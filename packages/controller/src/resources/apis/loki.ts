@@ -63,7 +63,7 @@ export function LokiAPIResources(
   const namespace = getTenantNamespace(tenant);
   const api = "loki";
   const name = `${api}-api`;
-  const lokiQuerierUrl = "http://querier.loki.svc.cluster.local:1080";
+  const lokiQuerierUrl = "http://query-frontend.loki.svc.cluster.local:1080";
   const lokiDistributorUrl = "http://distributor.loki.svc.cluster.local:1080";
 
   const lokiApiProxyCliArgs = [

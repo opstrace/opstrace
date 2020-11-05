@@ -60,7 +60,7 @@ export function GrafanaDatasourceResources(
         editable: false,
         type: "loki",
         orgId: 1,
-        url: "http://querier.loki.svc.cluster.local:1080",
+        url: "http://query-frontend.loki.svc.cluster.local:1080",
         access: "proxy",
         version: 1,
         jsonData: {
@@ -106,7 +106,7 @@ export function GrafanaDatasourceResources(
             editable: false,
             type: "loki",
             orgId: 1,
-            url: "http://querier.loki.svc.cluster.local:1080",
+            url: "http://query-frontend.loki.svc.cluster.local:1080",
             access: "proxy",
             version: 1,
             jsonData: {
