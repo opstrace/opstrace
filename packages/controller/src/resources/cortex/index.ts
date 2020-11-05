@@ -211,7 +211,8 @@ export function CortexResources(
       store_gateway_addresses: `store-gateway.${namespace}.svc.cluster.local:9095`
     },
     query_range: {
-      split_queries_by_day: true,
+      // https://cortexmetrics.io/docs/configuration/configuration-file/#query_range_config
+      split_queries_by_interval: "24h",
       align_queries_with_step: true,
       cache_results: true,
       results_cache: {
