@@ -388,7 +388,7 @@ suite("Loki API test suite", function () {
     const queryParams = {
       query: `{searchcrit="${searchcrit}"}`,
       direction: "FORWARD",
-      limit: "10000",
+      limit: "5000",
       start: timestampToNanoSinceEpoch(starttime.minusHours(1)),
       end: timestampToNanoSinceEpoch(starttime.plusHours(1))
     };
@@ -493,7 +493,7 @@ suite("Loki API test suite", function () {
       const queryParams = {
         query: `{searchcrit="${searchcrit}"}`,
         direction: "FORWARD",
-        limit: "20000",
+        limit: "5000",
         start: timestampToNanoSinceEpoch(starttime.minusHours(1)),
         end: timestampToNanoSinceEpoch(starttime.plusHours(1))
       };
