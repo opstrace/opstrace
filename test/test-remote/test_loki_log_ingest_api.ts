@@ -33,7 +33,8 @@ import {
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
   LOKI_API_TLS_VERIFY,
   globalTestSuiteSetupOnce,
-  enrichHeadersWithAuthToken
+  enrichHeadersWithAuthToken,
+  toRFC3339
 } from "./testutils";
 
 import {
@@ -146,7 +147,7 @@ suite("Loki API test suite", function () {
   });
 
   test("insert w/ cntnrzd FluentD(loki plugin), then query", async function () {
-    const sampleTimeRFC3339nano = "2020-10-10T10:10:01.123456789Z";
+    const now = toRFC3339(new Date());
 
     // Objects in this array are examples for what the Docker JSON file logging
     // writes. In particylar, the `log` key and the `time` key are what said
@@ -155,11 +156,11 @@ suite("Loki API test suite", function () {
     const logfileJsonDocs = [
       {
         log: "sample message 1with\nnewline loki output plugin",
-        time: sampleTimeRFC3339nano
+        time: now
       },
       {
         log: "sample message 2with\nnewline loki output plugin",
-        time: sampleTimeRFC3339nano
+        time: now
       }
     ];
 
@@ -177,7 +178,7 @@ suite("Loki API test suite", function () {
     );
 
     // Query for the log records that were just inserted.
-    const ts = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const ts = ZonedDateTime.parse(now);
     const searchStart = ts.minusHours(1);
     const searchEnd = ts.plusHours(1);
     const queryParams = {
@@ -202,8 +203,8 @@ suite("Loki API test suite", function () {
     const testname = testName(this);
 
     // `sampletsns` is for example: "1286705401123456789"
-    const sampleTimeRFC3339nano = "2020-10-10T10:10:01.123456789Z";
-    const ts = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const now = toRFC3339(new Date());
+    const ts = ZonedDateTime.parse(now);
     const sampletsns = timestampToNanoSinceEpoch(ts);
     const samplemsg = "aaa\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
@@ -301,8 +302,8 @@ suite("Loki API test suite", function () {
     const testname = testName(this);
 
     // Specify details of log record to be inserted.
-    const sampleTimeRFC3339nano = "2012-10-10T10:10:01.123456789Z";
-    const sampletimestamp = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const now = toRFC3339(new Date());
+    const timestamp = ZonedDateTime.parse(now);
     const samplemsg = "bbb\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
     const samplelabels = {
@@ -313,8 +314,8 @@ suite("Loki API test suite", function () {
     const logStreamFragment = new LogStreamFragment(samplelabels);
     logStreamFragment.addEntry(
       new LogStreamEntry(samplemsg, {
-        seconds: sampletimestamp.toEpochSecond(),
-        nanos: sampletimestamp.nano()
+        seconds: timestamp.toEpochSecond(),
+        nanos: timestamp.nano()
       })
     );
     const pushrequest = logStreamFragment.serialize();
@@ -338,8 +339,8 @@ suite("Loki API test suite", function () {
     logHTTPResponse(response);
     assert.strictEqual(response.statusCode, 204);
 
-    const searchStart = sampletimestamp.minusHours(1);
-    const searchEnd = sampletimestamp.plusHours(1);
+    const searchStart = timestamp.minusHours(1);
+    const searchEnd = timestamp.plusHours(1);
     const queryParams = {
       query: `{searchcrit="${searchcrit}"}`,
       direction: "BACKWARD",
@@ -356,7 +357,7 @@ suite("Loki API test suite", function () {
     );
     assert.strictEqual(
       result.entries[0][0],
-      timestampToNanoSinceEpoch(sampletimestamp)
+      timestampToNanoSinceEpoch(timestamp)
     );
     assert.strictEqual(result.entries[0][1], samplemsg);
     assert.deepStrictEqual(result.labels, samplelabels);
