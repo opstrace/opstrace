@@ -18,6 +18,7 @@ import { strict as assert } from "assert";
 
 import { ZonedDateTime } from "@js-joda/core";
 import got from "got";
+import { performance } from "perf_hooks";
 
 import {
   log,
@@ -263,6 +264,9 @@ suite("Loki API test suite", function () {
   test("insert log records with equivalent timestamps", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
+    // https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_timeorigin
+    // get current time in nanoseconds from epoch
+    const now = performance.timeOrigin + performance.now();
 
     const payload = {
       streams: [
@@ -272,8 +276,8 @@ suite("Loki API test suite", function () {
             uniq: rndstring().slice(0, 5)
           },
           values: [
-            ["1286705401123456789", "aaa"],
-            ["1286705401123456789", "aaa"]
+            [now, "aaa"],
+            [now, "aaa"]
           ]
         }
       ]
