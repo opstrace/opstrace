@@ -146,7 +146,7 @@ suite("Loki API test suite", function () {
   });
 
   test("insert w/ cntnrzd FluentD(loki plugin), then query", async function () {
-    const sampleTimeRFC3339nano = "2010-10-10T10:10:01.123456789Z";
+    const sampleTimeRFC3339nano = "2020-10-10T10:10:01.123456789Z";
 
     // Objects in this array are examples for what the Docker JSON file logging
     // writes. In particylar, the `log` key and the `time` key are what said
@@ -202,7 +202,7 @@ suite("Loki API test suite", function () {
     const testname = testName(this);
 
     // `sampletsns` is for example: "1286705401123456789"
-    const sampleTimeRFC3339nano = "2010-10-10T10:10:01.123456789Z";
+    const sampleTimeRFC3339nano = "2020-10-10T10:10:01.123456789Z";
     const ts = ZonedDateTime.parse(sampleTimeRFC3339nano);
     const sampletsns = timestampToNanoSinceEpoch(ts);
     const samplemsg = "aaa\nwith newline";
@@ -370,7 +370,7 @@ suite("Loki API test suite", function () {
     }
 
     const searchcrit = rndstring(5);
-    const starttime = ZonedDateTime.parse("2015-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.parse("2020-01-01T00:01:00.000000000Z");
     const pushrequest = createDummyPushRequest(
       starttime,
       {
@@ -416,7 +416,7 @@ suite("Loki API test suite", function () {
   test("log push load with pbuf, multi stream fragments", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
-    const starttime = ZonedDateTime.parse("2015-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.parse("2020-01-01T00:01:00.000000000Z");
 
     // N_streams determines the number of HTTP POST requests made. Each
     // insertion request has in its body a protobuf message containing a push

@@ -380,7 +380,7 @@ export class DummyStream {
 
   public async fetchAndValidate(opts: FetchAndValidateOpts): Promise<number> {
     const lokiQuerierBaseURL = opts.querierBaseUrl;
-    const chunkSize = opts.chunkSize || 20000;
+    const chunkSize = opts.chunkSize || 5000;
     const inspectEveryNthEntry = opts.inspectEveryNthEntry || 0;
     const customQueryFunc = opts.customQueryFunc;
     // not yet built in
