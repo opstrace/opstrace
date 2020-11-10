@@ -376,7 +376,7 @@ suite("Loki API test suite", function () {
         testname: testname,
         searchcrit: searchcrit
       },
-      10 ** 3,
+      5000,
       textgen
     );
     await postProtobufToLoki(
