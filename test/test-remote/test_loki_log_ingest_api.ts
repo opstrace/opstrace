@@ -16,9 +16,8 @@
 
 import { strict as assert } from "assert";
 
-import { ZonedDateTime } from "@js-joda/core";
+import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 import got from "got";
-import { performance } from "perf_hooks";
 
 import {
   log,
@@ -35,7 +34,7 @@ import {
   LOKI_API_TLS_VERIFY,
   globalTestSuiteSetupOnce,
   enrichHeadersWithAuthToken,
-  toRFC3339
+  timestampToRFC3339Nano
 } from "./testutils";
 
 import {
@@ -148,8 +147,7 @@ suite("Loki API test suite", function () {
   });
 
   test("insert w/ cntnrzd FluentD(loki plugin), then query", async function () {
-    const now = toRFC3339(new Date());
-
+    const now = timestampToRFC3339Nano(ZonedDateTime.now(ZoneOffset.UTC));
     // Objects in this array are examples for what the Docker JSON file logging
     // writes. In particylar, the `log` key and the `time` key are what said
     // driver produces. Note that the exact same timestamp can be used across
@@ -179,7 +177,7 @@ suite("Loki API test suite", function () {
     );
 
     // Query for the log records that were just inserted.
-    const ts = ZonedDateTime.parse(now);
+    const ts = ZonedDateTime.now();
     const searchStart = ts.minusHours(1);
     const searchEnd = ts.plusHours(1);
     const queryParams = {
@@ -204,8 +202,7 @@ suite("Loki API test suite", function () {
     const testname = testName(this);
 
     // `sampletsns` is for example: "1286705401123456789"
-    const now = toRFC3339(new Date());
-    const ts = ZonedDateTime.parse(now);
+    const ts = ZonedDateTime.now();
     const sampletsns = timestampToNanoSinceEpoch(ts);
     const samplemsg = "aaa\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
@@ -264,9 +261,7 @@ suite("Loki API test suite", function () {
   test("insert log records with equivalent timestamps", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
-    // https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_timeorigin
-    // get current time in nanoseconds from epoch
-    const now = performance.timeOrigin + performance.now();
+    const now = timestampToNanoSinceEpoch(ZonedDateTime.now());
 
     const payload = {
       streams: [
@@ -306,8 +301,7 @@ suite("Loki API test suite", function () {
     const testname = testName(this);
 
     // Specify details of log record to be inserted.
-    const now = toRFC3339(new Date());
-    const timestamp = ZonedDateTime.parse(now);
+    const timestamp = ZonedDateTime.now();
     const samplemsg = "bbb\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
     const samplelabels = {
@@ -375,7 +369,7 @@ suite("Loki API test suite", function () {
     }
 
     const searchcrit = rndstring(5);
-    const starttime = ZonedDateTime.parse("2020-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.now();
     const pushrequest = createDummyPushRequest(
       starttime,
       {
@@ -401,7 +395,7 @@ suite("Loki API test suite", function () {
     const result = await waitForLokiQueryResult(
       TENANT_DEFAULT_LOKI_API_BASE_URL,
       queryParams,
-      10 ** 3,
+      5000,
       false
     );
 
@@ -421,7 +415,7 @@ suite("Loki API test suite", function () {
   test("log push load with pbuf, multi stream fragments", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
-    const starttime = ZonedDateTime.parse("2020-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.now();
 
     // N_streams determines the number of HTTP POST requests made. Each
     // insertion request has in its body a protobuf message containing a push
@@ -431,7 +425,7 @@ suite("Loki API test suite", function () {
     // generated text message with `N_chars_per_msg` characters.
     // Each stream fragment has a unique label set!
     const N_streams = 6;
-    const N_entries_per_stream_fragment = 10 ** 4;
+    const N_entries_per_stream_fragment = 5000;
     const N_chars_per_msg = 60;
 
     // Generate one unique search criterion per stream.
