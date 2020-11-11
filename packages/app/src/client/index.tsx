@@ -17,8 +17,17 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
+import * as Sentry from "@sentry/react";
+import { Integrations } from "@sentry/tracing";
 import * as serviceWorker from "./serviceWorker";
 import { RoutesWithSSRAssetRemoval } from "./routes";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DNS,
+  integrations: [
+    new Integrations.BrowserTracing(),
+  ]
+});
 
 const root = document.getElementById("root");
 
