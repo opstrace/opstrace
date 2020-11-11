@@ -74,7 +74,7 @@ module.exports = ({ config }) => {
       use: ["style-loader", "css-loader"]
     },
     {
-      test: /\.ttf$/,
+      test: /fonts\/.*\.(woff|woff2|eot|ttf|svg)$/,
       use: ["file-loader"]
     }
   );
