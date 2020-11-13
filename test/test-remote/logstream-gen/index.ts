@@ -327,7 +327,7 @@ function parseCmdlineArgs() {
       "Maximum number of log entries to fetch per query during read/validation phase",
 
     type: "int",
-    defaultValue: 60000
+    defaultValue: 5000
   });
 
   parser.addArgument("--bearer-token-file", {
