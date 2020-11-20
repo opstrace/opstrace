@@ -67,6 +67,7 @@ const AuthenticatedRoutes = () => {
       {EARLY_ACCESS && ChatRoutes}
       {EARLY_ACCESS && HistoryRoutes}
       <Route key="/cluster" path="/cluster" component={ClusterView} />
+      <Route key="*" path="*" component={NotFound} />
     </Switch>
   );
 };
@@ -86,15 +87,14 @@ const Routes = () => {
         )}
       />
       <Route
-        key="/:tab"
-        path="/:tab"
+        key="*"
+        path="*"
         component={() => (
           <WithAuthentication onFailure={<Redirect to="/login" />}>
             <AuthenticatedRoutes />
           </WithAuthentication>
         )}
       />
-      <Route key="*" path="*" component={NotFound} />
     </Switch>
   );
 };
