@@ -17,7 +17,7 @@ import { setEditingMode } from "state/file/utils/navigation";
 import { SplitPane } from "client/components/SplitPane";
 import { ModuleEditor } from "client/components/Editor";
 import { useFocusedOpenFile } from "state/file/hooks/useFiles";
-import Layout from "client/layout";
+import Layout from "client/layout/MainContent";
 
 import ModuleOutput from "./ModuleOutput";
 

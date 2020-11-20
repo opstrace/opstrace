@@ -1,16 +1,16 @@
 import React from "react";
 
 import ActivityBar from "./ActivityBar";
-import Box from "../Box/Box";
+import Box from "client/components/Box/Box";
 
 export default {
-  title: "Components/ActivityBar"
+  title: "Views/Common/ActivityBar"
 };
 
 export const Default = (): JSX.Element => {
   return (
     <Box ml={1}>
-      <ActivityBar activeTab={"/m"} />
+      <ActivityBar activeTab={"/module"} />
     </Box>
   );
 };

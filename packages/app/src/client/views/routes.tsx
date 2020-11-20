@@ -2,7 +2,7 @@ import React from "react";
 import { Switch, Route, Redirect } from "react-router";
 
 import WithAuthentication from "client/components/withAuthentication";
-import { EARLY_ACCESS } from "client/flags";
+import { EARLY_PREVIEW } from "client/flags";
 
 import LoginView from "./login";
 import ModuleView from "./module";
@@ -10,6 +10,8 @@ import ChatView from "./chat";
 import HistoryView from "./history";
 import ClusterView from "./cluster";
 import NotFound from "./404/404";
+import FullPage from "client/layout/FullPage";
+import { ActivityBar } from "./common/ActivityBar";
 
 const scopedModulePathParams =
   ":mode(-|e)/:branch/@:scope/:name/:version/:path*";
@@ -62,13 +64,18 @@ const HistoryRoutes = () => (
 
 const AuthenticatedRoutes = () => {
   return (
-    <Switch>
-      {EARLY_ACCESS && ModuleRoutes}
-      {EARLY_ACCESS && ChatRoutes}
-      {EARLY_ACCESS && HistoryRoutes}
-      <Route key="/cluster" path="/cluster" component={ClusterView} />
-      <Route key="*" path="*" component={NotFound} />
-    </Switch>
+    <FullPage>
+      {/* If you change route config, make sure to also check the tabs in ActivityBar to ensure they are configured with the updated routing.
+          At some point we can refactor the ActivityBar so that we pass tabs in from here, to make all route configuration central and within this file. */}
+      <ActivityBar />
+      <Switch>
+        {EARLY_PREVIEW && ModuleRoutes}
+        {EARLY_PREVIEW && ChatRoutes}
+        {EARLY_PREVIEW && HistoryRoutes}
+        <Route key="/cluster" path="/cluster" component={ClusterView} />
+        <Route key="*" path="*" component={NotFound} />
+      </Switch>
+    </FullPage>
   );
 };
 
