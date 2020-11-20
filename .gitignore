@@ -43,3 +43,6 @@ pkg/loki/loki
 tenant-api-token-*
 opstrace_cli_*.log
 packages/cli/src/buildinfo.ts
+
+.idea
+*.iml
