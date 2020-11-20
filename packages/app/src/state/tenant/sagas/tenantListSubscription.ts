@@ -26,6 +26,25 @@ import { SubscriptionID } from "../types";
 
 type Actions = ActionType<typeof actions>;
 
+export function* executeActionsChannel(channel: any) {
+  // create a local reference inside the fork
+  const chan = channel;
+
+  try {
+    while (true) {
+      // pull next from channel
+      const action: Actions = yield take(chan);
+      // dispatch action
+      yield put(action);
+    }
+  } finally {
+    // If task cancelled, close the channel
+    if (yield cancelled()) {
+      chan.close();
+    }
+  }
+}
+
 /**
  * tenantListSubscriptionManager listens for subscribe and unsubscribe requests.
  *
@@ -55,29 +74,12 @@ export default function* tenantListSubscriptionManager() {
       const channel = yield call(tenantListSubscriptionEventChannel);
 
       // Fork the subscription task
-      activeSubscription = yield fork(function* () {
-        // create a local reference inside the fork
-        const chan = channel;
-
-        try {
-          while (true) {
-            // pull next from channel
-            const action: Actions = yield take(chan);
-            // dispatch action
-            yield put(action);
-          }
-        } finally {
-          // If task cancelled, close the channel
-          if (yield cancelled()) {
-            chan.close();
-          }
-        }
-      });
+      activeSubscription = yield fork(executeActionsChannel, channel);
     }
   });
   /**
   // Fork an unsubscribe handler
-  yield fork(function* () {
+  yield fork(function*() {
     while (true) {
       // wait for the unsubscribe action and then cancel the subscription task
       const action: ReturnType<typeof actions.unsubscribeFromTenantList> = yield take(

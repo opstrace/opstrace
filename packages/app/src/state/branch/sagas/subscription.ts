@@ -25,7 +25,23 @@ import * as actions from "../actions";
 import { SubscriptionID } from "../types";
 
 type Actions = ActionType<typeof actions>;
-
+export function* executeActionsChannel(channel: any) {
+  // create a local reference inside the fork
+  const chan = channel;
+  try {
+    while (true) {
+      // pull next from channel
+      const action: Actions = yield take(chan);
+      // dispatch action
+      yield put(action);
+    }
+  } finally {
+    // If task cancelled, close the channel
+    if (yield cancelled()) {
+      chan.close();
+    }
+  }
+}
 /**
  * branchSubscriptionManager listens for subscribe and unsubscribe requests.
  *
@@ -55,24 +71,7 @@ export default function* branchSubscriptionManager() {
       const channel = yield call(branchSubscriptionEventChannel);
 
       // Fork the subscription task
-      activeSubscription = yield fork(function* () {
-        // create a local reference inside the fork
-        const chan = channel;
-
-        try {
-          while (true) {
-            // pull next from channel
-            const action: Actions = yield take(chan);
-            // dispatch action
-            yield put(action);
-          }
-        } finally {
-          // If task cancelled, close the channel
-          if (yield cancelled()) {
-            chan.close();
-          }
-        }
-      });
+      activeSubscription = yield fork(executeActionsChannel, channel);
     }
   });
 
