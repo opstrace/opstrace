@@ -35,16 +35,13 @@ const ActivityBar = () => {
         return;
       }
       const tabRegex = new RegExp(`^${ActivityBarTabs[activeTabIndex]}`);
-      // history is mocked in storybook so exit early if it's not the "real" history
-      history &&
-        history.push &&
-        history.push({
-          ...history.location,
-          pathname: history.location.pathname.replace(
-            tabRegex,
-            ActivityBarTabs[index]
-          )
-        });
+      history.push({
+        ...history.location,
+        pathname: history.location.pathname.replace(
+          tabRegex,
+          ActivityBarTabs[index]
+        )
+      });
     },
     [history, activeTabIndex]
   );
@@ -57,10 +54,12 @@ const ActivityBar = () => {
     const foundIndex = ActivityBarTabs.findIndex(tab =>
       pathname.startsWith(tab)
     );
+
     if (foundIndex < 0) {
       changeTab(0);
       return;
     }
+
     if (foundIndex !== activeTabIndex) {
       setActiveTabIndex(foundIndex);
     }
