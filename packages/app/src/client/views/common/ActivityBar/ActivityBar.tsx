@@ -1,17 +1,20 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import ViewModuleIcon from "@material-ui/icons/Apps";
+import CodeIcon from "@material-ui/icons/Code";
 import ChatIcon from "@material-ui/icons/Chat";
 import HistoryIcon from "@material-ui/icons/History";
-import SyncAltIcon from "@material-ui/icons/SyncAlt";
-import Box from "../Box/Box";
+import SettingsIcon from "@material-ui/icons/Settings";
+import Box from "client/components/Box/Box";
 import { ITheme } from "client/themes";
 import Tracy from "./Tracy";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
+import { EARLY_PREVIEW } from "client/flags";
 
-export const ActivityBarTabs = ["/module", "/chat", "/history", "/registry"];
+export const ActivityBarTabs = EARLY_PREVIEW
+  ? ["/module", "/chat", "/history", "/registry", "/cluster"]
+  : ["/cluster"];
 
 const getDividerColor = (theme: ITheme) => theme.palette.divider;
 
@@ -19,17 +22,19 @@ const TabContainer = styled.div`
   border-right: 1px solid ${props => getDividerColor(props.theme)};
 `;
 
-export type ActivityBarProps = {
-  activeTab: string;
-};
-
-const ActivityBar = ({ activeTab }: ActivityBarProps) => {
-  const activeTabIndex = ActivityBarTabs.findIndex(t => t === activeTab);
+const ActivityBar = () => {
+  const { pathname } = useLocation();
+  const [activeTabIndex, setActiveTabIndex] = useState<number | null>(null);
   const history = useHistory();
 
   const changeTab = useCallback(
     (index: number) => {
-      const tabRegex = new RegExp(`^${activeTab}`);
+      if (activeTabIndex === null) {
+        // This case occurs when we haven't parsed the current url yet to find an active tab.
+        // A user would have to be super fast to hit this - very unlikely, but protect against it all the same.
+        return;
+      }
+      const tabRegex = new RegExp(`^${ActivityBarTabs[activeTabIndex]}`);
       // history is mocked in storybook so exit early if it's not the "real" history
       history &&
         history.push &&
@@ -41,7 +46,7 @@ const ActivityBar = ({ activeTab }: ActivityBarProps) => {
           )
         });
     },
-    [history, activeTab]
+    [history, activeTabIndex]
   );
 
   const handleChange = (event: React.ChangeEvent<{}>, index: number) => {
@@ -49,10 +54,17 @@ const ActivityBar = ({ activeTab }: ActivityBarProps) => {
   };
 
   useEffect(() => {
-    if (activeTabIndex < 0) {
+    const foundIndex = ActivityBarTabs.findIndex(tab =>
+      pathname.startsWith(tab)
+    );
+    if (foundIndex < 0) {
       changeTab(0);
+      return;
     }
-  }, [activeTabIndex, history, changeTab]);
+    if (foundIndex !== activeTabIndex) {
+      setActiveTabIndex(foundIndex);
+    }
+  }, [activeTabIndex, history, changeTab, pathname]);
 
   return (
     <Box display="flex" height="100vh" width={50}>
@@ -63,14 +75,16 @@ const ActivityBar = ({ activeTab }: ActivityBarProps) => {
         <Tabs
           orientation="vertical"
           variant="standard"
-          value={activeTabIndex < 0 ? 0 : activeTabIndex}
+          value={
+            activeTabIndex === null || activeTabIndex < 0 ? 0 : activeTabIndex
+          }
           onChange={handleChange}
           aria-label="activity-bar"
         >
-          <Tab icon={<ViewModuleIcon />} />
-          <Tab icon={<ChatIcon />} />
-          <Tab icon={<HistoryIcon />} />
-          <Tab icon={<SyncAltIcon />} />
+          {EARLY_PREVIEW && <Tab icon={<CodeIcon />} />}
+          {EARLY_PREVIEW && <Tab icon={<ChatIcon />} />}
+          {EARLY_PREVIEW && <Tab icon={<HistoryIcon />} />}
+          <Tab icon={<SettingsIcon />} />
         </Tabs>
       </TabContainer>
     </Box>

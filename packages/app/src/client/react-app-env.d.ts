@@ -22,7 +22,7 @@
 declare namespace NodeJS {
   interface ProcessEnv {
     readonly NODE_ENV: "development" | "production" | "test";
-    readonly EARLY_ACCESS?: "true";
+    readonly EARLY_PREVIEW?: "true";
     readonly PUBLIC_URL: string;
   }
 }

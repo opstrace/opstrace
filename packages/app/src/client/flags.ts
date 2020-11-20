@@ -15,4 +15,4 @@
  */
 
 // this flag will be set at build time, i.e. when running "yarn clientbuild" or "yarn client:watch".
-export const EARLY_ACCESS = !!process.env.EARLY_ACCESS;
+export const EARLY_PREVIEW = !!process.env.EARLY_PREVIEW;
