@@ -1,4 +1,6 @@
 import React from "react";
+import { createMemoryHistory } from "history";
+import { Router } from "react-router-dom";
 import { ITheme } from "../src/client/themes/types";
 import ThemeProvider from "../src/client/themes/Provider";
 import { StoreProvider } from "../src/state/provider";
@@ -17,9 +19,11 @@ class WithProviders extends React.Component<Props> {
     const { theme, children } = this.props;
 
     return (
-      <StoreProvider>
-        <ThemeProvider theme={theme}>{children}</ThemeProvider>
-      </StoreProvider>
+      <Router history={createMemoryHistory()}>
+        <StoreProvider>
+          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+        </StoreProvider>
+      </Router>
     );
   }
 }
