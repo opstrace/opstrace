@@ -10,7 +10,7 @@ export default {
 export const Default = (): JSX.Element => {
   return (
     <Box ml={1}>
-      <ActivityBar activeTab={"/module"} />
+      <ActivityBar />
     </Box>
   );
 };
