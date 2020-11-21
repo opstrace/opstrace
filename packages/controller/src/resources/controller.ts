@@ -68,7 +68,6 @@ export function ControllerResources({
               }
             },
             spec: {
-              imagePullSecrets: [{ name: "dockerhub-credentials" }],
               serviceAccountName: "opstrace-controller",
               containers: [
                 {
