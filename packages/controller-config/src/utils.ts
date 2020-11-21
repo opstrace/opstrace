@@ -66,7 +66,6 @@ export const serialize = (
           tlsCertificateIssuer: ccfg.tlsCertificateIssuer,
           terminate: ccfg.terminate,
           version: ccfg.version,
-          mode: ccfg.mode,
           gcpAuthOptions: ccfg.gcpAuthOptions,
           uiSourceIpFirewallRules: ccfg.uiSourceIpFirewallRules,
           apiSourceIpFirewallRules: ccfg.apiSourceIpFirewallRules,

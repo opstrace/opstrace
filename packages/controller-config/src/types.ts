@@ -72,11 +72,6 @@ export const controllerConfigSchema = yup
         "must be less than 30 characters to be reliably used for cloud infrastructure naming (bigtable has a 30 char limit)"
       ),
 
-    mode: yup
-      .mixed<"development" | "production">()
-      .oneOf(["development", "production"])
-      .required("[internal] must specify mode (development | production)"),
-
     gcpAuthOptions: yup
       .mixed<GCPAuthOptions | undefined>()
       .when(["target", "dnsProvider"], {
