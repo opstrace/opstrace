@@ -19,10 +19,12 @@ import {
   Deployment,
   ClusterRoleBinding,
   ServiceAccount,
-  Namespace
+  Namespace,
+  Ingress
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
+import { getDomain } from "../../helpers";
 
 export function OpstraceApplicationResources(
   state: State,
@@ -37,6 +39,7 @@ export function OpstraceApplicationResources(
       "we do not have a version specified for controller resources 'state.config.config?.version'"
     );
   }
+  const domain = getDomain(state);
 
   collection.add(
     new Namespace(
@@ -44,7 +47,58 @@ export function OpstraceApplicationResources(
         apiVersion: "v1",
         kind: "Namespace",
         metadata: {
-          name: namespace
+          name: namespace,
+          labels: {
+            // although this isn't actually a "tenant", we use this label to trick
+            // kubed into thinking it's a tenant so that the certificates are copied into
+            // this namespace too.
+            tenant: "opstrace-application",
+            "cert-manager.io/disable-validation": "true"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Ingress(
+      {
+        apiVersion: "networking.k8s.io/v1beta1",
+        kind: "Ingress",
+        metadata: {
+          name: "opstrace-application",
+          namespace,
+          annotations: {
+            "kubernetes.io/ingress.class": "ui",
+            "external-dns.alpha.kubernetes.io/ttl": "30",
+            "nginx.ingress.kubernetes.io/client-body-buffer-size": "10m"
+          }
+        },
+        spec: {
+          tls: [
+            {
+              hosts: [domain],
+              secretName: "https-cert"
+            }
+          ],
+          rules: [
+            {
+              host: domain,
+              http: {
+                paths: [
+                  {
+                    backend: {
+                      serviceName: "opstrace-application",
+                      servicePort: 3001 as any
+                    },
+                    pathType: "ImplementationSpecific",
+                    path: "/"
+                  }
+                ]
+              }
+            }
+          ]
         }
       },
       kubeConfig
