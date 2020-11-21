@@ -27,12 +27,10 @@ export const CONTROLLER_NAME = "opstrace-controller";
 export function ControllerResources({
   controllerImage,
   opstraceClusterName,
-  mode,
   kubeConfig
 }: {
   controllerImage: string;
   opstraceClusterName: string;
-  mode: "development" | "production";
   kubeConfig: KubeConfig;
 }): ResourceCollection {
   const collection = new ResourceCollection();
@@ -40,9 +38,6 @@ export function ControllerResources({
   const name = CONTROLLER_NAME;
 
   const controllerCmdlineArgs = [`${opstraceClusterName}`];
-  if (mode == "production") {
-    controllerCmdlineArgs.push("--prod");
-  }
 
   collection.add(
     new Deployment(
