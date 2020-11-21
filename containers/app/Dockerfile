@@ -25,7 +25,8 @@ WORKDIR /build/packages/app
 RUN yarn --frozen-lockfile
 RUN yarn run tsc -b
 RUN ls -ahltr
-RUN NODE_OPTIONS=--max_old_space_size=4096 yarn build
+
+RUN yarn build
 RUN CI=true yarn test
 
 # Second stage, lean image w/o build tooling and ideally w/o unnecessary deps.

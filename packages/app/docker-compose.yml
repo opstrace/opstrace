@@ -89,9 +89,9 @@ services:
     volumes:
        - ../../:/usr/src/opstrace
     command: yarn client:watch
-  web-server-rebuilder:
+  app-server-rebuilder:
     build: .
-    container_name: web-server-rebuilder
+    container_name: app-server-rebuilder
     volumes:
        - ../../:/usr/src/opstrace
     command: yarn server:build-watch
