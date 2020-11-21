@@ -140,7 +140,7 @@ export function OpstraceApplicationResources(
                   name: "opstrace-application",
                   image: `opstrace/app:${version}`,
                   imagePullPolicy: "Always",
-                  command: ["node", "--prof", "./cmd.js"],
+                  command: ["node", "main.js"],
                   resources: {
                     limits: {
                       cpu: "1",
