@@ -148,7 +148,6 @@ function* createClusterCore() {
     version: "notneededanymore",
     target: ccfg.cloud_provider,
     region: region, // not sure why that's needed
-    mode: "development", // note: this is here only to keep legacy concepts working temporarily
     cert_issuer: ccfg.cert_issuer,
     gcpAuthOptions,
     infrastructureName: ccfg.cluster_name,
@@ -245,7 +244,6 @@ function* createClusterCore() {
   yield call(deployControllerResources, {
     controllerImage: ccfg.controller_image,
     opstraceClusterName: ccfg.cluster_name,
-    mode: "development", // note: only here to keep legacy code paths working for now
     kubeConfig
   });
 

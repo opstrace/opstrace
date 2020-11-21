@@ -24,7 +24,6 @@ import { ControllerResources } from "../resources/controller";
 export function* deployControllerResources(config: {
   controllerImage: string;
   opstraceClusterName: string;
-  mode: "development" | "production";
   kubeConfig: KubeConfig;
 }) {
   const resources = ControllerResources(config)
