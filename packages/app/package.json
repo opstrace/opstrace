@@ -196,8 +196,8 @@
     "react-dom": "^16.13.1"
   },
   "scripts": {
-    "client:watch": "node scripts/startClient.js",
-    "client:build": "node scripts/buildClient.js",
+    "client:watch": "NODE_OPTIONS=--max_old_space_size=4096 node scripts/startClient.js",
+    "client:build": "NODE_OPTIONS=--max_old_space_size=4096 node scripts/buildClient.js",
     "client:build-debug-workbox": "node scripts/buildClient.js --workbox-debug",
     "client:test": "node scripts/test.js",
     "server:build-watch": "NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
