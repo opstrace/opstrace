@@ -20,7 +20,8 @@ import {
   ClusterRoleBinding,
   ServiceAccount,
   Namespace,
-  Ingress
+  Ingress,
+  Service
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
@@ -99,6 +100,36 @@ export function OpstraceApplicationResources(
               }
             }
           ]
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          name: "opstrace-application",
+          labels: {
+            "k8s-app": "opstrace-application"
+          },
+          namespace
+        },
+        spec: {
+          ports: [
+            {
+              name: "http",
+              port: 3001,
+              protocol: "TCP",
+              targetPort: 3001 as any
+            }
+          ],
+          selector: {
+            "k8s-app": "opstrace-application"
+          }
         }
       },
       kubeConfig
