@@ -35,6 +35,7 @@ import { APIResources } from "../resources/apis";
 import { CortexResources } from "../resources/cortex";
 import { IngressResources } from "../resources/ingress";
 import { TenantResources } from "../resources/tenants";
+import { OpstraceApplicationResources } from "../resources/app";
 
 import { getControllerConfig } from "../helpers";
 
@@ -67,6 +68,7 @@ export function* reconciliationLoop(kubeConfig: KubeConfig) {
     desired.add(MemcacheResources(state, kubeConfig, "cortex"));
     desired.add(CortexResources(state, kubeConfig, "cortex"));
     desired.add(IngressResources(state, kubeConfig, "ingress"));
+    desired.add(OpstraceApplicationResources(state, kubeConfig, "application"));
     desired.add(TenantResources(state, kubeConfig));
 
     yield call(reconcile, desired, reduceCollection(actualCollection));

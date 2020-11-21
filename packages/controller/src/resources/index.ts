@@ -22,3 +22,4 @@ export * from "./monitoring";
 export * from "./storage";
 export * from "./apis";
 export * from "./tenants";
+export * from "./app";
