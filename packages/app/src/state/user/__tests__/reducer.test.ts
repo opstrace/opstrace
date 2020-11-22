@@ -18,12 +18,15 @@ import * as actions from "../actions";
 
 const mockState = {
   currentUser: {
+    username: "Test",
+    avatar: null,
     email: "email@email.com",
     preference: {
       dark_mode: true
     }
   },
-  loading: false
+  loading: false,
+  currentUserLoaded: false
 };
 
 test("return mock state", () => {
@@ -34,6 +37,8 @@ test("return mock state", () => {
 
 test("handle setCurrentUser action", () => {
   const user = {
+    username: "My User",
+    avatar: null,
     email: "test@test.com",
     preference: {
       dark_mode: false

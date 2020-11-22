@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import sanitizeScope from "../sanitizeScope";
+import { sanitizeScope, sanitizeFilePath, sanitizeFileExt } from "../sanitize";
 
 test("sanitizeScope returns correct value", () => {
   expect(sanitizeScope("@/foo/bar")).toEqual("/foo/bar");
+});
+
+test("sanitizeFilePath returns correct value", () => {
+  expect(sanitizeFilePath("/foo/bar")).toEqual("foo/bar");
+});
+
+test("sanitizeFileExt returns correct value", () => {
+  expect(sanitizeFileExt(".ts")).toEqual("ts");
 });

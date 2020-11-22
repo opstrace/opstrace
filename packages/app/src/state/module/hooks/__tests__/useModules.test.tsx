@@ -9,7 +9,6 @@ import { mainReducer } from "state/reducer";
 
 import useModules, {
   getModules,
-  getCurrentBranchName,
   getCurrentBranchModules,
   getMainBranchModules,
   getCombinedModules,
@@ -55,12 +54,6 @@ test("getModules selector", () => {
   expect(getModules(state)).toEqual([{ name: "test-module", branch_name: "test-branch" }]);
 });
 
-test("getCurrentBranchName selector", () => {
-  const subState = { branches: { currentBranchName: "Test" } };
-  const state = mainReducer(subState as CombinedState<any>, mockAction);
-  expect(getCurrentBranchName(state)).toEqual("Test");
-});
-
 describe("getCurrentBranchModules selector", () => {
   test("should find current branch modules", () => {
     const subState = {
@@ -71,7 +64,11 @@ describe("getCurrentBranchModules selector", () => {
           { name: "module-3", branch_name: "unknown-branch" }
         ]
       },
-      branches: { currentBranchName: "test-branch" }
+      branches: {
+        currentBranchName: "test-branch", branches: [
+          { name: "test-branch", id: "branch-1" }
+        ]
+      }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
     expect(getCurrentBranchModules(state)).toEqual([
@@ -85,10 +82,14 @@ describe("getCurrentBranchModules selector", () => {
       modules: {
         modules: [{ name: "module-1", branch_name: "test-branch" }]
       },
-      branches: { currentBranchName: "unknown-branch" }
+      branches: {
+        currentBranchName: "unknown-branch", branches: [
+          { name: "test-branch", id: "branch-1" }
+        ]
+      }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
-    expect(getCurrentBranchModules(state)).toEqual([]);
+    expect(getCurrentBranchModules(state)).toBeNull();
   });
 });
 
@@ -131,13 +132,33 @@ describe("getCombinedModules selector", () => {
           { name: "module-3", branch_name: "unknown-branch" }
         ]
       },
-      branches: { currentBranchName: "test-branch" }
+      branches: {
+        currentBranchName: "test-branch", branches: [
+          { name: "test-branch", id: "branch-1" }
+        ]
+      }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
     expect(getCombinedModules(state)).toEqual([
       { name: "module-2", branch_name: "test-branch" },
       { name: "module-1", branch_name: "main" }
     ]);
+  });
+
+  test("should not find main branch modules and current branch modules if branches list is empty", () => {
+    const subState = {
+      modules: {
+        modules: [
+          { name: "module-1", branch_name: "main" },
+          { name: "module-2", branch_name: "test-branch" }
+        ]
+      },
+      branches: {
+        currentBranchName: "test-branch", branches: []
+      }
+    };
+    const state = mainReducer(subState as CombinedState<any>, mockAction);
+    expect(getCombinedModules(state)).toBeNull();
   });
 
   test("should not find main branch modules and current branch modules if its absent in store", () => {
@@ -195,7 +216,11 @@ describe("getCurrentBranchModule selector", () => {
           { name: "test-2", branch_name: "test-branch", scope: "/foo" }
         ]
       },
-      branches: { currentBranchName: "test-branch" }
+      branches: {
+        currentBranchName: "test-branch", branches: [
+          { name: "test-branch", id: "branch-1" }
+        ]
+      }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
     expect(getCurrentBranchModule("test-2", "/foo")(state)).toEqual({
@@ -213,7 +238,7 @@ describe("getCurrentBranchModule selector", () => {
           { name: "test-1", branch_name: "main", scope: "/" }
         ],
       },
-      branches: { currentBranchName: "test-branch" }
+      branches: { currentBranchName: "test-branch", branches: [] }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
     expect(getCurrentBranchModule("test-1", "/")(state)).toBeUndefined();

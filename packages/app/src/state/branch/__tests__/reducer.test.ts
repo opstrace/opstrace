@@ -43,7 +43,7 @@ test("handle set action", () => {
 test("handle setCurrentBranch action", () => {
   const reducer = BranchReducer(
     mockState,
-    actions.setCurrentBranch("new-main")
+    actions.setCurrentBranch({ history: {} as any, name: "new-main" })
   );
 
   expect(reducer.currentBranchName).toEqual("new-main");
