@@ -78,8 +78,8 @@ export const getMainBranchModule = (name: string, scope: string) =>
   );
 
 export const getCurrentBranchModule = (name: string, scope: string) =>
-  createSelector(getMainBranchModules, modules =>
-    modules.find(m => m.name === name && m.scope === scope)
+  createSelector(getCurrentBranchModules, modules =>
+    modules?.find(m => m.name === name && m.scope === scope)
   );
 
 /**

@@ -109,3 +109,19 @@ test("handle closeFile action", () => {
 
   expect(reducer.openFiles.length).toEqual(0);
 });
+
+test("handle requestOpenFileWithParams action", () => {
+  const params = {
+    selectedFilePath: "foo/bar/test",
+    selectedModuleName: "module-123",
+    selectedModuleScope: "scope-123",
+    selectedModuleVersion: "1.1"
+  };
+
+  const reducer = FileReducer(
+    mockState,
+    actions.requestOpenFileWithParams({ history: {} as any, params })
+  );
+
+  expect(reducer).toEqual({ ...mockState, history: {}, params });
+});
