@@ -23,7 +23,7 @@ import * as serviceWorker from "./serviceWorker";
 import { RoutesWithSSRAssetRemoval } from "./routes";
 
 Sentry.init({
-  dsn: process.env.SENTRY_DNS,
+  dsn: "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
   integrations: [
     new Integrations.BrowserTracing(),
   ]
