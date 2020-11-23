@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* eslint-disable import/first */
 import "source-map-support/register";
 
 import express from "express";
@@ -101,9 +103,8 @@ lightship.registerShutdownHandler(async () => {
   // Allow sufficient amount of time to allow all of the existing
   // HTTP requests to finish before terminating the service.
   log.info(
-    `waiting ${
-      shutdownDelay / 1000
-    }s for connections to close before shutting down`
+    `waiting ${shutdownDelay /
+      1000}s for connections to close before shutting down`
   );
 
   await delay(shutdownDelay);

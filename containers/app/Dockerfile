@@ -17,7 +17,8 @@ COPY tsconfig.json package.json yarn.lock /build/
 RUN mkdir /build/lib && mkdir /build/packages
 COPY lib/utils /build/lib/utils/
 COPY packages/app /build/packages/app/
-
+# increase node's default mem limit to something much bigger than needed
+ENV NODE_OPTIONS=--max_old_space_size=8192
 # this also creates the dir if it does not exist
 WORKDIR /build/packages/app
 
