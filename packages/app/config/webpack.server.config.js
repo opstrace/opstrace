@@ -18,21 +18,19 @@
 
 "use strict";
 
+const fs = require("fs");
 const path = require("path");
 const nodeExternals = require("webpack-node-externals");
 const svgToMiniDataURI = require("mini-svg-data-uri");
 const paths = require("./paths");
 const postcssNormalize = require("postcss-normalize");
 const getCSSModuleLocalIdent = require("react-dev-utils/getCSSModuleLocalIdent");
+const NodemonPlugin = require("nodemon-webpack-plugin");
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
 
 const isEnvDevelopment = process.env.NODE_ENV === "development";
 const isEnvProduction = process.env.NODE_ENV === "production";
-// Variable used for enabling profiling in Production
-// passed into alias object. Uses a flag if passed into the build command
-const isEnvProductionProfile =
-  isEnvProduction && process.argv.includes("--profile");
 
 const imageInlineSizeLimit = Infinity;
 
@@ -41,6 +39,26 @@ const cssRegex = /\.css$/;
 const cssModuleRegex = /\.module\.css$/;
 const sassRegex = /\.(scss|sass)$/;
 const sassModuleRegex = /\.module\.(scss|sass)$/;
+
+// https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
+const dotenvFiles = [
+  path.join(process.cwd(), `.env.server.${process.env.NODE_ENV}`)
+];
+// Load environment variables from .env* files. Suppress warnings using silent
+// if this file is missing. dotenv will never modify any environment variables
+// that have already been set.  Variable expansion is supported in .env files.
+// https://github.com/motdotla/dotenv
+// https://github.com/motdotla/dotenv-expand
+dotenvFiles.forEach(dotenvFile => {
+  console.log(dotenvFile, fs.existsSync(dotenvFile));
+  if (fs.existsSync(dotenvFile)) {
+    require("dotenv-expand")(
+      require("dotenv").config({
+        path: dotenvFile
+      })
+    );
+  }
+});
 
 // common function to get style loaders
 const getStyleLoaders = (cssOptions, preProcessor) => {
@@ -99,8 +117,7 @@ module.exports = {
   entry: "./src/server/server.ts",
   output: {
     path: path.resolve(__dirname, "..", "dist"),
-    filename: "[name].js",
-    chunkFilename: "[name].chunk.js",
+    filename: "server.js",
     libraryTarget: "commonjs2",
     devtoolModuleFilenameTemplate: "../[resource-path]",
     globalObject: "self"
@@ -125,6 +142,7 @@ module.exports = {
     extensions: [".ts", ".tsx", ".mjs", ".js", ".jsx"],
     alias: paths.aliases
   },
+  plugins: [new NodemonPlugin()],
   module: {
     strictExportPresence: true,
     rules: [

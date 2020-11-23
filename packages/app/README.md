@@ -3,20 +3,25 @@
 To get started:
 
 ```bash
-# ensure dependencies are installed and linked
+# Ensure dependencies are installed and linked
 yarn
 
-# ensure dependencies are compiled (this can take up to 2 mins sometimes...)
+# Ensure dependencies are compiled (this can take up to 2 mins sometimes...)
+# This only has to be done once (and again when files change in linked packages)
 yarn tsc -b
 
-# start development containers with docker compose (you must have docker installed)
-yarn up
+# Terminal 1) Start supporting services in containers with docker compose (you must have docker installed)
+yarn services:start
+
+# Terminal 2) Start the web-server/api in watch mode. The server will reload on changes.
+yarn server:start
+
+# Terminal 3) Start the ui client (webpack dev server to serve the ui in watch mode)
+yarn client:start
 ```
 
-Services launched by `yarn up`:
+Services launched by `yarn services:start`:
 
-* __UI__: served by webpack dev server available at [localhost:3000](http://localhost:3000).
-* __Web-server/API__: Express based application available on [localhost:3001](http://localhost:3001). The UI has a proxy set to direct api requests through to the web-server automatically.
 * __GraphQL server__: [Hasura](https://hasura.io) GraphQL API.
 * __Postgres__: A single postgres instance backing our GraphQL server.
 * __Minio__: A single minio server for module storage.

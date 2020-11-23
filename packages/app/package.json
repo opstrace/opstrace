@@ -143,6 +143,7 @@
     "monaco-editor-webpack-plugin": "^2.0.0",
     "new-github-issue-url": "^0.2.1",
     "nodemon": "^2.0.4",
+    "nodemon-webpack-plugin": "^4.3.2",
     "optimize-css-assets-webpack-plugin": "5.0.3",
     "pnp-webpack-plugin": "1.6.4",
     "polished": "^3.6.6",
@@ -196,16 +197,13 @@
     "react-dom": "^16.13.1"
   },
   "scripts": {
-    "client:watch": "NODE_OPTIONS=--max_old_space_size=4096 node scripts/startClient.js",
-    "client:build": "NODE_OPTIONS=--max_old_space_size=4096 node scripts/buildClient.js",
+    "client:start": "node scripts/startClient.js",
+    "client:build": "node scripts/buildClient.js",
     "client:build-debug-workbox": "node scripts/buildClient.js --workbox-debug",
     "client:test": "node scripts/test.js",
-    "server:build-watch": "NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
+    "server:start": "NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
     "server:build": "NODE_ENV=production webpack --config config/webpack.server.config.js",
-    "server:start-watch": "NODE_ENV=development webpack --config config/webpack.server.config.js && nodemon --watch dist --exec \"node dist/main.js\"",
-    "server:start": "node dist/main.js",
     "clean": "rimraf build dist .cache tsconfig.tsbuildinfo",
-    "watch": "yarn up",
     "build": "yarn client:build && yarn server:build",
     "test": "yarn client:test",
     "lint": "eslint --ext .ts,.tsx src",
@@ -214,16 +212,15 @@
     "metadata:export": "yarn hasura metadata export --admin-secret myadminsecret",
     "types:watch": "HASURA_ADMIN_SECRET=myadminsecret graphql-codegen --config codegen.js --watch",
     "console": "hasura console --admin-secret myadminsecret",
-    "generate_cert": "./scripts/gen_self_signed_cert.sh",
-    "up": "docker-compose up"
+    "services:start": "docker-compose up"
   },
   "proxy": {
     "/_": {
-      "target": "http://web-server:3001",
+      "target": "http://localhost:3001",
       "ws": true
     },
     "/modules": {
-      "target": "http://web-server:3001"
+      "target": "http://localhost:3001"
     }
   },
   "browserslist": {
