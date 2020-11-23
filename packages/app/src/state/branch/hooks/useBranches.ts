@@ -19,7 +19,8 @@ import { useDispatch, useSelector, State } from "state/provider";
 import { subscribe, unsubscribe } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-const getCurrentBranchName = (state: State) => state.branches.currentBranchName;
+export const getCurrentBranchName = (state: State) =>
+  state.branches.currentBranchName;
 
 export const getBranches = createSelector(
   (state: State) => state.branches.branches,
@@ -28,8 +29,8 @@ export const getBranches = createSelector(
 
 export const getCurrentBranch = createSelector(
   (state: State) => state.branches.loading,
-  (state: State) => state.branches.branches,
-  (state: State) => state.branches.currentBranchName,
+  getBranches,
+  getCurrentBranchName,
   (loading, branches, currentBranchName) => {
     if (loading) {
       return undefined;
