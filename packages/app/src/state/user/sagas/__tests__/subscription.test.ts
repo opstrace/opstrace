@@ -38,8 +38,8 @@ describe("currentUserSubscriptionManager", () => {
         [matchers.call.fn(currentUserSubscriptionEventChannel), mockChannel]
       ])
       .take(actions.subscribe)
-      .dispatch(actions.subscribe({ id: 1, email: "test" }))
-      .call(currentUserSubscriptionEventChannel, "test")
+      .dispatch(actions.subscribe(1))
+      .call(currentUserSubscriptionEventChannel)
       .fork(executeActionsChannel, mockChannel)
       //Should wait for subscribe actions again
       .take(actions.subscribe)
@@ -57,7 +57,7 @@ describe("currentUserSubscriptionManager", () => {
         // Mock part
         [matchers.call.fn(currentUserSubscriptionEventChannel), mockChannel]
       ])
-      .dispatch(actions.subscribe({ id: 1, email: "test" }))
+      .dispatch(actions.subscribe(1))
       .run();
     await expectSaga(unSubscribeSaga).dispatch(actions.unsubscribe(1)).run();
     await expectSaga(subscribeSaga)
@@ -65,8 +65,8 @@ describe("currentUserSubscriptionManager", () => {
         // Mock part
         [matchers.call.fn(currentUserSubscriptionEventChannel), mockChannel]
       ])
-      .dispatch(actions.subscribe({ id: 1, email: "test" }))
-      .call(currentUserSubscriptionEventChannel, "test")
+      .dispatch(actions.subscribe(1))
+      .call(currentUserSubscriptionEventChannel)
       .fork(executeActionsChannel, mockChannel)
       .run();
   });
@@ -84,8 +84,8 @@ describe("currentUserSubscriptionManager", () => {
         ]
       ])
       .take(actions.subscribe)
-      .dispatch(actions.subscribe({ id: 1, email: "test" }))
-      .dispatch(actions.subscribe({ id: 2, email: "test2" }))
+      .dispatch(actions.subscribe(1))
+      .dispatch(actions.subscribe(2))
       .run()
       .then(({ effects }) => {
         expect(effects.call).toHaveLength(1);
@@ -115,7 +115,7 @@ describe("currentUserSubscriptionManager", () => {
         [matchers.call.fn(currentUserSubscriptionEventChannel), mockChannel],
         [matchers.fork.fn(executeActionsChannel), mockTask]
       ])
-      .dispatch(actions.subscribe({ id: 1, email: "test" }))
+      .dispatch(actions.subscribe(1))
       .run();
     const forkedUnsubscribe = saga.next().value;
     const unSubscribeSaga = forkedUnsubscribe.payload.fn;

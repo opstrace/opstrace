@@ -5,8 +5,13 @@ import { renderHook } from "@testing-library/react-hooks";
 import { StoreProvider } from "state/provider";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-import useCurrentUser from "../useCurrentUser";
+import useCurrentUser, {
+  getCurrentUser,
+  getCurrentUserLoaded
+} from "../useCurrentUser";
 import { subscribe } from "../../actions";
+import { mainReducer } from "state/reducer";
+import { CombinedState } from "redux";
 
 jest.mock("react-redux", () => ({
   ...jest.requireActual("react-redux") as object,
@@ -19,6 +24,8 @@ jest.mock("state/utils/getSubscriptionID");
 afterEach(() => {
   jest.clearAllMocks();
 });
+
+const mockAction = { type: "UNKNOWN_ACTION" } as any;
 
 test("useCurrentUser hook", () => {
   const user = {
@@ -40,6 +47,36 @@ test("useCurrentUser hook", () => {
     wrapper: ({ children }: any) => <StoreProvider>{children}</StoreProvider>
   });
 
-  expect(dispatchMock).toHaveBeenCalledWith(subscribe({ id: 1, email: "foobar"}));
+  expect(dispatchMock).toHaveBeenCalledWith(subscribe(1));
   expect(result.current).toEqual(user);
+});
+
+test("getCurrentUser selector", () => {
+  const subState = {
+    users: {
+      currentUser: {
+        username: "Test",
+        email: "email@test.com",
+      }
+    },
+  };
+  const state = mainReducer(subState as CombinedState<any>, mockAction);
+  expect(getCurrentUser(state)).toEqual({
+    username: "Test",
+    email: "email@test.com",
+  });
+});
+
+test("getCurrentUserLoaded selector", () => {
+  const subState = {
+    users: {
+      currentUserLoaded: true,
+      currentUser: {
+        username: "Test"
+      }
+    },
+  };
+
+  const state = mainReducer(subState as CombinedState<any>, mockAction);
+  expect(getCurrentUserLoaded(state)).toBeTruthy();
 });
