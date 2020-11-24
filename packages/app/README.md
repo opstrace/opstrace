@@ -30,8 +30,8 @@ See the [docker compose]("./docker-compose.yml) file the services launched.
 
 ## Authentication
 
-By default, Auth0 implicit flow with PKCE is used to get a JWT for a user client-side. That JWT is then submitted to the web-server to create
-a session upon successful validation of the the token. This session is then used to handle authentication for the graphql server, web ui, and nginx ingress.
+By default, Auth0 flow with PKCE is used to get a JWT for a user client-side. That JWT is then submitted to the web-server to create
+a session upon successful validation of the the token. This session is then used to handle authentication for the graphql server, web ui, and nginx-ingress.
 
 ## Frequently used Scripts
 
