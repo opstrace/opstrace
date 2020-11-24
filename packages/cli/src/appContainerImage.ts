@@ -20,6 +20,10 @@ import { BUILD_INFO } from "./buildinfo";
 // We build the opstrace/app at the same we build opstrace/controller in CI
 // so we expect to always have matching image tags for both image repos,
 // where that tag is BUILD_INFO.VERSION_STRING.
+
+// I alternatively considered setting this with a similar mechanism to how we
+// set images for our api proxies, however it looked a little more involved since I'd have
+// to abstract it to not be specific to our Go packages, like it is today.
 const APP_CONTAINER_IMAGE = `opstrace/app:${BUILD_INFO.VERSION_STRING}`;
 
 export default APP_CONTAINER_IMAGE;
