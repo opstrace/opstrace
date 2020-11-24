@@ -27,7 +27,6 @@ RUN yarn --frozen-lockfile
 RUN yarn run tsc -b
 RUN ls -ahltr
 
-RUN CI=true yarn test
 RUN yarn build
 
 # Second stage, copy bundled files across

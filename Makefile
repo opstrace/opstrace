@@ -168,6 +168,9 @@ clean:
 # implementation details used in public targets above or do not yet have
 # an important role in human daily operations. They might be exercised by CI!
 
+.PHONY: run-app-unit-tests
+run-app-unit-tests:
+	CI=true yarn workspace @opstrace/app test
 
 .PHONY: cli-crashtest
 cli-crashtest:
