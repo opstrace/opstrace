@@ -30,22 +30,16 @@ RUN ls -ahltr
 RUN yarn build
 RUN CI=true yarn test
 
-# Second stage, lean image w/o build tooling and ideally w/o unnecessary deps.
+# Second stage, copy bundled files across
 FROM node:14.15.1-buster-slim AS prod-stage
-COPY tsconfig.json package.json yarn.lock /build/
 WORKDIR /build
 
-# Copy the lib/ and packages/ dirs ignorantly from the previous stage, i.e.
-# they contain our TS source files.
-COPY --from=build-stage /build/packages/app ./packages/app
-COPY --from=build-stage /build/lib ./lib
-
-RUN cd /build && du -ha . | sort -r -h | head -n 50 || true
-RUN yarn --frozen-lockfile --production
-RUN cd /build && du -ha . | sort -r -h | head -n 50 || true
+# Copy the build (ui build) and dist (server build) folders from previous step.
+COPY --from=build-stage /build/packages/app/dist ./packages/app/dist
+COPY --from=build-stage /build/packages/app/build ./packages/app/build
 
 WORKDIR /build/packages/app
 RUN ls -ahltr
-# maybe add a quick check here that 'confirms' that all required dependencies
-# are there? (`yarn test` was run in the previous stage only)
+# if possible, maybe add a quick check here that 'confirms' that all required dependencies
+# are there. Not sure how we can do that... in the meantime, we rely on e2e testing to catch any issues.
 WORKDIR /build/packages/app/dist
