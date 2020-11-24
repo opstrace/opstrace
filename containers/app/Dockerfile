@@ -27,8 +27,8 @@ RUN yarn --frozen-lockfile
 RUN yarn run tsc -b
 RUN ls -ahltr
 
-RUN yarn build
 RUN CI=true yarn test
+RUN yarn build
 
 # Second stage, copy bundled files across
 FROM node:14.15.1-buster-slim AS prod-stage
