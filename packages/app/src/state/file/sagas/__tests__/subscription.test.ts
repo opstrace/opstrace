@@ -31,7 +31,7 @@ describe("fileSubscriptionManager", () => {
   test("should subscribe for new actions", async () => {
     const saga = fileSubscriptionManager();
     const forkedSubscribe = saga.next().value;
-    const subscribeSaga = forkedSubscribe.payload.fn;
+    const subscribeSaga = (forkedSubscribe as any).payload.fn;
     await expectSaga(subscribeSaga)
       .provide([
         // Mock part
@@ -49,9 +49,9 @@ describe("fileSubscriptionManager", () => {
   test("should subscribe for action again after cancel", async () => {
     const saga = fileSubscriptionManager();
     const forkedSubscribe = saga.next().value;
-    const subscribeSaga = forkedSubscribe.payload.fn;
+    const subscribeSaga = (forkedSubscribe as any).payload.fn;
     const forkedUnsubscribe = saga.next().value;
-    const unSubscribeSaga = forkedUnsubscribe.payload.fn;
+    const unSubscribeSaga = (forkedUnsubscribe as any).payload.fn;
     await expectSaga(subscribeSaga)
       .provide([
         // Mock part
@@ -74,7 +74,7 @@ describe("fileSubscriptionManager", () => {
   test("should not subscribe for actions twice", async () => {
     const saga = fileSubscriptionManager();
     const forkedSubscribe = saga.next().value;
-    const subscribeSaga = forkedSubscribe.payload.fn;
+    const subscribeSaga = (forkedSubscribe as any).payload.fn;
     await expectSaga(subscribeSaga)
       .provide([
         // Mock part
@@ -97,7 +97,7 @@ describe("fileSubscriptionManager", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     saga.next().value;
     const forkedUnsubscribe = saga.next().value;
-    const unSubscribeSaga = forkedUnsubscribe.payload.fn;
+    const unSubscribeSaga = (forkedUnsubscribe as any).payload.fn;
     await testSaga(unSubscribeSaga)
       .next()
       .take(actions.unsubscribe)
@@ -108,7 +108,7 @@ describe("fileSubscriptionManager", () => {
   test("should unsubscribe existent subscription", async () => {
     const saga = fileSubscriptionManager();
     const forkedSubscribe = saga.next().value;
-    const subscribeSaga = forkedSubscribe.payload.fn;
+    const subscribeSaga = (forkedSubscribe as any).payload.fn;
     await expectSaga(subscribeSaga)
       .provide([
         // Mock part
@@ -118,7 +118,7 @@ describe("fileSubscriptionManager", () => {
       .dispatch(actions.subscribe(1))
       .run();
     const forkedUnsubscribe = saga.next().value;
-    const unSubscribeSaga = forkedUnsubscribe.payload.fn;
+    const unSubscribeSaga = (forkedUnsubscribe as any).payload.fn;
     // It should cancel tasks
     await testSaga(unSubscribeSaga)
       .next()

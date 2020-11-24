@@ -83,15 +83,8 @@ test("getFileTree returns correct tree structure", () => {
       {
         directories: [
           {
-            directories: [
-              {
-                directories: [],
-                files: [file1],
-                name: "",
-                path: "@//module-1"
-              }
-            ],
-            files: [],
+            directories: [],
+            files: [file1],
             name: "module-1",
             path: "@/"
           }
@@ -103,15 +96,8 @@ test("getFileTree returns correct tree structure", () => {
       {
         directories: [
           {
-            directories: [
-              {
-                directories: [],
-                files: [file2, file3],
-                name: "",
-                path: "@/foo/module-2"
-              }
-            ],
-            files: [],
+            directories: [],
+            files: [file2, file3],
             name: "module-2",
             path: "@/foo"
           }
