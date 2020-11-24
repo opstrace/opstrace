@@ -80,8 +80,10 @@ export { gcpProjectID };
 // configuration for the cluster creation process which does _not_ belong
 // semantically to the cluster config itself.
 export interface ClusterCreateConfigInterface {
+  // if true, will not deploy the controller. This is useful for running the controller locally instead during development.
   holdController: boolean;
-  tenantApiTokens: Dict<string>; // tenant name : api token map, can be empty
+  // tenant name : api token map, can be empty
+  tenantApiTokens: Dict<string>;
 }
 
 let clusterCreateConfig: ClusterCreateConfigInterface;
@@ -145,7 +147,7 @@ function* createClusterCore() {
   // hub, see opstrace-prelaunch/issues/1298.
   const controllerConfig: ControllerConfigType = {
     name: ccfg.cluster_name,
-    version: "notneededanymore",
+    applicationImage: ccfg.application_image,
     target: ccfg.cloud_provider,
     region: region, // not sure why that's needed
     cert_issuer: ccfg.cert_issuer,
@@ -155,8 +157,12 @@ function* createClusterCore() {
     metricRetention: retentionConf.metrics,
     dnsName: dnsConf.dnsName,
     authenticationCookie:
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15),
+      Math.random()
+        .toString(36)
+        .substring(2, 15) +
+      Math.random()
+        .toString(36)
+        .substring(2, 15),
     terminate: false,
     controllerTerminated: false,
     tlsCertificateIssuer: ccfg.cert_issuer,
