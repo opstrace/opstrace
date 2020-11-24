@@ -92,6 +92,9 @@ source ci/test-cli/cli-tests-pre-cluster.sh
 echo "--- make rebuild-testrunner-container-images"
 make rebuild-testrunner-container-images
 
+echo "--- run app unit tests"
+make run-app-unit-tests
+
 echo "--- make build-and-push-app-image"
 make build-and-push-app-image
 
