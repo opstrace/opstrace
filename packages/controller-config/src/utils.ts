@@ -57,27 +57,7 @@ export const serialize = (
         name: CONFIGMAP_NAME
       },
       data: {
-        [STORAGE_KEY]: JSON.stringify({
-          name: ccfg.name,
-          infrastructureName: ccfg.infrastructureName,
-          target: ccfg.target,
-          region: ccfg.region,
-          dnsName: ccfg.dnsName,
-          tlsCertificateIssuer: ccfg.tlsCertificateIssuer,
-          terminate: ccfg.terminate,
-          version: ccfg.version,
-          gcpAuthOptions: ccfg.gcpAuthOptions,
-          uiSourceIpFirewallRules: ccfg.uiSourceIpFirewallRules,
-          apiSourceIpFirewallRules: ccfg.apiSourceIpFirewallRules,
-          logRetention: ccfg.logRetention,
-          metricRetention: ccfg.metricRetention,
-          oidcClientId: ccfg.oidcClientId,
-          oidcClientSecret: ccfg.oidcClientSecret, // make k8s secret
-          authenticationCookie: ccfg.authenticationCookie,
-          data_api_authn_pubkey_pem: ccfg.data_api_authn_pubkey_pem,
-          disable_data_api_authentication: ccfg.disable_data_api_authentication,
-          aws: ccfg.aws
-        })
+        [STORAGE_KEY]: JSON.stringify(ccfg)
       }
     },
     kubeConfig
