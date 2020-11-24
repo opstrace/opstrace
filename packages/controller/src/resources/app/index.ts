@@ -34,11 +34,9 @@ export function OpstraceApplicationResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const version = state.config.config?.version;
-  if (!version) {
-    throw Error(
-      "we do not have a version specified for controller resources 'state.config.config?.version'"
-    );
+  const applicationImage = state.config.config?.applicationImage;
+  if (!applicationImage) {
+    throw Error("we do not have an applicationImage specified");
   }
   const domain = getDomain(state);
 
@@ -169,9 +167,37 @@ export function OpstraceApplicationResources(
               containers: [
                 {
                   name: "opstrace-application",
-                  image: `opstrace/app:${version}`,
+                  image: applicationImage,
                   imagePullPolicy: "Always",
-                  command: ["node", "main.js"],
+                  command: ["node", "server.js"],
+                  env: [
+                    { name: "GRAPHQL_ENDPOINT_HOST", value: "localhost" },
+                    { name: "GRAPHQL_ENDPOINT_PORT", value: "8080" },
+                    {
+                      name: "GRAPHQL_ENDPOINT",
+                      value: "http://localhost:8080/v1/graphql"
+                    },
+                    {
+                      name: "HASURA_GRAPHQL_ADMIN_SECRET",
+                      value: "myadminsecret"
+                    },
+                    {
+                      name: "AUTH0_CLIENT_ID",
+                      value: "vs6bgTunbVK4dvdLRj02DptWjOmAVWVM"
+                    },
+                    {
+                      name: "AUTH0_DOMAIN",
+                      value: "opstrace-dev.us.auth0.com"
+                    },
+                    { name: "HASURA_ADMIN_SECRET", value: "myadminsecret" },
+                    { name: "DOMAIN", value: "http://localhost:3001" },
+                    { name: "UI_DOMAIN", value: "http://localhost:3000" },
+                    {
+                      name: "COOKIE_SECRET",
+                      value:
+                        "aef23610b381f01bf2325f012324a42c2e3e85b12ac37492e07fa98df00cdd20"
+                    }
+                  ],
                   resources: {
                     limits: {
                       cpu: "1",

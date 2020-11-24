@@ -34,7 +34,7 @@ import {
   setCreateConfig,
   waitUntilLokiCortexAreReachable
 } from "@opstrace/installer";
-
+import appContainerImage from "./appContainerImage";
 import * as schemas from "./schemas";
 
 function readTenantApiTokenFiles(tenants: string[]): Dict<string> {
@@ -77,6 +77,8 @@ async function checkClusterStatus() {
     ...{
       aws: infraConfigAWS,
       gcp: infraConfigGCP,
+      // Making this the same as
+      application_image: appContainerImage,
       cloud_provider: cli.CLIARGS.cloudProvider,
       cluster_name: cli.CLIARGS.clusterName,
       data_api_authn_pubkey_pem: ""

@@ -31,14 +31,17 @@ export const controllerConfigSchema = yup
       .mixed<"gcp" | "aws">()
       .oneOf(["gcp", "aws"])
       .required("must specify a target (gcp | aws)"),
-    version: yup.string().required("must specify a version"),
+    applicationImage: yup.string().required("must specify applicationImage"),
     region: yup.string().required("must specify region"),
     logRetention: yup.number().required("must specify log retention"),
     metricRetention: yup.number().required("must specify metric retention"),
     dnsName: yup.string().required(),
     terminate: yup.bool().default(false),
     // https://stackoverflow.com/a/63944333/145400
-    data_api_authn_pubkey_pem: yup.string().typeError().strict(true),
+    data_api_authn_pubkey_pem: yup
+      .string()
+      .typeError()
+      .strict(true),
     disable_data_api_authentication: yup.bool().required(),
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
