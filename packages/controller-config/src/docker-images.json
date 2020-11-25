@@ -19,5 +19,6 @@
   "nodeExporter": "quay.io/prometheus/node-exporter:v0.18.1",
   "oauth2Proxy": "quay.io/pusher/oauth2_proxy:v4.0.0",
   "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
-  "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1"
+  "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1",
+  "hasuraGraphqlEngine": "hasura/graphql-engine:v1.3.3"
 }
