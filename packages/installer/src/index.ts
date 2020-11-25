@@ -156,13 +156,9 @@ function* createClusterCore() {
     logRetention: retentionConf.logs,
     metricRetention: retentionConf.metrics,
     dnsName: dnsConf.dnsName,
-    authenticationCookie:
-      Math.random()
-        .toString(36)
-        .substring(2, 15) +
-      Math.random()
-        .toString(36)
-        .substring(2, 15),
+    authSessionCookieSecret:
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15),
     terminate: false,
     controllerTerminated: false,
     tlsCertificateIssuer: ccfg.cert_issuer,

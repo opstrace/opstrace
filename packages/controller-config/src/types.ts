@@ -38,19 +38,16 @@ export const controllerConfigSchema = yup
     dnsName: yup.string().required(),
     terminate: yup.bool().default(false),
     // https://stackoverflow.com/a/63944333/145400
-    data_api_authn_pubkey_pem: yup
-      .string()
-      .typeError()
-      .strict(true),
+    data_api_authn_pubkey_pem: yup.string().typeError().strict(true),
     disable_data_api_authentication: yup.bool().required(),
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     oidcClientId: yup.string().required(),
     oidcClientSecret: yup.string().required(),
-    authenticationCookie: yup
+    authSessionCookieSecret: yup
       .string()
       .required(
-        "[internal] must specify authenticationCookie for oauth2_proxy to use"
+        "[internal] must specify authSessionCookieSecret for oauth2_proxy to use"
       ),
 
     cert_issuer: yup
