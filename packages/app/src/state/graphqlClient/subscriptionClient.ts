@@ -21,9 +21,9 @@ import { ApolloClient, InMemoryCache, from } from "@apollo/client";
 export * from "../graphql-api-types";
 
 // we use webpack to set these "false" during client build
-const headers = process.env.HASURA_ADMIN_SECRET
+const headers = process.env.HASURA_GRAPHQL_ADMIN_SECRET
   ? {
-      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET
+      "x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET
     }
   : {};
 

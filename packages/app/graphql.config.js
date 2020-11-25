@@ -21,7 +21,7 @@ module.exports = {
       default: {
         url: "http://localhost:8080/v1/graphql",
         headers: {
-          "X-Hasura-Admin-Secret": process.env.HASURA_ADMIN_SECRET
+          "X-Hasura-Admin-Secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET
         }
       }
     }
