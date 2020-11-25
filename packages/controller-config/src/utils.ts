@@ -62,7 +62,7 @@ export const serialize = (
     },
     kubeConfig
   );
-  cm.setOwnership({ protect: true }); // Protect so the reconciliation loop doesn't destroy it again.
+  cm.setManagementOption({ protect: true }); // Protect so the reconciliation loop doesn't destroy it again.
 
   return cm;
 };

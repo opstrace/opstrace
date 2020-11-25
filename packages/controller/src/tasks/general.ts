@@ -30,7 +30,7 @@ export function* deployControllerResources(config: {
     .get()
     .map(r => {
       // Protect these resources so we don't ever terminate them in the reconcile loop
-      r.setOwnership({ protect: true });
+      r.setManagementOption({ protect: true });
       return r;
     });
 
