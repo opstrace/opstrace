@@ -164,7 +164,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing) || hasIngressChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Ingresses.forEach(r => {
@@ -181,7 +183,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.StorageClasses.forEach(r => {
@@ -198,7 +202,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.PersistentVolumeClaims.forEach(r => {
@@ -218,7 +224,9 @@ export function* reconcile(
         haveLabelsChanged(r, existing) ||
         hasStatefulSetChanged(r, existing)
       ) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.StatefulSets.forEach(r => {
@@ -235,7 +243,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.ServiceAccounts.forEach(r => {
@@ -252,7 +262,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing) || hasServiceChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Services.forEach(r => {
@@ -269,7 +281,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing) || hasSecretChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Secrets.forEach(r => {
@@ -286,7 +300,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.RoleBindings.forEach(r => {
@@ -303,7 +319,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Roles.forEach(r => {
@@ -320,7 +338,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Namespaces.forEach(r => {
@@ -337,7 +357,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing) || hasDeploymentChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Deployments.forEach(r => {
@@ -354,7 +376,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing) || hasDaemonSetChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.DaemonSets.forEach(r => {
@@ -371,7 +395,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.CustomResourceDefinitions.forEach(r => {
@@ -388,7 +414,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing) || hasConfigMapChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.ConfigMaps.forEach(r => {
@@ -405,7 +433,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.ClusterRoleBindings.forEach(r => {
@@ -422,7 +452,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.ClusterRoles.forEach(r => {
@@ -439,7 +471,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.PodSecurityPolicies.forEach(r => {
@@ -456,7 +490,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.ApiServices.forEach(r => {
@@ -476,7 +512,9 @@ export function* reconcile(
         haveLabelsChanged(r, existing) ||
         hasAlertManagerChanged(r, existing)
       ) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Alertmanagers.forEach(r => {
@@ -493,7 +531,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.PodMonitors.forEach(r => {
@@ -510,7 +550,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing) || hasPrometheusChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Prometheuses.forEach(r => {
@@ -530,7 +572,9 @@ export function* reconcile(
         haveLabelsChanged(r, existing) ||
         hasPrometheusRuleChanged(r, existing)
       ) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.PrometheusRules.forEach(r => {
@@ -550,7 +594,9 @@ export function* reconcile(
         haveLabelsChanged(r, existing) ||
         hasServiceMonitorChanged(r, existing)
       ) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.ServiceMonitors.forEach(r => {
@@ -567,7 +613,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Certificates.forEach(r => {
@@ -584,7 +632,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.CertificateRequests.forEach(r => {
@@ -601,7 +651,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Challenges.forEach(r => {
@@ -618,7 +670,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.ClusterIssuers.forEach(r => {
@@ -635,7 +689,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Issuers.forEach(r => {
@@ -652,7 +708,9 @@ export function* reconcile(
         return;
       }
       if (haveLabelsChanged(r, existing)) {
-        updateCollection.push(r);
+        if (!r.shouldPreventUpdate()) {
+          updateCollection.push(r);
+        }
       }
     });
     actualState.Orders.forEach(r => {

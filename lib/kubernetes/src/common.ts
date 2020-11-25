@@ -117,8 +117,8 @@ export class ResourceCollection {
       }, this.resources)
       .map(resource => {
         // don't override ownership if it's already set
-        if (!resource.isProtected()) {
-          resource.setOwnership({ protect: false });
+        if (!resource.isProtected() && !resource.shouldPreventUpdate()) {
+          resource.setManagementOption({ protect: false });
         }
         return resource;
       });
@@ -166,13 +166,19 @@ export class K8sResource implements Resource {
   delete(): Promise<{ response: any; body: any }> {
     return Promise.resolve({ response: {}, body: {} });
   }
-  setOwnership({ protect }: { protect?: boolean }) {
+  setManagementOption({ protect }: { protect?: boolean }) {
     if (!this.resource.metadata.annotations) {
       this.resource.metadata.annotations = {};
     }
     this.resource.metadata.annotations[OPSTRACE_MANAGED_KEY] = protect
       ? "protected"
       : "owned";
+  }
+  setShouldNeverUpdate() {
+    if (!this.resource.metadata.annotations) {
+      this.resource.metadata.annotations = {};
+    }
+    this.resource.metadata.annotations[OPSTRACE_MANAGED_KEY] = "no-update";
   }
   isOurs() {
     return (
@@ -184,6 +190,12 @@ export class K8sResource implements Resource {
     return (
       OPSTRACE_MANAGED_KEY in this.annotations &&
       this.annotations[OPSTRACE_MANAGED_KEY] === "protected"
+    );
+  }
+  shouldPreventUpdate(): boolean {
+    return (
+      OPSTRACE_MANAGED_KEY in this.annotations &&
+      this.annotations[OPSTRACE_MANAGED_KEY] === "no-update"
     );
   }
   isTerminating(): boolean {
