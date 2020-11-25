@@ -47,7 +47,9 @@ const subscriptionErrorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 const subscriptionClient = () => {
-  const endpoint = `ws://${window.location.host}/_/graphql`;
+  const endpoint = `${window.location.protocol === "https:" ? "wss" : "ws"}://${
+    window.location.host
+  }/_/graphql`;
   const wsLink = new WebSocketLink({
     uri: endpoint,
     options: {
