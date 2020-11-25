@@ -26,16 +26,6 @@ const common: ThemeOptions = {
           minWidth: "48px"
         }
       }
-    },
-    MuiButton: {
-      sizeSmall: {
-        borderRadius: 4,
-        fontSize: 12,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingTop: 2,
-        paddingBottom: 2
-      }
     }
   },
   props: {

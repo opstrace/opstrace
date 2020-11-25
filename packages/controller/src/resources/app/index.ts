@@ -112,7 +112,7 @@ export function OpstraceApplicationResources(
         metadata: {
           name: "opstrace-application",
           labels: {
-            "k8s-app": "opstrace-application"
+            app: "opstrace-application"
           },
           namespace
         },
@@ -121,12 +121,11 @@ export function OpstraceApplicationResources(
             {
               name: "http",
               port: 3001,
-              protocol: "TCP",
-              targetPort: 3001 as any
+              targetPort: "http" as any
             }
           ],
           selector: {
-            "k8s-app": "opstrace-application"
+            app: "opstrace-application"
           }
         }
       },
@@ -143,7 +142,7 @@ export function OpstraceApplicationResources(
           name: "opstrace-application",
           namespace,
           labels: {
-            "k8s-app": "opstrace-application"
+            app: "opstrace-application"
           }
         },
         spec: {
@@ -153,13 +152,13 @@ export function OpstraceApplicationResources(
           },
           selector: {
             matchLabels: {
-              name: "opstrace-application"
+              app: "opstrace-application"
             }
           },
           template: {
             metadata: {
               labels: {
-                name: "opstrace-application"
+                app: "opstrace-application"
               }
             },
             spec: {
@@ -169,7 +168,7 @@ export function OpstraceApplicationResources(
                   name: "opstrace-application",
                   image: applicationImage,
                   imagePullPolicy: "Always",
-                  command: ["node", "server.js"],
+                  command: ["node", "dist/server.js"],
                   env: [
                     { name: "GRAPHQL_ENDPOINT_HOST", value: "localhost" },
                     { name: "GRAPHQL_ENDPOINT_PORT", value: "8080" },
@@ -198,16 +197,13 @@ export function OpstraceApplicationResources(
                         "aef23610b381f01bf2325f012324a42c2e3e85b12ac37492e07fa98df00cdd20"
                     }
                   ],
-                  resources: {
-                    limits: {
-                      cpu: "1",
-                      memory: "1Gi"
-                    },
-                    requests: {
-                      cpu: "0.5",
-                      memory: "500Mi"
+                  ports: [
+                    {
+                      containerPort: 3001,
+                      name: "http"
                     }
-                  }
+                  ],
+                  resources: {}
                 }
               ]
             }
