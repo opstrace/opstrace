@@ -38,7 +38,7 @@ export function Oauth2Resources(
   const {
     oidcClientId,
     oidcClientSecret,
-    authenticationCookie
+    authSessionCookieSecret
   } = getControllerConfig(state);
 
   state.tenants.list.tenants.forEach(tenant => {
@@ -161,7 +161,7 @@ export function Oauth2Resources(
                     env: [
                       {
                         name: "OAUTH2_PROXY_COOKIE_SECRET",
-                        value: authenticationCookie
+                        value: authSessionCookieSecret
                       }
                     ],
                     image: DockerImages.oauth2Proxy,
