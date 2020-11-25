@@ -20,7 +20,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const nodeExternals = require("webpack-node-externals");
 const svgToMiniDataURI = require("mini-svg-data-uri");
 const paths = require("./paths");
 const postcssNormalize = require("postcss-normalize");
@@ -50,7 +49,6 @@ const dotenvFiles = [
 // https://github.com/motdotla/dotenv
 // https://github.com/motdotla/dotenv-expand
 dotenvFiles.forEach(dotenvFile => {
-  console.log(dotenvFile, fs.existsSync(dotenvFile));
   if (fs.existsSync(dotenvFile)) {
     require("dotenv-expand")(
       require("dotenv").config({
@@ -132,7 +130,7 @@ module.exports = {
     : isEnvDevelopment && "source-map",
   externals: [
     "@loadable/component",
-    nodeExternals(),
+    "fsevents",
     "react",
     "react-dom",
     "react-native"

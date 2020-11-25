@@ -39,6 +39,7 @@ COPY --from=build-stage /build/packages/app/build ./packages/app/build
 
 WORKDIR /build/packages/app
 RUN ls -ahltr
+
+EXPOSE 3001
 # if possible, maybe add a quick check here that 'confirms' that all required dependencies
 # are there. Not sure how we can do that... in the meantime, we rely on e2e testing to catch any issues.
-WORKDIR /build/packages/app/dist
