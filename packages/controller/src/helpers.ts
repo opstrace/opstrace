@@ -20,6 +20,20 @@ import { Tenant } from "@opstrace/tenants";
 
 export const DEVELOPMENT = "development";
 /**
+ * Generates a random 75 char long string of alphanumeric characters
+ */
+export function generateSecretValue() {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
+}
+/**
  * currentVersion returns the version of this controller.
  * If running with --development, currentVersion will return "development"
  */

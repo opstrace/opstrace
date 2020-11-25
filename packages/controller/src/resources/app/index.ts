@@ -21,11 +21,12 @@ import {
   ServiceAccount,
   Namespace,
   Ingress,
-  Service
+  Service,
+  Secret
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
-import { getDomain } from "../../helpers";
+import { getDomain, generateSecretValue } from "../../helpers";
 
 export function OpstraceApplicationResources(
   state: State,
@@ -133,6 +134,50 @@ export function OpstraceApplicationResources(
     )
   );
 
+  const sessionCookieSecret = new Secret(
+    {
+      apiVersion: "v1",
+      data: {
+        COOKIE_SECRET: generateSecretValue()
+      },
+      kind: "Secret",
+      metadata: {
+        name: "session-cookie-secret",
+        namespace: namespace
+      },
+      type: "Opaque"
+    },
+    kubeConfig
+  );
+  // We don't want this value to change once it exists.
+  // This value changing would cause all sessions to be invalidated immediately
+  // and that would be a bad experience during an upgrade.
+  // This value of this secret can always be updated manually if instant session invalidation is desired.
+  sessionCookieSecret.setShouldNeverUpdate();
+
+  collection.add(sessionCookieSecret);
+
+  const hasuraAdminSecret = new Secret(
+    {
+      apiVersion: "v1",
+      data: {
+        HASURA_ADMIN_SECRET: generateSecretValue()
+      },
+      kind: "Secret",
+      metadata: {
+        name: "hasura-admin-secret",
+        namespace: namespace
+      },
+      type: "Opaque"
+    },
+    kubeConfig
+  );
+  // We don't want this value to change once it exists either.
+  // The value of this secret can always be updated manually in the cluster if needs be for security purposes.
+  hasuraAdminSecret.setShouldNeverUpdate();
+
+  collection.add(hasuraAdminSecret);
+
   collection.add(
     new Deployment(
       {
@@ -170,15 +215,14 @@ export function OpstraceApplicationResources(
                   imagePullPolicy: "Always",
                   command: ["node", "dist/server.js"],
                   env: [
-                    { name: "GRAPHQL_ENDPOINT_HOST", value: "localhost" },
+                    {
+                      name: "GRAPHQL_ENDPOINT_HOST",
+                      value: `graphql.${namespace}.svc.cluster.local`
+                    },
                     { name: "GRAPHQL_ENDPOINT_PORT", value: "8080" },
                     {
                       name: "GRAPHQL_ENDPOINT",
-                      value: "http://localhost:8080/v1/graphql"
-                    },
-                    {
-                      name: "HASURA_GRAPHQL_ADMIN_SECRET",
-                      value: "myadminsecret"
+                      value: `graphql.${namespace}.svc.cluster.local:8080/v1/graphql`
                     },
                     {
                       name: "AUTH0_CLIENT_ID",
@@ -188,13 +232,25 @@ export function OpstraceApplicationResources(
                       name: "AUTH0_DOMAIN",
                       value: "opstrace-dev.us.auth0.com"
                     },
-                    { name: "HASURA_ADMIN_SECRET", value: "myadminsecret" },
-                    { name: "DOMAIN", value: "http://localhost:3001" },
-                    { name: "UI_DOMAIN", value: "http://localhost:3000" },
+                    { name: "DOMAIN", value: domain },
+                    { name: "UI_DOMAIN", value: domain },
                     {
                       name: "COOKIE_SECRET",
-                      value:
-                        "aef23610b381f01bf2325f012324a42c2e3e85b12ac37492e07fa98df00cdd20"
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: "session-cookie-secret",
+                          key: "COOKIE_SECRET"
+                        }
+                      }
+                    },
+                    {
+                      name: "HASURA_GRAPHQL_ADMIN_SECRET",
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: "hasura-admin-secret",
+                          key: "HASURA_ADMIN_SECRET"
+                        }
+                      }
                     }
                   ],
                   ports: [
