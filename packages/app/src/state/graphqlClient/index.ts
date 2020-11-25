@@ -26,7 +26,7 @@ const endpoint =
 if (!endpoint) {
   throw Error("Must specify GRAPHQL_ENDPOINT env var");
 }
-const adminSecret = process.env.HASURA_ADMIN_SECRET;
+const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
 
 const client = adminSecret
   ? new GraphQLClient(endpoint, {

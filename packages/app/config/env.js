@@ -82,7 +82,7 @@ function getClientEnvironment(publicUrl) {
             ? undefined
             : process.env.EARLY_PREVIEW,
         // Always set this to null in the client
-        HASURA_ADMIN_SECRET: null,
+        HASURA_GRAPHQL_ADMIN_SECRET: null,
         // Useful for determining whether we’re running in production mode.
         // Most importantly, it switches React into the correct mode.
         NODE_ENV: process.env.NODE_ENV || "development",
