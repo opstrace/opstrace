@@ -27,6 +27,7 @@ import {
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
 import { getDomain, generateSecretValue } from "../../helpers";
+import { DockerImages } from "@opstrace/controller-config";
 
 export function OpstraceApplicationResources(
   state: State,
@@ -212,7 +213,7 @@ export function OpstraceApplicationResources(
                 {
                   name: "opstrace-application",
                   image: applicationImage,
-                  imagePullPolicy: "Always",
+                  imagePullPolicy: "IfNotPresent",
                   command: ["node", "dist/server.js"],
                   env: [
                     {
@@ -256,6 +257,111 @@ export function OpstraceApplicationResources(
                   ports: [
                     {
                       containerPort: 3001,
+                      name: "http"
+                    }
+                  ],
+                  resources: {}
+                }
+              ]
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          name: "graphql",
+          labels: {
+            app: "graphql"
+          },
+          namespace
+        },
+        spec: {
+          ports: [
+            {
+              name: "http",
+              port: 8080,
+              targetPort: "http" as any
+            }
+          ],
+          selector: {
+            app: "graphql"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Deployment(
+      {
+        apiVersion: "apps/v1",
+        kind: "Deployment",
+        metadata: {
+          name: "graphql",
+          namespace,
+          labels: {
+            app: "graphql"
+          }
+        },
+        spec: {
+          replicas: 1,
+          strategy: {
+            type: "Recreate"
+          },
+          selector: {
+            matchLabels: {
+              app: "graphql"
+            }
+          },
+          template: {
+            metadata: {
+              labels: {
+                app: "graphql"
+              }
+            },
+            spec: {
+              serviceAccountName: "graphql",
+              containers: [
+                {
+                  name: "graphql",
+                  image: DockerImages.hasuraGraphqlEngine,
+                  imagePullPolicy: "IfNotPresent",
+                  env: [
+                    {
+                      name: "HASURA_GRAPHQL_ADMIN_SECRET",
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: "hasura-admin-secret",
+                          key: "HASURA_ADMIN_SECRET"
+                        }
+                      }
+                    },
+                    {
+                      name: "HASURA_GRAPHQL_DATABASE_URL",
+                      value:
+                        "postgres://postgres:postgrespassword@postgres:5432/postgres"
+                    },
+                    {
+                      name: "HASURA_GRAPHQL_ENABLE_CONSOLE",
+                      value: "false"
+                    },
+                    {
+                      name: "HASURA_GRAPHQL_ENABLED_LOG_TYPES",
+                      value: "startup, http-log, websocket-log"
+                    }
+                  ],
+                  ports: [
+                    {
+                      containerPort: 8080,
                       name: "http"
                     }
                   ],
