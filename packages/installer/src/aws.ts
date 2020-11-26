@@ -261,28 +261,6 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
     })
   });
 
-  // CertManager role
-  const CertManagerRoleName = `${ccfg.cluster_name}-cert-manager`;
-  log.info(`Ensuring ${CertManagerRoleName} role exists`);
-  const certManagerRole: AWS.IAM.Role = yield call(ensureRoleExists, {
-    RoleName: CertManagerRoleName,
-    AssumeRolePolicyDocument: JSON.stringify({
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Effect: "Allow",
-          Principal: {
-            Service: "eks.amazonaws.com"
-          },
-          Action: "sts:AssumeRole"
-        }
-      ]
-    })
-  });
-
-  // To be used when pushing the controller config to the cluster
-  setCertManagerRoleArn(certManagerRole.Arn);
-
   // EKS Role
   const EKSClusterRoleName = `${ccfg.cluster_name}-eks-controlplane`;
   log.info(`Ensuring ${EKSClusterRoleName} role exists`);
@@ -369,7 +347,31 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
     })
   });
 
-  // Cortex Bucket Policy
+  // CertManager role
+  const CertManagerRoleName = `${ccfg.cluster_name}-cert-manager`;
+  log.info(`Ensuring ${CertManagerRoleName} role exists`);
+  const certManagerRole: AWS.IAM.Role = yield call(ensureRoleExists, {
+    RoleName: CertManagerRoleName,
+    AssumeRolePolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        // allow users in eks-nodes role to assume the cert-manager role, this
+        // is required for the node running cert-manager to be able to assume
+        // the cert-manager role
+        {
+          Effect: "Allow",
+          Principal: {
+            AWS: workerNodeRole.Arn
+          },
+          Action: "sts:AssumeRole"
+        }
+      ]
+    })
+  });
+
+  // To be used when pushing the controller config to the cluster
+  setCertManagerRoleArn(certManagerRole.Arn);
+
   const EKSServiceLinkedRolePolicyName = `${ccfg.cluster_name}-eks-linked-service`;
   log.info(`Ensuring ${EKSServiceLinkedRolePolicyName} policy exists`);
   const linkedServicePolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
