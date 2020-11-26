@@ -31,7 +31,6 @@ export const controllerConfigSchema = yup
       .mixed<"gcp" | "aws">()
       .oneOf(["gcp", "aws"])
       .required("must specify a target (gcp | aws)"),
-    applicationImage: yup.string().required("must specify applicationImage"),
     region: yup.string().required("must specify region"),
     logRetention: yup.number().required("must specify log retention"),
     metricRetention: yup.number().required("must specify metric retention"),

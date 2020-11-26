@@ -12016,10 +12016,10 @@ hastscript@^5.0.0:
     property-information "^5.0.0"
     space-separated-tokens "^1.0.0"
 
-hasura-cli@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/hasura-cli/-/hasura-cli-1.3.1.tgz#6fa494d0e63e76f8146d3883301479296701db8d"
-  integrity sha512-9xbDcWeqF1ZnmAdNFbA6BpFaKkeivFxZlBLATU0WhO0IA+wrH81zEs+oLsH1qHTwlnWU3kIQgisHlmZr+nSIZQ==
+hasura-cli@1.3.3:
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/hasura-cli/-/hasura-cli-1.3.3.tgz#8673d1c5748f9d8a05f0adacde6e3b446f0406a4"
+  integrity sha512-bIZaI+RIjTotqeHJpwByyvVQvS/EDoHdDcizcvFSPKSsh7Zehro9ZwyyPmvtIEvDn1EI3I2s5vxAVOOJrJR5qw==
   dependencies:
     axios "^0.19.0"
     chalk "^2.4.2"

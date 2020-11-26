@@ -1,7 +1,7 @@
-build
+**/build
 secrets
 test
 ci
 npm-debug.log
 .git
-node_modules
+**/node_modules

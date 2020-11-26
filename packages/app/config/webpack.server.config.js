@@ -21,6 +21,7 @@
 const fs = require("fs");
 const path = require("path");
 const svgToMiniDataURI = require("mini-svg-data-uri");
+const nodeExternals = require("webpack-node-externals");
 const paths = require("./paths");
 const postcssNormalize = require("postcss-normalize");
 const getCSSModuleLocalIdent = require("react-dev-utils/getCSSModuleLocalIdent");
@@ -130,7 +131,7 @@ module.exports = {
     : isEnvDevelopment && "source-map",
   externals: [
     "@loadable/component",
-    "fsevents",
+    nodeExternals({ allowlist: [/@opstrace/] }), // bundle any of our linked packages like @opstrace/utils
     "react",
     "react-dom",
     "react-native"

@@ -36,10 +36,6 @@ export function OpstraceApplicationResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const applicationImage = state.config.config?.applicationImage;
-  if (!applicationImage) {
-    throw Error("we do not have an applicationImage specified");
-  }
   const domain = getDomain(state);
 
   collection.add(
@@ -212,7 +208,7 @@ export function OpstraceApplicationResources(
               containers: [
                 {
                   name: "opstrace-application",
-                  image: applicationImage,
+                  image: DockerImages.app,
                   imagePullPolicy: "IfNotPresent",
                   command: ["node", "dist/server.js"],
                   env: [
@@ -329,11 +325,10 @@ export function OpstraceApplicationResources(
               }
             },
             spec: {
-              serviceAccountName: "graphql",
               containers: [
                 {
                   name: "graphql",
-                  image: DockerImages.hasuraGraphqlEngine,
+                  image: DockerImages.graphqlEngine,
                   imagePullPolicy: "IfNotPresent",
                   env: [
                     {

@@ -58,11 +58,7 @@ export const infraConfigSchemaGCP = yup
 export const clusterConfigFileSchema = yup
   .object({
     // infra-related things, provider-independent
-    node_count: yup
-      .number()
-      .positive()
-      .integer()
-      .required(),
+    node_count: yup.number().positive().integer().required(),
 
     // Note(JP): CONTROLLER_IMAGE_DEFAULT is supposed to be inserted by
     // CI / the build system (for any build, there is supposed to be a sane
@@ -86,16 +82,8 @@ export const clusterConfigFileSchema = yup
       .oneOf(["letsencrypt-prod", "letsencrypt-staging"])
       .default("letsencrypt-staging"),
 
-    log_retention_days: yup
-      .number()
-      .positive()
-      .integer()
-      .default(7),
-    metric_retention_days: yup
-      .number()
-      .positive()
-      .integer()
-      .default(7),
+    log_retention_days: yup.number().positive().integer().default(7),
+    metric_retention_days: yup.number().positive().integer().default(7),
 
     data_api_authentication_disabled: yup.boolean().default(false),
     data_api_authorized_ip_ranges: yup
@@ -142,13 +130,7 @@ export const renderedClusterConfigSchema = clusterConfigFileSchema.concat(
       // can be empty when `disable_data_api_authentication` is true
       // allow empty string, but not undefined:
       // https://stackoverflow.com/a/63944333/145400
-      data_api_authn_pubkey_pem: yup
-        .string()
-        .typeError()
-        .strict(true),
-      // merge in the non-user facing application_image so the controller
-      // can deploy it.
-      application_image: yup.string().required()
+      data_api_authn_pubkey_pem: yup.string().typeError().strict(true)
     })
     .noUnknown()
     .defined()
