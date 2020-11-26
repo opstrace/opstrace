@@ -54,13 +54,3 @@ The corresponding _public_ key, though, is passed into the Opstrace cluster and 
 Given these details, you can think of the API tokens as long-lived client certificates -- it's just that instead X.509 the system uses JWT as the meta data container format.
 
 Note that this concept does not allow for secure, immediate, individual API token revocation: the most predictable \(and secure\) way to invalidate API tokens in this model is to invalidate all of them at the same time by using a fresh public key for token verification.
-
-#### Outlook: creating new API tokens, rotating key material
-
-Possible directions in the future:
-
-* For allowing out-of-band PKI management:
-  * Ability to pass in an RSA private key to the cluster `create` operation so that _this_ would be used for signing API tokens, instead of using a newly generated key.
-  * Ability to invoke the cluster management CLI with the specific purpose to generate a new API token given an externally provided private key.
-* For allowing key pair \(public key\) rotation without downtime:
-  * Allow data API authenticator to be re-configured: allow for adding \(an\) additional public key\(s\) and also allow for removing public keys.
