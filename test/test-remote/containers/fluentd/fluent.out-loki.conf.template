@@ -1,0 +1,65 @@
+<system>
+  log_level debug
+</system>
+
+<source>
+    @type tail
+
+    format json
+    tag dummytag.*
+
+    # Keep the pos file within the container
+    pos_file /fluent_pos_file
+
+    # Dynamically inject log source
+    path {{{samples_log_file_path}}}
+
+    # Keep time string in RFC3339Nano format written by Docker's JSON file
+    # logging driver
+    keep_time_key true
+
+    # But also read the timestamp into FluentD's logic. This is required for
+    # the Loki output plugin to pick up the correct log record time.
+    time_format %Y-%m-%dT%H:%M:%S.%NZ
+
+    # Read log file from head.
+    read_from_head true
+</source>
+
+<filter dummytag.**>
+    @type record_transformer
+    enable_ruby true
+    <record>
+        host "sample_host"
+        pod_name "sample_pod_name"
+        namespace "sample_namespace"
+        container_name "sample_container_name"
+        {{{indexFieldName}}} {{{indexFieldValue}}}
+    </record>
+</filter>
+
+#<match dummytag.**>
+#  @type stdout
+#</match>
+
+# https://github.com/grafana/loki/tree/master/fluentd/fluent-plugin-grafana-loki#usage
+<match dummytag.**>
+  @type loki
+  url "{{{loki_api_base_url}}}"
+  insecure_tls true
+  flush_interval 1s
+
+  {{#bearerTokenFilePath}}
+    bearer_token_file {{{bearerTokenFilePath}}}
+  {{/bearerTokenFilePath}}
+  {{^bearerTokenFilePath}}
+    # bearer_token_file not set
+  {{/bearerTokenFilePath}}
+
+  <label>
+    host
+    namespace
+    {{{indexFieldName}}}
+  </label>
+</match>
+

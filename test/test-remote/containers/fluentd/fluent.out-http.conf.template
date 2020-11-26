@@ -1,0 +1,56 @@
+<system>
+  log_level debug
+</system>
+
+<source>
+    @type tail
+
+    format json
+    tag dummytag.*
+
+    # Keep the pos file within the container
+    pos_file /fluent_pos_file
+
+    # Dynamically inject log source
+    path {{{samples_log_file_path}}}
+
+    # Keep time string in RFC3339Nano format written by Docker's JSON file
+    # logging driver
+    keep_time_key true
+
+    # Read log file from head.
+    read_from_head true
+</source>
+
+<filter dummytag.**>
+    @type record_transformer
+    enable_ruby true
+    <record>
+        labels {
+            "host": "sample_host",
+            "pod_name": "sample_pod_name",
+            "namespace": "sample_namespace",
+            "container_name": "sample_container_name",
+            "{{{indexFieldName}}}": "{{{indexFieldValue}}}"
+        }
+    </record>
+</filter>
+
+#<match dummytag.**>
+#  @type stdout
+#</match>
+
+<match dummytag.**>
+    @type http
+    endpoint {{{log_ingest_url}}}
+    tls_verify_mode none
+    open_timeout 5s
+    read_timeout 60s
+    <format>
+        @type json
+    </format>
+    <buffer>
+        flush_interval 1s
+    </buffer>
+</match>
+

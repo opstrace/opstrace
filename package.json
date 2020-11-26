@@ -1,0 +1,111 @@
+{
+  "name": "@opstrace/opstrace",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "lib/*",
+    "test/*",
+    "modules/*"
+  ],
+  "repository": "https://github.com/opstrace/opstrace.git",
+  "enginesStrict": true,
+  "engines": {
+    "node": ">=14.10.0"
+  },
+  "description": "Observability Platform",
+  "main": "./build/cli.js",
+  "author": "Opstrace, Inc.",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@redux-saga/types": "^1.1.0",
+    "@types/node": "^14.14.7",
+    "@types/source-map-support": "^0.5.2",
+    "@types/yup": "^0.28.3",
+    "@typescript-eslint/eslint-plugin": "^4.7.0",
+    "@typescript-eslint/parser": "^4.7.0",
+    "babel-eslint": "10.x",
+    "eslint": "^7.13.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-plugin-flowtype": "5.x",
+    "eslint-plugin-import": "2.x",
+    "eslint-plugin-jsx-a11y": "6.x",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "7.x",
+    "eslint-plugin-react-hooks": "4.x",
+    "husky": "^4.3.0",
+    "istanbul-reports": "^3.0.2",
+    "lint-staged": "^10.4.0",
+    "markdownlint-cli": "^0.24.0",
+    "pkg": "^4.4.9",
+    "prettier": "^2.1.2",
+    "redux-devtools-extension": "^2.13.8",
+    "rimraf": "^3.0.0",
+    "source-map-support": "^0.5.19",
+    "ts-loader": "^8.0.11",
+    "ts-node": "^9.0.0",
+    "typescript": "4.0.5",
+    "wsrun": "^5.2.0"
+  },
+  "dependencies": {
+    "@octokit/rest": "^16.43.1",
+    "@types/js-yaml": "^3.12.5",
+    "google-auth-library": "^6.1.3",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "redux": "^4.0.4",
+    "redux-saga": "^1.1.2",
+    "typesafe-actions": "^5.1.0"
+  },
+  "resolutions": {
+    "**/**/bl": "^4.0.3",
+    "**/**/dot-prop": "^5.1.1",
+    "**/**/elliptic": "^6.5.3",
+    "**/**/lodash": "^4.17.19",
+    "**/**/object-path": "^0.11.5",
+    "**/**/serialize-javascript": "^3.1.0",
+    "**/**/yargs-parser": "^13.1.2"
+  },
+  "scripts": {
+    "clean": "yarn wsrun -c clean && rimraf .cache tsconfig.tsbuildinfo",
+    "lint": "yarn wsrun -c lint",
+    "golint": "cd go && golangci-lint run --fix -c .golangci.yml # ",
+    "markdownlint": "markdownlint",
+    "license": "addlicense -c 'Opstrace, Inc.' -l apache -check",
+    "watch:controller": "yarn workspace @opstrace/controller watch",
+    "build:controller": "yarn workspace @opstrace/controller build",
+    "watch:installer": "yarn workspace @opstrace/installer watch",
+    "build:installer": "yarn workspace @opstrace/installer build",
+    "watch:uninstaller": "yarn workspace @opstrace/uninstaller watch",
+    "build:uninstaller": "yarn workspace @opstrace/uninstaller build",
+    "watch:cli": "yarn workspace @opstrace/cli watch",
+    "build:cli": "yarn workspace @opstrace/cli build",
+    "build:ui": "yarn workspace @opstrace/app build",
+    "watch:ui": "yarn workspace @opstrace/app watch",
+    "unit-test:ui": "yarn workspace @opstrace/app test",
+    "watch": "yarn wsrun -p @opstrace/controller -p @opstrace/uninstaller -p @opstrace/installer -p @opstrace/cli -c watch"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.go": [
+      "yarn license",
+      "gofmt -s -w",
+      "yarn golint"
+    ],
+    "*.{js,css,json,ts}": [
+      "yarn license",
+      "yarn run prettier --write"
+    ],
+    "*.md": [
+      "markdownlint"
+    ]
+  }
+}

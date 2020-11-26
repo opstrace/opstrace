@@ -1,0 +1,19 @@
+scrape_configs:
+  - job_name: "{{{index_field_value}}}"
+    scrape_interval: 1s
+    static_configs:
+      - targets: ['localhost:{{{prom_listen_port}}}']
+
+remote_write:
+  - url: "{{{remote_write_url}}}"
+    queue_config:
+      batch_send_deadline: 1s
+    {{#bearerTokenFilePath}}
+    bearer_token_file: {{{bearerTokenFilePath}}}
+    {{/bearerTokenFilePath}}
+    {{^bearerTokenFilePath}}
+    {{/bearerTokenFilePath}}
+    tls_config:
+      insecure_skip_verify: true
+
+

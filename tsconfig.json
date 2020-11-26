@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "outDir": "build",
+    "target": "ES2020",
+    "module": "commonjs",
+    "allowJs": false,
+    "moduleResolution": "node",
+    "declaration": true,
+    "experimentalDecorators": true,
+    "pretty": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    // skipLibCheck might be considered unacceptable,
+    // also see this discussion:
+    // https://github.com/firebase/firebase-functions/issues/551
+    "skipLibCheck": true,
+    "incremental": true,
+    "downlevelIteration": true,
+    "declarationMap": true,
+    "composite": true,
+    "inlineSourceMap": true
+  },
+  "exclude": [
+    "**/node_modules/*",
+    "**/dist",
+    "**/build",
+    "**/test",
+    "**/spec",
+    "**/scripts"
+  ],
+  "references": [
+    { "path": "./packages/controller" },
+    { "path": "./packages/installer" },
+    { "path": "./packages/uninstaller" },
+    { "path": "./packages/cli" }
+  ]
+}

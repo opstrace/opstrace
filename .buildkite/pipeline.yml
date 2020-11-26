@@ -1,0 +1,67 @@
+env:
+  OPSTRACE_PREBUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-prebuild"
+  CHECKOUT_VERSION_STRING: "${BUILDKITE_COMMIT:0:8}-ci"
+  PKG_CACHE_PATH: "/tmp"
+steps:
+  - label: "🔨 lint, compile, build"
+    key: "preamble"
+    env:
+      OPSTRACE_BUILD_DIR: "${OPSTRACE_PREBUILD_DIR}"
+    command:
+      - docker ps
+      - bash ci/fetch-main.sh
+      - echo "--- make rebuild-ci-container-image"
+      - make rebuild-ci-container-image
+      - make ci-preamble
+  - label: "🔨 check docs"
+    key: "check-docs"
+    depends_on:
+      - "preamble"
+    env:
+      OPSTRACE_BUILD_DIR: "${OPSTRACE_PREBUILD_DIR}"
+    command:
+      - make ci-check-docs-fastpath | tee fastpath-stdout
+      - ci/check-docs-fastpath-helper.sh fastpath-stdout FASTPATHEXIT
+    soft_fail:
+      - exit_status: 42
+  - label: "🔨 main test (GCP)"
+    key: "maintest-gcp"
+    depends_on:
+      - "preamble"
+      - "check-docs"
+    env:
+      OPSTRACE_CLUSTER_NAME: "bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-gcp"
+      OPSTRACE_CLOUD_PROVIDER: "gcp"
+    command:
+      - cd "${OPSTRACE_PREBUILD_DIR}" && make ci-deploy-testremote-teardown
+    artifact_paths:
+      - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-gcp/bk-artifacts/**/*"
+  - label: "🔨 main test (AWS)"
+    key: "maintest-aws"
+    depends_on:
+      - "preamble"
+      - "check-docs"
+    env:
+      OPSTRACE_CLUSTER_NAME: "bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
+      OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-aws"
+      OPSTRACE_CLOUD_PROVIDER: "aws"
+    command:
+      - cd "${OPSTRACE_PREBUILD_DIR}" && make ci-deploy-testremote-teardown
+    artifact_paths:
+      - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-aws/bk-artifacts/**/*"
+  - label: "🔨 cleanup /tmp"
+    key: "cleanup-tmp"
+    depends_on: "preamble"
+    allow_dependency_failure: true
+    command:
+      - source ci/wipe-bk-tmp-dir.sh
+  - label: "🔨 publish opstrace-cli"
+    key: "publish-opstrace-cli"
+    depends_on:
+      - "maintest-gcp"
+      - "maintest-aws"
+      - "check-docs"
+    allow_dependency_failure: false
+    command:
+      - cd "${OPSTRACE_PREBUILD_DIR}" && make ci-cli-publish-to-s3

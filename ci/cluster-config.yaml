@@ -1,0 +1,4 @@
+tenants:
+  - default
+env_label: ci
+node_count: 3

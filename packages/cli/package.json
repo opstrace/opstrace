@@ -1,0 +1,35 @@
+{
+  "name": "@opstrace/cli",
+  "version": "0.0.0",
+  "description": "Opstrace CLI",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "repository": "https://github.com/opstrace/opstrace.git",
+  "author": "Opstrace, Inc.",
+  "license": "Apache-2.0",
+  "private": true,
+  "bin": {
+    "opstrace": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
+    "clean": "rimraf build .cache tsconfig.tsbuildinfo",
+    "prebuild": "yarn clean",
+    "lint": "eslint . --ext .ts"
+  },
+  "devDependencies": {
+    "@types/argparse": "2.0.2"
+  },
+  "dependencies": {
+    "@opstrace/config": "^0.0.0",
+    "@opstrace/installer": "^0.0.0",
+    "@opstrace/uninstaller": "^0.0.0",
+    "@types/jsonwebtoken": "^8.5.0",
+    "yesno": "^0.3.1",
+    "argparse": "2.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "@js-joda/core": "^3.1.0",
+    "yup": "^0.28.5"
+  }
+}

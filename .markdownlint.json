@@ -1,0 +1,24 @@
+{
+  "line-length": false,
+  "first-line-h1": false,
+  "no-trailing-punctuation": { "punctuation": ",;:!" },
+  "no-multiple-blanks": false,
+  "no-duplicate-header": false,
+  "ul-style": {
+    "style": "asterisk"
+  },
+  "proper-names": {
+    "code_blocks": false,
+    "names": [
+      "hello@opstrace.com",
+      "Alertmanager",
+      "Auth0",
+      "Grafana",
+      "VS Code",
+      "FluentD",
+      "Opstrace",
+      "Prometheus",
+      "Promtail"
+    ]
+  }
+}
