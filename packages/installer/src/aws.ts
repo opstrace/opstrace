@@ -17,7 +17,7 @@
 import { strict as assert } from "assert";
 
 import AWS from "aws-sdk";
-import { call, fork, join } from "redux-saga/effects";
+import { all, call, fork, join } from "redux-saga/effects";
 
 import { ensureDNSExists } from "@opstrace/dns";
 import {
@@ -32,6 +32,8 @@ import {
   ensureInternetGatewayExists,
   attachInternetGateway,
   ensureEKSExists,
+  ensureRDSClusterExists,
+  ensureRDSInstanceExists,
   associateRouteTable,
   ensureSecurityGroupExists,
   authorizeSecurityGroupIngress,
@@ -50,7 +52,8 @@ import {
   STSRegionCheck,
   getZoneForDNSName,
   getRecordsForZone,
-  setCertManagerRoleArn
+  setCertManagerRoleArn,
+  RDSSubnetGroupRes
 } from "@opstrace/aws";
 
 import {
@@ -65,11 +68,49 @@ import {
   createOrUpdateCM
 } from "@opstrace/kubernetes";
 
-import { log, getBucketName, sleep } from "@opstrace/utils";
+import { log, getBucketName, sleep, entries } from "@opstrace/utils";
 
 import { getAWSConfig } from "@opstrace/config";
 
-export function* ensureAWSInfraExists(): Generator<any, string, any> {
+type TagList = { Key: string; Value: string }[];
+
+export type EnsureAWSInfraExistsResponse = {
+  kubeconfigString: string;
+  postgreSQLEndpoint: string;
+};
+
+function* ensureRDSExists({
+  name,
+  subnetGroupName,
+  labels,
+  securityGroupId
+}: {
+  name: string;
+  subnetGroupName: string;
+  labels: TagList;
+  securityGroupId: string;
+}): Generator<any, AWS.RDS.DBCluster, any> {
+  // Create the Aurora cluster
+  const dbCluster: AWS.RDS.DBCluster = yield call(ensureRDSClusterExists, {
+    opstraceDBClusterName: name,
+    clusterLabels: labels,
+    subnetGroupName,
+    securityGroupId
+  });
+  // Create the Aurora instance
+  yield call(ensureRDSInstanceExists, {
+    opstraceDBInstanceName: name,
+    instanceLabels: labels
+  });
+
+  return dbCluster;
+}
+
+export function* ensureAWSInfraExists(): Generator<
+  any,
+  EnsureAWSInfraExistsResponse,
+  any
+> {
   const ccfg: NewRenderedClusterConfigType = getClusterConfig();
 
   const awsConfig = getAWSConfig(ccfg);
@@ -120,6 +161,24 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
     vpc,
     subnets: awsConfig.subnets
   });
+
+  const rdsSubnets: Subnet[] = yield call(ensureSubnetsExist, {
+    name: ccfg.cluster_name,
+    vpc,
+    nameTag: "-rds",
+    subnets: awsConfig.rdsSubnets
+  });
+
+  const rdsSubnetIds = rdsSubnets.map(s => s.SubnetId);
+
+  if (rdsSubnetIds.find(s => !s)) {
+    throw Error("RDS SubnetId is undefined, retry");
+  }
+
+  const rdsSubnetGroup: AWS.RDS.DBSubnetGroup = yield call([
+    new RDSSubnetGroupRes(ccfg.cluster_name, rdsSubnetIds as string[]),
+    "setup"
+  ]);
 
   log.info(`subnets: ${subnets.map(s => s.CidrBlock).join(", ")}`);
   const internetGateway: AWS.EC2.InternetGateway = yield call(
@@ -203,10 +262,11 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
     "setup"
   ]);
 
+  const allSubnets = subnets.concat(rdsSubnets);
   // Note(JP): this should be subject to a setup() loop provides by the
   // AWSResource class.
-  for (let i = 0; i < subnets.length; i++) {
-    const { SubnetId, Public } = subnets[i];
+  for (let i = 0; i < allSubnets.length; i++) {
+    const { SubnetId, Public } = allSubnets[i];
     if (!SubnetId) {
       throw Error(`Subnet does not exist`);
     }
@@ -466,8 +526,37 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
 
   assert(workerSecurityGroup.GroupId);
 
+  // RDS Security group
+  const RDSSecurityGroupName = `${ccfg.cluster_name}-rds-security-group`;
+  log.info(`Ensuring ${RDSSecurityGroupName} Security Group exists`);
+  const rdsSecurityGroup: AWS.EC2.SecurityGroup = yield call(
+    ensureSecurityGroupExists,
+    {
+      VpcId: vpc.VpcId,
+      name: ccfg.cluster_name,
+      GroupName: RDSSecurityGroupName,
+      Description: `Security Group for RDS`
+    }
+  );
+
   // Add ingress rules
   let ingressRules: AWS.EC2.AuthorizeSecurityGroupIngressRequest[] = [
+    {
+      GroupId: rdsSecurityGroup.GroupId,
+      IpPermissions: [
+        {
+          FromPort: 0,
+          ToPort: 5432,
+          IpProtocol: "-1",
+          UserIdGroupPairs: [
+            {
+              GroupId: workerSecurityGroup.GroupId,
+              VpcId: vpc.VpcId
+            }
+          ]
+        }
+      ]
+    },
     {
       GroupId: masterSecurityGroup.GroupId,
       IpPermissions: [
@@ -598,16 +687,35 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
     opstrace_cluster_name: ccfg.cluster_name
   };
 
-  const cluster: AWS.EKS.Cluster = yield call(ensureEKSExists, {
-    subnets,
-    opstraceClusterName: ccfg.cluster_name,
-    endpointPrivateAccess,
-    endpointPublicAccess,
-    k8sVersion,
-    clusterLabels,
-    roleArn: eksClusterRole.Arn!,
-    securityGroupId: masterSecurityGroup.GroupId
-  });
+  const clusterLabelList = entries(clusterLabels).reduce<TagList>(
+    (acc, curr) => {
+      acc.push({
+        Key: curr[0],
+        Value: curr[1]
+      });
+      return acc;
+    },
+    []
+  );
+  // Run the following in parallel
+  const [cluster, dbCluster]: [AWS.EKS.Cluster, AWS.RDS.DBCluster] = yield all([
+    call(ensureEKSExists, {
+      subnets,
+      opstraceClusterName: ccfg.cluster_name,
+      endpointPrivateAccess,
+      endpointPublicAccess,
+      k8sVersion,
+      clusterLabels,
+      roleArn: eksClusterRole.Arn!,
+      securityGroupId: masterSecurityGroup.GroupId
+    }),
+    call(ensureRDSExists, {
+      name: ccfg.cluster_name,
+      labels: clusterLabelList,
+      subnetGroupName: rdsSubnetGroup.DBSubnetGroupName!,
+      securityGroupId: rdsSecurityGroup.GroupId!
+    })
+  ]);
 
   log.info(`Generating kubeConfig`);
   const kubeconfigString: string = generateKubeconfigStringForEksCluster(
@@ -673,7 +781,11 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
     launchConfigurationName: LaunchConfigurationName
   });
 
-  return kubeconfigString;
+  if (!dbCluster.Endpoint) {
+    throw Error("RDS Aurora cluster did not return an Endpoint");
+  }
+
+  return { kubeconfigString, postgreSQLEndpoint: dbCluster.Endpoint };
 }
 
 /**

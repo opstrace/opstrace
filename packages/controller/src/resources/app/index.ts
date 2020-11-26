@@ -209,7 +209,7 @@ export function OpstraceApplicationResources(
                 {
                   name: "opstrace-application",
                   image: DockerImages.app,
-                  imagePullPolicy: "IfNotPresent",
+                  imagePullPolicy: "Always",
                   command: ["node", "dist/server.js"],
                   env: [
                     {
@@ -342,8 +342,7 @@ export function OpstraceApplicationResources(
                     },
                     {
                       name: "HASURA_GRAPHQL_DATABASE_URL",
-                      value:
-                        "postgres://postgres:postgrespassword@postgres:5432/postgres"
+                      value: `postgres://opstrace:2020WasQuiteTheYear@${state.config.config?.postgreSQLEndpoint}/opstrace`
                     },
                     {
                       name: "HASURA_GRAPHQL_ENABLE_CONSOLE",

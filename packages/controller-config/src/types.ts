@@ -43,6 +43,7 @@ export const controllerConfigSchema = yup
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     oidcClientId: yup.string().required(),
     oidcClientSecret: yup.string().required(),
+    postgreSQLEndpoint: yup.string().notRequired(),
     authSessionCookieSecret: yup
       .string()
       .required(

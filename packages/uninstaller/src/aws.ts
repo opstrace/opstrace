@@ -20,6 +20,8 @@ import { Task } from "redux-saga";
 import {
   ensureAddressDoesNotExist,
   destroyVPC,
+  destroyRDSCluster,
+  destroyRDSInstance,
   ensureSubnetsDoNotExist,
   ensureRoleDoesNotExist,
   destroyInstanceProfile,
@@ -38,7 +40,8 @@ import {
   NatGatewayRes,
   VpcEndpointRes,
   RouteTablePrivateRes,
-  RouteTablePublicRes
+  RouteTablePublicRes,
+  RDSSubnetGroupRes
 } from "@opstrace/aws";
 import { DNSClient } from "@opstrace/dns";
 
@@ -101,6 +104,10 @@ export function* destroyAWSInfra() {
   taskGroup1.push(
     yield fork(destroyInstanceProfile, destroyConfig.clusterName)
   );
+
+  taskGroup1.push(yield fork(destroyRDSInstance, destroyConfig.clusterName));
+
+  taskGroup1.push(yield fork(destroyRDSCluster, destroyConfig.clusterName));
 
   // Note(JP): with the autoscaling group being gone: assume that all
   // ec2 instances are gone, i.e. workloads are gone.
@@ -183,6 +190,10 @@ export function* destroyAWSInfra() {
   const taskGroupBob = [];
 
   taskGroupBob.push(
+    yield fork([new RDSSubnetGroupRes(destroyConfig.clusterName), "teardown"])
+  );
+
+  taskGroupBob.push(
     yield fork(ensureSubnetsDoNotExist, destroyConfig.clusterName)
   );
 
@@ -240,6 +251,13 @@ function* startSecurityGroupDeletionTasks() {
 
   const EKSMasterSecurityGroupName = `${destroyConfig.clusterName}-eks-master-security-group`;
   const EKSWorkerSecurityGroupName = `${destroyConfig.clusterName}-eks-worker-security-group`;
+  const RDSSecurityGroupName = `${destroyConfig.clusterName}-rds-security-group`;
+
+  taskGroupSGs.push(
+    yield fork(ensureSecurityGroupPermissionsDoNotExist, {
+      GroupName: RDSSecurityGroupName
+    })
+  );
 
   taskGroupSGs.push(
     yield fork(ensureSecurityGroupPermissionsDoNotExist, {
@@ -250,6 +268,12 @@ function* startSecurityGroupDeletionTasks() {
   taskGroupSGs.push(
     yield fork(ensureSecurityGroupPermissionsDoNotExist, {
       GroupName: EKSMasterSecurityGroupName
+    })
+  );
+
+  taskGroupSGs.push(
+    yield fork(ensureSecurityGroupDoesNotExist, {
+      GroupName: RDSSecurityGroupName
     })
   );
 

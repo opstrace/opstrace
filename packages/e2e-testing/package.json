@@ -4,7 +4,8 @@
   "description": "Opstrace e2e testing",
   "scripts": {
     "cypress:open": "cypress open",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint . --ext .js",
+    "clean": "rimraf build .cache tsconfig.tsbuildinfo"
   },
   "eslintConfig": {
     "env": {

@@ -148,6 +148,13 @@ export function eksClient(regionOverride?: string): AWS.EKS {
   });
 }
 
+export function rdsClient(): AWS.RDS {
+  return new AWS.RDS({
+    region: getAWSRegion(),
+    maxRetries: 10
+  });
+}
+
 export function r53Client(): AWS.Route53 {
   return new AWS.Route53({
     region: getAWSRegion(),

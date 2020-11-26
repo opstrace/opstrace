@@ -56,6 +56,7 @@ import { rootReducer } from "./reducer";
 import { ensureGCPInfraExists } from "./gcp";
 import {
   ensureAWSInfraExists,
+  EnsureAWSInfraExistsResponse,
   waitUntilRoute53EntriesAreAvailable
 } from "./aws";
 import { ClusterCreateTimeoutError } from "./errors";
@@ -144,8 +145,8 @@ function* createClusterCore() {
   const dnsConf = getDnsConfig(ccfg.cloud_provider);
 
   // Fail fast if specified controller docker image cannot be found on docker
-  // hub, see opstrace-prelaunch/issues/1298.
-  const controllerConfig: ControllerConfigType = {
+  // hub, see https://github.com/opstrace/opstrace/issues/1298.
+  let controllerConfig: ControllerConfigType = {
     name: ccfg.cluster_name,
     target: ccfg.cloud_provider,
     region: region, // not sure why that's needed
@@ -184,16 +185,23 @@ function* createClusterCore() {
   }
 
   let kubeconfigString = "";
+  let postgreSQLEndpoint = "";
+
   if (ccfg.cloud_provider === "gcp") {
     kubeconfigString = yield call(ensureGCPInfraExists, gcpAuthOptions!);
   }
   if (ccfg.cloud_provider === "aws") {
-    kubeconfigString = yield call(ensureAWSInfraExists);
-
     controllerConfig.aws = {
       certManagerRoleArn: getCertManagerRoleArn()
     };
+    const res: EnsureAWSInfraExistsResponse = yield call(ensureAWSInfraExists);
+    kubeconfigString = res.kubeconfigString;
+    postgreSQLEndpoint = res.postgreSQLEndpoint;
   }
+
+  // Update our controllerConfig with the Postgress Endpoint and revalidate for good measure
+  controllerConfig = { ...controllerConfig, postgreSQLEndpoint };
+  controllerConfigSchema.validateSync(controllerConfig, { strict: true });
 
   if (!kubeconfigString) {
     throw Error("couldn't compute a kubeconfig");

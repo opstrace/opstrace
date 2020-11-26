@@ -124,10 +124,12 @@ function* createSubnetWithTags(vpc: EC2.Vpc, sntc: any, clusterName: string) {
 export function* ensureSubnetsExist({
   vpc,
   name,
+  nameTag,
   subnets
 }: {
   vpc: EC2.Vpc;
   name: string;
+  nameTag?: string;
   subnets: Subnet[];
 }) {
   // Note(JP): towards making clear what name that is.
@@ -138,8 +140,8 @@ export function* ensureSubnetsExist({
     const existingSubnets: Subnet[] = yield call(getSubnets, clusterName);
 
     const subnetsToCreate = subnets
-      .filter(s => !existingSubnets.find(e => s.CidrBlock !== e.CidrBlock))
-      .map((s, i) => ({ ...s, Name: `${name}-${i}` }));
+      .filter(s => !existingSubnets.find(e => s.CidrBlock === e.CidrBlock))
+      .map((s, i) => ({ ...s, Name: `${name}-${i}${nameTag}` }));
 
     for (const sntc of subnetsToCreate) {
       if (!sntc.CidrBlock) {
@@ -152,19 +154,23 @@ export function* ensureSubnetsExist({
       yield call(createSubnetWithTags, vpc, sntc, clusterName);
     }
 
-    const readySubnets = existingSubnets.filter(s => s.State === "available");
+    const readySubnets = existingSubnets.filter(
+      s =>
+        s.State === "available" &&
+        subnets.find(e => s.CidrBlock === e.CidrBlock)
+    );
 
     const subnetPublic: { [key: string]: boolean } = subnets.reduce(
       (a, s) => ({ ...a, [s.CidrBlock as string]: s.Public }),
       {}
     );
 
-    existingSubnets.forEach(subnet => {
+    readySubnets.forEach(subnet => {
       subnet.Public = subnetPublic[subnet.CidrBlock!];
     });
 
     if (readySubnets.length === subnets.length) {
-      return existingSubnets;
+      return readySubnets;
     }
 
     yield delay(1 * SECOND);
