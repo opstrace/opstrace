@@ -1,0 +1,762 @@
+/**
+ * Copyright 2020 Opstrace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { strict as assert } from "assert";
+
+import AWS from "aws-sdk";
+import { call, fork, join } from "redux-saga/effects";
+
+import { ensureDNSExists } from "@opstrace/dns";
+import {
+  createVPC,
+  ensureSubnetsExist,
+  ensureRoleExists,
+  createInstanceProfile,
+  ensureAutoScalingGroupExists,
+  ensurePolicyExists,
+  attachPolicy,
+  addRole,
+  ensureInternetGatewayExists,
+  attachInternetGateway,
+  ensureEKSExists,
+  associateRouteTable,
+  ensureSecurityGroupExists,
+  authorizeSecurityGroupIngress,
+  authorizeSecurityGroupEgress,
+  ensureLaunchConfigurationExists,
+  generateKubeconfigStringForEksCluster,
+  Subnet,
+  ElasticIPRes,
+  S3BucketRes,
+  RouteTablePrivateRes,
+  RouteTablePublicRes,
+  RouteRes,
+  NatGatewayRes,
+  VpcEndpointRes,
+  ServiceLinkedRoleRes,
+  STSRegionCheck,
+  getZoneForDNSName,
+  getRecordsForZone
+} from "@opstrace/aws";
+
+import {
+  getClusterConfig,
+  getDnsConfig,
+  NewRenderedClusterConfigType
+} from "@opstrace/config";
+
+import {
+  ConfigMap,
+  getKubeConfig,
+  createOrUpdateCM
+} from "@opstrace/kubernetes";
+
+import { log, getBucketName, sleep } from "@opstrace/utils";
+
+import { getAWSConfig } from "@opstrace/config";
+
+export function* ensureAWSInfraExists(): Generator<any, string, any> {
+  const ccfg: NewRenderedClusterConfigType = getClusterConfig();
+
+  const awsConfig = getAWSConfig(ccfg);
+
+  // Small start for checks; fail fast for certain known traps.
+  yield call([new STSRegionCheck(ccfg.cluster_name), "setup"]);
+
+  // State-mutating API calls below.
+  yield call([new ServiceLinkedRoleRes(ccfg.cluster_name), "setup"]);
+  yield call(ensureDNSExists, {
+    opstraceClusterName: ccfg.cluster_name,
+    dnsName: getDnsConfig(ccfg.cloud_provider).dnsName,
+    target: ccfg.cloud_provider,
+    dnsProvider: ccfg.cloud_provider
+  });
+
+  const lokiBucketName = getBucketName({
+    clusterName: ccfg.cluster_name,
+    suffix: "loki"
+  });
+  const cortexBucketName = getBucketName({
+    clusterName: ccfg.cluster_name,
+    suffix: "cortex"
+  });
+
+  // create s3 buckets and vpc concurrently
+  const tasks = [];
+  tasks.push(
+    yield fork([new S3BucketRes(ccfg.cluster_name, lokiBucketName), "setup"])
+  );
+  tasks.push(
+    yield fork([new S3BucketRes(ccfg.cluster_name, cortexBucketName), "setup"])
+  );
+
+  const vpctask = yield fork(createVPC, {
+    clusterName: ccfg.cluster_name,
+    cidr: awsConfig.vpc.CidrBlock
+  });
+  tasks.push(vpctask);
+  yield join([...tasks]);
+
+  const vpc: AWS.EC2.Vpc = vpctask.result();
+  assert(vpc.VpcId);
+  log.info(`VPC ${vpc.VpcId} created for: ${vpc.CidrBlock}`);
+
+  const subnets: Subnet[] = yield call(ensureSubnetsExist, {
+    name: ccfg.cluster_name,
+    vpc,
+    subnets: awsConfig.subnets
+  });
+
+  log.info(`subnets: ${subnets.map(s => s.CidrBlock).join(", ")}`);
+  const internetGateway: AWS.EC2.InternetGateway = yield call(
+    ensureInternetGatewayExists,
+    ccfg.cluster_name
+  );
+
+  // done assert instead of N non-null-assertion.
+  assert(internetGateway.InternetGatewayId);
+
+  yield call(attachInternetGateway, {
+    VpcId: vpc.VpcId,
+    InternetGatewayId: internetGateway.InternetGatewayId
+  });
+
+  const address: AWS.EC2.Address = yield call([
+    new ElasticIPRes(ccfg.cluster_name),
+    "setup"
+  ]);
+
+  // NatGateway needs a public subnetId
+  const publicSubnet = subnets.find(
+    s =>
+      s.AvailabilityZone === awsConfig.zone &&
+      awsConfig.subnets.find(cs => cs.CidrBlock === s.CidrBlock && cs.Public)
+  );
+
+  if (!publicSubnet || !publicSubnet.SubnetId) {
+    throw Error(`Could not find a public Subnet in stacks zone`);
+  }
+
+  const natGateway: AWS.EC2.NatGateway = yield call(
+    [new NatGatewayRes(ccfg.cluster_name), "setup"],
+    {
+      SubnetId: publicSubnet.SubnetId,
+      AllocationId: address.AllocationId!
+    }
+  );
+
+  const rtPublic: AWS.EC2.RouteTable = yield call(
+    [new RouteTablePublicRes(ccfg.cluster_name), "setup"],
+    vpc.VpcId
+  );
+  assert(rtPublic.RouteTableId);
+
+  const rtPrivate: AWS.EC2.RouteTable = yield call(
+    [new RouteTablePrivateRes(ccfg.cluster_name), "setup"],
+    vpc.VpcId
+  );
+  assert(rtPrivate.RouteTableId);
+
+  // Create VPC endpoint for S3 (let's maybe add a comment here why that's
+  // needed -- probably a simple explanation)
+  const vpceParams: AWS.EC2.CreateVpcEndpointRequest = {
+    ServiceName: `com.amazonaws.${awsConfig.region}.s3`,
+    VpcId: vpc.VpcId,
+    RouteTableIds: [rtPublic.RouteTableId, rtPrivate.RouteTableId]
+  };
+  yield call(
+    [new VpcEndpointRes(ccfg.cluster_name, `${ccfg.cluster_name}-s3`), "setup"],
+    vpceParams
+  );
+
+  log.info("create route for: internet gateway/public route table");
+  yield call([
+    new RouteRes(ccfg.cluster_name, {
+      RouteTableId: rtPublic.RouteTableId,
+      GatewayId: internetGateway.InternetGatewayId,
+      DestinationCidrBlock: "0.0.0.0/0"
+    }),
+    "setup"
+  ]);
+
+  log.info("create route for: NAT gateway/private route table");
+  yield call([
+    new RouteRes(ccfg.cluster_name, {
+      RouteTableId: rtPrivate.RouteTableId,
+      NatGatewayId: natGateway.NatGatewayId,
+      DestinationCidrBlock: "0.0.0.0/0"
+    }),
+    "setup"
+  ]);
+
+  // Note(JP): this should be subject to a setup() loop provides by the
+  // AWSResource class.
+  for (let i = 0; i < subnets.length; i++) {
+    const { SubnetId, Public } = subnets[i];
+    if (!SubnetId) {
+      throw Error(`Subnet does not exist`);
+    }
+    if (!Public) {
+      // Associate Private RouteTable with Private Subnets
+      log.info(
+        "ensuring private RouteTable is associated with private subnets"
+      );
+      yield call(associateRouteTable, {
+        RouteTableId: rtPrivate.RouteTableId,
+        SubnetId
+      });
+    }
+    if (Public) {
+      log.info("ensuring public RouteTable is associated with public subnets");
+      // Associate Public RouteTable with Public Subnets
+      yield call(associateRouteTable, {
+        RouteTableId: rtPublic.RouteTableId,
+        SubnetId
+      });
+    }
+  }
+
+  // EKS Role
+  const EKSClusterRoleName = `${ccfg.cluster_name}-eks-controlplane`;
+  log.info(`Ensuring ${EKSClusterRoleName} role exists`);
+  const eksClusterRole: AWS.IAM.Role = yield call(ensureRoleExists, {
+    RoleName: EKSClusterRoleName,
+    AssumeRolePolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Principal: {
+            Service: "eks.amazonaws.com"
+          },
+          Action: "sts:AssumeRole"
+        }
+      ]
+    })
+  });
+
+  // Worker Nodes Role
+  const EKSWorkerNodesRoleName = `${ccfg.cluster_name}-eks-nodes`;
+  log.info(`Ensuring ${EKSWorkerNodesRoleName} role exists`);
+  const workerNodeRole: AWS.IAM.Role = yield call(ensureRoleExists, {
+    RoleName: EKSWorkerNodesRoleName,
+    AssumeRolePolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Principal: {
+            Service: "ec2.amazonaws.com"
+          },
+          Action: "sts:AssumeRole"
+        }
+      ]
+    })
+  });
+
+  // Worker Node Policy
+  const Route53ExternalDNSPolicyName = `${ccfg.cluster_name}-externaldns`;
+  log.info(`Ensuring ${Route53ExternalDNSPolicyName} policy exists`);
+  const route53Policy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
+    PolicyName: Route53ExternalDNSPolicyName,
+    PolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: "route53:GetChange",
+          Resource: "arn:aws:route53:::change/*"
+        },
+        {
+          Effect: "Allow",
+          Action: ["route53:ChangeResourceRecordSets"],
+          Resource: ["arn:aws:route53:::hostedzone/*"]
+        },
+        {
+          Effect: "Allow",
+          Action: [
+            "route53:ListHostedZones",
+            "route53:ListHostedZonesByName",
+            "route53:ListResourceRecordSets"
+          ],
+          Resource: ["*"]
+        }
+      ]
+    })
+  });
+
+  // Loki Bucket Policy
+  const LokiS3PolicyName = `${lokiBucketName}-s3`;
+  log.info(`Ensuring ${LokiS3PolicyName} policy exists`);
+  const lokiBucketPolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
+    PolicyName: LokiS3PolicyName,
+    PolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Sid: "ListObjectsInBucket",
+          Effect: "Allow",
+          Action: ["s3:ListBucket"],
+          Resource: [`arn:aws:s3:::${lokiBucketName}`]
+        },
+        {
+          Sid: "AllObjectActions",
+          Effect: "Allow",
+          Action: "s3:*Object",
+          Resource: [`arn:aws:s3:::${lokiBucketName}/*`]
+        }
+      ]
+    })
+  });
+
+  // Cortex Bucket Policy
+  const CortexS3PolicyName = `${cortexBucketName}-s3`;
+  log.info(`Ensuring ${CortexS3PolicyName} policy exists`);
+  const cortexBucketPolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
+    PolicyName: CortexS3PolicyName,
+    PolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Sid: "ListObjectsInBucket",
+          Effect: "Allow",
+          Action: ["s3:ListBucket"],
+          Resource: [`arn:aws:s3:::${cortexBucketName}`]
+        },
+        {
+          Sid: "AllObjectActions",
+          Effect: "Allow",
+          Action: "s3:*Object",
+          Resource: [`arn:aws:s3:::${cortexBucketName}/*`]
+        }
+      ]
+    })
+  });
+
+  // Cortex Bucket Policy
+  const EKSServiceLinkedRolePolicyName = `${ccfg.cluster_name}-eks-linked-service`;
+  log.info(`Ensuring ${EKSServiceLinkedRolePolicyName} policy exists`);
+  const linkedServicePolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
+    PolicyName: EKSServiceLinkedRolePolicyName,
+    PolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: "iam:CreateServiceLinkedRole",
+          Resource: "arn:aws:iam::*:role/aws-service-role/*"
+        },
+        {
+          Effect: "Allow",
+          Action: ["ec2:DescribeAccountAttributes"],
+          Resource: "*"
+        }
+      ]
+    })
+  });
+
+  // Attach policies
+  const eksWorkerNodeRolePolicies = [
+    {
+      RoleName: EKSClusterRoleName,
+      PolicyArn: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+    },
+    {
+      RoleName: EKSClusterRoleName,
+      PolicyArn: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+    },
+    { RoleName: EKSClusterRoleName, PolicyArn: linkedServicePolicy.Arn! },
+    {
+      RoleName: EKSWorkerNodesRoleName,
+      PolicyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+    },
+    {
+      RoleName: EKSWorkerNodesRoleName,
+      PolicyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+    },
+    {
+      RoleName: EKSWorkerNodesRoleName,
+      PolicyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+    },
+    {
+      RoleName: EKSWorkerNodesRoleName,
+      PolicyArn: "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
+    },
+    { RoleName: EKSWorkerNodesRoleName, PolicyArn: route53Policy.Arn! },
+    // {
+    //   RoleName: EKSWorkerNodesRoleName,
+    //   PolicyArn: lokiDynamoDBPolicy.Arn!
+    // },
+    { RoleName: EKSWorkerNodesRoleName, PolicyArn: lokiBucketPolicy.Arn! },
+    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexBucketPolicy.Arn! }
+  ];
+
+  for (let i = 0; i < eksWorkerNodeRolePolicies.length; i++) {
+    const policy = eksWorkerNodeRolePolicies[i];
+    log.info(`Ensuring ${policy.RoleName} is attached`);
+
+    yield call(attachPolicy, {
+      ...policy
+    });
+  }
+
+  // EKS Security Group
+  const EKSMasterSecurityGroupName = `${ccfg.cluster_name}-eks-master-security-group`;
+  const EKSWorkerSecurityGroupName = `${ccfg.cluster_name}-eks-worker-security-group`;
+
+  log.info(`Ensuring ${EKSMasterSecurityGroupName} Security Group exists`);
+  const masterSecurityGroup: AWS.EC2.SecurityGroup = yield call(
+    ensureSecurityGroupExists,
+    {
+      VpcId: vpc.VpcId,
+      name: ccfg.cluster_name,
+      GroupName: EKSMasterSecurityGroupName,
+      Description: `Security Group for EKS control plane`
+    }
+  );
+
+  assert(masterSecurityGroup.GroupId);
+
+  log.info(`Ensuring ${EKSWorkerSecurityGroupName} Security Group exists`);
+  const workerSecurityGroup: AWS.EC2.SecurityGroup = yield call(
+    ensureSecurityGroupExists,
+    {
+      VpcId: vpc.VpcId,
+      name: ccfg.cluster_name,
+      GroupName: EKSWorkerSecurityGroupName,
+      Description: `Security Group for EKS worker nodes`
+    }
+  );
+
+  assert(workerSecurityGroup.GroupId);
+
+  // Add ingress rules
+  let ingressRules: AWS.EC2.AuthorizeSecurityGroupIngressRequest[] = [
+    {
+      GroupId: masterSecurityGroup.GroupId,
+      IpPermissions: [
+        {
+          FromPort: 443,
+          ToPort: 443,
+          IpProtocol: "tcp",
+          UserIdGroupPairs: [
+            {
+              GroupId: workerSecurityGroup.GroupId,
+              VpcId: vpc.VpcId
+            }
+          ]
+        }
+      ]
+    },
+    {
+      GroupId: workerSecurityGroup.GroupId,
+      IpPermissions: [
+        {
+          FromPort: 0,
+          ToPort: 65535,
+          IpProtocol: "-1",
+          UserIdGroupPairs: [
+            {
+              GroupId: workerSecurityGroup.GroupId,
+              VpcId: vpc.VpcId
+            }
+          ]
+        },
+        {
+          FromPort: 1025,
+          ToPort: 65535,
+          IpProtocol: "tcp",
+          UserIdGroupPairs: [
+            {
+              GroupId: masterSecurityGroup.GroupId,
+              VpcId: vpc.VpcId
+            }
+          ]
+        },
+        {
+          FromPort: 443,
+          ToPort: 443,
+          IpProtocol: "tcp",
+          UserIdGroupPairs: [
+            {
+              GroupId: masterSecurityGroup.GroupId,
+              VpcId: vpc.VpcId
+            }
+          ]
+        }
+      ]
+    }
+  ];
+
+  // Add any user defined masterAuthorizedNetworks for connecting to the EKS API
+  const { masterAuthorizedNetworks } = awsConfig;
+  ingressRules = ingressRules.concat(
+    masterAuthorizedNetworks.map(CidrIp => ({
+      GroupId: masterSecurityGroup.GroupId,
+      IpPermissions: [
+        {
+          FromPort: 443,
+          ToPort: 443,
+          IpProtocol: "tcp",
+          IpRanges: [
+            {
+              CidrIp
+            }
+          ]
+        }
+      ]
+    }))
+  );
+
+  log.info(`Ensuring ${ingressRules.length} Ingress Rules exist`);
+  for (let i = 0; i < ingressRules.length; i++) {
+    yield call(authorizeSecurityGroupIngress, {
+      Rule: ingressRules[i]
+    });
+  }
+
+  // Add egress rules
+  const egressRules: AWS.EC2.AuthorizeSecurityGroupEgressRequest[] = [
+    {
+      GroupId: masterSecurityGroup.GroupId,
+      IpPermissions: [
+        {
+          FromPort: 0,
+          ToPort: 0,
+          IpProtocol: "-1",
+          IpRanges: [
+            {
+              CidrIp: "0.0.0.0/0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      GroupId: workerSecurityGroup.GroupId,
+      IpPermissions: [
+        {
+          FromPort: 0,
+          ToPort: 0,
+          IpProtocol: "-1",
+          IpRanges: [
+            {
+              CidrIp: "0.0.0.0/0"
+            }
+          ]
+        }
+      ]
+    }
+  ];
+
+  log.info(`Ensuring ${egressRules.length} Egress Rules exist`);
+  for (let i = 0; i < egressRules.length; i++) {
+    yield call(authorizeSecurityGroupEgress, {
+      Rule: egressRules[i]
+    });
+  }
+
+  const { endpointPrivateAccess, endpointPublicAccess, k8sVersion } = awsConfig;
+
+  const clusterLabels = {
+    opstrace_cluster_name: ccfg.cluster_name
+  };
+
+  const cluster: AWS.EKS.Cluster = yield call(ensureEKSExists, {
+    subnets,
+    opstraceClusterName: ccfg.cluster_name,
+    endpointPrivateAccess,
+    endpointPublicAccess,
+    k8sVersion,
+    clusterLabels,
+    roleArn: eksClusterRole.Arn!,
+    securityGroupId: masterSecurityGroup.GroupId
+  });
+
+  log.info(`Generating kubeConfig`);
+  const kubeconfigString: string = generateKubeconfigStringForEksCluster(
+    awsConfig.region,
+    cluster
+  );
+
+  const kubeConfig = getKubeConfig({
+    loadFromCluster: false,
+    kubeconfig: kubeconfigString
+  });
+  const awsAuthConfigMap = new ConfigMap(
+    {
+      apiVersion: "v1",
+      kind: "ConfigMap",
+      metadata: {
+        name: "aws-auth",
+        namespace: "kube-system"
+      },
+      data: {
+        mapRoles: `- rolearn: ${workerNodeRole.Arn}\n  username: system:node:{{EC2PrivateDNSName}}\n  groups:\n    - system:bootstrappers\n    - system:nodes\n`
+      }
+    },
+    kubeConfig
+  );
+
+  yield call(createOrUpdateCM, awsAuthConfigMap);
+
+  const instanceProfileName = yield call(
+    createInstanceProfile,
+    ccfg.cluster_name
+  );
+
+  log.info(
+    `Ensuring InstanceProfile has ${EKSWorkerNodesRoleName} role attached`
+  );
+
+  yield call(addRole, {
+    InstanceProfileName: instanceProfileName,
+    RoleName: EKSWorkerNodesRoleName
+  });
+
+  // Launch Configuration
+  const { imageId, instanceType } = awsConfig;
+  const LaunchConfigurationName = `${ccfg.cluster_name}-primary-launch-configuration`;
+  yield call(ensureLaunchConfigurationExists, {
+    name: ccfg.cluster_name,
+    cluster,
+    LaunchConfigurationName,
+    IamInstanceProfile: instanceProfileName,
+    securityGroupId: workerSecurityGroup.GroupId,
+    imageId,
+    instanceType
+  });
+
+  yield call(ensureAutoScalingGroupExists, {
+    opstraceClusterName: ccfg.cluster_name,
+    subnets,
+    zone: awsConfig.zone,
+    maxSize: ccfg.node_count,
+    minSize: ccfg.node_count,
+    desiredCapacity: ccfg.node_count,
+    launchConfigurationName: LaunchConfigurationName
+  });
+
+  return kubeconfigString;
+}
+
+/**
+ * Workaround to handle slow Route53 DNS setup. Wait until the data api
+ * endpoints are listed in the hosted zone records.
+ */
+export async function waitUntilRoute53EntriesAreAvailable(
+  clusterName: string,
+  tenantNames: string[]
+) {
+  const clusterDNSName = `${clusterName}.opstrace.io.`;
+
+  // system tenant is there by default, check corresponding endpoints, too
+  const tnames = [...tenantNames];
+  tnames.push("system");
+
+  while (true) {
+    log.info(
+      "waiting for Route53 hosted zone '%s' to be set up",
+      clusterDNSName
+    );
+    const zone = await getZoneForDNSName(clusterDNSName);
+
+    if (!zone) {
+      log.info(
+        "route53: hosted zone %s not found, retrying later...",
+        clusterDNSName
+      );
+      await sleep(30.0);
+      continue; // retry
+    }
+
+    log.debug("route53: found hosted zone %s", zone.Id);
+
+    let letsencryptChallengeDone = true;
+    const recordsets = await getRecordsForZone(zone);
+
+    if (recordsets === undefined || recordsets.length == 0) {
+      log.info(
+        "no records found in hosted zone %s, retrying later...",
+        clusterDNSName
+      );
+      await sleep(30.0);
+    }
+
+    // generate the list of domains to check
+    const probeDomains = new Map();
+    for (const tname of tnames) {
+      const tenantDomain = `${tname}.${clusterDNSName}`;
+
+      probeDomains.set(`cortex-external.${tenantDomain}`, false);
+      probeDomains.set(`loki-external.${tenantDomain}`, false);
+    }
+
+    // Based on
+    // https://letsencrypt.org/2019/10/09/onboarding-your-customers-with-lets-encrypt-and-acme.html
+    //
+    // Iterate over the list of records and if we have a TXT entry with
+    // _acme-challenge then Let's Encrypt DNS validation is ongoing and we
+    // should retry later. This is a precautionary measure to ensure we
+    // don't trigger DNS host not found errors later when validating
+    // the data api endpoints.
+    //
+    // Check if the required domains are created.
+    //
+    for (const r of recordsets) {
+      log.debug("record name=%s type=%s", r.Name, r.Type);
+      if (r.Type == "TXT" && r.Name.startsWith("_acme-challenge")) {
+        letsencryptChallengeDone = false;
+      }
+
+      for (const domainName of probeDomains.keys()) {
+        if (r.Type == "A" && r.Name == domainName) {
+          log.debug("domain %s is set", domainName);
+          probeDomains.set(domainName, true);
+        }
+      }
+    }
+
+    if (!letsencryptChallengeDone) {
+      log.debug(
+        "lets encrypt DNS validation challenge in progress, retrying later..."
+      );
+      await sleep(30.0);
+      continue; // retry
+    }
+
+    // check if all entries were found
+    const allEntriesFound = Array.from(probeDomains.entries()).reduce(
+      (acc, entry) => {
+        if (!entry[1]) {
+          log.debug(
+            "domain %s not found in hosted zone, retrying later...",
+            entry[0]
+          );
+        }
+        return acc && entry[1];
+      }
+    );
+
+    if (allEntriesFound) {
+      log.info("hosted zone %s is ready", clusterDNSName);
+      break;
+    }
+
+    // sleep before retrying
+    await sleep(30.0);
+  }
+}

@@ -1,0 +1,8 @@
+subscription SubscribeToModules {
+  module {
+    name
+    scope
+    created_at
+    branch_name
+  }
+}

@@ -1,0 +1,7 @@
+subscription SubscribeToBranches {
+  branch {
+    name
+    created_at
+    protected
+  }
+}

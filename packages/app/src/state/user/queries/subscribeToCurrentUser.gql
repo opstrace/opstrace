@@ -1,0 +1,10 @@
+subscription SubscribeToCurrentUser {
+  user {
+    email
+    avatar
+    username
+    preference {
+      dark_mode
+    }
+  }
+}

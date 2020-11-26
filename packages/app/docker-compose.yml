@@ -1,0 +1,97 @@
+version: "3.6"
+services:
+  postgres:
+    image: postgres:12
+    restart: always
+    volumes:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+  graphql:
+    image: hasura/graphql-engine:v1.3.1.cli-migrations-v2
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "postgres"
+    restart: always
+    volumes:
+      - ./migrations:/hasura-migrations
+      - ./metadata:/hasura-metadata
+      - type: bind
+        source: ./secrets/cert.crt
+        target: /etc/ssl/certs/selfsigned.crt
+        read_only: true
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
+      ## disable the console served by server https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#before-you-begin
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # set to "false" to disable console
+      ## enable debugging mode. It is recommended to disable this in production
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      ## uncomment next line to set an admin secret
+      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecret
+  s3:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    logging:
+      driver: none
+  app-server:
+    build: .
+    ports:
+      - "3001:3001"
+    container_name: app-server
+    environment:
+      GRAPHQL_ENDPOINT_HOST: graphql
+      GRAPHQL_ENDPOINT_PORT: 8080
+      GRAPHQL_ENDPOINT: http://graphql:8080/v1/graphql
+      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecret
+      AUTH0_CLIENT_ID: vs6bgTunbVK4dvdLRj02DptWjOmAVWVM
+      AUTH0_DOMAIN: opstrace-dev.us.auth0.com
+      HASURA_ADMIN_SECRET: myadminsecret
+      DOMAIN: http://localhost:3001
+      UI_DOMAIN: http://localhost:3000
+      COOKIE_SECRET: aef23610b381f01bf2325f012324a42c2e3e85b12ac37492e07fa98df00cdd20
+    volumes:
+       - ../../:/usr/src/opstrace
+    command: yarn server:start-watch
+  app-ui:
+    build: .
+    ports:
+      - "3000:3000"
+    container_name: app-ui
+    stdin_open: true
+    environment:
+      ## Unset the following EARLY_PREVIEW var to see the default UI as it is deployed to the cluster.
+      ## This variable is unset in the cluster so users only receive new features once they're ready for consumption.
+      # EARLY_PREVIEW: "true"
+      AUTH0_CLIENT_ID: vs6bgTunbVK4dvdLRj02DptWjOmAVWVM
+      AUTH0_DOMAIN: opstrace-dev.us.auth0.com
+    volumes:
+       - ../../:/usr/src/opstrace
+    command: yarn client:watch
+  web-server-rebuilder:
+    build: .
+    container_name: web-server-rebuilder
+    volumes:
+       - ../../:/usr/src/opstrace
+    command: yarn server:build-watch

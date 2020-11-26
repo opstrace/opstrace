@@ -1,0 +1,28 @@
+{
+  "name": "@opstrace/gcp",
+  "version": "0.0.0",
+  "description": "Library for managing GCP infrastructure",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "repository": "https://github.com/opstrace/opstrace.git",
+  "author": "Opstrace, Inc.",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
+    "clean": "rimraf build .cache tsconfig.tsbuildinfo",
+    "prebuild": "yarn clean",
+    "lint": "eslint . --ext .ts --quiet"
+  },
+  "dependencies": {
+    "@google-cloud/common": "^3.4.1",
+    "@google-cloud/compute": "^2.4.0",
+    "@google-cloud/container": "^2.1.0",
+    "@google-cloud/storage": "^5.4.0",
+    "@opstrace/utils": "^0.0.0",
+    "fp-ts": "^2.5.3",
+    "googleapis": "^64.0.0",
+    "io-ts": "^2.2.9"
+  }
+}

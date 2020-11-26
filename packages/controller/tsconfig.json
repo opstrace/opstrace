@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "build"
+  },
+  "include": ["**/dashboards/*.json", "src/**/*.ts"],
+  "references": [
+    { "path": "../tenants" },
+    { "path": "../config" },
+    { "path": "../controller-config" },
+    { "path": "../../lib/kubernetes" },
+    { "path": "../../lib/utils" }
+  ]
+}

@@ -1,0 +1,10 @@
+mutation UpdateUser($email: String!, $username: String!, $avatar: String!) {
+  update_user(
+    _set: { username: $username, email: $email, avatar: $avatar }
+    where: { email: { _eq: $email } }
+  ) {
+    returning {
+      email
+    }
+  }
+}

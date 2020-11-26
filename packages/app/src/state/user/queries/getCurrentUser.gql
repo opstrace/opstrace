@@ -1,0 +1,10 @@
+query GetCurrentUser {
+  user {
+    email
+    avatar
+    username
+    preference {
+      dark_mode
+    }
+  }
+}

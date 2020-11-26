@@ -1,0 +1,9 @@
+subscription SubscribeToModuleVersions {
+  module_version {
+    version
+    module_name
+    module_scope
+    created_at
+    branch_name
+  }
+}

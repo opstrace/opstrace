@@ -1,0 +1,5 @@
+mutation CreateBranch($name: String!) {
+  insert_branch_one(object: { name: $name }) {
+    name
+  }
+}

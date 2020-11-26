@@ -1,0 +1,31 @@
+{
+  "name": "@opstrace/kubernetes",
+  "version": "0.0.0",
+  "description": "Library for managing Kubernetes resources",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "repository": "https://github.com/opstrace/opstrace.git",
+  "author": "Opstrace, Inc.",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "generate-apis": "yarn run ts-node ./scripts/generate-apis.ts",
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p . -w",
+    "clean": "rimraf build .cache tsconfig.tsbuildinfo",
+    "prebuild": "yarn clean",
+    "lint": "echo done"
+  },
+  "dependencies": {
+    "@kubernetes/client-node": "0.13.0",
+    "@opstrace/utils": "^0.0.0",
+    "glob": "^7.1.6",
+    "js-yaml": "^3.13.1",
+    "json-schema-to-typescript": "^8.2.0",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/request": "^2.48.4"
+  }
+}

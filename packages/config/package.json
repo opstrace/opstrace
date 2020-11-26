@@ -1,0 +1,23 @@
+{
+  "name": "@opstrace/config",
+  "version": "0.0.0",
+  "description": "Configuration management",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "repository": "https://github.com/opstrace/opstrace.git",
+  "author": "Opstrace, Inc.",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
+    "clean": "rimraf build .cache tsconfig.tsbuildinfo",
+    "prebuild": "yarn clean",
+    "lint": "echo done"
+  },
+  "dependencies": {
+    "@opstrace/tenants": "^0.0.0",
+    "@opstrace/gcp": "^0.0.0",
+    "yup": "^0.28.5"
+  }
+}

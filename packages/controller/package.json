@@ -1,0 +1,36 @@
+{
+  "name": "@opstrace/controller",
+  "version": "0.0.0",
+  "description": "Opstrace Kubernetes Controller",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "repository": "https://github.com/opstrace/opstrace.git",
+  "author": "Opstrace, Inc.",
+  "license": "Apache-2.0",
+  "private": true,
+  "bin": {
+    "opstrace": "./build/cmd.js"
+  },
+  "pkg": {
+    "assets": "**/dashboards/*.json"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
+    "clean": "rimraf build .cache tsconfig.tsbuildinfo",
+    "prebuild": "yarn clean",
+    "lint": "echo done"
+  },
+  "dependencies": {
+    "argparse": "^1.0.10",
+    "js-yaml": "^3.14.0",
+    "@opstrace/config": "^0.0.0",
+    "@opstrace/kubernetes": "^0.0.0",
+    "@opstrace/tenants": "^0.0.0",
+    "@opstrace/utils": "^0.0.0",
+    "@opstrace/controller-config": "^0.0.0"
+  },
+  "devDependencies": {
+    "@types/argparse": "^1.0.38"
+  }
+}

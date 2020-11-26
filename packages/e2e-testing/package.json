@@ -1,0 +1,25 @@
+{
+  "name": "@opstrace/e2e-testing",
+  "version": "0.0.0",
+  "description": "Opstrace e2e testing",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "lint": "eslint . --ext .js"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "node": true
+    },
+    "rules": {
+      "cypress/no-unnecessary-waiting": "warn"
+    },
+    "extends": [
+      "plugin:cypress/recommended"
+    ]
+  },
+  "devDependencies": {
+    "cypress": "^5.5.0",
+    "eslint-plugin-cypress": "^2.11.2"
+  }
+}

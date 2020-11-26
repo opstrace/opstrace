@@ -1,0 +1,422 @@
+- table:
+    schema: public
+    name: branch
+  array_relationships:
+  - name: files
+    using:
+      foreign_key_constraint_on:
+        column: branch_name
+        table:
+          schema: public
+          name: file
+  - name: modules
+    using:
+      foreign_key_constraint_on:
+        column: branch_name
+        table:
+          schema: public
+          name: module
+  - name: versions
+    using:
+      foreign_key_constraint_on:
+        column: branch_name
+        table:
+          schema: public
+          name: module_version
+  insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+      - has_merged
+      - protected
+      - name
+      - created_at
+      backend_only: false
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - has_merged
+      - protected
+      - name
+      - created_at
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - name
+      - created_at
+      - protected
+      - has_merged
+      filter: {}
+  - role: user_admin
+    permission:
+      columns:
+      - has_merged
+      - protected
+      - name
+      - created_at
+      filter: {}
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - name
+      - protected
+      filter: {}
+      check: null
+  - role: user_admin
+    permission:
+      columns:
+      - name
+      - protected
+      filter: {}
+      check: null
+  delete_permissions:
+  - role: user
+    permission:
+      filter:
+        protected:
+          _ne: true
+  - role: user_admin
+    permission:
+      filter:
+        protected:
+          _ne: true
+- table:
+    schema: public
+    name: file
+  object_relationships:
+  - name: branch
+    using:
+      foreign_key_constraint_on: branch_name
+  - name: module
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: module
+        column_mapping:
+          module_scope: scope
+          branch_name: branch_name
+          module_name: name
+  - name: version
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: module_version
+        column_mapping:
+          module_scope: module_scope
+          module_version: version
+          branch_name: branch_name
+          module_name: module_name
+  insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+      - path
+      - id
+      - created_at
+      - module_version
+      - module_name
+      - branch_name
+      - ext
+      - module_scope
+      - base_file_id
+      - mark_deleted
+      - is_modified
+      backend_only: false
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - is_modified
+      - mark_deleted
+      - branch_name
+      - ext
+      - module_name
+      - module_scope
+      - module_version
+      - path
+      - created_at
+      - base_file_id
+      - id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - is_modified
+      - mark_deleted
+      - branch_name
+      - ext
+      - module_name
+      - module_scope
+      - module_version
+      - path
+      - created_at
+      - base_file_id
+      - id
+      filter: {}
+  - role: user_admin
+    permission:
+      columns:
+      - is_modified
+      - mark_deleted
+      - branch_name
+      - ext
+      - module_name
+      - module_scope
+      - module_version
+      - path
+      - created_at
+      - base_file_id
+      - id
+      filter: {}
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - base_file_id
+      - branch_name
+      - ext
+      - is_modified
+      - mark_deleted
+      - module_name
+      - module_scope
+      - module_version
+      - path
+      filter: {}
+      check: null
+  - role: user_admin
+    permission:
+      columns:
+      - base_file_id
+      - branch_name
+      - ext
+      - is_modified
+      - mark_deleted
+      - module_name
+      - module_scope
+      - module_version
+      - path
+      filter: {}
+      check: null
+- table:
+    schema: public
+    name: module
+  object_relationships:
+  - name: branch
+    using:
+      foreign_key_constraint_on: branch_name
+  array_relationships:
+  - name: files
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: file
+        column_mapping:
+          branch_name: branch_name
+          name: module_name
+          scope: module_scope
+  - name: versions
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: module_version
+        column_mapping:
+          branch_name: branch_name
+          name: module_name
+          scope: module_scope
+  insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+      - name
+      - created_at
+      - branch_name
+      - scope
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - branch_name
+      - name
+      - scope
+      - created_at
+      filter: {}
+- table:
+    schema: public
+    name: module_version
+  object_relationships:
+  - name: branch
+    using:
+      foreign_key_constraint_on: branch_name
+  - name: module
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: module
+        column_mapping:
+          module_scope: scope
+          branch_name: branch_name
+          module_name: name
+  array_relationships:
+  - name: files
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: file
+        column_mapping:
+          module_scope: module_scope
+          branch_name: branch_name
+          version: module_version
+          module_name: module_name
+  insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+      - module_name
+      - created_at
+      - version
+      - branch_name
+      - module_scope
+      backend_only: false
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - branch_name
+      - module_name
+      - module_scope
+      - version
+      - created_at
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - branch_name
+      - module_name
+      - module_scope
+      - version
+      - created_at
+      filter: {}
+  - role: user_admin
+    permission:
+      columns:
+      - branch_name
+      - module_name
+      - module_scope
+      - version
+      - created_at
+      filter: {}
+- table:
+    schema: public
+    name: user
+  object_relationships:
+  - name: preference
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_preference
+        column_mapping:
+          email: email
+  insert_permissions:
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - created_at
+      - email
+      - username
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - email
+      - created_at
+      - username
+      - avatar
+      filter:
+        email:
+          _eq: X-Hasura-User-Id
+  - role: user_admin
+    permission:
+      columns:
+      - avatar
+      - created_at
+      - email
+      - session_last_updated
+      - username
+      filter: {}
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - avatar
+      - username
+      filter:
+        email:
+          _eq: X-Hasura-User-Id
+      check: null
+  - role: user_admin
+    permission:
+      columns:
+      - username
+      filter: {}
+      check: null
+- table:
+    schema: public
+    name: user_preference
+  object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: email
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - email
+      - dark_mode
+      filter:
+        email:
+          _eq: X-Hasura-User-Id
+  - role: user_admin
+    permission:
+      columns:
+      - dark_mode
+      - email
+      filter:
+        email:
+          _eq: X-Hasura-User-Id
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - dark_mode
+      filter:
+        email:
+          _eq: X-Hasura-User-Id
+      check: null
+  - role: user_admin
+    permission:
+      columns:
+      - dark_mode
+      filter:
+        email:
+          _eq: X-Hasura-User-Id
+      check: null
