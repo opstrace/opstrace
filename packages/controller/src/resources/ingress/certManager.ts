@@ -23,7 +23,7 @@ import {
   ClusterRoleBinding,
   RoleBinding,
   Service,
-  V1IssuerResource,
+  V1ClusterissuerResource,
   V1CertificateResource,
   CustomResourceDefinition,
   Role,
@@ -33,8 +33,7 @@ import {
   challenges,
   clusterIssuers,
   issuers,
-  orders,
-  V1ClusterissuerResource
+  orders
 } from "@opstrace/kubernetes";
 import {
   getControllerConfig,
@@ -45,6 +44,7 @@ import {
 import { State } from "../../reducer";
 import { entries } from "@opstrace/utils";
 import { DockerImages } from "@opstrace/controller-config";
+import { V1IssuerResource } from "@opstrace/kubernetes/build/custom-resources/v1issuer";
 
 function newGCPCredentialsSecret(
   namespace: string,
@@ -79,30 +79,6 @@ function newGCPCredentialsSecret(
   );
 }
 
-function newAWSCredentialsSecret(
-  namespace: string,
-  awsAuthOptions: any,
-  kubeConfig: KubeConfig
-): Secret {
-  return new Secret(
-    {
-      apiVersion: "v1",
-      data: {
-        secretAccessKey: Buffer.from(awsAuthOptions!.secretAccessKey).toString(
-          "base64"
-        )
-      },
-      kind: "Secret",
-      metadata: {
-        name: `aws-secret-access-key`,
-        namespace: namespace
-      },
-      type: "Opaque"
-    },
-    kubeConfig
-  );
-}
-
 export function CertManagerResources(
   state: State,
   kubeConfig: KubeConfig,
@@ -124,7 +100,7 @@ export function CertManagerResources(
     target,
     gcpAuthOptions,
     region,
-    awsAuthOptions,
+    aws,
     tlsCertificateIssuer
   } = getControllerConfig(state);
 
@@ -153,25 +129,17 @@ export function CertManagerResources(
   }
 
   if (target === "aws") {
-    if (!awsAuthOptions) {
+    if (!aws) {
       throw new Error(
-        "require awsAuthOptions to set up dns challenge for certManager"
+        "require aws config to set up dns challenge for certManager"
       );
     }
     dns01 = {
       route53: {
-        accessKeyID: awsAuthOptions.accessKeyId,
         region,
-        secretAccessKeySecretRef: {
-          key: "secretAccessKey",
-          name: "aws-secret-access-key"
-        }
+        role: aws.certManagerRoleArn
       }
     };
-
-    collection.add(
-      newAWSCredentialsSecret(namespace, awsAuthOptions, kubeConfig)
-    );
   }
 
   //
@@ -188,12 +156,6 @@ export function CertManagerResources(
   state.tenants.list.tenants.forEach(tenant => {
     const tenantNamespace = getTenantNamespace(tenant);
     const host = getTenantDomain(tenant, state);
-
-    if (target === "aws") {
-      collection.add(
-        newAWSCredentialsSecret(tenantNamespace, awsAuthOptions, kubeConfig)
-      );
-    }
 
     if (target === "gcp") {
       collection.add(
@@ -1267,6 +1229,11 @@ export function CertManagerResources(
     )
   );
 
+  const extraArgs: string[] = [];
+  if (target === "aws") {
+    extraArgs.push("--issuer-ambient-credentials=true");
+  }
+
   collection.add(
     new Deployment(
       {
@@ -1312,7 +1279,7 @@ export function CertManagerResources(
                     "--v=2",
                     "--cluster-resource-namespace=$(POD_NAMESPACE)",
                     "--leader-election-namespace=kube-system"
-                  ],
+                  ].concat(extraArgs),
                   env: [
                     {
                       name: "POD_NAMESPACE",
@@ -1335,7 +1302,28 @@ export function CertManagerResources(
                   resources: {}
                 }
               ],
-              serviceAccountName: "cert-manager"
+              serviceAccountName: "cert-manager",
+              securityContext: {
+                //
+                // for cert-manager to be able to read the the service account
+                // token with the iam role. otherwise the challenge will fail
+                // with:
+                //
+                // Warning  PresentError  17s (x4 over 42s)  cert-manager
+                // Error presenting challenge: error instantiating route53
+                // challenge solver: unable to assume role: WebIdentityErr:
+                // failed fetching WebIdentity token: caused by: WebIdentityErr:
+                // unable to read file at
+                // /var/run/secrets/eks.amazonaws.com/serviceaccount/token
+                // caused by: open
+                // /var/run/secrets/eks.amazonaws.com/serviceaccount/token:
+                // permission denied
+                //
+                // https://github.com/aws/amazon-eks-pod-identity-webhook/issues/8
+                //
+                fsGroup: 1001,
+                runAsUser: 1001
+              }
             }
           }
         }

@@ -16,7 +16,7 @@
 
 import * as yup from "yup";
 import { gcpAuthOptionsSchema, GCPAuthOptions } from "@opstrace/gcp";
-import { awsAuthOptionsSchema, AWSAuthOptions } from "@opstrace/aws";
+import { AWSConfig } from "@opstrace/aws";
 
 export const controllerConfigSchema = yup
   .object({
@@ -90,14 +90,8 @@ export const controllerConfigSchema = yup
           ),
         otherwise: () => yup.mixed().strip(true)
       }),
-
-    awsAuthOptions: yup.mixed<AWSAuthOptions | undefined>().when(["target"], {
-      // if target is aws, then make this required, otherwise it's not required
-      is: "aws",
-      then: () =>
-        awsAuthOptionsSchema.required("[internal] must specify awsAuthOptions"),
-      otherwise: () => yup.mixed().strip(true)
-    }),
+    // AWS configuration
+    aws: yup.mixed<AWSConfig | undefined>(),
 
     controllerTerminated: yup.bool().default(false)
   })

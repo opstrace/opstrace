@@ -49,7 +49,8 @@ import {
   ServiceLinkedRoleRes,
   STSRegionCheck,
   getZoneForDNSName,
-  getRecordsForZone
+  getRecordsForZone,
+  setCertManagerRoleArn
 } from "@opstrace/aws";
 
 import {
@@ -229,6 +230,59 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
     }
   }
 
+  // Policy required for external-dns and cert-manager
+  const Route53ExternalDNSPolicyName = `${ccfg.cluster_name}-externaldns`;
+  log.info(`Ensuring ${Route53ExternalDNSPolicyName} policy exists`);
+  const route53Policy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
+    PolicyName: Route53ExternalDNSPolicyName,
+    PolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: "route53:GetChange",
+          Resource: "arn:aws:route53:::change/*"
+        },
+        {
+          Effect: "Allow",
+          Action: ["route53:ChangeResourceRecordSets"],
+          Resource: ["arn:aws:route53:::hostedzone/*"]
+        },
+        {
+          Effect: "Allow",
+          Action: [
+            "route53:ListHostedZones",
+            "route53:ListHostedZonesByName",
+            "route53:ListResourceRecordSets"
+          ],
+          Resource: ["*"]
+        }
+      ]
+    })
+  });
+
+  // CertManager role
+  const CertManagerRoleName = `${ccfg.cluster_name}-cert-manager`;
+  log.info(`Ensuring ${CertManagerRoleName} role exists`);
+  const certManagerRole: AWS.IAM.Role = yield call(ensureRoleExists, {
+    RoleName: CertManagerRoleName,
+    AssumeRolePolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Principal: {
+            Service: "eks.amazonaws.com"
+          },
+          Action: "sts:AssumeRole"
+        }
+      ]
+    })
+  });
+
+  // To be used when pushing the controller config to the cluster
+  setCertManagerRoleArn(certManagerRole.Arn);
+
   // EKS Role
   const EKSClusterRoleName = `${ccfg.cluster_name}-eks-controlplane`;
   log.info(`Ensuring ${EKSClusterRoleName} role exists`);
@@ -262,37 +316,6 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
             Service: "ec2.amazonaws.com"
           },
           Action: "sts:AssumeRole"
-        }
-      ]
-    })
-  });
-
-  // Worker Node Policy
-  const Route53ExternalDNSPolicyName = `${ccfg.cluster_name}-externaldns`;
-  log.info(`Ensuring ${Route53ExternalDNSPolicyName} policy exists`);
-  const route53Policy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
-    PolicyName: Route53ExternalDNSPolicyName,
-    PolicyDocument: JSON.stringify({
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Effect: "Allow",
-          Action: "route53:GetChange",
-          Resource: "arn:aws:route53:::change/*"
-        },
-        {
-          Effect: "Allow",
-          Action: ["route53:ChangeResourceRecordSets"],
-          Resource: ["arn:aws:route53:::hostedzone/*"]
-        },
-        {
-          Effect: "Allow",
-          Action: [
-            "route53:ListHostedZones",
-            "route53:ListHostedZonesByName",
-            "route53:ListResourceRecordSets"
-          ],
-          Resource: ["*"]
         }
       ]
     })
@@ -396,12 +419,10 @@ export function* ensureAWSInfraExists(): Generator<any, string, any> {
       PolicyArn: "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
     },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: route53Policy.Arn! },
-    // {
-    //   RoleName: EKSWorkerNodesRoleName,
-    //   PolicyArn: lokiDynamoDBPolicy.Arn!
-    // },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: lokiBucketPolicy.Arn! },
-    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexBucketPolicy.Arn! }
+    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexBucketPolicy.Arn! },
+    // Attach route53 policy to cert manager role
+    { RoleName: certManagerRole.RoleName, PolicyArn: route53Policy.Arn! }
   ];
 
   for (let i = 0; i < eksWorkerNodeRolePolicies.length; i++) {

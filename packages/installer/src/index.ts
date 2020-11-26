@@ -15,7 +15,6 @@
  */
 import { strict as assert } from "assert";
 
-import AWS from "aws-sdk";
 import got, { Response as GotResponse, Options as GotOptions } from "got";
 import { fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
@@ -44,7 +43,7 @@ import {
   getValidatedGCPAuthOptionsFromFile,
   GCPAuthOptions
 } from "@opstrace/gcp";
-import { getAwsAuthOptions } from "@opstrace/aws";
+import { getCertManagerRoleArn } from "@opstrace/aws";
 import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
   set as updateControllerConfig,
@@ -113,8 +112,6 @@ function* createClusterCore() {
 
   let gcpAuthOptions: GCPAuthOptions | undefined;
 
-  let awsAuthOptions;
-
   // not sure why the controller needs to know about 'region', but here we go.
   let region: string;
 
@@ -140,18 +137,6 @@ function* createClusterCore() {
 
     // set `region` (legacy code maintenance, clean up)
     region = ccfg.aws.region;
-
-    // This is here mainly to pass these details on into the Opstrace cluster.
-    // Relevant discussion:
-    // opstrace-prelaunch/issues/1274
-    // Rely on the CLI entry point to error out when these credentials are
-    // not set/defined.
-    const awsAccessKeyId = AWS.config.credentials!.accessKeyId;
-    const awsAccessKeySecret = AWS.config.credentials!.secretAccessKey;
-
-    // Note(JP): why do we explicitly need `awsAuthOptions`? All client tooling
-    // should automatically consume the corresponding environment variables.
-    awsAuthOptions = getAwsAuthOptions(awsAccessKeyId, awsAccessKeySecret);
   }
 
   const dnsConf = getDnsConfig(ccfg.cloud_provider);
@@ -166,7 +151,6 @@ function* createClusterCore() {
     mode: "development", // note: this is here only to keep legacy concepts working temporarily
     cert_issuer: ccfg.cert_issuer,
     gcpAuthOptions,
-    awsAuthOptions,
     infrastructureName: ccfg.cluster_name,
     logRetention: retentionConf.logs,
     metricRetention: retentionConf.metrics,
@@ -206,6 +190,10 @@ function* createClusterCore() {
   }
   if (ccfg.cloud_provider === "aws") {
     kubeconfigString = yield call(ensureAWSInfraExists);
+
+    controllerConfig.aws = {
+      certManagerRoleArn: getCertManagerRoleArn()
+    };
   }
 
   if (!kubeconfigString) {
