@@ -21,12 +21,11 @@ export declare interface Dict<T = any> {
   [key: string]: T;
 }
 
-export const awsAuthOptionsSchema = yup.object({
-  accessKeyId: yup.string().required("accessKeyId"),
-  secretAccessKey: yup.string().required("secretAccessKey")
+export const awsConfigSchema = yup.object({
+  certManagerRoleArn: yup.string()
 });
 
-export type AWSAuthOptions = yup.InferType<typeof awsAuthOptionsSchema>;
+export type AWSConfig = yup.InferType<typeof awsConfigSchema>;
 
 type SubnetPublicDefinition = { Public: boolean };
 

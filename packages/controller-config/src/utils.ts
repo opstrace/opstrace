@@ -68,7 +68,6 @@ export const serialize = (
           version: ccfg.version,
           mode: ccfg.mode,
           gcpAuthOptions: ccfg.gcpAuthOptions,
-          awsAuthOptions: ccfg.awsAuthOptions,
           uiSourceIpFirewallRules: ccfg.uiSourceIpFirewallRules,
           apiSourceIpFirewallRules: ccfg.apiSourceIpFirewallRules,
           apiExternalSourceIpFirewallRules:
@@ -79,7 +78,8 @@ export const serialize = (
           oidcClientSecret: ccfg.oidcClientSecret, // make k8s secret
           authenticationCookie: ccfg.authenticationCookie,
           data_api_authn_pubkey_pem: ccfg.data_api_authn_pubkey_pem,
-          disable_data_api_authentication: ccfg.disable_data_api_authentication
+          disable_data_api_authentication: ccfg.disable_data_api_authentication,
+          aws: ccfg.aws
         })
       }
     },

@@ -18,7 +18,7 @@ import AWS from "aws-sdk";
 
 import { log } from "@opstrace/utils";
 
-import { AWSAuthOptions, AWSApiError } from "./types";
+import { AWSApiError } from "./types";
 
 // supposed to be a tidy immutable singleton in the future: write/set once,
 // read/consume from anywhere w/o the need to explicitly pass this through
@@ -37,6 +37,19 @@ function getAWSRegion() {
     throw new Error("call setAWSRegion() first");
   }
   return awsRegion;
+}
+
+let certManagerRoleArn: string | undefined;
+
+export function setCertManagerRoleArn(arn: string) {
+  certManagerRoleArn = arn;
+}
+
+export function getCertManagerRoleArn() {
+  if (certManagerRoleArn === undefined) {
+    throw new Error("call setCertManagerArn() first");
+  }
+  return certManagerRoleArn;
 }
 
 // Adjust global (singleton) AWS client config
@@ -342,11 +355,3 @@ users:
       - ${cluster.name}
 `;
 }
-
-export const getAwsAuthOptions = (
-  accessKeyId: string,
-  secretAccessKey: string
-): AWSAuthOptions => ({
-  accessKeyId,
-  secretAccessKey
-});
