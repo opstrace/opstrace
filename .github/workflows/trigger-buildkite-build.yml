@@ -1,0 +1,32 @@
+name: trigger-buildkite-for-pr
+on:
+  pull_request:
+      types: [labeled]
+
+jobs:
+  j1:
+    name: Trigger cluster test ("test-remote") through Buildkite
+    runs-on: ubuntu-latest
+    steps:
+      - name: emit-context
+        env:
+          CTX_PR_SENDER:  ${{ github.event.pull_request.user.login }}
+          CTX_ACTOR: ${{ github.actor }}
+          CTX_PR_COMMIT: ${{ github.event.pull_request.head.sha }}
+          CTX_PR_REF: ${{ github.ref }}
+          CTX_PR_BRANCH_NAME: ${{ github.head_ref }}
+          CTX_LABEL_NAME: ${{ github.event.label.name }}
+          CTX_EXPRESSION_FOR_RUNNING: ${{ github.event.label.name == 'buildkite-test-this' }}
+        run: env | grep CTX_
+      - name: trigger
+        if: github.event.label.name == 'buildkite-test-this'
+        env:
+          BUILDKITE_API_ACCESS_TOKEN: ${{ secrets.buildkite_api_token_for_triggering_builds }}
+          PIPELINE: "opstrace/opstrace"
+          BRANCH: ${{ github.ref }}
+          COMMIT: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BASE_BRANCH: ${{ github.base_ref }}
+          PR_REPO: git://github.com/opstrace/opstrace.git
+          MESSAGE: ":github: PR ${{ github.event.pull_request.number }} triggered by ${{ github.actor }} -- ${{ github.event.pull_request.head.sha }}"
+        uses: jgehrcke/trigger-pipeline-action@0b796e37a0ff69c5e66601d88fcbb508a642c99e

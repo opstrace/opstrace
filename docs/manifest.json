@@ -1,0 +1,102 @@
+{
+  "routes": [
+    {
+      "heading": true,
+      "title": "Opstrace Documentation",
+      "routes": [
+        {
+          "title": "Opstrace Introduction",
+          "path": "/docs/README.md"
+        },
+        {
+          "title": "Opstrace Quick Start",
+          "path": "/docs/quickstart.mdx"
+        },
+        {
+          "heading": true,
+          "title": "User Guide",
+          "routes": [
+            {
+              "title": "Sending Metrics with Prometheus",
+              "path": "/docs/guides/user/sending-metrics-with-prometheus.md"
+            },
+            {
+              "title": "Sending Logs with FluentD",
+              "path": "/docs/guides/user/sending-logs-with-fluentd.md"
+            },
+            {
+              "title": "Sending Logs with Promtail",
+              "path": "/docs/guides/user/sending-logs-with-fluentd.md"
+            },
+            {
+              "title": "Instrumenting a K8s Cluster",
+              "path": "/docs/guides/user/instrumenting-a-k8s-cluster.md"
+            }
+          ]
+        },
+        {
+          "heading": true,
+          "title": "Administrator Guide",
+          "routes": [
+            {
+              "title": "Hands-on Troubleshooting",
+              "path": "/docs/guides/administrator/troubleshooting.md"
+            },
+            {
+              "title": "Upgrading",
+              "path": "/docs/guides/administrator/upgrading.md"
+            }
+          ]
+        },
+        {
+          "heading": true,
+          "title": "Contributor Guide",
+          "routes": [
+            {
+              "title": "Development Environment",
+              "path": "/docs/guides/contributor/setting-up-your-dev-env.md"
+            },
+            {
+              "title": "Running and Writing Tests",
+              "path": "/docs/guides/contributor/test-remote.md"
+            },
+            {
+              "title": "Developer Workflows",
+              "path": "/docs/guides/contributor/workflows.md"
+            },
+            {
+              "title": "Writing Docs",
+              "path": "/docs/guides/contributor/writing-docs.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "heading": true,
+      "title": "References",
+      "routes": [
+        {
+          "title": "Frequently Asked Questions",
+          "path": "/docs/references/faq.md"
+        },
+        {
+          "title": "Cluster Configuration",
+          "path": "/docs/references/cluster-configuration.md"
+        },
+        {
+          "title": "Command Line Interface (CLI)",
+          "path": "/docs/references/cli.md"
+        },
+        {
+          "title": "Key Concepts",
+          "path": "/docs/references/concepts.md"
+        },
+        {
+          "title": "Cloud Permissions",
+          "path": "/docs/references/cloud-permissions.md"
+        }
+      ]
+    }
+  ]
+}

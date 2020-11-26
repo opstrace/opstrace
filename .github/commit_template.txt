@@ -1,0 +1,45 @@
+
+
+## Example first line: "bump: update Node to v42.0".
+##
+## Specifically, the first line should contain a type and a description
+## of the change being made.
+##
+## Change types:
+## - arch: large architectural changes/refactors (potentially breaking)
+## - bump: third-party lib/component bump (can be big, including Cortex, ...)
+## - chore: small routine tasks, very localized refactors
+## - ci: change to automated CI pipeline
+## - cli: change to the cluster management CLI (create, destroy, ..., )
+## - cortex: change to cortex (config change for example)
+## - controller: change in the k8s controller CLI
+## - dashboards: e.g. change to grafana dashboards for system monitoring
+## - docs: any documentation change
+## - feat: user-facing feature addition. Makes most sense in a semver world which we are not yet in.
+## - fix: fix for user-facing issue in the opstrace system (fix user-facing bug). Makes most sense in a semver world which we are not yet in.
+## - installer: change in installer (cluster creation)
+## - looker: change to looker project
+## - loki: change to loki (config change for example)
+## - makefile: change in main Makefile
+## - perf: user-facing performance tweak. Makes most sense in a semver world which we are not yet in.
+## - revert: specifically for a git revert commit
+## - systemlogs: change in opstrace system log arch/implementation
+## - test-remote: change in test-remote project
+## - test-scale: perhaps this could be a type?
+## - ui: any changes relating to the app package
+## - uninstaller: change in uninstaller (cluster destruction/teardown)
+## - website: change in the website code or content
+## - wip: work in progress, later to be edited/squashed ("i don't want to think about choosing the right prefix now!")
+##
+## See https://www.conventionalcommits.org/en/v1.0.0/ for background.
+##
+## The first line should also:
+## - be at most 89 characters long
+## - contain a description that is at most 72 characters long
+## - not end with sentence-ending punctuation
+## - start (after the type) with a lowercase imperative ("add", "fix")
+##
+## The second line should be empty, per normal Git convention. The
+## remaining lines should be limited to a reasonable length (72
+## characters is common), though there's currently no enforcement for
+## that.
