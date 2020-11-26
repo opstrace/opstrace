@@ -35,3 +35,6 @@ export * from "./types";
 export * from "./util";
 export * from "./vpc";
 export * from "./vpcEndpoint";
+export * from "./rdsCluster";
+export * from "./rdsInstance";
+export * from "./rdsSubnetGroup";

@@ -72,7 +72,8 @@ export function getAWSConfig(ccfg: NewRenderedClusterConfigType) {
     vpc: {
       CidrBlock: "192.168.0.0/16"
     },
-    // Why four subnets? Is that an EKS requirement?
+    // Why four subnets? Is that an EKS requirement? Yes, to meet the requirements of 2 AZs.
+    // So we get one public in each AZ and one private in each AZ. Note - we launch all nodes on the private subnets.
     subnets: [
       {
         CidrBlock: "192.168.0.0/19",
@@ -95,6 +96,23 @@ export function getAWSConfig(ccfg: NewRenderedClusterConfigType) {
       },
       {
         CidrBlock: "192.168.96.0/19",
+        AvailabilityZone: `${ccfg.aws.region}${otherZone}`,
+        Public: false
+      }
+    ],
+    // Both RDS subnets are private and belong to the same VPC as our EKS cluster
+    rdsSubnets: [
+      {
+        CidrBlock: "192.168.128.0/19",
+        AvailabilityZone: `${ccfg.aws.region}${ccfg.aws.zone_suffix}`,
+        Public: false
+      },
+      // Choose a different zone for the other two subnets. Otherwise: EKS
+      // cluster setup: tryCreate(): assume that creation failed:
+      // InvalidParameterException: Subnets specified must be in at least two
+      // different AZs (HTTP status code: 400)
+      {
+        CidrBlock: "192.168.160.0/19",
         AvailabilityZone: `${ccfg.aws.region}${otherZone}`,
         Public: false
       }

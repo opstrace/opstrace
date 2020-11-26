@@ -36,25 +36,24 @@ COPY lib/utils /build/lib/utils/
 WORKDIR /build/lib/utils
 RUN yarn run tsc -b
 
-# Copy over the app package
-COPY packages/app /build/packages/app/
-
 WORKDIR /build/packages/app
+# temporarily move node_modules
+RUN mv node_modules ../node_modules
+# Copy over the needed parts of the app package
+COPY packages/app /build/packages/app/
+# move node_module back after we've copied everything else in
+RUN mv ../node_modules node_modules
+
 RUN ls -ahltr
 RUN yarn build
 
 # Second stage, copy bundled files across
 FROM node:14.15.1-buster-slim AS prod-stage
-
-COPY yarn.lock /build/packages/app/
 # Copy over built app package
-COPY --from=build-stage /build/packages/app/package.json /build/packages/app/package.json
 COPY --from=build-stage /build/packages/app/dist /build/packages/app/dist
 COPY --from=build-stage /build/packages/app/build /build/packages/app/build
 
 WORKDIR /build/packages/app
-# Install just the production dependencies
-RUN yarn --frozen-lockfile --network-timeout 1000000 --production
 RUN ls -ahltr
 
 EXPOSE 3001
