@@ -65,6 +65,7 @@ export function* destroyAWSInfra() {
   const LaunchConfigurationName = `${destroyConfig.clusterName}-primary-launch-configuration`;
   const EKSWorkerNodesRoleName = `${destroyConfig.clusterName}-eks-nodes`;
   const EKSClusterRoleName = `${destroyConfig.clusterName}-eks-controlplane`;
+  const CertManagerRoleName = `${destroyConfig.clusterName}-cert-manager`;
 
   const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
 
@@ -112,7 +113,11 @@ export function* destroyAWSInfra() {
     yield fork(detachPoliciesFromRoles, cortexBucketName, lokiBucketName)
   );
 
-  for (const rname of [EKSWorkerNodesRoleName, EKSClusterRoleName]) {
+  for (const rname of [
+    EKSWorkerNodesRoleName,
+    EKSClusterRoleName,
+    CertManagerRoleName
+  ]) {
     taskGroup2.push(
       yield fork(ensureRoleDoesNotExist, {
         RoleName: rname
@@ -269,6 +274,7 @@ function* detachPoliciesFromRoles(
 ) {
   const EKSWorkerNodesRoleName = `${destroyConfig.clusterName}-eks-nodes`;
   const EKSClusterRoleName = `${destroyConfig.clusterName}-eks-controlplane`;
+  const CertManagerRoleName = `${destroyConfig.clusterName}-cert-manager`;
   const EKSServiceLinkedRolePolicyName = `${destroyConfig.clusterName}-eks-linked-service`;
   const CortexS3PolicyName = `${cortexBucketName}-s3`;
   const LokiS3PolicyName = `${lokiBucketName}-s3`;
@@ -324,6 +330,12 @@ function* detachPoliciesFromRoles(
       RoleName: EKSWorkerNodesRoleName,
       PolicyArn: pol.Arn
     });
+    if (pol.PolicyName == Route53ExternalDNSPolicyName) {
+      eksWorkerNodeRolePolicies.push({
+        RoleName: CertManagerRoleName,
+        PolicyArn: pol.Arn
+      });
+    }
   }
 
   // Detach policies from roles concurrently.
