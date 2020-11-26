@@ -163,8 +163,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing) || hasIngressChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing) || hasIngressChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -182,8 +182,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -201,8 +201,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -220,11 +220,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (
-        haveLabelsChanged(r, existing) ||
-        hasStatefulSetChanged(r, existing)
-      ) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasStatefulSetChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -242,8 +242,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -261,8 +261,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing) || hasServiceChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing) || hasServiceChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -280,8 +280,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing) || hasSecretChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing) || hasSecretChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -299,8 +299,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -318,8 +318,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -337,8 +337,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -356,8 +356,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing) || hasDeploymentChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasDeploymentChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -375,8 +378,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing) || hasDaemonSetChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasDaemonSetChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -394,8 +400,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -413,8 +419,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing) || hasConfigMapChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasConfigMapChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -432,8 +441,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -451,8 +460,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -470,8 +479,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -489,8 +498,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -508,11 +517,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (
-        haveLabelsChanged(r, existing) ||
-        hasAlertManagerChanged(r, existing)
-      ) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasAlertManagerChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -530,8 +539,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -549,8 +558,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing) || hasPrometheusChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasPrometheusChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -568,11 +580,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (
-        haveLabelsChanged(r, existing) ||
-        hasPrometheusRuleChanged(r, existing)
-      ) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasPrometheusRuleChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -590,11 +602,11 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (
-        haveLabelsChanged(r, existing) ||
-        hasServiceMonitorChanged(r, existing)
-      ) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasServiceMonitorChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
@@ -612,8 +624,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -631,8 +643,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -650,8 +662,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -669,8 +681,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -688,8 +700,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }
@@ -707,8 +719,8 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (haveLabelsChanged(r, existing)) {
-        if (!r.shouldPreventUpdate()) {
+      if (!r.shouldPreventUpdate()) {
+        if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
       }

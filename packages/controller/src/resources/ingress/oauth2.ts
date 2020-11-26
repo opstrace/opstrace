@@ -35,11 +35,7 @@ export function Oauth2Resources(
   kubeConfig: KubeConfig
 ): ResourceCollection {
   const collection = new ResourceCollection();
-  const {
-    oidcClientId,
-    oidcClientSecret,
-    authSessionCookieSecret
-  } = getControllerConfig(state);
+  const { oidcClientId, oidcClientSecret } = getControllerConfig(state);
 
   state.tenants.list.tenants.forEach(tenant => {
     const tenantHost = getTenantDomain(tenant, state);
@@ -161,7 +157,7 @@ export function Oauth2Resources(
                     env: [
                       {
                         name: "OAUTH2_PROXY_COOKIE_SECRET",
-                        value: authSessionCookieSecret
+                        value: "lkasjdf"
                       }
                     ],
                     image: DockerImages.oauth2Proxy,

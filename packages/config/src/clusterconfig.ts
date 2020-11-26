@@ -57,7 +57,6 @@ export interface NewRenderedClusterConfigType {
   cert_issuer: "letsencrypt-prod" | "letsencrypt-staging";
   data_api_authn_pubkey_pem: string;
   controller_image: string;
-  application_image: string;
   tenants: string[];
   env_label: string;
   log_retention_days: number; // bigint to force this to integer?

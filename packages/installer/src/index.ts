@@ -147,7 +147,6 @@ function* createClusterCore() {
   // hub, see opstrace-prelaunch/issues/1298.
   const controllerConfig: ControllerConfigType = {
     name: ccfg.cluster_name,
-    applicationImage: ccfg.application_image,
     target: ccfg.cloud_provider,
     region: region, // not sure why that's needed
     cert_issuer: ccfg.cert_issuer,

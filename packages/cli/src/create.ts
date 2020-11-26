@@ -38,7 +38,6 @@ import * as ucc from "./ucc";
 import * as util from "./util";
 import * as schemas from "./schemas";
 import { BUILD_INFO } from "./buildinfo";
-import appContainerImage from "./appContainerImage";
 
 type PubkeyPemType = string;
 type TenantApiTokensType = Dict<string>;
@@ -71,7 +70,6 @@ export async function create() {
     ...{
       aws: infraConfigAWS,
       gcp: infraConfigGCP,
-      application_image: appContainerImage,
       cloud_provider: cli.CLIARGS.cloudProvider,
       cluster_name: cli.CLIARGS.clusterName,
       data_api_authn_pubkey_pem: data_api_authn_pubkey_pem

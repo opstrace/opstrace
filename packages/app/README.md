@@ -68,3 +68,39 @@ The build is minified and the filenames include the hashes.
 __Killed: error Command failed with exit code 137.__: This usually means your default memory for docker is too low. See docker documentation on increasing the default memory. For MacOS users, you can
 navigate to: Docker for Mac > Preferences > resources and increase the memory setting >= 4GB.
 
+## Test Build and Deploy
+
+Build and push container images with the following script (it will rebuild and push images if content has changed in this package):
+
+```bash
+../../ci/build-docker-images-update-controller-config.sh
+```
+
+`packages/controller-config/src/docker-images.json` will be updated to refer to newly built images.
+
+
+Now build the controller to use the new configuration:
+
+```bash
+cd ../controller && yarn build
+```
+
+Run the controller locally if you don't have one already running in your remote cluster:
+
+```bash
+cd ../../ && make controller-local
+```
+
+The controller will now update the deployments with the new images specified in `packages/controller-config/src/docker-images.json`
+
+__If you have a controller running in your cluster already, it's best to delete it and continue your testing by running the controller locally__. To check if you have a controller running:
+
+```bash
+kubectl get deploy opstrace-controller -n kube-system
+```
+
+To delete the in-cluster controller:
+
+```bash
+kubectl delete deploy opstrace-controller -n kube-system
+```
