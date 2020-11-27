@@ -35,16 +35,23 @@ import { getStatefulSetRolloutMessage } from "./statefulset";
 import { getDaemonSetRolloutMessage } from "./daemonset";
 import { getDeploymentRolloutMessage } from "./deployment";
 import { getPersistentVolumeReleaseMessage } from "./persistentVolume";
+import {
+  V1CertificateResource,
+  V1CertificateResourceType
+} from "../custom-resources";
+import { getCertificateRolloutMessage } from "./certificates";
 
 export function clusterIsEmpty(
   deployments: DeploymentType[],
   daemonsets: DaemonSetType[],
-  statefulsets: StatefulSetType[]
+  statefulsets: StatefulSetType[],
+  certificates: V1CertificateResourceType[]
 ) {
   return (
     daemonsets.filter(r => r.isOurs()).length === 0 &&
     deployments.filter(r => r.isOurs() && !r.isProtected()).length === 0 &&
-    statefulsets.filter(r => r.isOurs()).length === 0
+    statefulsets.filter(r => r.isOurs()).length === 0 &&
+    certificates.filter(r => r.isOurs()).length == 0
   );
 }
 
@@ -74,6 +81,13 @@ export function activeDaemonsets(daemonsets: DaemonSetType[]) {
 export function activeStatefulsets(statefulsets: StatefulSetType[]) {
   return statefulsets
     .map(r => getStatefulSetRolloutMessage(r))
+    .sort()
+    .filter(m => !!m);
+}
+
+export function activeCertificates(certificates: V1CertificateResourceType[]) {
+  return certificates
+    .map(r => getCertificateRolloutMessage(r))
     .sort()
     .filter(m => !!m);
 }
@@ -165,6 +179,7 @@ export interface RunningReporterResourceInputs {
   DaemonSets: DaemonSets;
   Deployments: Deployments;
   StatefulSets: StatefulSets;
+  Certificates: V1CertificateResource[];
 }
 
 export type GetRunningReporterResourceInputs = () => RunningReporterResourceInputs;
@@ -184,6 +199,7 @@ export function* runningReporter(options: RunningReporterOptions) {
   let lastActiveDeployments: string[] = [];
   let lastActiveDaemonSets: string[] = [];
   let lastActiveStatefulSets: string[] = [];
+  let lastActiveCerts: string[] = [];
 
   let noActivesSince: number = Infinity;
   let lastHeartbeat: number = Infinity;
@@ -191,11 +207,11 @@ export function* runningReporter(options: RunningReporterOptions) {
   let firstReport = true;
 
   while (true) {
-    const { DaemonSets, Deployments, StatefulSets } = yield call(
+    const { DaemonSets, Deployments, StatefulSets, Certificates } = yield call(
       options.getResourceInputs
     );
 
-    if (clusterIsEmpty(Deployments, DaemonSets, StatefulSets)) {
+    if (clusterIsEmpty(Deployments, DaemonSets, StatefulSets, Certificates)) {
       // Still starting up so skip processing
       yield delay(1 * SECOND);
       continue;
@@ -209,6 +225,9 @@ export function* runningReporter(options: RunningReporterOptions) {
     // Check StatefulSets
     const activeStatefulSets = activeStatefulsets(StatefulSets);
 
+    // Check Certificates
+    const activeCerts = activeCertificates(Certificates);
+
     const daemonSetStatusChange = activeDaemonSets.filter(
       active => !lastActiveDaemonSets.find(existing => existing === active)
     );
@@ -219,6 +238,10 @@ export function* runningReporter(options: RunningReporterOptions) {
 
     const statefulSetStatusChange = activeStatefulSets.filter(
       active => !lastActiveStatefulSets.find(existing => existing === active)
+    );
+
+    const certificateStatusChange = activeCerts.filter(
+      active => !lastActiveCerts.find(existing => existing === active)
     );
 
     const waitingForCount =
@@ -234,7 +257,8 @@ export function* runningReporter(options: RunningReporterOptions) {
     const didWaitingForContentChange =
       daemonSetStatusChange.length ||
       deploymentStatusChange.length ||
-      statefulSetStatusChange.length;
+      statefulSetStatusChange.length ||
+      certificateStatusChange.length;
 
     if (waitingForCount > 0 && noActivesSince !== Infinity) {
       noActivesSince = Infinity;
@@ -258,7 +282,8 @@ export function* runningReporter(options: RunningReporterOptions) {
         ready: isReadyNow,
         activeDaemonSets: activeDaemonSets,
         activeDeployments: activeDeploys,
-        activeStatefulSets: activeStatefulSets
+        activeStatefulSets: activeStatefulSets,
+        certificates: activeCerts
       });
 
       firstReport = false;
@@ -267,6 +292,7 @@ export function* runningReporter(options: RunningReporterOptions) {
       lastActiveDaemonSets = activeDaemonSets;
       lastActiveDeployments = activeDeploys;
       lastActiveStatefulSets = activeStatefulSets;
+      lastActiveCerts = activeCerts;
     }
 
     yield delay(1 * SECOND);
