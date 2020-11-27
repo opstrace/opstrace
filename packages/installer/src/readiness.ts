@@ -21,7 +21,8 @@ import {
   clusterIsEmpty,
   activeDaemonsets,
   activeDeployments,
-  activeStatefulsets
+  activeStatefulsets,
+  activeCertificates
 } from "@opstrace/kubernetes";
 
 import { CONTROLLER_NAME } from "@opstrace/controller";
@@ -178,6 +179,8 @@ export function* installationProgressReporter() {
     // Check StatefulSets
     const activeStatefulSets = activeStatefulsets(StatefulSets.resources);
 
+    const activeCerts = activeCertificates(Certificates.resources);
+
     log.info(`waiting for ${activeDeploys.length} Deployments`);
     if (activeDeploys.length < 3) {
       // for the last few: show the names.
@@ -199,6 +202,14 @@ export function* installationProgressReporter() {
       // for the last few: show the names.
       for (const s of activeStatefulSets) {
         log.debug("    %s", s);
+      }
+    }
+
+    log.info(`waiting for ${activeCerts.length} Certificate`);
+    if (activeCerts.length < 3) {
+      // for the last few: show the names.
+      for (const c of activeCerts) {
+        log.debug("    %s", c);
       }
     }
 
