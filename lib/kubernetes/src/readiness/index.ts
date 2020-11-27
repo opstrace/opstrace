@@ -247,12 +247,14 @@ export function* runningReporter(options: RunningReporterOptions) {
     const waitingForCount =
       activeDaemonSets.length +
       activeDeployments.length +
-      activeStatefulSets.length;
+      activeStatefulSets.length +
+      activeCerts.length;
 
     const didWaitingForCountChange =
       lastActiveDaemonSets.length !== activeDaemonSets.length ||
       lastActiveDeployments.length !== activeDeployments.length ||
-      lastActiveStatefulSets.length !== activeStatefulSets.length;
+      lastActiveStatefulSets.length !== activeStatefulSets.length ||
+      lastActiveCerts.length != activeCerts.length;
 
     const didWaitingForContentChange =
       daemonSetStatusChange.length ||
