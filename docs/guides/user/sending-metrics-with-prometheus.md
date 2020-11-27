@@ -28,13 +28,13 @@ This is the tenant-specific data API endpoint of an Opstrace cluster for ingesti
 The endpoint URL is constructed using the tenant name and the cluster name:
 
 ```yaml
-url: https://cortex-external.${TENANT_NAME}.${CLUSTER_NAME}.opstrace.io:8443/api/v1/push
+url: https://cortex.${TENANT_NAME}.${CLUSTER_NAME}.opstrace.io/api/v1/push
 ```
 
 Example:
 
 ```yaml
-url: https://cortex-external.default.testcluster.opstrace.io:8443/api/v1/push
+url: https://cortex.default.testcluster.opstrace.io/api/v1/push
 ```
 
 ## Choosing `bearer_token_file`
