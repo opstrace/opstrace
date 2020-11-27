@@ -17,7 +17,7 @@
 import { RDS } from "aws-sdk";
 
 import { log } from "@opstrace/utils";
-
+import { AWSApiError } from "./types";
 import { getTags, awsPromErrFilter, rdsClient } from "./util";
 import { AWSResource } from "./resource";
 
@@ -31,16 +31,26 @@ export class RDSSubnetGroupRes extends AWSResource<RDS.DBSubnetGroup, void> {
   }
 
   private async getSubnetGroup(): Promise<RDS.DBSubnetGroup | false> {
-    const result: RDS.DBSubnetGroupMessage = await awsPromErrFilter(
-      rdsClient()
-        .describeDBSubnetGroups({ DBSubnetGroupName: this.ocname })
-        .promise()
-    );
+    try {
+      const result: RDS.DBSubnetGroupMessage = await awsPromErrFilter(
+        rdsClient()
+          .describeDBSubnetGroups({ DBSubnetGroupName: this.ocname })
+          .promise()
+      );
 
-    if (result && result.DBSubnetGroups && result.DBSubnetGroups.length > 0) {
-      return result.DBSubnetGroups[0];
+      if (result && result.DBSubnetGroups && result.DBSubnetGroups.length > 0) {
+        return result.DBSubnetGroups[0];
+      }
+      return false;
+    } catch (e) {
+      if (e instanceof AWSApiError) {
+        // well-defined, explicit confirmation that instance does not exist.
+        if (e.name == "DBSubnetGroupNotFoundFault") {
+          return false;
+        }
+      }
+      throw e;
     }
-    return false;
   }
 
   protected async tryCreate(): Promise<true> {
