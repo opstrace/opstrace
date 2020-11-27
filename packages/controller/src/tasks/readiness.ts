@@ -30,12 +30,18 @@ import { log } from "@opstrace/utils";
 function* getRunningReporterResources() {
   return yield call(function* () {
     const state: State = yield select();
-    const { DaemonSets, Deployments, StatefulSets } = state.kubernetes.cluster;
+    const {
+      DaemonSets,
+      Deployments,
+      StatefulSets,
+      Certificates
+    } = state.kubernetes.cluster;
 
     const resources: RunningReporterResourceInputs = {
       DaemonSets: DaemonSets.resources,
       Deployments: Deployments.resources,
-      StatefulSets: StatefulSets.resources
+      StatefulSets: StatefulSets.resources,
+      Certificates: Certificates.resources
     };
 
     return resources;

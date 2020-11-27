@@ -150,13 +150,19 @@ export function* installationProgressReporter() {
   while (true) {
     const state: State = yield select();
 
-    const { DaemonSets, Deployments, StatefulSets } = state.kubernetes.cluster;
+    const {
+      DaemonSets,
+      Deployments,
+      StatefulSets,
+      Certificates
+    } = state.kubernetes.cluster;
 
     if (
       clusterIsEmpty(
         Deployments.resources,
         DaemonSets.resources,
-        StatefulSets.resources
+        StatefulSets.resources,
+        Certificates.resources
       )
     ) {
       // Still starting up so skip processing
