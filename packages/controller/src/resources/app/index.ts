@@ -135,14 +135,13 @@ export function OpstraceApplicationResources(
     {
       apiVersion: "v1",
       data: {
-        COOKIE_SECRET: generateSecretValue()
+        COOKIE_SECRET: Buffer.from(generateSecretValue()).toString("base64")
       },
       kind: "Secret",
       metadata: {
         name: "session-cookie-secret",
         namespace: namespace
-      },
-      type: "Opaque"
+      }
     },
     kubeConfig
   );
@@ -158,19 +157,21 @@ export function OpstraceApplicationResources(
     {
       apiVersion: "v1",
       data: {
-        HASURA_ADMIN_SECRET: generateSecretValue()
+        HASURA_ADMIN_SECRET: Buffer.from(generateSecretValue()).toString(
+          "base64"
+        )
       },
       kind: "Secret",
       metadata: {
         name: "hasura-admin-secret",
         namespace: namespace
-      },
-      type: "Opaque"
+      }
     },
     kubeConfig
   );
   // We don't want this value to change once it exists either.
-  // The value of this secret can always be updated manually in the cluster if needs be for security purposes.
+  // The value of this secret can always be updated manually in the cluster if needs be (kubectl delete <name> -n application) and the controller will create a new one.
+  // The corresponding deployment pods that consume it will need to be restarted also to get the new env var containing the new secret.
   hasuraAdminSecret.setShouldNeverUpdate();
 
   collection.add(hasuraAdminSecret);
@@ -219,7 +220,7 @@ export function OpstraceApplicationResources(
                     { name: "GRAPHQL_ENDPOINT_PORT", value: "8080" },
                     {
                       name: "GRAPHQL_ENDPOINT",
-                      value: `graphql.${namespace}.svc.cluster.local:8080/v1/graphql`
+                      value: `http://graphql.${namespace}.svc.cluster.local:8080/v1/graphql`
                     },
                     {
                       name: "AUTH0_CLIENT_ID",

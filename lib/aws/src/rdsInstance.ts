@@ -78,7 +78,9 @@ class RDSInstanceRes extends AWSResource<
     await awsPromErrFilter(
       rdsClient()
         .deleteDBInstance({
-          DBInstanceIdentifier: this.ocname
+          DBInstanceIdentifier: this.ocname,
+          // Skip final snapshotting of the DB before destroy - we don't care about keeping a snap
+          SkipFinalSnapshot: true
         })
         .promise()
     );
@@ -117,7 +119,7 @@ async function getInstance(
   } catch (e) {
     if (e instanceof AWSApiError) {
       // well-defined, explicit confirmation that instance does not exist.
-      if (e.name == "ResourceNotFoundException") {
+      if (e.name == "DBInstanceNotFound") {
         return false;
       }
     }

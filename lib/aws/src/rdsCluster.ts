@@ -78,7 +78,9 @@ class RDSClusterRes extends AWSResource<
     await awsPromErrFilter(
       rdsClient()
         .deleteDBCluster({
-          DBClusterIdentifier: this.ocname
+          DBClusterIdentifier: this.ocname,
+          // Skip final snapshotting of the DB before destroy - we don't care about keeping a snap
+          SkipFinalSnapshot: true
         })
         .promise()
     );
@@ -118,7 +120,7 @@ async function getCluster(
   } catch (e) {
     if (e instanceof AWSApiError) {
       // well-defined, explicit confirmation that cluster does not exist.
-      if (e.name == "ResourceNotFoundException") {
+      if (e.name == "DBClusterNotFoundFault") {
         return false;
       }
     }
