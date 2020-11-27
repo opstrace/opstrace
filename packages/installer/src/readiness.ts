@@ -205,7 +205,7 @@ export function* installationProgressReporter() {
       }
     }
 
-    log.info(`waiting for ${activeCerts.length} Certificate`);
+    log.info(`waiting for ${activeCerts.length} Certificates`);
     if (activeCerts.length < 3) {
       // for the last few: show the names.
       for (const c of activeCerts) {

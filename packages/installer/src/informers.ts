@@ -30,7 +30,8 @@ export function* runInformers(kubeConfig: KubeConfig) {
       k8s.Deployment.startInformer(kubeConfig, channel),
       k8s.Secret.startInformer(kubeConfig, channel),
       k8s.StatefulSet.startInformer(kubeConfig, channel),
-      k8s.StatefulSet.startInformer(kubeConfig, channel)
+      k8s.StatefulSet.startInformer(kubeConfig, channel),
+      k8s.V1CertificateResource.startInformer(kubeConfig, channel)
     ];
 
     // return the unsubscribe function for eventChannel. This will be called
