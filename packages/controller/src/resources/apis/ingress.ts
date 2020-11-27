@@ -18,7 +18,7 @@ import { Ingress, ResourceCollection } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
 import { Tenant } from "@opstrace/tenants";
-import { getExternalApiDomain } from "../../helpers";
+import { getApiDomain } from "../../helpers";
 
 export const addApiIngress = ({
   serviceName,
@@ -39,19 +39,19 @@ export const addApiIngress = ({
   state: State;
   collection: ResourceCollection;
 }) => {
-  const externalApiHost = getExternalApiDomain(api, tenant, state);
+  const apiHost = getApiDomain(api, tenant, state);
 
-  // Add ingress for external API
+  // Add ingress for data API
   collection.add(
     new Ingress(
       {
         apiVersion: "networking.k8s.io/v1beta1",
         kind: "Ingress",
         metadata: {
-          name: `${api}-apiexternal`,
+          name: `${api}`,
           namespace,
           annotations: {
-            "kubernetes.io/ingress.class": "apiexternal",
+            "kubernetes.io/ingress.class": "api",
             "external-dns.alpha.kubernetes.io/ttl": "30",
             "nginx.ingress.kubernetes.io/client-body-buffer-size": "10m"
           }
@@ -59,13 +59,13 @@ export const addApiIngress = ({
         spec: {
           tls: [
             {
-              hosts: [externalApiHost],
+              hosts: [apiHost],
               secretName: "https-cert"
             }
           ],
           rules: [
             {
-              host: externalApiHost,
+              host: apiHost,
               http: {
                 paths: [
                   {

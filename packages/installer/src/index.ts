@@ -104,7 +104,7 @@ function* createClusterCore() {
   ]!;
 
   const firewallConf = getFirewallConfig({
-    apiexternal: ccfg.data_api_authorized_ip_ranges
+    api: ccfg.data_api_authorized_ip_ranges
   });
   const retentionConf = {
     logs: ccfg.log_retention_days,
@@ -179,7 +179,6 @@ function* createClusterCore() {
     tlsCertificateIssuer: ccfg.cert_issuer,
     uiSourceIpFirewallRules: firewallConf.ui,
     apiSourceIpFirewallRules: firewallConf.api,
-    apiExternalSourceIpFirewallRules: firewallConf.apiexternal,
     oidcClientId:
       "492745505745-sdef5ljea5pqjn3mg6499r66aifgl4le.apps.googleusercontent.com",
     oidcClientSecret: "b6rPEc0tnv8tZyc0eN8xpz1h",
@@ -310,10 +309,10 @@ export async function waitUntilLokiCortexAreReachable(
   tnames.push("system");
 
   for (const tname of tnames) {
-    const mid = `${tname}.${opstraceClusterName}.opstrace.io:8443`;
+    const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
     // opstrace-prelaunch/issues/1570
-    probeUrls[`https://cortex-external.${mid}/api/v1/labels`] = tname;
-    probeUrls[`https://loki-external.${mid}/loki/api/v1/labels`] = tname;
+    probeUrls[`https://cortex.${mid}/api/v1/labels`] = tname;
+    probeUrls[`https://loki.${mid}/loki/api/v1/labels`] = tname;
   }
 
   const requestSettings: GotOptions = {

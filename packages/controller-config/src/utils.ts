@@ -71,8 +71,6 @@ export const serialize = (
           awsAuthOptions: ccfg.awsAuthOptions,
           uiSourceIpFirewallRules: ccfg.uiSourceIpFirewallRules,
           apiSourceIpFirewallRules: ccfg.apiSourceIpFirewallRules,
-          apiExternalSourceIpFirewallRules:
-            ccfg.apiExternalSourceIpFirewallRules,
           logRetention: ccfg.logRetention,
           metricRetention: ccfg.metricRetention,
           oidcClientId: ccfg.oidcClientId,

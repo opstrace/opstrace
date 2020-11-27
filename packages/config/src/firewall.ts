@@ -19,17 +19,14 @@ export type AuthorizedIp = string;
 export interface FirewallConfig {
   ui: AuthorizedIp[];
   api: AuthorizedIp[];
-  apiexternal: AuthorizedIp[];
 }
 
 export const getFirewallConfig = ({
   ui,
-  api,
-  apiexternal
+  api
 }: Partial<FirewallConfig>): FirewallConfig => {
   return {
     ui: ui || ["0.0.0.0/0"],
-    api: api || ["0.0.0.0/0"],
-    apiexternal: apiexternal || []
+    api: api || []
   };
 };

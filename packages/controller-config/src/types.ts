@@ -42,7 +42,6 @@ export const controllerConfigSchema = yup
     disable_data_api_authentication: yup.bool().required(),
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
-    apiExternalSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     oidcClientId: yup.string().required(),
     oidcClientSecret: yup.string().required(),
     authenticationCookie: yup
