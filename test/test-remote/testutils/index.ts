@@ -144,10 +144,10 @@ export function globalTestSuiteSetupOnce() {
     }
   }
 
-  TENANT_DEFAULT_LOKI_API_BASE_URL = `https://loki-external.default.${clusterName}.opstrace.io:8443`;
-  TENANT_SYSTEM_LOKI_API_BASE_URL = `https://loki-external.system.${clusterName}.opstrace.io:8443`;
-  TENANT_DEFAULT_CORTEX_API_BASE_URL = `https://cortex-external.default.${clusterName}.opstrace.io:8443`;
-  TENANT_SYSTEM_CORTEX_API_BASE_URL = `https://cortex-external.system.${clusterName}.opstrace.io:8443`;
+  TENANT_DEFAULT_LOKI_API_BASE_URL = `https://loki.default.${clusterName}.opstrace.io`;
+  TENANT_SYSTEM_LOKI_API_BASE_URL = `https://loki.system.${clusterName}.opstrace.io`;
+  TENANT_DEFAULT_CORTEX_API_BASE_URL = `https://cortex.default.${clusterName}.opstrace.io`;
+  TENANT_SYSTEM_CORTEX_API_BASE_URL = `https://cortex.system.${clusterName}.opstrace.io`;
 
   // Create a definite temporary directory for this test runner, within the
   // operating system's TMPDIR (shared across test runner invocation, "insecure"

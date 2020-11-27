@@ -3,8 +3,8 @@
 # Require env variable CHECKOUT_VERSION_STRING to be set.
 export LOOKER_IMAGE_NAME="opstrace/looker:${CHECKOUT_VERSION_STRING}"
 
-export TENANT_DEFAULT_LOKI_API_BASE_URL="https://loki-external.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io:8443"
-export TENANT_DEFAULT_CORTEX_API_BASE_URL="https://cortex-external.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io:8443"
+export TENANT_DEFAULT_LOKI_API_BASE_URL="https://loki.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io"
+export TENANT_DEFAULT_CORTEX_API_BASE_URL="https://cortex.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
 DNSIP="$(ci/dns_cache.sh)"
 # Do _not_ quote $COMMON_ARGS when using it (it's in fact not a single arg, but
