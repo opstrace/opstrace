@@ -34,13 +34,13 @@ This is the tenant-specific data API endpoint of an Opstrace cluster for ingesti
 The endpoint URL is constructed using the tenant name and the cluster name:
 
 ```xml
-url https://loki-external.${TENANT_NAME}.${CLUSTER_NAME}.opstrace.io:8443/loki/api/v1/push
+url https://loki.${TENANT_NAME}.${CLUSTER_NAME}.opstrace.io/loki/api/v1/push
 ```
 
 Example:
 
 ```xml
-url https://loki-external.default.testcluster.opstrace.io:8443/loki/api/v1/push
+url https://loki.default.testcluster.opstrace.io/loki/api/v1/push
 ```
 
 ## Choosing `bearer_token_file`

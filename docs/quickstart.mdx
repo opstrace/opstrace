@@ -146,7 +146,7 @@ Create a file with the Prometheus configuration to send data to your Opstrace cl
 # send metrics to the Opstrace cluster with Prometheus
 cat <<EOF > prometheus.yml
   remote_write:
-    - url: "https://cortex-external.myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io:8443/api/v1/push"
+    - url: "https://cortex.myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io/api/v1/push"
       bearer_token_file: /var/run/tenant/token
       queue_config:
         batch_send_deadline: 5s
@@ -192,7 +192,7 @@ cat <<EOF > fluentd.conf
 
 <match *>
   @type loki
-  url https://loki-external.myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io:8443
+  url https://loki.myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io
   flush_interval 5s
   bearer_token_file /var/run/tenant/token
   extra_labels { "label": "quickstart" }

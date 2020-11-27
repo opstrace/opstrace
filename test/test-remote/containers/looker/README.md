@@ -18,7 +18,7 @@ b2228f7f-dev: digest: sha256:23b0537c614de4960b4d0d4fdeb43e389bd2c1dd212395446a8
 
 `make publish-as-latest` might be a convenient helper.
 
-## Create a GCP VM, create opstrace cluster, perform tests
+## Create a GCP VM, create Opstrace cluster, perform tests
 
 ### Create load generator machine (GCP VM)
 
@@ -61,7 +61,7 @@ $ docker pull opstrace/looker:b2228f7f-dev
 Set Loki API base URL in env, e.g.:
 
 ```bash
-export LOOKER_LOKI_API_BASE_URL=https://loki-external.default.jp.opstrace.io:8443
+export LOOKER_LOKI_API_BASE_URL=https://loki.default.jp.opstrace.io
 ```
 
 What follows are two examples for invoking looker in a container.
@@ -108,7 +108,7 @@ $ cat looker-1588769553-WXgeUxmIzUug.report.json
   "argv": [
     "/usr/local/bin/node",
     "/build/looker",
-    "https://loki-external.default.jp.opstrace.io:8443",
+    "https://loki.default.jp.opstrace.io",
     "--n-concurrent-streams",
     "10",
     "--n-entries-per-stream-fragment",
@@ -122,7 +122,7 @@ $ cat looker-1588769553-WXgeUxmIzUug.report.json
     "2"
   ],
   "config": {
-    "lokiurl": "https://loki-external.default.jp.opstrace.io:8443",
+    "lokiurl": "https://loki.default.jp.opstrace.io",
     "n_concurrent_streams": 10,
     "n_entries_per_stream_fragment": 10000,
     "n_chars_per_msg": 100,
@@ -167,7 +167,7 @@ Look at Opstrace cluster dashboard(s), keep note of things, make screenshots. Th
 Set Loki API base URL in env, e.g.:
 
 ```bash
-export LOOKER_LOKI_API_BASE_URL=https://loki-external.default.jp.opstrace.io:8443
+export LOOKER_LOKI_API_BASE_URL=https://loki.default.jp.opstrace.io
 ```
 
 ### quick test (a few seconds)
@@ -200,7 +200,7 @@ Note that currently the Loki API rejects HTTP requests with a body larger than
 Goal: run two containers side-by-side on the same host:
 
 * looker, exposing /metrics
-* Prometheus, scraping looker's /metrics endpoint, pushing into opstrace cluster.
+* Prometheus, scraping looker's /metrics endpoint, pushing into Opstrace cluster.
 
 Example Prometheus config:
 
@@ -213,7 +213,7 @@ scrape_configs:
       - targets: ['localhost:8900']
 
 remote_write:
-  - url: https://prometheus-external.default.jp.opstrace.io:8443/api/prom/push
+  - url: https://prometheus.default.jp.opstrace.io/api/prom/push
     queue_config:
       batch_send_deadline: 5s
     tls_config:

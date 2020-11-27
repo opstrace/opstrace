@@ -68,7 +68,7 @@ metadata:
 data:
   prometheus.yml: |-
     remote_write:
-    - url: https://cortex-external.${TENANT_NAME}.${CLUSTER_NAME}.opstrace.io:8443/api/v1/push
+    - url: https://cortex.${TENANT_NAME}.${CLUSTER_NAME}.opstrace.io/api/v1/push
       bearer_token_file: /var/run/${TENANT_NAME}-tenant/authToken
 
     scrape_configs:
@@ -244,7 +244,7 @@ metadata:
 data:
   promtail.yml: |
     client:
-      url: https://loki-external.default.#{CLUSTER_NAME}.opstrace.io:8443/loki/api/v1/push
+      url: https://loki.default.#{CLUSTER_NAME}.opstrace.io/loki/api/v1/push
       bearer_token_file: /var/run/default-tenant/authToken
 
     scrape_configs:
