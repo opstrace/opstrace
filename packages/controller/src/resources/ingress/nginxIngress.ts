@@ -48,26 +48,19 @@ export function NginxIngressResources(
   const {
     target,
     uiSourceIpFirewallRules,
-    apiSourceIpFirewallRules,
-    apiExternalSourceIpFirewallRules
+    apiSourceIpFirewallRules
   } = getControllerConfig(state);
   const ports: {
     ui: { public: boolean; http: number; https: number };
     api: { public: boolean; http: number; https: number };
-    apiexternal: { public: boolean; http: number; https: number };
   } = {
     ui: {
       public: true,
       http: 80,
       https: 443
     },
-    apiexternal: {
-      public: true,
-      http: 8080,
-      https: 8443
-    },
     api: {
-      public: false,
+      public: true,
       http: 80,
       https: 443
     }
@@ -75,8 +68,7 @@ export function NginxIngressResources(
 
   entries({
     ui: uiSourceIpFirewallRules,
-    api: apiSourceIpFirewallRules,
-    apiexternal: apiExternalSourceIpFirewallRules
+    api: apiSourceIpFirewallRules
   }).forEach(([endpointName, sourceIps]) => {
     const endpointConfig = ports[endpointName];
 
@@ -382,7 +374,6 @@ export function NginxIngressResources(
             resources: ["configmaps"],
             resourceNames: [
               "ingress-controller-leader-api-api",
-              "ingress-controller-leader-apiexternal-apiexternal",
               "ingress-controller-leader-ui-ui"
             ],
             verbs: ["get", "update"]

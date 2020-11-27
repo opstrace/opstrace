@@ -724,8 +724,8 @@ export async function waitUntilRoute53EntriesAreAvailable(
     for (const tname of tnames) {
       const tenantDomain = `${tname}.${clusterDNSName}`;
 
-      probeDomains.set(`cortex-external.${tenantDomain}`, false);
-      probeDomains.set(`loki-external.${tenantDomain}`, false);
+      probeDomains.set(`cortex.${tenantDomain}`, false);
+      probeDomains.set(`loki.${tenantDomain}`, false);
     }
 
     // Based on

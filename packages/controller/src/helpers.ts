@@ -71,12 +71,6 @@ export const getApiDomain = (
   state: State
 ): string => `${api}.${getTenantDomain(tenant, state)}`;
 
-export const getExternalApiDomain = (
-  api: string,
-  tenant: Tenant,
-  state: State
-): string => `${api}-external.${getTenantDomain(tenant, state)}`;
-
 export const getNodeCount = (state: State): number =>
   state.kubernetes.cluster.Nodes.resources.length;
 
