@@ -36,16 +36,33 @@ import {
 } from "..";
 
 import { logDifference } from "./general";
+import { NetworkingV1beta1IngressTLS } from "@kubernetes/client-node";
 
 export * from "./general";
 export * from "./Pod";
+
+function isNetworkingV1beta1IngressTLSEqual(
+  desired: NetworkingV1beta1IngressTLS,
+  existing: NetworkingV1beta1IngressTLS
+): boolean {
+  return (
+    isDeepStrictEqual(desired?.hosts, existing?.hosts) &&
+    desired?.secretName == existing?.secretName
+  );
+}
 
 export const hasIngressChanged = (
   desired: IngressType,
   existing: IngressType
 ) => {
   if (
-    !isDeepStrictEqual(desired.spec.spec!.tls, existing.spec.spec!.tls) ||
+    Array.isArray(desired.spec.spec?.tls) &&
+    Array.isArray(existing.spec.spec?.tls) &&
+    (desired.spec.spec?.tls.length !== existing.spec.spec?.tls.length ||
+      desired.spec.spec?.tls.find(
+        (t, i) =>
+          !isNetworkingV1beta1IngressTLSEqual(t, existing.spec.spec!.tls![i])
+      )) &&
     !isDeepStrictEqual(
       desired.spec.metadata!.annotations,
       existing.spec.metadata!.annotations
