@@ -20,9 +20,9 @@ export function getCertificateRolloutMessage(
   c: V1CertificateResourceType
 ): string {
   const certificate = c.spec!;
-  const status = certificate.status!;
+  const conditions = certificate.status?.conditions ?? [];
 
-  for (const c of status.conditions!) {
+  for (const c of conditions) {
     if (c.reason == "Ready" && c.status == "True" && c.type == "Ready") {
       // certificate is ready
       return "";
