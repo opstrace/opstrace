@@ -21,3 +21,5 @@ export * from "./network";
 export * from "./subnetworks";
 export * from "./types";
 export * from "./util";
+export * from "./cloudSQL";
+export { sql_v1beta4 } from "googleapis";
