@@ -90,11 +90,7 @@ async function checkClusterStatus() {
   };
   setCreateConfig(createConfig);
 
-  await waitUntilLokiCortexAreReachable(
-    ccfg.cluster_name,
-    ccfg.tenants,
-    ccfg.cloud_provider
-  );
+  await waitUntilLokiCortexAreReachable(ccfg.cluster_name, ccfg.tenants);
 }
 
 // Race to check cluster status and fail if it takes longer than 60 seconds.
