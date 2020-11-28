@@ -51,6 +51,7 @@ function* getRunningReporterResources() {
 let activeDeployments = -1;
 let activeDaemonSets = -1;
 let activeStatefulSets = -1;
+let activeCertificates = -1;
 
 function* handleRunningReporterChange(e: RunningReporterChangeEvent) {
   return yield call(function () {
@@ -80,7 +81,15 @@ function* handleRunningReporterChange(e: RunningReporterChangeEvent) {
       );
       activeStatefulSets = e.activeStatefulSets.length;
     }
-
+    if (
+      activeCertificates === -1 ||
+      activeCertificates !== e.activeCertificates.length
+    ) {
+      log.info(
+        `Waiting for ${e.activeCertificates.length} active Certificates`
+      );
+      activeCertificates = e.activeCertificates.length;
+    }
     // yield call(patch, name, {
     //   heartbeat: Date.now(),
     //   controllerReady: e.ready
