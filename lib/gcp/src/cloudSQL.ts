@@ -63,18 +63,20 @@ async function peerVpcs({
 }
 
 export function* ensureCloudSQLExists({
+  clusterName,
   instance,
   addressName,
   network,
   region,
   ipCidrRange
 }: {
+  clusterName: string;
   addressName: string;
   network: string;
   region: string;
   ipCidrRange: string;
   instance: sql_v1beta4.Schema$DatabaseInstance;
-}): Generator<any, void, any> {
+}): Generator<any, sql_v1beta4.Schema$DatabaseInstance, any> {
   log.info(`Ensuring CloudSQL exists`);
 
   const auth = new google.auth.GoogleAuth({
@@ -96,11 +98,16 @@ export function* ensureCloudSQLExists({
     ipCidrRange
   });
   log.info(`Ensure SQLInstance exists`);
-  yield call(ensureSQLInstanceExists, { instance });
+  const existingInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
+    ensureSQLInstanceExists,
+    { instance }
+  );
   log.info(`Ensure SQLDatabase exists`);
-  yield call(ensureSQLDatabaseExists, { instance });
+  yield call(ensureSQLDatabaseExists, { instanceName: clusterName });
   log.info(`Peering cluster vpc with cloudSQL services vpc`);
   yield call(peerVpcs, { network, addressName });
+
+  return existingInstance;
 }
 
 export function* ensureCloudSQLDoesNotExist({
