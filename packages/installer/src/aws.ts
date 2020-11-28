@@ -53,7 +53,6 @@ import {
   STSRegionCheck,
   getZoneForDNSName,
   getRecordsForZone,
-  setCertManagerRoleArn,
   RDSSubnetGroupRes
 } from "@opstrace/aws";
 
@@ -432,9 +431,6 @@ export function* ensureAWSInfraExists(): Generator<
     })
   });
 
-  // To be used when pushing the controller config to the cluster
-  setCertManagerRoleArn(certManagerRole.Arn);
-
   const EKSServiceLinkedRolePolicyName = `${ccfg.cluster_name}-eks-linked-service`;
   log.info(`Ensuring ${EKSServiceLinkedRolePolicyName} policy exists`);
   const linkedServicePolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
@@ -790,6 +786,8 @@ export function* ensureAWSInfraExists(): Generator<
 
   return {
     kubeconfigString,
+    // To be used when pushing the controller config to the cluster
+    certManagerRoleArn: certManagerRole.Arn,
     // We've hardcoded the password here for now (and in the @opstrace/config package) to keep the installer
     // idempodent. We could generate this during install and then save the value in a secret, but it
     // would certainly add more complexity to maintain an idempodent install and also introduce a critical
