@@ -20,3 +20,4 @@ export * from "./gke";
 export * from "./aws";
 export * from "./tenants";
 export * from "./clusterconfig";
+export * from "./cloudSQL";
