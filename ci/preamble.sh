@@ -49,6 +49,12 @@ set -o xtrace
 # If there are any changes to go directory then build and publish the images to
 # docker hub. Update packages/controller-config/docker-images.json to use the
 # newly built image tags in this test run.
+# This step will check various packages and determine if docker images should be
+# rebuilt and pushed.
+# - cortex-proxy-api
+# - loki-proxy-api
+# - app
+# - graphql
 echo "--- Update docker-images.json"
 ${DIR}/build-docker-images-update-controller-config.sh
 
@@ -94,9 +100,6 @@ make rebuild-testrunner-container-images
 
 echo "--- run app unit tests"
 make run-app-unit-tests
-
-echo "--- make build-and-push-app-image"
-make build-and-push-app-image
 
 echo "--- build looker image"
 # looker: does image build? push it, too!
