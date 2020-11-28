@@ -20,6 +20,6 @@
   "oauth2Proxy": "quay.io/pusher/oauth2_proxy:v4.0.0",
   "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
   "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1",
-  "graphqlEngine": "opstrace/graphql:d41d8cd98f00b204e9800998ecf8427e",
-  "app": "opstrace/app:d41d8cd98f00b204e9800998ecf8427e"
+  "graphqlEngine": "opstrace/graphql:1d98f368e4c30b588e7e13c78dfcb57b",
+  "app": "opstrace/app:1d98f368e4c30b588e7e13c78dfcb57b"
 }
