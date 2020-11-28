@@ -56,7 +56,6 @@ import { rootReducer } from "./reducer";
 import { ensureGCPInfraExists } from "./gcp";
 import {
   ensureAWSInfraExists,
-  EnsureAWSInfraExistsResponse,
   waitUntilRoute53EntriesAreAvailable
 } from "./aws";
 import { ClusterCreateTimeoutError } from "./errors";
@@ -66,6 +65,7 @@ import {
   waitForControllerDeployment
 } from "./readiness";
 import { storeSystemTenantApiAuthTokenAsSecret } from "./secrets";
+import { EnsureInfraExistsResponse } from "./types";
 
 // GCP-specific cluster creation code can rely on this being set. First I tried
 // to wrap this into the non-user-given cluster config schema but then realized
@@ -188,13 +188,18 @@ function* createClusterCore() {
   let postgreSQLEndpoint = "";
 
   if (ccfg.cloud_provider === "gcp") {
-    kubeconfigString = yield call(ensureGCPInfraExists, gcpAuthOptions!);
+    const res: EnsureInfraExistsResponse = yield call(
+      ensureGCPInfraExists,
+      gcpAuthOptions!
+    );
+    kubeconfigString = res.kubeconfigString;
+    postgreSQLEndpoint = res.postgreSQLEndpoint;
   }
   if (ccfg.cloud_provider === "aws") {
     controllerConfig.aws = {
       certManagerRoleArn: getCertManagerRoleArn()
     };
-    const res: EnsureAWSInfraExistsResponse = yield call(ensureAWSInfraExists);
+    const res: EnsureInfraExistsResponse = yield call(ensureAWSInfraExists);
     kubeconfigString = res.kubeconfigString;
     postgreSQLEndpoint = res.postgreSQLEndpoint;
   }

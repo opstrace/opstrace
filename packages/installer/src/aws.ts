@@ -71,13 +71,9 @@ import {
 import { log, getBucketName, sleep, entries } from "@opstrace/utils";
 
 import { getAWSConfig } from "@opstrace/config";
+import { EnsureInfraExistsResponse } from "./types";
 
 type TagList = { Key: string; Value: string }[];
-
-export type EnsureAWSInfraExistsResponse = {
-  kubeconfigString: string;
-  postgreSQLEndpoint: string;
-};
 
 function* ensureRDSExists({
   name,
@@ -108,7 +104,7 @@ function* ensureRDSExists({
 
 export function* ensureAWSInfraExists(): Generator<
   any,
-  EnsureAWSInfraExistsResponse,
+  EnsureInfraExistsResponse,
   any
 > {
   const ccfg: NewRenderedClusterConfigType = getClusterConfig();
@@ -785,7 +781,18 @@ export function* ensureAWSInfraExists(): Generator<
     throw Error("RDS Aurora cluster did not return an Endpoint");
   }
 
-  return { kubeconfigString, postgreSQLEndpoint: dbCluster.Endpoint };
+  return {
+    kubeconfigString,
+    // We've hardcoded the password here for now (and in the @opstrace/config package) to keep the installer
+    // idempodent. We could generate this during install and then save the value in a secret, but it
+    // would certainly add more complexity to maintain an idempodent install and also introduce a critical
+    // failure zone between successful RDS creation and writing the password secret to the cluster.
+    // If a failure occured in between those two steps, we would likely not be able to recover without
+    // additional steps to reset the password on the postgres instance.
+    // The Postgres endpoint is attached to it's own private subnet which is only accessible from within the cluster's VPC.
+    // Their is no public endpoint for the RDS instance.
+    postgreSQLEndpoint: `postgres://opstrace:2020WasQuiteTheYear@${dbCluster.Endpoint}/opstrace`
+  };
 }
 
 /**

@@ -377,7 +377,7 @@ export function OpstraceApplicationResources(
                     },
                     {
                       name: "HASURA_GRAPHQL_DATABASE_URL",
-                      value: `postgres://opstrace:2020WasQuiteTheYear@${state.config.config?.postgreSQLEndpoint}/opstrace`
+                      value: state.config.config?.postgreSQLEndpoint
                     },
                     {
                       name: "HASURA_GRAPHQL_ENABLE_CONSOLE",
