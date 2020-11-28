@@ -20,6 +20,7 @@ import {
   ensureGatewayDoesNotExist,
   ensureNetworkDoesNotExist,
   ensureSubNetworkDoesNotExist,
+  ensureCloudSQLDoesNotExist,
   emptyBucket
 } from "@opstrace/gcp";
 import { destroyDNS } from "@opstrace/dns";
@@ -39,6 +40,12 @@ export function* destroyGCPInfra() {
 
   log.info(`Ensure GKE deletion`);
   yield call(ensureGKEDoesNotExist, destroyConfig.clusterName);
+
+  log.info("Ensure CloudSQL deletion");
+  yield call(ensureCloudSQLDoesNotExist, {
+    clusterName: destroyConfig.clusterName,
+    addressName: `google-managed-services-${destroyConfig.clusterName}`
+  });
 
   log.info(`Destroying CloudNat and Router`);
   yield call(
