@@ -20,6 +20,7 @@ import { google, sql_v1beta4 } from "googleapis";
 import { getGcpProjectId } from "./cluster";
 
 import { SECOND, log } from "@opstrace/utils";
+import { getSQLInstance } from "./cloudSQLInstance";
 
 const sql = google.sql("v1beta4");
 
@@ -30,6 +31,13 @@ export async function getSQLDatabase(
   instanceName: string
 ): Promise<sql_v1beta4.Schema$Database | false> {
   try {
+    // First check if the instance is available and running, because we'll get a 400 status
+    // if we try to read a database from an instance that is not RUNNING, and we can't have
+    // a database if our instance isn't running.
+    const instance = await getSQLInstance(instanceName);
+    if (!instance || instance.state !== "RUNNING") {
+      return false;
+    }
     const projectId = await getGcpProjectId();
     const res = await sql.databases.get({
       project: projectId,

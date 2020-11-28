@@ -184,10 +184,35 @@ export function* ensureNetworkDoesNotExist({ name }: NetworkRequest) {
       const routes = yield call(getRoutes, routesClient, name);
 
       for (let r = 0; r < routes.length; r++) {
+        if (routes[r].name.startsWith("peering-route-")) {
+          /**
+           The route has this shape:
+           {
+            id: '6392894806056270323',
+            creationTimestamp: '2020-11-27T19:42:21.002-08:00',
+            name: 'peering-route-5ee5591cf975f5f0',
+            description: 'Auto generated route via peering [cloudsql-postgres-googleapis-com].',
+            network: 'https://www.googleapis.com/compute/v1/projects/vast-pad-240918/global/networks/matdev',
+            destRange: '192.168.64.0/24',
+            priority: 0,
+            nextHopPeering: 'cloudsql-postgres-googleapis-com',
+            selfLink: 'https://www.googleapis.com/compute/v1/projects/vast-pad-240918/global/routes/peering-route-5ee5591cf975f5f0',
+            kind: 'compute#route'
+          }
+          The only reasonable way to determine if this is the auto generated peering route is to check the name prefix.
+          Auto-generated peering routes cannot be destroyed manually since they're managed by gcp, so we want to skip this route.
+           */
+          continue;
+        }
         log.info(`Destroying route: ${routes[r].name}`);
         yield call(destroyRoute, routesClient, routes[r].name);
       }
-      if (routes.length) {
+      if (
+        !(
+          routes.length === 0 ||
+          (routes.length === 1 && routes[0].name.startsWith("peering-route-"))
+        )
+      ) {
         yield delay(5 * SECOND);
 
         continue;
