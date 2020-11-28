@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { call, delay } from "redux-saga/effects";
+import { all, call, delay } from "redux-saga/effects";
 import { protos as gkeProtos } from "@google-cloud/container";
 
 import {
@@ -23,10 +23,16 @@ import {
   ensureSubNetworkExists,
   ensureGatewayExists,
   ensureGKEExists,
-  generateKubeconfigStringForGkeCluster
+  generateKubeconfigStringForGkeCluster,
+  ensureCloudSQLExists,
+  sql_v1beta4
 } from "@opstrace/gcp";
 import { ensureDNSExists } from "@opstrace/dns";
-import { getGKEClusterConfig, getDnsConfig } from "@opstrace/config";
+import {
+  getGKEClusterConfig,
+  getDnsConfig,
+  getCloudSQLConfig
+} from "@opstrace/config";
 import { GCPAuthOptions } from "@opstrace/gcp";
 import { getBucketName, log, SECOND } from "@opstrace/utils";
 import {
@@ -95,22 +101,39 @@ export function* ensureGCPInfraExists(gcpAuthOptions: GCPAuthOptions) {
     gcpProjectID
   });
 
+  const cloudSQLConfig = getCloudSQLConfig(ccfg, gcpAuthOptions);
+
   // Note(jp): the `gkeConf` object contains a property called `name` which
   // is the GKE cluster name. In addition we provide a `name` property
   // directly, which I have now renamed to `GKEClusterName` because I think
   // it's semantically the same. When that is confirmed I think we should
   // not pass this piece of information in twice, but only once.
   log.info(`Ensuring GKE exists`);
-  const gkecluster: gkeProtos.google.container.v1.ICluster = yield call(
-    ensureGKEExists,
-    {
+  const res: [
+    gkeProtos.google.container.v1.ICluster,
+    sql_v1beta4.Schema$DatabaseInstance
+  ] = yield all([
+    call(ensureGKEExists, {
       GKEClusterName: ccfg.cluster_name,
       region: ccfg.gcp.region,
       gcpProjectID,
       zone: ccfg.gcp.zone_suffix,
       cluster: gkeConf
-    }
-  );
+    }),
+    call(ensureCloudSQLExists, {
+      instance: cloudSQLConfig,
+      // The network here is our VPC that we launch the cluster into
+      network: `projects/${gcpProjectID}/global/networks/${ccfg.cluster_name}`,
+      addressName: `google-managed-services-${ccfg.cluster_name}`,
+      region: ccfg.gcp.region,
+      // This range must not collide with the subnet range, which is also attached to the same VPC.
+      // Select a range that still provides room for making the subnet above larger if we need to.
+      ipCidrRange: "192.168.64.0" // this technically isn't a range because we don't have the /number, but we don't need it
+      // because it's added as a separate parameter when calling the cloud api (for some reason google requires it to be split..)
+    })
+  ]);
+
+  const gkecluster = res[0];
 
   const gkeKubeconfigString: string = generateKubeconfigStringForGkeCluster(
     gcpProjectID,
