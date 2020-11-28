@@ -43,7 +43,6 @@ import {
   getValidatedGCPAuthOptionsFromFile,
   GCPAuthOptions
 } from "@opstrace/gcp";
-import { getCertManagerRoleArn } from "@opstrace/aws";
 import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
   set as updateControllerConfig,
@@ -199,12 +198,17 @@ function* createClusterCore() {
     postgreSQLEndpoint = res.postgreSQLEndpoint;
   }
   if (ccfg.cloud_provider === "aws") {
-    controllerConfig.aws = {
-      certManagerRoleArn: getCertManagerRoleArn()
-    };
     const res: EnsureInfraExistsResponse = yield call(ensureAWSInfraExists);
     kubeconfigString = res.kubeconfigString;
     postgreSQLEndpoint = res.postgreSQLEndpoint;
+
+    if (!res.certManagerRoleArn) {
+      throw Error("must return the certManagerRoleArn from aws infra install");
+    }
+
+    controllerConfig.aws = {
+      certManagerRoleArn: res.certManagerRoleArn
+    };
   }
 
   // Update our controllerConfig with the Postgress Endpoint and revalidate for good measure

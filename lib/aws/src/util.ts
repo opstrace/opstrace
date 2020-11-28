@@ -39,19 +39,6 @@ function getAWSRegion() {
   return awsRegion;
 }
 
-let certManagerRoleArn: string | undefined;
-
-export function setCertManagerRoleArn(arn: string) {
-  certManagerRoleArn = arn;
-}
-
-export function getCertManagerRoleArn() {
-  if (certManagerRoleArn === undefined) {
-    throw new Error("call setCertManagerArn() first");
-  }
-  return certManagerRoleArn;
-}
-
 // Adjust global (singleton) AWS client config
 // `AWS.config` *is* "the global configuration object singleton instance", see
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS.html#config-property
