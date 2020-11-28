@@ -216,7 +216,8 @@ export function* installationProgressReporter() {
     if (
       activeDeploys.length +
         activeDaemonSets.length +
-        activeStatefulSets.length ===
+        activeStatefulSets.length +
+        activeCerts.length ===
       0
     ) {
       break;

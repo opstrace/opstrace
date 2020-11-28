@@ -188,6 +188,7 @@ export interface RunningReporterChangeEvent {
   activeDeployments: string[];
   activeStatefulSets: string[];
   activeDaemonSets: string[];
+  activeCertificates: string[];
 }
 
 export interface RunningReporterOptions {
@@ -285,7 +286,7 @@ export function* runningReporter(options: RunningReporterOptions) {
         activeDaemonSets: activeDaemonSets,
         activeDeployments: activeDeploys,
         activeStatefulSets: activeStatefulSets,
-        certificates: activeCerts
+        activeCertificates: activeCerts
       });
 
       firstReport = false;
