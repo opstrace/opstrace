@@ -46,16 +46,17 @@ export async function getSQLDatabase(
 }
 
 const createSQLDatabase = async ({
-  instance
+  instanceName
 }: {
-  instance: sql_v1beta4.Schema$Database;
+  instanceName: string;
 }) => {
   const projectId = await getGcpProjectId();
   return sql.databases.insert({
     // Project ID of the project to which the newly created Cloud SQL instances should belong.
     project: projectId,
+    instance: instanceName,
     requestBody: {
-      instance: instance.name,
+      instance: instanceName,
       name: "opstrace",
       project: projectId
     }
@@ -72,22 +73,19 @@ async function destroySQLDatabase(name: string) {
 }
 
 export function* ensureSQLDatabaseExists({
-  instance
+  instanceName
 }: {
-  instance: sql_v1beta4.Schema$Database;
+  instanceName: string;
 }): Generator<any, sql_v1beta4.Schema$Database, any> {
-  if (!instance.name) {
-    throw Error("must provide name for CloudSQLDatabase");
-  }
   while (true) {
     const existingSQLDatabase: sql_v1beta4.Schema$Database = yield call(
       getSQLDatabase,
-      instance.name
+      instanceName
     );
 
     if (!existingSQLDatabase) {
       try {
-        yield call(createSQLDatabase, { instance });
+        yield call(createSQLDatabase, { instanceName });
       } catch (e) {
         if (!e.code || (e.code && e.code !== 409)) {
           throw e;
