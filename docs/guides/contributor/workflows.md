@@ -45,7 +45,6 @@ First, build the CLI as well as container images:
 ```bash
 make cli
 make build-and-push-controller-image
-make build-and-push-app-image
 ```
 
 Then create the cluster (choose provider and cluster name and config at will):
