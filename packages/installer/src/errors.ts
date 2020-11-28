@@ -15,6 +15,7 @@
  */
 
 export class ClusterCreateTimeoutError extends Error {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(...args: any[]) {
     super(...args);
     Error.captureStackTrace(this, ClusterCreateTimeoutError);

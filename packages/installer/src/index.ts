@@ -73,7 +73,7 @@ import { EnsureInfraExistsResponse } from "./types";
 // used at runtime that has little to do with "config": users provide svc acc
 // credentials and these implicitly define the gcp project ID.
 let gcpProjectID: string;
-export function setGcpProjectID(p: string) {
+export function setGcpProjectID(p: string): void {
   gcpProjectID = p;
 }
 export { gcpProjectID };
@@ -88,7 +88,7 @@ export interface ClusterCreateConfigInterface {
 }
 
 let clusterCreateConfig: ClusterCreateConfigInterface;
-export function setCreateConfig(c: ClusterCreateConfigInterface) {
+export function setCreateConfig(c: ClusterCreateConfigInterface): void {
   clusterCreateConfig = c;
 }
 
@@ -100,7 +100,7 @@ const CREATE_ATTEMPT_TIMEOUT_SECONDS = 60 * 40;
 
 function* createClusterCore() {
   const ccfg: NewRenderedClusterConfigType = getClusterConfig();
-
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const gcpCredFilePath: string = process.env[
     "GOOGLE_APPLICATION_CREDENTIALS"
   ]!;
@@ -188,9 +188,12 @@ function* createClusterCore() {
   let postgreSQLEndpoint = "";
 
   if (ccfg.cloud_provider === "gcp") {
+    if (!gcpAuthOptions) {
+      throw Error("could not location authentication credentials for gcp");
+    }
     const res: EnsureInfraExistsResponse = yield call(
       ensureGCPInfraExists,
-      gcpAuthOptions!
+      gcpAuthOptions
     );
     kubeconfigString = res.kubeconfigString;
     postgreSQLEndpoint = res.postgreSQLEndpoint;
@@ -279,12 +282,7 @@ function* createClusterCore() {
     );
   }
 
-  yield call(
-    waitUntilLokiCortexAreReachable,
-    ccfg.cluster_name,
-    ccfg.tenants,
-    ccfg.cloud_provider
-  );
+  yield call(waitUntilLokiCortexAreReachable, ccfg.cluster_name, ccfg.tenants);
 
   log.info(
     `cluster creation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
@@ -298,9 +296,8 @@ function* createClusterCore() {
  */
 export async function waitUntilLokiCortexAreReachable(
   opstraceClusterName: string,
-  tenantNames: string[],
-  cloudProvider: "gcp" | "aws"
-) {
+  tenantNames: string[]
+): Promise<void> {
   // key: unique url, value: corresponding tenant name
   const probeUrls: Dict<string> = {};
 
@@ -368,6 +365,7 @@ export async function waitUntilLokiCortexAreReachable(
       }
 
       if (resp.statusCode == 200) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let data: any;
         try {
           data = JSON.parse(resp.body);
@@ -443,8 +441,9 @@ function* rootTaskCreate() {
  * Entry point for cluster creation, to be called by CLI.
  */
 export async function createCluster(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   smOnError: (e: Error, detail: any) => void
-) {
+): Promise<void> {
   const sm = createSagaMiddleware({ onError: smOnError });
 
   createStore(rootReducer, applyMiddleware(sm));

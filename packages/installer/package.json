@@ -13,7 +13,7 @@
     "watch": "tsc -b -w",
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
-    "lint": "eslint . --max-warnings 30 --ext .ts"
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
     "got": "11.8.0",

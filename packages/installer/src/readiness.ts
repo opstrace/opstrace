@@ -26,7 +26,7 @@ import {
 } from "@opstrace/kubernetes";
 
 import { CONTROLLER_NAME } from "@opstrace/controller";
-
+//eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* waitForControllerDeployment() {
   while (true) {
     const state: State = yield select();
@@ -131,11 +131,11 @@ export function* waitForControllerDeployment() {
 
     log.info(
       "controller deployment: replicas: %s, of which are READY: %s",
-      cd.spec.status!.replicas,
-      cd.spec.status!.readyReplicas || 0
+      cd.spec.status?.replicas,
+      cd.spec.status?.readyReplicas || 0
     );
 
-    const rr = cd.spec.status!.readyReplicas;
+    const rr = cd.spec.status?.readyReplicas;
 
     if (rr !== undefined && rr >= 1) {
       log.info(
@@ -146,7 +146,7 @@ export function* waitForControllerDeployment() {
     yield delay(15000);
   }
 }
-
+//eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* installationProgressReporter() {
   while (true) {
     const state: State = yield select();

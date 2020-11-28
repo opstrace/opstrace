@@ -45,6 +45,7 @@ import { EnsureInfraExistsResponse } from "./types";
 
 export function* ensureGCPInfraExists(
   gcpAuthOptions: GCPAuthOptions
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Generator<any, EnsureInfraExistsResponse, any> {
   const ccfg: NewRenderedClusterConfigType = getClusterConfig();
 

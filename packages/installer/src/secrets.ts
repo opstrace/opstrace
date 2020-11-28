@@ -31,7 +31,7 @@ import { log } from "@opstrace/utils";
 export async function storeSystemTenantApiAuthTokenAsSecret(
   authToken: string,
   kubeConfig: KubeConfiguration
-) {
+): Promise<void> {
   const ns = new Namespace(
     {
       apiVersion: "v1",
