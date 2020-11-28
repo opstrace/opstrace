@@ -57,5 +57,7 @@ WORKDIR /build/packages/app
 RUN ls -ahltr
 
 EXPOSE 3001
+# Expose lightship port for http checks
+EXPOSE 9000
 # if possible, maybe add a quick check here that 'confirms' that all required dependencies
 # are there. Not sure how we can do that... in the meantime, we rely on e2e testing to catch any issues.

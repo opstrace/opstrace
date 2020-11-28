@@ -206,6 +206,7 @@ export function OpstraceApplicationResources(
             },
             spec: {
               serviceAccountName: "opstrace-application",
+              terminationGracePeriodSeconds: 80, // we give the app 60 seconds to drain existing connections
               containers: [
                 {
                   name: "opstrace-application",
@@ -257,7 +258,40 @@ export function OpstraceApplicationResources(
                       name: "http"
                     }
                   ],
-                  resources: {}
+                  resources: {},
+                  readinessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 9000 as any
+                    },
+                    failureThreshold: 1,
+                    initialDelaySeconds: 5,
+                    periodSeconds: 5,
+                    successThreshold: 1,
+                    timeoutSeconds: 5
+                  },
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/live",
+                      port: 9000 as any
+                    },
+                    failureThreshold: 3,
+                    initialDelaySeconds: 5,
+                    periodSeconds: 30,
+                    successThreshold: 1,
+                    timeoutSeconds: 5
+                  },
+                  startupProbe: {
+                    httpGet: {
+                      path: "/live",
+                      port: 9000 as any
+                    },
+                    failureThreshold: 3,
+                    initialDelaySeconds: 10,
+                    periodSeconds: 30,
+                    successThreshold: 1,
+                    timeoutSeconds: 5
+                  }
                 }
               ]
             }
