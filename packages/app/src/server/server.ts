@@ -54,11 +54,11 @@ const maxAge = isDevEnvironment ? 0 : oneYear;
 // https://github.com/gajus/lightship
 const lightship = createLightship({
   signals: ["SIGINT", "SIGTERM"],
-  shutdownHandlerTimeout: 90000,
+  shutdownHandlerTimeout: 60000,
   port: 9000
 });
 
-const shutdownDelay: number = isDevEnvironment ? 0 : 60000;
+const shutdownDelay: number = isDevEnvironment ? 0 : 30000;
 
 function createServer() {
   const app = express();
