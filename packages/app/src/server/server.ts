@@ -48,11 +48,15 @@ setLogger(
 );
 
 const oneYear = 1000 * 60 * 60 * 24 * 365;
-
+// cache everything for one year by default
 const maxAge = isDevEnvironment ? 0 : oneYear;
 
 // https://github.com/gajus/lightship
-const lightship = createLightship({ signals: ["SIGINT", "SIGTERM"] });
+const lightship = createLightship({
+  signals: ["SIGINT", "SIGTERM"],
+  shutdownHandlerTimeout: 90000,
+  port: 9000
+});
 
 const shutdownDelay: number = isDevEnvironment ? 0 : 60000;
 
@@ -103,8 +107,9 @@ lightship.registerShutdownHandler(async () => {
   // Allow sufficient amount of time to allow all of the existing
   // HTTP requests to finish before terminating the service.
   log.info(
-    `waiting ${shutdownDelay /
-      1000}s for connections to close before shutting down`
+    `waiting ${
+      shutdownDelay / 1000
+    }s for connections to close before shutting down`
   );
 
   await delay(shutdownDelay);
