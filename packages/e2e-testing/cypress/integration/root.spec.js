@@ -1,3 +1,18 @@
+/**
+ * Copyright 2020 Opstrace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 describe("Root route", () => {
   beforeEach(() => {
     cy.visit("/");
@@ -7,10 +22,14 @@ describe("Root route", () => {
     console.log(Cypress.env());
 
     cy.get("li[role='treeitem']").first().contains("@opstrace").click();
-    cy.get("li[role='treeitem']").first().should("have.attr", "aria-expanded", "true");
+    cy.get("li[role='treeitem']")
+      .first()
+      .should("have.attr", "aria-expanded", "true");
 
     cy.get("li[role='treeitem']").first().contains("@opstrace").click();
-    cy.get("li[role='treeitem']").first().should("have.attr", "aria-expanded", "false");
+    cy.get("li[role='treeitem']")
+      .first()
+      .should("have.attr", "aria-expanded", "false");
   });
 
   it("change url by clicking on sidebar items", () => {
@@ -31,7 +50,9 @@ describe("Root route", () => {
     cy.get("body").find(".Pane.vertical.Pane1").should("exist");
 
     cy.get("body").type("{shift}{command}p");
-    cy.get("input[aria-label='picker filter']").type("Toggle Sidebar visibility{enter}");
+    cy.get("input[aria-label='picker filter']").type(
+      "Toggle Sidebar visibility{enter}"
+    );
 
     cy.get("body").find(".Pane.vertical.Pane1").should("not.exist");
   });
@@ -43,7 +64,6 @@ describe("Root route with unknown module", () => {
   });
 
   it("shows module not exist message", () => {
-    cy.wait(500);
     cy.get("span").contains("Module does not exist");
     cy.get("button").contains("Home").click();
     cy.url().should("eq", `${Cypress.config().baseUrl}/`);

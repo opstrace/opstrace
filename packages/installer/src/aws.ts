@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { strict as assert } from "assert";
 
 import AWS from "aws-sdk";
@@ -85,6 +86,7 @@ function* ensureRDSExists({
   subnetGroupName: string;
   labels: TagList;
   securityGroupId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): Generator<any, AWS.RDS.DBCluster, any> {
   // Create the Aurora cluster
   const dbCluster: AWS.RDS.DBCluster = yield call(ensureRDSClusterExists, {
@@ -101,10 +103,11 @@ function* ensureRDSExists({
 
   return dbCluster;
 }
-
 export function* ensureAWSInfraExists(): Generator<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any,
   EnsureInfraExistsResponse,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
 > {
   const ccfg: NewRenderedClusterConfigType = getClusterConfig();
@@ -195,6 +198,10 @@ export function* ensureAWSInfraExists(): Generator<
     "setup"
   ]);
 
+  if (!address || !address.AllocationId) {
+    throw Error(`Did not receive an AllocationId from AWS.EC2.Address`);
+  }
+
   // NatGateway needs a public subnetId
   const publicSubnet = subnets.find(
     s =>
@@ -210,7 +217,7 @@ export function* ensureAWSInfraExists(): Generator<
     [new NatGatewayRes(ccfg.cluster_name), "setup"],
     {
       SubnetId: publicSubnet.SubnetId,
-      AllocationId: address.AllocationId!
+      AllocationId: address.AllocationId
     }
   );
 
@@ -802,7 +809,7 @@ export function* ensureAWSInfraExists(): Generator<
 export async function waitUntilRoute53EntriesAreAvailable(
   clusterName: string,
   tenantNames: string[]
-) {
+): Promise<void> {
   const clusterDNSName = `${clusterName}.opstrace.io.`;
 
   // system tenant is there by default, check corresponding endpoints, too

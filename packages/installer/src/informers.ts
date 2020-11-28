@@ -20,6 +20,7 @@ import * as k8s from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { log } from "@opstrace/utils";
 
+//eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* runInformers(kubeConfig: KubeConfig) {
   log.info("starting informers");
 
