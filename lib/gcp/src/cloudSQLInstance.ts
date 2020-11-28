@@ -58,7 +58,8 @@ const createSQLInstance = async ({
 };
 
 async function destroySQLInstance(instanceName: string) {
-  return sql.instances.delete({ instance: instanceName });
+  const projectId = await getGcpProjectId();
+  return sql.instances.delete({ project: projectId, instance: instanceName });
 }
 
 export function* ensureSQLInstanceExists({
@@ -135,6 +136,7 @@ export function* ensureSQLInstanceDoesNotExist(opstraceClusterName: string) {
         log.info("Got grpc error 5 (NOT_FOUND) upon delete. Done.");
         return;
       }
+      throw e;
     }
   }
 }
