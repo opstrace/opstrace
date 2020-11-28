@@ -41,8 +41,11 @@ import {
   NewRenderedClusterConfigType
 } from "@opstrace/config";
 import { gcpProjectID } from "./index";
+import { EnsureInfraExistsResponse } from "./types";
 
-export function* ensureGCPInfraExists(gcpAuthOptions: GCPAuthOptions) {
+export function* ensureGCPInfraExists(
+  gcpAuthOptions: GCPAuthOptions
+): Generator<any, EnsureInfraExistsResponse, any> {
   const ccfg: NewRenderedClusterConfigType = getClusterConfig();
 
   if (ccfg.gcp === undefined) {
@@ -109,7 +112,7 @@ export function* ensureGCPInfraExists(gcpAuthOptions: GCPAuthOptions) {
   // it's semantically the same. When that is confirmed I think we should
   // not pass this piece of information in twice, but only once.
   log.info(`Ensuring GKE exists`);
-  const res: [
+  const [gkecluster, cloudSQLInstance]: [
     gkeProtos.google.container.v1.ICluster,
     sql_v1beta4.Schema$DatabaseInstance
   ] = yield all([
@@ -121,6 +124,7 @@ export function* ensureGCPInfraExists(gcpAuthOptions: GCPAuthOptions) {
       cluster: gkeConf
     }),
     call(ensureCloudSQLExists, {
+      clusterName: ccfg.cluster_name,
       instance: cloudSQLConfig,
       // The network here is our VPC that we launch the cluster into
       network: `projects/${gcpProjectID}/global/networks/${ccfg.cluster_name}`,
@@ -133,12 +137,29 @@ export function* ensureGCPInfraExists(gcpAuthOptions: GCPAuthOptions) {
     })
   ]);
 
-  const gkecluster = res[0];
+  const privateAddress = cloudSQLInstance.ipAddresses?.find(
+    address => address.type === "PRIVATE"
+  );
+  if (!privateAddress || !privateAddress.ipAddress) {
+    throw Error("did not return a privateIp address for CloudSQL instance");
+  }
 
   const gkeKubeconfigString: string = generateKubeconfigStringForGkeCluster(
     gcpProjectID,
     gkecluster
   );
 
-  return gkeKubeconfigString;
+  return {
+    kubeconfigString: gkeKubeconfigString,
+    // We've hardcoded the password here for now (and in the @opstrace/config package) to keep the installer
+    // idempodent. We could generate this during install and then save the value in a secret, but it
+    // would certainly add more complexity to maintain an idempodent install and also introduce a critical
+    // failure zone between successful CloudSQL creation and writing the password secret to the cluster.
+    // If a failure occured in between those two steps, we would likely not be able to recover without
+    // additional steps to reset the password on the postgres instance.
+    // The Postgres endpoint is attached to it's own private subnet which is only accessible from within the cluster's VPC.
+    // Their is no public endpoint for the CloudSQL instance.
+    // The default user created when standing up a CloudSQL instance is "postgres".
+    postgreSQLEndpoint: `postgres://postgres:2020WasQuiteTheYear@${privateAddress.ipAddress}:5432/opstrace`
+  };
 }
