@@ -22,8 +22,6 @@ import graphqlClient from "state/graphqlClient";
 import env from "server/env";
 import { GeneralServerError, UnexpectedServerError } from "server/errors";
 
-const UI_DOMAIN_PROTOCOL =
-  process.env.NODE_ENV === "development" ? "http:" : "https:";
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against
 // the Auth0 JSON Web Key Set
@@ -94,15 +92,23 @@ function auth(): express.Router {
       res.redirect(
         `https://${env.AUTH0_DOMAIN}/v2/logout?client_id=${
           env.AUTH0_CLIENT_ID
-        }&returnTo=${UI_DOMAIN_PROTOCOL}//${encodeURIComponent(env.UI_DOMAIN)}`
+        }&returnTo=${encodeURIComponent(env.UI_DOMAIN)}`
       );
     });
   });
 
-  auth.get("/nginx-ingress/webhook", (req, res) => {});
+  auth.get("/nginx-ingress/webhook", (req, res) => {
+    if (req.session.email) {
+      res.setHeader("X-Auth-Request-User", req.session.email);
+      res.setHeader("X-Auth-Request-Email", req.session.email);
+      res.sendStatus(200);
+      return;
+    }
+    res.sendStatus(401);
+  });
 
   // add a catch all for misconfigured auth requests
-  auth.all("*", function (req, res, next) {
+  auth.all("*", function(req, res, next) {
     next(new GeneralServerError(404, "auth route not found"));
   });
 
