@@ -40,12 +40,11 @@ precacheAndRoute(self.__precacheManifest);
 
 // return app shell for all navigation requests
 // This assumes /app-shell has been precached.
-const handler = createHandlerBoundToURL("/app-shell", {
-  cacheName: "opstrace-app-install-time-v1",
+const handler = createHandlerBoundToURL("/app-shell");
+const navigationRoute = new NavigationRoute(handler, {
   // make sure we don't cache routes to our api
   denylist: [new RegExp("^/_/"), new RegExp("^/modules/.*/latest/")]
 });
-const navigationRoute = new NavigationRoute(handler);
 registerRoute(navigationRoute);
 
 /*eslint-enable */
