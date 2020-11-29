@@ -130,14 +130,16 @@ export function* ensureAddressDoesNotExist({
   addressName: string;
 }) {
   while (true) {
-    const address = yield call(getAddress, { name: addressName });
+    const address: compute_v1.Schema$Address = yield call(getAddress, {
+      name: addressName
+    });
 
     if (!address) {
       log.info("Global Address teardown: desired state reached");
       return;
     }
 
-    log.info(`Global Address is ${address.state}`);
+    log.info(`Global Address is ${address.status}`);
 
     try {
       yield call(deleteAddress, {
