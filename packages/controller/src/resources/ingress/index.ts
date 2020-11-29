@@ -22,7 +22,6 @@ import { CertManagerResources } from "./certManager";
 import { KubedResources } from "./kubed";
 import { ExternalDnsResources } from "./externalDns";
 import { NginxIngressResources } from "./nginxIngress";
-import { Oauth2Resources } from "./oauth2";
 
 export function IngressResources(
   state: State,
@@ -53,7 +52,6 @@ export function IngressResources(
   collection.add(KubedResources(state, kubeConfig, namespace));
   collection.add(ExternalDnsResources(state, kubeConfig, namespace));
   collection.add(NginxIngressResources(state, kubeConfig, namespace));
-  collection.add(Oauth2Resources(state, kubeConfig));
 
   const domain = getDomain(state);
 

@@ -155,17 +155,11 @@ function* createClusterCore() {
     logRetention: retentionConf.logs,
     metricRetention: retentionConf.metrics,
     dnsName: dnsConf.dnsName,
-    authSessionCookieSecret:
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15),
     terminate: false,
     controllerTerminated: false,
     tlsCertificateIssuer: ccfg.cert_issuer,
     uiSourceIpFirewallRules: firewallConf.ui,
     apiSourceIpFirewallRules: firewallConf.api,
-    oidcClientId:
-      "492745505745-sdef5ljea5pqjn3mg6499r66aifgl4le.apps.googleusercontent.com",
-    oidcClientSecret: "b6rPEc0tnv8tZyc0eN8xpz1h",
     data_api_authn_pubkey_pem: ccfg.data_api_authn_pubkey_pem,
     disable_data_api_authentication: ccfg.data_api_authentication_disabled
   };
