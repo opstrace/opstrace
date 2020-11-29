@@ -51,7 +51,7 @@ export default function setupWebsocketHandling(server: http.Server) {
         );
       });
     } else {
-      console.log("destroying");
+      log.info("denying socket upgrade request to unknown endpoint");
       socket.destroy();
     }
   });
