@@ -44,6 +44,10 @@ export const REGION_EKS_AMI_MAPPING: Record<string, string> = {
   "cn-northwest-1": "ami-0f18cdaf5fc2121bf"
 };
 
+export const KNOWN_AWS_REGIONS: string[] = Object.entries(
+  REGION_EKS_AMI_MAPPING
+).map(([region, _]) => region);
+
 export function getAWSConfig(ccfg: NewRenderedClusterConfigType) {
   // Using k3s instead of EKS will wipe a lot of these config options, which is
   // why I'm hardcoding the region, vpc, and subnets for now.

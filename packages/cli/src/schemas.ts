@@ -16,7 +16,7 @@
 
 import * as yup from "yup";
 
-import { CLUSTER_NAME_REGEX } from "@opstrace/config";
+import { CLUSTER_NAME_REGEX, KNOWN_AWS_REGIONS } from "@opstrace/config";
 
 import { BUILD_INFO } from "./buildinfo";
 
@@ -29,7 +29,7 @@ const CONTROLLER_IMAGE_DEFAULT = `opstrace/controller:${BUILD_INFO.VERSION_STRIN
 export const infraConfigSchemaAWS = yup
   .object({
     instance_type: yup.string().default("t3.2xlarge"),
-    region: yup.string().default("us-west-2"),
+    region: yup.string().oneOf(KNOWN_AWS_REGIONS).default("us-west-2"),
     zone_suffix: yup.string().default("a")
   })
   .noUnknown(true, err => {
