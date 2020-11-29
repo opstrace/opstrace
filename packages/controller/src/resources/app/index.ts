@@ -191,7 +191,7 @@ export function OpstraceApplicationResources(
         spec: {
           replicas: 1,
           strategy: {
-            type: "Recreate"
+            type: "RollingUpdate"
           },
           selector: {
             matchLabels: {
@@ -346,7 +346,7 @@ export function OpstraceApplicationResources(
         spec: {
           replicas: 1,
           strategy: {
-            type: "Recreate"
+            type: "RollingUpdate"
           },
           selector: {
             matchLabels: {
