@@ -25,17 +25,18 @@ const Login = (props: { state?: State }) => {
   } = useAuth0();
   const [loginError, setLoginError] = useState<GeneralServerError | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const { redirectUri } = useQueryParams<{ redirectUri?: string }>();
-
+  // This will look for a param like so: /login?rd=%2Fgrafana
+  // NOTE: rd must include the host, relative paths do not work.
+  const { rd } = useQueryParams<{ rd?: string }>();
   const auth0Login = useCallback(() => {
     loginWithRedirect({
       redirectUri: window.location.href,
       appState: {
         // this is the redirect uri to navigate to after we've successfully created a session
-        redirectUri
+        redirectUri: rd
       }
     });
-  }, [loginWithRedirect, redirectUri]);
+  }, [loginWithRedirect, rd]);
 
   // first get the accessToken from Auth0
   useEffect(() => {
@@ -75,8 +76,9 @@ const Login = (props: { state?: State }) => {
             ).toLowerCase()
           }
         });
+        
         if (props.state?.redirectUri) {
-          window.location.href = props.state.redirectUri;
+          window.location.href = props.state.redirectUri.startsWith("http") ? props.state.redirectUri : `https://${decodeURIComponent(props.state.redirectUri)}`;
         } else {
           window.location.pathname = "/";
         }

@@ -26,7 +26,11 @@ const session = expressSession({
   saveUninitialized: false,
   cookie: isDevEnvironment
     ? {}
-    : { secure: true, httpOnly: true, domain: `.${env.UI_DOMAIN}` } // make cookies secure and available on the UI_DOMAIN and *.UI_DOMAIN (for Grafana)
+    : {
+        secure: true,
+        httpOnly: true,
+        domain: `.${env.UI_DOMAIN.replace("https://", "")}`
+      } // make cookies secure and available on the UI_DOMAIN and *.UI_DOMAIN (for Grafana)
 });
 
 function sessionParser(

@@ -16,7 +16,7 @@
 
 import { KubeConfig } from "@kubernetes/client-node";
 import { ResourceCollection, Namespace, Ingress } from "@opstrace/kubernetes";
-import { getTenantDomain, getTenantNamespace } from "../../helpers";
+import { getTenantDomain, getTenantNamespace, getDomain } from "../../helpers";
 import { State } from "../../reducer";
 import { CertManagerResources } from "./certManager";
 import { KubedResources } from "./kubed";
@@ -55,6 +55,8 @@ export function IngressResources(
   collection.add(NginxIngressResources(state, kubeConfig, namespace));
   collection.add(Oauth2Resources(state, kubeConfig));
 
+  const domain = getDomain(state);
+
   state.tenants.list.tenants.forEach(tenant => {
     const tenantHost = getTenantDomain(tenant, state);
     const tenantNamespace = getTenantNamespace(tenant);
@@ -70,8 +72,10 @@ export function IngressResources(
             annotations: {
               "kubernetes.io/ingress.class": "ui",
               "external-dns.alpha.kubernetes.io/ttl": "30",
-              "nginx.ingress.kubernetes.io/auth-url": `https://${tenantHost}/oauth2/auth`,
-              "nginx.ingress.kubernetes.io/auth-signin": `https://${tenantHost}/oauth2/start?rd=$escaped_request_uri`,
+              "nginx.ingress.kubernetes.io/auth-url": `https://${domain}/_/auth/nginx-ingress/webhook`,
+              "nginx.ingress.kubernetes.io/auth-signin": `https://${domain}/login?rd=${encodeURIComponent(
+                "https://"
+              )}${encodeURIComponent(tenantHost)}$escaped_request_uri`,
               "nginx.ingress.kubernetes.io/auth-response-headers":
                 "X-Auth-Request-User, X-Auth-Request-Email"
             }
