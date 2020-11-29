@@ -34,12 +34,20 @@ export function getCloudSQLConfig(
     name: ccfg.cluster_name,
     project: gcpAuthOptions.credentials.project_id,
     region: ccfg.gcp.region,
+    // We've hardcoded the password here for now (and in the @opstrace/config package) to keep the installer
+    // idempodent. We could generate this during install and then save the value in a secret, but it
+    // would certainly add more complexity to maintain an idempodent install and also introduce a critical
+    // failure zone between successful CloudSQL creation and writing the password secret to the cluster.
+    // If a failure occured in between those two steps, we would likely not be able to recover without
+    // additional steps to reset the password on the postgres instance.
+    // The Postgres endpoint is attached to it's own private subnet which is only accessible from within the cluster's VPC.
+    // Their is no public endpoint for the CloudSQL instance.
     rootPassword: "2020WasQuiteTheYear",
     serviceAccountEmailAddress: gcpAuthOptions.credentials.client_email,
     settings: {
       userLabels,
       // https://cloud.google.com/sql/docs/postgres/create-instance#machine-types
-      tier: "db-custom-1-3840",
+      tier: "db-custom-2-3840",
       ipConfiguration: {
         // Don't assign a public IP
         ipv4Enabled: false,
