@@ -27,15 +27,18 @@ const sql = google.sql("v1beta4");
  * Get SQL Instance with a specific SQL Instance name if it exists.
  */
 export async function getSQLInstance(
-  instanceName: string
+  clusterName: string
 ): Promise<sql_v1beta4.Schema$DatabaseInstance | false> {
   try {
     const projectId = await getGcpProjectId();
-    const res = await sql.instances.get({
+    const res = await sql.instances.list({
       project: projectId,
-      instance: instanceName
+      filter: `settings.userLabels.opstrace_cluster_name:${clusterName}`
     });
-    return res.data ? res.data : false;
+    if (res.data && res.data.items?.length) {
+      return res.data.items[0];
+    }
+    return false;
   } catch (e) {
     if (e.code === 404) {
       return false;
@@ -44,11 +47,24 @@ export async function getSQLInstance(
   }
 }
 
+/**
+ * Get the CloudSQL instance NAME in RUNNABLE state associated with this Opstrace cluster, or false.
+ * @param opstraceClusterName
+ */
+export async function getRunnableSQLInstanceName(opstraceClusterName: string) {
+  const instance = await getSQLInstance(opstraceClusterName);
+  if (!instance || instance.state !== "RUNNABLE" || !instance.name) {
+    return false;
+  }
+  return instance.name ? instance.name : false;
+}
+
 const createSQLInstance = async ({
   instance
 }: {
   instance: sql_v1beta4.Schema$DatabaseInstance;
 }) => {
+  log.info("create SQLInstance");
   const projectId = await getGcpProjectId();
   return sql.instances.insert({
     // Project ID of the project to which the newly created Cloud SQL instances should belong.
@@ -63,52 +79,61 @@ async function destroySQLInstance(instanceName: string) {
 }
 
 export function* ensureSQLInstanceExists({
+  opstraceClusterName,
   instance
 }: {
+  opstraceClusterName: string;
   instance: sql_v1beta4.Schema$DatabaseInstance;
 }): Generator<any, sql_v1beta4.Schema$DatabaseInstance, any> {
-  if (!instance.name) {
-    throw Error("must provide name for CloudSQLInstance");
-  }
+  // Ensure instance has the correct label - this is the primary method for
+  // correlating an instance with an Opstrace cluster.
+  instance.settings!.userLabels!.opstrace_cluster_name = opstraceClusterName;
+  // Create a random name for the instance to avoid the following constraint:
+  // When you delete an instance, you cannot reuse the name of the deleted instance until one week from the deletion date.
+  // There is an 82 char limit for instance names - we are fine using ~13 chars for the unix time suffix
+  instance.name = `${opstraceClusterName}-${Date.now()}`;
+  instance.connectionName = instance.name;
+
   while (true) {
     const existingSQLInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
       getSQLInstance,
-      instance.name
+      opstraceClusterName
     );
 
-    if (!existingSQLInstance) {
-      try {
-        yield call(createSQLInstance, { instance });
-      } catch (e) {
-        if (!e.code || (e.code && e.code !== 409)) {
-          throw e;
-        }
-      }
-    }
     if (existingSQLInstance) {
       log.info(`SQLInstance is ${existingSQLInstance.state}`);
+
+      if (existingSQLInstance.state === "RUNNABLE") {
+        return existingSQLInstance;
+      }
+
+      if (existingSQLInstance.state === "FAILED") {
+        throw Error("Failed to create SQL Instance");
+      }
+
+      yield delay(10 * SECOND);
+      continue;
     }
 
-    if (existingSQLInstance && existingSQLInstance.state === "RUNNABLE") {
-      return existingSQLInstance;
+    try {
+      yield call(createSQLInstance, { instance });
+    } catch (e) {
+      // Don't bother filtering for errors here because GCP has some quirks.
+      // A 409 here doesn't necessarily mean that the instance has been created, therefore you're good to go.
+      // A 409 can also return this error message:
+      // "message": "The Cloud SQL instance already exists. When you delete an instance, you cannot reuse the name of the deleted instance until one week from the deletion date."
+      throw e;
     }
-
-    if (existingSQLInstance && existingSQLInstance.state === "FAILED") {
-      throw Error("Failed to create SQL Instance");
-    }
-
-    yield delay(10 * SECOND);
   }
 }
 
 export function* ensureSQLInstanceDoesNotExist(opstraceClusterName: string) {
   log.info("SQLInstance teardown: start");
 
-  const SQLInstanceName = opstraceClusterName;
   while (true) {
     const existingSQLInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
       getSQLInstance,
-      SQLInstanceName
+      opstraceClusterName
     );
 
     if (!existingSQLInstance) {
@@ -123,20 +148,15 @@ export function* ensureSQLInstanceDoesNotExist(opstraceClusterName: string) {
 
       continue;
     }
-
+    if (!existingSQLInstance.name) {
+      throw Error("Found existing SQLInstance but it doesn't have a name");
+    }
     try {
-      yield call(destroySQLInstance, SQLInstanceName);
+      yield call(destroySQLInstance, existingSQLInstance.name);
     } catch (e) {
-      if (e.code && e.code === 3) {
-        log.info("grpc error 3: %s, retry", e.details);
-        continue;
+      if (!e.code || (e.code && e.code !== 404)) {
+        throw e;
       }
-
-      if (e.code && e.code === 5) {
-        log.info("Got grpc error 5 (NOT_FOUND) upon delete. Done.");
-        return;
-      }
-      throw e;
     }
   }
 }

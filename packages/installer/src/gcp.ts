@@ -125,7 +125,7 @@ export function* ensureGCPInfraExists(
       cluster: gkeConf
     }),
     call(ensureCloudSQLExists, {
-      clusterName: ccfg.cluster_name,
+      opstraceClusterName: ccfg.cluster_name,
       instance: cloudSQLConfig,
       // The network here is our VPC that we launch the cluster into
       network: `projects/${gcpProjectID}/global/networks/${ccfg.cluster_name}`,

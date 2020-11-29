@@ -17,4 +17,6 @@
 export type EnsureInfraExistsResponse = {
   kubeconfigString: string;
   postgreSQLEndpoint: string;
+  // Only applicable to AWS
+  certManagerRoleArn?: string;
 };

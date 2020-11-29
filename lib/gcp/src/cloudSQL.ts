@@ -48,6 +48,7 @@ async function peerVpcs({
         service: "servicenetworking.googleapis.com"
       }
     });
+
     if (res.data.error) {
       log.error(
         "failed creating service peering for cloudSQL and cluster vpc: %",
@@ -63,18 +64,18 @@ async function peerVpcs({
 }
 
 export function* ensureCloudSQLExists({
-  clusterName,
   instance,
   addressName,
   network,
   region,
-  ipCidrRange
+  ipCidrRange,
+  opstraceClusterName
 }: {
-  clusterName: string;
   addressName: string;
   network: string;
   region: string;
   ipCidrRange: string;
+  opstraceClusterName: string;
   instance: sql_v1beta4.Schema$DatabaseInstance;
 }): Generator<any, sql_v1beta4.Schema$DatabaseInstance, any> {
   log.info(`Ensuring CloudSQL exists`);
@@ -90,6 +91,7 @@ export function* ensureCloudSQLExists({
   });
 
   google.options({ auth });
+
   log.info(`Ensure Address exists`);
   yield call(ensureAddressExists, {
     region,
@@ -97,24 +99,31 @@ export function* ensureCloudSQLExists({
     network,
     ipCidrRange
   });
+
+  log.info(`Peering cluster vpc with cloudSQL services vpc`);
+  yield call(peerVpcs, { network, addressName });
+
   log.info(`Ensure SQLInstance exists`);
   const existingInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
     ensureSQLInstanceExists,
-    { instance }
+    { instance, opstraceClusterName }
   );
+
+  if (!existingInstance.name) {
+    throw Error("SQLInstance did not return a name");
+  }
+
   log.info(`Ensure SQLDatabase exists`);
-  yield call(ensureSQLDatabaseExists, { instanceName: clusterName });
-  log.info(`Peering cluster vpc with cloudSQL services vpc`);
-  yield call(peerVpcs, { network, addressName });
+  yield call(ensureSQLDatabaseExists, { opstraceClusterName });
 
   return existingInstance;
 }
 
 export function* ensureCloudSQLDoesNotExist({
-  clusterName,
+  opstraceClusterName,
   addressName
 }: {
-  clusterName: string;
+  opstraceClusterName: string;
   addressName: string;
 }): Generator<any, any, any> {
   const auth = new google.auth.GoogleAuth({
@@ -129,9 +138,9 @@ export function* ensureCloudSQLDoesNotExist({
 
   google.options({ auth });
   log.info(`Ensure SQLDatabase deletion`);
-  yield call(ensureSQLDatabaseDoesNotExist, clusterName);
+  yield call(ensureSQLDatabaseDoesNotExist, opstraceClusterName);
   log.info(`Ensure SQLInstance deletion`);
-  yield call(ensureSQLInstanceDoesNotExist, clusterName);
+  yield call(ensureSQLInstanceDoesNotExist, opstraceClusterName);
   log.info(`Ensure Address deletion`);
   yield call(ensureAddressDoesNotExist, { addressName });
 }
