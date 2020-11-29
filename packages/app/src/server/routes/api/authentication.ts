@@ -22,6 +22,8 @@ import graphqlClient from "state/graphqlClient";
 import env from "server/env";
 import { GeneralServerError, UnexpectedServerError } from "server/errors";
 
+const UI_DOMAIN_PROTOCOL =
+  process.env.NODE_ENV === "development" ? "http:" : "https:";
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against
 // the Auth0 JSON Web Key Set
@@ -92,7 +94,7 @@ function auth(): express.Router {
       res.redirect(
         `https://${env.AUTH0_DOMAIN}/v2/logout?client_id=${
           env.AUTH0_CLIENT_ID
-        }&returnTo=${encodeURIComponent(env.UI_DOMAIN)}`
+        }&returnTo=${UI_DOMAIN_PROTOCOL}//${encodeURIComponent(env.UI_DOMAIN)}`
       );
     });
   });
