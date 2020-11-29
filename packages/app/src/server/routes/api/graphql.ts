@@ -15,7 +15,7 @@
  */
 import httpProxy from "http-proxy";
 import express from "express";
-
+import querystring from "querystring";
 import env from "server/env";
 import { log } from "@opstrace/utils/lib/log";
 
@@ -39,6 +39,35 @@ export const graphqlProxy = httpProxy.createProxyServer({
   ws: true
 });
 
+/**
+ * bodyParser middleware (which we use earlier in chain to parse POST body content), doesn't play
+ * well with the http-proxy, since the body is parsed and altered. It results in POSTs hanging until the connection times out.
+ *
+ * This is a workaround to restream the already parsed body, for the proxy target to consume.
+ */
+graphqlProxy.on("proxyReq", function onProxyReq(proxyReq, req, res) {
+  // @ts-ignore
+  if (!req.body || !Object.keys(req.body).length) {
+    return;
+  }
+
+  const contentType = proxyReq.getHeader("Content-Type");
+  const writeBody = (bodyData: string) => {
+    proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+    proxyReq.write(bodyData);
+  };
+
+  if (contentType === "application/json") {
+    // @ts-ignore
+    writeBody(JSON.stringify(req.body));
+  }
+
+  if (contentType === "application/x-www-form-urlencoded") {
+    // @ts-ignore
+    writeBody(querystring.stringify(req.body));
+  }
+});
+
 function graphql(): express.Router {
   const graphql = express.Router();
 
@@ -47,6 +76,7 @@ function graphql(): express.Router {
       res.sendStatus(401);
       return;
     }
+
     graphqlProxy.web(
       req,
       res,
