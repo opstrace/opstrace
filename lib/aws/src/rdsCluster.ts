@@ -176,6 +176,14 @@ export async function ensureRDSClusterExists({
     // Just a reminder that this cluster is not exposed to the internet.
     // The Opstrace securityGroupId is the only way in.
     MasterUsername: "opstrace",
+    // We've hardcoded the password here for now (and in the @opstrace/config package) to keep the installer
+    // idempodent. We could generate this during install and then save the value in a secret, but it
+    // would certainly add more complexity to maintain an idempodent install and also introduce a critical
+    // failure zone between successful RDS creation and writing the password secret to the cluster.
+    // If a failure occured in between those two steps, we would likely not be able to recover without
+    // additional steps to reset the password on the postgres instance.
+    // The Postgres endpoint is attached to it's own private subnet which is only accessible from within the cluster's VPC.
+    // Their is no public endpoint for the RDS instance.
     MasterUserPassword: "2020WasQuiteTheYear"
   };
 
