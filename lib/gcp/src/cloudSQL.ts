@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { call } from "redux-saga/effects";
+import { call, delay } from "redux-saga/effects";
 import { google, sql_v1beta4 } from "googleapis";
-import { log } from "@opstrace/utils";
+import { log, SECOND } from "@opstrace/utils";
 import {
   ensureSQLInstanceDoesNotExist,
   ensureSQLInstanceExists
@@ -102,6 +102,12 @@ export function* ensureCloudSQLExists({
 
   log.info(`Peering cluster vpc with cloudSQL services vpc`);
   yield call(peerVpcs, { network, addressName });
+  // If we move too quickly with creating the instance after a peering request,
+  // we'll get an error. Usually the second retry will succeed.
+  // To save us some errors in our logs, just wait a bit here.
+  // Would be nice to find a clean way to wait for the peering to be complete
+  // but I couldn't find anything to help me with that.
+  yield delay(10 * SECOND);
 
   log.info(`Ensure SQLInstance exists`);
   const existingInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
