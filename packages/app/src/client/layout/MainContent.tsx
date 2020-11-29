@@ -1,7 +1,5 @@
 import React from "react";
 
-import { Page } from "client/components/Page";
-// import { ActivityBar } from "client/components/ActivityBar";
 import { Box } from "client/components/Box";
 import { SplitPane } from "client/components/SplitPane";
 import { useCommandService } from "client/services/Command";
@@ -36,19 +34,16 @@ const Layout = (props: {
   );
 
   return (
-    <Page p={0} justifyContent="left" alignItems="normal">
-      {/* <ActivityBar activeTab={props.activeTab} /> */}
-      <Box position="relative" display="flex" flexGrow={1}>
-        {display.state.sidebarVisible ? (
-          <SplitPane split="vertical" size={300} minSize={100}>
-            {props.sidebar}
-            {props.children}
-          </SplitPane>
-        ) : (
-          props.children
-        )}
-      </Box>
-    </Page>
+    <Box position="relative" display="flex" flexGrow={1}>
+      {display.state.sidebarVisible ? (
+        <SplitPane split="vertical" size={300} minSize={100}>
+          {props.sidebar}
+          {props.children}
+        </SplitPane>
+      ) : (
+        props.children
+      )}
+    </Box>
   );
 };
 
