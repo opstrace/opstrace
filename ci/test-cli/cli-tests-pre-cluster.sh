@@ -31,6 +31,31 @@ test_version() {
     set +o xtrace
 }
 
+test_destroy() {
+
+    echo "test unknown AWS --region upon destroy"
+    set +e
+    haystack=$(./build/bin/opstrace destroy aws foobar --region us-west2 2>&1)
+    exitcode=$?
+    if [[ $exitcode == 1 ]]; then
+        echo "confirmed: exit code 1"
+    else
+        echo "unexpected: exit code $exitcode"
+        exit 1
+    fi
+    for regex in 'provided AWS region (us-west2) is not known' 'Choose one of' 'us-west-2';
+    do
+    if [[ $haystack =~ $regex ]]; then
+        echo "regex found in haystack: $regex"
+    else
+        echo "unexpected: regex not found in haystack: $regex"
+        exit 1
+    fi
+    done
+    set -e
+
+}
+
 test_help() {
     # Confirm that help text does _not_ contain "index.js".
     ! ./build/bin/opstrace --help | grep 'index\.js'
@@ -55,9 +80,9 @@ test_help() {
         exit 1
     fi
     done
-
     set -e
 }
 
 test_help
 test_version
+test_destroy
