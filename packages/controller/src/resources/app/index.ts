@@ -22,7 +22,8 @@ import {
   Namespace,
   Ingress,
   Service,
-  Secret
+  Secret,
+  withPodAntiAffinityRequired
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
@@ -207,6 +208,9 @@ export function OpstraceApplicationResources(
             spec: {
               serviceAccountName: "opstrace-application",
               terminationGracePeriodSeconds: 80, // we give the app 60 seconds to drain existing connections
+              affinity: withPodAntiAffinityRequired({
+                app: "opstrace-application"
+              }),
               containers: [
                 {
                   name: "opstrace-application",
@@ -231,8 +235,8 @@ export function OpstraceApplicationResources(
                       name: "AUTH0_DOMAIN",
                       value: "opstrace-dev.us.auth0.com"
                     },
-                    { name: "DOMAIN", value: domain },
-                    { name: "UI_DOMAIN", value: domain },
+                    { name: "DOMAIN", value: `https://${domain}` },
+                    { name: "UI_DOMAIN", value: `https://${domain}` },
                     {
                       name: "COOKIE_SECRET",
                       valueFrom: {
@@ -360,6 +364,9 @@ export function OpstraceApplicationResources(
               }
             },
             spec: {
+              affinity: withPodAntiAffinityRequired({
+                app: "graphql"
+              }),
               containers: [
                 {
                   name: "graphql",
