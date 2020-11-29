@@ -33,6 +33,9 @@ test_version() {
 
 test_destroy() {
 
+    # For this test we have to pass the aws cred discovery stage
+    export AWS_ACCESS_KEY_ID="foo"
+    export AWS_SECRET_ACCESS_KEY="bar"
     echo "test unknown AWS --region upon destroy"
     set +e
     haystack=$(./build/bin/opstrace destroy aws foobar --region us-west2 2>&1)
@@ -55,7 +58,8 @@ test_destroy() {
     fi
     done
     set -e
-
+    unset AWS_ACCESS_KEY_ID
+    unset AWS_SECRET_ACCESS_KEY
 }
 
 test_help() {
