@@ -43,7 +43,9 @@ test_destroy() {
         echo "unexpected: exit code $exitcode"
         exit 1
     fi
-    for regex in 'provided AWS region (us-west2) is not known' 'Choose one of' 'us-west-2';
+
+    echo "haystack: ${haystack}"
+    for regex in 'provided AWS region \(us-west2\) is not known' 'Choose one of' 'us-west-2';
     do
     if [[ $haystack =~ $regex ]]; then
         echo "regex found in haystack: $regex"
