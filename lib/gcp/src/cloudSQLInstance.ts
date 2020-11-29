@@ -114,16 +114,11 @@ export function* ensureSQLInstanceExists({
       yield delay(10 * SECOND);
       continue;
     }
-
-    try {
-      yield call(createSQLInstance, { instance });
-    } catch (e) {
-      // Don't bother filtering for errors here because GCP has some quirks.
-      // A 409 here doesn't necessarily mean that the instance has been created, therefore you're good to go.
-      // A 409 can also return this error message:
-      // "message": "The Cloud SQL instance already exists. When you delete an instance, you cannot reuse the name of the deleted instance until one week from the deletion date."
-      throw e;
-    }
+    // Don't bother catching errors here because GCP has some quirks.
+    // A 409 here doesn't necessarily mean that the instance has been created, therefore you're good to go.
+    // A 409 can also return this error message:
+    // "message": "The Cloud SQL instance already exists. When you delete an instance, you cannot reuse the name of the deleted instance until one week from the deletion date."
+    yield call(createSQLInstance, { instance });
   }
 }
 
