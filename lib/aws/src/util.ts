@@ -81,19 +81,21 @@ AWS.config.update({
           retryCount
         );
       } else {
-        // Note(JP): it seems like 404-style "cannot be found" errors trigger
-        // this code path, but the request is then (rightfully) not retried.
-        // Looks like a bug in aws-sdk-js
-        log.debug(
-          "aws-sdk-js request failed (attempt %s): %s",
+        // An example `err.message` for the frequent real-world scenario of a
+        // TCP connect() timeout is "Socket timed out without establishing a
+        // connection". Info-log that so that the reason for delays is not
+        // hidden from users.
+        log.info(
+          "aws-sdk-js request failed (attempt %s): %s: %s",
           retryCount,
+          err.name,
           err.message
         );
       }
       if (retryCount < 2) {
         return 1000;
       }
-      return 5000;
+      return 3000;
     }
   }
 });
