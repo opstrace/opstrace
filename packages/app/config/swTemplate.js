@@ -43,7 +43,7 @@ precacheAndRoute(self.__precacheManifest);
 const handler = createHandlerBoundToURL("/app-shell", {
   cacheName: "opstrace-app-install-time-v1",
   // make sure we don't cache routes to our api
-  blacklist: [new RegExp("/_/"), new RegExp("/modules/.*/latest/")]
+  denylist: [new RegExp("^/_/"), new RegExp("^/modules/.*/latest/")]
 });
 const navigationRoute = new NavigationRoute(handler);
 registerRoute(navigationRoute);
