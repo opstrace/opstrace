@@ -43,7 +43,7 @@ export function* destroyGCPInfra() {
 
   log.info("Ensure CloudSQL deletion");
   yield call(ensureCloudSQLDoesNotExist, {
-    clusterName: destroyConfig.clusterName,
+    opstraceClusterName: destroyConfig.clusterName,
     addressName: `google-managed-services-${destroyConfig.clusterName}`
   });
 

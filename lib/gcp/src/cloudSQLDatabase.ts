@@ -20,7 +20,7 @@ import { google, sql_v1beta4 } from "googleapis";
 import { getGcpProjectId } from "./cluster";
 
 import { SECOND, log } from "@opstrace/utils";
-import { getSQLInstance } from "./cloudSQLInstance";
+import { getRunnableSQLInstanceName } from "./cloudSQLInstance";
 
 const sql = google.sql("v1beta4");
 
@@ -28,17 +28,18 @@ const sql = google.sql("v1beta4");
  * Get SQL Database with a specific SQL Database name if exists.
  */
 export async function getSQLDatabase(
-  instanceName: string
+  opstraceClusterName: string
 ): Promise<sql_v1beta4.Schema$Database | false> {
   try {
     // First check if the instance is available and running, because we'll get a 400 status
-    // if we try to read a database from an instance that is not RUNNING, and we can't have
+    // if we try to read a database from an instance that is not RUNNABLE, and we can't have
     // a database if our instance isn't running.
-    const instance = await getSQLInstance(instanceName);
-    if (!instance || instance.state !== "RUNNING") {
+    const instanceName = await getRunnableSQLInstanceName(opstraceClusterName);
+    if (!instanceName) {
       return false;
     }
     const projectId = await getGcpProjectId();
+
     const res = await sql.databases.get({
       project: projectId,
       instance: instanceName,
@@ -54,11 +55,16 @@ export async function getSQLDatabase(
 }
 
 const createSQLDatabase = async ({
-  instanceName
+  opstraceClusterName
 }: {
-  instanceName: string;
+  opstraceClusterName: string;
 }) => {
+  log.info("create SQLDatabase");
   const projectId = await getGcpProjectId();
+  const instanceName = await getRunnableSQLInstanceName(opstraceClusterName);
+  if (!instanceName) {
+    return false;
+  }
   return sql.databases.insert({
     // Project ID of the project to which the newly created Cloud SQL instances should belong.
     project: projectId,
@@ -73,6 +79,7 @@ const createSQLDatabase = async ({
 
 async function destroySQLDatabase(name: string) {
   const projectId = await getGcpProjectId();
+
   return sql.databases.delete({
     instance: name,
     database: "opstrace",
@@ -81,21 +88,43 @@ async function destroySQLDatabase(name: string) {
 }
 
 export function* ensureSQLDatabaseExists({
-  instanceName
+  opstraceClusterName
 }: {
-  instanceName: string;
+  opstraceClusterName: string;
 }): Generator<any, sql_v1beta4.Schema$Database, any> {
   while (true) {
     const existingSQLDatabase: sql_v1beta4.Schema$Database = yield call(
       getSQLDatabase,
-      instanceName
+      opstraceClusterName
     );
 
     if (!existingSQLDatabase) {
       try {
-        yield call(createSQLDatabase, { instanceName });
+        yield call(createSQLDatabase, { opstraceClusterName });
       } catch (e) {
-        if (!e.code || (e.code && e.code !== 409)) {
+        /**
+         Google api returns a 400 (not the expected 409) if the database already exists...
+         
+         "data": {
+          "error": {
+            "code": 400,
+            "message": "Invalid request: failed to create database opstrace. Detail: pq: database \"opstrace\" already exists\n.",
+            "errors": [
+              {
+                "message": "Invalid request: failed to create database opstrace. Detail: pq: database \"opstrace\" already exists\n.",
+                "domain": "global",
+                "reason": "invalid"
+              }
+            ]
+          }
+        },
+         */
+        if (
+          !e.code ||
+          (e.code &&
+            e.code !== 400 &&
+            /already exists/.test(e.response?.data?.error?.message))
+        ) {
           throw e;
         }
       }
@@ -112,11 +141,10 @@ export function* ensureSQLDatabaseExists({
 export function* ensureSQLDatabaseDoesNotExist(opstraceClusterName: string) {
   log.info("SQLDatabase teardown: start");
 
-  const SQLDatabaseName = opstraceClusterName;
   while (true) {
     const existingSQLDatabase: sql_v1beta4.Schema$Database = yield call(
       getSQLDatabase,
-      SQLDatabaseName
+      opstraceClusterName
     );
 
     if (!existingSQLDatabase) {
@@ -124,17 +152,15 @@ export function* ensureSQLDatabaseDoesNotExist(opstraceClusterName: string) {
       return;
     }
 
-    try {
-      yield call(destroySQLDatabase, SQLDatabaseName);
-    } catch (e) {
-      if (e.code && e.code === 3) {
-        log.info("grpc error 3: %s, retry", e.details);
-        continue;
-      }
+    if (!existingSQLDatabase.instance) {
+      throw Error("found SQLDatabase with no instance field");
+    }
 
-      if (e.code && e.code === 5) {
-        log.info("Got grpc error 5 (NOT_FOUND) upon delete. Done.");
-        return;
+    try {
+      yield call(destroySQLDatabase, existingSQLDatabase.instance);
+    } catch (e) {
+      if (!e.code || (e.code && e.code !== 404)) {
+        throw e;
       }
     }
 
