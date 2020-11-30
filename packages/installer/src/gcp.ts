@@ -27,6 +27,7 @@ import {
   ensureCloudSQLExists,
   sql_v1beta4,
   ensureServiceAccountExists,
+  setCertManagerServiceAccount
 } from "@opstrace/gcp";
 import { ensureDNSExists } from "@opstrace/dns";
 import {
@@ -158,6 +159,8 @@ export function* ensureGCPInfraExists(
     projectId: gcpProjectID
   });
 
+  setCertManagerServiceAccount(certManagerSA);
+
   return {
     kubeconfigString: gkeKubeconfigString,
     // We've hardcoded the password here for now (and in the @opstrace/config package) to keep the installer
@@ -171,5 +174,4 @@ export function* ensureGCPInfraExists(
     // The default user created when standing up a CloudSQL instance is "postgres".
     postgreSQLEndpoint: `postgres://postgres:2020WasQuiteTheYear@${privateAddress.ipAddress}:5432/opstrace`
   };
-
 }

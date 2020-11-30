@@ -67,3 +67,16 @@ export const getValidatedGCPAuthOptionsFromFile = (
   };
   return gcpAuthOptions;
 };
+
+let certManagerSA: string | undefined;
+
+export function setCertManagerServiceAccount(sa: string) {
+  certManagerSA = sa;
+}
+
+export function getCertManagerServiceAccount() {
+  if (certManagerSA === undefined) {
+    throw new Error("call setCertManagerServiceAccount() first");
+  }
+  return certManagerSA;
+}
