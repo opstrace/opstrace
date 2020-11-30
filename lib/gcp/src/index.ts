@@ -16,6 +16,7 @@
 
 export * from "./bucket";
 export * from "./cluster";
+export * from "./iam";
 export * from "./NATGateway";
 export * from "./network";
 export * from "./subnetworks";
