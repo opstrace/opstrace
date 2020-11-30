@@ -1,0 +1,136 @@
+# red
+
+- name: "type: bug"
+  color: "d73a4a"
+  aliases: []
+  description: "user-facing problem (describe the problem in the title!)"
+
+- name: "type: ci-instability"
+  color: "ee0701"
+  aliases: []
+  description: "may or may not be a user-facing problem, too"
+
+- name: "priority: 0"
+  color: "ee0701"
+  aliases: []
+  description: "a problem or task with high urgency level"
+
+# greenish pastel
+
+- name: "type: bump"
+  color: "bfe5bf"
+  aliases: []
+  description: "a task tracking a component or package bump (often just for maintenance)"
+
+- name: "type: devprod"
+  color: "bfe5bf"
+  aliases: []
+  description: "a problem or task related to developer productivity (build time, etc)"
+
+- name: "type: code cleanup"
+  color: "bfe5bf"
+  aliases: []
+  description: "for tasks like: improve sanity, improve naming, reduce debt (not user-facing)"
+
+- name: "type: interface cleanup"
+  color: "bfe5bf"
+  aliases: []
+  description: "related to interface consolidation (HTTP status codes, name length constraints, URLs, ...) "
+
+- name: "type: security"
+  color: "bfe5bf"
+  aliases: []
+  description: "a problem or task related to security"
+
+- name: "type: task"
+  color: "bfe5bf"
+  aliases: []
+  description: "a well-defined generic task, probably a small feature or part of a feature"
+
+- name: "type: ux"
+  color: "bfe5bf"
+  aliases: []
+  description: "an issue or task related to user experience (big or small)"
+
+- name: "type: feature"
+  color: "bfe5bf"
+  aliases: []
+  description: "a user-facing feature"
+
+# Let's try to use this `type: feature` carefully. These are often proposals,
+# for starters. And even if they are not just proposals but do reflect
+# high-level decisions, "feature tickets" are often not well-defined tasks yet.
+
+# light violet
+
+- name: "area: ui/app stack"
+  color: "d4c5f9"
+  aliases: ["area: ui"]
+  description: ""
+- name: "area: cli"
+  color: "d4c5f9"
+  aliases: []
+  description: ""
+- name: "area: test-remote"
+  color: "d4c5f9"
+  aliases: []
+  description: ""
+- name: "area: installer"
+  color: "d4c5f9"
+  aliases: []
+  description: ""
+- name: "area: uninstaller"
+  color: "d4c5f9"
+  aliases: []
+  description: ""
+- name: "area: controller"
+  color: "d4c5f9"
+  aliases: []
+  description: ""
+- name: "area: dns-service"
+  color: "d4c5f9"
+  aliases: []
+  description: "task/issue related to our DNS service, but also DNS service client in CLI"
+- name: "area: ci"
+  color: "d4c5f9"
+  aliases: []
+  description: ""
+- name: "area: docs"
+  color: "d4c5f9"
+  aliases: []
+  description: ""
+
+# light yellow
+
+- name: "thinktank: proposal"
+  color: "fef2c0"
+  aliases: []
+  description: "a proposal, up for discussion"
+- name: "thinktank: feedback"
+  color: "fef2c0"
+  aliases: []
+  description: "external feedback, up for discussion"
+- name: "thinktank: question"
+  color: "fef2c0"
+  aliases: []
+  description: "a specific question (from inside or outside)"
+
+# grey for state dddddd
+# Will need to see how/if we manage state in this repo (with codetree?)
+
+- name: "state: backlog"
+  color: "dddddd"
+  aliases: []
+  description: "state (codetree)"
+- name: "state: wontdo"
+  color: "dddddd"
+  aliases: []
+  description: "state (codetree)"
+- name: "state: invalid"
+  color: "dddddd"
+  aliases: []
+  description: "state (codetree)"
+- name: "state: in-progress"
+  color: "dddddd"
+  aliases: []
+  description: "state (codetree)"
