@@ -14,35 +14,45 @@
  * limitations under the License.
  */
 import { useEffect } from "react";
+import { createSelector } from "reselect";
 import { useDispatch, useSelector, State } from "state/provider";
-import { subscribe, unsubscribe } from "../actions";
+import { subscribeToUserList, unsubscribeFromUserList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-export const getCurrentUser = (state: State) => state.users.currentUser;
-export const getCurrentUserLoaded = (state: State) =>
-  state.users.currentUserLoaded;
+export const getCurrentUserId = (state: State) => state.users.currentUserId;
+
+export const getUsers = (state: State) => state.users.users;
+
+export const getCurrentUser = createSelector(
+  getUsers,
+  getCurrentUserId,
+  (users, currentUserId) => users.find(u => u.opaque_id === currentUserId)
+);
+
+export const getCurrentUserIdLoaded = (state: State) =>
+  state.users.currentUserIdLoaded;
 
 export function useCurrentUserLoaded() {
-  return useSelector(getCurrentUserLoaded);
+  return useSelector(getCurrentUserIdLoaded);
 }
 
 /**
  * Subscribes to users and will update on
- * any changes. Automatically unsubscribes
+ * any changes. Automatically unsubscribeFromUserLists
  * on unmount.
  */
 export default function useCurrentUser() {
-  const user = useSelector(getCurrentUser);
+  const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const subId = getSubscriptionID();
-    dispatch(subscribe(subId));
+    dispatch(subscribeToUserList(subId));
 
     return () => {
-      dispatch(unsubscribe(subId));
+      dispatch(unsubscribeFromUserList(subId));
     };
-  }, [dispatch, user?.email]);
+  }, [dispatch, currentUser?.email]);
 
-  return user;
+  return currentUser;
 }

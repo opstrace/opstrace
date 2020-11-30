@@ -21,5 +21,6 @@ declare module "express-session" {
     email: string;
     username: string;
     avatar: string;
+    opaqueUserId: string;
   }
 }

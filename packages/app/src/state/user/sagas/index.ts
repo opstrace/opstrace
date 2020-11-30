@@ -18,12 +18,10 @@ import * as actions from "../actions";
 import graphqlClient from "state/graphqlClient";
 import { State } from "state/reducer";
 
-import currentUserSubscriptionManager from "./currentUserSubscription";
 import userListSubscriptionManager from "./userListSubscription";
 
 export default function* userTaskManager() {
   const sagas = [
-    currentUserSubscriptionManager,
     userListSubscriptionManager,
     persistDarkModePreference,
     addUser,
@@ -57,6 +55,8 @@ function* addUser() {
       yield graphqlClient.CreateUser({
         email: action.payload,
         avatar: "",
+        // set the email as the username for now, it'll be overwritten
+        // when the user logs in for the first time
         username: action.payload
       });
     } catch (err) {
@@ -86,7 +86,7 @@ function* persistDarkModePreference() {
       actions.setDarkMode
     );
     const state: State = yield select();
-    const email = state.users.currentUser?.email;
+    const email = state.users.currentUserId;
     if (!email) {
       return;
     }

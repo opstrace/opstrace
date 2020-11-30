@@ -55,22 +55,22 @@ const UserList = (props: UserListProps) => {
 
 const ClusterSidebar = () => {
   const [selectedUserIndex, setSelectedUserIndex] = useState<number>(-1);
-  const params = useParams<{ email?: string; tenant?: string }>();
+  const params = useParams<{ id?: string; tenant?: string }>();
   const { activatePickerWithText } = usePickerService();
   const users = useUserList();
   const history = useHistory();
 
   useEffect(() => {
-    const idx = users.findIndex(u => u.email === params.email);
+    const idx = users.findIndex(u => u.opaque_id === params.id);
     if (idx > -1) {
       setSelectedUserIndex(idx);
     }
     // handle case where the email is invalid
-    if (params.email && idx < 0 && users.length) {
+    if (params.id && idx < 0 && users.length) {
       // navigate to first user in the list by default
-      history.push(`/cluster/users/${users[0].email}`);
+      history.push(`/cluster/users/${users[0].opaque_id}`);
     }
-  }, [users, params.email, history]);
+  }, [users, params.id, history]);
 
   const addUser = useCallback(() => {
     activatePickerWithText("add user: ");
@@ -78,7 +78,7 @@ const ClusterSidebar = () => {
 
   const onUserSelect = useCallback(
     (selected: User) => {
-      history.push(`/cluster/users/${selected.email}`);
+      history.push(`/cluster/users/${selected.opaque_id}`);
     },
     [history]
   );

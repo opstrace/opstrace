@@ -4,17 +4,16 @@ mutation UpdateUser(
   $avatar: String!
   $time: timestamptz!
 ) {
-  update_user(
+  update_user_by_pk(
     _set: {
       username: $username
       email: $email
       avatar: $avatar
       session_last_updated: $time
     }
-    where: { email: { _eq: $email } }
+    pk_columns: { email: $email }
   ) {
-    returning {
-      email
-    }
+    email
+    opaque_id
   }
 }

@@ -66,7 +66,8 @@ function auth(): express.Router {
       } else if (!existingUser) {
         return next(new GeneralServerError(401, "Unauthorized"));
       }
-      await graphqlClient.UpdateUser({
+
+      const userResp = await graphqlClient.UpdateUser({
         email,
         username,
         avatar,
@@ -76,13 +77,25 @@ function auth(): express.Router {
       req.session.email = email;
       req.session.username = username;
       req.session.avatar = avatar;
+      req.session.opaqueUserId = userResp.data?.update_user_by_pk?.opaque_id;
+
       log.info("updating session with: %s", req.body);
-      // update user in db
     } catch (err) {
       return next(new UnexpectedServerError(err));
     }
 
     res.sendStatus(200);
+  });
+
+  // Allow clients to request data about the current user
+  auth.get("/session", async (req, res) => {
+    if (req.session.email) {
+      res.status(200).json({
+        uid: req.session.opaqueUserId
+      });
+      return;
+    }
+    res.sendStatus(401);
   });
 
   auth.get("/logout", (req, res) => {

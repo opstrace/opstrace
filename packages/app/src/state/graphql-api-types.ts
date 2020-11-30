@@ -1692,6 +1692,7 @@ export type User = {
   avatar?: Maybe<Scalars["String"]>;
   created_at: Scalars["timestamptz"];
   email: Scalars["String"];
+  opaque_id: Scalars["uuid"];
   /** An object relationship */
   preference?: Maybe<User_Preference>;
   role: Scalars["String"];
@@ -1739,6 +1740,7 @@ export type User_Bool_Exp = {
   avatar?: Maybe<String_Comparison_Exp>;
   created_at?: Maybe<Timestamptz_Comparison_Exp>;
   email?: Maybe<String_Comparison_Exp>;
+  opaque_id?: Maybe<Uuid_Comparison_Exp>;
   preference?: Maybe<User_Preference_Bool_Exp>;
   role?: Maybe<String_Comparison_Exp>;
   session_last_updated?: Maybe<Timestamptz_Comparison_Exp>;
@@ -1756,6 +1758,7 @@ export type User_Insert_Input = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
+  opaque_id?: Maybe<Scalars["uuid"]>;
   preference?: Maybe<User_Preference_Obj_Rel_Insert_Input>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
@@ -1767,6 +1770,7 @@ export type User_Max_Fields = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
+  opaque_id?: Maybe<Scalars["uuid"]>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
@@ -1777,6 +1781,7 @@ export type User_Max_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
+  opaque_id?: Maybe<Order_By>;
   role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
   username?: Maybe<Order_By>;
@@ -1787,6 +1792,7 @@ export type User_Min_Fields = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
+  opaque_id?: Maybe<Scalars["uuid"]>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
@@ -1797,6 +1803,7 @@ export type User_Min_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
+  opaque_id?: Maybe<Order_By>;
   role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
   username?: Maybe<Order_By>;
@@ -1828,6 +1835,7 @@ export type User_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
+  opaque_id?: Maybe<Order_By>;
   preference?: Maybe<User_Preference_Order_By>;
   role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
@@ -1986,6 +1994,8 @@ export enum User_Select_Column {
   /** column name */
   Email = "email",
   /** column name */
+  OpaqueId = "opaque_id",
+  /** column name */
   Role = "role",
   /** column name */
   SessionLastUpdated = "session_last_updated",
@@ -1998,6 +2008,7 @@ export type User_Set_Input = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
+  opaque_id?: Maybe<Scalars["uuid"]>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
@@ -2011,6 +2022,8 @@ export enum User_Update_Column {
   CreatedAt = "created_at",
   /** column name */
   Email = "email",
+  /** column name */
+  OpaqueId = "opaque_id",
   /** column name */
   Role = "role",
   /** column name */
@@ -2138,18 +2151,6 @@ export type SetDarkModeMutation = {
   update_user_preference_by_pk?: Maybe<Pick<User_Preference, "dark_mode">>;
 };
 
-export type SubscribeToCurrentUserSubscriptionVariables = Exact<{
-  [key: string]: never;
-}>;
-
-export type SubscribeToCurrentUserSubscription = {
-  user: Array<
-    Pick<User, "email" | "avatar" | "username"> & {
-      preference?: Maybe<Pick<User_Preference, "dark_mode">>;
-    }
-  >;
-};
-
 export type SubscribeToUserListSubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
@@ -2164,7 +2165,8 @@ export type SubscribeToUserListSubscription = {
       | "username"
       | "session_last_updated"
       | "created_at"
-    >
+      | "opaque_id"
+    > & { preference?: Maybe<Pick<User_Preference, "dark_mode">> }
   >;
 };
 
@@ -2176,7 +2178,7 @@ export type UpdateUserMutationVariables = Exact<{
 }>;
 
 export type UpdateUserMutation = {
-  update_user?: Maybe<{ returning: Array<Pick<User, "email">> }>;
+  update_user_by_pk?: Maybe<Pick<User, "email" | "opaque_id">>;
 };
 
 export const CreateBranchDocument = gql`
@@ -2288,18 +2290,6 @@ export const SetDarkModeDocument = gql`
     }
   }
 `;
-export const SubscribeToCurrentUserDocument = gql`
-  subscription SubscribeToCurrentUser {
-    user {
-      email
-      avatar
-      username
-      preference {
-        dark_mode
-      }
-    }
-  }
-`;
 export const SubscribeToUserListDocument = gql`
   subscription SubscribeToUserList {
     user {
@@ -2309,6 +2299,10 @@ export const SubscribeToUserListDocument = gql`
       username
       session_last_updated
       created_at
+      opaque_id
+      preference {
+        dark_mode
+      }
     }
   }
 `;
@@ -2319,18 +2313,17 @@ export const UpdateUserDocument = gql`
     $avatar: String!
     $time: timestamptz!
   ) {
-    update_user(
+    update_user_by_pk(
       _set: {
         username: $username
         email: $email
         avatar: $avatar
         session_last_updated: $time
       }
-      where: { email: { _eq: $email } }
+      pk_columns: { email: $email }
     ) {
-      returning {
-        email
-      }
+      email
+      opaque_id
     }
   }
 `;
@@ -2496,22 +2489,6 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<SetDarkModeMutation>(
           print(SetDarkModeDocument),
-          variables
-        )
-      );
-    },
-    SubscribeToCurrentUser(
-      variables?: SubscribeToCurrentUserSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToCurrentUserSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToCurrentUserSubscription>(
-          print(SubscribeToCurrentUserDocument),
           variables
         )
       );

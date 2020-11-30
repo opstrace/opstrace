@@ -74,8 +74,8 @@ const AuthenticatedRoutes = () => {
         {EARLY_PREVIEW && HistoryRoutes}
         <Route exact key="/cluster" path="/cluster" component={ClusterView} />
         <Route
-          key="/cluster/users/:email"
-          path="/cluster/users/:email"
+          key="/cluster/users/:id"
+          path="/cluster/users/:id"
           component={ClusterView}
         />
         <Route
