@@ -43,7 +43,7 @@ Please join us and make some contributions, however big or small.
 
 * Start by reading the [Contributing guide](./CONTRIBUTING.md) to become familiar with the process.
 * Then review our [Development guide](./docs/guides/contributor/setting-up-your-dev-env.md) to learn how to setup your environment and build the code.
-* If you'd like a place to start and get your feet wet, explore our [`gettings started` issues](https://github.com/opstrace/opstrace/labels/getting-started), or reach out in [Discussions](https://go.opstrace.com/community).
+* If you'd like a place to start and get your feet wet, explore our [`getting started` issues](https://github.com/opstrace/opstrace/labels/getting-started), or reach out in [Discussions](https://go.opstrace.com/community).
 
 There is of course a lot to do.
 Take a look at our [high-level roadmap](./docs/references/roadmap.md) to see where we're heading, and feel free to get in touch with us regarding questions and suggestions.
