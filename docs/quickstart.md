@@ -15,7 +15,7 @@ At the end you will have a _complete, secure, scalable, multi-tenant, self-heali
 
 <!-- we want to highlight our features, this is the list to start iterating with; wordsmithing needed ^^^ -->
 
-For this quick start, running the Opstrace cluster for an hour should cost about \$1.00.
+For this quick start, running the Opstrace cluster for an hour should cost about $1.00.
 
 ## Step 0: Setup
 
