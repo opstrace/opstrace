@@ -25,7 +25,7 @@ Open a terminal and verify you have the following (we will use the same terminal
 
 * For creating the Opstrace cluster in your account...
   * The [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-    * We recommend `AdministratorAccess` for this quick start; for additional information on permissions and other configuration options please see our [cloud permissions reference](docs/references/cloud-permissions).
+    * We recommend `AdministratorAccess` for this quick start; for additional information on permissions and other configuration options please see our [cloud permissions reference](./references/cloud-permissions.md).
     * While AWS and GCP are supported, we will focus on AWS in this quick start.
 * For sending dummy data to the cluster...
   * [Docker](https://docs.docker.com/install/)
@@ -82,9 +82,9 @@ Export the cluster name to an environment variable in your open terminal so we c
 export OPSTRACE_CLUSTER_NAME=<choose_a_name>
 ```
 
-Then, you'll create a simple cluster [configuration file](/docs/references/cluster-configuration) with the most basic options.
+Then, you'll create a simple cluster [configuration file](./references/cluster-configuration.md) with the most basic options.
 Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts the cluster-internal metrics.
-Learn more about tenant isolation in our [key concepts references](/docs/references/concepts#tenants).
+Learn more about tenant isolation in our [key concepts references](./references/concepts.md#tenants).
 
 ```bash
 cat <<EOF > opstrace-config.yaml
@@ -108,7 +108,7 @@ Let's get things going:
 **Be patient:** Cluster creation takes on average 30 minutes on AWS (but it can go as long as 45 minutes).
 
 **So you know:** The CLI is largely re-entrant. If it is interrupted while setting up cloud infrastructure you can re-invoke the same command and it will continue where it left off.
-For additional information understanding and troubleshooting the `create` command, see our [CLI reference section](/docs/references/cli#create).
+For additional information understanding and troubleshooting the `create` command, see our [CLI reference section](./references/cli#create).
 
 When everything is done, you'll see the following log line:
 
@@ -122,7 +122,7 @@ Now that your Opstrace cluster is up and running, let's take a closer look.
 
 Before we proceed to send data to the cluster, let's check in on how the cluster is doing.
 The Opstrace cluster monitors itself, so we have a lot of metris about its own operation.
-In this step, we will look at some key metrics about data coming into the cluster: total number of metrics and logs coming in across both the `myteam` and `system` [tenants](/docs/references/concepts#tenants), ingestion latency, and also the write rate from the `myteam` tenant only.
+In this step, we will look at some key metrics about data coming into the cluster: total number of metrics and logs coming in across both the `myteam` and `system` [tenants](./references/concepts.md#tenants), ingestion latency, and also the write rate from the `myteam` tenant only.
 Once we send data to the cluster in Step 4, these write rate graphs will be populated, which demonstrates the ability of the cluster to monitor different tenants independently or together.
 
 Log in to the Grafana UI and look at the Quick Start Overview dashboard here:
@@ -141,7 +141,7 @@ Let's get started by creating the following observability workload on your lapto
 * Log messages from Avalanche and Prometheus scraped with [FluentD](https://www.fluentd.org/), which will send them to the Opstrace cluster.
 
 **Launch:** Start the following workloads in the same terminal window you've been using thus far, as shown below in the code blocks below.
-If you do open a new terminal, however, do be sure you're still in the correct directory since these commands will look in `pwd` for the [API token files](/docs/references/concepts#anatomy-of-a-data-api-token-and-how-to-present-it) created during `opstrace create`, and be sure to have your `OPSTRACE_CLUSTER_NAME` environment variable set.
+If you do open a new terminal, however, do be sure you're still in the correct directory since these commands will look in `pwd` for the [API token files](./references/concepts.md#anatomy-of-a-data-api-token-and-how-to-present-it) created during `opstrace create`, and be sure to have your `OPSTRACE_CLUSTER_NAME` environment variable set.
 Create a file with the Prometheus configuration to send data to your Opstrace cluster:
 
 ```bash
@@ -272,7 +272,7 @@ You now have dummy (random) metrics and logs being sent to the Opstrace cluster,
 
 ## Step 4: Validate the data
 
-You can view this ingested data in the `myteam` [tenant](/docs/references/concepts#tenant), which we specified in the configuration file, using the Grafana "explore" view:
+You can view this ingested data in the `myteam` [tenant](./references/concepts.md#tenant), which we specified in the configuration file, using the Grafana "explore" view:
 
 ```text
 https://myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
