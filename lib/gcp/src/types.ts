@@ -371,6 +371,12 @@ export const gkeCluster = t.partial(
         enabled: t.boolean
       }).props
     ),
+    // https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters
+    workloadIdentityConfig: t.partial(
+      t.interface({
+        workloadPool: t.string
+      }).props
+    ),
     selfLink: t.string,
     endpoint: t.string,
     initialClusterVersion: t.string,
