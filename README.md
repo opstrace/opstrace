@@ -9,32 +9,16 @@
 
 <img src="https://user-images.githubusercontent.com/19239758/97793010-00161b00-1ba3-11eb-949b-e62eae6fdb9c.png" width="350">
 
-# A scalable, secure, and open source Datadog alternative
+# Secure observability, deployed in your own network
 
-Building and maintaining an open source observability stack based on the open source tools today is difficult.
-Opstrace brings them together in a powerful wrapper so you can focus on what you do best.
-
-Choosing the right way to monitor your software systems shouldn't be so hard and it shouldn't come with so many tradeoffs:
-
-* SaaS vendors are easy, but expensive and take control of your data
-* Open source provides control, but can require significant expertise and lacks ease-of-use
-* Rolling your own provides ultimate control but requires (at least) several engineers to maintain and operate
-
+<!-- TODO: we don't have a summary in paragraph form -->
 Opstrace is the best way to run open source observability in your own cloud account, with the simple user experience of a typical SaaS vendor.
 
-## Features
-
-<!-- This list can either be 3, 5 or 6 items long. -->
-
-* Scalable, long-term storage for your metrics and logs
-* No vendor lock-in; leverage the best _open_ APIs and projects
-* Retain control of your data by storing it in your own network
-* A modern, collaborative analytic experience
-* Up to 10x cheaper than typical SaaS
+<!-- TODO: we should probably add the feature list here, once we have it, no? -->
 
 ## Quick Start
 
-To try Opstrace for yourself you can get started with our quick start: <https://go.opstrace.com/quickstart>.
+To try Opstrace for yourself you can get started with our quick start: [https://go.opstrace.com/quickstart](https://go.opstrace.com/quickstart).
 
 ## Contributing
 
@@ -60,7 +44,7 @@ We want to build the system we'd build for ourselves if it was our full-time job
 
 * Chat with us in our [GitHub Discussions](https://go.opstrace.com/community)
 * Subscribe to our email newsletter (about 1 or 2 per month)
-* Contribute a [proposal](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=proposal&template=2-proposal.md&title=) or a [bug report](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
+* Contribute a [proposal](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=thinktank:%20proposal&template=2-proposal.md&title=) or a [bug report](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=type:%20bug&template=1-bug_report.md&title=)
 
 ## Security Reports
 
