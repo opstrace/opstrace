@@ -93,10 +93,13 @@ test("select last option within range", async () => {
     fireEvent.keyDown(providerTextInput, { key })
   );
 
-  expect(selectFirstProviderOption).toHaveBeenCalledWith({
-    id: "option-3",
-    text: "option 3"
-  });
+  expect(selectFirstProviderOption).toHaveBeenCalledWith(
+    {
+      id: "option-3",
+      text: "option 3"
+    },
+    ""
+  );
 });
 
 test("change provider and select first option within range", async () => {
@@ -115,10 +118,13 @@ test("change provider and select first option within range", async () => {
     fireEvent.keyDown(providerTextInput, { key })
   );
 
-  expect(selectSecondProviderOption).toHaveBeenCalledWith({
-    id: "option-4",
-    text: "option 4"
-  });
+  expect(selectSecondProviderOption).toHaveBeenCalledWith(
+    {
+      id: "option-4",
+      text: "option 4"
+    },
+    ""
+  );
 });
 
 const wrap = (children: React.ReactNode) => {
