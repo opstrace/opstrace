@@ -65,9 +65,13 @@ function auth(): express.Router {
         await graphqlClient.CreateUser({ email, username, avatar });
       } else if (!existingUser) {
         return next(new GeneralServerError(401, "Unauthorized"));
-      } else {
-        await graphqlClient.UpdateUser({ email, username, avatar });
       }
+      await graphqlClient.UpdateUser({
+        email,
+        username,
+        avatar,
+        time: new Date().toISOString()
+      });
 
       req.session.email = email;
       req.session.username = username;

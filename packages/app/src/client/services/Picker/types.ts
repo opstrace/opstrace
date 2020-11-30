@@ -26,8 +26,14 @@ export type PickerListProps = {
 };
 
 export type PickerProvider = {
+  title?: string;
+  // Disable's the filtering of options
+  disableFilter?: boolean;
+  // Disable input
+  disableInput?: boolean;
   activationPrefix: string;
-  onSelected: (option: PickerOption) => void;
+  onSelected: (option: PickerOption, inputText?: string) => void;
+  onInputChange?: (text: string) => void;
   options: PickerOption[];
 };
 

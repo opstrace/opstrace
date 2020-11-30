@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { createAction } from "typesafe-actions";
-import { CurrentUser, SubscriptionID } from "./types";
+import { CurrentUser, SubscriptionID, Users } from "./types";
 
 export const setCurrentUser = createAction("SET_CURRENT_USER")<CurrentUser>();
 export const setCurrentUserNull = createAction("SET_CURRENT_USER_NULL")();
@@ -27,3 +27,14 @@ export const subscribe = createAction("SUBSCRIBE_CURRENT_USER")<
 export const unsubscribe = createAction("UNSUBSCRIBE_CURRENT_USER")<
   SubscriptionID
 >();
+
+export const subscribeToUserList = createAction("SUBSCRIBE_USER_LIST")<
+  SubscriptionID
+>();
+
+export const unsubscribeFromUserList = createAction("UNSUBSCRIBE_USER_LIST")<
+  SubscriptionID
+>();
+export const setUserList = createAction("SET_USER_LIST")<Users>();
+export const deleteUser = createAction("DELETE_USER")<string>();
+export const addUser = createAction("ADD_USER")<string>();

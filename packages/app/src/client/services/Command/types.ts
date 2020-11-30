@@ -25,6 +25,7 @@ export type CommandEvent = {
 export type Command = {
   id: string;
   description: string;
+  disabled?: boolean;
   handler: (event: CommandEvent, args?: any[]) => any;
   keybindings?: string[];
   category?: CommandCategory;

@@ -34,7 +34,9 @@ function commandToPickerOption(cmd: Command): PickerOption {
 
 function filterCommands(cmds: Command[]): PickerOption[] {
   return cmds
-    .filter(cmd => cmd.id !== cmdID && cmd.category !== "Hidden")
+    .filter(
+      cmd => cmd.id !== cmdID && cmd.category !== "Hidden" && !cmd.disabled
+    )
     .map(commandToPickerOption);
 }
 

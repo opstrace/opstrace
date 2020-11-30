@@ -15,7 +15,7 @@
  */
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { CurrentUser } from "./types";
+import { CurrentUser, Users } from "./types";
 import * as actions from "./actions";
 
 type UserActions = ActionType<typeof actions>;
@@ -24,6 +24,7 @@ type UserState = {
   currentUser: CurrentUser;
   loading: boolean;
   currentUserLoaded: boolean;
+  users: Users;
 };
 
 const CurrentUserInitialState: CurrentUser = {
@@ -38,7 +39,8 @@ const CurrentUserInitialState: CurrentUser = {
 const UserInitialState: UserState = {
   currentUser: CurrentUserInitialState,
   loading: true,
-  currentUserLoaded: false
+  currentUserLoaded: false,
+  users: []
 };
 
 const currentUserReducer = createReducer<CurrentUser, UserActions>(
@@ -62,14 +64,20 @@ const currentUserReducer = createReducer<CurrentUser, UserActions>(
     }
   );
 
-export const reducer = createReducer<UserState, UserActions>(
-  UserInitialState
-).handleAction(
-  [actions.setDarkMode, actions.setCurrentUser], // pass all these actions through to currentUserReducer
-  (state, action): UserState => ({
-    ...state,
-    currentUser: currentUserReducer(state.currentUser, action),
-    loading: false,
-    currentUserLoaded: true
-  })
-);
+export const reducer = createReducer<UserState, UserActions>(UserInitialState)
+  .handleAction(
+    [actions.setDarkMode, actions.setCurrentUser], // pass all these actions through to currentUserReducer
+    (state, action): UserState => ({
+      ...state,
+      currentUser: currentUserReducer(state.currentUser, action),
+      loading: false,
+      currentUserLoaded: true
+    })
+  )
+  .handleAction(
+    actions.setUserList,
+    (state, action): UserState => ({
+      ...state,
+      users: action.payload
+    })
+  );
