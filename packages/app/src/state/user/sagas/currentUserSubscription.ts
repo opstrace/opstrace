@@ -38,7 +38,7 @@ export default function* currentUserSubscriptionManager() {
   const subscribers = new Set<SubscriptionID>();
 
   // Fork a subscribe handler
-  yield fork(function* () {
+  yield fork(function*() {
     while (true) {
       // wait for a subscribe action
       const action: ReturnType<typeof actions.subscribe> = yield take(
@@ -55,7 +55,7 @@ export default function* currentUserSubscriptionManager() {
       const channel = yield call(currentUserSubscriptionEventChannel);
 
       // Fork the subscription task
-      activeSubscription = yield fork(function* () {
+      activeSubscription = yield fork(function*() {
         // create a local reference inside the fork
         const chan = channel;
 
@@ -77,7 +77,7 @@ export default function* currentUserSubscriptionManager() {
   });
 
   // Fork an unsubscribe handler
-  yield fork(function* () {
+  yield fork(function*() {
     while (true) {
       // wait for the unsubscribe action and then cancel the subscription task
       const action: ReturnType<typeof actions.unsubscribe> = yield take(

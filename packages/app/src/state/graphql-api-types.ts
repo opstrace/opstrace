@@ -1694,6 +1694,7 @@ export type User = {
   email: Scalars["String"];
   /** An object relationship */
   preference?: Maybe<User_Preference>;
+  role: Scalars["String"];
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username: Scalars["String"];
 };
@@ -1739,6 +1740,7 @@ export type User_Bool_Exp = {
   created_at?: Maybe<Timestamptz_Comparison_Exp>;
   email?: Maybe<String_Comparison_Exp>;
   preference?: Maybe<User_Preference_Bool_Exp>;
+  role?: Maybe<String_Comparison_Exp>;
   session_last_updated?: Maybe<Timestamptz_Comparison_Exp>;
   username?: Maybe<String_Comparison_Exp>;
 };
@@ -1755,6 +1757,7 @@ export type User_Insert_Input = {
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
   preference?: Maybe<User_Preference_Obj_Rel_Insert_Input>;
+  role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
 };
@@ -1764,6 +1767,7 @@ export type User_Max_Fields = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
+  role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
 };
@@ -1773,6 +1777,7 @@ export type User_Max_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
+  role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
   username?: Maybe<Order_By>;
 };
@@ -1782,6 +1787,7 @@ export type User_Min_Fields = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
+  role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
 };
@@ -1791,6 +1797,7 @@ export type User_Min_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
+  role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
   username?: Maybe<Order_By>;
 };
@@ -1822,6 +1829,7 @@ export type User_Order_By = {
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
   preference?: Maybe<User_Preference_Order_By>;
+  role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
   username?: Maybe<Order_By>;
 };
@@ -1978,6 +1986,8 @@ export enum User_Select_Column {
   /** column name */
   Email = "email",
   /** column name */
+  Role = "role",
+  /** column name */
   SessionLastUpdated = "session_last_updated",
   /** column name */
   Username = "username"
@@ -1988,6 +1998,7 @@ export type User_Set_Input = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
+  role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
 };
@@ -2000,6 +2011,8 @@ export enum User_Update_Column {
   CreatedAt = "created_at",
   /** column name */
   Email = "email",
+  /** column name */
+  Role = "role",
   /** column name */
   SessionLastUpdated = "session_last_updated",
   /** column name */
@@ -2089,6 +2102,14 @@ export type CreateUserMutation = {
   insert_user_preference_one?: Maybe<Pick<User_Preference, "email">>;
 };
 
+export type DeleteUserMutationVariables = Exact<{
+  email: Scalars["String"];
+}>;
+
+export type DeleteUserMutation = {
+  delete_user_by_pk?: Maybe<Pick<User, "email">>;
+};
+
 export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetCurrentUserQuery = {
@@ -2129,10 +2150,29 @@ export type SubscribeToCurrentUserSubscription = {
   >;
 };
 
+export type SubscribeToUserListSubscriptionVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type SubscribeToUserListSubscription = {
+  user: Array<
+    Pick<
+      User,
+      | "role"
+      | "email"
+      | "avatar"
+      | "username"
+      | "session_last_updated"
+      | "created_at"
+    >
+  >;
+};
+
 export type UpdateUserMutationVariables = Exact<{
   email: Scalars["String"];
   username: Scalars["String"];
   avatar: Scalars["String"];
+  time: Scalars["timestamptz"];
 }>;
 
 export type UpdateUserMutation = {
@@ -2205,6 +2245,13 @@ export const CreateUserDocument = gql`
     }
   }
 `;
+export const DeleteUserDocument = gql`
+  mutation DeleteUser($email: String!) {
+    delete_user_by_pk(email: $email) {
+      email
+    }
+  }
+`;
 export const GetCurrentUserDocument = gql`
   query GetCurrentUser {
     user {
@@ -2253,10 +2300,32 @@ export const SubscribeToCurrentUserDocument = gql`
     }
   }
 `;
+export const SubscribeToUserListDocument = gql`
+  subscription SubscribeToUserList {
+    user {
+      role
+      email
+      avatar
+      username
+      session_last_updated
+      created_at
+    }
+  }
+`;
 export const UpdateUserDocument = gql`
-  mutation UpdateUser($email: String!, $username: String!, $avatar: String!) {
+  mutation UpdateUser(
+    $email: String!
+    $username: String!
+    $avatar: String!
+    $time: timestamptz!
+  ) {
     update_user(
-      _set: { username: $username, email: $email, avatar: $avatar }
+      _set: {
+        username: $username
+        email: $email
+        avatar: $avatar
+        session_last_updated: $time
+      }
       where: { email: { _eq: $email } }
     ) {
       returning {
@@ -2370,6 +2439,22 @@ export function getSdk(
         )
       );
     },
+    DeleteUser(
+      variables: DeleteUserMutationVariables
+    ): Promise<{
+      data?: DeleteUserMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<DeleteUserMutation>(
+          print(DeleteUserDocument),
+          variables
+        )
+      );
+    },
     GetCurrentUser(
       variables?: GetCurrentUserQueryVariables
     ): Promise<{
@@ -2427,6 +2512,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<SubscribeToCurrentUserSubscription>(
           print(SubscribeToCurrentUserDocument),
+          variables
+        )
+      );
+    },
+    SubscribeToUserList(
+      variables?: SubscribeToUserListSubscriptionVariables
+    ): Promise<{
+      data?: SubscribeToUserListSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<SubscribeToUserListSubscription>(
+          print(SubscribeToUserListDocument),
           variables
         )
       );

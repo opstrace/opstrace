@@ -14,10 +14,71 @@
  * limitations under the License.
  */
 import { all, select, take, call, spawn } from "redux-saga/effects";
-import subscriptionManager from "./subscription";
 import * as actions from "../actions";
 import graphqlClient from "state/graphqlClient";
 import { State } from "state/reducer";
+
+import currentUserSubscriptionManager from "./currentUserSubscription";
+import userListSubscriptionManager from "./userListSubscription";
+
+export default function* userTaskManager() {
+  const sagas = [
+    currentUserSubscriptionManager,
+    userListSubscriptionManager,
+    persistDarkModePreference,
+    addUser,
+    deleteUser
+  ];
+  // technique to keep the root alive and spawn sagas into their
+  // own retry-on-failure loop.
+  // https://redux-saga.js.org/docs/advanced/RootSaga.html
+  yield all(
+    sagas.map(saga =>
+      spawn(function*() {
+        while (true) {
+          try {
+            yield call(saga);
+            break;
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      })
+    )
+  );
+}
+
+function* addUser() {
+  while (true) {
+    const action: ReturnType<typeof actions.addUser> = yield take(
+      actions.addUser
+    );
+    try {
+      yield graphqlClient.CreateUser({
+        email: action.payload,
+        avatar: "",
+        username: action.payload
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
+
+function* deleteUser() {
+  while (true) {
+    const action: ReturnType<typeof actions.deleteUser> = yield take(
+      actions.deleteUser
+    );
+    try {
+      yield graphqlClient.DeleteUser({
+        email: action.payload
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
 
 function* persistDarkModePreference() {
   while (true) {
@@ -35,25 +96,4 @@ function* persistDarkModePreference() {
       console.error(err);
     }
   }
-}
-
-export default function* userTaskManager() {
-  const sagas = [subscriptionManager, persistDarkModePreference];
-  // technique to keep the root alive and spawn sagas into their
-  // own retry-on-failure loop.
-  // https://redux-saga.js.org/docs/advanced/RootSaga.html
-  yield all(
-    sagas.map(saga =>
-      spawn(function* () {
-        while (true) {
-          try {
-            yield call(saga);
-            break;
-          } catch (e) {
-            console.error(e);
-          }
-        }
-      })
-    )
-  );
 }

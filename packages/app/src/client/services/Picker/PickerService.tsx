@@ -17,6 +17,7 @@ import { useTypesafeReducer } from "../../hooks/useTypesafeReducer";
 import { actions, pickerReducer, initialState } from "./reducer";
 import Divider from "@material-ui/core/Divider";
 import matchSorter from "match-sorter";
+import { Typography } from "client/components/Typography";
 
 const boundedIndex = (value: number, max: number) => {
   if (value < 0) return 0;
@@ -42,7 +43,7 @@ function PickerList(props: PickerListProps) {
   );
 
   return (
-    <Box width={300} height={500}>
+    <Box width={400} height={500}>
       <List renderItem={renderItem} items={props.options} itemSize={() => 30} />
     </Box>
   );
@@ -76,14 +77,18 @@ function PickerService({ children }: { children: React.ReactNode }) {
     state.providers
   );
 
+  const filterValue = state.text
+    ?.replace(activePicker?.activationPrefix || "", "")
+    .replace(/^\s+/, "");
+
   const onSelect = useCallback(
     (selected: PickerOption) => {
       close();
       if (activePicker && selected) {
-        activePicker.onSelected(selected);
+        activePicker.onSelected(selected, filterValue);
       }
     },
-    [activePicker, close]
+    [activePicker, close, filterValue]
   );
 
   const options = useMemo((): PickerOption[] => {
@@ -104,13 +109,17 @@ function PickerService({ children }: { children: React.ReactNode }) {
     setSelectedIndex(0);
   }, [activePicker?.activationPrefix]);
 
-  const filterValue = state.text
-    ?.replace(activePicker?.activationPrefix || "", "")
-    .replace(/^\s+/, "");
+  useEffect(() => {
+    if (activePicker?.onInputChange) {
+      activePicker.onInputChange(filterValue || "");
+    }
+  }, [filterValue, activePicker]);
 
-  const filteredOptions = matchSorter(options, filterValue || "", {
-    keys: ["text"]
-  });
+  const filteredOptions = activePicker?.disableFilter
+    ? options
+    : matchSorter(options, filterValue || "", {
+        keys: ["text"]
+      });
 
   return (
     <>
@@ -124,37 +133,50 @@ function PickerService({ children }: { children: React.ReactNode }) {
         maxWidth="md"
       >
         <Box pr={2} pl={2} pt={1} pb={1}>
-          <InputBase
-            inputRef={inputRef}
-            onKeyDown={e => {
-              if (e.key === "ArrowUp") {
-                e.preventDefault();
-                setSelectedIndex(
-                  boundedIndex(selectedIndex - 1, filteredOptions.length - 1)
-                );
-              }
-              if (e.key === "ArrowDown") {
-                e.preventDefault();
-                setSelectedIndex(
-                  boundedIndex(selectedIndex + 1, filteredOptions.length - 1)
-                );
-              }
-              if (e.key === "Enter") {
-                onSelect(filteredOptions[selectedIndex]);
-              }
-            }}
-            onBlur={() => {
-              // don't let us remove focus unless we're closing it
-              inputRef.current?.focus();
-            }}
-            fullWidth
-            autoFocus
-            value={state.text || ""}
-            inputProps={{ "aria-label": "picker filter" }}
-            onChange={e => {
-              setText(e.target.value);
-            }}
-          />
+          {activePicker?.title ? (
+            <Box width="100%" pb={1}>
+              <Typography color="textSecondary" variant="h6">
+                {activePicker.title}
+              </Typography>
+            </Box>
+          ) : null}
+          <Box
+            height={activePicker?.disableInput ? "0px" : "auto"}
+            width="100%"
+            overflow="hidden"
+          >
+            <InputBase
+              inputRef={inputRef}
+              onKeyDown={e => {
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setSelectedIndex(
+                    boundedIndex(selectedIndex - 1, filteredOptions.length - 1)
+                  );
+                }
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setSelectedIndex(
+                    boundedIndex(selectedIndex + 1, filteredOptions.length - 1)
+                  );
+                }
+                if (e.key === "Enter") {
+                  onSelect(filteredOptions[selectedIndex]);
+                }
+              }}
+              onBlur={() => {
+                // don't let us remove focus unless we're closing it
+                inputRef.current?.focus();
+              }}
+              fullWidth
+              autoFocus
+              value={state.text || ""}
+              inputProps={{ "aria-label": "picker filter" }}
+              onChange={e => {
+                setText(e.target.value);
+              }}
+            />
+          </Box>
           <Divider />
         </Box>
         <PickerList

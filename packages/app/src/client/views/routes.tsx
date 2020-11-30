@@ -72,7 +72,17 @@ const AuthenticatedRoutes = () => {
         {EARLY_PREVIEW && ModuleRoutes}
         {EARLY_PREVIEW && ChatRoutes}
         {EARLY_PREVIEW && HistoryRoutes}
-        <Route key="/cluster" path="/cluster" component={ClusterView} />
+        <Route exact key="/cluster" path="/cluster" component={ClusterView} />
+        <Route
+          key="/cluster/users/:email"
+          path="/cluster/users/:email"
+          component={ClusterView}
+        />
+        <Route
+          key="/cluster/tenants/:tenant"
+          path="/cluster/tenants/:tenant"
+          component={ClusterView}
+        />
         <Route key="*" path="*" component={NotFound} />
       </Switch>
     </FullPage>
