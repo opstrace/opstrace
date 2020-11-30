@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import axios from "axios";
 import React, { useState, useEffect } from "react";
-import graphqlClient from "state/graphqlClient";
+import { useDispatch } from "react-redux";
 import useCurrentUser, {
   useCurrentUserLoaded
 } from "state/user/hooks/useCurrentUser";
+import { setCurrentUser } from "state/user/actions";
 /**
  * withAccess wraps a component to ensure the component
  * is only mounted if access has been granted.
@@ -30,41 +32,40 @@ export default function WithAuthentication(props: {
   children: React.ReactNode;
 }) {
   const [pending, setPending] = useState(true);
-  const [granted, setGranted] = useState(false);
+  const dispatch = useDispatch();
   const currentUser = useCurrentUser();
   const currentUserLoaded = useCurrentUserLoaded();
 
   useEffect(() => {
     let unmounted = false;
 
-    if (currentUser.email) {
-      setGranted(true);
+    if (currentUser?.email) {
       setPending(false);
       return;
     }
     if (!currentUserLoaded) {
       (async function checkHasAccess() {
         try {
-          await graphqlClient.GetCurrentUser();
-          !unmounted && setGranted(true);
+          const res = await axios.get("/_/auth/session");
+          dispatch(setCurrentUser(res.data.uid));
         } catch (e) {
-          !unmounted && setGranted(false);
         } finally {
           !unmounted && setPending(false);
         }
       })();
     }
-    if (!currentUser.email && currentUserLoaded) {
-      setGranted(false);
+    if (!currentUser?.email && currentUserLoaded) {
       setPending(false);
     }
-    return () => { unmounted = true; }
-  }, [currentUser, currentUserLoaded]);
+    return () => {
+      unmounted = true;
+    };
+  }, [currentUser, currentUserLoaded, dispatch]);
 
   if (pending) {
     return null;
   }
-  if (granted) {
+  if (currentUser) {
     return <>{props.children}</>;
   }
   return <>{props.onFailure}</>;

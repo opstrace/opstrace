@@ -15,69 +15,65 @@
  */
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { CurrentUser, Users } from "./types";
+import { Users } from "./types";
 import * as actions from "./actions";
 
 type UserActions = ActionType<typeof actions>;
 
 type UserState = {
-  currentUser: CurrentUser;
+  currentUserId: string;
+  currentUserIdLoaded: boolean;
   loading: boolean;
-  currentUserLoaded: boolean;
   users: Users;
 };
 
-const CurrentUserInitialState: CurrentUser = {
-  username: "",
-  avatar: null,
-  email: "",
-  preference: {
-    dark_mode: true
-  }
-};
-
 const UserInitialState: UserState = {
-  currentUser: CurrentUserInitialState,
+  currentUserId: "",
   loading: true,
-  currentUserLoaded: false,
+  currentUserIdLoaded: false,
   users: []
 };
 
-const currentUserReducer = createReducer<CurrentUser, UserActions>(
-  CurrentUserInitialState
-)
+export const reducer = createReducer<UserState, UserActions>(UserInitialState)
   .handleAction(
     actions.setCurrentUser,
-    (state, action): CurrentUser => action.payload
+    (state, action): UserState => ({
+      ...state,
+      currentUserId: action.payload,
+      currentUserIdLoaded: true
+    })
   )
   .handleAction(
     actions.setDarkMode,
-    (state, action): CurrentUser => {
+    (state, action): UserState => {
+      // Make the changes optimistically
+      const currentUser = state.users.find(
+        u => u.email !== state.currentUserId
+      );
+      if (!currentUser) {
+        return state;
+      }
+      const users = state.users
+        .filter(u => u.email !== state.currentUserId)
+        .concat({
+          ...currentUser,
+          preference: {
+            ...currentUser.preference,
+            dark_mode: action.payload
+          }
+        });
+
       return {
-        email: state?.email || "",
-        username: state?.username || "",
-        avatar: state?.avatar,
-        preference: {
-          dark_mode: action.payload
-        }
+        ...state,
+        users
       };
     }
-  );
-
-export const reducer = createReducer<UserState, UserActions>(UserInitialState)
-  .handleAction(
-    [actions.setDarkMode, actions.setCurrentUser], // pass all these actions through to currentUserReducer
-    (state, action): UserState => ({
-      ...state,
-      currentUser: currentUserReducer(state.currentUser, action),
-      loading: false,
-      currentUserLoaded: true
-    })
   )
   .handleAction(
     actions.setUserList,
     (state, action): UserState => ({
       ...state,
-      users: action.payload
+      users: action.payload,
+      loading: false
     })
   );

@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Skeleton from "@material-ui/lab/Skeleton";
 import Avatar from "@material-ui/core/Avatar";
 
 import { Box } from "client/components/Box";
 import { deleteUser } from "state/user/actions";
-import { User } from "state/user/types";
 
 import useUserList from "state/user/hooks/useUserList";
 import Layout from "client/layout/MainContent";
@@ -31,21 +30,18 @@ const AttributeValue = (props: { children: React.ReactNode }) => (
 );
 
 const Cluster = () => {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const params = useParams<{ email?: string; tenant?: string }>();
+  const params = useParams<{ id?: string; tenant?: string }>();
   const users = useUserList();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const user = users.find(u => u.email === params.email);
-    if (user) {
-      setSelectedUser(user);
-    }
-  }, [users, params.email]);
+  const selectedUser = useMemo(
+    () => users.find(u => u.opaque_id === params.id),
+    [params.id, users]
+  );
 
   const { activatePickerWithText } = usePickerService(
     {
-      title: `Delete ${params.email}?`,
+      title: `Delete ${selectedUser?.email}?`,
       activationPrefix: "delete user directly?:",
       disableFilter: true,
       disableInput: true,
@@ -60,12 +56,12 @@ const Cluster = () => {
         }
       ],
       onSelected: option => {
-        if (option.id === "yes" && params.email) {
-          dispatch(deleteUser(params.email));
+        if (option.id === "yes" && selectedUser?.email) {
+          dispatch(deleteUser(selectedUser?.email));
         }
       }
     },
-    [params.email]
+    [selectedUser?.email]
   );
 
   const getContent = () => {

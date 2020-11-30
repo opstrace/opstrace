@@ -9,7 +9,7 @@ import { User } from "state/user/types";
 function userToPickerOption(user: User): PickerOption {
   return {
     text: user.email,
-    id: user.email
+    id: user.opaque_id
   };
 }
 

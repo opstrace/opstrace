@@ -76,9 +76,11 @@ const Login = (props: { state?: State }) => {
             ).toLowerCase()
           }
         });
-        
+
         if (props.state?.redirectUri) {
-          window.location.href = props.state.redirectUri.startsWith("http") ? props.state.redirectUri : `https://${decodeURIComponent(props.state.redirectUri)}`;
+          window.location.href = props.state.redirectUri.startsWith("http")
+            ? props.state.redirectUri
+            : `https://${decodeURIComponent(props.state.redirectUri)}`;
         } else {
           window.location.pathname = "/";
         }

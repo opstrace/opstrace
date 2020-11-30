@@ -6,5 +6,9 @@ subscription SubscribeToUserList {
     username
     session_last_updated
     created_at
+    opaque_id
+    preference {
+      dark_mode
+    }
   }
 }

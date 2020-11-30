@@ -347,10 +347,12 @@
   - role: user
     permission:
       columns:
-      - email
-      - created_at
-      - username
       - avatar
+      - created_at
+      - email
+      - opaque_id
+      - role
+      - username
       filter:
         email:
           _eq: X-Hasura-User-Id
@@ -360,6 +362,7 @@
       - avatar
       - created_at
       - email
+      - opaque_id
       - role
       - session_last_updated
       - username
@@ -413,9 +416,7 @@
       columns:
       - dark_mode
       - email
-      filter:
-        email:
-          _eq: X-Hasura-User-Id
+      filter: {}
   update_permissions:
   - role: user
     permission:

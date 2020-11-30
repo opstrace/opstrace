@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { put, call, take, fork, cancelled, cancel } from "redux-saga/effects";
+import { put, call, take, fork, cancelled } from "redux-saga/effects";
 import { Task, eventChannel, EventChannel } from "redux-saga";
 import { ActionType } from "typesafe-actions";
 import {
@@ -75,23 +75,26 @@ export default function* userListSubscriptionManager() {
       });
     }
   });
-
-  // Fork an unsubscribe handler
-  yield fork(function*() {
-    while (true) {
-      // wait for the unsubscribe action and then cancel the subscription task
-      const action: ReturnType<typeof actions.unsubscribeFromUserList> = yield take(
-        actions.unsubscribeFromUserList
-      );
-      // remove from subscribers
-      subscribers.delete(action.payload);
-      // Cancel active subscription if there are no subscribers
-      if (activeSubscription && subscribers.size === 0) {
-        yield cancel(activeSubscription);
-        activeSubscription = undefined;
+  /** Do not unsubscribe for users, because this is the main method
+   *  of retrieving info about the currently authenticated user.
+   
+    // Fork an unsubscribe handler
+    yield fork(function*() {
+      while (true) {
+        // wait for the unsubscribe action and then cancel the subscription task
+        const action: ReturnType<typeof actions.unsubscribeFromUserList> = yield take(
+          actions.unsubscribeFromUserList
+        );
+        // remove from subscribers
+        subscribers.delete(action.payload);
+        // Cancel active subscription if there are no subscribers
+        if (activeSubscription && subscribers.size === 0) {
+          yield cancel(activeSubscription);
+          activeSubscription = undefined;
+        }
       }
-    }
-  });
+    });
+  */
 }
 
 /**
