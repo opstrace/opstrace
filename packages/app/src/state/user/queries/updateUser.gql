@@ -1,6 +1,16 @@
-mutation UpdateUser($email: String!, $username: String!, $avatar: String!) {
+mutation UpdateUser(
+  $email: String!
+  $username: String!
+  $avatar: String!
+  $time: timestamptz!
+) {
   update_user(
-    _set: { username: $username, email: $email, avatar: $avatar }
+    _set: {
+      username: $username
+      email: $email
+      avatar: $avatar
+      session_last_updated: $time
+    }
     where: { email: { _eq: $email } }
   ) {
     returning {

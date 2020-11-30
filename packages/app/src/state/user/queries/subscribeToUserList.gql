@@ -1,0 +1,10 @@
+subscription SubscribeToUserList {
+  user {
+    role
+    email
+    avatar
+    username
+    session_last_updated
+    created_at
+  }
+}
