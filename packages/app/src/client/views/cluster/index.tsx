@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Skeleton from "@material-ui/lab/Skeleton";
 import Avatar from "@material-ui/core/Avatar";
+import { useDispatch } from "react-redux";
 
 import { Box } from "client/components/Box";
 import { deleteUser } from "state/user/actions";
@@ -14,7 +15,8 @@ import SideBar from "./Sidebar";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 import { usePickerService } from "client/services/Picker";
-import { useDispatch } from "react-redux";
+import { useCommandService } from "client/services/Command";
+import useCurrentUser from "state/user/hooks/useCurrentUser";
 
 const AttributeKey = (props: { children: React.ReactNode }) => (
   <Box p={3} pt={2} pb={2}>
@@ -32,6 +34,7 @@ const AttributeValue = (props: { children: React.ReactNode }) => (
 const Cluster = () => {
   const params = useParams<{ id?: string; tenant?: string }>();
   const users = useUserList();
+  const currentUser = useCurrentUser();
   const dispatch = useDispatch();
 
   const selectedUser = useMemo(
@@ -63,6 +66,8 @@ const Cluster = () => {
     },
     [selectedUser?.email]
   );
+
+  const cmdService = useCommandService();
 
   const getContent = () => {
     if (selectedUser) {
@@ -97,17 +102,30 @@ const Cluster = () => {
                   )
                 }
                 action={
-                  <Box ml={3}>
-                    <Button
-                      variant="outlined"
-                      size="medium"
-                      disabled={users.length < 2}
-                      onClick={() =>
-                        activatePickerWithText("delete user directly?: ")
-                      }
-                    >
-                      Delete
-                    </Button>
+                  <Box ml={3} display="flex" flexWrap="wrap">
+                    {selectedUser.email === currentUser?.email ? (
+                      <Box p={1}>
+                        <Button
+                          variant="outlined"
+                          size="medium"
+                          onClick={() => cmdService.executeCommand("logout")}
+                        >
+                          Logout
+                        </Button>
+                      </Box>
+                    ) : null}
+                    <Box p={1}>
+                      <Button
+                        variant="outlined"
+                        size="medium"
+                        disabled={users.length < 2}
+                        onClick={() =>
+                          activatePickerWithText("delete user directly?: ")
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </Box>
                   </Box>
                 }
                 title={selectedUser.username}

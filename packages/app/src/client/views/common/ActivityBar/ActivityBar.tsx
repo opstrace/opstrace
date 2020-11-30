@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
+import IconButton from "@material-ui/core/IconButton";
+import Avatar from "@material-ui/core/Avatar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import CodeIcon from "@material-ui/icons/Code";
@@ -11,6 +13,7 @@ import { ITheme } from "client/themes";
 import Tracy from "./Tracy";
 import { useHistory, useLocation } from "react-router-dom";
 import { EARLY_PREVIEW } from "client/flags";
+import useCurrentUser from "state/user/hooks/useCurrentUser";
 
 export const ActivityBarTabs = EARLY_PREVIEW
   ? ["/module", "/chat", "/history", "/registry", "/cluster"]
@@ -18,14 +21,21 @@ export const ActivityBarTabs = EARLY_PREVIEW
 
 const getDividerColor = (theme: ITheme) => theme.palette.divider;
 
-const TabContainer = styled.div`
+const ActivityBarContainer = styled(Box)`
   border-right: 1px solid ${props => getDividerColor(props.theme)};
 `;
+
+const AvatarButton = styled(IconButton)`
+  padding: 0px;
+`;
+
+const avatarStyle = { height: 35, width: 35 };
 
 const ActivityBar = () => {
   const { pathname } = useLocation();
   const [activeTabIndex, setActiveTabIndex] = useState<number | null>(null);
   const history = useHistory();
+  const currentUser = useCurrentUser();
 
   const changeTab = useCallback(
     (index: number) => {
@@ -50,6 +60,10 @@ const ActivityBar = () => {
     changeTab(index);
   };
 
+  const navigateToCurrentUser = useCallback(() => {
+    history.push(`/cluster/users/${currentUser?.opaque_id}`);
+  }, [currentUser, history]);
+
   useEffect(() => {
     const foundIndex = ActivityBarTabs.findIndex(tab =>
       pathname.startsWith(tab)
@@ -66,8 +80,13 @@ const ActivityBar = () => {
   }, [activeTabIndex, history, changeTab, pathname]);
 
   return (
-    <Box display="flex" height="100vh" width={50}>
-      <TabContainer>
+    <ActivityBarContainer
+      display="flex"
+      height="100vh"
+      width={50}
+      flexDirection="column"
+    >
+      <Box>
         <Box width={50} height={62} p={1} mb={4}>
           <Tracy />
         </Box>
@@ -85,8 +104,27 @@ const ActivityBar = () => {
           {EARLY_PREVIEW && <Tab icon={<HistoryIcon />} />}
           <Tab icon={<SettingsIcon />} />
         </Tabs>
-      </TabContainer>
-    </Box>
+      </Box>
+      <Box flexGrow={1} display="flex" width={50} alignItems="flex-end">
+        <Box width={50} height={62} p={1} mb={2}>
+          {currentUser?.avatar ? (
+            <AvatarButton onClick={navigateToCurrentUser}>
+              <Avatar
+                alt={currentUser?.username}
+                style={avatarStyle}
+                src={currentUser?.avatar}
+              />
+            </AvatarButton>
+          ) : (
+            <AvatarButton onClick={navigateToCurrentUser}>
+              <Avatar alt={currentUser?.username} style={avatarStyle}>
+                {currentUser?.username.slice(0, 1).toUpperCase()}
+              </Avatar>
+            </AvatarButton>
+          )}
+        </Box>
+      </Box>
+    </ActivityBarContainer>
   );
 };
 
