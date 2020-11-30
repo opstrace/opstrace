@@ -35,49 +35,10 @@ import {
   issuers,
   orders
 } from "@opstrace/kubernetes";
-import {
-  getControllerConfig,
-  getDomain,
-  getTenantNamespace,
-  getTenantDomain
-} from "../../helpers";
+import { getControllerConfig, getDomain, getTenantDomain } from "../../helpers";
 import { State } from "../../reducer";
-import { entries } from "@opstrace/utils";
 import { DockerImages } from "@opstrace/controller-config";
 import { V1IssuerResource } from "@opstrace/kubernetes/build/custom-resources/v1issuer";
-
-function newGCPCredentialsSecret(
-  namespace: string,
-  gcpAuthOptions: any,
-  kubeConfig: KubeConfig
-): Secret {
-  // Ensure keys are ordered or it will trigger an update
-  // TODO: extract into a util
-  const ordered: { [key: string]: string } = {};
-  entries(gcpAuthOptions!.credentials)
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .forEach(function ([key, value]) {
-      ordered[key] = value;
-    });
-
-  return new Secret(
-    {
-      apiVersion: "v1",
-      data: {
-        "service-account.json": Buffer.from(JSON.stringify(ordered)).toString(
-          "base64"
-        )
-      },
-      kind: "Secret",
-      metadata: {
-        name: `gcp-service-account`,
-        namespace: namespace
-      },
-      type: "Opaque"
-    },
-    kubeConfig
-  );
-}
 
 export function CertManagerResources(
   state: State,
@@ -98,34 +59,26 @@ export function CertManagerResources(
 
   const {
     target,
-    gcpAuthOptions,
     region,
     aws,
+    gcp,
     tlsCertificateIssuer
   } = getControllerConfig(state);
 
   let dns01 = {};
 
   if (target === "gcp") {
-    if (!gcpAuthOptions) {
+    if (!gcp) {
       throw new Error(
-        "require gcpAuthOptions to set up dns challenge for certManager"
+        "require gcp config to set up dns challenge for certManager"
       );
     }
 
     dns01 = {
       cloudDNS: {
-        project: gcpAuthOptions.projectId,
-        serviceAccountSecretRef: {
-          name: "gcp-service-account",
-          key: "service-account.json"
-        }
+        project: gcp.projectId
       }
     };
-
-    collection.add(
-      newGCPCredentialsSecret(namespace, gcpAuthOptions, kubeConfig)
-    );
   }
 
   if (target === "aws") {
@@ -154,15 +107,7 @@ export function CertManagerResources(
   //
   let domains: string[] = [getDomain(state)];
   state.tenants.list.tenants.forEach(tenant => {
-    const tenantNamespace = getTenantNamespace(tenant);
     const host = getTenantDomain(tenant, state);
-
-    if (target === "gcp") {
-      collection.add(
-        newGCPCredentialsSecret(tenantNamespace, gcpAuthOptions, kubeConfig)
-      );
-    }
-
     domains = domains.concat([host, `*.${host}`]);
   });
 
@@ -321,6 +266,13 @@ export function CertManagerResources(
     )
   );
 
+  let annotations = {};
+  if (target == "gcp") {
+    annotations = {
+      "iam.gke.io/gcp-service-account": gcp!.certManagerServiceAccount
+    };
+  }
+
   collection.add(
     new ServiceAccount(
       {
@@ -334,7 +286,8 @@ export function CertManagerResources(
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/instance": "cert-manager",
             "app.kubernetes.io/name": "cert-manager"
-          }
+          },
+          annotations: annotations
         }
       },
       kubeConfig
@@ -1229,11 +1182,6 @@ export function CertManagerResources(
     )
   );
 
-  const extraArgs: string[] = [];
-  if (target === "aws") {
-    extraArgs.push("--issuer-ambient-credentials=true");
-  }
-
   collection.add(
     new Deployment(
       {
@@ -1278,8 +1226,9 @@ export function CertManagerResources(
                   args: [
                     "--v=2",
                     "--cluster-resource-namespace=$(POD_NAMESPACE)",
-                    "--leader-election-namespace=kube-system"
-                  ].concat(extraArgs),
+                    "--leader-election-namespace=kube-system",
+                    "--issuer-ambient-credentials=true"
+                  ],
                   env: [
                     {
                       name: "POD_NAMESPACE",
