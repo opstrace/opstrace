@@ -339,7 +339,7 @@
     permission:
       check: {}
       columns:
-      - created_at
+      - avatar
       - email
       - username
       backend_only: false
@@ -360,6 +360,7 @@
       - avatar
       - created_at
       - email
+      - role
       - session_last_updated
       - username
       filter: {}
@@ -379,6 +380,10 @@
       - username
       filter: {}
       check: null
+  delete_permissions:
+  - role: user_admin
+    permission:
+      filter: {}
 - table:
     schema: public
     name: user_preference
@@ -386,6 +391,14 @@
   - name: user
     using:
       foreign_key_constraint_on: email
+  insert_permissions:
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - dark_mode
+      - email
+      backend_only: false
   select_permissions:
   - role: user
     permission:
@@ -420,3 +433,7 @@
         email:
           _eq: X-Hasura-User-Id
       check: null
+  delete_permissions:
+  - role: user_admin
+    permission:
+      filter: {}
