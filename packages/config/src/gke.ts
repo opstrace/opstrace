@@ -99,6 +99,13 @@ export function getGKEClusterConfig(
           oauthScopes
         }
       }
-    ]
+    ],
+    //
+    // Enable workload identity
+    // https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+    //
+    workloadIdentityConfig: {
+      workloadPool: `${gcpAuthOptions.projectId}.svc.id.goog`
+    }
   };
 }
