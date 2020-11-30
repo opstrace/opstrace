@@ -41,7 +41,8 @@ import { getKubeConfig, k8sListNamespacesOrError } from "@opstrace/kubernetes";
 
 import {
   getValidatedGCPAuthOptionsFromFile,
-  GCPAuthOptions
+  GCPAuthOptions,
+  getCertManagerServiceAccount
 } from "@opstrace/gcp";
 import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
@@ -150,7 +151,6 @@ function* createClusterCore() {
     target: ccfg.cloud_provider,
     region: region, // not sure why that's needed
     cert_issuer: ccfg.cert_issuer,
-    gcpAuthOptions,
     infrastructureName: ccfg.cluster_name,
     logRetention: retentionConf.logs,
     metricRetention: retentionConf.metrics,
@@ -190,6 +190,11 @@ function* createClusterCore() {
     );
     kubeconfigString = res.kubeconfigString;
     postgreSQLEndpoint = res.postgreSQLEndpoint;
+
+    controllerConfig.gcp = {
+      projectId: gcpAuthOptions!.projectId,
+      certManagerServiceAccount: getCertManagerServiceAccount()
+    };
   }
   if (ccfg.cloud_provider === "aws") {
     const res: EnsureInfraExistsResponse = yield call(ensureAWSInfraExists);

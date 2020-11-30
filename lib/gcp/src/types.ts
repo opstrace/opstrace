@@ -18,6 +18,13 @@ import * as yup from "yup";
 import * as t from "io-ts";
 import { CredentialBody } from "google-auth-library";
 
+export const gcpConfigSchema = yup.object({
+  projectId: yup.string(),
+  certManagerServiceAccount: yup.string()
+});
+
+export type GCPConfig = yup.InferType<typeof gcpConfigSchema>;
+
 export const serviceAccountSchema = yup
   .object({
     auth_uri: yup.string().required(),

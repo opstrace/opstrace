@@ -15,7 +15,7 @@
  */
 
 import * as yup from "yup";
-import { gcpAuthOptionsSchema, GCPAuthOptions } from "@opstrace/gcp";
+import { GCPConfig } from "@opstrace/gcp";
 import { AWSConfig } from "@opstrace/aws";
 
 export const controllerConfigSchema = yup
@@ -68,20 +68,15 @@ export const controllerConfigSchema = yup
         "must be less than 30 characters to be reliably used for cloud infrastructure naming (bigtable has a 30 char limit)"
       ),
 
-    gcpAuthOptions: yup
-      .mixed<GCPAuthOptions | undefined>()
-      .when(["target", "dnsProvider"], {
-        // if target or dnsProvider is gcp, then make this required, otherwise it's not required
-        is: (target: string, dnsProvider: string) =>
-          target === "gcp" || dnsProvider === "gcp",
-        then: () =>
-          gcpAuthOptionsSchema.required(
-            "[internal] must specify gcpAuthOptions"
-          ),
-        otherwise: () => yup.mixed().strip(true)
-      }),
+    mode: yup
+      .mixed<"development" | "production">()
+      .oneOf(["development", "production"])
+      .required("[internal] must specify mode (development | production)"),
+
     // AWS configuration
     aws: yup.mixed<AWSConfig | undefined>(),
+    // GCP configuration
+    gcp: yup.mixed<GCPConfig | undefined>(),
 
     controllerTerminated: yup.bool().default(false)
   })
