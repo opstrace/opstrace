@@ -23,13 +23,13 @@ Before you start: note that throughout the quick start the code blocks are almos
 
 Open a terminal and verify you have the following (we will use the same terminal for the entire quick start):
 
-- For creating the Opstrace cluster in your account...
-  - The [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-    - We recommend `AdministratorAccess` for this quick start; for additional information on permissions and other configuration options please see our [cloud permissions reference](docs/references/cloud-permissions).
-    - While AWS and GCP are supported, we will focus on AWS in this quick start.
-- For sending dummy data to the cluster...
-  - [Docker](https://docs.docker.com/install/)
-  - [Docker Compose](https://docs.docker.com/compose/install/)
+* For creating the Opstrace cluster in your account...
+  * The [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+    * We recommend `AdministratorAccess` for this quick start; for additional information on permissions and other configuration options please see our [cloud permissions reference](docs/references/cloud-permissions).
+    * While AWS and GCP are supported, we will focus on AWS in this quick start.
+* For sending dummy data to the cluster...
+  * [Docker](https://docs.docker.com/install/)
+  * [Docker Compose](https://docs.docker.com/compose/install/)
 
 ```bash
 aws configure list
@@ -137,8 +137,8 @@ Next, let's send in some dummy data to the Opstrace cluster as if it were our ow
 
 Let's get started by creating the following observability workload on your laptop:
 
-- Dummy metrics from [Avalanche](https://github.com/open-fresh/avalanche) scraped with [Prometheus](https://prometheus.io/), which will send them to the Opstrace cluster.
-- Log messages from Avalanche and Prometheus scraped with [FluentD](https://www.fluentd.org/), which will send them to the Opstrace cluster.
+* Dummy metrics from [Avalanche](https://github.com/open-fresh/avalanche) scraped with [Prometheus](https://prometheus.io/), which will send them to the Opstrace cluster.
+* Log messages from Avalanche and Prometheus scraped with [FluentD](https://www.fluentd.org/), which will send them to the Opstrace cluster.
 
 **Launch:** Start the following workloads in the same terminal window you've been using thus far, as shown below in the code blocks below.
 If you do open a new terminal, however, do be sure you're still in the correct directory since these commands will look in `pwd` for the [API token files](/docs/references/concepts#anatomy-of-a-data-api-token-and-how-to-present-it) created during `opstrace create`, and be sure to have your `OPSTRACE_CLUSTER_NAME` environment variable set.
