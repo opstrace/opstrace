@@ -9,6 +9,7 @@ import ModuleView from "./module";
 import ChatView from "./chat";
 import HistoryView from "./history";
 import ClusterView from "./cluster";
+import HelpDialog from "./help";
 import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
 import { ActivityBar } from "./common/ActivityBar";
@@ -85,6 +86,7 @@ const AuthenticatedRoutes = () => {
         />
         <Route key="*" path="*" component={NotFound} />
       </Switch>
+      <HelpDialog />
     </FullPage>
   );
 };

@@ -54,7 +54,7 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
         return state;
       }
       const users = state.users
-        .filter(u => u.email !== state.currentUserId)
+        .filter(u => u.opaque_id !== state.currentUserId)
         .concat({
           ...currentUser,
           preference: {

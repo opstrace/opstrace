@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import IconButton from "@material-ui/core/IconButton";
+import HelpIcon from "@material-ui/icons/HelpOutline";
 import Avatar from "@material-ui/core/Avatar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -14,6 +15,7 @@ import Tracy from "./Tracy";
 import { useHistory, useLocation } from "react-router-dom";
 import { EARLY_PREVIEW } from "client/flags";
 import useCurrentUser from "state/user/hooks/useCurrentUser";
+import { useCommandService } from "client/services/Command";
 
 export const ActivityBarTabs = EARLY_PREVIEW
   ? ["/module", "/chat", "/history", "/registry", "/cluster"]
@@ -27,6 +29,15 @@ const ActivityBarContainer = styled(Box)`
 
 const AvatarButton = styled(IconButton)`
   padding: 0px;
+`;
+
+const HelpButton = styled(IconButton)`
+  padding: 0px;
+
+  .MuiSvgIcon-root {
+    width: 40px;
+    height: 40px;
+  }
 `;
 
 const avatarStyle = { height: 35, width: 35 };
@@ -79,6 +90,8 @@ const ActivityBar = () => {
     }
   }, [activeTabIndex, history, changeTab, pathname]);
 
+  const cmdService = useCommandService();
+
   return (
     <ActivityBarContainer
       display="flex"
@@ -106,22 +119,31 @@ const ActivityBar = () => {
         </Tabs>
       </Box>
       <Box flexGrow={1} display="flex" width={50} alignItems="flex-end">
-        <Box width={50} height={62} p={1} mb={2}>
-          {currentUser?.avatar ? (
-            <AvatarButton onClick={navigateToCurrentUser}>
-              <Avatar
-                alt={currentUser?.username}
-                style={avatarStyle}
-                src={currentUser?.avatar}
-              />
-            </AvatarButton>
-          ) : (
-            <AvatarButton onClick={navigateToCurrentUser}>
-              <Avatar alt={currentUser?.username} style={avatarStyle}>
-                {currentUser?.username.slice(0, 1).toUpperCase()}
-              </Avatar>
-            </AvatarButton>
-          )}
+        <Box>
+          <Box width={50} height={50} p={1} mb={1} ml="-3px">
+            <HelpButton
+              onClick={() => cmdService.executeCommand("open-help-dialog")}
+            >
+              <HelpIcon color="disabled" />
+            </HelpButton>
+          </Box>
+          <Box width={50} height={62} p={1} mb={2}>
+            {currentUser?.avatar ? (
+              <AvatarButton onClick={navigateToCurrentUser}>
+                <Avatar
+                  alt={currentUser?.username}
+                  style={avatarStyle}
+                  src={currentUser?.avatar}
+                />
+              </AvatarButton>
+            ) : (
+              <AvatarButton onClick={navigateToCurrentUser}>
+                <Avatar alt={currentUser?.username} style={avatarStyle}>
+                  {currentUser?.username.slice(0, 1).toUpperCase()}
+                </Avatar>
+              </AvatarButton>
+            )}
+          </Box>
         </Box>
       </Box>
     </ActivityBarContainer>

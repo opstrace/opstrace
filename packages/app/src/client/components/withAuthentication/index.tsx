@@ -49,7 +49,6 @@ export default function WithAuthentication(props: {
           const res = await axios.get("/_/auth/session");
           dispatch(setCurrentUser(res.data.uid));
         } catch (e) {
-        } finally {
           !unmounted && setPending(false);
         }
       })();
@@ -62,11 +61,11 @@ export default function WithAuthentication(props: {
     };
   }, [currentUser, currentUserLoaded, dispatch]);
 
-  if (pending) {
-    return null;
-  }
   if (currentUser) {
     return <>{props.children}</>;
+  }
+  if (pending) {
+    return null;
   }
   return <>{props.onFailure}</>;
 }
