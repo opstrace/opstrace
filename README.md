@@ -21,11 +21,11 @@ Storing data in your cloud provider's object store (e.g. S3) and exposing data r
 
 ## Quick Start
 
-Want to kick the tires?  Spin up an Opstrace cluster in your own cloud account with our [quick start](https://opstrace.com/docs/quickstart).
+Want to kick the tires?  Spin up an Opstrace cluster in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
 
 ## Documentation
 
-You can find our documentation at [opstrace.com](https://opstrace.com/docs).
+You can find the Opstrace documentation at [opstrace.com](https://go.opstrace.com/docs).
 
 
 ## Contributing
