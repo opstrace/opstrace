@@ -28,7 +28,8 @@ import {
   sql_v1beta4,
   ensureServiceAccountExists,
   setCertManagerServiceAccount,
-  setExternalDNSServiceAccount
+  setExternalDNSServiceAccount,
+  setCortexServiceAccount
 } from "@opstrace/gcp";
 import { ensureDNSExists } from "@opstrace/dns";
 import {
@@ -173,6 +174,16 @@ export function* ensureGCPInfraExists(
     kubernetesServiceAccount: "ingress/external-dns"
   });
   setExternalDNSServiceAccount(externalDNSSA);
+
+  // Create a Google service account to be used by cortex.
+  log.info(`Ensuring external-dns service account exists`);
+  const cortexSA = yield call(ensureServiceAccountExists, {
+    name: `${ccfg.cluster_name}-cortex`,
+    projectId: gcpProjectID,
+    role: "roles/storage.admin",
+    kubernetesServiceAccount: "cortex/cortex"
+  });
+  setCortexServiceAccount(cortexSA);
 
   return {
     kubeconfigString: gkeKubeconfigString,

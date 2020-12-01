@@ -21,7 +21,8 @@ import { CredentialBody } from "google-auth-library";
 export const gcpConfigSchema = yup.object({
   projectId: yup.string(),
   certManagerServiceAccount: yup.string(),
-  externalDNSServiceAccount: yup.string()
+  externalDNSServiceAccount: yup.string(),
+  cortexServiceAccount: yup.string()
 });
 
 export type GCPConfig = yup.InferType<typeof gcpConfigSchema>;

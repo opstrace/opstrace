@@ -26,6 +26,7 @@ import {
   Namespace,
   ResourceCollection,
   Service,
+  ServiceAccount,
   StatefulSet,
   V1PrometheusruleResource,
   V1ServicemonitorResource,
@@ -316,6 +317,31 @@ export function CortexResources(
         kind: "Namespace",
         metadata: {
           name: namespace
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  let annotations = {};
+  let serviceAccountName: string | undefined = undefined;
+  if (target == "gcp") {
+    annotations = {
+      "iam.gke.io/gcp-service-account": state.config.config!.gcp!
+        .cortexServiceAccount
+    };
+    serviceAccountName = "cortex";
+  }
+
+  collection.add(
+    new ServiceAccount(
+      {
+        apiVersion: "v1",
+        kind: "ServiceAccount",
+        metadata: {
+          name: "cortex",
+          namespace,
+          annotations: annotations
         }
       },
       kubeConfig
@@ -1215,6 +1241,7 @@ export function CortexResources(
                   ]
                 }
               ],
+              serviceAccountName: serviceAccountName,
               volumes: [
                 {
                   configMap: {
@@ -1516,6 +1543,7 @@ export function CortexResources(
                   ]
                 }
               ],
+              serviceAccountName: serviceAccountName,
               volumes: [
                 {
                   configMap: {

@@ -93,3 +93,16 @@ export function getExternalDNSServiceAccount() {
   }
   return externalDNSSA;
 }
+
+let cortexSA: string | undefined;
+
+export function setCortexServiceAccount(sa: string) {
+  cortexSA = sa;
+}
+
+export function getCortexServiceAccount() {
+  if (cortexSA === undefined) {
+    throw new Error("call setCortexServiceAccount() first");
+  }
+  return cortexSA;
+}
