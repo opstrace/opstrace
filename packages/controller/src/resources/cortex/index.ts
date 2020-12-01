@@ -40,7 +40,7 @@ export function CortexResources(
   namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
-  const { name, infrastructureName, target, region } = getControllerConfig(
+  const { name, infrastructureName, target, region, gcp } = getControllerConfig(
     state
   );
   const bucketName = getBucketName({
@@ -325,10 +325,9 @@ export function CortexResources(
 
   let annotations = {};
   let serviceAccountName: string | undefined = undefined;
-  if (target == "gcp") {
+  if (target === "gcp") {
     annotations = {
-      "iam.gke.io/gcp-service-account": state.config.config!.gcp!
-        .cortexServiceAccount
+      "iam.gke.io/gcp-service-account": gcp!.cortexServiceAccount
     };
     serviceAccountName = "cortex";
   }
@@ -1071,6 +1070,7 @@ export function CortexResources(
                   ]
                 }
               ],
+              serviceAccountName: serviceAccountName,
               volumes: [
                 {
                   configMap: {
@@ -1412,6 +1412,7 @@ export function CortexResources(
                   ]
                 }
               ],
+              serviceAccountName: serviceAccountName,
               volumes: [
                 {
                   configMap: {
