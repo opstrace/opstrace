@@ -21,12 +21,13 @@ Storing data in your cloud provider's object store (e.g. S3) and exposing data r
 
 ## Quick Start
 
-Want to kick the tires?  Spin up an Opstrace cluster in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
+Want to kick the tires?
+Spin up an Opstrace cluster in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
 
 ## Documentation
 
 You can find the Opstrace documentation at [opstrace.com](https://go.opstrace.com/docs).
-We would also like to invite you to improve these docs and have started setting up a [corresponding guide](./docs/guides/contributor/writing-docs.md).
+We would also like to invite you to improve these docs together with us and have started setting up a [corresponding guide](./docs/guides/contributor/writing-docs.md).
 
 
 ## Contributing
@@ -41,7 +42,8 @@ Please join us and make some contributions, however big or small.
 There is of course a lot to do.
 Take a look at our [high-level roadmap](./docs/references/roadmap.md) to see where we're heading, and feel free to get in touch with us regarding questions and suggestions.
 
-IMPORTANT NOTE: We welcome contributions from developers of all backgrounds. We encode that in a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
+IMPORTANT NOTE: We welcome contributions from developers of all backgrounds.
+We encode that in a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
 ## Get In Touch
