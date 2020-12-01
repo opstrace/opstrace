@@ -1,1 +1,2 @@
 packages/app/src/client/components/Editor/lib/workers/modulescript/lib/typescriptServices.js linguist-vendored
+*.md linguist-documentation=false linguist-detectable=true
