@@ -37,6 +37,13 @@ export function* destroyGCPInfra() {
     role: "roles/dns.admin"
   });
 
+  log.info(`Ensure external-dns service account deletion`);
+  yield call(ensureServiceAccountDoesNotExist, {
+    name: `${destroyConfig.clusterName}-external-dns`,
+    projectId: destroyConfig.gcpProjectID!,
+    role: "roles/dns.admin"
+  });
+
   const lokiBucketName = getBucketName({
     clusterName: destroyConfig.clusterName,
     suffix: "loki"
