@@ -1,3 +1,19 @@
+/**
+ * Copyright 2020 Opstrace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { initialState, commandServiceReducer, actions } from "../reducer";
 
 const command1 = {
@@ -17,7 +33,7 @@ const command2 = {
 const mockState = {
   commands: [command1, command2],
   keyBindings: {
-    "shift": [command1]
+    shift: [command1]
   }
 };
 
@@ -44,7 +60,10 @@ describe("handle register action", () => {
   });
 
   test("don't change commands list when it already has this command and update keyBindings", () => {
-    const reducer = commandServiceReducer(mockState, actions.register(command2));
+    const reducer = commandServiceReducer(
+      mockState,
+      actions.register(command2)
+    );
 
     expect(reducer.commands.length).toEqual(2);
     expect(reducer.keyBindings["shift"].length).toEqual(2);
@@ -61,13 +80,19 @@ describe("handle unregister action", () => {
       keybindings: ["shift"]
     };
 
-    const reducer = commandServiceReducer(mockState, actions.unregister(command));
+    const reducer = commandServiceReducer(
+      mockState,
+      actions.unregister(command)
+    );
 
     expect(reducer).toEqual(mockState);
   });
 
   test("remove command from commands list and keyBindings when command is already registered", () => {
-    const reducer = commandServiceReducer(mockState, actions.unregister(command1));
+    const reducer = commandServiceReducer(
+      mockState,
+      actions.unregister(command1)
+    );
 
     expect(reducer.commands.length).toEqual(1);
     expect(reducer.keyBindings["shift"].length).toEqual(0);
