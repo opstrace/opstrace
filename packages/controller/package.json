@@ -15,11 +15,12 @@
     "assets": "**/dashboards/*.json"
   },
   "scripts": {
-    "build": "tsc -b",
-    "watch": "tsc -b -w",
+    "build": "yarn copyGraphqlSdk && tsc -b",
+    "watch": "yarn copyGraphqlSdk && tsc -b -w",
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
-    "lint": "echo done"
+    "lint": "echo done",
+    "copyGraphqlSdk": "cp ../app/src/state/graphql-api-types.ts ./src/dbSDK.ts"
   },
   "dependencies": {
     "argparse": "^1.0.10",
@@ -28,7 +29,10 @@
     "@opstrace/kubernetes": "^0.0.0",
     "@opstrace/tenants": "^0.0.0",
     "@opstrace/utils": "^0.0.0",
-    "@opstrace/controller-config": "^0.0.0"
+    "@opstrace/controller-config": "^0.0.0",
+    "graphql": "^15.0.0",
+    "graphql-request": "^3.0.0",
+    "graphql-tag": "^2.10.3"
   },
   "devDependencies": {
     "@types/argparse": "^1.0.38"
