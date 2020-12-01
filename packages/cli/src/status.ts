@@ -111,11 +111,11 @@ function* rootTaskStatus() {
 }
 
 // Empty reducer to make redux-saga happy.
-const reducer = (state = 0, action: any) => {
+const reducer = (state = 0) => {
   return state;
 };
 
-export async function status() {
+export async function status(): Promise<void> {
   const sm = createSagaMiddleware({ onError: smErrorLastResort });
   createStore(reducer, applyMiddleware(sm));
   await sm.run(rootTaskStatus).toPromise();

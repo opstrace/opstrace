@@ -190,7 +190,7 @@ async function listOpstraceClustersInRegion(
       }
       throw e;
     }
-    const ocn = dcresp.cluster!.tags!.opstrace_cluster_name;
+    const ocn = dcresp.cluster?.tags?.opstrace_cluster_name;
     if (ocn !== undefined) {
       opstraceClusterNames.push(ocn);
     }
@@ -230,7 +230,7 @@ async function listGKEClusters() {
   }
 
   for (const c of clusters) {
-    const ocn = c.resourceLabels!.opstrace_cluster_name;
+    const ocn = c.resourceLabels?.opstrace_cluster_name;
     if (ocn !== undefined) {
       process.stdout.write(`${ocn}\n`);
     }

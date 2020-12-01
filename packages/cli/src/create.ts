@@ -42,7 +42,7 @@ import { BUILD_INFO } from "./buildinfo";
 type PubkeyPemType = string;
 type TenantApiTokensType = Dict<string>;
 
-export async function create() {
+export async function create(): Promise<void> {
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
     schemas.ClusterConfigFileSchemaType,
     InfraConfigTypeAWS | undefined,
