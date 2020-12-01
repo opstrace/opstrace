@@ -54,7 +54,7 @@ async function getServiceAccount({
   } catch (e) {
     // a 404 is expected if the resource does not exist,
     // otherwise throw the error back
-    if (e.code === undefined || e.code !== "404") {
+    if (e.code === undefined || e.code !== 404) {
       throw e;
     }
   }
@@ -94,7 +94,7 @@ async function getIAMPolicy({
     });
     return resp.data;
   } catch (e) {
-    if (e.code === undefined || e.code !== "404") {
+    if (e.code === undefined || e.code !== 404) {
       throw e;
     }
   }
