@@ -37,10 +37,7 @@ export const controllerConfigSchema = yup
     dnsName: yup.string().required(),
     terminate: yup.bool().default(false),
     // https://stackoverflow.com/a/63944333/145400
-    data_api_authn_pubkey_pem: yup
-      .string()
-      .typeError()
-      .strict(true),
+    data_api_authn_pubkey_pem: yup.string().typeError().strict(true),
     disable_data_api_authentication: yup.bool().required(),
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
@@ -67,12 +64,6 @@ export const controllerConfigSchema = yup
         30,
         "must be less than 30 characters to be reliably used for cloud infrastructure naming (bigtable has a 30 char limit)"
       ),
-
-    mode: yup
-      .mixed<"development" | "production">()
-      .oneOf(["development", "production"])
-      .required("[internal] must specify mode (development | production)"),
-
     // AWS configuration
     aws: yup.mixed<AWSConfig | undefined>(),
     // GCP configuration
