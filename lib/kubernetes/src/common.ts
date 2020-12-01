@@ -117,7 +117,7 @@ export class ResourceCollection {
       }, this.resources)
       .map(resource => {
         // don't override ownership if it's already set
-        if (!resource.isProtected() && !resource.shouldPreventUpdate()) {
+        if (!resource.isProtected() && !resource.isImmutable()) {
           resource.setManagementOption({ protect: false });
         }
         return resource;
@@ -174,7 +174,7 @@ export class K8sResource implements Resource {
       ? "protected"
       : "owned";
   }
-  setShouldNeverUpdate() {
+  setImmutable() {
     if (!this.resource.metadata.annotations) {
       this.resource.metadata.annotations = {};
     }
@@ -192,7 +192,7 @@ export class K8sResource implements Resource {
       this.annotations[OPSTRACE_MANAGED_KEY] === "protected"
     );
   }
-  shouldPreventUpdate(): boolean {
+  isImmutable(): boolean {
     return (
       OPSTRACE_MANAGED_KEY in this.annotations &&
       this.annotations[OPSTRACE_MANAGED_KEY] === "no-update"
