@@ -19,6 +19,6 @@
   "nodeExporter": "quay.io/prometheus/node-exporter:v0.18.1",
   "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
   "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1",
-  "graphqlEngine": "opstrace/graphql:4ad7f6e67d00d02587852907454be630",
-  "app": "opstrace/app:4ad7f6e67d00d02587852907454be630"
+  "graphqlEngine": "opstrace/graphql:9b608e7d528871b10ea65429a3aa7f93",
+  "app": "opstrace/app:643d5717b4c62d9b301133962428049c"
 }
