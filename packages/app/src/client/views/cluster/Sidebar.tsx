@@ -1,57 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ListItemAvatar } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
-import Avatar from "@material-ui/core/Avatar";
 import IconButton from "@material-ui/core/IconButton";
 import AddIcon from "@material-ui/icons/Add";
 import useUserList from "state/user/hooks/useUserList";
 
 import { Box } from "client/components/Box";
 import { SideBar, SideBarContainer } from "client/components/SideBar";
-import { List, ButtonListItem, ListItemText } from "client/components/List";
-import { Users, User } from "state/user/types";
+import { User } from "state/user/types";
 import UserPicker from "./UserPicker";
 import AddUserDialog from "./AddUserDialog";
 import { usePickerService } from "client/services/Picker";
 import DeleteUserDialog from "./DeleteUserDialog";
-
-export type UserListProps = {
-  selectedUserIndex: number;
-  users: Users;
-  onSelect: (selectedOption: User) => void;
-};
-
-const avatarStyle = { width: 30, height: 30 };
-
-const UserList = (props: UserListProps) => {
-  const { selectedUserIndex, onSelect } = props;
-
-  const renderItem = useCallback(
-    ({ data, index }: { data: User; index: number }) => (
-      <ButtonListItem
-        selected={index === selectedUserIndex}
-        onClick={() => onSelect(data)}
-        key={data.email}
-      >
-        <ListItemAvatar>
-          {data.avatar ? (
-            <Avatar alt={data.username} style={avatarStyle} src={data.avatar} />
-          ) : (
-            <Avatar alt={data.username} style={avatarStyle}>
-              {data.username.slice(0, 1).toUpperCase()}
-            </Avatar>
-          )}
-        </ListItemAvatar>
-        <ListItemText primary={data.email} />
-      </ButtonListItem>
-    ),
-    [selectedUserIndex, onSelect]
-  );
-
-  return (
-    <List renderItem={renderItem} items={props.users} itemSize={() => 40} />
-  );
-};
+import UserList from "./UserList";
 
 const ClusterSidebar = () => {
   const [selectedUserIndex, setSelectedUserIndex] = useState<number>(-1);
@@ -95,10 +55,10 @@ const ClusterSidebar = () => {
       <AddUserDialog />
       <DeleteUserDialog />
       <SideBar>
-        <SideBarContainer title="Tenants" minHeight={100}>
+        <SideBarContainer title="Tenants" minHeight={100} flexGrow={1}>
           <Box p={1}>placeholder</Box>
         </SideBarContainer>
-        <SideBarContainer title="Users" flexGrow={1} actions={userActions}>
+        <SideBarContainer title="Users" flexGrow={3} actions={userActions}>
           <UserList
             selectedUserIndex={selectedUserIndex}
             onSelect={onUserSelect}
