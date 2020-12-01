@@ -3,6 +3,9 @@ description: >-
   See it for yourself—get your hands dirty with Opstrace by creating a cluster and sending dummy data.
 ---
 
+
+This shouldn't trigger a CI build.
+
 # Opstrace Quick Start
 
 We think the best way to understand Opstrace is to try it for yourself.
