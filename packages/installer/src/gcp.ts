@@ -156,7 +156,9 @@ export function* ensureGCPInfraExists(
   log.info(`Ensuring cert-manager service account exists`);
   const certManagerSA = yield call(ensureServiceAccountExists, {
     name: `${ccfg.cluster_name}-cert-manager`,
-    projectId: gcpProjectID
+    projectId: gcpProjectID,
+    role: "roles/dns.admin",
+    kubernetesServiceAccount: "ingress/cert-manager"
   });
 
   setCertManagerServiceAccount(certManagerSA);
