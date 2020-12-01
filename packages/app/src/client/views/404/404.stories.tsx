@@ -15,11 +15,12 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import NotFound from "./404";
 
 export default {
   title: "Views/404"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return <NotFound />;

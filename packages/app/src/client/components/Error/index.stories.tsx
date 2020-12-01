@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import ErrorBoundary, { ErrorProps } from "./Boundary";
 import ErrorView from "./View";
@@ -22,7 +23,7 @@ import { Typography } from "../Typography";
 
 export default {
   title: "Components/ErrorBoundary"
-};
+} as Meta;
 
 const ThrowRenderErrorComponent = () => {
   throw new Error("I am an error message");

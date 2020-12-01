@@ -15,13 +15,14 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import { Box } from "../Box";
 import SplitPane from "./SplitPane";
 
 export default {
   title: "Components/SplitPane"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

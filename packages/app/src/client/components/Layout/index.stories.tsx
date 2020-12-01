@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import Box from "../Box/Box";
 import Column from "./Column";
@@ -24,7 +25,7 @@ import Row from "./Row";
 
 export default {
   title: "Components/Layout"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

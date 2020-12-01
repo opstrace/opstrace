@@ -16,6 +16,8 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
+/* eslint-disable  @typescript-eslint/no-unused-vars */
+
 declare namespace ts {
   const versionMajorMinor = "3.8";
   /** The version of the TypeScript compiler release */

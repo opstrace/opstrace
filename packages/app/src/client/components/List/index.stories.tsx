@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import List, { VirtualListRenderItemProps } from "./List";
 import { ButtonListItem } from "./ListItem";
 import ListItemSecondaryAction from "./ListItemSecondaryAction";
@@ -23,7 +24,7 @@ import { Box } from "../Box";
 
 export default {
   title: "Components/List"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   const renderItem = ({ index }: VirtualListRenderItemProps) => {

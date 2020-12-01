@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
 import { withKnobs, radios } from "@storybook/addon-knobs";
 
@@ -23,7 +24,7 @@ import Button from "./Button";
 export default {
   title: "Components/Button",
   decorators: [withKnobs]
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   const variant = radios(

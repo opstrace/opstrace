@@ -20,11 +20,12 @@ export type MyComponentWithErrorProps = {
   someProp: string;
 };
 
-export default class MyComponentWithError extends React.Component<
-  MyComponentWithErrorProps
-> {
-  render() {
+export default class MyComponentWithError extends React.Component<MyComponentWithErrorProps> {
+  componentDidMount(): void {
     throw Error("This is a simulated error");
+  }
+
+  render() {
     return null;
   }
 }

@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import { BrowserRouter } from "react-router-dom";
 
 import ExternalLink from "./ExternalLink";
@@ -22,7 +23,7 @@ import Link from "./Link";
 
 export default {
   title: "Components/Link"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

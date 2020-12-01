@@ -15,6 +15,7 @@
  */
 
 import React, { useState } from "react";
+import { Meta } from "@storybook/react";
 
 import Services from "../index";
 import { useNotificationService } from "./NotificationService";
@@ -23,7 +24,7 @@ import { NotificationState } from "./types";
 
 export default {
   title: "Services/Notification"
-};
+} as Meta;
 
 function IWantToUseANotificationService() {
   const randomType = (): NotificationState => {

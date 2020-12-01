@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import "./lib/workers";
 
 import { Box } from "../Box";
@@ -23,7 +24,7 @@ import TextFileModel from "state/file/TextFileModel";
 
 export default {
   title: "Components/Editor"
-};
+} as Meta;
 
 export const ReadOnly = (): JSX.Element => {
   const possiblyForkedFile = {

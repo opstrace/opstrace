@@ -2,7 +2,6 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-"use strict";
 
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import type * as mode from "./msMode";
@@ -391,14 +390,14 @@ var language = {
     "@"
   ],
   // we include these common regular expressions
-  symbols: /[=><!~?:&|+\-*\/\^%]+/,
+  symbols: /[=><!~?:&|+\-*/^%]+/,
   escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
   digits: /\d+(_+\d+)*/,
   octaldigits: /[0-7]+(_+[0-7]+)*/,
   binarydigits: /[0-1]+(_+[0-1]+)*/,
   hexdigits: /[[0-9a-fA-F]+(_+[0-9a-fA-F]+)*/,
-  regexpctl: /[(){}\[\]\$\^|\-*+?\.]/,
-  regexpesc: /\\(?:[bBdDfnrstvwWn0\\\/]|@regexpctl|c[A-Z]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})/,
+  regexpctl: /[(){}[\]$^|\-*+?.]/,
+  regexpesc: /\\(?:[bBdDfnrstvwWn0\\/]|@regexpctl|c[A-Z]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})/,
   // The main tokenizer for our languages
   tokenizer: {
     root: [[/[{}]/, "delimiter.bracket"], { include: "common" }],
@@ -414,17 +413,17 @@ var language = {
           }
         }
       ],
-      [/[A-Z][\w\$]*/, "type.identifier"],
+      [/[A-Z][\w$]*/, "type.identifier"],
       // [/[A-Z][\w\$]*/, 'identifier'],
       // whitespace
       { include: "@whitespace" },
       // regular expression: ensure it is terminated before beginning (otherwise it is an opeator)
       [
-        /\/(?=([^\\\/]|\\.)+\/([gimsuy]*)(\s*)(\.|;|,|\)|\]|\}|$))/,
+        /\/(?=([^\\/]|\\.)+\/([gimsuy]*)(\s*)(\.|;|,|\)|\]|\}|$))/,
         { token: "regexp", bracket: "@open", next: "@regexp" }
       ],
       // delimiters and operators
-      [/[()\[\]]/, "@brackets"],
+      [/[()[\]]/, "@brackets"],
       [/[<>](?!@symbols)/, "@brackets"],
       [/!(?=([^=]|$))/, "delimiter"],
       [
@@ -437,8 +436,8 @@ var language = {
         }
       ],
       // numbers
-      [/(@digits)[eE]([\-+]?(@digits))?/, "number.float"],
-      [/(@digits)\.(@digits)([eE][\-+]?(@digits))?/, "number.float"],
+      [/(@digits)[eE]([-+]?(@digits))?/, "number.float"],
+      [/(@digits)\.(@digits)([eE][-+]?(@digits))?/, "number.float"],
       [/0[xX](@hexdigits)n?/, "number.hex"],
       [/0[oO]?(@octaldigits)n?/, "number.octal"],
       [/0[bB](@binarydigits)n?/, "number.binary"],
@@ -459,14 +458,14 @@ var language = {
       [/\/\/.*$/, "comment"]
     ],
     comment: [
-      [/[^\/*]+/, "comment"],
+      [/[^/*]+/, "comment"],
       [/\*\//, "comment", "@pop"],
-      [/[\/*]/, "comment"]
+      [/[/*]/, "comment"]
     ],
     jsdoc: [
-      [/[^\/*]+/, "comment.doc"],
+      [/[^/*]+/, "comment.doc"],
       [/\*\//, "comment.doc", "@pop"],
-      [/[\/*]/, "comment.doc"]
+      [/[/*]/, "comment.doc"]
     ],
     // We match regular expression quite precisely
     regexp: [
@@ -479,7 +478,7 @@ var language = {
         ]
       ],
       [
-        /(\[)(\^?)(?=(?:[^\]\\\/]|\\.)+)/,
+        /(\[)(\^?)(?=(?:[^\]\\/]|\\.)+)/,
         [
           "regexp.escape.control",
           { token: "regexp.escape.control", next: "@regexrange" }
@@ -488,7 +487,7 @@ var language = {
       [/(\()(\?:|\?=|\?!)/, ["regexp.escape.control", "regexp.escape.control"]],
       [/[()]/, "regexp.escape.control"],
       [/@regexpctl/, "regexp.escape.control"],
-      [/[^\\\/]/, "regexp"],
+      [/[^\\/]/, "regexp"],
       [/@regexpesc/, "regexp.escape"],
       [/\\\./, "regexp.invalid"],
       [

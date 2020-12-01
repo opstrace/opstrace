@@ -15,13 +15,14 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import { radios } from "@storybook/addon-knobs";
 import NotificationsList from "./NotificationsList";
 import NotificationItem from "./NotificationItem";
 
 export default {
   title: "Components/NotificationsList"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

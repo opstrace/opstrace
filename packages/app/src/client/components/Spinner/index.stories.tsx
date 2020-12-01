@@ -15,13 +15,14 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import { Box } from "../Box";
 import Spinner from "./Spinner";
 
 export default {
   title: "Components/Spinner"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

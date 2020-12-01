@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import { usePickerService } from "../Picker";
 import { useCommandService } from "./CommandService";
@@ -23,7 +24,7 @@ import { Button } from "client/components/Button";
 
 export default {
   title: "Services/CommandService"
-};
+} as Meta;
 
 function IWantToUseACommandService() {
   const cmdService = useCommandService({
