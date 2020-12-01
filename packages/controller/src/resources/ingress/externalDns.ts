@@ -44,6 +44,14 @@ export function ExternalDnsResources(
     platformProvider = "aws";
   }
 
+  let annotations = {};
+  if (target == "gcp") {
+    annotations = {
+      "iam.gke.io/gcp-service-account": state.config.config!.gcp!
+        .externalDNSServiceAccount
+    };
+  }
+
   collection.add(
     new ServiceAccount(
       {
@@ -51,7 +59,8 @@ export function ExternalDnsResources(
         kind: "ServiceAccount",
         metadata: {
           name: "external-dns",
-          namespace
+          namespace,
+          annotations: annotations
         }
       },
       kubeConfig
