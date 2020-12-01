@@ -109,12 +109,6 @@ function PickerService({ children }: { children: React.ReactNode }) {
     setSelectedIndex(0);
   }, [activePicker?.activationPrefix]);
 
-  useEffect(() => {
-    if (activePicker?.onInputChange) {
-      activePicker.onInputChange(filterValue || "");
-    }
-  }, [filterValue, activePicker]);
-
   const filteredOptions = activePicker?.disableFilter
     ? options
     : matchSorter(options, filterValue || "", {
