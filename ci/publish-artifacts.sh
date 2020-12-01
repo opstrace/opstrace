@@ -15,8 +15,19 @@ bash ci/check-if-docs-pr.sh && exit 0
 # PR) confidently: when this passes on a PR, then this should imply with
 # _great_ propability that this also passes for `main`.
 
+
+if [ "${BUILDKITE_BRANCH}" != "main" ]; then
+    PR_OR_MAIN="prs/${BUILDKITE_PULL_REQUEST}"
+else
+    PR_OR_MAIN="main"
+fi;
+
+echo "BUILDKITE_PULL_REQUEST: ${BUILDKITE_PULL_REQUEST}"
+echo "PR_OR_MAIN: ${PR_OR_MAIN}"
+
 # For context, see https://github.com/opstrace/opstrace/issues/48
-make tag-controller-image-as-latest-main || true
+# Replace slash with hypen in `PR_OR_MAIN`: prs/1337 -> prs-1337
+docker tag opstrace/controller:${CHECKOUT_VERSION_STRING} opstrace/controller:latest-${PR_OR_MAIN//\//-}
 
 # TODO: provioning as `latest` should be done with an atomic switch instead of
 # relying on individual commands to succeed sequentially (update might fail
@@ -30,16 +41,9 @@ make tag-controller-image-as-latest-main || true
 # objects immediately after creation in Amazon S3.""
 S3_BUCKET_NAME="opstrace-ci-main-artifacts"
 
-if [ "${BUILDKITE_BRANCH}" != "main" ]; then
-    PR_OR_MAIN="prs/${BUILDKITE_PULL_REQUEST}"
-else
-    PR_OR_MAIN="main"
-fi;
 
-echo "BUILDKITE_PULL_REQUEST: ${BUILDKITE_PULL_REQUEST}"
-echo "PR_OR_MAIN: ${PR_OR_MAIN}"
-
-# Must not end with trailing slash.
+# Must not end with trailing slash. Relies on a slash _in_ ${PR_OR_MAIN} when
+# this is PR: e.g., prs/1337
 S3_BURL_CLI="s3://${S3_BUCKET_NAME}/cli/${PR_OR_MAIN}"
 
 # Goal: roughly the following structure:
