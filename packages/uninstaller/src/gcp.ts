@@ -44,6 +44,13 @@ export function* destroyGCPInfra() {
     role: "roles/dns.admin"
   });
 
+  log.info(`Ensure cortex service account deletion`);
+  yield call(ensureServiceAccountDoesNotExist, {
+    name: `${destroyConfig.clusterName}-cortex`,
+    projectId: destroyConfig.gcpProjectID!,
+    role: "roles/storage.admin"
+  });
+
   const lokiBucketName = getBucketName({
     clusterName: destroyConfig.clusterName,
     suffix: "loki"
