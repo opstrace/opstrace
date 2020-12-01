@@ -93,11 +93,7 @@ gcp:
 
 <!--/tabs-->
 
-Note:
-
-* The example above shows the defaults.
-* For now, expect badness when changing the region/zone (cf. issue [1033](opstrace-prelaunch/issues/1033)).
-
+Note: the example above shows the defaults.
 
 ### `env_label`
 
