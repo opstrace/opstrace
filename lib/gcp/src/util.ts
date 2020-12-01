@@ -80,3 +80,16 @@ export function getCertManagerServiceAccount() {
   }
   return certManagerSA;
 }
+
+let externalDNSSA: string | undefined;
+
+export function setExternalDNSServiceAccount(sa: string) {
+  externalDNSSA = sa;
+}
+
+export function getExternalDNSServiceAccount() {
+  if (externalDNSSA === undefined) {
+    throw new Error("call setExternalDNSServiceAccount() first");
+  }
+  return externalDNSSA;
+}
