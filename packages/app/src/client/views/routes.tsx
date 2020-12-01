@@ -73,7 +73,12 @@ const AuthenticatedRoutes = () => {
         {EARLY_PREVIEW && ModuleRoutes}
         {EARLY_PREVIEW && ChatRoutes}
         {EARLY_PREVIEW && HistoryRoutes}
-        <Route exact key="/cluster" path="/cluster" component={ClusterView} />
+        <Redirect
+          exact
+          key="/cluster"
+          from="/cluster"
+          to="/cluster/tenants/system"
+        />
         <Route
           key="/cluster/users/:id"
           path="/cluster/users/:id"

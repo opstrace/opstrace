@@ -16,13 +16,13 @@
 import { createAction } from "typesafe-actions";
 import { SubscriptionID, Tenants } from "./types";
 
-export const subscribeToTenantList = createAction("SUBSCRIBE_USER_LIST")<
+export const subscribeToTenantList = createAction("SUBSCRIBE_TENANT_LIST")<
   SubscriptionID
 >();
 
-export const unsubscribeFromTenantList = createAction("UNSUBSCRIBE_USER_LIST")<
-  SubscriptionID
->();
+export const unsubscribeFromTenantList = createAction(
+  "UNSUBSCRIBE_TENANT_LIST"
+)<SubscriptionID>();
 export const setTenantList = createAction("SET_TENANT_LIST")<Tenants>();
 export const deleteTenant = createAction("DELETE_TENANT")<string>();
 export const addTenant = createAction("ADD_TENANT")<string>();

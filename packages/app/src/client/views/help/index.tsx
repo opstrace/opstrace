@@ -7,6 +7,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { Box } from "client/components/Box";
 import { useCommandService } from "client/services/Command";
 import styled from "styled-components";
+import { Typography } from "client/components/Typography";
 
 const FullPageDialog = styled(Dialog)`
   .MuiPaper-root {
@@ -53,6 +54,8 @@ const Help = () => {
     [open]
   );
 
+  const isMacLike = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+
   return (
     <FullPageDialog open={open} onBackdropClick={() => setOpen(false)}>
       <DialogTitle>
@@ -72,7 +75,18 @@ const Help = () => {
           alignItems="center"
           flexWrap="wrap"
         >
-          placeholder
+          <Box>
+            <Box p={2} width="100%" textAlign="center">
+              <Typography variant="h6" color="textSecondary">
+                {isMacLike ? "⌘ + p" : "⌃ + p"}
+              </Typography>
+            </Box>
+            <Box p={2}>
+              <Typography>
+                Use the command pallete to navigate with contextual commands.
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </DialogContent>
     </FullPageDialog>

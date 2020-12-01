@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 
 import { Box } from "client/components/Box";
 import { deleteUser } from "state/user/actions";
+import { deleteTenant } from "state/tenant/actions";
 
 import useUserList from "state/user/hooks/useUserList";
 import Layout from "client/layout/MainContent";
@@ -17,9 +18,11 @@ import { Button } from "client/components/Button";
 import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
 import useCurrentUser from "state/user/hooks/useCurrentUser";
+import useTenantList from "state/tenant/hooks/useTenantList";
+import { ExternalLink } from "client/components/Link";
 
 const AttributeKey = (props: { children: React.ReactNode }) => (
-  <Box p={3} pt={2} pb={2}>
+  <Box pt={2} pb={2}>
     <Typography variant="h6" color="textSecondary">
       {props.children}
     </Typography>
@@ -34,12 +37,17 @@ const AttributeValue = (props: { children: React.ReactNode }) => (
 const Cluster = () => {
   const params = useParams<{ id?: string; tenant?: string }>();
   const users = useUserList();
+  const tenants = useTenantList();
   const currentUser = useCurrentUser();
   const dispatch = useDispatch();
 
   const selectedUser = useMemo(
     () => users.find(u => u.opaque_id === params.id),
     [params.id, users]
+  );
+  const selectedTenant = useMemo(
+    () => tenants.find(t => t.name === params.tenant),
+    [params.tenant, tenants]
   );
 
   const { activatePickerWithText } = usePickerService(
@@ -65,6 +73,30 @@ const Cluster = () => {
       }
     },
     [selectedUser?.email]
+  );
+  usePickerService(
+    {
+      title: `Delete ${selectedTenant?.name}?`,
+      activationPrefix: "delete tenant directly?:",
+      disableFilter: true,
+      disableInput: true,
+      options: [
+        {
+          id: "yes",
+          text: `yes`
+        },
+        {
+          id: "no",
+          text: "no"
+        }
+      ],
+      onSelected: option => {
+        if (option.id === "yes" && selectedTenant?.name) {
+          dispatch(deleteTenant(selectedTenant?.name));
+        }
+      }
+    },
+    [selectedTenant?.name]
   );
 
   const cmdService = useCommandService();
@@ -137,7 +169,7 @@ const Cluster = () => {
                     <AttributeKey>Username:</AttributeKey>
                     <AttributeKey>Email:</AttributeKey>
                     <AttributeKey>Last Login:</AttributeKey>
-                    <AttributeKey>Created At:</AttributeKey>
+                    <AttributeKey>Created:</AttributeKey>
                   </Box>
                   <Box display="flex" flexDirection="column" flexGrow={1}>
                     <AttributeValue>{selectedUser.role}</AttributeValue>
@@ -153,6 +185,66 @@ const Cluster = () => {
                 </Box>
               </CardContent>
             </Card>
+          </Box>
+        </Box>
+      );
+    }
+
+    if (selectedTenant) {
+      return (
+        <Box
+          width="100%"
+          height="100%"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
+          p={1}
+        >
+          <Box maxWidth={700}>
+            <Card p={3}>
+              <CardHeader
+                titleTypographyProps={{ variant: "h5" }}
+                action={
+                  <Box ml={3} display="flex" flexWrap="wrap">
+                    <Box p={1}>
+                      <Button
+                        variant="outlined"
+                        size="medium"
+                        disabled={selectedTenant.type === "SYSTEM"}
+                        onClick={() =>
+                          activatePickerWithText("delete tenant directly?: ")
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </Box>
+                  </Box>
+                }
+                title={selectedTenant.name}
+              />
+              <CardContent>
+                <Box display="flex">
+                  <Box display="flex" flexDirection="column">
+                    <AttributeKey>Grafana:</AttributeKey>
+                    <AttributeKey>Created:</AttributeKey>
+                  </Box>
+                  <Box display="flex" flexDirection="column" flexGrow={1}>
+                    <AttributeValue>
+                      <ExternalLink
+                        href={`${window.location.protocol}//${selectedTenant.name}.${window.location.host}`}
+                      >
+                        {`${selectedTenant.name}.${window.location.host}`}
+                      </ExternalLink>
+                    </AttributeValue>
+                    <AttributeValue>{selectedTenant.created_at}</AttributeValue>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+            <Typography color="textSecondary">
+              New tenants can take 5 mins to provision and for dns to propagate
+            </Typography>
           </Box>
         </Box>
       );
