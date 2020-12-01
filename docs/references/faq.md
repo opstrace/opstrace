@@ -1,49 +1,38 @@
 ---
-description: Get to know Opstrace through the most frequently asked questions.
+description: The answers to some of the most common questions we hear.
 ---
 
 # Frequently Asked Questions
 
-## What is Opstrace?
+## How does this work with—or replace—my existing Prometheus?
 
-Opstrace is the only complete, open-core observability platform.
-We bundle and extend the best-of-breed open source solutions so you can focus more on what matters—your own business.
+If you're already using Prometheus, it's very easy to get started with Opstrace.
+As shown in our [docs](./sending-metrics-with-prometheus.md#remote_write-configuration-block-the-basics), all you need to do is add a couple of lines to your Prometheus configuration and your data will also be sent securely to the Opstrace cluster.
+One great advantage is that you can now reduce the footprint of your Prometheus instance, as all long-term storage is now safely done by a [Cortex](https://github.com/cortexproject/cortex/) instance in your S3 buckets.
 
-## Why would I use Opstrace instead of Prometheus + Grafana?
+## Can I run this on my own Kubernetes cluster?
 
-Opstrace provides a simpler administrative interface as well as advanced features such as reliable, long-term storage.
-Many people install and operate these open source projects themselves, but it takes a lot of effort—Opstrace simplifies all of this.
+In order to provide a reliable experience, we control the entire infrastructure from end to end.
+Opstrace is best used in its own account spearately from the infrastructure its meant to monitor.
+Running Opstrace on your own Kubernetes cluster would defeat the purpose by putting the burden of resource management and operations on your own team.
 
-## Is this production-ready?
+## Can I use this in production?
 
-Not yet, but we're working on it.
-Opstrace is currently a preview release.
-We hope feedback and contributions from the community will help accelerate this goal.
+Opstrace is currently released as early access.
+We wanted to get it out to the public as soon as it had enough to be useful to some people.
 
-## How do I use my own DNS?
+## How do I use my own domain?
 
-Our `*.opstrace.io` domain is provided as a convenience to users as a fast method for getting started.
-However, we do understand that you will want to use your own domain for production purposes.
-This is an enterprise feature, so if you are interested please email us at <hello@opstrace.com>.
+Our `*.opstrace.io` domain is provided to our users for free as a convenience.
+To use a custom domain, [email us](mailto:hello@opstrace.com) about our commercial version.
 
-## Can I use the Kubernetes orchestration components on their own?
+## How do I connect to my single sign-on provider, such as Okta?
 
-Not at this time.
-Although we may productize this work in the future, that is not currently planned.
-Let us know what you think in our [GitHub Discussions](https://go.opstrace.com/community).
+The built-in authentication is provided to our users for free as a convenience.
+To configure single sign-on [email us](mailto:hello@opstrace.com) about our commercial version.
 
-## Can I use the UI standalone?
+## How is your commercial version priced?
 
-Not at this time.
-The Opstrace UI is intended to be the centerpiece of our platform, and may not always maintain compatibility with existing APIs.
-
-## Will Opstrace always be open source?
-
-Yes! We believe in the power of open source communities.
-In the past, we've both benefited from them and contributed to them, and feel strongly that this model promotes success for everyone involved.
-However, Opstrace _will_ have some commercial component targeted toward commercial buyers who have specific needs.
-
-## If I already have a Kubernetes cluster, can I use that instead?
-
-We use your cloud provider's hosted Kubernetes offering to fully orchestrate our workflows; it's part of what makes Opstrace reliable—we control all parts of the stack.
-Instead of thinking "can I use my existing k8s cluster," think "I am installing Opstrace somewhere on my network, over which I have full control... unlike our former big SaaS provider."
+Just because you send more and more data to the Opstrace cluster doesn't mean you should pay us more.
+We charge a flat _per-user_ price.
+Because we make money by people who gain value from our platform, we are therefore highly aligned with our users to be both transparent about the overall costs and to work to drive down those costs (which is typically dominated by the backend storage).
