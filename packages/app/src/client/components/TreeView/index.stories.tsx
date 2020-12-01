@@ -15,13 +15,14 @@
  */
 
 import React, { useCallback, useState } from "react";
+import { Meta } from "@storybook/react";
 
 import ModuleTreeView from "./ModuleTreeView";
 import ModuleTreeViewContainer from "./ModuleTreeViewContainer";
 
 export default {
   title: "Components/ModuleTreeView"
-};
+} as Meta;
 
 export const SingleModule = (): JSX.Element => {
   const [selected, setSelected] = useState("");

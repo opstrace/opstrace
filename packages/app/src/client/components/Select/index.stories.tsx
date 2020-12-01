@@ -15,12 +15,13 @@
  */
 
 import React, { useState } from "react";
+import { Meta } from "@storybook/react";
 
 import Select from "./Select";
 
 export default {
   title: "Components/Select"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   const [value, setValue] = useState("2.0.0");

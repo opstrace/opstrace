@@ -15,12 +15,13 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import Emoji from "./Emoji";
 
 export default {
   title: "Components/Emoji"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

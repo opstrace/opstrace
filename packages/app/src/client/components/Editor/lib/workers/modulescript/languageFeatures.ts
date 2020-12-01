@@ -2,7 +2,6 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-"use strict";
 
 import { LanguageServiceDefaultsImpl } from ".";
 import * as ts from "./lib/typescriptServices";
@@ -476,7 +475,7 @@ export class SuggestAdapter
     item: monaco.languages.CompletionItem,
     token: CancellationToken
   ): Promise<monaco.languages.CompletionItem> {
-    const myItem = <MyCompletionItem>item;
+    const myItem = item as MyCompletionItem;
     const resource = myItem.uri;
     const position = myItem.position;
     const offset = model.getOffsetAt(position);
@@ -490,7 +489,7 @@ export class SuggestAdapter
     if (!details || model.isDisposed()) {
       return myItem;
     }
-    return <MyCompletionItem>{
+    return {
       uri: resource,
       position: position,
       label: details.name,
@@ -499,7 +498,7 @@ export class SuggestAdapter
       documentation: {
         value: displayPartsToString(details.documentation)
       }
-    };
+    } as MyCompletionItem;
   }
 
   private static convertKind(
@@ -672,12 +671,12 @@ export class OccurrencesAdapter
     }
 
     return entries.map(entry => {
-      return <monaco.languages.DocumentHighlight>{
+      return {
         range: this._textSpanToRange(model, entry.textSpan),
         kind: entry.isWriteAccess
           ? monaco.languages.DocumentHighlightKind.Write
           : monaco.languages.DocumentHighlightKind.Text
-      };
+      } as monaco.languages.DocumentHighlight;
     });
   }
 }
@@ -812,9 +811,8 @@ export class OutlineAdapter
       let result: monaco.languages.DocumentSymbol = {
         name: item.text,
         detail: "",
-        kind: <monaco.languages.SymbolKind>(
-          (outlineTypeTable[item.kind] || monaco.languages.SymbolKind.Variable)
-        ),
+        kind: (outlineTypeTable[item.kind] ||
+          monaco.languages.SymbolKind.Variable) as monaco.languages.SymbolKind,
         range: this._textSpanToRange(model, item.spans[0]),
         selectionRange: this._textSpanToRange(model, item.spans[0]),
         tags: [],

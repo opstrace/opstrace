@@ -18,7 +18,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-"use strict";
+
 import * as Events from "events";
 import * as ts from "./lib/typescriptServices";
 import { libFileMap } from "./lib/lib";
@@ -225,11 +225,11 @@ export class ModuleScriptWorker
       return;
     }
 
-    return <ts.IScriptSnapshot>{
+    return {
       getText: (start, end) => text.substring(start, end),
       getLength: () => text.length,
       getChangeRange: () => undefined
-    };
+    } as ts.IScriptSnapshot;
   }
 
   getScriptKind?(fileName: string): ts.ScriptKind {
@@ -290,12 +290,12 @@ export class ModuleScriptWorker
     // contains cyclic data structures.
     diagnostics.forEach(diag => {
       diag.file = undefined;
-      const related = <ts.Diagnostic[]>diag.relatedInformation;
+      const related = diag.relatedInformation as ts.Diagnostic[];
       if (related) {
         related.forEach(diag2 => (diag2.file = undefined));
       }
     });
-    return <monaco.languages.typescript.Diagnostic[]>diagnostics;
+    return diagnostics as monaco.languages.typescript.Diagnostic[];
   }
 
   getSyntacticDiagnostics(

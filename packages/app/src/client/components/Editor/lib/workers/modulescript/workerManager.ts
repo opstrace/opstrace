@@ -2,7 +2,6 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-"use strict";
 
 import { LanguageServiceDefaultsImpl } from ".";
 import { ModuleScriptWorker } from "./msWorker";
@@ -73,7 +72,7 @@ export class WorkerManager {
         }
       });
 
-      let p = <Promise<ModuleScriptWorker>>this._worker.getProxy();
+      let p = this._worker.getProxy() as Promise<ModuleScriptWorker>;
 
       if (this._defaults.getEagerModelSync()) {
         p = p.then(worker => {

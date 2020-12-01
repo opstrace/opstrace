@@ -15,12 +15,13 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import SideBar from "./SideBar";
 
 export default {
   title: "Components/SideBar"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return <SideBar>some child component</SideBar>;

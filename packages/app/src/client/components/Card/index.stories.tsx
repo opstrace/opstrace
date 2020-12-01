@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import Card from "./Card";
 import CardActions from "./CardActions";
@@ -26,7 +27,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 
 export default {
   title: "Components/Card"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import AsyncComponent from "./AsyncComponent";
 
 // import just the prop types - this won't include the actual components in this bundle
@@ -23,7 +24,7 @@ import { MyComponentWithErrorProps } from "./mocks/MyComponentWithError";
 
 export default {
   title: "Components/AsyncComponent"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   const Component = AsyncComponent<MyComponentProps>(() =>

@@ -15,12 +15,13 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import Page from "./Page";
 
 export default {
   title: "Components/Page"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return <Page>Some content</Page>;

@@ -15,12 +15,13 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import Typography from "./Typography";
 
 export default {
   title: "Components/Typography"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

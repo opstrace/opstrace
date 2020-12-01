@@ -15,12 +15,13 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import Services from "../../services";
 import Login from ".";
 
 export default {
   title: "Views/Login"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

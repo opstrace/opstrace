@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 /* eslint-disable no-restricted-globals */
-"use strict";
 
 import * as worker from "monaco-editor-core/esm/vs/editor/editor.worker";
 import { ModuleScriptWorker, ICreateData } from "./msWorker";

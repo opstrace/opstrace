@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 import { makeStyles } from "@material-ui/core/styles";
 import Avatar from "@material-ui/core/Avatar";
 
@@ -33,7 +34,7 @@ import Box from "../Box/Box";
 
 export default {
   title: "Components/Dialog"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   const [open, setOpen] = React.useState(false);

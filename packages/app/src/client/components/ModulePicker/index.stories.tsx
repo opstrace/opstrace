@@ -15,13 +15,14 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import ModulePicker from "./ModulePicker";
 import Services from "../../services";
 
 export default {
   title: "Components/ModulePicker"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

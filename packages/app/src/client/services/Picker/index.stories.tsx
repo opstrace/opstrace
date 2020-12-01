@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useCallback } from "react";
+import { Meta } from "@storybook/react";
 
 import { usePickerService } from "./PickerService";
 import { PickerOption } from "./types";
@@ -23,7 +24,7 @@ import Services from "../index";
 
 export default {
   title: "Services/Picker"
-};
+} as Meta;
 
 function IWantToUseAPicker() {
   const [options, setOptions] = React.useState([
@@ -47,16 +48,16 @@ function IWantToUseAPicker() {
     [options.length]
   );
 
-  const addOption = () => {
+  const addOption = useCallback(() => {
     const now = Date.now().toString();
     setOptions([...options, { id: now, text: now }]);
-  };
+  }, [options]);
 
   // example of updating options in the background
   React.useEffect(() => {
     const id = setInterval(addOption, 2000);
     return () => clearInterval(id);
-  }, [options.length]);
+  }, [options.length, addOption]);
 
   return (
     <>
