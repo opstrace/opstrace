@@ -243,7 +243,7 @@ const Cluster = () => {
               </CardContent>
             </Card>
             <Typography color="textSecondary">
-              New tenants can take 5 mins to provision and for dns to propagate
+              New tenants can take 5 minutes to provision with dns propagation
             </Typography>
           </Box>
         </Box>
