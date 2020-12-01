@@ -13,7 +13,7 @@
     "watch": "tsc -b -w",
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
-    "lint": "echo done"
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
     "@opstrace/tenants": "^0.0.0",
