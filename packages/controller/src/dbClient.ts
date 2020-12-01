@@ -15,18 +15,10 @@
  */
 import { GraphQLClient } from "graphql-request";
 import { getSdk } from "./dbSDK";
-import { log } from "@opstrace/utils";
 
 // Make this optional, so that running the controller locally during dev
 // doesn't require a connection to the db.
 const endpoint = process.env.GRAPHQL_ENDPOINT;
-
-if (!endpoint) {
-  log.warning(
-    "no env var GRAPHQL_ENDPOINT configured. This is ok, but the controller will not respond to tenant updates"
-  );
-}
-
 const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
 
 if (endpoint && !adminSecret) {
