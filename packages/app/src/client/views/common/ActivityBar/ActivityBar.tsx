@@ -68,7 +68,12 @@ const ActivityBar = () => {
   );
 
   const handleChange = (event: React.ChangeEvent<{}>, index: number) => {
-    changeTab(index);
+    if (index !== activeTabIndex) {
+      changeTab(index);
+    } else {
+      // toggle the sidebar
+      cmdService.executeCommand("toggle-sidebar-visibility");
+    }
   };
 
   const navigateToCurrentUser = useCallback(() => {
