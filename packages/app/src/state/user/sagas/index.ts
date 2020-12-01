@@ -15,10 +15,10 @@
  */
 import { all, select, take, call, spawn } from "redux-saga/effects";
 import * as actions from "../actions";
-import graphqlClient from "state/graphqlClient";
-import { State } from "state/reducer";
+import graphqlClient, { User } from "state/graphqlClient";
 
 import userListSubscriptionManager from "./userListSubscription";
+import { getCurrentUser } from "../hooks/useCurrentUser";
 
 export default function* userTaskManager() {
   const sagas = [
@@ -85,13 +85,15 @@ function* persistDarkModePreference() {
     const action: ReturnType<typeof actions.setDarkMode> = yield take(
       actions.setDarkMode
     );
-    const state: State = yield select();
-    const email = state.users.currentUserId;
-    if (!email) {
+    const user: User | undefined = yield select(getCurrentUser);
+    if (!user?.email) {
       return;
     }
     try {
-      yield graphqlClient.SetDarkMode({ email, darkMode: action.payload });
+      yield graphqlClient.SetDarkMode({
+        email: user.email,
+        darkMode: action.payload
+      });
     } catch (err) {
       console.error(err);
     }
