@@ -324,6 +324,31 @@
       filter: {}
 - table:
     schema: public
+    name: tenant
+  insert_permissions:
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - name
+      - type
+      backend_only: false
+  select_permissions:
+  - role: user_admin
+    permission:
+      columns:
+      - created_at
+      - name
+      - type
+      filter: {}
+  delete_permissions:
+  - role: user_admin
+    permission:
+      filter:
+        type:
+          _ne: SYSTEM
+- table:
+    schema: public
     name: user
   object_relationships:
   - name: preference

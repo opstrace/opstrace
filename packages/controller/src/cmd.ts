@@ -26,22 +26,25 @@ import { fetch as fetchTenants } from "@opstrace/tenants";
 
 import { setLogger, buildLogger, log } from "@opstrace/utils";
 
+// has to be set before we import the tasks because they depend
+// on the logger
+setLogger(
+  buildLogger({
+    stderrLevel: "info",
+    filePath: undefined
+  })
+);
+
 import {
   reconciliationLoop,
   runInformers,
   blockUntilCacheHydrated,
-  runReporter
+  runReporter,
+  syncTenants
 } from "./tasks";
 import { rootReducer } from "./reducer";
 
 function* core() {
-  setLogger(
-    buildLogger({
-      stderrLevel: "info",
-      filePath: undefined
-    })
-  );
-
   const parser = new argparse.ArgumentParser({
     description: "Opstrace controller"
   });
@@ -88,6 +91,9 @@ function* core() {
 
   log.info(`starting kubernetes readiness reporter`);
   yield fork(runReporter);
+
+  log.info(`starting tenant sync`);
+  yield fork(syncTenants, kubeConfig);
 
   log.info(`starting reconciliation`);
   yield fork(reconciliationLoop, kubeConfig);

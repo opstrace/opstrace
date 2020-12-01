@@ -1,0 +1,7 @@
+query GetTenants {
+  tenant {
+    name
+    created_at
+    type
+  }
+}
