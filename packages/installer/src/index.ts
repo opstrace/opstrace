@@ -42,7 +42,8 @@ import { getKubeConfig, k8sListNamespacesOrError } from "@opstrace/kubernetes";
 import {
   getValidatedGCPAuthOptionsFromFile,
   GCPAuthOptions,
-  getCertManagerServiceAccount
+  getCertManagerServiceAccount,
+  getExternalDNSServiceAccount
 } from "@opstrace/gcp";
 import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
@@ -193,7 +194,8 @@ function* createClusterCore() {
 
     controllerConfig.gcp = {
       projectId: gcpAuthOptions!.projectId,
-      certManagerServiceAccount: getCertManagerServiceAccount()
+      certManagerServiceAccount: getCertManagerServiceAccount(),
+      externalDNSServiceAccount: getExternalDNSServiceAccount()
     };
   }
   if (ccfg.cloud_provider === "aws") {
