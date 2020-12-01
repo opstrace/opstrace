@@ -11,10 +11,15 @@
 
 # Secure observability, deployed in your own network
 
-<!-- TODO: we don't have a summary in paragraph form -->
-Opstrace is the best way to run open source observability in your own cloud account, with the simple user experience of a typical SaaS vendor.
+<!-- TODO: review this; trying to make sentences from our "three-liners" -->
 
-<!-- TODO: we should probably add the feature list here, once we have it, no? -->
+Opstrace deploys secure, horizontally-scalable open source observability in your own cloud account, combining open APIs with the simple user experience of a large service provider.
+
+Since **data never leaves your network**, it remains private.
+
+With **authenticated multi-tenant APIs** each team or environment can have their own protected sandbox to work with (tenants offer authorization and rate-limiting).
+
+Storing data in your cloud provider's object store (e.g. S3) and exposing data retention primitives makes cost **controllable, and up to 10x cheaper** than popular metered service providers.
 
 ## Quick Start
 
