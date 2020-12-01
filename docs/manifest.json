@@ -26,7 +26,7 @@
             },
             {
               "title": "Sending Logs with Promtail",
-              "path": "/docs/guides/user/sending-logs-with-fluentd.md"
+              "path": "/docs/guides/user/sending-logs-with-promtail.md"
             },
             {
               "title": "Instrumenting a K8s Cluster",
