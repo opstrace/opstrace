@@ -27,7 +27,11 @@ echo "PR_OR_MAIN: ${PR_OR_MAIN}"
 
 # For context, see https://github.com/opstrace/opstrace/issues/48
 # Replace slash with hypen in `PR_OR_MAIN`: prs/1337 -> prs-1337
+set -x
 docker tag opstrace/controller:${CHECKOUT_VERSION_STRING} opstrace/controller:latest-${PR_OR_MAIN//\//-}
+# The tag was local only, push it into the docker hub repo
+docker push opstrace/controller:latest-${PR_OR_MAIN//\//-}
+set +x
 
 # TODO: provioning as `latest` should be done with an atomic switch instead of
 # relying on individual commands to succeed sequentially (update might fail
