@@ -27,7 +27,8 @@ import {
   ensureCloudSQLExists,
   sql_v1beta4,
   ensureServiceAccountExists,
-  setCertManagerServiceAccount
+  setCertManagerServiceAccount,
+  setExternalDNSServiceAccount
 } from "@opstrace/gcp";
 import { ensureDNSExists } from "@opstrace/dns";
 import {
@@ -162,6 +163,16 @@ export function* ensureGCPInfraExists(
   });
 
   setCertManagerServiceAccount(certManagerSA);
+
+  // Create a Google service account to be used by external-dns.
+  log.info(`Ensuring external-dns service account exists`);
+  const externalDNSSA = yield call(ensureServiceAccountExists, {
+    name: `${ccfg.cluster_name}-external-dns`,
+    projectId: gcpProjectID,
+    role: "roles/dns.admin",
+    kubernetesServiceAccount: "ingress/external-dns"
+  });
+  setExternalDNSServiceAccount(externalDNSSA);
 
   return {
     kubeconfigString: gkeKubeconfigString,
