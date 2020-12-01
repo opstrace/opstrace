@@ -33,7 +33,6 @@ export type PickerProvider = {
   disableInput?: boolean;
   activationPrefix: string;
   onSelected: (option: PickerOption, inputText?: string) => void;
-  onInputChange?: (text: string) => void;
   options: PickerOption[];
 };
 
