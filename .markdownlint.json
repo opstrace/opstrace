@@ -11,6 +11,7 @@
     "code_blocks": false,
     "names": [
       "hello@opstrace.com",
+      "security@opstrace.com",
       "Alertmanager",
       "Auth0",
       "Grafana",

@@ -11,8 +11,6 @@
 
 # Secure observability, deployed in your own network
 
-<!-- TODO: review this; trying to make sentences from our "three-liners" -->
-
 Opstrace deploys secure, horizontally-scalable open source observability in your own cloud account, combining open APIs with the simple user experience of a large service provider.
 
 Since **data never leaves your network**, it remains private.
@@ -23,7 +21,7 @@ Storing data in your cloud provider's object store (e.g. S3) and exposing data r
 
 ## Quick Start
 
-To try Opstrace for yourself you can get started with our quick start: [https://go.opstrace.com/quickstart](https://go.opstrace.com/quickstart).
+Spin up an Opstrace cluster in your own cloud account to kick the tires with our quick start: [https://go.opstrace.com/quickstart](https://go.opstrace.com/quickstart).
 
 ## Contributing
 
@@ -54,4 +52,4 @@ We want to build the system we'd build for ourselves if it was our full-time job
 ## Security Reports
 
 We take security seriously.
-If you believe you have found a security issue in our project or any related projects, please contact us at <security@opstrace.com> to responsibly disclose the issue.
+If you believe you have found a security issue in our project or any related projects, please email us at [security@opstrace.com](mailto:security@opstrace.com) to responsibly disclose the issue.
