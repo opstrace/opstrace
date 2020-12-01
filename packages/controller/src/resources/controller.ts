@@ -64,6 +64,7 @@ export function ControllerResources({
   // The value of this secret can always be updated manually in the cluster if needs be (kubectl delete <name> -n application) and the controller will create a new one.
   // The corresponding deployment pods that consume it will need to be restarted also to get the new env var containing the new secret.
   hasuraAdminSecret.setImmutable();
+  collection.add(hasuraAdminSecret);
 
   collection.add(
     new Deployment(
