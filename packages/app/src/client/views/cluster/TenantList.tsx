@@ -44,4 +44,4 @@ const TenantList = (props: TenantListProps) => {
   );
 };
 
-export default TenantList;
+export default React.memo(TenantList);

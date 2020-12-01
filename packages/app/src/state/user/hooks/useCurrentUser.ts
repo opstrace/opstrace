@@ -23,17 +23,25 @@ export const getCurrentUserId = (state: State) => state.users.currentUserId;
 
 export const getUsers = (state: State) => state.users.users;
 
+export const getCurrentUserIdLoaded = (state: State) =>
+  state.users.currentUserIdLoaded;
+
+export const getUsersLoading = (state: State) => state.users.loading;
+
 export const getCurrentUser = createSelector(
   getUsers,
   getCurrentUserId,
   (users, currentUserId) => users.find(u => u.opaque_id === currentUserId)
 );
 
-export const getCurrentUserIdLoaded = (state: State) =>
-  state.users.currentUserIdLoaded;
+export const getCurrentUserLoaded = createSelector(
+  getCurrentUserIdLoaded,
+  getUsersLoading,
+  (currentUserLoaded, usersLoading) => currentUserLoaded && !usersLoading
+);
 
 export function useCurrentUserLoaded() {
-  return useSelector(getCurrentUserIdLoaded);
+  return useSelector(getCurrentUserLoaded);
 }
 
 /**

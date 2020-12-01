@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useContext } from "react";
+import React, { useCallback, useEffect, useContext, useMemo } from "react";
 import hotkeys from "hotkeys-js";
 
 import type {
@@ -94,7 +94,9 @@ export function useCommandService(command?: Command, dependencies?: any[]) {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, dependencies || []);
 
-  return { executeCommand: commandService.executeCommand };
+  return useMemo(() => ({ executeCommand: commandService.executeCommand }), [
+    commandService.executeCommand
+  ]);
 }
 
 export default React.memo(CommandContextProvider);

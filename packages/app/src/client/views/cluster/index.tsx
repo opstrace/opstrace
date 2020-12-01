@@ -255,7 +255,9 @@ const Cluster = () => {
     );
   };
 
-  return <Layout sidebar={SideBar}>{getContent()}</Layout>;
+  const content = getContent();
+
+  return <Layout sidebar={SideBar}>{content}</Layout>;
 };
 
 export default Cluster;

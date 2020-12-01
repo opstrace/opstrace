@@ -205,14 +205,12 @@ export function usePickerService(
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, dependencies || []);
 
-  if (!provider) {
-    return {
+  return useMemo(
+    () => ({
       activatePickerWithText: picker.setText
-    };
-  }
-  return {
-    activatePickerWithText: picker.setText
-  };
+    }),
+    [picker.setText]
+  );
 }
 
 export default React.memo(PickerService);

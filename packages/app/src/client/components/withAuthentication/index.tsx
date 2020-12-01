@@ -39,7 +39,7 @@ export default function WithAuthentication(props: {
   useEffect(() => {
     let unmounted = false;
 
-    if (currentUser?.email) {
+    if (currentUserLoaded) {
       setPending(false);
       return;
     }
@@ -52,9 +52,6 @@ export default function WithAuthentication(props: {
           !unmounted && setPending(false);
         }
       })();
-    }
-    if (!currentUser?.email && currentUserLoaded) {
-      setPending(false);
     }
     return () => {
       unmounted = true;
