@@ -117,3 +117,16 @@ aws s3 cp "${FNAME_AWSAPICALLS}" \
     --acl public-read
 
 echo "done: publishing artifacts to S3"
+
+if [ "${BUILDKITE_BRANCH}" == "main" ]; then
+    # pragmatic test: did the upload succeed?
+    set -x
+    mkdir -p dir-for-testing-download
+    curl -L https://opstrace-ci-main-artifacts.s3-us-west-2.amazonaws.com/cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2 | \
+        tar xjf - -C dir-for-testing-download
+    # Expect this "latest" to match what was just uploaded. That is certainly
+    # subject to race conditions and S3 eventual consistency struggles -- but
+    # we can also assume that the scheduled build from main runs only a couple
+    # of times per day, and that not with concurrency.
+    ./dir-for-testing-download/opstrace --version | grep "${CHECKOUT_VERSION_STRING}"
+fi
