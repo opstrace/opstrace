@@ -56,12 +56,12 @@ steps:
     allow_dependency_failure: true
     command:
       - source ci/wipe-bk-tmp-dir.sh
-  - label: "🔨 publish opstrace-cli"
-    key: "publish-opstrace-cli"
+  - label: "🔨 publish artifacts"
+    key: "publish-artifacts"
     depends_on:
       - "maintest-gcp"
       - "maintest-aws"
       - "check-docs"
     allow_dependency_failure: false
     command:
-      - cd "${OPSTRACE_PREBUILD_DIR}" && make ci-cli-publish-to-s3
+      - cd "${OPSTRACE_PREBUILD_DIR}" && make ci-publish-artifacts
