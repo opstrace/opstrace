@@ -106,3 +106,16 @@ export function getCortexServiceAccount() {
   }
   return cortexSA;
 }
+
+let lokiSA: string | undefined;
+
+export function setLokiServiceAccount(sa: string) {
+  lokiSA = sa;
+}
+
+export function getLokiServiceAccount() {
+  if (lokiSA === undefined) {
+    throw new Error("call setLokiServiceAccount() first");
+  }
+  return lokiSA;
+}
