@@ -21,7 +21,8 @@ import {
   ensureNetworkDoesNotExist,
   ensureSubNetworkDoesNotExist,
   ensureCloudSQLDoesNotExist,
-  emptyBucket
+  emptyBucket,
+  ensureServiceAccountDoesNotExist
 } from "@opstrace/gcp";
 import { destroyDNS } from "@opstrace/dns";
 import { log, getBucketName } from "@opstrace/utils";
@@ -29,6 +30,13 @@ import { log, getBucketName } from "@opstrace/utils";
 import { destroyConfig } from "./index";
 
 export function* destroyGCPInfra() {
+  log.info(`Ensure cert-manager service account deletion`);
+  yield call(ensureServiceAccountDoesNotExist, {
+    name: `${destroyConfig.clusterName}-cert-manager`,
+    projectId: destroyConfig.gcpProjectID!,
+    role: "roles/dns.admin"
+  });
+
   const lokiBucketName = getBucketName({
     clusterName: destroyConfig.clusterName,
     suffix: "loki"

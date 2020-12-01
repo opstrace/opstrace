@@ -157,7 +157,7 @@ async function ensurePolicyBindingExists({
     }
 
     //
-    // https://cloud.google.com/resource-manager/reference/rest/v1/projects/getIamPolicy
+    // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
     //
     const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
       resource: sa.projectId!,
@@ -169,7 +169,6 @@ async function ensurePolicyBindingExists({
 
     await resourcemanager.projects.setIamPolicy(request);
   } catch (e) {
-    log.debug(`failed to apply policy: ${JSON.stringify(e, null, 2)}`);
     throw e;
   }
 }
@@ -225,6 +224,87 @@ export function* ensureServiceAccountExists({
       yield call(ensurePolicyBindingExists, { sa, role });
       yield call(ensureGSAKSALinkExists, { kubernetesServiceAccount, sa });
       return sa.email;
+    } catch (e) {
+      log.error(
+        `caught error and will retry later: ${JSON.stringify(e, null, 2)}`
+      );
+      yield delay(5 * SECOND);
+    }
+  }
+}
+
+async function ensurePolicyBindingDoesNotExist({
+  sa,
+  role
+}: {
+  sa: iam_v1.Schema$ServiceAccount;
+  role: string;
+}) {
+  try {
+    await authorize();
+
+    let policy = await getIAMPolicy({ sa });
+
+    if (policy === undefined) {
+      throw new Error("failed to fetch IAM policy");
+    }
+
+    const member = `serviceAccount:${sa.email!}`;
+
+    for (const b of policy.bindings!) {
+      if (b.role! === role) {
+        b.members = b.members!.filter(m => m !== member);
+      }
+    }
+
+    //
+    // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
+    //
+    const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
+      resource: sa.projectId!,
+      requestBody: {
+        policy: policy
+      }
+    };
+    log.debug(`policy request: ${JSON.stringify(request, null, 2)}`);
+
+    await resourcemanager.projects.setIamPolicy(request);
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function deleteServiceAccount({
+  sa
+}: {
+  sa: iam_v1.Schema$ServiceAccount;
+}) {
+  try {
+    await authorize();
+
+    await iam.projects.serviceAccounts.delete({ name: sa.name! });
+  } catch (e) {
+    throw e;
+  }
+}
+
+export function* ensureServiceAccountDoesNotExist({
+  name,
+  projectId,
+  role
+}: {
+  name: string;
+  projectId: string;
+  role: string;
+}) {
+  while (true) {
+    try {
+      const sa = yield call(getServiceAccount, { projectId, name });
+      if (sa !== undefined) {
+        yield call(ensurePolicyBindingDoesNotExist, { sa: sa!, role });
+        yield call(deleteServiceAccount, { sa });
+      }
+      return;
     } catch (e) {
       log.error(
         `caught error and will retry later: ${JSON.stringify(e, null, 2)}`
