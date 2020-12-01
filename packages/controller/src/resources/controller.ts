@@ -18,9 +18,11 @@ import {
   ResourceCollection,
   Deployment,
   ClusterRoleBinding,
-  ServiceAccount
+  ServiceAccount,
+  Secret
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
+import { generateSecretValue } from "../helpers";
 
 export const CONTROLLER_NAME = "opstrace-controller";
 
@@ -38,6 +40,30 @@ export function ControllerResources({
   const name = CONTROLLER_NAME;
 
   const controllerCmdlineArgs = [`${opstraceClusterName}`];
+
+  // create this secret in the kube-system namespace. The controller
+  // itself will copy this secret over to the application namespace
+  // when the controller starts.
+  const hasuraAdminSecret = new Secret(
+    {
+      apiVersion: "v1",
+      data: {
+        HASURA_ADMIN_SECRET: Buffer.from(generateSecretValue()).toString(
+          "base64"
+        )
+      },
+      kind: "Secret",
+      metadata: {
+        name: "hasura-admin-secret",
+        namespace: namespace
+      }
+    },
+    kubeConfig
+  );
+  // We don't want this value to change once it exists either.
+  // The value of this secret can always be updated manually in the cluster if needs be (kubectl delete <name> -n application) and the controller will create a new one.
+  // The corresponding deployment pods that consume it will need to be restarted also to get the new env var containing the new secret.
+  hasuraAdminSecret.setImmutable();
 
   collection.add(
     new Deployment(
@@ -85,7 +111,18 @@ export function ControllerResources({
                       cpu: "0.5",
                       memory: "500Mi"
                     }
-                  }
+                  },
+                  env: [
+                    {
+                      name: "HASURA_GRAPHQL_ADMIN_SECRET",
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: "hasura-admin-secret",
+                          key: "HASURA_ADMIN_SECRET"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }

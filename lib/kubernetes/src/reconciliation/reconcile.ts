@@ -163,7 +163,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing) || hasIngressChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -171,7 +171,13 @@ export function* reconcile(
     });
     actualState.Ingresses.forEach(r => {
       const shouldKeep = find(r, desiredState.Ingresses);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -182,7 +188,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -190,7 +196,13 @@ export function* reconcile(
     });
     actualState.StorageClasses.forEach(r => {
       const shouldKeep = find(r, desiredState.StorageClasses);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -201,7 +213,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -209,7 +221,13 @@ export function* reconcile(
     });
     actualState.PersistentVolumeClaims.forEach(r => {
       const shouldKeep = find(r, desiredState.PersistentVolumeClaims);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -220,7 +238,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasStatefulSetChanged(r, existing)
@@ -231,7 +249,13 @@ export function* reconcile(
     });
     actualState.StatefulSets.forEach(r => {
       const shouldKeep = find(r, desiredState.StatefulSets);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -242,7 +266,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -250,7 +274,13 @@ export function* reconcile(
     });
     actualState.ServiceAccounts.forEach(r => {
       const shouldKeep = find(r, desiredState.ServiceAccounts);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -261,7 +291,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing) || hasServiceChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -269,7 +299,13 @@ export function* reconcile(
     });
     actualState.Services.forEach(r => {
       const shouldKeep = find(r, desiredState.Services);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -280,7 +316,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing) || hasSecretChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -288,7 +324,13 @@ export function* reconcile(
     });
     actualState.Secrets.forEach(r => {
       const shouldKeep = find(r, desiredState.Secrets);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -299,7 +341,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -307,7 +349,13 @@ export function* reconcile(
     });
     actualState.RoleBindings.forEach(r => {
       const shouldKeep = find(r, desiredState.RoleBindings);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -318,7 +366,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -326,7 +374,13 @@ export function* reconcile(
     });
     actualState.Roles.forEach(r => {
       const shouldKeep = find(r, desiredState.Roles);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -337,7 +391,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -345,7 +399,13 @@ export function* reconcile(
     });
     actualState.Namespaces.forEach(r => {
       const shouldKeep = find(r, desiredState.Namespaces);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -356,7 +416,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasDeploymentChanged(r, existing)
@@ -367,7 +427,13 @@ export function* reconcile(
     });
     actualState.Deployments.forEach(r => {
       const shouldKeep = find(r, desiredState.Deployments);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -378,7 +444,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasDaemonSetChanged(r, existing)
@@ -389,7 +455,13 @@ export function* reconcile(
     });
     actualState.DaemonSets.forEach(r => {
       const shouldKeep = find(r, desiredState.DaemonSets);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -400,7 +472,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -408,7 +480,13 @@ export function* reconcile(
     });
     actualState.CustomResourceDefinitions.forEach(r => {
       const shouldKeep = find(r, desiredState.CustomResourceDefinitions);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -419,7 +497,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasConfigMapChanged(r, existing)
@@ -430,7 +508,13 @@ export function* reconcile(
     });
     actualState.ConfigMaps.forEach(r => {
       const shouldKeep = find(r, desiredState.ConfigMaps);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -441,7 +525,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -449,7 +533,13 @@ export function* reconcile(
     });
     actualState.ClusterRoleBindings.forEach(r => {
       const shouldKeep = find(r, desiredState.ClusterRoleBindings);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -460,7 +550,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -468,7 +558,13 @@ export function* reconcile(
     });
     actualState.ClusterRoles.forEach(r => {
       const shouldKeep = find(r, desiredState.ClusterRoles);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -479,7 +575,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -487,7 +583,13 @@ export function* reconcile(
     });
     actualState.PodSecurityPolicies.forEach(r => {
       const shouldKeep = find(r, desiredState.PodSecurityPolicies);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -498,7 +600,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -506,7 +608,13 @@ export function* reconcile(
     });
     actualState.ApiServices.forEach(r => {
       const shouldKeep = find(r, desiredState.ApiServices);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -517,7 +625,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasAlertManagerChanged(r, existing)
@@ -528,7 +636,13 @@ export function* reconcile(
     });
     actualState.Alertmanagers.forEach(r => {
       const shouldKeep = find(r, desiredState.Alertmanagers);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -539,7 +653,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -547,7 +661,13 @@ export function* reconcile(
     });
     actualState.PodMonitors.forEach(r => {
       const shouldKeep = find(r, desiredState.PodMonitors);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -558,7 +678,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasPrometheusChanged(r, existing)
@@ -569,7 +689,13 @@ export function* reconcile(
     });
     actualState.Prometheuses.forEach(r => {
       const shouldKeep = find(r, desiredState.Prometheuses);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -580,7 +706,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasPrometheusRuleChanged(r, existing)
@@ -591,7 +717,13 @@ export function* reconcile(
     });
     actualState.PrometheusRules.forEach(r => {
       const shouldKeep = find(r, desiredState.PrometheusRules);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -602,7 +734,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (
           haveLabelsChanged(r, existing) ||
           hasServiceMonitorChanged(r, existing)
@@ -613,7 +745,13 @@ export function* reconcile(
     });
     actualState.ServiceMonitors.forEach(r => {
       const shouldKeep = find(r, desiredState.ServiceMonitors);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -624,7 +762,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -632,7 +770,13 @@ export function* reconcile(
     });
     actualState.Certificates.forEach(r => {
       const shouldKeep = find(r, desiredState.Certificates);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -643,7 +787,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -651,7 +795,13 @@ export function* reconcile(
     });
     actualState.CertificateRequests.forEach(r => {
       const shouldKeep = find(r, desiredState.CertificateRequests);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -662,7 +812,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -670,7 +820,13 @@ export function* reconcile(
     });
     actualState.Challenges.forEach(r => {
       const shouldKeep = find(r, desiredState.Challenges);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -681,7 +837,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -689,7 +845,13 @@ export function* reconcile(
     });
     actualState.ClusterIssuers.forEach(r => {
       const shouldKeep = find(r, desiredState.ClusterIssuers);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -700,7 +862,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -708,7 +870,13 @@ export function* reconcile(
     });
     actualState.Issuers.forEach(r => {
       const shouldKeep = find(r, desiredState.Issuers);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
@@ -719,7 +887,7 @@ export function* reconcile(
         createCollection.push(r);
         return;
       }
-      if (!r.shouldPreventUpdate()) {
+      if (!r.isImmutable()) {
         if (haveLabelsChanged(r, existing)) {
           updateCollection.push(r);
         }
@@ -727,7 +895,13 @@ export function* reconcile(
     });
     actualState.Orders.forEach(r => {
       const shouldKeep = find(r, desiredState.Orders);
-      if (!shouldKeep && r.isOurs() && !r.isTerminating() && !r.isProtected()) {
+      if (
+        !shouldKeep &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()
+      ) {
         deleteCollection.push(r);
       }
     });
