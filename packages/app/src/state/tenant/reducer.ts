@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-export * from "./general";
-export * from "./reconciliation";
-export * from "./informers";
-export * from "./wait";
-export * from "./readiness";
-export * from "./syncTenants";
+import { createReducer, ActionType } from "typesafe-actions";
+import { Tenants } from "./types";
+import * as actions from "./actions";
+
+type TenantActions = ActionType<typeof actions>;
+
+type TenantState = {
+  loading: boolean;
+  tenants: Tenants;
+};
+
+const TenantInitialState: TenantState = {
+  loading: true,
+  tenants: []
+};
+
+export const reducer = createReducer<TenantState, TenantActions>(
+  TenantInitialState
+).handleAction(
+  actions.setTenantList,
+  (state, action): TenantState => ({
+    ...state,
+    tenants: action.payload,
+    loading: false
+  })
+);

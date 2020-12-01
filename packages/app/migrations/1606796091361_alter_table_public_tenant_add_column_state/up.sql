@@ -1,0 +1,1 @@
+ALTER TABLE "public"."tenant" ADD COLUMN "state" text NOT NULL DEFAULT 'PROVISIONING';

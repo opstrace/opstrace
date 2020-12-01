@@ -1,0 +1,7 @@
+mutation CreateTenants($tenants: [tenant_insert_input!]!) {
+  insert_tenant(objects: $tenants) {
+    returning {
+      name
+    }
+  }
+}

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { SubscribeToTenantListSubscription } from "state/graphqlClient";
 
-export * from "./general";
-export * from "./reconciliation";
-export * from "./informers";
-export * from "./wait";
-export * from "./readiness";
-export * from "./syncTenants";
+export type Tenant = SubscribeToTenantListSubscription["tenant"][0];
+export type Tenants = Tenant[];
+
+// use this same id to unsubscribe
+export type SubscriptionID = number;

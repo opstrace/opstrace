@@ -1,0 +1,7 @@
+subscription SubscribeToTenantList {
+  tenant {
+    name
+    created_at
+    type
+  }
+}

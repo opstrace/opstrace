@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { createAction } from "typesafe-actions";
+import { SubscriptionID, Tenants } from "./types";
 
-export * from "./general";
-export * from "./reconciliation";
-export * from "./informers";
-export * from "./wait";
-export * from "./readiness";
-export * from "./syncTenants";
+export const subscribeToTenantList = createAction("SUBSCRIBE_USER_LIST")<
+  SubscriptionID
+>();
+
+export const unsubscribeFromTenantList = createAction("UNSUBSCRIBE_USER_LIST")<
+  SubscriptionID
+>();
+export const setTenantList = createAction("SET_TENANT_LIST")<Tenants>();
+export const deleteTenant = createAction("DELETE_TENANT")<string>();
+export const addTenant = createAction("ADD_TENANT")<string>();
