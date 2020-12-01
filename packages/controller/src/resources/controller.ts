@@ -121,6 +121,10 @@ export function ControllerResources({
                           key: "HASURA_ADMIN_SECRET"
                         }
                       }
+                    },
+                    {
+                      name: "GRAPHQL_ENDPOINT",
+                      value: `http://graphql.application.svc.cluster.local:8080/v1/graphql`
                     }
                   ]
                 }

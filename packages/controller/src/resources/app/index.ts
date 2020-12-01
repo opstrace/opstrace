@@ -150,17 +150,52 @@ export function OpstraceApplicationResources(
   // This value changing would cause all sessions to be invalidated immediately
   // and that would be a bad experience during an upgrade.
   // This value of this secret can always be updated manually if instant session invalidation is desired.
-  sessionCookieSecret.setShouldNeverUpdate();
+  sessionCookieSecret.setImmutable();
 
   collection.add(sessionCookieSecret);
+
+  let secretValue = Buffer.from(generateSecretValue()).toString("base64");
+  // copy the secret that we've already set for Hasura in the kube-system namespace
+  const secretToCopy = state.kubernetes.cluster.Secrets.resources.find(
+    secret =>
+      secret.name === "hasura-admin-secret" &&
+      secret.namespace === "kube-system"
+  );
+
+  if (secretToCopy) {
+    // use the value of the secret we want to copy
+    secretValue = Buffer.from(
+      secretToCopy.data!.HASURA_ADMIN_SECRET,
+      "base64"
+    ).toString("base64");
+  }
+
+  // Specifying this secret in kube-system will ensure it exists if it didn't before.
+  const kubeSystemHasuraAdminSecret = new Secret(
+    {
+      apiVersion: "v1",
+      data: {
+        HASURA_ADMIN_SECRET: secretValue
+      },
+      kind: "Secret",
+      metadata: {
+        name: "hasura-admin-secret",
+        namespace: "kube-system"
+      }
+    },
+    kubeConfig
+  );
+  // We don't want this value to change once it exists either.
+  // The value of this secret can always be updated manually in the cluster if needs be (kubectl delete <name> -n application) and the controller will create a new one.
+  // The corresponding deployment pods that consume it will need to be restarted also to get the new env var containing the new secret.
+  kubeSystemHasuraAdminSecret.setImmutable();
+  collection.add(kubeSystemHasuraAdminSecret);
 
   const hasuraAdminSecret = new Secret(
     {
       apiVersion: "v1",
       data: {
-        HASURA_ADMIN_SECRET: Buffer.from(generateSecretValue()).toString(
-          "base64"
-        )
+        HASURA_ADMIN_SECRET: secretValue
       },
       kind: "Secret",
       metadata: {
@@ -173,8 +208,7 @@ export function OpstraceApplicationResources(
   // We don't want this value to change once it exists either.
   // The value of this secret can always be updated manually in the cluster if needs be (kubectl delete <name> -n application) and the controller will create a new one.
   // The corresponding deployment pods that consume it will need to be restarted also to get the new env var containing the new secret.
-  hasuraAdminSecret.setShouldNeverUpdate();
-
+  hasuraAdminSecret.setImmutable();
   collection.add(hasuraAdminSecret);
 
   collection.add(
