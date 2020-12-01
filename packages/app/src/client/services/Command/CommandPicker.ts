@@ -46,14 +46,14 @@ function CommandPicker({ commands }: CommandPickerProps) {
     description: "Show and Run Commands",
     handler: e => {
       e.keyboardEvent?.preventDefault();
-      activatePickerWithText(">");
+      activatePickerWithText("");
     },
-    keybindings: ["mod+shift+p"]
+    keybindings: ["mod+p"]
   });
 
   const { activatePickerWithText } = usePickerService(
     {
-      activationPrefix: ">",
+      activationPrefix: "",
       options: filterCommands(commands),
       onSelected: option => {
         cmdService.executeCommand(option.id);
