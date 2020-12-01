@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import { select, delay } from "redux-saga/effects";
+import { select, delay, SelectEffect, CallEffect } from "redux-saga/effects";
+import { CombinedState } from "redux";
 import { State } from "./reducer";
 import { log, SECOND } from "@opstrace/utils";
 
-export function* uninstallProgressReporter() {
+export function* uninstallProgressReporter(): Generator<
+  SelectEffect | CallEffect,
+  void,
+  CombinedState<State>
+> {
   while (true) {
     const state: State = yield select();
 

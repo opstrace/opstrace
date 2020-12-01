@@ -15,7 +15,14 @@
  */
 
 import { IAM } from "aws-sdk";
-import { call, fork, join } from "redux-saga/effects";
+import {
+  call,
+  fork,
+  join,
+  JoinEffect,
+  CallEffect,
+  ForkEffect
+} from "redux-saga/effects";
 import { Task } from "redux-saga";
 import {
   ensureAddressDoesNotExist,
@@ -54,7 +61,12 @@ interface RolenamePolicyarnAssociation {
   PolicyArn: string;
 }
 
-export function* destroyAWSInfra() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function* destroyAWSInfra(): Generator<
+  JoinEffect | CallEffect | ForkEffect | Generator<ForkEffect, Task[], Task>,
+  void,
+  any
+> {
   const lokiBucketName = getBucketName({
     clusterName: destroyConfig.clusterName,
     suffix: "loki"

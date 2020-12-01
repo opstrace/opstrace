@@ -15,13 +15,33 @@
  */
 
 import { eventChannel } from "redux-saga";
-import { put, take, cancelled, select, delay } from "redux-saga/effects";
+import { CombinedState } from "redux";
+
+import {
+  put,
+  take,
+  cancelled,
+  select,
+  delay,
+  ChannelTakeEffect,
+  PutEffect,
+  CancelledEffect,
+  CallEffect,
+  SelectEffect
+} from "redux-saga/effects";
 import * as k8s from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { log, SECOND } from "@opstrace/utils";
 import { State } from "./reducer";
+import { Action } from "redux";
 
-export function* runInformers(kubeConfig: KubeConfig) {
+export function* runInformers(
+  kubeConfig: KubeConfig
+): Generator<
+  ChannelTakeEffect<void | unknown> | PutEffect | CancelledEffect,
+  void,
+  Action
+> {
   log.info(`Starting informers`);
 
   const clusterChannel = eventChannel(channel => {
@@ -55,7 +75,11 @@ export function* runInformers(kubeConfig: KubeConfig) {
   }
 }
 
-export function* blockUntilCacheHydrated() {
+export function* blockUntilCacheHydrated(): Generator<
+  SelectEffect | CallEffect,
+  void,
+  CombinedState<State>
+> {
   while (true) {
     const { kubernetes }: State = yield select();
     const {

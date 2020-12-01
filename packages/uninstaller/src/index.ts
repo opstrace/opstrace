@@ -314,7 +314,7 @@ function* rootTaskDestroy() {
  * Entry point for cluster teardown/destroy, to be called by CLI.
  */
 export async function destroyCluster(
-  smOnError: (e: Error, detail: any) => void
+  smOnError: (e: Error, detail: unknown) => void
 ): Promise<void> {
   const sm = createSagaMiddleware({ onError: smOnError });
   createStore(rootReducer, applyMiddleware(sm));

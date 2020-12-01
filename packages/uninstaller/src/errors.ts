@@ -15,7 +15,7 @@
  */
 
 export class ClusterDestroyTimeoutError extends Error {
-  constructor(...args: any[]) {
+  constructor(...args: string[] | undefined[]) {
     super(...args);
     Error.captureStackTrace(this, ClusterDestroyTimeoutError);
   }
