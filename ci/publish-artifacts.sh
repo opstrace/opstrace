@@ -15,6 +15,9 @@ bash ci/check-if-docs-pr.sh && exit 0
 # PR) confidently: when this passes on a PR, then this should imply with
 # _great_ propability that this also passes for `main`.
 
+# For context, see https://github.com/opstrace/opstrace/issues/48
+make tag-controller-image-as-latest-main || true
+
 # TODO: provioning as `latest` should be done with an atomic switch instead of
 # relying on individual commands to succeed sequentially (update might fail
 # after partial mutation). See below.
