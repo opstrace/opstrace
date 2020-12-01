@@ -151,6 +151,13 @@ build-and-push-controller-image:
 	docker push $(DOCKER_REPO)/controller:$(CHECKOUT_VERSION_STRING)
 
 
+# Used only by CI.
+# For context, see https://github.com/opstrace/opstrace/issues/48
+.PHONY: tag-controller-image-as-latest-main
+tag-controller-image-as-latest-main:
+	docker tag $(DOCKER_REPO)/controller:$(CHECKOUT_VERSION_STRING) $(DOCKER_REPO)/controller:latest-main
+
+
 .PHONY: clean
 clean:
 	@# Wipe state (might not be complete)
