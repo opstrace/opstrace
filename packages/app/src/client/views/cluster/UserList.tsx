@@ -48,4 +48,4 @@ const UserList = (props: UserListProps) => {
   );
 };
 
-export default UserList;
+export default React.memo(UserList);
