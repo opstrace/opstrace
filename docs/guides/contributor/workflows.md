@@ -60,7 +60,7 @@ You might find a simple workaround using the file `packages/controller-config/sr
 
 ## Local checkout: quick iteration while changing the CLI
 
-For automatic and iterative `tsc`-compilation of the CLI and its dependencies, you can run `yarn watch:cli`.
+You can run `yarn watch:cli` for automatic and iterative `tsc`-compilation of the CLI and its dependencies.
 
 In a separate terminal, you can then invoke the CLI via the `packages/cli/build/index.js` entry point. Example:
 
@@ -68,16 +68,16 @@ In a separate terminal, you can then invoke the CLI via the `packages/cli/build/
 node packages/cli/build/index.js create aws testcluster -c cluster-config.yaml
 ```
 
-That is practically expected to fail with
+In almost all of the cases, this cluster creation attempt is then expected to fail with:
 
-```
+```text
 ...
 2020-12-01T12:12:06.139Z info: check if docker image exists on docker hub: opstrace/controller:<tag>
 ...
 error: docker image not present on docker hub: you might want to push that first
 ```
 
-Why is that? It is important to appreciate that this CLI build (not built by CI) cannot have awareness of a sane corresponding default for the `controller_image` parameter in the cluster configuration. Therefore, it is pointing to an image that usually does not exist on Docker Hub.
+Why is that? It is essential to appreciate that this CLI build (not built by CI) cannot have awareness of a sane corresponding default for the `controller_image` parameter in the cluster configuration. Therefore, it is pointing to an image that usually does not exist on Docker Hub.
 
 You might decide that all you need is to get a cluster running using the latest and greatest controller image built by CI, from `main`.
 For achieving that, you can use a moving target image tag: `opstrace/controller:latest-main`. For example:
@@ -91,11 +91,10 @@ node_count: 3
 ```
 
 
-When you use this `cluster-config.yaml` for your testing/iteration effort you can stop worrying about the "controller image does not exist" error.
+When you use this `cluster-config.yaml` for your testing/iteration effort, you can stop worrying about the "controller image does not exist" error.
 
-Just note than _this_ controller image might not perfectly fit the changes that you are actually working on.
-If your changes also affect the controller, you might have to go through the more time-consuming process of doing `make build-and-push-controller-image` to achieve a sane outcome.
-But at this point, you have definitely entered the "I know what I am doing" stage and know best what is needed and what the trade-offs are.
+Just note that _this_ controller image might not perfectly fit the CLI changes that you are testing: if your changes also affect the controller, you might have to go through the more time-consuming process involving `make build-and-push-controller-image` (see above) to achieve a sane outcome.
+But at this point, you have certainly entered the "I know what I am doing" stage and know best what is needed and what the trade-offs are.
 
 
 ## Run the `test-remote` suite against a remote cluster
