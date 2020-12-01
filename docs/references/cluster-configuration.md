@@ -193,10 +193,3 @@ Note that the controller does not get deployed into the cluster when initiating 
 In that case, `controller_image` must still be set but is ignored.
 
 Change this (compared to the default value) only when you know what you're doing :-).
-
-## tmpdoc: these parameters exist as of today, but ...
-
-### `log_retention_days` and `metrics_retention_days`
-
-Note: untested, unclear how to document that even. Broken. Bad.
-See [issue 1696](opstrace-prelaunch/issues/1696)
