@@ -15,25 +15,25 @@
  */
 import { useEffect } from "react";
 import { useDispatch, useSelector, State } from "state/provider";
-import { subscribeToUserList, unsubscribeFromUserList } from "../actions";
+import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-export const getUserList = (state: State) => state.users.users;
+export const getTenantList = (state: State) => state.users.users;
 /**
  * Subscribes to users and will update on
- * any changes. Automatically unsubscribeFromUserLists
+ * any changes. Automatically unsubscribeFromTenantLists
  * on unmount.
  */
-export default function useUserList() {
-  const users = useSelector(getUserList);
+export default function useTenantList() {
+  const users = useSelector(getTenantList);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const subId = getSubscriptionID();
-    dispatch(subscribeToUserList(subId));
+    dispatch(subscribeToTenantList(subId));
 
     return () => {
-      dispatch(unsubscribeFromUserList(subId));
+      dispatch(unsubscribeFromTenantList(subId));
     };
   }, [dispatch]);
 

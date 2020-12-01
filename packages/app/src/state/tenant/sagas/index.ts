@@ -19,7 +19,7 @@ import graphqlClient from "state/graphqlClient";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
 
-export default function* userTaskManager() {
+export default function* tenantTaskManager() {
   const sagas = [tenantListSubscriptionManager, addTenant, deleteTenant];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
@@ -46,8 +46,12 @@ function* addTenant() {
       actions.addTenant
     );
     try {
-      yield graphqlClient.CreateTenant({
-        name: action.payload
+      yield graphqlClient.CreateTenants({
+        tenants: [
+          {
+            name: action.payload
+          }
+        ]
       });
     } catch (err) {
       console.error(err);
