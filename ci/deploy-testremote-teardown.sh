@@ -42,7 +42,6 @@ source secrets/aws-dev-svc-acc-env.sh
 # Set GCP service account credentials (also used for opstrace create gcp ...)
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
 
-#AWS_CLI_REGION="us-west-2"
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
 
@@ -151,7 +150,7 @@ df -h
 curl --request POST \
     --url https://opstrace-dev.us.auth0.com/oauth/token \
     --header 'content-type: application/json' \
-    --data '{"client_id":"yWCIjhLo93q7jiBUNPYGXT2JKLPNiKih","client_secret":"GM5uWBlT3-5O07nNWhraKKrmC-_CFWzh1cbeki5yKQt4T2EgB2fKT4tjrCwhj0EN","audience":"https://dns-api.opstrace.net/dns/","grant_type":"client_credentials"}' \
+    --data-binary "@secrets/dns-service-login-for-ci.json" \
     | jq -jr .access_token > access.jwt
 
 # Run opstrace installer locally. The installer will deploy the controller into
