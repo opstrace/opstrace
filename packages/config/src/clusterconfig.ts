@@ -22,7 +22,7 @@ let clusterConfig: NewRenderedClusterConfigType;
 // not implementing length constraint, on purpose
 export const CLUSTER_NAME_REGEX = /^[a-z0-9-_]+$/;
 
-export function setClusterConfig(c: NewRenderedClusterConfigType) {
+export function setClusterConfig(c: NewRenderedClusterConfigType): void {
   if (clusterConfig !== undefined) {
     throw new Error("setClusterConfig() was already called before");
   }

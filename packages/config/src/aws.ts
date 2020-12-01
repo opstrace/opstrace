@@ -48,9 +48,26 @@ export const REGION_EKS_AMI_MAPPING: Record<string, string> = {
 
 export const KNOWN_AWS_REGIONS: string[] = Object.entries(
   REGION_EKS_AMI_MAPPING
-).map(([region, _]) => region);
+).map(([region]) => region);
 
-export function getAWSConfig(ccfg: NewRenderedClusterConfigType) {
+type AWSConfigType = {
+  k8sVersion: string;
+  endpointPublicAccess: boolean;
+  endpointPrivateAccess: boolean;
+  region: string;
+  zone: string;
+  vpc: {
+    CidrBlock: string;
+  };
+  subnets: { CidrBlock: string; AvailabilityZone: string; Public: boolean }[];
+  masterAuthorizedNetworks: string[];
+  instanceType: string;
+  imageId: string;
+};
+
+export function getAWSConfig(
+  ccfg: NewRenderedClusterConfigType
+): AWSConfigType {
   // Using k3s instead of EKS will wipe a lot of these config options, which is
   // why I'm hardcoding the region, vpc, and subnets for now.
   // EKS has region/zone specific imageId so avoid computing that
