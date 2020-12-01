@@ -38,8 +38,6 @@ export function getGKEClusterConfig(
     }
   ];
   const oauthScopes = [
-    "https://www.googleapis.com/auth/bigtable.admin.table",
-    "https://www.googleapis.com/auth/bigtable.data",
     "https://www.googleapis.com/auth/logging.write",
     "https://www.googleapis.com/auth/monitoring",
     "https://www.googleapis.com/auth/devstorage.read_write",
