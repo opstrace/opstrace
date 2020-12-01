@@ -227,8 +227,8 @@ generate-aws-api-call-list:
 		sort | uniq
 
 
-PHONY: cli-publish-artifacts
-cli-publish-artifacts: fetch-secrets
+PHONY: publish-artifacts
+publish-artifacts: fetch-secrets
 	@# If in doubt: never trigger this manually (this is used by CI)
 	source secrets/aws-dev-svc-acc-env.sh && bash ci/publish-artifacts.sh
 
