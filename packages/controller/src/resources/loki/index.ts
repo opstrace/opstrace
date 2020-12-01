@@ -26,7 +26,8 @@ import {
   V1PrometheusruleResource,
   withPodAntiAffinityRequired,
   StatefulSet,
-  PersistentVolumeClaim
+  PersistentVolumeClaim,
+  ServiceAccount
 } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
 import { min, select, getBucketName } from "@opstrace/utils";
@@ -39,7 +40,9 @@ export function LokiResources(
   namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
-  const { infrastructureName, target, region } = getControllerConfig(state);
+  const { infrastructureName, target, region, gcp } = getControllerConfig(
+    state
+  );
   const bucketName = getBucketName({
     clusterName: infrastructureName,
     suffix: "loki"
@@ -235,6 +238,30 @@ export function LokiResources(
         kind: "Namespace",
         metadata: {
           name: namespace
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  let annotations = {};
+  let serviceAccountName: string | undefined = undefined;
+  if (target === "gcp") {
+    annotations = {
+      "iam.gke.io/gcp-service-account": gcp!.lokiServiceAccount
+    };
+    serviceAccountName = "loki";
+  }
+
+  collection.add(
+    new ServiceAccount(
+      {
+        apiVersion: "v1",
+        kind: "ServiceAccount",
+        metadata: {
+          name: "loki",
+          namespace,
+          annotations: annotations
         }
       },
       kubeConfig
@@ -727,6 +754,7 @@ export function LokiResources(
                   ]
                 }
               ],
+              serviceAccountName: serviceAccountName,
               securityContext: {
                 fsGroup: 2000
               },
@@ -864,6 +892,7 @@ export function LokiResources(
               securityContext: {
                 fsGroup: 2000
               },
+              serviceAccountName: serviceAccountName,
               volumes: [
                 {
                   configMap: {
@@ -958,6 +987,7 @@ export function LokiResources(
                   ]
                 }
               ],
+              serviceAccountName: serviceAccountName,
               securityContext: {
                 fsGroup: 2000
               },

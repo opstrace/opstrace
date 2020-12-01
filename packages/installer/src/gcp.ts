@@ -29,7 +29,8 @@ import {
   ensureServiceAccountExists,
   setCertManagerServiceAccount,
   setExternalDNSServiceAccount,
-  setCortexServiceAccount
+  setCortexServiceAccount,
+  setLokiServiceAccount
 } from "@opstrace/gcp";
 import { ensureDNSExists } from "@opstrace/dns";
 import {
@@ -176,7 +177,7 @@ export function* ensureGCPInfraExists(
   setExternalDNSServiceAccount(externalDNSSA);
 
   // Create a Google service account to be used by cortex.
-  log.info(`Ensuring external-dns service account exists`);
+  log.info(`Ensuring cortex service account exists`);
   const cortexSA = yield call(ensureServiceAccountExists, {
     name: `${ccfg.cluster_name}-cortex`,
     projectId: gcpProjectID,
@@ -184,6 +185,16 @@ export function* ensureGCPInfraExists(
     kubernetesServiceAccount: "cortex/cortex"
   });
   setCortexServiceAccount(cortexSA);
+
+  // Create a Google service account to be used by loki.
+  log.info(`Ensuring loki service account exists`);
+  const lokiSA = yield call(ensureServiceAccountExists, {
+    name: `${ccfg.cluster_name}-loki`,
+    projectId: gcpProjectID,
+    role: "roles/storage.admin",
+    kubernetesServiceAccount: "loki/loki"
+  });
+  setLokiServiceAccount(lokiSA);
 
   return {
     kubeconfigString: gkeKubeconfigString,

@@ -44,7 +44,8 @@ import {
   GCPAuthOptions,
   getCertManagerServiceAccount,
   getExternalDNSServiceAccount,
-  getCortexServiceAccount
+  getCortexServiceAccount,
+  getLokiServiceAccount
 } from "@opstrace/gcp";
 import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
@@ -197,7 +198,8 @@ function* createClusterCore() {
       projectId: gcpAuthOptions!.projectId,
       certManagerServiceAccount: getCertManagerServiceAccount(),
       externalDNSServiceAccount: getExternalDNSServiceAccount(),
-      cortexServiceAccount: getCortexServiceAccount()
+      cortexServiceAccount: getCortexServiceAccount(),
+      lokiServiceAccount: getLokiServiceAccount()
     };
   }
   if (ccfg.cloud_provider === "aws") {

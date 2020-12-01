@@ -22,7 +22,8 @@ export const gcpConfigSchema = yup.object({
   projectId: yup.string(),
   certManagerServiceAccount: yup.string(),
   externalDNSServiceAccount: yup.string(),
-  cortexServiceAccount: yup.string()
+  cortexServiceAccount: yup.string(),
+  lokiServiceAccount: yup.string()
 });
 
 export type GCPConfig = yup.InferType<typeof gcpConfigSchema>;

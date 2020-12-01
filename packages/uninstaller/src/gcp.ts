@@ -51,6 +51,13 @@ export function* destroyGCPInfra() {
     role: "roles/storage.admin"
   });
 
+  log.info(`Ensure loki service account deletion`);
+  yield call(ensureServiceAccountDoesNotExist, {
+    name: `${destroyConfig.clusterName}-loki`,
+    projectId: destroyConfig.gcpProjectID!,
+    role: "roles/storage.admin"
+  });
+
   const lokiBucketName = getBucketName({
     clusterName: destroyConfig.clusterName,
     suffix: "loki"
