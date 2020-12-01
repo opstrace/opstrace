@@ -118,19 +118,20 @@
 # grey for state dddddd
 # Will need to see how/if we manage state in this repo (with codetree?)
 
-- name: "state: backlog"
+- name: "backlog"
   color: "dddddd"
-  aliases: []
-  description: "state (codetree)"
+  aliases: ["state: backlog"]
+  description: "state (used by codetree)"
+- name: "in progress"
+  color: "dddddd"
+  aliases: ["state: in-progress"]
+  description: "state (used by codetree)"
+
 - name: "state: wontdo"
   color: "dddddd"
   aliases: []
-  description: "state (codetree)"
+  description: ""
 - name: "state: invalid"
   color: "dddddd"
   aliases: []
-  description: "state (codetree)"
-- name: "state: in-progress"
-  color: "dddddd"
-  aliases: []
-  description: "state (codetree)"
+  description: ""
