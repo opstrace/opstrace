@@ -69,17 +69,13 @@ async function createServiceAccount({
   accountId: string;
   projectId: string;
 }): Promise<iam_v1.Schema$ServiceAccount> {
-  try {
-    await authorize();
-    const params = {
-      name: `projects/${projectId}`,
-      accountId: accountId
-    };
-    const sa = await iam.projects.serviceAccounts.create(params);
-    return sa.data;
-  } catch (e) {
-    throw e;
-  }
+  await authorize();
+  const params = {
+    name: `projects/${projectId}`,
+    accountId: accountId
+  };
+  const sa = await iam.projects.serviceAccounts.create(params);
+  return sa.data;
 }
 
 async function getIAMPolicy({
@@ -116,61 +112,57 @@ async function ensurePolicyBindingExists({
   sa: iam_v1.Schema$ServiceAccount;
   role: string;
 }) {
-  try {
-    await authorize();
+  await authorize();
 
-    log.debug(`apply policy to sa: ${JSON.stringify(sa, null, 2)}`);
+  log.debug(`apply policy to sa: ${JSON.stringify(sa, null, 2)}`);
 
-    let policy = (await getIAMPolicy({ sa })) ?? {};
+  const policy = (await getIAMPolicy({ sa })) ?? {};
 
-    // handle empty policy bindings
-    if (policy.bindings === undefined) {
-      policy.bindings = [];
-    }
-
-    const member = `serviceAccount:${sa.email!}`;
-
-    let done = false;
-    for (const b of policy.bindings!) {
-      if (b.role! === role) {
-        for (const m of b.members!) {
-          if (m === member) {
-            log.debug("policy is already set, nothing to do");
-            done = true;
-          }
-        }
-        if (!done) {
-          log.debug("adding member to existing role");
-          done = true;
-          if (b.members === undefined) {
-            b.members = [];
-          }
-          b.members!.push(member);
-        }
-      }
-    }
-
-    // role does not exist in policy so add it now
-    if (!done) {
-      log.debug("adding new policy binding");
-      policy.bindings!.push({ members: [member], role: role });
-    }
-
-    //
-    // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
-    //
-    const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
-      resource: sa.projectId!,
-      requestBody: {
-        policy: policy
-      }
-    };
-    log.debug(`policy request: ${JSON.stringify(request, null, 2)}`);
-
-    await resourcemanager.projects.setIamPolicy(request);
-  } catch (e) {
-    throw e;
+  // handle empty policy bindings
+  if (policy.bindings === undefined) {
+    policy.bindings = [];
   }
+
+  const member = `serviceAccount:${sa.email!}`;
+
+  let done = false;
+  for (const b of policy.bindings!) {
+    if (b.role! === role) {
+      for (const m of b.members!) {
+        if (m === member) {
+          log.debug("policy is already set, nothing to do");
+          done = true;
+        }
+      }
+      if (!done) {
+        log.debug("adding member to existing role");
+        done = true;
+        if (b.members === undefined) {
+          b.members = [];
+        }
+        b.members!.push(member);
+      }
+    }
+  }
+
+  // role does not exist in policy so add it now
+  if (!done) {
+    log.debug("adding new policy binding");
+    policy.bindings!.push({ members: [member], role: role });
+  }
+
+  //
+  // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
+  //
+  const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
+    resource: sa.projectId!,
+    requestBody: {
+      policy: policy
+    }
+  };
+  log.debug(`policy request: ${JSON.stringify(request, null, 2)}`);
+
+  await resourcemanager.projects.setIamPolicy(request);
 }
 
 // We manage this service account so just go ahead and set the required policy.
@@ -183,25 +175,21 @@ async function ensureGSAKSALinkExists({
   kubernetesServiceAccount: string;
   sa: iam_v1.Schema$ServiceAccount;
 }) {
-  try {
-    await authorize();
+  await authorize();
 
-    const role = "roles/iam.workloadIdentityUser";
-    const member = `serviceAccount:${sa.projectId!}.svc.id.goog[${kubernetesServiceAccount}]`;
+  const role = "roles/iam.workloadIdentityUser";
+  const member = `serviceAccount:${sa.projectId!}.svc.id.goog[${kubernetesServiceAccount}]`;
 
-    const policy = {
-      bindings: [{ members: [member], role: role }]
-    };
+  const policy = {
+    bindings: [{ members: [member], role: role }]
+  };
 
-    await iam.projects.serviceAccounts.setIamPolicy({
-      resource: sa.name!,
-      requestBody: {
-        policy: policy
-      }
-    });
-  } catch (e) {
-    throw e;
-  }
+  await iam.projects.serviceAccounts.setIamPolicy({
+    resource: sa.name!,
+    requestBody: {
+      policy: policy
+    }
+  });
 }
 
 export function* ensureServiceAccountExists({
@@ -217,7 +205,7 @@ export function* ensureServiceAccountExists({
 }): Generator<any, string, any> {
   while (true) {
     try {
-      let sa =
+      const sa =
         (yield call(getServiceAccount, { projectId, name })) ??
         (yield call(createServiceAccount, { projectId, accountId: name }));
 
@@ -240,38 +228,34 @@ async function ensurePolicyBindingDoesNotExist({
   sa: iam_v1.Schema$ServiceAccount;
   role: string;
 }) {
-  try {
-    await authorize();
+  await authorize();
 
-    let policy = await getIAMPolicy({ sa });
+  const policy = await getIAMPolicy({ sa });
 
-    if (policy === undefined) {
-      throw new Error("failed to fetch IAM policy");
-    }
-
-    const member = `serviceAccount:${sa.email!}`;
-
-    for (const b of policy.bindings!) {
-      if (b.role! === role) {
-        b.members = b.members!.filter(m => m !== member);
-      }
-    }
-
-    //
-    // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
-    //
-    const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
-      resource: sa.projectId!,
-      requestBody: {
-        policy: policy
-      }
-    };
-    log.debug(`policy request: ${JSON.stringify(request, null, 2)}`);
-
-    await resourcemanager.projects.setIamPolicy(request);
-  } catch (e) {
-    throw e;
+  if (policy === undefined) {
+    throw new Error("failed to fetch IAM policy");
   }
+
+  const member = `serviceAccount:${sa.email!}`;
+
+  for (const b of policy.bindings!) {
+    if (b.role! === role) {
+      b.members = b.members!.filter(m => m !== member);
+    }
+  }
+
+  //
+  // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
+  //
+  const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
+    resource: sa.projectId!,
+    requestBody: {
+      policy: policy
+    }
+  };
+  log.debug(`policy request: ${JSON.stringify(request, null, 2)}`);
+
+  await resourcemanager.projects.setIamPolicy(request);
 }
 
 async function deleteServiceAccount({
@@ -279,13 +263,8 @@ async function deleteServiceAccount({
 }: {
   sa: iam_v1.Schema$ServiceAccount;
 }) {
-  try {
-    await authorize();
-
-    await iam.projects.serviceAccounts.delete({ name: sa.name! });
-  } catch (e) {
-    throw e;
-  }
+  await authorize();
+  await iam.projects.serviceAccounts.delete({ name: sa.name! });
 }
 
 export function* ensureServiceAccountDoesNotExist({
