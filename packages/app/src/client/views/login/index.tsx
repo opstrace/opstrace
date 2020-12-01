@@ -10,6 +10,7 @@ import { Typography } from "client/components/Typography";
 import { useCommandService } from "client/services/Command";
 import { ErrorView } from "client/components/Error";
 import useQueryParams from "client/hooks/useQueryParams";
+import TracyImg from "../common/Tracy";
 
 interface State extends AppState {
   redirectUri: string;
@@ -175,7 +176,19 @@ const LoginPage = () => {
         redirectUri={window.location.origin}
         onRedirectCallback={onRedirectCallback}
       >
-        <Login state={state} />
+        <Box>
+          <Box p={1} mb={4} display="flex" width="100%" justifyContent="center">
+            <Box p={1} height={150} width={100}>
+              <TracyImg />
+            </Box>
+            <Box p={1} height={150} display="flex" alignItems="center">
+              <Typography variant="h3">opstrace</Typography>
+            </Box>
+          </Box>
+          <Box p={1} display="flex" width="100%" justifyContent="center">
+            <Login state={state} />
+          </Box>
+        </Box>
       </Auth0Provider>
     </Page>
   );

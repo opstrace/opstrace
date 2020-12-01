@@ -11,7 +11,7 @@ import HistoryIcon from "@material-ui/icons/History";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Box from "client/components/Box/Box";
 import { ITheme } from "client/themes";
-import Tracy from "./Tracy";
+import Tracy from "../Tracy";
 import { useHistory, useLocation } from "react-router-dom";
 import { EARLY_PREVIEW } from "client/flags";
 import useCurrentUser from "state/user/hooks/useCurrentUser";
