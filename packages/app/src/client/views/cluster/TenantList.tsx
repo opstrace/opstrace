@@ -1,9 +1,14 @@
 import React, { useCallback } from "react";
 import { ListItemAvatar } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
+import styled from "styled-components";
 
-import { List, ButtonListItem, ListItemText } from "client/components/List";
+import { List, ListItem, ListItemText } from "client/components/List";
 import { Tenants, Tenant } from "state/tenant/types";
+
+const StyledListItem = styled(ListItem)`
+  cursor: pointer;
+`;
 
 export type TenantListProps = {
   selectedTenantIndex: number;
@@ -18,7 +23,7 @@ const TenantList = (props: TenantListProps) => {
 
   const renderItem = useCallback(
     ({ data, index }: { data: Tenant; index: number }) => (
-      <ButtonListItem
+      <StyledListItem
         selected={index === selectedTenantIndex}
         onClick={() => onSelect(data)}
         key={data.name}
@@ -29,7 +34,7 @@ const TenantList = (props: TenantListProps) => {
           </Avatar>
         </ListItemAvatar>
         <ListItemText primary={data.name} />
-      </ButtonListItem>
+      </StyledListItem>
     ),
     [selectedTenantIndex, onSelect]
   );

@@ -1,9 +1,14 @@
 import React, { useCallback } from "react";
 import { ListItemAvatar } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
+import styled from "styled-components";
 
-import { List, ButtonListItem, ListItemText } from "client/components/List";
+import { List, ListItem, ListItemText } from "client/components/List";
 import { Users, User } from "state/user/types";
+
+const StyledListItem = styled(ListItem)`
+  cursor: pointer;
+`;
 
 export type UserListProps = {
   selectedUserIndex: number;
@@ -18,7 +23,7 @@ const UserList = (props: UserListProps) => {
 
   const renderItem = useCallback(
     ({ data, index }: { data: User; index: number }) => (
-      <ButtonListItem
+      <StyledListItem
         selected={index === selectedUserIndex}
         onClick={() => onSelect(data)}
         key={data.email}
@@ -33,7 +38,7 @@ const UserList = (props: UserListProps) => {
           )}
         </ListItemAvatar>
         <ListItemText primary={data.email} />
-      </ButtonListItem>
+      </StyledListItem>
     ),
     [selectedUserIndex, onSelect]
   );

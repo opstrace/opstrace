@@ -48,7 +48,7 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
     (state, action): UserState => {
       // Make the changes optimistically
       const currentUser = state.users.find(
-        u => u.email !== state.currentUserId
+        u => u.opaque_id === state.currentUserId
       );
       if (!currentUser) {
         return state;

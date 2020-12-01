@@ -8,7 +8,6 @@ import type {
 import { actions, notificationServiceReducer, initialState } from "./reducer";
 import { useTypesafeReducer } from "../../hooks/useTypesafeReducer";
 import NotificationsList from "../../components/NotificationsList/NotificationsList";
-import { useCommandService } from "client/services/Command";
 
 const notificationServiceContext = React.createContext<NotificationServiceApi | null>(
   null
@@ -31,16 +30,17 @@ function NotificationService({ children }: { children: React.ReactNode }) {
     changeVisibility
   };
 
-  useCommandService({
-    id: "toggle-notification-visibility",
-    description: "Toggle notifications visibility",
-    keybindings: ["mod+e"],
-    category: "View",
-    handler: e => {
-      e.keyboardEvent?.preventDefault();
-      changeVisibility();
-    }
-  });
+  // Enable this when we have notifications to show
+  // useCommandService({
+  //   id: "toggle-notification-visibility",
+  //   description: "Toggle notifications visibility",
+  //   keybindings: ["mod+e"],
+  //   category: "View",
+  //   handler: e => {
+  //     e.keyboardEvent?.preventDefault();
+  //     changeVisibility();
+  //   }
+  // });
 
   return (
     <>
