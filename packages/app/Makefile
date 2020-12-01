@@ -5,7 +5,7 @@ DOCKER_REPO ?= opstrace
 # DOCKER_IMAGE_TAG is a md5sum of all the files (except hidden) in this package's
 # directory. We use it to have a deterministic method to calculate a docker
 # image tag and to only build and push a new image when changes have been made.
-DOCKER_IMAGE_TAG ?= $(shell find . -type f -not -path "./node_modules/*" -not -path "./secrets/*" -not -path "./build/*" -not -path "./dist/*" -not -path "./public/*" -not -path "./.storybook/*" -not -name ".*" -not -name "*.md" -print0 | sort -z -d -f | xargs -0 cat | md5sum | cut -d' ' -f1)
+DOCKER_IMAGE_TAG ?= $(shell find . -type f -not -path "./node_modules/*" -not -path "./secrets/*" -not -path "./build/*" -not -path "./dist/*" -not -path "./.storybook/*" -not -name ".*" -not -name "*.md" -print0 | sort -z -d -f | xargs -0 cat | md5sum | cut -d' ' -f1)
 
 all: build-image publish
 
