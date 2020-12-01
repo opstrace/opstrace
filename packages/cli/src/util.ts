@@ -27,7 +27,7 @@ import * as cli from "./index";
  * Validate command line-provided cluster name, with a focus on good error
  * messages.
  */
-export function validateClusterNameOrDie(cn: string) {
+export function validateClusterNameOrDie(cn: string): void {
   if (cn.length > 13) {
     die(`cluster name must not be longer than 13 characters`);
   }
@@ -55,7 +55,7 @@ export function validateClusterNameOrDie(cn: string) {
  * elsewhere.
  */
 export function gcpValidateCredFileAndGetProjectIDOrError(): string {
-  const fpath = process.env["GOOGLE_APPLICATION_CREDENTIALS"]!;
+  const fpath = process.env["GOOGLE_APPLICATION_CREDENTIALS"] || "";
   let opts;
   try {
     opts = getValidatedGCPAuthOptionsFromFile(fpath);
@@ -110,7 +110,10 @@ export async function promptForProceed(question?: string): Promise<void> {
  * https://github.com/redux-saga/redux-saga/issues/1698
  * https://redux-saga.js.org/docs/basics/ErrorHandling.html
  */
-export function smErrorLastResort(e: Error, detail: any): void {
+export function smErrorLastResort(
+  e: Error,
+  detail: { sagaStack: string }
+): void {
   // Cleanly shut down runtime when the inner call stack has thrown
   // ExitError. To that end, simply let it bubble up.
   // Note(JP): when throwing an error in here it's seemingly not passing
