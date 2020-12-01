@@ -32,7 +32,7 @@ function IWantToUseACommandService() {
       <Button
         variant="contained"
         state="secondary"
-        onClick={() => activatePickerWithText("> ")}
+        onClick={() => activatePickerWithText("")}
       >
         open command picker
       </Button>

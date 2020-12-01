@@ -49,9 +49,7 @@ describe("render CommandPicker", () => {
     const commandProviderArgument = mockedUseCommandService.mock.calls[0][0];
 
     commandProviderArgument.handler(Event);
-    expect(mockedPickerService.activatePickerWithText).toHaveBeenCalledWith(
-      ">"
-    );
+    expect(mockedPickerService.activatePickerWithText).toHaveBeenCalledWith("");
   });
 
   test("CommandPicker has correct options", async () => {

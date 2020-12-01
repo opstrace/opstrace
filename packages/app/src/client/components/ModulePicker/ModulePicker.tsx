@@ -25,7 +25,7 @@ const ModulePicker = () => {
 
   const { activatePickerWithText } = usePickerService(
     {
-      activationPrefix: "",
+      activationPrefix: ">",
       options: files ? files.files.map(fileToPickerOption) : [],
       onSelected: option => {
         if (!files) {
@@ -56,9 +56,9 @@ const ModulePicker = () => {
     description: "Select File",
     handler: e => {
       e.keyboardEvent?.preventDefault();
-      activatePickerWithText("");
+      activatePickerWithText("> ");
     },
-    keybindings: ["mod+p"]
+    keybindings: ["mod+shift+p"]
   });
 
   return null;
