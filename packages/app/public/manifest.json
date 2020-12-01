@@ -1,21 +1,32 @@
 {
   "short_name": "Opstrace",
   "name": "Opstrace",
+  "description": "Secure Observability Deployed in your Network",
   "icons": [
     {
       "src": "favicon.ico",
-      "sizes": "164x164",
+      "sizes": "96x96",
       "type": "image/x-icon"
     },
     {
-      "src": "logo_192.png",
-      "type": "image/png",
-      "sizes": "192x192"
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
     },
     {
-      "src": "logo_512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "start_url": ".",
