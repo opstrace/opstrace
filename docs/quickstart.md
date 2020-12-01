@@ -74,11 +74,11 @@ So let's get started.
 
 ## Step 1: Create a cluster
 
-Choose a name for your cluster and enter it here (it must be 13 characters or less):
+Choose an `$OPSTRACE_CLUSTER_NAME` for your cluster (it must be 13 characters or less):
 
 <!--input:$OPSTRACE_CLUSTER_NAME-->
 
-The cluster name will update throughout this document to make copy and pasting easier.  It will also globally identify you in the provided `opstrace.io` domain, which we provide for you by default.
+The cluster name will globally identify you in the provided `opstrace.io` domain, which we provide for you by default.
 
 Then, you'll create a simple cluster [configuration file](./references/cluster-configuration.md) with the most basic options.
 Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts the cluster-internal metrics.
