@@ -27,7 +27,7 @@ Spin up an Opstrace cluster in your own cloud account with our [quick start](htt
 ## Documentation
 
 You can find the Opstrace documentation at [opstrace.com](https://go.opstrace.com/docs).
-We would also like to invite you to improve these docs together with us and have started setting up a [corresponding guide](./docs/guides/contributor/writing-docs.md).
+We would also like to invite you to improve these docs together with us and have [corresponding guide](./docs/guides/contributor/writing-docs.md).
 
 
 ## Contributing
