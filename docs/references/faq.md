@@ -13,7 +13,7 @@ One great advantage is that you may be able to reduce the footprint of your Prom
 ## Can I run this on my own Kubernetes cluster?
 
 In order to provide a reliable experience, we control the entire infrastructure from end to end.
-Opstrace is best used in its own account spearately from the infrastructure its meant to monitor.
+Your Opstrace cluster is best kept separate from the infrastructure its meant to monitor.
 Running Opstrace on your own Kubernetes cluster would defeat the purpose by putting the burden of resource management and operations on your own team.
 
 ## Can I use this in production?
@@ -29,10 +29,10 @@ To use a custom domain, [email us](mailto:hello@opstrace.com) about our commerci
 ## How do I connect to my single sign-on provider, such as Okta?
 
 The built-in authentication is provided to our users for free as a convenience.
-To configure single sign-on [email us](mailto:hello@opstrace.com) about our commercial version.
+To freely configure single sign-on [email us](mailto:hello@opstrace.com) about our commercial version.
 
 ## How is your commercial version priced?
 
 Just because you send more and more data to the Opstrace cluster doesn't mean you should pay us more.
 We charge a flat _per-user_ price.
-Because we make money by people who gain value from our platform, we are therefore highly aligned with our users to be both transparent about the overall costs and to work to drive down those costs (which is typically dominated by the backend storage).
+Because we make money by people who gain value from our platform, we are therefore highly aligned with our users to be both transparent about the overall costs and to work to drive down those costs (which is typically dominated by storage).
