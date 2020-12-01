@@ -25,7 +25,9 @@ import { log, SECOND } from "@opstrace/utils";
 export function* syncTenants(kubeConfig: KubeConfig) {
   return yield call(function* () {
     if (!dbClient) {
-      log.warning("exiting tenant sync due to missing config");
+      log.warning(
+        "exiting tenant sync due to missing env vars GRAPHQL_ENDPOINT & HASURA_GRAPHQL_ADMIN_SECRET"
+      );
       return;
     }
     while (true) {
