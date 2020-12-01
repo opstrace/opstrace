@@ -19,6 +19,7 @@ import moduleManager from "./module/sagas";
 import moduleVersionManager from "./moduleVersion/sagas";
 import fileManager from "./file/sagas";
 import userManager from "./user/sagas";
+import tenantManager from "./tenant/sagas";
 
 export default function* main() {
   const sagas = [
@@ -26,7 +27,8 @@ export default function* main() {
     moduleManager,
     moduleVersionManager,
     fileManager,
-    userManager
+    userManager,
+    tenantManager
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.

@@ -18,14 +18,14 @@ import { useDispatch, useSelector, State } from "state/provider";
 import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-export const getTenantList = (state: State) => state.users.users;
+export const getTenantList = (state: State) => state.tenants.tenants;
 /**
- * Subscribes to users and will update on
+ * Subscribes to tenants and will update on
  * any changes. Automatically unsubscribeFromTenantLists
  * on unmount.
  */
 export default function useTenantList() {
-  const users = useSelector(getTenantList);
+  const tenants = useSelector(getTenantList);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -37,5 +37,5 @@ export default function useTenantList() {
     };
   }, [dispatch]);
 
-  return users;
+  return tenants;
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { put, call, take, fork, cancelled, cancel } from "redux-saga/effects";
+import { put, call, take, fork, cancelled } from "redux-saga/effects";
 import { Task, eventChannel, EventChannel } from "redux-saga";
 import { ActionType } from "typesafe-actions";
 import {
@@ -75,7 +75,7 @@ export default function* tenantListSubscriptionManager() {
       });
     }
   });
-
+  /**
   // Fork an unsubscribe handler
   yield fork(function* () {
     while (true) {
@@ -92,6 +92,7 @@ export default function* tenantListSubscriptionManager() {
       }
     }
   });
+  */
 }
 
 /**
