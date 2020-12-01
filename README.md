@@ -38,11 +38,6 @@ Take a look at our [high-level roadmap](./docs/references/roadmap.md) to see whe
 IMPORTANT NOTE: We welcome contributions from developers of all backgrounds. We encode that in a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
-## Opstrace Team
-
-The Opstrace team came together to solve a pernicious, recurring problem we've seen over and over again: the unacceptable tradeoffs with observability.
-We want to build the system we'd build for ourselves if it was our full-time job—and, well, now it is our full-time job!
-
 ## Get In Touch
 
 * Chat with us in our [GitHub Discussions](https://go.opstrace.com/community)
