@@ -130,5 +130,5 @@ error Command failed with exit code 1.
 ### Code: `make lint-codebase`
 
 Some parts of the code base are not covered by proper linting yet.
-We're working through it slowly in [#875](opstrace-prelaunch/issues/875).
+We're working through it slowly in [#51](https://github.com/opstrace/opstrace/issues/51).
 PRs welcome!
