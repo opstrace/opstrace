@@ -41,7 +41,6 @@ By participating in this project you agree to abide by its terms.
 ## Get In Touch
 
 * Chat with us in our [GitHub Discussions](https://go.opstrace.com/community)
-* Subscribe to our email newsletter (about 1 or 2 per month)
 * Contribute a [proposal](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=thinktank:%20proposal&template=2-proposal.md&title=) or a [bug report](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=type:%20bug&template=1-bug_report.md&title=)
 
 ## Security Reports
