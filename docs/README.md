@@ -21,7 +21,7 @@ After your cluster is running, our Controller inside the cluster will maintain t
 All of your data resides safely (and inexpensively) in your own S3 buckets.
 
 Frequently whole teams take weeks or months to set up a stack like this, and then it's an ongoing maintenance headache.
-And even if a team does all of this, they often skimp on certain critical aspects of configuration such as exposing API endpoints securely.
+And even if a team does all of this, they often skimp on certain critical aspects of configuration, such as exposing API endpoints securely.
 
 Opstrace does all of that for you.
 It looks a little something like this...
