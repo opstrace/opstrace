@@ -291,7 +291,17 @@ Now, let's query the logs:
 
 As you can see, the data we sent to the Opstrace cluster in step 3 is indeed ingested as expected.
 
-## Step 5: Clean up
+## Step 5: Add users and tenants
+
+Congratulations!
+You've walked through the majority of our foundational release, but we're [working on much more](./references/roadmap.md).
+Before you clean up the cluster you've created, why not check out our UI which allows you to add users and tenants to the system:
+
+```text
+https://$CLUSTER_NAME.opstrace.io/login
+```
+
+## Step 6: Clean up
 
 With this quick start we've shown you how easy it is to stand up an observability platform with long-term storage and security enabled by default.
 We've done the heavy lifting behind the scenes; to configure this all on your own requires many more steps and manual maintenance.
