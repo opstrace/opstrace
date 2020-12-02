@@ -72,11 +72,13 @@ AWS.config.update({
         // TCP connect() timeout is "Socket timed out without establishing a
         // connection". Info-log that so that the reason for delays is not
         // hidden from users.
-        log.info(
-          "aws-sdk-js request failed (attempt %s): %s: %s",
+        log.debug(
+          "aws-sdk-js request failed (attempt %s): %s: %s (retryable, according to sdk: %s)",
           retryCount,
           err.name,
-          err.message
+          err.message,
+          //@ts-ignore: we want to log that also if undefined
+          err.retryable
         );
       }
       if (retryCount < 2) {
