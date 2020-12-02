@@ -62,25 +62,45 @@ AWS.config.update({
       // Secondary reason: use a really simple retry strategy for starters.
       // Assume that HTTP requests are fired off in the context of micro tasks
       // which retry "forever" anyway.
+
       if (!err) {
+        // Code path allows this, but this happens rarely or never, check old
+        // logs.
         log.debug(
           "aws-sdk-js request failed (attempt %s): no err information",
           retryCount
         );
-      } else {
-        // An example `err.message` for the frequent real-world scenario of a
-        // TCP connect() timeout is "Socket timed out without establishing a
-        // connection". Info-log that so that the reason for delays is not
-        // hidden from users.
-        log.debug(
-          "aws-sdk-js request failed (attempt %s): %s: %s (retryable, according to sdk: %s)",
-          retryCount,
-          err.name,
-          err.message,
-          //@ts-ignore: we want to log that also if undefined
-          err.retryable
-        );
+        return 3000;
       }
+
+      //@ts-ignore: .code is sometimes set :)
+      if (err && err.code === "TimeoutError") {
+        // For the frequent real-world scenario of a TCP connect() timeout.
+        // Message is "Socket timed out without establishing a connection".
+        // Info-log that so that the reason for delays is not hidden from
+        // users.
+        const waitSec = 3 ** retryCount;
+        log.debug(
+          "AWS API request failed (attempt %s): %s (retry in %s seconds)",
+          retryCount,
+          err.message,
+          waitSec
+        );
+
+        return waitSec * 1000;
+      }
+
+      // All other cases: might sadly be non-retryable errors, also see
+      // https://github.com/opstrace/opstrace/issues/66
+      log.debug(
+        "aws-sdk-js request failed (attempt %s): %s: %s (retryable, according to sdk: %s)",
+        retryCount,
+        err.name,
+        err.message,
+        //@ts-ignore: we want to log that also if undefined
+        err.retryable
+      );
+
       if (retryCount < 2) {
         return 1000;
       }
