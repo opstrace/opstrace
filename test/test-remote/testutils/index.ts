@@ -81,6 +81,7 @@ export declare interface Dict<T = any> {
  * We then started using this module in other contexts (looker) and the side
  * effect of import became intolerable.
  */
+export let CLUSTER_BASE_URL: string;
 export let TENANT_DEFAULT_LOKI_API_BASE_URL: string;
 export let TENANT_DEFAULT_CORTEX_API_BASE_URL: string;
 export let TENANT_DEFAULT_API_TOKEN_FILEPATH: string | undefined;
@@ -90,6 +91,8 @@ export let TENANT_SYSTEM_CORTEX_API_BASE_URL: string;
 export let TENANT_SYSTEM_API_TOKEN_FILEPATH: string | undefined;
 let globalTestSuiteSetupPerformed = false;
 export function globalTestSuiteSetupOnce() {
+  log.info("globalTestSuiteSetupOnce()");
+
   if (globalTestSuiteSetupPerformed) {
     return;
   }
@@ -144,10 +147,33 @@ export function globalTestSuiteSetupOnce() {
     }
   }
 
+  CLUSTER_BASE_URL = `https://${clusterName}.opstrace.io`;
   TENANT_DEFAULT_LOKI_API_BASE_URL = `https://loki.default.${clusterName}.opstrace.io`;
   TENANT_SYSTEM_LOKI_API_BASE_URL = `https://loki.system.${clusterName}.opstrace.io`;
   TENANT_DEFAULT_CORTEX_API_BASE_URL = `https://cortex.default.${clusterName}.opstrace.io`;
   TENANT_SYSTEM_CORTEX_API_BASE_URL = `https://cortex.system.${clusterName}.opstrace.io`;
+
+  log.info("CLUSTER_BASE_URL: %s", CLUSTER_BASE_URL);
+
+  log.info(
+    "TENANT_DEFAULT_LOKI_API_BASE_URL: %s",
+    TENANT_DEFAULT_LOKI_API_BASE_URL
+  );
+
+  log.info(
+    "TENANT_SYSTEM_LOKI_API_BASE_URL: %s",
+    TENANT_SYSTEM_LOKI_API_BASE_URL
+  );
+
+  log.info(
+    "TENANT_DEFAULT_CORTEX_API_BASE_URL: %s",
+    TENANT_DEFAULT_CORTEX_API_BASE_URL
+  );
+
+  log.info(
+    "TENANT_SYSTEM_CORTEX_API_BASE_URL: %s",
+    TENANT_SYSTEM_CORTEX_API_BASE_URL
+  );
 
   // Create a definite temporary directory for this test runner, within the
   // operating system's TMPDIR (shared across test runner invocation, "insecure"
