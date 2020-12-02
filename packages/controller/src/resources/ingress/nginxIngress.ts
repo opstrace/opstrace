@@ -41,10 +41,7 @@ export function NginxIngressResources(
   const collection = new ResourceCollection();
 
   const domain = getDomain(state);
-  const ingressLoadBalancerAnnotations = {
-    "external-dns.alpha.kubernetes.io/hostname": `${domain}`,
-    "external-dns.alpha.kubernetes.io/ttl": "30"
-  };
+
   const {
     target,
     uiSourceIpFirewallRules,
@@ -72,6 +69,13 @@ export function NginxIngressResources(
   }).forEach(([endpointName, sourceIps]) => {
     const endpointConfig = ports[endpointName];
 
+    let extraSVCLoadBalancerAnnotations = {};
+    if (endpointName === "ui") {
+      extraSVCLoadBalancerAnnotations = {
+        "external-dns.alpha.kubernetes.io/hostname": `${domain}`
+      };
+    }
+
     collection.add(
       new Service(
         {
@@ -85,7 +89,8 @@ export function NginxIngressResources(
               "app.kubernetes.io/part-of": "ingress-nginx"
             },
             annotations: {
-              ...ingressLoadBalancerAnnotations,
+              "external-dns.alpha.kubernetes.io/ttl": "30",
+              ...extraSVCLoadBalancerAnnotations,
               ...getLoadBalancerAnnotations({
                 isPublic: endpointConfig.public,
                 platform: target
