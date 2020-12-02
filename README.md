@@ -3,7 +3,7 @@
 <!-- markdownlint-disable MD033 -->
 
 [![Build status](https://badge.buildkite.com/df9e995b3a5e4b0bebce8b432b0bf48b092fd261b7017b65c1.svg?branch=main)](https://buildkite.com/opstrace/opstrace)
-[![License](https://img.shields.io/github/license/opstrace/opstracestyle=flat-square&logo=appveyor)](https://github.com/opstrace/opstrace/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/opstrace/opstrace?style=flat-square&logo=appveyor)](https://github.com/opstrace/opstrace/blob/main/LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopstrace%2Fopstrace.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopstrace%2Fopstrace?ref=badge_shield&style=social)
 
