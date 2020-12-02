@@ -25,6 +25,7 @@ steps:
     soft_fail:
       - exit_status: 42
   - label: "🔨 main test (GCP)"
+    skip: "temporarily skipping GCP builds"
     key: "maintest-gcp"
     depends_on:
       - "preamble"
