@@ -25,7 +25,6 @@ steps:
     soft_fail:
       - exit_status: 42
   - label: "🔨 main test (GCP)"
-    skip: "temporarily skipping GCP builds"
     key: "maintest-gcp"
     depends_on:
       - "preamble"
@@ -60,7 +59,6 @@ steps:
   - label: "🔨 publish artifacts"
     key: "publish-artifacts"
     depends_on:
-      - "maintest-gcp"
       - "maintest-aws"
       - "check-docs"
     allow_dependency_failure: false
