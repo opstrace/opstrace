@@ -15,9 +15,9 @@ Opstrace deploys secure, horizontally-scalable open source observability in your
 
 Since **data never leaves your network**, it remains private.
 
-With **authenticated multi-tenant APIs** each team or environment can have their own protected sandbox to work with (tenants offer authorization and rate-limiting).
+With **authenticated multi-tenant APIs**, each team or environment can have their own protected sandbox to work with (tenants offer authorization and rate-limiting).
 
-Storing data in your cloud provider's object store (e.g. S3) and exposing data retention primitives makes cost **controllable, and up to 10x cheaper** than popular metered service providers.
+Storing data in your cloud provider's object store (e.g. S3) and exposing data retention primitives makes cost **controllable and up to 10x cheaper** than popular metered service providers.
 
 ## Quick Start
 
@@ -36,7 +36,7 @@ We :heart: working on open source projects, and we hope you do too.
 Please join us and make some contributions, however big or small.
 
 * Start by reading the [Contributing guide](./CONTRIBUTING.md) to become familiar with the process.
-* Then review our [Development guide](./docs/guides/contributor/setting-up-your-dev-env.md) to learn how to setup your environment and build the code.
+* Then review our [Development guide](./docs/guides/contributor/setting-up-your-dev-env.md) to learn how to set up your environment and build the code.
 * If you'd like a place to start and get your feet wet, explore our [`getting started` issues](https://github.com/opstrace/opstrace/labels/getting-started), or reach out in [Discussions](https://go.opstrace.com/community).
 
 There is of course a lot to do.
@@ -44,7 +44,7 @@ Take a look at our [high-level roadmap](./docs/references/roadmap.md) to see whe
 
 IMPORTANT NOTE: We welcome contributions from developers of all backgrounds.
 We encode that in a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
-By participating in this project you agree to abide by its terms.
+By participating in this project, you agree to abide by its terms.
 
 ## Get In Touch
 
