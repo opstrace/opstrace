@@ -90,6 +90,7 @@ tenants:
   - myteam
 env_label: quickstart
 node_count: 3
+cert_issuer: letsencrypt-prod
 EOF
 ```
 
