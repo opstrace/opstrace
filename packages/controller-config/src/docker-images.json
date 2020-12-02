@@ -15,7 +15,7 @@
   "lokiApiProxy": "opstrace/loki-api:7633d73fc9cf6af5d2caaa25d90fe242",
   "memcached": "memcached:1.6.6-alpine",
   "memcachedExporter": "prom/memcached-exporter:v0.6.0",
-  "nginxController": "quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1",
+  "nginxController": "quay.io/kubernetes-ingress-controller/nginx-ingress-controller:3.12.0",
   "nodeExporter": "quay.io/prometheus/node-exporter:v0.18.1",
   "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
   "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1",
