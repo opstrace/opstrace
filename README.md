@@ -3,9 +3,9 @@
 <!-- markdownlint-disable MD033 -->
 
 [![Build status](https://badge.buildkite.com/df9e995b3a5e4b0bebce8b432b0bf48b092fd261b7017b65c1.svg)](https://buildkite.com/opstrace/scheduled-main-builds)
-[![License](https://img.shields.io/github/license/opstrace/opstrace?style=flat-square&logo=appveyor)](https://github.com/opstrace/opstrace/blob/main/LICENSE)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+[![License](https://img.shields.io/github/license/opstrace/opstrace)](https://github.com/opstrace/opstrace/blob/main/LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopstrace%2Fopstrace.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopstrace%2Fopstrace?ref=badge_shield&style=social)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 <img src="https://user-images.githubusercontent.com/19239758/97793010-00161b00-1ba3-11eb-949b-e62eae6fdb9c.png" width="350">
 
