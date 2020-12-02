@@ -20,7 +20,7 @@
     "@opstrace/aws": "^0.0.0",
     "@opstrace/gcp": "^0.0.0",
     "@opstrace/utils": "^0.0.0",
-    "aws-sdk": "^2.788.0",
+    "aws-sdk": "^2.802.0",
     "open": "^7.3.0"
   }
 }

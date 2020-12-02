@@ -1,7 +1,7 @@
 {
   "name": "@opstrace/aws",
   "version": "0.0.0",
-  "description": "Library for managing GCP infrastructure",
+  "description": "Library for managing AWS infrastructure",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "repository": "https://github.com/opstrace/opstrace.git",
@@ -18,7 +18,7 @@
   "dependencies": {
     "@opstrace/utils": "^0.0.0",
     "@opstrace/config": "^0.0.0",
-    "aws-sdk": "^2.788.0",
+    "aws-sdk": "^2.802.0",
     "fp-ts": "^2.5.3",
     "io-ts": "^2.1.3"
   }
