@@ -286,7 +286,7 @@ function* createClusterCore() {
     `cluster creation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
   );
   log.info(
-    `You may now want to visit https://${ccfg.cluster_name}.opstrace.io/ in your browser!`
+    `You may now want to visit https://${ccfg.cluster_name}.opstrace.io/login in your browser!`
   );
 }
 
