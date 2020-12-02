@@ -188,9 +188,32 @@ export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
 # TODO: remove when we add GCP managed certificates and remove the
 # use of insecure_skip_verify in the tests
 echo "--- checking cluster is using certificate issued by LetsEncrypt"
-openssl s_client -showcerts -connect system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443 </dev/null \
-| openssl x509 -noout -issuer \
-|& grep "Fake LE Intermediate"
+set -e
+
+check_certificate() {
+    # Timeout the command after 10 seconds in case it's stuck.
+    timeout --kill-after=10 10 \
+    openssl s_client -showcerts -connect system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443 </dev/null \
+    | openssl x509 -noout -issuer \
+    |& grep "Fake LE Intermediate"
+}
+
+# Retry the certificate check up to 3 times. Wait 5s before retrying.
+count=0
+retries=3
+until check_certificate
+do
+    retcode=$?
+    wait=5
+    count=$(($count + 1))
+    if [ $count -lt $retries ]; then
+        echo "failed checking if cluster is using certificate issued by LetsEncrypt, retrying in ${wait} seconds..."
+        sleep $wait
+    else
+        exit ${retcode}
+    fi
+done
+set +e
 
 echo "+++ run test-remote"
 
