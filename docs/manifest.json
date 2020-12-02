@@ -81,6 +81,10 @@
           "path": "/docs/references/faq.md"
         },
         {
+          "title": "Roadmap",
+          "path": "/docs/references/roadmap.md"
+        },
+        {
           "title": "Cluster Configuration",
           "path": "/docs/references/cluster-configuration.md"
         },
