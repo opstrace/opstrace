@@ -73,7 +73,8 @@ import {
   hasServiceMonitorChanged,
   hasIngressChanged,
   hasAlertManagerChanged,
-  hasPrometheusChanged
+  hasPrometheusChanged,
+  hasCertificateChanged
 } from "../equality";
 
 import { entries } from "@opstrace/utils";
@@ -763,7 +764,10 @@ export function* reconcile(
         return;
       }
       if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasCertificateChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }

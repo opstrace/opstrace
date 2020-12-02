@@ -37,6 +37,8 @@ import {
 
 import { logDifference } from "./general";
 import { NetworkingV1beta1IngressTLS } from "@kubernetes/client-node";
+import { V1CertificateResource } from "../custom-resources";
+import { isCertificateEqual } from "./Certificate";
 
 export * from "./general";
 export * from "./Pod";
@@ -137,6 +139,22 @@ export const hasStatefulSetChanged = (
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec,
+      existing.spec
+    );
+    return true;
+  }
+
+  return false;
+};
+
+export const hasCertificateChanged = (
+  desired: V1CertificateResource,
+  existing: V1CertificateResource
+) => {
+  if (!isCertificateEqual(desired.spec, existing.spec)) {
+    logDifference(
+      `${desired.spec}/${desired.spec}`,
       desired.spec,
       existing.spec
     );
