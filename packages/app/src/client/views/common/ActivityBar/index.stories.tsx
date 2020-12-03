@@ -15,13 +15,14 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
 
 import ActivityBar from "./ActivityBar";
 import Box from "client/components/Box/Box";
 
 export default {
   title: "Views/Common/ActivityBar"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return (

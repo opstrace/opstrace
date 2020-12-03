@@ -61,10 +61,10 @@ interface RolenamePolicyarnAssociation {
   PolicyArn: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function* destroyAWSInfra(): Generator<
   JoinEffect | CallEffect | ForkEffect | Generator<ForkEffect, Task[], Task>,
   void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
 > {
   const lokiBucketName = getBucketName({

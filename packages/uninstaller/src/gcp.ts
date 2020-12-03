@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { call } from "redux-saga/effects";
+import { call, CallEffect, ForkEffect, JoinEffect } from "redux-saga/effects";
 import {
   ensureGKEDoesNotExist,
   ensureGatewayDoesNotExist,
@@ -28,33 +28,39 @@ import { destroyDNS } from "@opstrace/dns";
 import { log, getBucketName } from "@opstrace/utils";
 
 import { destroyConfig } from "./index";
+import { Task } from "redux-saga";
 
-export function* destroyGCPInfra() {
+export function* destroyGCPInfra(): Generator<
+  JoinEffect | CallEffect | ForkEffect | Generator<ForkEffect, Task[], Task>,
+  void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+> {
   log.info(`Ensure cert-manager service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-cert-manager`,
-    projectId: destroyConfig.gcpProjectID!,
+    projectId: destroyConfig.gcpProjectID ?? "",
     role: "roles/dns.admin"
   });
 
   log.info(`Ensure external-dns service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-external-dns`,
-    projectId: destroyConfig.gcpProjectID!,
+    projectId: destroyConfig.gcpProjectID ?? "",
     role: "roles/dns.admin"
   });
 
   log.info(`Ensure cortex service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-cortex`,
-    projectId: destroyConfig.gcpProjectID!,
+    projectId: destroyConfig.gcpProjectID ?? "",
     role: "roles/storage.admin"
   });
 
   log.info(`Ensure loki service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-loki`,
-    projectId: destroyConfig.gcpProjectID!,
+    projectId: destroyConfig.gcpProjectID ?? "",
     role: "roles/storage.admin"
   });
 
@@ -80,14 +86,14 @@ export function* destroyGCPInfra() {
   yield call(
     ensureGatewayDoesNotExist,
     destroyConfig.clusterName,
-    destroyConfig.gcpRegion!
+    destroyConfig.gcpRegion ?? ""
   );
 
   log.info(`Destroying Subnet`);
   yield call(
     ensureSubNetworkDoesNotExist,
     destroyConfig.clusterName,
-    destroyConfig.gcpRegion!
+    destroyConfig.gcpRegion ?? ""
   );
 
   log.info(`Destroying VPC`);
