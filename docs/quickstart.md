@@ -108,7 +108,7 @@ Let's get things going:
 **Be patient:** Cluster creation takes on average 30 minutes on AWS (but it can go as long as 45 minutes).
 
 **So you know:** The CLI is largely re-entrant. If it is interrupted while setting up cloud infrastructure you can re-invoke the same command and it will continue where it left off.
-For additional information understanding and troubleshooting the `create` command, see our [CLI reference section](./references/cli#create).
+For additional information understanding and troubleshooting the `create` command, see our [CLI reference section](./references/cli.md#create).
 
 When everything is done, you'll see the following log line:
 
