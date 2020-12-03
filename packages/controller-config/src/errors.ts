@@ -15,7 +15,7 @@
  */
 
 export class ConfigDoesNotExistError extends Error {
-  constructor(...args: any[]) {
+  constructor(...args: string[] | undefined[]) {
     super(...args);
     Error.captureStackTrace(this, ConfigDoesNotExistError);
   }
