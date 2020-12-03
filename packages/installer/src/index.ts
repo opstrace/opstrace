@@ -195,7 +195,7 @@ function* createClusterCore() {
     postgreSQLEndpoint = res.postgreSQLEndpoint;
 
     controllerConfig.gcp = {
-      projectId: gcpAuthOptions!.projectId,
+      projectId: gcpAuthOptions.projectId,
       certManagerServiceAccount: getCertManagerServiceAccount(),
       externalDNSServiceAccount: getExternalDNSServiceAccount(),
       cortexServiceAccount: getCortexServiceAccount(),

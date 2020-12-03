@@ -15,11 +15,13 @@
  */
 
 import React from "react";
+import { Meta } from "@storybook/react";
+
 import HelpPage from ".";
 
 export default {
   title: "Views/help"
-};
+} as Meta;
 
 export const Default = (): JSX.Element => {
   return <HelpPage />;
