@@ -25,7 +25,6 @@ export const addApiIngress = ({
   namespace,
   tenant,
   api,
-  issuer,
   kubeConfig,
   state,
   collection
@@ -38,7 +37,7 @@ export const addApiIngress = ({
   kubeConfig: KubeConfig;
   state: State;
   collection: ResourceCollection;
-}) => {
+}): void => {
   const apiHost = getApiDomain(api, tenant, state);
 
   // Add ingress for data API
