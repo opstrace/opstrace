@@ -31,7 +31,7 @@ fi
 # git --no-pager diff HEAD main
 git --no-pager diff --name-only HEAD main
 
-DOCS_ONLY_CHANGES=$(git --no-pager diff --name-only HEAD main | egrep -v "^docs/|.gitattributes|^.github|^README.md" | tr -d '[:space:]')
+DOCS_ONLY_CHANGES=$(git --no-pager diff --name-only HEAD main | egrep -v "^docs/|.gitattributes|^.github|^README.md|^.markdownlint.json" | tr -d '[:space:]')
 if [ -z "${DOCS_ONLY_CHANGES}" ];
 then
     echo "--- docs only PR (${BUILDKITE_PULL_REQUEST}) - skipping next steps"
