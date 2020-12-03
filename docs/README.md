@@ -16,7 +16,7 @@ Opstrace clusters expose a horizontally scalable [Prometheus](https://prometheus
 You can point your existing Prometheus or [FluentD](https://fluentd.org)/[Promtail](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/_index.md) instances to it.
 We also plan to support a wide variety of other APIs, such as the Datadog agent.
 
-Creating an Opstrace Cluster requires our [command-line interface](./docs/references/cli.md), which talks directly to your cloud provider.
+Creating an Opstrace Cluster requires our [command-line interface](./references/cli.md), which talks directly to your cloud provider.
 It orchestrates the tedious process of setting everything up.
 After your cluster is running, our Controller inside the cluster will maintain things over time.
 All of your data resides safely (and inexpensively) in your own S3 buckets.
