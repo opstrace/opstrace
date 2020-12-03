@@ -7,7 +7,8 @@
 
 ## What does it do?
 
-Opstrace automates the creation and management of a secure, horizontally-scalable metrics and logs platform. It consists of an installer that runs as a CLI to use your cloud credentials to provision and configure an Opstrace cluster in your account, as well as internal components that manage its ongoing lifecycle (repairing and updating components as needed).
+Opstrace automates the creation and management of a secure, horizontally-scalable metrics and logs platform.
+It consists of an installer that runs as a CLI to use your cloud credentials to provision and configure an Opstrace cluster in your account, as well as internal components that manage its ongoing lifecycle (repairing and updating components as needed).
 
 ## How does it work?
 
@@ -30,10 +31,10 @@ It looks a little something like this...
 
 ## How can I use it?
 
-First, give our [Quick Start](./docs/quickstart.md) a try.
+First, give our [Quick Start](./quickstart.md) a try.
 
 Then you can check out our three guides on the left—User, Administrator, and Contributor—for more details on how to create and use an Opstrace cluster.
 
-See also [Key Concepts](docs/references/concepts.md) to understand the core concepts of an Opstrace cluster.
+See also [Key Concepts](./references/concepts.md) to understand the core concepts of an Opstrace cluster.
 
 Missing something?  Check out our [issues](https://go.opstrace.com/gh) to see if it's planned, and if not, [submit a proposal](https://go.opstrace.com/proposal) and/or contact us in our [community discussions](https://go.opstrace.com/community).
