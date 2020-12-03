@@ -60,6 +60,11 @@ type AWSConfigType = {
     CidrBlock: string;
   };
   subnets: { CidrBlock: string; AvailabilityZone: string; Public: boolean }[];
+  rdsSubnets: {
+    CidrBlock: string;
+    AvailabilityZone: string;
+    Public: boolean;
+  }[];
   masterAuthorizedNetworks: string[];
   instanceType: string;
   imageId: string;
