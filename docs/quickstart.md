@@ -74,11 +74,11 @@ So let's get started.
 
 ## Step 1: Create a cluster
 
-Choose an `$OPSTRACE_CLUSTER_NAME` for your cluster (it must be 13 characters or less):
+Choose an `OPSTRACE_CLUSTER_NAME` for your cluster (it must be 13 characters or less):
 
 <!--input:$OPSTRACE_CLUSTER_NAME-->
 
-The cluster name will globally identify you in the provided `opstrace.io` domain, which we provide for you by default.
+The cluster name will globally identify you `$OPSTRACE_CLUSTER_NAME.opstrace.io` domain, which we provide for you by default.
 
 Then, you'll create a simple cluster [configuration file](./references/cluster-configuration.md) with the most basic options.
 Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts the cluster-internal metrics.
@@ -94,8 +94,9 @@ cert_issuer: letsencrypt-prod
 EOF
 ```
 
-**Your input needed:** After you initiate the command below, a browser page is going to pop up asking you to sign in with a Google account. and provide a seamless user experience with our automated DNS: `$OPSTRACE_CLUSTER_NAME.opstrace.io`.
-To achieve that, we ask you to log in to Opstrace with a Google account; we will open a browser page for you automatically, but should that fail, the URL will be printed in the CLI output.
+**Your input needed:** After you initiate the command below, a browser page is going to pop up asking you to sign in with a Google account.
+(The URL will also be printed in the CLI output.)
+This is so we can and provide a seamless user experience for our provided DNS.
 
 Let's get things going:
 
