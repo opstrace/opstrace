@@ -40,7 +40,7 @@ export const configReducer = createReducer<ConfigState, Actions>(
 )
   .handleAction(
     configMapActions.fetch.request,
-    (state, _): ConfigState => ({
+    (state): ConfigState => ({
       ...state,
       loading: true
     })

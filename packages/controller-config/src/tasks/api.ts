@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { call } from "redux-saga/effects";
+import { call, CallEffect } from "redux-saga/effects";
+import { V1ConfigMap } from "@kubernetes/client-node";
 
 import { serialize, configmap, deserialize } from "../utils";
 
@@ -33,7 +34,13 @@ import { log } from "@opstrace/utils";
  * Return deserialized configmap or `undefined` if the config map cannot
  * be found.
  */
-export function* fetch(kubeConfig: KubeConfiguration) {
+export function* fetch(
+  kubeConfig: KubeConfiguration
+): Generator<
+  CallEffect,
+  ControllerConfigType | undefined,
+  { body: V1ConfigMap }
+> {
   const cm = configmap(kubeConfig);
   try {
     const v1ConfigMap = yield call([cm, cm.read]);
@@ -50,7 +57,7 @@ export function* fetch(kubeConfig: KubeConfiguration) {
 export function* set(
   controllerconfig: ControllerConfigType,
   kubeConfig: KubeConfiguration
-) {
+): Generator<CallEffect, void, unknown> {
   const cm = serialize(controllerconfig, kubeConfig);
 
   // Expect this error structure:

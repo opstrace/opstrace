@@ -17,8 +17,8 @@
 import { createAsyncAction, createAction } from "typesafe-actions";
 import { ControllerConfigType } from "./types";
 
-export namespace actions {
-  export const set = createAsyncAction(
+export const actions = {
+  set: createAsyncAction(
     "SET_CONFIG_REQUEST",
     "SET_CONFIG_SUCCESS",
     "SET_CONFIG_FAILURE"
@@ -26,25 +26,25 @@ export namespace actions {
     { config: ControllerConfigType },
     { config: ControllerConfigType },
     { config: ControllerConfigType; error: Error }
-  >();
+  >(),
 
-  export const destroy = createAsyncAction(
+  destroy: createAsyncAction(
     "DESTROY_CONFIG_REQUEST",
     "DESTROY_CONFIG_SUCCESS",
     "DESTROY_CONFIG_FAILURE"
-  )<{ name: string }, { name: string }, { name: string; error: Error }>();
+  )<{ name: string }, { name: string }, { name: string; error: Error }>(),
 
-  export const fetchAll = createAsyncAction(
+  fetchAll: createAsyncAction(
     "FETCH_CONFIG_REQUEST",
     "FETCH_CONFIG_SUCCESS",
     "FETCH_CONFIG_FAILURE"
-  )<undefined, { config: ControllerConfigType }, { error: Error }>();
+  )<undefined, { config: ControllerConfigType }, { error: Error }>(),
 
-  export const subscribe = createAction("SUBSCRIBE_CONFIG")<{}>();
+  subscribe: createAction("SUBSCRIBE_CONFIG")<unknown>(),
 
-  export const unSubscribe = createAction("UNSUBSCRIBE_CONFIG")<{}>();
+  unSubscribe: createAction("UNSUBSCRIBE_CONFIG")<unknown>(),
 
-  export const onChanged = createAction("ON_CONFIG_CHANGED")<{
+  onChanged: createAction("ON_CONFIG_CHANGED")<{
     config: ControllerConfigType;
-  }>();
-}
+  }>()
+};
