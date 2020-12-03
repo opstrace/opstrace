@@ -17,30 +17,30 @@
 import { createAsyncAction, createAction } from "typesafe-actions";
 import { Tenant, Tenants } from "./types";
 
-export namespace actions {
-  export const set = createAsyncAction(
+export const actions = {
+  set: createAsyncAction(
     "SET_TENANT_REQUEST",
     "SET_TENANT_SUCCESS",
     "SET_TENANT_FAILURE"
-  )<{ tenant: Tenant }, { tenant: Tenant }, { tenant: Tenant; error: Error }>();
+  )<{ tenant: Tenant }, { tenant: Tenant }, { tenant: Tenant; error: Error }>(),
 
-  export const destroy = createAsyncAction(
+  destroy: createAsyncAction(
     "DESTROY_TENANT_REQUEST",
     "DESTROY_TENANT_SUCCESS",
     "DESTROY_TENANT_FAILURE"
-  )<{ name: string }, { name: string }, { name: string; error: Error }>();
+  )<{ name: string }, { name: string }, { name: string; error: Error }>(),
 
-  export const fetchAll = createAsyncAction(
+  fetchAll: createAsyncAction(
     "FETCH_TENANTS_REQUEST",
     "FETCH_TENANTS_SUCCESS",
     "FETCH_TENANTS_FAILURE"
-  )<undefined, { tenants: Tenants }, { error: Error }>();
+  )<undefined, { tenants: Tenants }, { error: Error }>(),
 
-  export const subscribe = createAction("SUBSCRIBE_TENANTS")<{}>();
+  subscribe: createAction("SUBSCRIBE_TENANTS")<unknown>(),
 
-  export const unSubscribe = createAction("UNSUBSCRIBE_TENANTS")<{}>();
+  unSubscribe: createAction("UNSUBSCRIBE_TENANTS")<unknown>(),
 
-  export const onChanged = createAction("ON_TENANTS_CHANGED")<{
+  onChanged: createAction("ON_TENANTS_CHANGED")<{
     tenants: Tenants;
-  }>();
-}
+  }>()
+};
