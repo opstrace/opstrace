@@ -40,7 +40,7 @@ export const tenantsReducer = createReducer<TenantsState, Actions>(
 )
   .handleAction(
     configMapActions.fetch.request,
-    (state, _): TenantsState => ({
+    (state): TenantsState => ({
       ...state,
       loading: true
     })

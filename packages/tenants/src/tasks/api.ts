@@ -15,7 +15,7 @@
  */
 
 import { call } from "redux-saga/effects";
-
+import { CallEffect } from "redux-saga/effects";
 import { Tenants } from "../types";
 import { serialize, deserialize } from "../utils";
 import {
@@ -23,18 +23,24 @@ import {
   ConfigMap,
   createOrUpdateCM
 } from "@opstrace/kubernetes";
+import { V1ConfigMap } from "@kubernetes/client-node";
 
 /**
  * Fetch Tenants
  */
-export function* fetch(kubeConfig: KubeConfiguration) {
+export function* fetch(
+  kubeConfig: KubeConfiguration
+): Generator<CallEffect, Tenants, { body: V1ConfigMap }> {
   const cm = serialize([], kubeConfig);
   const v1ConfigMap = yield call([cm, cm.read]);
 
   return deserialize(new ConfigMap(v1ConfigMap.body, kubeConfig));
 }
 
-export function* set(tenants: Tenants, kubeConfig: KubeConfiguration) {
+export function* set(
+  tenants: Tenants,
+  kubeConfig: KubeConfiguration
+): Generator<CallEffect, void, unknown> {
   const cm = serialize(tenants, kubeConfig);
   yield call(createOrUpdateCM, cm);
 }

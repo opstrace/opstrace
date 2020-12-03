@@ -24,8 +24,10 @@ export const isTenantStorage = (configMap: ConfigMap): boolean =>
   configMap.name === TENANTS_STORAGE_CONFIGMAP_NAME;
 
 export const deserialize = (configMap: ConfigMap): Tenants => {
-  const _tenants: [] = JSON.parse(configMap.spec.data![TENANTS_STORAGE_KEY]);
-  return _tenants.map((t: any) => tenantSchema.cast(t));
+  const _tenants: [] = JSON.parse(
+    configMap.spec.data?.[TENANTS_STORAGE_KEY] || ""
+  );
+  return _tenants.map((t: Tenants) => tenantSchema.cast(t));
 };
 
 export const serialize = (
