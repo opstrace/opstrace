@@ -137,7 +137,7 @@ function* shouldDestroy() {
   });
 }
 
-export function* runReporter() {
+export function* runReporter(): IterableIterator<unknown> {
   return yield call(
     reporter,
     {
