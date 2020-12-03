@@ -24,14 +24,31 @@ fi
 
 # List the files that are touched in the PR, filter for docs changes and remove
 # whitespace. If output is empty then only docs are changed.
-# Note: known limitation, see
-# opstrace-prelaunch/issues/1708#issuecomment-717404504
+#
+# https://docs.github.com/en/free-pro-team@latest/rest/reference/pulls#list-pull-requests-files
+FILES_EDITED_IN_PR=$(
+    curl \
+    --silent \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/opstrace/opstrace/pulls/${BUILDKITE_PULL_REQUEST}/files \
+  | jq -r '.[].filename'
+)
 
-# For debugging, how what this command really returns
-# git --no-pager diff HEAD main
-git --no-pager diff --name-only HEAD main
+# If the PR touches any of the following files then it's considered a docs only
+# PR and it should skip the rest of the CI steps.
+#
+# Note the bashism: Within double quotes, a newline preceded by a backslash is
+# removed.
+ALLOWLIST="\
+^docs/|\
+.gitattributes|\
+^.github|\
+^README.md|\
+^.markdownlint.json|\
+ci/check-if-docs-pr.sh\
+"
 
-DOCS_ONLY_CHANGES=$(git --no-pager diff --name-only HEAD main | egrep -v "^docs/|.gitattributes|^.github|^README.md|^.markdownlint.json" | tr -d '[:space:]')
+DOCS_ONLY_CHANGES=$(echo ${FILES_EDITED_IN_PR}| egrep -v "${ALLOWLIST}" | tr -d '[:space:]')
 if [ -z "${DOCS_ONLY_CHANGES}" ];
 then
     echo "--- docs only PR (${BUILDKITE_PULL_REQUEST}) - skipping next steps"
