@@ -528,6 +528,10 @@ yarn.lock: package.json $(PACKAGE_JSON) node_modules
 node_modules:
 	mkdir -p node_modules
 
+.PHONY: unit-tests
+unit-tests: yarn-frozen-lockfile
+	cd lib/kubernetes && yarn test
+
 .PHONY: preamble
 preamble:
 	bash "ci/preamble.sh"
