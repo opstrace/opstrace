@@ -32,6 +32,8 @@ tsconfig.tsbuildinfo
 **/lib/utils/lib
 **/module_cache
 **/modules/**/lib
+# jest coverage directory
+coverage/
 
 pkg/cortex-push/cortex-push
 pkg/datadog/datadog
