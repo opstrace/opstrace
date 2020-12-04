@@ -122,7 +122,11 @@ if [ "${BUILDKITE_BRANCH}" == "main" ]; then
     # pragmatic test: did the upload succeed?
     set -x
     mkdir -p dir-for-testing-download
-    curl -L https://opstrace-ci-main-artifacts.s3-us-west-2.amazonaws.com/cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2 | \
+    curl \
+        --retry 3 \
+        --retry-delay 5 \
+        --retry-all-errors \
+        -L https://opstrace-ci-main-artifacts.s3-us-west-2.amazonaws.com/cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2 | \
         tar xjf - -C dir-for-testing-download
     # Expect this "latest" to match what was just uploaded. That is certainly
     # subject to race conditions and S3 eventual consistency struggles -- but
