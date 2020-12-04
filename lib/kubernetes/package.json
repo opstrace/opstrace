@@ -15,7 +15,7 @@
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
     "lint": "echo done",
-    "test": "jest --coverage"
+    "test": "node scripts/test.js --coverage"
   },
   "dependencies": {
     "@kubernetes/client-node": "0.13.0",
