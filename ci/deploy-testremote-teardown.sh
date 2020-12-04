@@ -148,6 +148,9 @@ echo "--- file system usage after entering CI container"
 df -h
 
 curl --request POST \
+    --retry 3 \
+    --retry-delay 5 \
+    --retry-all-errors \
     --url https://opstrace-dev.us.auth0.com/oauth/token \
     --header 'content-type: application/json' \
     --data-binary "@secrets/dns-service-login-for-ci.json" \
