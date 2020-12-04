@@ -78,7 +78,7 @@ Choose an `OPSTRACE_CLUSTER_NAME` for your cluster (it must be 13 characters or 
 
 <!--input:$OPSTRACE_CLUSTER_NAME-->
 
-The cluster name will globally identify you `$OPSTRACE_CLUSTER_NAME.opstrace.io` domain, which we provide for you by default.
+The cluster name will globally identify you in our domain as `$OPSTRACE_CLUSTER_NAME.opstrace.io`, which we provide for you by default as a convenience.
 
 Then, you'll create a simple cluster [configuration file](./references/cluster-configuration.md) with the most basic options.
 Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts the cluster-internal metrics.
