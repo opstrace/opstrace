@@ -28,6 +28,9 @@ fi
 # https://docs.github.com/en/free-pro-team@latest/rest/reference/pulls#list-pull-requests-files
 FILES_EDITED_IN_PR=$(
     curl \
+    --retry 3 \
+    --retry-delay 5 \
+    --retry-all-errors \
     --silent \
     -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/opstrace/opstrace/pulls/${BUILDKITE_PULL_REQUEST}/files \
