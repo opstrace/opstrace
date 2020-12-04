@@ -24,11 +24,19 @@ steps:
       - ci/check-docs-fastpath-helper.sh fastpath-stdout FASTPATHEXIT
     soft_fail:
       - exit_status: 42
+  - label: "🔨 unit tests"
+    key: "unit-tests"
+    depends_on:
+      - "preamble"
+      - "check-docs"
+    command:
+      - cd "${OPSTRACE_PREBUILD_DIR}" && make ci-unit-tests
   - label: "🔨 main test (GCP)"
     key: "maintest-gcp"
     depends_on:
       - "preamble"
       - "check-docs"
+      - "unit-tests"
     env:
       OPSTRACE_CLUSTER_NAME: "bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
       OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-gcp"
@@ -42,6 +50,7 @@ steps:
     depends_on:
       - "preamble"
       - "check-docs"
+      - "unit-tests"
     env:
       OPSTRACE_CLUSTER_NAME: "bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
       OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-aws"
