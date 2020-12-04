@@ -1,6 +1,9 @@
 #!/bin/bash
 set -o xtrace
 
+# Import helper functions.
+source ci/utils.sh
+
 # Exit code specification: detect when this CI run has been triggered from a
 # pull request (not a scheduled main build). If that is the case, inspect the
 # diff: detect if this is a "docs-only" change. If that is the case, exit with
@@ -28,9 +31,6 @@ fi
 # https://docs.github.com/en/free-pro-team@latest/rest/reference/pulls#list-pull-requests-files
 FILES_EDITED_IN_PR=$(
     curl \
-    --retry 3 \
-    --retry-delay 5 \
-    --retry-all-errors \
     --silent \
     -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/opstrace/opstrace/pulls/${BUILDKITE_PULL_REQUEST}/files \

@@ -8,6 +8,9 @@ set -o pipefail
 # Skip steps if it's a docs pr
 bash ci/check-if-docs-pr.sh && exit 0
 
+# Import helper functions.
+source ci/utils.sh
+
 # Philosophy: run this with every PR, even if publishing from PRs is not really
 # needed. Make it so that when this runs from `main` that the code path is
 # practically the same as the one from non-main branches (PRs). Goal: we should
@@ -122,11 +125,7 @@ if [ "${BUILDKITE_BRANCH}" == "main" ]; then
     # pragmatic test: did the upload succeed?
     set -x
     mkdir -p dir-for-testing-download
-    curl \
-        --retry 3 \
-        --retry-delay 5 \
-        --retry-all-errors \
-        -L https://opstrace-ci-main-artifacts.s3-us-west-2.amazonaws.com/cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2 | \
+    curl -L https://opstrace-ci-main-artifacts.s3-us-west-2.amazonaws.com/cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2 | \
         tar xjf - -C dir-for-testing-download
     # Expect this "latest" to match what was just uploaded. That is certainly
     # subject to race conditions and S3 eventual consistency struggles -- but
