@@ -253,6 +253,19 @@ export function OpstraceApplicationResources(
                   command: ["node", "dist/server.js"],
                   env: [
                     {
+                      name: "REDIS_HOST",
+                      value: `redis-master.${namespace}.svc.cluster.local`
+                    },
+                    {
+                      name: "REDIS_PASSWORD",
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: "redis-password",
+                          key: "REDIS_MASTER_PASSWORD"
+                        }
+                      }
+                    },
+                    {
                       name: "GRAPHQL_ENDPOINT_HOST",
                       value: `graphql.${namespace}.svc.cluster.local`
                     },

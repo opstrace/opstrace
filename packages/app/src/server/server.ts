@@ -39,6 +39,7 @@ import setupWebsocketHandling from "./routes/websockets";
 import sessionParser from "./middleware/session";
 import catchErrorsMiddleware from "./middleware/error";
 import serverRender from "./middleware/render";
+import { GeneralServerError } from "./errors";
 
 setLogger(
   buildLogger({
@@ -84,6 +85,15 @@ function createServer() {
   }
   app.use(sessionParser);
 
+  app.use(function sessionCheck(req, res, next) {
+    if (!req.session) {
+      return next(
+        new GeneralServerError(500, "connection to session backend lost")
+      );
+    }
+    next();
+  });
+
   // all api routes will be prefixed with _/ which gets us around the service worker cache
   // we don't want these responses cached long term by the service worker
   app.use("/_", api());
@@ -107,9 +117,8 @@ lightship.registerShutdownHandler(async () => {
   // Allow sufficient amount of time to allow all of the existing
   // HTTP requests to finish before terminating the service.
   log.info(
-    `waiting ${
-      shutdownDelay / 1000
-    }s for connections to close before shutting down`
+    `waiting ${shutdownDelay /
+      1000}s for connections to close before shutting down`
   );
 
   await delay(shutdownDelay);
