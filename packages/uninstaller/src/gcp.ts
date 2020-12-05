@@ -36,31 +36,37 @@ export function* destroyGCPInfra(): Generator<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
 > {
+  if (!destroyConfig.gcpProjectID) {
+    throw Error("gcp project id not specified in credentials");
+  }
+  if (!destroyConfig.gcpRegion) {
+    throw Error("gcp region not specified in credentials");
+  }
   log.info(`Ensure cert-manager service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-cert-manager`,
-    projectId: destroyConfig.gcpProjectID ?? "",
+    projectId: destroyConfig.gcpProjectID,
     role: "roles/dns.admin"
   });
 
   log.info(`Ensure external-dns service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-external-dns`,
-    projectId: destroyConfig.gcpProjectID ?? "",
+    projectId: destroyConfig.gcpProjectID,
     role: "roles/dns.admin"
   });
 
   log.info(`Ensure cortex service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-cortex`,
-    projectId: destroyConfig.gcpProjectID ?? "",
+    projectId: destroyConfig.gcpProjectID,
     role: "roles/storage.admin"
   });
 
   log.info(`Ensure loki service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-loki`,
-    projectId: destroyConfig.gcpProjectID ?? "",
+    projectId: destroyConfig.gcpProjectID,
     role: "roles/storage.admin"
   });
 
@@ -86,14 +92,14 @@ export function* destroyGCPInfra(): Generator<
   yield call(
     ensureGatewayDoesNotExist,
     destroyConfig.clusterName,
-    destroyConfig.gcpRegion ?? ""
+    destroyConfig.gcpRegion
   );
 
   log.info(`Destroying Subnet`);
   yield call(
     ensureSubNetworkDoesNotExist,
     destroyConfig.clusterName,
-    destroyConfig.gcpRegion ?? ""
+    destroyConfig.gcpRegion
   );
 
   log.info(`Destroying VPC`);

@@ -71,17 +71,17 @@ export function PrometheusResources(
   let promSecrets: string[] = [];
   let promBearerTokenFile: string | undefined = undefined;
 
-  const remoteWrite: {url: string, bearerTokenFile?: string} = {
+  const remoteWrite: { url: string; bearerTokenFile?: string } = {
     url: `http://cortex-api.${getTenantNamespace(
       tenant
     )}.svc.cluster.local:8080/api/v1/push`
   };
 
-  const remoteRead: {url: string, bearerTokenFile?: string} = {
+  const remoteRead: { url: string; bearerTokenFile?: string } = {
     url: `http://cortex-api.${getTenantNamespace(
       tenant
     )}.svc.cluster.local:8080/api/v1/read`
-  }
+  };
 
   if (tenant.type !== "SYSTEM") {
     ruleNamespaceSelector = serviceMonitorNamespaceSelector = {
@@ -120,6 +120,7 @@ export function PrometheusResources(
             {
               name: "web",
               port: 9090,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "web" as any
             }
           ],
@@ -209,12 +210,8 @@ export function PrometheusResources(
               }
             ]
           },
-          remoteWrite: [
-            remoteWrite
-          ],
-          remoteRead: [
-            remoteRead
-          ],
+          remoteWrite: [remoteWrite],
+          remoteRead: [remoteRead],
           image: "quay.io/prometheus/prometheus:v2.21.0",
           baseImage: "quay.io/prometheus/prometheus",
           nodeSelector: {

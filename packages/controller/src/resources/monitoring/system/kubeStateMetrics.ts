@@ -118,11 +118,13 @@ export function KubeStateMetricsResources(
             {
               name: "https-main",
               port: 8443,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "https-main" as any
             },
             {
               name: "https-self",
               port: 9443,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "https-self" as any
             }
           ],

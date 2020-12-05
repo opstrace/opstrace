@@ -222,6 +222,7 @@ export function KubedResources(
             {
               port: 443,
               protocol: "TCP",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 8443 as any
             }
           ],

@@ -85,6 +85,7 @@ export function PrometheusAdaptorResources(
             {
               name: "https",
               port: 443,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 6443 as any
             }
           ],
@@ -114,7 +115,9 @@ export function PrometheusAdaptorResources(
           },
           strategy: {
             rollingUpdate: {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               maxSurge: 1 as any,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               maxUnavailable: 0 as any
             }
           },

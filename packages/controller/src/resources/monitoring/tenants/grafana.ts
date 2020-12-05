@@ -185,6 +185,7 @@ export function GrafanaResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/api/health",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: "http" as any
                     }
                   },
@@ -337,6 +338,7 @@ export function GrafanaResources(
             {
               name: "http",
               port: 3000,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "http" as any
             }
           ],
