@@ -70,6 +70,7 @@ export const addApiIngress = ({
                   {
                     backend: {
                       serviceName,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       servicePort: 8080 as any
                     },
                     pathType: "ImplementationSpecific",

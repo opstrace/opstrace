@@ -139,12 +139,14 @@ export function CortexAPIResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/metrics",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 8080 as any
                     }
                   },
                   livenessProbe: {
                     httpGet: {
                       path: "/metrics",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 8080 as any
                     }
                   },
@@ -180,6 +182,7 @@ export function CortexAPIResources(
               name: "http",
               port: 8080,
               protocol: "TCP",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 8080 as any
             }
           ],

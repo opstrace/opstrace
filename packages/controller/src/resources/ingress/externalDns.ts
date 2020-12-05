@@ -47,8 +47,8 @@ export function ExternalDnsResources(
   let annotations = {};
   if (target == "gcp") {
     annotations = {
-      "iam.gke.io/gcp-service-account": state.config.config!.gcp!
-        .externalDNSServiceAccount
+      "iam.gke.io/gcp-service-account":
+        state.config.config?.gcp?.externalDNSServiceAccount
     };
   }
 

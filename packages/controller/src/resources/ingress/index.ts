@@ -95,6 +95,7 @@ export function IngressResources(
                       pathType: "ImplementationSpecific",
                       backend: {
                         serviceName: "prometheus",
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         servicePort: 9090 as any
                       }
                     },
@@ -103,6 +104,7 @@ export function IngressResources(
                       pathType: "ImplementationSpecific",
                       backend: {
                         serviceName: "alertmanager",
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         servicePort: 9093 as any
                       }
                     },
@@ -111,6 +113,7 @@ export function IngressResources(
                       pathType: "ImplementationSpecific",
                       backend: {
                         serviceName: "grafana",
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         servicePort: 3000 as any
                       }
                     }
@@ -157,6 +160,7 @@ export function IngressResources(
                       backend: {
                         // This is skipped because we rewrite
                         serviceName: "grafana",
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         servicePort: 3000 as any
                       }
                     }

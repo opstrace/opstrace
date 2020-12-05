@@ -111,6 +111,7 @@ function* getDestroyingReporterResources() {
 }
 
 function* handleDestroyingReporterChange(e: DestroyingReporterChangeEvent) {
+  // eslint-disable-next-line require-yield
   return yield call(function* () {
     //const state: State = yield select();
     //const { name, controllerTerminated } = getControllerConfig(state);

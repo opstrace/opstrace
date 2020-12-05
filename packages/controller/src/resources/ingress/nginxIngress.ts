@@ -107,11 +107,13 @@ export function NginxIngressResources(
               {
                 name: "http",
                 port: endpointConfig.http,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 targetPort: "http" as any
               },
               {
                 name: "https",
                 port: endpointConfig.https,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 targetPort: "https" as any
               }
             ]
@@ -202,6 +204,7 @@ export function NginxIngressResources(
                       failureThreshold: 3,
                       httpGet: {
                         path: "/healthz",
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         port: 10254 as any,
                         scheme: "HTTP"
                       },
@@ -214,6 +217,7 @@ export function NginxIngressResources(
                       failureThreshold: 3,
                       httpGet: {
                         path: "/healthz",
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         port: 10254 as any,
                         scheme: "HTTP"
                       },
