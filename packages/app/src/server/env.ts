@@ -56,8 +56,20 @@ if (!HASURA_GRAPHQL_ADMIN_SECRET) {
   throw Error("must provide env vars: HASURA_GRAPHQL_ADMIN_SECRET");
 }
 
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+if (!REDIS_PASSWORD && !isDevEnvironment) {
+  throw Error("must provide env vars: REDIS_PASSWORD");
+}
+
+const REDIS_HOST = process.env.REDIS_HOST;
+if (!REDIS_HOST && !isDevEnvironment) {
+  throw Error("must provide env vars: REDIS_HOST");
+}
+
 const envars = {
   PORT,
+  REDIS_HOST,
+  REDIS_PASSWORD,
   AUTH0_DOMAIN,
   AUTH0_CLIENT_ID,
   UI_DOMAIN,

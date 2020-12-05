@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 import express from "express";
+import redis from "redis";
+
 import expressSession from "express-session";
 import cookieParser from "cookie-parser";
 import env, { isDevEnvironment } from "server/env";
 
+const RedisStore = require("connect-redis")(expressSession);
+
+// Default to in-memory store - useful for dev
+let store:
+  | expressSession.MemoryStore
+  | typeof RedisStore = new expressSession.MemoryStore();
+// If we have Redis connection config, create a Redis store for the session backend
+if (env.REDIS_HOST) {
+  store = new RedisStore({
+    client: redis.createClient({
+      host: env.REDIS_HOST,
+      password: env.REDIS_PASSWORD
+    })
+  });
+}
+
 const session = expressSession({
   name: "opstrace.sid",
-  store: new expressSession.MemoryStore(),
+  store: store,
   secret: env.COOKIE_SECRET,
   resave: true,
   saveUninitialized: false,
