@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 module.exports = {
+  // "DeprecationWarning: '~/.eslintrc.*' config files have been deprecated.
+  // Please remove it or add 'root:true' to the config files in your projects
+  // in order to avoid ..."
+  root: true,
   env: {
     browser: false,
     es2020: true
