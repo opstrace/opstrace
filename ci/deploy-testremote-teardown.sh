@@ -168,6 +168,8 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         bash ci/gen-cli-aws-mutating-api-calls-list.sh "${FNAME}" && \
         cp "${FNAME}" /build/bk-artifacts && \
         cp "${FNAME}" ${OPSTRACE_PREBUILD_DIR}
+    # show aws-auth cfg map contents for debuggability:
+    kubectl describe configmap aws-auth --namespace=kube-system
 else
     cat ci/cluster-config.yaml | ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
 fi
