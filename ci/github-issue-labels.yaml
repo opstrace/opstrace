@@ -52,6 +52,11 @@
   aliases: []
   description: "an issue or task related to user experience (big or small)"
 
+- name: "type: devX / tooling"
+  color: "bfe5bf"
+  aliases: []
+  description: "an issue or task related to developer experience: linting, workflows, makefile"
+
 - name: "type: feature"
   color: "bfe5bf"
   aliases: []
