@@ -16,7 +16,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { strict as assert } from "assert";
-
+import yaml from "js-yaml";
 import AWS from "aws-sdk";
 import dedent from "dedent";
 import { all, call, fork, join } from "redux-saga/effects";
@@ -361,6 +361,7 @@ export function* ensureAWSInfraExists(): Generator<
       ]
     })
   });
+  const mapRolesYamlString = genmapRolesYamlString(workerNodeRole.Arn);
 
   // Loki Bucket Policy
   const LokiS3PolicyName = `${lokiBucketName}-s3`;
@@ -728,21 +729,6 @@ export function* ensureAWSInfraExists(): Generator<
     kubeconfig: kubeconfigString
   });
 
-  const mapRolesYamlString = dedent(`
-  - rolearn: ${workerNodeRole.Arn}
-  username: <system:node:{{EC2PrivateDNSName}}>
-  groups:
-    - <system:bootstrappers>
-    - <system:nodes>
-
-  - rolearn: arn:aws:iam::959325414060:role/AWSReservedSSO_AdministratorAccess_8488c3da2f880f06
-    username: <system:node:{{EC2PrivateDNSName}}>
-    groups:
-      - <system:bootstrappers>
-      - <system:nodes>
-      - <system:masters>
-  `);
-
   const awsAuthConfigMap = new ConfigMap(
     {
       apiVersion: "v1",
@@ -815,6 +801,36 @@ export function* ensureAWSInfraExists(): Generator<
     // Their is no public endpoint for the RDS instance.
     postgreSQLEndpoint: `postgres://opstrace:2020WasQuiteTheYear@${dbCluster.Endpoint}/opstrace`
   };
+}
+
+function genmapRolesYamlString(workerNodeRoleArn: string): string {
+  // This needs to be a valid YAML document.
+  const mapRolesYamlString = dedent(`
+    - rolearn: ${workerNodeRoleArn}
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+    - rolearn: arn:aws:iam::959325414060:role/AWSReservedSSO_AdministratorAccess_8488c3da2f880f06
+      username: cluster-admin
+      groups:
+        - system:masters
+  `).trim(); // + "\n";
+
+  // This is a developer safety net to confirm that the above's string is a
+  // valid YAML doc. Let this crash if it isn't. Better than having AWS/EKS not
+  // discovering the nodes (which seems to be the primary outfall when this
+  // YAML document is bad). Notably, `yaml.safeLoad()` does not seem to error
+  // out when a trailing newline is missing. Strictly, though, a valid YAML
+  // document requires a trailing newline character. Also see
+  // https://github.com/opstrace/opstrace/pull/112#issuecomment-739836920
+  assert(mapRolesYamlString.endsWith("\n"));
+  const mapRolesParsed = yaml.safeLoad(mapRolesYamlString);
+  log.info(
+    "EKS aws-auth config map, mapRoles key, parsed from YAML: %s",
+    JSON.stringify(mapRolesParsed, null, 2)
+  );
+  return mapRolesYamlString;
 }
 
 /**
