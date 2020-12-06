@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "got": "11.8.0",
+    "dedent": "0.7.0",
     "@opstrace/gcp": "^0.0.0",
     "@opstrace/dns": "^0.0.0",
     "@opstrace/tenants": "^0.0.0",
