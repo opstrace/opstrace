@@ -110,10 +110,8 @@ export async function promptForProceed(question?: string): Promise<void> {
  * https://github.com/redux-saga/redux-saga/issues/1698
  * https://redux-saga.js.org/docs/basics/ErrorHandling.html
  */
-export function smErrorLastResort(
-  e: Error,
-  detail: { sagaStack: string }
-): void {
+//@ts-ignore: Argument 'detail' should be typed with a non-any type
+export function smErrorLastResort(e: Error, detail: any): void {
   // Cleanly shut down runtime when the inner call stack has thrown
   // ExitError. To that end, simply let it bubble up.
   // Note(JP): when throwing an error in here it's seemingly not passing
@@ -132,7 +130,13 @@ export function smErrorLastResort(
 
   // e.stack contains error name and message
   log.error("error seen by saga middleware:\n%s", e.stack);
-  log.error("saga stack: %s", detail.sagaStack);
+  // `detail` is actually expected to be `{ sagaStack: string }` -- use `any`
+  // in type signature for easier integration -- the way redux-saga calls it is
+  // actually `unknown`.
+
+  if (detail && detail.sagaStack !== undefined) {
+    log.error("saga stack: %s", detail.sagaStack);
+  }
   die("exit.");
 }
 
