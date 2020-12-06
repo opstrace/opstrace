@@ -194,11 +194,13 @@ echo "--- checking cluster is using certificate issued by LetsEncrypt"
 set -e
 
 check_certificate() {
-    # Timeout the command after 10 seconds in case it's stuck.
+    # Timeout the command after 10 seconds in case it's stuck. Redirect stderr
+    # to stdout (for `timout` and `openssl`), do the grep filter on stdout, but
+    # also show all output on stderr via a tee shunt.
     timeout --kill-after=10 10 \
     openssl s_client -showcerts -connect system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443 </dev/null \
     | openssl x509 -noout -issuer \
-    |& grep "Fake LE Intermediate"
+    |& tee /dev/stderr | grep "Fake LE Intermediate"
 }
 
 # Retry the certificate check up to 3 times. Wait 5s before retrying.
