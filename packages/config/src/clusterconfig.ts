@@ -40,6 +40,7 @@ export interface InfraConfigTypeAWS {
   region: string;
   zone_suffix: string;
   instance_type: string;
+  eks_admin_roles: string[];
 }
 
 export interface InfraConfigTypeGCP {

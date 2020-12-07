@@ -2,3 +2,6 @@ tenants:
   - default
 env_label: ci
 node_count: 3
+aws:
+  eks_admin_roles:
+    - AWSReservedSSO_AdministratorAccess_8488c3da2f880f06
