@@ -61,6 +61,9 @@ func NewReverseProxy(
 	rp.revproxyQuerier.ErrorHandler = proxyErrorHandler
 	rp.revproxyDistributor.ErrorHandler = proxyErrorHandler
 
+	rp.revproxyQuerier.ModifyResponse = rp.LogResponse
+	rp.revproxyDistributor.ModifyResponse = rp.LogResponse
+
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -79,6 +82,11 @@ func NewReverseProxy(
 	rp.revproxyDistributor.Transport = transport
 
 	return rp
+}
+
+func (rp *ReverseProxy) LogResponse(resp *http.Response) error {
+	log.Debugf("response status=%s request url=%s", resp.Status, resp.Request.URL.String())
+	return nil
 }
 
 func (rp *ReverseProxy) HandleWithQuerierProxy(w http.ResponseWriter, r *http.Request) {
