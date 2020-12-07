@@ -78,9 +78,12 @@ AWS.config.update({
         // For the frequent real-world scenario of a TCP connect() timeout.
         // Message is "Socket timed out without establishing a connection".
         // Info-log that so that the reason for delays is not hidden from
-        // users.
+        // users. Update(JP): sadly, this _also_ hits in for the recv() /read
+        // timeout (when the HTTP request was sent, but the response didn't
+        // arrive in a timely fashion; sadly also a misleading error message:
+        // "Connection timed out after 30000ms"
         const waitSec = 3 ** retryCount;
-        log.debug(
+        log.info(
           "AWS API request failed (attempt %s): %s (retry in %s seconds)",
           retryCount,
           err.message,
