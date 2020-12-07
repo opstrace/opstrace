@@ -805,7 +805,8 @@ export function* ensureAWSInfraExists(): Generator<
 
 function genmapRolesYamlString(workerNodeRoleArn: string): string {
   // This needs to be a valid YAML document.
-  const mapRolesYamlString = dedent(`
+  const mapRolesYamlString =
+    dedent(`
     - rolearn: ${workerNodeRoleArn}
       username: system:node:{{EC2PrivateDNSName}}
       groups:
@@ -815,7 +816,7 @@ function genmapRolesYamlString(workerNodeRoleArn: string): string {
       username: cluster-admin
       groups:
         - system:masters
-  `).trim(); // + "\n";
+  `).trim() + "\n";
 
   // This is a developer safety net to confirm that the above's string is a
   // valid YAML doc. Let this crash if it isn't. Better than having AWS/EKS not
