@@ -522,8 +522,11 @@ yarn.lock.md5: yarn.lock
 # a yarn install.
 PACKAGE_JSON = $(wildcard lib/**/*package.json packages/**/*package.json)
 
-yarn.lock: package.json $(PACKAGE_JSON)
+yarn.lock: package.json $(PACKAGE_JSON) node_modules
 	yarn --frozen-lockfile && touch yarn.lock
+
+node_modules:
+	mkdir -p node_modules
 
 .PHONY: preamble
 preamble:
