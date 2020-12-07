@@ -15,6 +15,8 @@
  */
 
 import { call, CallEffect, ForkEffect, JoinEffect } from "redux-saga/effects";
+import { Task } from "redux-saga";
+import { strict as assert } from "assert";
 import {
   ensureGKEDoesNotExist,
   ensureGatewayDoesNotExist,
@@ -28,7 +30,6 @@ import { destroyDNS } from "@opstrace/dns";
 import { log, getBucketName } from "@opstrace/utils";
 
 import { destroyConfig } from "./index";
-import { Task } from "redux-saga";
 
 export function* destroyGCPInfra(): Generator<
   JoinEffect | CallEffect | ForkEffect | Generator<ForkEffect, Task[], Task>,
@@ -36,12 +37,9 @@ export function* destroyGCPInfra(): Generator<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
 > {
-  if (!destroyConfig.gcpProjectID) {
-    throw Error("gcp project id not specified in credentials");
-  }
-  if (!destroyConfig.gcpRegion) {
-    throw Error("gcp region not specified in credentials");
-  }
+  assert(destroyConfig.gcpProjectID);
+  assert(destroyConfig.gcpRegion);
+
   log.info(`Ensure cert-manager service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-cert-manager`,
