@@ -52,6 +52,7 @@ import {
   VpcEndpointRes,
   ServiceLinkedRoleRes,
   STSRegionCheck,
+  STSAccountIDRes,
   getZoneForDNSName,
   getRecordsForZone,
   RDSSubnetGroupRes
@@ -116,6 +117,11 @@ export function* ensureAWSInfraExists(): Generator<
 
   // Small start for checks; fail fast for certain known traps.
   yield call([new STSRegionCheck(ccfg.cluster_name), "setup"]);
+
+  const awsAccountID: string = yield call([
+    new STSAccountIDRes(ccfg.cluster_name),
+    "setup"
+  ]);
 
   // State-mutating API calls below.
   yield call([new ServiceLinkedRoleRes(ccfg.cluster_name), "setup"]);
