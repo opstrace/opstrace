@@ -63,9 +63,9 @@ There be dragons when you change this: we develop with three nodes, and—for no
 <!--tabs-->
 ### `aws`
 
-Allows for setting infrastructure-related configuration specific to Amazon Web Services (AWS).
+Allows for setting configuration specific to Amazon Web Services (AWS).
 
-*Value type:* flat object
+*Value type:* object
 
 *Example:*
 
@@ -74,7 +74,11 @@ aws:
     instance_type: t3.2xlarge
     region: us-west-2
     zone_suffix: a
+    eks_admin_roles:
+        - AWSReservedSSO_AdministratorAccess_133333abc3333337
 ```
+
+Use the `eks_admin_roles` parameter (expected to be an enumeration of strings) to define individual AWS IAM roles that should have administrator access to the underlying EKS cluster, via e.g. the [EKS console](https://aws.amazon.com/blogs/containers/introducing-the-new-amazon-eks-console/).
 
 ### `gcp`
 
