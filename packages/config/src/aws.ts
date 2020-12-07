@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import { NewRenderedClusterConfigType } from "./clusterconfig";
 
 // These are AMIs for k8s 1.18
@@ -55,9 +57,7 @@ export function getAWSConfig(ccfg: NewRenderedClusterConfigType) {
   // till we have to.
   // Also, passing in 4 subnets is not cool.
 
-  if (ccfg.aws === undefined) {
-    throw Error("`aws` property expected");
-  }
+  assert(ccfg.aws !== undefined);
 
   // "Subnets specified must be in at least two different AZs", see below.
   let otherZone: string;
