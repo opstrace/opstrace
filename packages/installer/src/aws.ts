@@ -367,7 +367,12 @@ export function* ensureAWSInfraExists(): Generator<
       ]
     })
   });
-  const mapRolesYamlString = genmapRolesYamlString(workerNodeRole.Arn);
+
+  const mapRolesYamlString = genmapRolesYamlString(
+    workerNodeRole.Arn,
+    awsAccountID,
+    "AWSReservedSSO_AdministratorAccess_8488c3da2f880f06"
+  );
 
   // Loki Bucket Policy
   const LokiS3PolicyName = `${lokiBucketName}-s3`;
@@ -809,7 +814,11 @@ export function* ensureAWSInfraExists(): Generator<
   };
 }
 
-function genmapRolesYamlString(workerNodeRoleArn: string): string {
+function genmapRolesYamlString(
+  workerNodeRoleArn: string,
+  awsAccountID: string,
+  awsIamRoleName: string
+): string {
   // This needs to be a valid YAML document.
   const mapRolesYamlString =
     dedent(`
@@ -818,7 +827,7 @@ function genmapRolesYamlString(workerNodeRoleArn: string): string {
       groups:
         - system:bootstrappers
         - system:nodes
-    - rolearn: arn:aws:iam::959325414060:role/AWSReservedSSO_AdministratorAccess_8488c3da2f880f06
+    - rolearn: arn:aws:iam::${awsAccountID}:role/${awsIamRoleName}
       username: cluster-admin
       groups:
         - system:masters
