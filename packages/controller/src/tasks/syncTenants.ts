@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { call, delay, select, CallEffect } from "redux-saga/effects";
+import { call, delay, select } from "redux-saga/effects";
 
 import { KubeConfig } from "@kubernetes/client-node";
 import { set as updateTenants, Tenants } from "@opstrace/tenants";
@@ -22,9 +22,7 @@ import dbClient, { ClientResponse } from "../dbClient";
 import { State } from "../reducer";
 import { log, SECOND } from "@opstrace/utils";
 
-export function* syncTenants(
-  kubeConfig: KubeConfig
-): Generator<CallEffect, unknown, unknown> {
+export function* syncTenants(kubeConfig: KubeConfig) {
   return yield call(function* () {
     if (!dbClient) {
       log.warning(

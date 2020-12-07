@@ -22,7 +22,7 @@ export const DEVELOPMENT = "development";
 /**
  * Generates a random 75 char long string of alphanumeric characters
  */
-export function generateSecretValue(): string {
+export function generateSecretValue() {
   return (
     Math.random().toString(36).substring(2, 15) +
     Math.random().toString(36).substring(2, 15) +
@@ -37,8 +37,7 @@ export function generateSecretValue(): string {
  * currentVersion returns the version of this controller.
  * If running with --development, currentVersion will return "development"
  */
-export const currentVersion = (): string =>
-  process.env.STACK_VERSION || DEVELOPMENT;
+export const currentVersion = () => process.env.STACK_VERSION || DEVELOPMENT;
 
 /**
  * iAmDesiredVersion will return true if the version passed in is equal to the version of this controller instance.
@@ -64,14 +63,14 @@ export const getTenantNamespace = (tenant: Tenant): string =>
 /**
  * Get the queue endpoint.
  */
-export const getQueueEndpoint = (): string =>
+export const getQueueEndpoint = () =>
   "kafka-kafka-bootstrap.kafka.svc.cluster.local:9092";
 
 /**
  * getDomain returns the root domain for this stack
  * @param state
  */
-export const getDomain = (state: State): string => {
+export const getDomain = (state: State) => {
   const stack = getControllerConfig(state);
 
   return `${stack.name}.${stack.dnsName.replace(/\.$/, "")}`;

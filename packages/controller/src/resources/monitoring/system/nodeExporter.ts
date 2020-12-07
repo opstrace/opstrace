@@ -113,7 +113,6 @@ export function NodeExporterResources(
             {
               name: "https",
               port: 9100,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "https" as any
             }
           ],

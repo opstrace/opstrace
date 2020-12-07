@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { all, AllEffect } from "redux-saga/effects";
+import { all } from "redux-saga/effects";
 
 import { KubeConfig } from "@kubernetes/client-node";
 import { createResource } from "@opstrace/kubernetes";
@@ -25,7 +25,7 @@ export function* deployControllerResources(config: {
   controllerImage: string;
   opstraceClusterName: string;
   kubeConfig: KubeConfig;
-}): Generator<AllEffect<Promise<void>[]>, void, unknown> {
+}) {
   const resources = ControllerResources(config)
     .get()
     .map(r => {

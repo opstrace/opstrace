@@ -260,7 +260,6 @@ export function AlertManagerResources(
             {
               name: "web",
               port: 9093,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "web" as any
             }
           ],

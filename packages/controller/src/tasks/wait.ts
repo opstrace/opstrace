@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import { select, delay, CallEffect, SelectEffect } from "redux-saga/effects";
+import { select, delay } from "redux-saga/effects";
 import { State } from "../reducer";
 import { SECOND, log } from "@opstrace/utils";
-import { CombinedState } from "redux";
 
-export function* blockUntilCacheHydrated(): Generator<
-  CallEffect | SelectEffect,
-  void,
-  CombinedState<State>
-> {
+export function* blockUntilCacheHydrated() {
   while (true) {
     const { kubernetes }: State = yield select();
     const {

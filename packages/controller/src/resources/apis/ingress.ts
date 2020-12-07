@@ -25,6 +25,7 @@ export const addApiIngress = ({
   namespace,
   tenant,
   api,
+  issuer,
   kubeConfig,
   state,
   collection
@@ -37,7 +38,7 @@ export const addApiIngress = ({
   kubeConfig: KubeConfig;
   state: State;
   collection: ResourceCollection;
-}): void => {
+}) => {
   const apiHost = getApiDomain(api, tenant, state);
 
   // Add ingress for data API
@@ -70,7 +71,6 @@ export const addApiIngress = ({
                   {
                     backend: {
                       serviceName,
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       servicePort: 8080 as any
                     },
                     pathType: "ImplementationSpecific",
