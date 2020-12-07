@@ -18,7 +18,6 @@
 import { strict as assert } from "assert";
 import yaml from "js-yaml";
 import AWS from "aws-sdk";
-import dedent from "dedent";
 import { all, call, fork, join } from "redux-saga/effects";
 
 import { ensureDNSExists } from "@opstrace/dns";
@@ -112,6 +111,7 @@ export function* ensureAWSInfraExists(): Generator<
   any
 > {
   const ccfg: NewRenderedClusterConfigType = getClusterConfig();
+  assert(ccfg.aws !== undefined);
 
   const awsConfig = getAWSConfig(ccfg);
 
@@ -368,10 +368,10 @@ export function* ensureAWSInfraExists(): Generator<
     })
   });
 
-  const mapRolesYamlString = genmapRolesYamlString(
+  const mapRolesYamlString = genMapRolesYamlString(
     workerNodeRole.Arn,
     awsAccountID,
-    "AWSReservedSSO_AdministratorAccess_8488c3da2f880f06"
+    ccfg.aws.eks_admin_roles
   );
 
   // Loki Bucket Policy
@@ -814,24 +814,51 @@ export function* ensureAWSInfraExists(): Generator<
   };
 }
 
-function genmapRolesYamlString(
+function genMapRolesYamlString(
   workerNodeRoleArn: string,
   awsAccountID: string,
-  awsIamRoleName: string
+  userGivenAdminRoleNames: string[]
 ): string {
-  // This needs to be a valid YAML document.
-  const mapRolesYamlString =
-    dedent(`
-    - rolearn: ${workerNodeRoleArn}
-      username: system:node:{{EC2PrivateDNSName}}
-      groups:
-        - system:bootstrappers
-        - system:nodes
-    - rolearn: arn:aws:iam::${awsAccountID}:role/${awsIamRoleName}
-      username: cluster-admin
-      groups:
-        - system:masters
-  `).trim() + "\n";
+  const mapRolesItems = [
+    {
+      rolearn: workerNodeRoleArn,
+      username: "system:node:{{EC2PrivateDNSName}}",
+      groups: ["system:bootstrappers", "system:nodes"]
+    }
+  ];
+
+  for (const rname of userGivenAdminRoleNames) {
+    log.info(
+      "EKS aws-auth config map: generate custom mapRoles entry for IAM role: %s",
+      rname
+    );
+    mapRolesItems.push({
+      rolearn: `arn:aws:iam::${awsAccountID}:role/${rname}`,
+      username: "cluster-admin",
+      groups: ["system:masters"]
+    });
+  }
+
+  // // This needs to be a valid YAML document.
+  // const mapRolesYamlString =
+  //   dedent(`
+  //   - rolearn: ${workerNodeRoleArn}
+  //     username: system:node:{{EC2PrivateDNSName}}
+  //     groups:
+  //       - system:bootstrappers
+  //       - system:nodes
+  //   - rolearn: arn:aws:iam::${awsAccountID}:role/${awsIamRoleName}
+  //     username: cluster-admin
+  //     groups:
+  //       - system:masters
+  // `).trim() + "\n";
+
+  const yopts: yaml.DumpOptions = { indent: 2 };
+  const mapRolesYamlString = yaml.safeDump(mapRolesItems, yopts);
+  log.debug(
+    "EKS aws-auth config map, mapRoles key, parsed from YAML: %s",
+    mapRolesYamlString
+  );
 
   // This is a developer safety net to confirm that the above's string is a
   // valid YAML doc. Let this crash if it isn't. Better than having AWS/EKS not
@@ -843,7 +870,7 @@ function genmapRolesYamlString(
   assert(mapRolesYamlString.endsWith("\n"));
   const mapRolesParsed = yaml.safeLoad(mapRolesYamlString);
   log.info(
-    "EKS aws-auth config map, mapRoles key, parsed from YAML: %s",
+    "EKS aws-auth config map: mapRoles key, parsed from YAML: %s",
     JSON.stringify(mapRolesParsed, null, 2)
   );
   return mapRolesYamlString;
