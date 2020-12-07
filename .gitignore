@@ -13,6 +13,7 @@ out
 .cache
 .build
 yarn-error.log
+yarn.lock.md5
 
 opstrace-config.yaml
 prometheus.yml
