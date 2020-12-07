@@ -191,7 +191,6 @@ export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
 # TODO: remove when we add GCP managed certificates and remove the
 # use of insecure_skip_verify in the tests
 echo "--- checking cluster is using certificate issued by LetsEncrypt"
-set -e
 
 check_certificate() {
     # Timeout the command after 10 seconds in case it's stuck. Redirect stderr
@@ -218,7 +217,6 @@ do
         exit ${retcode}
     fi
 done
-set +e
 
 echo "+++ run test-remote"
 
