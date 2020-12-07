@@ -54,9 +54,8 @@ node_count: 3
 
 You should explicitly choose the number of machines your Opstrace cluster is comprised of, which is why this is a required parameter for now.
 
-**WARNING:** Here be dragons.
-😈
-There be dragons when you change this: we develop with three nodes, and—for now—we rarely test with less or more.
+**Warning 😈:**
+Here be dragons: we develop with three nodes, and—for now—we rarely test with less or more.
 
 ## Optional parameters
 
@@ -80,6 +79,11 @@ aws:
 
 Use the `eks_admin_roles` parameter (expected to be an enumeration of strings) to define individual AWS IAM roles that should have administrator access to the underlying EKS cluster, via e.g. the [EKS console](https://aws.amazon.com/blogs/containers/introducing-the-new-amazon-eks-console/).
 
+
+**Note:**
+we develop and test mainly with `region` set to `us-west-2`.
+To date, we test other regions only manually and rarely.
+
 ### `gcp`
 
 Allows for setting infrastructure-related configuration specific to Google Cloud Platform (GCP).
@@ -98,6 +102,10 @@ gcp:
 <!--/tabs-->
 
 Note: the example above shows the defaults.
+
+**Warning 😈:**
+we develop and test with region `us-west2` and have not validated other regions yet.
+
 
 ### `env_label`
 
