@@ -15,25 +15,12 @@
  */
 
 import { eventChannel } from "redux-saga";
-import {
-  put,
-  take,
-  cancelled,
-  ChannelTakeEffect,
-  PutEffect,
-  CancelledEffect
-} from "redux-saga/effects";
+import { put, take, cancelled } from "redux-saga/effects";
 import * as k8s from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { log, debugLogErrorDetail } from "@opstrace/utils";
 
-export function* runInformers(
-  kubeConfig: KubeConfig
-): Generator<
-  ChannelTakeEffect<unknown> | PutEffect | CancelledEffect,
-  void,
-  Event
-> {
+export function* runInformers(kubeConfig: KubeConfig) {
   log.info(`Starting informers`);
 
   const clusterChannel = eventChannel(channel => {

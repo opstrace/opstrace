@@ -248,7 +248,7 @@ export function LokiResources(
   let serviceAccountName: string | undefined = undefined;
   if (target === "gcp") {
     annotations = {
-      "iam.gke.io/gcp-service-account": gcp?.lokiServiceAccount
+      "iam.gke.io/gcp-service-account": gcp!.lokiServiceAccount
     };
     serviceAccountName = "loki";
   }
@@ -303,13 +303,11 @@ export function LokiResources(
             {
               name: "querier-http-metrics",
               port: 1080,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 1080 as any
             },
             {
               name: "querier-grpc",
               port: 9095,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -340,7 +338,6 @@ export function LokiResources(
             {
               name: "loki-gossip-ring",
               port: 7946,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 7946 as any
             }
           ],
@@ -407,13 +404,11 @@ export function LokiResources(
             {
               name: "distributor-http-metrics",
               port: 1080,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 1080 as any
             },
             {
               name: "distributor-grpc",
               port: 9095,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -480,13 +475,11 @@ export function LokiResources(
             {
               name: "ingester-http-metrics",
               port: 1080,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 1080 as any
             },
             {
               name: "ingester-grpc",
               port: 9095,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -553,13 +546,11 @@ export function LokiResources(
             {
               name: "compactor-http-metrics",
               port: 1080,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 1080 as any
             },
             {
               name: "compactor-grpc",
               port: 9095,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -661,7 +652,6 @@ export function LokiResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 1080 as any
                     },
                     initialDelaySeconds: 15,
@@ -746,7 +736,6 @@ export function LokiResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 1080 as any
                     },
                     initialDelaySeconds: 15,
@@ -882,7 +871,6 @@ export function LokiResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 1080 as any
                     },
                     initialDelaySeconds: 15,
@@ -981,7 +969,6 @@ export function LokiResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 1080 as any
                     },
                     initialDelaySeconds: 15,

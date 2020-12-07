@@ -125,7 +125,6 @@ export function PrometheusOperatorResources(
             {
               name: "http",
               port: 8443,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "https" as any
             }
           ],

@@ -88,7 +88,6 @@ export function OpstraceApplicationResources(
                   {
                     backend: {
                       serviceName: "opstrace-application",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       servicePort: 3001 as any
                     },
                     pathType: "ImplementationSpecific",
@@ -121,7 +120,6 @@ export function OpstraceApplicationResources(
             {
               name: "http",
               port: 3001,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "http" as any
             }
           ],
@@ -167,7 +165,7 @@ export function OpstraceApplicationResources(
   if (secretToCopy) {
     // use the value of the secret we want to copy
     secretValue = Buffer.from(
-      secretToCopy.data?.HASURA_ADMIN_SECRET ?? "",
+      secretToCopy.data!.HASURA_ADMIN_SECRET,
       "base64"
     ).toString("base64");
   }
@@ -315,7 +313,6 @@ export function OpstraceApplicationResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 9000 as any
                     },
                     failureThreshold: 1,
@@ -327,7 +324,6 @@ export function OpstraceApplicationResources(
                   livenessProbe: {
                     httpGet: {
                       path: "/live",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 9000 as any
                     },
                     failureThreshold: 3,
@@ -339,7 +335,6 @@ export function OpstraceApplicationResources(
                   startupProbe: {
                     httpGet: {
                       path: "/live",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 9000 as any
                     },
                     failureThreshold: 3,
@@ -375,7 +370,6 @@ export function OpstraceApplicationResources(
             {
               name: "http",
               port: 8080,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "http" as any
             }
           ],

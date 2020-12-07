@@ -269,7 +269,7 @@ export function CertManagerResources(
   let annotations = {};
   if (target == "gcp") {
     annotations = {
-      "iam.gke.io/gcp-service-account": gcp?.certManagerServiceAccount
+      "iam.gke.io/gcp-service-account": gcp!.certManagerServiceAccount
     };
   }
 
@@ -1105,7 +1105,6 @@ export function CertManagerResources(
             {
               port: 9402,
               protocol: "TCP",
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9402 as any
             }
           ],

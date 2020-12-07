@@ -24,7 +24,6 @@ export function GetGrafanaDashboards(): {
   const dashboards: { name: string; content: string }[] = [];
 
   glob.sync(`${__dirname}/dashboards/**/*.json`).forEach(function (file) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const content = require(path.resolve(file));
     const filename = file.split("/").pop() || "";
 
