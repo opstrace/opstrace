@@ -20,11 +20,13 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
@@ -59,6 +61,23 @@ func NewReverseProxy(
 	rp.revproxyQuerier.ErrorHandler = proxyErrorHandler
 	rp.revproxyDistributor.ErrorHandler = proxyErrorHandler
 
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   29 * time.Second, // WIP: checking which config option triggers an error
+			KeepAlive: 28 * time.Second, // WIP: checking which config option triggers an error
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   9 * time.Second, // WIP: just checking the TLS handshake timeout triggers an error
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+
+	rp.revproxyQuerier.Transport = transport
+	rp.revproxyDistributor.Transport = transport
+
 	return rp
 }
 
@@ -83,9 +102,12 @@ func (rp *ReverseProxy) HandleWithDistributorProxy(w http.ResponseWriter, r *htt
 }
 
 func proxyErrorHandler(resp http.ResponseWriter, r *http.Request, proxyerr error) {
+	if r.Response != nil {
+		log.Warnf("http: before overriding response status is %s", r.Response.Status)
+	}
 	// Native error handler behavior: set status and log
 	resp.WriteHeader(http.StatusBadGateway)
-	log.Warnf("http: proxy error: %s", proxyerr)
+	log.Warnf("http: proxy error: '%s'", proxyerr)
 
 	// Additional: write string representation of proxy error (as bytes) to
 	// response stream. Log when that fails.
