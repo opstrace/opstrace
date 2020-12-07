@@ -81,9 +81,8 @@ lint-docs:
 
 
 .PHONY: tsc
-tsc: cli-set-build-info-constants
+tsc: cli-set-build-info-constants yarn-frozen-lockfile
 	@# tsc-compile the opstrace cli and controller cli
-	yarn --frozen-lockfile
 	yarn build:controller
 	yarn build:cli
 
@@ -187,9 +186,8 @@ lint-codebase.go:
 	(cd go/ && golangci-lint run)
 
 .PHONY: cli-tsc
-cli-tsc: cli-set-build-info-constants
+cli-tsc: cli-set-build-info-constants yarn-frozen-lockfile
 	@# tsc-compile the opstrace cli (not the controller cli)
-	yarn --frozen-lockfile
 	yarn build:cli
 
 
@@ -507,6 +505,25 @@ website-build:
 .PHONY: deploy-testremote-teardown
 deploy-testremote-teardown:
 	bash "ci/deploy-testremote-teardown.sh"
+
+#
+# The following yarn* rules ensure we only run `yarn --frozen-lockfile` if the
+# contents of yarn.lock or any package.json changed.
+#
+.PHONY: yarn-frozen-lockfile
+yarn-frozen-lockfile: yarn.lock.md5
+
+# Check if the contents of yarn.lock changed to trigger a yarn install if
+# necessary.
+yarn.lock.md5: yarn.lock
+	md5sum yarn.lock | (cmp -s yarn.lock.md5 - || md5sum yarn.lock > yarn.lock.md5)
+
+# Find all the package.json files in the repo. If any are updated it'll trigger
+# a yarn install.
+PACKAGE_JSON = $(wildcard lib/**/*package.json packages/**/*package.json)
+
+yarn.lock: package.json $(PACKAGE_JSON)
+	yarn --frozen-lockfile && touch yarn.lock
 
 .PHONY: preamble
 preamble:
