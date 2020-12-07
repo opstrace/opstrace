@@ -111,6 +111,7 @@ export async function promptForProceed(question?: string): Promise<void> {
  * https://redux-saga.js.org/docs/basics/ErrorHandling.html
  */
 //@ts-ignore: Argument 'detail' should be typed with a non-any type
+// eslint-disable-next-line
 export function smErrorLastResort(e: Error, detail: any): void {
   // Cleanly shut down runtime when the inner call stack has thrown
   // ExitError. To that end, simply let it bubble up.
