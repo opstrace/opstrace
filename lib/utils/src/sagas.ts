@@ -91,6 +91,20 @@ export function* retryUponAnyError({
           attempt,
           err
         );
+
+        // situation w/o stack trace, example:
+        //  2020-12-07T11:46:53.770Z error: error during cluster creation (attempt 3):
+        //  AssertionError [ERR_ASSERTION]: false == true
+        //  2020-12-07T11:46:53.771Z error: JSON representation of err: {
+        //    "generatedMessage": true,
+        //    "code": "ERR_ASSERTION",
+        //    "actual": false,
+        //    "expected": true,
+        //    "operator": "=="
+        //  }
+        // be sure to include stack object explicitly in debug log:
+        // https://nodejs.org/api/errors.html#errors_error_stack
+        log.debug("`err?.stack`: %s", err?.stack);
         // log JSON-serialized `err` object because it's not always an Error
         // object, see opstrace-prelaunch/issues/1290
         // (optimize for debuggability). Note that this might not always work
