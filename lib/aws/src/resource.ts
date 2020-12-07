@@ -163,7 +163,7 @@ export abstract class AWSResource<
    *
    * Return `false`: desired state is not yet reached.
    *
-   * Return `Dict<any>` or `true`: desired state is reached. The returned
+   * Return `CheckCreateSuccessType`: desired state is reached. The returned
    * object represents state and is returned by `setup()`.
    *
    * Expected to throw `AWSApiError` which might mean that state could not be
