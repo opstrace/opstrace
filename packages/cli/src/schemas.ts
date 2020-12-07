@@ -30,7 +30,8 @@ export const infraConfigSchemaAWS = yup
   .object({
     instance_type: yup.string().default("t3.2xlarge"),
     region: yup.string().oneOf(KNOWN_AWS_REGIONS).default("us-west-2"),
-    zone_suffix: yup.string().default("a")
+    zone_suffix: yup.string().default("a"),
+    eks_admin_roles: yup.array().of(yup.string()).default([])
   })
   .noUnknown(true, err => {
     //@ts-ignore: see opstrace-prelaunch/pull/892 for discussion
