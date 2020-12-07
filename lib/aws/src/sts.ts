@@ -70,3 +70,33 @@ export class STSRegionCheck extends AWSResource<true> {
     return true;
   }
 }
+
+// This does not really set up a resource, but is for getting the AWS account
+// ID in a robust fashion (think: a wrapper around  sts.getCallerIdentity()).
+export class STSAccountIDRes extends AWSResource<string> {
+  protected rname = "STS account ID check";
+
+  protected async tryCreate(): Promise<boolean> {
+    return true;
+  }
+
+  protected async checkCreateSuccess(): Promise<string | false> {
+    const result: STS.GetCallerIdentityResponse = await awsPromErrFilter(
+      stsClient().getCallerIdentity().promise()
+    );
+
+    if (result.Account) {
+      return result.Account;
+    }
+    return false;
+  }
+
+  protected async tryDestroy() {
+    log.warning("tryDestroy() should never be called: %s", this.rname);
+  }
+
+  protected async checkDestroySuccess(): Promise<true | string> {
+    log.warning("tryDestroy() should never be called: %s", this.rname);
+    return true;
+  }
+}
