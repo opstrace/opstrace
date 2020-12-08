@@ -96,7 +96,7 @@
       "gofmt -s -w",
       "yarn golint"
     ],
-    "*.{js,css,json,ts}": [
+    "*.{js,css,json,ts,tsx}": [
       "yarn license",
       "yarn run prettier --write"
     ],
