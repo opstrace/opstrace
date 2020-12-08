@@ -25,7 +25,7 @@ export const isConfigStorage = (configMap: ConfigMap): boolean =>
 
 export const deserialize = (configMap: ConfigMap): ControllerConfigType => {
   return controllerConfigSchema.cast(
-    JSON.parse(configMap.spec.data?.STORAGE_KEY || "")
+    JSON.parse(configMap.spec.data?.[STORAGE_KEY] ?? "")
   );
 };
 
