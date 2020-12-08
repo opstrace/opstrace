@@ -108,7 +108,6 @@ export function debugLogErrorDetail(err: Error) {
     log.debug("debugLogErrorDetail: `err` obj is undefined. Sadness.");
     return;
   }
-  log.debug(": %s");
 
   let s: string;
   s = `err.name: ${err.name}`;
