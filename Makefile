@@ -530,7 +530,7 @@ node_modules:
 
 .PHONY: unit-tests
 unit-tests: yarn-frozen-lockfile
-	cd lib/kubernetes && yarn test
+	cd lib/kubernetes && CI=true yarn test
 
 .PHONY: preamble
 preamble:
