@@ -27,6 +27,9 @@ make set-dockerhub-credentials
 echo "--- lint docs: quick feedback"
 make lint-docs
 
+echo "--- detect missing license headers"
+make check-license-headers
+
 # If this is a docs-only change: skip the rest of the preamble, move on to the
 # next build step in the BK pipeline which allows for a
 # docs-only-change-fastpath-pipeline-exit.
