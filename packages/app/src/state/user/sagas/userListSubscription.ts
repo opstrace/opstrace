@@ -31,6 +31,26 @@ type Actions = ActionType<typeof actions>;
  *
  * There can only exist a single subscription at any given time.
  */
+
+export function* executeActionsChannel(channel: any) {
+  // create a local reference inside the fork
+  const chan = channel;
+
+  try {
+    while (true) {
+      // pull next from channel
+      const action: Actions = yield take(chan);
+      // dispatch action
+      yield put(action);
+    }
+  } finally {
+    // If task cancelled, close the channel
+    if (yield cancelled()) {
+      chan.close();
+    }
+  }
+}
+
 export default function* userListSubscriptionManager() {
   let activeSubscription: Task | undefined;
   // track all subscribers so we only cancel the subscription
@@ -38,7 +58,7 @@ export default function* userListSubscriptionManager() {
   const subscribers = new Set<SubscriptionID>();
 
   // Fork a subscribe handler
-  yield fork(function*() {
+  yield fork(function* () {
     while (true) {
       // wait for a subscribe action
       const action: ReturnType<typeof actions.subscribeToUserList> = yield take(
@@ -55,24 +75,7 @@ export default function* userListSubscriptionManager() {
       const channel = yield call(userListSubscriptionEventChannel);
 
       // Fork the subscription task
-      activeSubscription = yield fork(function*() {
-        // create a local reference inside the fork
-        const chan = channel;
-
-        try {
-          while (true) {
-            // pull next from channel
-            const action: Actions = yield take(chan);
-            // dispatch action
-            yield put(action);
-          }
-        } finally {
-          // If task cancelled, close the channel
-          if (yield cancelled()) {
-            chan.close();
-          }
-        }
-      });
+      activeSubscription = yield fork(executeActionsChannel, channel);
     }
   });
   /** Do not unsubscribe for users, because this is the main method

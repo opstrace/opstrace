@@ -17,16 +17,10 @@ import { reducer as UserReducer } from "../reducer";
 import * as actions from "../actions";
 
 const mockState = {
-  currentUser: {
-    username: "Test",
-    avatar: null,
-    email: "email@email.com",
-    preference: {
-      dark_mode: true
-    }
-  },
-  loading: false,
-  currentUserLoaded: false
+  currentUserId: "",
+  loading: true,
+  currentUserIdLoaded: false,
+  users: []
 };
 
 test("return mock state", () => {
@@ -36,22 +30,53 @@ test("return mock state", () => {
 });
 
 test("handle setCurrentUser action", () => {
-  const user = {
-    username: "My User",
-    avatar: null,
-    email: "test@test.com",
-    preference: {
-      dark_mode: false
-    }
-  };
+  const reducer = UserReducer(mockState, actions.setCurrentUser("test-id"));
 
-  const reducer = UserReducer(mockState, actions.setCurrentUser(user));
-
-  expect(reducer.currentUser).toEqual(user);
+  expect(reducer.currentUserId).toEqual("test-id");
+  expect(reducer.currentUserIdLoaded).toBeTruthy();
 });
 
 test("handle setDarkMode action", () => {
-  const reducer = UserReducer(mockState, actions.setDarkMode(false));
+  const testState = {
+    currentUserId: "test1",
+    loading: true,
+    currentUserIdLoaded: false,
+    users: [
+      {
+        email: "test1@test.com",
+        username: "test1",
+        role: "",
+        opaque_id: "test1",
+        created_at: "20202-11-11",
+        preference: { dark_mode: false }
+      }
+    ]
+  };
+  const reducer = UserReducer(testState, actions.setDarkMode(true));
 
-  expect(reducer.currentUser?.preference?.dark_mode).toBeFalsy();
+  expect(reducer.users[0].preference?.dark_mode).toBeTruthy();
+});
+
+test("handle setUserList action", () => {
+  const usersList = [
+    {
+      email: "test1@test.com",
+      username: "test1",
+      role: "",
+      opaque_id: "test1",
+      created_at: "20202-11-11",
+      preference: { dark_mode: false }
+    },
+    {
+      email: "test2@test.com",
+      username: "test2",
+      role: "",
+      opaque_id: "test2",
+      created_at: "20202-11-12"
+    }
+  ];
+
+  const reducer = UserReducer(mockState, actions.setUserList(usersList));
+
+  expect(reducer.users).toEqual(usersList);
 });

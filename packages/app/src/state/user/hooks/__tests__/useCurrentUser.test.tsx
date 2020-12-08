@@ -7,9 +7,13 @@ import getSubscriptionID from "state/utils/getSubscriptionID";
 
 import useCurrentUser, {
   getCurrentUser,
-  getCurrentUserLoaded
+  getCurrentUserLoaded,
+  getCurrentUserId,
+  getUsers,
+  getCurrentUserIdLoaded,
+  getUsersLoading
 } from "../useCurrentUser";
-import { subscribe } from "../../actions";
+import { subscribeToUserList } from "../../actions";
 import { mainReducer } from "state/reducer";
 import { CombinedState } from "redux";
 
@@ -29,12 +33,10 @@ const mockAction = { type: "UNKNOWN_ACTION" } as any;
 
 test("useCurrentUser hook", () => {
   const user = {
-    currentUser: {
-      email: "email@email.com",
-      preference: {
-        dark_mode: true
-      }
-    }
+    currentUserId: "",
+    loading: true,
+    currentUserIdLoaded: false,
+    users: []
   };
 
   const dispatchMock = jest.fn();
@@ -47,36 +49,124 @@ test("useCurrentUser hook", () => {
     wrapper: ({ children }: any) => <StoreProvider>{children}</StoreProvider>
   });
 
-  expect(dispatchMock).toHaveBeenCalledWith(subscribe(1));
+  expect(dispatchMock).toHaveBeenCalledWith(subscribeToUserList(1));
   expect(result.current).toEqual(user);
 });
 
 test("getCurrentUser selector", () => {
+  const user1 = {
+    email: "test1@test.com",
+    username: "test1",
+    role: "",
+    opaque_id: "test1",
+    created_at: "20202-11-11",
+    preference: { dark_mode: false }
+  };
+  const user2 = {
+    email: "test2@test.com",
+    username: "test2",
+    role: "",
+    opaque_id: "test2",
+    created_at: "20202-11-12"
+  };
   const subState = {
     users: {
-      currentUser: {
-        username: "Test",
-        email: "email@test.com",
-      }
-    },
+      currentUserId: "test2",
+      loading: true,
+      currentUserIdLoaded: false,
+      users: [user1, user2]
+    }
   };
   const state = mainReducer(subState as CombinedState<any>, mockAction);
-  expect(getCurrentUser(state)).toEqual({
-    username: "Test",
-    email: "email@test.com",
-  });
+  expect(getCurrentUser(state)).toEqual(user2);
+});
+
+test("getUsers selector", () => {
+  const user1 = {
+    email: "test1@test.com",
+    username: "test1",
+    role: "",
+    opaque_id: "test1",
+    created_at: "20202-11-11",
+    preference: { dark_mode: false }
+  };
+  const user2 = {
+    email: "test2@test.com",
+    username: "test2",
+    role: "",
+    opaque_id: "test2",
+    created_at: "20202-11-12"
+  };
+  const subState = {
+    users: {
+      currentUserId: "test2",
+      loading: true,
+      currentUserIdLoaded: false,
+      users: [user1, user2]
+    }
+  };
+  const state = mainReducer(subState as CombinedState<any>, mockAction);
+  expect(getUsers(state)).toEqual([user1, user2]);
+});
+
+test("getCurrentUserIdLoaded selector", () => {
+  const subState = {
+    users: {
+      currentUserId: "test2",
+      loading: true,
+      currentUserIdLoaded: false,
+      users: [{
+        email: "test2@test.com",
+        username: "test2",
+        role: "",
+        opaque_id: "test2",
+        created_at: "20202-11-12"
+      }]
+    }
+  };
+
+  const state = mainReducer(subState as CombinedState<any>, mockAction);
+  expect(getCurrentUserIdLoaded(state)).toBeFalsy();
+});
+
+test("getUsersLoading selector", () => {
+  const subState = {
+    users: {
+      currentUserId: "test2",
+      loading: true,
+      currentUserIdLoaded: false,
+      users: []
+    }
+  };
+
+  const state = mainReducer(subState as CombinedState<any>, mockAction);
+  expect(getUsersLoading(state)).toBeTruthy();
 });
 
 test("getCurrentUserLoaded selector", () => {
   const subState = {
     users: {
-      currentUserLoaded: true,
-      currentUser: {
-        username: "Test"
-      }
-    },
+      currentUserId: "test2",
+      loading: true,
+      currentUserIdLoaded: false,
+      users: []
+    }
   };
 
   const state = mainReducer(subState as CombinedState<any>, mockAction);
-  expect(getCurrentUserLoaded(state)).toBeTruthy();
+  expect(getCurrentUserLoaded(state)).toBeFalsy();
+});
+
+test("getCurrentUserId selector", () => {
+  const subState = {
+    users: {
+      currentUserId: "test2",
+      loading: true,
+      currentUserIdLoaded: false,
+      users: []
+    }
+  };
+
+  const state = mainReducer(subState as CombinedState<any>, mockAction);
+  expect(getCurrentUserId(state)).toEqual("test2");
 });
