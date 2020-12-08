@@ -43,8 +43,8 @@ echo "current working directory: $(pwd)"
 source secrets/aws-dev-svc-acc-env.sh
 
 # Set GCP service account credentials (also used for opstrace create gcp ...)
-export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
-
+#export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
+export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-ci-shard-aaa.json
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
 
