@@ -112,7 +112,7 @@ For additional information understanding and troubleshooting the `create` comman
 
 When everything is done, you'll see the following log line:
 
-`info: cluster creation finished`
+`info: cluster creation finished: $OPSTRACE_CLUSTER_NAME (aws)`  
 
 You now have a secure, scalable, multi-tenant, open standards-based observability platform running _inside_ your cloud account, right next to the software that you want to monitor.
 
