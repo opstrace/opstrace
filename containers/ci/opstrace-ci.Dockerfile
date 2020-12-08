@@ -46,7 +46,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 
 # - NodeJS and npm, for compiling and running opstrace CLI / controller
 # - Install NodeJS via nvm, analogue to local dev setup
-ENV NODE_VERSION v14.15.0
+ENV NODE_VERSION v14.15.1
 ENV NVM_DIR /nvm
 RUN mkdir $NVM_DIR && git clone https://github.com/nvm-sh/nvm.git "${NVM_DIR}"
 RUN cd "${NVM_DIR}" && git checkout v0.37.0
