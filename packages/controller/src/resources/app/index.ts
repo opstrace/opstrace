@@ -313,7 +313,8 @@ export function OpstraceApplicationResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      port: 9000 as any
+                      port: 9000 as any,
+                      scheme: "HTTP"
                     },
                     failureThreshold: 1,
                     initialDelaySeconds: 5,
@@ -324,7 +325,8 @@ export function OpstraceApplicationResources(
                   livenessProbe: {
                     httpGet: {
                       path: "/live",
-                      port: 9000 as any
+                      port: 9000 as any,
+                      scheme: "HTTP"
                     },
                     failureThreshold: 3,
                     initialDelaySeconds: 5,
