@@ -33,6 +33,9 @@ make lint-docs
 echo "check if this is a docs-only change, exit preamble early if so"
 bash ci/check-if-docs-pr.sh && exit 0
 
+echo "--- detect missing license headers"
+make check-license-headers
+
 # Do this early when the checkout is fresh (no non-repo files within /packages
 # or /lib as of previous tsc invocations -- these could erroenously invalidate
 # the controller image cache layers).
@@ -71,9 +74,6 @@ echo "--- Compile Typescript code base, trigger pkg single-binary builds"
 # uninstaller) and then also pkg-build it (for linux).
 echo "--- make cli-tsc"
 make cli-tsc
-
-echo "--- detect missing license headers"
-make check-license-headers
 
 echo "--- make lint-codebase"
 make lint-codebase
