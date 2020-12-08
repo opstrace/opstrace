@@ -136,7 +136,6 @@ const isContainerProbeEqual = (
   desired: V1Probe | undefined,
   existing: V1Probe | undefined
 ): boolean => {
-  //const res = (
   return (
     isDeepStrictEqual(desired?.exec, existing?.exec) &&
     desired?.failureThreshold === existing?.failureThreshold &&
@@ -147,12 +146,6 @@ const isContainerProbeEqual = (
     isDeepStrictEqual(desired?.tcpSocket, existing?.tcpSocket) &&
     desired?.timeoutSeconds === existing?.timeoutSeconds
   );
-  // log.info(`probes match? ${res}`)
-  // if (!res) {
-  //   log.info(`desired=${JSON.stringify(desired)}`)
-  //   log.info(`existing=${JSON.stringify(existing)}`)
-  // }
-  // return res
 };
 
 const areContainerPortsEqual = (
