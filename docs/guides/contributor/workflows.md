@@ -132,3 +132,9 @@ error Command failed with exit code 1.
 Some parts of the code base are not covered by proper linting yet.
 We're working through it slowly in [#51](https://github.com/opstrace/opstrace/issues/51).
 PRs welcome!
+
+
+### License headers: `make check-license-headers`
+
+CI runs `make check-license-headers` to see if you maybe try to add (a) new code file(s) to the repository without setting the expected license header.
+You can run `make check-license-headers` locally -- it is expected to modify relevant source files in place, in your current checkout (you can then review the changes, and commit them if they look good).
