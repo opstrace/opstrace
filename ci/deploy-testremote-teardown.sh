@@ -133,8 +133,6 @@ teardown() {
 
     echo "--- destroy cluster"
     if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-        echo "NO AWS HERE TODAY :)"
-        exit 1
         ./build/bin/opstrace destroy aws ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
         EXITCODE_DESTROY=$?
     else
@@ -212,9 +210,11 @@ fi
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+
     cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
         --log-level=debug --yes \
         --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
+
     # Context: issue opstrace-prelaunch/issues/1905.
     # Copy outfile to prebuild/preamble dir. Required by
     # `make cli-publish-to-s3`.
