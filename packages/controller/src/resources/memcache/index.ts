@@ -114,11 +114,13 @@ export function MemcacheResources(
             {
               name: "memcached-client",
               port: 11211,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 11211 as any
             },
             {
               name: "exporter-http-metrics",
               port: 9150,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9150 as any
             }
           ],
@@ -185,11 +187,13 @@ export function MemcacheResources(
             {
               name: "memcached-client",
               port: 11211,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 11211 as any
             },
             {
               name: "exporter-http-metrics",
               port: 9150,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9150 as any
             }
           ],
