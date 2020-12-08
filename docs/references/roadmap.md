@@ -26,8 +26,8 @@ When you write code you _assert_ certain code paths work—alerts should be the 
 **Tracing**
 
 * Tracing suffers similar problems to logs and metrics–it's expensive to operate and even more difficult to set up.
-(Not to mention the GDPR issues of sending your data out to a 3rd party provider.)
-It's also hard to set up existing open source tools your own account.
+Not to mention the wide-ranging privacy concerns with sending _any of_ your data out to a 3rd party provider.
+And if you're using existing open source tools to run it in your own account, it's even harder to do, with more ongoing maintenance burden.
 Despite all this, we will provide distributed tracing as a deliberate feature, making it just as easy, secure, and private as logs and metrics.
 
-To discuss these topics and more, please join us in our [community discussions](https://go.opstrace.com/community).
+We welcome you to join our [community discussions](https://go.opstrace.com/community) and ask us questions, make proposals, and/or just chat about what we're doing.
