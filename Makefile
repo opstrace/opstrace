@@ -242,6 +242,28 @@ cli-test-s3-latest:
 	./opstrace --help
 
 
+.PHONY: check-license-headers
+check-license-headers:
+	@echo "does addlicense work?"
+	command -v addlicense
+	# Walk through the directory tree. For every directory (that is not
+	# ./.git), execute a bash process. Echo the current directory. Abort if no
+	# files in the directory (flat) have a matching extension. Else: run
+	# `addlicense` so that it _modifies_ the source files. If we were to run
+	# `addlicense` w/o the previous file existence check it would emit plenty
+	# of "no such file or directory" error messages. Note: we start bash so
+	# that we can rely on bash's glob behavior. Also note that `addlicense`
+	# does not have well-behaved recursive directory tree walking behavior.
+	# That's why we use find/bashglob to control _that_ part. Fail the target
+	# when this technique producess file changes (show the changes, too).
+	find . -not -path '*/.git/*' -not -path '*/node_modules*'  -type d -exec bash -c \
+		'echo "dir: {}"; stat {}/*.{ts,tsx,go,css,json} &> /dev/null && addlicense -c "Opstrace, Inc." -l apache {}/*.{ts,tsx,go,css,json}' \;
+	# Show the changes.
+	git --no-pager diff
+	# This returns non-zero when there is a diff.
+	git diff --exit-code
+
+
 .PHONY: cli-set-build-info-constants
 cli-set-build-info-constants:
 	# Set build info constants for the next tsc-based CLI build. This also
