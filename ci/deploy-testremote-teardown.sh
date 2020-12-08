@@ -133,6 +133,8 @@ teardown() {
 
     echo "--- destroy cluster"
     if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+        echo "NO AWS HERE TODAY :)"
+        exit 1
         ./build/bin/opstrace destroy aws ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
         EXITCODE_DESTROY=$?
     else
