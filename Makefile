@@ -267,10 +267,8 @@ check-license-headers:
 		-not -path '*/kubernetes/src/custom-resources*' \
 		-type d -exec bash -c \
 		$$'echo "dir: {}"; shopt -s extglob \n addlicense -c "Opstrace, Inc." -l apache {}/@(*.ts|*.tsx|*.json|*.go|*.css)' \;
-	# Show the changes.
-	git --no-pager diff
-	# This returns non-zero when there is a diff.
-	git diff --exit-code
+	# Show the changes. This returns non-zero when there is a diff.
+	git --no-pager diff --exit-code
 
 
 .PHONY: cli-set-build-info-constants
