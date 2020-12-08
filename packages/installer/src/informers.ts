@@ -18,7 +18,7 @@ import { eventChannel } from "redux-saga";
 import { put, take, cancelled } from "redux-saga/effects";
 import * as k8s from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
-import { log } from "@opstrace/utils";
+import { log, debugLogErrorDetail } from "@opstrace/utils";
 
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* runInformers(kubeConfig: KubeConfig) {
@@ -41,17 +41,29 @@ export function* runInformers(kubeConfig: KubeConfig) {
       unsubscribes.forEach(fn => fn());
     };
   });
-  try {
-    while (true) {
-      const event = yield take(clusterChannel);
-      yield put(event);
+
+  while (true) {
+    let event: any;
+    try {
+      event = yield take(clusterChannel);
+    } catch (err) {
+      log.warning("error during `event = yield take(clusterChannel)`: %s", err);
+      debugLogErrorDetail(err);
     }
-  } catch (e) {
-    log.error(e);
-  } finally {
-    // If task cancelled, close the channel, unsubscribing the informers
+    if (event !== undefined) {
+      try {
+        yield put(event);
+      } catch (err) {
+        log.warning("error during `yield put(event)`: %s", err);
+        debugLogErrorDetail(err);
+      }
+    }
     if (yield cancelled()) {
+      log.info(
+        "informer loop got signal: cancelled -- close cluster channels, end loop"
+      );
       clusterChannel.close();
+      break;
     }
   }
 }

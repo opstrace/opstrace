@@ -102,3 +102,30 @@ export function buildLogger(opts: CliLogOptions): Logger {
 // maxFiles?: number;
 // eol?: string;
 // tailable?: boolean;
+
+export function debugLogErrorDetail(err: Error) {
+  if (err === undefined) {
+    log.debug("debugLogErrorDetail: `err` obj is undefined. Sadness.");
+    return;
+  }
+  log.debug(": %s");
+
+  let s: string;
+  s = `err.name: ${err.name}`;
+  // Also log `code`, a property on NodeJS errors:
+  // https://nodejs.org/api/errors.html#errors_class_error
+  //@ts-ignore: code does not exist on type Error
+  s += `err.code: ${err.code}`;
+  s += `err.message: ${err.message}`;
+  s += `err.stack: ${err.stack}`;
+  log.debug("err detail: %s", s);
+  // log JSON-serialized `err` object because it's not always an Error
+  // object, see opstrace-prelaunch/issues/1290
+  // (optimize for debuggability). Note that this might not always work
+  // e.g. as of `TypeError: Converting circular structure to JSON`
+  try {
+    log.debug("JSON representation of err: %s", JSON.stringify(err, null, 2));
+  } catch (e) {
+    log.debug("could not json-serialize error: %s", e);
+  }
+}
