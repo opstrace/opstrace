@@ -131,6 +131,7 @@ export function LokiAPIResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/metrics",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 8080 as any,
                       scheme: "HTTP"
                     },
@@ -142,6 +143,7 @@ export function LokiAPIResources(
                   livenessProbe: {
                     httpGet: {
                       path: "/metrics",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 8080 as any,
                       scheme: "HTTP"
                     },
@@ -182,6 +184,7 @@ export function LokiAPIResources(
               name: "http",
               port: 8080,
               protocol: "TCP",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 8080 as any
             }
           ],
