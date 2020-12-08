@@ -19,7 +19,7 @@ import { getSdk } from "./dbSDK";
 // Make this optional, so that running the controller locally during dev
 // doesn't require a connection to the db.
 const endpoint = process.env.GRAPHQL_ENDPOINT;
-const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
+const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET ?? "";
 
 if (endpoint && !adminSecret) {
   throw Error(
@@ -30,14 +30,15 @@ if (endpoint && !adminSecret) {
 const client = endpoint
   ? new GraphQLClient(endpoint, {
       headers: {
-        "x-hasura-admin-secret": adminSecret!
+        "x-hasura-admin-secret": adminSecret
       }
     })
   : null;
 
 export type PromiseReturnType<T> = T extends PromiseLike<infer U> ? U : T;
-export type ClientResponse<T extends (args?: any) => {}> = PromiseReturnType<
-  ReturnType<T>
->;
+export type ClientResponse<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends (args?: any) => Record<string, any>
+> = PromiseReturnType<ReturnType<T>>;
 
 export default client ? getSdk(client) : null;
