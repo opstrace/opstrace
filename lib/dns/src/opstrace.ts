@@ -166,6 +166,16 @@ export class DNSClient {
       }
     };
     return axios.request(createRequest);
+    // Note(JP): expect the following error and die().
+    // "code": 403,
+    // "errors": [
+    //   {
+    //     "message": "Cloud DNS API has not been used in project 540196616614 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/dns.googleapis.com/overview?project=540196616614 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.",
+    //     "domain": "usageLimits",
+    //     "reason": "accessNotConfigured",
+    //     "extendedHelp": "https://console.developers.google.com"
+    //   }
+    // ],
   }
 
   public async AddNameservers(
