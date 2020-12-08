@@ -1049,13 +1049,31 @@ export function CortexResources(
                       name: "grpc"
                     }
                   ],
+                  // https://github.com/cortexproject/cortex-helm-chart/blob/14ee59e7b3e8772f19a12ab16979e5143f51ae92/values.yaml#L250-L254
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      port: 80 as any
+                      port: 80 as any,
+                      scheme: "HTTP"
                     },
-                    initialDelaySeconds: 15,
-                    timeoutSeconds: 1
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+                  // https://github.com/cortexproject/cortex-helm-chart/blob/14ee59e7b3e8772f19a12ab16979e5143f51ae92/values.yaml#L245-L249
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 80 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   resources: config.ingester.resources,
                   volumeMounts: [
