@@ -247,17 +247,26 @@ check-license-headers:
 	@echo "does addlicense work?"
 	command -v addlicense
 	# Walk through the directory tree. For every directory (that is not
-	# ./.git), execute a bash process. Echo the current directory. Abort if no
-	# files in the directory (flat) have a matching extension. Else: run
-	# `addlicense` so that it _modifies_ the source files. If we were to run
-	# `addlicense` w/o the previous file existence check it would emit plenty
-	# of "no such file or directory" error messages. Note: we start bash so
-	# that we can rely on bash's glob behavior. Also note that `addlicense`
-	# does not have well-behaved recursive directory tree walking behavior.
-	# That's why we use find/bashglob to control _that_ part. Fail the target
-	# when this technique producess file changes (show the changes, too).
-	find . -not -path '*/.git/*' -not -path '*/node_modules*'  -type d -exec bash -c \
-		'echo "dir: {}"; stat {}/*.{ts,tsx,go,css,json} &> /dev/null && addlicense -c "Opstrace, Inc." -l apache {}/*.{ts,tsx,go,css,json}' \;
+	# ./.git), execute a bash process. Echo the current directory. Set the
+	# extended globbing option. Add a newline in the command; for that option
+	# to take effect (Otherwise bash would show a syntax error on line 0). For
+	# being able to add a newline in a single-quoted string we have to add a
+	# dollar sign to the front of the string (See
+	# https://stackoverflow.com/a/3182519/145400). To make that work in this
+	# Makefile, escape the single dollar sign with another dollar sign. Run
+	# `addlicense` so that it _modifies_ the source files. `addlicense` will
+	# show a "no such file or directory" error when the extended glob does not
+	# match a single file in the current directory. That's fine. Note: we start
+	# bash so that we can rely on bash's extended glob behavior. Also note that
+	# `addlicense` does not have well-behaved recursive directory tree walking
+	# behavior (with predictable pattern matching!). That's why we use
+	# find/bash+extglob to control _that_ part. Fail the target when this
+	# technique produces file changes (show the changes, too).
+	find . -not -path '*/.git/*' \
+		-not -path '*/node_modules*' \
+		-not -path '*/kubernetes/src/custom-resources*' \
+		-type d -exec bash -c \
+		$$'echo "dir: {}"; shopt -s extglob \n addlicense -c "Opstrace, Inc." -l apache {}/@(*.ts|*.tsx|*.json|*.go|*.css)' \;
 	# Show the changes.
 	git --no-pager diff
 	# This returns non-zero when there is a diff.
