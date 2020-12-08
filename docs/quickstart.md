@@ -5,31 +5,27 @@ description: >-
 
 # Opstrace Quick Start
 
-We think the best way to understand Opstrace is to try it for yourself.
-In this hands-on quick start you will set up a 3-node Opstrace cluster inside your cloud account.
-You'll send metrics and logs to it from your local machine, and query the data to test the end-to-end flow.
+Try Opstrace by setting up a 3-node cluster inside your cloud account.
+Send metrics and logs to it from your local machine, and query the data to test the end-to-end flow.
 
 ![quick start overview](https://share.balsamiq.com/c/ijnF4CDC5q8AEDuewqQhX7.png)
 
-At the end you will have a _complete, secure, scalable, multi-tenant, self-healing, and open source_ observability platform running inside of your account.
-
-<!-- we want to highlight our features, this is the list to start iterating with; wordsmithing needed ^^^ -->
-
-For this quick start, running the Opstrace cluster for an hour should cost about $1.00.
+* You’ll have a _secure_, _horizontally-scalable_, _multi-tenant_, and _self-healing_ open source observability platform.
+* Running the Opstrace cluster for an hour costs about $1.00.
 
 ## Step 0: Setup
 
-Before you start: note that throughout the quick start the code blocks are almost all copy and pastable.
+Open a terminal and verify you have the following:
 
-Open a terminal and verify you have the following (we will use the same terminal for the entire quick start):
-
-* For creating the Opstrace cluster in your account...
+* For creating the cluster:
   * The [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-    * We recommend `AdministratorAccess` for this quick start; for additional information on permissions and other configuration options please see our [cloud permissions reference](./references/cloud-permissions.md).
+    * We recommend `AdministratorAccess` for this quick start; for additional info check out our [cloud permissions reference](./references/cloud-permissions.md).
     * While AWS and GCP are supported, we will focus on AWS in this quick start.
-* For sending dummy data to the cluster...
+* For sending dummy data:
   * [Docker](https://docs.docker.com/install/)
   * [Docker Compose](https://docs.docker.com/compose/install/)
+
+Note: the code blocks are all copy and pastable.
 
 ```bash
 aws configure list
@@ -38,7 +34,7 @@ docker-compose --version
 ```
 
 Now, create an empty directory to use.
-We will write some files locally (auth tokens and config files) that you will need to reference, so it's best to keep it all in one spot.
+We will write some files locally (auth tokens and config files) that you will need to reference, so stay in this directory.
 For example:
 
 ```bash
