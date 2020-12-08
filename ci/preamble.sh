@@ -27,9 +27,6 @@ make set-dockerhub-credentials
 echo "--- lint docs: quick feedback"
 make lint-docs
 
-echo "--- detect missing license headers"
-make check-license-headers
-
 # If this is a docs-only change: skip the rest of the preamble, move on to the
 # next build step in the BK pipeline which allows for a
 # docs-only-change-fastpath-pipeline-exit.
@@ -74,6 +71,9 @@ echo "--- Compile Typescript code base, trigger pkg single-binary builds"
 # uninstaller) and then also pkg-build it (for linux).
 echo "--- make cli-tsc"
 make cli-tsc
+
+echo "--- detect missing license headers"
+make check-license-headers
 
 echo "--- make lint-codebase"
 make lint-codebase
