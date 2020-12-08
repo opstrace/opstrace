@@ -22,8 +22,11 @@ import {
   V1ContainerPort,
   V1VolumeMount,
   V1KeyToPath,
-  V1EnvVar
+  V1EnvVar,
+  V1Probe
 } from "@kubernetes/client-node";
+
+import { isDeepStrictEqual } from "util";
 
 export const ENV_HASH_NAME = "OPSTRACE_CONTROLLER_VERSION";
 
@@ -98,7 +101,9 @@ const isContainerEqual = (
     !areContainerPortsEqual(desired, existing) ||
     !areVolumeMountsEqual(desired, existing) ||
     !areEnvVariablesEqual(desired, existing) ||
-    !areContainerArgsEqual(desired, existing)
+    !areContainerArgsEqual(desired, existing) ||
+    !areContainerReadinessProbesEqual(desired, existing) ||
+    !areContainerLivenessProbesEqual(desired, existing)
   ) {
     return false;
   }
@@ -108,6 +113,46 @@ const isContainerEqual = (
   }
 
   return true;
+};
+
+const areContainerReadinessProbesEqual = (
+  desired: V1Container,
+  existing: V1Container
+): boolean => {
+  return isContainerProbeEqual(
+    desired?.readinessProbe,
+    existing?.readinessProbe
+  );
+};
+
+const areContainerLivenessProbesEqual = (
+  desired: V1Container,
+  existing: V1Container
+): boolean => {
+  return isContainerProbeEqual(desired?.livenessProbe, existing?.livenessProbe);
+};
+
+const isContainerProbeEqual = (
+  desired: V1Probe | undefined,
+  existing: V1Probe | undefined
+): boolean => {
+  //const res = (
+  return (
+    isDeepStrictEqual(desired?.exec, existing?.exec) &&
+    desired?.failureThreshold === existing?.failureThreshold &&
+    isDeepStrictEqual(desired?.httpGet, existing?.httpGet) &&
+    desired?.initialDelaySeconds === existing?.initialDelaySeconds &&
+    desired?.periodSeconds === existing?.periodSeconds &&
+    desired?.successThreshold === existing?.successThreshold &&
+    isDeepStrictEqual(desired?.tcpSocket, existing?.tcpSocket) &&
+    desired?.timeoutSeconds === existing?.timeoutSeconds
+  );
+  // log.info(`probes match? ${res}`)
+  // if (!res) {
+  //   log.info(`desired=${JSON.stringify(desired)}`)
+  //   log.info(`existing=${JSON.stringify(existing)}`)
+  // }
+  // return res
 };
 
 const areContainerPortsEqual = (
