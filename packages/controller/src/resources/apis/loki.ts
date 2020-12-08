@@ -131,14 +131,24 @@ export function LokiAPIResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/metrics",
-                      port: 8080 as any
-                    }
+                      port: 8080 as any,
+                      scheme: "HTTP"
+                    },
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   livenessProbe: {
                     httpGet: {
                       path: "/metrics",
-                      port: 8080 as any
-                    }
+                      port: 8080 as any,
+                      scheme: "HTTP"
+                    },
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   resources: config.resources,
                   env: lokiApiProxyEnv
