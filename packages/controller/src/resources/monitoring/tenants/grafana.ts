@@ -185,8 +185,24 @@ export function GrafanaResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/api/health",
-                      port: "http" as any
-                    }
+                      port: "http" as any,
+                      scheme: "HTTP"
+                    },
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/api/health",
+                      port: "http" as any,
+                      scheme: "HTTP"
+                    },
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   resources: {},
                   env: [
