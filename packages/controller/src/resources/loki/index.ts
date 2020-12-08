@@ -649,13 +649,31 @@ export function LokiResources(
                       name: "grpc"
                     }
                   ],
+                  // https://github.com/grafana/loki/blob/6d85c7c212f95c7fbf902b467edc46a5ec3555fd/production/helm/loki/values.yaml#L167-L171
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      port: 1080 as any
+                      port: 1080 as any,
+                      scheme: "HTTP"
                     },
-                    initialDelaySeconds: 15,
-                    timeoutSeconds: 1
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+                  // https://github.com/grafana/loki/blob/6d85c7c212f95c7fbf902b467edc46a5ec3555fd/production/helm/loki/values.yaml#L117-L121
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 1080 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   resources: deploymentConfig.distributor.resources,
                   volumeMounts: [
@@ -736,10 +754,26 @@ export function LokiResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      port: 1080 as any
+                      port: 1080 as any,
+                      scheme: "HTTP"
                     },
-                    initialDelaySeconds: 15,
-                    timeoutSeconds: 1
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 1080 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   resources: deploymentConfig.ingester.resources,
                   volumeMounts: [
@@ -871,10 +905,26 @@ export function LokiResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      port: 1080 as any
+                      port: 1080 as any,
+                      scheme: "HTTP"
                     },
                     initialDelaySeconds: 15,
-                    timeoutSeconds: 1
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 1080 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 15,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   resources: deploymentConfig.querier.resources,
                   volumeMounts: [
@@ -969,10 +1019,26 @@ export function LokiResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
-                      port: 1080 as any
+                      port: 1080 as any,
+                      scheme: "HTTP"
                     },
                     initialDelaySeconds: 15,
-                    timeoutSeconds: 1
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 1080 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 15,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
                   },
                   resources: deploymentConfig.querier.resources,
                   volumeMounts: [
