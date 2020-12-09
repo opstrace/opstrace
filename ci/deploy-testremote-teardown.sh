@@ -60,7 +60,7 @@ configure_kubectl_aws_or_gcp() {
     kubectl cluster-info
 }
 
-setup_ci_metrics() {
+start_data_collection_deployment_loop() {
     cat ci/metrics/promtail.yaml.template | envsubst > ci/metrics/promtail.yaml
     cat ci/metrics/prometheus.yaml.template | envsubst > ci/metrics/prometheus.yaml
 
@@ -68,12 +68,17 @@ setup_ci_metrics() {
     echo "temp file for kctl output: ${LOG_OUTERR_FILEPATH}"
     while true
     do
-        # Wait for the `create` procedure to at some point write out a
-        # kubeconfig file. This next command will fail for various reasons when
-        # the --kubeconfig file does not exist yet, when k8s cluster isn't
-        # reachable yet, etc. Rely on `kubectl` to exit with code 0 when the
-        # deployments have been submitted successfully. Rely on pipefail
-        # option.
+        # This function and therefore this loop body runs in the background,
+        # concurrently with a cluster `create` operation. Wait for the `create`
+        # procedure to at some point write out a kubeconfig file. This next
+        # command will fail for various reasons when the --kubeconfig file does
+        # not exist yet, when k8s cluster isn't reachable yet, etc. Rely on
+        # `kubectl` to exit with code 0 when the deployments have been
+        # submitted successfully. Rely on pipefail option. Collect stderr and
+        # stdout in a file. Also stream stdout/err to original stdouterr / i.e.
+        # have this output interleave with other build log output (good enough
+        # for now, I think).
+
         kubectl apply \
             -f ci/metrics/ \
             -f secrets/opstrace-ci-authtoken-secrets.yaml \
@@ -81,11 +86,11 @@ setup_ci_metrics() {
         kexitcode=$?
 
         if [ $kexitcode -eq 0 ]; then
-            echo "setup_ci_metrics: kubectl apply ... succeeded, stop loop"
+            echo -e "\n\nstart_data_collection_deployment_loop: kubectl apply ... succeeded, stop loop"
             break
         fi
 
-        echo "setup_ci_metrics: last exit code: $kexitcode -- continue to wait (30 sec)" |& tee -a "${LOG_OUTERR_FILEPATH}"
+        echo -e "\n\nstart_data_collection_deployment_loop: last exit code: $kexitcode -- continue to wait (30 sec)" |& tee -a "${LOG_OUTERR_FILEPATH}"
         sleep 30
     done
 
@@ -184,6 +189,17 @@ curl --request POST \
     --data-binary "@secrets/dns-service-login-for-ci.json" \
     | jq -jr .access_token > access.jwt
 
+
+# CI_DATA_COLLECTION is an env var set in the Buildkite pipeline -- when set to
+# "enabled", we want to send logs and metrics from the to-be-tested Opstrace
+# cluster in this CI run to an aggregation Opstrace cluster. Run this function
+# in the background. Do not apply further timeout / job control.
+if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
+    echo "--- setup: start_data_collection_deployment_loop"
+    start_data_collection_deployment_loop &
+fi
+
+
 # Run opstrace installer locally. The installer will deploy the controller into
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
@@ -206,15 +222,6 @@ fi
 
 echo "--- connect kubectl to the CI cluster"
 configure_kubectl_aws_or_gcp
-
-#
-# CI_DATA_COLLECTION is an env var set in buildkite pipeline, when set to
-# "enabled" logs and metrics of the cluster are sent to opstrace ci cluster
-#
-if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
-    echo "--- setup: send metrics and logs to the ci cluster"
-    setup_ci_metrics
-fi
 
 # Makefile logic uses `OPSTRACE_KUBE_CONFIG_HOST` to mount kubectl config into
 # the test-remote container.
