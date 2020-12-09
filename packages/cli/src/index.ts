@@ -60,6 +60,7 @@ interface CliOptsInterface {
   showVersion: boolean;
   regionToDestroyIn: string;
   assumeYes: boolean;
+  kubeconfigFilePath: string; // emtpy means: not set
 }
 
 // Note(JP): think of this as a singleton object (set once, immutable, allow
@@ -221,6 +222,16 @@ function parseCmdlineArgs() {
     action: "store_true",
     default: false,
     dest: "holdController"
+  });
+
+  parserCreate.add_argument("--write-kubeconfig-file", {
+    help:
+      "Write kubectl config file (for KUBECONFIG env var) when data is " +
+      "available (after k8s clsuter has been set up).",
+    type: "str",
+    metavar: "PATH",
+    dest: "kubeconfigFilePath",
+    default: ""
   });
 
   parserDestroy.add_argument("--region", {
