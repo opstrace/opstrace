@@ -94,11 +94,6 @@ echo "--- build looker image"
 # `make image` is supposed to inherit the env variable CHECKOUT_VERSION_STRING
 ( cd test/test-remote/containers/looker ; make image ; make publish )
 
-echo "--- execute remaining preamble tidbits "
-# Log in to GCP with service account credentials. Note(JP): the authentication
-# state is I think stored in a well-known location in the home dir.
-gcloud auth activate-service-account --key-file=./secrets/gcp-credentials.json --project vast-pad-240918
-
 # subsequent build steps are supposed to depend on actual build artifacts
 # like the pkg-based single binary CLI or Docker images. The node_modules
 # dir (expected to be more than 1 GB in size) is not needed anymore. Remove it.

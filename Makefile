@@ -45,6 +45,8 @@ OPSTRACE_BUILD_DIR ?= $(shell pwd)
 # Name of the cloud platform. Supported values are gcp and aws.
 OPSTRACE_CLOUD_PROVIDER ?= gcp
 
+OPSTRACE_GCP_PROJECT_ID ?= vast-pad-240918
+
 # Defaults for GCP cloud platform (does not work for AWS)
 ifeq (gcp,$(OPSTRACE_CLOUD_PROVIDER))
 	OPSTRACE_REGION ?= us-west2
@@ -120,7 +122,10 @@ kconfig: checkenv-clustername kconfig-$(OPSTRACE_CLOUD_PROVIDER)
 
 .PHONY: kconfig-gcp
 kconfig-gcp:
-	gcloud container clusters get-credentials $(OPSTRACE_CLUSTER_NAME) --zone $(OPSTRACE_REGION)-$(OPSTRACE_ZONE) --project vast-pad-240918
+	gcloud container clusters get-credentials \
+		$(OPSTRACE_CLUSTER_NAME) \
+		--zone $(OPSTRACE_REGION)-$(OPSTRACE_ZONE) \
+		--project $(OPSTRACE_GCP_PROJECT_ID)
 
 .PHONY: kconfig-aws
 kconfig-aws:
