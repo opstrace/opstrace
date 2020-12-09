@@ -34,8 +34,6 @@ steps:
   - label: "🔨 main test (GCP)"
     key: "maintest-gcp"
     depends_on:
-      - "preamble"
-      - "check-docs"
       - "unit-tests"
     env:
       OPSTRACE_CLUSTER_NAME: "bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
@@ -48,8 +46,6 @@ steps:
   - label: "🔨 main test (AWS)"
     key: "maintest-aws"
     depends_on:
-      - "preamble"
-      - "check-docs"
       - "unit-tests"
     env:
       OPSTRACE_CLUSTER_NAME: "bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
