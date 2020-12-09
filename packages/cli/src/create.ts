@@ -93,7 +93,8 @@ export async function create(): Promise<void> {
 
   const createConfig: ClusterCreateConfigInterface = {
     holdController: cli.CLIARGS.holdController,
-    tenantApiTokens: tenantApiTokens
+    tenantApiTokens: tenantApiTokens,
+    kubeconfigFilePath: cli.CLIARGS.kubeconfigFilePath
   };
   setCreateConfig(createConfig);
 

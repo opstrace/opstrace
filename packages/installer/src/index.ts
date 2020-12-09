@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import fs from "fs";
 import { strict as assert } from "assert";
 
 import got, { Response as GotResponse, Options as GotOptions } from "got";
@@ -88,6 +90,9 @@ export interface ClusterCreateConfigInterface {
   holdController: boolean;
   // tenant name : api token map, can be empty
   tenantApiTokens: Dict<string>;
+  // if set, write a KUBECONFIG file to this path, asap after k8s cluster
+  // has been provisioned.
+  kubeconfigFilePath: string;
 }
 
 let clusterCreateConfig: ClusterCreateConfigInterface;
@@ -228,6 +233,25 @@ function* createClusterCore() {
     loadFromCluster: false,
     kubeconfig: kubeconfigString
   });
+
+  // If asked for by the user, write out the kubeconfig to a file, so that they
+  // can start interacting with the k8s cluster (misc integration).
+  if (clusterCreateConfig.kubeconfigFilePath !== "") {
+    const path = clusterCreateConfig.kubeconfigFilePath;
+    log.info("try to write kubeconfig to file: %s", path);
+    try {
+      fs.writeFileSync(path, kubeconfigString, { encoding: "utf8" });
+    } catch (err) {
+      // This is not critical for cluster creation, just convenience. Log
+      // how/why writing failed, otherwise proceed
+      log.warning(
+        "could not write kubeconfig to file %s: %s: %s",
+        path,
+        err.code,
+        err.message
+      );
+    }
+  }
 
   // Try to interact with the k8s API (for debugging, kept from legacy code)
   try {
