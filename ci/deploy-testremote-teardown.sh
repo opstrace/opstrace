@@ -58,9 +58,24 @@ configure_kubectl_aws_or_gcp() {
 }
 
 setup_ci_metrics() {
-   cat ci/metrics/promtail.yaml.template | envsubst > ci/metrics/promtail.yaml
-   cat ci/metrics/prometheus.yaml.template | envsubst > ci/metrics/prometheus.yaml
-   kubectl apply -f ci/metrics/ -f secrets/opstrace-ci-authtoken-secrets.yaml
+    cat ci/metrics/promtail.yaml.template | envsubst > ci/metrics/promtail.yaml
+    cat ci/metrics/prometheus.yaml.template | envsubst > ci/metrics/prometheus.yaml
+
+    LOG_OUTERR_FILEPATH=$(mktemp /tmp/kubectl_apply.XXXXXX)
+    echo "temp file for kctl output: ${LOG_OUTERR_FILEPATH}"
+    while true
+    do
+        # this will fail for various reasons when the k8s cluster isn't there yet
+        # rely on pipefail
+        # rely on the `create` procedure to at some point write out a kubeconfig file
+        export KUBECONFIG=/path/to/admin.conf
+        kubectl apply -f ci/metrics/ -f secrets/opstrace-ci-authtoken-secrets.yaml |& tee -a "${LOG_OUTERR_FILEPATH}"
+        kexitcode=$?
+
+        echo "setup_ci_metrics: last exit code: $kexitcode -- continue to wait (30 sec)" |& tee -a "${LOG_OUTERR_FILEPATH}"
+        sleep 30
+    done
+
 }
 
 teardown() {
