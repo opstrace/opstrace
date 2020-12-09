@@ -43,7 +43,7 @@ export function* runInformers(kubeConfig: KubeConfig) {
   });
 
   while (true) {
-    let event: any;
+    let event;
     try {
       event = yield take(clusterChannel);
     } catch (err) {
