@@ -44,18 +44,31 @@ source secrets/aws-dev-svc-acc-env.sh
 
 # Set GCP service account credentials (also used for opstrace create gcp ...)
 #export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
+#export OPSTRACE_GCP_PROJECT_ID="vast-pad-240918"
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-ci-shard-aaa.json
+export OPSTRACE_GCP_PROJECT_ID="ci-shard-aaa"
+
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
 
 # `opstrace create ...` is going to write to this.
 KUBECONFIG_FILEPATH="kubeconfig_${OPSTRACE_CLUSTER_NAME}"
 
+echo "--- cloud auth activate-service-account: ${GOOGLE_APPLICATION_CREDENTIALS}"
+# Log in to GCP with service account credentials. Note(JP): the authentication
+# state is I think stored in a well-known location in the home dir.
+gcloud auth activate-service-account \
+    --key-file=${GOOGLE_APPLICATION_CREDENTIALS} \
+    --project ${OPSTRACE_GCP_PROJECT_ID}
+
+
 configure_kubectl_aws_or_gcp() {
     if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         aws eks --region ${AWS_CLI_REGION} update-kubeconfig --name ${OPSTRACE_CLUSTER_NAME}
     else
-        gcloud container clusters get-credentials ${OPSTRACE_CLUSTER_NAME} --zone ${GCLOUD_CLI_ZONE} --project vast-pad-240918
+        gcloud container clusters get-credentials ${OPSTRACE_CLUSTER_NAME} \
+            --zone ${GCLOUD_CLI_ZONE} \
+            --project ${OPSTRACE_GCP_PROJECT_ID}
     fi
     kubectl cluster-info
 }
@@ -118,7 +131,7 @@ teardown() {
 
     # When cluster creation failed then maybe the k8s cluster was set up
     # correctly, but the deployment phase failed. In that case the command
-    # `make install-gcp` below fails, beaming us to right here, w/o kubectl
+    # `opstrace create` below fails, beaming us to right here, w/o kubectl
     # having been configured against said k8s cluster (that happens when make
     # install-gcp succeeds). Here, perform a best effort: try to connect
     # kubectl to the k8s cluster, ignoring errors (rely on +e before). Also see
