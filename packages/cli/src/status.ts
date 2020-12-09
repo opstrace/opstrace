@@ -86,7 +86,8 @@ async function checkClusterStatus() {
   const tenantApiTokens = readTenantApiTokenFiles(ccfg.tenants);
   const createConfig: ClusterCreateConfigInterface = {
     holdController: cli.CLIARGS.holdController,
-    tenantApiTokens: tenantApiTokens
+    tenantApiTokens: tenantApiTokens,
+    kubeconfigFilePath: ""
   };
   setCreateConfig(createConfig);
 
