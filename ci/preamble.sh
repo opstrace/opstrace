@@ -36,18 +36,14 @@ bash ci/check-if-docs-pr.sh && exit 0
 echo "--- detect missing license headers"
 make check-license-headers
 
+echo "--- lint codebase: quick feedback"
+make lint-codebase
+
 # Do this early when the checkout is fresh (no non-repo files within /packages
 # or /lib as of previous tsc invocations -- these could erroenously invalidate
 # the controller image cache layers).
 echo "--- make build-and-push-controller-image"
-
 make build-and-push-controller-image
-
-echo "--- Run go unit tests"
-set +o xtrace
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-make -C ${DIR}/../go unit-tests
-set -o xtrace
 
 # If there are any changes to go directory then build and publish the images to
 # docker hub. Update packages/controller-config/docker-images.json to use the
@@ -59,6 +55,7 @@ set -o xtrace
 # - app
 # - graphql
 echo "--- Update docker-images.json"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ${DIR}/build-docker-images-update-controller-config.sh
 
 echo "--- Compile Typescript code base, trigger pkg single-binary builds"
@@ -75,9 +72,6 @@ echo "--- Compile Typescript code base, trigger pkg single-binary builds"
 echo "--- make cli-tsc"
 make cli-tsc
 
-echo "--- make lint-codebase"
-make lint-codebase
-
 echo "--- make cli-pkg"
 make cli-pkg
 
@@ -91,18 +85,8 @@ echo "--- CLI single-binary sanity check"
 ./build/bin/opstrace --version
 ./build/bin/opstrace --version | grep "${CHECKOUT_VERSION_STRING}"
 
-echo "--- make cli-crashtest"
-make cli-crashtest
-
-echo "--- run opstrace CLI tests (cli-tests-pre-cluster.sh)"
-# Assume that these are fast
-source ci/test-cli/cli-tests-pre-cluster.sh
-
 echo "--- make rebuild-testrunner-container-images"
 make rebuild-testrunner-container-images
-
-echo "--- run app unit tests"
-make run-app-unit-tests
 
 echo "--- build looker image"
 # looker: does image build? push it, too!

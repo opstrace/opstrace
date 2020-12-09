@@ -165,6 +165,7 @@ clean:
 
 .PHONY: run-app-unit-tests
 run-app-unit-tests:
+	@echo "--- run app unit tests"
 	CI=true yarn workspace @opstrace/app test
 
 .PHONY: cli-crashtest
@@ -175,11 +176,12 @@ cli-crashtest:
 	# interested in confirming whether grep as the last command in the pipeline
 	# exits non-zero (did not find match -> error), or with exit code 0 (did
 	# find match -> test passed).
+	@echo "--- make cli-crashtest"
 	./build/bin/opstrace crashtest || exit 0 # so that the output is visible in build log
 	set +o pipefail && ./build/bin/opstrace crashtest 2>&1 | grep 'cli/src/index.ts:'
 
 
-lint-codebase.js:
+lint-codebase.js: yarn-frozen-lockfile
 	yarn run lint
 
 lint-codebase.go:
@@ -560,8 +562,30 @@ yarn.lock: package.json $(PACKAGE_JSON) node_modules
 node_modules:
 	mkdir -p node_modules
 
+#
+# Run all the unit tests.
+#
 .PHONY: unit-tests
-unit-tests: yarn-frozen-lockfile
+unit-tests: yarn-frozen-lockfile \
+	cli-crashtest \
+	cli-tests \
+	run-app-unit-tests \
+	ts-unit-tests \
+	go-unit-tests
+
+.PHONY: cli-tests
+cli-tests:
+	@echo "--- run opstrace CLI tests (cli-tests-pre-cluster.sh)"
+	CHECKOUT_VERSION_STRING=${CHECKOUT_VERSION_STRING} source ci/test-cli/cli-tests-pre-cluster.sh
+
+.PHONY: go-unit-tests
+go-unit-tests:
+	@echo "--- run go unit tests"
+	cd go && make unit-tests
+
+.PHONY: ts-unit-tests
+ts-unit-tests:
+	@echo "--- run lib unit tests"
 	cd lib/kubernetes && CI=true yarn test
 
 .PHONY: preamble
