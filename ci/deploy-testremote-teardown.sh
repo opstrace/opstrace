@@ -79,11 +79,13 @@ start_data_collection_deployment_loop() {
         # have this output interleave with other build log output (good enough
         # for now, I think).
 
+        set +e
         kubectl apply \
             -f ci/metrics/ \
             -f secrets/opstrace-ci-authtoken-secrets.yaml \
             --kubeconfig "${KUBECONFIG_FILEPATH}" |& tee -a "${LOG_OUTERR_FILEPATH}"
         kexitcode=$?
+        set -e
 
         if [ $kexitcode -eq 0 ]; then
             echo -e "\n\nstart_data_collection_deployment_loop: kubectl apply ... succeeded, stop loop"
@@ -197,6 +199,10 @@ curl --request POST \
 if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
     echo "--- setup: start_data_collection_deployment_loop"
     start_data_collection_deployment_loop &
+    # Take a quick, short break before generating more log output, so that
+    # the output from the first loop iteration goes into the "proper" section
+    # in the build log.
+    sleep 5
 fi
 
 
