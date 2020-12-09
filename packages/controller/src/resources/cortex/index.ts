@@ -1012,7 +1012,7 @@ export function CortexResources(
         spec: {
           serviceName: "ingester",
           replicas: config.ingester.replicas,
-          podManagementPolicy: "Parallel",
+          podManagementPolicy: "OrderedReady",
           selector: {
             matchLabels: {
               name: "ingester"
@@ -1210,7 +1210,7 @@ export function CortexResources(
         spec: {
           serviceName: "store-gateway",
           replicas: config.storegateway.replicas,
-          podManagementPolicy: "Parallel",
+          podManagementPolicy: "OrderedReady",
           selector: {
             matchLabels: {
               name: "store-gateway"
@@ -1381,7 +1381,7 @@ export function CortexResources(
         spec: {
           serviceName: "compactor",
           replicas: config.compactor.replicas,
-          podManagementPolicy: "Parallel",
+          podManagementPolicy: "OrderedReady",
           selector: {
             matchLabels: {
               name: "compactor"

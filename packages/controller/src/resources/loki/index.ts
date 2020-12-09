@@ -713,7 +713,7 @@ export function LokiResources(
           serviceName: "ingester",
           replicas: deploymentConfig.ingester.replicas,
           revisionHistoryLimit: 10,
-          podManagementPolicy: "Parallel",
+          podManagementPolicy: "OrderedReady",
           selector: {
             matchLabels: {
               name: "ingester",
@@ -978,7 +978,7 @@ export function LokiResources(
           serviceName: "querier",
           replicas: deploymentConfig.querier.replicas,
           revisionHistoryLimit: 10,
-          podManagementPolicy: "Parallel",
+          podManagementPolicy: "OrderedReady",
           selector: {
             matchLabels: {
               name: "querier",
