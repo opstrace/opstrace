@@ -48,6 +48,9 @@ export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
 
+# `opstrace create ...` is going to write to this.
+KUBECONFIG_FILEPATH="kubeconfig_${OPSTRACE_CLUSTER_NAME}"
+
 configure_kubectl_aws_or_gcp() {
     if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         aws eks --region ${AWS_CLI_REGION} update-kubeconfig --name ${OPSTRACE_CLUSTER_NAME}
@@ -65,12 +68,22 @@ setup_ci_metrics() {
     echo "temp file for kctl output: ${LOG_OUTERR_FILEPATH}"
     while true
     do
-        # this will fail for various reasons when the k8s cluster isn't there yet
-        # rely on pipefail
-        # rely on the `create` procedure to at some point write out a kubeconfig file
-        export KUBECONFIG=/path/to/admin.conf
-        kubectl apply -f ci/metrics/ -f secrets/opstrace-ci-authtoken-secrets.yaml |& tee -a "${LOG_OUTERR_FILEPATH}"
+        # Wait for the `create` procedure to at some point write out a
+        # kubeconfig file. This next command will fail for various reasons when
+        # the --kubeconfig file does not exist yet, when k8s cluster isn't
+        # reachable yet, etc. Rely on `kubectl` to exit with code 0 when the
+        # deployments have been submitted successfully. Rely on pipefail
+        # option.
+        kubectl apply \
+            -f ci/metrics/ \
+            -f secrets/opstrace-ci-authtoken-secrets.yaml \
+            --kubeconfig "${KUBECONFIG_FILEPATH}" |& tee -a "${LOG_OUTERR_FILEPATH}"
         kexitcode=$?
+
+        if [ $kexitcode -eq 0 ]; then
+            echo "setup_ci_metrics: kubectl apply ... succeeded, stop loop"
+            break
+        fi
 
         echo "setup_ci_metrics: last exit code: $kexitcode -- continue to wait (30 sec)" |& tee -a "${LOG_OUTERR_FILEPATH}"
         sleep 30
@@ -175,7 +188,9 @@ curl --request POST \
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-    cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
+    cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
+        --log-level=debug --yes \
+        --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
     # Context: issue opstrace-prelaunch/issues/1905.
     # Copy outfile to prebuild/preamble dir. Required by
     # `make cli-publish-to-s3`.
@@ -184,7 +199,9 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         cp "${FNAME}" /build/bk-artifacts && \
         cp "${FNAME}" ${OPSTRACE_PREBUILD_DIR}
 else
-    cat ci/cluster-config.yaml | ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
+    cat ci/cluster-config.yaml | ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} \
+        --log-level=debug --yes \
+        --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
 fi
 
 echo "--- connect kubectl to the CI cluster"
