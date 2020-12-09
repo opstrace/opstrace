@@ -265,6 +265,9 @@ check-license-headers:
 	find . -not -path '*/.git/*' \
 		-not -path '*/node_modules*' \
 		-not -path '*/kubernetes/src/custom-resources*' \
+		-not -path '*/.cache/*' \
+		-not -path '*/.npm/*' \
+		-not -path './build/*' \
 		-type d -exec bash -c \
 		$$'echo "dir: {}"; shopt -s extglob \n addlicense -c "Opstrace, Inc." -l apache {}/@(*.ts|*.tsx|*.json|*.go|*.css)' \;
 	# Show the changes. This returns non-zero when there is a diff.
