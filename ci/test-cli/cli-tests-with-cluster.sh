@@ -2,8 +2,10 @@
 
 # ./build is supposed to be the directory containing the tsc compile output and
 # single-binary builds.
-export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
 
+# For GCP, rely on `GOOGLE_APPLICATION_CREDENTIALS` to be set, pointing to
+# a service account credential file (also encoding the GCP project ID).
+echo "GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
 
 test_list() {
     set -o xtrace
