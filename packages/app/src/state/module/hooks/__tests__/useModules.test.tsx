@@ -1,3 +1,19 @@
+/**
+ * Copyright 2020 Opstrace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import React from "react";
 import { CombinedState } from "redux";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,7 +34,7 @@ import useModules, {
 import { subscribe } from "../../actions";
 
 jest.mock("react-redux", () => ({
-  ...jest.requireActual("react-redux") as object,
+  ...(jest.requireActual("react-redux") as object),
   useDispatch: jest.fn(),
   useSelector: jest.fn()
 }));
@@ -49,9 +65,13 @@ test("useModules hook", () => {
 });
 
 test("getModules selector", () => {
-  const subState = { modules: { modules: [{ name: "test-module", branch_name: "test-branch" }] } };
+  const subState = {
+    modules: { modules: [{ name: "test-module", branch_name: "test-branch" }] }
+  };
   const state = mainReducer(subState as CombinedState<any>, mockAction);
-  expect(getModules(state)).toEqual([{ name: "test-module", branch_name: "test-branch" }]);
+  expect(getModules(state)).toEqual([
+    { name: "test-module", branch_name: "test-branch" }
+  ]);
 });
 
 describe("getCurrentBranchModules selector", () => {
@@ -65,9 +85,8 @@ describe("getCurrentBranchModules selector", () => {
         ]
       },
       branches: {
-        currentBranchName: "test-branch", branches: [
-          { name: "test-branch", id: "branch-1" }
-        ]
+        currentBranchName: "test-branch",
+        branches: [{ name: "test-branch", id: "branch-1" }]
       }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
@@ -83,9 +102,8 @@ describe("getCurrentBranchModules selector", () => {
         modules: [{ name: "module-1", branch_name: "test-branch" }]
       },
       branches: {
-        currentBranchName: "unknown-branch", branches: [
-          { name: "test-branch", id: "branch-1" }
-        ]
+        currentBranchName: "unknown-branch",
+        branches: [{ name: "test-branch", id: "branch-1" }]
       }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
@@ -133,9 +151,8 @@ describe("getCombinedModules selector", () => {
         ]
       },
       branches: {
-        currentBranchName: "test-branch", branches: [
-          { name: "test-branch", id: "branch-1" }
-        ]
+        currentBranchName: "test-branch",
+        branches: [{ name: "test-branch", id: "branch-1" }]
       }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
@@ -154,7 +171,8 @@ describe("getCombinedModules selector", () => {
         ]
       },
       branches: {
-        currentBranchName: "test-branch", branches: []
+        currentBranchName: "test-branch",
+        branches: []
       }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
@@ -180,7 +198,7 @@ describe("getCombinedModules selector", () => {
         modules: [
           { name: "test-1", branch_name: "main", scope: "/foo" },
           { name: "test-2", branch_name: "main", scope: "/foo" },
-          { name: "test-2", branch_name: "test-branch", scope: "/foo" },
+          { name: "test-2", branch_name: "test-branch", scope: "/foo" }
         ]
       }
     };
@@ -199,7 +217,7 @@ describe("getCombinedModules selector", () => {
           { name: "test-1", branch_name: "test-branch", scope: "/foo" },
           { name: "test-1", branch_name: "main", scope: "/" }
         ]
-      },
+      }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
     expect(getMainBranchModule("test-1", "/foo")(state)).toBeUndefined();
@@ -217,9 +235,8 @@ describe("getCurrentBranchModule selector", () => {
         ]
       },
       branches: {
-        currentBranchName: "test-branch", branches: [
-          { name: "test-branch", id: "branch-1" }
-        ]
+        currentBranchName: "test-branch",
+        branches: [{ name: "test-branch", id: "branch-1" }]
       }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
@@ -236,7 +253,7 @@ describe("getCurrentBranchModule selector", () => {
         modules: [
           { name: "test-1", branch_name: "test-branch", scope: "/foo" },
           { name: "test-1", branch_name: "main", scope: "/" }
-        ],
+        ]
       },
       branches: { currentBranchName: "test-branch", branches: [] }
     };
