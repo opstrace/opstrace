@@ -1,4 +1,3 @@
-
 # How to set up a GCP project for Opstrace
 
 This is a detailed walk-through showing how to set up a fresh GCP project for Opstrace.
@@ -8,7 +7,10 @@ This is a detailed walk-through showing how to set up a fresh GCP project for Op
 Start by creating a fresh project with the [GCP UI](https://console.cloud.google.com/projectcreate).
 In addition to using a good project name (which you can change later), be sure to choose an expressive **project ID** on that screen (as the UI says: **it cannot be changed later**).
 
-Remember that project ID.
+
+**Note:** to prevent confusion, maybe first pick the project ID and then make the name match the ID.
+
+Take note of that project ID.
 We will use it down below.
 
 Next up, enable billing for that new project: link a GCP billing account to it, via [the GCP UI](https://console.cloud.google.com/billing/linkedaccount).
@@ -23,15 +25,13 @@ You must [download and install that SDK](https://cloud.google.com/sdk/docs/insta
 After installing `gcloud`, start the login process with `gcloud auth login`.
 Log in using the same GCP account that you created the project with above.
 
-
 Review `gcloud`'s authentication state:
 
 ```bash
 gcloud auth list
 ```
 
-Are you sure that `gcloud` is now logged in with and using the GCP account that you created the project with above?
-Great, then we can move on.
+The remaining steps assume that `gcloud` is now in fact logged in to a GCP account that has admin privileges for the newly created project.
 
 In the current terminal, set these two environment variables:
 
