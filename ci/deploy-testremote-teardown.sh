@@ -43,10 +43,15 @@ echo "current working directory: $(pwd)"
 source secrets/aws-dev-svc-acc-env.sh
 
 # Set GCP service account credentials (also used for opstrace create gcp ...)
+
 #export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
 #export OPSTRACE_GCP_PROJECT_ID="vast-pad-240918"
-export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-ci-shard-aaa.json
-export OPSTRACE_GCP_PROJECT_ID="ci-shard-aaa"
+
+# Three times aaa for now (no actual sharding yet, but prepare). Use `shuf`
+# from coreutils: "shuf shuffles its input by outputting a random permutation
+# of its input lines. Each output permutation is equally likely"
+OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-aaa ci-shard-aaa)
+export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
