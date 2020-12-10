@@ -75,6 +75,7 @@ export function RedisResources(
             {
               name: "redis",
               port: 6379,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 6379 as any
             }
           ],
