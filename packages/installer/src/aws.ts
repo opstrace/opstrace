@@ -144,10 +144,26 @@ export function* ensureAWSInfraExists(): Generator<
   // create s3 buckets and vpc concurrently
   const tasks = [];
   tasks.push(
-    yield fork([new S3BucketRes(ccfg.cluster_name, lokiBucketName), "setup"])
+    yield fork([
+      new S3BucketRes(
+        ccfg.cluster_name,
+        lokiBucketName,
+        ccfg.log_retention_days,
+        ccfg.tenants
+      ),
+      "setup"
+    ])
   );
   tasks.push(
-    yield fork([new S3BucketRes(ccfg.cluster_name, cortexBucketName), "setup"])
+    yield fork([
+      new S3BucketRes(
+        ccfg.cluster_name,
+        cortexBucketName,
+        ccfg.metric_retention_days,
+        ccfg.tenants
+      ),
+      "setup"
+    ])
   );
 
   const vpctask = yield fork(createVPC, {
