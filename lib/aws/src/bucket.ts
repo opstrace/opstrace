@@ -24,11 +24,18 @@ import { AWSResource } from "./resource";
 
 export class S3BucketRes extends AWSResource<true> {
   private bname: string;
-
+  // the array of lifecycle rules to apply to this bucket, we don't handle the
+  // deletion since that is taken cared of for us when the bucket is deleted
+  private lifecycleRules: AWS.S3.LifecycleRules = [];
   // overridden in constructor, see below.
   protected rname = "";
 
-  constructor(opstraceClusterName: string, bucketName: string) {
+  constructor(
+    opstraceClusterName: string,
+    bucketName: string,
+    retentionPeriod: number = 0,
+    tenants: string[] = []
+  ) {
     super(opstraceClusterName);
 
     this.changeRname(`s3 bucket ${bucketName}`);
@@ -37,6 +44,52 @@ export class S3BucketRes extends AWSResource<true> {
     assert.equal(bucketName.startsWith(opstraceClusterName), true);
 
     this.bname = bucketName;
+
+    // Don't forget the system tenant
+    const tnames = [...tenants];
+    tnames.push("system");
+
+    //
+    // For each tenant create a lifecycle rule that deletes data when retention
+    // period is reached. The retention period follows the following rules (from
+    // https://aws.amazon.com/premiumsupport/knowledge-center/s3-lifecycle-rule-delay/):
+    //
+    // "Amazon S3 rounds the transition or expiration date of an object to
+    // midnight UTC the next day. For example, if you created an object on
+    // 1/1/2020 10:30 UTC, and you set the lifecycle rule to transition the
+    // object after 3 days, then the transition date of the object is 1/5/2020
+    // 00:00 UTC. Before you check whether a lifecycle rule has been satisfied,
+    // be sure to verify that enough time has elapsed."
+    //
+    for (const tname of tnames) {
+      this.lifecycleRules.push({
+        ID: `${tname}-tenant-retention-period`,
+        Status: "Enabled",
+        AbortIncompleteMultipartUpload: {
+          DaysAfterInitiation: retentionPeriod
+        },
+        Expiration: {
+          Days: retentionPeriod
+        },
+        //
+        // https://docs.aws.amazon.com/AmazonS3/latest/dev/intro-lifecycle-rules.html#non-current-days-calculations
+        //
+        // "In a versioning-enabled bucket, you can have multiple versions of an
+        // object, there is always one current version, and zero or more
+        // noncurrent versions. Each time you upload an object, the current
+        // version is retained as the noncurrent version and the newly added
+        // version, the successor, becomes the current version."
+        //
+        // No harm in setting it so we ensure it's always deleted correctly.
+        //
+        NoncurrentVersionExpiration: {
+          NoncurrentDays: retentionPeriod
+        },
+        Filter: {
+          Prefix: `${tname}/`
+        }
+      });
+    }
   }
 
   private async lookup(): Promise<boolean> {
@@ -63,37 +116,84 @@ export class S3BucketRes extends AWSResource<true> {
     }
   }
 
+  private async lifecycleRulesAreApplied(): Promise<boolean> {
+    try {
+      const resp = await awsPromErrFilter(
+        s3Client()
+          .getBucketLifecycleConfiguration({
+            Bucket: this.bname
+          })
+          .promise()
+      );
+
+      if (resp.Rules === undefined) {
+        return false;
+      }
+
+      const ids: string[] = [];
+      for (const r of resp.Rules as AWS.S3.LifecycleRules) {
+        if (r.ID !== undefined) {
+          ids.push(r.ID);
+        }
+      }
+      // Check if the bucket rules contains all the necessary rule ids.
+      return this.lifecycleRules.every(r => ids.includes(r.ID!));
+    } catch (e) {
+      if (e instanceof AWSApiError) {
+        if (e.statusCode == 404 || e.statusCode == 403) {
+          log.debug(
+            "getBucketLifecycleConfiguration resp, treat as 'does not exist': %s",
+            e.message
+          );
+          return false;
+        }
+      }
+      throw e;
+    }
+  }
+
   async tryCreate(): Promise<true> {
-    // Rely on the client lib to throw an Error in all(!) cases where the
-    // bucket was not created. Still not 100 % sure if aws-sdk-jk is doing
-    // that or not, but let's see.
-
-    await awsPromErrFilter(
-      s3Client()
-        .createBucket({
-          Bucket: this.bname,
-          CreateBucketConfiguration: {
-            // "Specifies the Region where the bucket will be created. If you
-            // don't specify a Region, the bucket is created in the US East (N.
-            // Virginia) Region (us-east-1)."
-            LocationConstraint: s3Client().config.region!
-          }
-        })
-        .promise()
-    );
-
-    // Note(JP): in the legacy approach we applied a lifecycle config right
-    // away. Don't do this, revisit later. See
-    // opstrace-prelaunch/issues/1469
+    try {
+      // Rely on the client lib to throw an Error in all(!) cases where the
+      // bucket was not created. Still not 100 % sure if aws-sdk-jk is doing
+      // that or not, but let's see.
+      await awsPromErrFilter(
+        s3Client()
+          .createBucket({
+            Bucket: this.bname,
+            CreateBucketConfiguration: {
+              // "Specifies the Region where the bucket will be created. If you
+              // don't specify a Region, the bucket is created in the US East (N.
+              // Virginia) Region (us-east-1)."
+              LocationConstraint: s3Client().config.region!
+            }
+          })
+          .promise()
+      );
+    } catch (e) {
+      // fail on any error except if it's 409 BucketAlreadyOwnedByYou error
+      if (!(e instanceof AWSApiError) || e.statusCode != 409) {
+        throw e;
+      }
+    } finally {
+      // Apply lifecycle configuration rules to the bucket.
+      await awsPromErrFilter(
+        s3Client()
+          .putBucketLifecycleConfiguration({
+            Bucket: this.bname,
+            LifecycleConfiguration: {
+              Rules: this.lifecycleRules
+            }
+          })
+          .promise()
+      );
+    }
 
     return true;
   }
 
   async checkCreateSuccess(): Promise<boolean> {
-    if (await this.lookup()) {
-      return true;
-    }
-    return false;
+    return (await this.lookup()) && (await this.lifecycleRulesAreApplied());
   }
 
   // for now, perform only the first step of 2-step-bucket-deletion procedure.
