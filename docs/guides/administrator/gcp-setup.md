@@ -45,7 +45,7 @@ Throughout all following steps, it is assumed that these two environment variabl
 **Note:** be sure that `GCP_PROJECT_ID` is set to the ID of the project, not to the name.
 The ID is all lower-case and does not contain whitespace.
 
-### Step 3: create a service account
+## Step 3: create a service account
 
 Issue this command to create a new service account in the new project:
 
@@ -54,7 +54,7 @@ $ gcloud iam service-accounts create "${GCP_PROJECT_ID}-svc-acc" "--project=${GC
 Created service account [<project>-svc-acc].
 ```
 
-### Step 4: set service account permissions
+## Step 4: set service account permissions
 
 With the following command you can confirm that this service account does not yet have any security roles assigned in the current project:
 
@@ -94,51 +94,51 @@ roles/editor
 roles/iam.securityAdmin
 ```
 
-### Step 5: enable GCP APIs
+## Step 5: enable GCP APIs
 
 Cloud DNS API:
 
 ```text
 $ gcloud services enable dns.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/acf.0679b145-a036-4766-b030-d1a0d66869cd" finished successfully.
+Operation "operations/a<snip>d" finished successfully.
 ```
 
 Compute Engine API:
 
 ```text
 $ gcloud services enable compute.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/acf.2d797b72-c113-4e59-a6ec-647c8382c772" finished successfully.
+Operation "operations/a<snip>2" finished successfully.
 ```
 
 Kubernetes Engine API:
 
 ```text
 $ gcloud services enable container.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/acf.0ac51eeb-0872-4418-9cc6-1863b2a3eb22" finished successfully.
+Operation "operations/a<snip>2" finished successfully.
 ```
 
 Cloud SQL Admin API:
 
 ```text
 $ gcloud services enable sqladmin.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/acf.47a1162b-e502-4a12-8a7f-8bbbddd7637e" finished successfully.
+Operation "operations/a<snip>e" finished successfully.
 ```
 
 Service Networking API:
 
 ```text
 $ gcloud services enable servicenetworking.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/acf.22d4c45b-031a-4677-8ea1-476d04e6a6d7" finished successfully.
+Operation "operations/a<snip>7" finished successfully.
 ```
 
 Cloud Resource Manager API:
 
 ```text
 $ gcloud services enable cloudresourcemanager.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/acf.ec59f252-37b5-45e4-9d25-0351d30d18ba" finished successfully.
+Operation "operations/a<snip>a" finished successfully.
 ```
 
-### Step 6: create a key and credentials file for the service account
+## Step 6: create a key and credentials file for the service account
 
 Issue the following command to generate a private key for the service account, and to store it together with credential metadata in a JSON file (in your current working directory):
 
@@ -157,6 +157,6 @@ chmod 600 "${GCP_PROJECT_ID}-svc-acc.json"
 
 Now, move this credential file wherever you need it to be and remember to always treat it securely: for a production workflow, you may want to submit it to a system designed for storing secrets, and then wipe it from your local machine.
 
-### Further steps
+## Further steps
 
 For creating an Opstrace cluster using this project and service account, all you need to do is to set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` (to point to the credentials file created in step 7) before invoking `opstrace create gcp ...`. For further information, please have a look at the [CLI reference documentation](./cli.md).
