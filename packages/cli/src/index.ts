@@ -208,7 +208,7 @@ function parseCmdlineArgs() {
     // answer to all prompts and run non-interactively."
     p.add_argument("--yes", {
       help:
-        "Automatic yes to prompts; assume 'yes' as answer to all prompts and" +
+        "Automatic yes to prompts; assume 'yes' as answer to all prompts and " +
         "run non-interactively.",
       action: "store_true",
       default: false,
@@ -226,8 +226,8 @@ function parseCmdlineArgs() {
 
   parserCreate.add_argument("--write-kubeconfig-file", {
     help:
-      "Write kubectl config file (for KUBECONFIG env var) when data is " +
-      "available (after k8s clsuter has been set up).",
+      "Write kubectl config file (for KUBECONFIG env var) as soon as data is " +
+      "available (right after K8s cluster has been set up).",
     type: "str",
     metavar: "PATH",
     dest: "kubeconfigFilePath",
