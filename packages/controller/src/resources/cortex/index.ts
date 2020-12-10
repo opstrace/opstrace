@@ -327,7 +327,7 @@ export function CortexResources(
   let serviceAccountName: string | undefined = undefined;
   if (target === "gcp") {
     annotations = {
-      "iam.gke.io/gcp-service-account": gcp!.cortexServiceAccount
+      "iam.gke.io/gcp-service-account": gcp?.cortexServiceAccount
     };
     serviceAccountName = "cortex";
   }
@@ -365,11 +365,13 @@ export function CortexResources(
             {
               name: "memcached-client",
               port: 11211,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 11211 as any
             },
             {
               name: "exporter-http-metrics",
               port: 9150,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9150 as any
             }
           ],
@@ -400,6 +402,7 @@ export function CortexResources(
             {
               name: "loki-gossip-ring",
               port: 7946,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 7946 as any
             }
           ],
@@ -536,11 +539,13 @@ export function CortexResources(
             {
               name: "memcached-client",
               port: 11211,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 11211 as any
             },
             {
               name: "exporter-http-metrics",
               port: 9150,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9150 as any
             }
           ],
@@ -677,11 +682,13 @@ export function CortexResources(
             {
               name: "memcached-client",
               port: 11211,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 11211 as any
             },
             {
               name: "exporter-http-metrics",
               port: 9150,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9150 as any
             }
           ],
@@ -748,11 +755,13 @@ export function CortexResources(
             {
               name: "memcached-client",
               port: 11211,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 11211 as any
             },
             {
               name: "exporter-http-metrics",
               port: 9150,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9150 as any
             }
           ],
@@ -908,12 +917,14 @@ export function CortexResources(
           ports: [
             {
               port: 80,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 80 as any,
               name: "http"
             },
             {
               name: "distributor-grpc",
               port: 9095,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -979,12 +990,14 @@ export function CortexResources(
           ports: [
             {
               port: 80,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 80 as any,
               name: "http"
             },
             {
               name: "ingester-grpc",
               port: 9095,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -1053,6 +1066,7 @@ export function CortexResources(
                   readinessProbe: {
                     httpGet: {
                       path: "/ready",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 80 as any,
                       scheme: "HTTP"
                     },
@@ -1066,6 +1080,7 @@ export function CortexResources(
                   livenessProbe: {
                     httpGet: {
                       path: "/ready",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       port: 80 as any,
                       scheme: "HTTP"
                     },
@@ -1180,12 +1195,14 @@ export function CortexResources(
           ports: [
             {
               port: 80,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 80 as any,
               name: "http"
             },
             {
               name: "store-gateway-grpc",
               port: 9095,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -1351,12 +1368,14 @@ export function CortexResources(
           ports: [
             {
               port: 80,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 80 as any,
               name: "http"
             },
             {
               name: "compactor-grpc",
               port: 9095,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
@@ -1596,12 +1615,14 @@ export function CortexResources(
           ports: [
             {
               port: 80,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 80 as any,
               name: "http"
             },
             {
               name: "querier-grpc",
               port: 9095,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: 9095 as any
             }
           ],
