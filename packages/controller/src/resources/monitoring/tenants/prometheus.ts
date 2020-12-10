@@ -120,6 +120,7 @@ export function PrometheusResources(
             {
               name: "web",
               port: 9090,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "web" as any
             }
           ],
