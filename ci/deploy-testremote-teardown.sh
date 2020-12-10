@@ -74,41 +74,9 @@ configure_kubectl_aws_or_gcp() {
 }
 
 start_data_collection_deployment_loop() {
-    cat ci/metrics/promtail.yaml.template | envsubst > ci/metrics/promtail.yaml
-    cat ci/metrics/prometheus.yaml.template | envsubst > ci/metrics/prometheus.yaml
-
-    LOG_OUTERR_FILEPATH=$(mktemp /tmp/kubectl_apply.XXXXXX)
-    echo "temp file for kctl output: ${LOG_OUTERR_FILEPATH}"
-    while true
-    do
-        # This function and therefore this loop body runs in the background,
-        # concurrently with a cluster `create` operation. Wait for the `create`
-        # procedure to at some point write out a kubeconfig file. This next
-        # command will fail for various reasons when the --kubeconfig file does
-        # not exist yet, when k8s cluster isn't reachable yet, etc. Rely on
-        # `kubectl` to exit with code 0 when the deployments have been
-        # submitted successfully. Rely on pipefail option. Collect stderr and
-        # stdout in a file. Also stream stdout/err to original stdouterr / i.e.
-        # have this output interleave with other build log output (good enough
-        # for now, I think).
-
-        set +e
-        kubectl apply \
-            -f ci/metrics/ \
-            -f secrets/opstrace-ci-authtoken-secrets.yaml \
-            --kubeconfig "${KUBECONFIG_FILEPATH}" |& tee -a "${LOG_OUTERR_FILEPATH}"
-        kexitcode=$?
-        set -e
-
-        if [ $kexitcode -eq 0 ]; then
-            echo -e "\n\nstart_data_collection_deployment_loop: kubectl apply ... succeeded, stop loop"
-            break
-        fi
-
-        echo -e "\n\nstart_data_collection_deployment_loop: last exit code: $kexitcode -- continue to wait (30 sec)" |& tee -a "${LOG_OUTERR_FILEPATH}"
-        sleep 30
-    done
-
+    # Run this as a child process in the background. Rely on it to
+    # terminate by itself.
+    bash data-collection-deployment-loop.sh &
 }
 
 teardown() {
@@ -292,3 +260,8 @@ source ci/invoke-looker.sh
 
 echo "--- run opstrace CLI tests (cli-tests-with-cluster.sh)"
 source ci/test-cli/cli-tests-with-cluster.sh
+
+# One child process was spawned (see start_data_collection_deployment_loop()).
+# Be a good citizen and join that explicitly (expect that to have terminated by
+# now, long ago).
+wait
