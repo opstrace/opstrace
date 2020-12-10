@@ -49,7 +49,9 @@ source secrets/aws-dev-svc-acc-env.sh
 
 # Three times aaa for now (no actual sharding yet, but prepare). Use `shuf`
 # from coreutils: "shuf shuffles its input by outputting a random permutation
-# of its input lines. Each output permutation is equally likely"
+# of its input lines. Each output permutation is equally likely".
+# Also see https://github.com/opstrace/opstrace/pull/128#issuecomment-742519078
+# and https://stackoverflow.com/q/5189913/145400.
 OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-aaa ci-shard-aaa)
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
@@ -81,7 +83,7 @@ configure_kubectl_aws_or_gcp() {
 start_data_collection_deployment_loop() {
     # Run this as a child process in the background. Rely on it to
     # terminate by itself.
-    bash data-collection-deployment-loop.sh "$KUBECONFIG_FILEPATH" &
+    bash ci/data-collection-deployment-loop.sh "$KUBECONFIG_FILEPATH" &
 }
 
 teardown() {
