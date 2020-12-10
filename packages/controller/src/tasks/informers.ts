@@ -77,7 +77,7 @@ export function* runInformers(
   });
 
   while (true) {
-    let event: any;
+    let event;
     try {
       event = yield take(clusterChannel);
     } catch (err) {

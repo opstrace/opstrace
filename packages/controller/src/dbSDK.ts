@@ -29,8 +29,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  timestamp: unknown;
-  timestamptz: unknown;
+  timestamp: number;
+  timestamptz: number;
   uuid: unknown;
 };
 
