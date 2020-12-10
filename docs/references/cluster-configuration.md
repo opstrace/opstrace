@@ -59,7 +59,6 @@ Here be dragons: we develop with three nodes, and—for now—we rarely test wit
 
 ## Optional parameters
 
-<!--tabs-->
 ### `aws`
 
 Allows for setting configuration specific to Amazon Web Services (AWS).
@@ -99,7 +98,6 @@ gcp:
     zone_suffix: a
 ```
 
-<!--/tabs-->
 
 Note: the example above shows the defaults.
 
