@@ -28,6 +28,16 @@ echo "OPSTRACE_CLOUD_PROVIDER: $OPSTRACE_CLOUD_PROVIDER"
 cat ci/metrics/promtail.yaml.template | envsubst > ci/metrics/promtail.yaml
 cat ci/metrics/prometheus.yaml.template | envsubst > ci/metrics/prometheus.yaml
 
+if [ -n "$1" ]; then
+    KUBECONFIG_FILEPATH="${1}"
+    echo "data collection deployment loop: expect kubeconfig filepath: ${KUBECONFIG_FILEPATH}"
+else
+    echo "first arg (kubeconfig filepath) is required"
+    exit 1
+fi
+
+echo "KUBECONFIG_FILEPATH: $KUBECONFIG_FILEPATH"
+
 LOG_OUTERR_FILEPATH=$(mktemp /tmp/kubectl_apply.XXXXXX)
 echo "temp file for kctl output: ${LOG_OUTERR_FILEPATH}"
 while true

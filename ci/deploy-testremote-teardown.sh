@@ -76,7 +76,7 @@ configure_kubectl_aws_or_gcp() {
 start_data_collection_deployment_loop() {
     # Run this as a child process in the background. Rely on it to
     # terminate by itself.
-    bash data-collection-deployment-loop.sh &
+    bash data-collection-deployment-loop.sh "$KUBECONFIG_FILEPATH" &
 }
 
 teardown() {
