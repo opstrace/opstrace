@@ -52,7 +52,7 @@ source secrets/aws-dev-svc-acc-env.sh
 # of its input lines. Each output permutation is equally likely".
 # Also see https://github.com/opstrace/opstrace/pull/128#issuecomment-742519078
 # and https://stackoverflow.com/q/5189913/145400.
-OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-aaa ci-shard-aaa)
+OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-bbb ci-shard-bbb ci-shard-bbb)
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
 AWS_CLI_REGION="us-west-2"
