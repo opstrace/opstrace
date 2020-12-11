@@ -44,11 +44,11 @@ FILES_EDITED_IN_PR=$(
 # removed.
 ALLOWLIST="\
 ^docs/|\
-.gitattributes|\
+^.gitattributes|\
 ^.github|\
 ^README.md|\
 ^.markdownlint.json|\
-ci/check-if-docs-pr.sh\
+^ci/check-if-docs-pr.sh\
 "
 
 DOCS_ONLY_CHANGES=$(echo ${FILES_EDITED_IN_PR}| egrep -v "${ALLOWLIST}" | tr -d '[:space:]')
