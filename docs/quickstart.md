@@ -321,10 +321,10 @@ You can then destroy the cluster—and save the log output to a file—as follow
 ./opstrace destroy aws $OPSTRACE_CLUSTER_NAME
 ```
 
-Please also send us your log files via email:
+If something went wrong or was unpleasant, please send us your log files via email:
 
 ```bash
-tar czf opstrace-$USER-logs.tgz opstrace_cli_*.log
+tar czf opstrace-logs.tgz opstrace_cli_*.log
 ```
 
 Share the resulting file with us at [hello@opstrace.com](mailto:hello@opstrace.com).
