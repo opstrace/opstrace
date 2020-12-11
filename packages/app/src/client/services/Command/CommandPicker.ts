@@ -28,7 +28,8 @@ type CommandPickerProps = {
 function commandToPickerOption(cmd: Command): PickerOption {
   return {
     id: cmd.id,
-    text: cmd.description
+    text: cmd.description,
+    keybinding: cmd.keybindings
   };
 }
 
