@@ -52,18 +52,18 @@ Download the latest Opstrace CLI binary from S3, which you will use to create th
 ### MacOS
 
 ```bash
-# download our compressed CLI tarball
+# Download and extract the CLI tarball.
 curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
-# test it
+# Test the extracted binary.
 ./opstrace --help
 ```
 
 ### Linux
 
 ```bash
-# download our compressed CLI tarball
+# Download and extract the CLI tarball.
 curl -L https://go.opstrace.com/cli-latest-linux | tar xjf -
-# test it
+# Test the extracted binary.
 ./opstrace --help
 ```
 
