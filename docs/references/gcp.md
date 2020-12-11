@@ -28,4 +28,4 @@ That service account must have certain security roles applied in the GCP project
 If you would like to know which individual permissions are implied by any of these roles, please search for that role (e.g. `roles/container.admin`) on the [GCP IAM permissions reference page](https://cloud.google.com/iam/docs/permissions-reference).
 
 Note: we didn't quite arrive at fulfilling the [principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege) here—this is an ongoing effort.
-If you have specific ideas for reducing the set if privileges required, please [open an issue](https://github.com/opstrace/opstrace/issues/new/choose)!
+If you have specific ideas for reducing the set of privileges required, please [open an issue](https://github.com/opstrace/opstrace/issues/new/choose)!
