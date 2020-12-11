@@ -227,29 +227,35 @@ echo "--- checking cluster is using certificate issued by LetsEncrypt"
 
 check_certificate() {
     # Timeout the command after 10 seconds in case it's stuck. Redirect stderr
-    # to stdout (for `timout` and `openssl`), do the grep filter on stdout, but
+    # to stdout (for `timeout` and `openssl`), do the grep filter on stdout, but
     # also show all output on stderr via a tee shunt.
     timeout --kill-after=10 10 \
-    openssl s_client -showcerts -connect system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443 </dev/null \
+    openssl s_client -showcerts -connect "${1}"  </dev/null \
     | openssl x509 -noout -issuer \
     |& tee /dev/stderr | grep "Fake LE Intermediate"
 }
 
-# Retry the certificate check up to 3 times. Wait 5s before retrying.
-count=0
-retries=3
-until check_certificate
-do
-    retcode=$?
-    wait=5
-    count=$(($count + 1))
-    if [ $count -lt $retries ]; then
-        echo "failed checking if cluster is using certificate issued by LetsEncrypt, retrying in ${wait} seconds..."
-        sleep $wait
-    else
-        exit ${retcode}
-    fi
-done
+retry_check_certificate() {
+    # Retry the certificate check up to 3 times. Wait 5s before retrying.
+    count=0
+    retries=3
+    until check_certificate "${1}"
+    do
+        retcode=$?
+        wait=5
+        count=$(($count + 1))
+        if [ $count -lt $retries ]; then
+            echo "failed checking if cluster is using certificate issued by LetsEncrypt, retrying in ${wait} seconds..."
+            sleep $wait
+        else
+            exit ${retcode}
+        fi
+    done
+}
+
+retry_check_certificate loki.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
+retry_check_certificate cortex.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
+retry_check_certificate system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 
 echo "+++ run test-remote"
 
