@@ -47,12 +47,12 @@ source secrets/aws-dev-svc-acc-env.sh
 #export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
 #export OPSTRACE_GCP_PROJECT_ID="vast-pad-240918"
 
-# Three times aaa for now (no actual sharding yet, but prepare). Use `shuf`
-# from coreutils: "shuf shuffles its input by outputting a random permutation
-# of its input lines. Each output permutation is equally likely".
-# Also see https://github.com/opstrace/opstrace/pull/128#issuecomment-742519078
-# and https://stackoverflow.com/q/5189913/145400.
-OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-bbb ci-shard-bbb ci-shard-bbb)
+# Shard across GCP CI projects. `shuf` from coreutils: "shuf shuffles its input
+# by outputting a random permutation of its input lines. Each output
+# permutation is equally likely". Also see
+# https://github.com/opstrace/opstrace/pull/128#issuecomment-742519078 and
+# https://stackoverflow.com/q/5189913/145400.
+OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb)
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
 AWS_CLI_REGION="us-west-2"
