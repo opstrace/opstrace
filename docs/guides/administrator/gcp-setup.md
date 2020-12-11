@@ -5,7 +5,7 @@ This is a detailed walk-through showing how to set up a fresh GCP project for Op
 ## Step 1: create a project
 
 Start by creating a fresh project with the [GCP UI](https://console.cloud.google.com/projectcreate).
-In addition to using a good project name (which you can change later), be sure to choose an expressive **project ID** on that screen (as the UI says: **it cannot be changed later**).
+In addition to using a good project name (which you can change later), be sure to choose an expressive **project ID** on that screen (as the UI says: the project ID **cannot be changed later**).
 
 
 **Note:** to prevent confusion, maybe first pick the project ID and then make the name match the ID.
@@ -13,14 +13,12 @@ In addition to using a good project name (which you can change later), be sure t
 Take note of that project ID.
 We will use it down below.
 
-Next up, enable billing for that new project: link a GCP billing account to it, via [the GCP UI](https://console.cloud.google.com/billing/linkedaccount).
-
-**Note:** some of the next steps will not work if you don't link a billing account.
+Next up, enable billing for that new project: link a GCP billing account to it, via the [GCP UI](https://console.cloud.google.com/billing/linkedaccount). Some of the next steps will not work if you don't link a billing account.
 
 ## Step 2: set up the  `gcloud` CLI
 
 The `gcloud` command-line tool is a part of the Google Cloud SDK.
-You must [download and install that SDK](https://cloud.google.com/sdk/docs/install) on your system and initialize it before you can use the `gcloud` CLI.
+You have to [download and install that SDK](https://cloud.google.com/sdk/docs/install) on your system and initialize it before you can use the `gcloud` CLI.
 
 After installing `gcloud`, start the login process with `gcloud auth login`.
 Log in using the same GCP account that you created the project with above.
@@ -43,7 +41,7 @@ export GCP_SVC_ACC="${GCP_PROJECT_ID}-svc-acc@${GCP_PROJECT_ID}.iam.gserviceacco
 Throughout all following steps, it is assumed that these two environment variables are set in the current terminal.
 
 **Note:** be sure that `GCP_PROJECT_ID` is set to the ID of the project, not to the name.
-The ID is all lower-case and does not contain whitespace.
+The ID is all lowercase and does not contain whitespace.
 
 ## Step 3: create a service account
 
@@ -67,7 +65,7 @@ gcloud projects get-iam-policy ${GCP_PROJECT_ID}  \
 
 Expected: no output
 
-Next up, grant privileges to the newly created service account (in the current project):
+Next up, grant privileges to the newly created service account:
 
 ```text
 gcloud projects add-iam-policy-binding ${GCP_PROJECT_ID} "--member=serviceAccount:${GCP_SVC_ACC}" \
@@ -100,42 +98,42 @@ Cloud DNS API:
 
 ```text
 $ gcloud services enable dns.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/a<snip>d" finished successfully.
+Operation "operations/<snip>" finished successfully.
 ```
 
 Compute Engine API:
 
 ```text
 $ gcloud services enable compute.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/a<snip>2" finished successfully.
+Operation "operations/<snip>" finished successfully.
 ```
 
 Kubernetes Engine API:
 
 ```text
 $ gcloud services enable container.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/a<snip>2" finished successfully.
+Operation "operations/<snip>" finished successfully.
 ```
 
 Cloud SQL Admin API:
 
 ```text
 $ gcloud services enable sqladmin.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/a<snip>e" finished successfully.
+Operation "operations/<snip>" finished successfully.
 ```
 
 Service Networking API:
 
 ```text
 $ gcloud services enable servicenetworking.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/a<snip>7" finished successfully.
+Operation "operations/<snip>" finished successfully.
 ```
 
 Cloud Resource Manager API:
 
 ```text
 $ gcloud services enable cloudresourcemanager.googleapis.com "--project=${GCP_PROJECT_ID}"
-Operation "operations/a<snip>a" finished successfully.
+Operation "operations/<snip>" finished successfully.
 ```
 
 ## Step 6: create a key and credentials file for the service account
