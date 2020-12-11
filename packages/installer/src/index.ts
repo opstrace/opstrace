@@ -316,6 +316,7 @@ function* createClusterCore() {
   }
 
   yield call(waitUntilLokiCortexAreReachable, ccfg.cluster_name, ccfg.tenants);
+  yield call(waitUntilGrafanaIsReachable, ccfg.cluster_name, ccfg.tenants);
 
   log.info(
     `cluster creation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
@@ -414,6 +415,100 @@ export async function waitUntilLokiCortexAreReachable(
           }
           log.info(`${probeUrl}: JSON doc 'status': ${data.status}`);
         }
+      }
+
+      log.debug(`HTTP response details:
+  status: ${resp.statusCode}
+  body[:500]: ${resp.body.slice(0, 500)}`);
+
+      if (attempt % 2 === 0) {
+        log.info(`${probeUrl}: still waiting, unexpected HTTP response`);
+      }
+
+      await sleep(5.0);
+    }
+  }
+
+  log.info(
+    "waiting for expected HTTP responses at these URLs: %s",
+    JSON.stringify(probeUrls, null, 2)
+  );
+  const actors = [];
+  for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
+    actors.push(wait(probeUrl, tenantName));
+  }
+  await Promise.all(actors);
+  log.info("All probe URLs returned expected HTTP responses, continue");
+}
+
+export async function waitUntilGrafanaIsReachable(
+  opstraceClusterName: string,
+  tenantNames: string[]
+): Promise<void> {
+  // key: unique url, value: corresponding tenant name
+  const probeUrls: Dict<string> = {};
+
+  // system tenant is there by default, check corresponding endpoints, too
+  const tnames = [...tenantNames];
+  tnames.push("system");
+
+  for (const tname of tnames) {
+    const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
+
+    probeUrls[`https://${mid}/`] = tname;
+  }
+
+  const requestSettings: GotOptions = {
+    throwHttpErrors: false,
+    retry: 0,
+    https: { rejectUnauthorized: false },
+    timeout: {
+      connect: 3000,
+      request: 10000
+    }
+  };
+
+  async function wait(probeUrl: string, tenantName: string) {
+    let attempt = 0;
+    while (true) {
+      attempt++;
+
+      // Copy common request settings, add authentication proof if required.
+      const rs: GotOptions = { ...requestSettings };
+
+      let resp: GotResponse<string>;
+      try {
+        //@ts-ignore `got(probeUrl, rs)` returns `unknown` from tsc's point of view
+        resp = await got(probeUrl, rs);
+      } catch (e) {
+        if (e instanceof got.RequestError) {
+          // Assume that for most of the 'waiting time' the probe fails in this
+          // error handler.
+
+          // When the debug log level is active then I think it's the right
+          // thing to log every negative probe outcome as it happens (e.g. DNS
+          // resolution error or TCP connection timeout).
+          log.debug(`${probeUrl}: HTTP request failed with: ${e.message}`);
+
+          // But on info level just emit the fact that the expected outcome is
+          // still being waited for, every now and then (maybe every ~20
+          // seconds).
+          if (attempt % 5 === 0) {
+            log.info(
+              `${probeUrl}: still waiting for expected signal. Last error: ${e.message}`
+            );
+          }
+
+          await sleep(5.0);
+          continue;
+        } else {
+          throw e;
+        }
+      }
+
+      if (resp.statusCode === 200) {
+        log.info(`${probeUrl}: got expected HTTP response`);
+        return;
       }
 
       log.debug(`HTTP response details:
