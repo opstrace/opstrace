@@ -94,7 +94,7 @@ test("service has dialog element when activeProviderIndex > -1", async () => {
   expect(dialogElement).toBeInTheDocument();
 });
 
-test("select last option within range", async () => {
+test("select last option when the picker list is loop through", async () => {
   wrap(
     <PickerService>
       <div />
@@ -105,9 +105,14 @@ test("select last option within range", async () => {
 
   expect(providerTextInput).toBeInTheDocument();
 
-  ["ArrowDown", "ArrowDown", "ArrowDown", "ArrowDown", "Enter"].map(key =>
-    fireEvent.keyDown(providerTextInput, { key })
-  );
+  [
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowDown",
+    "Enter"
+  ].map(key => fireEvent.keyDown(providerTextInput, { key }));
 
   expect(selectFirstProviderOption).toHaveBeenCalledWith(
     {
@@ -118,7 +123,7 @@ test("select last option within range", async () => {
   );
 });
 
-test("change provider and select first option within range", async () => {
+test("change provider and select first option when the picker list is loop through ", async () => {
   wrap(
     <PickerService>
       <div />
@@ -130,7 +135,7 @@ test("change provider and select first option within range", async () => {
 
   fireEvent.change(providerTextInput, { target: { value: "provider-2" } });
 
-  ["ArrowUp", "ArrowUp", "ArrowUp", "Enter"].map(key =>
+  ["ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "Enter"].map(key =>
     fireEvent.keyDown(providerTextInput, { key })
   );
 
