@@ -36,8 +36,8 @@ import matchSorter from "match-sorter";
 import { Typography } from "client/components/Typography";
 
 const boundedIndex = (value: number, max: number) => {
-  if (value < 0) return 0;
-  if (value > max) return max;
+  if (value < 0) return max;
+  if (value > max) return 0;
 
   return value;
 };
