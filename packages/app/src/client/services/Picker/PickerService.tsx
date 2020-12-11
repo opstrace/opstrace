@@ -19,6 +19,7 @@ import InputBase from "@material-ui/core/InputBase";
 import List from "client/components/List/List";
 import { ButtonListItem } from "client/components/List/ListItem";
 import ListItemText from "client/components/List/ListItemText";
+import ListItemSecondaryAction from "client/components/List/ListItemSecondaryAction";
 import Dialog from "client/components/Dialog/Dialog";
 import Box from "client/components/Box/Box";
 
@@ -53,6 +54,11 @@ function PickerList(props: PickerListProps) {
         key={data.id}
       >
         <ListItemText primary={data.text} />
+        {data.keybinding?.length && (
+          <ListItemSecondaryAction>
+            {data.keybinding[0]}
+          </ListItemSecondaryAction>
+        )}
       </ButtonListItem>
     ),
     [selectedIndex, onSelect]

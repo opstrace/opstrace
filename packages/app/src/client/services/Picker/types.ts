@@ -17,6 +17,7 @@
 export type PickerOption = {
   id: string;
   text: string;
+  keybinding?: string[];
 };
 
 export type PickerListProps = {
