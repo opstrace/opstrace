@@ -53,6 +53,7 @@ source secrets/aws-dev-svc-acc-env.sh
 # https://github.com/opstrace/opstrace/pull/128#issuecomment-742519078 and
 # https://stackoverflow.com/q/5189913/145400.
 OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb)
+echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
 AWS_CLI_REGION="us-west-2"
