@@ -121,7 +121,7 @@ Now that your Opstrace cluster is up and running, let's take a closer look.
 ## Step 2: Check the cluster
 
 Before we proceed to send data to the cluster, let's check in on how the cluster is doing.
-The Opstrace cluster monitors itself, so we have a lot of metris about its own operation.
+The Opstrace cluster monitors itself, so we have a lot of metrics about its own operation.
 In this step, we will look at some key metrics about data coming into the cluster: total number of metrics and logs coming in across both the `myteam` and `system` [tenants](./references/concepts.md#tenants), ingestion latency, and also the write rate from the `myteam` tenant only.
 Once we send data to the cluster in Step 4, these write rate graphs will be populated, which demonstrates the ability of the cluster to monitor different tenants independently or together.
 
