@@ -32,6 +32,7 @@ import {
 import {
   ClusterCreateConfigInterface,
   setCreateConfig,
+  waitUntilGrafanaIsReachable,
   waitUntilLokiCortexAreReachable
 } from "@opstrace/installer";
 import * as schemas from "./schemas";
@@ -92,6 +93,7 @@ async function checkClusterStatus() {
   setCreateConfig(createConfig);
 
   await waitUntilLokiCortexAreReachable(ccfg.cluster_name, ccfg.tenants);
+  await waitUntilGrafanaIsReachable(ccfg.cluster_name, ccfg.tenants);
 }
 
 // Race to check cluster status and fail if it takes longer than 60 seconds.
