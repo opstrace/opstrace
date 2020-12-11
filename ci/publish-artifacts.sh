@@ -5,9 +5,6 @@ set -o errtrace
 set -o nounset
 set -o pipefail
 
-# Skip steps if it's a docs pr
-bash ci/check-if-docs-pr.sh && exit 0
-
 # Import helper functions.
 source ci/utils.sh
 

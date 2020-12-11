@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Skip steps if it's a docs pr
-bash ci/check-if-docs-pr.sh && exit 0
-
 # Import helper functions.
 source ci/utils.sh
 

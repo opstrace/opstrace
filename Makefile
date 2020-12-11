@@ -575,14 +575,14 @@ node_modules:
 .PHONY: unit-tests
 unit-tests: yarn-frozen-lockfile \
 	cli-crashtest \
-	cli-tests \
+	cli-tests-no-cluster \
 	run-app-unit-tests \
 	ts-unit-tests \
 	go-unit-tests
 
-.PHONY: cli-tests
-cli-tests:
-	@echo "--- run opstrace CLI tests (cli-tests-pre-cluster.sh)"
+.PHONY: cli-tests-no-cluster
+cli-tests-no-cluster:
+	@echo "--- run CLI tests that do not need a cluster (cli-tests-pre-cluster.sh)"
 	CHECKOUT_VERSION_STRING=${CHECKOUT_VERSION_STRING} source ci/test-cli/cli-tests-pre-cluster.sh
 
 .PHONY: go-unit-tests
