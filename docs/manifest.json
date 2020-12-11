@@ -45,6 +45,10 @@
             {
               "title": "Upgrading",
               "path": "/docs/guides/administrator/upgrading.md"
+            },
+            {
+              "title": "GCP project setup",
+              "path": "/docs/guides/administrator/gcp-setup.md"
             }
           ]
         },
@@ -97,8 +101,12 @@
           "path": "/docs/references/concepts.md"
         },
         {
-          "title": "Cloud Permissions",
-          "path": "/docs/references/cloud-permissions.md"
+          "title": "AWS configuration",
+          "path": "/docs/references/aws.md"
+        },
+        {
+          "title": "GCP configuration",
+          "path": "/docs/references/gcp.md"
         }
       ]
     }
