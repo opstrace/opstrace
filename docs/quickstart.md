@@ -300,7 +300,7 @@ You've walked through the majority of our foundational release, but we're [worki
 Before you clean up the cluster you've created, why not check out our UI which allows you to add users and tenants to the system:
 
 ```text
-https://$CLUSTER_NAME.opstrace.io/login
+https://$OPSTRACE_CLUSTER_NAME.opstrace.io/login
 ```
 
 ## Step 6: Clean up
