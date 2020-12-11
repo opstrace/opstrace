@@ -157,4 +157,5 @@ Now, move this credential file wherever you need it to be and remember to always
 
 ## Further steps
 
-For creating an Opstrace cluster using this project and service account, all you need to do is to set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` (to point to the credentials file created in step 7) before invoking `opstrace create gcp ...`. For further information, please have a look at the [CLI reference documentation](./cli.md).
+For creating an Opstrace cluster using this project and service account, all you need to do is to set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` (to point to the credentials file created in step 7) before invoking `opstrace create gcp ...`.
+For further information, please have a look at the [CLI reference documentation](../../references/cli.md).
