@@ -221,7 +221,7 @@ configure_kubectl_aws_or_gcp
 # the test-remote container.
 export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
 
-# TODO: remove when we add GCP managed certificates and remove the
+# TODO: remove when we add cloud provider managed certificates and remove the
 # use of insecure_skip_verify in the tests
 echo "--- checking cluster is using certificate issued by LetsEncrypt"
 
