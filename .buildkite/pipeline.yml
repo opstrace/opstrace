@@ -31,7 +31,7 @@ steps:
       - "check-docs"
     command:
       - cd "${OPSTRACE_PREBUILD_DIR}"
-      - ci/check-if-docs-pr.sh || make ci-unit-tests
+      - bash ci/check-if-docs-pr.sh || make ci-unit-tests
   - label: "🔨 main test (GCP)"
     key: "maintest-gcp"
     depends_on:
@@ -42,7 +42,7 @@ steps:
       OPSTRACE_CLOUD_PROVIDER: "gcp"
     command:
       - cd "${OPSTRACE_PREBUILD_DIR}"
-      - ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
+      - bash ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
     artifact_paths:
       - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-gcp/bk-artifacts/**/*"
   - label: "🔨 main test (AWS)"
@@ -55,7 +55,7 @@ steps:
       OPSTRACE_CLOUD_PROVIDER: "aws"
     command:
       - cd "${OPSTRACE_PREBUILD_DIR}"
-      - ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
+      - bash ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
     artifact_paths:
       - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-aws/bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"
@@ -72,4 +72,4 @@ steps:
     allow_dependency_failure: false
     command:
       - cd "${OPSTRACE_PREBUILD_DIR}"
-      - ci/check-if-docs-pr.sh || make ci-publish-artifacts
+      - bash ci/check-if-docs-pr.sh || make ci-publish-artifacts
