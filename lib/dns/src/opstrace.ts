@@ -96,7 +96,13 @@ export class DNSClient {
       await delay(1000);
       process.stderr.write(".");
     }
-    open(verification_uri);
+    try {
+      open(verification_uri);
+    } catch {
+      console.log(
+        `Failed to launch default browser, please visit ${verification_uri}`
+      );
+    }
     while (true) {
       await delay(res.data["interval"] * 1000);
       const tokenRequest: AxiosRequestConfig = {
