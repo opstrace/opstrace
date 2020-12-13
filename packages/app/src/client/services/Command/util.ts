@@ -42,3 +42,8 @@ export function replaceModKeyWithPlatformMetaKey(key: string) {
 export function getModifierSymbol(modifier: string) {
   return modifier in modifiers ? modifiers[modifier] : modifier;
 }
+
+export function getKeysFromKeybinding(keybinding: string) {
+  const keysArray = replaceModKeyWithPlatformMetaKey(keybinding).split("+");
+  return keysArray.map(key => getModifierSymbol(key));
+}

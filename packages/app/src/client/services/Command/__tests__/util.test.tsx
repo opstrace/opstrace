@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import { getPlatformMetaKey, replaceModKeyWithPlatformMetaKey, getModifierSymbol } from "../util";
+import {
+  getPlatformMetaKey,
+  replaceModKeyWithPlatformMetaKey,
+  getModifierSymbol,
+  getKeysFromKeybinding
+} from "../util";
 
 const navigatorGetter = jest.spyOn(global, "navigator", "get");
 
@@ -26,7 +31,7 @@ describe("handle platformMetaKey", () => {
   test("return correct value when platform is iPod", () => {
     navigatorGetter.mockReturnValue({
       ...global.navigator,
-      platform: "iPod",
+      platform: "iPod"
     });
     expect(getPlatformMetaKey()).toEqual("cmd");
   });
@@ -35,7 +40,7 @@ describe("handle platformMetaKey", () => {
     const navigatorGetter = jest.spyOn(global, "navigator", "get");
     navigatorGetter.mockReturnValue({
       ...global.navigator,
-      platform: "unknown",
+      platform: "unknown"
     });
     expect(getPlatformMetaKey()).toEqual("ctrl");
   });
@@ -45,18 +50,22 @@ describe("handle replaceModKeyWithPlatformMetaKey", () => {
   test("return correct value when platform is iPhone", () => {
     navigatorGetter.mockReturnValue({
       ...global.navigator,
-      platform: "iPhone",
+      platform: "iPhone"
     });
-    expect(replaceModKeyWithPlatformMetaKey("mod+shift+z")).toEqual("cmd+shift+z");
+    expect(replaceModKeyWithPlatformMetaKey("mod+shift+z")).toEqual(
+      "cmd+shift+z"
+    );
   });
 
   test("return correct value when platform is unknown", () => {
     const navigatorGetter = jest.spyOn(global, "navigator", "get");
     navigatorGetter.mockReturnValue({
       ...global.navigator,
-      platform: "test",
+      platform: "test"
     });
-    expect(replaceModKeyWithPlatformMetaKey("shift+mod+q")).toEqual("shift+ctrl+q");
+    expect(replaceModKeyWithPlatformMetaKey("shift+mod+q")).toEqual(
+      "shift+ctrl+q"
+    );
   });
 });
 
@@ -64,4 +73,23 @@ test("get correct modifier symbols", () => {
   expect(getModifierSymbol("shift")).toEqual("⇧");
   expect(getModifierSymbol("control")).toEqual("⌃");
   expect(getModifierSymbol("enter")).toEqual("enter");
+});
+
+describe("handle getKeysFromKeybinding", () => {
+  test("return correct value when platform is iPad", () => {
+    navigatorGetter.mockReturnValue({
+      ...global.navigator,
+      platform: "iPad"
+    });
+    expect(getKeysFromKeybinding("mod+shift+z")).toEqual(["⌘", "⇧", "z"]);
+  });
+
+  test("return correct value when platform is unknown", () => {
+    const navigatorGetter = jest.spyOn(global, "navigator", "get");
+    navigatorGetter.mockReturnValue({
+      ...global.navigator,
+      platform: "test"
+    });
+    expect(getKeysFromKeybinding("shift+mod+q")).toEqual(["⇧", "⌃", "q"]);
+  });
 });
