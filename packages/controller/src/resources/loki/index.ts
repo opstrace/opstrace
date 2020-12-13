@@ -15,6 +15,7 @@
  */
 
 import { KubeConfig } from "@kubernetes/client-node";
+import { strict as assert } from "assert";
 import * as yaml from "js-yaml";
 import {
   ResourceCollection,
@@ -247,8 +248,9 @@ export function LokiResources(
   let annotations = {};
   let serviceAccountName: string | undefined = undefined;
   if (target === "gcp") {
+    assert(gcp?.lokiServiceAccount);
     annotations = {
-      "iam.gke.io/gcp-service-account": gcp?.lokiServiceAccount
+      "iam.gke.io/gcp-service-account": gcp.lokiServiceAccount
     };
     serviceAccountName = "loki";
   }

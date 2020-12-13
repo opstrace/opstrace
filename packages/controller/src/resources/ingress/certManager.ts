@@ -15,6 +15,7 @@
  */
 
 import { KubeConfig } from "@kubernetes/client-node";
+import { strict as assert } from "assert";
 import {
   ResourceCollection,
   ServiceAccount,
@@ -268,8 +269,9 @@ export function CertManagerResources(
 
   let annotations = {};
   if (target == "gcp") {
+    assert(gcp?.certManagerServiceAccount);
     annotations = {
-      "iam.gke.io/gcp-service-account": gcp?.certManagerServiceAccount
+      "iam.gke.io/gcp-service-account": gcp.certManagerServiceAccount
     };
   }
 
