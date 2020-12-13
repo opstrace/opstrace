@@ -15,6 +15,7 @@
  */
 
 import { KubeConfig } from "@kubernetes/client-node";
+import { strict as assert } from "assert";
 import {
   ResourceCollection,
   ServiceAccount,
@@ -46,9 +47,10 @@ export function ExternalDnsResources(
 
   let annotations = {};
   if (target == "gcp") {
+    assert(state.config.config?.gcp?.externalDNSServiceAccount);
     annotations = {
       "iam.gke.io/gcp-service-account":
-        state.config.config?.gcp?.externalDNSServiceAccount
+        state.config.config.gcp.externalDNSServiceAccount
     };
   }
 

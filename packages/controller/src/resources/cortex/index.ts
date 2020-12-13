@@ -15,6 +15,7 @@
  */
 
 import * as yaml from "js-yaml";
+import { strict as assert } from "assert";
 import { getBucketName } from "@opstrace/utils";
 import { State } from "../../reducer";
 import { getNodeCount, getControllerConfig } from "../../helpers";
@@ -326,8 +327,9 @@ export function CortexResources(
   let annotations = {};
   let serviceAccountName: string | undefined = undefined;
   if (target === "gcp") {
+    assert(gcp?.cortexServiceAccount);
     annotations = {
-      "iam.gke.io/gcp-service-account": gcp?.cortexServiceAccount
+      "iam.gke.io/gcp-service-account": gcp.cortexServiceAccount
     };
     serviceAccountName = "cortex";
   }
