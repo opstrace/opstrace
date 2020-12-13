@@ -17,7 +17,6 @@ import { GraphQLClient } from "graphql-request";
 import { print } from "graphql";
 import { GraphQLError } from "graphql-request/dist/types";
 import gql from "graphql-tag";
-
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
@@ -29,9 +28,9 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  timestamp: number;
-  timestamptz: number;
-  uuid: unknown;
+  timestamp: any;
+  timestamptz: any;
+  uuid: any;
 };
 
 /** expression to compare columns of type Boolean. All fields are combined with logical 'AND'. */
@@ -2648,22 +2647,22 @@ export const UpdateUserDocument = gql`
 `;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
-export type SdkResponse<T> = {
-  data?: T;
-  extensions?: unknown;
-  headers: Headers;
-  status: number;
-  errors?: GraphQLError[];
-};
 
 const defaultWrapper: SdkFunctionWrapper = sdkFunction => sdkFunction();
-
 export function getSdk(
   client: GraphQLClient,
   withWrapper: SdkFunctionWrapper = defaultWrapper
-): Sdk {
+) {
   return {
-    CreateBranch(variables: CreateBranchMutationVariables) {
+    CreateBranch(
+      variables: CreateBranchMutationVariables
+    ): Promise<{
+      data?: CreateBranchMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<CreateBranchMutation>(
           print(CreateBranchDocument),
@@ -2671,7 +2670,15 @@ export function getSdk(
         )
       );
     },
-    SubscribeToBranches(variables?: SubscribeToBranchesSubscriptionVariables) {
+    SubscribeToBranches(
+      variables?: SubscribeToBranchesSubscriptionVariables
+    ): Promise<{
+      data?: SubscribeToBranchesSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToBranchesSubscription>(
           print(SubscribeToBranchesDocument),
@@ -2679,7 +2686,15 @@ export function getSdk(
         )
       );
     },
-    SubscribeToFiles(variables?: SubscribeToFilesSubscriptionVariables) {
+    SubscribeToFiles(
+      variables?: SubscribeToFilesSubscriptionVariables
+    ): Promise<{
+      data?: SubscribeToFilesSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToFilesSubscription>(
           print(SubscribeToFilesDocument),
@@ -2687,7 +2702,15 @@ export function getSdk(
         )
       );
     },
-    SubscribeToModules(variables?: SubscribeToModulesSubscriptionVariables) {
+    SubscribeToModules(
+      variables?: SubscribeToModulesSubscriptionVariables
+    ): Promise<{
+      data?: SubscribeToModulesSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToModulesSubscription>(
           print(SubscribeToModulesDocument),
@@ -2697,7 +2720,13 @@ export function getSdk(
     },
     SubscribeToModuleVersions(
       variables?: SubscribeToModuleVersionsSubscriptionVariables
-    ) {
+    ): Promise<{
+      data?: SubscribeToModuleVersionsSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToModuleVersionsSubscription>(
           print(SubscribeToModuleVersionsDocument),
@@ -2705,7 +2734,15 @@ export function getSdk(
         )
       );
     },
-    CreateTenants(variables: CreateTenantsMutationVariables) {
+    CreateTenants(
+      variables: CreateTenantsMutationVariables
+    ): Promise<{
+      data?: CreateTenantsMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<CreateTenantsMutation>(
           print(CreateTenantsDocument),
@@ -2713,7 +2750,15 @@ export function getSdk(
         )
       );
     },
-    DeleteTenant(variables: DeleteTenantMutationVariables) {
+    DeleteTenant(
+      variables: DeleteTenantMutationVariables
+    ): Promise<{
+      data?: DeleteTenantMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<DeleteTenantMutation>(
           print(DeleteTenantDocument),
@@ -2721,14 +2766,28 @@ export function getSdk(
         )
       );
     },
-    GetTenants(variables?: GetTenantsQueryVariables) {
+    GetTenants(
+      variables?: GetTenantsQueryVariables
+    ): Promise<{
+      data?: GetTenantsQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<GetTenantsQuery>(print(GetTenantsDocument), variables)
       );
     },
     SubscribeToTenantList(
       variables?: SubscribeToTenantListSubscriptionVariables
-    ) {
+    ): Promise<{
+      data?: SubscribeToTenantListSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToTenantListSubscription>(
           print(SubscribeToTenantListDocument),
@@ -2736,7 +2795,15 @@ export function getSdk(
         )
       );
     },
-    CreateUser(variables: CreateUserMutationVariables) {
+    CreateUser(
+      variables: CreateUserMutationVariables
+    ): Promise<{
+      data?: CreateUserMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<CreateUserMutation>(
           print(CreateUserDocument),
@@ -2744,7 +2811,15 @@ export function getSdk(
         )
       );
     },
-    DeleteUser(variables: DeleteUserMutationVariables) {
+    DeleteUser(
+      variables: DeleteUserMutationVariables
+    ): Promise<{
+      data?: DeleteUserMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<DeleteUserMutation>(
           print(DeleteUserDocument),
@@ -2752,7 +2827,15 @@ export function getSdk(
         )
       );
     },
-    GetCurrentUser(variables?: GetCurrentUserQueryVariables) {
+    GetCurrentUser(
+      variables?: GetCurrentUserQueryVariables
+    ): Promise<{
+      data?: GetCurrentUserQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<GetCurrentUserQuery>(
           print(GetCurrentUserDocument),
@@ -2760,12 +2843,28 @@ export function getSdk(
         )
       );
     },
-    GetUser(variables: GetUserQueryVariables) {
+    GetUser(
+      variables: GetUserQueryVariables
+    ): Promise<{
+      data?: GetUserQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<GetUserQuery>(print(GetUserDocument), variables)
       );
     },
-    SetDarkMode(variables: SetDarkModeMutationVariables) {
+    SetDarkMode(
+      variables: SetDarkModeMutationVariables
+    ): Promise<{
+      data?: SetDarkModeMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<SetDarkModeMutation>(
           print(SetDarkModeDocument),
@@ -2773,7 +2872,15 @@ export function getSdk(
         )
       );
     },
-    SubscribeToUserList(variables?: SubscribeToUserListSubscriptionVariables) {
+    SubscribeToUserList(
+      variables?: SubscribeToUserListSubscriptionVariables
+    ): Promise<{
+      data?: SubscribeToUserListSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToUserListSubscription>(
           print(SubscribeToUserListDocument),
@@ -2781,7 +2888,15 @@ export function getSdk(
         )
       );
     },
-    UpdateUser(variables: UpdateUserMutationVariables) {
+    UpdateUser(
+      variables: UpdateUserMutationVariables
+    ): Promise<{
+      data?: UpdateUserMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
       return withWrapper(() =>
         client.rawRequest<UpdateUserMutation>(
           print(UpdateUserDocument),
@@ -2791,52 +2906,4 @@ export function getSdk(
     }
   };
 }
-
-export type Sdk = {
-  CreateBranch(
-    variables: CreateBranchMutationVariables
-  ): Promise<SdkResponse<CreateBranchMutation>>;
-  CreateTenants(
-    variables: CreateTenantsMutationVariables
-  ): Promise<SdkResponse<CreateTenantsMutation>>;
-  SetDarkMode(
-    variables: SetDarkModeMutationVariables
-  ): Promise<SdkResponse<SetDarkModeMutation>>;
-  SubscribeToUserList(
-    variables?: SubscribeToUserListSubscriptionVariables
-  ): Promise<SdkResponse<SubscribeToUserListSubscription>>;
-  DeleteTenant(
-    variables: DeleteTenantMutationVariables
-  ): Promise<SdkResponse<DeleteTenantMutation>>;
-  CreateUser(
-    variables: CreateUserMutationVariables
-  ): Promise<SdkResponse<CreateUserMutation>>;
-  DeleteUser(
-    variables: DeleteUserMutationVariables
-  ): Promise<SdkResponse<DeleteUserMutation>>;
-  SubscribeToModules(
-    variables?: SubscribeToModulesSubscriptionVariables
-  ): Promise<SdkResponse<SubscribeToModulesSubscription>>;
-  GetTenants(
-    variables?: GetTenantsQueryVariables
-  ): Promise<SdkResponse<GetTenantsQuery>>;
-  SubscribeToModuleVersions(
-    variables?: SubscribeToModuleVersionsSubscriptionVariables
-  ): Promise<SdkResponse<SubscribeToModuleVersionsSubscription>>;
-  UpdateUser(
-    variables: UpdateUserMutationVariables
-  ): Promise<SdkResponse<UpdateUserMutation>>;
-  SubscribeToFiles(
-    variables?: SubscribeToFilesSubscriptionVariables
-  ): Promise<SdkResponse<SubscribeToFilesSubscription>>;
-  GetCurrentUser(
-    variables?: GetCurrentUserQueryVariables
-  ): Promise<SdkResponse<GetCurrentUserQuery>>;
-  SubscribeToBranches(
-    variables?: SubscribeToBranchesSubscriptionVariables
-  ): Promise<SdkResponse<SubscribeToBranchesSubscription>>;
-  SubscribeToTenantList(
-    variables?: SubscribeToTenantListSubscriptionVariables
-  ): Promise<SdkResponse<SubscribeToTenantListSubscription>>;
-  GetUser(variables: GetUserQueryVariables): Promise<SdkResponse<GetUserQuery>>;
-};
+export type Sdk = ReturnType<typeof getSdk>;
