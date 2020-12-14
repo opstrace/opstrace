@@ -1330,10 +1330,34 @@ export function LokiResources(
                       name: "grpc"
                     },
                     {
-                      containerPort: 80,
+                      containerPort: 1080,
                       name: "http"
                     }
                   ],
+                  readinessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 1080 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+                  livenessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      port: 1080 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
                   volumeMounts: [
                     {
                       mountPath: "/etc/loki",
