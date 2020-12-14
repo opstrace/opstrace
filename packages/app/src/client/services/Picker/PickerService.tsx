@@ -44,7 +44,7 @@ const boundedIndex = (value: number, max: number) => {
 };
 
 function PickerList(props: PickerListProps) {
-  const { selectedIndex, onSelect } = props;
+  const { selectedIndex, onSelect, secondaryAction } = props;
 
   const renderItem = useCallback(
     ({ data, index }: { data: PickerOption; index: number }) => (
@@ -54,14 +54,14 @@ function PickerList(props: PickerListProps) {
         key={data.id}
       >
         <ListItemText primary={data.text} />
-        {data.keybinding?.length && (
+        {secondaryAction && (
           <ListItemSecondaryAction>
-            {data.keybinding[0]}
+            {secondaryAction(data)}
           </ListItemSecondaryAction>
         )}
       </ButtonListItem>
     ),
-    [selectedIndex, onSelect]
+    [selectedIndex, onSelect, secondaryAction]
   );
 
   return (
@@ -199,6 +199,7 @@ function PickerService({ children }: { children: React.ReactNode }) {
           selectedIndex={selectedIndex}
           onSelect={onSelect}
           options={filteredOptions}
+          secondaryAction={activePicker?.secondaryAction}
         />
       </Dialog>
     </>

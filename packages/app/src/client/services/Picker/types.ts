@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { ReactNode } from "react";
 
 export type PickerOption = {
   id: string;
   text: string;
-  keybinding?: string[];
 };
 
 export type PickerListProps = {
   selectedIndex: number;
   options: PickerOption[];
   onSelect: (selectedOption: PickerOption) => void;
+  secondaryAction?: (option: PickerOption) => ReactNode;
 };
 
 export type PickerProvider = {
@@ -35,6 +36,7 @@ export type PickerProvider = {
   activationPrefix: string;
   onSelected: (option: PickerOption, inputText?: string) => void;
   options: PickerOption[];
+  secondaryAction?: (option: PickerOption) => ReactNode;
 };
 
 export type PickerApi = {
