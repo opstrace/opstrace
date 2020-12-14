@@ -72,7 +72,15 @@ So let's get started.
 
 Choose an `OPSTRACE_CLUSTER_NAME` for your cluster (it must be 13 characters or less):
 
-<!--input:$OPSTRACE_CLUSTER_NAME-->
+````markdown
+<!--export-to-input-->
+
+```bash
+export OPSTRACE_CLUSTER_NAME=<choose_a_name>
+```
+
+<!--/export-to-input-->
+````
 
 The cluster name will globally identify you in our domain as `$OPSTRACE_CLUSTER_NAME.opstrace.io`, which we provide for you by default as a convenience.
 
