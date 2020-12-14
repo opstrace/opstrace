@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useCallback } from "react";
 import { PickerOption, usePickerService } from "../Picker";
 import { useCommandService } from "./CommandService";
 import { Command } from "./types";
+import { getKeysFromKeybinding } from "client/services/Command/util";
+import Box from "client/components/Box/Box";
 
 const cmdID = "open-command-picker";
 
@@ -28,8 +30,7 @@ type CommandPickerProps = {
 function commandToPickerOption(cmd: Command): PickerOption {
   return {
     id: cmd.id,
-    text: cmd.description,
-    keybinding: cmd.keybindings
+    text: cmd.description
   };
 }
 
@@ -39,6 +40,28 @@ function filterCommands(cmds: Command[]): PickerOption[] {
       cmd => cmd.id !== cmdID && cmd.category !== "Hidden" && !cmd.disabled
     )
     .map(commandToPickerOption);
+}
+
+function renderKeybindings(data?: Command) {
+  if (!data?.keybindings?.length) {
+    return null;
+  }
+
+  const keybindings = data.keybindings.map(keys => getKeysFromKeybinding(keys));
+
+  return (
+    <Box display="flex">
+      {keybindings.map(keys => (
+        <Box display="flex" ml={1}>
+          {keys.map(keyCode => (
+            <Box bgcolor="grey.500" p={0.3} ml={0.3}>
+              {keyCode}
+            </Box>
+          ))}
+        </Box>
+      ))}
+    </Box>
+  );
 }
 
 function CommandPicker({ commands }: CommandPickerProps) {
@@ -52,13 +75,19 @@ function CommandPicker({ commands }: CommandPickerProps) {
     keybindings: ["mod+p"]
   });
 
+  const getCommand = useCallback(
+    id => commands.find(command => command.id === id),
+    [commands]
+  );
+
   const { activatePickerWithText } = usePickerService(
     {
       activationPrefix: "",
       options: filterCommands(commands),
       onSelected: option => {
         cmdService.executeCommand(option.id);
-      }
+      },
+      secondaryAction: option => renderKeybindings(getCommand(option.id))
     },
     [commands]
   );
