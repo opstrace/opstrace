@@ -20,11 +20,13 @@ import { GeneralServerError } from "server/errors";
 import datasourceHandler from "./datasource";
 import auth from "./authentication";
 import graphql from "./graphql";
+import pubUiCfg from "./uicfg";
 
 function api(): express.Router {
   const api = express.Router();
   // mount auth handlers
   api.use("/auth", auth());
+  api.use("/public-ui-config", pubUiCfg());
   // mount our graphql proxy
   api.use("/graphql", graphql());
   // mount the datasource proxy
