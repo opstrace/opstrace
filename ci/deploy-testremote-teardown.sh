@@ -276,3 +276,7 @@ source ci/test-cli/cli-tests-with-cluster.sh
 # Be a good citizen and join that explicitly (expect that to have terminated by
 # now, long ago).
 wait
+
+
+# for doing manual testing work
+sleep 1333337
