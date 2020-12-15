@@ -27,7 +27,11 @@ import {
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
-import { getDomain, generateSecretValue } from "../../helpers";
+import {
+  getDomain,
+  generateSecretValue,
+  getControllerConfig
+} from "../../helpers";
 import { DockerImages } from "@opstrace/controller-config";
 
 export function OpstraceApplicationResources(
@@ -38,6 +42,13 @@ export function OpstraceApplicationResources(
   const collection = new ResourceCollection();
 
   const domain = getDomain(state);
+
+  const { envLabel } = getControllerConfig(state);
+
+  let auth0_client_id = "vs6bgTunbVK4dvdLRj02DptWjOmAVWVM";
+  if (envLabel === "opstrace-ci") {
+    auth0_client_id = "5MoCYfPXPuEzceBLRUr6T6SAklT2GDys";
+  }
 
   collection.add(
     new Namespace(
@@ -276,7 +287,7 @@ export function OpstraceApplicationResources(
                     },
                     {
                       name: "AUTH0_CLIENT_ID",
-                      value: "vs6bgTunbVK4dvdLRj02DptWjOmAVWVM"
+                      value: auth0_client_id
                     },
                     {
                       name: "AUTH0_DOMAIN",

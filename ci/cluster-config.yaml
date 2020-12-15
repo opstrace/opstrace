@@ -1,6 +1,6 @@
 tenants:
   - default
-env_label: ci
+env_label: opstrace-ci
 node_count: 3
 aws:
   eks_admin_roles:
