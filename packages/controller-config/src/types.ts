@@ -20,13 +20,7 @@ import { AWSConfig } from "@opstrace/aws";
 
 export const controllerConfigSchema = yup
   .object({
-    name: yup
-      .string()
-      .required("Must provide a name")
-      .matches(
-        /^[A-Za-z0-9-]+$/,
-        "must only contain alphanumeric characters and -"
-      ),
+    name: yup.string(),
     target: yup
       .mixed<"gcp" | "aws">()
       .oneOf(["gcp", "aws"])
@@ -43,32 +37,18 @@ export const controllerConfigSchema = yup
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     postgreSQLEndpoint: yup.string().notRequired(),
     envLabel: yup.string(),
+    // Note: remove one of cert_issuer and `tlsCertificateIssuer`.
     cert_issuer: yup
       .string()
       .oneOf(["letsencrypt-prod", "letsencrypt-staging"])
       .required(),
-
     tlsCertificateIssuer: yup
       .mixed<"letsencrypt-staging" | "letsencrypt-prod">()
       .oneOf(["letsencrypt-staging", "letsencrypt-prod"])
-      .required(
-        "[internal] must specify tlsCertificateIssuer (letsencrypt-staging or letsencrypt-prod)"
-      ),
-    infrastructureName: yup
-      .string()
-      .required(
-        "[internal] used to track the name for cloud infrastructure components. Should be the output of `getInfrastructureName(stackName)`"
-      )
-      .min(1)
-      .max(
-        30,
-        "must be less than 30 characters to be reliably used for cloud infrastructure naming (bigtable has a 30 char limit)"
-      ),
-    // AWS configuration
+      .required(),
+    infrastructureName: yup.string().required(),
     aws: yup.mixed<AWSConfig | undefined>(),
-    // GCP configuration
     gcp: yup.mixed<GCPConfig | undefined>(),
-
     controllerTerminated: yup.bool().default(false)
   })
   .noUnknown()
