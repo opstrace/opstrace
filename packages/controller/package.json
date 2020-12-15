@@ -19,13 +19,8 @@
     "watch": "yarn copyGraphqlSdk && tsc -b -w",
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
-    "lint": "eslint --ext .ts src/",
+    "lint": "eslint . --ext .ts",
     "copyGraphqlSdk": "cp ../app/src/state/graphql-api-types.ts ./src/dbSDK.ts"
-  },
-  "eslintConfig": {
-    "ignorePatterns": [
-      "src/dbSDK.ts"
-    ]
   },
   "dependencies": {
     "argparse": "^1.0.10",
