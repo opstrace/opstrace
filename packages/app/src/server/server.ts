@@ -104,6 +104,13 @@ function createServer() {
   // return the app-shell for PWA
   app.use("*", serverRender);
 
+  log.info("about to start HTTP server");
+  log.info(
+    "using AUTH0_DOMAIN %s and AUTH0_CLIENT_ID %s",
+    env.AUTH0_DOMAIN,
+    env.AUTH0_CLIENT_ID
+  );
+
   return http
     .createServer(app)
     .listen(env.PORT, () => log.info(`server running on port: ${env.PORT}`));
@@ -117,8 +124,9 @@ lightship.registerShutdownHandler(async () => {
   // Allow sufficient amount of time to allow all of the existing
   // HTTP requests to finish before terminating the service.
   log.info(
-    `waiting ${shutdownDelay /
-      1000}s for connections to close before shutting down`
+    `waiting ${
+      shutdownDelay / 1000
+    }s for connections to close before shutting down`
   );
 
   await delay(shutdownDelay);
