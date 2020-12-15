@@ -26,7 +26,7 @@ function api(): express.Router {
   const api = express.Router();
   // mount auth handlers
   api.use("/auth", auth());
-  api.use("/public-ui-config", pubUiCfg());
+  api.use("/public-ui-config", pubUiCfg);
   // mount our graphql proxy
   api.use("/graphql", graphql());
   // mount the datasource proxy
