@@ -42,7 +42,7 @@ export const controllerConfigSchema = yup
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     postgreSQLEndpoint: yup.string().notRequired(),
-
+    envLabel: yup.string(),
     cert_issuer: yup
       .string()
       .oneOf(["letsencrypt-prod", "letsencrypt-staging"])

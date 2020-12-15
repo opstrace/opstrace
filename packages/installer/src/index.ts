@@ -159,6 +159,7 @@ function* createClusterCore() {
     target: ccfg.cloud_provider,
     region: region, // not sure why that's needed
     cert_issuer: ccfg.cert_issuer,
+    envLabel: ccfg.env_label,
     infrastructureName: ccfg.cluster_name,
     logRetention: retentionConf.logs,
     metricRetention: retentionConf.metrics,
