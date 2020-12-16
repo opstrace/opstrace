@@ -27,10 +27,6 @@ services:
     volumes:
       - ./migrations:/hasura-migrations
       - ./metadata:/hasura-metadata
-      - type: bind
-        source: ./secrets/cert.crt
-        target: /etc/ssl/certs/selfsigned.crt
-        read_only: true
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
       ## disable the console served by server https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#before-you-begin
@@ -55,4 +51,3 @@ services:
       retries: 3
     logging:
       driver: none
- 
