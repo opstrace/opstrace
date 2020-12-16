@@ -42,7 +42,7 @@ const checkJwt = jwt({
   algorithms: ["RS256"]
 });
 
-function auth(): express.Router {
+function createAuthHandler(): express.Router {
   const auth = express.Router();
   // endpoint for creating a session so we don't have to
   // pass JWTs to every API request.
@@ -125,11 +125,11 @@ function auth(): express.Router {
   });
 
   // add a catch all for misconfigured auth requests
-  auth.all("*", function(req, res, next) {
+  auth.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "auth route not found"));
   });
 
   return auth;
 }
 
-export default auth;
+export default createAuthHandler;

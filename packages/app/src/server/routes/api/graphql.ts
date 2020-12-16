@@ -68,7 +68,7 @@ graphqlProxy.on("proxyReq", function onProxyReq(proxyReq, req, res) {
   }
 });
 
-function graphql(): express.Router {
+function createGraphqlHandler(): express.Router {
   const graphql = express.Router();
 
   graphql.use("/", (req, res) => {
@@ -92,4 +92,4 @@ function graphql(): express.Router {
   return graphql;
 }
 
-export default graphql;
+export default createGraphqlHandler;

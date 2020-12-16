@@ -17,7 +17,7 @@
 import env from "server/env";
 import { NextFunction, Request, Response } from "express";
 
-export default function pubUiCfg(
+export default function pubUiCfgHandler(
   req: Request,
   res: Response,
   next: NextFunction

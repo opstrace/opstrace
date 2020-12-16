@@ -18,20 +18,16 @@ import express from "express";
 
 import { GeneralServerError } from "server/errors";
 import datasourceHandler from "./datasource";
-import auth from "./authentication";
-import graphql from "./graphql";
-import pubUiCfg from "./uicfg";
+import createAuthHandler from "./authentication";
+import createGraphqlHandler from "./graphql";
+import pubUiCfgHandler from "./uicfg";
 
 function api(): express.Router {
   const api = express.Router();
-  // mount auth handlers
-  api.use("/auth", auth());
-  api.use("/public-ui-config", pubUiCfg);
-  // mount our graphql proxy
-  api.use("/graphql", graphql());
-  // mount the datasource proxy
+  api.use("/auth", createAuthHandler());
+  api.use("/public-ui-config", pubUiCfgHandler);
+  api.use("/graphql", createGraphqlHandler());
   api.use("/datasource/:target", datasourceHandler);
-  // add a catch all for misconfigured api requests
   api.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
   });
