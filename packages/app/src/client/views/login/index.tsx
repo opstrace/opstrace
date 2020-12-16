@@ -30,15 +30,16 @@ import { ErrorView } from "client/components/Error";
 import useQueryParams from "client/hooks/useQueryParams";
 import TracyImg from "../common/Tracy";
 
-interface State extends AppState {
-  redirectUri: string;
-}
-
 
 interface LoginConfigInterface {
   auth0_client_id: string;
   auth0_domain: string;
 }
+
+interface State extends AppState {
+  redirectUri: string;
+}
+
 
 // https://github.com/JustinBeckwith/retry-axios
 // Attach rax "interceptor" to axios globally.
@@ -88,10 +89,9 @@ async function fetchLoginConfig(): Promise<LoginConfigInterface> {
     response = await axios.get("/_/public-ui-config", axiosDefaultOpts);
   } catch (e) {
     // Expect this when axios could not get a good response after N retries.
-    // console.log('setLoginFlowError')
-    // setLoginFlowError(e);
-    // It seems like there is some higher-level retry going on so even when
-    // we don't handle this in any particular way
+    // Note(JP): It seems like there is some higher-level retry going on so
+    // within the React machinery; so even when we don't handle this failure
+    // here in any particular way things seem to recover.
     console.error("error during fetchAndSetLoginConfig:", e);
   }
 
@@ -122,7 +122,6 @@ const Login = (props: { state?: State }) => {
     accessDeniedError,
     setAccessDeniedError
   ] = useState<GeneralServerError | null>(null);
-  //const [loginFlowError, setLoginFlowError] = useState<GeneralServerError | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   // This will look for a param like so: /login?rd=%2Fgrafana
   // NOTE: rd must include the host, relative paths do not work.
@@ -209,28 +208,6 @@ const Login = (props: { state?: State }) => {
 
   // The login flow succeeded (identity communicated and verified), but on the
   // it was detected that this particular user does not have access to the
-  // cluster.
-  // if (loginFlowError) {
-  //   return (
-  //     <ErrorView
-  //       title="Login problem"
-  //       subheader=""
-  //       actions={null}
-  //       emoji="😕"
-  //       maxWidth={400}
-  //     >
-  //       <Typography>Problem during login flow: {loginFlowError.message}</Typography>
-  //       <br />
-  //       <br />
-  //       <Typography>
-  //       Try again?
-  //       </Typography>
-  //     </ErrorView>
-  //   );
-  // }
-
-  // The login flow succeeded (identity communicated and verified), but on the
-  // it was detected that this particular user does not have access to the
   // cluster (make sure to call this only when `user.email` is defined).
   if (accessDeniedError) {
     return (
@@ -284,17 +261,7 @@ const Login = (props: { state?: State }) => {
 
 function LoginPageParent() {
   // Uninitialized state will cause Child to error out
-  const [loginConfig, setLoginConfig] = useState<LoginConfigInterface>();
-
-  // Data does't start loading
-  // until *after* Parent is mounted
-  // useEffect(() => {
-  //   useEffect(() => {fetchLoginConfig()});
-  //   fetch('/data')
-  //     .then(res => res.json())
-  //     .then(data => setLoginConfig(data));
-  // }, []);
-
+  const [loginConfig, setLoginConfig] = useState<LoginConfigInterface | undefined>();
   useEffect(() => {
     (async () => {
       const lcfg = await fetchLoginConfig();
@@ -302,7 +269,10 @@ function LoginPageParent() {
     })();
   });
 
-  // Do not render child until loginconfig is populated
+  // Do not render child until loginconfig is populated. Kudos to
+  // https://stackoverflow.com/a/57312722/145400 for the `{...loginConfig}` to
+  // work around `not assignable to type 'IntrinsicAttributes..` kind of errors
+  // when doing `loginconfig={loginconfig}`.
   return (
     <div>{loginConfig && <LoginPageChild {...loginConfig} />}</div>
   );
