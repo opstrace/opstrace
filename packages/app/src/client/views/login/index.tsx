@@ -39,8 +39,6 @@ interface LoginConfigInterface {
   auth0_domain: string;
 }
 
-let loginConfig: LoginConfigInterface | undefined;
-
 // https://github.com/JustinBeckwith/retry-axios
 // Attach rax "interceptor" to axios globally.
 rax.attach();
@@ -82,7 +80,8 @@ const axiosDefaultOpts = {
   raxConfig: raxcfg
 };
 
-async function fetchAndSetLoginConfig(): Promise<void> {
+// Read (non-senstive) UI client config from UI server component.
+async function fetchLoginConfig(): Promise<LoginConfigInterface> {
   let response: AxiosResponse | undefined;
   try {
     response = await axios.get("/_/public-ui-config", axiosDefaultOpts);
@@ -96,16 +95,17 @@ async function fetchAndSetLoginConfig(): Promise<void> {
   }
 
   if (response === undefined) {
-    return;
+    throw new Error("could not GET /public-ui-config");
   }
 
   console.info(`got public-ui-config. data: `, response.data);
 
-  // Mutate module-level global
-  loginConfig = {
+  const loginConfig: LoginConfigInterface = {
     auth0_client_id: response.data.auth0_client_id,
     auth0_domain: response.data.auth0_domain
   };
+
+  return loginConfig;
 }
 
 const Login = (props: { state?: State }) => {
@@ -136,17 +136,8 @@ const Login = (props: { state?: State }) => {
     });
   }, [loginWithRedirect, rd]);
 
-  // Read (non-senstive) UI client config from UI server component.
-  useEffect(() => {
-    fetchAndSetLoginConfig();
-  });
-
   // first get the accessToken from Auth0
   useEffect(() => {
-    if (loginConfig === undefined) {
-      return;
-    }
-
     (async function getAccessToken() {
       try {
         const token = await getAccessTokenSilently({
@@ -301,21 +292,44 @@ const Login = (props: { state?: State }) => {
   );
 };
 
-const LoginPage = () => {
+function LoginPageParent() {
+  // Uninitialized state will cause Child to error out
+  const [loginConfig, setLoginConfig] = useState<LoginConfigInterface>();
+
+  // Data does't start loading
+  // until *after* Parent is mounted
+  // useEffect(() => {
+  //   useEffect(() => {fetchLoginConfig()});
+  //   fetch('/data')
+  //     .then(res => res.json())
+  //     .then(data => setLoginConfig(data));
+  // }, []);
+
+  useEffect(() => {
+    (async () => {
+      const lcfg = await fetchLoginConfig();
+      setLoginConfig(lcfg);
+    })();
+  });
+
+  // Do not render child until loginconfig is populated
+  return (
+    <div>{loginConfig && <LoginPageChild loginConfig={loginConfig} />}</div>
+  );
+}
+
+function LoginPageChild(lcfg: LoginConfigInterface) {
   const [state, setState] = useState<State | undefined>();
 
   const onRedirectCallback = useCallback((state: AppState) => {
     setState(state as State);
   }, []);
 
-  // Read (non-senstive) UI client config from UI server component.
-  //useEffect(() => {fetchAndSetLoginConfig()});
-
   return (
     <Page>
       <Auth0Provider
-        domain={loginConfig?.auth0_domain || "not initialized"}
-        clientId={loginConfig?.auth0_client_id || "not initialized"}
+        domain={lcfg.auth0_domain}
+        clientId={lcfg.auth0_client_id}
         audience="https://user-cluster.opstrace.io/api"
         scope="email openid profile"
         useRefreshTokens={true}
@@ -338,6 +352,6 @@ const LoginPage = () => {
       </Auth0Provider>
     </Page>
   );
-};
+}
 
-export default LoginPage;
+export default LoginPageParent;
