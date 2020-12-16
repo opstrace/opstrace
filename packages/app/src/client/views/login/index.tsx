@@ -15,6 +15,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from "react";
+import { RouteComponentProps } from "@reach/router";
 import * as rax from "retry-axios";
 
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -34,7 +35,11 @@ interface State extends AppState {
   redirectUri: string;
 }
 
-interface LoginConfigInterface {
+// extends Route... because of
+// https://github.com/reach/router/blob/d2c9ad06715c9d48c2d16f55f7cd889b626d2521/website/src/markdown/pages/typescript.md#parse-data-from-the-url
+// https://github.com/reach/router/issues/141#issuecomment-528216202
+// https://github.com/reach/router/issues/141#issuecomment-451646939
+interface LoginConfigInterface extends RouteComponentProps {
   auth0_client_id: string;
   auth0_domain: string;
 }
