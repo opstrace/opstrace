@@ -155,6 +155,9 @@ const Login = (props: { state?: State }) => {
     );
   }
 
+  // The login flow succeeded (identity communicated and verified), but on the
+  // it was detected that this particular user does not have access to the
+  // cluster (make sure to call this only when `user.email` is defined).
   if (accessDeniedError) {
     return (
       <ErrorView
@@ -168,7 +171,7 @@ const Login = (props: { state?: State }) => {
         <br />
         <br />
         <Typography>
-          Contact your administrator or Logout and try again with a different
+          Contact your administrator or log out and try again with a different
           account.
         </Typography>
         <Box mt={3} pb={0}>
