@@ -265,6 +265,9 @@ export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-
 
 make test-remote
 
+cp playwright-loginpage.png /build/bk-artifacts || true
+
+
 echo "+++ run looker tests"
 
 source ci/invoke-looker.sh

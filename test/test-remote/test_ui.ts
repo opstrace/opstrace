@@ -68,6 +68,6 @@ suite("test UI with playwright", function () {
     await sleep(10);
     log.info("page.screenshot()");
 
-    await page.screenshot({ path: `loginpage.png` });
+    await page.screenshot({ path: "playwright-loginpage.png" });
   });
 });
