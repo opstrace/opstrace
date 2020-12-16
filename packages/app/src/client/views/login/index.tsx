@@ -264,6 +264,12 @@ function LoginPageParent() {
   const [loginConfig, setLoginConfig] = useState<LoginConfigInterface | undefined>();
   useEffect(() => {
     (async () => {
+      // Without this early exit criterion, `fetchLoginConfig()` is going to
+      // be called with every render cycle.
+      if (loginConfig !== undefined) {
+        return
+      }
+
       const lcfg = await fetchLoginConfig();
       setLoginConfig(lcfg);
     })();
@@ -279,6 +285,7 @@ function LoginPageParent() {
 }
 
 function LoginPageChild(lcfg: LoginConfigInterface) {
+  console.log('initialize LoginPageChild() with login config: ', lcfg)
   const [state, setState] = useState<State | undefined>();
 
   const onRedirectCallback = useCallback((state: AppState) => {
