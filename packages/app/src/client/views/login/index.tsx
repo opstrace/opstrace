@@ -15,7 +15,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from "react";
-import { RouteComponentProps } from "@reach/router";
 import * as rax from "retry-axios";
 
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -35,11 +34,8 @@ interface State extends AppState {
   redirectUri: string;
 }
 
-// extends Route... because of
-// https://github.com/reach/router/blob/d2c9ad06715c9d48c2d16f55f7cd889b626d2521/website/src/markdown/pages/typescript.md#parse-data-from-the-url
-// https://github.com/reach/router/issues/141#issuecomment-528216202
-// https://github.com/reach/router/issues/141#issuecomment-451646939
-interface LoginConfigInterface extends RouteComponentProps {
+
+interface LoginConfigInterface {
   auth0_client_id: string;
   auth0_domain: string;
 }
@@ -211,17 +207,6 @@ const Login = (props: { state?: State }) => {
     [accessToken]
   );
 
-  if (loginConfig === undefined) {
-    return (
-      <></>
-      //   <>
-      //   <Box display="flex" alignItems="center" p={1}>
-      //     <Typography color="textSecondary"> Fetching config ... </Typography>
-      //   </Box>
-      // </>
-    );
-  }
-
   // The login flow succeeded (identity communicated and verified), but on the
   // it was detected that this particular user does not have access to the
   // cluster.
@@ -319,7 +304,7 @@ function LoginPageParent() {
 
   // Do not render child until loginconfig is populated
   return (
-    <div>{loginConfig && <LoginPageChild loginConfig={loginConfig} />}</div>
+    <div>{loginConfig && <LoginPageChild {...loginConfig} />}</div>
   );
 }
 
