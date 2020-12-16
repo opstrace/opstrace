@@ -28,10 +28,6 @@ Services launched by `yarn services:start`:
 
 See the [docker compose]("./docker-compose.yml) file the services launched.
 
-## Authentication
-
-By default, Auth0 flow with PKCE is used to get a JWT for a user client-side. That JWT is then submitted to the web-server to create
-a session upon successful validation of the the token. This session is then used to handle authentication for the graphql server, web ui, and nginx-ingress.
 
 ## Frequently used Scripts
 
@@ -104,3 +100,20 @@ To delete the in-cluster controller:
 ```bash
 kubectl delete deploy opstrace-controller -n kube-system
 ```
+
+## Background: login, authentication, session management
+
+By default, the UI logs in to the cluster through a canonical single sign-on flow: an OAuth 2.0 Authorization Code Flow involving a so-called Proof Key for Code Exchange (PKCE).
+The PKCE technique is specified in [RFC 7636](https://tools.ietf.org/html/rfc7636).
+
+In this type of single sign-on flow, the UI/browser/user-agent is the so-called relying party (RP).
+Because the RP is functionally and configuration-wise the same across potentially many Opstrace cluster environments, there is no OAuth 2.0 client secret associated with the RP.
+The RP is identified by only the client ID -- which is _shared_ across environments.
+That is the major reason for adopting the Proof Key for Code Exchange as a required layer of security.
+
+We use Auth0 as the identity provider (IdP) in this flow and can therefore proxy to other popular IdPs like GitHub and Google.
+
+By the end of the PKCE-based flow, the RP submits an artifact (OpenID Connect ID Token) to the UI backend (running in the Opstrace cluster) where it is verified using public key cryptography. When said verification succeeds, the RP (the UI) is considered as successfully logged in -- and the UI backend creates a "server-side" session in a key-value store.
+The corresponding session identifier is persisted with the UI through a browser cookie.
+
+In all subsequent HTTP requests issued by the UI, said cookie is sent and serves as authentication proof until the corresponding session expires, or gets otherwise revoked or invalidated.
