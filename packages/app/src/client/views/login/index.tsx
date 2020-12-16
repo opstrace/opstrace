@@ -15,7 +15,9 @@
  */
 
 import React, { useCallback, useEffect, useState } from "react";
-import axios from "axios";
+import * as rax from "retry-axios";
+
+import axios, { AxiosError, AxiosResponse } from "axios";
 
 import { Auth0Provider, useAuth0, AppState } from "@auth0/auth0-react";
 import { GeneralServerError } from "server/errors";
@@ -31,6 +33,47 @@ import TracyImg from "../common/Tracy";
 interface State extends AppState {
   redirectUri: string;
 }
+
+// https://github.com/JustinBeckwith/retry-axios
+// Attach rax "interceptor" to axios globally.
+rax.attach();
+const raxcfg = {
+  // For requests that return a transient error (5xx).
+  retry: 3,
+
+  // For transient errors on transport level (DNS resolution, TCP connect()
+  // timeout, recv() timeout)
+  noResponseRetries: 3,
+
+  // Constant delay between attempts.
+  backoffType: "static" as "static",
+  // Delay between attempts in ms
+  retryDelay: 4000,
+
+  // HTTP methods to automatically retry
+  httpMethodsToRetry: ["GET", "DELETE", "PUT"],
+
+  // The response status codes to retry. 2 tuple array: list of ranges.
+  statusCodesToRetry: [
+    [100, 199],
+    [429, 429],
+    [500, 599]
+  ],
+
+  onRetryAttempt: function(err: AxiosError) {
+    const cfg = rax.getConfig(err);
+    //@ts-ignore cfg possibly undefined
+    console.log(`Retry attempt #${cfg.currentRetryAttempt} -- error: ${err}`);
+  }
+};
+
+const axiosDefaultOpts = {
+  // As this timeout constant does not only affect connect() timeout but also
+  // response generation time, it needs to be used with care for those
+  // HTTP endpoints that by definition can take _long_ to generate a response.
+  timeout: 15000,
+  raxConfig: raxcfg
+};
 
 const Login = (props: { state?: State }) => {
   const {
