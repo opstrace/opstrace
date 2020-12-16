@@ -21,7 +21,7 @@ import { log } from "./log";
 // Note(JP): this module implements tooling for doing deadline handling and
 // duration measurement based on a monotonic time source.
 
-export function sleep(seconds: number) {
+export function sleep(seconds: number): Promise<unknown> {
   return new Promise(resolve => setTimeout(resolve, seconds * 1000.0));
 }
 
@@ -35,7 +35,7 @@ export function mtime(): bigint {
   return process.hrtime.bigint();
 }
 
-export function mtimeDiffSeconds(ref: bigint) {
+export function mtimeDiffSeconds(ref: bigint): number {
   // number of seconds passed since reference point in time (in the past).
   // `ref` must be a value previously obtained from `mtime()`. Number()
   // converts a BigInt to a regular Number type, allowing for translating from
@@ -45,17 +45,17 @@ export function mtimeDiffSeconds(ref: bigint) {
   return Number(process.hrtime.bigint() - ref) / 10 ** 9;
 }
 
-export function mtimeDeadlineInSeconds(seconds: number) {
+export function mtimeDeadlineInSeconds(seconds: number): bigint {
   return process.hrtime.bigint() + BigInt(seconds * 10 ** 9);
 }
 
-export function mtimeDeadlineTimeLeftSeconds(deadline: bigint) {
+export function mtimeDeadlineTimeLeftSeconds(deadline: bigint): number {
   // given a deadline as returned by `mtimeDeadlineInSeconds` calculate
   // the time left in seconds from _now_ until that deadline is hit.
   return Number(deadline - process.hrtime.bigint()) / 10 ** 9;
 }
 
-export function timeoutTerminator(timeoutSeconds: number) {
+export function timeoutTerminator(timeoutSeconds: number): EventEmitter {
   // Exit NodeJS process in with non-zero exit status once the deadline is hit.
 
   // check current time against deadline every so often.
@@ -85,6 +85,7 @@ export function timeoutTerminator(timeoutSeconds: number) {
   // https://eslint.org/docs/rules/no-async-promise-executor
   // https://github.com/eslint/eslint/issues/11982
   // https://github.com/standard/standard/issues/1239
+  // eslint-disable-next-line no-async-promise-executor,@typescript-eslint/no-unused-vars
   new Promise(async function (resolvefunc, _) {
     timeoutCanceller.once("cancel", () => {
       log.debug("timeoutTerminator: cancel event received");

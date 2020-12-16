@@ -19,16 +19,16 @@ import moment from "moment";
 export const SECOND = 1000;
 
 function isToday(momentDate: moment.Moment) {
-  var yesterday = moment().clone().startOf("day");
+  const yesterday = moment().clone().startOf("day");
   return momentDate.isSame(yesterday, "d");
 }
 
 function isYesterday(momentDate: moment.Moment) {
-  var yesterday = moment().clone().subtract(1, "days").startOf("day");
+  const yesterday = moment().clone().subtract(1, "days").startOf("day");
   return momentDate.isSame(yesterday, "d");
 }
 
-export function timeAgo(timestamp: number, DWMY_timeAgo: boolean = true) {
+export function timeAgo(timestamp: number, DWMY_timeAgo = true): string {
   const momentDate = moment.unix(timestamp);
   const dateTime = {
     seconds: moment().diff(momentDate, "seconds"),

@@ -27,7 +27,7 @@ const logFormat = format.printf(
 // then use it via `log.info('msg')` etc.
 export let log: Logger;
 
-export function setLogger(logger: Logger) {
+export function setLogger(logger: Logger): void {
   if (log !== undefined) {
     throw Error("logger already set");
   }
@@ -42,7 +42,9 @@ export interface CliLogOptions {
 
 export function buildLogger(opts: CliLogOptions): Logger {
   // Try to import the `TransportStream` type. Use that instead of `any`.
-  const ts: any[] = [
+  const ts: Array<
+    transports.ConsoleTransportInstance | transports.FileTransportInstance
+  > = [
     // Emit to stderr (stdout is default). Also see opstrace-prelaunch/issues/998.
     new transports.Console({
       stderrLevels: Object.keys(config.syslog.levels),
@@ -103,7 +105,7 @@ export function buildLogger(opts: CliLogOptions): Logger {
 // eol?: string;
 // tailable?: boolean;
 
-export function debugLogErrorDetail(err: Error) {
+export function debugLogErrorDetail(err: Error): void {
   if (err === undefined) {
     log.debug("debugLogErrorDetail: `err` obj is undefined. Sadness.");
     return;

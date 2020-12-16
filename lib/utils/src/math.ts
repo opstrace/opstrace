@@ -20,7 +20,7 @@
  * @param minimum number
  * @param value number
  */
-export const min = (minimum: number, value: number) =>
+export const min = (minimum: number, value: number): number =>
   value < minimum ? minimum : value;
 
 /**
@@ -29,7 +29,7 @@ export const min = (minimum: number, value: number) =>
  * @param maximum number
  * @param value number
  */
-export const max = (maximum: number, value: number) =>
+export const max = (maximum: number, value: number): number =>
   value > maximum ? maximum : value;
 
 /**
@@ -37,7 +37,7 @@ export const max = (maximum: number, value: number) =>
  *
  * @param value number
  */
-export const roundDown = (value: number) => Math.floor(value);
+export const roundDown = (value: number): number => Math.floor(value);
 
 /**
  * Rounds number down to the nearest odd number. If value is an odd number, will return the value,
@@ -45,7 +45,8 @@ export const roundDown = (value: number) => Math.floor(value);
  *
  * @param value number
  */
-export const roundDownToOdd = (value: number) => Math.ceil(value - 1) | 1;
+export const roundDownToOdd = (value: number): number =>
+  Math.ceil(value - 1) | 1;
 
 type Range = { "<=": number; choose: number };
 
@@ -68,7 +69,7 @@ type Range = { "<=": number; choose: number };
  * @param value number
  * @param ranges [{ "<=": number, choose: number }]
  */
-export const select = (value: number, ranges: Range[]) => {
+export const select = (value: number, ranges: Range[]): number => {
   const val = ranges
     // Sort to make sure range is ordered from lowest "<=" to highest "<=".
     .sort((a, b) => a["<="] - b["<="])
