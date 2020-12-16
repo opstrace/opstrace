@@ -18,16 +18,16 @@
  * Utilities for redux-saga-based task management.
  */
 
-import { call, delay } from "redux-saga/effects";
+import { call, delay, CallEffect } from "redux-saga/effects";
 
 import { log } from "./log";
 import { SECOND } from "./time";
 import { ExitError } from "./errors";
 
 export interface RetryUponAnyErrorParams {
-  task: any;
+  task: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   maxAttempts: number;
-  doNotLogDetailForTheseErrors: any;
+  doNotLogDetailForTheseErrors: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   actionName: string;
   delaySeconds: number;
 }
@@ -43,7 +43,7 @@ export function* retryUponAnyError({
   doNotLogDetailForTheseErrors,
   actionName,
   delaySeconds
-}: RetryUponAnyErrorParams) {
+}: RetryUponAnyErrorParams): Generator<CallEffect<unknown>, void, unknown> {
   let attempt = 0;
   while (true) {
     attempt++;

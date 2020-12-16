@@ -40,10 +40,11 @@ export function die(errorMessage: string): never {
   throw new errors.ExitError(1, errorMessage);
 }
 
-export function hasUpperCase(s: string) {
+export function hasUpperCase(s: string): boolean {
   return s.toLowerCase() != s;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export declare interface Dict<T = any> {
   [key: string]: T;
 }

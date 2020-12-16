@@ -16,10 +16,14 @@
 
 import { readFileSync, writeFileSync } from "fs";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function readJSONFromFile(filename: string): any {
   return JSON.parse(readFileSync(filename, "utf8"));
 }
-
-export async function writeJSONToFile(filename: string, obj: any) {
+export async function writeJSONToFile(
+  filename: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+  obj: any
+): Promise<void> {
   writeFileSync(filename, JSON.stringify(obj, null, 2));
 }

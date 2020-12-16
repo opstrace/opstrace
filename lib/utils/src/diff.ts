@@ -18,6 +18,10 @@ import DeepDiff from "deep-diff";
 /**
  * Deep diff between two object, using lodash
  */
-export function diff(object: any, base: any) {
+export function diff(
+  object: any, // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+  base: any // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): DeepDiff.Diff<any, any>[] | undefined {
   return DeepDiff.diff(object, base);
 }
