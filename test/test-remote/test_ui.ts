@@ -57,8 +57,7 @@ suite("test UI with playwright", function () {
     // the main resource failed to load.
 
     log.info("page.goto()");
-    await page.goto("https://matapple.opstrace.io/", {
-      //CLUSTER_BASE_URL, {
+    await page.goto(CLUSTER_BASE_URL, {
       // Wait until the DOM load event
       waitUntil: "load"
     });
