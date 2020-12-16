@@ -45,6 +45,10 @@ const Login = (props: { state?: State }) => {
     accessDeniedError,
     setAccessDeniedError
   ] = useState<GeneralServerError | null>(null);
+  const [
+    loginFlowError,
+    setLoginFlowError
+  ] = useState<GeneralServerError | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   // This will look for a param like so: /login?rd=%2Fgrafana
   // NOTE: rd must include the host, relative paths do not work.
@@ -132,6 +136,25 @@ const Login = (props: { state?: State }) => {
   // The login flow succeeded (identity communicated and verified), but on the
   // it was detected that this particular user does not have access to the
   // cluster.
+  if (loginFlowError) {
+    return (
+      <ErrorView
+        title="Login problem"
+        subheader=""
+        actions={null}
+        emoji="😕"
+        maxWidth={400}
+      >
+        <Typography>
+          Problem during login flow: {loginFlowError.message}
+        </Typography>
+        <br />
+        <br />
+        <Typography>Try again?</Typography>
+      </ErrorView>
+    );
+  }
+
   if (accessDeniedError) {
     return (
       <ErrorView
