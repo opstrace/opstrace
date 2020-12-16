@@ -47,13 +47,20 @@ dns_cache() {
     unbound_ip
 }
 
-(
-#
-# acquire an exclusive scoped lock, fail after 90s
-# https://linux.die.net/man/1/flock
-#
-flock -x -w 90 200 || exit 1
+if [ "$(uname)" = "Linux" ]; then
+    (
+    #
+    # Check https://github.com/opstrace/opstrace-prelaunch/issues/1744
+    #
+    # acquire an exclusive scoped lock, fail after 90s
+    # https://linux.die.net/man/1/flock
+    #
+    flock -x -w 90 200 || exit 1
 
-dns_cache
+    dns_cache
 
-) 200>/tmp/unbound.lock
+    ) 200>/tmp/unbound.lock
+else
+    dns_cache
+fi
+
