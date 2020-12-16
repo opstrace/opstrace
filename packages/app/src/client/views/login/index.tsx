@@ -40,7 +40,11 @@ const Login = (props: { state?: State }) => {
     getAccessTokenSilently,
     loginWithRedirect
   } = useAuth0();
-  const [loginError, setLoginError] = useState<GeneralServerError | null>(null);
+
+  const [
+    accessDeniedError,
+    setAccessDeniedError
+  ] = useState<GeneralServerError | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   // This will look for a param like so: /login?rd=%2Fgrafana
   // NOTE: rd must include the host, relative paths do not work.
@@ -103,7 +107,7 @@ const Login = (props: { state?: State }) => {
         }
       } catch (e) {
         if (GeneralServerError.isInstance(e.response.data)) {
-          setLoginError(e.response.data);
+          setAccessDeniedError(e.response.data);
         } else {
           console.error(e);
         }
@@ -125,7 +129,10 @@ const Login = (props: { state?: State }) => {
     [accessToken]
   );
 
-  if (loginError) {
+  // The login flow succeeded (identity communicated and verified), but on the
+  // it was detected that this particular user does not have access to the
+  // cluster.
+  if (accessDeniedError) {
     return (
       <ErrorView
         title="Unauthorized"
