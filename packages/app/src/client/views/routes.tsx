@@ -20,6 +20,8 @@ import { Switch, Route, Redirect } from "react-router";
 import WithAuthentication from "client/components/withAuthentication";
 import { EARLY_PREVIEW } from "client/flags";
 
+// I think this imports the default export from ./login which is actually
+// the `LoginPage` object with the <Auth0Provider>...
 import LoginView from "./login";
 import ModuleView from "./module";
 import ChatView from "./chat";

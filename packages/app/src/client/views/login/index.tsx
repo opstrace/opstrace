@@ -34,6 +34,13 @@ interface State extends AppState {
   redirectUri: string;
 }
 
+interface LoginConfigInterface {
+  auth0_client_id: string;
+  auth0_domain: string;
+}
+
+let loginConfig: LoginConfigInterface | undefined;
+
 // https://github.com/JustinBeckwith/retry-axios
 // Attach rax "interceptor" to axios globally.
 rax.attach();
@@ -75,6 +82,32 @@ const axiosDefaultOpts = {
   raxConfig: raxcfg
 };
 
+async function fetchAndSetLoginConfig(): Promise<void> {
+  let response: AxiosResponse | undefined;
+  try {
+    response = await axios.get("/_/public-ui-config", axiosDefaultOpts);
+  } catch (e) {
+    // Expect this when axios could not get a good response after N retries.
+    // console.log('setLoginFlowError')
+    // setLoginFlowError(e);
+    // It seems like there is some higher-level retry going on so even when
+    // we don't handle this in any particular way
+    console.error("error during fetchAndSetLoginConfig:", e);
+  }
+
+  if (response === undefined) {
+    return;
+  }
+
+  console.info(`got public-ui-config. data: `, response.data);
+
+  // Mutate module-level global
+  loginConfig = {
+    auth0_client_id: response.data.auth0_client_id,
+    auth0_domain: response.data.auth0_domain
+  };
+}
+
 const Login = (props: { state?: State }) => {
   const {
     logout,
@@ -88,10 +121,7 @@ const Login = (props: { state?: State }) => {
     accessDeniedError,
     setAccessDeniedError
   ] = useState<GeneralServerError | null>(null);
-  const [
-    loginFlowError,
-    setLoginFlowError
-  ] = useState<GeneralServerError | null>(null);
+  //const [loginFlowError, setLoginFlowError] = useState<GeneralServerError | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   // This will look for a param like so: /login?rd=%2Fgrafana
   // NOTE: rd must include the host, relative paths do not work.
@@ -106,8 +136,17 @@ const Login = (props: { state?: State }) => {
     });
   }, [loginWithRedirect, rd]);
 
+  // Read (non-senstive) UI client config from UI server component.
+  useEffect(() => {
+    fetchAndSetLoginConfig();
+  });
+
   // first get the accessToken from Auth0
   useEffect(() => {
+    if (loginConfig === undefined) {
+      return;
+    }
+
     (async function getAccessToken() {
       try {
         const token = await getAccessTokenSilently({
@@ -176,27 +215,38 @@ const Login = (props: { state?: State }) => {
     [accessToken]
   );
 
+  if (loginConfig === undefined) {
+    return (
+      <></>
+      //   <>
+      //   <Box display="flex" alignItems="center" p={1}>
+      //     <Typography color="textSecondary"> Fetching config ... </Typography>
+      //   </Box>
+      // </>
+    );
+  }
+
   // The login flow succeeded (identity communicated and verified), but on the
   // it was detected that this particular user does not have access to the
   // cluster.
-  if (loginFlowError) {
-    return (
-      <ErrorView
-        title="Login problem"
-        subheader=""
-        actions={null}
-        emoji="😕"
-        maxWidth={400}
-      >
-        <Typography>
-          Problem during login flow: {loginFlowError.message}
-        </Typography>
-        <br />
-        <br />
-        <Typography>Try again?</Typography>
-      </ErrorView>
-    );
-  }
+  // if (loginFlowError) {
+  //   return (
+  //     <ErrorView
+  //       title="Login problem"
+  //       subheader=""
+  //       actions={null}
+  //       emoji="😕"
+  //       maxWidth={400}
+  //     >
+  //       <Typography>Problem during login flow: {loginFlowError.message}</Typography>
+  //       <br />
+  //       <br />
+  //       <Typography>
+  //       Try again?
+  //       </Typography>
+  //     </ErrorView>
+  //   );
+  // }
 
   // The login flow succeeded (identity communicated and verified), but on the
   // it was detected that this particular user does not have access to the
@@ -257,11 +307,15 @@ const LoginPage = () => {
   const onRedirectCallback = useCallback((state: AppState) => {
     setState(state as State);
   }, []);
+
+  // Read (non-senstive) UI client config from UI server component.
+  //useEffect(() => {fetchAndSetLoginConfig()});
+
   return (
     <Page>
       <Auth0Provider
-        domain="opstrace-dev.us.auth0.com"
-        clientId="vs6bgTunbVK4dvdLRj02DptWjOmAVWVM"
+        domain={loginConfig?.auth0_domain || "not initialized"}
+        clientId={loginConfig?.auth0_client_id || "not initialized"}
         audience="https://user-cluster.opstrace.io/api"
         scope="email openid profile"
         useRefreshTokens={true}
