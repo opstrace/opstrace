@@ -23,13 +23,16 @@ import { useCommandService } from "client/services/Command";
 import { ModuleTreeViewContainer } from "client/components/TreeView";
 
 import BranchSelector from "client/views/common/BranchSelector";
+import { usePickerService } from "client/services/Picker";
 
 const ModuleSidebar = () => {
-  const createNewBranch = useCallback(() => {
-    console.log("calling createBranch");
-  }, []);
+  const { activatePickerWithText } = usePickerService();
 
-  const createNewModule = useCallback(() => {
+  const createBranch = useCallback(() => {
+    activatePickerWithText("create branch: ");
+  }, [activatePickerWithText]);
+
+  const createModule = useCallback(() => {
     console.log("calling createModule");
   }, []);
 
@@ -40,30 +43,30 @@ const ModuleSidebar = () => {
       category: "Module",
       handler: e => {
         e.keyboardEvent?.preventDefault();
-        createNewModule();
+        createModule();
       }
     },
-    [createNewModule]
+    [createModule]
   );
 
   const branchActions = (
-    <IconButton size="small" onClick={createNewBranch}>
+    <IconButton size="small" onClick={createBranch}>
       <AddIcon />
     </IconButton>
   );
 
   const moduleActions = (
-    <IconButton size="small" onClick={createNewModule}>
+    <IconButton size="small" onClick={createModule}>
       <AddIcon />
     </IconButton>
   );
 
   return (
     <SideBar>
-      <SideBarContainer title="Branches" actions={branchActions}>
+      <SideBarContainer title="Branches" actions={branchActions} minHeight={50}>
         <BranchSelector />
       </SideBarContainer>
-      <SideBarContainer title="Modules" actions={moduleActions}>
+      <SideBarContainer title="Modules" actions={moduleActions} flexGrow={1}>
         <ModuleTreeViewContainer />
       </SideBarContainer>
     </SideBar>

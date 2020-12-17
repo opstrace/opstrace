@@ -34,7 +34,7 @@ import useCurrentUser from "state/user/hooks/useCurrentUser";
 import { useCommandService } from "client/services/Command";
 
 export const ActivityBarTabs = EARLY_PREVIEW
-  ? ["/module", "/chat", "/history", "/registry", "/cluster"]
+  ? ["/module", "/chat", "/history", "/cluster"]
   : ["/cluster"];
 
 const getDividerColor = (theme: ITheme) => theme.palette.divider;
@@ -71,6 +71,15 @@ const ActivityBar = () => {
         // A user would have to be super fast to hit this - very unlikely, but protect against it all the same.
         return;
       }
+      if (ActivityBarTabs[activeTabIndex] === "/cluster") {
+        // Since we're navigating from /cluster to another tab, we want to clear the url of all subresources
+        history.push({
+          ...history.location,
+          pathname: ActivityBarTabs[index]
+        });
+        return;
+      }
+      // Keep all subresources and replace the tab part of the url
       const tabRegex = new RegExp(`^${ActivityBarTabs[activeTabIndex]}`);
       history.push({
         ...history.location,
