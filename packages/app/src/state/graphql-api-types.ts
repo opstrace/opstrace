@@ -736,6 +736,9 @@ export enum Exporter_Update_Column {
 
 /** columns and relationships of "file" */
 export type File = {
+  /** An object relationship */
+  alias?: Maybe<File>;
+  alias_for?: Maybe<Scalars["uuid"]>;
   base_file_id?: Maybe<Scalars["uuid"]>;
   /** An object relationship */
   branch: Branch;
@@ -792,6 +795,8 @@ export type File_Bool_Exp = {
   _and?: Maybe<Array<Maybe<File_Bool_Exp>>>;
   _not?: Maybe<File_Bool_Exp>;
   _or?: Maybe<Array<Maybe<File_Bool_Exp>>>;
+  alias?: Maybe<File_Bool_Exp>;
+  alias_for?: Maybe<Uuid_Comparison_Exp>;
   base_file_id?: Maybe<Uuid_Comparison_Exp>;
   branch?: Maybe<Branch_Bool_Exp>;
   branch_name?: Maybe<String_Comparison_Exp>;
@@ -818,6 +823,8 @@ export enum File_Constraint {
 
 /** input type for inserting data into table "file" */
 export type File_Insert_Input = {
+  alias?: Maybe<File_Obj_Rel_Insert_Input>;
+  alias_for?: Maybe<Scalars["uuid"]>;
   base_file_id?: Maybe<Scalars["uuid"]>;
   branch?: Maybe<Branch_Obj_Rel_Insert_Input>;
   branch_name?: Maybe<Scalars["String"]>;
@@ -836,6 +843,7 @@ export type File_Insert_Input = {
 
 /** aggregate max on columns */
 export type File_Max_Fields = {
+  alias_for?: Maybe<Scalars["uuid"]>;
   base_file_id?: Maybe<Scalars["uuid"]>;
   branch_name?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
@@ -849,6 +857,7 @@ export type File_Max_Fields = {
 
 /** order by max() on columns of table "file" */
 export type File_Max_Order_By = {
+  alias_for?: Maybe<Order_By>;
   base_file_id?: Maybe<Order_By>;
   branch_name?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
@@ -862,6 +871,7 @@ export type File_Max_Order_By = {
 
 /** aggregate min on columns */
 export type File_Min_Fields = {
+  alias_for?: Maybe<Scalars["uuid"]>;
   base_file_id?: Maybe<Scalars["uuid"]>;
   branch_name?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
@@ -875,6 +885,7 @@ export type File_Min_Fields = {
 
 /** order by min() on columns of table "file" */
 export type File_Min_Order_By = {
+  alias_for?: Maybe<Order_By>;
   base_file_id?: Maybe<Order_By>;
   branch_name?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
@@ -909,6 +920,8 @@ export type File_On_Conflict = {
 
 /** ordering options when selecting data from "file" */
 export type File_Order_By = {
+  alias?: Maybe<File_Order_By>;
+  alias_for?: Maybe<Order_By>;
   base_file_id?: Maybe<Order_By>;
   branch?: Maybe<Branch_Order_By>;
   branch_name?: Maybe<Order_By>;
@@ -932,6 +945,8 @@ export type File_Pk_Columns_Input = {
 
 /** select columns of table "file" */
 export enum File_Select_Column {
+  /** column name */
+  AliasFor = "alias_for",
   /** column name */
   BaseFileId = "base_file_id",
   /** column name */
@@ -958,6 +973,7 @@ export enum File_Select_Column {
 
 /** input type for updating data in table "file" */
 export type File_Set_Input = {
+  alias_for?: Maybe<Scalars["uuid"]>;
   base_file_id?: Maybe<Scalars["uuid"]>;
   branch_name?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
@@ -973,6 +989,8 @@ export type File_Set_Input = {
 
 /** update columns of table "file" */
 export enum File_Update_Column {
+  /** column name */
+  AliasFor = "alias_for",
   /** column name */
   BaseFileId = "base_file_id",
   /** column name */
@@ -1232,6 +1250,7 @@ export enum Module_Update_Column {
 
 /** columns and relationships of "module_version" */
 export type Module_Version = {
+  author_email?: Maybe<Scalars["String"]>;
   /** An object relationship */
   branch: Branch;
   branch_name: Scalars["String"];
@@ -1302,6 +1321,7 @@ export type Module_Version_Bool_Exp = {
   _and?: Maybe<Array<Maybe<Module_Version_Bool_Exp>>>;
   _not?: Maybe<Module_Version_Bool_Exp>;
   _or?: Maybe<Array<Maybe<Module_Version_Bool_Exp>>>;
+  author_email?: Maybe<String_Comparison_Exp>;
   branch?: Maybe<Branch_Bool_Exp>;
   branch_name?: Maybe<String_Comparison_Exp>;
   created_at?: Maybe<Timestamptz_Comparison_Exp>;
@@ -1320,6 +1340,7 @@ export enum Module_Version_Constraint {
 
 /** input type for inserting data into table "module_version" */
 export type Module_Version_Insert_Input = {
+  author_email?: Maybe<Scalars["String"]>;
   branch?: Maybe<Branch_Obj_Rel_Insert_Input>;
   branch_name?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
@@ -1332,6 +1353,7 @@ export type Module_Version_Insert_Input = {
 
 /** aggregate max on columns */
 export type Module_Version_Max_Fields = {
+  author_email?: Maybe<Scalars["String"]>;
   branch_name?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   module_name?: Maybe<Scalars["String"]>;
@@ -1341,6 +1363,7 @@ export type Module_Version_Max_Fields = {
 
 /** order by max() on columns of table "module_version" */
 export type Module_Version_Max_Order_By = {
+  author_email?: Maybe<Order_By>;
   branch_name?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   module_name?: Maybe<Order_By>;
@@ -1350,6 +1373,7 @@ export type Module_Version_Max_Order_By = {
 
 /** aggregate min on columns */
 export type Module_Version_Min_Fields = {
+  author_email?: Maybe<Scalars["String"]>;
   branch_name?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   module_name?: Maybe<Scalars["String"]>;
@@ -1359,6 +1383,7 @@ export type Module_Version_Min_Fields = {
 
 /** order by min() on columns of table "module_version" */
 export type Module_Version_Min_Order_By = {
+  author_email?: Maybe<Order_By>;
   branch_name?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   module_name?: Maybe<Order_By>;
@@ -1389,6 +1414,7 @@ export type Module_Version_On_Conflict = {
 
 /** ordering options when selecting data from "module_version" */
 export type Module_Version_Order_By = {
+  author_email?: Maybe<Order_By>;
   branch?: Maybe<Branch_Order_By>;
   branch_name?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
@@ -1410,6 +1436,8 @@ export type Module_Version_Pk_Columns_Input = {
 /** select columns of table "module_version" */
 export enum Module_Version_Select_Column {
   /** column name */
+  AuthorEmail = "author_email",
+  /** column name */
   BranchName = "branch_name",
   /** column name */
   CreatedAt = "created_at",
@@ -1423,6 +1451,7 @@ export enum Module_Version_Select_Column {
 
 /** input type for updating data in table "module_version" */
 export type Module_Version_Set_Input = {
+  author_email?: Maybe<Scalars["String"]>;
   branch_name?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   module_name?: Maybe<Scalars["String"]>;
@@ -1432,6 +1461,8 @@ export type Module_Version_Set_Input = {
 
 /** update columns of table "module_version" */
 export enum Module_Version_Update_Column {
+  /** column name */
+  AuthorEmail = "author_email",
   /** column name */
   BranchName = "branch_name",
   /** column name */
@@ -2657,6 +2688,7 @@ export type Timestamptz_Comparison_Exp = {
 
 /** columns and relationships of "user" */
 export type User = {
+  active: Scalars["Boolean"];
   avatar?: Maybe<Scalars["String"]>;
   created_at: Scalars["timestamptz"];
   email: Scalars["String"];
@@ -2727,6 +2759,7 @@ export type User_Bool_Exp = {
   _and?: Maybe<Array<Maybe<User_Bool_Exp>>>;
   _not?: Maybe<User_Bool_Exp>;
   _or?: Maybe<Array<Maybe<User_Bool_Exp>>>;
+  active?: Maybe<Boolean_Comparison_Exp>;
   avatar?: Maybe<String_Comparison_Exp>;
   created_at?: Maybe<Timestamptz_Comparison_Exp>;
   email?: Maybe<String_Comparison_Exp>;
@@ -2746,6 +2779,7 @@ export enum User_Constraint {
 
 /** input type for inserting data into table "user" */
 export type User_Insert_Input = {
+  active?: Maybe<Scalars["Boolean"]>;
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
@@ -2824,6 +2858,7 @@ export type User_On_Conflict = {
 
 /** ordering options when selecting data from "user" */
 export type User_Order_By = {
+  active?: Maybe<Order_By>;
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
@@ -2981,6 +3016,8 @@ export enum User_Preference_Update_Column {
 /** select columns of table "user" */
 export enum User_Select_Column {
   /** column name */
+  Active = "active",
+  /** column name */
   Avatar = "avatar",
   /** column name */
   CreatedAt = "created_at",
@@ -2998,6 +3035,7 @@ export enum User_Select_Column {
 
 /** input type for updating data in table "user" */
 export type User_Set_Input = {
+  active?: Maybe<Scalars["Boolean"]>;
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
@@ -3009,6 +3047,8 @@ export type User_Set_Input = {
 
 /** update columns of table "user" */
 export enum User_Update_Column {
+  /** column name */
+  Active = "active",
   /** column name */
   Avatar = "avatar",
   /** column name */
