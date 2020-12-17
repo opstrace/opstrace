@@ -152,8 +152,23 @@ export class DNSClient {
           continue;
         }
       }
+
+      assert(response);
+
+      this.accessToken = response.data["access_token"];
+      this.idToken = response.data["id_token"];
+      this.headers["authorization"] = `Bearer ${this.accessToken}`;
+      this.headers["x-opstrace-id-token"] = this.idToken;
+
+      log.info("write authentication state to current working directory");
+      fs.writeFileSync(accessTokenFile, this.accessToken, {
+        encoding: "utf-8"
+      });
+      fs.writeFileSync(idTokenFile, this.idToken, { encoding: "utf-8" });
+
+      // leave polling loop
+      break;
     }
-    process.stderr.write("\n");
   }
 
   public async GetAll(): Promise<string[]> {
