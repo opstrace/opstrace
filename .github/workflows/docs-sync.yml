@@ -1,0 +1,27 @@
+name: Sync Algolia
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "docs/**"
+
+jobs:
+  algolia:
+    runs-on: ubuntu-latest
+    name: Algolia Sync
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: opstrace/algolia-docs-sync@v1
+        with:
+          algoliaId: "QTVPN6XDU8"
+          algoliaKey: ${{ secrets.ALGOLIA_KEY }}
+          algoliaIndex: "opstrace-docs"
+  vercel:
+    runs-on: ubuntu-latest
+    name: Rebuild
+    steps:
+      - name: Trigger rebuild
+        run: curl -X POST https://api.vercel.com/v1/integrations/deploy/${{ secrets.VERCEL_DEPLOY_ID }}
