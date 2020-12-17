@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createAction, createAsyncAction } from "typesafe-actions";
+import { createAction } from "typesafe-actions";
 import { History } from "history";
 import { Branches, SubscriptionID } from "./types";
 
@@ -31,12 +31,11 @@ export const unsubscribe = createAction("UNSUBSCRIBE_BRANCHES")<
   SubscriptionID
 >();
 
-export const createBranch = createAsyncAction(
-  "CREATE_BRANCH_REQUEST",
-  "CREATE_BRANCH_SUCCESS",
-  "CREATE_BRANCH_FAILURE"
-)<
-  { name: string; history: History },
-  { name: string; history: History },
-  { name: string; history: History }
->();
+export const createBranch = createAction("CREATE_BRANCH")<{
+  history: History;
+  name: string;
+}>();
+export const deleteBranch = createAction("DELETE_BRANCH")<{
+  history: History;
+  name: string;
+}>();
