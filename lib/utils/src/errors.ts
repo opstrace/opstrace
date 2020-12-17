@@ -29,3 +29,14 @@ export class ExitError extends Error {
     Error.captureStackTrace(this, ExitError);
   }
 }
+
+// `create` and `destroy` know the concept of high-level retries -- these are
+// triggered by unforeseen errors, accompanied with a lot of debug information.
+// This here is an error that an inner part can throw to trigger a high-evel
+// retry w/o producing a lot of generic error output.
+export class HighLevelRetry extends Error {
+  constructor(msg: string) {
+    super(msg);
+    Error.captureStackTrace(this, HighLevelRetry);
+  }
+}
