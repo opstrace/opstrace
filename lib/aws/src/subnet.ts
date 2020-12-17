@@ -16,11 +16,13 @@
 
 import { EC2 } from "aws-sdk";
 import { delay, call } from "redux-saga/effects";
+import { strict as assert } from "assert";
 
 import { SECOND, log } from "@opstrace/utils";
 
-import { Subnet, AWSApiError } from "./types";
+import { Subnet, AWSApiError, PickRequired } from "./types";
 import { getTagFilter, getTags, awsPromErrFilter, ec2c } from "./util";
+import { CreateSubnetRequest } from "aws-sdk/clients/ec2";
 
 async function getSubnets(
   clusterName: string
@@ -69,7 +71,11 @@ async function deleteSubnet(subnetId: string) {
  * CREATE request -- note that for other resources we put more effort into not
  * accidentally creating them twice, but maybe that's not needed here!)
  */
-function* createSubnetWithTags(vpc: EC2.Vpc, sntc: any, clusterName: string) {
+function* createSubnetWithTags(
+  vpc: EC2.Vpc,
+  sntc: PickRequired<Subnet, "CidrBlock">,
+  clusterName: string
+) {
   // Set resource tags within the resource creation request to have
   // those tags apply atomically with creation.
   const snettags: EC2.TagList = getTags(clusterName);
@@ -81,10 +87,13 @@ function* createSubnetWithTags(vpc: EC2.Vpc, sntc: any, clusterName: string) {
     snettags.push({ Key: "kubernetes.io/role/internal-elb", Value: "1" });
   }
 
-  const snetCreateParams = {
+  // Ideally next resources should be always defined by the time we call this piece.
+  assert(vpc.VpcId !== undefined);
+
+  const snetCreateParams: CreateSubnetRequest = {
     CidrBlock: sntc.CidrBlock,
     AvailabilityZone: sntc.AvailabilityZone,
-    VpcId: vpc.VpcId!,
+    VpcId: vpc.VpcId,
     TagSpecifications: [
       {
         ResourceType: "subnet",
@@ -131,7 +140,7 @@ export function* ensureSubnetsExist({
   name: string;
   nameTag?: string;
   subnets: Subnet[];
-}) {
+}): Generator<unknown, Subnet[], Subnet[]> {
   // Note(JP): towards making clear what name that is.
   const clusterName = name;
 
@@ -151,7 +160,13 @@ export function* ensureSubnetsExist({
       if (!sntc.AvailabilityZone) {
         throw Error(`No AvailabilityZone specified for subnet`);
       }
-      yield call(createSubnetWithTags, vpc, sntc, clusterName);
+
+      yield call(
+        createSubnetWithTags,
+        vpc,
+        sntc as PickRequired<Subnet, "CidrBlock" | "AvailabilityZone">,
+        clusterName
+      );
     }
 
     const readySubnets = existingSubnets.filter(
@@ -166,7 +181,7 @@ export function* ensureSubnetsExist({
     );
 
     readySubnets.forEach(subnet => {
-      subnet.Public = subnetPublic[subnet.CidrBlock!];
+      subnet.Public = !!subnet.CidrBlock && subnetPublic[subnet.CidrBlock];
     });
 
     if (readySubnets.length === subnets.length) {
@@ -179,9 +194,11 @@ export function* ensureSubnetsExist({
 
 /**
  *
- * @param param0 clusterName: the Opstrace cluster name
+ * @param clusterName: the Opstrace cluster name
  */
-export function* ensureSubnetsDoNotExist(clusterName: string) {
+export function* ensureSubnetsDoNotExist(
+  clusterName: string
+): Generator<unknown, void, Subnet[]> {
   log.info("Initiating subnet teardown");
 
   const delaySeconds = 20;

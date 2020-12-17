@@ -190,6 +190,8 @@ export async function ensureRDSClusterExists({
   return await new RDSClusterRes(opstraceDBClusterName).setup(dbCreateParams);
 }
 
-export async function destroyRDSCluster(opstraceDBClusterName: string) {
+export async function destroyRDSCluster(
+  opstraceDBClusterName: string
+): Promise<void> {
   return await new RDSClusterRes(opstraceDBClusterName).teardown();
 }

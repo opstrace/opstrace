@@ -19,13 +19,14 @@ import AWS from "aws-sdk";
 import { log } from "@opstrace/utils";
 
 import { AWSApiError } from "./types";
+import { PromiseResult } from "aws-sdk/lib/request";
 
 // supposed to be a tidy immutable singleton in the future: write/set once,
 // read/consume from anywhere w/o the need to explicitly pass this through
 // function arguments.
 let awsRegion: string | undefined;
 
-export function setAWSRegion(r: string) {
+export function setAWSRegion(r: string): void {
   if (awsRegion !== undefined) {
     throw new Error("setAWSRegion() was already called before");
   }
@@ -208,7 +209,9 @@ export function stsClient(): AWS.STS {
  *
  * @param prom
  */
-export async function awsPromErrFilter(prom: Promise<any>) {
+export async function awsPromErrFilter<D, E>(
+  prom: Promise<PromiseResult<D, E>>
+): Promise<D> {
   try {
     return await prom;
   } catch (e) {
@@ -224,7 +227,7 @@ export async function awsPromErrFilter(prom: Promise<any>) {
  *
  * Also see https://github.com/aws/aws-sdk-js/issues/2611
  */
-export function throwIfAWSAPIError(err: Error) {
+export function throwIfAWSAPIError(err: Error): void {
   //log.debug("err detail: %s", JSON.stringify(err, null, 2));
   //@ts-ignore: property originalError does not exist on type Error.
   const awserr = err.originalError;
@@ -252,7 +255,7 @@ export function throwIfAWSAPIError(err: Error) {
   throw new AWSApiError(msg, err.name, httpsc);
 }
 
-export function getWaitTimeSeconds(cycle: number) {
+export function getWaitTimeSeconds(cycle: number): number {
   // various callers rely on 0 wait time in cycle 1 (1 corresponds to the first
   // cycle).
   if (cycle == 1) {
@@ -262,7 +265,12 @@ export function getWaitTimeSeconds(cycle: number) {
   return 10;
 }
 
-export const getTagFilter = (clusterName: string) => ({
+export const getTagFilter = (
+  clusterName: string
+): {
+  Name: string;
+  Values: string[];
+} => ({
   Name: `tag:opstrace_cluster_name`,
   Values: [clusterName]
 });
@@ -286,7 +294,7 @@ export const tagResource = ({
   clusterName: string;
   resourceId: string;
   tags?: AWS.EC2.Tag[];
-}): Promise<any> => {
+}): Promise<void> => {
   return new Promise((resolve, reject) => {
     const additionalTags = tags ? tags : [];
     ec2c().createTags(
@@ -310,7 +318,7 @@ export const untagResource = ({
 }: {
   name: string;
   resourceId: string;
-}): Promise<any> => {
+}): Promise<void> => {
   return new Promise((resolve, reject) => {
     ec2c().deleteTags(
       {
@@ -342,7 +350,7 @@ export const getAccountId = (): Promise<string> => {
 export function generateKubeconfigStringForEksCluster(
   region: string,
   cluster: AWS.EKS.Cluster
-) {
+): string {
   return `apiVersion: v1
 preferences: {}
 kind: Config
@@ -350,7 +358,7 @@ kind: Config
 clusters:
 - cluster:
     server: ${cluster.endpoint}
-    certificate-authority-data: ${cluster.certificateAuthority!.data}
+    certificate-authority-data: ${cluster.certificateAuthority?.data}
   name: ${cluster.name}
 
 contexts:

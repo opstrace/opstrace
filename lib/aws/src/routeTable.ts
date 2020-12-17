@@ -111,9 +111,11 @@ abstract class RouteTableRes extends AWSResource<EC2.RouteTable, string> {
     }
 
     log.info("try to delete route table: %s", rt.RouteTableId);
-    await deleteRouteTable({
-      RouteTableId: rt.RouteTableId!
-    });
+    if (rt.RouteTableId) {
+      await deleteRouteTable({
+        RouteTableId: rt.RouteTableId
+      });
+    }
   }
 
   protected async checkDestroySuccess(): Promise<true | string> {

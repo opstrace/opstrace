@@ -116,7 +116,9 @@ export async function createInstanceProfile(
   return ipres.getIpName();
 }
 
-export async function destroyInstanceProfile(opstraceClusterName: string) {
+export async function destroyInstanceProfile(
+  opstraceClusterName: string
+): Promise<void> {
   await new InstanceProfileRes(opstraceClusterName).teardown();
 }
 
@@ -126,7 +128,7 @@ export const addRole = ({
 }: {
   RoleName: string;
   InstanceProfileName: string;
-}) => {
+}): Promise<void> => {
   return new Promise((resolve, reject) => {
     iamClient().addRoleToInstanceProfile(
       { RoleName, InstanceProfileName },
@@ -151,7 +153,7 @@ export const removeRole = ({
 }: {
   RoleName: string;
   InstanceProfileName: string;
-}) => {
+}): Promise<void> => {
   log.info(
     `Ensuring InstanceProfile ${InstanceProfileName} has ${RoleName} role removed`
   );

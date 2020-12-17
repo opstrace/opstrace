@@ -143,7 +143,7 @@ class ASGRes extends AWSResource<
     log.info(
       "%s setup: last scaling activity has status `%s`%s",
       this.rname,
-      lastActivity.StatusCode!,
+      lastActivity.StatusCode,
       msgsuffix
     );
 
@@ -156,7 +156,7 @@ class ASGRes extends AWSResource<
       log.warning(
         "%s setup: last scaling activity has status FAILED: %s",
         this.rname,
-        lastActivity.StatusMessage!
+        lastActivity.StatusMessage
       );
       log.warning(
         "The Auto Scaling group shows a `failed`' scaling event (see above " +
