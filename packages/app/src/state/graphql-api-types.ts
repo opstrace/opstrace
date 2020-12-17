@@ -3086,6 +3086,14 @@ export type CreateBranchMutation = {
   insert_branch_one?: Maybe<Pick<Branch, "name">>;
 };
 
+export type DeleteBranchMutationVariables = Exact<{
+  name: Scalars["String"];
+}>;
+
+export type DeleteBranchMutation = {
+  delete_branch_by_pk?: Maybe<Pick<Branch, "name">>;
+};
+
 export type SubscribeToBranchesSubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
@@ -3386,6 +3394,13 @@ export type UpdateUserMutation = {
 export const CreateBranchDocument = gql`
   mutation CreateBranch($name: String!) {
     insert_branch_one(object: { name: $name }) {
+      name
+    }
+  }
+`;
+export const DeleteBranchDocument = gql`
+  mutation DeleteBranch($name: String!) {
+    delete_branch_by_pk(name: $name) {
       name
     }
   }
@@ -3726,6 +3741,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<CreateBranchMutation>(
           print(CreateBranchDocument),
+          variables
+        )
+      );
+    },
+    DeleteBranch(
+      variables: DeleteBranchMutationVariables
+    ): Promise<{
+      data?: DeleteBranchMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<DeleteBranchMutation>(
+          print(DeleteBranchDocument),
           variables
         )
       );
