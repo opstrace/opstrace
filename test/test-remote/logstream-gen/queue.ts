@@ -66,7 +66,7 @@ export class Queue {
 
   async put(item: any) {
     this.checkClosed();
-    return new Promise((resolvefunc, reject) => {
+    return new Promise<void>((resolvefunc, reject) => {
       if (this.length < this.maxLength) {
         // Accept item immediately (resolve promise immediately). Store in
         // buffer or -- if there is at least one pending get -- then serve item

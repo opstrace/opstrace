@@ -132,6 +132,7 @@ export function timeoutTerminator(timeoutSeconds: number): EventEmitter {
     // End of loop after having been cancelled. Explicitly resolve the promise
     // although nobody waits for its resolution (resource cleanup).
     log.info("timeoutTerminator: cancelled");
+    //@ts-ignore missing one argument (was tested w/o argument, should work)
     resolvefunc();
   });
 
