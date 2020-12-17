@@ -18,6 +18,8 @@ import fs from "fs";
 
 import { log, Dict, die } from "@opstrace/utils";
 import { setAWSRegion } from "@opstrace/aws";
+import { GCPAuthOptions } from "@opstrace/gcp";
+
 import {
   NewRenderedClusterConfigType,
   InfraConfigTypeAWS,
@@ -58,10 +60,15 @@ export async function create(): Promise<void> {
     tenantApiTokens
   ] = genCryptoMaterialForAPIAuth(userClusterConfig);
 
-  let gcpProjectID: string | undefined;
+  //let gcpProjectID: string | undefined;
   if (cli.CLIARGS.cloudProvider == "gcp") {
-    gcpProjectID = util.gcpValidateCredFileAndGetProjectIDOrError();
-    setGcpProjectID(gcpProjectID);
+    const gcpopts: GCPAuthOptions = util.gcpValidateCredFileAndGetDetailOrError();
+    log.info("GCP project ID: %s", gcpopts.projectId);
+    log.info(
+      "GCP service account email notation: %s",
+      gcpopts.credentials.client_email
+    );
+    setGcpProjectID(gcpopts.projectId);
   }
 
   // renderedClusterConfig: internal, complete
@@ -165,7 +172,9 @@ function genCryptoMaterialForAPIAuth(
 
     data_api_authn_pubkey_pem = cryp.getPubkeyAsPem();
 
-    log.info("generated public key for data API auth token (JWT) verification");
+    log.info(
+      "serialized public key for data API auth token (JWT) verification"
+    );
 
     log.debug(
       "public key in PEM-encoded X.509 SubjectPublicKeyInfo/OpenSSL format:\n%s",

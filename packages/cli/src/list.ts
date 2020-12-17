@@ -27,7 +27,7 @@ import * as util from "./util";
 
 export async function list(): Promise<void> {
   if (cli.CLIARGS.cloudProvider == "gcp") {
-    util.gcpValidateCredFileAndGetProjectIDOrError();
+    util.gcpValidateCredFileAndGetDetailOrError();
     await listGKEClusters();
     return;
   }
