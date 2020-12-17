@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call } from "redux-saga/effects";
+import { delay, call, CallEffect } from "redux-saga/effects";
 //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
 import Compute from "@google-cloud/compute";
 import { log, SECOND } from "@opstrace/utils";
@@ -25,7 +25,7 @@ class Routes extends Compute {
   }
   destroy(
     name: string,
-    callback: (err: any, data: any) => Record<string, unknown>
+    callback: (err: Error, data: any) => Record<string, unknown>
   ) {
     //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
     this.request(
@@ -36,7 +36,7 @@ class Routes extends Compute {
       callback
     );
   }
-  list(callback: (err: any, data: any) => void) {
+  list(callback: (err: Error, data: any) => void) {
     //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
     this.request(
       {
@@ -50,7 +50,7 @@ class Routes extends Compute {
 
 const getRoutes = (client: any, networkName: string) =>
   new Promise((resolve, reject) => {
-    client.list((err: any, data: any) => {
+    client.list((err: Error, data: any) => {
       if (err) {
         reject(err);
       } else {
@@ -73,7 +73,7 @@ const getRoutes = (client: any, networkName: string) =>
 
 const destroyRoute = (client: any, name: string) =>
   new Promise((resolve, reject) => {
-    client.destroy(name, (err: any, _: any) => {
+    client.destroy(name, (err: Error, _: any) => {
       if (err) {
         reject(err);
       } else {
@@ -118,7 +118,9 @@ export interface NetworkRequest {
   name: string;
 }
 
-export function* ensureNetworkExists(networkName: string) {
+export function* ensureNetworkExists(
+  networkName: string
+): Generator<CallEffect, boolean, boolean> {
   const client = new Compute();
 
   while (true) {
@@ -151,7 +153,9 @@ export function* ensureNetworkExists(networkName: string) {
   }
 }
 
-export function* ensureNetworkDoesNotExist({ name }: NetworkRequest) {
+export function* ensureNetworkDoesNotExist({
+  name
+}: NetworkRequest): Generator<CallEffect, void, any> {
   const client = new Compute();
 
   const routesClient = new Routes();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call } from "redux-saga/effects";
+import { delay, call, CallEffect } from "redux-saga/effects";
 
 //@ts-ignore : don't know the reason but have to add one now for ESLint :-).
 import Compute from "@google-cloud/compute";
@@ -29,7 +29,7 @@ class Router extends Compute {
     region: string,
     network: string,
     project: string,
-    callback: (err: any, data: any) => Record<string, unknown>
+    callback: (err: Error, data: any) => Record<string, unknown>
   ) {
     //@ts-ignore : don't know the reason but have to add one now for ESLint :-).
     this.request(
@@ -54,7 +54,7 @@ class Router extends Compute {
   destroyGateway(
     name: string,
     region: string,
-    callback: (err: any, data: any) => Record<string, unknown>
+    callback: (err: Error, data: any) => Record<string, unknown>
   ) {
     //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
     this.request(
@@ -68,7 +68,7 @@ class Router extends Compute {
   getGateway(
     name: string,
     region: string,
-    callback: (err: any, data: any) => void
+    callback: (err: Error, data: any) => void
   ) {
     //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
     this.request(
@@ -90,7 +90,7 @@ const doesGatewayExist = async (
   new Promise(async res => {
     try {
       await new Promise((resolve, reject) => {
-        client.getGateway(name, region, (err: any, data: any) => {
+        client.getGateway(name, region, (err: Error, data: any) => {
           if (err) {
             reject(err);
           } else {
@@ -119,13 +119,19 @@ const createGateway = (
   }
 ) =>
   new Promise((resolve, reject) => {
-    client.createGateway(name, region, network, project, (err: any, _: any) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(true);
+    client.createGateway(
+      name,
+      region,
+      network,
+      project,
+      (err: Error, _: any) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(true);
+        }
       }
-    });
+    );
   });
 
 const destroyGateway = (
@@ -139,7 +145,7 @@ const destroyGateway = (
   }
 ) =>
   new Promise((resolve, reject) => {
-    client.destroyGateway(name, region, (err: any, _: any) => {
+    client.destroyGateway(name, region, (err: Error, _: any) => {
       if (err) {
         reject(err);
       } else {
@@ -158,7 +164,7 @@ export function* ensureGatewayExists({
   name,
   region,
   gcpProjectID
-}: NatRequest) {
+}: NatRequest): Generator<CallEffect, boolean, boolean> {
   const client = new Router();
 
   while (true) {
@@ -192,7 +198,7 @@ export function* ensureGatewayExists({
 export function* ensureGatewayDoesNotExist(
   opstraceClusterName: string,
   gcpRegion: string
-) {
+): Generator<CallEffect, void, boolean> {
   const client = new Router();
 
   while (true) {

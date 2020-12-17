@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call } from "redux-saga/effects";
+import { delay, call, CallEffect } from "redux-saga/effects";
 import { google, compute_v1 } from "googleapis";
 import { SECOND, log } from "@opstrace/utils";
 import { getGcpProjectId } from "./cluster";
@@ -88,7 +88,11 @@ export function* ensureAddressExists({
   network: string;
   region: string;
   ipCidrRange: string;
-}) {
+}): Generator<
+  CallEffect,
+  compute_v1.Schema$Address,
+  compute_v1.Schema$Address
+> {
   log.info("create global Address: %s", addressName);
   while (true) {
     const address: compute_v1.Schema$Address = yield call(getAddress, {
@@ -128,7 +132,7 @@ export function* ensureAddressDoesNotExist({
   addressName
 }: {
   addressName: string;
-}) {
+}): Generator<CallEffect, void, compute_v1.Schema$Address> {
   while (true) {
     const address: compute_v1.Schema$Address = yield call(getAddress, {
       name: addressName

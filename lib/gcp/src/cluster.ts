@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call } from "redux-saga/effects";
+import { delay, call, CallEffect } from "redux-saga/effects";
 
 import { ApiError as GCPApiError } from "@google-cloud/common";
 import { google } from "googleapis";
@@ -25,6 +25,7 @@ import {
 
 import { SECOND, log } from "@opstrace/utils";
 import { GKECluster, RUNNING, ERROR } from "./types";
+import { ClusterManagerClient } from "@google-cloud/container/build/src/v1";
 
 const container = google.container("v1");
 
@@ -102,7 +103,7 @@ export async function getAllGKEClusters(): Promise<
 }
 
 const createGKECluster = async (
-  client: any,
+  client: ClusterManagerClient,
   {
     name,
     cluster,
@@ -168,7 +169,7 @@ export function* ensureGKEExists({
   cluster,
   gcpProjectID
 }: GKEExistsRequest): Generator<
-  any,
+  CallEffect,
   gkeProtos.google.container.v1.ICluster,
   any
 > {

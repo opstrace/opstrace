@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call } from "redux-saga/effects";
+import { delay, call, CallEffect } from "redux-saga/effects";
 import { google, sql_v1beta4 } from "googleapis";
 
 import { getGcpProjectId } from "./cluster";
@@ -51,7 +51,9 @@ export async function getSQLInstance(
  * Get the CloudSQL instance NAME in RUNNABLE state associated with this Opstrace cluster, or false.
  * @param opstraceClusterName
  */
-export async function getRunnableSQLInstanceName(opstraceClusterName: string) {
+export async function getRunnableSQLInstanceName(
+  opstraceClusterName: string
+): Promise<string | boolean> {
   const instance = await getSQLInstance(opstraceClusterName);
   if (!instance || instance.state !== "RUNNABLE" || !instance.name) {
     return false;
@@ -84,7 +86,7 @@ export function* ensureSQLInstanceExists({
 }: {
   opstraceClusterName: string;
   instance: sql_v1beta4.Schema$DatabaseInstance;
-}): Generator<any, sql_v1beta4.Schema$DatabaseInstance, any> {
+}): Generator<CallEffect, sql_v1beta4.Schema$DatabaseInstance, any> {
   // Ensure instance has the correct label - this is the primary method for
   // correlating an instance with an Opstrace cluster.
   instance.settings!.userLabels!.opstrace_cluster_name = opstraceClusterName;
@@ -122,7 +124,9 @@ export function* ensureSQLInstanceExists({
   }
 }
 
-export function* ensureSQLInstanceDoesNotExist(opstraceClusterName: string) {
+export function* ensureSQLInstanceDoesNotExist(
+  opstraceClusterName: string
+): Generator<CallEffect, void, any> {
   log.info("SQLInstance teardown: start");
 
   while (true) {

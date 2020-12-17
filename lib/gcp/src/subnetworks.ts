@@ -26,7 +26,7 @@ import { log, SECOND } from "@opstrace/utils";
 const doesSubNetworkExist = async (
   client: any,
   { name }: { name: string }
-): Promise<any> => {
+): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     client
       .getSubnetworks()
@@ -61,7 +61,11 @@ const createSubNetwork = (
   });
 };
 
-const deleteSubNetwork = (client: any, region: string, name: string) => {
+const deleteSubNetwork = (
+  client: any,
+  region: string,
+  name: string
+): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     client
       .region(region)
