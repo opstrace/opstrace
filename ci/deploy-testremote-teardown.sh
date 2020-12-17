@@ -265,7 +265,8 @@ export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-
 
 make test-remote
 
-cp playwright-loginpage.png /build/bk-artifacts || true
+# Relay on screenshots to be created with a certain file name prefix.
+cp playwright-*.png /build/bk-artifacts || true
 
 
 echo "+++ run looker tests"
