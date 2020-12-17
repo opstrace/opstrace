@@ -21,6 +21,9 @@ import {
   sleep
 } from "./testutils";
 
+// Set debug mode for playwright, before importing it
+process.env.DEBUG = "pw:api";
+
 import type { ChromiumBrowser } from "playwright";
 import { chromium } from "playwright";
 
@@ -30,6 +33,7 @@ suite("test_ui_with_headless_browser", function () {
   suiteSetup(async function () {
     log.info("suite setup");
     globalTestSuiteSetupOnce();
+
     log.info("chromium.launch()");
     browser = await chromium.launch();
     log.info("suite setup done");
