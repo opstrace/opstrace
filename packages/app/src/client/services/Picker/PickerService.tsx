@@ -43,6 +43,9 @@ const boundedIndex = (value: number, max: number) => {
   return value;
 };
 
+const PICKER_WIDTH = 400;
+const PICKER_HEIGHT = 500;
+
 function PickerList(props: PickerListProps) {
   const { selectedIndex, onSelect, secondaryAction } = props;
 
@@ -65,7 +68,7 @@ function PickerList(props: PickerListProps) {
   );
 
   return (
-    <Box width={400} height={500}>
+    <Box width={PICKER_WIDTH} height={PICKER_HEIGHT}>
       <List renderItem={renderItem} items={props.options} itemSize={() => 30} />
     </Box>
   );
@@ -102,6 +105,10 @@ function PickerService({ children }: { children: React.ReactNode }) {
   const filterValue = state.text
     ?.replace(activePicker?.activationPrefix || "", "")
     .replace(/^\s+/, "");
+
+  const hasValidationError = activePicker?.textValidator
+    ? !activePicker?.textValidator.test(filterValue || "")
+    : false;
 
   const onSelect = useCallback(
     (selected: PickerOption) => {
@@ -177,7 +184,9 @@ function PickerService({ children }: { children: React.ReactNode }) {
                   );
                 }
                 if (e.key === "Enter") {
-                  onSelect(filteredOptions[selectedIndex]);
+                  if (!hasValidationError) {
+                    onSelect(filteredOptions[selectedIndex]);
+                  }
                 }
               }}
               onBlur={() => {
@@ -195,12 +204,21 @@ function PickerService({ children }: { children: React.ReactNode }) {
           </Box>
           <Divider />
         </Box>
-        <PickerList
-          selectedIndex={selectedIndex}
-          onSelect={onSelect}
-          options={filteredOptions}
-          secondaryAction={activePicker?.secondaryAction}
-        />
+        {hasValidationError ? (
+          <Box width={PICKER_WIDTH} height={PICKER_HEIGHT} textAlign="center">
+            <Typography variant="caption" color="textSecondary">
+              {activePicker?.textValidationFailedMessage ||
+                `Input must satisfy ${activePicker?.textValidator?.toString()}`}
+            </Typography>
+          </Box>
+        ) : (
+          <PickerList
+            selectedIndex={selectedIndex}
+            onSelect={onSelect}
+            options={filteredOptions}
+            secondaryAction={activePicker?.secondaryAction}
+          />
+        )}
       </Dialog>
     </>
   );
