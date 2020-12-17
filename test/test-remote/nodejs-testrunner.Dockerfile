@@ -24,6 +24,13 @@ RUN cat package.json
 
 RUN yarn install --frozen-lockfile
 
+# browserType.launch: Failed to launch chromium because executable doesn't
+# exist at
+# /var/lib/buildkite-agent/.cache/ms-playwright/chromium-833159/chrome-linux/chrome
+# [2020-12-17T10:46:05Z] Try re-installing playwright with "npm install
+# playwright"
+RUN yarn add playwright --frozen-lockfile
+
 # Disable automatic NPM update check (would always show "npm update check
 # failed").
 ENV NO_UPDATE_NOTIFIER true
