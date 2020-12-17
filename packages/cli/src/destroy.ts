@@ -26,7 +26,8 @@ export async function destroy(): Promise<void> {
   let gcpProjectID: string | undefined;
   let gcpRegion: string | undefined;
   if (cli.CLIARGS.cloudProvider == "gcp") {
-    gcpProjectID = util.gcpValidateCredFileAndGetProjectIDOrError();
+    const gcpopts = util.gcpValidateCredFileAndGetDetailOrError();
+    gcpProjectID = gcpopts.projectId;
     gcpRegion = gcpGetRegionToDestroyIn();
   }
 

@@ -18,7 +18,10 @@ import { ZonedDateTime, DateTimeFormatter } from "@js-joda/core";
 import yesno from "yesno";
 
 import { log, hasUpperCase, die, sleep, ExitError } from "@opstrace/utils";
-import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
+import {
+  getValidatedGCPAuthOptionsFromFile,
+  GCPAuthOptions
+} from "@opstrace/gcp";
 import { CLUSTER_NAME_REGEX } from "@opstrace/config";
 
 import * as cli from "./index";
@@ -54,9 +57,9 @@ export function validateClusterNameOrDie(cn: string): void {
  * Do not handle GOOGLE_APPLICATION_CREDENTIALS to not be set; handled
  * elsewhere.
  */
-export function gcpValidateCredFileAndGetProjectIDOrError(): string {
+export function gcpValidateCredFileAndGetDetailOrError(): GCPAuthOptions {
   const fpath = process.env["GOOGLE_APPLICATION_CREDENTIALS"] || "";
-  let opts;
+  let opts: GCPAuthOptions;
   try {
     opts = getValidatedGCPAuthOptionsFromFile(fpath);
   } catch (err) {
@@ -64,7 +67,7 @@ export function gcpValidateCredFileAndGetProjectIDOrError(): string {
       `the environment variable GOOGLE_APPLICATION_CREDENTIALS does not appear to point to a valid file ('${fpath}'): ${err.message}`
     );
   }
-  return opts.projectId;
+  return opts;
 }
 
 export async function promptForProceed(question?: string): Promise<void> {
