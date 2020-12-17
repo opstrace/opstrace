@@ -22,7 +22,7 @@ import { call, delay, CallEffect } from "redux-saga/effects";
 
 import { log } from "./log";
 import { SECOND } from "./time";
-import { ExitError } from "./errors";
+import { ExitError, HighLevelRetry } from "./errors";
 
 export interface RetryUponAnyErrorParams {
   task: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -64,7 +64,8 @@ export function* retryUponAnyError({
     } catch (err) {
       // Cleanly shut down runtime when the inner call stack has thrown
       // ExitError (that's precisely the signal to _not_ retry). To that end,
-      // simply let it bubble up.
+      // simply let it bubble up (rely on ExitError to be handled further
+      // outside).
       if (err instanceof ExitError) {
         throw err;
       }
@@ -80,10 +81,19 @@ export function* retryUponAnyError({
       let logdetail = true;
       for (const etype of doNotLogDetailForTheseErrors) {
         if (err instanceof etype) {
+          log.debug("do not log error detail");
           logdetail = false;
           break;
         }
       }
+
+      // `HighLevelRetry` is precisely the signal to initiate a high-level
+      // retry without creating a lot of noise.
+      if (err instanceof HighLevelRetry) {
+        log.debug("saw HighLevelRetry error: %s", err.message);
+        logdetail = false;
+      }
+
       if (logdetail) {
         log.error(
           "error during %s (attempt %s):\n%s",
