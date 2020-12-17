@@ -19,6 +19,7 @@ export * from "./time";
 export * from "./math";
 export * from "./log";
 export * from "./file";
+export * from "./httpclient";
 export * from "./naming";
 export * from "./sagas";
 export * from "./errors";
