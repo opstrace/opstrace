@@ -41,7 +41,7 @@ export class NatGatewayRes extends AWSResource<
     const ngws = result.NatGateways;
 
     for (const ng of ngws) {
-      log.debug("NG %s: state %s", ng.NatGatewayId!, ng.State!);
+      log.debug("NG %s: state %s", ng.NatGatewayId, ng.State);
     }
 
     if (ngws.length == 1) {
@@ -56,7 +56,7 @@ export class NatGatewayRes extends AWSResource<
     const notDeleted = ngws.filter(ng => ng.State !== "deleted");
     const failed = ngws.filter(ng => ng.State === "failed");
     const ongoing = ngws.filter(
-      ng => !["failed", "deleted"].includes(ng.State!)
+      ng => !ng.State || !["failed", "deleted"].includes(ng.State)
     );
 
     // If state management is done 'right' then there should never be more

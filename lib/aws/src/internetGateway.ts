@@ -122,12 +122,16 @@ class InternetGatewayRes extends AWSResource<EC2.InternetGateway> {
 /**
  * Expected to yield `EC2.InternetGateway` upon success.
  */
-export async function ensureInternetGatewayExists(clusterName: string) {
+export async function ensureInternetGatewayExists(
+  clusterName: string
+): Promise<EC2.InternetGateway> {
   const igr = new InternetGatewayRes(clusterName);
   return await igr.setup();
 }
 
-export async function ensureInternetGatewayDoesNotExist(clusterName: string) {
+export async function ensureInternetGatewayDoesNotExist(
+  clusterName: string
+): Promise<void> {
   const igr = new InternetGatewayRes(clusterName);
   return await igr.teardown();
 }
@@ -144,7 +148,7 @@ export const attachInternetGateway = ({
 }: {
   InternetGatewayId: string;
   VpcId: string;
-}): Promise<any> => {
+}): Promise<void> => {
   log.info("attaching Internet Gateway to Vpc %s", VpcId);
   return new Promise((resolve, reject) => {
     ec2c().attachInternetGateway({ VpcId, InternetGatewayId }, err => {

@@ -15,6 +15,7 @@
  */
 
 import { EC2 } from "aws-sdk";
+import { strict as assert } from "assert";
 
 import { log } from "@opstrace/utils";
 
@@ -53,13 +54,14 @@ export class ElasticIPRes extends AWSResource<EC2.Address> {
     log.info("allocated ec2 address, allocation id: %s", result.AllocationId);
 
     // assume that result.AllocationId is defined (why would it not be?)
+    assert(result.AllocationId);
     // todo: enter a try-to-tag-loop, deadline-control that loop
     // do that with a sub class of AWSResource
     // note that if tagResource() fails then the next invocation of tryCreate()
     // will allocate another ip addr.
     await tagResource({
       clusterName: this.ocname,
-      resourceId: result.AllocationId!
+      resourceId: result.AllocationId
     });
     return true;
   }
@@ -68,7 +70,7 @@ export class ElasticIPRes extends AWSResource<EC2.Address> {
     return await this.getAddrforCluster();
   }
 
-  protected async tryDestroy() {
+  protected async tryDestroy(): Promise<void> {
     const address = await this.getAddrforCluster();
     if (address === false) return;
 
@@ -77,7 +79,7 @@ export class ElasticIPRes extends AWSResource<EC2.Address> {
     // opstrace-prelaunch/issues/1081
     // expect wrapper to ignore this error
     await awsPromErrFilter(
-      ec2c().releaseAddress({ AllocationId: address.AllocationId! }).promise()
+      ec2c().releaseAddress({ AllocationId: address.AllocationId }).promise()
     );
   }
 
@@ -92,7 +94,9 @@ export class ElasticIPRes extends AWSResource<EC2.Address> {
   }
 }
 
-export async function ensureAddressDoesNotExist(clusterName: string) {
+export async function ensureAddressDoesNotExist(
+  clusterName: string
+): Promise<void> {
   const addr = new ElasticIPRes(clusterName);
   await addr.teardown();
 }

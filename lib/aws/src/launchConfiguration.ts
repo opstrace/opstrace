@@ -54,9 +54,9 @@ const getLaunchConfiguration = async ({
  */
 async function createLaunchConfiguration(
   launchConfigParams: AutoScaling.CreateLaunchConfigurationType
-): Promise<any> {
+): Promise<unknown> {
   // result not well-typed in library,
-  const result: any = await awsPromErrFilter(
+  const result: unknown = await awsPromErrFilter(
     autoScalingClient().createLaunchConfiguration(launchConfigParams).promise()
   );
   if (result) {
@@ -99,7 +99,11 @@ export function* ensureLaunchConfigurationExists({
   imageId: string;
   instanceType: string;
   keyName?: string;
-}) {
+}): Generator<
+  unknown,
+  AutoScaling.LaunchConfiguration,
+  AutoScaling.LaunchConfiguration | undefined
+> {
   log.info(`Ensuring LaunchConfiguration ${LaunchConfigurationName} exists`);
   // Note(JP): assume cluster is ready, and then make it so that this
   // assumption is fulfilled.
@@ -159,7 +163,7 @@ export function* ensureLaunchConfigurationDoesNotExist({
   LaunchConfigurationName
 }: {
   LaunchConfigurationName: string;
-}) {
+}): Generator<unknown, void, AutoScaling.LaunchConfiguration> {
   log.info(
     `Ensuring LaunchConfiguration ${LaunchConfigurationName} does not exist`
   );

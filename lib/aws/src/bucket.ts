@@ -33,7 +33,7 @@ export class S3BucketRes extends AWSResource<true> {
   constructor(
     opstraceClusterName: string,
     bucketName: string,
-    retentionPeriod: number = 0,
+    retentionPeriod = 0,
     tenants: string[] = []
   ) {
     super(opstraceClusterName);
@@ -137,7 +137,9 @@ export class S3BucketRes extends AWSResource<true> {
         }
       }
       // Check if the bucket rules contains all the necessary rule ids.
-      return this.lifecycleRules.every(r => ids.includes(r.ID!));
+      return this.lifecycleRules.every(
+        r => r.ID !== undefined && ids.includes(r.ID)
+      );
     } catch (e) {
       if (e instanceof AWSApiError) {
         if (e.statusCode == 404 || e.statusCode == 403) {
@@ -165,7 +167,7 @@ export class S3BucketRes extends AWSResource<true> {
               // "Specifies the Region where the bucket will be created. If you
               // don't specify a Region, the bucket is created in the US East (N.
               // Virginia) Region (us-east-1)."
-              LocationConstraint: s3Client().config.region!
+              LocationConstraint: s3Client().config.region
             }
           })
           .promise()
@@ -210,7 +212,7 @@ export class S3BucketRes extends AWSResource<true> {
 
     // Chek if the `opstrace-uninstall-auto-delete-after-one-day` lifecycle
     // config has been set (name-based convention).
-    const result: AWS.S3.BucketLifecycleConfiguration = await awsPromErrFilter(
+    const result = await awsPromErrFilter(
       s3Client()
         .getBucketLifecycleConfiguration({
           Bucket: this.bname
@@ -218,7 +220,7 @@ export class S3BucketRes extends AWSResource<true> {
         .promise()
     );
 
-    for (const rule of result.Rules) {
+    for (const rule of result?.Rules ?? []) {
       if (rule.ID === "opstrace-uninstall-auto-delete-after-one-day")
         return true;
     }

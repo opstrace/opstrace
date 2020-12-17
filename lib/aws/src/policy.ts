@@ -76,7 +76,7 @@ export function* ensurePolicyExists({
 }: {
   PolicyName: string;
   PolicyDocument: string;
-}) {
+}): Generator<unknown, IAM.Policy, IAM.Policy> {
   while (true) {
     const existingPolicy: IAM.Policy = yield call(getPolicy, {
       PolicyName
@@ -109,7 +109,7 @@ export function* ensurePolicyDoesNotExist({
   PolicyName
 }: {
   PolicyName: string;
-}) {
+}): Generator<unknown, void, IAM.Policy> {
   while (true) {
     const existingPolicy: IAM.Policy = yield call(getPolicy, {
       PolicyName

@@ -183,7 +183,7 @@ class VPCRes extends AWSResource<EC2.Vpc, EC2.CreateVpcRequest> {
 
     if (vpc !== false && this.vpcidForElbTeardown === undefined) {
       // Store VPC ID for subsequent destroy loop iterations.
-      this.vpcidForElbTeardown = vpc.VpcId!;
+      this.vpcidForElbTeardown = vpc.VpcId;
     }
 
     // if set by this or any previous destroy loop iteration then try to delete
@@ -201,11 +201,14 @@ class VPCRes extends AWSResource<EC2.Vpc, EC2.CreateVpcRequest> {
             "vpc teardown: try to delete ELB %s ...",
             lb.LoadBalancerArn
           );
-          await awsPromErrFilter(
-            elbClient()
-              .deleteLoadBalancer({ LoadBalancerArn: lb.LoadBalancerArn! })
-              .promise()
-          );
+
+          if (lb.LoadBalancerArn) {
+            await awsPromErrFilter(
+              elbClient()
+                .deleteLoadBalancer({ LoadBalancerArn: lb.LoadBalancerArn })
+                .promise()
+            );
+          }
         }
       } else {
         // reset state (not necessary, but enables faster exit).
@@ -213,8 +216,8 @@ class VPCRes extends AWSResource<EC2.Vpc, EC2.CreateVpcRequest> {
       }
     }
 
-    if (vpc !== false) {
-      await awsPromErrFilter(ec2c().deleteVpc({ VpcId: vpc.VpcId! }).promise());
+    if (vpc !== false && vpc.VpcId) {
+      await awsPromErrFilter(ec2c().deleteVpc({ VpcId: vpc.VpcId }).promise());
     }
   }
 
@@ -302,12 +305,18 @@ export async function createVPC({
   // not undefined.
   const vpc: EC2.Vpc = await vpcres.setup(params);
 
-  await new VPCAttrRes(clusterName, "enableDnsHostnames", vpc.VpcId!).setup();
-  await new VPCAttrRes(clusterName, "enableDnsSupport", vpc.VpcId!).setup();
+  assert(vpc.VpcId !== undefined);
+
+  await new VPCAttrRes(clusterName, "enableDnsHostnames", vpc.VpcId).setup();
+  await new VPCAttrRes(clusterName, "enableDnsSupport", vpc.VpcId).setup();
 
   return vpc;
 }
 
-export async function destroyVPC({ clusterName }: { clusterName: string }) {
+export async function destroyVPC({
+  clusterName
+}: {
+  clusterName: string;
+}): Promise<void> {
   await new VPCRes(clusterName).teardown();
 }

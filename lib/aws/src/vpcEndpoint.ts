@@ -63,7 +63,7 @@ export class VpcEndpointRes extends AWSResource<
     return await this.lookup();
   }
 
-  protected async tryDestroy() {
+  protected async tryDestroy(): Promise<void> {
     const vpe = await this.lookup();
     if (vpe === false) {
       return;

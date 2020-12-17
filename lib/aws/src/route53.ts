@@ -47,7 +47,9 @@ import { AWSApiError } from "./types";
  *
  * Return after all matching zones have been deleted in the described fashion.
  */
-export async function route53PurgeZonesForDnsName(dnsName: string) {
+export async function route53PurgeZonesForDnsName(
+  dnsName: string
+): Promise<void> {
   log.info("Purge Route53 hosted zone(s) for DNS name: %s", dnsName);
 
   while (true) {
@@ -178,7 +180,7 @@ export async function getRecordsForZone(
       log.debug(
         "route53: got truncated resource record sets response, fetching next batch"
       );
-      params.StartRecordName = result.NextRecordName!;
+      params.StartRecordName = result.NextRecordName;
       params.StartRecordType = result.NextRecordType;
     }
   } while (result.IsTruncated);
@@ -227,7 +229,9 @@ export async function sendChangeRequest(
  * submitted as a "change request" and can then be followed with a so-called
  * change ID. Do this, wait for the task to complete.
  */
-export async function waitForChangeToComplete(change: Route53.ChangeInfo) {
+export async function waitForChangeToComplete(
+  change: Route53.ChangeInfo
+): Promise<void> {
   log.info("route53: wait for submitted change request to complete");
 
   while (true) {

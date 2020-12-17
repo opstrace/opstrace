@@ -169,6 +169,8 @@ export async function ensureRDSInstanceExists({
   return await new RDSInstanceRes(opstraceDBInstanceName).setup(dbCreateParams);
 }
 
-export async function destroyRDSInstance(opstraceDBInstanceName: string) {
+export async function destroyRDSInstance(
+  opstraceDBInstanceName: string
+): Promise<void> {
   return await new RDSInstanceRes(opstraceDBInstanceName).teardown();
 }

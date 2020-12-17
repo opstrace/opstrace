@@ -59,7 +59,7 @@ export class ServiceLinkedRoleRes extends AWSResource<true> {
     return false;
   }
 
-  protected async tryDestroy() {
+  protected async tryDestroy(): Promise<void> {
     log.warning("not cleaning up: %s", this.rname);
   }
 

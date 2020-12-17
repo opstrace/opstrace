@@ -139,7 +139,7 @@ export async function doesEKSClusterExist({
 
   // now see if the unambigious resource tag also matches.
   if (cluster) {
-    const ocn = cluster.tags!.opstrace_cluster_name;
+    const ocn = cluster.tags?.opstrace_cluster_name;
     if (ocn !== undefined && ocn == opstraceClusterName) {
       return cluster;
     }
@@ -190,6 +190,6 @@ export async function ensureEKSExists({
   return await new EKSRes(opstraceClusterName).setup(eksCreateParams);
 }
 
-export async function destroyEKS(opstraceClusterName: string) {
+export async function destroyEKS(opstraceClusterName: string): Promise<void> {
   return await new EKSRes(opstraceClusterName).teardown();
 }
