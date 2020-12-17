@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { put, call, take, fork, cancelled, cancel } from "redux-saga/effects";
+import {
+  put,
+  call,
+  take,
+  takeEvery,
+  fork,
+  cancelled,
+  cancel
+} from "redux-saga/effects";
 import { Task, eventChannel, EventChannel } from "redux-saga";
 import { ActionType } from "typesafe-actions";
 import {
@@ -53,42 +61,32 @@ export default function* branchSubscriptionManager() {
   // once everybody has unsubscribed
   const subscribers = new Set<SubscriptionID>();
 
-  // Fork a subscribe handler
-  yield fork(function* () {
-    while (true) {
-      // wait for a subscribe action
-      const action: ReturnType<typeof actions.subscribe> = yield take(
-        actions.subscribe
-      );
-      // add to tracked subscribers
-      subscribers.add(action.payload);
+  yield takeEvery(actions.subscribe, function* (
+    action: ReturnType<typeof actions.subscribe>
+  ) {
+    // add to tracked subscribers
+    subscribers.add(action.payload);
 
-      if (activeSubscription) {
-        // already subscribed
-        return;
-      }
-
-      const channel = yield call(branchSubscriptionEventChannel);
-
-      // Fork the subscription task
-      activeSubscription = yield fork(executeActionsChannel, channel);
+    if (activeSubscription) {
+      // already subscribed
+      return;
     }
+
+    const channel = yield call(branchSubscriptionEventChannel);
+
+    // Fork the subscription task
+    activeSubscription = yield fork(executeActionsChannel, channel);
   });
 
-  // Fork an unsubscribe handler
-  yield fork(function* () {
-    while (true) {
-      // wait for the unsubscribe action and then cancel the subscription task
-      const action: ReturnType<typeof actions.unsubscribe> = yield take(
-        actions.unsubscribe
-      );
-      // remove from subscribers
-      subscribers.delete(action.payload);
-      // Cancel active subscription if there are no subscribers
-      if (activeSubscription && subscribers.size === 0) {
-        yield cancel(activeSubscription);
-        activeSubscription = undefined;
-      }
+  yield takeEvery(actions.unsubscribe, function* (
+    action: ReturnType<typeof actions.unsubscribe>
+  ) {
+    // remove from subscribers
+    subscribers.delete(action.payload);
+    // Cancel active subscription if there are no subscribers
+    if (activeSubscription && subscribers.size === 0) {
+      yield cancel(activeSubscription);
+      activeSubscription = undefined;
     }
   });
 }
