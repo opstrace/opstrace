@@ -103,35 +103,54 @@ export class DNSClient {
         `Failed to launch default browser, please visit ${verification_uri}`
       );
     }
+    const tokenRequest: AxiosRequestConfig = {
+      method: "POST",
+      url: `${issuer}/oauth/token`,
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      data: qs.stringify({
+        grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        device_code: res.data["device_code"],
+        client_id
+      })
+    };
+
+    // Poll for verification.
     while (true) {
       await delay(res.data["interval"] * 1000);
-      const tokenRequest: AxiosRequestConfig = {
-        method: "POST",
-        url: `${issuer}/oauth/token`,
-        headers: { "content-type": "application/x-www-form-urlencoded" },
-        data: qs.stringify({
-          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-          device_code: res.data["device_code"],
-          client_id
-        })
-      };
+      let response: AxiosResponse | undefined;
       try {
-        const r = await axios.request(tokenRequest);
-        this.accessToken = r.data["access_token"];
-        this.idToken = r.data["id_token"];
-        this.headers["authorization"] = `Bearer ${this.accessToken}`;
-        fs.writeFileSync(accessTokenFile, this.accessToken, {
-          encoding: "utf-8"
-        });
-        this.headers["x-opstrace-id-token"] = this.idToken;
-        fs.writeFileSync(idTokenFile, this.idToken, { encoding: "utf-8" });
-        break;
-      } catch (error) {
-        if (error.response.data["error"] === "authorization_pending") {
-          process.stderr.write(".");
+        response = await axios.request(tokenRequest);
+      } catch (err) {
+        if (err?.response?.data) {
+          const data = err?.response?.data;
+
+          // Handle the expected case of the user not yet having confirmed
+          // the login in their browse, and keep waiting / polling.
+          if (data["error"] === "authorization_pending") {
+            process.stderr.write(".");
+            continue;
+          }
+
+          // Let's see if there is decent error detail in the response.
+          const descr = data["error_description"];
+          if (descr !== undefined) {
+            log.warning("verification failed: %s", descr);
+            // Note(JP): the legacy behavior here is to keep polling. I think
+            // this is probably always known to be a permanent error, and that
+            // we should leave the polling loop.
+            continue;
+          }
+
+          // TODO: think about which cases to handle how. Don't retry
+          // everything.
+          if (err.response) {
+            log.warning("unexpected response: %s", err.response);
+            continue;
+          }
+
+          log.warning("unexpected error: %s", err);
           continue;
         }
-        console.log(error.response.data["error_description"]);
       }
     }
     process.stderr.write("\n");
