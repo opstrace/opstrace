@@ -195,7 +195,7 @@ export class DNSClient {
   }
 
   /**
-   * Perform HTTP request. If response body contains data, decode via JSON and
+   * Perform HTTP request. If response body contains data, JSON-decode and
    * return the resulting object. If the response body does not contain data
    * (length 0), return `undefined`. Perform HTTP request error handling, see
    * below.
@@ -207,31 +207,12 @@ export class DNSClient {
     const action = `DNS service client:${method}`;
     log.debug("do %s", action);
 
-    // const mergedOpts = got.mergeOptions(opts, {
-    //   headers: this.headers,
-    //   // Hard-code JSON mode so that the return type of `httpcl()` below is a
-    //   // response object with the `body` property being the decoded JSON object.
-    //   responseType: "text" as const,
-    //   resolveBodyOnly: false
-    // });
-
-    //opts.headers = this.headers;
-    //opts.responseType = undefined;
-
     const opts = {
       headers: this.headers,
       method: method,
       // If `data` is provided, send as JSON request body.
       json: data
-      // Hard-code JSON mode so that the return type of `httpcl()` below is a
-      // response object with the `body` property being the decoded JSON object.
-      // responseType: "text" as const,
-      // resolveBodyOnly: false
     };
-
-    // if (data !== undefined) {
-    //   opts;
-    // }
 
     // Fire off HTTP request. This is doing basic retrying.
     try {
