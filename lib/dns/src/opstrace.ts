@@ -17,7 +17,7 @@
 import * as fs from "fs";
 
 import qs from "qs";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import open from "open";
 
 import { log } from "@opstrace/utils";
@@ -144,11 +144,11 @@ export class DNSClient {
       url,
       headers: this.headers
     };
-    const r = await axios.request(getRequest);
-    return r.data;
+    const response: AxiosResponse = await axios.request(getRequest);
+    return response.data;
   }
 
-  public async Delete(clustername: string): Promise<any> {
+  public async Delete(clustername: string): Promise<AxiosResponse> {
     log.debug("DNSClient.Delete()");
     const deleteRequest: AxiosRequestConfig = {
       method: "DELETE",
@@ -158,10 +158,11 @@ export class DNSClient {
         clustername
       }
     };
-    return axios.request(deleteRequest);
+    const response: AxiosResponse = await axios.request(deleteRequest);
+    return response;
   }
 
-  public async Create(clustername: string): Promise<any> {
+  public async Create(clustername: string): Promise<AxiosResponse> {
     log.debug("DNSClient.Create()");
     const createRequest: AxiosRequestConfig = {
       method: "POST",
@@ -171,7 +172,8 @@ export class DNSClient {
         clustername
       }
     };
-    return axios.request(createRequest);
+    const response: AxiosResponse = await axios.request(createRequest);
+    return response;
     // Note(JP): expect the following error and die().
     // "code": 403,
     // "errors": [
@@ -187,7 +189,7 @@ export class DNSClient {
   public async AddNameservers(
     clustername: string,
     nameservers: string[]
-  ): Promise<any> {
+  ): Promise<AxiosResponse> {
     log.debug("DNSClient.AddNameservers()");
     const updateRequest: AxiosRequestConfig = {
       method: "PUT",
@@ -198,6 +200,7 @@ export class DNSClient {
         nameservers
       }
     };
-    return axios.request(updateRequest);
+    const response: AxiosResponse = await axios.request(updateRequest);
+    return response;
   }
 }
