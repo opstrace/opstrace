@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback } from "react";
+import React from "react";
 import Skeleton from "@material-ui/lab/Skeleton";
 
 import { Box } from "client/components/Box";
@@ -23,30 +23,14 @@ import { Select } from "client/components/Select";
 import { useDispatch } from "react-redux";
 import { setCurrentBranch } from "state/branch/actions";
 import { useHistory } from "react-router-dom";
-import { useCommandService } from "client/services/Command";
+import BranchPicker from "./BranchPicker";
+import CreateBranchDialog from "./CreateBranchDialog";
 
 const BranchSelector = () => {
   const branches = useBranches();
   const currentBranch = useCurrentBranch();
   const dispatch = useDispatch();
   const history = useHistory();
-
-  const createNewBranch = useCallback(() => {
-    console.log("calling createBranch");
-  }, []);
-
-  useCommandService(
-    {
-      id: "create-branch",
-      description: "Create Branch",
-      category: "Module",
-      handler: e => {
-        e.keyboardEvent?.preventDefault();
-        createNewBranch();
-      }
-    },
-    [createNewBranch]
-  );
 
   return (
     <Box width="100%" p={1}>
@@ -68,6 +52,8 @@ const BranchSelector = () => {
           ))}
         </Select>
       )}
+      <CreateBranchDialog />
+      <BranchPicker />
     </Box>
   );
 };
