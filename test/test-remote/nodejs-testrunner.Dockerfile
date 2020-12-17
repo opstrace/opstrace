@@ -29,6 +29,8 @@ RUN yarn install --frozen-lockfile
 # /var/lib/buildkite-agent/.cache/ms-playwright/chromium-833159/chrome-linux/chrome
 # [2020-12-17T10:46:05Z] Try re-installing playwright with "npm install
 # playwright"
+# https://github.com/microsoft/playwright/pull/2192
+ENV PLAYWRIGHT_BROWSERS_PATH=0
 RUN yarn add playwright --frozen-lockfile
 
 # Disable automatic NPM update check (would always show "npm update check
