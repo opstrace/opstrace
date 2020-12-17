@@ -277,6 +277,14 @@
       - branch_name
       - scope
       backend_only: false
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - branch_name
+      - name
+      - scope
+      backend_only: false
   select_permissions:
   - role: user
     permission:
@@ -285,6 +293,14 @@
       - name
       - scope
       - created_at
+      filter: {}
+  - role: user_admin
+    permission:
+      columns:
+      - branch_name
+      - created_at
+      - name
+      - scope
       filter: {}
 - table:
     schema: public
