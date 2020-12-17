@@ -469,6 +469,7 @@ export async function waitUntilGrafanaIsReachable(
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function wait(probeUrl: string, tenantName: string) {
     let attempt = 0;
     while (true) {

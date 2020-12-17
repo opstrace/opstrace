@@ -29,7 +29,7 @@ class Router extends Compute {
     region: string,
     network: string,
     project: string,
-    callback: (err: Error, data: any) => Record<string, unknown>
+    callback: (err: Error, data: unknown) => Record<string, unknown> | void
   ) {
     //@ts-ignore : don't know the reason but have to add one now for ESLint :-).
     this.request(
@@ -54,7 +54,7 @@ class Router extends Compute {
   destroyGateway(
     name: string,
     region: string,
-    callback: (err: Error, data: any) => Record<string, unknown>
+    callback: (err: Error, data: unknown) => Record<string, unknown> | void
   ) {
     //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
     this.request(
@@ -68,7 +68,7 @@ class Router extends Compute {
   getGateway(
     name: string,
     region: string,
-    callback: (err: Error, data: any) => void
+    callback: (err: Error, data: unknown) => void
   ) {
     //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
     this.request(
@@ -90,7 +90,7 @@ const doesGatewayExist = async (
   new Promise(async res => {
     try {
       await new Promise((resolve, reject) => {
-        client.getGateway(name, region, (err: Error, data: any) => {
+        client.getGateway(name, region, (err: Error) => {
           if (err) {
             reject(err);
           } else {
@@ -105,7 +105,7 @@ const doesGatewayExist = async (
   });
 
 const createGateway = (
-  client: any,
+  client: Router,
   {
     name,
     region,
@@ -119,23 +119,17 @@ const createGateway = (
   }
 ) =>
   new Promise((resolve, reject) => {
-    client.createGateway(
-      name,
-      region,
-      network,
-      project,
-      (err: Error, _: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(true);
-        }
+    client.createGateway(name, region, network, project, (err: Error) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(true);
       }
-    );
+    });
   });
 
 const destroyGateway = (
-  client: any,
+  client: Router,
   {
     name,
     region
@@ -145,7 +139,7 @@ const destroyGateway = (
   }
 ) =>
   new Promise((resolve, reject) => {
-    client.destroyGateway(name, region, (err: Error, _: any) => {
+    client.destroyGateway(name, region, (err: Error) => {
       if (err) {
         reject(err);
       } else {

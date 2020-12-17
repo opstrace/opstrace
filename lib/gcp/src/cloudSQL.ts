@@ -76,7 +76,7 @@ export function* ensureCloudSQLExists({
   region: string;
   ipCidrRange: string;
   opstraceClusterName: string;
-  instance: sql_v1beta4.Schema$DatabaseInstance;
+  instance: sql_v1beta4.Schema$DatabaseInstance; // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): Generator<CallEffect, sql_v1beta4.Schema$DatabaseInstance, any> {
   log.info(`Ensuring CloudSQL exists`);
 

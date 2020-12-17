@@ -28,7 +28,7 @@ export function generateKubeconfigStringForGkeCluster(
   return `apiVersion: v1
 clusters:
 - cluster:
-    certificate-authority-data: ${cluster.masterAuth!.clusterCaCertificate}
+    certificate-authority-data: ${cluster.masterAuth?.clusterCaCertificate}
     server: https://${cluster.endpoint}
   name: ${context}
 contexts:
