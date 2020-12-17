@@ -90,7 +90,7 @@ async function destroySQLDatabase(name: string) {
 export function* ensureSQLDatabaseExists({
   opstraceClusterName
 }: {
-  opstraceClusterName: string;
+  opstraceClusterName: string; // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): Generator<any, sql_v1beta4.Schema$Database, any> {
   while (true) {
     const existingSQLDatabase: sql_v1beta4.Schema$Database = yield call(
@@ -104,7 +104,7 @@ export function* ensureSQLDatabaseExists({
       } catch (e) {
         /**
          Google api returns a 400 (not the expected 409) if the database already exists...
-         
+
          "data": {
           "error": {
             "code": 400,
@@ -138,7 +138,9 @@ export function* ensureSQLDatabaseExists({
   }
 }
 
-export function* ensureSQLDatabaseDoesNotExist(opstraceClusterName: string) {
+export function* ensureSQLDatabaseDoesNotExist(
+  opstraceClusterName: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Generator<any, void, any> {
   log.info("SQLDatabase teardown: start");
 
   while (true) {

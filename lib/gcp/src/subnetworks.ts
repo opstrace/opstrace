@@ -22,6 +22,10 @@ import { ApiError as GCPApiError } from "@google-cloud/common";
 import Compute from "@google-cloud/compute";
 import { log, SECOND } from "@opstrace/utils";
 
+// Currently as @google-cloud/compute does not provide typings - it doesn't
+// make much sense to fix all lint errors for any
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // assume one subnet with that name,  not multiple
 const doesSubNetworkExist = async (
   client: any,
@@ -91,7 +95,7 @@ export function* ensureSubNetworkExists({
   gcpRegion,
   gcpProjectID,
   ipCidrRange
-}: SubnetRequest) {
+}: SubnetRequest): Generator<unknown, void, unknown> {
   const client = new Compute();
 
   const snetname = opstraceClusterName;
@@ -152,7 +156,7 @@ export function* ensureSubNetworkExists({
 export function* ensureSubNetworkDoesNotExist(
   opstraceClusterName: string,
   gcpRegion: string
-) {
+): Generator<unknown, void, unknown> {
   const client = new Compute();
 
   let operation: any;

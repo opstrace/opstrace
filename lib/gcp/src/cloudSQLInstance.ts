@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
 import { delay, call, CallEffect } from "redux-saga/effects";
 import { google, sql_v1beta4 } from "googleapis";
 
@@ -53,7 +54,7 @@ export async function getSQLInstance(
  */
 export async function getRunnableSQLInstanceName(
   opstraceClusterName: string
-): Promise<string | boolean> {
+): Promise<string | false> {
   const instance = await getSQLInstance(opstraceClusterName);
   if (!instance || instance.state !== "RUNNABLE" || !instance.name) {
     return false;
@@ -85,11 +86,12 @@ export function* ensureSQLInstanceExists({
   instance
 }: {
   opstraceClusterName: string;
-  instance: sql_v1beta4.Schema$DatabaseInstance;
+  instance: sql_v1beta4.Schema$DatabaseInstance; // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): Generator<CallEffect, sql_v1beta4.Schema$DatabaseInstance, any> {
   // Ensure instance has the correct label - this is the primary method for
   // correlating an instance with an Opstrace cluster.
-  instance.settings!.userLabels!.opstrace_cluster_name = opstraceClusterName;
+  assert(instance.settings?.userLabels);
+  instance.settings.userLabels.opstrace_cluster_name = opstraceClusterName;
   // Create a random name for the instance to avoid the following constraint:
   // When you delete an instance, you cannot reuse the name of the deleted instance until one week from the deletion date.
   // There is an 82 char limit for instance names - we are fine using ~13 chars for the unix time suffix
@@ -125,7 +127,7 @@ export function* ensureSQLInstanceExists({
 }
 
 export function* ensureSQLInstanceDoesNotExist(
-  opstraceClusterName: string
+  opstraceClusterName: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Generator<CallEffect, void, any> {
   log.info("SQLInstance teardown: start");
 

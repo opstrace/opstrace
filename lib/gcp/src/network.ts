@@ -19,6 +19,9 @@ import { delay, call, CallEffect } from "redux-saga/effects";
 import Compute from "@google-cloud/compute";
 import { log, SECOND } from "@opstrace/utils";
 
+// Currently as @google-cloud/compute does not provide typings - it doesn't
+// make much sense to fix all lint errors for any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 class Routes extends Compute {
   constructor(options = {}) {
     super(options);
@@ -73,7 +76,7 @@ const getRoutes = (client: any, networkName: string) =>
 
 const destroyRoute = (client: any, name: string) =>
   new Promise((resolve, reject) => {
-    client.destroy(name, (err: Error, _: any) => {
+    client.destroy(name, (err: Error) => {
       if (err) {
         reject(err);
       } else {

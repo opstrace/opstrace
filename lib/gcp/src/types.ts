@@ -249,7 +249,7 @@ export const gkeCluster = t.partial(
     nodePools: t.array(partialNodePool),
     locations: t.array(t.string),
     enableKubernetesAlpha: t.boolean,
-    resourceLabels: t.any,
+    resourceLabels: t.unknown,
     labelFingerprint: t.string,
     legacyAbac: t.partial(
       t.interface({

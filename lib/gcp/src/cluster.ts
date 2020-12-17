@@ -56,7 +56,7 @@ export async function doesGKEClusterExist({
 
   if (clusters) {
     for (const c of clusters) {
-      const ocn = c.resourceLabels!.opstrace_cluster_name;
+      const ocn = c.resourceLabels?.opstrace_cluster_name;
       if (ocn !== undefined && ocn == opstraceClusterName) {
         return c;
       }
@@ -129,6 +129,7 @@ const createGKECluster = async (
   google.options({ auth });
   // use the nodejs wrapper around the google api for creation so that releaseChannel can be specified.
   // releaseChannel does not get sent with the @google-cloud/container grpc library. :sadface:
+  // @ts-ignore GKECluster is not compatible with clusters create
   return container.projects.locations.clusters.create({
     parent,
     requestBody: {
@@ -171,6 +172,7 @@ export function* ensureGKEExists({
 }: GKEExistsRequest): Generator<
   CallEffect,
   gkeProtos.google.container.v1.ICluster,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
 > {
   const client = new gkeClient();
@@ -218,7 +220,9 @@ export function* ensureGKEExists({
   }
 }
 
-export function* ensureGKEDoesNotExist(opstraceClusterName: string) {
+export function* ensureGKEDoesNotExist(
+  opstraceClusterName: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Generator<unknown, void, any> {
   log.info("GKE teardown: start");
 
   // current convention: gke cluster name matches OCN.
@@ -248,10 +252,14 @@ export function* ensureGKEDoesNotExist(opstraceClusterName: string) {
     yield delay(30 * SECOND);
 
     try {
+      if (!existingGKECluster.location) {
+        log.info(`No location for cluster %s`, GKEClusterName);
+        continue;
+      }
       yield call(
         destroyGKECluster,
         GKEClusterName,
-        existingGKECluster.location!
+        existingGKECluster.location
       );
     } catch (e) {
       if (e.code && e.code === 3) {

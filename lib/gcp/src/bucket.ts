@@ -47,7 +47,7 @@ const createBucket = async ({
   name: string;
   location: string;
   storage: gcs.Storage;
-}): Promise<[gcs.Bucket, any] | null> => {
+}): Promise<gcs.CreateBucketResponse | null> => {
   return storage.createBucket(name, {
     location
   });
@@ -61,7 +61,7 @@ export const setBucketLifecycle = async ({
   name: string;
   days: number;
   storage: gcs.Storage;
-}): Promise<[gcs.Bucket, any] | null> =>
+}): Promise<gcs.CreateBucketResponse | null> =>
   new Promise((resolve, reject) => {
     const bucket = storage.bucket(name);
     //-

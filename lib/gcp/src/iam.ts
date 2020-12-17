@@ -86,7 +86,7 @@ async function getIAMPolicy({
   try {
     await authorize();
     const resp = await resourcemanager.projects.getIamPolicy({
-      resource: sa.projectId!
+      resource: sa.projectId ?? undefined
     });
     return resp.data;
   } catch (e) {
@@ -123,12 +123,12 @@ async function ensurePolicyBindingExists({
     policy.bindings = [];
   }
 
-  const member = `serviceAccount:${sa.email!}`;
+  const member = `serviceAccount:${sa.email}`;
 
   let done = false;
-  for (const b of policy.bindings!) {
-    if (b.role! === role) {
-      for (const m of b.members!) {
+  for (const b of policy.bindings) {
+    if (b.role === role) {
+      for (const m of b.members ?? []) {
         if (m === member) {
           log.debug("policy is already set, nothing to do");
           done = true;
@@ -137,10 +137,9 @@ async function ensurePolicyBindingExists({
       if (!done) {
         log.debug("adding member to existing role");
         done = true;
-        if (b.members === undefined) {
-          b.members = [];
-        }
-        b.members!.push(member);
+        const members = b.members ?? [];
+        members.push(member);
+        b.members = members;
       }
     }
   }
@@ -148,14 +147,14 @@ async function ensurePolicyBindingExists({
   // role does not exist in policy so add it now
   if (!done) {
     log.debug("adding new policy binding");
-    policy.bindings!.push({ members: [member], role: role });
+    policy.bindings.push({ members: [member], role: role });
   }
 
   //
   // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
   //
   const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
-    resource: sa.projectId!,
+    resource: sa.projectId ?? undefined,
     requestBody: {
       policy: policy
     }
@@ -178,14 +177,14 @@ async function ensureGSAKSALinkExists({
   await authorize();
 
   const role = "roles/iam.workloadIdentityUser";
-  const member = `serviceAccount:${sa.projectId!}.svc.id.goog[${kubernetesServiceAccount}]`;
+  const member = `serviceAccount:${sa.projectId}.svc.id.goog[${kubernetesServiceAccount}]`;
 
   const policy = {
     bindings: [{ members: [member], role: role }]
   };
 
   await iam.projects.serviceAccounts.setIamPolicy({
-    resource: sa.name!,
+    resource: sa.name ?? undefined,
     requestBody: {
       policy: policy
     }
@@ -201,7 +200,7 @@ export function* ensureServiceAccountExists({
   name: string;
   projectId: string;
   role: string;
-  kubernetesServiceAccount: string;
+  kubernetesServiceAccount: string; // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): Generator<CallEffect, string, any> {
   while (true) {
     try {
@@ -236,11 +235,11 @@ async function ensurePolicyBindingDoesNotExist({
     throw new Error("failed to fetch IAM policy");
   }
 
-  const member = `serviceAccount:${sa.email!}`;
+  const member = `serviceAccount:${sa.email}`;
 
-  for (const b of policy.bindings!) {
-    if (b.role! === role) {
-      b.members = b.members!.filter(m => m !== member);
+  for (const b of policy.bindings ?? []) {
+    if (b.role === role) {
+      b.members = b.members?.filter(m => m !== member);
     }
   }
 
@@ -248,7 +247,7 @@ async function ensurePolicyBindingDoesNotExist({
   // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
   //
   const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
-    resource: sa.projectId!,
+    resource: sa.projectId ?? undefined,
     requestBody: {
       policy: policy
     }
@@ -264,7 +263,7 @@ async function deleteServiceAccount({
   sa: iam_v1.Schema$ServiceAccount;
 }) {
   await authorize();
-  await iam.projects.serviceAccounts.delete({ name: sa.name! });
+  await iam.projects.serviceAccounts.delete({ name: sa.name ?? undefined });
 }
 
 export function* ensureServiceAccountDoesNotExist({
@@ -274,13 +273,13 @@ export function* ensureServiceAccountDoesNotExist({
 }: {
   name: string;
   projectId: string;
-  role: string;
-}) {
+  role: string; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}): Generator<unknown, void, any> {
   while (true) {
     try {
       const sa = yield call(getServiceAccount, { projectId, name });
       if (sa !== undefined) {
-        yield call(ensurePolicyBindingDoesNotExist, { sa: sa!, role });
+        yield call(ensurePolicyBindingDoesNotExist, { sa, role });
         yield call(deleteServiceAccount, { sa });
       }
       return;
