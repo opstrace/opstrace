@@ -121,11 +121,11 @@ export function* ensureDNSExists({
 
   const clusters: string[] = yield call([
     opstraceClient,
-    opstraceClient.GetAll
+    opstraceClient.getAllEntries
   ]);
 
   log.debug(
-    "DNS API client GetAll() yielded clusters: %s",
+    "DNS API client getAllEntries() yielded: %s",
     JSON.stringify(clusters, null, 2)
   );
 
