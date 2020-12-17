@@ -15,6 +15,7 @@
  */
 
 import * as fs from "fs";
+import { strict as assert } from "assert";
 
 import qs from "qs";
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
@@ -75,6 +76,7 @@ export class DNSClient {
     if (this.accessToken !== "") {
       return;
     }
+
     const deviceCodeRequest: AxiosRequestConfig = {
       method: "POST",
       url: `${issuer}/oauth/device/code`,
@@ -87,22 +89,32 @@ export class DNSClient {
     };
 
     const res = await axios.request(deviceCodeRequest);
+
     const verification_uri = res.data["verification_uri_complete"];
-    console.log(
-      `Opening browser to sign in in 5 seconds. If it does not open, follow this url: ${verification_uri}`
+    log.info(
+      "Opening browser to sign in to the Opstrace DNS service in a few " +
+        "seconds. If it does not open, follow this url: %s",
+      verification_uri
     );
-    console.log(`Verification code: ${res.data["user_code"]}`);
+    log.info("Verification code: %s", res.data["user_code"]);
+
+    // visualzie the countdown before trying to open the browser.
     for (const _ in [1, 2, 3, 4, 5]) {
       await delay(1000);
       process.stderr.write(".");
     }
+    process.stderr.write("\n");
+
     try {
       open(verification_uri);
-    } catch {
-      console.log(
-        `Failed to launch default browser, please visit ${verification_uri}`
+    } catch (err) {
+      log.info("failed to open browser: %s", err.message);
+      log.info(
+        "Please manually visit this URL in your browser: %s",
+        verification_uri
       );
     }
+
     const tokenRequest: AxiosRequestConfig = {
       method: "POST",
       url: `${issuer}/oauth/token`,
