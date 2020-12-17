@@ -478,7 +478,7 @@ rebuild-testrunner-container-images:
 	# context).
 	cp -n yarn.lock test/test-remote
 	docker build --rm --force-rm \
-		--tag opstrace/test-remote:latest \
+		--tag opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		-f ./test/test-remote/nodejs-testrunner.Dockerfile test/test-remote/
 	rm -f test/test-remote/yarn.lock
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
@@ -517,7 +517,7 @@ test-remote:
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		--dns $(shell ci/dns_cache.sh) \
-		opstrace/test-remote:latest \
+		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && yarn run mocha'
 
 
