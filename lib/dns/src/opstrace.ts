@@ -19,15 +19,24 @@ import { strict as assert } from "assert";
 
 import qs from "qs";
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
+
+import got, { Options as GotOptions } from "got";
+
 import open from "open";
 
-import { log } from "@opstrace/utils";
+import {
+  log,
+  httpcl,
+  debugLogHTTPResponse,
+  HighLevelRetry,
+  die
+} from "@opstrace/utils";
 
 const accessTokenFile = "./access.jwt";
 const idTokenFile = "./id.jwt";
 
+const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
 const issuer = "https://opstrace-dev.us.auth0.com";
-const url = "https://dns-api.opstrace.net/dns/";
 const client_id = "fT9EPILybLT44hQl2xE7hK0eTuH1sb21";
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -84,7 +93,7 @@ export class DNSClient {
       data: qs.stringify({
         client_id,
         scope: "profile email openid",
-        audience: url
+        audience: DNS_SERVICE_URL
       })
     };
 
@@ -184,70 +193,88 @@ export class DNSClient {
     }
   }
 
-  public async GetAll(): Promise<string[]> {
-    log.debug("DNSClient.GetAll()");
-    const getRequest: AxiosRequestConfig = {
-      method: "GET",
-      url,
-      headers: this.headers
-    };
-    const response: AxiosResponse = await axios.request(getRequest);
-    return response.data;
+  private async requestAndHandleErrors(opts: GotOptions): Promise<unknown> {
+    const action = `DNSClient:${opts.method}`;
+    log.debug("start: %s", action);
+
+    opts.headers = this.headers;
+
+    // Hard-code JSON mode so that the return type of `httpcl()` below is not a
+    // response object, but the decoded JSON object.
+    opts.responseType = "json" as const;
+
+    // Fire off HTTP request. This is doing basic retrying logic for transient
+    // issues. Note that with `opts.responseType = "json"` above the return
+    // value is the decoded JSON object (type `unknown`) and if JSON parsing
+    // fails then `got` throws a got.ParseError which derives from
+    // `got.RequestError`, i.e. it is handled below.
+    try {
+      return await httpcl(DNS_SERVICE_URL, opts);
+    } catch (e) {
+      if (e instanceof got.RequestError) {
+        log.error("%s failed: %s: %s", action, e.code, e.message);
+        debugLogHTTPResponse(e.response);
+
+        if (e.response?.statusCode === 403) {
+          die("DNS setup failed with a permanent error (403 HTTP response).");
+        }
+
+        if (e.response?.statusCode === 401) {
+          // TODO: do that really, automatically: delete authentication
+          // state, log in again.
+          log.info("got a 401 response: need to refresh authentication state");
+        }
+
+        // It's actually unlikely that a high-level retry will heal something
+        // at this point, but maybe it does. Let's see, maybe it's better UX to
+        // `die()`, here, too.
+        throw new HighLevelRetry(`${action} failed`);
+      }
+      throw e;
+    }
   }
 
-  public async Delete(clustername: string): Promise<AxiosResponse> {
-    log.debug("DNSClient.Delete()");
-    const deleteRequest: AxiosRequestConfig = {
+  public async GetAll(): Promise<unknown[]> {
+    const data: unknown = this.requestAndHandleErrors({
+      method: "GET"
+    });
+    assert(Array.isArray(data));
+    return data;
+  }
+
+  public async Delete(clustername: string): Promise<void> {
+    this.requestAndHandleErrors({
       method: "DELETE",
-      url,
-      headers: this.headers,
-      data: {
+      json: {
         clustername
       }
-    };
-    const response: AxiosResponse = await axios.request(deleteRequest);
-    return response;
+    });
   }
 
-  public async Create(clustername: string): Promise<AxiosResponse> {
-    log.debug("DNSClient.Create()");
-    const createRequest: AxiosRequestConfig = {
+  public async Create(clustername: string): Promise<void> {
+    this.requestAndHandleErrors({
       method: "POST",
-      url,
-      headers: this.headers,
-      data: {
+      json: {
         clustername
       }
-    };
-    const response: AxiosResponse = await axios.request(createRequest);
-    return response;
-    // Note(JP): expect the following error and die().
-    // "code": 403,
-    // "errors": [
-    //   {
-    //     "message": "Cloud DNS API has not been used in project 540196616614 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/dns.googleapis.com/overview?project=540196616614 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.",
-    //     "domain": "usageLimits",
-    //     "reason": "accessNotConfigured",
-    //     "extendedHelp": "https://console.developers.google.com"
-    //   }
-    // ],
+    });
   }
 
   public async AddNameservers(
     clustername: string,
     nameservers: string[]
-  ): Promise<AxiosResponse> {
-    log.debug("DNSClient.AddNameservers()");
-    const updateRequest: AxiosRequestConfig = {
+  ): Promise<void> {
+    log.debug(
+      "attempt to add name servers for cluster %s: %s",
+      clustername,
+      nameservers
+    );
+    this.requestAndHandleErrors({
       method: "PUT",
-      url,
-      headers: this.headers,
-      data: {
+      json: {
         clustername,
         nameservers
       }
-    };
-    const response: AxiosResponse = await axios.request(updateRequest);
-    return response;
+    });
   }
 }
