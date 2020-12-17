@@ -26,12 +26,12 @@ import { chromium } from "playwright";
 
 let browser: ChromiumBrowser;
 
-suite("test UI with playwright", function () {
+suite("test_ui_with_headless_browser", function () {
   suiteSetup(async function () {
     log.info("suite setup");
     globalTestSuiteSetupOnce();
     log.info("chromium.launch()");
-    browser = await chromium.launch({ headless: false });
+    browser = await chromium.launch();
     log.info("suite setup done");
   });
 
@@ -48,26 +48,14 @@ suite("test UI with playwright", function () {
     log.info("context.newPage()");
     const page = await context.newPage();
 
-    log.info(CLUSTER_BASE_URL);
-    // page.goto will throw an error if:
-    // there's an SSL error (e.g. in case of self-signed certificates).
-    // target URL is invalid.
-    // the timeout is exceeded during navigation.
-    // the remote server does not respond or is unreachable.
-    // the main resource failed to load.
-
-    log.info("page.goto(CLUSTER_BASE_URL)");
-    await page.goto(CLUSTER_BASE_URL, {
-      // Wait until the DOM load event
-      waitUntil: "load"
-    });
-    log.info("loaded");
+    log.info("page.goto(%s)", CLUSTER_BASE_URL);
+    await page.goto(CLUSTER_BASE_URL);
+    log.info("`load` event");
 
     // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
     // <span class="MuiButton-label">Login</span>
-    log.info("page.waitForSelector(css=button)");
+    log.info('page.waitForSelector("css=button")');
     await page.waitForSelector("css=button");
-    log.info("done");
 
     log.info("page.screenshot()");
     await page.screenshot({ path: "playwright-loginpage.png" });
@@ -75,8 +63,8 @@ suite("test UI with playwright", function () {
     log.info('page.click("text=Login")');
     await page.click("text=Login");
 
-    // with the `load` event we'd get a black screenshot.
-    // Waiting a little longer yields the "hit enter to log in" screen.
-    await sleep(10);
+    // work in progress, sleep won't stay here :)
+    await sleep(20);
+    await page.screenshot({ path: "playwright-after-login-click.png" });
   });
 });
