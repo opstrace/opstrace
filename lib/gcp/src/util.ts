@@ -23,7 +23,7 @@ import { GCPAuthOptions, serviceAccountSchema } from "./types";
 export function generateKubeconfigStringForGkeCluster(
   projectid: string,
   cluster: gkeProtos.google.container.v1.ICluster
-) {
+): string {
   const context = `${projectid}_${cluster.name}`;
   return `apiVersion: v1
 clusters:
@@ -70,11 +70,11 @@ export const getValidatedGCPAuthOptionsFromFile = (
 
 let certManagerSA: string | undefined;
 
-export function setCertManagerServiceAccount(sa: string) {
+export function setCertManagerServiceAccount(sa: string): void {
   certManagerSA = sa;
 }
 
-export function getCertManagerServiceAccount() {
+export function getCertManagerServiceAccount(): string {
   if (certManagerSA === undefined) {
     throw new Error("call setCertManagerServiceAccount() first");
   }
@@ -83,11 +83,11 @@ export function getCertManagerServiceAccount() {
 
 let externalDNSSA: string | undefined;
 
-export function setExternalDNSServiceAccount(sa: string) {
+export function setExternalDNSServiceAccount(sa: string): void {
   externalDNSSA = sa;
 }
 
-export function getExternalDNSServiceAccount() {
+export function getExternalDNSServiceAccount(): string {
   if (externalDNSSA === undefined) {
     throw new Error("call setExternalDNSServiceAccount() first");
   }
@@ -96,11 +96,11 @@ export function getExternalDNSServiceAccount() {
 
 let cortexSA: string | undefined;
 
-export function setCortexServiceAccount(sa: string) {
+export function setCortexServiceAccount(sa: string): void {
   cortexSA = sa;
 }
 
-export function getCortexServiceAccount() {
+export function getCortexServiceAccount(): string {
   if (cortexSA === undefined) {
     throw new Error("call setCortexServiceAccount() first");
   }
@@ -109,11 +109,11 @@ export function getCortexServiceAccount() {
 
 let lokiSA: string | undefined;
 
-export function setLokiServiceAccount(sa: string) {
+export function setLokiServiceAccount(sa: string): void {
   lokiSA = sa;
 }
 
-export function getLokiServiceAccount() {
+export function getLokiServiceAccount(): string {
   if (lokiSA === undefined) {
     throw new Error("call setLokiServiceAccount() first");
   }

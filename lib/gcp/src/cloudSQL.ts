@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { call, delay } from "redux-saga/effects";
+import { call, delay, CallEffect } from "redux-saga/effects";
 import { google, sql_v1beta4 } from "googleapis";
 import { log, SECOND } from "@opstrace/utils";
 import {
@@ -77,7 +77,7 @@ export function* ensureCloudSQLExists({
   ipCidrRange: string;
   opstraceClusterName: string;
   instance: sql_v1beta4.Schema$DatabaseInstance;
-}): Generator<any, sql_v1beta4.Schema$DatabaseInstance, any> {
+}): Generator<CallEffect, sql_v1beta4.Schema$DatabaseInstance, any> {
   log.info(`Ensuring CloudSQL exists`);
 
   const auth = new google.auth.GoogleAuth({
@@ -131,7 +131,7 @@ export function* ensureCloudSQLDoesNotExist({
 }: {
   opstraceClusterName: string;
   addressName: string;
-}): Generator<any, any, any> {
+}): Generator<CallEffect, void, unknown> {
   const auth = new google.auth.GoogleAuth({
     scopes: [
       "https://www.googleapis.com/auth/cloud-platform",

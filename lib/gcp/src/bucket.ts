@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call } from "redux-saga/effects";
+import { delay, call, CallEffect } from "redux-saga/effects";
 import * as gcs from "@google-cloud/storage";
 
 import { SECOND, log } from "@opstrace/utils";
@@ -98,7 +98,7 @@ export function* ensureBucketExists({
   bucketName: string;
   retentionDays: number;
   region: string;
-}) {
+}): Generator<CallEffect, unknown, unknown> {
   const storage = new gcs.Storage();
 
   log.info("create GCS bucket: %s", bucketName);
@@ -133,7 +133,11 @@ export function* ensureBucketExists({
   }
 }
 
-export function* emptyBucket({ bucketName }: { bucketName: string }) {
+export function* emptyBucket({
+  bucketName
+}: {
+  bucketName: string;
+}): Generator<CallEffect, void, unknown> {
   const storage = new gcs.Storage();
 
   const bucket = yield call(getBucket, { name: bucketName, storage });

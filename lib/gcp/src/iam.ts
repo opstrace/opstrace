@@ -16,7 +16,7 @@
 
 import { log, SECOND } from "@opstrace/utils";
 import { google, iam_v1 } from "googleapis";
-import { delay, call } from "redux-saga/effects";
+import { delay, call, CallEffect } from "redux-saga/effects";
 
 const iam = google.iam("v1");
 const resourcemanager = google.cloudresourcemanager("v1");
@@ -202,7 +202,7 @@ export function* ensureServiceAccountExists({
   projectId: string;
   role: string;
   kubernetesServiceAccount: string;
-}): Generator<any, string, any> {
+}): Generator<CallEffect, string, any> {
   while (true) {
     try {
       const sa =
