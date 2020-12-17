@@ -29,7 +29,7 @@ import { requestOpenFileWithParams } from "state/file/actions";
 import { setCurrentBranch } from "state/branch/actions";
 import { sanitizeFilePath, sanitizeScope } from "state/utils/sanitize";
 import { useCommandService } from "client/services/Command";
-import { setEditingMode } from "state/file/utils/navigation";
+import { isEditMode, setEditingMode } from "state/file/utils/navigation";
 import { SplitPane } from "client/components/SplitPane";
 import { ModuleEditor } from "client/components/Editor";
 import { useFocusedOpenFile } from "state/file/hooks/useFiles";
@@ -38,8 +38,7 @@ import Layout from "client/layout/MainContent";
 import ModuleOutput from "./ModuleOutput";
 
 const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
-  const { mode, branch, scope = "", name, version, path } = useParams<{
-    mode: string;
+  const { branch, scope = "", name, version, path } = useParams<{
     branch: string;
     scope?: string;
     name: string;
@@ -61,8 +60,7 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const processedInitialLoad = useRef(false);
-  const editing = mode === "e";
-
+  const editing = isEditMode(history);
   // when we first land here we need to check the route params
   // and ensure we request to open the file represented by
   // the route we're on
@@ -154,4 +152,4 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
   );
 };
 
-export default ModuleLayout;
+export default React.memo(ModuleLayout);
