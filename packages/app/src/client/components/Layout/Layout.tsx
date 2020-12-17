@@ -64,10 +64,14 @@ const Layout = (props: LayoutProps) => {
 
   // Hide any initial flickering of recalculating the layout
   useEffect(() => {
+    let timer: number;
     if (nodeRef.current && !visible) {
       // set visible on next RAF
-      setTimeout(() => setVisible(true));
+      timer = setTimeout(() => setVisible(true));
     }
+    return () => {
+      timer && clearTimeout(timer);
+    };
   }, [minChildHeight, visible]);
 
   useEffect(() => {
