@@ -20,7 +20,7 @@ import { strict as assert } from "assert";
 import qs from "qs";
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
-import got, { Options as GotOptions } from "got";
+import got, { Response as GotResponse } from "got";
 
 import open from "open";
 
@@ -28,6 +28,7 @@ import {
   log,
   httpcl,
   debugLogHTTPResponse,
+  debugLogHTTPResponseLight,
   HighLevelRetry,
   die
 } from "@opstrace/utils";
@@ -193,23 +194,54 @@ export class DNSClient {
     }
   }
 
-  private async requestAndHandleErrors(opts: GotOptions): Promise<unknown> {
-    const action = `DNSClient:${opts.method}`;
-    log.debug("start: %s", action);
+  /**
+   * Perform HTTP request. If response body contains data, decode via JSON and
+   * return the resulting object. If the response body does not contain data
+   * (length 0), return `undefined`. Perform HTTP request error handling, see
+   * below.
+   */
+  private async requestAndHandleErrors(
+    method: "GET" | "DELETE" | "POST" | "PUT",
+    data?: Record<string, any>
+  ): Promise<unknown | undefined> {
+    const action = `DNS service client:${method}`;
+    log.debug("do %s", action);
 
-    opts.headers = this.headers;
+    // const mergedOpts = got.mergeOptions(opts, {
+    //   headers: this.headers,
+    //   // Hard-code JSON mode so that the return type of `httpcl()` below is a
+    //   // response object with the `body` property being the decoded JSON object.
+    //   responseType: "text" as const,
+    //   resolveBodyOnly: false
+    // });
 
-    // Hard-code JSON mode so that the return type of `httpcl()` below is not a
-    // response object, but the decoded JSON object.
-    opts.responseType = "json" as const;
+    //opts.headers = this.headers;
+    //opts.responseType = undefined;
 
-    // Fire off HTTP request. This is doing basic retrying logic for transient
-    // issues. Note that with `opts.responseType = "json"` above the return
-    // value is the decoded JSON object (type `unknown`) and if JSON parsing
-    // fails then `got` throws a got.ParseError which derives from
-    // `got.RequestError`, i.e. it is handled below.
+    const opts = {
+      headers: this.headers,
+      method: method,
+      // If `data` is provided, send as JSON request body.
+      json: data
+      // Hard-code JSON mode so that the return type of `httpcl()` below is a
+      // response object with the `body` property being the decoded JSON object.
+      // responseType: "text" as const,
+      // resolveBodyOnly: false
+    };
+
+    // if (data !== undefined) {
+    //   opts;
+    // }
+
+    // Fire off HTTP request. This is doing basic retrying.
     try {
-      return await httpcl(DNS_SERVICE_URL, opts);
+      const resp: GotResponse<string> = await httpcl(DNS_SERVICE_URL, opts);
+      debugLogHTTPResponseLight(resp);
+      if (resp.body.length > 0) {
+        // For a 2xx response, rely on the body to be valid JSON.
+        return JSON.parse(resp.body);
+      }
+      return undefined;
     } catch (e) {
       if (e instanceof got.RequestError) {
         log.error("%s failed: %s: %s", action, e.code, e.message);
@@ -234,30 +266,16 @@ export class DNSClient {
     }
   }
 
-  public async GetAll(): Promise<unknown[]> {
-    const data: unknown = this.requestAndHandleErrors({
-      method: "GET"
-    });
-    assert(Array.isArray(data));
-    return data;
+  public async getAllEntries(): Promise<unknown> {
+    return await this.requestAndHandleErrors("GET");
   }
 
   public async Delete(clustername: string): Promise<void> {
-    this.requestAndHandleErrors({
-      method: "DELETE",
-      json: {
-        clustername
-      }
-    });
+    await this.requestAndHandleErrors("DELETE", { clustername });
   }
 
   public async Create(clustername: string): Promise<void> {
-    this.requestAndHandleErrors({
-      method: "POST",
-      json: {
-        clustername
-      }
-    });
+    await this.requestAndHandleErrors("POST", { clustername });
   }
 
   public async AddNameservers(
@@ -269,12 +287,9 @@ export class DNSClient {
       clustername,
       nameservers
     );
-    this.requestAndHandleErrors({
-      method: "PUT",
-      json: {
-        clustername,
-        nameservers
-      }
+    await this.requestAndHandleErrors("PUT", {
+      clustername,
+      nameservers
     });
   }
 }

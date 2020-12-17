@@ -177,12 +177,12 @@ export function debugLogHTTPResponse(
     `);
 }
 
-export function logHTTPResponseLight(resp: GotResponse): void {
+export function debugLogHTTPResponseLight(resp: GotResponse): void {
   const t1 = (resp.timings.phases.total ?? -1000) / 1000.0;
   const t2 = (resp.timings.phases.firstByte ?? -1000) / 1000.0;
-  log.info(
-    `resp to ${resp.request.options.method} -> ${
+  log.debug(
+    `resp to ${resp.request.options.method}(${resp.requestUrl}) -> ${
       resp.statusCode
-    }. total time: ${t1.toFixed(2)} s. resp time: ${t2.toFixed(2)} `
+    }. total time: ${t1.toFixed(2)} s. resp time: ${t2.toFixed(2)} s.`
   );
 }
