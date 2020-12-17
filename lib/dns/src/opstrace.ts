@@ -72,7 +72,7 @@ export class DNSClient {
     return Promise.resolve(DNSClient.instance);
   }
 
-  public async Login() {
+  public async Login(): Promise<void> {
     if (this.accessToken !== "") {
       return;
     }
@@ -99,6 +99,7 @@ export class DNSClient {
     log.info("Verification code: %s", res.data["user_code"]);
 
     // visualzie the countdown before trying to open the browser.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const _ in [1, 2, 3, 4, 5]) {
       await delay(1000);
       process.stderr.write(".");

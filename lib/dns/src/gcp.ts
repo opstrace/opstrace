@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import { DNS } from "@google-cloud/dns";
-import { DNSZone, DNSRecord } from "./types";
+import { CreateZoneResponse, DNS } from "@google-cloud/dns";
+import { DNSZone, DNSRecord, PartialRequired } from "./types";
 import { constructNSRecordOptions } from "./util";
+import {
+  CreateChangeResponse,
+  DeleteZoneResponse
+} from "@google-cloud/dns/build/src/zone";
 
 const getName = (dnsName: string): string =>
   dnsName.replace(/\.$/, "").replace(/\./g, "-");
@@ -65,7 +69,7 @@ export const createZone = async ({
 }: {
   dnsName: string;
   dns: DNS;
-}): Promise<any> => {
+}): Promise<CreateZoneResponse> => {
   const name = getName(dnsName);
   return dns.createZone(name, {
     description: `Managed by Opstrace`,
@@ -80,7 +84,7 @@ export const deleteZone = async ({
 }: {
   dnsName: string;
   dns: DNS;
-}): Promise<any> => {
+}): Promise<DeleteZoneResponse> => {
   const name = getName(dnsName);
   return dns.zone(name).delete({
     force: true
@@ -93,12 +97,12 @@ export const addNSRecord = async ({
   record
 }: {
   dns: DNS;
-  zone: DNSZone;
+  zone: PartialRequired<DNSZone, "name">;
   record: ReturnType<typeof constructNSRecordOptions>;
-}): Promise<any> => {
+}): Promise<CreateChangeResponse> => {
   return dns
-    .zone(zone.name!)
-    .addRecords([dns.zone(zone.name!).record("ns", record)]);
+    .zone(zone.name)
+    .addRecords([dns.zone(zone.name).record("ns", record)]);
 };
 
 export const removeNSRecord = async ({
@@ -107,14 +111,14 @@ export const removeNSRecord = async ({
   record
 }: {
   dns: DNS;
-  zone: DNSZone;
-  record: DNSRecord;
-}): Promise<any> => {
-  return dns.zone(zone.name!).deleteRecords([
-    dns.zone(zone.name!).record("ns", {
-      name: record.name!,
-      data: record.rrdatas!,
-      ttl: record.ttl!
+  zone: PartialRequired<DNSZone, "name">;
+  record: PartialRequired<DNSRecord, "name" | "rrdatas" | "ttl">;
+}): Promise<CreateChangeResponse> => {
+  return dns.zone(zone.name).deleteRecords([
+    dns.zone(zone.name).record("ns", {
+      name: record.name,
+      data: record.rrdatas,
+      ttl: record.ttl
     })
   ]);
 };

@@ -51,7 +51,7 @@ export const getZone = async ({
             name: r.Name,
             type: r.Type,
             ttl: r.TTL,
-            rrdatas: r.ResourceRecords!.map(r => r.Value)
+            rrdatas: r.ResourceRecords?.map(r => r.Value)
           }));
           resolve({ zone: { name: Id, dnsName: Name }, records });
         });
@@ -69,7 +69,7 @@ export const createZone = async ({
 }: {
   dnsName: string;
   dns: Route53;
-}): Promise<any> => {
+}): Promise<void> => {
   return new Promise((resolve, reject) =>
     dns.createHostedZone(
       {
@@ -99,7 +99,7 @@ export const addNSRecord = async ({
   dns: Route53;
   zone: DNSZone;
   record: ReturnType<typeof constructNSRecordOptions>;
-}): Promise<any> => {
+}): Promise<void> => {
   return new Promise((resolve, reject) =>
     dns.changeResourceRecordSets(
       {
@@ -108,7 +108,7 @@ export const addNSRecord = async ({
             {
               Action: "CREATE",
               ResourceRecordSet: {
-                Name: record.name!,
+                Name: record.name,
                 ResourceRecords: record.data.map(d => ({ Value: d })),
                 TTL: record.ttl,
                 Type: "NS"
@@ -117,7 +117,8 @@ export const addNSRecord = async ({
           ],
           Comment: `Managed by Opstrace`
         },
-        HostedZoneId: zone.name!
+        // FIXME: What if our zone.name is indeed undefined?
+        HostedZoneId: zone.name ?? ""
       },
       err => {
         if (err) {
