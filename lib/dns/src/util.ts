@@ -20,7 +20,11 @@ export const constructNSRecordOptions = ({
 }: {
   name: string;
   nameservers: string[];
-}) => ({
+}): {
+  name: string;
+  data: string[];
+  ttl: number;
+} => ({
   name,
   data: nameservers,
   ttl: 30
@@ -32,4 +36,4 @@ export const getSubdomain = ({
 }: {
   stackName: string;
   dnsName: string;
-}) => `${stackName}.${dnsName}`;
+}): string => `${stackName}.${dnsName}`;

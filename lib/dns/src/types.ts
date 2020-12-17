@@ -30,3 +30,6 @@ export type DNSZone = {
 
 // Denotes support for these 2 providers
 export type Provider = "aws" | "gcp";
+
+export type PartialRequired<T, K extends keyof T> = Omit<T, K> &
+  Required<Pick<T, K>>;

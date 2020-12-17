@@ -15,7 +15,7 @@
  */
 
 import { delay, call } from "redux-saga/effects";
-import { DNS } from "@google-cloud/dns";
+import { CreateZoneResponse, DNS } from "@google-cloud/dns";
 import { Route53 } from "aws-sdk";
 import { DNSZone, DNSRecord, Provider } from "./types";
 import { getSubdomain } from "./util";
@@ -25,6 +25,7 @@ import * as GCP from "./gcp";
 import * as AWS from "./aws";
 
 import { SECOND, log } from "@opstrace/utils";
+import { DeleteZoneResponse } from "@google-cloud/dns/build/src/zone";
 
 export { DNSClient } from "./opstrace";
 
@@ -59,7 +60,7 @@ const createZone = async ({
   dnsName: string;
   dns: DNS | Route53;
   provider: Provider;
-}): Promise<any> => {
+}): Promise<CreateZoneResponse | void | null> => {
   if (provider === "gcp") {
     return GCP.createZone({ dnsName, dns: dns as DNS });
   }
@@ -71,13 +72,14 @@ const createZone = async ({
 
 const deleteZone = async ({
   dnsName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   name,
   dns
 }: {
   dnsName: string;
-  name: string;
+  name?: string;
   dns: DNS | Route53;
-}): Promise<any> => {
+}): Promise<DeleteZoneResponse> => {
   log.debug("deleteZone()");
   // only for GCP since opstrace-prelaunch/issues/1225
   return GCP.deleteZone({ dnsName, dns: dns as DNS });
@@ -94,13 +96,16 @@ export function* ensureDNSExists({
   opstraceClusterName,
   dnsName,
   dnsProvider,
-  target
-}: DNSRequest) {
+  target // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: DNSRequest): Generator<unknown, string, any> {
   const provider = dnsProvider;
   let gcpDNS;
   let awsDNS;
 
-  const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
+  const opstraceClient: DNSClient = yield call([
+    DNSClient,
+    DNSClient.getInstance
+  ]);
 
   // quick tranlation of canonical opstrace cluster name into legacy stack name
   const stackName = opstraceClusterName;
@@ -114,16 +119,20 @@ export function* ensureDNSExists({
     awsDNS = new Route53();
   }
 
-  const clusters = yield call([opstraceClient, opstraceClient.GetAll]);
+  const clusters: string[] = yield call([
+    opstraceClient,
+    opstraceClient.GetAll
+  ]);
 
   log.debug(
     "DNS API client GetAll() yielded clusters: %s",
     JSON.stringify(clusters, null, 2)
   );
 
-  if (!clusters.find((e: any) => e["clustername"] == opstraceClusterName)) {
+  // @ts-ignore either type of opstraceClient.GetAll is wrong or we are doing something wrong here
+  if (!clusters.find(e => e["clustername"] == opstraceClusterName)) {
     log.debug(
-      "cluster name nto find in opstraceClient.GetAll() response, call opstraceClient.Create()"
+      "cluster name not found in opstraceClient.GetAll() response, call opstraceClient.Create()"
     );
     yield call([opstraceClient, opstraceClient.Create], opstraceClusterName);
   }
@@ -157,12 +166,18 @@ export function* ensureDNSExists({
       continue;
     }
     // Add NS record to root
-    const subdomainNsRecord = subZone.records!.find(r => r.type === "NS");
-    yield call(
-      [opstraceClient, opstraceClient.AddNameservers],
-      stackName,
-      subdomainNsRecord!.rrdatas!
-    );
+    const subdomainNsRecord = subZone.records?.find(r => r.type === "NS");
+
+    // TODO: check if we actually can ignore the fact, that there are no name-servers
+    if (!subdomainNsRecord?.rrdatas) {
+      log.info("no NS record to be added");
+    } else {
+      yield call(
+        [opstraceClient, opstraceClient.AddNameservers],
+        stackName,
+        subdomainNsRecord.rrdatas
+      );
+    }
     return subZoneName;
   }
 }
@@ -174,9 +189,12 @@ export function* destroyDNS({
   dnsName
 }: {
   stackName: string;
-  dnsName: string;
-}) {
-  const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
+  dnsName: string; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}): Generator<unknown, void, any> {
+  const opstraceClient: DNSClient = yield call([
+    DNSClient,
+    DNSClient.getInstance
+  ]);
 
   const gcpDNS = new DNS();
 
@@ -193,7 +211,7 @@ export function* destroyDNS({
     try {
       yield call(deleteZone, {
         dnsName: subZoneName,
-        name: subZone.zone.name!,
+        name: subZone.zone.name,
         dns: gcpDNS as DNS
       });
     } catch (err) {
