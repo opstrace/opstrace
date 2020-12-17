@@ -31,7 +31,7 @@ suite("test UI with playwright", function () {
     log.info("suite setup");
     globalTestSuiteSetupOnce();
     log.info("chromium.launch()");
-    browser = await chromium.launch();
+    browser = await chromium.launch({ headless: false });
     log.info("suite setup done");
   });
 
@@ -56,17 +56,27 @@ suite("test UI with playwright", function () {
     // the remote server does not respond or is unreachable.
     // the main resource failed to load.
 
-    log.info("page.goto()");
+    log.info("page.goto(CLUSTER_BASE_URL)");
     await page.goto(CLUSTER_BASE_URL, {
       // Wait until the DOM load event
       waitUntil: "load"
     });
+    log.info("loaded");
+
+    // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
+    // <span class="MuiButton-label">Login</span>
+    log.info("page.waitForSelector(css=button)");
+    await page.waitForSelector("css=button");
+    log.info("done");
+
+    log.info("page.screenshot()");
+    await page.screenshot({ path: "playwright-loginpage.png" });
+
+    log.info('page.click("text=Login")');
+    await page.click("text=Login");
 
     // with the `load` event we'd get a black screenshot.
     // Waiting a little longer yields the "hit enter to log in" screen.
     await sleep(10);
-    log.info("page.screenshot()");
-
-    await page.screenshot({ path: "playwright-loginpage.png" });
   });
 });
