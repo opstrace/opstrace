@@ -490,6 +490,10 @@ test-remote:
 	@# Mount ~/.kube into container: the testrunner requires kubectl to be
 	@# available and properly configured in the cluster.
 	@#
+	@# The test runner's intended wait to leave file system artifacts behind is
+	@# on the host in ${OPSTRACE_BUILD_DIR} is through writing to
+	@# `/test-remote-artifacts` in the container
+	@#
 	@# --tty for colorized output in the terminal
 	@#
 	@# Note(JP): can we do -i to make this Ctrl+C/SIGINTable?
@@ -498,18 +502,21 @@ test-remote:
 	@echo "* Expects kubectl to be configured against to-be-tested cluster"
 	@# Dump cluster-info outside container, for debugging
 	kubectl cluster-info
+	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	@echo "* Start NodeJS/Mocha testrunner in container"
 	source ./secrets/aws-dev-svc-acc-env.sh && \
 	docker run --tty --rm \
 		--net=host \
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
+		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-e KUBECONFIG=/kubeconfig/config \
+		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
 		-e TENANT_DEFAULT_API_TOKEN_FILEPATH \
