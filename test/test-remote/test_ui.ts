@@ -40,7 +40,15 @@ suite("test_ui_with_headless_browser", function () {
     globalTestSuiteSetupOnce();
 
     log.info("chromium.launch()");
-    browser = await chromium.launch();
+    browser = await chromium.launch({
+      args: [
+        // https://github.com/microsoft/playwright/blob/761bd78879c83ed810ae38ef39513b2d874badb1/docs/ci.md#docker
+        "--disable-dev-shm-usage",
+        // https://github.com/microsoft/playwright/issues/4761
+        "--disable-gpu"
+      ]
+    });
+
     log.info("suite setup done");
   });
 
