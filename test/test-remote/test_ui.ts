@@ -22,7 +22,8 @@ import {
 } from "./testutils";
 
 // Set debug mode for playwright, before importing it
-process.env.DEBUG = "pw:api";
+// this does not work, too late probably. set via Makefile entrypoint
+// process.env.DEBUG = "pw:api";
 
 import type { ChromiumBrowser } from "playwright";
 import { chromium } from "playwright";
