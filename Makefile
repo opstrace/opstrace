@@ -505,7 +505,7 @@ test-remote:
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	@echo "* Start NodeJS/Mocha testrunner in container"
 	source ./secrets/aws-dev-svc-acc-env.sh && \
-	docker run --tty --rm \
+	docker run --tty --interactive --rm \
 		--net=host \
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
