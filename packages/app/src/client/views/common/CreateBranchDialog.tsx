@@ -54,6 +54,7 @@ const CreateBranchPicker = () => {
   useCommandService({
     id: "create-branch-picker",
     description: "Create Branch",
+    keybindings: ["mod+b"],
     handler: e => {
       e.keyboardEvent?.preventDefault();
       activatePickerWithText("create branch: ");
