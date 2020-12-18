@@ -29,6 +29,11 @@ import { chromium } from "playwright";
 
 let browser: ChromiumBrowser;
 
+// Generate and return a path in the artifact directory
+function artipath(filename: string) {
+  return path.join(TEST_REMOTE_ARTIFACT_DIRECTORY, filename);
+}
+
 suite("test_ui_with_headless_browser", function () {
   suiteSetup(async function () {
     log.info("suite setup");
@@ -62,7 +67,9 @@ suite("test_ui_with_headless_browser", function () {
     await page.waitForSelector("css=button");
 
     log.info("page.screenshot()");
-    await page.screenshot({ path: "playwright-loginpage.png" });
+    await page.screenshot({
+      path: artipath("playwright-loginpage.png")
+    });
 
     log.info('page.click("text=Login")');
     await page.click("text=Login");

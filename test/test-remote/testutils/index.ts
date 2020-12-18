@@ -82,6 +82,7 @@ export declare interface Dict<T = any> {
  * effect of import became intolerable.
  */
 export let CLUSTER_BASE_URL: string;
+export let TEST_REMOTE_ARTIFACT_DIRECTORY: string;
 export let TENANT_DEFAULT_LOKI_API_BASE_URL: string;
 export let TENANT_DEFAULT_CORTEX_API_BASE_URL: string;
 export let TENANT_DEFAULT_API_TOKEN_FILEPATH: string | undefined;
@@ -123,6 +124,27 @@ export function globalTestSuiteSetupOnce() {
   log.info(
     "TENANT_SYSTEM_API_TOKEN_FILEPATH: %s (if undefined: don't authenticate requests)",
     TENANT_SYSTEM_API_TOKEN_FILEPATH
+  );
+
+  // When the test runner is meant to create output artifacts (files) then it
+  // needs to know which directory it's supposed to write them in. Default to
+  // the current working directory but allow this to be set via env var -- used
+  // for containerized invocation of the test runner during `make test-remote`.
+  TEST_REMOTE_ARTIFACT_DIRECTORY =
+    process.env.TEST_REMOTE_ARTIFACT_DIRECTORY || ".";
+
+  // throws an error if TEST_REMOTE_ARTIFACT_DIRECTORY does not exist.
+  if (!fs.lstatSync(TEST_REMOTE_ARTIFACT_DIRECTORY).isDirectory()) {
+    log.error(
+      "TEST_REMOTE_ARTIFACT_DIRECTORY does not seem to be a directory: %s",
+      TEST_REMOTE_ARTIFACT_DIRECTORY
+    );
+    process.exit(1);
+  }
+
+  log.info(
+    "Using TEST_REMOTE_ARTIFACT_DIRECTORY: %s",
+    TEST_REMOTE_ARTIFACT_DIRECTORY
   );
 
   for (const tfp of [
