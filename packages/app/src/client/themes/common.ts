@@ -33,6 +33,7 @@ const common: ThemeOptions = {
       indicatorColor: "primary",
       TabIndicatorProps: {
         style: {
+          transitionDuration: "unset",
           left: "0px",
           width: "3px",
           right: "unset"
