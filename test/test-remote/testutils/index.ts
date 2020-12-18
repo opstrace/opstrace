@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { strict as assert } from "assert";
+// import { strict as assert } from "assert";
 import events from "events";
 import fs, { readFileSync } from "fs";
 import os from "os";
@@ -104,6 +104,7 @@ export function globalTestSuiteSetupOnce() {
     log.error("env variable OPSTRACE_CLUSTER_NAME must be set");
     process.exit(1);
   }
+
   const provider: string = process.env.OPSTRACE_CLOUD_PROVIDER || "";
   if (!provider) {
     log.error(
@@ -165,7 +166,14 @@ export function globalTestSuiteSetupOnce() {
         tfp,
         JSON.stringify(claims, null, 2)
       );
-      assert.equal(claims["aud"], `opstrace-cluster-${clusterName}`);
+      if (claims["aud"] !== `opstrace-cluster-${clusterName}`) {
+        log.error(
+          "aud claim (%s) does not match expected value %s",
+          claims["aud"],
+          `opstrace-cluster-${clusterName}`
+        );
+        process.exit(1);
+      }
     }
   }
 
