@@ -39,7 +39,7 @@ const Layout = (props: {
       description: display.state.sidebarVisible
         ? "Hide Sidebar"
         : "Show Sidebar",
-      keybindings: ["mod+b"],
+      keybindings: ["mod+shift+b"],
       category: "View",
       handler: e => {
         e.keyboardEvent?.preventDefault();
