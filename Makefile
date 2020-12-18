@@ -525,7 +525,43 @@ test-remote:
 		-e AWS_SECRET_ACCESS_KEY \
 		--dns $(shell ci/dns_cache.sh) \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && DEBUG=pw:api yarn run mocha  --grep test_ui'
+		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && yarn run mocha --grep test_ui --invert'
+
+# Note(JP): dirty duplication. This is supposed to be the _exact_ same as the
+# test-remote target abvove, but instead of
+#    yarn run mocha --grep test_ui --invert
+# do
+#    DEBUG=pw:api
+#    yarn run mocha --grep test_ui
+# -> `make test-remote` runs all tests except those that have `test_ui` in their
+#     suite/test name. `make test-remote-ui` runs all tests that match.
+#     Note: `--invert, -i  Inverts --grep and --fgrep matches`.
+.PHONY: test-remote-ui
+test-remote-ui:
+	kubectl cluster-info
+	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
+	source ./secrets/aws-dev-svc-acc-env.sh && \
+	docker run --tty --interactive --rm \
+		--net=host \
+		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/test-remote \
+		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
+		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
+		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v /tmp:/tmp \
+		-u $(shell id -u):${DOCKER_GID_HOST} \
+		-v /etc/passwd:/etc/passwd \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-e KUBECONFIG=/kubeconfig/config \
+		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
+		-e OPSTRACE_CLUSTER_NAME \
+		-e OPSTRACE_CLOUD_PROVIDER \
+		-e TENANT_DEFAULT_API_TOKEN_FILEPATH \
+		-e TENANT_SYSTEM_API_TOKEN_FILEPATH \
+		-e AWS_ACCESS_KEY_ID \
+		-e AWS_SECRET_ACCESS_KEY \
+		--dns $(shell ci/dns_cache.sh) \
+		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
+		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && DEBUG=pw:api yarn run mocha --grep test_ui'
 
 
 # Used by CI:
