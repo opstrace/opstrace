@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import path from "path";
+
 import {
   log,
   globalTestSuiteSetupOnce,
   CLUSTER_BASE_URL,
+  TEST_REMOTE_ARTIFACT_DIRECTORY,
   sleep
 } from "./testutils";
 
@@ -84,7 +87,32 @@ suite("test_ui_with_headless_browser", function () {
     await page.click("text=Login");
 
     // work in progress, sleep won't stay here :)
-    await sleep(20);
-    await page.screenshot({ path: "playwright-after-login-click.png" });
+    // can be improved using the following event log:
+    // pw:api => page.click started +0ms
+    // pw:api waiting for selector "text=Login" +2ms
+    // pw:api   selector resolved to visible <span class="MuiButton-label">Login</span> +4ms
+    // pw:api attempting click action +2ms
+    // pw:api   waiting for element to be visible, enabled and not moving +1ms
+    // pw:api   element is visible, enabled and does not move +14ms
+    // pw:api   scrolling into view if needed +0ms
+    // pw:api   done scrolling +1ms
+    // pw:api   checking that element receives pointer events at (556.37,459) +1ms
+    // pw:api   element does receive pointer events +4ms
+    // pw:api   performing click action +1ms
+    // pw:api   click action done +9ms
+    // pw:api   waiting for scheduled navigations to finish +0ms
+    // pw:api   navigated to "https://opstrace-dev.us.auth0.com/authorize?audience=https%3A%2F%2Fuser-cluster.opstrace.io%2Fapi&scope=openid%20profile%20email%20offline_access&client_id=5MoCYfPXPuEzceBLRUr6T6SAklT2GDys&redirect_uri=https%3A%2F%2Fjp7.opstrace.io&response_type=code&response_mode=web_message&state=dFI1Y1JPUH5SVGVqdmFXeEdibUxxZjRUaDYyRk5PN3NMQzJpcmlKQVBhWg%3D%3D&nonce=U35admNuVDZ3ZzlRd25za3FMOElBRWw2Q2tqU2E3UThzMXlFdlRqRF8xRg%3D%3D&code_challenge=M2I5M1dbD022JJsdAVfq3Ap50J9NeMc8ujcE9GMjNvg&code_challenge_method=S256&prompt=none&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4yLjAifQ%3D%3D" +478ms
+    // pw:api   "load" event fired +245ms
+    // pw:api   "domcontentloaded" event fired +0ms
+    // pw:api   navigated to "https://opstrace-dev.us.auth0.com/login?state=g6Fo2SA2c2ExS011UXBjWkxHUE4xU2RoOE1ZZUV6dExTd0pYS6N0aWTZIDVMR1lCc3ZGYzBzVk1kWG5ldkdMYTc2YmUtNGpNR2hIo2NpZNkgNU1vQ1lmUFhQdUV6Y2VCTFJVcjZUNlNBa2xUMkdEeXM&client=5MoCYfPXPuEzceBLRUr6T6SAklT2GDys&protocol=oauth2&audience=https%3A%2F%2Fuser-cluster.opstrace.io%2Fapi&scope=openid%20profile%20email%20offline_access&redirect_uri=https%3A%2F%2Fjp7.opstrace.io%2Flogin&response_type=code&response_mode=query&nonce=c0FPNXhyMzA2OHg2ODhOTlY4YWZ2cC1ROXZmamhTajNUSWRxbHU1NTRhSg%3D%3D&code_challenge=QLiigAsWKNn8IGoKLbo2xTR8_yvRjFwDZo8Izdal3dY&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4yLjAifQ%3D%3D" +130ms
+    // pw:api   navigated to "https://opstrace-dev.us.auth0.com/login?state=g6Fo2SA2c2ExS011UXBjWkxHUE4xU2RoOE1ZZUV6dExTd0pYS6N0aWTZIDVMR1lCc3ZGYzBzVk1kWG5ldkdMYTc2YmUtNGpNR2hIo2NpZNkgNU1vQ1lmUFhQdUV6Y2VCTFJVcjZUNlNBa2xUMkdEeXM&client=5MoCYfPXPuEzceBLRUr6T6SAklT2GDys&protocol=oauth2&audience=https%3A%2F%2Fuser-cluster.opstrace.io%2Fapi&scope=openid%20profile%20email%20offline_access&redirect_uri=https%3A%2F%2Fjp7.opstrace.io%2Flogin&response_type=code&response_mode=query&nonce=c0FPNXhyMzA2OHg2ODhOTlY4YWZ2cC1ROXZmamhTajNUSWRxbHU1NTRhSg%3D%3D&code_challenge=QLiigAsWKNn8IGoKLbo2xTR8_yvRjFwDZo8Izdal3dY&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4yLjAifQ%3D%3D" +0ms
+    // pw:api   navigations have finished +1ms
+    // pw:api <= page.click succeeded +1ms
+    // pw:api   "domcontentloaded" event fired +242ms
+    // pw:api   "load" event fired +1s
+    await sleep(10);
+    await page.screenshot({
+      path: artipath("playwright-after-login-click.png")
+    });
   });
 });
