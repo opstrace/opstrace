@@ -525,7 +525,7 @@ test-remote:
 		-e AWS_SECRET_ACCESS_KEY \
 		--dns $(shell ci/dns_cache.sh) \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && yarn run mocha'
+		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && DEBUG=pw:api yarn run mocha  --grep test_ui'
 
 
 # Used by CI:
