@@ -33,7 +33,7 @@
     "dockerode": "^3.2.1",
     "express": "^4.17.1",
     "get-port": "^5.1.1",
-    "got": "11.8.0",
+    "got": "11.8.1",
     "http-terminator": "^2.0.3",
     "logfmt": "^1.3.2",
     "long": "^4.0.0",
