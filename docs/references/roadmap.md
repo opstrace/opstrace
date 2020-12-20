@@ -6,7 +6,7 @@ Our early access version provides a foundation that solves many [real pain point
 But we know there is still a lot more to do to have a _complete_ observability platform that is more than just private, secure and cost-effective.
 This high-level roadmap highlights major guideposts along our path toward that goal.
 
-**Opstrace Collaborative UI™**
+**Opstrace Collaborative UI**
 
 * Today's observability tools are disjoint from the day-to-day development process.
 For example, dashboards can break easily with a deploy and sharing analyses is hard (screenshots anyone?).
