@@ -110,7 +110,10 @@ suite("test_ui_with_headless_browser", function () {
     // pw:api <= page.click succeeded +1ms
     // pw:api   "domcontentloaded" event fired +242ms
     // pw:api   "load" event fired +1s
-    await sleep(10);
+
+    // Wait for CI-specific username/pw login form to appear
+    await page.waitForSelector("text=Don't remember your password?");
+
     await page.screenshot({
       path: artipath("playwright-after-login-click.png")
     });
