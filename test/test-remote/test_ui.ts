@@ -79,7 +79,7 @@ suite("test_ui_with_headless_browser", function () {
 
     log.info("page.screenshot()");
     await page.screenshot({
-      path: artipath("playwright-rootpage.png")
+      path: artipath("uishot-rootpage.png")
     });
 
     log.info('page.click("text=Login")');
@@ -92,7 +92,7 @@ suite("test_ui_with_headless_browser", function () {
     await page.fill("css=input[type=password]", "This-is-not-a-secret!");
 
     await page.screenshot({
-      path: artipath("playwright-auth0-login-page.png")
+      path: artipath("uishot-auth0-login-page.png")
     });
 
     await page.click("css=button[type=submit]");
@@ -102,7 +102,7 @@ suite("test_ui_with_headless_browser", function () {
     await page.waitForSelector("text=Grafana:");
 
     await page.screenshot({
-      path: artipath("playwright-after-auth0-login.png")
+      path: artipath("uishot-after-auth0-login.png")
     });
   });
 });
