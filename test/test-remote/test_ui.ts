@@ -20,8 +20,8 @@ import {
   log,
   globalTestSuiteSetupOnce,
   CLUSTER_BASE_URL,
-  TEST_REMOTE_ARTIFACT_DIRECTORY,
-  sleep
+  TEST_REMOTE_ARTIFACT_DIRECTORY
+  //sleep
 } from "./testutils";
 
 // Set debug mode for playwright, before importing it
