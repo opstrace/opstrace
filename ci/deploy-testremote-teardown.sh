@@ -263,37 +263,42 @@ echo "+++ run test-remote"
 export TENANT_DEFAULT_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
 export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
 
-# Disable automatic error handling temporarily, keep not of exit code for later.
 set +e
 make test-remote
 EXITCODE_MAKE_TESTREMOTE=$?
 set -e
+echo "--- Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
 
-echo "+++ Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
-
-
+set +e
 make test-remote-ui
-# Relay on screenshots to be created with a certain file name prefix.
-cp playwright-*.png /build/bk-artifacts || true
+EXITCODE_MAKE_TESTREMOTE_UI=$?
+set -e
+echo "--- Exit status of make test-remote-ui: ${EXITCODE_MAKE_TESTREMOTE_UI}"
 
-echo "+++ run looker tests"
+
+# Relay on screenshots to be created with a certain file name prefix.
+cp uishot-*.png /build/bk-artifacts || true
+
+echo "--- run looker tests"
 
 source ci/invoke-looker.sh
-
 
 echo "--- run opstrace CLI tests (cli-tests-with-cluster.sh)"
 source ci/test-cli/cli-tests-with-cluster.sh
 
-
-# Deferred exit if `make test-remote` failed
+# Delayed exit if `make test-remote` failed
 if [ "${EXITCODE_MAKE_TESTREMOTE}" -ne 0 ]; then
     echo "make test-remote did exit with code ${EXITCODE_MAKE_TESTREMOTE}. Exit now."
     exit "${EXITCODE_MAKE_TESTREMOTE}"
+fi
+
+# Delayed exit if `make test-remote-ui` failed
+if [ "${EXITCODE_MAKE_TESTREMOTE_UI}" -ne 0 ]; then
+    echo "make test-remote-ui did exit with code ${EXITCODE_MAKE_TESTREMOTE_UI}. Exit now."
+    exit "${EXITCODE_MAKE_TESTREMOTE_UI}"
 fi
 
 # One child process was spawned (see start_data_collection_deployment_loop()).
 # Be a good citizen and join that explicitly (expect that to have terminated by
 # now, long ago).
 wait
-
-sleep 10000
