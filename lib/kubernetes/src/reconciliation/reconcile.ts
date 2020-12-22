@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, all, call } from "redux-saga/effects";
+import { delay, all, call, CallEffect } from "redux-saga/effects";
 
 import { reduceCollection, addResourcesWithVolumeUpdates } from "./utils";
 
@@ -116,7 +116,7 @@ export type ReconcileResourceTypes = {
 export function* reconcile(
   desired: ResourceCollection,
   actual: Partial<ReconcileResourceTypes>
-) {
+): Generator<CallEffect, void, unknown> {
   const actualState: ReconcileResourceTypes = {
     Nodes: [],
     Ingresses: [],
@@ -918,6 +918,7 @@ export function* reconcile(
     // Create a new updateCollection since we've possibly added items to toUpdate with addResourcesWithVolumeUpdates
     const comprehensiveUpdateCollection = entries(toUpdate).reduce<
       K8sResource[]
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     >((acc, [_, resources]) => acc.concat(resources), []);
 
     yield call(applyRateLimitedApiRequests, createCollection, "create");
