@@ -21,9 +21,10 @@ export type KubernetesError = {
   message: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 export const kubernetesError = (e: any): KubernetesError => {
   let statusCode = -1;
-  let message = JSON.stringify(e);
+  const message = JSON.stringify(e);
   const err = e.response as IncomingMessage;
 
   if (err && "statusCode" in err && err.statusCode) {
