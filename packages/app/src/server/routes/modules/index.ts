@@ -13,82 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import express, { NextFunction } from "express";
-// import { Service, startService } from "esbuild";
-// import path from 'path';
-import { Request, Response } from "express";
+import express from "express";
 import { GeneralServerError } from "server/errors";
-// import { log } from "@opstrace/utils/lib/log";
-import resolveFile from "./lib-compiler";
 
-// import db from "@opstrace/ui-kit/lib/state/client";
-
-// let esbuildService: Service | null = null;
-
-// interface CompileOptions {
-//   filePath: string;
-// }
-
-// export async function compileUserModule({ filePath }: CompileOptions) {
-//   esbuildService = esbuildService || (await startService());
-//   const contents = await fs.readFile(filePath, "utf-8");
-
-//   const { js, jsSourceMap, warnings } = await esbuildService!.transform(
-//     contents,
-//     {
-//       loader: "tsx",
-//       sourcefile: filePath,
-//       sourcemap: "external"
-//     }
-//   );
-
-//   for (const warning of warnings) {
-//     log.info(`${filePath}
-// ${warning.text}`);
-//   }
-
-//   return {
-//     code: js || "",
-//     map: jsSourceMap,
-//     warnings
-//   };
-// }
-
-async function opstraceFileHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    if (!req.params.library) {
-      res.sendStatus(404);
-    }
-    const modulePath = await resolveFile(req.params.library, req.url);
-
-    if (modulePath) {
-      res.sendFile(modulePath, {
-        maxAge: 0 //TODO: configure appropriate caching
-      });
-    } else {
-      res.sendStatus(404);
-    }
-  } catch (err) {
-    next(err);
-  }
-}
-
-function modules({ maxAge }: { maxAge: number }) {
+function createCacheableModuleServingHandler({ maxAge }: { maxAge: number }) {
   const router = express.Router();
-  // use /lib and /src so our sourcemaps remain useful
-  router.use("/@opstrace/:library/lib", opstraceFileHandler);
-  router.use("/@opstrace/:library/src", opstraceFileHandler);
-
   // add a catch all for misconfigured requests
-  router.all("*", function (req, res, next) {
+  router.all("*", function(req, res, next) {
     next(new GeneralServerError(404, "module not found"));
   });
 
   return router;
 }
 
-export default modules;
+export default createCacheableModuleServingHandler;
