@@ -71,8 +71,11 @@ const ActivityBar = () => {
         // A user would have to be super fast to hit this - very unlikely, but protect against it all the same.
         return;
       }
-      if (ActivityBarTabs[activeTabIndex] === "/cluster") {
-        // Since we're navigating from /cluster to another tab, we want to clear the url of all subresources
+      if (
+        ActivityBarTabs[activeTabIndex] === "/cluster" ||
+        ActivityBarTabs[index] === "/cluster"
+      ) {
+        // Since we're navigating to or from /cluster, we want to clear the url of all subresources
         history.push({
           ...history.location,
           pathname: ActivityBarTabs[index]
