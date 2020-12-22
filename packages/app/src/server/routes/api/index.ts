@@ -21,18 +21,24 @@ import datasourceHandler from "./datasource";
 import createAuthHandler from "./authentication";
 import createGraphqlHandler from "./graphql";
 import pubUiCfgHandler from "./uicfg";
+import createModuleHandler from "./modules";
+import authRequired from "server/middleware/auth";
 
-function api(): express.Router {
+function createAPIRoutes(): express.Router {
   const api = express.Router();
   api.use("/auth", createAuthHandler());
   api.use("/public-ui-config", pubUiCfgHandler);
-  api.use("/graphql", createGraphqlHandler());
-  api.use("/datasource/:target", datasourceHandler);
-  api.all("*", function (req, res, next) {
+
+  // Authentication required
+  api.use("/module", authRequired, createModuleHandler());
+  api.use("/graphql", authRequired, createGraphqlHandler());
+  api.use("/datasource/:target", authRequired, datasourceHandler);
+
+  api.all("*", function(req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
   });
 
   return api;
 }
 
-export default api;
+export default createAPIRoutes;
