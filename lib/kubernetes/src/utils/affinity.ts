@@ -16,7 +16,18 @@
 
 export const withPodAntiAffinityRequired = (matchLabels: {
   [key: string]: string;
-}) => ({
+}): {
+  podAntiAffinity: {
+    requiredDuringSchedulingIgnoredDuringExecution: [
+      {
+        labelSelector: {
+          matchLabels: { [key: string]: string };
+        };
+        topologyKey: string;
+      }
+    ];
+  };
+} => ({
   podAntiAffinity: {
     requiredDuringSchedulingIgnoredDuringExecution: [
       {
