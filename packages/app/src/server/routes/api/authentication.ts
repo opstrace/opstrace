@@ -21,6 +21,7 @@ import { log } from "@opstrace/utils/lib/log";
 import graphqlClient from "state/graphqlClient";
 import env from "server/env";
 import { GeneralServerError, UnexpectedServerError } from "server/errors";
+import authRequired from "server/middleware/auth";
 
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against
@@ -88,14 +89,10 @@ function createAuthHandler(): express.Router {
   });
 
   // Allow clients to request data about the current user
-  auth.get("/session", async (req, res) => {
-    if (req.session.email) {
-      res.status(200).json({
-        uid: req.session.opaqueUserId
-      });
-      return;
-    }
-    res.sendStatus(401);
+  auth.get("/session", authRequired, async (req, res) => {
+    res.status(200).json({
+      uid: req.session.opaqueUserId
+    });
   });
 
   auth.get("/logout", (req, res) => {
@@ -114,18 +111,14 @@ function createAuthHandler(): express.Router {
     });
   });
 
-  auth.get("/nginx-ingress/webhook", (req, res) => {
-    if (req.session.email) {
-      res.setHeader("X-Auth-Request-User", req.session.email);
-      res.setHeader("X-Auth-Request-Email", req.session.email);
-      res.sendStatus(200);
-      return;
-    }
-    res.sendStatus(401);
+  auth.get("/nginx-ingress/webhook", authRequired, (req, res) => {
+    res.setHeader("X-Auth-Request-User", req.session.email!);
+    res.setHeader("X-Auth-Request-Email", req.session.email!);
+    res.sendStatus(200);
   });
 
   // add a catch all for misconfigured auth requests
-  auth.all("*", function (req, res, next) {
+  auth.all("*", function(req, res, next) {
     next(new GeneralServerError(404, "auth route not found"));
   });
 
