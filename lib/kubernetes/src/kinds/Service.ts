@@ -44,13 +44,13 @@ export const serviceActions = {
     "FETCH_K8S_SERVICES_REQUEST",
     "FETCH_K8S_SERVICES_SUCCESS",
     "FETCH_K8S_SERVICES_FAILURE"
-  )<{}, { resources: Services }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: Services }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_SERVICES")<ServiceType>(),
   onAdded: createAction("ON_ADDED_K8S_SERVICES")<ServiceType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_SERVICES")<ServiceType>()
 };
 export type ServiceActions = ActionType<typeof serviceActions>;
-export interface ServiceState extends ResourceCache<ServiceType> {}
+export type ServiceState = ResourceCache<ServiceType>;
 
 const initialState: ServiceState = {
   loaded: false,
@@ -63,6 +63,7 @@ export const servicesReducer = createReducer<ServiceState, ServiceActions>(
 )
   .handleAction(
     serviceActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): ServiceState => ({
       ...state,
       loaded: false

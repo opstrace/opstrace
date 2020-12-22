@@ -29,15 +29,14 @@ import {
   Watch
 } from "@kubernetes/client-node";
 import { K8sResource, isSameObject, ResourceCache, union } from "../common";
-import { IncomingMessage } from "http";;
+import { IncomingMessage } from "http";
 import { log } from "@opstrace/utils";
 
 export type RoleBindingType = RoleBinding;
 export type RoleBindings = RoleBindingType[];
 
 export const isRoleBinding = <(r: K8sResource) => r is RoleBindingType>(
-  (resource =>
-    resource instanceof RoleBinding)
+  (resource => resource instanceof RoleBinding)
 );
 
 export const roleBindingActions = {
@@ -45,13 +44,13 @@ export const roleBindingActions = {
     "FETCH_K8S_ROLE_BINDINGS_REQUEST",
     "FETCH_K8S_ROLE_BINDINGS_SUCCESS",
     "FETCH_K8S_ROLE_BINDINGS_FAILURE"
-  )<{}, { resources: RoleBindings }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: RoleBindings }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_ROLE_BINDINGS")<RoleBindingType>(),
   onAdded: createAction("ON_ADDED_K8S_ROLE_BINDINGS")<RoleBindingType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_ROLE_BINDINGS")<RoleBindingType>()
 };
 export type RoleBindingActions = ActionType<typeof roleBindingActions>;
-export interface RoleBindingState extends ResourceCache<RoleBindingType> {}
+export type RoleBindingState = ResourceCache<RoleBindingType>;
 
 const initialState: RoleBindingState = {
   loaded: false,
@@ -65,6 +64,7 @@ export const roleBindingsReducer = createReducer<
 >(initialState)
   .handleAction(
     roleBindingActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): RoleBindingState => ({
       ...state,
       loaded: false

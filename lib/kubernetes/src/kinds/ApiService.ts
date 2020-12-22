@@ -44,13 +44,13 @@ export const apiServiceActions = {
     "FETCH_K8S_API_SERVICES_REQUEST",
     "FETCH_K8S_API_SERVICES_SUCCESS",
     "FETCH_K8S_API_SERVICES_FAILURE"
-  )<{}, { resources: ApiServices }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: ApiServices }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_API_SERVICE")<ApiServiceType>(),
   onAdded: createAction("ON_ADDED_K8S_API_SERVICE")<ApiServiceType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_API_SERVICE")<ApiServiceType>()
 };
 export type ApiServiceActions = ActionType<typeof apiServiceActions>;
-export interface ApiServiceState extends ResourceCache<ApiServiceType> {}
+export type ApiServiceState = ResourceCache<ApiServiceType>;
 
 const initialState: ApiServiceState = {
   loaded: false,
@@ -64,6 +64,7 @@ export const apiServicesReducer = createReducer<
 >(initialState)
   .handleAction(
     apiServiceActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): ApiServiceState => ({
       ...state,
       loaded: false

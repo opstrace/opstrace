@@ -44,7 +44,11 @@ export const podSecurityPolicyActions = {
     "FETCH_K8S_POD_SECURITY_POLICIES_REQUEST",
     "FETCH_K8S_POD_SECURITY_POLICIES_SUCCESS",
     "FETCH_K8S_POD_SECURITY_POLICIES_FAILURE"
-  )<{}, { resources: PodSecurityPolicies }, { error: Error }>(),
+  )<
+    Record<string, unknown>,
+    { resources: PodSecurityPolicies },
+    { error: Error }
+  >(),
   onUpdated: createAction("ON_UPDATED_K8S_POD_SECURITY_POLICIES")<
     PodSecurityPolicyType
   >(),
@@ -58,8 +62,7 @@ export const podSecurityPolicyActions = {
 export type PodSecurityPolicyActions = ActionType<
   typeof podSecurityPolicyActions
 >;
-export interface PodSecurityPolicyState
-  extends ResourceCache<PodSecurityPolicyType> {}
+export type PodSecurityPolicyState = ResourceCache<PodSecurityPolicyType>;
 
 const initialState: PodSecurityPolicyState = {
   loaded: false,
@@ -73,6 +76,7 @@ export const podSecurityPoliciesReducer = createReducer<
 >(initialState)
   .handleAction(
     podSecurityPolicyActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): PodSecurityPolicyState => ({
       ...state,
       loaded: false

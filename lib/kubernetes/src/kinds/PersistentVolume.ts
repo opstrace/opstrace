@@ -43,7 +43,11 @@ export const persistentVolumeActions = {
     "FETCH_K8S_PERSISTENT_VOLUMES_REQUEST",
     "FETCH_K8S_PERSISTENT_VOLUMES_SUCCESS",
     "FETCH_K8S_PERSISTENT_VOLUMES_FAILURE"
-  )<{}, { resources: PersistentVolumes }, { error: Error }>(),
+  )<
+    Record<string, unknown>,
+    { resources: PersistentVolumes },
+    { error: Error }
+  >(),
   onUpdated: createAction("ON_UPDATED_K8S_PERSISTENT_VOLUMES")<
     PersistentVolumeType
   >(),
@@ -57,8 +61,7 @@ export const persistentVolumeActions = {
 export type PersistentVolumeActions = ActionType<
   typeof persistentVolumeActions
 >;
-export interface PersistentVolumeState
-  extends ResourceCache<PersistentVolumeType> {}
+export type PersistentVolumeState = ResourceCache<PersistentVolumeType>;
 
 const initialState: PersistentVolumeState = {
   loaded: false,
@@ -72,6 +75,7 @@ export const persistentVolumesReducer = createReducer<
 >(initialState)
   .handleAction(
     persistentVolumeActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): PersistentVolumeState => ({
       ...state,
       loaded: false

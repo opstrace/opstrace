@@ -44,7 +44,11 @@ export const serviceAccountActions = {
     "FETCH_K8S_SERVICE_ACCOUNTS_REQUEST",
     "FETCH_K8S_SERVICE_ACCOUNTS_SUCCESS",
     "FETCH_K8S_SERVICE_ACCOUNTS_FAILURE"
-  )<{}, { resources: ServiceAccounts }, { error: Error }>(),
+  )<
+    Record<string, unknown>,
+    { resources: ServiceAccounts },
+    { error: Error }
+  >(),
   onUpdated: createAction("ON_UPDATED_K8S_SERVICE_ACCOUNTS")<
     ServiceAccountType
   >(),
@@ -54,8 +58,7 @@ export const serviceAccountActions = {
   >()
 };
 export type ServiceAccountActions = ActionType<typeof serviceAccountActions>;
-export interface ServiceAccountState
-  extends ResourceCache<ServiceAccountType> {}
+export type ServiceAccountState = ResourceCache<ServiceAccountType>;
 
 const initialState: ServiceAccountState = {
   loaded: false,
@@ -69,6 +72,7 @@ export const serviceAccountsReducer = createReducer<
 >(initialState)
   .handleAction(
     serviceAccountActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): ServiceAccountState => ({
       ...state,
       loaded: false

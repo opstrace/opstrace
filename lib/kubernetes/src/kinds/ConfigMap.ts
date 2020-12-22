@@ -44,7 +44,7 @@ export const configMapActions = {
     "FETCH_K8S_CONFIGMAPS_REQUEST",
     "FETCH_K8S_CONFIGMAPS_SUCCESS",
     "FETCH_K8S_CONFIGMAPS_FAILURE"
-  )<{}, { resources: ConfigMaps }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: ConfigMaps }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_CONFIGMAPS_REQUEST")<ConfigMapType>(),
   onAdded: createAction("ON_ADDED_K8S_CONFIGMAPS_REQUEST")<ConfigMapType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_CONFIGMAPS_REQUEST")<
@@ -66,6 +66,7 @@ export const configMapsReducer = createReducer<
 >(initialState)
   .handleAction(
     configMapActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): ConfigMapState => ({
       ...state,
       loaded: false

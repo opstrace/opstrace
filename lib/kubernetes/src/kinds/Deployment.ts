@@ -45,13 +45,13 @@ export const deploymentActions = {
     "FETCH_K8S_DEPLOYMENTS_REQUEST",
     "FETCH_K8S_DEPLOYMENTS_SUCCESS",
     "FETCH_K8S_DEPLOYMENTS_FAILURE"
-  )<{}, { resources: Deployments }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: Deployments }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_DEPLOYMENTS")<DeploymentType>(),
   onAdded: createAction("ON_ADDED_K8S_DEPLOYMENTS")<DeploymentType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_DEPLOYMENTS")<DeploymentType>()
 };
 export type DeploymentActions = ActionType<typeof deploymentActions>;
-export interface DeploymentState extends ResourceCache<DeploymentType> {}
+export type DeploymentState = ResourceCache<DeploymentType>;
 
 const initialState: DeploymentState = {
   loaded: false,
@@ -65,6 +65,7 @@ export const deploymentsReducer = createReducer<
 >(initialState)
   .handleAction(
     deploymentActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): DeploymentState => ({
       ...state,
       loaded: false

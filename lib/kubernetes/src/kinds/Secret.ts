@@ -44,13 +44,13 @@ export const secretActions = {
     "FETCH_K8S_SECRETS_REQUEST",
     "FETCH_K8S_SECRETS_SUCCESS",
     "FETCH_K8S_SECRETS_FAILURE"
-  )<{}, { resources: Secrets }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: Secrets }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_SECRETS")<SecretType>(),
   onAdded: createAction("ON_ADDED_K8S_SECRETS")<SecretType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_SECRETS")<SecretType>()
 };
 export type SecretActions = ActionType<typeof secretActions>;
-export interface SecretState extends ResourceCache<SecretType> {}
+export type SecretState = ResourceCache<SecretType>;
 
 const initialState: SecretState = {
   loaded: false,
@@ -63,6 +63,7 @@ export const secretsReducer = createReducer<SecretState, SecretActions>(
 )
   .handleAction(
     secretActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): SecretState => ({
       ...state,
       loaded: false

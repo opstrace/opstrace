@@ -43,13 +43,13 @@ export const namespaceActions = {
     "FETCH_K8S_NAMESPACES_REQUEST",
     "FETCH_K8S_NAMESPACES_SUCCESS",
     "FETCH_K8S_NAMESPACES_FAILURE"
-  )<{}, { resources: Namespaces }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: Namespaces }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_NAMESPACE")<NamespaceType>(),
   onAdded: createAction("ON_ADDED_K8S_NAMESPACE")<NamespaceType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_NAMESPACE")<NamespaceType>()
 };
 export type NamespaceActions = ActionType<typeof namespaceActions>;
-export interface NamespaceState extends ResourceCache<NamespaceType> {}
+export type NamespaceState = ResourceCache<NamespaceType>;
 
 const initialState: NamespaceState = {
   loaded: false,
@@ -63,6 +63,7 @@ export const namespacesReducer = createReducer<
 >(initialState)
   .handleAction(
     namespaceActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): NamespaceState => ({
       ...state,
       loaded: false

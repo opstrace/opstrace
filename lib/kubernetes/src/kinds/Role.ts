@@ -44,13 +44,13 @@ export const roleActions = {
     "FETCH_K8S_ROLES_REQUEST",
     "FETCH_K8S_ROLES_SUCCESS",
     "FETCH_K8S_ROLES_FAILURE"
-  )<{}, { resources: Roles }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: Roles }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_ROLES")<RoleType>(),
   onAdded: createAction("ON_ADDED_K8S_ROLES")<RoleType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_ROLES")<RoleType>()
 };
 export type RoleActions = ActionType<typeof roleActions>;
-export interface RoleState extends ResourceCache<RoleType> {}
+export type RoleState = ResourceCache<RoleType>;
 
 const initialState: RoleState = {
   loaded: false,
@@ -61,6 +61,7 @@ const initialState: RoleState = {
 export const rolesReducer = createReducer<RoleState, RoleActions>(initialState)
   .handleAction(
     roleActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): RoleState => ({
       ...state,
       loaded: false
