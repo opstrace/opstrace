@@ -3264,6 +3264,31 @@ export type SubscribeToFilesSubscription = {
   >;
 };
 
+export type CreateModuleMutationVariables = Exact<{
+  name: Scalars["String"];
+  scope: Scalars["String"];
+  branch: Scalars["String"];
+  version: Scalars["String"];
+  files: Array<File_Insert_Input>;
+}>;
+
+export type CreateModuleMutation = {
+  insert_module_one?: Maybe<Pick<Module, "created_at">>;
+  insert_module_version_one?: Maybe<Pick<Module_Version, "created_at">>;
+  insert_file?: Maybe<{ returning: Array<Pick<File, "id">> }>;
+};
+
+export type GetModuleQueryVariables = Exact<{
+  name: Scalars["String"];
+  scope: Scalars["String"];
+  branch: Scalars["String"];
+}>;
+
+export type GetModuleQuery = {
+  module_by_pk?: Maybe<Pick<Module, "created_at">>;
+  branch_by_pk?: Maybe<Pick<Branch, "protected">>;
+};
+
 export type SubscribeToModulesSubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
@@ -3570,6 +3595,46 @@ export const SubscribeToFilesDocument = gql`
       base_file_id
       mark_deleted
       is_modified
+    }
+  }
+`;
+export const CreateModuleDocument = gql`
+  mutation CreateModule(
+    $name: String!
+    $scope: String!
+    $branch: String!
+    $version: String!
+    $files: [file_insert_input!]!
+  ) {
+    insert_module_one(
+      object: { name: $name, scope: $scope, branch_name: $branch }
+    ) {
+      created_at
+    }
+    insert_module_version_one(
+      object: {
+        module_name: $name
+        module_scope: $scope
+        branch_name: $branch
+        version: $version
+      }
+    ) {
+      created_at
+    }
+    insert_file(objects: $files) {
+      returning {
+        id
+      }
+    }
+  }
+`;
+export const GetModuleDocument = gql`
+  query GetModule($name: String!, $scope: String!, $branch: String!) {
+    module_by_pk(branch_name: $branch, name: $name, scope: $scope) {
+      created_at
+    }
+    branch_by_pk(name: $branch) {
+      protected
     }
   }
 `;
@@ -3983,6 +4048,35 @@ export function getSdk(
           print(SubscribeToFilesDocument),
           variables
         )
+      );
+    },
+    CreateModule(
+      variables: CreateModuleMutationVariables
+    ): Promise<{
+      data?: CreateModuleMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<CreateModuleMutation>(
+          print(CreateModuleDocument),
+          variables
+        )
+      );
+    },
+    GetModule(
+      variables: GetModuleQueryVariables
+    ): Promise<{
+      data?: GetModuleQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetModuleQuery>(print(GetModuleDocument), variables)
       );
     },
     SubscribeToModules(
