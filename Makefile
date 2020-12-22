@@ -83,8 +83,9 @@ lint-docs:
 
 
 .PHONY: tsc
-tsc: cli-set-build-info-constants yarn-frozen-lockfile
+tsc: cli-set-build-info-constants
 	@# tsc-compile the opstrace cli and controller cli
+	yarn --frozen-lockfile
 	yarn build:controller
 	yarn build:cli
 
@@ -188,15 +189,17 @@ cli-crashtest:
 	set +o pipefail && ./build/bin/opstrace crashtest 2>&1 | grep 'cli/src/index.ts:'
 
 
-lint-codebase.js: yarn-frozen-lockfile
+lint-codebase.js:
+	yarn --frozen-lockfile
 	yarn run lint
 
 lint-codebase.go:
 	(cd go/ && golangci-lint run)
 
 .PHONY: cli-tsc
-cli-tsc: cli-set-build-info-constants yarn-frozen-lockfile
+cli-tsc: cli-set-build-info-constants
 	@# tsc-compile the opstrace cli (not the controller cli)
+	yarn --frozen-lockfile
 	yarn build:cli
 
 
@@ -591,37 +594,18 @@ deploy-testremote-teardown:
 	bash "ci/deploy-testremote-teardown.sh"
 
 #
-# The following yarn* rules ensure we only run `yarn --frozen-lockfile` if the
-# contents of yarn.lock or any package.json changed.
-#
-.PHONY: yarn-frozen-lockfile
-yarn-frozen-lockfile: yarn.lock.md5
-
-# Check if the contents of yarn.lock changed to trigger a yarn install if
-# necessary.
-yarn.lock.md5: yarn.lock
-	md5sum yarn.lock | (cmp -s yarn.lock.md5 - || md5sum yarn.lock > yarn.lock.md5)
-
-# Find all the package.json files in the repo. If any are updated it'll trigger
-# a yarn install.
-PACKAGE_JSON = $(wildcard lib/**/*package.json packages/**/*package.json)
-
-yarn.lock: package.json $(PACKAGE_JSON) node_modules
-	yarn --frozen-lockfile && touch yarn.lock
-
-node_modules:
-	mkdir -p node_modules
-
-#
 # Run all the unit tests.
 #
 .PHONY: unit-tests
-unit-tests: yarn-frozen-lockfile \
+unit-tests: node_modules \
 	cli-crashtest \
 	cli-tests-no-cluster \
 	run-app-unit-tests \
 	ts-unit-tests \
 	go-unit-tests
+
+node_modules:
+	yarn --frozen-lockfile
 
 .PHONY: cli-tests-no-cluster
 cli-tests-no-cluster:
