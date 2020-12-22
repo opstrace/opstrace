@@ -43,7 +43,11 @@ export const persistentVolumeClaimActions = {
     "FETCH_K8S_PERSISTENT_VOLUME_CLAIMS_REQUEST",
     "FETCH_K8S_PERSISTENT_VOLUME_CLAIMS_SUCCESS",
     "FETCH_K8S_PERSISTENT_VOLUME_CLAIMS_FAILURE"
-  )<{}, { resources: PersistentVolumeClaims }, { error: Error }>(),
+  )<
+    Record<string, unknown>,
+    { resources: PersistentVolumeClaims },
+    { error: Error }
+  >(),
   onUpdated: createAction("ON_UPDATED_K8S_PERSISTENT_VOLUME_CLAIMS")<
     PersistentVolumeClaimType
   >(),
@@ -57,8 +61,9 @@ export const persistentVolumeClaimActions = {
 export type PersistentVolumeClaimActions = ActionType<
   typeof persistentVolumeClaimActions
 >;
-export interface PersistentVolumeClaimState
-  extends ResourceCache<PersistentVolumeClaimType> {}
+export type PersistentVolumeClaimState = ResourceCache<
+  PersistentVolumeClaimType
+>;
 
 const initialState: PersistentVolumeClaimState = {
   loaded: false,
@@ -72,6 +77,7 @@ export const persistentVolumeClaimsReducer = createReducer<
 >(initialState)
   .handleAction(
     persistentVolumeClaimActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): PersistentVolumeClaimState => ({
       ...state,
       loaded: false

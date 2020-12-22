@@ -44,13 +44,13 @@ export const statefulSetActions = {
     "FETCH_K8S_STATEFUL_SETS_REQUEST",
     "FETCH_K8S_STATEFUL_SETS_SUCCESS",
     "FETCH_K8S_STATEFUL_SETS_FAILURE"
-  )<{}, { resources: StatefulSets }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: StatefulSets }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_STATEFUL_SETS")<StatefulSetType>(),
   onAdded: createAction("ON_ADDED_K8S_STATEFUL_SETS")<StatefulSetType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_STATEFUL_SETS")<StatefulSetType>()
 };
 export type StatefulSetActions = ActionType<typeof statefulSetActions>;
-export interface StatefulSetState extends ResourceCache<StatefulSetType> {}
+export type StatefulSetState = ResourceCache<StatefulSetType>;
 
 const initialState: StatefulSetState = {
   loaded: false,
@@ -64,6 +64,7 @@ export const statefulSetsReducer = createReducer<
 >(initialState)
   .handleAction(
     statefulSetActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): StatefulSetState => ({
       ...state,
       loaded: false

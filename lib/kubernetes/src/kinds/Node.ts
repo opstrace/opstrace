@@ -44,13 +44,13 @@ export const nodeActions = {
     "FETCH_K8S_NODES_REQUEST",
     "FETCH_K8S_NODES_SUCCESS",
     "FETCH_K8S_NODES_FAILURE"
-  )<{}, { resources: Nodes }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: Nodes }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_NODES")<NodeType>(),
   onAdded: createAction("ON_ADDED_K8S_NODES")<NodeType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_NODES")<NodeType>()
 };
 export type NodeActions = ActionType<typeof nodeActions>;
-export interface NodeState extends ResourceCache<NodeType> {}
+export type NodeState = ResourceCache<NodeType>;
 
 const initialState: NodeState = {
   loaded: false,
@@ -61,6 +61,7 @@ const initialState: NodeState = {
 export const nodesReducer = createReducer<NodeState, NodeActions>(initialState)
   .handleAction(
     nodeActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): NodeState => ({
       ...state,
       loaded: false

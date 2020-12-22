@@ -44,13 +44,13 @@ export const clusterRoleActions = {
     "FETCH_K8S_CLUSTER_ROLES_REQUEST",
     "FETCH_K8S_CLUSTER_ROLES_SUCCESS",
     "FETCH_K8S_CLUSTER_ROLES_FAILURE"
-  )<{}, { resources: ClusterRoles }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: ClusterRoles }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_ClUSTER_ROLES")<ClusterRoleType>(),
   onAdded: createAction("ON_ADDED_K8S_ClUSTER_ROLES")<ClusterRoleType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_ClUSTER_ROLES")<ClusterRoleType>()
 };
 export type ClusterRoleActions = ActionType<typeof clusterRoleActions>;
-export interface ClusterRoleState extends ResourceCache<ClusterRoleType> {}
+export type ClusterRoleState = ResourceCache<ClusterRoleType>;
 
 const initialState: ClusterRoleState = {
   loaded: false,
@@ -64,6 +64,7 @@ export const clusterRolesReducer = createReducer<
 >(initialState)
   .handleAction(
     clusterRoleActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): ClusterRoleState => ({
       ...state,
       loaded: false

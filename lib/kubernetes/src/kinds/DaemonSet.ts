@@ -44,13 +44,13 @@ export const daemonSetActions = {
     "FETCH_K8S_DAEMONSETS_REQUEST",
     "FETCH_K8S_DAEMONSETS_SUCCESS",
     "FETCH_K8S_DAEMONSETS_FAILURE"
-  )<{}, { resources: DaemonSets }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: DaemonSets }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_DAEMONSETS")<DaemonSetType>(),
   onAdded: createAction("ON_ADDED_K8S_DAEMONSETS")<DaemonSetType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_DAEMONSETS")<DaemonSetType>()
 };
 export type DaemonSetActions = ActionType<typeof daemonSetActions>;
-export interface DaemonSetState extends ResourceCache<DaemonSetType> {}
+export type DaemonSetState = ResourceCache<DaemonSetType>;
 
 const initialState: DaemonSetState = {
   loaded: false,
@@ -64,6 +64,7 @@ export const daemonSetsReducer = createReducer<
 >(initialState)
   .handleAction(
     daemonSetActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): DaemonSetState => ({
       ...state,
       loaded: false

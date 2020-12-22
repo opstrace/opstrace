@@ -44,7 +44,11 @@ export const crdActions = {
     "FETCH_K8S_CRDS_REQUEST",
     "FETCH_K8S_CRDS_SUCCESS",
     "FETCH_K8S_CRDS_FAILURE"
-  )<{}, { resources: CustomResourceDefinitions }, { error: Error }>(),
+  )<
+    Record<string, unknown>,
+    { resources: CustomResourceDefinitions },
+    { error: Error }
+  >(),
   onUpdated: createAction("ON_UPDATED_K8S_CRDS")<
     CustomResourceDefinitionType
   >(),
@@ -54,8 +58,9 @@ export const crdActions = {
   >()
 };
 export type CustomResourceDefinitionActions = ActionType<typeof crdActions>;
-export interface CustomResourceDefinitionState
-  extends ResourceCache<CustomResourceDefinitionType> {}
+export type CustomResourceDefinitionState = ResourceCache<
+  CustomResourceDefinitionType
+>;
 
 const initialState: CustomResourceDefinitionState = {
   loaded: false,
@@ -69,6 +74,7 @@ export const crdsReducer = createReducer<
 >(initialState)
   .handleAction(
     crdActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): CustomResourceDefinitionState => ({
       ...state,
       loaded: false

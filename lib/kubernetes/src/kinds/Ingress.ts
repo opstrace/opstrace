@@ -44,13 +44,13 @@ export const ingressActions = {
     "FETCH_K8S_INGRESSES_REQUEST",
     "FETCH_K8S_INGRESSES_SUCCESS",
     "FETCH_K8S_INGRESSES_FAILURE"
-  )<{}, { resources: Ingresses }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: Ingresses }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_INGRESSES")<IngressType>(),
   onAdded: createAction("ON_ADDED_K8S_INGRESSES")<IngressType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_INGRESSES")<IngressType>()
 };
 export type IngressActions = ActionType<typeof ingressActions>;
-export interface IngressState extends ResourceCache<IngressType> {}
+export type IngressState = ResourceCache<IngressType>;
 
 const initialState: IngressState = {
   loaded: false,
@@ -63,6 +63,7 @@ export const ingressesReducer = createReducer<IngressState, IngressActions>(
 )
   .handleAction(
     ingressActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): IngressState => ({
       ...state,
       loaded: false

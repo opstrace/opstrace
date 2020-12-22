@@ -44,7 +44,7 @@ export const storageClassActions = {
     "FETCH_K8S_STORAGE_CLASSES_REQUEST",
     "FETCH_K8S_STORAGE_CLASSES_SUCCESS",
     "FETCH_K8S_STORAGE_CLASSES_FAILURE"
-  )<{}, { resources: StorageClasses }, { error: Error }>(),
+  )<Record<string, unknown>, { resources: StorageClasses }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_STORAGE_CLASSES")<StorageClassType>(),
   onAdded: createAction("ON_ADDED_K8S_STORAGE_CLASSES")<StorageClassType>(),
   onDestroyed: createAction("ON_DESTROYED_K8S_STORAGE_CLASSES")<
@@ -52,7 +52,7 @@ export const storageClassActions = {
   >()
 };
 export type storageClassActions = ActionType<typeof storageClassActions>;
-export interface StorageClassState extends ResourceCache<StorageClassType> {}
+export type StorageClassState = ResourceCache<StorageClassType>;
 
 const initialState: StorageClassState = {
   loaded: false,
@@ -66,6 +66,7 @@ export const storageClassesReducer = createReducer<
 >(initialState)
   .handleAction(
     storageClassActions.fetch.request,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (state, _): StorageClassState => ({
       ...state,
       loaded: false
