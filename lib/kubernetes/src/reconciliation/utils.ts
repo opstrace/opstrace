@@ -37,7 +37,25 @@ import {
   isClusterRoleBinding,
   isClusterRole,
   isPodSecurityPolicy,
-  find
+  find,
+  Ingress,
+  StorageClass,
+  PersistentVolumeClaim,
+  StatefulSet,
+  ServiceAccount,
+  Service,
+  Secret,
+  RoleBinding,
+  Role,
+  Namespace,
+  Deployment,
+  DaemonSet,
+  CustomResourceDefinition,
+  ConfigMap,
+  ClusterRoleBinding,
+  ClusterRole,
+  PodSecurityPolicy,
+  ApiService
 } from "../kinds";
 import {
   WithMountedVolumeType,
@@ -55,10 +73,55 @@ import {
   isV1ChallengeResource,
   isV1ClusterissuerResource,
   isV1IssuerResource,
-  isV1OrderResource
+  isV1OrderResource,
+  V1AlertmanagerResource,
+  V1PodmonitorResource,
+  V1PrometheusResource,
+  V1PrometheusruleResource,
+  V1ServicemonitorResource,
+  V1CertificateResource,
+  V1CertificaterequestResource,
+  V1ChallengeResource,
+  V1ClusterissuerResource,
+  V1IssuerResource,
+  V1OrderResource
 } from "../custom-resources";
 
-export const reduceCollection = (resources: Array<K8sResource>) => ({
+type ReduceCollectionType = {
+  Ingresses: Ingress[];
+  StorageClasses: StorageClass[];
+  PersistentVolumeClaims: PersistentVolumeClaim[];
+  StatefulSets: StatefulSet[];
+  ServiceAccounts: ServiceAccount[];
+  Services: Service[];
+  Secrets: Secret[];
+  RoleBindings: RoleBinding[];
+  Roles: Role[];
+  Namespaces: Namespace[];
+  Deployments: Deployment[];
+  DaemonSets: DaemonSet[];
+  CustomResourceDefinitions: CustomResourceDefinition[];
+  ConfigMaps: ConfigMap[];
+  ClusterRoleBindings: ClusterRoleBinding[];
+  ClusterRoles: ClusterRole[];
+  PodSecurityPolicies: PodSecurityPolicy[];
+  ApiServices: ApiService[];
+  Alertmanagers: V1AlertmanagerResource[];
+  PodMonitors: V1PodmonitorResource[];
+  Prometheuses: V1PrometheusResource[];
+  PrometheusRules: V1PrometheusruleResource[];
+  ServiceMonitors: V1ServicemonitorResource[];
+  Certificates: V1CertificateResource[];
+  CertificateRequests: V1CertificaterequestResource[];
+  Challenges: V1ChallengeResource[];
+  ClusterIssuers: V1ClusterissuerResource[];
+  Issuers: V1IssuerResource[];
+  Orders: V1OrderResource[];
+};
+
+export const reduceCollection = (
+  resources: Array<K8sResource>
+): ReduceCollectionType => ({
   Ingresses: resources.filter(isIngress),
   StorageClasses: resources.filter(isStorageClass),
   PersistentVolumeClaims: resources.filter(isPersistentVolumeClaim),
@@ -142,7 +205,7 @@ export const addResourcesWithVolumeUpdates = (
 export const ensureResourceIsUpdated = <T extends WithMountedVolumeType>(
   resource: T
 ): T => {
-  resource.spec.spec!.template!.spec!.containers.forEach(c => {
+  resource.spec.spec?.template?.spec?.containers.forEach(c => {
     if (!c.env) {
       c.env = [];
     }
