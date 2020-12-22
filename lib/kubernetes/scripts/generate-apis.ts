@@ -48,7 +48,7 @@ const outDir = `${__dirname}/../src/custom-resources`;
   servicemonitor,
   probe,
   thanosruler
-].map(async (crd: any) => {
+].map(async crd => {
   try {
     await GenerateCodeForCRD(crd, outDir);
     console.log(`Successfully generated Resource for: ${crd.spec.names.kind}`);

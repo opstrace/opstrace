@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { compile } from "json-schema-to-typescript";
+/* eslint-disable no-useless-escape, @typescript-eslint/explicit-module-boundary-types */
+import { compile, JSONSchema } from "json-schema-to-typescript";
 import * as fs from "fs";
 
 const renderFileHeader = () => `/* eslint-disable */
@@ -758,6 +759,7 @@ export class ${className} extends K8sResource {
  * @param manifest
  * @param outDir
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GenerateCodeForv1Beta1CRD(manifest: any, outDir: string) {
   const group = manifest.spec.group;
   const name = manifest.spec.names.plural;
@@ -773,7 +775,7 @@ export async function GenerateCodeForv1Beta1CRD(manifest: any, outDir: string) {
 
     await compile(manifest.spec.validation.openAPIV3Schema, interfaceName).then(
       (ts: string) => {
-        var regexObj = new RegExp(interfaceName, "i");
+        const regexObj = new RegExp(interfaceName, "i");
         // compile will CamelCase the name, so get the compiled interfaceName
         const match = ts.match(regexObj);
         if (match) {
@@ -782,11 +784,12 @@ export async function GenerateCodeForv1Beta1CRD(manifest: any, outDir: string) {
         return (contents += ts);
       }
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let methods: { [index: string]: any } = {};
 
     const templatePath = `/apis/${group}/${version}${namespace}/${name}/{name}`;
     methods = ["delete", "read", "patch"].reduce(
-      (acc: { [index: string]: any }, method) => {
+      (acc: { [index: string]: unknown }, method) => {
         acc[method] = templatePath;
         return acc;
       },
@@ -794,13 +797,13 @@ export async function GenerateCodeForv1Beta1CRD(manifest: any, outDir: string) {
     );
 
     const resourcePath = `/apis/${group}/${version}${namespace}/${name}`;
-    methods = ["create"].reduce((acc: { [index: string]: any }, method) => {
+    methods = ["create"].reduce((acc: { [index: string]: unknown }, method) => {
       acc[method] = resourcePath;
       return acc;
     }, methods);
 
     const listPath = `/apis/${group}/${version}/${name}`;
-    methods = ["list"].reduce((acc: { [index: string]: any }, method) => {
+    methods = ["list"].reduce((acc: { [index: string]: unknown }, method) => {
       acc[method] = listPath;
       return acc;
     }, methods);
@@ -869,20 +872,21 @@ export async function GenerateCodeForv1Beta1CRD(manifest: any, outDir: string) {
  * @param manifest
  * @param outDir
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GenerateCodeV1CRD(manifest: any, outDir: string) {
   const group = manifest.spec.group;
   const name = manifest.spec.names.plural;
   const namespace =
     manifest.spec.scope === "Cluster" ? "" : "/namespaces/{namespace}";
 
-  const addSpec = async (version: string, schema: any) => {
+  const addSpec = async (version: string, schema: JSONSchema) => {
     let interfaceName =
       version + (manifest.spec.names.singular || manifest.spec.names.kind);
     let contents = renderFileHeader();
     const filename = interfaceName;
 
     await compile(schema, interfaceName).then((ts: string) => {
-      var regexObj = new RegExp(interfaceName, "i");
+      const regexObj = new RegExp(interfaceName, "i");
       // compile will CamelCase the name, so get the compiled interfaceName
       const match = ts.match(regexObj);
       if (match) {
@@ -890,11 +894,12 @@ export async function GenerateCodeV1CRD(manifest: any, outDir: string) {
       }
       return (contents += ts);
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let methods: { [index: string]: any } = {};
 
     const templatePath = `/apis/${group}/${version}${namespace}/${name}/{name}`;
     methods = ["delete", "read", "patch"].reduce(
-      (acc: { [index: string]: any }, method) => {
+      (acc: { [index: string]: unknown }, method) => {
         acc[method] = templatePath;
         return acc;
       },
@@ -902,13 +907,13 @@ export async function GenerateCodeV1CRD(manifest: any, outDir: string) {
     );
 
     const resourcePath = `/apis/${group}/${version}${namespace}/${name}`;
-    methods = ["create"].reduce((acc: { [index: string]: any }, method) => {
+    methods = ["create"].reduce((acc: { [index: string]: unknown }, method) => {
       acc[method] = resourcePath;
       return acc;
     }, methods);
 
     const listPath = `/apis/${group}/${version}/${name}`;
-    methods = ["list"].reduce((acc: { [index: string]: any }, method) => {
+    methods = ["list"].reduce((acc: { [index: string]: unknown }, method) => {
       acc[method] = listPath;
       return acc;
     }, methods);
@@ -970,7 +975,7 @@ export async function GenerateCodeV1CRD(manifest: any, outDir: string) {
   } else {
     const versions = manifest.spec.versions || [];
     return Promise.all(
-      versions.map((version: { name: string; schema: any }) =>
+      versions.map((version: { name: string; schema: JSONSchema }) =>
         addSpec(version.name, version.schema.openAPIV3Schema)
       )
     );
@@ -982,6 +987,7 @@ export async function GenerateCodeV1CRD(manifest: any, outDir: string) {
  * @param manifest
  * @param outDir
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GenerateCodeForCRD(manifest: any, outDir: string) {
   if (manifest.apiVersion === "apiextensions.k8s.io/v1") {
     return GenerateCodeV1CRD(manifest, outDir);

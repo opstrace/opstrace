@@ -14,7 +14,7 @@
     "watch": "tsc -p . -w",
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
-    "lint": "echo done",
+    "lint": "eslint --ext .ts scripts/",
     "test": "node scripts/test.js --coverage"
   },
   "dependencies": {
