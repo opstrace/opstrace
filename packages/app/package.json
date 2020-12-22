@@ -89,6 +89,7 @@
     "lightship": "^6.1.0",
     "lodash": "^4.17.20",
     "match-sorter": "^4.2.1",
+    "minio": "^7.0.18",
     "monaco-editor": "^0.20.0",
     "monaco-editor-core": "^0.20.0",
     "monaco-editor-webpack-plugin": "^2.0.0",
@@ -115,6 +116,7 @@
     "styled-components": "^5.2.0",
     "subscriptions-transport-ws": "^0.9.18",
     "typesafe-actions": "^5.1.0",
+    "uuid": "^8.3.2",
     "winston": "^3.3.3"
   },
   "devDependencies": {
@@ -147,9 +149,11 @@
     "@testing-library/react-hooks": "^3.4.2",
     "@testing-library/user-event": "^12.0.15",
     "@types/connect-redis": "^0.0.15",
+    "@types/minio": "^7.0.6",
     "@types/redis": "^2.8.28",
     "@types/testing-library__jest-dom": "^5.9.1",
     "@types/testing-library__react": "^10.2.0",
+    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "autoprefixer": "^9.8.6",

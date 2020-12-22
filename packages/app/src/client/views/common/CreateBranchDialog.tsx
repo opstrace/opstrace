@@ -21,6 +21,7 @@ import { useCommandService } from "client/services/Command";
 import { createBranch } from "state/branch/actions";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { branchNameRegex } from "state/branch/types";
 
 const CreateBranchPicker = () => {
   const dispatch = useDispatch();
@@ -31,7 +32,7 @@ const CreateBranchPicker = () => {
       title: "Enter branch name",
       activationPrefix: "create branch:",
       disableFilter: true,
-      textValidator: /^[a-z0-9_-]+$/i,
+      textValidator: branchNameRegex,
       options: [
         {
           id: "yes",
