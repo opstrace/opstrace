@@ -34,6 +34,7 @@ import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { select } from "@opstrace/utils";
 import { KubeConfig } from "@kubernetes/client-node";
+import { DockerImages } from "@opstrace/controller-config";
 
 export function PrometheusResources(
   state: State,
@@ -169,6 +170,18 @@ export function PrometheusResources(
     )
   );
 
+  //
+  // "Image if specified has precedence over baseImage, tag and sha
+  // combinations. Specifying the version is still necessary to ensure the
+  // Prometheus Operator knows what version of Thanos is being configured."
+  //
+  // https://docs.openshift.com/container-platform/4.4/rest_api/monitoring_apis/prometheus-monitoring-coreos-com-v1.html
+  //
+  // Get the deployed version from the base image. This ensures image and
+  // version parameters are always in sync.
+  //
+  const prometheusVersion = DockerImages.prometheus.split(":")[1];
+
   collection.add(
     new V1PrometheusResource(
       {
@@ -212,8 +225,7 @@ export function PrometheusResources(
           },
           remoteWrite: [remoteWrite],
           remoteRead: [remoteRead],
-          image: "quay.io/prometheus/prometheus:v2.21.0",
-          baseImage: "quay.io/prometheus/prometheus",
+          image: DockerImages.prometheus,
           nodeSelector: {
             "kubernetes.io/os": "linux"
           },
@@ -238,7 +250,7 @@ export function PrometheusResources(
           serviceAccountName: name,
           serviceMonitorNamespaceSelector,
           serviceMonitorSelector,
-          version: "v2.21.0"
+          version: prometheusVersion
         }
       },
       kubeConfig
