@@ -174,7 +174,6 @@ export function PrometheusOperatorResources(
                 {
                   args: [
                     "--kubelet-service=kube-system/kubelet",
-                    "--logtostderr=true",
                     "--config-reloader-image=jimmidyson/configmap-reload:v0.4.0",
                     "--prometheus-config-reloader=quay.io/prometheus-operator/prometheus-config-reloader:v0.42.1"
                   ],
@@ -202,7 +201,6 @@ export function PrometheusOperatorResources(
                 },
                 {
                   args: [
-                    "--logtostderr",
                     "--secure-listen-address=:8443",
                     "--tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
                     "--upstream=http://127.0.0.1:8080/"
