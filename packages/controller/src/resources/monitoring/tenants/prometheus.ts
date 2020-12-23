@@ -46,13 +46,14 @@ export function PrometheusResources(
   const name = getPrometheusName(tenant);
 
   const config = {
-    replicas: select(getNodeCount(state), [
+    shards: select(getNodeCount(state), [
       { "<=": 6, choose: 2 },
       {
         "<=": Infinity,
         choose: 3
       }
     ]),
+    replicas: 1,
     diskSize: "10Gi",
     resources: {}
   };
@@ -259,7 +260,7 @@ export function PrometheusResources(
           // and the PR
           // https://github.com/prometheus-operator/prometheus-operator/pull/3241
           //
-          shards: config.replicas,
+          shards: config.shards,
           resources: config.resources,
           secrets: promSecrets,
           ruleNamespaceSelector,
