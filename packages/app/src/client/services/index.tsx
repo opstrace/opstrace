@@ -20,16 +20,18 @@ import { NotificationService } from "./Notification";
 import { DisplayService } from "./Display";
 import { ThemeCommands } from "../themes/Provider";
 
-const Services = ({ children }: { children: React.ReactNode }) => (
-  <PickerService>
-    <CommandService>
-      <ThemeCommands>
-        <NotificationService>
-          <DisplayService>{children}</DisplayService>
-        </NotificationService>
-      </ThemeCommands>
-    </CommandService>
-  </PickerService>
-);
+const Services = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <PickerService>
+      <CommandService>
+        <ThemeCommands>
+          <NotificationService>
+            <DisplayService>{children}</DisplayService>
+          </NotificationService>
+        </ThemeCommands>
+      </CommandService>
+    </PickerService>
+  );
+};
 
-export default Services;
+export default React.memo(Services);

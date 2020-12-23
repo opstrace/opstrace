@@ -127,11 +127,14 @@ function PickerService({ children }: { children: React.ReactNode }) {
     return activePicker.options;
   }, [activePicker]);
 
-  const picker: PickerApi = {
-    register,
-    unregister,
-    setText
-  };
+  const picker: PickerApi = useMemo(
+    () => ({
+      register,
+      unregister,
+      setText
+    }),
+    [register, unregister, setText]
+  );
 
   useEffect(() => {
     // reset selectedIndex

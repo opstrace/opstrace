@@ -50,6 +50,7 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
 
   const currentBranchName = useCurrentBranchName();
   const currentBranch = useCurrentBranch();
+  const file = useFocusedOpenFile();
 
   const {
     requestedModuleName,
@@ -121,8 +122,6 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
     },
     [editing, history]
   );
-
-  const file = useFocusedOpenFile();
 
   const getModuleContent = () => {
     if (currentBranch === null) {
