@@ -233,6 +233,33 @@ export function PrometheusResources(
           probeNamespaceSelector: {},
           probeSelector: {},
           replicas: config.replicas,
+          //
+          // "To run Prometheus in a highly available manner, two (or more)
+          // instances need to be running with the same configuration, that
+          // means they scrape the same targets, which in turn means they will
+          // have the same data in memory and on disk, which in turn means they
+          // are answering requests the same way. In reality this is not
+          // entirely true, as the scrape cycles can be slightly different, and
+          // therefore the recorded data can be slightly different. This means
+          // that single requests can differ slightly. What all of the above
+          // means for Prometheus is that there is a problem when a single
+          // Prometheus instance is not able to scrape the entire infrastructure
+          // anymore. This is where Prometheus' sharding feature comes into
+          // play. It divides the targets Prometheus scrapes into multiple
+          // groups, small enough for a single Prometheus instance to scrape. If
+          // possible functional sharding is recommended. What is meant by
+          // functional sharding is that all instances of Service A are being
+          // scraped by Prometheus A"
+          //
+          // https://github.com/prometheus-operator/prometheus-operator/blob/02a5bac9610299372e9f77cbbe0c824ce636795b/Documentation/high-availability.md#prometheus
+          //
+          //
+          // Not much docs on enabling sharding besides this issue
+          // https://github.com/prometheus-operator/prometheus-operator/issues/3130#issuecomment-610506794
+          // and the PR
+          // https://github.com/prometheus-operator/prometheus-operator/pull/3241
+          //
+          shards: config.replicas,
           resources: config.resources,
           secrets: promSecrets,
           ruleNamespaceSelector,
