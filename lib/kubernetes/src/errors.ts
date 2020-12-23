@@ -15,7 +15,7 @@
  */
 
 export class KubernetesApiNotAvailableError extends Error {
-  constructor(...args: any[]) {
+  constructor(...args: (string | undefined)[]) {
     super(...args);
     Error.captureStackTrace(this, KubernetesApiNotAvailableError);
   }

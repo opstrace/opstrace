@@ -18,19 +18,19 @@ import { DaemonSetType } from "../kinds";
 
 export function getDaemonSetRolloutMessage(ds: DaemonSetType): string {
   const daemonset = ds.spec;
-  const spec = ds.spec.spec!;
-  const metadata = daemonset.metadata!;
-  const status = daemonset.status!;
+  const spec = ds.spec.spec;
+  const metadata = daemonset.metadata;
+  const status = daemonset.status;
 
-  const updatedNumberScheduled = status.updatedNumberScheduled || 0;
-  const desiredNumberScheduled = status.desiredNumberScheduled || 0;
-  const numberAvailable = status.numberAvailable || 0;
+  const updatedNumberScheduled = status?.updatedNumberScheduled || 0;
+  const desiredNumberScheduled = status?.desiredNumberScheduled || 0;
+  const numberAvailable = status?.numberAvailable || 0;
 
   // Taken from https://github.com/kubernetes/kubectl/blob/0a26b53c373b22de64bf667dad7a2440359334d3/pkg/polymorphichelpers/rollout_status.go#L95
-  if (spec.updateStrategy && spec.updateStrategy.type !== "RollingUpdate") {
+  if (spec?.updateStrategy && spec?.updateStrategy.type !== "RollingUpdate") {
     return "";
   }
-  if ((metadata.generation || 0) <= (status.observedGeneration || 0)) {
+  if ((metadata?.generation || 0) <= (status?.observedGeneration || 0)) {
     if (updatedNumberScheduled < desiredNumberScheduled) {
       return `Waiting for DaemonSet ${ds.namespace}/${ds.name} rollout to finish: ${updatedNumberScheduled} out of ${desiredNumberScheduled} new pods have been updated`;
     }

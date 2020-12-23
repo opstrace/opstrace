@@ -18,17 +18,17 @@ import { DeploymentType } from "../kinds";
 
 export function getDeploymentRolloutMessage(d: DeploymentType): string {
   const deployment = d.spec;
-  const spec = d.spec.spec!;
-  const metadata = deployment.metadata!;
-  const status = deployment.status!;
+  const spec = d.spec.spec;
+  const metadata = deployment.metadata;
+  const status = deployment.status;
 
-  const replicas = spec.replicas || 0;
-  const updatedReplicas = status.updatedReplicas || 0;
-  const availableReplicas = status.availableReplicas || 0;
+  const replicas = spec?.replicas || 0;
+  const updatedReplicas = status?.updatedReplicas || 0;
+  const availableReplicas = status?.availableReplicas || 0;
 
   // Taken from https://github.com/kubernetes/kubectl/blob/0a26b53c373b22de64bf667dad7a2440359334d3/pkg/polymorphichelpers/rollout_status.go#L59
 
-  if ((metadata.generation || 0) <= (status.observedGeneration || 0)) {
+  if ((metadata?.generation || 0) <= (status?.observedGeneration || 0)) {
     // TODO: add case to handle progressDeadlineSeconds condition.
     if (updatedReplicas < replicas) {
       return `Waiting for Deployment ${d.namespace}/${d.name} rollout to finish: ${updatedReplicas} out of ${replicas} new replicas have been updated`;

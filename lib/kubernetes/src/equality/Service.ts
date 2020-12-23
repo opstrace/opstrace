@@ -42,6 +42,7 @@ export const isServiceSpecEqual = (
       desired.loadBalancerSourceRanges.length ===
         (existing.loadBalancerSourceRanges?.length || 0) &&
       !desired.loadBalancerSourceRanges.find(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (p, i) => p !== existing.loadBalancerSourceRanges![i]
       )
     )
@@ -64,6 +65,7 @@ const areServicePortsEqual = (
     Array.isArray(desired.ports) &&
     !(
       desired.ports.length === existing.ports?.length &&
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       !desired.ports.find((p, i) => !isServicePortEqual(p, existing.ports![i]))
     )
   ) {

@@ -80,6 +80,7 @@ const isPodSpecEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
     !(
       desired.initContainers.length === existing.initContainers.length &&
       !desired.initContainers.find(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (c, i) => !isContainerEqual(c, existing.initContainers![i])
       )
     )
@@ -158,6 +159,7 @@ const areContainerPortsEqual = (
     !(
       desired.ports.length === existing.ports.length &&
       !desired.ports.find(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (p, i) => !isContainerPortEqual(p, existing.ports![i])
       )
     )
@@ -180,6 +182,7 @@ const areContainerArgsEqual = (
     Array.isArray(existing.args) &&
     !(
       desired.args.length === existing.args.length &&
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       !desired.args.find((a, i) => a !== existing.args![i])
     )
   ) {
@@ -217,6 +220,7 @@ const areEnvVariablesEqual = (
         (e, i) =>
           !isEnvVariableEqual(
             e,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             existing.env!.filter(e => e.name !== ENV_HASH_NAME)[i]
           )
       )
@@ -263,6 +267,7 @@ const areVolumeMountsEqual = (
     !(
       desired.volumeMounts.length === existing.volumeMounts.length &&
       !desired.volumeMounts.find(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (p, i) => !isVolumeMountEqual(p, existing.volumeMounts![i])
       )
     )
@@ -293,6 +298,7 @@ const areVolumesEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
     Array.isArray(existing.volumes) &&
     !(
       desired.volumes.length === existing.volumes.length &&
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       !desired.volumes.find((v, i) => !isVolumeEqual(v, existing.volumes![i]))
     )
   ) {
@@ -392,7 +398,7 @@ const areVolumeItemsEqual = (
     Array.isArray(existing) &&
     !(
       desired.length === existing.length &&
-      !desired.find((s, i) => !isVolumeItemEqual(s, existing![i]))
+      !desired.find((s, i) => !isVolumeItemEqual(s, existing[i]))
     )
   ) {
     return false;

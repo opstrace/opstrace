@@ -19,12 +19,12 @@ import { PersistentVolumeType } from "../kinds";
 export function getPersistentVolumeReleaseMessage(
   pv: PersistentVolumeType
 ): string {
-  const spec = pv.spec.spec!;
+  const spec = pv.spec.spec;
 
-  if (spec.gcePersistentDisk && spec.gcePersistentDisk.pdName) {
+  if (spec?.gcePersistentDisk?.pdName) {
     return `Waiting for PersistentVolume ${pv.namespace}/${pv.name} to release Persistent Disk ${spec.gcePersistentDisk.pdName}.`;
   }
-  if (spec.awsElasticBlockStore && spec.awsElasticBlockStore.volumeID) {
+  if (spec?.awsElasticBlockStore?.volumeID) {
     return `Waiting for PersistentVolume ${pv.namespace}/${pv.name} to release Persistent Disk ${spec.awsElasticBlockStore.volumeID}.`;
   }
   return `Waiting for PersistentVolume ${pv.namespace}/${pv.name} to release Unknown Disk.`;

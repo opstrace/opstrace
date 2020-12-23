@@ -63,11 +63,12 @@ export const hasIngressChanged = (
     (desired.spec.spec?.tls.length !== existing.spec.spec?.tls.length ||
       desired.spec.spec?.tls.find(
         (t, i) =>
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           !isNetworkingV1beta1IngressTLSEqual(t, existing.spec.spec!.tls![i])
       )) &&
     !isDeepStrictEqual(
-      desired.spec.metadata!.annotations,
-      existing.spec.metadata!.annotations
+      desired.spec.metadata?.annotations,
+      existing.spec.metadata?.annotations
     )
   ) {
     logDifference(
