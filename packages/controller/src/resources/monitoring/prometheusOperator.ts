@@ -178,8 +178,8 @@ export function PrometheusOperatorResources(
                 {
                   args: [
                     "--kubelet-service=kube-system/kubelet",
-                    "--config-reloader-image=jimmidyson/configmap-reload:v0.4.0",
-                    "--prometheus-config-reloader=quay.io/prometheus-operator/prometheus-config-reloader:v0.42.1"
+                    `--config-reloader-image=${DockerImages.configMapReloader}`,
+                    `--prometheus-config-reloader=${DockerImages.prometheusConfigReloader}`
                   ],
                   image: DockerImages.prometheusOperator,
                   name: "prometheus-operator",
