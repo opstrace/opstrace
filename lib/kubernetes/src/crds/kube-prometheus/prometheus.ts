@@ -4778,6 +4778,17 @@ export const prometheus = {
                       "SHA of Prometheus container image to be deployed. Defaults to the value of `version`. Similar to a tag, but the SHA explicitly deploys an immutable container image. Version and Tag are ignored if SHA is set. Deprecated: use 'image' instead.  The image digest can be specified as part of the image URL.",
                     type: "string"
                   },
+                  //
+                  // NOTE: Added manually since kube-prometheus hasn't updated the
+                  // CRDs with this field.
+                  //
+                  // https://github.com/brancz/prometheus-operator/blob/08823836edbc486315246795688de45ab081afc0/Documentation/api.md
+                  shards: {
+                    description:
+                      "EXPERIMENTAL: Number of shards to distribute targets onto. Number of replicas multiplied by shards is the total number of Pods created. Note that scaling down shards will not reshard data onto remaining instances, it must be manually moved. Increasing shards will not reshard data either but it will continue to be available from the same instances. To query globally use Thanos sidecar and Thanos querier or remote write data to a central location. Sharding is done on the content of the __address__ target meta-label.",
+                    format: "int32",
+                    type: "integer"
+                  },
                   storage: {
                     description:
                       "Storage spec to specify how storage shall be used.",
