@@ -51,6 +51,10 @@ export function PrometheusOperatorResources(
   collection.add(new CustomResourceDefinition(probe, kubeConfig));
   collection.add(new CustomResourceDefinition(thanosruler, kubeConfig));
 
+  const prometheusOperatorVersion = DockerImages.prometheusOperator.split(
+    ":"
+  )[1];
+
   collection.add(
     new V1ServicemonitorResource(
       {
@@ -60,7 +64,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1",
+            "app.kubernetes.io/version": prometheusOperatorVersion,
             tenant: "system"
           },
           name: "prometheus-operator",
@@ -77,7 +81,7 @@ export function PrometheusOperatorResources(
             matchLabels: {
               "app.kubernetes.io/component": "controller",
               "app.kubernetes.io/name": "prometheus-operator",
-              "app.kubernetes.io/version": "v0.42.1"
+              "app.kubernetes.io/version": prometheusOperatorVersion
             }
           }
         }
@@ -95,7 +99,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": prometheusOperatorVersion
           },
           name: "prometheus-operator",
           namespace
@@ -114,7 +118,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": prometheusOperatorVersion
           },
           name: "prometheus-operator",
           namespace
@@ -148,7 +152,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": prometheusOperatorVersion
           },
           name: "prometheus-operator",
           namespace
@@ -166,7 +170,7 @@ export function PrometheusOperatorResources(
               labels: {
                 "app.kubernetes.io/component": "controller",
                 "app.kubernetes.io/name": "prometheus-operator",
-                "app.kubernetes.io/version": "v0.42.1"
+                "app.kubernetes.io/version": prometheusOperatorVersion
               }
             },
             spec: {
