@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call, cancel, fork } from "redux-saga/effects";
+import { delay, call, cancel, fork, CallEffect } from "redux-saga/effects";
 import { Task, Saga } from "redux-saga";
 import { SECOND } from "@opstrace/utils";
 import {
@@ -46,7 +46,7 @@ export function clusterIsEmpty(
   daemonsets: DaemonSetType[],
   statefulsets: StatefulSetType[],
   certificates: V1CertificateResourceType[]
-) {
+): boolean {
   return (
     daemonsets.filter(r => r.isOurs()).length === 0 &&
     deployments.filter(r => r.isOurs() && !r.isProtected()).length === 0 &&
@@ -57,35 +57,37 @@ export function clusterIsEmpty(
 
 export function activePersistentVolumes(
   persistentVolumes: PersistentVolumeType[]
-) {
+): string[] {
   return persistentVolumes
     .map(pv => getPersistentVolumeReleaseMessage(pv))
     .sort()
     .filter(m => !!m);
 }
 
-export function activeDeployments(deployments: DeploymentType[]) {
+export function activeDeployments(deployments: DeploymentType[]): string[] {
   return deployments
     .map(r => getDeploymentRolloutMessage(r))
     .sort()
     .filter(m => !!m);
 }
 
-export function activeDaemonsets(daemonsets: DaemonSetType[]) {
+export function activeDaemonsets(daemonsets: DaemonSetType[]): string[] {
   return daemonsets
     .map(r => getDaemonSetRolloutMessage(r))
     .sort()
     .filter(m => !!m);
 }
 
-export function activeStatefulsets(statefulsets: StatefulSetType[]) {
+export function activeStatefulsets(statefulsets: StatefulSetType[]): string[] {
   return statefulsets
     .map(r => getStatefulSetRolloutMessage(r))
     .sort()
     .filter(m => !!m);
 }
 
-export function activeCertificates(certificates: V1CertificateResourceType[]) {
+export function activeCertificates(
+  certificates: V1CertificateResourceType[]
+): string[] {
   return certificates
     .map(r => getCertificateRolloutMessage(r))
     .sort()
@@ -96,7 +98,8 @@ export function* reporter(
   runningReporterOptions: RunningReporterOptions,
   destroyingReporterOptions: DestroyingReporterOptions,
   shouldDestroy: Saga
-) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Generator<CallEffect, any, unknown> {
   return yield call(function* () {
     let reportRunning: Task | null = null;
     let reportDestroying: Task | null = null;
@@ -143,9 +146,12 @@ export interface DestroyingReporterOptions {
   onChange: Saga;
 }
 
-export function* destroyingReporter(options: DestroyingReporterOptions) {
+export function* destroyingReporter(
+  options: DestroyingReporterOptions
+): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+Generator<CallEffect, void, any> {
   let existingPersistentVolumes: string[] = [];
-  let lastHeartbeat: number = Infinity;
+  let lastHeartbeat = Infinity;
   let firstReport = true;
 
   while (true) {
@@ -196,15 +202,18 @@ export interface RunningReporterOptions {
   onChange: Saga;
 }
 
-export function* runningReporter(options: RunningReporterOptions) {
+export function* runningReporter(
+  options: RunningReporterOptions
+): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+Generator<CallEffect, void, any> {
   let lastActiveDeployments: string[] = [];
   let lastActiveDaemonSets: string[] = [];
   let lastActiveStatefulSets: string[] = [];
   let lastActiveCerts: string[] = [];
 
-  let noActivesSince: number = Infinity;
-  let lastHeartbeat: number = Infinity;
-  let ready: boolean = false;
+  let noActivesSince = Infinity;
+  let lastHeartbeat = Infinity;
+  let ready = false;
   let firstReport = true;
 
   while (true) {

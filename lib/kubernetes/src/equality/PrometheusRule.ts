@@ -37,31 +37,31 @@ type Group = {
 type Rule = {
   alert?: string;
   annotations?: {
-    [k: string]: any;
+    [k: string]: unknown;
   };
   expr: string | number;
   for?: string;
   labels?: {
-    [k: string]: any;
+    [k: string]: unknown;
   };
   record?: string;
-  [k: string]: any;
+  [k: string]: unknown;
 };
 
 const areGroupsEqual = (
   desired: V1Prometheusrule,
   existing: V1Prometheusrule
 ): boolean => {
-  if (typeof desired.spec!.groups !== typeof existing.spec!.groups) {
+  if (typeof desired.spec.groups !== typeof existing.spec.groups) {
     return false;
   }
 
   if (
-    Array.isArray(desired.spec!.groups) &&
+    Array.isArray(desired.spec.groups) &&
     !(
-      desired.spec!.groups.length === existing.spec!.groups!.length &&
-      !desired.spec!.groups.find(
-        (g, i) => !isGroupEqual(g, existing.spec!.groups![i])
+      desired.spec.groups.length === existing.spec.groups!.length &&
+      !desired.spec.groups.find(
+        (g, i) => !isGroupEqual(g, existing.spec.groups![i])
       )
     )
   ) {

@@ -78,7 +78,7 @@ const isPodSpecEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
     Array.isArray(desired.initContainers) &&
     Array.isArray(existing.initContainers) &&
     !(
-      desired.initContainers.length === existing.initContainers!.length &&
+      desired.initContainers.length === existing.initContainers.length &&
       !desired.initContainers.find(
         (c, i) => !isContainerEqual(c, existing.initContainers![i])
       )
@@ -156,7 +156,7 @@ const areContainerPortsEqual = (
     Array.isArray(desired.ports) &&
     Array.isArray(existing.ports) &&
     !(
-      desired.ports.length === existing.ports!.length &&
+      desired.ports.length === existing.ports.length &&
       !desired.ports.find(
         (p, i) => !isContainerPortEqual(p, existing.ports![i])
       )
@@ -179,7 +179,7 @@ const areContainerArgsEqual = (
     Array.isArray(desired.args) &&
     Array.isArray(existing.args) &&
     !(
-      desired.args.length === existing.args!.length &&
+      desired.args.length === existing.args.length &&
       !desired.args.find((a, i) => a !== existing.args![i])
     )
   ) {
@@ -212,7 +212,7 @@ const areEnvVariablesEqual = (
     Array.isArray(existing.env) &&
     !(
       desired.env.length ===
-        existing.env!.filter(e => e.name !== ENV_HASH_NAME).length &&
+        existing.env.filter(e => e.name !== ENV_HASH_NAME).length &&
       !desired.env.find(
         (e, i) =>
           !isEnvVariableEqual(
@@ -261,7 +261,7 @@ const areVolumeMountsEqual = (
     Array.isArray(desired.volumeMounts) &&
     Array.isArray(existing.volumeMounts) &&
     !(
-      desired.volumeMounts.length === existing.volumeMounts!.length &&
+      desired.volumeMounts.length === existing.volumeMounts.length &&
       !desired.volumeMounts.find(
         (p, i) => !isVolumeMountEqual(p, existing.volumeMounts![i])
       )
@@ -292,7 +292,7 @@ const areVolumesEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
     Array.isArray(desired.volumes) &&
     Array.isArray(existing.volumes) &&
     !(
-      desired.volumes.length === existing.volumes!.length &&
+      desired.volumes.length === existing.volumes.length &&
       !desired.volumes.find((v, i) => !isVolumeEqual(v, existing.volumes![i]))
     )
   ) {
@@ -391,7 +391,7 @@ const areVolumeItemsEqual = (
     Array.isArray(desired) &&
     Array.isArray(existing) &&
     !(
-      desired.length === existing!.length &&
+      desired.length === existing.length &&
       !desired.find((s, i) => !isVolumeItemEqual(s, existing![i]))
     )
   ) {

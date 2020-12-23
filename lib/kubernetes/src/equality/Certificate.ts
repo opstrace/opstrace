@@ -28,14 +28,14 @@ export const isCertificateEqual = (
 
   if (
     !isDeepStrictEqual(
-      desired.metadata!.annotations,
-      existing.metadata!.annotations
+      desired.metadata?.annotations,
+      existing.metadata?.annotations
     )
   ) {
     log.debug(
       `annotations mismatch: ${JSON.stringify(
-        desired.metadata!.annotations
-      )} vs ${existing.metadata!.annotations}`
+        desired.metadata?.annotations
+      )} vs ${existing.metadata?.annotations}`
     );
     return false;
   }

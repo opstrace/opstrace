@@ -21,10 +21,10 @@ export const isServiceMonitorEqual = (
   desired: V1Servicemonitor,
   existing: V1Servicemonitor
 ): boolean => {
-  if (!isDeepStrictEqual(desired.spec!.selector, existing.spec!.selector)) {
+  if (!isDeepStrictEqual(desired.spec.selector, existing.spec.selector)) {
     return false;
   }
-  if (desired.spec!.jobLabel !== existing.spec!.jobLabel) {
+  if (desired.spec.jobLabel !== existing.spec.jobLabel) {
     return false;
   }
   if (!areEndpointsEqual(desired, existing)) {
@@ -44,19 +44,19 @@ const areEndpointsEqual = (
   desired: V1Servicemonitor,
   existing: V1Servicemonitor
 ): boolean => {
-  if (typeof desired.spec!.endpoints !== typeof existing.spec!.endpoints) {
+  if (typeof desired.spec.endpoints !== typeof existing.spec.endpoints) {
     return false;
   }
 
   if (
-    Array.isArray(desired.spec!.endpoints) &&
+    Array.isArray(desired.spec.endpoints) &&
     !(
-      desired.spec!.endpoints.length === existing.spec!.endpoints!.length &&
-      !desired.spec!.endpoints.find(
+      desired.spec.endpoints.length === existing.spec.endpoints.length &&
+      !desired.spec.endpoints.find(
         (p, i) =>
           !isEndpointEqual(
             p as Endpoint,
-            existing.spec!.endpoints![i] as Endpoint
+            existing.spec.endpoints[i] as Endpoint
           )
       )
     )

@@ -17,8 +17,8 @@
 import { DaemonSetType } from "../kinds";
 
 export function getDaemonSetRolloutMessage(ds: DaemonSetType): string {
-  const daemonset = ds.spec!;
-  const spec = ds.spec!.spec!;
+  const daemonset = ds.spec;
+  const spec = ds.spec.spec!;
   const metadata = daemonset.metadata!;
   const status = daemonset.status!;
 

@@ -19,7 +19,7 @@ import { V1CertificateResourceType } from "../custom-resources";
 export function getCertificateRolloutMessage(
   c: V1CertificateResourceType
 ): string {
-  const certificate = c.spec!;
+  const certificate = c.spec;
   const conditions = certificate.status?.conditions ?? [];
 
   for (const c of conditions) {

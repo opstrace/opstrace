@@ -17,8 +17,8 @@
 import { DeploymentType } from "../kinds";
 
 export function getDeploymentRolloutMessage(d: DeploymentType): string {
-  const deployment = d.spec!;
-  const spec = d.spec!.spec!;
+  const deployment = d.spec;
+  const spec = d.spec.spec!;
   const metadata = deployment.metadata!;
   const status = deployment.status!;
 

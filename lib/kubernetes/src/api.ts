@@ -18,7 +18,7 @@ import { K8sResource } from "./common";
 import { kubernetesError } from "./utils";
 import { log } from "@opstrace/utils";
 
-export const createResource = async (resource: K8sResource) => {
+export const createResource = async (resource: K8sResource): Promise<void> => {
   log.debug(
     "createResource for %s(ns: %s):",
     resource.name,
@@ -42,7 +42,7 @@ export const createResource = async (resource: K8sResource) => {
   return;
 };
 
-export const deleteResource = async (resource: K8sResource) => {
+export const deleteResource = async (resource: K8sResource): Promise<void> => {
   try {
     await resource.delete();
   } catch (e) {
@@ -54,7 +54,7 @@ export const deleteResource = async (resource: K8sResource) => {
   return;
 };
 
-export const updateResource = async (resource: K8sResource) => {
+export const updateResource = async (resource: K8sResource): Promise<void> => {
   try {
     await resource.update();
   } catch (e) {
