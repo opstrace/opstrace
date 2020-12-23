@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
 import { StatefulSetType } from "../kinds";
 
 export function getStatefulSetRolloutMessage(s: StatefulSetType): string {
   const statefulSet = s.spec;
-  const spec = s.spec.spec!;
-  const metadata = statefulSet.metadata!;
-  const status = statefulSet.status!;
+  const spec = s.spec.spec;
+  const metadata = statefulSet.metadata;
+  const status = statefulSet.status;
+
+  assert(spec);
+  assert(metadata);
+  assert(status);
 
   const replicas = spec.replicas || 0;
   const updatedReplicas = status.updatedReplicas || 0;

@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+// It may be worth it to fix proper typing for `any` later.
+// Right now it may affect too much parts
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 import localVarRequest from "request";
 import { KubeConfig, V1Status } from "@kubernetes/client-node";
 
@@ -63,8 +69,8 @@ export function union<T extends K8sResource>(
 
 /**
  * isSameObject returns true if the two resources (a and b) reference the same kubernetes object
- * @param a
- * @param b
+ * @param o1
+ * @param o2
  */
 export function isSameObject<T extends K8sResource>(o1: T, o2: T): boolean {
   return o1.name === o2.name && o1.namespace === o2.namespace;
@@ -132,28 +138,23 @@ export class ResourceCollection {
  * K8sResource represents a Kubernetes resource.
  */
 export class K8sResource implements Resource {
-  protected resource: any;
-  protected kubeConfig: KubeConfig;
-
-  constructor(resource: any, kubeConfig: KubeConfig) {
-    this.resource = resource;
-    this.kubeConfig = kubeConfig;
-  }
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  constructor(protected resource: any, protected kubeConfig: KubeConfig) {}
   get namespace(): string {
-    return this.resource.metadata!.namespace || "default";
+    return this.resource.metadata?.namespace || "default";
   }
   get name(): string {
-    return this.resource.metadata!.name;
+    return this.resource.metadata?.name;
   }
   get annotations(): { [key: string]: string } {
-    if (this.resource.metadata!.annotations) {
-      return this.resource.metadata!.annotations;
+    if (this.resource.metadata?.annotations) {
+      return this.resource.metadata.annotations;
     }
     return {};
   }
   get labels(): { [key: string]: string } {
-    if (this.resource.metadata!.labels) {
-      return this.resource.metadata!.labels;
+    if (this.resource.metadata?.labels) {
+      return this.resource.metadata.labels;
     }
     return {};
   }
@@ -225,8 +226,7 @@ const typeMap: { [index: string]: any } = {
  * From https://github.com/kubernetes-client/javascript/blob/master/src/gen/model/models.ts#L1835
  */
 export class ObjectSerializer {
-  public static findCorrectType(data: any, expectedType: string) {
-    /* eslint-disable-next-line  */
+  public static findCorrectType(data: any, expectedType: string): string {
     if (data == undefined) {
       return expectedType;
     } else if (primitives.indexOf(expectedType.toLowerCase()) !== -1) {
