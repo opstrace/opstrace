@@ -100,8 +100,8 @@ export const hasDeploymentChanged = (
 
   if (
     !Pod.isPodSpecTemplateEqual(
-      desired.spec.spec!.template,
-      existing.spec.spec!.template
+      desired.spec.spec?.template,
+      existing.spec.spec?.template
     )
   ) {
     logDifference(
@@ -134,8 +134,8 @@ export const hasStatefulSetChanged = (
 
   if (
     !Pod.isPodSpecTemplateEqual(
-      desired.spec.spec!.template,
-      existing.spec.spec!.template
+      desired.spec.spec?.template,
+      existing.spec.spec?.template
     )
   ) {
     logDifference(
@@ -171,8 +171,8 @@ export const hasDaemonSetChanged = (
 ): boolean => {
   if (
     !Pod.isPodSpecTemplateEqual(
-      desired.spec.spec!.template,
-      existing.spec.spec!.template
+      desired.spec.spec?.template,
+      existing.spec.spec?.template
     )
   ) {
     logDifference(
@@ -217,7 +217,7 @@ export const hasServiceChanged = (
   desired: ServiceType,
   existing: ServiceType
 ): boolean => {
-  if (!Service.isServiceSpecEqual(desired.spec.spec!, existing.spec.spec!)) {
+  if (!Service.isServiceSpecEqual(desired.spec.spec, existing.spec.spec)) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
       desired.spec,
@@ -234,7 +234,7 @@ export const hasConfigMapChanged = (
   existing: ConfigMapType
 ): boolean => {
   if (
-    !isDeepStrictEqual(desired.spec.data!, existing.spec.data) ||
+    !isDeepStrictEqual(desired.spec.data, existing.spec.data) ||
     !isDeepStrictEqual(desired.spec.binaryData, existing.spec.binaryData)
   ) {
     logDifference(

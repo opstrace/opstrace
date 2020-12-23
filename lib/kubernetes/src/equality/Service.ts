@@ -18,9 +18,12 @@ import { isDeepStrictEqual } from "util";
 import { V1ServiceSpec, V1ServicePort } from "@kubernetes/client-node";
 
 export const isServiceSpecEqual = (
-  desired: V1ServiceSpec,
-  existing: V1ServiceSpec
+  desired?: V1ServiceSpec,
+  existing?: V1ServiceSpec
 ): boolean => {
+  if (!desired || !existing) {
+    return !desired && !existing;
+  }
   if (!isDeepStrictEqual(desired.selector, existing.selector)) {
     return false;
   }

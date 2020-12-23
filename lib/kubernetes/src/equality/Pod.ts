@@ -31,16 +31,16 @@ import { isDeepStrictEqual } from "util";
 export const ENV_HASH_NAME = "OPSTRACE_CONTROLLER_VERSION";
 
 export const isPodSpecTemplateEqual = (
-  desired: V1PodTemplateSpec,
-  existing: V1PodTemplateSpec
+  desired?: V1PodTemplateSpec,
+  existing?: V1PodTemplateSpec
 ): boolean => {
-  if (typeof desired.spec !== typeof existing.spec) {
+  if (typeof desired?.spec !== typeof existing?.spec) {
     return false;
   }
 
   if (
-    desired.spec &&
-    existing.spec &&
+    desired?.spec &&
+    existing?.spec &&
     !isPodSpecEqual(desired.spec, existing.spec)
   ) {
     return false;
