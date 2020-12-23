@@ -51,10 +51,15 @@ function renderKeybindings(data?: Command) {
 
   return (
     <Box display="flex">
-      {keybindings.map(keys => (
-        <Box display="flex" ml={1}>
-          {keys.map(keyCode => (
-            <Box bgcolor="grey.500" p={0.3} ml={0.3}>
+      {keybindings.map((keys, idx) => (
+        <Box display="flex" ml={1} key={`keybinding-${idx}`}>
+          {keys.map((keyCode, partIdx) => (
+            <Box
+              bgcolor="grey.500"
+              p={0.3}
+              ml={0.3}
+              key={`keybinding-key-${partIdx}`}
+            >
               {keyCode}
             </Box>
           ))}
