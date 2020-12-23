@@ -25,14 +25,12 @@ import {
   withPodAntiAffinityRequired
 } from "@opstrace/kubernetes";
 import {
-  getNodeCount,
   getTenantNamespace,
   getPrometheusName,
   getDomain
 } from "../../../helpers";
 import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
-import { select } from "@opstrace/utils";
 import { KubeConfig } from "@kubernetes/client-node";
 
 export function PrometheusResources(
@@ -45,13 +43,9 @@ export function PrometheusResources(
   const name = getPrometheusName(tenant);
 
   const config = {
-    replicas: select(getNodeCount(state), [
-      { "<=": 6, choose: 2 },
-      {
-        "<=": Infinity,
-        choose: 3
-      }
-    ]),
+    // TODO: set number of replicas per shard with
+    // https://github.com/opstrace/opstrace/pull/215
+    replicas: 1,
     diskSize: "10Gi",
     resources: {}
   };
