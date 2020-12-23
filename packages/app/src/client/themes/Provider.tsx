@@ -55,7 +55,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-class ThemeProvider extends React.Component<Props> {
+class ThemeProvider extends React.PureComponent<Props> {
   render() {
     const { children, theme } = this.props;
 
