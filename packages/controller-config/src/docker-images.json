@@ -17,7 +17,7 @@
   "memcachedExporter": "prom/memcached-exporter:v0.6.0",
   "nginxController": "k8s.gcr.io/ingress-nginx/controller:v0.41.2",
   "nodeExporter": "quay.io/prometheus/node-exporter:v0.18.1",
-  "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
+  "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.8.2",
   "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1",
   "prometheus": "quay.io/prometheus/prometheus:v2.21.0",
   "graphqlEngine": "opstrace/graphql:7232833b5b41ed1793caff32ca128926",
