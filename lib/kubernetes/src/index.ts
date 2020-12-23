@@ -31,7 +31,7 @@ import { log, sleep, mtime, mtimeDeadlineInSeconds } from "@opstrace/utils";
 
 // Used by installer/uninstaller for robust config map creation/update,
 // useful logging. Context: opstrace-prelaunch/issues/1039
-export async function createOrUpdateCM(cm: ConfigMap) {
+export async function createOrUpdateCM(cm: ConfigMap): Promise<void> {
   // For choosing the overall operation deadline note that the connect()
   // timeout control for the underlying HTTP client is not yet working well --
   // might take ~2 minutes, see

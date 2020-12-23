@@ -56,7 +56,7 @@ function isNetworkingV1beta1IngressTLSEqual(
 export const hasIngressChanged = (
   desired: IngressType,
   existing: IngressType
-) => {
+): boolean => {
   if (
     Array.isArray(desired.spec.spec?.tls) &&
     Array.isArray(existing.spec.spec?.tls) &&
@@ -83,11 +83,11 @@ export const hasIngressChanged = (
 export const hasDeploymentChanged = (
   desired: DeploymentType,
   existing: DeploymentType
-) => {
+): boolean => {
   if (
-    desired.spec.spec!.replicas &&
-    existing.spec.spec!.replicas &&
-    desired.spec.spec!.replicas !== existing.spec.spec!.replicas
+    desired.spec.spec?.replicas &&
+    existing.spec.spec?.replicas &&
+    desired.spec.spec.replicas !== existing.spec.spec.replicas
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -117,11 +117,11 @@ export const hasDeploymentChanged = (
 export const hasStatefulSetChanged = (
   desired: StatefulSetType,
   existing: StatefulSetType
-) => {
+): boolean => {
   if (
-    desired.spec.spec!.replicas &&
-    existing.spec.spec!.replicas &&
-    desired.spec.spec!.replicas !== existing.spec.spec!.replicas
+    desired.spec.spec?.replicas &&
+    existing.spec.spec?.replicas &&
+    desired.spec.spec.replicas !== existing.spec.spec.replicas
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -151,7 +151,7 @@ export const hasStatefulSetChanged = (
 export const hasCertificateChanged = (
   desired: V1CertificateResource,
   existing: V1CertificateResource
-) => {
+): boolean => {
   if (!isCertificateEqual(desired.spec, existing.spec)) {
     logDifference(
       `${desired.spec}/${desired.spec}`,
@@ -167,7 +167,7 @@ export const hasCertificateChanged = (
 export const hasDaemonSetChanged = (
   desired: DaemonSetType,
   existing: DaemonSetType
-) => {
+): boolean => {
   if (
     !Pod.isPodSpecTemplateEqual(
       desired.spec.spec!.template,
@@ -185,7 +185,10 @@ export const hasDaemonSetChanged = (
   return false;
 };
 
-export const hasSecretChanged = (desired: SecretType, existing: SecretType) => {
+export const hasSecretChanged = (
+  desired: SecretType,
+  existing: SecretType
+): boolean => {
   // If the secret has this annotation then it means it'll be updated by
   // cert-manager and synchronized by kubed.
   if (
@@ -212,7 +215,7 @@ export const hasSecretChanged = (desired: SecretType, existing: SecretType) => {
 export const hasServiceChanged = (
   desired: ServiceType,
   existing: ServiceType
-) => {
+): boolean => {
   if (!Service.isServiceSpecEqual(desired.spec.spec!, existing.spec.spec!)) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -228,7 +231,7 @@ export const hasServiceChanged = (
 export const hasConfigMapChanged = (
   desired: ConfigMapType,
   existing: ConfigMapType
-) => {
+): boolean => {
   if (
     !isDeepStrictEqual(desired.spec.data!, existing.spec.data) ||
     !isDeepStrictEqual(desired.spec.binaryData, existing.spec.binaryData)
@@ -247,7 +250,7 @@ export const hasConfigMapChanged = (
 export const hasServiceMonitorChanged = (
   desired: V1ServicemonitorResourceType,
   existing: V1ServicemonitorResourceType
-) => {
+): boolean => {
   if (!ServiceMonitor.isServiceMonitorEqual(desired.spec, existing.spec)) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -263,7 +266,7 @@ export const hasServiceMonitorChanged = (
 export const hasPrometheusRuleChanged = (
   desired: V1PrometheusruleResourceType,
   existing: V1PrometheusruleResourceType
-) => {
+): boolean => {
   if (!PrometheusRule.isPrometheusRuleEqual(desired.spec, existing.spec)) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -279,7 +282,7 @@ export const hasPrometheusRuleChanged = (
 export const hasPrometheusChanged = (
   desired: V1PrometheusResourceType,
   existing: V1PrometheusResourceType
-) => {
+): boolean => {
   if (!Prometheus.isPrometheusEqual(desired.spec, existing.spec)) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -295,7 +298,7 @@ export const hasPrometheusChanged = (
 export const hasAlertManagerChanged = (
   desired: V1AlertmanagerResourceType,
   existing: V1AlertmanagerResourceType
-) => {
+): boolean => {
   if (!AlertManager.isAlertManagerEqual(desired.spec, existing.spec)) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,

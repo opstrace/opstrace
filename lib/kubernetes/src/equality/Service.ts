@@ -40,9 +40,7 @@ export const isServiceSpecEqual = (
     Array.isArray(desired.loadBalancerSourceRanges) &&
     !(
       desired.loadBalancerSourceRanges.length ===
-        ((existing.loadBalancerSourceRanges &&
-          existing.loadBalancerSourceRanges!.length) ||
-          0) &&
+        (existing.loadBalancerSourceRanges?.length || 0) &&
       !desired.loadBalancerSourceRanges.find(
         (p, i) => p !== existing.loadBalancerSourceRanges![i]
       )
@@ -65,7 +63,7 @@ const areServicePortsEqual = (
   if (
     Array.isArray(desired.ports) &&
     !(
-      desired.ports.length === existing.ports!.length &&
+      desired.ports.length === existing.ports?.length &&
       !desired.ports.find((p, i) => !isServicePortEqual(p, existing.ports![i]))
     )
   ) {

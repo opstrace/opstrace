@@ -17,8 +17,8 @@
 import { StatefulSetType } from "../kinds";
 
 export function getStatefulSetRolloutMessage(s: StatefulSetType): string {
-  const statefulSet = s.spec!;
-  const spec = s.spec!.spec!;
+  const statefulSet = s.spec;
+  const spec = s.spec.spec!;
   const metadata = statefulSet.metadata!;
   const status = statefulSet.status!;
 

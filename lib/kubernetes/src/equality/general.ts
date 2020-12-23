@@ -23,11 +23,12 @@ import {
   SecretType,
   ConfigMapType
 } from "../kinds";
+import { V1Volume } from "@kubernetes/client-node";
 
 export const haveLabelsChanged = (
   desired: K8sResource,
   existing: K8sResource
-) =>
+): boolean =>
   entries(desired.labels).find(([k, v]) => existing.labels[k] !== v)
     ? true
     : false;
@@ -48,26 +49,27 @@ export const hasMountedVolume = (
   resource: WithMountedVolumeType,
   secrets: SecretType[],
   configMaps: ConfigMapType[]
-) => {
-  const volumes = resource.spec!.spec!.template.spec!.volumes;
+): boolean | V1Volume | undefined => {
+  const volumes = resource.spec?.spec?.template.spec?.volumes;
   if (!volumes) {
     return false;
   }
   return volumes.find(v => {
     // Check secrets mounted as a volume
-    if (v.secret && v.secret.secretName) {
+    const secretName = v.secret?.secretName;
+    if (secretName) {
       const hasSecretChanged = secrets.find(
-        s =>
-          s.name === v.secret!.secretName && s.namespace === resource.namespace
+        s => s.name === secretName && s.namespace === resource.namespace
       );
       if (hasSecretChanged) {
         return true;
       }
     }
     // Check configMaps mounted as a volume
-    if (v.configMap && v.configMap.name) {
+    const configMapName = v.configMap?.name;
+    if (configMapName) {
       const hasCMChanged = configMaps.find(
-        c => c.name === v.configMap!.name && c.namespace === resource.namespace
+        c => c.name === configMapName && c.namespace === resource.namespace
       );
       if (hasCMChanged) {
         return true;
@@ -77,6 +79,11 @@ export const hasMountedVolume = (
   });
 };
 
-export function logDifference(name: string, desired: any, existing: any) {
-  log.info("%s change in spec: %s", name, JSON.stringify(diff(desired, existing), null, 2))
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+export function logDifference(name: string, desired: any, existing: any): void {
+  log.info(
+    "%s change in spec: %s",
+    name,
+    JSON.stringify(diff(desired, existing), null, 2)
+  );
 }
