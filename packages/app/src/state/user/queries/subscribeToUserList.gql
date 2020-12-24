@@ -3,6 +3,7 @@ subscription SubscribeToUserList {
     role
     email
     avatar
+    active
     username
     session_last_updated
     created_at

@@ -1,5 +1,0 @@
-mutation DeleteUser($email: String!) {
-  delete_user_by_pk(email: $email) {
-    email
-  }
-}

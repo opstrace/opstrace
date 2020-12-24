@@ -37,5 +37,5 @@ export default function useUserList() {
     };
   }, [dispatch]);
 
-  return users;
+  return users.filter(user => user.active);
 }
