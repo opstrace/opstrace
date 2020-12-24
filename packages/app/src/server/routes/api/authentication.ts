@@ -59,7 +59,7 @@ function createAuthHandler(): express.Router {
     try {
       const userMeta = await graphqlClient.GetUser({ email: req.body.email });
       const firstUser = userMeta.data?.user_aggregate.aggregate?.count === 0;
-      const existingUser = userMeta.data?.user_by_pk;
+      const existingUser = userMeta.data?.user_by_pk?.active;
 
       if (firstUser) {
         // first user
@@ -118,7 +118,7 @@ function createAuthHandler(): express.Router {
   });
 
   // add a catch all for misconfigured auth requests
-  auth.all("*", function(req, res, next) {
+  auth.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "auth route not found"));
   });
 

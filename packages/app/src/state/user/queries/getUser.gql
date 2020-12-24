@@ -3,8 +3,9 @@ query GetUser($email: String!) {
     email
     avatar
     username
+    active
   }
-  user_aggregate {
+  user_aggregate(where: { active: { _eq: true } }) {
     aggregate {
       count
     }

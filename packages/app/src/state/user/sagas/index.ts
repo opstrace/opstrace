@@ -19,6 +19,8 @@ import graphqlClient, { User } from "state/graphqlClient";
 
 import userListSubscriptionManager from "./userListSubscription";
 import { getCurrentUser } from "../hooks/useCurrentUser";
+import { State } from "state/reducer";
+import { getUserList } from "../hooks/useUserList";
 
 export default function* userTaskManager() {
   const sagas = [
@@ -52,13 +54,26 @@ function* addUserListener() {
 
 function* addUser(action: ReturnType<typeof actions.addUser>) {
   try {
-    yield graphqlClient.CreateUser({
-      email: action.payload,
-      avatar: "",
-      // set the email as the username for now, it'll be overwritten
-      // when the user logs in for the first time
-      username: action.payload
-    });
+    const state: State = yield select();
+    const registeredUsers = getUserList(state);
+    const existingDeactivatedUser = registeredUsers.find(
+      user => user.email === action.payload && !user.active
+    );
+    // We set users as inactive instead of deleting so that all the history
+    // created by them is not disrupted/lost
+    if (existingDeactivatedUser) {
+      yield graphqlClient.ReactivateUser({
+        email: action.payload
+      });
+    } else {
+      yield graphqlClient.CreateUser({
+        email: action.payload,
+        avatar: "",
+        // set the email as the username for now, it'll be overwritten
+        // when the user logs in for the first time
+        username: action.payload
+      });
+    }
   } catch (err) {
     console.error(err);
   }
@@ -70,6 +85,8 @@ function* deleteUserListener() {
 
 function* deleteUser(action: ReturnType<typeof actions.deleteUser>) {
   try {
+    // When we "delete" a user, we actually set the user as inactive instead of deleting so that all the history
+    // created by them is not disrupted/lost
     yield graphqlClient.DeleteUser({
       email: action.payload
     });

@@ -167,17 +167,18 @@
     permission:
       check: {}
       columns:
+      - alias_for
+      - base_file_id
+      - branch_name
+      - created_at
+      - ext
+      - id
       - is_modified
       - mark_deleted
-      - branch_name
-      - ext
       - module_name
       - module_scope
       - module_version
       - path
-      - created_at
-      - base_file_id
-      - id
       backend_only: false
   select_permissions:
   - role: user
@@ -198,17 +199,18 @@
   - role: user_admin
     permission:
       columns:
+      - alias_for
+      - base_file_id
+      - branch_name
+      - created_at
+      - ext
+      - id
       - is_modified
       - mark_deleted
-      - branch_name
-      - ext
       - module_name
       - module_scope
       - module_version
       - path
-      - created_at
-      - base_file_id
-      - id
       filter: {}
   update_permissions:
   - role: user
@@ -228,6 +230,7 @@
   - role: user_admin
     permission:
       columns:
+      - alias_for
       - base_file_id
       - branch_name
       - ext
@@ -456,6 +459,7 @@
   - role: user_admin
     permission:
       columns:
+      - active
       - avatar
       - created_at
       - email
@@ -477,13 +481,10 @@
   - role: user_admin
     permission:
       columns:
+      - active
       - username
       filter: {}
       check: null
-  delete_permissions:
-  - role: user_admin
-    permission:
-      filter: {}
 - table:
     schema: public
     name: user_preference
