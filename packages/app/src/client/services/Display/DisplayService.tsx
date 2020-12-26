@@ -27,6 +27,7 @@ import {
 interface DisplayServiceApi {
   state: DisplayServiceState;
   setSidebarVisible: (visible: boolean) => void;
+  setSidebarWidth: (size: number) => void;
 }
 
 const displayService = React.createContext<DisplayServiceApi | null>(null);
@@ -38,14 +39,15 @@ class DisplayServiceProviderChildren extends React.PureComponent {
 }
 
 function DisplayService({ children }: { children: React.ReactNode }) {
-  const [state, { setSidebarVisible }] = useTypesafeReducer<
+  const [state, { setSidebarVisible, setSidebarWidth }] = useTypesafeReducer<
     DisplayServiceState,
     typeof actions
   >(displayServiceReducer, initialState, actions);
 
   const api: DisplayServiceApi = {
     state,
-    setSidebarVisible
+    setSidebarVisible,
+    setSidebarWidth
   };
 
   return (

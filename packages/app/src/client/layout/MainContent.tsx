@@ -52,7 +52,12 @@ const Layout = (props: {
   return (
     <Box position="relative" display="flex" flexGrow={1}>
       {display.state.sidebarVisible ? (
-        <SplitPane split="vertical" size={300} minSize={100}>
+        <SplitPane
+          split="vertical"
+          size={display.state.sidebarWidth || 300}
+          minSize={100}
+          onChangeSize={display.setSidebarWidth}
+        >
           {props.sidebar}
           {props.children}
         </SplitPane>

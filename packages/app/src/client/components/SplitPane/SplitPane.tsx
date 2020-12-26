@@ -23,6 +23,7 @@ import { ITheme } from "client/themes";
 export type SplitPaneProps = {
   children: React.ReactNode[];
   onDrag?: (isDragging: boolean) => {};
+  onChangeSize?: (size: number) => void;
   split: "vertical" | "horizontal";
   size: number;
   minSize?: number;
@@ -33,6 +34,7 @@ function SplitPane({
   onDrag,
   split,
   size,
+  onChangeSize,
   minSize = 0
 }: SplitPaneProps) {
   if (children.length !== 2) {
@@ -54,6 +56,7 @@ function SplitPane({
       onDragStarted={onDragStarted}
       onDragFinished={onDragFinished}
       size={size}
+      onChange={onChangeSize}
     >
       <Box height="100%" width="100%">
         {children[0]}

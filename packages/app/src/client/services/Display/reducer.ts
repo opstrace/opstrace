@@ -17,28 +17,41 @@
 import { createReducer, ActionType, createAction } from "typesafe-actions";
 
 export const actions = {
-  setSidebarVisible: createAction("DISPLAY_SET_SIDEBAR_VISIBLE")<boolean>()
+  setSidebarVisible: createAction("DISPLAY_SET_SIDEBAR_VISIBLE")<boolean>(),
+  setSidebarWidth: createAction("DISPLAY_SET_SIDEBAR_WIDTH")<number>()
 };
 
 type Actions = ActionType<typeof actions>;
 
 export type DisplayServiceState = {
   sidebarVisible: boolean;
+  sidebarWidth?: number;
 };
 
 export const initialState: DisplayServiceState = {
-  sidebarVisible: true
+  sidebarVisible: true,
+  sidebarWidth: undefined
 };
 
 export const displayServiceReducer = createReducer<
   DisplayServiceState,
   Actions
->(initialState).handleAction(
-  actions.setSidebarVisible,
-  (state, action): DisplayServiceState => {
-    return {
-      ...state,
-      sidebarVisible: action.payload
-    };
-  }
-);
+>(initialState)
+  .handleAction(
+    actions.setSidebarVisible,
+    (state, action): DisplayServiceState => {
+      return {
+        ...state,
+        sidebarVisible: action.payload
+      };
+    }
+  )
+  .handleAction(
+    actions.setSidebarWidth,
+    (state, action): DisplayServiceState => {
+      return {
+        ...state,
+        sidebarWidth: action.payload
+      };
+    }
+  );
