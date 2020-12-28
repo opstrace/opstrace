@@ -115,6 +115,7 @@ fetch-secrets:
 	--include "opstrace-ci-authtoken-secrets.yaml" \
 	--include "dns-service-login-for-ci.json" \
 	--include "gcp-svc-acc-ci-shard-aaa.json" \
+	--include "gcp-svc-acc-ci-shard-ccc.json" \
 	--include "gcp-svc-acc-ci-shard-bbb.json"
 	chmod 600 secrets/ci.id_rsa
 
