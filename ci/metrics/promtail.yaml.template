@@ -6,7 +6,7 @@ metadata:
 data:
   promtail.yml: |
     client:
-      url: https://loki-external.builds.ci.aws.opstrace.io:8443/loki/api/v1/push
+      url: https://loki.builds.collection.opstrace.io/loki/api/v1/push
       bearer_token_file: /var/run/builds-tenant/authToken
       external_labels:
         opstrace_cluster_name: ${OPSTRACE_CLUSTER_NAME}
