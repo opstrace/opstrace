@@ -112,7 +112,7 @@ fetch-secrets:
 	--include "saas-secrets-token.json" \
 	--include "ci.id_rsa" \
 	--include "ci.id_rsa.pub" \
-	--include "opstrace-ci-authtoken-secrets.yaml" \
+	--include "opstrace-collection-cluster-authtoken-secrets.yaml" \
 	--include "dns-service-login-for-ci.json" \
 	--include "gcp-svc-acc-ci-shard-aaa.json" \
 	--include "gcp-svc-acc-ci-shard-ccc.json" \

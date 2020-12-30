@@ -48,7 +48,7 @@ do
     # Rely on the pipefail option.
     kubectl apply \
         -f ci/metrics/ \
-        -f secrets/opstrace-ci-authtoken-secrets.yaml \
+        -f secrets/opstrace-collection-cluster-authtoken-secrets.yaml \
         --kubeconfig "${KUBECONFIG_FILEPATH}" |& tee -a "${LOG_OUTERR_FILEPATH}"
     kexitcode=$?
     set -e

@@ -13,7 +13,7 @@ data:
         opstrace_cloud_provider: ${OPSTRACE_CLOUD_PROVIDER}
 
     remote_write:
-    - url: https://cortex-external.builds.ci.aws.opstrace.io:8443/api/v1/push
+    - url: https://cortex.builds.collection.opstrace.io/api/v1/push
       bearer_token_file: /var/run/builds-tenant/authToken
 
     scrape_configs:
