@@ -196,7 +196,7 @@ lint-codebase.js:
 
 lint-codebase.go:
 	# Also see https://github.com/opstrace/opstrace/issues/166
-	(cd go/ && golangci-lint --allow-parallel-runners run)
+	(cd go/ && golangci-lint run --allow-parallel-runners)
 
 .PHONY: cli-tsc
 cli-tsc: cli-set-build-info-constants
