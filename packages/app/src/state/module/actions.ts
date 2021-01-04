@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { createAction } from "typesafe-actions";
+import { History } from "history";
 import { Modules, SubscriptionID } from "./types";
 
 export const set = createAction("SET_MODULES")<Modules>();
@@ -22,3 +23,12 @@ export const subscribe = createAction("SUBSCRIBE_MODULES")<SubscriptionID>();
 export const unsubscribe = createAction("UNSUBSCRIBE_MODULES")<
   SubscriptionID
 >();
+
+export const createModule = createAction("CREATE_MODULE")<{
+  history: History;
+  name: string;
+}>();
+export const deleteModule = createAction("DELETE_MODULE")<{
+  history: History;
+  name: string;
+}>();

@@ -25,7 +25,7 @@ import { mainReducer } from "state/reducer";
 
 import {
   useSortedVersionsForModule,
-  makeVersionsForModuleSelector,
+  makeSortedVersionsForModuleSelector,
   useLatestMainVersionForModule
 } from "../useModuleVersions";
 import { subscribe } from "../../actions";
@@ -68,7 +68,7 @@ test("useSortedVersionsForModule hook", () => {
   expect(result.current).toEqual(versions);
 });
 
-describe("makeVersionsForModuleSelector selector", () => {
+describe("makeSortedVersionsForModuleSelector selector", () => {
   test("should find versions", () => {
     const subState = {
       branches: {
@@ -93,7 +93,7 @@ describe("makeVersionsForModuleSelector selector", () => {
       }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
-    expect(makeVersionsForModuleSelector("test-1", "/")(state)).toEqual([
+    expect(makeSortedVersionsForModuleSelector("test-1", "/")(state)).toEqual([
       {
         branch_name: "test-branch",
         module_name: "test-1",
@@ -127,7 +127,9 @@ describe("makeVersionsForModuleSelector selector", () => {
       }
     };
     const state = mainReducer(subState as CombinedState<any>, mockAction);
-    expect(makeVersionsForModuleSelector("test-1", "/")(state)).toEqual([]);
+    expect(makeSortedVersionsForModuleSelector("test-1", "/")(state)).toEqual(
+      []
+    );
   });
 });
 
