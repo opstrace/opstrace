@@ -27,8 +27,8 @@ import { ActionType } from "typesafe-actions";
 import {
   SubscribeToTenantListSubscription,
   SubscribeToTenantListDocument
-} from "state/graphqlClient";
-import subscriptionClient from "state/graphqlClient/subscriptionClient";
+} from "state/clients/graphqlClient";
+import subscriptionClient from "state/clients/graphqlClient/subscriptionClient";
 import * as actions from "../actions";
 import { SubscriptionID } from "../types";
 

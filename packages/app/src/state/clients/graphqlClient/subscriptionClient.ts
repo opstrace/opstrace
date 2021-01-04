@@ -18,7 +18,7 @@ import { WebSocketLink } from "@apollo/client/link/ws";
 import { onError } from "@apollo/client/link/error";
 import { ApolloClient, InMemoryCache, from } from "@apollo/client";
 
-export * from "../graphql-api-types";
+export * from "../../graphql-api-types";
 
 // we use webpack to set these "false" during client build
 const headers = process.env.HASURA_GRAPHQL_ADMIN_SECRET

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToTenantListSubscription } from "state/graphqlClient";
+import { SubscribeToTenantListSubscription } from "state/clients/graphqlClient";
 
 export type Tenant = SubscribeToTenantListSubscription["tenant"][0];
 export type Tenants = Tenant[];

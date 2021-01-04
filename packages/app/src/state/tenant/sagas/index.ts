@@ -15,7 +15,7 @@
  */
 import { all, call, spawn, takeEvery } from "redux-saga/effects";
 import * as actions from "../actions";
-import graphqlClient from "state/graphqlClient";
+import graphqlClient from "state/clients/graphqlClient";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
 
