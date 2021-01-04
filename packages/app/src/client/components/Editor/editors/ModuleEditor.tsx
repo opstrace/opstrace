@@ -15,32 +15,16 @@
  */
 
 import React, { useCallback, useEffect, useState } from "react";
-import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 
-import EditorSkeleton from "../lib/components/EditorSkeleton";
 import { ModuleEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
-
-function AutoSizingEditor(props: ModuleEditorProps) {
-  return (
-    <AutoSizer>
-      {({ height, width }: Size) => {
-        return <ModuleEditor {...props} height={height} width={width} />;
-      }}
-    </AutoSizer>
-  );
-}
-
-type ResizableModuleEditorProps = ModuleEditorProps & {
-  height: number;
-  width: number;
-};
 
 function ModuleEditor({
   textFileModel,
   height,
-  width
-}: ResizableModuleEditorProps) {
+  width,
+  visible
+}: ModuleEditorProps) {
   const [ready, setReady] = useState(false);
   const editorContainer = useCallback(
     async node => {
@@ -66,12 +50,12 @@ function ModuleEditor({
         style={{
           height,
           width,
-          opacity: ready ? 1 : 0
+          opacity: ready ? 1 : 0,
+          display: visible ? "block" : "none"
         }}
       />
-      {ready ? null : <EditorSkeleton />}
     </>
   );
 }
 
-export default React.memo(AutoSizingEditor);
+export default React.memo(ModuleEditor);
