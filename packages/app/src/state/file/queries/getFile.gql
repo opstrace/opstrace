@@ -1,5 +1,5 @@
-subscription SubscribeToFiles {
-  file {
+query GetFile($id: uuid!) {
+  file_by_pk(id: $id) {
     id
     ext
     path

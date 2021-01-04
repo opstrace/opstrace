@@ -1,0 +1,44 @@
+query GetModuleVersionFiles(
+  $branch: String
+  $name: String
+  $scope: String
+  $version: String
+) {
+  file(
+    where: {
+      _and: {
+        branch_name: { _eq: $branch }
+        module_version: { _eq: $version }
+        module_scope: { _eq: $scope }
+        module_name: { _eq: $name }
+      }
+    }
+  ) {
+    id
+    ext
+    path
+    module_name
+    module_scope
+    module_version
+    created_at
+    branch_name
+    base_file_id
+    mark_deleted
+    is_modified
+    alias_for
+    alias {
+      id
+      ext
+      path
+      module_name
+      module_scope
+      module_version
+      created_at
+      branch_name
+      base_file_id
+      mark_deleted
+      is_modified
+      alias_for
+    }
+  }
+}

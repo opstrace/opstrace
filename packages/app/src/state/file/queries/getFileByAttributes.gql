@@ -1,0 +1,46 @@
+query GetFileByAttrs(
+  $branch: String
+  $ext: String
+  $module: String
+  $scope: String
+  $version: String
+  $path: String
+) {
+  file(
+    where: {
+      branch_name: { _eq: $branch }
+      ext: { _eq: $ext }
+      module_name: { _eq: $module }
+      module_scope: { _eq: $scope }
+      module_version: { _eq: $version }
+      path: { _eq: $path }
+    }
+  ) {
+    id
+    ext
+    path
+    module_name
+    module_scope
+    module_version
+    created_at
+    branch_name
+    base_file_id
+    mark_deleted
+    is_modified
+    alias_for
+    alias {
+      id
+      ext
+      path
+      module_name
+      module_scope
+      module_version
+      created_at
+      branch_name
+      base_file_id
+      mark_deleted
+      is_modified
+      alias_for
+    }
+  }
+}
