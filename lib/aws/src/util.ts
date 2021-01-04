@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import AWS from "aws-sdk";
 
 import { log } from "@opstrace/utils";
@@ -336,12 +338,13 @@ export const untagResource = ({
 };
 
 export const getAccountId = (): Promise<string> => {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const sts = new AWS.STS();
     sts.getCallerIdentity({}, (err, data) => {
       if (err) {
         reject(err);
       }
+      assert(data.Account);
       resolve(data.Account);
     });
   });
