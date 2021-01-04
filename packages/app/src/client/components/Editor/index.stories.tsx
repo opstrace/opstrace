@@ -78,7 +78,12 @@ export const Default = (): JSX.Element => {
 
   return (
     <Box display="flex" width="100vw" height="100vh" p={1}>
-      <ModuleEditor textFileModel={textFileModel} />
+      <ModuleEditor
+        textFileModel={textFileModel}
+        width={700}
+        height={900}
+        visible={true}
+      />
     </Box>
   );
 };

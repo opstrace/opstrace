@@ -86,7 +86,7 @@ const editorColors = {
     lineHighlightBackground: colors.grey[200],
     lineHighlightBorder: colors.grey[200],
     rangeHighlightBackground: colors.grey[200],
-    selectionBackground: colors.grey[200],
+    selectionBackground: colors.grey[300],
     selectionHighlightBackground: colors.grey[200],
     wordHighlightStrongBackground: colors.grey[200],
     wordHighlightBackground: colors.grey[200]

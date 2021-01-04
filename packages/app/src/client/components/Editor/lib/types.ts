@@ -17,4 +17,7 @@ import TextFileModel from "state/file/TextFileModel";
 
 export type ModuleEditorProps = {
   textFileModel?: TextFileModel | null;
+  visible: boolean;
+  height: number;
+  width: number;
 };
