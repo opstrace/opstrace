@@ -59,7 +59,7 @@ export const deletePolicy = ({
   PolicyArn
 }: {
   PolicyArn: string;
-}): Promise<IAM.Policy | undefined> => {
+}): Promise<void> => {
   return new Promise((resolve, reject) => {
     iamClient().deletePolicy({ PolicyArn }, err => {
       if (err) {
