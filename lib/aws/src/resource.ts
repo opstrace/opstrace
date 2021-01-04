@@ -106,7 +106,7 @@ export abstract class AWSResource<
    * Return string: desired teardown state not yet reached, string represents
    * how that is (for logging purposes).
    */
-  protected abstract async checkDestroySuccess(): DestroyCheckResultType;
+  protected abstract checkDestroySuccess(): DestroyCheckResultType;
 
   /**
    * Call `checkDestroySuccess()` in child class and handle expected errors.
@@ -137,7 +137,7 @@ export abstract class AWSResource<
    * This keeps getting called repetitively as part of the teardown loop until
    * `checkDestroySuccess()` confirms resource destruction.
    */
-  protected abstract async tryDestroy(): TryDestroyResultType;
+  protected abstract tryDestroy(): TryDestroyResultType;
 
   /**
    * Call `tryDestroy()` in child class and handle expected errors.
@@ -169,7 +169,7 @@ export abstract class AWSResource<
    * Expected to throw `AWSApiError` which might mean that state could not be
    * checked or that desired state is not reached.
    */
-  protected abstract async checkCreateSuccess(): Promise<
+  protected abstract checkCreateSuccess(): Promise<
     CheckCreateSuccessType | false
   >;
 
@@ -241,9 +241,7 @@ export abstract class AWSResource<
    * That depends on the specific resource type and the specific implementation
    * of `tryCreate()` in the child class.
    */
-  protected abstract async tryCreate(
-    params: SetupParameterType
-  ): Promise<boolean>;
+  protected abstract tryCreate(params: SetupParameterType): Promise<boolean>;
 
   /**
    * Call `tryCreate()` in child class and handles expected errors. Assume
