@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { v4 as uuidv4 } from "uuid";
+
 import express, { NextFunction, Request, Response } from "express";
 import { Service, startService } from "esbuild";
 import { GeneralServerError, PayloadValidationError } from "server/errors";
@@ -21,11 +21,9 @@ import {
   CreateModuleRequestPayload,
   createModuleRequestSchema
 } from "state/module/types";
-import graphqlClient from "state/graphqlClient";
+import graphqlClient from "state/clients/graphqlClient";
 import { log } from "@opstrace/utils/lib/log";
-import { putObjects } from "server/middleware/s3Client";
-import { getFileUri } from "state/file/utils/uri";
-import { File } from "state/file/types";
+import ModuleClient from "server/moduleClient";
 
 let esbuildService: Service | null = null;
 
@@ -77,68 +75,13 @@ async function createModule(req: Request, res: Response, next: NextFunction) {
       )
     );
   }
-  const fileVersion = "0.0.0-snap.0";
-  const filesToCreate: { contents: string; file: File }[] = [
-    {
-      contents: `/**
-    * ###################
-    * 
-    * Module Dependencies
-    * 
-    * ###################
-    */
-   
-    `,
-      file: {
-        id: uuidv4(),
-        ext: "ts",
-        path: "dependencies",
-        module_version: fileVersion,
-        branch_name: payload.branch,
-        module_name: payload.name,
-        module_scope: payload.scope,
-        mark_deleted: false,
-        is_modified: true,
-        created_at: new Date().toISOString()
-      }
-    },
-    {
-      contents: `/**
-    * ####
-    * 
-    * Main
-    * 
-    * ####
-    */
-   
-    `,
-      file: {
-        id: uuidv4(),
-        ext: "tsx",
-        path: "main",
-        module_version: fileVersion,
-        branch_name: payload.branch,
-        module_name: payload.name,
-        module_scope: payload.scope,
-        mark_deleted: false,
-        is_modified: true,
-        created_at: new Date().toISOString()
-      }
-    }
-  ];
-
-  // Create files in storage bucket
-  await putObjects(
-    req.s3Client,
-    filesToCreate.map(f => ({ path: getFileUri(f.file), contents: f.contents }))
-  );
-  // Finally add to our index
-  await graphqlClient.CreateModule({
-    ...payload,
-    version: fileVersion,
-    files: filesToCreate.map(f => f.file)
-  });
-  res.sendStatus(200);
+  const moduleClient = new ModuleClient();
+  const error = await moduleClient.createModule(payload);
+  if (error) {
+    return next(error);
+  } else {
+    res.sendStatus(200);
+  }
 }
 
 function createModuleHandler() {
@@ -146,7 +89,7 @@ function createModuleHandler() {
 
   router.post("/", createModule);
   // add a catch all for misconfigured requests
-  router.all("*", function(req, res, next) {
+  router.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "module not found"));
   });
 

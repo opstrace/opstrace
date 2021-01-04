@@ -37,10 +37,10 @@ import modules from "./routes/modules";
 import setupWebsocketHandling from "./routes/websockets";
 
 import sessionParser from "./middleware/session";
-import createS3Client from "./middleware/s3Client";
 import catchErrorsMiddleware from "./middleware/error";
 import serverRender from "./middleware/render";
 import { GeneralServerError } from "./errors";
+import { ensureStorageBucketExists } from "./moduleClient";
 
 setLogger(
   buildLogger({
@@ -48,6 +48,10 @@ setLogger(
     filePath: undefined
   })
 );
+
+if (isDevEnvironment) {
+  ensureStorageBucketExists();
+}
 
 const oneYear = 1000 * 60 * 60 * 24 * 365;
 // cache everything for one year by default
@@ -94,8 +98,6 @@ function createServer() {
     }
     next();
   });
-
-  app.use(createS3Client);
   // all api routes will be prefixed with _/ which gets us around the service worker cache
   // we don't want these responses cached long term by the service worker
   app.use("/_", api());
@@ -126,8 +128,9 @@ lightship.registerShutdownHandler(async () => {
   // Allow sufficient amount of time to allow all of the existing
   // HTTP requests to finish before terminating the service.
   log.info(
-    `waiting ${shutdownDelay /
-      1000}s for connections to close before shutting down`
+    `waiting ${
+      shutdownDelay / 1000
+    }s for connections to close before shutting down`
   );
 
   await delay(shutdownDelay);

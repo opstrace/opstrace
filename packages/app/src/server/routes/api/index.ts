@@ -30,11 +30,11 @@ function createAPIRoutes(): express.Router {
   api.use("/public-ui-config", pubUiCfgHandler);
 
   // Authentication required
-  api.use("/module", authRequired, createModuleHandler());
+  api.use("/modules", authRequired, createModuleHandler());
   api.use("/graphql", authRequired, createGraphqlHandler());
   api.use("/datasource/:target", authRequired, datasourceHandler);
 
-  api.all("*", function(req, res, next) {
+  api.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
   });
 
