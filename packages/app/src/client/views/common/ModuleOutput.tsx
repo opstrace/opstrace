@@ -15,21 +15,16 @@
  */
 
 import React from "react";
-
-import TextFileModel from "state/file/TextFileModel";
-
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 
+import { useFocusedOpenFile } from "state/file/hooks/useFiles";
 import { Box } from "client/components/Box";
 import ModuleOutputSkeleton from "./ModuleOutputSkeleton";
 import { Scrollable } from "client/components/Scrollable";
 
-interface ModuleOutputProps {
-  textFileModel?: TextFileModel | null;
-}
-
-const ModuleOutput = ({ textFileModel }: ModuleOutputProps) => {
-  const contentLoading = textFileModel === undefined;
+const ModuleOutput = () => {
+  const file = useFocusedOpenFile();
+  const contentLoading = file === undefined;
 
   return (
     <AutoSizer>

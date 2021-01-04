@@ -139,6 +139,15 @@ const ActivityBar = () => {
         <Tabs
           orientation="vertical"
           variant="standard"
+          indicatorColor="primary"
+          TabIndicatorProps={{
+            style: {
+              transitionDuration: "unset",
+              left: "0px",
+              width: "3px",
+              right: "unset"
+            }
+          }}
           value={
             activeTabIndex === null || activeTabIndex < 0 ? 0 : activeTabIndex
           }

@@ -29,17 +29,6 @@ const common: ThemeOptions = {
     }
   },
   props: {
-    MuiTabs: {
-      indicatorColor: "primary",
-      TabIndicatorProps: {
-        style: {
-          transitionDuration: "unset",
-          left: "0px",
-          width: "3px",
-          right: "unset"
-        }
-      }
-    },
     MuiBackdrop: {
       transitionDuration: 0
     },
