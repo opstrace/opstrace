@@ -21,6 +21,7 @@ import getWorkerApi, {
 } from "client/components/Editor/lib/workers";
 
 import { sleep } from "state/utils/time";
+import socket from "state/clients/websocket";
 import { getTextEditorOptions, getRange } from "./utils/monaco";
 import { File, Files, IPossiblyForkedFile, onErrorHandler } from "./types";
 import {
@@ -28,38 +29,47 @@ import {
   getMonacoFileUri,
   getMonacoFileUriString
 } from "./utils/uri";
+import * as actions from "state/clients/websocket/actions";
+import LiveClient from "./LiveClient";
 
 class TextFileModel implements IPossiblyForkedFile {
-  public file: File;
-  // file this file was forked from
-  public baseFile?: File;
-  // latest version of base file (if this doesn't equal this.baseFile then rebaseReuired is true)
-  public latestBaseFile?: File;
-  // if latestBaseFile is newer than baseFile
-  public rebaseRequired: boolean;
-  public isNewModule: boolean;
-  public isNewFile: boolean;
+  // the file that is possibly forked
+  file: File;
+  // if this file is on a branch other than main, then baseFile points to the file on main if this is not a new file.
+  // The baseFile represents the version that this file has been rebased with.
+  baseFile?: File;
+  // aliasFor represents the actual file (this file is an alias, e.g. "latest" version, points to actual latest file)
+  aliasFor?: File;
+  // latest version of base file (if this doesn't equal this.baseFile then a rebase is required to bring baseFile up to the latest version on main branch)
+  latestBaseFile?: File;
+  // if latestBaseFile is newer than baseFile then rebaseRequired === true;
+  rebaseRequired: boolean;
+  // if this module cannot be found on main branch, isNewModule === true;
+  isNewModule: boolean;
+  // if this file cannot be found on main branch, isNewFile === true;
+  isNewFile: boolean;
   // track if this file is deleted so when we merge with main, we can remove it
-  public isDeletedFile: boolean;
+  isDeletedFile: boolean;
   // only possible in live mode, and indicates that file has deviated from baseFile
-  public isModifiedFile: boolean;
+  isModifiedFile: boolean;
   // all files are live if not on main branch
-  public live: boolean;
+  live: boolean;
   // all files that are not live are readOnly
-  public readOnly: boolean;
+  readOnly: boolean;
   // monaco text model
-  public monacoModel?: monaco.editor.ITextModel;
+  model?: monaco.editor.ITextModel;
 
-  // --- private ---
+  private liveClient?: LiveClient;
   private contents: string | null;
   private decorations: EditorDecorations = [];
-  private memoizedMonacoDecorations: string[] = [];
+  private themeDecorations: string[] = [];
   private disposables: monaco.IDisposable[] = [];
   private node?: HTMLDivElement;
-  private editor?: monaco.editor.IStandaloneCodeEditor;
+  private editor?: monaco.editor.ICodeEditor;
   private editorHeight: number = 0;
   private editorWidth: number = 0;
   private onErrorHandler?: onErrorHandler;
+  private viewerListeners = new Set<() => void>();
 
   constructor(pff: IPossiblyForkedFile, contents?: string) {
     this.file = pff.file;
@@ -69,13 +79,33 @@ class TextFileModel implements IPossiblyForkedFile {
     this.isNewModule = pff.isNewModule;
     this.isModifiedFile = pff.isModifiedFile;
     this.baseFile = pff.baseFile;
+    this.aliasFor = pff.aliasFor;
     this.latestBaseFile = pff.latestBaseFile;
-    this.live = pff.file.branch_name !== "main";
+    this.live =
+      pff.file.module_version === "latest" && pff.file.branch_name !== "main";
     this.readOnly = !this.live;
-
     this.contents = contents ? contents : null;
-
     this.initialize();
+  }
+
+  get viewers() {
+    if (!this.liveClient) {
+      return [];
+    }
+    return this.liveClient.viewers;
+  }
+
+  onViewersChange(callback: () => void) {
+    this.viewerListeners.add(callback);
+    return () => {
+      this.viewerListeners.delete(callback);
+    };
+  }
+
+  private onViewersChanged() {
+    for (const cb of this.viewerListeners) {
+      cb();
+    }
   }
 
   private async initialize() {
@@ -89,26 +119,42 @@ class TextFileModel implements IPossiblyForkedFile {
     }
     const monacoUri = getMonacoFileUri(this.file);
     const existingModel = monaco.editor.getModel(monacoUri);
-    if (!this.live) {
-      if (existingModel) {
-        this.monacoModel = existingModel;
-      } else {
-        this.monacoModel = monaco.editor.createModel(
-          this.contents,
-          "modulescript",
-          monacoUri
-        );
-      }
+
+    if (existingModel) {
+      this.model = existingModel;
     } else {
+      this.model = monaco.editor.createModel(
+        this.contents,
+        "modulescript",
+        monacoUri
+      );
     }
-    if (this.monacoModel) {
+
+    if (this.model) {
+      if (this.liveClient) {
+        this.liveClient.dispose();
+      }
+      this.liveClient = new LiveClient({
+        enable: this.live,
+        model: this.model,
+        file: this.file,
+        onViewersChanged: () => this.onViewersChanged()
+      });
+      this.model.updateOptions({ tabSize: 2 });
       this.disposables.push(
-        this.monacoModel.onDidChangeContent(() => this.updateDecorations())
+        this.model.onDidChangeContent(
+          (e: monaco.editor.IModelContentChangedEvent) =>
+            this.onContentChanged(e)
+        )
       );
     }
     if (this.node) {
       this._render();
     }
+  }
+
+  private onContentChanged(e: monaco.editor.IModelContentChangedEvent) {
+    this.updateDecorations();
   }
 
   private async updateDecorations() {
@@ -117,40 +163,38 @@ class TextFileModel implements IPossiblyForkedFile {
   }
 
   private applyDecorations() {
-    if (!this.editor || !this.monacoModel) {
+    if (!this.editor || !this.model) {
       return;
     }
-    this.memoizedMonacoDecorations = this.editor.deltaDecorations(
-      this.memoizedMonacoDecorations,
+    this.themeDecorations = this.editor.deltaDecorations(
+      this.themeDecorations,
       this.decorations.map(({ start, end, options }) => ({
-        range: getRange(this.monacoModel!, start, end),
+        range: getRange(this.model!, start, end),
         options
       }))
     );
   }
 
   private async getDecorations() {
-    if (!this.monacoModel) {
+    if (!this.model) {
       this.decorations = [];
     }
-    const api = await getWorkerApi();
-    const fileName = getMonacoFileUriString(this.file);
-    let decorations = await api.getDecorations(fileName);
-    if (decorations === null) {
-      // try again
-      await sleep(50);
-      decorations = await api.getDecorations(fileName);
+    try {
+      const api = await getWorkerApi();
+      const fileName = getMonacoFileUriString(this.file);
+      let decorations = await api.getDecorations(fileName);
+      if (decorations === null) {
+        // try again
+        await sleep(50);
+        decorations = await api.getDecorations(fileName);
+      }
+      this.decorations = decorations || [];
+    } catch (err) {
+      console.error(err);
     }
-    this.decorations = decorations || [];
   }
 
-  public updateEditorLayout({
-    height,
-    width
-  }: {
-    height: number;
-    width: number;
-  }) {
+  updateEditorLayout({ height, width }: { height: number; width: number }) {
     this.editorHeight = height;
     this.editorWidth = width;
     this._updateEditorLayout();
@@ -165,34 +209,38 @@ class TextFileModel implements IPossiblyForkedFile {
     }
   }
 
-  public async render(node: HTMLDivElement) {
+  async render(node: HTMLDivElement) {
     if (this.node && node !== this.node) {
-      this.editor?.dispose();
-      console.log("disposing editor and recreating.");
+      this.dispose();
+      this.initialize();
     }
     this.node = node;
     return this._render();
   }
 
   private async _render() {
-    if (!this.monacoModel || this.editor) {
-      console.log("returning early in _render");
+    if (!this.model || this.editor) {
       return;
     }
     this.editor = monaco.editor.create(
       this.node!,
-      getTextEditorOptions({ readOnly: this.readOnly, model: this.monacoModel })
+      getTextEditorOptions({ readOnly: this.readOnly, model: this.model })
     );
+    this.liveClient?.setEditor(this.editor);
+
     this._updateEditorLayout();
     await this.updateDecorations();
   }
 
-  public onFileStoreChange(files: Files) {
+  onFileStoreChange(files: Files) {
     // check rebaseRequired
     console.log(files);
   }
 
-  public dispose() {
+  dispose() {
+    socket.emit(actions.unsubscribeFile(this.file.id));
+    this.liveClient?.dispose();
+    this.liveClient = undefined;
     this.disposables.forEach(d => {
       try {
         d.dispose();
@@ -200,8 +248,12 @@ class TextFileModel implements IPossiblyForkedFile {
         // trying to dispose something already disposed
       }
     });
-    this.monacoModel?.dispose();
-    this.editor?.dispose();
+    try {
+      this.editor?.dispose();
+    } catch (e) {}
+    this.editor = undefined;
+    this.model?.dispose();
+    this.model = undefined;
     this.node = undefined;
     this.onErrorHandler = undefined;
   }
@@ -210,16 +262,16 @@ class TextFileModel implements IPossiblyForkedFile {
     this.onErrorHandler && this.onErrorHandler(error);
   }
 
-  private getResourceURI(latest: boolean) {
-    return `/modules/${getFileUri(this.file, {
-      useLatest: latest,
+  private getResourceURI(file: File) {
+    return `/modules/${getFileUri(file, {
+      branch: this.file.branch_name,
       ext: true
     })}`;
   }
 
-  private async loadFromAPI(latest: boolean) {
+  private async loadFromAPI(file: File) {
     try {
-      const res = await axios.get<string>(this.getResourceURI(latest));
+      const res = await axios.get<string>(this.getResourceURI(file));
       return res.data;
     } catch (err) {
       this.emitError(err);
@@ -231,11 +283,11 @@ class TextFileModel implements IPossiblyForkedFile {
     if (this.contents) {
       return this.contents;
     }
-    if (!this.live) {
-      return await this.loadFromAPI(false);
+    if (this.aliasFor) {
+      return await this.loadFromAPI(this.aliasFor);
     }
-    //TODO live mode
-    return "";
+
+    return await this.loadFromAPI(this.file);
   }
 }
 

@@ -15,7 +15,6 @@
  */
 import { useEffect } from "react";
 import { createSelector } from "reselect";
-import semverGt from "semver/functions/gt";
 
 import { useDispatch, useSelector, State } from "state/provider";
 import { subscribe, unsubscribe } from "../actions";
@@ -23,10 +22,9 @@ import getSubscriptionID from "state/utils/getSubscriptionID";
 
 import { useLatestMainVersionForModule } from "state/moduleVersion/hooks/useModuleVersions";
 import { getCurrentBranch } from "state/branch/hooks/useBranches";
-import { getFileUri } from "../utils/uri";
 import { isTypescriptFile } from "../utils/fileType";
 import getPossiblyForkedFilesForModuleVersion from "../utils/possiblyForkedFiles";
-import { File, IPossiblyForkedFile } from "../types";
+import { IPossiblyForkedFile } from "../types";
 
 const getFiles = createSelector(
   (state: State) => state.files.files,
@@ -44,7 +42,8 @@ export const getOpenFileParams = createSelector(
     requestedModuleName: fileState.selectedModuleName,
     requestedModuleScope: fileState.selectedModuleScope,
     requestedModuleVersion: fileState.selectedModuleVersion,
-    requestedFilePath: fileState.selectedFilePath
+    requestedFilePath: fileState.selectedFilePath,
+    requestOpenFilePending: fileState.requestOpenFilePending
   })
 );
 
@@ -97,6 +96,10 @@ export function useFocusedOpenFile() {
   return useSelector(getCurrentlySelectedFile);
 }
 
+export function useOpenFiles() {
+  return useSelector(getOpenFiles);
+}
+
 export function useBranchFiles() {
   const currentBranchFiles = useSelector(getCurrentBranchFiles);
 
@@ -129,27 +132,13 @@ export function useBranchTypescriptFiles() {
 export function useLatestBranchTypescriptFiles() {
   const files = useBranchTypescriptFiles();
 
-  const latest = new Map<string, File>();
-
   if (!files) {
     return files;
   }
 
-  files.forEach(f => {
-    const uri = getFileUri(f, { useLatest: true });
-    const version = latest.get(uri);
+  const latestFiles = files.filter(f => f.module_version === "latest");
 
-    if (!version) {
-      latest.set(uri, f);
-      return;
-    }
-
-    if (semverGt(f.module_version, version.module_version)) {
-      latest.set(uri, f);
-    }
-  });
-
-  return { files: [...latest.values()], tsFileCount: files.length };
+  return { files: latestFiles, tsFileCount: files.length };
 }
 
 /**
