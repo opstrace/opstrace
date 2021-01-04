@@ -20,7 +20,8 @@ import { getFileUri } from "./uri";
 export default function navigateToFile(
   file: File,
   history: History,
-  overrideWithBranch?: string
+  overrideWithBranch?: string,
+  latest?: boolean
 ) {
   const parts = history.location.pathname.replace(/^\//, "").split("/");
 
@@ -29,7 +30,8 @@ export default function navigateToFile(
   history.push({
     ...history.location,
     pathname: `/${tab}/${getFileUri(file, {
-      branch: overrideWithBranch || file.branch_name
+      branch: overrideWithBranch || file.branch_name,
+      useLatest: latest
     })}`
   });
 }

@@ -39,7 +39,7 @@ export default function getPossiblyForkedFilesForModuleVersion(
       // only return the files that match the version
       return;
     }
-
+    const aliasFor = file.alias_for && filesById.get(file.alias_for);
     const baseFile = file.base_file_id && filesById.get(file.base_file_id);
     const latestBaseFile =
       baseFile &&
@@ -61,6 +61,7 @@ export default function getPossiblyForkedFilesForModuleVersion(
     results.push({
       file,
       baseFile,
+      aliasFor,
       isNewModule,
       isNewFile,
       isDeletedFile,

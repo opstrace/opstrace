@@ -20,14 +20,17 @@ import {
   select,
   delay,
   putResolve,
-  takeEvery
+  takeLatest,
+  cancelled
 } from "redux-saga/effects";
+import isBefore from "date-fns/isBefore";
+import addMilliseconds from "date-fns/addMilliseconds";
 import subscriptionManager from "./subscription";
 import * as actions from "../actions";
 import { State } from "state/reducer";
 import getPossiblyForkedFilesForModuleVersion from "../utils/possiblyForkedFiles";
 import { getBranchTypescriptFiles } from "../hooks/useFiles";
-import { makeVersionsForModuleSelector } from "state/moduleVersion/hooks/useModuleVersions";
+import { makeSortedVersionsForModuleSelector } from "state/moduleVersion/hooks/useModuleVersions";
 import navigateToFile from "../utils/navigation";
 import { sanitizeFilePath, sanitizeScope } from "state/utils/sanitize";
 import { getCurrentBranch } from "state/branch/hooks/useBranches";
@@ -40,83 +43,113 @@ import { getCurrentBranch } from "state/branch/hooks/useBranches";
 //   }
 // }
 
+// function* checkNeedToUpdateOpenFileAlias() {
+//   while (true) {
+//     yield take(actions.set);
+
+//     const state: State = yield select();
+//   }
+// }
+
 function* fileOpenerRequestHandler() {
-  yield takeEvery(actions.requestOpenFileWithParams, fileOpener);
+  yield takeLatest(actions.requestOpenFileWithParams, fileOpener);
 }
 
 function* fileOpener(
   action: ReturnType<typeof actions.requestOpenFileWithParams>
 ) {
-  let loaded = false;
-  while (!loaded) {
-    // get latest state
-    const state: State = yield select();
-    const files = getBranchTypescriptFiles(state);
-    const currentBranch = getCurrentBranch(state);
+  try {
+    // Because state is eventually consistent (i.e. upon a module or file creation event,
+    // the client may not recieve all the latest state immediately), then we wait some time
+    // before the we declare the "file does not exist" and return to a common nav location.
+    // We timeout after 2 seconds because our Hasura subscriptions evaluate db changes every second.
+    const resolveTimeout = addMilliseconds(new Date(), 2000);
+    let currentBranchName: string = "main";
+    //TODO: notification for "waiting to find file"
 
-    if (files === undefined) {
-      // loop until files have loaded
-      yield delay(10);
-      continue;
-    } else {
-      loaded = true;
-    }
+    while (isBefore(new Date(), resolveTimeout)) {
+      // get latest state
+      const state: State = yield select();
+      const files = getBranchTypescriptFiles(state);
+      const currentBranch = getCurrentBranch(state);
 
-    const {
-      selectedModuleName,
-      selectedModuleScope,
-      selectedModuleVersion,
-      selectedFilePath
-    } = action.payload.params;
+      if (files === undefined) {
+        // loop until files have loaded
+        yield delay(10);
+        continue;
+      }
+      currentBranchName = currentBranch?.name || "main";
 
-    if (!files || !selectedModuleName || !selectedModuleVersion) {
-      return;
-    }
-    const moduleVersions = makeVersionsForModuleSelector(
-      selectedModuleName,
-      selectedModuleScope || ""
-    )(state);
+      const {
+        selectedModuleName,
+        selectedModuleScope,
+        selectedModuleVersion,
+        selectedFilePath
+      } = action.payload.params;
 
-    const latestMainVersion =
-      moduleVersions && moduleVersions.length
-        ? moduleVersions.find(v => v.branch_name === "main")
-        : null;
+      if (!files || !selectedModuleName || !selectedModuleVersion) {
+        return;
+      }
+      const sortedModuleVersions = makeSortedVersionsForModuleSelector(
+        selectedModuleName,
+        selectedModuleScope || ""
+      )(state);
 
-    const moduleFiles = files.filter(
-      f =>
-        f.module_name === selectedModuleName &&
-        f.module_scope === selectedModuleScope
-    );
+      const latestMainVersion =
+        sortedModuleVersions && sortedModuleVersions.length
+          ? sortedModuleVersions.find(v => v.branch_name === "main")
+          : null;
 
-    const isNewModule = !latestMainVersion;
-
-    const possiblyForkedFiles = getPossiblyForkedFilesForModuleVersion(
-      moduleFiles,
-      isNewModule,
-      selectedModuleVersion,
-      latestMainVersion?.version
-    );
-
-    const fileToOpen = possiblyForkedFiles.find(
-      pff =>
-        pff.file.module_name === selectedModuleName &&
-        sanitizeScope(pff.file.module_scope) ===
-          sanitizeScope(selectedModuleScope) &&
-        pff.file.module_version === selectedModuleVersion &&
-        sanitizeFilePath(pff.file.path) === sanitizeFilePath(selectedFilePath)
-    );
-
-    if (!fileToOpen) {
-      console.error("file does not exist");
-      // redirect home for now
-      action.payload.history.push("/");
-    } else {
-      yield putResolve(actions.openFile(fileToOpen));
-      navigateToFile(
-        fileToOpen.file,
-        action.payload.history,
-        currentBranch?.name
+      const moduleFiles = files.filter(
+        f =>
+          f.module_name === selectedModuleName &&
+          f.module_scope === selectedModuleScope
       );
+
+      const isNewModule = !latestMainVersion;
+
+      const possiblyForkedFiles = getPossiblyForkedFilesForModuleVersion(
+        moduleFiles,
+        isNewModule,
+        selectedModuleVersion,
+        latestMainVersion?.version
+      );
+
+      const fileToOpen = possiblyForkedFiles.find(pff => {
+        const match =
+          pff.file.module_name === selectedModuleName &&
+          sanitizeScope(pff.file.module_scope) ===
+            sanitizeScope(selectedModuleScope) &&
+          pff.file.module_version === selectedModuleVersion &&
+          sanitizeFilePath(pff.file.path) ===
+            sanitizeFilePath(selectedFilePath);
+        return match;
+      });
+
+      if (!fileToOpen) {
+        // Wait and then try again
+        yield delay(10);
+        continue;
+      } else {
+        yield putResolve(actions.openFile(fileToOpen));
+        yield call(
+          navigateToFile,
+          fileToOpen.file,
+          action.payload.history,
+          currentBranch?.name
+        );
+        return;
+      }
+    }
+    // TODO: notification
+    console.error("file does not exist");
+    // redirect to root of branch
+    yield call(action.payload.history.push, `/module/${currentBranchName}`);
+  } finally {
+    if (yield cancelled()) {
+      if (process.env.NODE_ENV === "development") {
+        console.info("canceled fileOpen due to new request");
+      }
     }
   }
 }

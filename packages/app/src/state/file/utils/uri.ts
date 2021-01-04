@@ -45,6 +45,36 @@ export function getFileUri(
     : possiblyWithBranch;
 }
 
+export function getFileAttributesFromUri(uri: string) {
+  const parts = uri.split("/");
+  if (parts.length < 4) {
+    throw Error(`invalid file uri: ${uri}`);
+  }
+  const branch = parts.shift();
+  let scope = "";
+
+  if (parts[0].startsWith("@")) {
+    scope = String(parts.shift());
+  }
+  const module = parts.shift();
+  const version = parts.shift();
+  const path = parts.join("/").split(".").slice(0, -1).join(".");
+  const [ext] = uri.split(".").slice(-1);
+
+  if (!branch || !module || !version || !path || !ext) {
+    throw Error(`invalid file uri: ${uri}`);
+  }
+
+  return {
+    branch,
+    scope,
+    module,
+    version,
+    path,
+    ext
+  };
+}
+
 export function getMonacoFileUriString(file: File) {
   return `module://${file.id}.${sanitizeFileExt(file.ext)}`;
 }

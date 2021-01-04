@@ -24,19 +24,23 @@ type FilesActions = ActionType<typeof actions>;
 
 type FilesState = {
   files: Files;
+  requestOpenFilePending: boolean;
   selectedFileId?: string;
   selectedFilePath?: string;
   selectedModuleName?: string;
   selectedModuleScope?: string;
   selectedModuleVersion?: string;
   openFiles: TextFileModel[];
+  openFileBrowsingHistory: string[];
   loading: boolean;
 };
 
 const FilesInitialState: FilesState = {
   files: [],
   openFiles: [],
-  loading: true
+  openFileBrowsingHistory: [],
+  loading: true,
+  requestOpenFilePending: false
 };
 
 export const reducer = createReducer<FilesState, FilesActions>(
@@ -57,32 +61,31 @@ export const reducer = createReducer<FilesState, FilesActions>(
     (state, action): FilesState => {
       return {
         ...state,
-        ...action.payload
+        ...action.payload,
+        requestOpenFilePending: true
       };
     }
   )
   .handleAction(
     actions.openFile,
     (state, action): FilesState => {
-      const alreadyOpen = state.openFiles.find(
-        f => f.file.id === action.payload.file.id
-      );
+      const fileId = action.payload.file.id;
+      const alreadyOpen = state.openFiles.find(f => f.file.id === fileId);
 
       const openFiles = alreadyOpen
         ? state.openFiles
         : [...state.openFiles, new TextFileModel(action.payload)];
 
-      // ensure it's the last item in the array
-      if (alreadyOpen) {
-        const idx = openFiles.findIndex(
-          f => f.file.id === action.payload.file.id
-        );
-        openFiles.splice(idx, 1);
-        openFiles.push(alreadyOpen);
-      }
+      const browsingHistory = state.openFileBrowsingHistory
+        .filter(id => id !== fileId)
+        .concat([fileId]);
 
-      const trimmedOpenFiles = openFiles.slice(
-        Math.max(openFiles.length - 5, 0)
+      const filesToKeepOpen = browsingHistory.slice(
+        Math.max(browsingHistory.length - 5, 0)
+      );
+
+      const trimmedOpenFiles = openFiles.filter(a =>
+        filesToKeepOpen.find(b => a.file.id === b)
       );
       // dispose the open files we've just trimmed from the array
       openFiles
@@ -93,17 +96,23 @@ export const reducer = createReducer<FilesState, FilesActions>(
         ...state,
         // limit number of open files to 5 for now
         openFiles: trimmedOpenFiles,
+        openFileBrowsingHistory: filesToKeepOpen,
         selectedFileId: action.payload.file.id,
         selectedFilePath: action.payload.file.path,
         selectedModuleName: action.payload.file.module_name,
         selectedModuleScope: action.payload.file.module_scope,
-        selectedModuleVersion: action.payload.file.module_version
+        selectedModuleVersion: action.payload.file.module_version,
+        requestOpenFilePending: false
       };
     }
   )
   .handleAction(
     actions.closeFile,
     (state, action): FilesState => {
+      // Always leave one file open
+      if (state.openFiles.length === 1) {
+        return state;
+      }
       const fileToClose = state.openFiles.find(
         f => f.file.id === action.payload
       );
@@ -113,6 +122,7 @@ export const reducer = createReducer<FilesState, FilesActions>(
       const openFiles = state.openFiles.filter(
         f => f.file.id !== action.payload
       );
+
       const selectedFileId =
         state.selectedFileId === action.payload
           ? openFiles[openFiles.length - 1].file.id
@@ -120,6 +130,9 @@ export const reducer = createReducer<FilesState, FilesActions>(
 
       return {
         ...state,
+        openFileBrowsingHistory: state.openFileBrowsingHistory.filter(
+          id => id !== action.payload
+        ),
         selectedFileId,
         openFiles
       };
