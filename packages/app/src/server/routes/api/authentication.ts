@@ -18,7 +18,7 @@ import express from "express";
 import jwt from "express-jwt";
 import jwksRsa from "jwks-rsa";
 import { log } from "@opstrace/utils/lib/log";
-import graphqlClient from "state/graphqlClient";
+import graphqlClient from "state/clients/graphqlClient";
 import env from "server/env";
 import { GeneralServerError, UnexpectedServerError } from "server/errors";
 import authRequired from "server/middleware/auth";

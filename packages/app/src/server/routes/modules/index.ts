@@ -15,12 +15,31 @@
  */
 import express from "express";
 import { GeneralServerError } from "server/errors";
+import ModuleClient from "server/moduleClient";
+import { log } from "@opstrace/utils";
 
 function createCacheableModuleServingHandler({ maxAge }: { maxAge: number }) {
   const router = express.Router();
+
+  router.get("*", async function (req, res, next) {
+    const moduleClient = new ModuleClient();
+    try {
+      const stream = await moduleClient.getS3File(req.url);
+      res.setHeader("Cache-Control", `public, max-age=${maxAge}`);
+
+      stream.on("error", err => {
+        log.error(`failed streaming file from s3 [${req.url}]: %s`, err);
+        next(err);
+      });
+      stream.pipe(res);
+    } catch (err) {
+      log.error(`failed fetching file from s3 [${req.url}]: %s`, err);
+      return next(err);
+    }
+  });
   // add a catch all for misconfigured requests
-  router.all("*", function(req, res, next) {
-    next(new GeneralServerError(404, "module not found"));
+  router.all("*", function (req, res, next) {
+    next(new GeneralServerError(404, "not found"));
   });
 
   return router;
