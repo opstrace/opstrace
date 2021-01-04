@@ -15,7 +15,7 @@
  */
 import { all, select, take, call, spawn, takeEvery } from "redux-saga/effects";
 import * as actions from "../actions";
-import graphqlClient, { User } from "state/graphqlClient";
+import graphqlClient, { User } from "state/clients/graphqlClient";
 
 import userListSubscriptionManager from "./userListSubscription";
 import { getCurrentUser } from "../hooks/useCurrentUser";
