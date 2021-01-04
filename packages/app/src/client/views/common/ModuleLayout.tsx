@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef } from "react";
-import { useDispatch, batch } from "react-redux";
+import React, { useEffect, useMemo } from "react";
+import { useDispatch } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 
 import { Box } from "client/components/Box";
-import { useOpenFileRequestParams } from "state/file/hooks/useFiles";
-import {
-  useCurrentBranchName,
-  useCurrentBranch
-} from "state/branch/hooks/useBranches";
+import { useCurrentBranch } from "state/branch/hooks/useBranches";
 import { ModulePicker } from "client/components/ModulePicker";
 import { requestOpenFileWithParams } from "state/file/actions";
 import { setCurrentBranch } from "state/branch/actions";
@@ -31,8 +27,7 @@ import { sanitizeFilePath, sanitizeScope } from "state/utils/sanitize";
 import { useCommandService } from "client/services/Command";
 import { isEditMode, setEditingMode } from "state/file/utils/navigation";
 import { SplitPane } from "client/components/SplitPane";
-import { ModuleEditor } from "client/components/Editor";
-import { useFocusedOpenFile } from "state/file/hooks/useFiles";
+import { ModuleEditorGroup } from "client/components/Editor";
 import Layout from "client/layout/MainContent";
 
 import ModuleOutput from "./ModuleOutput";
@@ -48,66 +43,28 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
   const sanitizedPath = sanitizeFilePath(path);
   const sanitizedScope = sanitizeScope(scope);
 
-  const currentBranchName = useCurrentBranchName();
   const currentBranch = useCurrentBranch();
-  const file = useFocusedOpenFile();
 
-  const {
-    requestedModuleName,
-    requestedModuleScope,
-    requestedModuleVersion,
-    requestedFilePath
-  } = useOpenFileRequestParams();
   const dispatch = useDispatch();
   const history = useHistory();
-  const processedInitialLoad = useRef(false);
   const editing = isEditMode(history);
   // when we first land here we need to check the route params
   // and ensure we request to open the file represented by
   // the route we're on
   useEffect(() => {
-    if (processedInitialLoad.current) {
-      return;
-    }
-    processedInitialLoad.current = true;
-
-    batch(() => {
-      if (branch !== currentBranchName) {
-        dispatch(setCurrentBranch({ name: branch, history }));
-      }
-      if (
-        sanitizedScope !== requestedModuleScope ||
-        name !== requestedModuleName ||
-        version !== requestedModuleVersion ||
-        sanitizedPath !== requestedFilePath
-      ) {
-        dispatch(
-          requestOpenFileWithParams({
-            history,
-            params: {
-              selectedModuleName: name,
-              selectedModuleVersion: version,
-              selectedFilePath: sanitizedPath,
-              selectedModuleScope: sanitizedScope
-            }
-          })
-        );
-      }
-    });
-  }, [
-    history,
-    dispatch,
-    branch,
-    name,
-    version,
-    sanitizedScope,
-    sanitizedPath,
-    currentBranchName,
-    requestedModuleName,
-    requestedModuleScope,
-    requestedModuleVersion,
-    requestedFilePath
-  ]);
+    dispatch(setCurrentBranch({ name: branch, history }));
+    dispatch(
+      requestOpenFileWithParams({
+        history,
+        params: {
+          selectedModuleName: name,
+          selectedModuleVersion: version,
+          selectedFilePath: sanitizedPath,
+          selectedModuleScope: sanitizedScope
+        }
+      })
+    );
+  }, [history, dispatch, branch, name, version, sanitizedScope, sanitizedPath]);
 
   useCommandService(
     {
@@ -123,7 +80,7 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
     [editing, history]
   );
 
-  const getModuleContent = () => {
+  const ModuleContent = useMemo(() => {
     if (currentBranch === null) {
       return "branch doesn't exist";
     }
@@ -133,20 +90,20 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
         <SplitPane split="vertical" size={700} minSize={100}>
           {/* Editor if in editor mode */}
           <Box position="absolute" left={0} right={0} top={0} bottom={0}>
-            <ModuleEditor textFileModel={file} />
+            <ModuleEditorGroup />
           </Box>
-          <ModuleOutput textFileModel={file} />
+          <ModuleOutput />
         </SplitPane>
       );
     }
 
-    return <ModuleOutput textFileModel={file} />;
-  };
+    return <ModuleOutput />;
+  }, [editing, currentBranch]);
 
   return (
     <>
       <ModulePicker />
-      <Layout sidebar={sidebar}>{getModuleContent()}</Layout>
+      <Layout sidebar={sidebar}>{ModuleContent}</Layout>
     </>
   );
 };

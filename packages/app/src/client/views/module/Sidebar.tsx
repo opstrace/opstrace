@@ -19,13 +19,13 @@ import IconButton from "@material-ui/core/IconButton";
 import AddIcon from "@material-ui/icons/Add";
 
 import { SideBar, SideBarContainer } from "client/components/SideBar";
-import { useCommandService } from "client/services/Command";
 import { ModuleTreeViewContainer } from "client/components/TreeView";
 
 import BranchSelector from "client/views/common/BranchSelector";
 import { usePickerService } from "client/services/Picker";
+import CreateModuleDialog from "client/views/common/CreateModuleDialog";
 
-const ModuleSidebar = () => {
+function ModuleSidebar() {
   const { activatePickerWithText } = usePickerService();
 
   const createBranch = useCallback(() => {
@@ -33,21 +33,8 @@ const ModuleSidebar = () => {
   }, [activatePickerWithText]);
 
   const createModule = useCallback(() => {
-    console.log("calling createModule");
-  }, []);
-
-  useCommandService(
-    {
-      id: "create-module",
-      description: "Create Module",
-      category: "Module",
-      handler: e => {
-        e.keyboardEvent?.preventDefault();
-        createModule();
-      }
-    },
-    [createModule]
-  );
+    activatePickerWithText("create module: ");
+  }, [activatePickerWithText]);
 
   const branchActions = (
     <IconButton size="small" onClick={createBranch}>
@@ -63,6 +50,7 @@ const ModuleSidebar = () => {
 
   return (
     <SideBar>
+      <CreateModuleDialog />
       <SideBarContainer title="Branches" actions={branchActions} minHeight={50}>
         <BranchSelector />
       </SideBarContainer>
@@ -71,6 +59,6 @@ const ModuleSidebar = () => {
       </SideBarContainer>
     </SideBar>
   );
-};
+}
 
 export default ModuleSidebar;

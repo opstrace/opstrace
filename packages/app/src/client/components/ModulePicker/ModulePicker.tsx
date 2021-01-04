@@ -51,6 +51,7 @@ const ModulePicker = () => {
         if (!file || !currentBranch) {
           return;
         }
+
         dispatch(
           requestOpenFileWithParams({
             history,

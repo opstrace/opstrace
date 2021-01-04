@@ -54,7 +54,6 @@ const ModuleTreeView = ({
   const versions = useSortedVersionsForModule(moduleName, moduleScope);
   const [version, setVersion] = useState<string>("");
   const [expanded, setExpanded] = useState<string[]>([]);
-  const setDefaultExpandedToExposeFile = useRef(false);
   const overrideVersionForBrowsing = useRef(false);
 
   const {
@@ -64,6 +63,7 @@ const ModuleTreeView = ({
     requestedFilePath
   } = useOpenFileRequestParams();
 
+  // This effect is all about setting the correct version
   useEffect(() => {
     if (overrideVersionForBrowsing.current) {
       return;
@@ -74,7 +74,6 @@ const ModuleTreeView = ({
       requestedModuleName === moduleName &&
       requestedModuleScope === moduleScope
     ) {
-      setDefaultExpandedToExposeFile.current = false;
       setVersion(requestedModuleVersion);
     }
 
@@ -108,7 +107,7 @@ const ModuleTreeView = ({
   );
 
   const fileTree = getFileTree(possiblyForkedFiles);
-
+  // This effect is all about setting the selected file
   useEffect(() => {
     // this is true if the user selects a different version from the dropdown
     if (overrideVersionForBrowsing.current) {
@@ -128,8 +127,7 @@ const ModuleTreeView = ({
           sanitizeFilePath(requestedFilePath)
       );
 
-      if (requestedFile && !setDefaultExpandedToExposeFile.current) {
-        setDefaultExpandedToExposeFile.current = true;
+      if (requestedFile && getFileId(requestedFile.file) !== selected) {
         setExpanded(getExpandedNodeIDsToExposeFile(requestedFile));
         onSelected(getFileId(requestedFile.file));
       }
@@ -142,7 +140,8 @@ const ModuleTreeView = ({
     moduleScope,
     onSelected,
     moduleName,
-    fileTree
+    fileTree,
+    selected
   ]);
 
   if (possiblyForkedFiles === null) {
