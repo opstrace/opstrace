@@ -1,0 +1,5 @@
+mutation UpdateAlias($id: uuid!, $alias: uuid) {
+  update_file_by_pk(pk_columns: { id: $id }, _set: { alias_for: $alias }) {
+    id
+  }
+}

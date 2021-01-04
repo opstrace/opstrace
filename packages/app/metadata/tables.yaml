@@ -122,6 +122,9 @@
     schema: public
     name: file
   object_relationships:
+  - name: alias
+    using:
+      foreign_key_constraint_on: alias_for
   - name: branch
     using:
       foreign_key_constraint_on: branch_name
@@ -349,11 +352,12 @@
     permission:
       check: {}
       columns:
+      - author_email
       - branch_name
+      - created_at
       - module_name
       - module_scope
       - version
-      - created_at
       backend_only: false
   select_permissions:
   - role: user
@@ -368,11 +372,12 @@
   - role: user_admin
     permission:
       columns:
+      - author_email
       - branch_name
+      - created_at
       - module_name
       - module_scope
       - version
-      - created_at
       filter: {}
 - table:
     schema: public
