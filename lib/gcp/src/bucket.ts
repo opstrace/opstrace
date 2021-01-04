@@ -85,7 +85,7 @@ export const setBucketLifecycle = async ({
         if (err) {
           reject(err);
         }
-        resolve();
+        resolve(null);
       }
     );
   });
