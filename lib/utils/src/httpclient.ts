@@ -41,6 +41,78 @@ const httpTimeoutSettings = {
 };
 
 function retryfunc(ro: GotRetryObject): number {
+  // log.debug("retry object: %s", JSON.stringify(ro, null, 2));
+
+  // Non-obvious pieces of information:
+  // (also see https://github.com/sindresorhus/got/issues/1143)
+  //
+  // - The GotRetryObject contains the entire retry configuration, potentially
+  //   the _custom_ one if a custom one was set through the `retry` property on
+  //   the got client object. See below for an example.
+  //
+  // - When an HTTP request fails (be it the first one, i.e. retry attempt 0,
+  //   or a later one) then `got` always invokes the _default_ retry mechanism
+  //   as defined in
+  //   https://github.com/sindresorhus/got/blob/v11.8.1/source/core/calculate-retry-delay.ts#L7
+  //
+  // - That default retry mechanism returns either 0, meaning that no actual
+  //   retry should happen, or non-zero meaning that a retry should happen (and
+  //   the number defines the delay).
+  //
+  // - THEN (after going through the default retry mechanism) this function
+  //   here is being called and presented with the result of the default retry
+  //   mechanism. It can do whatever it wants to do with that!
+  //
+  // - The default retry mechanism more or less obviously does honor
+  //   `statusCodes`, `limit`, etc when set on the `retry` property on the got
+  //   client object.
+  //
+  // Now it should be obvious that the first thing to be done here is to check
+  // `computedValue` of the GotRetryObject. If it's set to 0 then it means that
+  // the default retry mechanism decided (based on potentially custom settings)
+  // to _not_ retry. And because there's useful business logic in this default
+  // mechanism (check against status codes, errors, limit), we want to honor
+  // that here: return immediately and to simply pass this value (0) on.
+  //
+  // 2021-01-05T17:21:01.449Z debug: retry object: {"attemptCount": 1,
+  //   "retryOptions": {"limit": 10, "methods": ["GET", "PUT", "HEAD",
+  //   "DELETE", "OPTIONS", "TRACE"
+  //     ],
+  //     "statusCodes": [
+  //       408,
+  //       413,
+  //       500,
+  //       502,
+  //       503,
+  //       504,
+  //       521,
+  //       522,
+  //       524
+  //     ],
+  //     "errorCodes": [
+  //       "ETIMEDOUT",
+  //       "ECONNRESET",
+  //       "EADDRINUSE",
+  //       "ECONNREFUSED",
+  //       "EPIPE",
+  //       "ENOTFOUND",
+  //       "ENETUNREACH",
+  //       "EAI_AGAIN"
+  //     ],
+  //     "maxRetryAfter": 300000
+  //   },
+  //   "error": {"name": "HTTPError", "timings": {
+  //        ...
+  //       }
+  //     }
+  //   },
+  //   "computedValue": 0
+  // }
+
+  if (ro.computedValue === 0) {
+    return 0;
+  }
+
   const req = ro.error.request;
   if (req === undefined) {
     log.debug(
