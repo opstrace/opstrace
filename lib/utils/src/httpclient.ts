@@ -33,8 +33,9 @@ import { log } from "./log";
 // be set larger. The connect() timeout can /should in all cases be around or
 // below 10 seconds.
 const httpTimeoutSettings = {
-  // If a TCP connect() takes longer then ~5 seconds then most certainly there
-  // is a networking issue, fail fast in that case.
+  // If a TCP connect() takes longer then ~5 seconds then it's likely that
+  // there is a networking issue, fail fast in that case. Unlikely, but also
+  // possible: having a waiting position in the tcp accept queue of a server.
   connect: 10000,
   request: 30000
 };
@@ -52,7 +53,7 @@ function retryfunc(ro: GotRetryObject): number {
 
   // About got.RequestError "When a request fails. Contains a code property
   // with error class code, like ECONNREFUSED. All the errors below inherit
-  // this one.""
+  // this one."
 
   let msg = "";
   msg += `${req.options.method} HTTP request to ${req.requestUrl} failed. `;
@@ -92,50 +93,10 @@ function getBodyPrefix(resp: GotResponse<unknown>): string {
   return bodyPrefix;
 }
 
-// try {
-//     resp = await got(url);
-//   } catch (e) {
-//     if (e instanceof got.RequestError) {
-//      // here you _know_ what kinds of errors you handle
-//     } else {
-//       // re-throw everything else
-//       throw e;
-//     }
-//   }
-
-// export function gotRequestOptions(
-//   headers?: Record<string, string>,
-//   insecure_tls?: true
-// ): GotOptions {
-//   const opts: GotOptions = {
-//     // this also covers a range of transient issues:
-//     // ETIMEDOUT ECONNRESET EADDRINUSE ECONNREFUSED EPIPE ENOTFOUND ENETUNREACH EAI_AGAIN
-//     retry: {
-//       limit: 10,
-//       calculateDelay: retryfunc,
-//       // remove 429 for now, forhttps://github.com/opstrace/opstrace/issues/30
-//       statusCodes: [408, 413, 500, 502, 503, 504, 521, 522, 524],
-//       // do not retry for longer than 5 minutes
-//       maxRetryAfter: 5 * 60 * 1000
-//     },
-//     throwHttpErrors: true,
-//     timeout: httpTimeoutSettings
-//   };
-
-//   if (headers !== undefined) {
-//     opts.headers = headers;
-//   }
-
-//   if (insecure_tls === true) {
-//     // https://github.com/sindresorhus/got/issues/1191
-//     opts.https = { rejectUnauthorized: true };
-//   }
-
-//   return opts;
-// }
-
+// Create HTTP client object to be used by consumers of this module.
+// See https://github.com/sindresorhus/got#gotextendoptions
 export const httpcl: Got = got.extend({
-  // this also covers a range of transient issues:
+  // this covers a range of transient issues:
   // ETIMEDOUT ECONNRESET EADDRINUSE ECONNREFUSED EPIPE ENOTFOUND ENETUNREACH EAI_AGAIN
   retry: {
     limit: 10,
