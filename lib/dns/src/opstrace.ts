@@ -35,9 +35,8 @@ import {
   Dict
 } from "@opstrace/utils";
 
-const accessTokenFile = "./access.jwt";
-const idTokenFile = "./id.jwt";
-
+const ACCESS_TOKEN_FILE_PATH = "./access.jwt";
+const ID_TOKEN_FILE_PATH = "./id.jwt";
 const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
 const OIDC_ISSUER = "https://opstrace-dev.us.auth0.com";
 const OIDC_CLIENT_ID = "fT9EPILybLT44hQl2xE7hK0eTuH1sb21";
@@ -212,19 +211,19 @@ export class DNSClient {
 
   private constructor() {
     this.additionalHeaders = {};
-
     this.accessToken = "";
-    if (fs.existsSync(accessTokenFile)) {
-      this.accessToken = fs.readFileSync(accessTokenFile, {
+    this.idToken = "";
+
+    if (fs.existsSync(ACCESS_TOKEN_FILE_PATH)) {
+      this.accessToken = fs.readFileSync(ACCESS_TOKEN_FILE_PATH, {
         encoding: "utf8",
         flag: "r"
       });
       this.additionalHeaders["authorization"] = `Bearer ${this.accessToken}`;
     }
 
-    this.idToken = "";
-    if (fs.existsSync(idTokenFile)) {
-      this.idToken = fs.readFileSync(idTokenFile, {
+    if (fs.existsSync(ID_TOKEN_FILE_PATH)) {
+      this.idToken = fs.readFileSync(ID_TOKEN_FILE_PATH, {
         encoding: "utf8",
         flag: "r"
       });
@@ -257,10 +256,10 @@ export class DNSClient {
     this.additionalHeaders["x-opstrace-id-token"] = this.idToken;
 
     log.info("write authentication state to current working directory");
-    fs.writeFileSync(accessTokenFile, this.accessToken, {
+    fs.writeFileSync(ACCESS_TOKEN_FILE_PATH, this.accessToken, {
       encoding: "utf-8"
     });
-    fs.writeFileSync(idTokenFile, this.idToken, { encoding: "utf-8" });
+    fs.writeFileSync(ID_TOKEN_FILE_PATH, this.idToken, { encoding: "utf-8" });
   }
 
   /**
