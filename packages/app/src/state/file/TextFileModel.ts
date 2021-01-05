@@ -95,6 +95,12 @@ class TextFileModel implements IPossiblyForkedFile {
     return this.liveClient.viewers;
   }
 
+  onFileSystemReady() {
+    // Reset editor content to trigger all the editor diagnostics
+    // now that the file system in the worker is ready
+    this.model?.setValue(this.model.getValue());
+  }
+
   onViewersChange(callback: () => void) {
     this.viewerListeners.add(callback);
     return () => {

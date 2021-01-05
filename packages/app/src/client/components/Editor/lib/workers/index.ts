@@ -22,7 +22,7 @@ import EditorWorker from "worker-loader!monaco-editor/esm/vs/editor/editor.worke
 //@ts-ignore
 import MSWorker from "worker-loader!./modulescript/ms.worker";
 
-export type { EditorDecorations } from "./modulescript";
+export type { EditorDecorations, WorkerAPI } from "./modulescript";
 
 register();
 

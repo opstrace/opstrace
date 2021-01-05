@@ -15,9 +15,12 @@
  */
 
 import React, { useCallback, useEffect, useState } from "react";
-
+import getWorkerApi from "client/components/Editor/lib/workers";
 import { ModuleEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
+import getStore from "state/store";
+import { getCurrentBranchName } from "state/branch/hooks/useBranches";
+import { getCurrentBranchFiles } from "state/file/hooks/useFiles";
 
 function ModuleEditor({
   textFileModel,
@@ -31,6 +34,12 @@ function ModuleEditor({
       if (node && textFileModel) {
         await textFileModel.render(node);
         setReady(true);
+        const api = await getWorkerApi();
+        const state = getStore().getState();
+        const branch = getCurrentBranchName(state);
+        const files = getCurrentBranchFiles(state);
+        await api.setBranchFiles(branch, files || []);
+        textFileModel.onFileSystemReady();
       }
     },
     [textFileModel]
