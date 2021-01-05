@@ -251,15 +251,15 @@ export class DNSClient {
     return await this.requestAndHandleErrors("GET");
   }
 
-  public async Delete(clustername: string): Promise<void> {
+  public async delete(clustername: string): Promise<void> {
     await this.requestAndHandleErrors("DELETE", { clustername });
   }
 
-  public async Create(clustername: string): Promise<void> {
+  public async create(clustername: string): Promise<void> {
     await this.requestAndHandleErrors("POST", { clustername });
   }
 
-  public async AddNameservers(
+  public async addNameservers(
     clustername: string,
     nameservers: string[]
   ): Promise<void> {
