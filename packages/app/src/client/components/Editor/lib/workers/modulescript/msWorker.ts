@@ -19,11 +19,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as Events from "events";
 import * as ts from "./lib/typescriptServices";
+import path from "path";
 import { libFileMap } from "./lib/lib";
 import { IExtraLibs, EditorDecorations } from "./index";
 import getSyntaxClassname, { getSyntaxKindName } from "./utils/syntaxClass";
+import { Files, File } from "state/file/types";
+import semver from "semver";
+import { parseFileUriWithoutBranch } from "state/file/utils/uri";
+import { sanitizeFilePath, sanitizeScope } from "state/utils/sanitize";
 
 export class ModuleScriptWorker
   implements
@@ -34,9 +38,8 @@ export class ModuleScriptWorker
   private _languageService = ts.createLanguageService(this);
   private _compilerOptions: ts.CompilerOptions;
 
-  private files = new Map<string, ts.SourceFile>();
-  private _storeActions: any[] = [];
-  private _storeActionAdded = new Events.EventEmitter();
+  private filesByModule = new Map<string, Files>();
+  private branch = "main";
 
   constructor(ctx: monaco.worker.IWorkerContext, createData: ICreateData) {
     this._ctx = ctx;
@@ -44,22 +47,24 @@ export class ModuleScriptWorker
     this._extraLibs = createData.extraLibs;
   }
 
-  getBatchedActions(): Promise<any[]> {
-    const awaitBatch = new Promise<any[]>(resolve => {
-      const resolveActions = () => {
-        const actions = this._storeActions;
-        this._storeActions = [];
-        resolve(actions);
-      };
+  getModuleUri(name: string, scope: string) {
+    return scope ? `${sanitizeScope(scope)}/${name}` : name;
+  }
 
-      if (this._storeActions.length) {
-        resolveActions();
-      } else {
-        this._storeActionAdded.once("added", resolveActions);
-      }
+  setBranchFiles(branch: string, files: Files) {
+    if (branch !== this.branch) {
+      // Reset our source files
+      this.filesByModule.clear();
+    }
+    files.forEach(f => {
+      const module = this.getModuleUri(f.module_name, f.module_scope);
+
+      this.filesByModule.set(
+        module,
+        (this.filesByModule.get(module) || []).concat([f])
+      );
     });
-
-    return awaitBatch;
+    this.branch = branch;
   }
 
   getDecorations(fileName: string): null | EditorDecorations {
@@ -131,9 +136,133 @@ export class ModuleScriptWorker
     languageVersion: ts.ScriptTarget,
     onError?: (message: string) => void
   ) {
-    return this.files.get(fileName);
+    console.log("getSourcefile:", fileName);
+
+    return ts.createSourceFile(fileName, "empty", languageVersion);
   }
-  writeFile() {
+
+  ensureUriHasExtension(uri: string, extension?: string) {
+    // We have to ensure uri has extension because the compiler will vomit if it doesn't
+    const lastPart = uri.split("/").pop() || "";
+    const ext = lastPart.split(".").pop();
+
+    if (!ext) {
+      return uri + ".ts";
+    }
+    if (ext === uri || ext === lastPart) {
+      return uri + ".ts";
+    }
+    if (!["tsx", "tsx"].includes(ext)) {
+      return uri.substr(0, uri.length - ext.length) + "ts";
+    }
+    return uri;
+  }
+
+  resolveModuleNames(
+    moduleNames: string[],
+    containingFile: string
+  ): (ts.ResolvedModule | undefined)[] {
+    return moduleNames.map<ts.ResolvedModule | undefined>(name => {
+      if (name.startsWith(".")) {
+        // Relative import
+        const paths = containingFile.replace(/^module:\/\//, "").split("/");
+        // pop current file name
+        paths.pop();
+        containingFile = paths.join("/");
+        const resolvedPath = "module://" + path.join(containingFile, name);
+        const resolvedFile = this.getFile(resolvedPath);
+        return resolvedFile
+          ? {
+              resolvedFileName: this.ensureUriHasExtension(resolvedPath)
+            }
+          : undefined;
+      }
+      if (name.startsWith("https://") || name.startsWith("http://")) {
+        // external import
+        return {
+          resolvedFileName: this.ensureUriHasExtension(name)
+        };
+      }
+      const resolvedFile = this.getFile(name);
+      return resolvedFile
+        ? {
+            resolvedFileName: "module://" + this.ensureUriHasExtension(name)
+          }
+        : undefined;
+    });
+  }
+
+  getFileVersionsByBranch(fileName: string) {
+    const nullResult = {
+      current: [],
+      main: []
+    };
+
+    const attrs = parseFileUriWithoutBranch(fileName);
+    if (!attrs) {
+      return nullResult;
+    }
+    const module = this.getModuleUri(attrs.module, attrs.scope);
+
+    if (!this.filesByModule.has(module)) {
+      return nullResult;
+    }
+    const moduleFiles = this.filesByModule.get(module) || [];
+    const main: File[] = [];
+    const current = moduleFiles.filter(f => {
+      if (sanitizeFilePath(f.path) !== attrs.path) {
+        // not the correct file path
+        return false;
+      }
+      if (f.branch_name === "main") {
+        main.push(f);
+        return false;
+      }
+      return true;
+    });
+    return {
+      main,
+      current
+    };
+  }
+  getFile(fileName: string) {
+    console.log(fileName);
+    if (fileName.startsWith("https://")) {
+      // external https import
+    }
+    if (fileName.startsWith("http://")) {
+      // external https import
+    }
+    if (!fileName.startsWith(".")) {
+      // Absolute import
+    }
+    fileName = fileName.replace(/^module:\/\//, "");
+
+    const attrs = parseFileUriWithoutBranch(fileName);
+    if (!attrs) {
+      return;
+    }
+    const versions = this.getFileVersionsByBranch(fileName);
+
+    if (versions.current.length) {
+      return this.resolveVersion(versions.current, attrs.version);
+    }
+    return this.resolveVersion(versions.main, attrs.version);
+  }
+
+  resolveVersion(files: Files, range: string) {
+    const versions = files.map(f => f.module_version);
+
+    if (versions.includes(range)) {
+      return files.find(f => f.module_version === range);
+    }
+    // resolve the max version satisfied by range
+    const maxVersion = semver.maxSatisfying(versions, range);
+    const resolvedFile = files.find(f => f.module_version === maxVersion);
+
+    return resolvedFile;
+  }
+  writeFile(fileName: string, content: string) {
     // do nothing
   }
   getCurrentDirectory() {
@@ -143,12 +272,11 @@ export class ModuleScriptWorker
     return [];
   }
   fileExists(fileName: string) {
-    return this.files.get(fileName) != null;
+    return !!this.getFile(fileName);
   }
   readFile(fileName: string) {
-    return this.files.get(fileName) != null
-      ? this.files.get(fileName)!.getFullText()
-      : undefined;
+    console.log("reading file:", fileName);
+    return "";
   }
   getCanonicalFileName(fileName: string) {
     return fileName;
