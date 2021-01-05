@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { delay, call } from "redux-saga/effects";
+import { delay, call } from "typed-redux-saga";
 import { CreateZoneResponse, DNS } from "@google-cloud/dns";
 import { Route53 } from "aws-sdk";
 import { DNSZone, DNSRecord, Provider } from "./types";
@@ -119,10 +119,7 @@ export function* ensureDNSExists({
     awsDNS = new Route53();
   }
 
-  const clusters: string[] = yield call([
-    opstraceClient,
-    opstraceClient.getAllEntries
-  ]);
+  const clusters = yield* call([opstraceClient, opstraceClient.getAllEntries]);
 
   log.debug(
     "DNS API client getAllEntries() yielded: %s",

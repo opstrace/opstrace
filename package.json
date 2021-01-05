@@ -52,8 +52,6 @@
   },
   "dependencies": {
     "@types/js-yaml": "^3.12.5",
-    "redux": "^4.0.4",
-    "redux-saga": "^1.1.2",
     "typesafe-actions": "^5.1.0"
   },
   "resolutions": {

@@ -11516,10 +11516,10 @@ googleapis@^64.0.0:
     google-auth-library "^6.0.0"
     googleapis-common "^4.4.1"
 
-got@11.8.0, got@^11.6.2:
-  version "11.8.0"
-  resolved "https://registry.yarnpkg.com/got/-/got-11.8.0.tgz#be0920c3586b07fd94add3b5b27cb28f49e6545f"
-  integrity sha512-k9noyoIIY9EejuhaBNLyZ31D5328LeqnyPNXJQb2XlJZcKakLqN5m6O/ikhq/0lw56kUYS54fVm+D1x57YC9oQ==
+got@11.8.1, got@^11.8.1:
+  version "11.8.1"
+  resolved "https://registry.yarnpkg.com/got/-/got-11.8.1.tgz#df04adfaf2e782babb3daabc79139feec2f7e85d"
+  integrity sha512-9aYdZL+6nHmvJwHALLwKSUZ0hMwGaJGYv3hoPLPgnT8BoBXm1SjnZeky+91tfwJaDzun2s4RsBRy48IEYv2q2Q==
   dependencies:
     "@sindresorhus/is" "^4.0.0"
     "@szmarczak/http-timer" "^4.0.5"
@@ -11533,10 +11533,10 @@ got@11.8.0, got@^11.6.2:
     p-cancelable "^2.0.0"
     responselike "^2.0.0"
 
-got@11.8.1:
-  version "11.8.1"
-  resolved "https://registry.yarnpkg.com/got/-/got-11.8.1.tgz#df04adfaf2e782babb3daabc79139feec2f7e85d"
-  integrity sha512-9aYdZL+6nHmvJwHALLwKSUZ0hMwGaJGYv3hoPLPgnT8BoBXm1SjnZeky+91tfwJaDzun2s4RsBRy48IEYv2q2Q==
+got@^11.6.2:
+  version "11.8.0"
+  resolved "https://registry.yarnpkg.com/got/-/got-11.8.0.tgz#be0920c3586b07fd94add3b5b27cb28f49e6545f"
+  integrity sha512-k9noyoIIY9EejuhaBNLyZ31D5328LeqnyPNXJQb2XlJZcKakLqN5m6O/ikhq/0lw56kUYS54fVm+D1x57YC9oQ==
   dependencies:
     "@sindresorhus/is" "^4.0.0"
     "@szmarczak/http-timer" "^4.0.5"
@@ -18485,7 +18485,7 @@ redux-saga-test-plan@^4.0.1:
     object-assign "^4.1.0"
     util-inspect "^0.1.8"
 
-redux-saga@^1.1.2:
+redux-saga@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-1.1.3.tgz#9f3e6aebd3c994bbc0f6901a625f9a42b51d1112"
   integrity sha512-RkSn/z0mwaSa5/xH/hQLo8gNf4tlvT18qXDNvedihLcfzh+jMchDgaariQoehCpgRltEm4zHKJyINEz6aqswTw==
@@ -21047,6 +21047,14 @@ typed-function@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/typed-function/-/typed-function-2.0.0.tgz#15ab3825845138a8b1113bd89e60cd6a435739e8"
   integrity sha512-Hhy1Iwo/e4AtLZNK10ewVVcP2UEs408DS35ubP825w/YgSBK1KVLwALvvIG4yX75QJrxjCpcWkzkVRB0BwwYlA==
+
+typed-redux-saga@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/typed-redux-saga/-/typed-redux-saga-1.3.1.tgz#92b01db41e3510102f87eb9ff261ec73d38a2e44"
+  integrity sha512-nUj1/1/SAesEsZrr7o24ID+++CqZ6QfPVDcwhY2rVmm4vEBr/vbDHJ6j/w6SomOcooLwnh3sdaWVhNEIy7VgNA==
+  optionalDependencies:
+    "@babel/helper-module-imports" "^7.12.1"
+    babel-plugin-macros "^2.8.0"
 
 typed-styles@^0.0.7:
   version "0.0.7"
