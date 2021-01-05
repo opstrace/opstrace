@@ -276,7 +276,9 @@ export class DNSClient {
     this.additionalHeaders["authorization"] = `Bearer ${accessToken}`;
     this.additionalHeaders["x-opstrace-id-token"] = this.idToken;
 
-    log.info("write authentication state to current working directory");
+    log.info(
+      "login successful, write authentication state to current working directory"
+    );
     fs.writeFileSync(ACCESS_TOKEN_FILE_PATH, this.accessToken, {
       encoding: "utf-8"
     });
@@ -333,9 +335,7 @@ export class DNSClient {
           }
 
           if (e.response?.statusCode === 401) {
-            log.info(
-              "got a 401 response: need to refresh authentication state"
-            );
+            log.info("perform another login to refresh authentication state");
             this.clearAuthnState();
             await this.login();
 
