@@ -167,7 +167,7 @@ export function* destroyAWSInfra(): Generator<
   taskGroup4.push(yield fork(route53PurgeZonesForDnsName, route53dnsname));
   taskGroup4.push(
     yield fork(
-      [opstraceClient, opstraceClient.Delete],
+      [opstraceClient, opstraceClient.delete],
       destroyConfig.clusterName
     )
   );
