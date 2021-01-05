@@ -17,10 +17,10 @@
 import * as fs from "fs";
 import { strict as assert } from "assert";
 
-import qs from "qs";
-import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
-
-import got, { Response as GotResponse } from "got";
+import got, {
+  Response as GotResponse,
+  OptionsOfTextResponseBody as GotOptions
+} from "got";
 
 import open from "open";
 
@@ -30,44 +30,205 @@ import {
   debugLogHTTPResponse,
   debugLogHTTPResponseLight,
   HighLevelRetry,
-  die
+  die,
+  sleep,
+  Dict
 } from "@opstrace/utils";
 
 const accessTokenFile = "./access.jwt";
 const idTokenFile = "./id.jwt";
 
 const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
-const issuer = "https://opstrace-dev.us.auth0.com";
-const client_id = "fT9EPILybLT44hQl2xE7hK0eTuH1sb21";
+const OIDC_ISSUER = "https://opstrace-dev.us.auth0.com";
+const OIDC_CLIENT_ID = "fT9EPILybLT44hQl2xE7hK0eTuH1sb21";
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+/**
+ *
+ * @param dcode device code
+ *
+ * @returns `undefined`, signalling to the caller to keep looping
+ * @returns data object of type `Dict<string>` upon success.
+ */
+async function loginPollRequest(
+  dcode: string
+): Promise<Dict<string> | undefined> {
+  const opts: GotOptions = {
+    method: "POST",
+    form: {
+      grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+      device_code: dcode,
+      client_id: OIDC_CLIENT_ID
+    },
+    // Some HTTP error responses are expected. Do this handling work manually.
+    throwHttpErrors: false
+  };
+
+  const url = `${OIDC_ISSUER}/oauth/token`;
+
+  const resp: GotResponse<string> | undefined = await httpcl(url, opts);
+
+  if (resp === undefined) {
+    log.warning("loginPollRequest() did not yield an HTTP response");
+
+    // This is for the rare case where HTTP client-internal retrying didn't
+    // result in an HTTP response. Signal to the caller that the expected
+    // outcome isn't there yet.
+    return undefined;
+  }
+
+  debugLogHTTPResponseLight(resp);
+
+  let data: any;
+  try {
+    data = JSON.parse(resp.body);
+  } catch (err) {
+    log.warning(
+      "could not parse response body as JSON: %s: %s",
+      err.code,
+      err.message
+    );
+
+    return undefined;
+  }
+
+  if (data["id_token"] !== undefined) {
+    log.debug("OIDC ID Token in response, can stop polling");
+    return data;
+  }
+
+  // Handle the expected case of the user not yet having confirmed the login in
+  // their browser, and signal to caller to keep waiting / polling.
+  if (data["error"] === "authorization_pending") {
+    return undefined;
+  }
+
+  // Let's see if there is decent error detail in the response.
+  const descr = data["error_description"];
+  if (descr !== undefined) {
+    log.error("verification failed: %s", descr);
+    // Note(JP): the legacy behavior here was to keep polling. That does not
+    // seem to be the right approach. This should be looked at as a permanent
+    // DNS service login error. Leave the program.
+    die("DNS service login failed");
+  }
+
+  // TODO: think about which cases to handle how. Don't retry everything.
+  debugLogHTTPResponse(resp);
+  log.warning("unexpected HTTP response, but keep polling");
+  return undefined;
+}
+
+interface DeviceCodeLoginResult {
+  idToken: string;
+  accessToken: string;
+}
+
+async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
+  // Initiate new login flow.
+  const resp: GotResponse<string> = await httpcl(
+    `${OIDC_ISSUER}/oauth/device/code`,
+    {
+      method: "POST",
+      form: {
+        client_id: OIDC_CLIENT_ID,
+        scope: "profile email openid",
+        audience: DNS_SERVICE_URL
+      }
+    }
+  );
+
+  // JSON.parse()'s return value has inferred as type `any`. We're doing
+  // dynamic checking below.
+  // https://github.com/microsoft/TypeScript/issues/1897 is a great read.
+  const data = JSON.parse(resp.body);
+
+  if (data.verification_uri_complete === undefined) {
+    log.error("unexpected data in HTTP response: %s", data);
+    die("DNS service login failed");
+  }
+  assert(data["user_code"]);
+  assert(data["device_code"]);
+  assert(data["interval"]);
+
+  const verification_uri = data["verification_uri_complete"];
+  log.info(
+    "Opening browser to sign in to the Opstrace DNS service in a few " +
+      "seconds. If it does not open, follow this URL: %s",
+    data["verification_uri_complete"]
+  );
+  log.info("Verification code: %s", data["user_code"]);
+
+  // Visualize the countdown before trying to open the browser.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for (const _ in [1, 2, 3, 4, 5]) {
+    await sleep(1);
+    process.stderr.write(".");
+  }
+  process.stderr.write("\n");
+
+  try {
+    open(verification_uri);
+  } catch (err) {
+    log.info("Failed to open browser: %s", err.message);
+    log.info(
+      "Please manually visit this URL in your browser: %s",
+      verification_uri
+    );
+  }
+
+  // Poll for verification result.
+  let result: Dict<string> | undefined;
+  while (true) {
+    await sleep(data["interval"]);
+
+    result = await loginPollRequest(data["device_code"]);
+
+    if (result !== undefined) {
+      // Assume `result` is good, leave the polling loop.
+      break;
+    }
+
+    // Visualize to the user that polling is still ongoing.
+    process.stderr.write(".");
+  }
+
+  // Note(JP): only one of both is needed to present as authentication proof
+  // to the Opstrace DNS service. Consolidate that. Probably the ID Token.
+  assert(result["access_token"]);
+  assert(result["id_token"]);
+
+  return {
+    idToken: result["id_token"],
+    accessToken: result["access_token"]
+  };
+}
 
 export class DNSClient {
   accessToken: string;
   idToken: string;
-  headers: { [key: string]: string };
+  additionalHeaders: { [key: string]: string };
 
   private static instance: DNSClient;
 
   private constructor() {
-    this.headers = {
-      "content-type": "application/json"
-    };
+    this.additionalHeaders = {};
+
     this.accessToken = "";
     if (fs.existsSync(accessTokenFile)) {
       this.accessToken = fs.readFileSync(accessTokenFile, {
         encoding: "utf8",
         flag: "r"
       });
-      this.headers["authorization"] = `Bearer ${this.accessToken}`;
+      this.additionalHeaders["authorization"] = `Bearer ${this.accessToken}`;
     }
+
     this.idToken = "";
     if (fs.existsSync(idTokenFile)) {
       this.idToken = fs.readFileSync(idTokenFile, {
         encoding: "utf8",
         flag: "r"
       });
-      this.headers["x-opstrace-id-token"] = this.idToken;
+      this.additionalHeaders["x-opstrace-id-token"] = this.idToken;
     }
   }
 
@@ -77,121 +238,29 @@ export class DNSClient {
     }
 
     if (DNSClient.instance.accessToken === "") {
-      await DNSClient.instance.Login();
+      await DNSClient.instance.login();
     }
     return Promise.resolve(DNSClient.instance);
   }
 
-  public async Login(): Promise<void> {
+  public async login(): Promise<void> {
     if (this.accessToken !== "") {
+      log.debug("skip login: accessToken already set");
       return;
     }
 
-    const deviceCodeRequest: AxiosRequestConfig = {
-      method: "POST",
-      url: `${issuer}/oauth/device/code`,
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      data: qs.stringify({
-        client_id,
-        scope: "profile email openid",
-        audience: DNS_SERVICE_URL
-      })
-    };
+    const { accessToken, idToken } = await deviceCodeLogin();
 
-    const res = await axios.request(deviceCodeRequest);
+    this.accessToken = accessToken;
+    this.idToken = idToken;
+    this.additionalHeaders["authorization"] = `Bearer ${accessToken}`;
+    this.additionalHeaders["x-opstrace-id-token"] = this.idToken;
 
-    const verification_uri = res.data["verification_uri_complete"];
-    log.info(
-      "Opening browser to sign in to the Opstrace DNS service in a few " +
-        "seconds. If it does not open, follow this url: %s",
-      verification_uri
-    );
-    log.info("Verification code: %s", res.data["user_code"]);
-
-    // visualzie the countdown before trying to open the browser.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const _ in [1, 2, 3, 4, 5]) {
-      await delay(1000);
-      process.stderr.write(".");
-    }
-    process.stderr.write("\n");
-
-    try {
-      open(verification_uri);
-    } catch (err) {
-      log.info("failed to open browser: %s", err.message);
-      log.info(
-        "Please manually visit this URL in your browser: %s",
-        verification_uri
-      );
-    }
-
-    const tokenRequest: AxiosRequestConfig = {
-      method: "POST",
-      url: `${issuer}/oauth/token`,
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      data: qs.stringify({
-        grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-        device_code: res.data["device_code"],
-        client_id
-      })
-    };
-
-    // Poll for verification.
-    while (true) {
-      await delay(res.data["interval"] * 1000);
-      let response: AxiosResponse | undefined;
-      try {
-        response = await axios.request(tokenRequest);
-      } catch (err) {
-        if (err?.response?.data) {
-          const data = err?.response?.data;
-
-          // Handle the expected case of the user not yet having confirmed
-          // the login in their browse, and keep waiting / polling.
-          if (data["error"] === "authorization_pending") {
-            process.stderr.write(".");
-            continue;
-          }
-
-          // Let's see if there is decent error detail in the response.
-          const descr = data["error_description"];
-          if (descr !== undefined) {
-            log.warning("verification failed: %s", descr);
-            // Note(JP): the legacy behavior here is to keep polling. I think
-            // this is probably always known to be a permanent error, and that
-            // we should leave the polling loop.
-            continue;
-          }
-
-          // TODO: think about which cases to handle how. Don't retry
-          // everything.
-          if (err.response) {
-            log.warning("unexpected response: %s", err.response);
-            continue;
-          }
-
-          log.warning("unexpected error: %s", err);
-          continue;
-        }
-      }
-
-      assert(response);
-
-      this.accessToken = response.data["access_token"];
-      this.idToken = response.data["id_token"];
-      this.headers["authorization"] = `Bearer ${this.accessToken}`;
-      this.headers["x-opstrace-id-token"] = this.idToken;
-
-      log.info("write authentication state to current working directory");
-      fs.writeFileSync(accessTokenFile, this.accessToken, {
-        encoding: "utf-8"
-      });
-      fs.writeFileSync(idTokenFile, this.idToken, { encoding: "utf-8" });
-
-      // leave polling loop
-      break;
-    }
+    log.info("write authentication state to current working directory");
+    fs.writeFileSync(accessTokenFile, this.accessToken, {
+      encoding: "utf-8"
+    });
+    fs.writeFileSync(idTokenFile, this.idToken, { encoding: "utf-8" });
   }
 
   /**
@@ -207,16 +276,15 @@ export class DNSClient {
     const action = `DNS service client:${method}`;
     log.debug("do %s", action);
 
-    const opts = {
-      headers: this.headers,
+    const gotopts: GotOptions = {
+      headers: this.additionalHeaders,
       method: method,
-      // If `data` is provided, send as JSON request body.
       json: data
     };
 
     // Fire off HTTP request. This is doing basic retrying.
     try {
-      const resp: GotResponse<string> = await httpcl(DNS_SERVICE_URL, opts);
+      const resp: GotResponse<string> = await httpcl(DNS_SERVICE_URL, gotopts);
       debugLogHTTPResponseLight(resp);
       if (resp.body.length > 0) {
         // For a 2xx response, rely on the body to be valid JSON.
@@ -243,6 +311,8 @@ export class DNSClient {
         // `die()`, here, too.
         throw new HighLevelRetry(`${action} failed`);
       }
+
+      // Re-throw all other errors, such as JSON.parse() errors.
       throw e;
     }
   }
