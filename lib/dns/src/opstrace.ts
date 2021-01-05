@@ -37,7 +37,11 @@ import {
 
 const ACCESS_TOKEN_FILE_PATH = "./access.jwt";
 const ID_TOKEN_FILE_PATH = "./id.jwt";
+
+// Use e.g. https://httpbin.org/status/500
+// for testing behavior upon 5xx.
 const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
+
 const OIDC_ISSUER = "https://opstrace-dev.us.auth0.com";
 const OIDC_CLIENT_ID = "fT9EPILybLT44hQl2xE7hK0eTuH1sb21";
 
@@ -123,6 +127,8 @@ interface DeviceCodeLoginResult {
 }
 
 async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
+  log.info(`initiate device code login against ${OIDC_ISSUER}`);
+
   // Initiate new login flow.
   const resp: GotResponse<string> = await httpcl(
     `${OIDC_ISSUER}/oauth/device/code`,
@@ -215,6 +221,11 @@ export class DNSClient {
     this.idToken = "";
 
     if (fs.existsSync(ACCESS_TOKEN_FILE_PATH)) {
+      log.debug(
+        "DNS service client: read access token from %s",
+        ACCESS_TOKEN_FILE_PATH
+      );
+
       this.accessToken = fs.readFileSync(ACCESS_TOKEN_FILE_PATH, {
         encoding: "utf8",
         flag: "r"
@@ -223,12 +234,22 @@ export class DNSClient {
     }
 
     if (fs.existsSync(ID_TOKEN_FILE_PATH)) {
+      log.debug(
+        "DNS service client: read ID token from %s",
+        ID_TOKEN_FILE_PATH
+      );
+
       this.idToken = fs.readFileSync(ID_TOKEN_FILE_PATH, {
         encoding: "utf8",
         flag: "r"
       });
       this.additionalHeaders["x-opstrace-id-token"] = this.idToken;
     }
+  }
+
+  private clearAuthnState() {
+    this.accessToken = "";
+    this.idToken = "";
   }
 
   public static async getInstance(): Promise<DNSClient> {
@@ -281,38 +302,58 @@ export class DNSClient {
       json: data
     };
 
-    // Fire off HTTP request. This is doing basic retrying.
-    try {
-      const resp: GotResponse<string> = await httpcl(DNS_SERVICE_URL, gotopts);
-      debugLogHTTPResponseLight(resp);
-      if (resp.body.length > 0) {
-        // For a 2xx response, rely on the body to be valid JSON.
-        return JSON.parse(resp.body);
-      }
-      return undefined;
-    } catch (e) {
-      if (e instanceof got.RequestError) {
-        log.error("%s failed: %s: %s", action, e.code, e.message);
-        debugLogHTTPResponse(e.response);
+    while (true) {
+      try {
+        // Note: httpcl() is doing basic retrying for transient issues.
+        const resp: GotResponse<string> = await httpcl(
+          DNS_SERVICE_URL,
+          gotopts
+        );
 
-        if (e.response?.statusCode === 403) {
-          die("DNS setup failed with a permanent error (403 HTTP response).");
+        debugLogHTTPResponseLight(resp);
+
+        if (resp.body.length > 0) {
+          // For a 2xx response, rely on the body to be valid JSON.
+          return JSON.parse(resp.body);
         }
 
-        if (e.response?.statusCode === 401) {
-          // TODO: do that really, automatically: delete authentication
-          // state, log in again.
-          log.info("got a 401 response: need to refresh authentication state");
+        // Good response, no data in response.
+        return undefined;
+      } catch (e) {
+        if (e instanceof got.RequestError) {
+          // Emit as warning, not yet sure if that's fatal.
+          // `e.code` may be `undefined`. `e.message` may be
+          // "Response code 401 (Unauthorized)".
+          log.warning("%s failed: %s", action, e.message);
+
+          debugLogHTTPResponse(e.response);
+
+          if (e.response?.statusCode === 403) {
+            die("DNS setup failed with a permanent error (403 HTTP response).");
+          }
+
+          if (e.response?.statusCode === 401) {
+            log.info(
+              "got a 401 response: need to refresh authentication state"
+            );
+            this.clearAuthnState();
+            await this.login();
+
+            log.info(
+              "retry the request that previously failed with a 401 response"
+            );
+            continue;
+          }
+
+          // It's actually unlikely that a high-level retry will heal something
+          // at this point, but maybe it does. Let's see, maybe it's better UX to
+          // `die()`, here, too.
+          throw new HighLevelRetry(`${action} failed`);
         }
 
-        // It's actually unlikely that a high-level retry will heal something
-        // at this point, but maybe it does. Let's see, maybe it's better UX to
-        // `die()`, here, too.
-        throw new HighLevelRetry(`${action} failed`);
+        // Re-throw all other errors, such as JSON.parse() errors.
+        throw e;
       }
-
-      // Re-throw all other errors, such as JSON.parse() errors.
-      throw e;
     }
   }
 
