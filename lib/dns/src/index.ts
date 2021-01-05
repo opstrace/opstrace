@@ -134,7 +134,7 @@ export function* ensureDNSExists({
     log.debug(
       "cluster name not found in opstraceClient.GetAll() response, call opstraceClient.Create()"
     );
-    yield call([opstraceClient, opstraceClient.Create], opstraceClusterName);
+    yield call([opstraceClient, opstraceClient.create], opstraceClusterName);
   }
   // Ensure subzone exists
   const subZoneName = getSubdomain({ stackName, dnsName });
@@ -173,7 +173,7 @@ export function* ensureDNSExists({
       log.info("no NS record to be added");
     } else {
       yield call(
-        [opstraceClient, opstraceClient.AddNameservers],
+        [opstraceClient, opstraceClient.addNameservers],
         stackName,
         subdomainNsRecord.rrdatas
       );
@@ -223,5 +223,5 @@ export function* destroyDNS({
     }
   }
 
-  yield call([opstraceClient, opstraceClient.Delete], stackName);
+  yield call([opstraceClient, opstraceClient.delete], stackName);
 }
