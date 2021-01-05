@@ -202,7 +202,7 @@ export class DNSClient {
    */
   private async requestAndHandleErrors(
     method: "GET" | "DELETE" | "POST" | "PUT",
-    data?: Record<string, any>
+    data?: Record<string, unknown>
   ): Promise<unknown | undefined> {
     const action = `DNS service client:${method}`;
     log.debug("do %s", action);
