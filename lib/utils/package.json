@@ -19,6 +19,7 @@
     "@types/deep-diff": "^1.0.0",
     "deep-diff": "^1.0.2",
     "moment": "^2.24.0",
+    "got": "11.8.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {
