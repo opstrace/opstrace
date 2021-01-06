@@ -121,6 +121,7 @@ const Login = (props: { state?: State }) => {
     setAccessDeniedError
   ] = useState<GeneralServerError | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+
   // This will look for a param like so: /login?rd=%2Fgrafana
   // NOTE: rd must include the host, relative paths do not work.
   const { rd } = useQueryParams<{ rd?: string }>();
@@ -134,7 +135,7 @@ const Login = (props: { state?: State }) => {
     });
   }, [loginWithRedirect, rd]);
 
-  // first get the accessToken from Auth0
+  // Log in to Auth0 (SSO flow) -> obtain an access token.
   useEffect(() => {
     (async function getAccessToken() {
       try {
@@ -146,14 +147,21 @@ const Login = (props: { state?: State }) => {
     })();
   }, [isAuthenticated, getAccessTokenSilently]);
 
-  // second, create a session within the cluster, using the accessToken
+  // Use the access token to log in to (create a session with) the cluster.
   useEffect(() => {
     if (!accessToken || !user) {
       return;
     }
     (async function createSession() {
       try {
-        // create a session
+        // Login. Note(JP): the data in the body looks suspicious. I would
+        // expect the login credential (the access token) to be the only piece
+        // of communication to be transmitted here. The data in the body as it
+        // is sent here should not be trusted by the cluster. The cluster infer
+        // the user identity information from the /userinfo endpoint of the IdP
+        // using the access token (which it can cryptographically verify), or
+        // straight from the ID token which we may want to use here instead
+        // of the access token.
         await axios.request({
           method: "POST",
           url: "/_/auth/session",
@@ -220,8 +228,7 @@ const Login = (props: { state?: State }) => {
         <br />
         <br />
         <Typography>
-          Contact your administrator or log out and try again with a different
-          account.
+          Contact your administrator or log out and try again with a different account.
         </Typography>
         <Box mt={3} pb={0}>
           <Button
