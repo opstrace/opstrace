@@ -116,14 +116,14 @@ function retryfunc(ro: GotRetryObject): number {
   const req = ro.error.request;
   if (req === undefined) {
     log.debug(
-      "got retryfunc() called w/o request context. attempt; %s, error: %s",
+      "retryfunc() called w/o request context. attempt; %s, error: %s",
       ro.attemptCount,
       ro.error
     );
     return 1000;
   }
 
-  // About got.RequestError "When a request fails. Contains a code property
+  // About got.RequestError: "When a request fails. Contains a code property
   // with error class code, like ECONNREFUSED. All the errors below inherit
   // this one."
 

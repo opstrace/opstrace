@@ -95,7 +95,7 @@ async function loginPollRequest(
   }
 
   if (data["id_token"] !== undefined) {
-    log.debug("OIDC ID Token in response, can stop polling");
+    log.debug("OIDC ID Token in response");
     return data;
   }
 
@@ -126,10 +126,13 @@ interface DeviceCodeLoginResult {
   accessToken: string;
 }
 
+/**
+ * Initiate what Auth0 calls a device authorization flow:
+ * https://auth0.com/docs/flows/device-authorization-flow
+ */
 async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
   log.info(`initiate device code login against ${OIDC_ISSUER}`);
 
-  // Initiate new login flow.
   const resp: GotResponse<string> = await httpcl(
     `${OIDC_ISSUER}/oauth/device/code`,
     {
@@ -142,15 +145,13 @@ async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
     }
   );
 
-  // JSON.parse()'s return value has inferred as type `any`. We're doing
-  // dynamic checking below.
-  // https://github.com/microsoft/TypeScript/issues/1897 is a great read.
   const data = JSON.parse(resp.body);
 
   if (data.verification_uri_complete === undefined) {
     log.error("unexpected data in HTTP response: %s", data);
     die("DNS service login failed");
   }
+
   assert(data["user_code"]);
   assert(data["device_code"]);
   assert(data["interval"]);
@@ -174,7 +175,7 @@ async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
   try {
     open(verification_uri);
   } catch (err) {
-    log.info("Failed to open browser: %s", err.message);
+    log.info("failed to open browser: %s", err.message);
     log.info(
       "Please manually visit this URL in your browser: %s",
       verification_uri
@@ -182,14 +183,15 @@ async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
   }
 
   // Poll for verification result.
+
   let result: Dict<string> | undefined;
+
   while (true) {
     await sleep(data["interval"]);
 
     result = await loginPollRequest(data["device_code"]);
 
     if (result !== undefined) {
-      // Assume `result` is good, leave the polling loop.
       break;
     }
 
@@ -260,6 +262,7 @@ export class DNSClient {
     if (DNSClient.instance.accessToken === "") {
       await DNSClient.instance.login();
     }
+
     return Promise.resolve(DNSClient.instance);
   }
 
