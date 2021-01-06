@@ -99,8 +99,6 @@ async function fetchLoginConfig(): Promise<LoginConfigInterface> {
     throw new Error("could not GET /public-ui-config");
   }
 
-  console.info(`got public-ui-config. data: `, response.data);
-
   const loginConfig: LoginConfigInterface = {
     auth0_client_id: response.data.auth0_client_id,
     auth0_domain: response.data.auth0_domain
@@ -285,7 +283,7 @@ function LoginPageParent() {
 }
 
 function LoginPageChild(lcfg: LoginConfigInterface) {
-  console.log('initialize LoginPageChild() with login config: ', lcfg)
+
   const [state, setState] = useState<State | undefined>();
 
   const onRedirectCallback = useCallback((state: AppState) => {
