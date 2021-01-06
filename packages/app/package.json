@@ -63,7 +63,7 @@
     "@types/semver": "^7.3.4",
     "@types/shelljs": "^0.8.8",
     "@types/styled-components": "^5.1.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",
