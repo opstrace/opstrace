@@ -254,11 +254,11 @@ const Login = (props: { state?: State }) => {
           size="large"
           onClick={() => auth0Login()}
         >
-          Login
+          Log In
         </Button>
       </Box>
       <Box display="flex" alignItems="center" p={1}>
-        <Typography color="textSecondary"> Hit ENTER to login.</Typography>
+        <Typography color="textSecondary"> Hit ENTER to log in.</Typography>
       </Box>
     </>
   );
