@@ -244,6 +244,17 @@ const Login = (props: { state?: State }) => {
     );
   }
 
+  // Inspect query parameters: try to identify when we're in the middle of an
+  // SSO flow (when we're being redirected back from the identity provider) and
+  // do not display an interactive page in that case: no button, etc.
+  const querystring = window.location.search.substring(1);
+  const queryparms = new URLSearchParams(querystring);
+  const authzcode: null | string = queryparms.get("code")
+  if (authzcode !== null && authzcode.length > 1) {
+    // To render nothing, return null.
+    return null
+  }
+
   return (
     <>
       <Box display="flex" alignItems="center" p={1}>
