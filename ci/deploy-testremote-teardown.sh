@@ -258,6 +258,9 @@ retry_check_certificate loki.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate cortex.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 
+echo "--- check if deployed docker images match docker-images.json"
+source ci/check-deployed-docker-images.sh
+
 echo "+++ run test-remote"
 
 # `test-remote` needs these two env vars
