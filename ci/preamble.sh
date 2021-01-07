@@ -39,12 +39,6 @@ make check-license-headers
 echo "--- lint codebase: quick feedback"
 make lint-codebase
 
-# Do this early when the checkout is fresh (no non-repo files within /packages
-# or /lib as of previous tsc invocations -- these could erroenously invalidate
-# the controller image cache layers).
-echo "--- make build-and-push-controller-image"
-make build-and-push-controller-image
-
 # If there are any changes to go directory then build and publish the images to
 # docker hub. Update packages/controller-config/docker-images.json to use the
 # newly built image tags in this test run.
@@ -57,6 +51,12 @@ make build-and-push-controller-image
 echo "--- Update docker-images.json"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ${DIR}/build-docker-images-update-controller-config.sh
+
+# Do this early when the checkout is fresh (no non-repo files within /packages
+# or /lib as of previous tsc invocations -- these could erroenously invalidate
+# the controller image cache layers).
+echo "--- make build-and-push-controller-image"
+make build-and-push-controller-image
 
 echo "--- Compile Typescript code base, trigger pkg single-binary builds"
 
