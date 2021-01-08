@@ -265,6 +265,8 @@ echo "--- check if deployed docker images match docker-images.json"
 # this script. Reconfigure docker-images.json in order to check if the correct
 # docker image tags were deployed.
 #
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 CORTEX_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=cortex-api print-docker-image-name-tag)
 LOKI_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=loki-api print-docker-image-name-tag)
 OPSTRACE_APP_IMAGE=$(cd ${DIR}/../packages/app/ && make -s DOCKER_IMAGE_NAME=app print-docker-image-name-tag)
