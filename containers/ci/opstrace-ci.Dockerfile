@@ -95,3 +95,7 @@ RUN npm install -g markdownlint-cli@0.26.0
 
 # Set up `addlicense` so that we can use that right away
 RUN (cd /tmp && go get github.com/google/addlicense)
+
+# Set up eksctl in the container image. Used to set up prometheus to
+# remote_write to AWS managed instance
+RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/0.35.0/eksctl_Linux_amd64.tar.gz" | tar xz -C /usr/local/bin

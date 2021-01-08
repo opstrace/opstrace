@@ -184,6 +184,15 @@ curl --request POST \
 # cluster in this CI run to an aggregation Opstrace cluster. Run this function
 # in the background. Do not apply further timeout / job control.
 if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
+
+    if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+        echo "--- setting up access to AWS managed prometheus"
+        # the script will export SERVICE_ACCOUNT_IAM_AMP_INGEST_ROLE_ARN env var
+        # that will be used when setting up the prometheus remote_write section
+        # in the template
+        source ci/metrics/create-IRSA-AMP-ingest.sh
+    fi
+
     echo "--- setup: start_data_collection_deployment_loop"
     start_data_collection_deployment_loop &
     # Take a quick, short break before generating more log output, so that

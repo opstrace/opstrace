@@ -26,7 +26,14 @@ set -o pipefail
 echo "OPSTRACE_CLUSTER_NAME: $OPSTRACE_CLUSTER_NAME"
 echo "OPSTRACE_CLOUD_PROVIDER: $OPSTRACE_CLOUD_PROVIDER"
 cat ci/metrics/promtail.yaml.template | envsubst > ci/metrics/promtail.yaml
-cat ci/metrics/prometheus.yaml.template | envsubst > ci/metrics/prometheus.yaml
+
+# On AWS setup prometheus to also remote write to an AWS managed prometheus
+# instance.
+if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+    cat ci/metrics/prometheus.yaml.aws.template | envsubst > ci/metrics/prometheus.yaml
+else
+    cat ci/metrics/prometheus.yaml.template | envsubst > ci/metrics/prometheus.yaml
+fi
 
 if [ -n "$1" ]; then
     KUBECONFIG_FILEPATH="${1}"
