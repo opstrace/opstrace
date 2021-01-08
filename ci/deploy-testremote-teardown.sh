@@ -259,6 +259,17 @@ retry_check_certificate cortex.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 
 echo "--- check if deployed docker images match docker-images.json"
+#
+# The Buildkite pipeline before starting a step runs a git checkout. The
+# preamble step that sets up docker-images.json runs before the step that call
+# this script. Reconfigure docker-images.json in order to check if the correct
+# docker image tags were deployed.
+#
+CORTEX_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=cortex-api print-docker-image-name-tag)
+LOKI_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=loki-api print-docker-image-name-tag)
+OPSTRACE_APP_IMAGE=$(cd ${DIR}/../packages/app/ && make -s DOCKER_IMAGE_NAME=app print-docker-image-name-tag)
+OPSTRACE_GRAPHQL_IMAGE=$(cd ${DIR}/../packages/app/ && make -s DOCKER_IMAGE_NAME=graphql print-docker-image-name-tag)
+
 source ci/check-deployed-docker-images.sh
 
 echo "+++ run test-remote"
