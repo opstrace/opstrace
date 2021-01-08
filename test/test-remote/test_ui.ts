@@ -73,7 +73,7 @@ suite("test_ui_with_headless_browser", function () {
     log.info("`load` event");
 
     // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
-    // <span class="MuiButton-label">Login</span>
+    // <span class="MuiButton-label">Log in</span>
     log.info('page.waitForSelector("css=button")');
     await page.waitForSelector("css=button");
 
@@ -82,8 +82,8 @@ suite("test_ui_with_headless_browser", function () {
       path: artipath("uishot-rootpage.png")
     });
 
-    log.info('page.click("text=Login")');
-    await page.click("text=Login");
+    log.info('page.click("text=Log in")');
+    await page.click("text=Log in");
 
     // Wait for CI-specific username/pw login form to appear
     await page.waitForSelector("text=Don't remember your password?");
@@ -97,7 +97,7 @@ suite("test_ui_with_headless_browser", function () {
 
     await page.click("css=button[type=submit]");
 
-    // The first view after successfu login is expected to be the details page
+    // The first view after successful login is expected to be the details page
     // for the `system` tenant, showing a link to Grafana.
     await page.waitForSelector("text=Grafana:");
 
