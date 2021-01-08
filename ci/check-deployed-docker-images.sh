@@ -26,6 +26,14 @@ readarray -t EXPECTED_IMAGES < <(jq -r ' . | to_entries[] | .value ' packages/co
 FAIL=0
 for img in "${EXPECTED_IMAGES[@]}"
 do
+    # AWS doesn't deploy the local-volume-provisioner image so we need to skip
+    # it
+    if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+        if [[ "${img}" == *"local-volume-provisioner"* ]]; then
+            continue
+        fi
+    fi
+
     if ! grep -q ${img} <<< "${DEPLOYED_IMAGES}" ; then
         echo "ERROR: image ${img} was not deployed"
         FAIL=1
