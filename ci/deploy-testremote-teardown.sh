@@ -266,11 +266,7 @@ echo "--- check if deployed docker images match docker-images.json"
 # docker image tags were deployed.
 #
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-CORTEX_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=cortex-api print-docker-image-name-tag)
-LOKI_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=loki-api print-docker-image-name-tag)
-OPSTRACE_APP_IMAGE=$(cd ${DIR}/../packages/app/ && make -s DOCKER_IMAGE_NAME=app print-docker-image-name-tag)
-OPSTRACE_GRAPHQL_IMAGE=$(cd ${DIR}/../packages/app/ && make -s DOCKER_IMAGE_NAME=graphql print-docker-image-name-tag)
+${DIR}/build-docker-images-update-controller-config.sh
 
 source ci/check-deployed-docker-images.sh
 
