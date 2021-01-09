@@ -11,7 +11,7 @@ This high-level roadmap highlights major guideposts along our path toward that g
 * Today's observability tools are disjoint from the day-to-day development process.
 For example, dashboards can break easily with a deploy and sharing analyses is hard (screenshots anyone?).
 By integrating your data with code we can solve these existing problems and create new capabilities (think VScode meets Python notebooks).
-Stay tuned to our blog and/or sign up for our [newsletter](https://next-website-sigma.vercel.app/#newsletter-headline).
+Stay tuned to our blog and/or sign up for our [newsletter](https://opstrace.com/#newsletter).
 
 **First-class Alerts**
 

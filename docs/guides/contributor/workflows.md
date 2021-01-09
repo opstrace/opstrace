@@ -113,7 +113,7 @@ For controller development it can be helpful to create an Opstrace cluster and h
 
 ### Documentation: `make lint-docs`
 
-For linting our documentation, we use [Markdownlint](./docs/contributing/writing-docs.md#get-on-your-marks), with rules defined in `.markdownlint.json` in the project root.
+For linting our documentation, we use [Markdownlint](./docs/contributor/writing-docs.md#get-on-your-marks), with rules defined in `.markdownlint.json` in the project root.
 
 Here is an example of executing the command and a resulting error thrown from Markdownlint:
 

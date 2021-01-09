@@ -65,5 +65,5 @@ This is required for example when using `letsencrypt-staging` as `cert_issuer`.
 
 ## Further references
 
-* [Configuring Promtail: reference](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/configuration)
-* [Troubleshooting Promtail](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/troubleshooting)
+* [Configuring Promtail: reference](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/configuration.md)
+* [Troubleshooting Promtail](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/troubleshooting.md)

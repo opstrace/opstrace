@@ -274,7 +274,7 @@ You now have dummy (random) metrics and logs being sent to the Opstrace cluster,
 
 ## Step 4: Validate the data
 
-You can view this ingested data in the `myteam` [tenant](./references/concepts.md#tenant), which we specified in the configuration file, using the Grafana "explore" view:
+You can view this ingested data in the `myteam` [tenant](./references/concepts.md#tenants), which we specified in the configuration file, using the Grafana "explore" view:
 
 ```text
 https://myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
