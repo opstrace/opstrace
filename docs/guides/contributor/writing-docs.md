@@ -40,7 +40,7 @@ Hey, even professional technical writers need another set of eyes.
 
 ## When to update docs
 
-Ideally, docs is updated in the same pull request that also contains the corresponding code changes. Of course, some documents may not require updating. See our [pull request template](https://github.com/opstrace/opstrace/blob/main/.github/pull_request_temlate.md) to better assess what may or may not need updates.
+Ideally, docs is updated in the same pull request that also contains the corresponding code changes. Of course, some documents may not require updating. See our [pull request template](https://github.com/opstrace/opstrace/blob/main/.github/pull_request_template.md) to better assess what may or may not need updates.
 
 
 ## The doc creation possibilities
