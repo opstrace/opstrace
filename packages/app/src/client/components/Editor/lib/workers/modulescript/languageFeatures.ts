@@ -410,8 +410,7 @@ interface MyCompletionItem extends monaco.languages.CompletionItem {
   position: Position;
 }
 
-export class SuggestAdapter
-  extends Adapter
+export class SuggestAdapter extends Adapter
   implements monaco.languages.CompletionItemProvider {
   public get triggerCharacters(): string[] {
     return ["."];
@@ -537,8 +536,7 @@ export class SuggestAdapter
   }
 }
 
-export class SignatureHelpAdapter
-  extends Adapter
+export class SignatureHelpAdapter extends Adapter
   implements monaco.languages.SignatureHelpProvider {
   public signatureHelpTriggerCharacters = ["(", ","];
 
@@ -598,8 +596,7 @@ export class SignatureHelpAdapter
 
 // --- hover ------
 
-export class QuickInfoAdapter
-  extends Adapter
+export class QuickInfoAdapter extends Adapter
   implements monaco.languages.HoverProvider {
   public async provideHover(
     model: monaco.editor.ITextModel,
@@ -650,8 +647,7 @@ export class QuickInfoAdapter
 
 // --- occurrences ------
 
-export class OccurrencesAdapter
-  extends Adapter
+export class OccurrencesAdapter extends Adapter
   implements monaco.languages.DocumentHighlightProvider {
   public async provideDocumentHighlights(
     model: monaco.editor.ITextModel,
@@ -734,8 +730,7 @@ export class DefinitionAdapter extends Adapter {
 
 // --- references ------
 
-export class ReferenceAdapter
-  extends Adapter
+export class ReferenceAdapter extends Adapter
   implements monaco.languages.ReferenceProvider {
   constructor(
     private readonly _libFiles: LibFiles,
@@ -788,8 +783,7 @@ export class ReferenceAdapter
 
 // --- outline ------
 
-export class OutlineAdapter
-  extends Adapter
+export class OutlineAdapter extends Adapter
   implements monaco.languages.DocumentSymbolProvider {
   public async provideDocumentSymbols(
     model: monaco.editor.ITextModel,
@@ -919,8 +913,7 @@ export abstract class FormatHelper extends Adapter {
   }
 }
 
-export class FormatAdapter
-  extends FormatHelper
+export class FormatAdapter extends FormatHelper
   implements monaco.languages.DocumentRangeFormattingEditProvider {
   public async provideDocumentRangeFormattingEdits(
     model: monaco.editor.ITextModel,
@@ -953,8 +946,7 @@ export class FormatAdapter
   }
 }
 
-export class FormatOnTypeAdapter
-  extends FormatHelper
+export class FormatOnTypeAdapter extends FormatHelper
   implements monaco.languages.OnTypeFormattingEditProvider {
   get autoFormatTriggerCharacters() {
     return [";", "}", "\n"];
@@ -987,8 +979,7 @@ export class FormatOnTypeAdapter
 
 // --- code actions ------
 
-export class CodeActionAdaptor
-  extends FormatHelper
+export class CodeActionAdaptor extends FormatHelper
   implements monaco.languages.CodeActionProvider {
   public async provideCodeActions(
     model: monaco.editor.ITextModel,
@@ -1068,8 +1059,7 @@ export class CodeActionAdaptor
 }
 // --- rename ----
 
-export class RenameAdapter
-  extends Adapter
+export class RenameAdapter extends Adapter
   implements monaco.languages.RenameProvider {
   public async provideRenameEdits(
     model: monaco.editor.ITextModel,

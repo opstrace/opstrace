@@ -15,7 +15,6 @@ import {
   IEvent,
   Emitter
 } from "monaco-editor/esm/vs/editor/editor.api";
-import { Files } from "state/file/types";
 
 export { typescriptVersion } from "./lib/typescriptServicesMetadata"; // do not import the whole typescriptServices here
 
@@ -240,8 +239,12 @@ export interface WorkerAPI {
   ): Promise<ReturnType<ModuleScriptWorker["getDecorations"]>>;
   setBranchFiles(
     branch: string,
-    files: Files
+    files: string[]
   ): Promise<ReturnType<ModuleScriptWorker["setBranchFiles"]>>;
+  updateFile(
+    fileName: string,
+    contents: string
+  ): Promise<ReturnType<ModuleScriptWorker["updateFile"]>>;
 }
 
 export async function getWorkerApi(): Promise<WorkerAPI> {
@@ -255,8 +258,11 @@ export async function getWorkerApi(): Promise<WorkerAPI> {
     getDecorations(fileName: string) {
       return Promise.resolve(worker.getDecorations(fileName));
     },
-    setBranchFiles(branch: string, files: Files) {
+    setBranchFiles(branch: string, files: string[]) {
       return Promise.resolve(worker.setBranchFiles(branch, files));
+    },
+    updateFile(fileName: string, content: string) {
+      return Promise.resolve(worker.updateFile(fileName, content));
     }
   };
 }

@@ -85,5 +85,5 @@ test("getFileUri returns correct path with given branch", () => {
 });
 
 test("getMonacoFileUriString returns correct path", () => {
-  expect(getMonacoFileUriString(mockFile)).toEqual("module://file-1.ts");
+  expect(getMonacoFileUriString(mockFile)).toEqual("opstrace://file-1.ts");
 });
