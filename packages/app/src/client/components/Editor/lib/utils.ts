@@ -32,7 +32,7 @@ export function getRange(
 }
 
 export function getMonacoFileUriString(file: File) {
-  return `module://${file.id}.${sanitizeFileExt(file.ext)}`;
+  return `opstrace://${file.id}.${sanitizeFileExt(file.ext)}`;
 }
 
 export function getMonacoFileUri(file: File) {

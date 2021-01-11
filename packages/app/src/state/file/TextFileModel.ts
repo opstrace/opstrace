@@ -159,8 +159,13 @@ class TextFileModel implements IPossiblyForkedFile {
     }
   }
 
-  private onContentChanged(e: monaco.editor.IModelContentChangedEvent) {
+  private async onContentChanged(e: monaco.editor.IModelContentChangedEvent) {
     this.updateDecorations();
+    // const api = await getWorkerApi();
+    // if (!this.model) {
+    //   return;
+    // }
+    // api.updateFile(this.model.uri.toString(), this.model.getValue());
   }
 
   private async updateDecorations() {

@@ -21,6 +21,7 @@ import { GlobalEditorCSS } from "../lib/themes";
 import getStore from "state/store";
 import { getCurrentBranchName } from "state/branch/hooks/useBranches";
 import { getCurrentBranchFiles } from "state/file/hooks/useFiles";
+import { getMonacoFileUri } from "state/file/utils/uri";
 
 function ModuleEditor({
   textFileModel,
@@ -38,7 +39,10 @@ function ModuleEditor({
         const state = getStore().getState();
         const branch = getCurrentBranchName(state);
         const files = getCurrentBranchFiles(state);
-        await api.setBranchFiles(branch, files || []);
+        await api.setBranchFiles(
+          branch,
+          files?.map(f => getMonacoFileUri(f).toString()) || []
+        );
         textFileModel.onFileSystemReady();
       }
     },

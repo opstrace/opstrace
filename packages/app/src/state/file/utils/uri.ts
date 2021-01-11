@@ -54,14 +54,16 @@ export function getFileUri(
 }
 
 export function getMonacoFileUriString(file: File) {
-  return `module://${getFileUri(file, {
-    ext: true,
-    useVersionAtSymbol: true
-  })}`;
+  return getMonacoFileUri(file).fsPath;
 }
 
 export function getMonacoFileUri(file: File) {
-  return monaco.Uri.parse(getMonacoFileUriString(file));
+  return monaco.Uri.file(
+    getFileUri(file, {
+      ext: true,
+      branch: file.branch_name
+    })
+  );
 }
 
 const fileImportUriFormat = /^\/([^/]+)\/((?:@[^/@]+\/)?[^/@]+)(?:@([^/]+))?(\/.*)?$/;

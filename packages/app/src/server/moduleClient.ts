@@ -25,6 +25,7 @@ import { log } from "@opstrace/utils";
 import { getFileUri } from "state/file/utils/uri";
 import { applyOps } from "state/file/utils/ops";
 import { sleep } from "state/utils/time";
+import semver from "semver";
 
 export async function ensureStorageBucketExists() {
   try {
@@ -77,7 +78,7 @@ class ModuleClient {
   private redisPushQueue: RedisQueueItem[] = [];
   private lockFileOps = false;
 
-  private initialfileVersion = "0.0.0-snap.0";
+  private initialfileVersion = "0.0.1";
   private bucket = env.S3_BUCKET_NAME;
   constructor() {
     this.s3 = createS3Client();
@@ -145,6 +146,7 @@ class ModuleClient {
       if (!fileData) {
         throw Error("file does not exist");
       }
+      // Add to set so we don't unnecessarily snapshot the same module twice
       modulesToSnapshot.add(
         [
           fileData.branch_name,
@@ -169,6 +171,14 @@ class ModuleClient {
     return results;
   }
 
+  bumpSnapshotVersion(version: string) {
+    const bump = semver.inc(version, "patch");
+    if (!bump) {
+      throw Error(`invalid version passed to bumpSnapshotVersion: ${version}`);
+    }
+    return bump;
+  }
+
   async createModuleSnapshot(mod: {
     branch: string;
     name: string;
@@ -190,14 +200,11 @@ class ModuleClient {
         throw Error("no latest files found to create snapshot");
       }
 
-      const lastSnapshotVersion = latestFiles[0].alias?.module_version;
-      const snapshotParts = lastSnapshotVersion?.split(".") || [];
-      // Increment the counter
-      snapshotParts[snapshotParts.length - 1] = String(
-        parseInt(snapshotParts[snapshotParts.length - 1]) + 1
-      );
+      const latestVersion = latestFiles[0].alias?.module_version;
 
-      const snapshotVersion = snapshotParts.join(".");
+      const snapshotVersion = this.bumpSnapshotVersion(
+        latestVersion || this.initialfileVersion
+      );
       const updatedAliases = new Map<string, string>();
 
       let filesChanged = false;
@@ -305,7 +312,7 @@ class ModuleClient {
         // Alias for latest deps file
         id: uuidv4(),
         alias_for: depsFileId,
-        ext: "ts",
+        ext: "tsx",
         path: "deps",
         module_version: "latest",
         branch_name: mod.branch,
@@ -331,7 +338,7 @@ class ModuleClient {
       },
       {
         id: depsFileId,
-        ext: "ts",
+        ext: "tsx",
         path: "deps",
         module_version: this.initialfileVersion,
         branch_name: mod.branch,
