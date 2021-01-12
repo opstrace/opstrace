@@ -62,7 +62,8 @@ export function StorageResources(
           type: "pd-ssd"
         },
         provisioner: "kubernetes.io/gce-pd",
-        volumeBindingMode: "WaitForFirstConsumer"
+        volumeBindingMode: "WaitForFirstConsumer",
+        allowVolumeExpansion: true
       },
       kubeConfig
     )
