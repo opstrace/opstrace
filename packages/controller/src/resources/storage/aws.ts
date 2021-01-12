@@ -36,7 +36,8 @@ export function StorageResources(
           type: "gp2"
         },
         provisioner: "kubernetes.io/aws-ebs",
-        volumeBindingMode: "WaitForFirstConsumer"
+        volumeBindingMode: "WaitForFirstConsumer",
+        allowVolumeExpansion: true
       },
       kubeConfig
     )
