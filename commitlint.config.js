@@ -29,6 +29,7 @@ module.exports = {
         "ci", // change to automated CI pipeline
         "cli", // change to the cluster management CLI (create, destroy, ..., )
         "cortex", // change to cortex (config change for example)
+        "ddapi", // change to dd api project
         "controller", // change in the k8s controller CLI
         "dashboards", // change to Grafana dashboards
         "docs", // any documentation change
