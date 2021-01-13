@@ -9,6 +9,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/opstrace/opstrace/go/pkg/ddapi"
 )
 
 var (
