@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { File } from "state/file/types";
 import { sanitizeFileExt } from "state/utils/sanitize";
 

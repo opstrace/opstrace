@@ -1,4 +1,4 @@
-import { editor, IDisposable, Range } from "monaco-editor";
+import { editor, IDisposable, Range } from "monaco-editor/esm/vs/editor/editor.api";
 import { css } from "glamor";
 import { isActionOf } from "typesafe-actions";
 import socket, { WebsocketEvents } from "state/clients/websocket";

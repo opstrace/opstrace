@@ -15,7 +15,7 @@
  */
 
 import React from "react";
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { withTheme } from "styled-components";
 import { ITheme } from "client/themes";
 import darkTheme, { globalEditorCSS as DarkGlobalEditorCss } from "./dark";

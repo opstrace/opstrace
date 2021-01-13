@@ -13,31 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* eslint-disable import/no-webpack-loader-syntax, no-restricted-globals */
-import "monaco-editor/esm/vs/editor/editor.api";
-import { register, getWorkerApi } from "./modulescript";
+import "monaco-editor";
 //@ts-ignore
 import EditorWorker from "worker-loader!monaco-editor/esm/vs/editor/editor.worker.js";
 //@ts-ignore
-import MSWorker from "worker-loader!./modulescript/ms.worker";
+import TypescriptWorker from "worker-loader!./module/opstrace.worker";
+// Register typescript monarch tokens
+import "monaco-editor/esm/vs/basic-languages/monaco.contribution";
+// Register our typescript language features
+import "./monaco-typescript-4.1.1/monaco.contribution";
 
-export type { EditorDecorations, WorkerAPI } from "./modulescript";
-
-register();
-
-let msWorker: Worker;
+let tsWorker: Worker;
 //@ts-ignore
 self.MonacoEnvironment = {
   getWorker: function (_: any, label: string) {
-    if (label === "modulescript") {
-      if (!msWorker) {
-        msWorker = new MSWorker();
+    if (label === "typescript") {
+      if (!tsWorker) {
+        tsWorker = new TypescriptWorker();
       }
-      return msWorker;
+      return tsWorker;
     }
     return new EditorWorker();
   }
 };
 
-export default getWorkerApi;
