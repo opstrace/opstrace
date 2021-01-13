@@ -15,8 +15,28 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Instantiate HTTP client for writing to a Prometheus remote_write endpoint.
-var rwHTTPClient = buildRemoteWriteHttpClient()
+type DDCortexProxy struct {
+	tenantName            string
+	authenticationEnabled bool
+	remoteWriteURL        string
+	rwHTTPClient          *http.Client
+}
+
+func NewDDCortexProxy(
+	tenantName string,
+	remoteWriteURL string,
+	disableAPIAuthentication bool) *DDCortexProxy {
+	p := &DDCortexProxy{
+		tenantName:     tenantName,
+		remoteWriteURL: remoteWriteURL,
+		// Instantiate HTTP client for writing to a Prometheus remote_write
+		// endpoint (in this case this is expected to be served by Cortex).
+		rwHTTPClient:          buildRemoteWriteHTTPClient(),
+		authenticationEnabled: !disableAPIAuthentication,
+	}
+
+	return p
+}
 
 func logErrorEmit500(w http.ResponseWriter, e error) {
 	log.Error(fmt.Errorf("emit 500: %v", e))
@@ -28,7 +48,7 @@ func logErrorEmit400(w http.ResponseWriter, e error) {
 	http.Error(w, e.Error(), 400)
 }
 
-func SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
+func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Log raw request detail (with compressed body)
 	// dump, err := httputil.DumpRequest(r, false)
@@ -85,7 +105,7 @@ func SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
 	spbmsgbytes := snappy.Encode(nil, pbmsgbytes)
 	// log.Debugf("snappy-compressed pb msg: %s", spbmsgbytes)
 
-	postPromWriteRequestAndHandleErrors(w, spbmsgbytes)
+	ddcp.postPromWriteRequestAndHandleErrors(w, spbmsgbytes)
 
 	// Make the DD agent's HTTP client happy.
 	w.Header().Set("Content-Type", "application/json")
@@ -106,11 +126,11 @@ The challenge with this approach might be response translation -- after all, we
 may need to have more flexibility in translating Cortex responses for the DD
 agent.
 */
-func postPromWriteRequestAndHandleErrors(w http.ResponseWriter, spbmsgbytes []byte) error {
+func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWriter, spbmsgbytes []byte) error {
 
 	req, err := http.NewRequest(
 		http.MethodPost,
-		PromRemoteWriteUrl,
+		ddcp.remoteWriteURL,
 		bytes.NewBuffer(spbmsgbytes),
 	)
 
@@ -126,7 +146,7 @@ func postPromWriteRequestAndHandleErrors(w http.ResponseWriter, spbmsgbytes []by
 	req.Header.Set("Content-Type", "application/x-protobuf")
 	// TODO: Set tenant / X-Scope-OrgID  header.
 
-	resp, reqerr := rwHTTPClient.Do(req)
+	resp, reqerr := ddcp.rwHTTPClient.Do(req)
 
 	if reqerr != nil {
 		// What kinds of errors are handled here? Probably all those cases
@@ -157,7 +177,7 @@ func postPromWriteRequestAndHandleErrors(w http.ResponseWriter, spbmsgbytes []by
 	return nil
 }
 
-func buildRemoteWriteHttpClient() *http.Client {
+func buildRemoteWriteHTTPClient() *http.Client {
 
 	transport := &http.Transport{
 		//Proxy: http.ProxyFromEnvironment,
