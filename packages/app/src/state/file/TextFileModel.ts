@@ -14,23 +14,35 @@
  * limitations under the License.
  */
 import axios from "axios";
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 
-import getWorkerApi, {
-  EditorDecorations
-} from "client/components/Editor/lib/workers";
+import "client/components/Editor/lib/workers";
 
-import { sleep } from "state/utils/time";
+// import { sleep } from "state/utils/time";
 import socket from "state/clients/websocket";
-import { getTextEditorOptions, getRange } from "./utils/monaco";
+import {
+  getTextEditorOptions
+  // getRange
+} from "./utils/monaco";
 import { File, Files, IPossiblyForkedFile, onErrorHandler } from "./types";
 import {
   getFileUri,
-  getMonacoFileUri,
-  getMonacoFileUriString
+  getMonacoFileUri
+  // getMonacoFileUriString
 } from "./utils/uri";
 import * as actions from "state/clients/websocket/actions";
 import LiveClient from "./LiveClient";
+
+// monaco.languages.typescript.typescriptDefaults.setWorkerOptions({
+//   customWorkerPath: window.location.origin + "/static/js/module.worker.chunk.js"
+// });
+// monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+//   target: 99,
+//   jsx: 1,
+//   allowNonTsExtensions: true,
+//   declaration: true,
+//   noLibCheck: true
+// });
 
 class TextFileModel implements IPossiblyForkedFile {
   // the file that is possibly forked
@@ -61,8 +73,8 @@ class TextFileModel implements IPossiblyForkedFile {
 
   private liveClient?: LiveClient;
   private contents: string | null;
-  private decorations: EditorDecorations = [];
-  private themeDecorations: string[] = [];
+  // private decorations: EditorDecorations = [];
+  // private themeDecorations: string[] = [];
   private disposables: monaco.IDisposable[] = [];
   private node?: HTMLDivElement;
   private editor?: monaco.editor.ICodeEditor;
@@ -131,7 +143,7 @@ class TextFileModel implements IPossiblyForkedFile {
     } else {
       this.model = monaco.editor.createModel(
         this.contents,
-        "modulescript",
+        "typescript",
         monacoUri
       );
     }
@@ -177,29 +189,29 @@ class TextFileModel implements IPossiblyForkedFile {
     if (!this.editor || !this.model) {
       return;
     }
-    this.themeDecorations = this.editor.deltaDecorations(
-      this.themeDecorations,
-      this.decorations.map(({ start, end, options }) => ({
-        range: getRange(this.model!, start, end),
-        options
-      }))
-    );
+    // this.themeDecorations = this.editor.deltaDecorations(
+    //   this.themeDecorations,
+    //   this.decorations.map(({ start, end, options }) => ({
+    //     range: getRange(this.model!, start, end),
+    //     options
+    //   }))
+    // );
   }
 
   private async getDecorations() {
     if (!this.model) {
-      this.decorations = [];
+      // this.decorations = [];
     }
     try {
-      const api = await getWorkerApi();
-      const fileName = getMonacoFileUriString(this.file);
-      let decorations = await api.getDecorations(fileName);
-      if (decorations === null) {
-        // try again
-        await sleep(50);
-        decorations = await api.getDecorations(fileName);
-      }
-      this.decorations = decorations || [];
+      // const api = await getWorkerApi();
+      // const fileName = getMonacoFileUriString(this.file);
+      // let decorations = await api.getDecorations(fileName);
+      // if (decorations === null) {
+      //   // try again
+      //   await sleep(50);
+      //   decorations = await api.getDecorations(fileName);
+      // }
+      // this.decorations = decorations || [];
     } catch (err) {
       console.error(err);
     }
@@ -241,6 +253,12 @@ class TextFileModel implements IPossiblyForkedFile {
 
     this._updateEditorLayout();
     await this.updateDecorations();
+    // const worker = await typescript.getTypeScriptWorker();
+    // const thisWorker = await worker(this.model.uri);
+    // eslint-ignore-next-line
+    // @ts-ignore
+    // const dts = await thisWorker.getDTSEmitForFile(this.model.uri.toString());
+    // console.log(thisWorker);
   }
 
   onFileStoreChange(files: Files) {

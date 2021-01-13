@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import dot from "dot-object";
 import * as colors from "@material-ui/core/colors";
 import { createGlobalStyle, css } from "styled-components";
-import { SyntaxClass } from "../workers/modulescript";
+// import { SyntaxClass } from "../workers/typescript";
 
 const entries = Object.entries as <T>(
   o: T
@@ -28,7 +28,7 @@ const white = "#ffffff";
 const black = "#161616";
 const variableColor = "#c97c2a";
 
-const syntaxClasses: { [key in SyntaxClass]: string } = {
+const syntaxClasses = {
   variable: variableColor,
   type: colors.teal.A700,
   scope: "#db9504",
