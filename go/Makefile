@@ -86,7 +86,12 @@ build-loki: loki-api
 loki-api:
 	go build -o loki-api ./cmd/loki/main.go
 
+.PHONY: build-ddapi
+build-ddapi:
+	go build -o dd-api ./cmd/ddapi/ddapi.go
 
 .PHONY: unit-tests
 unit-tests:
 	go test -v ./...
+
+
