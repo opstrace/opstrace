@@ -81,11 +81,12 @@ module.exports = {
   testsSetup: resolveModule(resolveApp, "src/client/setupTests"),
   proxySetup: resolveApp("src/client/setupProxy.js"),
   appNodeModules: resolveApp("node_modules"),
-  editorWorkersDir: resolveApp("src/client/components/Editor/lib/workers"),
+  monacoTypescriptDir: resolveApp("src/workers/monaco-typescript-4.1.1"),
   aliases: {
     client: resolveApp("src/client/"),
     server: resolveApp("src/server/"),
-    state: resolveApp("src/state/")
+    state: resolveApp("src/state/"),
+    workers: resolveApp("src/workers/")
   },
   publicUrlOrPath
 };

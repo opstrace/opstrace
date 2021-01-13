@@ -19,7 +19,8 @@
     "paths": {
       "client/*": ["client/*"],
       "server/*": ["server/*"],
-      "state/*": ["state/*"]
+      "state/*": ["state/*"],
+      "workers/*": ["workers/*"]
     }
   },
   "include": ["src/**/*", "src/**/*.json"],

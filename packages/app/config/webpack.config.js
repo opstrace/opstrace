@@ -352,7 +352,7 @@ module.exports = function (webpackEnv) {
             }
           ],
           include: paths.appSrc,
-          exclude: [paths.editorWorkersDir]
+          exclude: [paths.monacoTypescriptDir]
         },
         {
           // "oneOf" will traverse all following loaders until one will
