@@ -15,8 +15,8 @@
  */
 import axios from "axios";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-
-import "client/components/Editor/lib/workers";
+// Ensure our workers for monaco are registered
+import "workers";
 
 // import { sleep } from "state/utils/time";
 import socket from "state/clients/websocket";
@@ -33,16 +33,6 @@ import {
 import * as actions from "state/clients/websocket/actions";
 import LiveClient from "./LiveClient";
 
-// monaco.languages.typescript.typescriptDefaults.setWorkerOptions({
-//   customWorkerPath: window.location.origin + "/static/js/module.worker.chunk.js"
-// });
-// monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-//   target: 99,
-//   jsx: 1,
-//   allowNonTsExtensions: true,
-//   declaration: true,
-//   noLibCheck: true
-// });
 
 class TextFileModel implements IPossiblyForkedFile {
   // the file that is possibly forked

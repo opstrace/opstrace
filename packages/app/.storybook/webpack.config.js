@@ -83,7 +83,8 @@ module.exports = ({ config }) => {
     ...config.resolve.alias,
     client: path.resolve("src/client/"),
     server: path.resolve("src/server/"),
-    state: path.resolve("src/state/")
+    state: path.resolve("src/state/"),
+    workers: path.resolve("src/workers/")
   };
 
   config.node = { fs: "empty" }; // See https://github.com/tree-sitter/tree-sitter/issues/466

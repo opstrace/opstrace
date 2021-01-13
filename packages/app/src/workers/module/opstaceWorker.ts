@@ -12,7 +12,8 @@ export class OpstraceModuleWorker extends TypeScriptWorker {
 			moduleResolution: 2,
 			lib: ["es6"],
 			noImplicitAny: true,
-			noImplicitThis: true
+			noImplicitThis: true,
+			declaration: true
 		}
 		super(ctx, {...createData, compilerOptions});
 	}

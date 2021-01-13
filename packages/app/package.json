@@ -306,10 +306,10 @@
       "^client/(.*)$": "<rootDir>/src/client/$1",
       "^server/(.*)$": "<rootDir>/src/server/$1",
       "^state/(.*)$": "<rootDir>/src/state/$1",
+      "^workers/(.*)$": "<rootDir>/src/workers/$1",
       "^react-native$": "react-native-web",
       "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
-      "monaco-editor": "<rootDir>/../../node_modules/monaco-editor/esm/vs/editor/editor.api",
-      "typescript/ts.worker": "<rootDir>/src/client/components/Editor/lib/workers/typescript/ts.worker.ts"
+      "monaco-editor": "<rootDir>/../../node_modules/monaco-editor/esm/vs/editor/editor.api"
     },
     "moduleFileExtensions": [
       "web.js",

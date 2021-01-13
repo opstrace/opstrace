@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-disable import/no-webpack-loader-syntax */
 import "monaco-editor";
 //@ts-ignore
 import EditorWorker from "worker-loader!monaco-editor/esm/vs/editor/editor.worker.js";
@@ -25,7 +26,7 @@ import "./monaco-typescript-4.1.1/monaco.contribution";
 
 let tsWorker: Worker;
 //@ts-ignore
-self.MonacoEnvironment = {
+self.MonacoEnvironment = { /* eslint-disable-line no-restricted-globals */
   getWorker: function (_: any, label: string) {
     if (label === "typescript") {
       if (!tsWorker) {
