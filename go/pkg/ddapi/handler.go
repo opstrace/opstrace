@@ -63,7 +63,6 @@ func logErrorEmit400(w http.ResponseWriter, e error) {
 }
 
 func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
-
 	// Log raw request detail (with compressed body)
 	// dump, err := httputil.DumpRequest(r, false)
 	// if err != nil {
@@ -95,7 +94,6 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 	// apiKey := r.URL.Query().Get("api_key")
 	// log.Infof("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
 
-	//var promTimeSeriesFragments []*prompb.TimeSeries
 	promTimeSeriesFragments, terr := TranslateDDSeriesJSON(bodybytes)
 	if terr != nil {
 		// Most likely bad input (bad request).
@@ -141,7 +139,6 @@ may need to have more flexibility in translating Cortex responses for the DD
 agent.
 */
 func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWriter, spbmsgbytes []byte) error {
-
 	req, err := http.NewRequest(
 		http.MethodPost,
 		ddcp.remoteWriteURL,
@@ -175,10 +172,12 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 	log.Infof("cortex HTTP response code: %v", resp.StatusCode)
 
 	bodybytes, readerr := ioutil.ReadAll(resp.Body)
+
 	if readerr != nil {
-		log.Fatal(err)
 		logErrorEmit500(w, fmt.Errorf("error while reading upstream response: %v", readerr))
+		return nil
 	}
+
 	bodytext := string(bodybytes)
 	log.Infof("cortex HTTP response body: %v", bodytext)
 
@@ -192,7 +191,6 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 }
 
 func buildRemoteWriteHTTPClient() *http.Client {
-
 	transport := &http.Transport{
 		//Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{

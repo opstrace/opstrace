@@ -21,7 +21,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/opstrace/opstrace/go/pkg/ddapi"
@@ -36,7 +35,6 @@ var (
 )
 
 func main() {
-
 	flag.StringVar(&listenAddress, "listen", "127.0.0.1:8082", "the listen address")
 	flag.StringVar(&remoteWriteURL,
 		"prom-remote-write-url",
@@ -44,8 +42,8 @@ func main() {
 		"A Prometheus remote_write endpoint (served by e.g. Cortex)")
 	flag.StringVar(&loglevel, "loglevel", "info", "error|info|debug")
 
-	//flag.StringVar(&tenantName, "tenantname", "", "")
-	//flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
+	// flag.StringVar(&tenantName, "tenantname", "", "")
+	// flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
 
 	tenantName = "test"
 	disableAPIAuthentication = true
@@ -58,10 +56,10 @@ func main() {
 	log.SetLevel(level)
 
 	// Show timestamps in TTY logger.
-	customFormatter := new(logrus.TextFormatter)
+	customFormatter := new(log.TextFormatter)
 	customFormatter.TimestampFormat = "2006-01-02 15:04:05.000"
 	customFormatter.FullTimestamp = true
-	logrus.SetFormatter(customFormatter)
+	log.SetFormatter(customFormatter)
 
 	_, uerr := url.Parse(remoteWriteURL)
 	if uerr != nil {
