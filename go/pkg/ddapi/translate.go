@@ -20,12 +20,8 @@ import (
 	"strings"
 
 	json "github.com/json-iterator/go"
-
-	"github.com/prometheus/prometheus/prompb"
-
-	//"github.com/golang/snappy"
-
 	"github.com/prometheus/common/log"
+	"github.com/prometheus/prometheus/prompb"
 )
 
 type ddPoint struct {
@@ -41,9 +37,8 @@ type ddPoint struct {
 // https://eagain.net/articles/go-json-array-to-struct/  -- relevant docs: "To
 // unmarshal JSON into a value implementing the Unmarshaler interface,
 // Unmarshal calls that value's UnmarshalJSON method, including when the input
-// is a JSON null"
+// is a JSON null".
 func (p *ddPoint) UnmarshalJSON(buf []byte) error {
-
 	dp := []interface{}{&p.Timestamp, &p.Value}
 
 	if err := json.Unmarshal(buf, &dp); err != nil {
@@ -119,7 +114,6 @@ labels). The time series fragment is comprised of one or multiple data points /
 samples.
 */
 func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
-
 	// Attempt to deserialize entire JSON document, using the type definitions
 	// above including the custom deserialization function
 	// ddPoint.UnmarshalJSON().
@@ -129,10 +123,11 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		return nil, fmt.Errorf("invalid JSON doc: %v", jerr)
 	}
 
+	// TODO: Consider preallocating `promTimeSeriesFragments`
+	//nolint:prealloc
 	var promTimeSeriesFragments []*prompb.TimeSeries
 
 	for _, fragment := range sfragments.Fragments {
-
 		// Build up label set as a map to ensure uniqueness of keys.
 		labels := map[string]string{
 			// A time series fragment corresponds to a specific metric with a
@@ -140,7 +135,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			"__name__": sanitizeMetricName(fragment.Name),
 			"instance": fragment.Host,
 			"job":      "ddagent",
-			//"host": "host",  // do not set host, that's `instance` in the
+			// "host": "host",  // do not set host, that's `instance` in the
 			// Prom world.
 			"device":           fragment.Device,
 			"type":             fragment.Type,
@@ -150,7 +145,6 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// Translate dd agent tags into label k/v pairs. Upon unexpected tag
 		// structure, log a warning but otherwise proceed.
 		for _, tag := range fragment.Tags {
-
 			t := strings.SplitN(tag, ":", 2)
 
 			if len(t) != 2 {
@@ -172,7 +166,6 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// `fragment.Device` may be empty).
 		promLabelset := make([]*prompb.Label, 0, len(labels))
 		for k, v := range labels {
-
 			if len(v) == 0 {
 				continue
 			}
@@ -184,11 +177,11 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			promLabelset = append(promLabelset, &l)
 		}
 
-		// https://github.com/open-telemetry/opentelemetry-go-contrib/blob/c047d14d67ab6fbd4895c7e57cdd163fc74c9f66/exporters/metric/cortex/cortex.go#L385
+		// Inspiration from
+		// https://github.com/open-telemetry/opentelemetry-go-contrib/blob/v0.15.0/exporters/metric/cortex/cortex.go#L385
 
 		var promSamples []prompb.Sample
 		for _, point := range fragment.Points {
-
 			// TODO: think about if `point.Value` should undergo a
 			// transformation, depending on the DD metric type (count, rate,
 			// gauge) and the `interval` property set in the input ts fragment.
@@ -210,8 +203,6 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		}
 
 		promTimeSeriesFragments = append(promTimeSeriesFragments, &pts)
-
 	}
-
 	return promTimeSeriesFragments, nil
 }
