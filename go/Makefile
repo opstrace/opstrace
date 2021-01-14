@@ -15,7 +15,7 @@ export GO111MODULE=on
 export GOPRIVATE=github.com/opstrace
 
 .PHONY: clean
-clean: clean-cortex clean-loki
+clean: clean-cortex clean-loki clean-ddapi
 
 .PHONY: clean-cortex
 clean-cortex:
@@ -25,8 +25,12 @@ clean-cortex:
 clean-loki:
 	rm -f loki-api
 
+.PHONY: clean-ddapi
+clean-ddapi:
+	rm -f ddapi
+
 .PHONY: build-image
-build-image: build-image-cortex build-image-loki
+build-image: build-image-cortex build-image-loki build-image-ddapi
 
 define get_docker_image_name
 	$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
@@ -54,8 +58,14 @@ build-image-loki: DOCKER_IMAGE_NAME = loki-api
 build-image-loki:
 	$(call build_docker_image)
 
+.PHONY: build-image-ddapi
+build-image-ddapi: DOCKERFILE = Dockerfile.ddapi
+build-image-ddapi: DOCKER_IMAGE_NAME = ddapi
+build-image-ddapi:
+	$(call build_docker_image)
+
 .PHONY: publish
-publish: publish-cortex publish-loki
+publish: publish-cortex publish-loki publish-ddapi
 
 define publish_docker_image
 	docker push $(call get_docker_image_name)
@@ -71,8 +81,13 @@ publish-loki: DOCKER_IMAGE_NAME = loki-api
 publish-loki:
 	$(call publish_docker_image)
 
+.PHONY: publish-ddapi
+publish-ddapi: DOCKER_IMAGE_NAME = ddapi
+publish-ddapi:
+	$(call publish_docker_image)
+
 .PHONY: build
-build: build-cortex build-loki
+build: build-cortex build-loki build-ddapi
 
 .PHONY: build-cortex
 build-cortex: cortex-api
@@ -87,8 +102,11 @@ loki-api:
 	go build -o loki-api ./cmd/loki/main.go
 
 .PHONY: build-ddapi
-build-ddapi:
-	go build -o dd-api ./cmd/ddapi/ddapi.go
+build-ddapi: ddapi
+
+ddapi:
+	go build -o ddapi ./cmd/ddapi/ddapi.go
+
 
 .PHONY: unit-tests
 unit-tests:
