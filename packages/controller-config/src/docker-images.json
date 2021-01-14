@@ -4,6 +4,7 @@
   "certManagerController": "quay.io/jetstack/cert-manager-controller:v1.0.4",
   "cortex": "cortexproject/cortex:v1.6.0",
   "cortexApiProxy": "opstrace/cortex-api:7633d73fc9cf6af5d2caaa25d90fe242",
+  "ddApi": "opstrace/ddapi:fd813ccbf9a09d32c4c57cb0fac6b7949be71a92",
   "externalDNS": "k8s.gcr.io/external-dns/external-dns:v0.7.4",
   "systemlogFluentd": "opstrace/systemlog-fluentd:fe6d0d84-dev",
   "grafana": "grafana/grafana:7.3.4-ubuntu",
