@@ -69,7 +69,7 @@ Allows for setting configuration specific to Amazon Web Services (AWS).
 
 ```yaml
 aws:
-    instance_type: t3.2xlarge
+    instance_type: t3.xlarge
     region: us-west-2
     zone_suffix: a
     eks_admin_roles:
