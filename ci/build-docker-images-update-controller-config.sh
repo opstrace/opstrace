@@ -6,9 +6,10 @@ set -oux pipefail
 
 CORTEX_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=cortex-api print-docker-image-name-tag)
 LOKI_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=loki-api print-docker-image-name-tag)
+DD_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=ddapi print-docker-image-name-tag)
 
 echo "Check if api docker images exist"
-docker pull ${CORTEX_API_PROXY_IMAGE} && docker pull ${LOKI_API_PROXY_IMAGE}
+docker pull ${CORTEX_API_PROXY_IMAGE} && docker pull ${LOKI_API_PROXY_IMAGE} && docker pull ${DD_API_PROXY_IMAGE}
 
 if [ $? -ne 0 ];
 then
@@ -51,6 +52,8 @@ echo "Updating controller docker image configuration"
 jqi '.cortexApiProxy = "'${CORTEX_API_PROXY_IMAGE}'"' ${DIR}/../packages/controller-config/src/docker-images.json
 
 jqi '.lokiApiProxy = "'${LOKI_API_PROXY_IMAGE}'"' ${DIR}/../packages/controller-config/src/docker-images.json
+
+jqi '.ddApi = "'${DD_API_PROXY_IMAGE}'"' ${DIR}/../packages/controller-config/src/docker-images.json
 
 jqi '.app = "'${OPSTRACE_APP_IMAGE}'"' ${DIR}/../packages/controller-config/src/docker-images.json
 
