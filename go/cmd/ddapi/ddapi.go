@@ -42,8 +42,8 @@ func main() {
 		"A Prometheus remote_write endpoint (served by e.g. Cortex)")
 	flag.StringVar(&loglevel, "loglevel", "info", "error|info|debug")
 
-	// flag.StringVar(&tenantName, "tenantname", "", "")
-	// flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
+	flag.StringVar(&tenantName, "tenantname", "", "")
+	flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
 
 	tenantName = "test"
 	disableAPIAuthentication = true
