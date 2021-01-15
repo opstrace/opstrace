@@ -20,9 +20,12 @@ import { ResourceCollection } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
 
 import { LokiAPIResources } from "./loki";
-import { SystemLogAgentResources } from "./systemlogs";
-
 import { CortexAPIResources } from "./cortex";
+import { DDAPIResources } from "./dd";
+
+// This does not serve an API, right?
+// Maybe we should move this out of resources/apis or rename resources/apis
+import { SystemLogAgentResources } from "./systemlogs";
 
 export function APIResources(
   state: State,
@@ -34,6 +37,7 @@ export function APIResources(
     collection.add(SystemLogAgentResources(state, tenant, kubeConfig));
     collection.add(LokiAPIResources(state, tenant, kubeConfig));
     collection.add(CortexAPIResources(state, tenant, kubeConfig));
+    collection.add(DDAPIResources(state, tenant, kubeConfig));
   });
 
   return collection;
