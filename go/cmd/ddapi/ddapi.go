@@ -45,9 +45,6 @@ func main() {
 	flag.StringVar(&tenantName, "tenantname", "", "")
 	flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
 
-	tenantName = "test"
-	disableAPIAuthentication = true
-
 	flag.Parse()
 	level, lerr := log.ParseLevel(loglevel)
 	if lerr != nil {
@@ -67,6 +64,9 @@ func main() {
 	}
 
 	log.Infof("Prometheus remote_write endpoint: %s", remoteWriteURL)
+	log.Infof("listen address: %s", listenAddress)
+	log.Infof("tenant name: %s", tenantName)
+	log.Infof("API authentication enabled (TODO!): %v", !disableAPIAuthentication)
 
 	ddcp := ddapi.NewDDCortexProxy(tenantName, remoteWriteURL, disableAPIAuthentication)
 
