@@ -107,13 +107,14 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 
 	log.Debugf("Prom write request: %s", writeRequest)
 
-	// Convert the struct to a slice of bytes and then compress it.
+	// Serialize struct into protobuf message (byte sequence).
 	pbmsgbytes, perr := proto.Marshal(writeRequest)
 	if perr != nil {
 		logErrorEmit500(w, fmt.Errorf("error while constructing Prometheus protobuf message: %v", perr))
 		return
 	}
 
+	// Snappy-compress the byte sequence.
 	spbmsgbytes := snappy.Encode(nil, pbmsgbytes)
 	// log.Debugf("snappy-compressed pb msg: %s", spbmsgbytes)
 
@@ -129,7 +130,7 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 Try to send the HTTP POST request to a Prometheus remote_write endpoint, as
 provided by the Cortex distributor/ingester system.
 
-Don't overdo it yet -- maybe change this approach to using a ReverseProxy
+Maybe change this approach to using a ReverseProxy
 object as we do in
 https://github.com/opstrace/opstrace/blob/3f405cd4baa709c5d624d8966b8e2820b28ea37f/go/pkg/middleware/proxy.go#L75
 ?
@@ -162,11 +163,12 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 	resp, reqerr := ddcp.rwHTTPClient.Do(req)
 
 	if reqerr != nil {
-		// What kinds of errors are handled here? Probably all those cases
-		// where not HTTP response is received. TODO: emit 50x indicating
-		// gateway error?  I assume this would handle all transport-related
-		// errors while trying to interact with the remote system. For
-		// timeouts, we should therefore emit a 504 Gateway Timeout.
+		// Which kinds of errors are handled here? Probably all those cases
+		// where the request could not be written to the tcp conn. TODO: emit
+		// 50x indicating gateway error?  I assume this would handle all
+		// transport-related errors while trying to interact with the remote
+		// system. For timeouts, we should therefore emit a 504 Gateway
+		// Timeout.
 		logErrorEmit500(w, fmt.Errorf("error while interacting with remote_write endpoint: %v", reqerr))
 	}
 	defer resp.Body.Close()

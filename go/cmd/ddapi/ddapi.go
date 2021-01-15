@@ -41,7 +41,6 @@ func main() {
 		"http://127.0.0.1:33333/api/v1/push",
 		"A Prometheus remote_write endpoint (served by e.g. Cortex)")
 	flag.StringVar(&loglevel, "loglevel", "info", "error|info|debug")
-
 	flag.StringVar(&tenantName, "tenantname", "", "")
 	flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
 
