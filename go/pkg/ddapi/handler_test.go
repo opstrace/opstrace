@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//nolint: gosec
 package ddapi
 
 import (
@@ -68,7 +69,7 @@ func TestSimpleInsert(t *testing.T) {
 
 	pushURL := getPushURL(container, ctx)
 
-	resp, err := http.Get(pushURL)
+	resp, _ := http.Get(pushURL)
 	// Expect 405, method not allowed
 	assert.Equal(t, resp.StatusCode, 405)
 }
