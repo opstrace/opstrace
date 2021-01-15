@@ -12,7 +12,7 @@ import {
   IEvent,
   IDisposable,
   Uri
-} from "./fillers/monaco-editor-core";
+} from "monaco-editor/esm/vs/editor/editor.api";
 
 //#region enums copied from typescript to prevent loading the entire typescriptServices ---
 
@@ -672,10 +672,9 @@ export const getJavaScriptWorker = (): Promise<
 
 // --- Registration to monaco editor ---
 
-function getMode(): Promise<typeof mode> {
+export function getMode(): Promise<typeof mode> {
   return import("./tsMode");
 }
-
 languages.onLanguage("typescript", () => {
   return getMode().then(mode => mode.setupTypeScript(typescriptDefaults));
 });
