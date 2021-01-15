@@ -122,9 +122,6 @@
     schema: public
     name: file
   object_relationships:
-  - name: alias
-    using:
-      foreign_key_constraint_on: alias_for
   - name: branch
     using:
       foreign_key_constraint_on: branch_name
@@ -150,33 +147,15 @@
           branch_name: branch_name
           module_name: module_name
   insert_permissions:
-  - role: user
-    permission:
-      check: {}
-      columns:
-      - path
-      - id
-      - created_at
-      - module_version
-      - module_name
-      - branch_name
-      - ext
-      - module_scope
-      - base_file_id
-      - mark_deleted
-      - is_modified
-      backend_only: false
   - role: user_admin
     permission:
       check: {}
       columns:
-      - alias_for
       - base_file_id
       - branch_name
-      - created_at
+      - contents
       - ext
       - id
-      - is_modified
       - mark_deleted
       - module_name
       - module_scope
@@ -184,67 +163,21 @@
       - path
       backend_only: false
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - is_modified
-      - mark_deleted
-      - branch_name
-      - ext
-      - module_name
-      - module_scope
-      - module_version
-      - path
-      - created_at
-      - base_file_id
-      - id
-      filter: {}
   - role: user_admin
     permission:
       columns:
-      - alias_for
       - base_file_id
       - branch_name
+      - contents
       - created_at
       - ext
       - id
-      - is_modified
       - mark_deleted
       - module_name
       - module_scope
       - module_version
       - path
       filter: {}
-  update_permissions:
-  - role: user
-    permission:
-      columns:
-      - base_file_id
-      - branch_name
-      - ext
-      - is_modified
-      - mark_deleted
-      - module_name
-      - module_scope
-      - module_version
-      - path
-      filter: {}
-      check: null
-  - role: user_admin
-    permission:
-      columns:
-      - alias_for
-      - base_file_id
-      - branch_name
-      - ext
-      - is_modified
-      - mark_deleted
-      - module_name
-      - module_scope
-      - module_version
-      - path
-      filter: {}
-      check: null
 - table:
     schema: public
     name: module
@@ -274,18 +207,12 @@
           name: module_name
           scope: module_scope
   insert_permissions:
-  - role: user
-    permission:
-      check: {}
-      columns:
-      - name
-      - created_at
-      - branch_name
-      - scope
-      backend_only: false
   - role: user_admin
     permission:
-      check: {}
+      check:
+        branch:
+          protected:
+            _eq: false
       columns:
       - branch_name
       - name
@@ -352,7 +279,6 @@
     permission:
       check: {}
       columns:
-      - author_email
       - branch_name
       - created_at
       - module_name
@@ -372,7 +298,6 @@
   - role: user_admin
     permission:
       columns:
-      - author_email
       - branch_name
       - created_at
       - module_name

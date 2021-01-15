@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 import { History } from "history";
-import { File } from "../types";
 import { getFileUri } from "./uri";
 
 export default function navigateToFile(
-  file: File,
+  file: {
+    module_version: string;
+    module_scope: string;
+    module_name: string;
+    branch_name: string;
+    path: string;
+  },
   history: History,
   overrideWithBranch?: string,
   latest?: boolean

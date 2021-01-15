@@ -15,6 +15,7 @@
  */
 import { TextOperations, UserSelection } from "state/file/types";
 import { createAction } from "typesafe-actions";
+import { CompilerOutput } from "workers/types";
 
 export const subscribeFile = createAction("SUBSCRIBE_FILE")<string>();
 export const unsubscribeFile = createAction("UNSUBSCRIBE_FILE")<string>();
@@ -38,3 +39,12 @@ export const viewerSelectionChange = createAction("FILE_USER_SELECTION")<{
   fileId: string;
   selection: UserSelection;
 }>();
+
+export const compilerOutput = createAction("FILE_COMPILER_OUTPUT")<{
+  fileId: string;
+  output: CompilerOutput;
+}>();
+
+export const compiledContentUpdated = createAction("FILE_COMPILER_UPDATED")<
+  string
+>();

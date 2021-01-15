@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { File, IDirectory, IPossiblyForkedFile } from "state/file/types";
+import TextFileModel from "state/file/TextFileModel";
+import { IDirectory } from "state/file/types";
 import { sanitizeScope, sanitizeFilePath } from "state/utils/sanitize";
 
 export function getDirectoryId(dir: IDirectory) {
@@ -24,8 +25,8 @@ export function getDirectoryId(dir: IDirectory) {
   return `dir:${sanitizeFilePath(dir.path)}/${dir.name}`;
 }
 
-export function getFileId(file: File) {
-  return "file:" + file.id;
+export function getFileId(id: string) {
+  return "file:" + id;
 }
 
 export function isDirectory(nodeId: string) {
@@ -44,22 +45,22 @@ export function getFileFromId(nodeId: string) {
   return nodeId.replace(/^file:/, "");
 }
 
-export function getExpandedNodeIDsToExposeFile(pff: IPossiblyForkedFile) {
-  const expandedIds = pff.file.module_scope
+export function getExpandedNodeIDsToExposeFile(tf: TextFileModel) {
+  const expandedIds = tf.file.module_scope
     ? [
-        `dir:@${sanitizeScope(pff.file.module_scope)}`,
-        `dir:@${sanitizeScope(pff.file.module_scope)}/${pff.file.module_name}`
+        `dir:@${sanitizeScope(tf.file.module_scope)}`,
+        `dir:@${sanitizeScope(tf.file.module_scope)}/${tf.file.module_name}`
       ]
-    : [`dir:${pff.file.module_name}`];
+    : [`dir:${tf.file.module_name}`];
 
-  const paths = sanitizeFilePath(pff.file.path).split("/");
+  const paths = sanitizeFilePath(tf.file.path).split("/");
   // pop the name off the paths - not needed when building directory ids
   paths.pop();
   paths.forEach(folderName => {
     const parentId = expandedIds[expandedIds.length - 1];
     expandedIds.push(`${parentId}/${folderName}`);
   });
-  expandedIds.push(getFileId(pff.file));
+  expandedIds.push(getFileId(tf.file.id));
 
   return expandedIds;
 }

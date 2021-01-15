@@ -40,7 +40,6 @@ import sessionParser from "./middleware/session";
 import catchErrorsMiddleware from "./middleware/error";
 import serverRender from "./middleware/render";
 import { GeneralServerError } from "./errors";
-import { ensureStorageBucketExists } from "./moduleClient";
 
 setLogger(
   buildLogger({
@@ -48,10 +47,6 @@ setLogger(
     filePath: undefined
   })
 );
-
-if (isDevEnvironment) {
-  ensureStorageBucketExists();
-}
 
 const oneYear = 1000 * 60 * 60 * 24 * 365;
 // cache everything for one year by default

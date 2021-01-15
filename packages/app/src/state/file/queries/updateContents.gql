@@ -1,0 +1,21 @@
+mutation UpdateContents(
+  $id: uuid!
+  $contents: String!
+  $js: String!
+  $dts: String!
+  $map: String!
+  $errors: jsonb!
+) {
+  update_file_by_pk(
+    pk_columns: { id: $id }
+    _set: {
+      contents: $contents
+      js: $js
+      dts: $dts
+      map: $map
+      compile_errors: $errors
+    }
+  ) {
+    id
+  }
+}

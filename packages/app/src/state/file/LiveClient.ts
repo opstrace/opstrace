@@ -1,23 +1,33 @@
-import { editor, IDisposable, Range } from "monaco-editor/esm/vs/editor/editor.api";
+import {
+  editor,
+  IDisposable,
+  Range
+} from "monaco-editor/esm/vs/editor/editor.api";
+import { debounce } from "lodash";
 import { css } from "glamor";
 import { isActionOf } from "typesafe-actions";
 import socket, { WebsocketEvents } from "state/clients/websocket";
 import * as actions from "state/clients/websocket/actions";
-import {
-  File,
-  Viewer,
-  ViewerSelection,
-  TextOperations
-} from "state/file/types";
+import { Viewer, ViewerSelection, TextOperations } from "state/file/types";
 import getStore from "state/store";
 import { getCurrentUser } from "state/user/hooks/useCurrentUser";
 import { getUserList } from "state/user/hooks/useUserList";
 import { User } from "state/user/types";
+import { getOpScriptWorker } from "workers";
+
+interface File {
+  id: string;
+  path: string;
+  contents: string;
+  branch_name: string;
+  module_name: string;
+  module_scope: string;
+  module_version: string;
+}
 
 interface LiveClientOptions {
   model: editor.ITextModel;
   file: File;
-  enable: boolean;
   onViewersChanged: () => void;
 }
 
@@ -88,36 +98,42 @@ class LiveClient {
 
   private viewerClasses: { [key: string]: string } = {};
   private vsd: { [key: string]: string[] } = {};
-  private disposables: IDisposable[] = [];
+  private modelDisposables: IDisposable[] = [];
+  private editorDisposables: IDisposable[] = [];
   private currentSelection?: ReturnType<typeof actions.viewerSelectionChange>;
-  // We create a live client for every file we open
-  // but we don't enable it unless this file represents
-  // the "latest" version of the file and it's not
-  // on the main branch, in other words, we only
-  // enable it if it's editable.
-  private enable: boolean;
 
   constructor(options: LiveClientOptions) {
-    this.enable = options.enable;
     this.file = options.file;
     this.model = options.model;
     this.onViewersChanged = options.onViewersChanged;
-
-    this.currentUser = getCurrentUser(getStore().getState());
-
     this.onMessage = this.onMessage.bind(this);
     this.onLocalChange = this.onLocalChange.bind(this);
+    this.debouncedOnContentChanged = debounce(
+      this.debouncedOnContentChanged.bind(this),
+      200
+    );
+    this.modelDisposables.push(
+      this.model.onDidChangeContent(this.onLocalChange)
+    );
 
-    this.disposables.push(this.model.onDidChangeContent(this.onLocalChange));
-
-    if (this.enable) {
-      socket.listen(this.onMessage);
-      socket.emit(actions.subscribeFile(this.file.id));
-    }
+    socket.listen(this.onMessage);
+    socket.emit(actions.subscribeFile(this.file.id));
   }
 
-  setEditor(editor: editor.ICodeEditor) {
-    this.disposables.push(
+  private debouncedOnContentChanged(
+    e: monaco.editor.IModelContentChangedEvent
+  ) {
+    this.getEmitOutput();
+  }
+
+  private async getEmitOutput() {
+    const worker = await getOpScriptWorker();
+    const output = await worker.emitFile(this.model.uri.toString());
+    socket.emit(actions.compilerOutput({ fileId: this.file.id, output }));
+  }
+
+  attachEditor(editor: editor.ICodeEditor) {
+    this.editorDisposables.push(
       editor.onDidChangeCursorSelection(e => {
         if (this.suppress) {
           // change came from remote
@@ -134,12 +150,20 @@ class LiveClient {
         socket.emit(this.currentSelection);
       })
     );
+
     this.editor = editor;
+  }
+
+  detachEditor() {
+    this.editorDisposables.forEach(d => d.dispose());
+    this.editorDisposables = [];
+    this.editor = undefined;
   }
 
   dispose() {
     socket.unlisten(this.onMessage);
-    this.disposables.forEach(d => d.dispose());
+    this.modelDisposables.forEach(d => d.dispose());
+    this.editorDisposables.forEach(d => d.dispose());
   }
 
   private getSelection(selection: monaco.Selection) {
@@ -173,6 +197,8 @@ class LiveClient {
     if (this.suppress) {
       return;
     }
+    this.debouncedOnContentChanged(e);
+
     const ops: TextOperations = [];
 
     e.changes.forEach(c => {
@@ -271,7 +297,7 @@ class LiveClient {
     }
     const { viewers, editor } = action.payload;
     this.clearViewerSelections();
-
+    this.currentUser = getCurrentUser(getStore().getState());
     if (!this.currentUser) {
       throw Error("no current user defined");
     }

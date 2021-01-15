@@ -18,28 +18,35 @@ import {
   sanitizeFileExt,
   sanitizeFilePath
 } from "state/utils/sanitize";
-import { File } from "../types";
 
-export function getModuleNameFromFile(file: File) {
+export function getModuleNameFromFile(file: {
+  module_name: string;
+  module_scope: string;
+}) {
   return file.module_scope
     ? `@${sanitizeScope(file.module_scope)}/${file.module_name}`
     : file.module_name;
 }
 
 export function getFileUri(
-  file: File,
+  file: {
+    module_version: string;
+    module_scope: string;
+    module_name: string;
+    path: string;
+  },
   options?: {
     useLatest?: boolean;
     branch?: string;
     version?: string;
     ext?: boolean;
-    useVersionAtSymbol?: boolean;
+    encodeAtSymbol?: boolean;
   }
 ) {
   const versionToUse = options?.useLatest ? "latest" : file.module_version;
 
   const filePath = `${getModuleNameFromFile(file)}${
-    options?.useVersionAtSymbol ? "@" : "/"
+    options?.encodeAtSymbol ? "%40" : "@"
   }${options?.version ? options.version : versionToUse}/${file.path.replace(
     /^\//,
     ""
@@ -48,16 +55,26 @@ export function getFileUri(
   const possiblyWithBranch = options?.branch
     ? `${options.branch}/${filePath}`
     : filePath;
-  return options?.ext
-    ? `${possiblyWithBranch}.${sanitizeFileExt(file.ext)}`
-    : possiblyWithBranch;
+  return options?.ext ? `${possiblyWithBranch}.tsx` : possiblyWithBranch;
 }
 
-export function getMonacoFileUriString(file: File) {
+export function getMonacoFileUriString(file: {
+  module_version: string;
+  module_scope: string;
+  module_name: string;
+  branch_name: string;
+  path: string;
+}) {
   return getMonacoFileUri(file).fsPath;
 }
 
-export function getMonacoFileUri(file: File) {
+export function getMonacoFileUri(file: {
+  module_version: string;
+  module_scope: string;
+  module_name: string;
+  branch_name: string;
+  path: string;
+}) {
   return monaco.Uri.file(
     getFileUri(file, {
       ext: true,
@@ -68,7 +85,7 @@ export function getMonacoFileUri(file: File) {
 
 const fileImportUriFormat = /^\/([^/]+)\/((?:@[^/@]+\/)?[^/@]+)(?:@([^/]+))?(\/.*)?$/;
 
-export function parseFileUri(uri: string) {
+export function parseFileImportUri(uri: string) {
   try {
     uri = decodeURIComponent(uri);
     // add leading "/" if doesn't exist
@@ -85,37 +102,23 @@ export function parseFileUri(uri: string) {
   const module = match[2];
   const scope = module.split("/").length > 1 ? module.split("/")[0] : "";
   const version = match[3] || "latest";
-  const fileName = (match[4] || "").replace(/\/\/+/g, "/");
+  const fileName = (match[4] || "main").replace(/\/\/+/g, "/");
   const fileNameParts = fileName.split(".");
   let path = fileName;
-  let ext = "";
-  if (fileNameParts.length) {
+  let ext = "tsx";
+  if (fileNameParts.length > 1) {
     ext = fileNameParts.pop()!;
     path = fileNameParts.join(".");
+  } else if (fileNameParts.length === 1) {
+    path = fileNameParts[0];
   }
 
   return {
-    branch,
-    module: scope ? module.split("/")[1] : module,
-    scope: sanitizeScope(scope),
-    version,
+    branch_name: branch,
+    module_name: scope ? module.split("/")[1] : module,
+    module_scope: sanitizeScope(scope),
+    module_version: version,
     path: sanitizeFilePath(path),
     ext: sanitizeFileExt(ext)
-  };
-}
-
-export function parseFileUriWithoutBranch(uri: string) {
-  // append branch for the parseFileUri to work (don't care about the branch value here)
-  const attrs = parseFileUri("/main/" + uri.replace(/^\//, ""));
-  if (!attrs) {
-    return null;
-  }
-  const { module, scope, version, path, ext } = attrs;
-  return {
-    module,
-    scope,
-    version,
-    path,
-    ext
   };
 }
