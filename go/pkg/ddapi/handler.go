@@ -122,7 +122,7 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 	// Make the DD agent's HTTP client happy.
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte(fmt.Sprintf(`{"status": "%s"}`, "ok")))
+	w.Write([]byte("{\"status\": \"ok\"}"))
 }
 
 /*
@@ -155,7 +155,9 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 	req.Header.Add("X-Prometheus-Remote-Write-Version", "0.1.0")
 	req.Header.Add("Content-Encoding", "snappy")
 	req.Header.Set("Content-Type", "application/x-protobuf")
-	// TODO: Set tenant / X-Scope-OrgID  header.
+
+	// Specify Cortex tenant to insert to.
+	req.Header.Set("X-Scope-OrgID", ddcp.tenantName)
 
 	resp, reqerr := ddcp.rwHTTPClient.Do(req)
 
