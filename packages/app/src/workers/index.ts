@@ -13,28 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Import only what is needed from monaco-editor
+import "monaco-editor/esm/vs/editor/editor.api";
+import "monaco-editor/esm/vs/editor/edcore.main";
+import "monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution";
 /* eslint-disable import/no-webpack-loader-syntax */
-import "monaco-editor";
 //@ts-ignore
 import EditorWorker from "worker-loader!monaco-editor/esm/vs/editor/editor.worker.js";
 //@ts-ignore
-import TypescriptWorker from "worker-loader!./module/opstrace.worker";
-// Register typescript monarch tokens
-import "monaco-editor/esm/vs/basic-languages/monaco.contribution";
+import OpScriptWebWorker from "worker-loader!./opscript/opscript.worker";
 // Register our typescript language features
-import "./monaco-typescript-4.1.1/monaco.contribution";
+import {
+  getTypeScriptWorker,
+  typescriptDefaults,
+  JsxEmit,
+  ScriptTarget
+} from "./monaco-typescript-4.1.1/monaco.contribution";
 
-let tsWorker: Worker;
+import type { OpScriptWorker } from "./opscript/opscriptWorker";
+
+export const getOpScriptWorker = async (): Promise<OpScriptWorker> => {
+  const worker = await getTypeScriptWorker();
+  const client = await worker();
+  return client as OpScriptWorker;
+};
+export const opScriptDefaults = typescriptDefaults;
+
+opScriptDefaults.setEagerModelSync(true);
+opScriptDefaults.setCompilerOptions({
+  jsx: JsxEmit.Preserve,
+  allowJs: true,
+  allowNonTsExtensions: true,
+  target: ScriptTarget.ES2015,
+  moduleResolution: 2,
+  lib: ["es6"],
+  noImplicitAny: true,
+  noImplicitThis: true,
+  declaration: true,
+  sourceMap: true
+});
 //@ts-ignore
-self.MonacoEnvironment = { /* eslint-disable-line no-restricted-globals */
+/* eslint-disable-line no-restricted-globals */ self.MonacoEnvironment = {
   getWorker: function (_: any, label: string) {
     if (label === "typescript") {
-      if (!tsWorker) {
-        tsWorker = new TypescriptWorker();
-      }
-      return tsWorker;
+      return new OpScriptWebWorker();
     }
     return new EditorWorker();
   }
 };
-

@@ -8,7 +8,7 @@ import { WorkerManager } from "./workerManager";
 import type { TypeScriptWorker } from "./tsWorker";
 import { LanguageServiceDefaults } from "./monaco.contribution";
 import * as languageFeatures from "./languageFeatures";
-import { languages, Uri } from "./fillers/monaco-editor-core";
+import { languages, Uri } from "monaco-editor/esm/vs/editor/editor.api";
 
 let javaScriptWorker: (...uris: Uri[]) => Promise<TypeScriptWorker>;
 let typeScriptWorker: (...uris: Uri[]) => Promise<TypeScriptWorker>;
@@ -53,7 +53,6 @@ function setupMode(
   const worker = (...uris: Uri[]): Promise<TypeScriptWorker> => {
     return client.getLanguageServiceWorker(...uris);
   };
-
   const libFiles = new languageFeatures.LibFiles(worker);
 
   languages.registerCompletionItemProvider(
