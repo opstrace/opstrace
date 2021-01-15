@@ -68,17 +68,6 @@ gcloud auth activate-service-account \
     --project ${OPSTRACE_GCP_PROJECT_ID}
 
 
-configure_kubectl_aws_or_gcp() {
-    if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-        aws eks --region ${AWS_CLI_REGION} update-kubeconfig --name ${OPSTRACE_CLUSTER_NAME}
-    else
-        gcloud container clusters get-credentials ${OPSTRACE_CLUSTER_NAME} \
-            --zone ${GCLOUD_CLI_ZONE} \
-            --project ${OPSTRACE_GCP_PROJECT_ID}
-    fi
-    kubectl cluster-info
-}
-
 start_data_collection_deployment_loop() {
     # Run this as a child process in the background. Rely on it to
     # terminate by itself.
@@ -226,34 +215,6 @@ export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
 # use of insecure_skip_verify in the tests
 echo "--- checking cluster is using certificate issued by LetsEncrypt"
 
-check_certificate() {
-    # Timeout the command after 10 seconds in case it's stuck. Redirect stderr
-    # to stdout (for `timeout` and `openssl`), do the grep filter on stdout, but
-    # also show all output on stderr via a tee shunt.
-    timeout --kill-after=10 10 \
-    openssl s_client -showcerts -connect "${1}"  </dev/null \
-    | openssl x509 -noout -issuer \
-    |& tee /dev/stderr | grep "Fake LE Intermediate"
-}
-
-retry_check_certificate() {
-    # Retry the certificate check up to 3 times. Wait 5s before retrying.
-    count=0
-    retries=3
-    until check_certificate "${1}"
-    do
-        retcode=$?
-        wait=5
-        count=$(($count + 1))
-        if [ $count -lt $retries ]; then
-            echo "failed checking if cluster is using certificate issued by LetsEncrypt, retrying in ${wait} seconds..."
-            sleep $wait
-        else
-            exit ${retcode}
-        fi
-    done
-}
-
 retry_check_certificate loki.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate cortex.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
@@ -288,12 +249,10 @@ EXITCODE_MAKE_TESTREMOTE_UI=$?
 set -e
 echo "--- Exit status of make test-remote-ui: ${EXITCODE_MAKE_TESTREMOTE_UI}"
 
-
-# Relay on screenshots to be created with a certain file name prefix.
+# Rely on screenshots to be created with a certain file name prefix.
 cp uishot-*.png /build/bk-artifacts || true
 
 echo "--- run looker tests"
-
 source ci/invoke-looker.sh
 
 echo "--- run opstrace CLI tests (cli-tests-with-cluster.sh)"

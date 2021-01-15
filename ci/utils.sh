@@ -33,3 +33,42 @@ curl() {
     --retry-delay 5 \
     "${@}"
 }
+
+configure_kubectl_aws_or_gcp() {
+    if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+        aws eks --region ${AWS_CLI_REGION} update-kubeconfig --name ${OPSTRACE_CLUSTER_NAME}
+    else
+        gcloud container clusters get-credentials ${OPSTRACE_CLUSTER_NAME} \
+            --zone ${GCLOUD_CLI_ZONE} \
+            --project ${OPSTRACE_GCP_PROJECT_ID}
+    fi
+    kubectl cluster-info
+}
+
+check_certificate() {
+    # Timeout the command after 10 seconds in case it's stuck. Redirect stderr
+    # to stdout (for `timeout` and `openssl`), do the grep filter on stdout, but
+    # also show all output on stderr via a tee shunt.
+    timeout --kill-after=10 10 \
+    openssl s_client -showcerts -connect "${1}"  </dev/null \
+    | openssl x509 -noout -issuer \
+    |& tee /dev/stderr | grep "Fake LE Intermediate"
+}
+
+retry_check_certificate() {
+    # Retry the certificate check up to 3 times. Wait 5s before retrying.
+    count=0
+    retries=3
+    until check_certificate "${1}"
+    do
+        retcode=$?
+        wait=5
+        count=$(($count + 1))
+        if [ $count -lt $retries ]; then
+            echo "failed checking if cluster is using certificate issued by LetsEncrypt, retrying in ${wait} seconds..."
+            sleep $wait
+        else
+            exit ${retcode}
+        fi
+    done
+}
