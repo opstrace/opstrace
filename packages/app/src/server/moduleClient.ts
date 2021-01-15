@@ -13,50 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Minio from "minio";
 import { promisify } from "util";
 import redis from "redis";
 import formatISO from "date-fns/formatISO";
 import { v4 as uuidv4 } from "uuid";
-import env, { isDevEnvironment } from "./env";
+import env from "./env";
 import graphqlClient from "state/clients/graphqlClient";
-import { Files, File, TextOperations } from "state/file/types";
+import { TextOperations } from "state/file/types";
 import { log } from "@opstrace/utils";
-import { getFileUri } from "state/file/utils/uri";
 import { applyOps } from "state/file/utils/ops";
 import { sleep } from "state/utils/time";
 import semver from "semver";
-
-export async function ensureStorageBucketExists() {
-  try {
-    const client = createS3Client();
-    // Ensure bucket exists in minio
-    const exists = await client.bucketExists(env.S3_BUCKET_NAME);
-    if (exists) {
-      return;
-    }
-    await client.makeBucket(env.S3_BUCKET_NAME, env.S3_BUCKET_REGION);
-  } catch (err) {
-    log.error(err);
-  }
-}
-
-function createS3Client(): Minio.Client {
-  if (isDevEnvironment) {
-    return new Minio.Client({
-      endPoint: env.S3_ENDPOINT,
-      port: 9000,
-      useSSL: false,
-      accessKey: "AKIAIOSFODNN7EXAMPLE",
-      secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    });
-  }
-  return new Minio.Client({
-    endPoint: env.S3_ENDPOINT,
-    accessKey: "",
-    secretKey: ""
-  });
-}
+import { CompilerOutput } from "workers/types";
 
 function createRedisClient(): redis.RedisClient {
   return redis.createClient({
@@ -68,7 +36,6 @@ function createRedisClient(): redis.RedisClient {
 type RedisQueueItem = { key: string; values: string[] };
 
 class ModuleClient {
-  s3: Minio.Client;
   graphql = graphqlClient;
   redis = createRedisClient();
   redisGet: (arg1: string) => Promise<string | null>;
@@ -79,39 +46,11 @@ class ModuleClient {
   private lockFileOps = false;
 
   private initialfileVersion = "0.0.1";
-  private bucket = env.S3_BUCKET_NAME;
   constructor() {
-    this.s3 = createS3Client();
     this.redisGet = promisify(this.redis.get).bind(this.redis);
     this.redisSet = promisify(this.redis.set).bind(this.redis);
     this.redisLRange = promisify(this.redis.lrange).bind(this.redis);
     this.redisDel = promisify(this.redis.del).bind(this.redis);
-  }
-
-  getS3File(uri: string) {
-    // Strip the leading "/" if it exists
-    return this.s3.getObject(this.bucket, uri.replace(/^\//, ""));
-  }
-
-  async getS3FileContent(uri: string): Promise<string> {
-    const stream = await this.getS3File(uri);
-
-    return new Promise((resolve, reject) => {
-      let content = "";
-
-      stream.on("data", function (chunk) {
-        content += chunk;
-      });
-
-      stream.on("end", function () {
-        resolve(content);
-      });
-
-      stream.on("error", function (err) {
-        log.error("stream interrupted when reading S3 file content: ", err);
-        reject(err);
-      });
-    });
   }
 
   async deleteFileOps(fileId: string) {
@@ -129,6 +68,36 @@ class ModuleClient {
       values: ops.map(ops => JSON.stringify(ops))
     });
     this.drainRedisPushQueue();
+  }
+
+  async saveCompilerOutput(fileId: string, compilerOutput: CompilerOutput) {
+    await this.redisSet(
+      `file:${fileId}:compiled_output`,
+      JSON.stringify(compilerOutput)
+    );
+  }
+
+  async getCompilerOutput(fileId: string): Promise<CompilerOutput> {
+    const res = await this.redisGet(`file:${fileId}:compiled_output`);
+    if (res) {
+      return JSON.parse(res) as CompilerOutput;
+    }
+    const graphqlRes = await this.graphql.GetCompiledOutput({ id: fileId });
+    const data = graphqlRes.data?.file_by_pk;
+    if (data) {
+      return {
+        js: data.js || "",
+        dts: data.dts || "",
+        sourceMap: data.map || "",
+        errors: data.compile_errors
+      };
+    }
+    return {
+      js: "",
+      dts: "",
+      sourceMap: "",
+      errors: []
+    };
   }
 
   async getFileOps(fileId: string): Promise<TextOperations> {
@@ -195,30 +164,30 @@ class ModuleClient {
       });
 
       const latestFiles = latestFilesResponse.data?.file || [];
+      const latestModuleVersionRes =
+        latestFilesResponse.data?.module_version || [];
+      const latestModuleVersion =
+        (latestModuleVersionRes.length && latestModuleVersionRes[0].version) ||
+        this.initialfileVersion;
 
       if (!latestFiles.length) {
         throw Error("no latest files found to create snapshot");
       }
 
-      const latestVersion = latestFiles[0].alias?.module_version;
-
-      const snapshotVersion = this.bumpSnapshotVersion(
-        latestVersion || this.initialfileVersion
-      );
-      const updatedAliases = new Map<string, string>();
+      const snapshotVersion = this.bumpSnapshotVersion(latestModuleVersion);
+      const updatedContent = new Map<
+        string,
+        CompilerOutput & { contents: string }
+      >();
 
       let filesChanged = false;
 
       const filesToCreate = await Promise.all(
         latestFiles.map(async f => {
-          if (!f.alias) {
-            throw Error("alias property not present on latest file");
-          }
           const ops = await this.getFileOps(f.id);
+          const compilerOutput = await this.getCompilerOutput(f.id);
 
-          let contents = await this.getS3FileContent(
-            getFileUri(f.alias, { branch: f.alias.branch_name, ext: true })
-          );
+          let contents = f.contents;
 
           if (ops.length) {
             filesChanged = true;
@@ -226,15 +195,18 @@ class ModuleClient {
             contents = applyOps(contents, ops);
           }
           const id = uuidv4();
-          updatedAliases.set(f.id, id);
+          updatedContent.set(f.id, { contents, ...compilerOutput });
 
           return {
             ...f,
             id,
             contents,
+            dts: compilerOutput.dts,
+            js: compilerOutput.js,
+            sourceMap: compilerOutput.sourceMap,
+            errors: compilerOutput.errors,
             module_version: snapshotVersion,
-            created_at: this.now(),
-            alias_for: undefined
+            created_at: this.now()
           };
         })
       );
@@ -245,34 +217,43 @@ class ModuleClient {
       }
 
       let attempts = 0;
-      const transaction = async (): Promise<Error | null> => {
+      const attempt = async (): Promise<Error | null> => {
         attempts++;
 
         try {
-          // Make sure we update "latest" to now point to the newly created
-          // snapshot.
-          const fileUpdates = latestFiles.map(f => ({
-            id: f.id,
-            alias_for: updatedAliases.get(f.id)
-          }));
-          // Add to s3 (only those files that have content)
-          await this.createS3Objects(filesToCreate.filter(f => !!f.contents));
+          const fileUpdates: (CompilerOutput & {
+            id: string;
+            contents: string;
+          })[] = [];
+
+          latestFiles.forEach(f => {
+            const update = updatedContent.get(f.id);
+            if (!update) return;
+
+            fileUpdates.push({
+              id: f.id,
+              contents: update.contents,
+              dts: update.dts,
+              js: update.js,
+              sourceMap: update.sourceMap,
+              errors: update.errors
+            });
+          });
           // Add to index
           await this.graphql.CreateVersionedFiles({
             ...mod,
             version: snapshotVersion,
-            // unset contents and alias because our index doesn't expect that field
-            files: filesToCreate.map<File>(f => ({
-              ...f,
-              contents: undefined,
-              alias: undefined
-            }))
+            files: filesToCreate
           });
-          // Update "latest" files to point to new aliases
+
           for (const update of fileUpdates) {
-            await this.graphql.UpdateAlias({
+            await this.graphql.UpdateContents({
               id: update.id,
-              alias: update.alias_for
+              contents: update.contents,
+              dts: update.dts || "",
+              js: update.js || "",
+              map: update.sourceMap || "",
+              errors: update.errors
             });
             // Reset ops for "latest" file
             await this.deleteFileOps(update.id);
@@ -280,9 +261,7 @@ class ModuleClient {
 
           return null;
         } catch (err) {
-          // retry (there are probably a few holes in this at the moment, like not checking graphql errors
-          // or ensuring createS3Objects doesn't error if objects already exist).
-          log.error("createModuleSnapshot error during transaction: %s", err);
+          log.error("createModuleSnapshot error during attempt: %s", err);
           if (attempts > 2) {
             // TODO: rollback
             log.error(
@@ -291,139 +270,21 @@ class ModuleClient {
             return err;
           }
           await sleep(1000);
-          return await transaction();
+          return await attempt();
         }
       };
-      return await transaction();
+      return await attempt();
     } catch (err) {
       return err;
     }
   }
 
-  async createModule(mod: {
-    branch: string;
-    name: string;
-    scope: string;
-  }): Promise<Error | null> {
-    const depsFileId = uuidv4();
-    const mainFileId = uuidv4();
-    const initialModuleFiles: Files = [
-      {
-        // Alias for latest deps file
-        id: uuidv4(),
-        alias_for: depsFileId,
-        ext: "tsx",
-        path: "deps",
-        module_version: "latest",
-        branch_name: mod.branch,
-        module_name: mod.name,
-        module_scope: mod.scope,
-        mark_deleted: false,
-        is_modified: true,
-        created_at: this.now()
-      },
-      {
-        // Alias for latest main file
-        id: uuidv4(),
-        alias_for: mainFileId,
-        ext: "tsx",
-        path: "main",
-        module_version: "latest",
-        branch_name: mod.branch,
-        module_name: mod.name,
-        module_scope: mod.scope,
-        mark_deleted: false,
-        is_modified: true,
-        created_at: this.now()
-      },
-      {
-        id: depsFileId,
-        ext: "tsx",
-        path: "deps",
-        module_version: this.initialfileVersion,
-        branch_name: mod.branch,
-        module_name: mod.name,
-        module_scope: mod.scope,
-        mark_deleted: false,
-        is_modified: true,
-        created_at: this.now(),
-        contents: `/**
-* ###################
-* 
-* Module Dependencies
-* 
-* ###################
-*/
-
-`
-      },
-      {
-        id: mainFileId,
-        ext: "tsx",
-        path: "main",
-        module_version: this.initialfileVersion,
-        branch_name: mod.branch,
-        module_name: mod.name,
-        module_scope: mod.scope,
-        mark_deleted: false,
-        is_modified: true,
-        created_at: this.now(),
-        contents: `/**
-* ###################
-* 
-* Main ⬇️
-* 
-* ###################
-*/
-
-`
-      }
-    ];
-    try {
-      // Add to s3 (all except the latest files which will be stored in Redis)
-      await this.createS3Objects(
-        initialModuleFiles.filter(f => f.module_version !== "latest")
-      );
-      // Add to index
-      await this.graphql.CreateModule({
-        ...mod,
-        version: this.initialfileVersion,
-        // unset contents because our index doesn't expect that field
-        files: initialModuleFiles.map(f => ({ ...f, contents: undefined }))
-      });
-      return null;
-    } catch (err) {
-      // TODO: handle specific errors better, perhaps a retry, maybe rollback s3 creation.
-      // [Warning] If adding the index fails, we will have orphaned objects in our bucket,
-      // which is assumed to be OK because they are extremely cheap, so long as they can
-      // be overwritten upon retry.
-      return err;
-    }
-  }
   // Return date in ISO format.
   // TODO: Check Postgres has the correct tz for the entry.
   // https://hasura.io/blog/postgres-date-time-data-types-on-graphql-fd926e86ee87/
   private now() {
     return formatISO(new Date());
   }
-
-  private async createS3Object(file: File) {
-    return this.s3.putObject(
-      this.bucket,
-      getFileUri(file, { branch: file.branch_name, ext: true }),
-      file.contents || "",
-      {
-        "Content-Type": `application/${
-          file.ext.startsWith("ts") ? "typescript" : "javascript"
-        }`
-      }
-    );
-  }
-
-  private async createS3Objects(files: Files) {
-    return Promise.all(files.map(f => this.createS3Object(f)));
-  }
-
   /**
    * Drains the redis queue of edits while guaranteeing order is preserved
    */

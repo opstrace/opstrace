@@ -15,6 +15,7 @@
  */
 
 import formatFn from "date-fns/format";
+import formatISO from "date-fns/formatISO";
 
 const getLocale = (locale: string): Promise<Locale> =>
   import(`date-fns/locale/${locale}/index.js`);
@@ -35,3 +36,7 @@ export const format = async (
     locale: asyncLocale
   });
 };
+
+export function isoNow() {
+  return formatISO(new Date());
+}

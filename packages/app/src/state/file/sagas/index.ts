@@ -28,9 +28,7 @@ import addMilliseconds from "date-fns/addMilliseconds";
 import subscriptionManager from "./subscription";
 import * as actions from "../actions";
 import { State } from "state/reducer";
-import getPossiblyForkedFilesForModuleVersion from "../utils/possiblyForkedFiles";
-import { getBranchTypescriptFiles } from "../hooks/useFiles";
-import { makeSortedVersionsForModuleSelector } from "state/moduleVersion/hooks/useModuleVersions";
+import { getCurrentBranchFiles } from "../hooks/useFiles";
 import navigateToFile from "../utils/navigation";
 import { sanitizeFilePath, sanitizeScope } from "state/utils/sanitize";
 import { getCurrentBranch } from "state/branch/hooks/useBranches";
@@ -70,7 +68,7 @@ function* fileOpener(
     while (isBefore(new Date(), resolveTimeout)) {
       // get latest state
       const state: State = yield select();
-      const files = getBranchTypescriptFiles(state);
+      const files = getCurrentBranchFiles(state);
       const currentBranch = getCurrentBranch(state);
 
       if (files === undefined) {
@@ -90,38 +88,20 @@ function* fileOpener(
       if (!files || !selectedModuleName || !selectedModuleVersion) {
         return;
       }
-      const sortedModuleVersions = makeSortedVersionsForModuleSelector(
-        selectedModuleName,
-        selectedModuleScope || ""
-      )(state);
-
-      const latestMainVersion =
-        sortedModuleVersions && sortedModuleVersions.length
-          ? sortedModuleVersions.find(v => v.branch_name === "main")
-          : null;
 
       const moduleFiles = files.filter(
         f =>
-          f.module_name === selectedModuleName &&
-          f.module_scope === selectedModuleScope
+          f.file.module_name === selectedModuleName &&
+          f.file.module_scope === selectedModuleScope
       );
 
-      const isNewModule = !latestMainVersion;
-
-      const possiblyForkedFiles = getPossiblyForkedFilesForModuleVersion(
-        moduleFiles,
-        isNewModule,
-        selectedModuleVersion,
-        latestMainVersion?.version
-      );
-
-      const fileToOpen = possiblyForkedFiles.find(pff => {
+      const fileToOpen = moduleFiles.find(model => {
         const match =
-          pff.file.module_name === selectedModuleName &&
-          sanitizeScope(pff.file.module_scope) ===
+          model.file.module_name === selectedModuleName &&
+          sanitizeScope(model.file.module_scope) ===
             sanitizeScope(selectedModuleScope) &&
-          pff.file.module_version === selectedModuleVersion &&
-          sanitizeFilePath(pff.file.path) ===
+          model.file.module_version === selectedModuleVersion &&
+          sanitizeFilePath(model.file.path) ===
             sanitizeFilePath(selectedFilePath);
         return match;
       });

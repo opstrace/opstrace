@@ -26,21 +26,6 @@ query GetFileByAttrs(
     branch_name
     base_file_id
     mark_deleted
-    is_modified
-    alias_for
-    alias {
-      id
-      ext
-      path
-      module_name
-      module_scope
-      module_version
-      created_at
-      branch_name
-      base_file_id
-      mark_deleted
-      is_modified
-      alias_for
-    }
+    contents
   }
 }

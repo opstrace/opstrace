@@ -60,7 +60,7 @@ export const makeSortedVersionsForModuleSelector = (
           return -1;
         });
 
-      return latestVersions.concat(
+      const allModuleVersions = latestVersions.concat(
         versions
           .filter(v => v.version !== "latest")
           .filter(
@@ -71,6 +71,11 @@ export const makeSortedVersionsForModuleSelector = (
                 v.branch_name === "main")
           )
           .sort((a, b) => semverCompare(b.version, a.version))
+      );
+      // filter out any duplications between current branch and main branch
+      return allModuleVersions.filter(
+        (v, idx) =>
+          idx === allModuleVersions.findIndex(b => b.version === v.version)
       );
     }
   );

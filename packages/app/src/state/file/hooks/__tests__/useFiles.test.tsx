@@ -30,7 +30,7 @@ import {
   getCurrentBranchFiles,
   getOpenFileParams,
   getCurrentlySelectedFile,
-  useBranchTypescriptFilesForModuleVersion,
+  useBranchFilesForModuleVersion,
   getBranchTypescriptFiles
 } from "../useFiles";
 import { subscribe } from "../../actions";
@@ -133,7 +133,7 @@ test("useBranchTypescriptFiles hook", () => {
   ]);
 });
 
-test("useBranchTypescriptFilesForModuleVersion hook", () => {
+test("useBranchFilesForModuleVersion hook", () => {
   const subState = [
     {
       id: "test-1",
@@ -160,7 +160,7 @@ test("useBranchTypescriptFilesForModuleVersion hook", () => {
   (useDispatch as jest.Mock).mockReturnValue(dispatchMock);
 
   const { result } = renderHook(
-    () => useBranchTypescriptFilesForModuleVersion("test", "/foo", "0.1"),
+    () => useBranchFilesForModuleVersion("test", "/foo", "0.1"),
     {
       wrapper: ({ children }: any) => <StoreProvider>{children}</StoreProvider>
     }

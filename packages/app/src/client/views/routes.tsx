@@ -33,8 +33,8 @@ import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
 import { ActivityBar } from "./common/ActivityBar";
 
-const scopedModulePathParams = ":branch/@:scope/:name/:version/:path*";
-const modulePathParams = ":branch/:name/:version/:path*";
+const scopedModulePathParams = ":branch/@:scope/:name@:version/:path*";
+const modulePathParams = ":branch/:name@:version/:path*";
 
 // Not used yet
 export const ChatRoutes = () => [

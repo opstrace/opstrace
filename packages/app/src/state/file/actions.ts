@@ -15,14 +15,32 @@
  */
 import { createAction } from "typesafe-actions";
 import { History } from "history";
-import { Files, IPossiblyForkedFile, SubscriptionID } from "./types";
+import { SubscriptionID } from "./types";
+import TextFileModel from "./TextFileModel";
 
-export const set = createAction("SET_FILES")<Files>();
+export const set = createAction("SET_FILES")<{
+  branch: string;
+  files: {
+    id: string;
+    path: string;
+    module_name: string;
+    module_scope: string;
+    module_version: string;
+    mark_deleted: boolean;
+    contents: string;
+  }[];
+}>();
 
-export const subscribe = createAction("SUBSCRIBE_FILES")<SubscriptionID>();
-export const unsubscribe = createAction("UNSUBSCRIBE_FILES")<SubscriptionID>();
+export const subscribe = createAction("SUBSCRIBE_FILES")<{
+  branch: string;
+  subId: SubscriptionID;
+}>();
+export const unsubscribe = createAction("UNSUBSCRIBE_FILES")<{
+  branch: string;
+  subId: SubscriptionID;
+}>();
 
-export const openFile = createAction("OPEN_FILE")<IPossiblyForkedFile>();
+export const openFile = createAction("OPEN_FILE")<TextFileModel>();
 export const closeFile = createAction("CLOSE_FILE")<string>();
 
 export const requestOpenFileWithParams = createAction("REQUEST_FILE_OPEN")<{

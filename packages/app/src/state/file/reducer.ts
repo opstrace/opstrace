@@ -16,14 +16,18 @@
 
 import { createReducer, ActionType } from "typesafe-actions";
 
-import { Files } from "./types";
 import * as actions from "./actions";
 import TextFileModel from "./TextFileModel";
+import { getFileUri } from "./utils/uri";
 
 type FilesActions = ActionType<typeof actions>;
 
+export interface FilesByBranch {
+  [branch: string]: { [path: string]: TextFileModel };
+}
+
 type FilesState = {
-  files: Files;
+  filesByBranch: FilesByBranch;
   requestOpenFilePending: boolean;
   selectedFileId?: string;
   selectedFilePath?: string;
@@ -32,14 +36,16 @@ type FilesState = {
   selectedModuleVersion?: string;
   openFiles: TextFileModel[];
   openFileBrowsingHistory: string[];
-  loading: boolean;
+  loaded: {
+    [branch: string]: boolean;
+  };
 };
 
 const FilesInitialState: FilesState = {
-  files: [],
+  filesByBranch: {},
   openFiles: [],
   openFileBrowsingHistory: [],
-  loading: true,
+  loaded: {},
   requestOpenFilePending: false
 };
 
@@ -49,10 +55,24 @@ export const reducer = createReducer<FilesState, FilesActions>(
   .handleAction(
     actions.set,
     (state, action): FilesState => {
+      const filesByPath: { [key: string]: TextFileModel } = {};
+      const files = action.payload.files;
+      const branch = action.payload.branch;
+      const branchFiles = state.filesByBranch[branch] || {};
+
+      files.forEach(file => {
+        const path = getFileUri(file, { branch, ext: true });
+        const existingFile = branchFiles[path];
+
+        filesByPath[path] = existingFile
+          ? existingFile
+          : new TextFileModel({ branch_name: branch, ...file });
+      });
+
       return {
         ...state,
-        files: action.payload,
-        loading: false
+        filesByBranch: { ...state.filesByBranch, [branch]: filesByPath },
+        loaded: { ...state.loaded, [branch]: true }
       };
     }
   )
@@ -74,7 +94,7 @@ export const reducer = createReducer<FilesState, FilesActions>(
 
       const openFiles = alreadyOpen
         ? state.openFiles
-        : [...state.openFiles, new TextFileModel(action.payload)];
+        : [...state.openFiles, action.payload];
 
       const browsingHistory = state.openFileBrowsingHistory
         .filter(id => id !== fileId)
@@ -87,10 +107,6 @@ export const reducer = createReducer<FilesState, FilesActions>(
       const trimmedOpenFiles = openFiles.filter(a =>
         filesToKeepOpen.find(b => a.file.id === b)
       );
-      // dispose the open files we've just trimmed from the array
-      openFiles
-        .filter(a => !trimmedOpenFiles.find(b => a === b))
-        .forEach(openFile => openFile.dispose());
 
       return {
         ...state,
@@ -113,12 +129,7 @@ export const reducer = createReducer<FilesState, FilesActions>(
       if (state.openFiles.length === 1) {
         return state;
       }
-      const fileToClose = state.openFiles.find(
-        f => f.file.id === action.payload
-      );
-      if (fileToClose) {
-        fileToClose.dispose();
-      }
+
       const openFiles = state.openFiles.filter(
         f => f.file.id !== action.payload
       );

@@ -10,7 +10,6 @@ query GetFile($id: uuid!) {
     branch_name
     base_file_id
     mark_deleted
-    is_modified
-    alias_for
+    contents
   }
 }

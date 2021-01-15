@@ -53,7 +53,7 @@ const ModuleTreeViewContainer = () => {
     <>
       {modules.map(module => (
         <ModuleTreeView
-          key={`${module.scope}/${module.name}`}
+          key={`${module.branch_name}/${module.scope}/${module.name}`}
           moduleName={module.name}
           moduleScope={module.scope}
           selected={selected}

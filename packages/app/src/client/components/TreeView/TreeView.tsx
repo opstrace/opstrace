@@ -18,7 +18,7 @@ import React from "react";
 import styled from "styled-components";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { IDirectory, IPossiblyForkedFile } from "state/file/types";
+import { IDirectory } from "state/file/types";
 import Typography from "../Typography/Typography";
 import { getDirectoryId, getFileId } from "./utils";
 
@@ -46,13 +46,11 @@ const BaseTreeViewItem = (props: TreeItemProps) => {
   );
 };
 
-const FileItem = (ppf: IPossiblyForkedFile) => {
+const FileItem = (path: string) => {
   return (
     <Box display="flex" alignItems="center" pt={0.5} pb={0.5}>
       <Box flexGrow={1} p={0}>
-        <Typography variant="body2">
-          {ppf.file.path.split("/").pop()}
-        </Typography>
+        <Typography variant="body2">{path.split("/").pop()}</Typography>
       </Box>
     </Box>
   );
@@ -68,11 +66,11 @@ const DirectoryItem = (dir: IDirectory) => {
   );
 };
 
-const renderModule = (ppf: IPossiblyForkedFile) => (
+const renderModule = ({ id, path }: { id: string; path: string }) => (
   <BaseTreeViewItem
-    key={getFileId(ppf.file)}
-    nodeId={getFileId(ppf.file)}
-    label={FileItem(ppf)}
+    key={getFileId(id)}
+    nodeId={getFileId(id)}
+    label={FileItem(path)}
   />
 );
 

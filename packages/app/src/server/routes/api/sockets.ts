@@ -38,6 +38,10 @@ class SocketClient {
       this.onFileEdit(socket, action);
     }
 
+    if (isActionOf(actions.compilerOutput, action)) {
+      this.onCompilerOutput(socket, action);
+    }
+
     if (isActionOf(actions.viewerSelectionChange, action)) {
       this.onViewerSelectionChange(socket, action);
     }
@@ -51,6 +55,24 @@ class SocketClient {
     // inject email and broadcast to all others watching this file
     action.payload.email = socket.request.session.email;
     this.emit(room, action, socket);
+  }
+
+  async onCompilerOutput(
+    socket: Socket,
+    action: ReturnType<typeof actions.compilerOutput>
+  ) {
+    const room = this.getFileRoom(action.payload.fileId);
+
+    await this.moduleClient.saveCompilerOutput(
+      action.payload.fileId,
+      action.payload.output
+    );
+    // broadcast to all others watching this file that new content is available
+    this.emit(
+      room,
+      actions.compiledContentUpdated(action.payload.fileId),
+      socket
+    );
   }
 
   onFileEdit(socket: Socket, action: ReturnType<typeof actions.edit>) {

@@ -47,8 +47,8 @@ type ResizableModuleEditorGroupProps = {
 
 function ModuleEditorGroup({ height, width }: ResizableModuleEditorGroupProps) {
   const openFiles = useOpenFiles();
-  const focussedFile = useFocusedOpenFile();
   const dispatch = useDispatch();
+  const focussedFile = useFocusedOpenFile();
   const history = useHistory();
   const [tabIndex, setTabIndex] = useState(
     focussedFile
@@ -150,16 +150,11 @@ function ModuleEditorGroup({ height, width }: ResizableModuleEditorGroupProps) {
         ))}
       </Tabs>
       <EditorViewers />
-      {openFiles.map(file => (
-        <Box key={`editor-${file.file.id}`}>
-          <ModuleEditor
-            textFileModel={file}
-            width={width}
-            height={file.live ? height - 48 - 50 : height - 48}
-            visible={file.file.id === focussedFile?.file.id}
-          />
-        </Box>
-      ))}
+        <ModuleEditor
+          width={width}
+          height={focussedFile?.live ? height - 48 - 50 : height - 48}
+          visible={true}
+        />
     </Box>
   );
 }

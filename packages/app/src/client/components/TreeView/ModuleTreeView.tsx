@@ -17,7 +17,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Skeleton from "@material-ui/lab/Skeleton";
 import {
-  useBranchTypescriptFilesForModuleVersion,
+  useBranchFilesForModuleVersion,
   useOpenFileRequestParams
 } from "state/file/hooks/useFiles";
 import { getFileTree } from "state/file/utils/tree";
@@ -100,13 +100,13 @@ const ModuleTreeView = ({
     requestedModuleName
   ]);
 
-  const possiblyForkedFiles = useBranchTypescriptFilesForModuleVersion(
+  const files = useBranchFilesForModuleVersion(
     moduleName,
     moduleScope,
     version
   );
 
-  const fileTree = getFileTree(possiblyForkedFiles);
+  const fileTree = getFileTree(files);
   // This effect is all about setting the selected file
   useEffect(() => {
     // this is true if the user selects a different version from the dropdown
@@ -121,34 +121,33 @@ const ModuleTreeView = ({
       requestedFilePath &&
       fileTree
     ) {
-      const requestedFile = possiblyForkedFiles?.find(
-        pff =>
-          sanitizeFilePath(pff.file.path) ===
-          sanitizeFilePath(requestedFilePath)
+      const requestedFile = files?.find(
+        tf =>
+          sanitizeFilePath(tf.file.path) === sanitizeFilePath(requestedFilePath)
       );
 
-      if (requestedFile && getFileId(requestedFile.file) !== selected) {
+      if (requestedFile && getFileId(requestedFile.file.id) !== selected) {
         setExpanded(getExpandedNodeIDsToExposeFile(requestedFile));
-        onSelected(getFileId(requestedFile.file));
+        onSelected(getFileId(requestedFile.file.id));
       }
     }
   }, [
     requestedModuleScope,
     requestedModuleName,
-    possiblyForkedFiles,
     requestedFilePath,
     moduleScope,
     onSelected,
     moduleName,
     fileTree,
-    selected
+    selected,
+    files
   ]);
 
-  if (possiblyForkedFiles === null) {
+  if (files === null) {
     return null;
   }
 
-  if (possiblyForkedFiles === undefined || versions === undefined) {
+  if (files === undefined || versions === undefined) {
     return (
       <Box position="relative" height="25px" width="100%" p={0.6}>
         <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
@@ -167,7 +166,7 @@ const ModuleTreeView = ({
     if (isFile(idString)) {
       const fileId = getFileFromId(idString);
 
-      const pff = possiblyForkedFiles.find(pff => pff.file.id === fileId);
+      const pff = files.find(tf => tf.file.id === fileId);
       if (pff) {
         dispatch(
           requestOpenFileWithParams({
