@@ -112,6 +112,19 @@ export function parseFileImportUri(uri: string) {
   } else if (fileNameParts.length === 1) {
     path = fileNameParts[0];
   }
+  if (path.endsWith(".jsx") && ext === "map") {
+    // ext === map, so just get rid of the .jsx
+    path = path.replace(/\.jsx$/, "");
+  }
+  if (path.endsWith(".js") && ext === "map") {
+    // ext === map, so just get rid of the .js
+    path = path.replace(/\.js$/, "");
+  }
+  if (path.endsWith(".d") && ext === "ts") {
+    // this is a .d.ts file
+    path = path.replace(/\.d$/, "");
+    ext = "d.ts";
+  }
 
   return {
     branch_name: branch,

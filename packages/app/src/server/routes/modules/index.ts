@@ -15,17 +15,63 @@
  */
 import express from "express";
 import { GeneralServerError } from "server/errors";
-// import ModuleClient from "server/moduleClient";
+import ModuleClient from "server/moduleClient";
 import { log } from "@opstrace/utils";
+import { parseFileImportUri } from "state/file/utils/uri";
+import graphqlClient from "state/clients/graphqlClient";
 
 function createCacheableModuleServingHandler({ maxAge }: { maxAge: number }) {
   const router = express.Router();
 
   router.get("*", async function (req, res, next) {
-    // const moduleClient = new ModuleClient();
     try {
+      const moduleClient = new ModuleClient();
+      const fileAttrs = parseFileImportUri(req.url);
+
+      if (!fileAttrs) {
+        return next(new GeneralServerError(404, "not found"));
+      }
+      let fileRes = await graphqlClient.GetFileId({
+        branch: fileAttrs.branch_name,
+        module: fileAttrs.module_name,
+        scope: fileAttrs.module_scope,
+        version: fileAttrs.module_version,
+        path: fileAttrs.path
+      });
+      const data = fileRes.data?.file;
+      if (!data || data.length === 0) {
+        return next(new GeneralServerError(404, "not found"));
+      }
+      // prioritize the file that is not on the main branch
+      const fileId =
+        data.length > 1
+          ? data.find(d => d.branch_name !== "main")?.id
+          : data[0].id;
+      const compilerOutput = await moduleClient.getCompilerOutput(fileId);
+
+      let contents: string = "";
+      let contentType: string = "";
+
+      if (fileAttrs.ext === "map") {
+        contents = compilerOutput.sourceMap || "";
+        contentType = "application/json"; // so it can be viewed in the console
+      } else if (fileAttrs.ext === "jsx") {
+        contents = compilerOutput.js || "";
+        contentType = "application/javascript";
+      } else if (fileAttrs.ext === "d.ts") {
+        contents = compilerOutput.dts || "";
+        contentType = "application/text";
+      }
+
+      if (!contents || !contentType) {
+        return next(new GeneralServerError(404, "not found"));
+      }
+
+      res.set("Content-Disposition", "inline");
+      res.setHeader("content-type", contentType);
+      res.status(200).send(contents);
     } catch (err) {
-      log.error(`failed fetching file from s3 [${req.url}]: %s`, err);
+      log.error(`fetching file failed [${req.url}]: %s`, err);
       return next(err);
     }
   });

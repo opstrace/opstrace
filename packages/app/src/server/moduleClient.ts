@@ -18,7 +18,7 @@ import redis from "redis";
 import formatISO from "date-fns/formatISO";
 import { v4 as uuidv4 } from "uuid";
 import env from "./env";
-import graphqlClient from "state/clients/graphqlClient";
+import graphqlClient, { File_Insert_Input } from "state/clients/graphqlClient";
 import { TextOperations } from "state/file/types";
 import { log } from "@opstrace/utils";
 import { applyOps } from "state/file/utils/ops";
@@ -197,17 +197,18 @@ class ModuleClient {
           const id = uuidv4();
           updatedContent.set(f.id, { contents, ...compilerOutput });
 
-          return {
+          const file: File_Insert_Input = {
             ...f,
             id,
             contents,
             dts: compilerOutput.dts,
             js: compilerOutput.js,
-            sourceMap: compilerOutput.sourceMap,
-            errors: compilerOutput.errors,
+            map: compilerOutput.sourceMap,
+            compile_errors: compilerOutput.errors,
             module_version: snapshotVersion,
             created_at: this.now()
           };
+          return file;
         })
       );
 
