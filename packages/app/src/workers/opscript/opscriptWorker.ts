@@ -1,3 +1,4 @@
+import path from "path";
 import {
   TypeScriptWorker,
   ICreateData
@@ -6,20 +7,187 @@ import * as ts from "../monaco-typescript-4.1.1/lib/typescriptServices";
 import { parseFileImportUri, getFileUri } from "state/file/utils/uri";
 import { CompilerOutput } from "workers/types";
 
+function parseFileName(fileName: string) {
+  return parseFileImportUri(fileName.replace(/^file:\/\/\//, ""));
+}
+
 export class OpScriptWorker extends TypeScriptWorker {
   constructor(ctx: monaco.worker.IWorkerContext, createData: ICreateData) {
     super(ctx, createData);
+    this.importExportVisitor = this.importExportVisitor.bind(this);
+    this.rewritePath = this.rewritePath.bind(this);
+    this.isDynamicImport = this.isDynamicImport.bind(this);
+    this.transformImports = this.transformImports.bind(this);
+  }
+
+  rewritePath(
+    importPath: string,
+    sf: ts.SourceFile,
+    afterDeclarations?: boolean
+  ) {
+    if (
+      importPath.startsWith(".") ||
+      importPath.startsWith("http://") ||
+      importPath.startsWith("https://")
+    ) {
+      // don't rewrite relative imports
+      return importPath;
+    }
+    const resolvedImports = this.resolveModuleNames([importPath], sf.fileName);
+    const absImportPath = resolvedImports[0]?.resolvedFileName;
+    if (!absImportPath) {
+      return importPath;
+    }
+
+    const parsedCurrentFile = parseFileName(sf.fileName);
+    if (!parsedCurrentFile) {
+      return importPath;
+    }
+    const currentFileUri = getFileUri(parsedCurrentFile);
+    const parsedImportFile = parseFileName(absImportPath);
+    if (!parsedImportFile) {
+      return importPath;
+    }
+    const importFileUri = getFileUri(parsedImportFile);
+    const relativePath = path.relative(currentFileUri, importFileUri);
+
+    return afterDeclarations ? relativePath + ".d.ts" : relativePath + ".jsx";
+  }
+
+  isDynamicImport(node: ts.Node): node is ts.CallExpression {
+    return (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword
+    );
+  }
+
+  importExportVisitor(
+    ctx: ts.TransformationContext,
+    sf: ts.SourceFile,
+    afterDeclarations?: boolean
+  ) {
+    const visitor: ts.Visitor = (node: ts.Node): ts.Node => {
+      let importPath: string = "";
+      if (
+        (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+        node.moduleSpecifier
+      ) {
+        const importPathWithQuotes = node.moduleSpecifier.getText(sf);
+        importPath = importPathWithQuotes.substr(
+          1,
+          importPathWithQuotes.length - 2
+        );
+      } else if (this.isDynamicImport(node)) {
+        const importPathWithQuotes = node.arguments[0].getText(sf);
+        importPath = importPathWithQuotes.substr(
+          1,
+          importPathWithQuotes.length - 2
+        );
+      } else if (
+        ts.isImportTypeNode(node) &&
+        ts.isLiteralTypeNode(node.argument) &&
+        ts.isStringLiteral(node.argument.literal)
+      ) {
+        importPath = node.argument.literal.text;
+      }
+
+      if (importPath) {
+        const rewrittenPath = this.rewritePath(
+          importPath,
+          sf,
+          afterDeclarations
+        );
+
+        // Only rewrite if we changed the value
+        if (rewrittenPath !== importPath) {
+          if (ts.isImportDeclaration(node)) {
+            return ctx.factory.updateImportDeclaration(
+              node,
+              node.decorators,
+              node.modifiers,
+              node.importClause,
+              ctx.factory.createStringLiteral(rewrittenPath)
+            );
+          } else if (ts.isExportDeclaration(node)) {
+            return ctx.factory.updateExportDeclaration(
+              node,
+              node.decorators,
+              node.modifiers,
+              node.isTypeOnly,
+              node.exportClause,
+              ctx.factory.createStringLiteral(rewrittenPath)
+            );
+          } else if (this.isDynamicImport(node)) {
+            return ctx.factory.updateCallExpression(
+              node,
+              node.expression,
+              node.typeArguments,
+              ctx.factory.createNodeArray([
+                ctx.factory.createStringLiteral(rewrittenPath)
+              ])
+            );
+          } else if (ts.isImportTypeNode(node)) {
+            return ctx.factory.updateImportTypeNode(
+              node,
+              ctx.factory.createLiteralTypeNode(
+                ctx.factory.createStringLiteral(rewrittenPath)
+              ),
+              node.qualifier,
+              node.typeArguments,
+              node.isTypeOf
+            );
+          }
+        }
+        return node;
+      }
+      return ts.visitEachChild(node, visitor, ctx);
+    };
+
+    return visitor;
+  }
+  transformImports(afterDeclarations?: boolean) {
+    return (ctx: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
+      return (sf: ts.SourceFile) =>
+        ts.visitNode(sf, this.importExportVisitor(ctx, sf, afterDeclarations));
+    };
   }
 
   emitFile(fileName: string): Promise<CompilerOutput> {
-    const output = this._languageService.getEmitOutput(fileName);
-    const errors = this.getFileErrors(fileName);
+    const program = this._languageService.getProgram();
+    let dts: string = "";
+    let js: string = "";
+    let map: string = "";
+
+    program?.emit(
+      program.getSourceFile(fileName),
+      (fileName: string, data: string) => {
+        if (fileName.endsWith(".d.ts")) {
+          dts = data;
+        } else if (fileName.endsWith(".map")) {
+          map = data;
+        } else {
+          js = data;
+        }
+      },
+      undefined,
+      undefined,
+      {
+        after: [
+          this.transformImports(false) as ts.TransformerFactory<ts.SourceFile>
+        ],
+        afterDeclarations: [
+          this.transformImports(true) as ts.TransformerFactory<
+            ts.SourceFile | ts.Bundle
+          >
+        ]
+      }
+    );
 
     return Promise.resolve({
-      errors,
-      dts: output.outputFiles.find(f => f.name.endsWith(".d.ts"))?.text,
-      js: output.outputFiles.find(f => f.name.endsWith(".jsx"))?.text,
-      sourceMap: output.outputFiles.find(f => f.name.endsWith(".map"))?.text
+      dts,
+      js,
+      sourceMap: map,
+      errors: this.getFileErrors(fileName)
     });
   }
 
@@ -78,8 +246,7 @@ export class OpScriptWorker extends TypeScriptWorker {
       } else {
         // check fallback locations, for simplicity assume that module at location
         // should be represented by '.d.ts' file
-        const currentFilePath = containingFile.replace(/^file:\/\/\//, "");
-        const parts = parseFileImportUri(currentFilePath);
+        const parts = parseFileName(containingFile);
         if (!parts) {
           resolvedModules.push(undefined);
           continue;
