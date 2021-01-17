@@ -1,0 +1,1 @@
+ALTER TABLE ONLY "public"."file" ALTER COLUMN "ext" DROP DEFAULT;

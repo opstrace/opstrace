@@ -129,7 +129,6 @@ class LiveClient {
   private async getEmitOutput() {
     const worker = await getOpScriptWorker();
     const output = await worker.emitFile(this.model.uri.toString());
-    console.log(output);
     socket.emit(actions.compilerOutput({ fileId: this.file.id, output }));
   }
 
