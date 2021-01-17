@@ -26,6 +26,7 @@ COPY packages/controller-config /build/packages/controller-config/
 
 WORKDIR /build/packages/controller
 
+ENV NODE_OPTIONS "--max-old-space-size=8192"
 RUN yarn --frozen-lockfile
 RUN yarn run tsc -b
 
