@@ -104,7 +104,6 @@ cli: cli-tsc cli-pkg
 .PHONY: fetch-secrets
 fetch-secrets:
 	@# Fetch secrets, expected to be done before every cloud deployment.
-	aws s3 cp "s3://buildkite-managedsecretsbucket-100ljuov8ugv2/vast-pad-240918-1445f1830b0e.json" secrets/gcp-credentials.json
 	aws s3 cp "s3://buildkite-managedsecretsbucket-100ljuov8ugv2/" secrets/ --recursive --exclude "*" \
 	--include "aws-credentials.json" \
 	--include "aws-dev-svc-acc-env.sh" \
@@ -114,6 +113,7 @@ fetch-secrets:
 	--include "ci.id_rsa.pub" \
 	--include "opstrace-collection-cluster-authtoken-secrets.yaml" \
 	--include "dns-service-login-for-ci.json" \
+	--include "gcp-svc-acc-dev-dns-service.json" \
 	--include "gcp-svc-acc-ci-shard-aaa.json" \
 	--include "gcp-svc-acc-ci-shard-bbb.json" \
 	--include "gcp-svc-acc-ci-shard-ccc.json" \
