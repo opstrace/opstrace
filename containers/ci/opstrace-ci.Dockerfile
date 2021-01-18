@@ -15,7 +15,7 @@ FROM debian:buster-slim
 # - uuid-runtime for uuidgen used by ci_events
 # - netcat for debugging
 RUN apt-get update && apt-get install -y -q --no-install-recommends \
-    uuid-runtime rsync curl gnupg2 git make jq moreutils netcat \
+    uuid-runtime rsync curl gnupg2 git make jq moreutils netcat-openbsd \
     build-essential gettext-base ca-certificates unzip less
 
 RUN apt-get install hub -y
