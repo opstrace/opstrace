@@ -111,8 +111,13 @@ ddapi:
 .PHONY: unit-tests
 unit-tests:
 	# Let's see if the Docker daemon of the bk host is available
-	docker info
-	echo -e "GET /v1.40/images/json HTTP/1.0\r\n" | nc -U /var/run/docker.sock
+	#docker info
+	#docker version
+	#echo -e "GET /v1.39/images/json HTTP/1.0\r\n" | nc -U /var/run/docker.sock
+	# Force a less mordern Docker Engine API version that the client supports,
+	# knowing (assuming) that the Docker daemon that we work against here is
+	# Docker CE 19.x
+	#DOCKER_HOST=unix:///var/run/docker.sock DOCKER_TLS_VERIFY=0
 	go test -v ./...
 
 
