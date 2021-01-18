@@ -47,10 +47,10 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 
 # - NodeJS and npm, for compiling and running opstrace CLI / controller
 # - Install NodeJS via nvm, analogue to local dev setup
-ENV NODE_VERSION v14.15.1
+ENV NODE_VERSION v14.15.4
 ENV NVM_DIR /nvm
 RUN mkdir $NVM_DIR && git clone https://github.com/nvm-sh/nvm.git "${NVM_DIR}"
-RUN cd "${NVM_DIR}" && git checkout v0.37.0
+RUN cd "${NVM_DIR}" && git checkout v0.37.2
 RUN . "${NVM_DIR}"/nvm.sh && nvm install "${NODE_VERSION}"
 
 # Put `node` and `npm` into PATH, for subsequent RUN statements but also for
@@ -73,14 +73,14 @@ RUN chmod -R o+rx "${NVM_DIR}"
 # Set up the Docker binaries so that within the container we can manage
 # containers running on the host with the `docker` CLI (the host's Docker
 # socket is going to be mounted in).
-RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz && \
-    tar --strip-components=1 -xvzf docker-19.03.5.tgz -C /usr/local/bin && \
-    rm -f docker-19.03.5.tgz
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-19.03.14.tgz && \
+    tar --strip-components=1 -xvzf docker-19.03.14.tgz -C /usr/local/bin && \
+    rm -f docker-19.03.14.tgz
 
 # Set up golang. Required to run golanglint-ci in the linter step.
-RUN curl -fsSLO https://golang.org/dl/go1.15.2.linux-amd64.tar.gz && \
-    tar -xzf go1.15.2.linux-amd64.tar.gz -C /usr/local/ && \
-    rm -f go1.15.2.linux-amd64.tar.gz
+RUN curl -fsSLO https://golang.org/dl/go1.15.6.linux-amd64.tar.gz && \
+    tar -xzf go1.15.6.linux-amd64.tar.gz -C /usr/local/ && \
+    rm -f go1.15.6.linux-amd64.tar.gz
 
 ENV GOPATH /go
 RUN mkdir -p $GOPATH/src $GOPATH/bin && chmod -R 777 $GOPATH
