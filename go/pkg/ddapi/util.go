@@ -43,12 +43,5 @@ func ZlibDecode(src []byte) ([]byte, error) {
 		return nil, err
 	}
 	defer r.Close()
-
-	dst, err := ioutil.ReadAll(r)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return dst, nil
+	return ioutil.ReadAll(r)
 }
