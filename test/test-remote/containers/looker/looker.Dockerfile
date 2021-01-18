@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:14-slim
 RUN mkdir /build
 
 # Build context is the `test/test-remote` directory in the repo. Pragmatically
@@ -7,7 +7,10 @@ RUN mkdir /build
 # `test/test-remote/yarn.lock` right before building the image (symlink does
 # not work, Docker would say `Forbidden path outside the build context:
 # yarn.lock`). `make image` does that.
-COPY tsconfig.json package.json yarn.lock /build/
+COPY tsconfig.json yarn.lock /build/
+
+# Use a dedicated package.json for the Docker image build
+COPY containers/looker/package.json /build/
 COPY testutils /build/testutils
 COPY loki-node-client-tools /build/loki-node-client-tools
 COPY prom-node-client-tools /build/prom-node-client-tools
@@ -18,7 +21,7 @@ WORKDIR /build
 RUN yarn install --frozen-lockfile
 
 COPY logstream-gen /build/logstream-gen
-RUN yarn run tsc tsconfig.json
+RUN yarn run tsc -b tsconfig.json
 
 # I tried for 45 minutes to set up a binary using the `bin` property in
 # package.json and failed miserably and a combination of `yarn install`, `yarn
