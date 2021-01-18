@@ -52,6 +52,7 @@ opScriptDefaults.setCompilerOptions({
   declaration: true,
   sourceMap: true
 });
+
 //@ts-ignore
 /* eslint-disable-line no-restricted-globals */ self.MonacoEnvironment = {
   getWorker: function (_: any, label: string) {

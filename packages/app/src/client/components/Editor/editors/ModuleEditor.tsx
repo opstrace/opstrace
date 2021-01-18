@@ -20,6 +20,13 @@ import { ModuleEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
 import { getTextEditorOptions } from "state/file/utils/monaco";
 import { useFocusedOpenFile } from "state/file/hooks/useFiles";
+// import { opScriptDefaults } from "workers";
+// import our user facing library
+/* eslint-disable import/no-webpack-loader-syntax */
+//@ts-ignore
+// import OpstraceLib from "raw-loader!../../../../opstrace.lib";
+
+// opScriptDefaults.addExtraLib(OpstraceLib);
 
 const emptyMonacoFileUri = monaco.Uri.parse("file://empty.tsx");
 const emptyModel = monaco.editor.createModel(

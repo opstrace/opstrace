@@ -126,7 +126,7 @@ export function useBranchFiles() {
         dispatch(unsubscribe({ branch: _currentBranchName, subId }));
       }
     };
-  }, [dispatch]);
+  }, [dispatch, currentBranchName]);
 
   return currentBranchFiles;
 }
