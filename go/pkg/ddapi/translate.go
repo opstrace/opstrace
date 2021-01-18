@@ -123,7 +123,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		return nil, fmt.Errorf("invalid JSON doc: %v", jerr)
 	}
 
-	promTimeSeriesFragments := make([]*prompb.TimeSeries, 0,len(sfragments.Fragments)
+	promTimeSeriesFragments := make([]*prompb.TimeSeries, 0, len(sfragments.Fragments))
 	for _, fragment := range sfragments.Fragments {
 		// Build up label set as a map to ensure uniqueness of keys.
 		labels := map[string]string{
