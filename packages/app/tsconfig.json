@@ -1,8 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES6",
     "lib": ["es6", "dom"],
+    "outDir": "build",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
