@@ -71,7 +71,6 @@
     "deepmerge": "^4.2.2",
     "delay": "^4.4.0",
     "dot-object": "^2.1.4",
-    "esbuild": "^0.8.32",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.2",
     "express-jwt": "^6.0.0",
@@ -153,6 +152,7 @@
     "@testing-library/react": "^10.0.0",
     "@testing-library/react-hooks": "^3.4.2",
     "@testing-library/user-event": "^12.0.15",
+    "@types/": "jcoreio/async-throttle",
     "@types/connect-redis": "^0.0.15",
     "@types/es-module-lexer": "^0.3.0",
     "@types/minio": "^7.0.6",
@@ -178,6 +178,7 @@
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^4.2.2",
     "es-module-lexer": "^0.3.26",
+    "esbuild": "^0.8.33",
     "eslint": "^7.11.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-loader": "4.0.2",
@@ -254,7 +255,8 @@
     "types:watch": "HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret graphql-codegen --config codegen.js --watch",
     "console": "hasura console --admin-secret myadminsecret",
     "services:start": "docker-compose up",
-    "dts:gen": "ts-node scripts/dtsGenerator.ts"
+    "lib:gen": "ts-node scripts/libGenerator.ts",
+    "lib:watch": "ts-node scripts/libGenerator.ts --watch"
   },
   "proxy": {
     "/_": {
