@@ -118,7 +118,14 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 	spbmsgbytes := snappy.Encode(nil, pbmsgbytes)
 	// log.Debugf("snappy-compressed pb msg: %s", spbmsgbytes)
 
-	ddcp.postPromWriteRequestAndHandleErrors(w, spbmsgbytes)
+	writeerr := ddcp.postPromWriteRequestAndHandleErrors(w, spbmsgbytes)
+
+	if writeerr != nil {
+		// That's the signal to terminate request processing. Error details can
+		// be ignored (rely on `postPromWriteRequestAndHandleErrors()` to have
+		// taken proper action, including logging).
+		return
+	}
 
 	// Make the DD agent's HTTP client happy.
 	w.Header().Set("Content-Type", "application/json")
@@ -170,6 +177,7 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 		// system. For timeouts, we should therefore emit a 504 Gateway
 		// Timeout.
 		logErrorEmit500(w, fmt.Errorf("error while interacting with remote_write endpoint: %v", reqerr))
+		return reqerr
 	}
 	defer resp.Body.Close()
 
@@ -179,7 +187,7 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 
 	if readerr != nil {
 		logErrorEmit500(w, fmt.Errorf("error while reading upstream response: %v", readerr))
-		return nil
+		return readerr
 	}
 
 	bodytext := string(bodybytes)
@@ -191,6 +199,7 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 	// 	return fmt.Errorf("%v", resp.Status)
 	// }
 
+	// Signal to the caller that the write to Cortex was successful.
 	return nil
 }
 
