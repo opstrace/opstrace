@@ -199,6 +199,9 @@ async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
     process.stderr.write(".");
   }
 
+  // The next log message should appear on its own new line.
+  process.stderr.write("\n");
+
   // Note(JP): only one of both is needed to present as authentication proof
   // to the Opstrace DNS service. Consolidate that. Probably the ID Token.
   assert(result["access_token"]);
