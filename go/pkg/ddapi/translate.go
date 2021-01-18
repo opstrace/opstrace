@@ -123,10 +123,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		return nil, fmt.Errorf("invalid JSON doc: %v", jerr)
 	}
 
-	// TODO: Consider preallocating `promTimeSeriesFragments`
-	//nolint:prealloc
-	var promTimeSeriesFragments []*prompb.TimeSeries
-
+	promTimeSeriesFragments := make([]*prompb.TimeSeries, 0,len(sfragments.Fragments)
 	for _, fragment := range sfragments.Fragments {
 		// Build up label set as a map to ensure uniqueness of keys.
 		labels := map[string]string{
@@ -180,7 +177,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// Inspiration from
 		// https://github.com/open-telemetry/opentelemetry-go-contrib/blob/v0.15.0/exporters/metric/cortex/cortex.go#L385
 
-		var promSamples []prompb.Sample
+		promSamples := make([]prompb.Sample, 0, len(fragment.Points))
 		for _, point := range fragment.Points {
 			// TODO: think about if `point.Value` should undergo a
 			// transformation, depending on the DD metric type (count, rate,
