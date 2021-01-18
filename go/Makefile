@@ -111,6 +111,7 @@ ddapi:
 .PHONY: unit-tests
 unit-tests:
 	# Let's see if the Docker daemon of the bk host is available
+	docker info
 	echo -e "GET /v1.40/images/json HTTP/1.0\r\n" | nc -U /var/run/docker.sock
 	go test -v ./...
 
