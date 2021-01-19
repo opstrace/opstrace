@@ -203,16 +203,25 @@ export function debugLogHTTPResponse(
     status: ${resp.statusCode}
     body[:500]: ${getBodyPrefix(resp)}
     headers: ${JSON.stringify(resp.headers)}
-    totalTime: ${(ts.phases.total ?? -1000) / 1000.0} s
-    dnsDone->TCPconnectDone: ${(ts.phases.tcp ?? -1000) / 1000.0} s
-    connectDone->reqSent ${(ts.phases.request ?? -1000) / 1000.0} s
-    reqSent->firstResponseByte: ${(ts.phases.firstByte ?? -1000) / 1000.0} s
+    totalTime: ${(ts.phases.total ? ts.phases.total : -1000) / 1000.0} s
+    dnsDone->TCPconnectDone: ${
+      (ts.phases.tcp ? ts.phases.tcp : -1000) / 1000.0
+    } s
+    connectDone->reqSent ${
+      (ts.phases.request ? ts.phases.request : -1000) / 1000.0
+    } s
+    reqSent->firstResponseByte: ${
+      (ts.phases.firstByte ? ts.phases.firstByte : -1000) / 1000.0
+    } s
     `);
 }
 
 export function debugLogHTTPResponseLight(resp: GotResponse): void {
-  const t1 = (resp.timings.phases.total ?? -1000) / 1000.0;
-  const t2 = (resp.timings.phases.firstByte ?? -1000) / 1000.0;
+  const t1 =
+    (resp.timings.phases.total ? resp.timings.phases.total : -1000) / 1000.0;
+  const t2 =
+    (resp.timings.phases.firstByte ? resp.timings.phases.firstByte : -1000) /
+    1000.0;
   log.debug(
     `resp to ${resp.request.options.method}(${resp.requestUrl}) -> ${
       resp.statusCode
