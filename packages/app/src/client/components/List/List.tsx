@@ -84,4 +84,12 @@ function VirtualList({
   );
 }
 
-export default React.memo(VirtualList);
+const List = React.memo(VirtualList);
+/**
+ * blah blah
+ * @param props
+ */
+function MemoList(props: VirtualListProps) {
+  return <List {...props} />;
+}
+export default MemoList;

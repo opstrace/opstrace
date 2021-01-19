@@ -16,7 +16,7 @@
 import express from "express";
 import { GeneralServerError } from "server/errors";
 import ModuleClient from "server/moduleClient";
-import { log } from "@opstrace/utils";
+import { log } from "@opstrace/utils/src/log";
 import { parseFileImportUri } from "state/file/utils/uri";
 import graphqlClient from "state/clients/graphqlClient";
 
