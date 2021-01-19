@@ -604,11 +604,12 @@ deploy-testremote-teardown:
 #
 .PHONY: unit-tests
 unit-tests: node_modules \
+	go-unit-tests \
 	cli-crashtest \
 	cli-tests-no-cluster \
 	run-app-unit-tests \
-	ts-unit-tests \
-	go-unit-tests
+	ts-unit-tests
+
 
 node_modules:
 	yarn --frozen-lockfile
