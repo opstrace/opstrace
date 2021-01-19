@@ -24,8 +24,9 @@ import { blue } from "@material-ui/core/colors";
 
 import List from "../List/List";
 import { ButtonListItem } from "../List/ListItem";
-import ListItemAvatar from "../List/ListItemAvatar";
-import ListItemText from "../List/ListItemText";
+import { ListItemAvatar } from "../List/ListItemAvatar";
+import { ListItemText } from "../List/ListItemText";
+
 import { Button } from "../Button";
 import { Typography } from "../Typography";
 import DialogTitle from "./DialogTitle";

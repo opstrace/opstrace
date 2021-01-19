@@ -378,7 +378,6 @@ export interface CustomTSWebWorkerFactory {
 }
 
 declare global {
-  var importScripts: (path: string) => void | undefined;
   var customTSWorkerFactory: CustomTSWebWorkerFactory | undefined;
 }
 

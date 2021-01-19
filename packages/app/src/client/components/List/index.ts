@@ -13,18 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export { default as ListItemAvatar } from "./ListItemAvatar";
-export * from "./ListItemAvatar";
-
-export { default as ListItem } from "./ListItem";
-export * from "./ListItem";
-
-export { default as ListItemSecondaryAction } from "./ListItemSecondaryAction";
-export * from "./ListItemSecondaryAction";
-
-export { default as ListItemText } from "./ListItemText";
-export * from "./ListItemText";
-
 export { default as List } from "./List";
+export * from "./ListItemAvatar";
+export * from "./ListItem";
+export * from "./ListItemSecondaryAction";
+export * from "./ListItemText";
 export * from "./List";

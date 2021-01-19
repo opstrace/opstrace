@@ -25,6 +25,4 @@ const BaseListItemAvatar = (props: ListItemAvatarProps) => (
   <MuiListItemAvatar {...props} />
 );
 
-const ListItemAvatar = styled(BaseListItemAvatar)``;
-
-export default ListItemAvatar;
+export const ListItemAvatar = styled(BaseListItemAvatar)``;

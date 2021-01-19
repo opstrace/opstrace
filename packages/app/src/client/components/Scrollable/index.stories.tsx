@@ -19,7 +19,7 @@ import { Meta } from "@storybook/react";
 
 import List, { VirtualListRenderItemProps } from "../List/List";
 import { ButtonListItem } from "../List/ListItem";
-import ListItemText from "../List/ListItemText";
+import { ListItemText } from "../List/ListItemText";
 
 export default {
   title: "Components/Scrollable"

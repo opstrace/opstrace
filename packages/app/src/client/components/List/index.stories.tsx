@@ -18,8 +18,8 @@ import React from "react";
 import { Meta } from "@storybook/react";
 import List, { VirtualListRenderItemProps } from "./List";
 import { ButtonListItem } from "./ListItem";
-import ListItemSecondaryAction from "./ListItemSecondaryAction";
-import ListItemText from "./ListItemText";
+import { ListItemSecondaryAction } from "./ListItemSecondaryAction";
+import { ListItemText } from "./ListItemText";
 import { Box } from "../Box";
 
 export default {

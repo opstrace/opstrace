@@ -192,6 +192,7 @@ export class DiagnosticsAdapter extends Adapter {
       let handle: number;
       const changeSubscription = model.onDidChangeContent(() => {
         clearTimeout(handle);
+        // @ts-ignore
         handle = setTimeout(() => this._doValidate(model), 500);
       });
 

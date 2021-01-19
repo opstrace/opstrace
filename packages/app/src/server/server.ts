@@ -21,7 +21,7 @@ import express from "express";
 import delay from "delay";
 import { createLightship } from "lightship";
 import http from "http";
-import { log, setLogger, buildLogger } from "@opstrace/utils/lib/log";
+import { log, setLogger, buildLogger } from "@opstrace/utils";
 import path from "path";
 import bodyParser from "body-parser";
 

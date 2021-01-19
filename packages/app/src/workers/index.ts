@@ -44,6 +44,7 @@ opScriptDefaults.setCompilerOptions({
   jsx: JsxEmit.Preserve,
   allowJs: true,
   allowNonTsExtensions: true,
+  allowSyntheticDefaultImports: true,
   target: ScriptTarget.ES2015,
   moduleResolution: 2,
   lib: ["es6"],

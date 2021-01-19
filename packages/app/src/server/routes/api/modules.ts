@@ -13,12 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import path from "path";
 import express from "express";
 import { GeneralServerError } from "server/errors";
 
 function createModuleHandler() {
   const router = express.Router();
+
+  router.get("/opstrace.lib.d.ts", async function (req, res, next) {
+    console.log(
+      "fetching",
+      path.resolve(process.cwd(), "lib/opstrace.lib.d.ts")
+    );
+    res.sendFile(
+      path.resolve(process.cwd(), "lib/opstrace.lib.d.ts"),
+      {
+        headers: {
+          "Content-Disposition": "inline",
+          "content-type": "text/html"
+        }
+      },
+      (err?: any) => {
+        if (err) {
+          next(err);
+        }
+      }
+    );
+  });
 
   // add a catch all for misconfigured requests
   router.all("*", function (req, res, next) {
