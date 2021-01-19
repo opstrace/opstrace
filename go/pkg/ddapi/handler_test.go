@@ -47,22 +47,28 @@ func getPushURL(c testcontainers.Container, ctx context.Context) string {
 func TestSimpleInsert(t *testing.T) {
 	ctx := context.Background()
 
-	// Assume that this is the directory that this package resides in.
-	// That's true at least when clicking `run test` in vs code :P
+	// Assume that this is the directory that this source file resides in.
+	// That's true when clicking `run test` in vs code, and interestingly also
+	// true when running `make unit-tests`, i.e. when running `go test ...`.
+	// https://stackoverflow.com/a/23847429/145400
 	testdir, err := os.Getwd()
+	log.Infof("test dir: %s", testdir)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	//  It is the caller's responsibility to remove the directory when no
-	//  longer needed.
+	// "It is the caller's responsibility to remove the directory when no
+	// longer needed.""
 	tempdir, err := ioutil.TempDir("/tmp", "opstrace-go-unit-tests")
+	log.Infof("created tmpdir: %s", tempdir)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Copy that file into /tmp so that it can be shared across containers,
-	// and so that the bindMount source is valid _on the host_, too.
+	// Copy the Cortex config file into `tempdir` (under /tmp) so that it can
+	// so that the bindMount source is valid _on the host_, too (assume that
+	// this test runner runs in a container, and that /tmp is shared between
+	// host and containers).
 	cortexCfgSourcePath := testdir + "/test-resources/cortex-dev-cfg.yaml"
 	cortexCfgHostPath := tempdir + "/cortex-dev-cfg.yaml"
 	simpleFileCopy(cortexCfgSourcePath, cortexCfgHostPath)
@@ -73,10 +79,6 @@ func TestSimpleInsert(t *testing.T) {
 		WaitingFor:   wait.ForHTTP("/ready").WithPort("33333/tcp"),
 		BindMounts:   map[string]string{cortexCfgHostPath: "/cortex-config.yaml"},
 		Cmd:          []string{"exec", "./cortex", "-config.file=/cortex-config.yaml"},
-		// Attempt to work around
-		// creating reaper failed: could not start container: dial tcp: i/o timeout
-		// see #257
-		// SkipReaper: true,
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
