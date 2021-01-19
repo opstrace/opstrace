@@ -451,6 +451,7 @@ ci-%: checkenv-builddir
 	stat "${OPSTRACE_BUILD_DIR}"
 	@echo -e "\n\n* invoke in CI container: make $*"
 	docker run -ti \
+	--net=host \
 	-v /tmp:/tmp \
 	-v ${OPSTRACE_BUILD_DIR}:/build \
 	-v ${PWD}:/checkout-readonly:ro \
