@@ -46,6 +46,11 @@ export function DDAPIResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
+  // Do not deploy DD API for system tenant.
+  if (tenant.type === "SYSTEM") {
+    return collection;
+  }
+
   const config = {
     replicas: select(getNodeCount(state), [
       { "<=": 4, choose: 2 },
