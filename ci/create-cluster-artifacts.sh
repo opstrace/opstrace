@@ -28,7 +28,7 @@ kubectl get all --namespace=cortex 2>/dev/null | awk '{print $1}' | \
 
 
 # See opstrace-prelaunch/issues/1319
-for LOKICORTEX in loki cortex
+for LOKICORTEX in loki cortex dd
 do
     for K8SNAMESPACE in system-tenant default-tenant
     do
