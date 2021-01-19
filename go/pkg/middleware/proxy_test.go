@@ -20,10 +20,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReverseProxy_healthy(t *testing.T) {
@@ -83,7 +85,7 @@ func TestReverseProxy_healthy(t *testing.T) {
 
 func TestReverseProxy_unhealthy(t *testing.T) {
 	tenantName := "test"
-	expectedError := "dial tcp 127.0.0.1:0: connect: connection refused"
+
 	// set a url for the querier and distributor so that it always fail to
 	// simulate an error reaching the backend
 	u, err := url.Parse("http://localhost:0")
@@ -105,15 +107,17 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 			t.Errorf("want 502 Bad Gateway got %v", resp.StatusCode)
 		}
 
-		b, err := ioutil.ReadAll(resp.Body)
+		rbody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			t.Errorf("got %v", err)
 		}
 
-		got := strings.TrimSpace(string(b))
-		if expectedError != got {
-			t.Errorf("want %v got %v", expectedError, got)
-		}
+		// Confirm that the original error message (for why the request could
+		// not be proxied) is contained in the response body.
+		assert.Regexp(
+			t,
+			regexp.MustCompile("^dial tcp .* connect: connection refused$"),
+			strings.TrimSpace(string(rbody)))
 	}
 
 	w := httptest.NewRecorder()
