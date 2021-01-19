@@ -76,7 +76,7 @@ func TestSimpleInsert(t *testing.T) {
 		// Attempt to work around
 		// creating reaper failed: could not start container: dial tcp: i/o timeout
 		// see #257
-		SkipReaper: true,
+		// SkipReaper: true,
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
