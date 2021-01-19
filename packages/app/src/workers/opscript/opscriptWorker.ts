@@ -1,3 +1,18 @@
+/**
+ * Copyright 2020 Opstrace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import path from "path";
 import {
   TypeScriptWorker,
@@ -6,6 +21,7 @@ import {
 import * as ts from "../monaco-typescript-4.1.1/lib/typescriptServices";
 import { parseFileImportUri, getFileUri } from "state/file/utils/uri";
 import { CompilerOutput } from "workers/types";
+import buildTime from "client/buildInfo";
 
 function parseFileName(fileName: string) {
   return parseFileImportUri(fileName.replace(/^file:\/\/\//, ""));
@@ -18,6 +34,22 @@ export class OpScriptWorker extends TypeScriptWorker {
     this.rewritePath = this.rewritePath.bind(this);
     this.isDynamicImport = this.isDynamicImport.bind(this);
     this.transformImports = this.transformImports.bind(this);
+    this.fetchLibTypes();
+  }
+
+  async fetchLibTypes() {
+    try {
+      const res = await fetch(`/_/modules/opstrace.lib.d.ts?v=${buildTime}`);
+      const content = await res.text();
+      this.updateExtraLibs({
+        "opstrace.lib.d.ts": {
+          content,
+          version: 1
+        }
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   rewritePath(
