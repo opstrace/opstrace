@@ -110,14 +110,13 @@ ddapi:
 
 .PHONY: unit-tests
 unit-tests:
-	# Let's see if the Docker daemon of the bk host is available
+	# These tests need access to a Docker daemon: they use the library
+	# `testcontainers-go`) to manage Docker container(s). If this target
+	# is executed in a Docker container, then that Docker container needs to
+	# have /var/run/docker.sock mounted into the container (from the host),
+	# and should be started in host networking mode (at least that's what's
+	# known to work).
 	#docker info
-	#docker version
-	#echo -e "GET /v1.39/images/json HTTP/1.0\r\n" | nc -U /var/run/docker.sock
-	# Force a less mordern Docker Engine API version that the client supports,
-	# knowing (assuming) that the Docker daemon that we work against here is
-	# Docker CE 19.x
-	#DOCKER_HOST=unix:///var/run/docker.sock DOCKER_TLS_VERIFY=0
 	go test -v ./...
 
 
