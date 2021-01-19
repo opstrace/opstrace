@@ -24,6 +24,7 @@ declare namespace NodeJS {
     readonly NODE_ENV: "development" | "production" | "test";
     readonly EARLY_PREVIEW?: "true";
     readonly PUBLIC_URL: string;
+    readonly BUILD_TIME: string;
   }
 }
 
