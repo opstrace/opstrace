@@ -15,6 +15,7 @@
 package ddapi
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -25,6 +26,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"text/template"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -34,19 +37,25 @@ import (
 )
 
 /*
+Shared these resources between tests:
+- a containerized Cortex instance
+- a DDCortexProxy instance
 
+Use `testify/suite` primitives for managing setup and teardown of these
+resources.
 
-Use `testify/suite` primitives.
+Ref:
+https://godoc.org/github.com/stretchr/testify/suite
 
-
+Interesting recipe:
 https://github.com/stretchr/testify/pull/655#issuecomment-588500729
 
 */
 
-// Define the suite, and absorb the built-in basic suite
-// functionality from testify - including assertion methods.
 type Suite struct {
 	suite.Suite
+
+	// The remaining properties represent shared state across tests.
 	tmpdir                 string
 	cortexContainerContext context.Context
 	cortexContainer        testcontainers.Container
@@ -132,6 +141,83 @@ func (suite *Suite) TestPostEmptyBody() {
 			suite.T(),
 			regexp.MustCompile("^bad request: error while translating body: invalid JSON doc: readObjectStart: expect .*$"),
 			strings.TrimSpace(string(rbody)))
+	}
+
+	checker(w)
+}
+
+func createJSONBody(metricname string) string {
+	const jsonTextTemplate = `
+	{
+		"series": [
+		  {
+			"metric": "unit.test.metric.{{.metricname}}",
+			"points": [
+			  [
+				{{.secondsSinceEpoch}},
+				1
+			  ]
+			],
+			"tags": [
+			  "version:7.24.1"
+			],
+			"host": "x1carb6",
+			"type": "rate",
+			"interval": 10
+		  }
+		]
+	  }
+`
+	data := map[string]interface{}{
+		"metricname":        metricname,
+		"secondsSinceEpoch": fmt.Sprintf("%v", time.Now().Unix()),
+	}
+
+	// Render template, store result in string.
+
+	t := template.Must(template.New("").Parse(jsonTextTemplate))
+
+	buf := &bytes.Buffer{}
+	if err := t.Execute(buf, data); err != nil {
+		panic(err)
+	}
+
+	// Return buffer (type *bytes.Buffer), can be passed as third argument to
+	// httptest.NewRequest(). This buffer holds UTF-8-encoded JSON. return buf
+
+	// Return string (JSON doc as text). Need to create strings.NewReader(s)
+	// then for passing it as third arg to httptest.NewRequest()
+	return buf.String()
+}
+
+func (suite *Suite) TestPostSimpleBody() {
+	jsonText := createJSONBody("dummymetric")
+	log.Infof("POST:\n%s", jsonText)
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series",
+		strings.NewReader(jsonText),
+	)
+
+	w := httptest.NewRecorder()
+	suite.ddcp.SeriesPostHandler(w, req)
+
+	checker := func(w *httptest.ResponseRecorder) {
+		resp := w.Result()
+		assert.Equal(suite.T(), 202, resp.StatusCode)
+
+		rbody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			suite.T().Errorf("readAll error: %v", err)
+		}
+		log.Infof("response body:\n%s", rbody)
+		// Confirm that the original error message (for why the request could
+		// not be proxied) is contained in the response body.
+		assert.Equal(
+			suite.T(),
+			"{\"status\": \"ok\"}",
+			strings.TrimSpace(string(rbody)),
+		)
 	}
 
 	checker(w)
