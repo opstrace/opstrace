@@ -97,7 +97,7 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 	promTimeSeriesFragments, terr := TranslateDDSeriesJSON(bodybytes)
 	if terr != nil {
 		// Most likely bad input (bad request).
-		logErrorEmit400(w, fmt.Errorf("bad request: error while translating JSON doc: %v", terr))
+		logErrorEmit400(w, fmt.Errorf("bad request: error while translating body: %v", terr))
 		return
 	}
 
