@@ -22,7 +22,6 @@ import {
   Deployment,
   Service,
   ServiceAccount,
-  PersistentVolumeClaim,
   V1ServicemonitorResource
 } from "@opstrace/kubernetes";
 
@@ -114,32 +113,6 @@ export function GrafanaResources(
         metadata: {
           name: "grafana-dashboards",
           namespace
-        }
-      },
-      kubeConfig
-    )
-  );
-
-  collection.add(
-    new PersistentVolumeClaim(
-      {
-        apiVersion: "v1",
-        kind: "PersistentVolumeClaim",
-        metadata: {
-          labels: {
-            app: "grafana"
-          },
-          name: "grafana-storage-claim",
-          namespace
-        },
-        spec: {
-          storageClassName: "pd-ssd",
-          accessModes: ["ReadWriteOnce"],
-          resources: {
-            requests: {
-              storage: "10Gi"
-            }
-          }
         }
       },
       kubeConfig
@@ -325,11 +298,6 @@ export function GrafanaResources(
                   volumeMounts: [
                     ...[
                       {
-                        mountPath: "/var/lib/grafana",
-                        name: "grafana-storage",
-                        readOnly: false
-                      },
-                      {
                         mountPath: "/etc/grafana/provisioning/datasources",
                         name: "grafana-datasources",
                         readOnly: false
@@ -356,12 +324,6 @@ export function GrafanaResources(
               serviceAccountName: "grafana",
               volumes: [
                 ...[
-                  {
-                    name: "grafana-storage",
-                    persistentVolumeClaim: {
-                      claimName: "grafana-storage-claim"
-                    }
-                  },
                   {
                     name: "grafana-datasources",
                     secret: {
