@@ -119,7 +119,7 @@ func (suite *Suite) TestPostEmptyBody() {
 
 		// Expect bad request, because there's no JSON body in the request
 		// And no content type header.
-		assert.Equal(suite.T(), resp.StatusCode, 400)
+		assert.Equal(suite.T(), 400, resp.StatusCode)
 
 		rbody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
