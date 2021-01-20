@@ -129,6 +129,7 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 
 	// Make the DD agent's HTTP client happy.
 	w.Header().Set("Content-Type", "application/json")
+	// Emit 202 response
 	w.WriteHeader(http.StatusAccepted)
 	w.Write([]byte("{\"status\": \"ok\"}"))
 }
