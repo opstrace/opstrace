@@ -44,6 +44,7 @@ module.exports = {
         "revert", // specifically for a git revert commit
         "systemlogs", // change in opstrace system log arch/implementation
         "test-remote", // change in test-remote project
+        "test-upgrade", // change in test-remote project
         "uninstaller", // change in uninstaller (cluster destruction/teardown)
         "website", // change in the website code or content
         "wip" // work in progress, later to be edited/squashed ("i don't want to think about choosing the right prefix now!")
