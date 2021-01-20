@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { urlJoin } from "url-join-ts";
 import {
   ResourceCollection,
   Deployment,
@@ -450,7 +451,10 @@ export function OpstraceApplicationResources(
                     },
                     {
                       name: "HASURA_GRAPHQL_DATABASE_URL",
-                      value: state.config.config?.postgreSQLEndpoint
+                      value: urlJoin(
+                        state.config.config?.postgreSQLEndpoint,
+                        state.config.config?.opstraceDBName
+                      )
                     },
                     {
                       name: "HASURA_GRAPHQL_ENABLE_CONSOLE",

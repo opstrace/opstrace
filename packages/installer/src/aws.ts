@@ -826,7 +826,8 @@ export function* ensureAWSInfraExists(): Generator<
     // additional steps to reset the password on the postgres instance.
     // The Postgres endpoint is attached to it's own private subnet which is only accessible from within the cluster's VPC.
     // Their is no public endpoint for the RDS instance.
-    postgreSQLEndpoint: `postgres://opstrace:2020WasQuiteTheYear@${dbCluster.Endpoint}/opstrace`
+    postgreSQLEndpoint: `postgres://opstrace:2020WasQuiteTheYear@${dbCluster.Endpoint}/`,
+    opstraceDBName: "opstrace"
   };
 }
 

@@ -188,6 +188,7 @@ function* createClusterCore() {
 
   let kubeconfigString = "";
   let postgreSQLEndpoint = "";
+  let opstraceDBName = "";
 
   if (ccfg.cloud_provider === "gcp") {
     if (!gcpAuthOptions) {
@@ -199,6 +200,7 @@ function* createClusterCore() {
     );
     kubeconfigString = res.kubeconfigString;
     postgreSQLEndpoint = res.postgreSQLEndpoint;
+    opstraceDBName = res.opstraceDBName;
 
     controllerConfig.gcp = {
       projectId: gcpAuthOptions.projectId,
@@ -223,7 +225,11 @@ function* createClusterCore() {
   }
 
   // Update our controllerConfig with the Postgress Endpoint and revalidate for good measure
-  controllerConfig = { ...controllerConfig, postgreSQLEndpoint };
+  controllerConfig = {
+    ...controllerConfig,
+    postgreSQLEndpoint,
+    opstraceDBName
+  };
   controllerConfigSchema.validateSync(controllerConfig, { strict: true });
 
   if (!kubeconfigString) {
