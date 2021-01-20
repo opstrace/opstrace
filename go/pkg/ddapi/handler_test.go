@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
+	"strings"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
@@ -31,6 +33,16 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+/*
+
+
+Use `testify/suite` primitives.
+
+
+https://github.com/stretchr/testify/pull/655#issuecomment-588500729
+
+*/
+
 // Define the suite, and absorb the built-in basic suite
 // functionality from testify - including assertion methods.
 type Suite struct {
@@ -39,9 +51,10 @@ type Suite struct {
 	cortexContainerContext context.Context
 	cortexContainer        testcontainers.Container
 	cortexPushURL          string
+	ddcp                   *DDCortexProxy
 }
 
-// `SetupSuite()`: is run once before all tests in the suite.
+// `SetupSuite()` is run once before the first test in the suite.
 func (suite *Suite) SetupSuite() {
 	d, err := createTmpDir()
 	if err != nil {
@@ -56,6 +69,13 @@ func (suite *Suite) SetupSuite() {
 		return
 	}
 	suite.cortexContainerContext, suite.cortexContainer, suite.cortexPushURL = ctx, cont, url
+
+	// Instantiate DDCortexProxy, to be shared across tests in this suite (of
+	// course, in a smart way: stop sharing when this thing ever changes
+	// towards being stateful anymore).
+	tenantName := "test"
+	disableAPIAuthentication := true
+	suite.ddcp = NewDDCortexProxy(tenantName, suite.cortexPushURL, disableAPIAuthentication)
 }
 
 // `TearDownSuite(): run once upon suite exit.
@@ -80,24 +100,19 @@ func (suite *Suite) TearDownSuite() {
 
 // Each suite method whose name starts with `Test` is run as a regular test.
 func (suite *Suite) TestCortexDirectly() {
-	// Test interacting straight with the containerized Cortex
-	// Expect 405 response: Method Not Allowed (only POST is supposed to work).
+	// Test interacting straight with the containerized Cortex Expect 405
+	// response: Method Not Allowed (only POST is supposed to work). In that
+	// sense, this test explicitly checks availability of Cortex to other
+	// tests.
 	resp, err := http.Get(suite.cortexPushURL)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), resp.StatusCode, 405)
 }
 
-func (suite *Suite) TestDDCP() {
-	tenantName := "text"
-	remoteWriteURL := suite.cortexPushURL
-	disableAPIAuthentication := true
-	ddcp := NewDDCortexProxy(tenantName, remoteWriteURL, disableAPIAuthentication)
-
-	// resp, err := http.Get(suite.cortexPushURL)
-	// assert.NotNil(suite.T(), err)
-	// assert.Equal(suite.T(), resp.StatusCode, 405)
-
+func (suite *Suite) TestPostEmptyBody() {
 	req := httptest.NewRequest("POST", "http://localhost/api/v1/series", nil)
+	w := httptest.NewRecorder()
+	suite.ddcp.SeriesPostHandler(w, req)
 
 	checker := func(w *httptest.ResponseRecorder) {
 		resp := w.Result()
@@ -108,14 +123,17 @@ func (suite *Suite) TestDDCP() {
 
 		rbody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			suite.T().Errorf("got %v", err)
+			suite.T().Errorf("readAll error: %v", err)
 		}
 
-		log.Infof("response body: %s", rbody)
+		// Confirm that the original error message (for why the request could
+		// not be proxied) is contained in the response body.
+		assert.Regexp(
+			suite.T(),
+			regexp.MustCompile("^bad request: error while translating body: invalid JSON doc: readObjectStart: expect .*$"),
+			strings.TrimSpace(string(rbody)))
 	}
 
-	w := httptest.NewRecorder()
-	ddcp.SeriesPostHandler(w, req)
 	checker(w)
 }
 
