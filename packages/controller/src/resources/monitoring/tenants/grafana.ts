@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { urlJoin } from "url-join-ts";
+
 import {
   ResourceCollection,
   ConfigMap,
@@ -48,6 +50,7 @@ export function GrafanaResources(
     name: string;
     readOnly: boolean;
   }[] = [];
+  const grafanaDBName = `grafana_${tenant.name}`;
 
   // Add our system dashboards.
   if (tenant.type === "SYSTEM") {
@@ -144,6 +147,27 @@ export function GrafanaResources(
   );
 
   collection.add(
+    new ConfigMap(
+      {
+        apiVersion: "v1",
+        data: {
+          "grafana.ini":
+            "[database]\nurl=" +
+            urlJoin(state.config.config?.postgreSQLEndpoint, grafanaDBName)
+        },
+        kind: "ConfigMap",
+        metadata: {
+          name: "grafana-config",
+          namespace
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  const dbconfig = new URL(state.config.config?.postgreSQLEndpoint || "");
+
+  collection.add(
     new Deployment(
       {
         apiVersion: "apps/v1",
@@ -172,6 +196,31 @@ export function GrafanaResources(
               }
             },
             spec: {
+              initContainers: [
+                {
+                  image: "tmaier/postgresql-client",
+                  name: "creategrafanadb",
+                  env: [
+                    {
+                      name: "PGHOST",
+                      value: dbconfig.hostname
+                    },
+                    {
+                      name: "PGUSER",
+                      value: dbconfig.username
+                    },
+                    {
+                      name: "PGPASSWORD",
+                      value: dbconfig.password
+                    }
+                  ],
+                  command: [
+                    "sh",
+                    "-c",
+                    `echo "SELECT 'CREATE DATABASE ${grafanaDBName}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${grafanaDBName}')\\gexec" | psql`
+                  ]
+                }
+              ],
               containers: [
                 {
                   image: DockerImages.grafana,
@@ -284,6 +333,12 @@ export function GrafanaResources(
                         mountPath: "/etc/grafana/provisioning/datasources",
                         name: "grafana-datasources",
                         readOnly: false
+                      },
+                      {
+                        mountPath: "/etc/grafana/grafana.ini",
+                        subPath: "grafana.ini",
+                        name: "grafana-config",
+                        readOnly: true
                       }
                     ],
                     ...volumeMounts
@@ -311,6 +366,12 @@ export function GrafanaResources(
                     name: "grafana-datasources",
                     secret: {
                       secretName: "grafana-datasources"
+                    }
+                  },
+                  {
+                    name: "grafana-config",
+                    configMap: {
+                      name: "grafana-config"
                     }
                   }
                 ],
