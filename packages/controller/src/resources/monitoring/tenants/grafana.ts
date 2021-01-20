@@ -171,7 +171,7 @@ export function GrafanaResources(
             spec: {
               initContainers: [
                 {
-                  image: "tmaier/postgresql-client",
+                  image: DockerImages.postgresClient,
                   name: "creategrafanadb",
                   env: [
                     {
