@@ -207,6 +207,7 @@ export function* ensureGCPInfraExists(
     // The Postgres endpoint is attached to it's own private subnet which is only accessible from within the cluster's VPC.
     // Their is no public endpoint for the CloudSQL instance.
     // The default user created when standing up a CloudSQL instance is "postgres".
-    postgreSQLEndpoint: `postgres://postgres:2020WasQuiteTheYear@${privateAddress.ipAddress}:5432/opstrace`
+    postgreSQLEndpoint: `postgres://postgres:2020WasQuiteTheYear@${privateAddress.ipAddress}:5432/`,
+    opstraceDBName: "opstrace"
   };
 }

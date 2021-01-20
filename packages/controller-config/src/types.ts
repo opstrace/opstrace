@@ -36,6 +36,7 @@ export const controllerConfigSchema = yup
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     postgreSQLEndpoint: yup.string().notRequired(),
+    opstraceDBName: yup.string().notRequired(),
     envLabel: yup.string(),
     // Note: remove one of cert_issuer and `tlsCertificateIssuer`.
     cert_issuer: yup
