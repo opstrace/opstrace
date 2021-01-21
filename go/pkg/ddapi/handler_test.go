@@ -156,7 +156,8 @@ func (suite *Suite) TestInsertOneSample() {
 
 	// Parameterize a simple time series fragment with one data point.
 	tsfragment := &DDTSFragment{
-		metricname: testname,
+		metricname:  testname,
+		sampleCount: 1,
 	}
 
 	suite.ddcp.SeriesPostHandler(
@@ -164,6 +165,28 @@ func (suite *Suite) TestInsertOneSample() {
 		genSubmitRequest(tsfragment.toJSON()),
 	)
 
+	checkerExpectInsertSuccess(w, suite.T())
+}
+
+func (suite *Suite) TestInsertZeroSamples() {
+	testname := suite.T().Name()
+	w := httptest.NewRecorder()
+
+	// Parameterize a simple time series fragment with zero data points.
+	tsfragment := &DDTSFragment{
+		metricname:  testname,
+		sampleCount: 0,
+	}
+
+	// Note: the resulting JSON doc really has an empty JSON sample array:
+	// "points": [],
+	suite.ddcp.SeriesPostHandler(
+		w,
+		genSubmitRequest(tsfragment.toJSON()),
+	)
+
+	// And yet, as of the time of writing, the cortex HTTP response code is 200
+	// and this submission doc is accepted. Review that in the future.
 	checkerExpectInsertSuccess(w, suite.T())
 }
 

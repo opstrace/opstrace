@@ -88,9 +88,6 @@ func (tsfragment *DDTSFragment) toJSON() string {
 
 	log.Infof("tsfragment.sampleCount: %d", tsfragment.sampleCount)
 	sampleCount = tsfragment.sampleCount
-	if tsfragment.sampleCount == 0 {
-		sampleCount = 1
-	}
 	timestampIncrement = tsfragment.timestampIncrement
 	if tsfragment.timestampIncrement == 0 {
 		timestampIncrement = 1
