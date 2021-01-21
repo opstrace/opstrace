@@ -177,6 +177,9 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// Inspiration from
 		// https://github.com/open-telemetry/opentelemetry-go-contrib/blob/v0.15.0/exporters/metric/cortex/cortex.go#L385
 
+		// Note(JP): handle special case of fragment.Points being of zero
+		// length: probably simply drop this fragment.
+
 		promSamples := make([]prompb.Sample, 0, len(fragment.Points))
 		for _, point := range fragment.Points {
 			// TODO: think about if `point.Value` should undergo a
