@@ -18,8 +18,10 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"mime"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/proto"
@@ -62,6 +64,34 @@ func logErrorEmit400(w http.ResponseWriter, e error) {
 	http.Error(w, e.Error(), 400)
 }
 
+// Determine whether the request includes a content-type header listing
+// application/json. Inspiration from
+// https://gist.github.com/rjz/fe283b02cbaa50c5991e1ba921adf7c9
+// https://github.com/dcos/bouncer/blob/master/bouncer/app/wsgiapp.py#L44
+func checkJSONContentType(r *http.Request) error {
+	ct := r.Header.Get("Content-type")
+
+	// Require header to be set.
+	if ct == "" {
+		return fmt.Errorf("request lacks content-type header")
+	}
+
+	// Note(JP): extract type and subtype of the Content-Type header (to make
+	// the checks invariant w.r.t. to further parameters such as charset). Also
+	// account for type and subtype being case- insensitive. See
+	// https://www.ietf.org/rfc/rfc1521.txt page 9.
+	for _, v := range strings.Split(ct, ",") {
+		t, _, err := mime.ParseMediaType(v)
+		if err != nil {
+			break
+		}
+		if t == "application/json" {
+			return nil
+		}
+	}
+	return fmt.Errorf("unexpected content-type header (expecting: application/json")
+}
+
 func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Log raw request detail (with compressed body)
 	// dump, err := httputil.DumpRequest(r, false)
@@ -71,6 +101,12 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 	// 	return
 	// }
 	// log.Info(string(dump))
+
+	cterr := checkJSONContentType(r)
+	if cterr != nil {
+		logErrorEmit400(w, fmt.Errorf("bad request: %v", cterr))
+		return
+	}
 
 	bodybytes, rerr := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
