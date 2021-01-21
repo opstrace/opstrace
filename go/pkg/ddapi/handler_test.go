@@ -62,7 +62,6 @@ func (suite *Suite) TestCortexDirectly() {
 }
 
 func (suite *Suite) TestPostMissingCTH() {
-
 	// Valid JSON in body, valid URL, valid method. Invalid: missing
 	// content-type header.
 	req := httptest.NewRequest(
