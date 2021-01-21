@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/json-iterator/go v1.1.10
+	github.com/lithammer/dedent v1.1.0
 	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/prometheus v2.5.0+incompatible

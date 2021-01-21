@@ -16,6 +16,7 @@ package ddapi
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -51,17 +52,7 @@ https://github.com/stretchr/testify/pull/655#issuecomment-588500729
 
 */
 
-func (suite *Suite) TestCortexDirectly() {
-	// Test interacting straight with the containerized Cortex Expect 405
-	// response: Method Not Allowed (only POST is supposed to work). In that
-	// sense, this test explicitly checks availability of Cortex to other
-	// tests.
-	resp, err := http.Get(suite.cortexPushURL)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), resp.StatusCode, 405)
-}
-
-func (suite *Suite) TestPostMissingCTH() {
+func (suite *Suite) TestMissingCTH() {
 	// Valid JSON in body, valid URL, valid method. Invalid: missing
 	// content-type header.
 	req := httptest.NewRequest(
@@ -94,7 +85,7 @@ func (suite *Suite) TestPostMissingCTH() {
 	checker(w)
 }
 
-func (suite *Suite) TestPostBadCTH() {
+func (suite *Suite) TestBadCTH() {
 	// Valid JSON in body, valid URL, valid method. Invalid: unexpected
 	// CT header
 	req := httptest.NewRequest(
@@ -129,7 +120,7 @@ func (suite *Suite) TestPostBadCTH() {
 	checker(w)
 }
 
-func (suite *Suite) TestPostEmptyBody() {
+func (suite *Suite) TestEmptyBody() {
 	// Valid URL, valid method, valid CT header, invalid: missing body
 	req := httptest.NewRequest("POST", "http://localhost/api/v1/series", nil)
 	req.Header.Set("Content-Type", "application/json")
@@ -159,32 +150,56 @@ func (suite *Suite) TestPostEmptyBody() {
 	checker(w)
 }
 
-func (suite *Suite) TestPostSimpleBody() {
+func (suite *Suite) TestInsertOneSample() {
 	testname := suite.T().Name()
 	w := httptest.NewRecorder()
 
-	suite.ddcp.SeriesPostHandler(
-		w,
-		genSubmitRequest(createJSONBody(testname)),
-	)
-
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-		assert.Equal(suite.T(), 202, resp.StatusCode)
-
-		rbody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			suite.T().Errorf("readAll error: %v", err)
-		}
-
-		assert.Equal(
-			suite.T(),
-			"{\"status\": \"ok\"}",
-			strings.TrimSpace(string(rbody)),
-		)
+	// Parameterize a simple time series fragment with one data point.
+	tsfragment := &DDTSFragment{
+		metricname: testname,
 	}
 
-	checker(w)
+	suite.ddcp.SeriesPostHandler(
+		w,
+		genSubmitRequest(tsfragment.toJSON()),
+	)
+
+	checkerExpectInsertSuccess(w, suite.T())
+}
+
+func (suite *Suite) TestInsertManySamples() {
+	testname := suite.T().Name()
+	w := httptest.NewRecorder()
+
+	// Parameterize a simple time series fragment with one data point.
+	tsfragment := &DDTSFragment{
+		metricname:           testname,
+		sampleCount:          10,
+		sampleValueIncrement: 1,
+	}
+
+	suite.ddcp.SeriesPostHandler(
+		w,
+		genSubmitRequest(tsfragment.toJSON()),
+	)
+
+	checkerExpectInsertSuccess(w, suite.T())
+}
+
+func checkerExpectInsertSuccess(w *httptest.ResponseRecorder, t *testing.T) {
+	resp := w.Result()
+	assert.Equal(t, 202, resp.StatusCode)
+
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("readAll error: %v", err)
+	}
+
+	assert.Equal(
+		t,
+		"{\"status\": \"ok\"}",
+		strings.TrimSpace(string(rbody)),
+	)
 }
 
 // Generate HTTP request to POST to the DD API proxy, specifically to
@@ -198,7 +213,8 @@ func genSubmitRequest(jsontext string) *http.Request {
 		strings.NewReader(jsontext),
 	)
 	req.Header.Set("Content-Type", "application/json")
-	log.Infof("generated POST request with body:\n%s", jsontext)
+	// log.Infof("generated POST request with body:\n%s", jsontext)
+	fmt.Fprintf(os.Stdout, "generated POST request with body:\n%s", jsontext)
 	return req
 }
 
@@ -235,6 +251,13 @@ func (suite *Suite) SetupSuite() {
 	tenantName := "test"
 	disableAPIAuthentication := true
 	suite.ddcp = NewDDCortexProxy(tenantName, suite.cortexPushURL, disableAPIAuthentication)
+
+	// Test interacting straight with the containerized Cortex Expect 405
+	// response: Method Not Allowed (only POST is supposed to work). In that
+	// sense, this test explicitly checks availability of Cortex.
+	resp, err := http.Get(suite.cortexPushURL)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), resp.StatusCode, 405)
 }
 
 // `TearDownSuite(): run once upon suite exit.
@@ -258,6 +281,6 @@ func (suite *Suite) TearDownSuite() {
 }
 
 // For 'go test' to run this suite, create a stdlib `testing` test function.
-func TestWithCortexSuite(t *testing.T) {
+func TestSubmitSeriesHandlerWithCortex(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
