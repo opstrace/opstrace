@@ -51,7 +51,7 @@ func NewReverseProxy(
 }
 
 func (rp *ReverseProxy) HandleWithQuerierProxy(w http.ResponseWriter, r *http.Request) {
-	if rp.authenticatorEnabled && !OpstraceRequestAuthenticator(w, r, rp.tenantName) {
+	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
 		// Error response has already been written. Terminate request handling.
 		return
 	}
@@ -61,7 +61,7 @@ func (rp *ReverseProxy) HandleWithQuerierProxy(w http.ResponseWriter, r *http.Re
 }
 
 func (rp *ReverseProxy) HandleWithDistributorProxy(w http.ResponseWriter, r *http.Request) {
-	if rp.authenticatorEnabled && !OpstraceRequestAuthenticator(w, r, rp.tenantName) {
+	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
 		// Error response has already been written. Terminate request handling.
 		return
 	}

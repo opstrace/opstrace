@@ -32,11 +32,15 @@ import (
 // for multiple public keys, each identified by a key id.
 var authtokenVerificationPubKey *rsa.PublicKey
 
-// Look up and cryptographically verify authentication proof in HTTP request.
-// Emit error HTTP responses and return `false` upon any failure. Return
-// `true` only when the authentication proof is valid and matches the
-// expected Opstrace tenant name.
-func OpstraceRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedTenantName string) bool {
+// Expect HTTP request to have a header of the shape
+//
+//      `Authorization: Bearer <AUTHTOKEN>` set.
+//
+// Extract and cryptographically verify authentication proof in HTTP request.
+// Emit error HTTP responses and return `false` upon any failure. Return `true`
+// only when the authentication proof is valid and matches the expected
+// Opstrace tenant name.
+func DataAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedTenantName string) bool {
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
 	av := r.Header.Get("Authorization")
@@ -50,7 +54,25 @@ func OpstraceRequestAuthenticator(w http.ResponseWriter, r *http.Request, expect
 	}
 
 	authTokenUnverified := asplits[1]
+	return requestAuthenticator(w, authTokenUnverified, expectedTenantName)
+}
 
+// Expect HTTP request to have URL containing a query parameter
+// api_key=<AUTHTOKEN>
+//
+// Extract and cryptographically verify authentication proof in HTTP request.
+// Emit error HTTP responses and return `false` upon any failure. Return `true`
+// only when the authentication proof is valid and matches the expected
+// Opstrace tenant name.
+func DDAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedTenantName string) bool {
+	// Assume that the DD agent sends the API key that it was configured with
+	// as a URL query parameter, e.g. ``...?api_key=1337`.
+	// Use that API key as Opstrace data API autthentication token.
+	authTokenUnverified := "1337"
+	return requestAuthenticator(w, authTokenUnverified, expectedTenantName)
+}
+
+func requestAuthenticator(w http.ResponseWriter, authTokenUnverified string, expectedTenantName string) bool {
 	// Perform RFC 7519-compliant JWT verification (standard claims, such as
 	// exp and nbf, but also cryptographic signature verification). Expect a
 	// set of standard claims to be present (`sub`, `iss` and the likes), and
@@ -61,7 +83,7 @@ func OpstraceRequestAuthenticator(w http.ResponseWriter, r *http.Request, expect
 	if parseerr != nil {
 		log.Infof("jwt verification failed: %s", parseerr)
 		// See below: must exit here, because `tokenstruct.Valid` may not
-		// be accessible.
+		// be accessible. See #282.
 		return exit401(w, "bad authentication token")
 	}
 
