@@ -55,18 +55,23 @@ func OpstraceRequestAuthenticator(w http.ResponseWriter, r *http.Request, expect
 	// exp and nbf, but also cryptographic signature verification). Expect a
 	// set of standard claims to be present (`sub`, `iss` and the likes), and
 	// custom claims to not be present.
-	tokenstruct, err := jwt.ParseWithClaims(
+	tokenstruct, parseerr := jwt.ParseWithClaims(
 		authTokenUnverified, &jwt.StandardClaims{}, keyLookupCallback)
 
-	if err != nil {
-		log.Infof("jwt verification failed: %s", err)
+	if parseerr != nil {
+		log.Infof("jwt verification failed: %s", parseerr)
+		// See below: must exit here, because `tokenstruct.Valid` may not
+		// be accessible.
+		return exit401(w, "bad authentication token")
 	}
 
 	// The `err` check above should be enough, but the documentation for
 	// `jwt-go` is kind of bad and most code examples check this `Valid`
-	// property, too.
+	// property, too. Update(JP): accessing `tokenstruct.Valid` can result in a
+	// segmentation fault here when `parseerr` above is not `nil`! That is
+	// why there are two checks and exit routes now.
 	if !(tokenstruct.Valid) {
-		log.Infof("jwt verification failed: %s", err)
+		log.Infof("jwt verification failed: %s", parseerr)
 		return exit401(w, "bad authentication token")
 	}
 
