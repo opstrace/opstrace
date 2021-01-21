@@ -67,7 +67,7 @@ func logErrorEmit400(w http.ResponseWriter, e error) {
 // Determine whether the request includes a content-type header listing
 // application/json. Inspiration from
 // https://gist.github.com/rjz/fe283b02cbaa50c5991e1ba921adf7c9
-// https://github.com/dcos/bouncer/blob/master/bouncer/app/wsgiapp.py#L44
+// https://github.com/dcos/bouncer/blob/master/bouncer/app/wsgiapp.py
 func checkJSONContentType(r *http.Request) error {
 	ct := r.Header.Get("Content-type")
 
@@ -89,7 +89,7 @@ func checkJSONContentType(r *http.Request) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("unexpected content-type header (expecting: application/json")
+	return fmt.Errorf("unexpected content-type header (expecting: application/json)")
 }
 
 func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {

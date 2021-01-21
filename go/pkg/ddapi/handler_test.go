@@ -95,6 +95,41 @@ func (suite *Suite) TestPostMissingCTH() {
 	checker(w)
 }
 
+func (suite *Suite) TestPostBadCTH() {
+	// Valid JSON in body, valid URL, valid method. Invalid: unexpected
+	// CT header
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series",
+		strings.NewReader("{}"),
+	)
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+	w := httptest.NewRecorder()
+	suite.ddcp.SeriesPostHandler(w, req)
+
+	checker := func(w *httptest.ResponseRecorder) {
+		resp := w.Result()
+
+		// Expect bad request, because there's no JSON body in the request.
+		assert.Equal(suite.T(), 400, resp.StatusCode)
+
+		rbody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			suite.T().Errorf("readAll error: %v", err)
+		}
+
+		// Confirm that the original error message (for why the request could
+		// not be proxied) is contained in the response body.
+		assert.Equal(
+			suite.T(),
+			"bad request: unexpected content-type header (expecting: application/json)",
+			strings.TrimSpace(string(rbody)),
+		)
+	}
+
+	checker(w)
+}
+
 func (suite *Suite) TestPostEmptyBody() {
 	// Valid URL, valid method, valid CT header, invalid: missing body
 	req := httptest.NewRequest("POST", "http://localhost/api/v1/series", nil)
