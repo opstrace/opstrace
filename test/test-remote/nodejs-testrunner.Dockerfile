@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
     libnss3 libcups2 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
     libdbus-c++-1-0v5 libdrm2 libxkbcommon0 libxcomposite1 \
     libxdamage1 libxfixes3 libxrandr2 libgbm1 libgtk-3-0 libgtk-3-0 \
-    libasound2 libatspi2.0-0
+    libasound2 libatspi2.0-0 libxshmfence
 
 # The test runner requires `kubectl`.
 RUN curl -sSL -O https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl && \
