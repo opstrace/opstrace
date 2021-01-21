@@ -25,36 +25,35 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestReverseProxy_healthy(t *testing.T) {
 	tenantName := "test"
+
+	// Create an actual HTTP server to be used as upstream (backend) for the
+	// proxy. Any request to / checks the X-Scope-Orgid header and writes
+	// the tenant name to the response.
 	router := mux.NewRouter()
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		orgID := r.Header.Get("X-Scope-Orgid")
-		if tenantName != orgID {
-			t.Errorf("want %v got %v", tenantName, orgID)
-		}
-		// write a test string in the response so we can check the
-		// request is proxied correctly
+		assert.Equal(t, tenantName, r.Header.Get("X-Scope-Orgid"))
 		fmt.Fprintln(w, tenantName)
 	})
-
 	backend := httptest.NewServer(router)
 	defer backend.Close()
-
-	u, err := url.Parse(backend.URL)
+	upstreamURL, err := url.Parse(backend.URL)
 	if err != nil {
 		t.Errorf("got %w", err)
 	}
 
-	// we can reuse the same backend to send both the querier and distributor
-	// requests
+	// Reuse the same backend for both the querier and distributor requests.
 	disableAPIAuth := true
-	rp := NewReverseProxy(tenantName, u, u, disableAPIAuth)
-	// create a request to the test backend
-	req := httptest.NewRequest("GET", u.String(), nil)
+	rp := NewReverseProxy(tenantName, upstreamURL, upstreamURL, disableAPIAuth)
+
+	// Create a request to the proxy (not to the backend/upstream). The URL
+	// does not really matter because we're bypassing the actual router.
+	req := httptest.NewRequest("GET", "http://localhost", nil)
 
 	checker := func(w *httptest.ResponseRecorder) {
 		resp := w.Result()
@@ -98,7 +97,7 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	disableAPIAuth := true
 	rp := NewReverseProxy(tenantName, u, u, disableAPIAuth)
 	// create a request to the test backend
-	req := httptest.NewRequest("GET", u.String(), nil)
+	req := httptest.NewRequest("GET", "http://localhost", nil)
 
 	checker := func(w *httptest.ResponseRecorder) {
 		resp := w.Result()
@@ -117,7 +116,18 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 		assert.Regexp(
 			t,
 			regexp.MustCompile("^dial tcp .* connect: connection refused$"),
-			strings.TrimSpace(string(rbody)))
+			strings.TrimSpace(string(rbody)),
+		)
+	}
+
+	w := httptest.NewRecorder()
+	rp.HandleWithDistributorProxy(w, req)
+	checker(w)
+
+	w = httptest.NewRecorder()
+	rp.HandleWithQuerierProxy(w, req)
+	checker(w)
+}
 	}
 
 	w := httptest.NewRecorder()
