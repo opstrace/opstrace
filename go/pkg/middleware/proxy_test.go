@@ -119,6 +119,29 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	rp.HandleWithQuerierProxy(w, req)
 	checker(w)
 }
+
+func TestReverseProxyAuthenticator_noheader(t *testing.T) {
+	disableAPIAuth := false
+
+	fakeURL, _ := url.Parse("http://localhost")
+
+	// No need for a proxy backend here because the request is expected to be
+	// processed in the proxy only, not going beyond the authenticator stage.
+	rp := NewReverseProxy("test", fakeURL, fakeURL, disableAPIAuth)
+
+	req := httptest.NewRequest("GET", "http://localhost", nil)
+
+	checker := func(w *httptest.ResponseRecorder) {
+		resp := w.Result()
+		// Expect 401 response because no authentication proof is set.
+		assert.Equal(t, 401, resp.StatusCode)
+
+		// Confirm that a helpful error message is in the body.
+		assert.Equal(
+			t,
+			"Authorization header missing",
+			getStrippedBody(resp),
+		)
 	}
 
 	w := httptest.NewRecorder()
