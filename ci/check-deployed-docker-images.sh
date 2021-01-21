@@ -34,6 +34,11 @@ do
         fi
     fi
 
+    # skip the check for init container images as the above check does not catch them
+    if [[ "${img}" == *"tmaier/postgresql-client"* ]]; then
+        continue
+    fi
+
     if ! grep -q ${img} <<< "${DEPLOYED_IMAGES}" ; then
         echo "ERROR: image ${img} was not deployed"
         FAIL=1
