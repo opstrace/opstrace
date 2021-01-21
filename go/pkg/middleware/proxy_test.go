@@ -25,27 +25,34 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReverseProxy_healthy(t *testing.T) {
-	tenantName := "test"
-
+func createProxyUpstream(tenantName string, t *testing.T) (*url.URL, func()) {
 	// Create an actual HTTP server to be used as upstream (backend) for the
-	// proxy. Any request to / checks the X-Scope-Orgid header and writes
-	// the tenant name to the response.
+	// proxies to be tested. Any request to / checks the X-Scope-Orgid header
+	// and writes the tenant name to the response.
 	router := mux.NewRouter()
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, tenantName, r.Header.Get("X-Scope-Orgid"))
 		fmt.Fprintln(w, tenantName)
 	})
+
 	backend := httptest.NewServer(router)
-	defer backend.Close()
+
 	upstreamURL, err := url.Parse(backend.URL)
+
 	if err != nil {
-		t.Errorf("got %w", err)
+		panic(err)
 	}
+
+	return upstreamURL, backend.Close
+}
+
+func TestReverseProxy_healthy(t *testing.T) {
+	tenantName := "test"
+	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
+	defer upstreamClose()
 
 	// Reuse the same backend for both the querier and distributor requests.
 	disableAPIAuth := true
@@ -57,20 +64,9 @@ func TestReverseProxy_healthy(t *testing.T) {
 
 	checker := func(w *httptest.ResponseRecorder) {
 		resp := w.Result()
-
-		if resp.StatusCode != http.StatusOK {
-			t.Errorf("want 200 Status OK got %v", resp.StatusCode)
-		}
-
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Errorf("got %v", err)
-		}
-
-		got := strings.TrimSpace(string(b))
-		if got != tenantName {
-			t.Errorf("want %v test got %v", tenantName, got)
-		}
+		assert.Equal(t, 200, resp.StatusCode)
+		// Check that the proxy's upstream has indeed written the response.
+		assert.Equal(t, tenantName, getStrippedBody(resp))
 	}
 
 	w := httptest.NewRecorder()
@@ -106,17 +102,12 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 			t.Errorf("want 502 Bad Gateway got %v", resp.StatusCode)
 		}
 
-		rbody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Errorf("got %v", err)
-		}
-
 		// Confirm that the original error message (for why the request could
 		// not be proxied) is contained in the response body.
 		assert.Regexp(
 			t,
 			regexp.MustCompile("^dial tcp .* connect: connection refused$"),
-			strings.TrimSpace(string(rbody)),
+			getStrippedBody(resp),
 		)
 	}
 
@@ -137,4 +128,14 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	w = httptest.NewRecorder()
 	rp.HandleWithQuerierProxy(w, req)
 	checker(w)
+}
+
+// Read all response body bytes, and return response body as string, with
+// leading and trailing whitespace stripped.
+func getStrippedBody(resp *http.Response) string {
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(fmt.Errorf("readAll error: %v", err))
+	}
+	return strings.TrimSpace(string(rbody))
 }
