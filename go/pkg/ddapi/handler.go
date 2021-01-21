@@ -29,13 +29,15 @@ import (
 	"github.com/prometheus/prometheus/prompb"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/opstrace/opstrace/go/pkg/middleware"
 )
 
 type DDCortexProxy struct {
-	tenantName            string
-	authenticationEnabled bool
-	remoteWriteURL        string
-	rwHTTPClient          *http.Client
+	tenantName           string
+	authenticatorEnabled bool
+	remoteWriteURL       string
+	rwHTTPClient         *http.Client
 }
 
 func NewDDCortexProxy(
@@ -47,8 +49,8 @@ func NewDDCortexProxy(
 		remoteWriteURL: remoteWriteURL,
 		// Instantiate HTTP client for writing to a Prometheus remote_write
 		// endpoint (in this case this is expected to be served by Cortex).
-		rwHTTPClient:          buildRemoteWriteHTTPClient(),
-		authenticationEnabled: !disableAPIAuthentication,
+		rwHTTPClient:         buildRemoteWriteHTTPClient(),
+		authenticatorEnabled: !disableAPIAuthentication,
 	}
 
 	return p
@@ -93,6 +95,11 @@ func checkJSONContentType(r *http.Request) error {
 }
 
 func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
+	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
 	// Log raw request detail (with compressed body)
 	// dump, err := httputil.DumpRequest(r, false)
 	// if err != nil {

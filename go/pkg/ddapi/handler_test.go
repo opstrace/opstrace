@@ -307,3 +307,73 @@ func (suite *Suite) TearDownSuite() {
 func TestSubmitSeriesHandlerWithCortex(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
+
+func TestDDProxyAuthenticator_nokey(t *testing.T) {
+	// Instantiate proxy with enabled authenticator
+	tenantName := "test"
+	disableAPIAuthentication := false
+	ddcp := NewDDCortexProxy(tenantName, "http://localhost", disableAPIAuthentication)
+
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series",
+		strings.NewReader("{}"),
+	)
+
+	w := httptest.NewRecorder()
+
+	ddcp.SeriesPostHandler(w, req)
+
+	checker := func(w *httptest.ResponseRecorder) {
+		resp := w.Result()
+		assert.Equal(t, 401, resp.StatusCode)
+		// Confirm that a helpful error message is in the body.
+		assert.Equal(
+			t,
+			"DD API key missing (api_key URL query parameter)",
+			getStrippedBody(resp),
+		)
+	}
+
+	checker(w)
+}
+
+func TestDDProxyAuthenticator_badtoken(t *testing.T) {
+	// Instantiate proxy with enabled authenticator
+	tenantName := "test"
+	disableAPIAuthentication := false
+	ddcp := NewDDCortexProxy(tenantName, "http://localhost", disableAPIAuthentication)
+
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series?api_key=foobarbadtoken",
+		strings.NewReader("{}"),
+	)
+
+	w := httptest.NewRecorder()
+
+	ddcp.SeriesPostHandler(w, req)
+
+	checker := func(w *httptest.ResponseRecorder) {
+		resp := w.Result()
+		assert.Equal(t, 401, resp.StatusCode)
+		// Confirm that a helpful error message is in the body.
+		assert.Equal(
+			t,
+			"bad authentication token",
+			getStrippedBody(resp),
+		)
+	}
+
+	checker(w)
+}
+
+// Read all response body bytes, and return response body as string, with
+// leading and trailing whitespace stripped.
+func getStrippedBody(resp *http.Response) string {
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(fmt.Errorf("readAll error: %v", err))
+	}
+	return strings.TrimSpace(string(rbody))
+}
