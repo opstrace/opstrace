@@ -67,8 +67,16 @@ func DataAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expecte
 func DDAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedTenantName string) bool {
 	// Assume that the DD agent sends the API key that it was configured with
 	// as a URL query parameter, e.g. ``...?api_key=1337`.
-	// Use that API key as Opstrace data API autthentication token.
-	authTokenUnverified := "1337"
+	// Use that API key as Opstrace data API authentication token.
+
+	// Only one parameter of that name is expected.
+	apikey := r.URL.Query().Get("api_key")
+
+	if apikey == "" {
+		return exit401(w, "DD API key missing (api_key URL query parameter)")
+	}
+
+	authTokenUnverified := apikey
 	return requestAuthenticator(w, authTokenUnverified, expectedTenantName)
 }
 
