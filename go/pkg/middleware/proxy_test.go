@@ -153,6 +153,40 @@ func TestReverseProxyAuthenticator_noheader(t *testing.T) {
 	checker(w)
 }
 
+func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
+	disableAPIAuth := false
+
+	fakeURL, _ := url.Parse("http://localhost")
+
+	// No need for a proxy backend here because the request is expected to be
+	// processed in the proxy only, not going beyond the authenticator stage.
+	rp := NewReverseProxy("test", fakeURL, fakeURL, disableAPIAuth)
+
+	req := httptest.NewRequest("GET", "http://localhost", nil)
+	req.Header.Set("Authorization", "Bearer foobarbadtoken")
+
+	checker := func(w *httptest.ResponseRecorder) {
+		resp := w.Result()
+		// Expect 401 response because no authentication proof is set.
+		assert.Equal(t, 401, resp.StatusCode)
+
+		// Confirm that a helpful error message is in the body.
+		assert.Equal(
+			t,
+			"bad authentication token",
+			getStrippedBody(resp),
+		)
+	}
+
+	w := httptest.NewRecorder()
+	rp.HandleWithDistributorProxy(w, req)
+	checker(w)
+
+	w = httptest.NewRecorder()
+	rp.HandleWithQuerierProxy(w, req)
+	checker(w)
+}
+
 // Read all response body bytes, and return response body as string, with
 // leading and trailing whitespace stripped.
 func getStrippedBody(resp *http.Response) string {
