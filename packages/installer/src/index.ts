@@ -416,6 +416,8 @@ export async function waitUntilUIIsReachable(
   const tnames = [...tenantNames];
   tnames.push("system");
 
+  // As of today this actually checks for Grafana, HTTP 200 response with
+  // body `<a href="/grafana/login">Found</a>.` is expected.
   for (const tname of tnames) {
     probeUrls[`https://${tname}.${opstraceClusterName}.opstrace.io/`] = tname;
   }
@@ -428,7 +430,7 @@ export async function waitUntilUIIsReachable(
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
     // Do not inspect JSON in response, do not enrich request with
     // authentication proof.
-    actors.push(waitForProbeURL(probeUrl, tenantName, 200, false, true));
+    actors.push(waitForProbeURL(probeUrl, tenantName, 200, false, false));
   }
   await Promise.all(actors);
   log.info(
