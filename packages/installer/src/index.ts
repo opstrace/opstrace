@@ -327,6 +327,11 @@ function* createClusterCore() {
     ccfg.cluster_name,
     ccfg.tenants
   );
+  yield call(
+    waitUntilDDAPIEndpointsAreReachable,
+    ccfg.cluster_name,
+    ccfg.tenants
+  );
   yield call(waitUntilGrafanaIsReachable, ccfg.cluster_name, ccfg.tenants);
 
   log.info(
@@ -356,6 +361,33 @@ export async function waitUntilDataAPIEndpointsAreReachable(
     // opstrace-prelaunch/issues/1570
     probeUrls[`https://cortex.${mid}/api/v1/labels`] = tname;
     probeUrls[`https://loki.${mid}/loki/api/v1/labels`] = tname;
+  }
+
+  log.info(
+    "waiting for expected HTTP responses at these URLs: %s",
+    JSON.stringify(probeUrls, null, 2)
+  );
+  const actors = [];
+  for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
+    actors.push(waitForProbeURL(probeUrl, tenantName, 200, true));
+  }
+  await Promise.all(actors);
+  log.info(
+    "wait for data API endpoints: all probe URLs returned expected HTTP responses, continue"
+  );
+}
+
+export async function waitUntilDDAPIEndpointsAreReachable(
+  opstraceClusterName: string,
+  tenantNames: string[]
+): Promise<void> {
+  // Do not check for system tenant (not deployed for it).
+  // key: unique url, value: corresponding tenant name
+  const probeUrls: Dict<string> = {};
+
+  for (const tname of tenantNames) {
+    const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
+    // opstrace-prelaunch/issues/1570
     probeUrls[`https://dd.${mid}/api/v1/series`] = tname;
   }
 
@@ -365,15 +397,11 @@ export async function waitUntilDataAPIEndpointsAreReachable(
   );
   const actors = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
-    if (probeUrl.includes("dd.")) {
-      actors.push(waitForProbeURL(probeUrl, tenantName, 405));
-    } else {
-      actors.push(waitForProbeURL(probeUrl, tenantName, 200, true));
-    }
+    actors.push(waitForProbeURL(probeUrl, tenantName, 405));
   }
   await Promise.all(actors);
   log.info(
-    "wait for data API endpoints: all probe URLs returned expected HTTP responses, continue"
+    "wait for DD API endpoints: all probe URLs returned expected HTTP responses, continue"
   );
 }
 
