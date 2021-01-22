@@ -27,13 +27,13 @@ import {
 import { State } from "../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { KubeConfig, V1EnvVar } from "@kubernetes/client-node";
-import { min, roundDown, select } from "@opstrace/utils";
 import {
   getNodeCount,
   getControllerConfig,
   getTenantNamespace
 } from "../../helpers";
 import { addApiIngress } from "./ingress";
+import { nodecountToReplicacount } from "./index";
 import {
   DockerImages,
   ControllerConfigType
@@ -53,14 +53,7 @@ export function CortexAPIResources(
   const { tlsCertificateIssuer } = getControllerConfig(state);
 
   const config = {
-    replicas: select(getNodeCount(state), [
-      { "<=": 4, choose: 2 },
-      { "<=": 6, choose: 4 },
-      {
-        "<=": Infinity,
-        choose: min(4, roundDown(getNodeCount(state) / 2))
-      }
-    ]),
+    replicas: nodecountToReplicacount(getNodeCount(state)),
     resources: {}
   };
 
