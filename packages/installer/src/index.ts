@@ -322,7 +322,11 @@ function* createClusterCore() {
     );
   }
 
-  yield call(waitUntilLokiCortexAreReachable, ccfg.cluster_name, ccfg.tenants);
+  yield call(
+    waitUntilDataAPIEndpointsAreReachable,
+    ccfg.cluster_name,
+    ccfg.tenants
+  );
   yield call(waitUntilGrafanaIsReachable, ccfg.cluster_name, ccfg.tenants);
 
   log.info(
@@ -336,7 +340,7 @@ function* createClusterCore() {
  * cluster-internal readiness wasn't always enough, see opstrace-prelaunch/issues/1245 and related
  * issues.
  */
-export async function waitUntilLokiCortexAreReachable(
+export async function waitUntilDataAPIEndpointsAreReachable(
   opstraceClusterName: string,
   tenantNames: string[]
 ): Promise<void> {
@@ -352,88 +356,7 @@ export async function waitUntilLokiCortexAreReachable(
     // opstrace-prelaunch/issues/1570
     probeUrls[`https://cortex.${mid}/api/v1/labels`] = tname;
     probeUrls[`https://loki.${mid}/loki/api/v1/labels`] = tname;
-  }
-
-  const requestSettings: GotOptions = {
-    throwHttpErrors: false,
-    retry: 0,
-    https: { rejectUnauthorized: false },
-    timeout: {
-      connect: 3000,
-      request: 10000
-    }
-  };
-
-  async function wait(probeUrl: string, tenantName: string) {
-    let attempt = 0;
-    while (true) {
-      attempt++;
-
-      // Copy common request settings, add authentication proof if required.
-      const rs: GotOptions = { ...requestSettings };
-      const tenantAuthToken = clusterCreateConfig.tenantApiTokens[tenantName];
-      if (tenantAuthToken !== undefined) {
-        rs.headers = { Authorization: `Bearer ${tenantAuthToken}` };
-      }
-
-      let resp: GotResponse<string>;
-      try {
-        //@ts-ignore `got(probeUrl, rs)` returns `unknown` from tsc's point of view
-        resp = await got(probeUrl, rs);
-      } catch (e) {
-        if (e instanceof got.RequestError) {
-          // Assume that for most of the 'waiting time' the probe fails in this
-          // error handler.
-
-          // When the debug log level is active then I think it's the right
-          // thing to log every negative probe outcome as it happens (e.g. DNS
-          // resolution error or TCP connection timeout).
-          log.debug(`${probeUrl}: HTTP request failed with: ${e.message}`);
-
-          // But on info level just emit the fact that the expected outcome is
-          // still being waited for, every now and then (maybe every ~20
-          // seconds).
-          if (attempt % 5 === 0) {
-            log.info(
-              `${probeUrl}: still waiting for expected signal. Last error: ${e.message}`
-            );
-          }
-
-          await sleep(5.0);
-          continue;
-        } else {
-          throw e;
-        }
-      }
-
-      if (resp.statusCode == 200) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let data: any;
-        try {
-          data = JSON.parse(resp.body);
-        } catch (err) {
-          log.debug(`${probeUrl}: JSON deserialization err: ${err.message}`);
-        }
-
-        if (data && data.status !== undefined) {
-          if (data.status == "success") {
-            log.info(`${probeUrl}: got expected HTTP response`);
-            return;
-          }
-          log.info(`${probeUrl}: JSON doc 'status': ${data.status}`);
-        }
-      }
-
-      log.debug(`HTTP response details:
-  status: ${resp.statusCode}
-  body[:500]: ${resp.body.slice(0, 500)}`);
-
-      if (attempt % 2 === 0) {
-        log.info(`${probeUrl}: still waiting, unexpected HTTP response`);
-      }
-
-      await sleep(5.0);
-    }
+    probeUrls[`https://dd.${mid}/loki/api/v1/labels`] = tname;
   }
 
   log.info(
@@ -442,10 +365,12 @@ export async function waitUntilLokiCortexAreReachable(
   );
   const actors = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
-    actors.push(wait(probeUrl, tenantName));
+    actors.push(waitForProbeURL(probeUrl, tenantName));
   }
   await Promise.all(actors);
-  log.info("All probe URLs returned expected HTTP responses, continue");
+  log.info(
+    "wait for data API endpoints: all probe URLs returned expected HTTP responses, continue"
+  );
 }
 
 export async function waitUntilGrafanaIsReachable(
@@ -460,11 +385,24 @@ export async function waitUntilGrafanaIsReachable(
   tnames.push("system");
 
   for (const tname of tnames) {
-    const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
-
-    probeUrls[`https://${mid}/`] = tname;
+    probeUrls[`https://${tname}.${opstraceClusterName}.opstrace.io/`] = tname;
   }
 
+  log.info(
+    "waiting for expected HTTP responses at these URLs: %s",
+    JSON.stringify(probeUrls, null, 2)
+  );
+  const actors = [];
+  for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
+    actors.push(waitForProbeURL(probeUrl, tenantName));
+  }
+  await Promise.all(actors);
+  log.info(
+    "wait for grafana endpoints: all probe URLs returned expected HTTP responses, continue"
+  );
+}
+
+async function waitForProbeURL(probeUrl: string, tenantName: string) {
   const requestSettings: GotOptions = {
     throwHttpErrors: false,
     retry: 0,
@@ -475,72 +413,75 @@ export async function waitUntilGrafanaIsReachable(
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function wait(probeUrl: string, tenantName: string) {
-    let attempt = 0;
-    while (true) {
-      attempt++;
+  let attempt = 0;
+  while (true) {
+    attempt++;
 
-      // Copy common request settings, add authentication proof if required.
-      const rs: GotOptions = { ...requestSettings };
-
-      let resp: GotResponse<string>;
-      try {
-        //@ts-ignore `got(probeUrl, rs)` returns `unknown` from tsc's point of view
-        resp = await got(probeUrl, rs);
-      } catch (e) {
-        if (e instanceof got.RequestError) {
-          // Assume that for most of the 'waiting time' the probe fails in this
-          // error handler.
-
-          // When the debug log level is active then I think it's the right
-          // thing to log every negative probe outcome as it happens (e.g. DNS
-          // resolution error or TCP connection timeout).
-          log.debug(`${probeUrl}: HTTP request failed with: ${e.message}`);
-
-          // But on info level just emit the fact that the expected outcome is
-          // still being waited for, every now and then (maybe every ~20
-          // seconds).
-          if (attempt % 5 === 0) {
-            log.info(
-              `${probeUrl}: still waiting for expected signal. Last error: ${e.message}`
-            );
-          }
-
-          await sleep(5.0);
-          continue;
-        } else {
-          throw e;
-        }
-      }
-
-      if (resp.statusCode === 200) {
-        log.info(`${probeUrl}: got expected HTTP response`);
-        return;
-      }
-
-      log.debug(`HTTP response details:
-  status: ${resp.statusCode}
-  body[:500]: ${resp.body.slice(0, 500)}`);
-
-      if (attempt % 2 === 0) {
-        log.info(`${probeUrl}: still waiting, unexpected HTTP response`);
-      }
-
-      await sleep(5.0);
+    // Copy common request settings, add authentication proof if required.
+    const rs: GotOptions = { ...requestSettings };
+    const tenantAuthToken = clusterCreateConfig.tenantApiTokens[tenantName];
+    if (tenantAuthToken !== undefined) {
+      rs.headers = { Authorization: `Bearer ${tenantAuthToken}` };
     }
-  }
 
-  log.info(
-    "waiting for expected HTTP responses at these URLs: %s",
-    JSON.stringify(probeUrls, null, 2)
-  );
-  const actors = [];
-  for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
-    actors.push(wait(probeUrl, tenantName));
+    let resp: GotResponse<string>;
+    try {
+      //@ts-ignore `got(probeUrl, rs)` returns `unknown` from tsc's point of view
+      resp = await got(probeUrl, rs);
+    } catch (e) {
+      if (e instanceof got.RequestError) {
+        // Assume that for most of the 'waiting time' the probe fails in this
+        // error handler.
+
+        // When the debug log level is active then I think it's the right
+        // thing to log every negative probe outcome as it happens (e.g. DNS
+        // resolution error or TCP connection timeout).
+        log.debug(`${probeUrl}: HTTP request failed with: ${e.message}`);
+
+        // But on info level just emit the fact that the expected outcome is
+        // still being waited for, every now and then (maybe every ~20
+        // seconds).
+        if (attempt % 5 === 0) {
+          log.info(
+            `${probeUrl}: still waiting for expected signal. Last error: ${e.message}`
+          );
+        }
+
+        await sleep(5.0);
+        continue;
+      } else {
+        throw e;
+      }
+    }
+
+    if (resp.statusCode == 200) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let data: any;
+      try {
+        data = JSON.parse(resp.body);
+      } catch (err) {
+        log.debug(`${probeUrl}: JSON deserialization err: ${err.message}`);
+      }
+
+      if (data && data.status !== undefined) {
+        if (data.status == "success") {
+          log.info(`${probeUrl}: got expected HTTP response`);
+          return;
+        }
+        log.info(`${probeUrl}: JSON doc 'status': ${data.status}`);
+      }
+    }
+
+    log.debug(`HTTP response details:
+status: ${resp.statusCode}
+body[:500]: ${resp.body.slice(0, 500)}`);
+
+    if (attempt % 2 === 0) {
+      log.info(`${probeUrl}: still waiting, unexpected HTTP response`);
+    }
+
+    await sleep(5.0);
   }
-  await Promise.all(actors);
-  log.info("All probe URLs returned expected HTTP responses, continue");
 }
 
 /**
