@@ -81,7 +81,6 @@ func (suite *Suite) TestMissingCTH() {
 		"bad request: request lacks content-type header",
 		strings.TrimSpace(string(rbody)),
 	)
-
 }
 
 func (suite *Suite) TestBadCTH() {
