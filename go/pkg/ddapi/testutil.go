@@ -178,13 +178,13 @@ func startCortex(tempdir string) (context.Context, testcontainers.Container, str
 	testdir, err := os.Getwd()
 	log.Infof("test dir: %s", testdir)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
-	// Copy the Cortex config file into `tempdir` (under /tmp) so that it can
-	// so that the bindMount source is valid _on the host_, too (assume that
-	// this test runner runs in a container, and that /tmp is shared between
-	// host and containers).
+	// Copy the Cortex config file into `tempdir` (under /tmp) so that the
+	// bindMount source is valid _on the host_, too (assume that this test
+	// runner runs in a container, and that /tmp is shared between host and
+	// containers).
 	cortexCfgSourcePath := testdir + "/test-resources/cortex-dev-cfg.yaml"
 	cortexCfgHostPath := tempdir + "/cortex-dev-cfg.yaml"
 	simpleFileCopy(cortexCfgSourcePath, cortexCfgHostPath)
@@ -220,8 +220,9 @@ func startCortex(tempdir string) (context.Context, testcontainers.Container, str
 	return ctx, container, pushURL, nil
 }
 
-// Copy the src file to dst. Any existing file will be overwritten and will not
-// copy file attributes. https://stackoverflow.com/a/21061062/145400
+// Copy file at `src` to file at `dst`. Any existing file will be overwritten.
+// File attributes are not copied.
+// https://stackoverflow.com/a/21061062/145400
 func simpleFileCopy(src, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
@@ -239,5 +240,4 @@ func simpleFileCopy(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	return out.Close()
 }
