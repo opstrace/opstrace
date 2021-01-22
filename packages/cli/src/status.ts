@@ -33,6 +33,7 @@ import {
   ClusterCreateConfigInterface,
   setCreateConfig,
   waitUntilGrafanaIsReachable,
+  waitUntilDDAPIEndpointsAreReachable,
   waitUntilDataAPIEndpointsAreReachable
 } from "@opstrace/installer";
 import * as schemas from "./schemas";
@@ -93,6 +94,7 @@ async function checkClusterStatus() {
   setCreateConfig(createConfig);
 
   await waitUntilDataAPIEndpointsAreReachable(ccfg.cluster_name, ccfg.tenants);
+  await waitUntilDDAPIEndpointsAreReachable(ccfg.cluster_name, ccfg.tenants);
   await waitUntilGrafanaIsReachable(ccfg.cluster_name, ccfg.tenants);
 }
 
