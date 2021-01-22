@@ -422,22 +422,22 @@ async function waitForProbeURL(
     }
   };
 
+  // Copy common request settings, add authentication proof if required.
+  const rs: GotOptions = { ...requestSettings };
+  const tenantAuthToken = clusterCreateConfig.tenantApiTokens[tenantName];
+  if (tenantAuthToken !== undefined) {
+    // The authentication scheme depends on the API in use. TODO?: Maybe make
+    // the DD API support the header-based authn scheme, too.
+    if (probeUrl.includes("dd.")) {
+      probeUrl = `${probeUrl}?api_key=${tenantAuthToken}`;
+    } else {
+      rs.headers = { Authorization: `Bearer ${tenantAuthToken}` };
+    }
+  }
+
   let attempt = 0;
   while (true) {
     attempt++;
-
-    // Copy common request settings, add authentication proof if required.
-    const rs: GotOptions = { ...requestSettings };
-    const tenantAuthToken = clusterCreateConfig.tenantApiTokens[tenantName];
-    if (tenantAuthToken !== undefined) {
-      // The authentication scheme depends on the API in use. TODO?: Maybe make
-      // the DD API support the header-based authn scheme, too.
-      if (probeUrl.includes("dd.")) {
-        probeUrl = `${probeUrl}?=api_key=${tenantAuthToken}`;
-      } else {
-        rs.headers = { Authorization: `Bearer ${tenantAuthToken}` };
-      }
-    }
 
     let resp: GotResponse<string>;
     try {
