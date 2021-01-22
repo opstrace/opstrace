@@ -27,6 +27,23 @@ import { DDAPIResources } from "./dd";
 // Maybe we should move this out of resources/apis or rename resources/apis
 import { SystemLogAgentResources } from "./systemlogs";
 
+/* Translate node count into replica count*/
+export function nodecountToReplicacount(nodecount: number) {
+  const NC_RC_MAP: Record<string, number> = {
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 3
+  };
+
+  const ncstring = nodecount.toFixed(0);
+  if (ncstring in NC_RC_MAP) {
+    return NC_RC_MAP[ncstring];
+  }
+
+  return Math.floor(nodecount / 2);
+}
+
 export function APIResources(
   state: State,
   kubeConfig: KubeConfig

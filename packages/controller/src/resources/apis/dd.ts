@@ -27,13 +27,13 @@ import {
 import { State } from "../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { KubeConfig, V1EnvVar } from "@kubernetes/client-node";
-import { min, roundDown, select } from "@opstrace/utils";
 import {
   getNodeCount,
   getControllerConfig,
   getTenantNamespace
 } from "../../helpers";
 import { addApiIngress } from "./ingress";
+import { nodecountToReplicacount } from "./index";
 import {
   DockerImages,
   ControllerConfigType
@@ -52,14 +52,7 @@ export function DDAPIResources(
   }
 
   const config = {
-    replicas: select(getNodeCount(state), [
-      { "<=": 4, choose: 2 },
-      { "<=": 6, choose: 4 },
-      {
-        "<=": Infinity,
-        choose: min(4, roundDown(getNodeCount(state) / 2))
-      }
-    ]),
+    replicas: nodecountToReplicacount(getNodeCount(state)),
     resources: {}
   };
 
@@ -70,8 +63,6 @@ export function DDAPIResources(
   const deplName = `${apiName}-api`;
   const remoteWriteURL = "http://distributor.cortex.svc.cluster.local";
 
-  const disableApiAuth = true;
-
   const ddApiCliArgs = [
     "-listen=:8080",
     `-tenantname=${tenant.name}`,
@@ -80,20 +71,16 @@ export function DDAPIResources(
 
   let ddApiEnv: V1EnvVar[];
 
-  //   if (!controllerConfig.disable_data_api_authentication) {
-  //
-  //   }
-
-  if (!disableApiAuth) {
+  if (controllerConfig.disable_data_api_authentication) {
+    ddApiEnv = [];
+    ddApiCliArgs.push("-disable-api-authn");
+  } else {
     ddApiEnv = [
       {
         name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
         value: controllerConfig.data_api_authn_pubkey_pem
       }
     ];
-  } else {
-    ddApiEnv = [];
-    ddApiCliArgs.push("-disable-api-authn");
   }
 
   collection.add(
