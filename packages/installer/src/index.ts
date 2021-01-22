@@ -356,7 +356,7 @@ export async function waitUntilDataAPIEndpointsAreReachable(
     // opstrace-prelaunch/issues/1570
     probeUrls[`https://cortex.${mid}/api/v1/labels`] = tname;
     probeUrls[`https://loki.${mid}/loki/api/v1/labels`] = tname;
-    probeUrls[`https://dd.${mid}/loki/api/v1/labels`] = tname;
+    probeUrls[`https://dd.${mid}/api/v1/series`] = tname;
   }
 
   log.info(
@@ -365,7 +365,11 @@ export async function waitUntilDataAPIEndpointsAreReachable(
   );
   const actors = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
-    actors.push(waitForProbeURL(probeUrl, tenantName));
+    if (probeUrl.includes("dd.")) {
+      actors.push(waitForProbeURL(probeUrl, tenantName, 405));
+    } else {
+      actors.push(waitForProbeURL(probeUrl, tenantName, 200, true));
+    }
   }
   await Promise.all(actors);
   log.info(
@@ -394,7 +398,7 @@ export async function waitUntilGrafanaIsReachable(
   );
   const actors = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
-    actors.push(waitForProbeURL(probeUrl, tenantName));
+    actors.push(waitForProbeURL(probeUrl, tenantName, 200));
   }
   await Promise.all(actors);
   log.info(
@@ -402,7 +406,12 @@ export async function waitUntilGrafanaIsReachable(
   );
 }
 
-async function waitForProbeURL(probeUrl: string, tenantName: string) {
+async function waitForProbeURL(
+  probeUrl: string,
+  tenantName: string,
+  expectedRespCode: number,
+  expectStatusSuccessJSON = false
+) {
   const requestSettings: GotOptions = {
     throwHttpErrors: false,
     retry: 0,
@@ -460,7 +469,11 @@ async function waitForProbeURL(probeUrl: string, tenantName: string) {
       }
     }
 
-    if (resp.statusCode == 200) {
+    if (resp.statusCode == expectedRespCode) {
+      if (!expectStatusSuccessJSON) {
+        return;
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let data: any;
       try {
