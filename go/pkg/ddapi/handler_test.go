@@ -52,6 +52,8 @@ https://github.com/stretchr/testify/pull/655#issuecomment-588500729
 
 */
 
+const TenantName = "test"
+
 func (suite *Suite) TestMissingCTH() {
 	// Valid JSON in body, valid URL, valid method. Invalid: missing
 	// content-type header.
@@ -271,9 +273,9 @@ func (suite *Suite) SetupSuite() {
 	// Instantiate DDCortexProxy, to be shared across tests in this suite (of
 	// course, in a smart way: stop sharing when this thing ever changes
 	// towards being stateful anymore).
-	tenantName := "test"
+
 	disableAPIAuthentication := true
-	suite.ddcp = NewDDCortexProxy(tenantName, suite.cortexPushURL, disableAPIAuthentication)
+	suite.ddcp = NewDDCortexProxy(TenantName, suite.cortexPushURL, disableAPIAuthentication)
 
 	// Test interacting straight with the containerized Cortex Expect 405
 	// response: Method Not Allowed (only POST is supposed to work). In that
@@ -310,9 +312,8 @@ func TestSubmitSeriesHandlerWithCortex(t *testing.T) {
 
 func TestDDProxyAuthenticator_nokey(t *testing.T) {
 	// Instantiate proxy with enabled authenticator
-	tenantName := "test"
 	disableAPIAuthentication := false
-	ddcp := NewDDCortexProxy(tenantName, "http://localhost", disableAPIAuthentication)
+	ddcp := NewDDCortexProxy(TenantName, "http://localhost", disableAPIAuthentication)
 
 	req := httptest.NewRequest(
 		"POST",
@@ -340,9 +341,8 @@ func TestDDProxyAuthenticator_nokey(t *testing.T) {
 
 func TestDDProxyAuthenticator_badtoken(t *testing.T) {
 	// Instantiate proxy with enabled authenticator
-	tenantName := "test"
 	disableAPIAuthentication := false
-	ddcp := NewDDCortexProxy(tenantName, "http://localhost", disableAPIAuthentication)
+	ddcp := NewDDCortexProxy(TenantName, "http://localhost", disableAPIAuthentication)
 
 	req := httptest.NewRequest(
 		"POST",
