@@ -240,4 +240,6 @@ func simpleFileCopy(src, dst string) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
