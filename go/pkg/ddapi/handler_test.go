@@ -101,19 +101,13 @@ func (suite *Suite) TestBadCTH() {
 	// Expect bad request, because there's no JSON body in the request.
 	assert.Equal(suite.T(), 400, resp.StatusCode)
 
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		suite.T().Errorf("readAll error: %v", err)
-	}
-
 	// Confirm that the original error message (for why the request could
 	// not be proxied) is contained in the response body.
 	assert.Equal(
 		suite.T(),
 		"bad request: unexpected content-type header (expecting: application/json)",
-		strings.TrimSpace(string(rbody)),
+		getStrippedBody(resp),
 	)
-
 }
 
 func (suite *Suite) TestEmptyBody() {
@@ -128,17 +122,12 @@ func (suite *Suite) TestEmptyBody() {
 	// Expect bad request, because there's no JSON body in the request.
 	assert.Equal(suite.T(), 400, resp.StatusCode)
 
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		suite.T().Errorf("readAll error: %v", err)
-	}
-
 	// Confirm that the original error message (for why the request could
 	// not be proxied) is contained in the response body.
 	assert.Regexp(
 		suite.T(),
 		regexp.MustCompile("^bad request: error while translating body: invalid JSON doc: readObjectStart: expect .*$"),
-		strings.TrimSpace(string(rbody)),
+		getStrippedBody(resp),
 	)
 }
 
@@ -204,16 +193,10 @@ func (suite *Suite) TestInsertManySamples() {
 func expectInsertSuccessResponse(w *httptest.ResponseRecorder, t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, 202, resp.StatusCode)
-
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Errorf("readAll error: %v", err)
-	}
-
 	assert.Equal(
 		t,
 		"{\"status\": \"ok\"}",
-		strings.TrimSpace(string(rbody)),
+		getStrippedBody(resp),
 	)
 }
 
