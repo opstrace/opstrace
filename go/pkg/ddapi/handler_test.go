@@ -66,25 +66,22 @@ func (suite *Suite) TestMissingCTH() {
 	w := httptest.NewRecorder()
 	suite.ddcp.SeriesPostHandler(w, req)
 
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-		assert.Equal(suite.T(), 400, resp.StatusCode)
+	resp := w.Result()
+	assert.Equal(suite.T(), 400, resp.StatusCode)
 
-		rbody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			suite.T().Errorf("readAll error: %v", err)
-		}
-
-		// Confirm that the original error message (for why the request could
-		// not be proxied) is contained in the response body.
-		assert.Equal(
-			suite.T(),
-			"bad request: request lacks content-type header",
-			strings.TrimSpace(string(rbody)),
-		)
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		suite.T().Errorf("readAll error: %v", err)
 	}
 
-	checker(w)
+	// Confirm that the original error message (for why the request could
+	// not be proxied) is contained in the response body.
+	assert.Equal(
+		suite.T(),
+		"bad request: request lacks content-type header",
+		strings.TrimSpace(string(rbody)),
+	)
+
 }
 
 func (suite *Suite) TestBadCTH() {
@@ -99,27 +96,24 @@ func (suite *Suite) TestBadCTH() {
 	w := httptest.NewRecorder()
 	suite.ddcp.SeriesPostHandler(w, req)
 
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
+	resp := w.Result()
 
-		// Expect bad request, because there's no JSON body in the request.
-		assert.Equal(suite.T(), 400, resp.StatusCode)
+	// Expect bad request, because there's no JSON body in the request.
+	assert.Equal(suite.T(), 400, resp.StatusCode)
 
-		rbody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			suite.T().Errorf("readAll error: %v", err)
-		}
-
-		// Confirm that the original error message (for why the request could
-		// not be proxied) is contained in the response body.
-		assert.Equal(
-			suite.T(),
-			"bad request: unexpected content-type header (expecting: application/json)",
-			strings.TrimSpace(string(rbody)),
-		)
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		suite.T().Errorf("readAll error: %v", err)
 	}
 
-	checker(w)
+	// Confirm that the original error message (for why the request could
+	// not be proxied) is contained in the response body.
+	assert.Equal(
+		suite.T(),
+		"bad request: unexpected content-type header (expecting: application/json)",
+		strings.TrimSpace(string(rbody)),
+	)
+
 }
 
 func (suite *Suite) TestEmptyBody() {
@@ -129,27 +123,23 @@ func (suite *Suite) TestEmptyBody() {
 	w := httptest.NewRecorder()
 	suite.ddcp.SeriesPostHandler(w, req)
 
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
+	resp := w.Result()
 
-		// Expect bad request, because there's no JSON body in the request.
-		assert.Equal(suite.T(), 400, resp.StatusCode)
+	// Expect bad request, because there's no JSON body in the request.
+	assert.Equal(suite.T(), 400, resp.StatusCode)
 
-		rbody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			suite.T().Errorf("readAll error: %v", err)
-		}
-
-		// Confirm that the original error message (for why the request could
-		// not be proxied) is contained in the response body.
-		assert.Regexp(
-			suite.T(),
-			regexp.MustCompile("^bad request: error while translating body: invalid JSON doc: readObjectStart: expect .*$"),
-			strings.TrimSpace(string(rbody)),
-		)
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		suite.T().Errorf("readAll error: %v", err)
 	}
 
-	checker(w)
+	// Confirm that the original error message (for why the request could
+	// not be proxied) is contained in the response body.
+	assert.Regexp(
+		suite.T(),
+		regexp.MustCompile("^bad request: error while translating body: invalid JSON doc: readObjectStart: expect .*$"),
+		strings.TrimSpace(string(rbody)),
+	)
 }
 
 func (suite *Suite) TestInsertOneSample() {
@@ -167,7 +157,7 @@ func (suite *Suite) TestInsertOneSample() {
 		genSubmitRequest(tsfragment.toJSON()),
 	)
 
-	checkerExpectInsertSuccess(w, suite.T())
+	expectInsertSuccessResponse(w, suite.T())
 }
 
 func (suite *Suite) TestInsertZeroSamples() {
@@ -189,7 +179,7 @@ func (suite *Suite) TestInsertZeroSamples() {
 
 	// And yet, as of the time of writing, the cortex HTTP response code is 200
 	// and this submission doc is accepted. Review that in the future.
-	checkerExpectInsertSuccess(w, suite.T())
+	expectInsertSuccessResponse(w, suite.T())
 }
 
 func (suite *Suite) TestInsertManySamples() {
@@ -208,10 +198,10 @@ func (suite *Suite) TestInsertManySamples() {
 		genSubmitRequest(tsfragment.toJSON()),
 	)
 
-	checkerExpectInsertSuccess(w, suite.T())
+	expectInsertSuccessResponse(w, suite.T())
 }
 
-func checkerExpectInsertSuccess(w *httptest.ResponseRecorder, t *testing.T) {
+func expectInsertSuccessResponse(w *httptest.ResponseRecorder, t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, 202, resp.StatusCode)
 
@@ -324,19 +314,14 @@ func TestDDProxyAuthenticator_noapikey(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ddcp.SeriesPostHandler(w, req)
-
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-		assert.Equal(t, 401, resp.StatusCode)
-		// Confirm that a helpful error message is in the body.
-		assert.Equal(
-			t,
-			"DD API key missing (api_key URL query parameter)",
-			getStrippedBody(resp),
-		)
-	}
-
-	checker(w)
+	resp := w.Result()
+	assert.Equal(t, 401, resp.StatusCode)
+	// Confirm that a helpful error message is in the body.
+	assert.Equal(
+		t,
+		"DD API key missing (api_key URL query parameter)",
+		getStrippedBody(resp),
+	)
 }
 
 func TestDDProxyAuthenticator_badtoken(t *testing.T) {
@@ -353,19 +338,14 @@ func TestDDProxyAuthenticator_badtoken(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ddcp.SeriesPostHandler(w, req)
-
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-		assert.Equal(t, 401, resp.StatusCode)
-		// Confirm that a helpful error message is in the body.
-		assert.Equal(
-			t,
-			"bad authentication token",
-			getStrippedBody(resp),
-		)
-	}
-
-	checker(w)
+	resp := w.Result()
+	assert.Equal(t, 401, resp.StatusCode)
+	// Confirm that a helpful error message is in the body.
+	assert.Equal(
+		t,
+		"bad authentication token",
+		getStrippedBody(resp),
+	)
 }
 
 // Read all response body bytes, and return response body as string, with
