@@ -332,7 +332,7 @@ function* createClusterCore() {
     ccfg.cluster_name,
     ccfg.tenants
   );
-  yield call(waitUntilGrafanaIsReachable, ccfg.cluster_name, ccfg.tenants);
+  yield call(waitUntilUIIsReachable, ccfg.cluster_name, ccfg.tenants);
 
   log.info(
     `cluster creation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
@@ -405,7 +405,7 @@ export async function waitUntilDDAPIEndpointsAreReachable(
   );
 }
 
-export async function waitUntilGrafanaIsReachable(
+export async function waitUntilUIIsReachable(
   opstraceClusterName: string,
   tenantNames: string[]
 ): Promise<void> {
@@ -426,7 +426,9 @@ export async function waitUntilGrafanaIsReachable(
   );
   const actors = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
-    actors.push(waitForProbeURL(probeUrl, tenantName, 200));
+    // Do not inspect JSON in response, do not enrich request with
+    // authentication proof.
+    actors.push(waitForProbeURL(probeUrl, tenantName, 200, false, true));
   }
   await Promise.all(actors);
   log.info(
@@ -438,7 +440,8 @@ async function waitForProbeURL(
   probeUrl: string,
   tenantName: string,
   expectedRespCode: number,
-  expectStatusSuccessJSON = false
+  expectStatusSuccessJSON = false,
+  addOpstraceAuthToken = true
 ) {
   const requestSettings: GotOptions = {
     throwHttpErrors: false,
@@ -453,13 +456,15 @@ async function waitForProbeURL(
   // Copy common request settings, add authentication proof if required.
   const rs: GotOptions = { ...requestSettings };
   const tenantAuthToken = clusterCreateConfig.tenantApiTokens[tenantName];
-  if (tenantAuthToken !== undefined) {
-    // The authentication scheme depends on the API in use. TODO?: Maybe make
-    // the DD API support the header-based authn scheme, too.
-    if (probeUrl.includes("dd.")) {
-      probeUrl = `${probeUrl}?api_key=${tenantAuthToken}`;
-    } else {
-      rs.headers = { Authorization: `Bearer ${tenantAuthToken}` };
+  if (addOpstraceAuthToken) {
+    if (tenantAuthToken !== undefined) {
+      // The authentication scheme depends on the API in use. TODO?: Maybe make
+      // the DD API support the header-based authn scheme, too.
+      if (probeUrl.includes("dd.")) {
+        probeUrl = `${probeUrl}?api_key=${tenantAuthToken}`;
+      } else {
+        rs.headers = { Authorization: `Bearer ${tenantAuthToken}` };
+      }
     }
   }
 

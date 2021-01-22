@@ -32,7 +32,7 @@ import {
 import {
   ClusterCreateConfigInterface,
   setCreateConfig,
-  waitUntilGrafanaIsReachable,
+  waitUntilUIIsReachable,
   waitUntilDDAPIEndpointsAreReachable,
   waitUntilDataAPIEndpointsAreReachable
 } from "@opstrace/installer";
@@ -95,7 +95,7 @@ async function checkClusterStatus() {
 
   await waitUntilDataAPIEndpointsAreReachable(ccfg.cluster_name, ccfg.tenants);
   await waitUntilDDAPIEndpointsAreReachable(ccfg.cluster_name, ccfg.tenants);
-  await waitUntilGrafanaIsReachable(ccfg.cluster_name, ccfg.tenants);
+  await waitUntilUIIsReachable(ccfg.cluster_name, ccfg.tenants);
 }
 
 // Race to check cluster status and fail if it takes longer than 60 seconds.
