@@ -53,7 +53,7 @@ func main() {
 
 	// Show timestamps in TTY logger.
 	customFormatter := new(log.TextFormatter)
-	customFormatter.TimestampFormat = "2006-01-02 15:04:05.000"
+	customFormatter.TimestampFormat = "2021-01-21 13:33:37.000"
 	customFormatter.FullTimestamp = true
 	log.SetFormatter(customFormatter)
 
@@ -65,7 +65,7 @@ func main() {
 	log.Infof("Prometheus remote_write endpoint: %s", remoteWriteURL)
 	log.Infof("listen address: %s", listenAddress)
 	log.Infof("tenant name: %s", tenantName)
-	log.Infof("API authentication enabled (TODO!): %v", !disableAPIAuthentication)
+	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
 
 	ddcp := ddapi.NewDDCortexProxy(tenantName, remoteWriteURL, disableAPIAuthentication)
 
