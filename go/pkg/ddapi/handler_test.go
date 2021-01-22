@@ -310,7 +310,7 @@ func TestSubmitSeriesHandlerWithCortex(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
 
-func TestDDProxyAuthenticator_nokey(t *testing.T) {
+func TestDDProxyAuthenticator_noapikey(t *testing.T) {
 	// Instantiate proxy with enabled authenticator
 	disableAPIAuthentication := false
 	ddcp := NewDDCortexProxy(TenantName, "http://localhost", disableAPIAuthentication)
