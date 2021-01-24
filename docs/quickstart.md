@@ -5,13 +5,13 @@ description: >-
 
 # Opstrace Quick Start
 
-Try Opstrace by setting up a 3-node cluster inside your cloud account.
-Send metrics and logs to it from your local machine, and query the data to test the end-to-end flow.
+Try Opstrace by installing it inside your AWS account.
+You'll send metrics and logs to it from your local machine, and query the data to test the end-to-end flow.
 
-![quick start overview](https://share.balsamiq.com/c/ijnF4CDC5q8AEDuewqQhX7.png)
+![quick start overview](.gitbook/assets/opstrace-quickstart-overview-v2.png)
 
 * You’ll have a _secure_, _horizontally-scalable_, _multi-tenant_, and _self-healing_ open source observability platform.
-* Running the Opstrace cluster for an hour costs about $1.00.
+* Running Opstrace for an hour costs less than $1.00.
 
 ## Step 0: Setup
 
