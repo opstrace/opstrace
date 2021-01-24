@@ -38,11 +38,13 @@ import {
 } from "@opstrace/installer";
 import * as schemas from "./schemas";
 
-function readTenantApiTokenFiles(tenants: string[]): Dict<string> {
+function readTenantApiTokenFiles(tenantNames: string[]): Dict<string> {
   const tenantApiTokens: Dict<string> = {};
   // also read system tenant api token
-  tenants.push("system");
-  for (const tname of tenants) {
+  const tnames = [...tenantNames];
+  tnames.push("system");
+
+  for (const tname of tnames) {
     const fpath = `tenant-api-token-${tname}`;
     const token = fs.readFileSync(fpath);
     tenantApiTokens[tname] = token.toString();
