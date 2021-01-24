@@ -69,7 +69,7 @@ Here is a laundry list of various style, grammar, and other choices we've made o
 * We follow [sembr.org](https://sembr.org), requiring each sentence written in Markdown to be on its own line.
 * Use _title case_ for top-level headings (`h1`); use _sentence case_ for all other headings.
 * Use colons when introducing a block quote or code block.
-* Use _log in to_ over _log into_ or _login to_.
+* Use the verb _log in to_ over _log into_ or _login to_; as a noun, use _login_.  ([Reference](https://grammarist.com/spelling/log-in-login/))
 * Prefer the singular use of _data,_ as in _this data_.
 * Prefer the phrase _the cluster_ or _the Opstrace cluster_ over other phrases such as _send data to Opstrace._
 * [Quotation marks](https://en.wikipedia.org/wiki/Quotation_marks_in_English#Nonstandard_usage) can be tricky to use in English: use them for quotations, highlighting unusual usage, an invented term, or calling out someone else's terms; do not use them for irony or emphasis, and beware of the downsides of [scare quotes](https://en.wikipedia.org/wiki/Scare_quotes). Alternatives may include italicization or capitalization. When in doubt, use quotation marks sparingly.
