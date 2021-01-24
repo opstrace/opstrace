@@ -1,6 +1,6 @@
 ---
 description: >-
-  See it for yourself—get your hands dirty with Opstrace by creating a cluster and sending dummy data.
+  See it for yourself—get your hands dirty with Opstrace by installing it in your account and sending dummy data.
 ---
 
 # Opstrace Quick Start
@@ -17,7 +17,7 @@ You'll send metrics and logs to it from your local machine, and query the data t
 
 Open a terminal and verify you have the following:
 
-* For creating the cluster:
+* For installing Opstrace:
   * The [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
     * We recommend `AdministratorAccess` for this quick start; for additional info check out our [cloud permissions reference](./references/cloud-permissions.md).
     * While AWS and GCP are supported, we will focus on AWS in this quick start.
@@ -25,7 +25,7 @@ Open a terminal and verify you have the following:
   * [Docker](https://docs.docker.com/install/)
   * [Docker Compose](https://docs.docker.com/compose/install/)
 
-Note: the code blocks are all copy and pastable.
+Note: the code blocks are all copy-and-pastable.
 
 ```bash
 aws configure list
@@ -41,7 +41,7 @@ For example:
 mkdir opstrace-quickstart && cd opstrace-quickstart
 ```
 
-Download the latest Opstrace CLI binary from S3, which you will use to create the cluster (~50M compressed):
+Download the latest Opstrace CLI binary from S3, which you will use to instal Opstrace (~50M compressed):
 
 <!--tabs-->
 
@@ -68,22 +68,22 @@ curl -L https://go.opstrace.com/cli-latest-linux | tar xjf -
 If you see a proper help message, you're ready to go.
 So let's get started.
 
-## Step 1: Create a cluster
+## Step 1: Install Opstrace
 
-Choose an `OPSTRACE_CLUSTER_NAME` for your cluster (it must be 13 characters or less):
+Choose an `OPSTRACE_NAME` for your Opstrace installation (it must be 13 characters or less):
 
 <!--export-to-input-->
 
 ```bash
-export OPSTRACE_CLUSTER_NAME=<choose_a_name>
+export OPSTRACE_NAME=<choose_a_name>
 ```
 
 <!--/export-to-input-->
 
-The cluster name will globally identify you in our domain as `$OPSTRACE_CLUSTER_NAME.opstrace.io`, which we provide for you by default as a convenience.
+The name will globally identify you in our domain as `$OPSTRACE_NAME.opstrace.io`, which we provide for you by default as a convenience.
 
-Then, you'll create a simple cluster [configuration file](./references/cluster-configuration.md) with the most basic options.
-Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts the cluster-internal metrics.
+Then, you'll create a simple [configuration file](./references/cluster-configuration.md) with the most basic options.
+Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts internal metrics.
 Learn more about tenant isolation in our [key concepts references](./references/concepts.md#tenants).
 
 ```bash
@@ -103,54 +103,41 @@ This is so we can and provide a seamless user experience for our provided DNS.
 Let's get things going:
 
 ```bash
-./opstrace create aws $OPSTRACE_CLUSTER_NAME \
+./opstrace create aws $OPSTRACE_NAME \
   -c opstrace-config.yaml
 ```
 
-**Be patient:** Cluster creation takes on average 30 minutes on AWS (but it can go as long as 45 minutes).
+**Be patient:** Installation takes on average 30 minutes on AWS (but it can go as long as 45 minutes).
 
 **So you know:** The CLI is largely re-entrant. If it is interrupted while setting up cloud infrastructure you can re-invoke the same command and it will continue where it left off.
 For additional information understanding and troubleshooting the `create` command, see our [CLI reference section](./references/cli.md#create).
 
 When everything is done, you'll see the following log line:
 
-`info: cluster creation finished: $OPSTRACE_CLUSTER_NAME (aws)`  
+`info: cluster creation finished: $OPSTRACE_NAME (aws)`  
 
 You now have a secure, scalable, multi-tenant, open standards-based observability platform running _inside_ your cloud account, right next to the software that you want to monitor.
 
-Now that your Opstrace cluster is up and running, let's take a closer look.
+Now that Opstrace is up and running, let's take a closer look.
 
-## Step 2: Check the cluster
+## Step 2: Send data to Opstrace
 
-Before we proceed to send data to the cluster, let's check in on how the cluster is doing.
-The Opstrace cluster monitors itself, so we have a lot of metrics about its own operation.
-In this step, we will look at some key metrics about data coming into the cluster: total number of metrics and logs coming in across both the `myteam` and `system` [tenants](./references/concepts.md#tenants), ingestion latency, and also the write rate from the `myteam` tenant only.
-Once we send data to the cluster in Step 4, these write rate graphs will be populated, which demonstrates the ability of the cluster to monitor different tenants independently or together.
+Next, let's send in some dummy data to Opstrace as if it were our own application.
+We'll generate a workload using some well-known Docker containers, push it to Opstrace using small config files we'll provide, then query back the data to verify it got there.
 
-Log in to the Grafana UI and look at the Quick Start Overview dashboard here:
+Let's get started by creating the following workload on your laptop:
 
-```text
-https://system.$OPSTRACE_CLUSTER_NAME.opstrace.io/grafana/d/2gd-0P3Wz3/system-overview?orgId=1&refresh=10&from=now-30m&to=now
-```
+* Dummy metrics generated by [Avalanche](https://github.com/open-fresh/avalanche) and scraped with [Prometheus](https://prometheus.io/).
+* Log messages from Avalanche and Prometheus scraped with [FluentD](https://www.fluentd.org/).
 
-## Step 3: Send data to the cluster
-
-Next, let's send in some dummy data to the Opstrace cluster as if it were our own application. We'll generate a workload using some well-known Docker containers, push it to the cluster using small config files we'll provide, then query back the data to verify it got there.
-
-Let's get started by creating the following observability workload on your laptop:
-
-* Dummy metrics from [Avalanche](https://github.com/open-fresh/avalanche) scraped with [Prometheus](https://prometheus.io/), which will send them to the Opstrace cluster.
-* Log messages from Avalanche and Prometheus scraped with [FluentD](https://www.fluentd.org/), which will send them to the Opstrace cluster.
-
-**Launch:** Start the following workloads in the same terminal window you've been using thus far, as shown below in the code blocks below.
-If you do open a new terminal, however, do be sure you're still in the correct directory since these commands will look in `pwd` for the [API token files](./references/concepts.md#anatomy-of-a-data-api-token-and-how-to-present-it) created during `opstrace create`, and be sure to have your `OPSTRACE_CLUSTER_NAME` environment variable set.
-Create a file with the Prometheus configuration to send data to your Opstrace cluster:
+**Launch:** Start the following workloads in the same terminal window you've been using thus far, as shown in the code blocks below.
+If you do open a new terminal, however, do be sure you're still in the correct directory since these commands will look in `pwd` for the [API token files](./references/concepts.md#anatomy-of-a-data-api-token-and-how-to-present-it) created during `opstrace create`, and be sure to have your `OPSTRACE_NAME` environment variable set.
+Create a file with the Prometheus configuration to send data to Opstrace:
 
 ```bash
-# send metrics to the Opstrace cluster with Prometheus
 cat <<EOF > prometheus.yml
   remote_write:
-    - url: "https://cortex.myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io/api/v1/push"
+    - url: "https://cortex.myteam.$OPSTRACE_NAME.opstrace.io/api/v1/push"
       bearer_token_file: /var/run/tenant/token
       queue_config:
         batch_send_deadline: 5s
@@ -169,7 +156,7 @@ EOF
 
 ```
 
-Create a file with the FluentD configuration to send logs to your Opstrace cluster:
+Create a file with the FluentD configuration:
 
 ```bash
 cat <<EOF > fluentd.conf
@@ -196,7 +183,7 @@ cat <<EOF > fluentd.conf
 
 <match *>
   @type loki
-  url https://loki.myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io
+  url https://loki.myteam.$OPSTRACE_NAME.opstrace.io
   flush_interval 5s
   bearer_token_file /var/run/tenant/token
   extra_labels { "label": "quickstart" }
@@ -270,14 +257,14 @@ Starting opstrace-getting-started_prometheus_1 ... done
 Starting opstrace-getting-started_avalanche_1  ... done
 ```
 
-You now have dummy (random) metrics and logs being sent to the Opstrace cluster, as you might in the real world.
+You now have dummy (random) metrics and associated logs (simulating an app you may have IRL) being sent to your [tenant](./references/concepts.md#tenants) Opstrace tenant.
 
-## Step 4: Validate the data
+## Step 3: Validate the data
 
-You can view this ingested data in the `myteam` [tenant](./references/concepts.md#tenants), which we specified in the configuration file, using the Grafana "explore" view:
+Let's view the data using the Grafana "explore" view:
 
 ```text
-https://myteam.$OPSTRACE_CLUSTER_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
+https://myteam.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
 ```
 
 1. To query these metrics, first select the "metrics" data source in the upper left-hand corner.
@@ -293,19 +280,19 @@ Now, let's query the logs:
 
 1. Switch the data source in the upper left-hand corner to "Logs". You will see the same label filter applied to the log data.
 
-As you can see, the data we sent to the Opstrace cluster in step 3 is indeed ingested as expected.
+As you can see, the data we sent to Opstrace in step 3 is indeed ingested as expected.
 
-## Step 5: Add users and tenants
+## Step 4: Add users and tenants
 
 Congratulations!
 You've walked through the majority of our foundational release, but we're [working on much more](./references/roadmap.md).
-Before you clean up the cluster you've created, why not check out our UI which allows you to add users and tenants to the system:
+Before you uninstall Opstrace, why not check out our UI which allows you to add users and tenants to the system:
 
 ```text
-https://$OPSTRACE_CLUSTER_NAME.opstrace.io/login
+https://$OPSTRACE_NAME.opstrace.io/login
 ```
 
-## Step 6: Clean up
+## Step 5: Clean up
 
 With this quick start we've shown you how easy it is to stand up an observability platform with long-term storage and security enabled by default.
 We've done the heavy lifting behind the scenes; to configure this all on your own requires many more steps and manual maintenance.
@@ -317,10 +304,10 @@ When you're ready to shut everything down, just kill and remove the docker conta
 docker-compose down
 ```
 
-You can then destroy the cluster—and save the log output to a file—as follows:
+You can then uninstall Opstrace:
 
 ```bash
-./opstrace destroy aws $OPSTRACE_CLUSTER_NAME
+./opstrace destroy aws $OPSTRACE_NAME
 ```
 
 If something went wrong or was unpleasant, please send us your log files via email:
@@ -336,6 +323,4 @@ Share the resulting file with us at [hello@opstrace.com](mailto:hello@opstrace.c
 That's it! 👏
 
 Congratulations, you're now an Opstrace user!
-But there’s always more to discover...
 
-<!-- TODO: need a better CTA here, or above -->
