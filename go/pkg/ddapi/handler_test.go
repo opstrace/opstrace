@@ -193,7 +193,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	jsonText1 := `
 	{
 		"series": [{
-			"metric": "unit.test.metric.foo",
+			"metric": "unit.test.metric.ooo",
 			"points": [[1610030001, 1]],
 			"type": "rate",
 			"interval": 10
@@ -210,13 +210,14 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	suite.ddcp.SeriesPostHandler(w, req)
-	// resp := w.Result()
+	resp := w.Result()
+	assert.Equal(suite.T(), 202, resp.StatusCode)
 
 	// same request, but sample older than the previous one
 	jsonText2 := `
 	{
 		"series": [{
-			"metric": "unit.test.metric.foo",
+			"metric": "unit.test.metric.ooo",
 			"points": [[1610030000, 1]],
 			"type": "rate",
 			"interval": 10
@@ -232,7 +233,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
 	suite.ddcp.SeriesPostHandler(w, req)
-	resp := w.Result()
+	resp = w.Result()
 
 	// Expect bad request, because there's no JSON body in the request.
 	assert.Equal(suite.T(), 400, resp.StatusCode)
