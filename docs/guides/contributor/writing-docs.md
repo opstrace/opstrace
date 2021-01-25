@@ -35,7 +35,7 @@ That said, we prefer to use the following extension to style its output more lik
 ## Keep it clean
 
 When your peers will be reading your documentation, you want it to be the best it can be.
-We recommend using [Grammarly](https://grammarly.com) to check for clarity, grammar, and proper word usage.
+We recommend using [Grammarly](https://www.grammarly.com) to check for clarity, grammar, and proper word usage.
 Hey, even professional technical writers need another set of eyes.
 
 ## When to update docs
