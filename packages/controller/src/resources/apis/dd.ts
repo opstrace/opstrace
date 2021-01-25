@@ -61,7 +61,8 @@ export function DDAPIResources(
   const namespace = getTenantNamespace(tenant);
   const apiName = "dd";
   const deplName = `${apiName}-api`;
-  const remoteWriteURL = "http://distributor.cortex.svc.cluster.local";
+  const remoteWriteURL =
+    "http://distributor.cortex.svc.cluster.local/api/v1/push";
 
   const ddApiCliArgs = [
     "-listen=:8080",
