@@ -161,11 +161,13 @@ suite("DD API test suite", function () {
 
     // Check that all three values in the original submit request are
     // covered by the query response.
-    const valuesSeen = resultArray.map(
+    const valuesSeen = resultArray[0].values.map(
       (sample: Array<[number, string]>) => sample[1]
     );
-    for (const v in [0, 1, 2]) {
-      valuesSeen.includes(v);
+    log.info("values seen: %s", valuesSeen);
+    for (const v of ["0", "1", "2"]) {
+      log.info("check for presence of value %s", v);
+      assert(valuesSeen.includes(v));
     }
 
     // pragmatic criterion for starters: expect a number of values. with the
