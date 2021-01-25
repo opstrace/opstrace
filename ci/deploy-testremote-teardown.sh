@@ -244,9 +244,6 @@ EXITCODE_MAKE_TESTREMOTE=$?
 set -e
 echo "--- Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
 
-# tmp sleep for live dev
-sleep 12000
-
 set +e
 make test-remote-ui
 EXITCODE_MAKE_TESTREMOTE_UI=$?
