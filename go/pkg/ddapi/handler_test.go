@@ -54,7 +54,7 @@ https://github.com/stretchr/testify/pull/655#issuecomment-588500729
 
 const TenantName = "test"
 
-func (suite *Suite) TestMissingCTH() {
+func (suite *Suite) TestDDProxyHandler_MissingCTH() {
 	// Valid JSON in body, valid URL, valid method. Invalid: missing
 	// content-type header.
 	req := httptest.NewRequest(
@@ -83,7 +83,7 @@ func (suite *Suite) TestMissingCTH() {
 	)
 }
 
-func (suite *Suite) TestBadCTH() {
+func (suite *Suite) TestDDProxyHandler_BadCTH() {
 	// Valid JSON in body, valid URL, valid method. Invalid: unexpected
 	// CT header
 	req := httptest.NewRequest(
@@ -109,7 +109,7 @@ func (suite *Suite) TestBadCTH() {
 	)
 }
 
-func (suite *Suite) TestEmptyBody() {
+func (suite *Suite) TestDDProxyHandler_EmptyBody() {
 	// Valid URL, valid method, valid CT header, invalid: missing body
 	req := httptest.NewRequest("POST", "http://localhost/api/v1/series", nil)
 	req.Header.Set("Content-Type", "application/json")
@@ -130,7 +130,7 @@ func (suite *Suite) TestEmptyBody() {
 	)
 }
 
-func (suite *Suite) TestInsertOneSample() {
+func (suite *Suite) TestDDProxyHandler_InsertOneSample() {
 	testname := suite.T().Name()
 	w := httptest.NewRecorder()
 
@@ -148,7 +148,7 @@ func (suite *Suite) TestInsertOneSample() {
 	expectInsertSuccessResponse(w, suite.T())
 }
 
-func (suite *Suite) TestInsertZeroSamples() {
+func (suite *Suite) TestDDProxyHandler_InsertZeroSamples() {
 	testname := suite.T().Name()
 	w := httptest.NewRecorder()
 
@@ -170,7 +170,7 @@ func (suite *Suite) TestInsertZeroSamples() {
 	expectInsertSuccessResponse(w, suite.T())
 }
 
-func (suite *Suite) TestInsertManySamples() {
+func (suite *Suite) TestDDProxyHandler_InsertManySamples() {
 	testname := suite.T().Name()
 	w := httptest.NewRecorder()
 
@@ -187,6 +187,63 @@ func (suite *Suite) TestInsertManySamples() {
 	)
 
 	expectInsertSuccessResponse(w, suite.T())
+}
+
+func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
+	jsonText1 := `
+	{
+		"series": [{
+			"metric": "unit.test.metric.foo",
+			"points": [[1610030001, 1]],
+			"type": "rate",
+			"interval": 10
+			}
+		]
+	}
+	`
+	// Valid URL, valid method. Invalid data (duplicate timestamps)
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series",
+		strings.NewReader(jsonText1),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	suite.ddcp.SeriesPostHandler(w, req)
+	//resp := w.Result()
+
+	// same request, but sample older than the previous one
+	jsonText2 := `
+	{
+		"series": [{
+			"metric": "unit.test.metric.foo",
+			"points": [[1610030000, 1]],
+			"type": "rate",
+			"interval": 10
+			}
+		]
+	}
+	`
+	req = httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series",
+		strings.NewReader(jsonText2),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	w = httptest.NewRecorder()
+	suite.ddcp.SeriesPostHandler(w, req)
+	resp := w.Result()
+
+	// Expect bad request, because there's no JSON body in the request.
+	assert.Equal(suite.T(), 400, resp.StatusCode)
+
+	// Confirm that the Cortex-emitted error message is contained in the
+	// response body.
+	assert.Regexp(
+		suite.T(),
+		regexp.MustCompile(".*sample timestamp out of order; last timestamp: 1610030001, incoming timestamp: 1610030000 for series.*$"),
+		getStrippedBody(resp),
+	)
 }
 
 func expectInsertSuccessResponse(w *httptest.ResponseRecorder, t *testing.T) {
