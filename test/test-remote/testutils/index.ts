@@ -157,6 +157,7 @@ export function globalTestSuiteSetupOnce() {
       const token = fs.readFileSync(tfp, {
         encoding: "utf8"
       });
+      log.info("inspect authentication token: %s", token);
       // Decode payload w/o verifying signature. Note that the return type
       // as of the time of writing does not even allow for writing
       // `if (claims.aud === undefined) {}` because tsc would error out with
