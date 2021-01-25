@@ -24,6 +24,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/opstrace/opstrace/go/pkg/ddapi"
+	"github.com/opstrace/opstrace/go/pkg/middleware"
 )
 
 var (
@@ -66,6 +67,10 @@ func main() {
 	log.Infof("listen address: %s", listenAddress)
 	log.Infof("tenant name: %s", tenantName)
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
+
+	if !disableAPIAuthentication {
+		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+	}
 
 	ddcp := ddapi.NewDDCortexProxy(tenantName, remoteWriteURL, disableAPIAuthentication)
 
