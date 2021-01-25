@@ -154,9 +154,11 @@ export function globalTestSuiteSetupOnce() {
     TENANT_DEFAULT_API_TOKEN_FILEPATH
   ]) {
     if (tfp !== undefined) {
-      const token = fs.readFileSync(tfp, {
-        encoding: "utf8"
-      });
+      const token = fs
+        .readFileSync(tfp, {
+          encoding: "utf8"
+        })
+        .trim();
       log.info("inspect authentication token: %s", token);
       // Decode payload w/o verifying signature. Note that the return type
       // as of the time of writing does not even allow for writing
