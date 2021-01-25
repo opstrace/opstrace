@@ -197,7 +197,7 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 		bytes.NewBuffer(spbmsgbytes),
 	)
 
-	// In which cases does this hit in?
+	// In which cases does this hit in (when does request construction fail)?
 	if err != nil {
 		return err
 	}
@@ -237,14 +237,17 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 	bodytext := string(bodybytes)
 	log.Infof("cortex HTTP response body: %v", bodytext)
 
-	// TODO: think about how to translate Cortex error codes into errors
-	// that mean something to the DD agent?
-	// if resp.StatusCode != http.StatusOK {
-	// 	return fmt.Errorf("%v", resp.Status)
-	// }
-
-	// Signal to the caller that the write to Cortex was successful.
-	return nil
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		// Signal to the caller that the write to Cortex was successful.
+		return nil
+	} else {
+		// TODO: think about how to translate Cortex error codes into errors
+		// that mean something to the DD agent? For now, forward the error
+		// response as-is.
+		w.WriteHeader(resp.StatusCode)
+		w.Write(bodybytes)
+		return fmt.Errorf("non-2xx HTTP response received from Cortex: %d", resp.StatusCode)
+	}
 }
 
 func buildRemoteWriteHTTPClient() *http.Client {
