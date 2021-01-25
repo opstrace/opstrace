@@ -16,6 +16,7 @@
       "GOPRIVATE": "github.com/opstrace"
     },
     "prettier.proseWrap": "never",
+    "typescript.tsdk": "opstrace/node_modules/typescript/lib",
   },
  "launch": {
     // Use IntelliSense to learn about possible attributes.
