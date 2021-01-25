@@ -15,7 +15,7 @@
  */
 
 import fs from "fs";
-//import { strict as assert } from "assert";
+import { strict as assert } from "assert";
 
 import { ZonedDateTime } from "@js-joda/core";
 import got from "got";
@@ -26,35 +26,12 @@ import {
   logHTTPResponse,
   httpTimeoutSettings,
   TENANT_DEFAULT_DD_API_BASE_URL,
+  TENANT_DEFAULT_CORTEX_API_BASE_URL,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
   globalTestSuiteSetupOnce
 } from "./testutils";
 
-// async function postToDDAPI(lokiBaseUrl: string, body: Buffer) {
-//   /*
-
-//     The body Buffer is expected to be a protobuf message or a snappy-compressed
-//     protobuf message. Notably, the other end decodes a snappy-compressed protobuf
-//     message just fine without indicating a special Content-Type header value.
-
-//     */
-
-//   let headers: Record<string, string> = {
-//     "Content-Type": "application/x-protobuf"
-//   };
-//   const url = `${lokiBaseUrl}/loki/api/v1/push`;
-//   headers = enrichHeadersWithAuthToken(url, headers);
-
-//   const response = await got.post(url, {
-//     body: body,
-//     throwHttpErrors: false,
-//     headers: headers,
-//     timeout: httpTimeoutSettings,
-//     https: { rejectUnauthorized: LOKI_API_TLS_VERIFY }
-//   });
-//   logHTTPResponse(response);
-//   return response;
-// }
+import { waitForCortexQueryResult } from "./test_prom_remote_write";
 
 function ddApiSeriesUrl() {
   let url = `${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
@@ -80,7 +57,9 @@ suite("DD API test suite", function () {
   });
 
   test("dd_api_insert_single_ts_fragment", async function () {
-    const metricname = `opstrace.dd.test-remote-${rndstring(5)}`;
+    const rndstr = rndstring(5);
+    const metricname = `opstrace.dd.test-remote-${rndstr}`;
+    const metricnameSanitized = `opstrace_dd_test_remote_${rndstr}`;
 
     const now = ZonedDateTime.now();
     const tsnow = now.toEpochSecond();
@@ -91,7 +70,7 @@ suite("DD API test suite", function () {
           metric: metricname,
           points: [
             [tsnow, 1],
-            [tsnow - 10, 0]
+            [tsnow - 2, 0]
           ],
           tags: ["version:7.24.1", "testtag:testvalue"],
           host: "somehost",
@@ -115,5 +94,29 @@ suite("DD API test suite", function () {
       https: { rejectUnauthorized: false }
     });
     logHTTPResponse(response);
+
+    // now query cortex
+
+    const searchStart = now.minusHours(1);
+    const searchEnd = now.plusHours(1);
+    // See opstrace-prelaunch/issues/1866 for a little
+    // bit of context -- this is not just an arbitrary query :-).
+    const queryParams = {
+      query: `${metricnameSanitized}{job="ddagent"}`,
+      start: searchStart.toEpochSecond().toString(),
+      end: searchEnd.toEpochSecond().toString(),
+      step: "1"
+    };
+
+    const resultArray = await waitForCortexQueryResult(
+      TENANT_DEFAULT_CORTEX_API_BASE_URL,
+      queryParams
+    );
+
+    log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
+
+    // pragmatic criterion for starters: expect a number of values. with the
+    // 1-second step size there should be tens or hundreds of values/samples.
+    assert.strictEqual(resultArray[0]["values"].length > 5, true);
   });
 });
