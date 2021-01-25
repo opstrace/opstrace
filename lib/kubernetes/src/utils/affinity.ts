@@ -18,23 +18,45 @@ export const withPodAntiAffinityRequired = (matchLabels: {
   [key: string]: string;
 }): {
   podAntiAffinity: {
-    requiredDuringSchedulingIgnoredDuringExecution: [
+    preferredDuringSchedulingIgnoredDuringExecution: [
       {
-        labelSelector: {
-          matchLabels: { [key: string]: string };
+        podAffinityTerm: {
+          labelSelector: {
+            matchLabels: { [key: string]: string };
+          };
+          topologyKey: string;
         };
-        topologyKey: string;
+        weight: number;
       }
     ];
   };
 } => ({
   podAntiAffinity: {
-    requiredDuringSchedulingIgnoredDuringExecution: [
+    preferredDuringSchedulingIgnoredDuringExecution: [
       {
-        labelSelector: {
-          matchLabels
+        podAffinityTerm: {
+          labelSelector: {
+            matchLabels
+          },
+          topologyKey: "kubernetes.io/hostname"
         },
-        topologyKey: "kubernetes.io/hostname"
+        //
+        // https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+        //
+        // "The weight field in preferredDuringSchedulingIgnoredDuringExecution
+        // is in the range 1-100. For each node that meets all of the scheduling
+        // requirements (resource request, RequiredDuringScheduling affinity
+        // expressions, etc.), the scheduler will compute a sum by iterating
+        // through the elements of this field and adding "weight" to the sum if
+        // the node matches the corresponding MatchExpressions. This score is
+        // then combined with the scores of other priority functions for the
+        // node. The node(s) with the highest total score are the most
+        // preferred."
+        //
+        // Give the maximum weight to this rule to prevent the pod from being
+        // scheduled to a node already running a pod for the given
+        // deployment.
+        weight: 100
       }
     ]
   }
