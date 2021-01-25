@@ -210,7 +210,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	suite.ddcp.SeriesPostHandler(w, req)
-	//resp := w.Result()
+	// resp := w.Result()
 
 	// same request, but sample older than the previous one
 	jsonText2 := `
@@ -241,7 +241,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	// response body.
 	assert.Regexp(
 		suite.T(),
-		regexp.MustCompile(".*sample timestamp out of order; last timestamp: 1610030001, incoming timestamp: 1610030000 for series.*$"),
+		regexp.MustCompile(".*sample timestamp out of order; .*, incoming timestamp: 1610030000 .*$"),
 		getStrippedBody(resp),
 	)
 }
