@@ -493,7 +493,15 @@ rebuild-testrunner-container-images:
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
 
+.PHONY: rebuild-looker-container-images
+rebuild-looker-container-images:
+	@echo "--- building looker container image"
+	make -C test/test-remote/containers/looker image
 
+#
+# * Overrides `/build/test-remote/node_modules` with an empty volume to ensure
+#   `node_modules` from the host are not shared with the container.
+#
 .PHONY: test-remote
 test-remote:
 	@# Mount ~/.kube into container: the testrunner requires kubectl to be
@@ -516,10 +524,11 @@ test-remote:
 	source ./secrets/aws-dev-svc-acc-env.sh && \
 	docker run --tty --interactive --rm \
 		--net=host \
-		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/test-remote \
+		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v /build/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
@@ -533,8 +542,9 @@ test-remote:
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		--dns $(shell ci/dns_cache.sh) \
+		--workdir /build/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && yarn run mocha --grep test_ui --invert'
+		yarn run mocha --grep test_ui --invert
 
 # Note(JP): dirty duplication. This is supposed to be the _exact_ same as the
 # test-remote target abvove, but instead of
@@ -552,10 +562,11 @@ test-remote-ui:
 	source ./secrets/aws-dev-svc-acc-env.sh && \
 	docker run --tty --interactive --rm \
 		--net=host \
-		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/test-remote \
+		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v /build/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
@@ -568,9 +579,11 @@ test-remote-ui:
 		-e TENANT_SYSTEM_API_TOKEN_FILEPATH \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
+		-e DEBUG=pw:api \
 		--dns $(shell ci/dns_cache.sh) \
+		--workdir /build/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		bash -O extglob -O dotglob -c 'cp -va --no-clobber /test-remote/!(node_*) . && DEBUG=pw:api yarn run mocha --grep test_ui'
+		yarn run mocha --grep test_ui
 
 
 # Used by CI:
