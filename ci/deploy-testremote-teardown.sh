@@ -161,6 +161,7 @@ mkdir -p "${OPSTRACE_BUILD_DIR}/bk-artifacts"
 echo "--- file system usage after entering CI container"
 df -h
 
+echo "--- set up dns-service credentials"
 curl --request POST \
     --url https://opstrace-dev.us.auth0.com/oauth/token \
     --header 'content-type: application/json' \
