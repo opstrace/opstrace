@@ -90,7 +90,6 @@ tenants:
 node_count: 3
 ```
 
-
 When you use this `cluster-config.yaml` for your testing/iteration effort, you can stop worrying about the "controller image does not exist" error.
 
 Just note that _this_ controller image might not perfectly fit the CLI changes that you are testing: if your changes also affect the controller, you might have to go through the more time-consuming process involving `make build-and-push-controller-image` (see above) to achieve a sane outcome.
@@ -103,11 +102,11 @@ See [the `test-remote` suite of tests](./test-remote), a document dedicated to t
 
 ## Create a cluster, but run the controller locally
 
-For controller development it can be helpful to create an Opstrace cluster and have the controller running on your local machine.
+For controller development it can be helpful to create an Opstrace cluster and have the controller running on your local machine. This allows much faster turnaround when working on the controller locally, since you can avoid needing to build and upload the controller docker image with every change.
 
 1. Use the `--hold-controller` argument upon cluster creation: `opstrace create ... [cluster-name] --hold-controller`
 2. `make kconfig-aws` or `make kconfig-gcp`: adjust the local kubeconfig to the newly created k8s cluster.
-3. Run the controller locally, with the `--external` flag: `node ./packages/controller/build/cmd.js --external [cluster-name]
+3. Run the controller locally, with the `--external` flag: `node ./packages/controller/build/cmd.js --external [cluster-name]`
 
 ## Linting code and docs
 
