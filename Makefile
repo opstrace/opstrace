@@ -103,6 +103,7 @@ cli: cli-tsc cli-pkg
 
 .PHONY: fetch-secrets
 fetch-secrets:
+	@echo "--- fetching secrets"
 	@# Fetch secrets, expected to be done before every cloud deployment.
 	aws s3 cp "s3://buildkite-managedsecretsbucket-100ljuov8ugv2/" secrets/ --recursive --exclude "*" \
 	--include "aws-credentials.json" \
@@ -357,6 +358,7 @@ rebuild-ci-container-image:
 	@# leak into the container image (image should be fully defined by the
 	@# Dockerfile.) Note: this also makes the build step much faster compared
 	@# sending a O(100 MB) large build context.
+	@echo "--- building ci container image"
 	docker build -t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING) - < containers/ci/opstrace-ci.Dockerfile
 
 
@@ -481,7 +483,7 @@ ci-%: checkenv-builddir
 
 .PHONY: rebuild-testrunner-container-images
 rebuild-testrunner-container-images:
-	@echo "* (Re)build and pull test runner container image(s)"
+	@echo "--- building testrunner container image"
 	# temporarily pull repo-global yarn lock file into test/test-remote so
 	# that `yarn install` in there respects that (repo root not part of build
 	# context).
@@ -518,6 +520,7 @@ test-remote:
 	@echo "* Local testrunner, tests a remote cluster through network"
 	@echo "* Expects kubectl to be configured against to-be-tested cluster"
 	@# Dump cluster-info outside container, for debugging
+	@echo "--- running test-remote"
 	kubectl cluster-info
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	@echo "* Start NodeJS/Mocha testrunner in container"
@@ -557,6 +560,7 @@ test-remote:
 #     Note: `--invert, -i  Inverts --grep and --fgrep matches`.
 .PHONY: test-remote-ui
 test-remote-ui:
+	echo "--- running test-remote-ui"
 	kubectl cluster-info
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	source ./secrets/aws-dev-svc-acc-env.sh && \
@@ -613,6 +617,15 @@ deploy-testremote-teardown:
 	bash "ci/deploy-testremote-teardown.sh"
 
 #
+# Target that runs a script in the ci/testupgrade/ directory. Check
+# .buildkite/test-upgrade-pipeline.yml to see how it can be used.
+#
+.PHONY: testupgrade-%
+testupgrade-%:
+	./ci/test-upgrade/$*.sh
+
+
+#
 # Run all the unit tests.
 #
 .PHONY: unit-tests
@@ -646,9 +659,6 @@ ts-unit-tests:
 preamble:
 	bash "ci/preamble.sh"
 
-.PHONY: deploy-upgrade-testremote-teardown-push
-deploy-upgrade-testremote-teardown-push:
-	bash "ci/deploy-upgrade-testremote-teardown-push.sh"
 
 .PHONY: update-api-proxy-docker-images.json
 update-api-proxy-docker-images.json:
