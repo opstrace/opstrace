@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { urlJoin } from "url-join-ts";
 import * as yaml from "js-yaml";
 import { strict as assert } from "assert";
 import { getBucketName } from "@opstrace/utils";
@@ -52,6 +53,9 @@ export function CortexResources(
   // TODO centralize these URLs
   const runbookUrl =
     "https://github.com/opstrace/opstrace/blob/master/docs/alerts";
+
+  const configsDBName = "cortex";
+  const dbconfig = new URL(state.config.config?.postgreSQLEndpoint || "");
 
   const config = {
     memcachedResults: {
@@ -121,6 +125,15 @@ export function CortexResources(
     },
     queryFrontend: {
       replicas: 2 // more than 2 is not beneficial (less advantage of queuing requests in front of queriers)
+    },
+    configs: {
+      replicas: 1 // start with 1, see how it goes
+    },
+    ruler: {
+      replicas: 3
+    },
+    alertmanager: {
+      replicas: 3
     },
     distributor: {
       resources: {
@@ -239,7 +252,8 @@ export function CortexResources(
       max_series_per_user: 5000000, // The maximum number of active series per user, per ingester
       accept_ha_samples: true,
       ha_cluster_label: "prometheus",
-      ha_replica_label: "prometheus_replica"
+      ha_replica_label: "prometheus_replica",
+      ruler_tenant_shard_size: 3
     },
     ingester: {
       lifecycler: {
@@ -308,6 +322,45 @@ export function CortexResources(
     },
     storage: {
       engine: "blocks"
+    },
+    configs: {
+      database: {
+        uri: urlJoin(state.config.config?.postgreSQLEndpoint, configsDBName),
+        migrations_dir: "/migrations"
+      }
+    },
+    alertmanager: {
+      enable_api: true,
+      storage: {
+        type: "configdb", // better to be explicit even if this is the default
+        configdb: {
+          configs_api_url: `http://configs.${namespace}.svc.cluster.local:80`
+        }
+      },
+      sharding_enabled: true,
+      sharding_ring: {
+        kvstore: {
+          store: "memberlist"
+        }
+      },
+      external_url: "/api/prom/alertmanager"
+    },
+    ruler: {
+      enable_api: true,
+      storage: {
+        type: "configdb", // better to be explicit even if this is the default
+        configdb: {
+          configs_api_url: `http://configs.${namespace}.svc.cluster.local:80`
+        }
+      },
+      enable_sharding: true,
+      sharding_strategy: "shuffle-sharding",
+      ring: {
+        kvstore: {
+          store: "memberlist"
+        }
+      },
+      alertmanager_url: `http://alertmanager.${namespace}.svc.cluster.local/api/prom/alertmanager/`
     }
   };
 
@@ -1805,6 +1858,435 @@ export function CortexResources(
           selector: {
             matchLabels: {
               name: "query-frontend"
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Deployment(
+      {
+        apiVersion: "apps/v1",
+        kind: "Deployment",
+        metadata: {
+          name: "configs",
+          namespace
+        },
+        spec: {
+          replicas: config.configs.replicas,
+          selector: {
+            matchLabels: {
+              name: "configs"
+            }
+          },
+          template: {
+            metadata: {
+              labels: {
+                name: "configs"
+              }
+            },
+            spec: {
+              initContainers: [
+                {
+                  image: DockerImages.postgresClient,
+                  name: "createcortexconfigsdb",
+                  env: [
+                    {
+                      name: "PGHOST",
+                      value: dbconfig.hostname
+                    },
+                    {
+                      name: "PGUSER",
+                      value: dbconfig.username
+                    },
+                    {
+                      name: "PGPASSWORD",
+                      value: dbconfig.password
+                    }
+                  ],
+                  command: [
+                    "sh",
+                    "-c",
+                    `echo "SELECT 'CREATE DATABASE ${configsDBName}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${configsDBName}')\\gexec" | psql`
+                  ]
+                }
+              ],
+              affinity: withPodAntiAffinityRequired({
+                name: "configs"
+              }),
+              containers: [
+                {
+                  name: "configs",
+                  image: DockerImages.cortex,
+                  imagePullPolicy: "IfNotPresent",
+                  args: [
+                    "-target=configs",
+                    "-config.file=/etc/cortex/config.yaml"
+                  ],
+                  env: config.env,
+                  ports: [
+                    {
+                      containerPort: 80,
+                      name: "http"
+                    }
+                  ],
+                  volumeMounts: [
+                    {
+                      mountPath: "/etc/cortex",
+                      name: "cortex"
+                    }
+                  ]
+                }
+              ],
+              volumes: [
+                {
+                  configMap: {
+                    name: "cortex"
+                  },
+                  name: "cortex"
+                }
+              ]
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          labels: {
+            job: `${namespace}.configs`,
+            name: "configs"
+          },
+          name: "configs",
+          namespace
+        },
+        spec: {
+          clusterIP: "None",
+          ports: [
+            {
+              port: 80,
+              name: "http"
+            }
+          ],
+          selector: {
+            name: "configs"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new V1ServicemonitorResource(
+      {
+        apiVersion: "monitoring.coreos.com/v1",
+        kind: "ServiceMonitor",
+        metadata: {
+          labels: {
+            name: "configs",
+            tenant: "system"
+          },
+          name: "configs",
+          namespace
+        },
+        spec: {
+          endpoints: [
+            {
+              interval: "30s",
+              port: "http",
+              path: "/metrics"
+            }
+          ],
+          jobLabel: "job",
+          namespaceSelector: {
+            matchNames: [namespace]
+          },
+          selector: {
+            matchLabels: {
+              name: "configs"
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Deployment(
+      {
+        apiVersion: "apps/v1",
+        kind: "Deployment",
+        metadata: {
+          name: "ruler",
+          namespace
+        },
+        spec: {
+          replicas: config.ruler.replicas,
+          selector: {
+            matchLabels: {
+              name: "ruler"
+            }
+          },
+          template: {
+            metadata: {
+              labels: {
+                name: "ruler"
+              }
+            },
+            spec: {
+              affinity: withPodAntiAffinityRequired({
+                name: "ruler"
+              }),
+              containers: [
+                {
+                  name: "ruler",
+                  image: DockerImages.cortex,
+                  imagePullPolicy: "IfNotPresent",
+                  args: [
+                    "-target=ruler",
+                    "-config.file=/etc/cortex/config.yaml"
+                  ],
+                  env: config.env,
+                  ports: [
+                    {
+                      containerPort: 80,
+                      name: "http"
+                    }
+                  ],
+                  volumeMounts: [
+                    {
+                      mountPath: "/etc/cortex",
+                      name: "cortex"
+                    }
+                  ]
+                }
+              ],
+              volumes: [
+                {
+                  configMap: {
+                    name: "cortex"
+                  },
+                  name: "cortex"
+                }
+              ]
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          labels: {
+            job: `${namespace}.ruler`,
+            name: "ruler"
+          },
+          name: "ruler",
+          namespace
+        },
+        spec: {
+          clusterIP: "None",
+          ports: [
+            {
+              port: 80,
+              name: "http"
+            }
+          ],
+          selector: {
+            name: "ruler"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new V1ServicemonitorResource(
+      {
+        apiVersion: "monitoring.coreos.com/v1",
+        kind: "ServiceMonitor",
+        metadata: {
+          labels: {
+            name: "ruler",
+            tenant: "system"
+          },
+          name: "ruler",
+          namespace
+        },
+        spec: {
+          endpoints: [
+            {
+              interval: "30s",
+              port: "http",
+              path: "/metrics"
+            }
+          ],
+          jobLabel: "job",
+          namespaceSelector: {
+            matchNames: [namespace]
+          },
+          selector: {
+            matchLabels: {
+              name: "ruler"
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Deployment(
+      {
+        apiVersion: "apps/v1",
+        kind: "Deployment",
+        metadata: {
+          name: "alertmanager",
+          namespace
+        },
+        spec: {
+          replicas: config.alertmanager.replicas,
+          selector: {
+            matchLabels: {
+              name: "alertmanager"
+            }
+          },
+          template: {
+            metadata: {
+              labels: {
+                name: "alertmanager"
+              }
+            },
+            spec: {
+              affinity: withPodAntiAffinityRequired({
+                name: "alertmanager"
+              }),
+              containers: [
+                {
+                  name: "alertmanager",
+                  image: DockerImages.cortex,
+                  imagePullPolicy: "IfNotPresent",
+                  args: [
+                    "-target=alertmanager",
+                    "-config.file=/etc/cortex/config.yaml"
+                  ],
+                  env: config.env,
+                  ports: [
+                    {
+                      containerPort: 9094,
+                      name: "alertmanager"
+                    },
+                    {
+                      containerPort: 80,
+                      name: "http"
+                    }
+                  ],
+                  volumeMounts: [
+                    {
+                      mountPath: "/etc/cortex",
+                      name: "cortex"
+                    }
+                  ]
+                }
+              ],
+              volumes: [
+                {
+                  configMap: {
+                    name: "cortex"
+                  },
+                  name: "cortex"
+                }
+              ]
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          labels: {
+            job: `${namespace}.alertmanager`,
+            name: "alertmanager"
+          },
+          name: "alertmanager",
+          namespace
+        },
+        spec: {
+          clusterIP: "None",
+          ports: [
+            {
+              port: 9094,
+              name: "cluster"
+            },
+            {
+              port: 80,
+              name: "http"
+            }
+          ],
+          selector: {
+            name: "alertmanager"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new V1ServicemonitorResource(
+      {
+        apiVersion: "monitoring.coreos.com/v1",
+        kind: "ServiceMonitor",
+        metadata: {
+          labels: {
+            name: "alertmanager",
+            tenant: "system"
+          },
+          name: "alertmanager",
+          namespace
+        },
+        spec: {
+          endpoints: [
+            {
+              interval: "30s",
+              port: "http",
+              path: "/metrics"
+            }
+          ],
+          jobLabel: "job",
+          namespaceSelector: {
+            matchNames: [namespace]
+          },
+          selector: {
+            matchLabels: {
+              name: "alertmanager"
             }
           }
         }
