@@ -29,6 +29,11 @@ Collecting these centrally can be done by setting up the [CloudWatch](https://gi
 
 * Reliably receive alerts if some part of your product is not available in some part of the world.
 
+**Total cost of ownership detailed in the UI**
+
+* Opstrace will show how much it costs to store metrics and logs inside of the product.
+No more spreadsheets and guessing but instead actionable information that is automatically kept up to date.
+
 **Tracing**
 
 * Tracing suffers similar problems to logs and metrics–it's expensive to operate and even more difficult to set up.
