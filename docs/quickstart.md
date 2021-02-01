@@ -13,7 +13,7 @@ You'll send metrics and logs to it from your local machine, and query the data t
 
 If you want to see the quick start run through at over 10x speed, check out our video here:
 
-<iframe width="300" height="170" src="https://www.youtube.com/embed/ooqBn1Q-y2Q" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ooqBn1Q-y2Q" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
 
 ## Step 0: Setup
 
