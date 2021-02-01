@@ -46,6 +46,7 @@ ALLOWLIST="\
 ^docs/|\
 ^.gitattributes|\
 ^.github|\
+^.gitignore|\
 ^README.md|\
 ^.markdownlint.json|\
 ^ci/check-if-docs-pr.sh\
