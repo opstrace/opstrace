@@ -11,10 +11,9 @@ You'll send metrics and logs to it from your local machine, and query the data t
 
 ![quick start overview diagram](/images/docs/opstrace-quickstart-overview-v2.png)
 
-* You’ll have a _secure_, _horizontally-scalable_, _multi-tenant_, and _self-healing_ open source observability platform.
-* Running Opstrace for an hour costs less than $1.00.
+If you want to see the quick start run through at over 10x speed, check out our video here:
 
-<iframe width="300" height="170" src="https://www.youtube.com/embed/XkVxYaHsDyY" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+<iframe width="300" height="170" src="https://www.youtube.com/embed/ooqBn1Q-y2Q" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
 
 ## Step 0: Setup
 
