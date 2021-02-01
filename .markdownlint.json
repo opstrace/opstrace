@@ -7,7 +7,6 @@
   "ul-style": {
     "style": "asterisk"
   },
-  "no-inline-html": { "allowed_elements": ["iframe"] },
   "proper-names": {
     "code_blocks": false,
     "names": [
