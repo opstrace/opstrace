@@ -14,3 +14,4 @@ jobs:
           use-verbose-mode: "yes"
           folder-path: "docs"
           check-modified-files-only: "yes"
+          base-branch: "main"
