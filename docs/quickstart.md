@@ -13,8 +13,6 @@ You'll send metrics and logs to it from your local machine, and query the data t
 * You’ll have a _secure_, _horizontally-scalable_, _multi-tenant_, and _self-healing_ open source observability platform.
 * Running Opstrace for an hour costs less than $1.00.
 
-At the end you can uninstall it and all provisioned resources will be cleaned up.
-
 ## Step 0: Setup
 
 Open a terminal and verify you have the following:
@@ -40,7 +38,7 @@ For example:
 mkdir opstrace-quickstart && cd opstrace-quickstart
 ```
 
-Download the latest Opstrace CLI binary from S3, which you will use to instal Opstrace (~50M compressed):
+Download the latest Opstrace CLI binary from S3, which you will use to install Opstrace (~50M compressed):
 
 <!--tabs-->
 
@@ -85,7 +83,7 @@ The name will globally identify you in our domain as `$OPSTRACE_NAME.opstrace.io
 
 Then, you'll create a simple [configuration file](./references/cluster-configuration.md) with the most basic options.
 Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts internal metrics.
-Learn more about tenant isolation in our [key concepts references](./references/concepts.md#tenants).
+Learn more about tenant isolation in our [key concepts references](./references/concepts.md#concepts).
 
 ```bash
 cat <<EOF > opstrace-config.yaml
@@ -258,7 +256,7 @@ Starting opstrace-getting-started_prometheus_1 ... done
 Starting opstrace-getting-started_avalanche_1  ... done
 ```
 
-You now have dummy (random) metrics and associated logs (simulating an app you may have IRL) being sent to your [tenant](./references/concepts.md#tenants) Opstrace tenant.
+You now have dummy (random) metrics and associated logs (simulating a real app you may have) being sent to your isolated [tenant](./references/concepts.md#tenants).
 
 ## Step 3: Validate the data
 
