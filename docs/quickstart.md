@@ -13,7 +13,7 @@ You'll send metrics and logs to it from your local machine, and query the data t
 * You’ll have a _secure_, _horizontally-scalable_, _multi-tenant_, and _self-healing_ open source observability platform.
 * Running Opstrace for an hour costs less than $1.00.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/XkVxYaHsDyY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/XkVxYaHsDyY" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
 
 ## Step 0: Setup
 
