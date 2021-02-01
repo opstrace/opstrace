@@ -5,25 +5,24 @@ description: >-
 
 # Opstrace Quick Start
 
-Try Opstrace by installing it inside your AWS account.
+Try Opstrace by actually installing it inside your AWS account.
 You'll send metrics and logs to it from your local machine, and query the data to test the end-to-end flow.
 
-![quick start overview](.gitbook/assets/opstrace-quickstart-overview-v2.png)
+![quick start overview diagram](/images/docs/opstrace-quickstart-overview-v2.png)
 
 * You’ll have a _secure_, _horizontally-scalable_, _multi-tenant_, and _self-healing_ open source observability platform.
 * Running Opstrace for an hour costs less than $1.00.
+
+At the end you can uninstall it and all provisioned resources will be cleaned up.
 
 ## Step 0: Setup
 
 Open a terminal and verify you have the following:
 
-* For installing Opstrace:
-  * The [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-    * We recommend `AdministratorAccess` for this quick start; for additional info check out our [cloud permissions reference](./references/cloud-permissions.md).
-    * While AWS and GCP are supported, we will focus on AWS in this quick start.
-* For sending dummy data:
-  * [Docker](https://docs.docker.com/install/)
-  * [Docker Compose](https://docs.docker.com/compose/install/)
+* For installing Opstrace you'll need the [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+  * We recommend `AdministratorAccess` for this quick start; for additional info check out our [cloud permissions reference](./references/cloud-permissions.md).
+  * While GCP is also fully supported, we will focus on AWS in this quick start.
+* For sending dummy data to Opstrace, you'll need [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
 
 Note: the code blocks are all copy-and-pastable.
 
@@ -48,18 +47,20 @@ Download the latest Opstrace CLI binary from S3, which you will use to instal Op
 ### MacOS
 
 ```bash
-# Download the CLI from S3 and extract it.
+# Download the CLI from S3 and extract it
 curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
-# Test the extracted binary.
+
+# Test the extracted binary
 ./opstrace --help
 ```
 
 ### Linux
 
 ```bash
-# Download the CLI from S3 and extract it.
+# Download the CLI from S3 and extract it
 curl -L https://go.opstrace.com/cli-latest-linux | tar xjf -
-# Test the extracted binary.
+
+# Test the extracted binary
 ./opstrace --help
 ```
 
