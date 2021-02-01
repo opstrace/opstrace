@@ -1,7 +1,8 @@
 ---
-description: >-
-  See it for yourself—get your hands dirty with Opstrace by installing it in your account and sending dummy data.
+description: See it for yourself—get your hands dirty with Opstrace by installing it in your account and sending dummy data.
 ---
+
+<!-- markdownlint-disable MD033 -->
 
 # Opstrace Quick Start
 
@@ -13,7 +14,7 @@ You'll send metrics and logs to it from your local machine, and query the data t
 * You’ll have a _secure_, _horizontally-scalable_, _multi-tenant_, and _self-healing_ open source observability platform.
 * Running Opstrace for an hour costs less than $1.00.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/XkVxYaHsDyY" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+<iframe width="300" height="170" src="https://www.youtube.com/embed/XkVxYaHsDyY" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
 
 ## Step 0: Setup
 
