@@ -21,7 +21,7 @@ You'll send metrics and logs to it from your local machine, and query the data t
 Open a terminal and verify you have the following:
 
 * For installing Opstrace you'll need the [AWS Command Line Interface v2 (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-  * We recommend `AdministratorAccess` for this quick start; for additional info check out our [cloud permissions reference](./references/cloud-permissions.md).
+  * We recommend `AdministratorAccess` for this quick start; for additional info check out our [cloud permissions reference](./references/aws.md).
   * While GCP is also fully supported, we will focus on AWS in this quick start.
 * For sending dummy data to Opstrace, you'll need [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
 
