@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD036 -->
 
-Our early access version provides a foundation that solves many [real pain points](/blog/public-launch-announcement) that people have today.
+Our early access version provides a foundation that solves many [real pain points](https://opstrace.com/blog/public-launch-announcement) that people have today.
 But we know there is still a lot more to do to have a _complete_ observability platform that is more than just private, secure and cost-effective.
 This high-level roadmap highlights major guideposts along our path toward that goal.
 

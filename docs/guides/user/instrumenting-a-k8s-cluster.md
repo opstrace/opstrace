@@ -16,7 +16,7 @@ To that end,
 
 * An Opstrace cluster.
 * A decision: for which Opstrace tenant would you like to send data?
-* An Opstrace tenant authentication token file (for the tenant of your choice). Also see [concepts](./docs/references/concepts.md).
+* An Opstrace tenant authentication token file (for the tenant of your choice). Also see [concepts](../../references/concepts.md).
 
 For following this guide step-by-step you will additionally need [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) installed on your computer.
 `Kind` is a tool for running a local k8s cluster using Docker.

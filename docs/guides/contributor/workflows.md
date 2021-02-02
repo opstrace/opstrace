@@ -98,7 +98,7 @@ But at this point, you have certainly entered the "I know what I am doing" stage
 
 ## Run the `test-remote` suite against a remote cluster
 
-See [the `test-remote` suite of tests](./test-remote), a document dedicated to this test suite.
+See [the `test-remote` suite of tests](https://github.com/opstrace/opstrace/tree/main/test/test-remote), a document dedicated to this test suite.
 
 ## Create a cluster, but run the controller locally
 
