@@ -68,12 +68,13 @@ suite("DD API test suite", function () {
       series: [
         {
           metric: metricname,
-          // Note: these samples are ascending in time, which is _not_
-          // the order that the dd agent sends fragments.
+          // Note: these samples are descending in time, which is
+          // the order that the DD agent sends fragments with. This order
+          // is currently strictly required by the receiving end.
           points: [
-            [tsnow - 240, 0],
+            [tsnow, 2],
             [tsnow - 120, 1],
-            [tsnow, 2]
+            [tsnow - 240, 0]
           ],
           tags: ["version:7.24.1", "testtag:testvalue"],
           host: "somehost",
@@ -115,49 +116,6 @@ suite("DD API test suite", function () {
     );
 
     log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
-
-    // When the `points` array in the submit request is ascending in time
-    // (newer samples towards the end of the array) then the result reflects
-    // all values:
-
-    // "values": [
-    //     [
-    //       1611598200,
-    //       "0"
-    //     ],
-    //     [
-    //       1611598260,
-    //       "0"
-    //     ],
-    //     [
-    //       1611598320,
-    //       "1"
-    //     ],
-    //     [
-    //       1611598380,
-    //       "1"
-    //     ],
-    //     [
-    //       1611598440,
-    //       "2"
-    //     ]
-    //   ]
-
-    // When the `points` array in the submit request is descending in time
-    // (newer samples towards the beginning of the array, which is what the DD
-    // agent seems to send) then the result reflects only the newest sample:
-    // all values:
-
-    // "values": [
-    //     [
-    //       1611599040,
-    //       "2"
-    //     ]
-
-    // The latter case seems to imply information loss with the current
-    // DD->Cortex translation logic (which simply iterates over DD
-    // agent-provided samples in the order as given in the JSON doc).
-    // Interestingly.
 
     // Check that all three values in the original submit request are
     // covered by the query response.
