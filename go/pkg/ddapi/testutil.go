@@ -110,6 +110,7 @@ func (tsfragment *DDTSFragment) toJSON() string {
 	// JSON construction.
 	points := make([]datapoint, sampleCount)
 	var i int64
+
 	for i = 0; i < sampleCount; i++ {
 		// Generate value string. The logic here makes it explicit that we
 		// distinguish two cases: in the resulting JSON doc -- should the
@@ -131,7 +132,11 @@ func (tsfragment *DDTSFragment) toJSON() string {
 			TimestampString: fmt.Sprintf("%v", firstSampleTime+i*timestampIncrement),
 			ValueString:     valueString,
 		}
-		points[i] = dp
+
+		// The DD agent sends samples in descending time order (newer samples
+		// towards the beginning of the array) and this is what the translator
+		// expects now. Reverse the order of points.
+		points[sampleCount-1-i] = dp
 	}
 
 	templatedata := map[string]interface{}{

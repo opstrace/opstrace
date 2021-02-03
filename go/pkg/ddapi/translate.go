@@ -177,22 +177,53 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// Inspiration from
 		// https://github.com/open-telemetry/opentelemetry-go-contrib/blob/v0.15.0/exporters/metric/cortex/cortex.go#L385
 
-		// Note(JP): handle special case of fragment.Points being of zero
-		// length: probably simply drop this fragment.
+		// Handle special case of fragment.Points being of zero length: simply
+		// drop this fragment.
+		if len(fragment.Points) == 0 {
+			log.Debugf("No samples in fragment, skip: %v", labels)
+			continue
+		}
 
 		promSamples := make([]prompb.Sample, 0, len(fragment.Points))
-		for _, point := range fragment.Points {
+
+		// Assume and require that `fragment.Points` contains samples in strict
+		// descending time order, i.e. the first sample being the newest. This
+		// is what the DD agent is expected to send. The Prometheus
+		// `prompb.TimeSeries` construct, however, seems to require `Samples`
+		// in strict ascending order, with the newest sample being last.
+		// Therefore, iterate over fragment.Points in reverse order and
+		// validate that the samples in `fragment.Points` are monotonic in
+		// time. When they are not, reject the HTTP request after all (for now,
+		// to learn what clients actually send -- we can be more liberal in the
+		// future).
+
+		var countmo = len(fragment.Points) - 1
+		var prevTimestamp int64 = fragment.Points[countmo].Timestamp
+
+		for i := countmo; i >= 0; i-- {
+			var curValue = fragment.Points[i].Value
+			var curTimestamp = fragment.Points[i].Timestamp
 			// TODO: think about if `point.Value` should undergo a
 			// transformation, depending on the DD metric type (count, rate,
 			// gauge) and the `interval` property set in the input ts fragment.
 			s := prompb.Sample{
-				Value: point.Value,
+				Value: curValue,
 				// A DD sample timestamp represents seconds since epoch. The
 				// prompb.Sample.Timestamp represents milliseconds since epoch.
-				Timestamp: point.Timestamp * 1000,
+				Timestamp: curTimestamp * 1000,
 			}
 
 			promSamples = append(promSamples, s)
+
+			// Allow adjacent samples to have equivalent timestamp (for now,
+			// not sure if that's allowed by Prometheus / Cortex).
+			if curTimestamp < prevTimestamp {
+				// TODO: also show labels in the error message, so that this
+				// fragment can actually be properly identified.
+				return nil, fmt.Errorf("bad sample at position %d: %v", i+1, fragment.Points[i])
+			}
+
+			prevTimestamp = fragment.Points[i].Timestamp
 		}
 
 		// Construct the Prometheus protobuf time series fragment, comprised of
