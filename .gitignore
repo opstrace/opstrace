@@ -12,6 +12,7 @@ out
 .venv
 .cache
 .build
+.log
 yarn-error.log
 
 opstrace-config.yaml

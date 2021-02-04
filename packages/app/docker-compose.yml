@@ -1,5 +1,9 @@
+###
+# Hasura dev environment. See README.md for more information.
+###
 version: "3.6"
 services:
+  # PostgreSQL service, accessed via pgadmin and hasura/graphql
   postgres:
     image: postgres:12
     restart: always
@@ -7,6 +11,8 @@ services:
       - /var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: postgrespassword
+  # pgadmin dashboard for inspecting/interacting with postgres directly
+  # See README for instructions on access
   pgadmin:
     image: dpage/pgadmin4
     restart: always
@@ -17,6 +23,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
+  # Hasura server, serving a GraphQL proxy in front of postgres
+  # Launch Hasura console using 'yarn console'
   graphql:
     image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
     ports:
@@ -29,13 +37,17 @@ services:
       - ./metadata:/hasura-metadata
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
-      ## disable the console served by server https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#before-you-begin
+      ## disable the console served by server, console should be run separately
+      ## see instructions: https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html
       HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # set to "false" to disable console
       ## enable debugging mode. It is recommended to disable this in production
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       ## uncomment next line to set an admin secret
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecret
+      ## https://hasura.io/docs/1.0/graphql/core/guides/telemetry.html
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+  # S3 service for storing modules
   s3:
     image: minio/minio
     ports:

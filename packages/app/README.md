@@ -20,14 +20,12 @@ yarn server:start
 yarn client:start
 ```
 
-Services launched by `yarn services:start`:
+Services launched by `yarn services:start` via [the docker compose file](docker-compose.yml):
 
 * __GraphQL server__: [Hasura](https://hasura.io) GraphQL API.
 * __Postgres__: A single postgres instance backing our GraphQL server.
-* __Minio__: A single minio server for module storage.
-
-See the [docker compose]("./docker-compose.yml) file the services launched.
-
+* __pgadmin__: A dashboard for manually interacting with Postgres.
+* __Minio__: A single S3/minio server for module storage.
 
 ## Frequently used Scripts
 
@@ -58,6 +56,49 @@ Builds the client for production to the `build` folder and builds the server for
 It bundles React in production mode and optimizes the build for the best performance.
 
 The build is minified and the filenames include the hashes.
+
+## Schema development
+
+For changing the Postgres schema e.g. adding new tables or existing new tables, we will launch Hasura+Postgres in a docker-compose environment, and then locally run the Hasura console for interacting with that environment. See also [Hasura migrations docs](https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html).
+
+Changes via the Hasura console will take effect immediately:
+- The Postgres schema in the docker-compose environment will be updated to reflect schema changes.
+- The Hasura `metadata/` and `migrations/` directories will be updated automatically (via mounts in the docker-compose environment).
+- The Typescript and Go GraphQL client code will be automatically regenerated (via `yarn types:watch`).
+
+`.gql` files must be explicitly created for any query/mutate calls to be included in the generated Typescript/Go client code. See existing `.gql` files under `src/state/` for examples.
+
+```
+# Ensure dependencies are installed and linked
+yarn
+docker-compose --version
+hasura version # see also: https://hasura.io/docs/1.0/graphql/core/hasura-cli/install-hasura-cli.html
+addlicense # run via codegen hook
+
+# Terminal 1) Start Hasura server and Postgres via docker-compose
+yarn services:start
+
+# Terminal 2) Start the Hasura console on the host environment
+yarn console
+
+# Terminal 3) Talk to Hasura server to regenerate Typescript and Go client code automatically:
+#             - /packages/app/src/state/graphql-api-types.ts
+#             - /go/pkg/graphql/client_generated.go (note: addlicense doesn't update this file because it appears generated)
+yarn types:watch
+
+# Browser: connect to localhost at the URL printed by "yarn console" and get to it
+```
+
+### pgadmin access
+
+The docker-compose environment includes a pgadmin instance for inspecting Postgres directly.
+
+1. With `yarn services:start` running in a terminal, connect to `http://localhost:5050`
+2. Log in with `pgadmin@example.com`/`admin`
+3. Right click `Servers` in left panel -> `Create` -> `Server`
+4. General tab: name=`foo`
+5. Connection tab: host=`postgres`, user=`postgres`, pass=`postgrespassword`, save password=`Y`
+6. Save, then navigate to tables under `Databases`/`postgres`/`Schemas`/`public`/`Tables`
 
 ### Troubleshooting
 
