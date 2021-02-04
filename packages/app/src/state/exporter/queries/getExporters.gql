@@ -1,0 +1,11 @@
+query GetExporters($tenant: String!) {
+  exporter(where: {tenant: {_eq: $tenant}}) {
+    tenant
+    name
+    type
+    credential
+    config
+    created_at
+    updated_at
+  }
+}

@@ -87,6 +87,39 @@
           _ne: true
 - table:
     schema: public
+    name: credential
+  object_relationships:
+  - name: tenantByTenant
+    using:
+      foreign_key_constraint_on: tenant
+  array_relationships:
+  - name: exporters
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: exporter
+        column_mapping:
+          tenant: tenant
+          name: credential
+- table:
+    schema: public
+    name: exporter
+  object_relationships:
+  - name: credentialByCredentialTenant
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: credential
+        column_mapping:
+          credential: name
+          tenant: tenant
+  - name: tenantByTenant
+    using:
+      foreign_key_constraint_on: tenant
+- table:
+    schema: public
     name: file
   object_relationships:
   - name: branch
@@ -325,6 +358,21 @@
 - table:
     schema: public
     name: tenant
+  array_relationships:
+  - name: credentials
+    using:
+      foreign_key_constraint_on:
+        column: tenant
+        table:
+          schema: public
+          name: credential
+  - name: exporters
+    using:
+      foreign_key_constraint_on:
+        column: tenant
+        table:
+          schema: public
+          name: exporter
   insert_permissions:
   - role: user_admin
     permission:
@@ -359,6 +407,14 @@
           name: user_preference
         column_mapping:
           email: email
+  array_relationships:
+  - name: user_preferences
+    using:
+      foreign_key_constraint_on:
+        column: email
+        table:
+          schema: public
+          name: user_preference
   insert_permissions:
   - role: user_admin
     permission:

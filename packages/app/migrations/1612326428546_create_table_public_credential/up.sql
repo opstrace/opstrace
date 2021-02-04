@@ -1,0 +1,1 @@
+CREATE TABLE "public"."credential"("tenant" text NOT NULL, "name" text NOT NULL, "type" text NOT NULL, "value" json NOT NULL, "created_at" timestamptz NOT NULL DEFAULT now(), "updated_at" timestamptz NOT NULL DEFAULT now(), PRIMARY KEY ("tenant","name") , FOREIGN KEY ("tenant") REFERENCES "public"."tenant"("name") ON UPDATE cascade ON DELETE cascade);

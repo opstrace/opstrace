@@ -1,0 +1,11 @@
+query GetExporter($tenant: String!, $name: String!) {
+  exporter_by_pk(tenant: $tenant, name: $name) {
+    tenant
+    name
+    type
+    credential
+    config
+    created_at
+    updated_at
+  }
+}

@@ -1,0 +1,9 @@
+subscription SubscribeToExporterList {
+  exporter {
+    name
+    tenant
+    type
+    credential
+    config
+  }
+}

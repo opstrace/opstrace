@@ -35,6 +35,12 @@ module.exports = {
       config: {
         rawRequest: true,
         skipTypename: true
+      },
+      hooks: {
+        afterOneFileWrite: [
+          "yarn run prettier --write",
+          "addlicense -c 'Opstrace, Inc.' -l apache"
+        ]
       }
     }
   }
