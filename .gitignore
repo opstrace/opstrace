@@ -40,6 +40,10 @@ pkg/datadog/datadog
 pkg/fluent-http/fluent-http
 pkg/loki/loki
 
+go/cortex-api
+go/ddapi
+go/loki-api
+
 tenant-api-token-*
 opstrace_cli_*.log
 packages/cli/src/buildinfo.ts
