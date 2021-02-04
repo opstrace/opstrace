@@ -18,4 +18,5 @@ require (
 	github.com/testcontainers/testcontainers-go v0.9.0
 	google.golang.org/genproto v0.0.0-20210111234610-22ae2b108f89 // indirect
 	google.golang.org/grpc v1.34.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 )
