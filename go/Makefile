@@ -2,10 +2,10 @@
 GIT_REVISION := $(shell git rev-parse --short HEAD)
 
 DOCKER_REPO ?= opstrace
-# DOCKER_IMAGE_TAG is a md5sum of all the files (except hidden) in the go
+# DOCKER_IMAGE_TAG is a shasum of all the files (except hidden) in the go
 # directory. We use it to have a deterministic method to calculate a docker
 # image tag.
-DOCKER_IMAGE_TAG ?= $(shell find . -type f -not -name ".*" -print0 | sort -z -d -f | xargs -0 cat | md5sum | cut -d' ' -f1)
+DOCKER_IMAGE_TAG ?= $(shell find . -type f -not -name ".*" -print0 | sort -z -d -f | xargs -0 cat | shasum | cut -d' ' -f1)
 
 DOCKERFILE = ./Dockerfile
 
