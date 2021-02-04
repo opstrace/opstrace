@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	json "github.com/json-iterator/go"
@@ -137,6 +138,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			// Prom world.
 			"device":           fragment.Device,
 			"type":             fragment.Type,
+			"interval":         strconv.FormatInt(fragment.Interval, 10),
 			"source_type_name": fragment.SourceTypeName,
 		}
 
