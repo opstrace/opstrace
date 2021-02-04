@@ -42,6 +42,19 @@ module.exports = {
           "addlicense -c 'Opstrace, Inc.' -l apache"
         ]
       }
+    },
+    "../../go/pkg/graphql/client_generated.go": {
+      plugins: [
+        "graphql-codegen-golang"
+      ],
+      config: {
+        packageName: "graphql",
+      },
+      hooks: {
+        afterOneFileWrite: [
+          "go fmt"
+        ]
+      }
     }
   }
 };

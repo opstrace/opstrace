@@ -2432,7 +2432,7 @@
     "@graphql-codegen/plugin-helpers" "^1.17.8"
     tslib "~2.0.0"
 
-"@graphql-codegen/plugin-helpers@^1.17.8":
+"@graphql-codegen/plugin-helpers@1.17.8", "@graphql-codegen/plugin-helpers@^1.17.8":
   version "1.17.8"
   resolved "https://registry.yarnpkg.com/@graphql-codegen/plugin-helpers/-/plugin-helpers-1.17.8.tgz#d47e8bd6b425b38cfc4e2d670b31183b8e9a91e8"
   integrity sha512-Ck1E4QC4yrhX5zUtMlc/uloly6TWSpJDA7+aJrdMOY+MEUgrrM7wJsLV9azNae2OmrhZAQopSuGezjHNbsqSdA==
@@ -11579,6 +11579,15 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.4.tgz#2256bde14d3632958c465ebc96dc467ca07a29fb"
   integrity sha512-WjKPNJF79dtJAVniUlGGWHYGz2jWxT6VhN/4m1NdkbZ2nOsEF+cI1Edgql5zCRhs/VsQYRvrXctxktVXZUkixw==
 
+graphql-codegen-golang@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/graphql-codegen-golang/-/graphql-codegen-golang-0.1.1.tgz#08f6f7062a6e827e775655adfb59f6ad00e20298"
+  integrity sha512-Jhv0FZFI3vS+V9AsOjMhXF2mqTzJIqkmf8Yl6jN1ps1iBuKZtGVIKiAc1Iso2u/KEmvSh75unj6u7/JOlGvhew==
+  dependencies:
+    "@graphql-codegen/plugin-helpers" "1.17.8"
+    graphql "15.3.0"
+    liquidjs "9.15.0"
+
 graphql-config@^3.0.2:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/graphql-config/-/graphql-config-3.0.3.tgz#58907c65ed7d6e04132321450b60e57863ea9a5f"
@@ -11607,7 +11616,7 @@ graphql-tag@^2.10.3, graphql-tag@^2.11.0:
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.11.0.tgz#1deb53a01c46a7eb401d6cb59dec86fa1cccbffd"
   integrity sha512-VmsD5pJqWJnQZMUeRwrDhfgoyqcfwEkvtpANqcoUG8/tOLkwNgU9mzub/Mc78OJMhHjx7gfAMTxzdG43VGg3bA==
 
-graphql@*, graphql@^15.0.0:
+graphql@*, graphql@15.3.0, graphql@^15.0.0:
   version "15.3.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.3.0.tgz#3ad2b0caab0d110e3be4a5a9b2aa281e362b5278"
   integrity sha512-GTCJtzJmkFLWRfFJuoo9RWWa/FfamUHgiFosxi/X1Ani4AVWbeyBenZTNX6dM+7WSbbFfTo/25eh0LLkwHMw2w==
@@ -14412,6 +14421,11 @@ lint-staged@^10.5.3:
     please-upgrade-node "^3.2.0"
     string-argv "0.3.1"
     stringify-object "^3.3.0"
+
+liquidjs@9.15.0:
+  version "9.15.0"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-9.15.0.tgz#03e8c13aeda89801a346c614b0802f320458d0ac"
+  integrity sha512-wRPNfMx6X3GGEDqTlBpw7VMo8ylKkzLYTcd7eeaDeYnZyR5BqUgF9tZy3FdPCHV2N/BassGKmlmlpJiRXGFOqg==
 
 listr-silent-renderer@^1.1.1:
   version "1.1.1"
