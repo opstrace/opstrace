@@ -52,7 +52,7 @@ ALLOWLIST="\
 ^ci/check-if-docs-pr.sh\
 "
 
-DOCS_ONLY_CHANGES=$(echo ${FILES_EDITED_IN_PR}| egrep -v "${ALLOWLIST}" | tr -d '[:space:]')
+DOCS_ONLY_CHANGES=$(echo "${FILES_EDITED_IN_PR}" | egrep -v "${ALLOWLIST}" | tr -d '[:space:]')
 if [ -z "${DOCS_ONLY_CHANGES}" ];
 then
     echo "--- docs only PR (${BUILDKITE_PULL_REQUEST}) - skipping next steps"
