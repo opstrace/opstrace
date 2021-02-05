@@ -77,6 +77,7 @@ function getClientEnvironment(publicUrl) {
       },
       {
         BUILD_TIME: Date.now().toString(),
+        RUNTIME: null,
         // Only allow this to be toggled in development (through the docker-compose file). Otherwise we make sure it is unset
         EARLY_PREVIEW:
           process.env.NODE_ENV !== "development"

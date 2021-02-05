@@ -15,8 +15,6 @@
  */
 import axios from "axios";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-// Ensure our workers for monaco are registered
-import "workers";
 
 import socket from "state/clients/websocket";
 import { getFileUri, getMonacoFileUri } from "./utils/uri";

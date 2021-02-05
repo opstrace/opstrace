@@ -23,7 +23,12 @@
     "downlevelIteration": true,
     "declarationMap": true,
     "composite": true,
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "types": [
+      "jest",
+      "node",
+      "mocha"
+    ]
   },
   "exclude": [
     "**/node_modules/*",

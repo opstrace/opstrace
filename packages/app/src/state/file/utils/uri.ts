@@ -36,6 +36,7 @@ export function getFileUri(
     path: string;
   },
   options?: {
+    external?: boolean;
     useLatest?: boolean;
     branch?: string;
     version?: string;
@@ -45,17 +46,30 @@ export function getFileUri(
 ) {
   const versionToUse = options?.useLatest ? "latest" : file.module_version;
 
-  const filePath = `${getModuleNameFromFile(file)}${
+  let filePath = `${getModuleNameFromFile(file)}${
     options?.encodeAtSymbol ? "%40" : "@"
   }${options?.version ? options.version : versionToUse}/${file.path.replace(
     /^\//,
     ""
   )}`;
 
-  const possiblyWithBranch = options?.branch
-    ? `${options.branch}/${filePath}`
-    : filePath;
-  return options?.ext ? `${possiblyWithBranch}.tsx` : possiblyWithBranch;
+  if (options?.external) {
+    filePath = `x/${filePath}`;
+  } else if (options?.branch) {
+    filePath = `${options.branch}/${filePath}`;
+  }
+
+  if (!options?.external && filePath.endsWith("/")) {
+    // default to the 'main' file
+    filePath += "main";
+  }
+
+  if (options?.external && filePath.endsWith("/")) {
+    // use "package_main" to tell the server we want to use the "main" field from the package's package.json
+    filePath += "index";
+  }
+
+  return options?.ext ? `${filePath}.tsx` : filePath;
 }
 
 export function getMonacoFileUriString(file: {
@@ -94,6 +108,11 @@ export function parseFileImportUri(uri: string) {
     return null;
   }
 
+  const external = /^(\/([^/]+)\/opstrace\/x\/|\/x\/)/.test(uri);
+  if (external) {
+    uri = uri.replace(/^\/([^/]+)\/opstrace\/x\//, "/x/");
+  }
+
   const match = fileImportUriFormat.exec(uri);
 
   if (match == null) return null;
@@ -102,7 +121,7 @@ export function parseFileImportUri(uri: string) {
   const module = match[2];
   const scope = module.split("/").length > 1 ? module.split("/")[0] : "";
   const version = match[3] || "latest";
-  const fileName = (match[4] || "main").replace(/\/\/+/g, "/");
+  const fileName = (match[4] || "").replace(/\/\/+/g, "/");
   const fileNameParts = fileName.split(".");
   let path = fileName;
   let ext = "tsx";
@@ -115,10 +134,12 @@ export function parseFileImportUri(uri: string) {
   if (path.endsWith(".jsx") && ext === "map") {
     // ext === map, so just get rid of the .jsx
     path = path.replace(/\.jsx$/, "");
+    ext = "jsx.map";
   }
   if (path.endsWith(".js") && ext === "map") {
     // ext === map, so just get rid of the .js
     path = path.replace(/\.js$/, "");
+    ext = "js.map";
   }
   if (path.endsWith(".d") && ext === "ts") {
     // this is a .d.ts file
@@ -132,6 +153,7 @@ export function parseFileImportUri(uri: string) {
     module_scope: sanitizeScope(scope),
     module_version: version,
     path: sanitizeFilePath(path),
-    ext: sanitizeFileExt(ext)
+    ext: sanitizeFileExt(ext),
+    external
   };
 }

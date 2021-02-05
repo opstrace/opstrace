@@ -22,6 +22,7 @@ import { useCommandService } from "client/services/Command";
 import { useDisplayService } from "client/services/Display";
 
 const Layout = (props: {
+  onDrag?: (isDragging: boolean) => void;
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }) => {
@@ -52,6 +53,7 @@ const Layout = (props: {
   return (
     <Box position="relative" display="flex" flexGrow={1}>
       <SplitPane
+        onDrag={props.onDrag}
         split="vertical"
         size={
           display.state.sidebarVisible ? display.state.sidebarWidth || 300 : 0

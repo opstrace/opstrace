@@ -14,6 +14,8 @@ import { getCurrentUser } from "state/user/hooks/useCurrentUser";
 import { getUserList } from "state/user/hooks/useUserList";
 import { User } from "state/user/types";
 import { getOpScriptWorker } from "workers";
+import Registry from "./Registry";
+import { CompilerOutput } from "workers/types";
 
 interface File {
   id: string;
@@ -123,12 +125,23 @@ class LiveClient {
   private debouncedOnContentChanged(
     e: monaco.editor.IModelContentChangedEvent
   ) {
-    this.getEmitOutput();
+    (async () => {
+      const output = await this.getEmitOutput();
+      if (output.js) {
+        Registry.parseAndLoadImports(output.js);
+      }
+      this.sendEmitOutput(output);
+    })();
   }
 
   private async getEmitOutput() {
     const worker = await getOpScriptWorker();
     const output = await worker.emitFile(this.model.uri.toString());
+
+    return output;
+  }
+
+  private sendEmitOutput(output: CompilerOutput) {
     socket.emit(actions.compilerOutput({ fileId: this.file.id, output }));
   }
 
@@ -152,6 +165,14 @@ class LiveClient {
     );
 
     this.editor = editor;
+
+    // Only load imports when this is file is visible
+    (async () => {
+      const output = await this.getEmitOutput();
+      if (output.js) {
+        Registry.parseAndLoadImports(output.js);
+      }
+    })();
   }
 
   detachEditor() {
@@ -265,6 +286,16 @@ class LiveClient {
     }
     this.setEditable(false);
     this.suppress = false;
+
+    if (this.editor) {
+      // Parse and load imports if this is the currently focussed file
+      (async () => {
+        const output = await this.getEmitOutput();
+        if (output.js) {
+          Registry.parseAndLoadImports(output.js);
+        }
+      })();
+    }
   }
 
   private onMessage(action: WebsocketEvents) {

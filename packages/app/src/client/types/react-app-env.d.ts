@@ -22,6 +22,7 @@
 declare namespace NodeJS {
   interface ProcessEnv {
     readonly NODE_ENV: "development" | "production" | "test";
+    readonly RUNTIME?: "sandbox";
     readonly EARLY_PREVIEW?: "true";
     readonly PUBLIC_URL: string;
     readonly BUILD_TIME: string;

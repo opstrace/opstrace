@@ -65,34 +65,39 @@ export default function* userListSubscriptionManager() {
   // once everybody has unsubscribed
   const subscribers = new Set<SubscriptionID>();
 
-  yield takeEvery(actions.subscribeToUserList, function* (
-    action: ReturnType<typeof actions.subscribeToUserList>
-  ) {
-    // add to tracked subscribers
-    subscribers.add(action.payload);
+  yield takeEvery(
+    actions.subscribeToUserList,
+    function* (action: ReturnType<typeof actions.subscribeToUserList>) {
+      if (process.env.RUNTIME === "sandbox") {
+        return;
+      }
+      // add to tracked subscribers
+      subscribers.add(action.payload);
 
-    if (activeSubscription) {
-      // already subscribed
-      return;
+      if (activeSubscription) {
+        // already subscribed
+        return;
+      }
+
+      const channel = yield call(userListSubscriptionEventChannel);
+
+      // Fork the subscription task
+      activeSubscription = yield fork(executeActionsChannel, channel);
     }
+  );
 
-    const channel = yield call(userListSubscriptionEventChannel);
-
-    // Fork the subscription task
-    activeSubscription = yield fork(executeActionsChannel, channel);
-  });
-
-  yield takeEvery(actions.unsubscribeFromUserList, function* (
-    action: ReturnType<typeof actions.unsubscribeFromUserList>
-  ) {
-    // remove from subscribers
-    subscribers.delete(action.payload);
-    // Cancel active subscription if there are no subscribers
-    if (activeSubscription && subscribers.size === 0) {
-      yield cancel(activeSubscription);
-      activeSubscription = undefined;
+  yield takeEvery(
+    actions.unsubscribeFromUserList,
+    function* (action: ReturnType<typeof actions.unsubscribeFromUserList>) {
+      // remove from subscribers
+      subscribers.delete(action.payload);
+      // Cancel active subscription if there are no subscribers
+      if (activeSubscription && subscribers.size === 0) {
+        yield cancel(activeSubscription);
+        activeSubscription = undefined;
+      }
     }
-  });
+  );
 }
 
 /**

@@ -45,6 +45,6 @@ export const compilerOutput = createAction("FILE_COMPILER_OUTPUT")<{
   output: CompilerOutput;
 }>();
 
-export const compiledContentUpdated = createAction("FILE_COMPILER_UPDATED")<
-  string
->();
+export const compilerUpdated = createAction("FILE_COMPILER_UPDATE")<{
+  fileId: string;
+}>();

@@ -17,7 +17,6 @@
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { onError } from "@apollo/client/link/error";
 import { ApolloClient, InMemoryCache, from } from "@apollo/client";
-
 export * from "../../graphql-api-types";
 
 // we use webpack to set these "false" during client build
@@ -53,7 +52,8 @@ const subscriptionClient = () => {
   const wsLink = new WebSocketLink({
     uri: endpoint,
     options: {
-      reconnect: true,
+      reconnect: process.env.RUNTIME !== "sandbox",
+      lazy: process.env.RUNTIME === "sandbox",
       connectionParams: {
         headers
       }

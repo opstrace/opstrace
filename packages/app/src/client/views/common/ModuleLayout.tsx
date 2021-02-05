@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 
@@ -30,7 +30,7 @@ import { SplitPane } from "client/components/SplitPane";
 import { ModuleEditorGroup } from "client/components/Editor";
 import Layout from "client/layout/MainContent";
 
-import ModuleOutput from "./ModuleOutput";
+import Sandbox from "./Sandbox";
 
 const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
   const { branch, scope = "", name, version, path } = useParams<{
@@ -80,30 +80,52 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
     [editing, history]
   );
 
+  // We have to keep track of any drag events on the SplitPane and show an overlay
+  // so the drag event doesn't get lost when hovering over a child iframe
+  const [dragging, setDragging] = useState(false);
+  const onDrag = useCallback((dragging: boolean) => {
+    if (dragging) {
+      setDragging(true);
+    } else {
+      setDragging(false);
+    }
+  }, []);
+
   const ModuleContent = useMemo(() => {
     if (currentBranch === null) {
       return "branch doesn't exist";
     }
 
-    if (editing) {
-      return (
-        <SplitPane split="vertical" size={700} minSize={100}>
-          {/* Editor if in editor mode */}
-          <Box position="absolute" left={0} right={0} top={0} bottom={0}>
-            <ModuleEditorGroup />
-          </Box>
-          <ModuleOutput />
-        </SplitPane>
-      );
-    }
-
-    return <ModuleOutput />;
-  }, [editing, currentBranch]);
+    return (
+      <SplitPane
+        onDrag={onDrag}
+        split="vertical"
+        size={editing ? 700 : 0}
+        minSize={100}
+      >
+        {/* Editor if in editor mode */}
+        <Box position="absolute" left={0} right={0} top={0} bottom={0}>
+          <ModuleEditorGroup />
+        </Box>
+        <Sandbox />
+      </SplitPane>
+    );
+  }, [editing, currentBranch, onDrag]);
 
   return (
     <>
       <ModulePicker />
-      <Layout sidebar={sidebar}>{ModuleContent}</Layout>
+      <Layout onDrag={onDrag} sidebar={sidebar}>
+        {ModuleContent}
+      </Layout>
+      <Box
+        position="absolute"
+        top={0}
+        bottom={0}
+        left={0}
+        right={0}
+        display={dragging ? "box" : "none"}
+      ></Box>
     </>
   );
 };
