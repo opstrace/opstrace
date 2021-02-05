@@ -22,8 +22,8 @@ import Avatar from "@material-ui/core/Avatar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import CodeIcon from "@material-ui/icons/Code";
-import ChatIcon from "@material-ui/icons/Chat";
-import HistoryIcon from "@material-ui/icons/History";
+// import ChatIcon from "@material-ui/icons/Chat";
+// import HistoryIcon from "@material-ui/icons/History";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Box from "client/components/Box/Box";
 import { ITheme } from "client/themes";
@@ -34,7 +34,7 @@ import useCurrentUser from "state/user/hooks/useCurrentUser";
 import { useCommandService } from "client/services/Command";
 
 export const ActivityBarTabs = EARLY_PREVIEW
-  ? ["/module", "/chat", "/history", "/cluster"]
+  ? ["/module", "/cluster"] //"/chat", "/history",
   : ["/cluster"];
 
 const getDividerColor = (theme: ITheme) => theme.palette.divider;
@@ -155,8 +155,8 @@ const ActivityBar = () => {
           aria-label="activity-bar"
         >
           {EARLY_PREVIEW && <Tab icon={<CodeIcon />} />}
-          {EARLY_PREVIEW && <Tab icon={<ChatIcon />} />}
-          {EARLY_PREVIEW && <Tab icon={<HistoryIcon />} />}
+          {/* {EARLY_PREVIEW && <Tab icon={<ChatIcon />} />}
+          {EARLY_PREVIEW && <Tab icon={<HistoryIcon />} />} */}
           <Tab icon={<SettingsIcon />} />
         </Tabs>
       </Box>
