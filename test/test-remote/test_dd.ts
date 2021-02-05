@@ -103,7 +103,7 @@ export async function startDDagentContainer() {
     // ],
     Env: ddEnv,
     HostConfig: {
-      NetworkMode: "host",
+      //NetworkMode: "host",
       Mounts: [
         // Mount Let's Encrypt Staging root CA into the container so that
         // golang discovers it when doing HTTP requests.
@@ -209,58 +209,6 @@ export async function startDDagentContainer() {
   }
 
   return terminateContainer;
-
-  // const maxWaitSeconds2 = 30;
-  // const deadline2 = mtimeDeadlineInSeconds(maxWaitSeconds2);
-  // log.info(
-  //   "wait for containerized Prom to scrape & remote_write metrics, deadline in %s s",
-  //   maxWaitSeconds2
-  // );
-  // const t0 = mtime();
-  // const rgx = /\sprometheus_remote_storage_succeeded_samples_total{.*} (?<count>[0-9]+)\s/;
-  // const metricsUrl = `http://127.0.0.1:${promListenPort}/metrics`;
-
-  // while (true) {
-  //   await sleep(0.1);
-
-  //   if (mtime() > deadline2) {
-  //     log.info("deadline hit");
-  //     await terminateContainer();
-  //     throw new Error(
-  //       `deadline hit while waiting for expected data on ${metricsUrl}`
-  //     );
-  //   }
-
-  //   const response = await got(metricsUrl, {
-  //     throwHttpErrors: false,
-  //     timeout: httpTimeoutSettings
-  //   });
-  //   if (response.statusCode == 200 && response.body) {
-  //     // log.info(response.body);
-  //     // With got 9.6 the `response.body` object is of type `string`
-  //     const match = response.body.match(rgx);
-  //     if (!match) continue;
-  //     const groups = match.groups;
-  //     if (!groups) continue;
-  //     const count = groups.count;
-  //     log.debug("count: %s", count);
-  //     if (Number(count) > 0) {
-  //       log.info(
-  //         "prometheus_remote_storage_succeeded_samples_total > 0: %s",
-  //         count
-  //       );
-  //       log.info("this took %s s", mtimeDiffSeconds(t0).toFixed(2));
-  //       break;
-  //     }
-  //   } else {
-  //     log.error("Got unexpected HTTP response from Prom /metrics");
-  //     logHTTPResponse(response);
-  //   }
-  // }
-
-  // // Note: abstract container into a class, perform cleanup upon test runner
-  // // exit. Also: handle errors, don't let errors get in the way of cleanup.
-  // await terminateContainer();
 }
 
 suite("DD API test suite", function () {
