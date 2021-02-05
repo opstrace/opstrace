@@ -16,15 +16,15 @@
 import path from "path";
 import express from "express";
 import { GeneralServerError } from "server/errors";
+import { getSDKFiles } from "sdk";
+
+// Get the lib files at startup
+const libFiles = getSDKFiles();
 
 function createModuleHandler() {
   const router = express.Router();
 
   router.get("/opstrace.lib.d.ts", async function (req, res, next) {
-    console.log(
-      "fetching",
-      path.resolve(process.cwd(), "lib/opstrace.lib.d.ts")
-    );
     res.sendFile(
       path.resolve(process.cwd(), "lib/opstrace.lib.d.ts"),
       {
@@ -39,6 +39,12 @@ function createModuleHandler() {
         }
       }
     );
+  });
+
+  router.get("/opstrace.lib.filelist", async function (req, res, next) {
+    const files = libFiles;
+
+    res.status(200).send({ files });
   });
 
   // add a catch all for misconfigured requests
