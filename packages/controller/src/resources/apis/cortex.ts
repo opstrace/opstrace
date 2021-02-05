@@ -66,8 +66,8 @@ export function CortexAPIResources(
   const name = `${api}-api`;
   const cortexQuerierUrl = "http://query-frontend.cortex.svc.cluster.local";
   const cortexDistributorUrl = "http://distributor.cortex.svc.cluster.local";
-  const cortexRulerUrl = `http://ruler.${namespace}.svc.cluster.local`;
-  const cortexAlertmanagerUrl = `http://alertmanager.${namespace}.svc.cluster.local`;
+  const cortexRulerUrl = "http://ruler.cortex.svc.cluster.local";
+  const cortexAlertmanagerUrl = "http://alertmanager.cortex.svc.cluster.local";
 
   const cortexApiProxyCliArgs = [
     "-listen=:8080",
@@ -75,7 +75,7 @@ export function CortexAPIResources(
     `-cortex-querier-url=${cortexQuerierUrl}`,
     `-cortex-distributor-url=${cortexDistributorUrl}`,
     `-cortex-ruler-url=${cortexRulerUrl}`,
-    `-cortex-alermanager-url=${cortexAlertmanagerUrl}`
+    `-cortex-alertmanager-url=${cortexAlertmanagerUrl}`
   ];
 
   let cortexApiProxyEnv: V1EnvVar[];
