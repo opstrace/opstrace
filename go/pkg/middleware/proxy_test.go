@@ -56,7 +56,7 @@ func TestReverseProxy_healthy(t *testing.T) {
 
 	// Reuse the same backend for both the querier and distributor requests.
 	disableAPIAuth := true
-	rp := NewReverseProxy(tenantName, upstreamURL, upstreamURL, disableAPIAuth)
+	rp := NewReverseProxy(tenantName, upstreamURL, upstreamURL, upstreamURL, upstreamURL, disableAPIAuth)
 
 	// Create a request to the proxy (not to the backend/upstream). The URL
 	// does not really matter because we're bypassing the actual router.
@@ -91,7 +91,7 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	// we can reuse the same backend to send both the querier and distributor
 	// requests
 	disableAPIAuth := true
-	rp := NewReverseProxy(tenantName, u, u, disableAPIAuth)
+	rp := NewReverseProxy(tenantName, u, u, u, u, disableAPIAuth)
 	// create a request to the test backend
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
@@ -127,7 +127,7 @@ func TestReverseProxyAuthenticator_noheader(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	rp := NewReverseProxy("test", fakeURL, fakeURL, disableAPIAuth)
+	rp := NewReverseProxy("test", fakeURL, fakeURL, fakeURL, fakeURL, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
@@ -160,7 +160,7 @@ func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	rp := NewReverseProxy("test", fakeURL, fakeURL, disableAPIAuth)
+	rp := NewReverseProxy("test", fakeURL, fakeURL, fakeURL, fakeURL, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 	req.Header.Set("Authorization", "Bearer foobarbadtoken")
