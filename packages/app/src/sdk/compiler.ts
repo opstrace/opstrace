@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import path from "path";
-import * as glob from "glob";
+import * as esbuild from "esbuild";
 import * as ts from "typescript";
 import { init, parse } from "es-module-lexer";
 import chokidar from "chokidar";
 import { debounce } from "lodash";
-import { exec } from "child_process";
+import { getEntrypoints, getVirtualDtsPath, removeExtension } from "./index";
 
 // compile all js into BUILD_DIRECTORY
 const BUILD_DIRECTORY = path.join(process.cwd(), "lib");
@@ -40,7 +40,8 @@ const options: ts.CompilerOptions = {
     "client/*": ["client/*"],
     "server/*": ["server/*"],
     "state/*": ["state/*"],
-    "workers/*": ["workers/*"]
+    "workers/*": ["workers/*"],
+    "@material-ui/*": ["@material-ui/es/*"]
   }
 };
 
@@ -99,21 +100,6 @@ function resolveModuleNames(
     }
   }
   return resolvedModules;
-}
-
-function getVirtualDtsPath(resolvedImportPath: string) {
-  return /\/node_modules\//.test(resolvedImportPath)
-    ? resolvedImportPath.replace(/^.*node_modules\//, "@node_modules/")
-    : resolvedImportPath
-        .replace(/^.*src\//, "@opstrace/")
-        .replace(/^@opstrace\/client\//, "@node_modules/_internal/")
-        .replace(/^@opstrace\/sdk\//, "@opstrace/");
-}
-
-function removeExtension(fileName: string) {
-  return fileName
-    .substr(0, fileName.length - path.extname(fileName).length)
-    .replace(/\.d$/, "");
 }
 
 function rewritePath(
@@ -327,13 +313,23 @@ function generateDtsFile(dtsFiles: Map<string, string>) {
  * limitations under the License.
  */
 `;
-  for (const [fileName, contents] of dtsFiles.entries()) {
+  for (let [fileName, contents] of dtsFiles.entries()) {
+    let moduleName = removeExtension(getVirtualDtsPath(fileName));
+    //     if (moduleName === "opstrace.com/x/react") {
+    //       contents = contents.replace(`declare const _default: any;`, "");
+    //       contents = contents.replace(
+    //         `export default _default;`,
+    //         `import React from "@node_modules/@types/react/index";
+    // export = React;`
+    //       );
+    //     }
     content += `
-declare module "${removeExtension(getVirtualDtsPath(fileName))}" {
+declare module "${moduleName}" {
   ${contents}
 }
 `;
   }
+
   ts.sys.writeFile(
     path.resolve(process.cwd(), BUILD_DIRECTORY, DTS_FILE_NAME),
     content
@@ -390,8 +386,7 @@ async function generateDts(sourceFiles: string[]) {
     ts.forEachChild(sf, dtsVisitor(sf, dtsFilesToVisit, dtsFiles, true));
     let content = dtsFiles.get(fileName)!;
 
-    // use es-module-lexer to parse imports first because it helps overcome
-    // some edge cases in the dtsVisitor.
+    // use es-module-lexer to parse imports as well because it picks up some edge cases.
     const [imports] = parse(content);
     let delta = 0;
 
@@ -421,10 +416,10 @@ async function generateDts(sourceFiles: string[]) {
           // Add this dts to our bundled dts.
           // The module we'll declare will be of the form:
           //
-          // @opstrace/components/button
-          // @opstrace/layout/row
-          // @opstrace/lib/react
-          // @opstrace/lib/lodash
+          // opstrace.com/x/sdk/components/button
+          // opstrace.com/x/sdk/layout/row
+          // opstrace.com/x/react
+          // opstrace.com/x/lodash
           const modulePath = removeExtension(getVirtualDtsPath(fileName));
           dtsFiles.set(modulePath, data);
         }
@@ -447,24 +442,159 @@ async function generateDts(sourceFiles: string[]) {
     );
   }
 }
-/**
- * Executes a command and return it as a Promise.
- */
-function execCommand(cmd: string): Promise<Error | string> {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-        return;
+
+const workerLoaderRegex = /^worker-loader\!(.+)/;
+
+const workerLoader: esbuild.Plugin = {
+  name: "worker-loader",
+  setup(build) {
+    build.onResolve({ filter: workerLoaderRegex }, args => {
+      let workerPath = args.path.replace(/^worker-loader\!/, "");
+
+      if (workerPath.startsWith(".")) {
+        return {
+          path: path.resolve(args.resolveDir, workerPath),
+          namespace: "worker-loader"
+        };
       }
-      if (stderr) {
-        reject(stderr);
-        return;
-      }
-      resolve(stdout);
+      return {
+        path: workerPath,
+        namespace: "worker-loader"
+      };
     });
-  });
-}
+
+    build.onLoad({ filter: /.*/, namespace: "worker-loader" }, async args => {
+      let workerPath = args.path.replace(/^worker-loader\!/, "");
+      let filePath = workerPath;
+
+      if (![".js"].includes(path.extname(workerPath))) {
+        workerPath += ".js";
+      }
+
+      if (![".js", ".ts"].includes(path.extname(filePath))) {
+        filePath += ".ts";
+      }
+
+      const outfile = path.join(BUILD_DIRECTORY, path.basename(workerPath));
+      // bundle worker entry in a sub-process
+      await esbuild.build({
+        entryPoints: [filePath],
+        outfile,
+        minify: true,
+        bundle: true
+      });
+
+      // return the bundled path wrapped in a Worker
+      return {
+        contents: `export default class WorkerWrapper extends Worker {
+          constructor() {
+            super(${JSON.stringify("./" + path.basename(workerPath))});
+          }
+        }`
+      };
+    });
+  }
+};
+
+const monacoLanguageLoader: esbuild.Plugin = {
+  name: "monaco-language-loader",
+  setup(build) {
+    const resolveMap = new Map<string, string>();
+
+    build.onResolve(
+      {
+        filter: /^monaco-editor\/esm\/vs\/basic-languages/
+      },
+      args => {
+        const realPath = require.resolve(args.path);
+        const prettyPath = path.basename(realPath);
+
+        resolveMap.set(prettyPath, realPath);
+
+        return {
+          path: prettyPath,
+          namespace: "monaco-language-loader"
+        };
+      }
+    );
+
+    build.onResolve(
+      { filter: /.*/, namespace: "monaco-language-loader" },
+      args => {
+        const realPath = path.resolve(
+          path.resolve(path.dirname(args.importer), args.path)
+        );
+        const prettyPath = path.basename(realPath);
+
+        resolveMap.set(prettyPath, realPath);
+
+        return {
+          path: prettyPath,
+          namespace: "monaco-language-loader"
+        };
+      }
+    );
+
+    build.onLoad(
+      { filter: /.*/, namespace: "monaco-language-loader" },
+      async args => {
+        const realPath = resolveMap.get(args.path);
+        if (!realPath) {
+          throw Error("real path hasn't been registered");
+        }
+        const outfile = path.join(BUILD_DIRECTORY, args.path);
+        // bundle worker entry in a sub-process
+        await esbuild.build({
+          entryPoints: [realPath],
+          outfile,
+          minify: true,
+          bundle: true,
+          define: {
+            "process.env.NODE_ENV": '"production"',
+            "process.env.BUILD_TIME": `"${Date.now().toString()}"`
+          },
+          format: "esm",
+          platform: "browser",
+          sourcemap: true,
+          loader: { ".ttf": "file" }
+        });
+
+        return {
+          contents: `export default ${JSON.stringify(args.path)}`
+        };
+      }
+    );
+  }
+};
+
+let reactResolvePlugin: esbuild.Plugin = {
+  name: "react-resolve",
+  setup(build) {
+    // Redirect all paths starting with "react/" to external skypack cdn
+    build.onResolve({ filter: /^react$/ }, args => {
+      return { path: "https://cdn.skypack.dev/react", external: true };
+    });
+
+    // Redirect all paths starting with "react-dom/" to external skypack cdn
+    build.onResolve({ filter: /^react-dom$/ }, args => {
+      return { path: "https://cdn.skypack.dev/react-dom", external: true };
+    });
+    // react-draggable is a cjs module with require statements, so pull in the esm version instead
+    build.onResolve({ filter: /^react-draggable$/ }, args => {
+      return {
+        path: "https://cdn.skypack.dev/react-draggable",
+        external: true
+      };
+    });
+    // Use the esm versions of material-ui
+    build.onResolve({ filter: /^@material-ui\// }, args => {
+      const paths = args.path.split("/");
+      paths.splice(2, 0, "esm");
+
+      return { path: require.resolve(paths.join("/")) };
+    });
+  }
+};
 
 /**
  * Bundle the library with code splitting
@@ -474,18 +604,28 @@ export async function bundle(files: string[]) {
   console.log(`Compiling Libraries..`);
 
   try {
-    await execCommand(`${path.join(
-      process.cwd(),
-      "node_modules/.bin/esbuild"
-    )} \
-   --outdir=${BUILD_DIRECTORY} \
-   --sourcemap \
-   --splitting \
-   --format=esm \
-   --platform=browser \
-   '--define:process.env.NODE_ENV="production"' \
-   --minify \
-   ${files.map(file => `--bundle ${file}`).join(" ")}`);
+    await esbuild.build({
+      entryPoints: files,
+      bundle: true,
+      outdir: BUILD_DIRECTORY,
+      outbase: "src/sdk",
+      external: ["react", "react-dom"],
+      define: {
+        "process.env.NODE_ENV": '"production"',
+        "process.env.HASURA_GRAPHQL_ADMIN_SECRET": '""',
+        "process.env.EARLY_PREVIEW": '""',
+        "process.env.GRAPHQL_ENDPOINT": '""',
+        "process.env.RUNTIME": '"sandbox"',
+        "process.env.BUILD_TIME": `"${Date.now().toString()}"`,
+        global: "self"
+      },
+      splitting: true,
+      format: "esm",
+      plugins: [reactResolvePlugin, monacoLanguageLoader, workerLoader],
+      platform: "browser",
+      sourcemap: true,
+      loader: { ".ttf": "file" }
+    });
   } catch (err) {
     console.error(err);
     return;
@@ -502,12 +642,8 @@ export async function bundle(files: string[]) {
  * Generate DTS file and bundle code with code splitting.
  */
 async function compileLibrary() {
-  const entrypoints = glob
-    .sync(path.resolve(process.cwd(), "src/sdk/**/*.ts"))
-    .filter(f => !/__tests__|\.spec\.|\.stories\.|index\./.test(f));
-
-  await bundle(entrypoints);
-  await generateDts(entrypoints);
+  await bundle(getEntrypoints());
+  await generateDts(getEntrypoints(true));
 }
 
 function watch() {
