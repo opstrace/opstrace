@@ -26,13 +26,17 @@ type ReverseProxy struct {
 	tenantName           string
 	revproxyQuerier      *httputil.ReverseProxy
 	revproxyDistributor  *httputil.ReverseProxy
+	revproxyRuler        *httputil.ReverseProxy
+	revproxyAlertmanager *httputil.ReverseProxy
 	authenticatorEnabled bool
 }
 
 func NewReverseProxy(
 	tenantName string,
 	querierURL,
-	distributorURL *url.URL,
+	distributorURL,
+	rulerURL,
+	alertmanagerURL *url.URL,
 	disableAPIAuthentication bool) *ReverseProxy {
 	rp := &ReverseProxy{
 		tenantName: tenantName,
@@ -41,11 +45,15 @@ func NewReverseProxy(
 		// https://github.com/grafana/loki/blob/master/docs/api.md#microservices-mode
 		revproxyQuerier:      httputil.NewSingleHostReverseProxy(querierURL),
 		revproxyDistributor:  httputil.NewSingleHostReverseProxy(distributorURL),
+		revproxyRuler:        httputil.NewSingleHostReverseProxy(rulerURL),
+		revproxyAlertmanager: httputil.NewSingleHostReverseProxy(alertmanagerURL),
 		authenticatorEnabled: !disableAPIAuthentication,
 	}
 
 	rp.revproxyQuerier.ErrorHandler = proxyErrorHandler
 	rp.revproxyDistributor.ErrorHandler = proxyErrorHandler
+	rp.revproxyRuler.ErrorHandler = proxyErrorHandler
+	rp.revproxyAlertmanager.ErrorHandler = proxyErrorHandler
 
 	return rp
 }
@@ -68,6 +76,26 @@ func (rp *ReverseProxy) HandleWithDistributorProxy(w http.ResponseWriter, r *htt
 
 	r.Header.Add("X-Scope-OrgID", rp.tenantName)
 	rp.revproxyDistributor.ServeHTTP(w, r)
+}
+
+func (rp *ReverseProxy) HandleWithRulerProxy(w http.ResponseWriter, r *http.Request) {
+	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
+	r.Header.Add("X-Scope-OrgID", rp.tenantName)
+	rp.revproxyRuler.ServeHTTP(w, r)
+}
+
+func (rp *ReverseProxy) HandleWithAlertmanagerProxy(w http.ResponseWriter, r *http.Request) {
+	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
+	r.Header.Add("X-Scope-OrgID", rp.tenantName)
+	rp.revproxyAlertmanager.ServeHTTP(w, r)
 }
 
 func proxyErrorHandler(resp http.ResponseWriter, r *http.Request, proxyerr error) {
