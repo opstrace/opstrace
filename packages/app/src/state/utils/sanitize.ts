@@ -22,5 +22,5 @@ export function sanitizeFilePath(path: string) {
 }
 
 export function sanitizeFileExt(ext: string) {
-  return ext.replace(/^\./, "");
+  return ext.replace(/^\./, "").split("?")[0];
 }

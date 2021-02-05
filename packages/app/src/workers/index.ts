@@ -27,10 +27,13 @@ import {
   getTypeScriptWorker,
   typescriptDefaults,
   JsxEmit,
-  ScriptTarget
+  ScriptTarget,
+  ModuleKind,
+  ModuleResolutionKind
 } from "./monaco-typescript-4.1.1/monaco.contribution";
 
 import type { OpScriptWorker } from "./opscript/opscriptWorker";
+import buildTime from "client/buildInfo";
 
 export const getOpScriptWorker = async (): Promise<OpScriptWorker> => {
   const worker = await getTypeScriptWorker();
@@ -39,14 +42,28 @@ export const getOpScriptWorker = async (): Promise<OpScriptWorker> => {
 };
 export const opScriptDefaults = typescriptDefaults;
 
+(async function fetchSDKTypings() {
+  if (process.env.RUNTIME === "sandbox") {
+    return;
+  }
+  try {
+    const res = await fetch(`/_/modules/opstrace.lib.d.ts?mtime=${buildTime}`);
+    const content = await res.text();
+    opScriptDefaults.addExtraLib(content, "opstrace.lib.d.ts");
+  } catch (err) {
+    console.error(err);
+  }
+})();
+
 opScriptDefaults.setEagerModelSync(true);
 opScriptDefaults.setCompilerOptions({
-  jsx: JsxEmit.Preserve,
+  jsx: JsxEmit.React,
   allowJs: true,
   allowNonTsExtensions: true,
   allowSyntheticDefaultImports: true,
   target: ScriptTarget.ES2015,
-  moduleResolution: 2,
+  moduleResolution: ModuleResolutionKind.NodeJs,
+  module: ModuleKind.ESNext,
   lib: ["es6"],
   noImplicitAny: true,
   noImplicitThis: true,
