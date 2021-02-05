@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import path from "path";
 import {
   TypeScriptWorker,
   ICreateData
 } from "../monaco-typescript-4.1.1/tsWorker";
 import * as ts from "../monaco-typescript-4.1.1/lib/typescriptServices";
 import { parseFileImportUri, getFileUri } from "state/file/utils/uri";
+import {
+  rewriteRegistryImport,
+  isRegistryImport
+} from "state/file/utils/registry";
 import { CompilerOutput } from "workers/types";
 import buildTime from "client/buildInfo";
 
@@ -28,25 +31,23 @@ function parseFileName(fileName: string) {
 }
 
 export class OpScriptWorker extends TypeScriptWorker {
+  private opstraceLibFiles: string[] = [];
   constructor(ctx: monaco.worker.IWorkerContext, createData: ICreateData) {
     super(ctx, createData);
     this.importExportVisitor = this.importExportVisitor.bind(this);
     this.rewritePath = this.rewritePath.bind(this);
     this.isDynamicImport = this.isDynamicImport.bind(this);
     this.transformImports = this.transformImports.bind(this);
-    this.fetchLibTypes();
+    this.fetchLibFiles();
   }
 
-  async fetchLibTypes() {
+  async fetchLibFiles() {
     try {
-      const res = await fetch(`/_/modules/opstrace.lib.d.ts?v=${buildTime}`);
-      const content = await res.text();
-      this.updateExtraLibs({
-        "opstrace.lib.d.ts": {
-          content,
-          version: 1
-        }
-      });
+      const res = await fetch(
+        `/_/modules/opstrace.lib.filelist?mtime=${buildTime}`
+      );
+      const content = await res.json();
+      this.opstraceLibFiles = content.files;
     } catch (err) {
       console.error(err);
     }
@@ -65,6 +66,11 @@ export class OpScriptWorker extends TypeScriptWorker {
       // don't rewrite relative imports
       return importPath;
     }
+    if (isRegistryImport(importPath)) {
+      // Use the Skypack CDN to serve up the esm version.
+      return rewriteRegistryImport(importPath);
+    }
+
     const resolvedImports = this.resolveModuleNames([importPath], sf.fileName);
     const absImportPath = resolvedImports[0]?.resolvedFileName;
     if (!absImportPath) {
@@ -80,10 +86,21 @@ export class OpScriptWorker extends TypeScriptWorker {
     if (!parsedImportFile) {
       return importPath;
     }
-    const importFileUri = getFileUri(parsedImportFile);
-    const relativePath = path.relative(currentFileUri, importFileUri);
+    const importFileUri = getFileUri(parsedImportFile, {
+      external: parsedImportFile.external
+    });
 
-    return afterDeclarations ? relativePath + ".d.ts" : relativePath + ".jsx";
+    const relativePath =
+      new Array(
+        currentFileUri.split("/").slice(0, -1).length +
+          (parsedImportFile.external ? 1 : 0)
+      )
+        .fill("../")
+        .reduce((rel, curr) => {
+          return curr + rel;
+        }, "") + importFileUri;
+
+    return afterDeclarations ? relativePath + ".d.ts" : relativePath + ".js";
   }
 
   isDynamicImport(node: ts.Node): node is ts.CallExpression {
@@ -190,37 +207,46 @@ export class OpScriptWorker extends TypeScriptWorker {
     let js: string = "";
     let map: string = "";
 
-    program?.emit(
-      program.getSourceFile(fileName),
-      (fileName: string, data: string) => {
-        if (fileName.endsWith(".d.ts")) {
-          dts = data;
-        } else if (fileName.endsWith(".map")) {
-          map = data;
-        } else {
-          js = data;
+    try {
+      program?.emit(
+        program.getSourceFile(fileName),
+        (fileName: string, data: string) => {
+          if (fileName.endsWith(".d.ts")) {
+            dts = data;
+          } else if (fileName.endsWith(".map")) {
+            map = data;
+          } else {
+            js = data;
+          }
+        },
+        undefined,
+        undefined,
+        {
+          after: [
+            this.transformImports(false) as ts.TransformerFactory<ts.SourceFile>
+          ],
+          afterDeclarations: [
+            this.transformImports(true) as ts.TransformerFactory<
+              ts.SourceFile | ts.Bundle
+            >
+          ]
         }
-      },
-      undefined,
-      undefined,
-      {
-        after: [
-          this.transformImports(false) as ts.TransformerFactory<ts.SourceFile>
-        ],
-        afterDeclarations: [
-          this.transformImports(true) as ts.TransformerFactory<
-            ts.SourceFile | ts.Bundle
-          >
-        ]
-      }
-    );
+      );
 
-    return Promise.resolve({
-      dts,
-      js,
-      sourceMap: map,
-      errors: this.getFileErrors(fileName)
-    });
+      return Promise.resolve({
+        dts,
+        js,
+        sourceMap: map,
+        errors: this.getFileErrors(fileName)
+      });
+    } catch (err) {
+      return Promise.resolve({
+        dts,
+        js,
+        sourceMap: map,
+        errors: []
+      });
+    }
   }
 
   getFileErrors(fileName: string) {
@@ -253,7 +279,7 @@ export class OpScriptWorker extends TypeScriptWorker {
   }
 
   fileExists(fileName: string): boolean {
-    return !!this._getModel(fileName);
+    return !!this._getModel(fileName) || fileName in this._extraLibs;
   }
 
   readFile(fileName: string): string | undefined {
@@ -266,18 +292,20 @@ export class OpScriptWorker extends TypeScriptWorker {
   ): (ts.ResolvedModule | undefined)[] {
     const resolvedModules: (ts.ResolvedModule | undefined)[] = [];
     for (const moduleName of moduleNames) {
-      // try to use standard resolution
-      let result = ts.resolveModuleName(
-        moduleName,
-        containingFile,
-        this._compilerOptions,
-        this
-      );
-      if (result.resolvedModule) {
-        resolvedModules.push(result.resolvedModule);
-      } else {
-        // check fallback locations, for simplicity assume that module at location
-        // should be represented by '.d.ts' file
+      try {
+        // try to use standard resolution
+        let result = ts.resolveModuleName(
+          moduleName,
+          containingFile,
+          this._compilerOptions,
+          this
+        );
+
+        if (result.resolvedModule) {
+          resolvedModules.push(result.resolvedModule);
+          continue;
+        }
+
         const parts = parseFileName(containingFile);
         if (!parts) {
           resolvedModules.push(undefined);
@@ -290,6 +318,18 @@ export class OpScriptWorker extends TypeScriptWorker {
           resolvedModules.push(undefined);
           continue;
         }
+
+        // Try resolve known registry files
+        if (this.opstraceLibFiles.includes(moduleName)) {
+          resolvedModules.push({
+            resolvedFileName: getFileUri(moduleNameParts, {
+              external: true,
+              ext: true
+            })
+          });
+          continue;
+        }
+        // Try resolve local files
         const locationsToCheck = [
           // try to resolve on current branch
           `file:///${getFileUri(moduleNameParts, {
@@ -315,6 +355,9 @@ export class OpScriptWorker extends TypeScriptWorker {
         if (!resolved) {
           resolvedModules.push(undefined);
         }
+      } catch (err) {
+        resolvedModules.push(undefined);
+        console.error(err);
       }
     }
     return resolvedModules;
