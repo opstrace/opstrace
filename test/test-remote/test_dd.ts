@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import events from "events";
 import fs from "fs";
 import { strict as assert } from "assert";
 
+import Docker from "dockerode";
 import { ZonedDateTime } from "@js-joda/core";
 import got from "got";
 
@@ -28,7 +29,14 @@ import {
   TENANT_DEFAULT_DD_API_BASE_URL,
   TENANT_DEFAULT_CORTEX_API_BASE_URL,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
-  globalTestSuiteSetupOnce
+  globalTestSuiteSetupOnce,
+  readDockerDNSSettings,
+  createTempfile,
+  mtimeDeadlineInSeconds,
+  mtime,
+  //mtimeDiffSeconds,
+  sleep,
+  readFirstNBytes
 } from "./testutils";
 
 import { waitForCortexQueryResult } from "./test_prom_remote_write";
@@ -44,6 +52,217 @@ function ddApiSeriesUrl() {
   return url;
 }
 
+export async function startDDagentContainer() {
+  log.info("start containerized DD agent");
+  const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+
+  const dockerDNS = readDockerDNSSettings();
+  log.info(`docker container dns settings: ${dockerDNS}`);
+
+  let ddApiKey = "none";
+  if (TENANT_DEFAULT_API_TOKEN_FILEPATH !== undefined) {
+    ddApiKey = fs.readFileSync(TENANT_DEFAULT_API_TOKEN_FILEPATH, {
+      encoding: "utf8"
+    });
+  }
+
+  // const letsEncryptStagingRootCACert = fs.readFileSync(
+  //   `${__dirname}/../containers/fakelerootx1.pem`,
+  //   {
+  //     encoding: "utf-8"
+  //   }
+  // );
+
+  // const promConfigFilePath = createTempfile("prom-config-", ".conf");
+  // fs.writeFileSync(promConfigFilePath, renderedConfigText, {
+  //   encoding: "utf-8"
+  // });
+
+  const ddEnv = [
+    `DD_API_KEY=${ddApiKey}`,
+    `DD_DD_URL=${TENANT_DEFAULT_DD_API_BASE_URL}`,
+    `CURL_CA_BUNDLE=""`
+  ];
+
+  log.info("container env: %s", ddEnv);
+
+  const outfilePath = createTempfile("prom-container-", ".outerr");
+  const outstream = fs.createWriteStream(outfilePath);
+  await events.once(outstream, "open");
+
+  const cont = await docker.createContainer({
+    Image: "gcr.io/datadoghq/agent:7",
+    AttachStdin: false,
+    AttachStdout: false,
+    AttachStderr: false,
+    Tty: false,
+    // Cmd: [
+    //   "--config.file=/etc/prometheus/prometheus.yml",
+    //   `--web.listen-address=127.0.0.1:${promListenPort}`,
+    //   "--log.level=debug"
+    // ],
+    Env: ddEnv,
+    HostConfig: {
+      NetworkMode: "host",
+      Mounts: [
+        // Mount Let's Encrypt Staging root CA into the container so that
+        // golang discovers it when doing HTTP requests.
+        {
+          Type: "bind",
+          Source: `${__dirname}/containers/fakelerootx1.pem`,
+          // use a path discovered by Golang but not used by the distro in the container image
+          Target: "/etc/ssl/ca-bundle.pem",
+          ReadOnly: true
+        },
+        {
+          Type: "bind",
+          Source: "/var/run/docker.sock",
+          Target: "/var/run/docker.sock",
+          ReadOnly: true
+        },
+        {
+          Type: "bind",
+          Source: "/proc/",
+          Target: "/host/proc/",
+          ReadOnly: true
+        },
+        {
+          Type: "bind",
+          Source: "/sys/fs/cgroup/",
+          Target: "/host/sys/fs/cgroup",
+          ReadOnly: true
+        },
+        {
+          Type: "bind",
+          Source: "/tmp",
+          Target: "/tmp",
+          ReadOnly: false
+        }
+      ],
+      Dns: readDockerDNSSettings()
+    }
+  });
+
+  log.info("attach file-backed stream");
+  const stream = await cont.attach({
+    stream: true,
+    stdout: true,
+    stderr: true
+  });
+  stream.pipe(outstream);
+
+  log.info("container start()");
+  await cont.start();
+
+  const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
+  const maxWaitSeconds = 30;
+  const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
+  log.info(
+    "Waiting for needle to appear in container log, deadline in %s s. Needle: %s",
+    maxWaitSeconds,
+    logNeedle
+  );
+
+  async function terminateContainer() {
+    log.info("terminate container");
+
+    try {
+      await cont.kill({ signal: "SIGTERM" });
+    } catch (err) {
+      log.warning("could not kill container: %s", err.message);
+    }
+
+    log.info("wait for container to stop");
+    try {
+      await cont.wait();
+    } catch (err) {
+      log.warning("error waiting for container: %s", err.message);
+    }
+
+    log.info("force-remove container");
+    try {
+      await cont.remove({ force: true });
+    } catch (err) {
+      log.warning("could not remove container: %s", err.message);
+    }
+    log.info(
+      "log output emitted by container (stdout/err from %s):\n%s",
+      outfilePath,
+      fs.readFileSync(outfilePath, {
+        encoding: "utf-8"
+      })
+    );
+  }
+
+  while (true) {
+    if (mtime() > deadline) {
+      log.info("deadline hit");
+      await terminateContainer();
+      throw new Error("DD agent container setup failed: deadline hit");
+    }
+    const fileHeadBytes = await readFirstNBytes(outfilePath, 10 ** 5);
+    if (fileHeadBytes.includes(Buffer.from(logNeedle, "utf-8"))) {
+      log.info("log needle found in container log, proceed");
+      break;
+    }
+    await sleep(0.1);
+  }
+
+  return terminateContainer;
+
+  // const maxWaitSeconds2 = 30;
+  // const deadline2 = mtimeDeadlineInSeconds(maxWaitSeconds2);
+  // log.info(
+  //   "wait for containerized Prom to scrape & remote_write metrics, deadline in %s s",
+  //   maxWaitSeconds2
+  // );
+  // const t0 = mtime();
+  // const rgx = /\sprometheus_remote_storage_succeeded_samples_total{.*} (?<count>[0-9]+)\s/;
+  // const metricsUrl = `http://127.0.0.1:${promListenPort}/metrics`;
+
+  // while (true) {
+  //   await sleep(0.1);
+
+  //   if (mtime() > deadline2) {
+  //     log.info("deadline hit");
+  //     await terminateContainer();
+  //     throw new Error(
+  //       `deadline hit while waiting for expected data on ${metricsUrl}`
+  //     );
+  //   }
+
+  //   const response = await got(metricsUrl, {
+  //     throwHttpErrors: false,
+  //     timeout: httpTimeoutSettings
+  //   });
+  //   if (response.statusCode == 200 && response.body) {
+  //     // log.info(response.body);
+  //     // With got 9.6 the `response.body` object is of type `string`
+  //     const match = response.body.match(rgx);
+  //     if (!match) continue;
+  //     const groups = match.groups;
+  //     if (!groups) continue;
+  //     const count = groups.count;
+  //     log.debug("count: %s", count);
+  //     if (Number(count) > 0) {
+  //       log.info(
+  //         "prometheus_remote_storage_succeeded_samples_total > 0: %s",
+  //         count
+  //       );
+  //       log.info("this took %s s", mtimeDiffSeconds(t0).toFixed(2));
+  //       break;
+  //     }
+  //   } else {
+  //     log.error("Got unexpected HTTP response from Prom /metrics");
+  //     logHTTPResponse(response);
+  //   }
+  // }
+
+  // // Note: abstract container into a class, perform cleanup upon test runner
+  // // exit. Also: handle errors, don't let errors get in the way of cleanup.
+  // await terminateContainer();
+}
+
 suite("DD API test suite", function () {
   suiteSetup(async function () {
     log.info("suite setup");
@@ -54,6 +273,12 @@ suite("DD API test suite", function () {
     // Note: this does not seem to be run upon Node shutdown, e.g. triggered
     // with SIGINT. Make cleanup better.
     log.info("suite teardown");
+  });
+
+  test("dd_api_run_dd_container", async function () {
+    const terminateContainer = await startDDagentContainer();
+    log.info("yes! now terminate");
+    await terminateContainer();
   });
 
   test("dd_api_insert_single_ts_fragment", async function () {

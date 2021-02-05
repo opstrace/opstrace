@@ -405,7 +405,7 @@ export function enrichHeadersWithAuthToken(
 
 // Check if we're running the DNS cache by reading from the file the
 // ci/dns_cache.sh script creates with the IP address of the DNS cache server.
-function readDockerDNSSettings(): any[] | undefined {
+export function readDockerDNSSettings(): any[] | undefined {
   try {
     return [readFileSync("/tmp/dns_cache_ip").toString()];
   } catch (e) {
