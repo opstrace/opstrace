@@ -136,17 +136,27 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			// metrics have a special noindex name prefix (example:
 			// n_o_i_n_d_e_x.datadog.agent.payload.dropped) -- remove that.
 			"__name__": sanitizeMetricName(strings.TrimPrefix(fragment.Name, "n_o_i_n_d_e_x.")),
-			"instance": fragment.Host,
-			"job":      "ddagent",
-			// "host": "host",  // do not set host, that's `instance` in the
-			// Prom world.
+			// In the Prometheus world, host is 'instance'. Maybe also add
+			// `host` label later again carrying the same value. For now, try
+			// to keep cardinality minimal.
+			"instance":         fragment.Host,
+			"job":              "ddagent",
 			"device":           fragment.Device,
 			"type":             fragment.Type,
-			"interval":         strconv.FormatInt(fragment.Interval, 10),
 			"source_type_name": fragment.SourceTypeName,
 		}
 
-		// Translate dd agent tags into label k/v pairs. Upon unexpected tag
+		// One goal is to keep cardinality minimal, i.e. to not set useless
+		// labels. That implies removing the `interval` label for DD metrics of
+		// type gauge (where interval isn't well defined). Another goal is to
+		// remove all interval values of 0 (which isn't well defined). In code,
+		// it looks like only the latter needs to be done -- satisfies the
+		// other goals, too.
+		if fragment.Interval != 0 {
+			labels["interval"] = strconv.FormatInt(fragment.Interval, 10)
+		}
+
+		// Translate DD agent tags into label k/v pairs. Upon unexpected tag
 		// structure, log a warning but otherwise proceed.
 		for _, tag := range fragment.Tags {
 			t := strings.SplitN(tag, ":", 2)
