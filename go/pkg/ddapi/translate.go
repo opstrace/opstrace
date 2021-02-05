@@ -130,8 +130,12 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// Build up label set as a map to ensure uniqueness of keys.
 		labels := map[string]string{
 			// A time series fragment corresponds to a specific metric with a
-			// name. Store this metric name in a reserved Prometheus label.
-			"__name__": sanitizeMetricName(fragment.Name),
+			// name. Store this metric name in the corresponding (reserved)
+			// Prometheus label. Replace disallowed characters with
+			// underscores; this typically affects the . separators. Some DD
+			// metrics have a special noindex name prefix (example:
+			// n_o_i_n_d_e_x.datadog.agent.payload.dropped) -- remove that.
+			"__name__": sanitizeMetricName(strings.TrimPrefix(fragment.Name, "n_o_i_n_d_e_x.")),
 			"instance": fragment.Host,
 			"job":      "ddagent",
 			// "host": "host",  // do not set host, that's `instance` in the
