@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import path from "path";
 import express from "express";
 import { GeneralServerError } from "server/errors";
 import ModuleClient from "server/moduleClient";
@@ -31,6 +32,30 @@ function createCacheableModuleServingHandler({ maxAge }: { maxAge: number }) {
       if (!fileAttrs) {
         return next(new GeneralServerError(404, "not found"));
       }
+
+      if (fileAttrs.external && fileAttrs.module_name === "sdk") {
+        res.sendFile(
+          path.resolve(
+            process.cwd(),
+            "lib",
+            fileAttrs.path + "." + fileAttrs.ext
+          ),
+          {
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Content-Disposition": "inline"
+            }
+          },
+          (err?: any) => {
+            if (err) {
+              next(err);
+            }
+          }
+        );
+
+        return;
+      }
+      // TODO: cache this so we don't have to hit the db on every HMR during module development
       let fileRes = await graphqlClient.GetFileId({
         branch: fileAttrs.branch_name,
         module: fileAttrs.module_name,
@@ -55,7 +80,7 @@ function createCacheableModuleServingHandler({ maxAge }: { maxAge: number }) {
       if (fileAttrs.ext === "map") {
         contents = compilerOutput.sourceMap || "";
         contentType = "application/json"; // so it can be viewed in the console
-      } else if (fileAttrs.ext === "jsx") {
+      } else if (fileAttrs.ext === "js") {
         contents = compilerOutput.js || "";
         contentType = "application/javascript";
       } else if (fileAttrs.ext === "d.ts") {
@@ -68,6 +93,7 @@ function createCacheableModuleServingHandler({ maxAge }: { maxAge: number }) {
       }
 
       res.set("Content-Disposition", "inline");
+      res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("content-type", contentType);
       res.status(200).send(contents);
     } catch (err) {
