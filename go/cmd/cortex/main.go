@@ -88,7 +88,7 @@ func main() {
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
 
 	reverseProxy := middleware.NewReverseProxy(tenantName, cortexqurl, cortexdurl,
-		cortexaurl, cortexrurl, disableAPIAuthentication)
+		cortexrurl, cortexaurl, disableAPIAuthentication)
 
 	// mux matches based on registration order, not prefix length.
 	router := mux.NewRouter()
