@@ -3,7 +3,11 @@ import { ActionType } from "typesafe-actions";
 
 import * as actions from "state/clients/websocket/actions";
 
-const socket = io({ path: "/_/socket", transports: ["websocket"] });
+const socket = io({
+  path: "/_/socket",
+  transports: ["websocket"],
+  autoConnect: process.env.RUNTIME !== "sandbox"
+});
 
 export type WebsocketEvents = ActionType<typeof actions>;
 type SubscriptionCallback = (action: WebsocketEvents) => void;

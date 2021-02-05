@@ -22,7 +22,7 @@ import { ITheme } from "client/themes";
 
 export type SplitPaneProps = {
   children: React.ReactNode[];
-  onDrag?: (isDragging: boolean) => {};
+  onDrag?: (isDragging: boolean) => void;
   onChangeSize?: (size: number) => void;
   split: "vertical" | "horizontal";
   size: number;
