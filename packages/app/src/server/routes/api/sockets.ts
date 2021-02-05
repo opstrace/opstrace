@@ -83,12 +83,8 @@ class SocketClient {
       action.payload.fileId,
       action.payload.output
     );
-    // broadcast to all others watching this file that new content is available
-    this.emit(
-      room,
-      actions.compiledContentUpdated(action.payload.fileId),
-      socket
-    );
+    // broadcast to all watching this file that new content is available (including self)
+    this.emit(room, actions.compilerUpdated({fileId: action.payload.fileId}));
   }
 
   onFileEdit(socket: Socket, action: ReturnType<typeof actions.edit>) {
