@@ -35,14 +35,13 @@ suite("system logs test suite", function () {
     log.info("suite teardown");
   });
 
-  async function testLoki(query: string) {
-    // Query for the log records that were just inserted.
+  async function query(expr: string) {
     const ts = ZonedDateTime.now();
     // Allow for testing clusters that started a couple of days ago
     const searchStart = ts.minusHours(100);
     const searchEnd = ts.plusHours(1);
     const queryParams = {
-      query: query,
+      query: expr,
       direction: "BACKWARD",
       regexp: "",
       limit: "10",
@@ -59,22 +58,25 @@ suite("system logs test suite", function () {
     );
 
     if (result.entries == undefined || result.entries.length == 0) {
-        throw new Error(`Expected query ${query} to return some entries`)
+      throw new Error(`Expected query ${query} to return some entries`);
     }
   }
 
   test("check loki ingester logs", async function () {
-    const query = '{k8s_namespace_name="loki", k8s_container_name="ingester"} |= "Starting Loki"';
-    await testLoki(query);
+    await query(
+      '{k8s_namespace_name="loki", k8s_container_name="ingester"} |= "Starting Loki"'
+    );
   });
 
   test("check cortex distributor logs", async function () {
-    const query = '{k8s_namespace_name="cortex", k8s_pod_name=~"distributor-.+"} |= "Starting Cortex"';
-    await testLoki(query);
+    await query(
+      '{k8s_namespace_name="cortex", k8s_pod_name=~"distributor-.+"} |= "Starting Cortex"'
+    );
   });
 
-  test("check systemlog FluentD instance logs", async function () {
-    const query = '{k8s_namespace_name="system-tenant", k8s_pod_name=~"systemlog.*"} |= "following tail of"';
-    await testLoki(query);
+  test("check systemlog Fluentd instance logs", async function () {
+    await query(
+      '{k8s_namespace_name="system-tenant", k8s_pod_name=~"systemlog.*"} |= "following tail of"'
+    );
   });
 });
