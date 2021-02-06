@@ -2,19 +2,17 @@
  * This module will not be available to users of the SDK.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { Route, Switch } from "react-router";
 import Skeleton from "@material-ui/lab/Skeleton";
 import { Box } from "client/components/Box";
-import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import Layout from "client/components/Layout/Layout";
-import { row } from "client/components/Layout/Row";
-import { column } from "client/components/Layout/Column";
+import Row from "client/components/Layout/Row";
+import Column from "client/components/Layout/Column";
 import { ErrorView } from "client/components/Error";
 import ErrorBoundary, { ErrorProps } from "client/components/Error/Boundary";
-import { Scrollable } from "client/components/Scrollable";
 import Theme from "client/themes";
 import Services from "client/services";
 import { StoreProvider } from "state/provider";
@@ -81,80 +79,50 @@ const GeneralSkeleton = () => (
   <Skeleton variant="rect" width="100%" height="100%" />
 );
 
-const LayoutEngine = (props: {
+const RuntimeRenderer = (props: {
   mod: any;
   error: Error | null;
 }): JSX.Element => {
-  const loading = row([
-    column([<GeneralSkeleton />, <GeneralSkeleton />]),
-    column([<GeneralSkeleton />, <GeneralSkeleton />])
-  ]);
+  const loading = (
+    <Layout>
+      <Row>
+        <GeneralSkeleton />
+        <GeneralSkeleton />
+      </Row>
+      <Row>
+        <Column>
+          <GeneralSkeleton />
+        </Column>
+        <Column>
+          <GeneralSkeleton />
+        </Column>
+      </Row>
+    </Layout>
+  );
 
-  const [main, setMain] = useState<any>(loading);
-
-  useEffect(() => {
+  const MainModule = useMemo(() => {
     if (props.error) {
-      return setMain(<GlobalErrorComponent error={props.error} />);
+      return <GlobalErrorComponent error={props.error} />;
     }
     if (!props.mod) {
-      return setMain(loading);
+      return loading;
     }
     if (typeof props.mod !== "function") {
-      return setMain(<GlobalErrorComponent />);
+      return <GlobalErrorComponent />;
     }
+    return props.mod as () => JSX.Element;
   }, [props.error, props.mod]);
-
-  useEffect(() => {
-    if (!props.mod) {
-      return;
-    }
-    const invokeModule = async () => {
-      try {
-        const res = await props.mod();
-        if (typeof res === "undefined") {
-          setMain(
-            <ErrorView
-              title="Undefined return value"
-              subheader=""
-              emoji="👻"
-              maxWidth={400}
-              actions={null}
-            >
-              <Typography>Default function doesn't return anything</Typography>
-            </ErrorView>
-          );
-        } else {
-          setMain(res);
-        }
-      } catch (err) {
-        setMain(<GlobalErrorComponent error={err} />);
-      }
-    };
-    invokeModule();
-  }, [props.mod]);
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
-      <AutoSizer>
-        {({ height, width }: Size) => {
-          return (
-            <Box position="absolute" width="100%" height="100%">
-              <Scrollable>
-                <Box
-                  p={0}
-                  justifyContent="left"
-                  alignItems="normal"
-                  data-testid="module-output"
-                >
-                  <Layout minHeight={height} width={width}>
-                    {main}
-                  </Layout>
-                </Box>
-              </Scrollable>
-            </Box>
-          );
-        }}
-      </AutoSizer>
+      <Box
+        position="absolute"
+        width="100%"
+        height="100%"
+        className="RuntimeWrapper"
+      >
+        {MainModule}
+      </Box>
     </div>
   );
 };
@@ -188,8 +156,12 @@ const Runtime = () => {
   }, [moduleUri, refreshRequestId]);
 
   return (
-    <ErrorBoundary fullPage errorComponent={GlobalErrorComponent}>
-      <LayoutEngine mod={state.module} error={state.error} />
+    <ErrorBoundary
+      fullPage
+      errorComponent={GlobalErrorComponent}
+      key={state.module?.toString()}
+    >
+      <RuntimeRenderer mod={state.module} error={state.error} />
     </ErrorBoundary>
   );
 };
