@@ -238,12 +238,6 @@ suite("DD API test suite", function () {
     log.info("suite teardown");
   });
 
-  test("dd_api_run_dd_container", async function () {
-    const terminateContainer = await startDDagentContainer();
-    log.info("yes! now terminate");
-    await terminateContainer();
-  });
-
   test("dd_api_insert_single_ts_fragment", async function () {
     const rndstr = rndstring(5);
     const metricname = `opstrace.dd.test-remote-${rndstr}`;
@@ -319,5 +313,58 @@ suite("DD API test suite", function () {
     // pragmatic criterion for starters: expect a number of values. with the
     // 1-second step size there should be tens or hundreds of values/samples.
     assert.strictEqual(resultArray[0]["values"].length > 5, true);
+  });
+
+  test("dd_api_run_agent_container_query_sysuptime", async function () {
+    const now = ZonedDateTime.now();
+
+    // The DD agent container is currently configured to send metrics to the DD
+    // API endpoint for the 'default' tenant.
+    const terminateContainer = await startDDagentContainer();
+
+    // Wait for some more samples to be pushed. Terminate contaienr before
+    // starting the query phase, so that the termination happens more or less
+    // reliably (regardless of errors during query phase).
+    await sleep(15);
+    await terminateContainer();
+    const searchStart = now.minusMinutes(45);
+    const searchEnd = now.plusMinutes(10);
+
+    // Note that this current setup does not insert a unique metric stream,
+    // i.e. if the test passes it does only guarantee that the insertion
+    // succeeded when the cluster is fresh (when this test was not run before
+    // against the same cluster. TODO: think about how to set a unique label
+    // here.
+    const queryParams = {
+      // This implicitly checks for two labels to be set by the translation
+      // layer. Change with care!
+      query: `system_uptime{job="ddagent", type="gauge"}`,
+      start: searchStart.toEpochSecond().toString(),
+      end: searchEnd.toEpochSecond().toString(),
+      step: "60s"
+    };
+
+    const resultArray = await waitForCortexQueryResult(
+      TENANT_DEFAULT_CORTEX_API_BASE_URL,
+      queryParams
+    );
+
+    log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
+
+    assert(resultArray[0].values.length > 1);
+    // confirm that there is just one stream (set of labels)
+    assert(resultArray.length == 1);
+
+    // Expected structure:
+    // "metric": {
+    //   "__name__": "system_uptime",
+    //   "instance": "x1carb6",
+    //   "job": "ddagent",
+    //   "source_type_name": "System",
+    //   "type": "gauge"
+    // },
+    assert(resultArray[0].metric.source_type_name === "System");
+
+    log.info("values seen: %s", JSON.stringify(resultArray[0].values, null, 2));
   });
 });
