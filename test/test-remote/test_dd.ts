@@ -52,6 +52,14 @@ function ddApiSeriesUrl() {
   return url;
 }
 
+function copyLEcertToHost() {
+  const src = `${__dirname}/containers/fakelerootx1.pem`;
+  const dst = createTempfile("le-staging-root-ca", ".pem");
+  log.info("copy %s to %s");
+  fs.copyFileSync(src, dst);
+  return dst;
+}
+
 export async function startDDagentContainer() {
   log.info("start containerized DD agent");
   const docker = new Docker({ socketPath: "/var/run/docker.sock" });
@@ -66,17 +74,14 @@ export async function startDDagentContainer() {
     });
   }
 
-  // const letsEncryptStagingRootCACert = fs.readFileSync(
-  //   `${__dirname}/../containers/fakelerootx1.pem`,
-  //   {
-  //     encoding: "utf-8"
-  //   }
-  // );
-
-  // const promConfigFilePath = createTempfile("prom-config-", ".conf");
-  // fs.writeFileSync(promConfigFilePath, renderedConfigText, {
-  //   encoding: "utf-8"
-  // });
+  // Prepare mounting Let's Encrypt Staging root CA into the container so that
+  // the Golang-based HTTP client discovers it when doing HTTP requests. Note:
+  // the path `${__dirname}/containers/fakelerootx1.pem` is valid _in the
+  // container_ running the test runner, but not on the host running the test
+  // runne container. For being able to mount this file into the DD agent
+  // container, first copy it to a location that's known to be shared between
+  // the test runner container and the host.
+  const leStagingRootCAFilePathOnHost = copyLEcertToHost();
 
   const ddEnv = [
     `DD_API_KEY=${ddApiKey}`,
@@ -96,21 +101,19 @@ export async function startDDagentContainer() {
     AttachStdout: false,
     AttachStderr: false,
     Tty: false,
-    // Cmd: [
-    //   "--config.file=/etc/prometheus/prometheus.yml",
-    //   `--web.listen-address=127.0.0.1:${promListenPort}`,
-    //   "--log.level=debug"
-    // ],
     Env: ddEnv,
     HostConfig: {
-      //NetworkMode: "host",
       Mounts: [
-        // Mount Let's Encrypt Staging root CA into the container so that
-        // golang discovers it when doing HTTP requests.
         {
           Type: "bind",
-          Source: `${__dirname}/containers/fakelerootx1.pem`,
-          // use a path discovered by Golang but not used by the distro in the container image
+          Source: leStagingRootCAFilePathOnHost,
+          // /etc/ssl/ca-bundle.pem is a place where the Golang-based HTTP
+          // client in the DD agent discovers and uses the CA file  when doing
+          // HTTP requests. It does however not overwrite the system store
+          // baked into the container image, because that path is not used by
+          // the distro in the DD agent container image. Kudos to
+          // https://stackoverflow.com/a/40051432/145400 for showing the paths
+          // that Golang walks through.
           Target: "/etc/ssl/ca-bundle.pem",
           ReadOnly: true
         },
