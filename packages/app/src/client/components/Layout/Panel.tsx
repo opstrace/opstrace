@@ -18,14 +18,18 @@ import React from "react";
 import Box from "@material-ui/core/Box";
 import styled from "styled-components";
 
+import Row from "./Row";
+import Column from "./Column";
+
 export type PanelProps = {
+  minHeight?: number;
   children: React.ReactNode;
 };
 
 const PanelWrapper = styled(Box)`
   border-radius: 2px;
   overflow: hidden;
-  border: 1px solid ${props => props.theme.palette.divider};
+  border: 1px solid ${props => props.theme?.palette?.divider};
   width: 100%;
   height: 100%;
   display: flex;
@@ -34,9 +38,39 @@ const PanelWrapper = styled(Box)`
 `;
 
 const Panel = (props: PanelProps) => {
+  let children = props.children;
+  let hasLayoutComponentChild = false;
+
+  if (React.isValidElement(children)) {
+    // Check if any of the children are layout components
+    React.Children.forEach(children, (c, idx) => {
+      if (c.type === Column || c.type === Row) {
+        hasLayoutComponentChild = true;
+      }
+    });
+
+    if (hasLayoutComponentChild) {
+      // Don't create a panel in this case. Map all components to layout components
+      children = React.Children.map(children, (c, idx) => {
+        if (c.type === Row) {
+          // wrap in an Column component
+          return React.cloneElement(c, {
+            minHeight: props.minHeight,
+            key: idx
+          });
+        }
+        return <Row minHeight={props.minHeight}>{c}</Row>;
+      });
+    }
+  }
+
+  if (hasLayoutComponentChild) {
+    return <>{children}</>;
+  }
+
   return (
     <Box width="100%" height="100%" p={0.25} className="LayoutPanel">
-      <PanelWrapper p={1}>{props.children}</PanelWrapper>
+      <PanelWrapper p={1}>{children}</PanelWrapper>
     </Box>
   );
 };

@@ -428,10 +428,9 @@ async function generateDts(sourceFiles: string[]) {
       undefined,
       {
         after: [
-          transformImports(
-            filesToVisit,
-            false
-          ) as ts.TransformerFactory<ts.SourceFile>
+          transformImports(filesToVisit, false) as ts.TransformerFactory<
+            ts.SourceFile
+          >
         ],
         afterDeclarations: [
           transformImports(filesToVisit, true) as ts.TransformerFactory<
@@ -567,8 +566,8 @@ const monacoLanguageLoader: esbuild.Plugin = {
   }
 };
 
-let reactResolvePlugin: esbuild.Plugin = {
-  name: "react-resolve",
+let externalizeSingletonLibraries: esbuild.Plugin = {
+  name: "externalize-libraries",
   setup(build) {
     // Redirect all paths starting with "react/" to external skypack cdn
     build.onResolve({ filter: /^react$/ }, args => {
@@ -586,6 +585,14 @@ let reactResolvePlugin: esbuild.Plugin = {
         external: true
       };
     });
+
+    build.onResolve({ filter: /^styled-components$/ }, args => {
+      return {
+        path: "https://cdn.skypack.dev/styled-components",
+        external: true
+      };
+    });
+
     // Use the esm versions of material-ui
     build.onResolve({ filter: /^@material-ui\// }, args => {
       const paths = args.path.split("/");
@@ -621,7 +628,11 @@ export async function bundle(files: string[]) {
       },
       splitting: true,
       format: "esm",
-      plugins: [reactResolvePlugin, monacoLanguageLoader, workerLoader],
+      plugins: [
+        externalizeSingletonLibraries,
+        monacoLanguageLoader,
+        workerLoader
+      ],
       platform: "browser",
       sourcemap: true,
       loader: { ".ttf": "file" }
