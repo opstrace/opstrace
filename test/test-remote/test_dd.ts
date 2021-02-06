@@ -55,7 +55,7 @@ function ddApiSeriesUrl() {
 function copyLEcertToHost() {
   const src = `${__dirname}/containers/fakelerootx1.pem`;
   const dst = createTempfile("le-staging-root-ca", ".pem");
-  log.info("copy %s to %s");
+  log.info("copy %s to %s", src, dst);
   fs.copyFileSync(src, dst);
   return dst;
 }
