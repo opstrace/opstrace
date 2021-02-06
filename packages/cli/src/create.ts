@@ -125,18 +125,26 @@ export async function create(): Promise<void> {
 }
 
 async function promptForResourceCreation(ccfg: NewRenderedClusterConfigType) {
+  const tos = "https://go.opstrace.com/terms-of-service";
   if (ccfg.cloud_provider === "aws") {
     const url = `https://go.opstrace.com/cli-aws-mutating-api-calls/${BUILD_INFO.VERSION_STRING}`;
+    // TODO omit AWS API link if a dev build
     log.info(
-      "Before we continue, please review the set of state-mutating " +
-        "AWS API calls emitted by this CLI during cluster creation: %s",
-      url
+      "\n\nYou can review the set of state-mutating AWS API calls made by this CLI: %s\n\n" +
+        "By selecting 'y' you agree to our terms of service: %s\n",
+      url,
+      tos
     );
-    await util.promptForProceed();
   }
 
-  // if (ccfg.cloud_provider === "gcp") {
-  // }
+  if (ccfg.cloud_provider === "gcp") {
+    log.info(
+      "\n\nBy selecting 'y' you agree to our terms of service: %s\n",
+      tos
+    );
+  }
+
+  await util.promptForProceed();
 }
 
 function writeTenantApiTokenFiles(tenantApiTokens: Dict<string>) {
