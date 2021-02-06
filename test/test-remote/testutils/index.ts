@@ -216,9 +216,10 @@ export function globalTestSuiteSetupOnce() {
   );
 
   // Create a definite temporary directory for this test runner, within the
-  // operating system's TMPDIR (shared across test runner invocation, "insecure"
-  // properties are fine). Subsequently put a "secure" per-run temporary files in
-  // there. `createTempfile()` below is the way to do that.
+  // operating system's TMPDIR (shared across test runner invocation,
+  // "insecure" properties are fine). Subsequently put unique and "secure"
+  // per-run temporary files in there. The function `createTempfile()` below is
+  // the way to do that.
 
   try {
     fs.mkdirSync(TMPDIRPATH, { mode: 0o777 });
@@ -228,6 +229,14 @@ export function globalTestSuiteSetupOnce() {
   }
 }
 
+/**
+ * Create a new temporary file, with a base name containing randomness. The
+ * absolute path has the structure $TMPDIR_ON_HOST/TEST_RUNNER_DIR/<basename>.
+ *
+ * The file is created with the lib https://raszi.github.io/node-tmp/
+ *
+ * Return the absolute path to the file.
+ */
 export function createTempfile(prefix: string, suffix: string): string {
   // Expected to return absolute path.
   return tmp.fileSync({
