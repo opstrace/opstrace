@@ -494,6 +494,7 @@ rebuild-testrunner-container-images:
 	rm -f test/test-remote/yarn.lock
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
+	docker pull gcr.io/datadoghq/agent:7
 
 .PHONY: rebuild-looker-container-images
 rebuild-looker-container-images:
