@@ -67,32 +67,37 @@ export async function startDDagentContainer() {
   const dockerDNS = readDockerDNSSettings();
   log.info(`docker container dns settings: ${dockerDNS}`);
 
+  // Prepare for mounting Let's Encrypt Staging root CA into the DD agent
+  // container (the goal is that the Golang-based HTTP client used in the DD
+  // agent discovers it when doing HTTP requests). Note: the path
+  // `${__dirname}/containers/fakelerootx1.pem` is valid _in the container_
+  // running the test runner, but not on the host running the test runner
+  // container. For being able to mount this file into the DD agent container,
+  // first copy it to a location that's known to be shared between the test
+  // runner container and the host.
+  const leStagingRootCAFilePathOnHost = copyLEcertToHost();
+
+  // Use magic DD agent environment variables to point the DD agent to
+  // the tested cluster's DD API implementation. Set the 'default' tenant's
+  // API authentication token as DD API key. The environnment variables
+  // supported by the DD agent are documented here:
+  // https://docs.datadoghq.com/agent/guide/environment-variables/
   let ddApiKey = "none";
   if (TENANT_DEFAULT_API_TOKEN_FILEPATH !== undefined) {
     ddApiKey = fs.readFileSync(TENANT_DEFAULT_API_TOKEN_FILEPATH, {
       encoding: "utf8"
     });
   }
-
-  // Prepare mounting Let's Encrypt Staging root CA into the container so that
-  // the Golang-based HTTP client discovers it when doing HTTP requests. Note:
-  // the path `${__dirname}/containers/fakelerootx1.pem` is valid _in the
-  // container_ running the test runner, but not on the host running the test
-  // runne container. For being able to mount this file into the DD agent
-  // container, first copy it to a location that's known to be shared between
-  // the test runner container and the host.
-  const leStagingRootCAFilePathOnHost = copyLEcertToHost();
-
   const ddEnv = [
     `DD_API_KEY=${ddApiKey}`,
-    `DD_DD_URL=${TENANT_DEFAULT_DD_API_BASE_URL}`,
-    `CURL_CA_BUNDLE=""`
+    `DD_DD_URL=${TENANT_DEFAULT_DD_API_BASE_URL}`
   ];
 
-  log.info("container env: %s", ddEnv);
+  log.info("DD agent container env: %s", ddEnv);
 
-  const outfilePath = createTempfile("prom-container-", ".outerr");
-  const outstream = fs.createWriteStream(outfilePath);
+  // Prepare file for capturing DD agent stdout/err.
+  const outerrfilePath = createTempfile("dd-agent-container-", ".outerr");
+  const outstream = fs.createWriteStream(outerrfilePath);
   await events.once(outstream, "open");
 
   const cont = await docker.createContainer({
@@ -157,8 +162,13 @@ export async function startDDagentContainer() {
   log.info("container start()");
   await cont.start();
 
+  // Expect a special log messaged emitted by the DD agent to confirm that time
+  // series fragments were successfully POSTed (2xx-acked) to the Opstrace
+  // cluster's DD API implementation.
   const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
-  const maxWaitSeconds = 30;
+
+  // It's known that this may take a while after DD agent startup.
+  const maxWaitSeconds = 40;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   log.info(
     "Waiting for needle to appear in container log, deadline in %s s. Needle: %s",
@@ -190,8 +200,8 @@ export async function startDDagentContainer() {
     }
     log.info(
       "log output emitted by container (stdout/err from %s):\n%s",
-      outfilePath,
-      fs.readFileSync(outfilePath, {
+      outerrfilePath,
+      fs.readFileSync(outerrfilePath, {
         encoding: "utf-8"
       })
     );
@@ -201,14 +211,16 @@ export async function startDDagentContainer() {
     if (mtime() > deadline) {
       log.info("deadline hit");
       await terminateContainer();
-      throw new Error("DD agent container setup failed: deadline hit");
+      throw new Error(
+        "DD agent container setup failed: deadline hit waiting for log needle"
+      );
     }
-    const fileHeadBytes = await readFirstNBytes(outfilePath, 10 ** 5);
+    const fileHeadBytes = await readFirstNBytes(outerrfilePath, 10 ** 5);
     if (fileHeadBytes.includes(Buffer.from(logNeedle, "utf-8"))) {
       log.info("log needle found in container log, proceed");
       break;
     }
-    await sleep(0.1);
+    await sleep(0.2);
   }
 
   return terminateContainer;
