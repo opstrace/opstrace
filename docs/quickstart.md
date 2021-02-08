@@ -117,7 +117,7 @@ When everything is done, you'll see the following log line:
 
 `info: cluster creation finished: $OPSTRACE_NAME (aws)`
 
-In case of any **installation errors** check the [known issues section](./guides/administrator/troubleshooting.md#known-issues) or search our [github issues](https://github.com/opstrace/opstrace/issues).
+In case of any **installation errors** check the [known issues section](./guides/administrator/troubleshooting.md#known-issues) or search our [GitHub issues](https://github.com/opstrace/opstrace/issues).
 
 You now have a secure, scalable, multi-tenant, open standards-based observability platform running _inside_ your cloud account, right next to the software that you want to monitor.
 
