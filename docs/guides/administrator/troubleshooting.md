@@ -112,3 +112,31 @@ And delete the certificate to have the controller recreate it and restart the re
 ```bash
 kubectl -n ingress delete certificate http-cert
 ```
+
+Check the installation succeeded by reissuing the `create` command.
+
+<!-- tabs -->
+
+### AWS
+
+```bash
+./opstrace create aws $OPSTRACE_NAME \
+  -c opstrace-config.yaml
+```
+
+When everything is done, you'll see the following log line:
+
+`info: cluster creation finished: $OPSTRACE_NAME (aws)`
+
+### GCP
+
+```bash
+./opstrace create gcp $OPSTRACE_NAME \
+  -c opstrace-config.yaml
+```
+
+When everything is done, you'll see the following log line:
+
+`info: cluster creation finished: $OPSTRACE_NAME (gcp)`
+
+<!-- tabs -->
