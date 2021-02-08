@@ -117,6 +117,8 @@ When everything is done, you'll see the following log line:
 
 `info: cluster creation finished: $OPSTRACE_NAME (aws)`
 
+In case of any **installation errors** check the [known issues section](./guides/administrator/troubleshooting.md#known-issues) or search our [github issues](https://github.com/opstrace/opstrace/issues).
+
 You now have a secure, scalable, multi-tenant, open standards-based observability platform running _inside_ your cloud account, right next to the software that you want to monitor.
 
 Now that Opstrace is up and running, let's take a closer look.
@@ -325,56 +327,3 @@ That's it! 👏
 
 Congratulations, you're now an Opstrace user!
 
-
-## Known Issues
-
-It's possible your installation can fail waiting for the certificates to be ready. When this happens, you'll see messages such as the following:
-
-```text
-info: waiting for 0 DaemonSets
-info: waiting for 0 StatefulSets
-info: waiting for 1 Certificates
-debug:   Waiting for Certificate ingress/https-cert to be ready
-```
-
-And when the installation fails:
-
-```text
-info: waiting for 0 DaemonSets
-info: waiting for 0 StatefulSets
-info: waiting for 1 Certificates
-warning: cluster creation attempt timed out after 2400 seconds
-error: 3 attempt(s) failed. Stop retrying. Exit.
-```
-
-This is a known problem that we are tracking in these issues:
-
-* [ci: waiting "for Certificate ingress/https-cert to be ready" didn't resolve](https://github.com/opstrace/opstrace/issues/151)
-* [Certificate sometimes fails to issue properly](https://github.com/jetstack/cert-manager/issues/3594)
-
-If this happens, the recommended workaround is to restart the certificate request process.
-
-First, if the installation process is stuck, you can exit by pressing Ctrl-C. Then proceed to [connect kubectl to your Opstrace cluster](./guides/administrator/troubleshooting.md#kubernetes-based-debugging).
-
-Afterward, find the certificate request created by cert-manager:
-
-```bash
-> kubectl -n ingress get certificaterequest
-NAME                         READY   AGE
-https-cert-XXXXX             False   30m
-kubed-apiserver-cert-XXXXX   True    30m
-```
-
-The certificate request starts with `https-cert-` followed by five random characters.
-
-Delete the failed certificate request:
-
-```bash
-kubectl -n ingress delete certificaterequest https-cert-XXXXX
-```
-
-And delete the certificate to have the controller recreate it and restart the request process:
-
-```bash
-kubectl -n ingress delete certificate http-cert
-```
