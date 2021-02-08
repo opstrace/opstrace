@@ -85,7 +85,7 @@ The name will globally identify you in our domain as `$OPSTRACE_NAME.opstrace.io
 
 Then, you'll create a simple [configuration file](./references/cluster-configuration.md) with the most basic options.
 Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts internal metrics.
-Learn more about tenant isolation in our [key concepts references](./references/concepts.md#concepts).
+Learn more about tenant isolation in our [key concepts references](./references/concepts.md#tenants).
 
 ```bash
 cat <<EOF > opstrace-config.yaml
