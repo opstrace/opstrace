@@ -113,7 +113,7 @@ And delete the certificate to have the controller recreate it and restart the re
 kubectl -n ingress delete certificate http-cert
 ```
 
-Check the installation succeeded by reissuing the `create` command.
+Check the installation succeeded by reissuing the `create` command:
 
 <!--tabs-->
 
