@@ -115,7 +115,7 @@ kubectl -n ingress delete certificate http-cert
 
 Check the installation succeeded by reissuing the `create` command.
 
-<!-- tabs -->
+<!--tabs-->
 
 ### AWS
 
@@ -139,4 +139,4 @@ When everything is done, you'll see the following log line:
 
 `info: cluster creation finished: $OPSTRACE_NAME (gcp)`
 
-<!-- tabs -->
+<!--/tabs-->
