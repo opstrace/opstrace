@@ -354,7 +354,7 @@ This is a known problem that we are tracking in these issues:
 
 If this happens, the recommended workaround is to restart the certificate request process.
 
-First, if the installation process is stuck, you can exit by pressing Ctrl-C. Then proceed to [connect kubectl to your Opstrace cluster](./guides/administrator/troubleshooting#kubernetes-based-debugging).
+First, if the installation process is stuck, you can exit by pressing Ctrl-C. Then proceed to [connect kubectl to your Opstrace cluster](./guides/administrator/troubleshooting.md#kubernetes-based-debugging).
 
 Afterward, find the certificate request created by cert-manager:
 
