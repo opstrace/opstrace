@@ -93,7 +93,7 @@ First, if the installation process is stuck, you can exit by pressing Ctrl-C. Th
 Afterward, find the certificate request created by cert-manager:
 
 ```bash
-> kubectl -n ingress get certificaterequest
+$ kubectl -n ingress get certificaterequest
 NAME                         READY   AGE
 https-cert-XXXXX             False   30m
 kubed-apiserver-cert-XXXXX   True    30m
