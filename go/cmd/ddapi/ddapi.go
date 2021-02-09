@@ -52,11 +52,12 @@ func main() {
 	}
 	log.SetLevel(level)
 
-	// Show timestamps in TTY logger.
-	customFormatter := new(log.TextFormatter)
-	customFormatter.TimestampFormat = "2021-01-21 13:33:37.000"
-	customFormatter.FullTimestamp = true
-	log.SetFormatter(customFormatter)
+	// Show timestamps in TTY logger. Note: outcomment for now, got a
+	// weird `log="time="9092-02-92 25:55:57.389"` in the cluster deployment.c
+	// customFormatter := new(log.TextFormatter)
+	// customFormatter.TimestampFormat = "2021-01-21 13:33:37.000"
+	// customFormatter.FullTimestamp = true
+	// log.SetFormatter(customFormatter)
 
 	_, uerr := url.Parse(remoteWriteURL)
 	if uerr != nil {
