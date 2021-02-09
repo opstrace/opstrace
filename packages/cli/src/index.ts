@@ -45,7 +45,7 @@ import * as list from "./list";
 import * as status from "./status";
 import * as upgrade from "./upgrade";
 import * as util from "./util";
-import { BUILD_INFO } from "./buildinfo";
+import { BUILD_INFO } from "@opstrace/buildinfo";
 
 const DEFAULT_LOG_LEVEL_STDERR = "info";
 

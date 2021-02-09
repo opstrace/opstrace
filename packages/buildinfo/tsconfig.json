@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "build"
+  },
+  "references": [
+    { "path": "../../lib/gcp" },
+    { "path": "../../lib/aws" },
+    { "path": "../../lib/utils" },
+    { "path": "../../lib/dns" },
+    { "path": "../../lib/kubernetes" },
+    { "path": "../config" },
+    { "path": "../tenants" },
+    { "path": "../controller" },
+    { "path": "../controller-config" }
+  ]
+}

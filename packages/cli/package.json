@@ -22,6 +22,7 @@
     "@types/argparse": "2.0.2"
   },
   "dependencies": {
+    "@opstrace/buildinfo": "^0.0.0",
     "@opstrace/config": "^0.0.0",
     "@opstrace/installer": "^0.0.0",
     "@opstrace/uninstaller": "^0.0.0",

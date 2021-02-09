@@ -18,10 +18,7 @@ import * as yup from "yup";
 
 import { CLUSTER_NAME_REGEX, KNOWN_AWS_REGIONS } from "@opstrace/config";
 
-import { BUILD_INFO } from "./buildinfo";
-
-// Also see issue opstrace-prelaunch/issues/1671.
-const CONTROLLER_IMAGE_DEFAULT = `opstrace/controller:${BUILD_INFO.VERSION_STRING}`;
+import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
 // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
 // For example, `us-west-2` is the _code_ describing a _region_ in AWS.
