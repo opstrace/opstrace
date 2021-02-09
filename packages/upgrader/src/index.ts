@@ -13,13 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  fork,
-  call,
-  race,
-  delay,
-  cancel
-} from "redux-saga/effects";
+import { fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
 import createSagaMiddleware from "redux-saga";
 
@@ -32,15 +26,14 @@ import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
 import { log, SECOND, retryUponAnyError } from "@opstrace/utils";
 
-import {
-  set as saveControllerConfig,
-  fetch as getControllerConfig
-} from "@opstrace/controller-config";
-
 import { rootReducer /*, State */ } from "./reducer";
 import { ClusterUpgradeTimeoutError } from "./errors";
 import { runInformers, blockUntilCacheHydrated } from "./informers";
-import { upgradeProgressReporter, waitForControllerDeployment } from "./readiness";
+import {
+  upgradeProgressReporter,
+  waitForControllerDeployment
+} from "./readiness";
+import { upgradeControllerDeployment } from "./upgrade";
 
 // Note: a largish number of attempts as long as micro retries are not yet
 // implemented carefully and thoughtfully.
@@ -125,21 +118,15 @@ function* triggerUpgrade(kubeConfig: KubeConfig) {
 
   log.info("k8s cluster seems to exist, trigger upgrade");
 
-  log.info("Get current controller config map");
-  const ccfg = yield call(getControllerConfig, kubeConfig);
-  if (ccfg === undefined) {
-    throw new Error("could not get controller config map");
-  }
-
-  // TODO
-  if (ccfg.terminate) {
-    yield call(saveControllerConfig, ccfg, kubeConfig);
-  }
-
   log.info("starting kubernetes informers");
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);
+
+  yield call(upgradeControllerDeployment, {
+    opstraceClusterName: upgradeConfig.clusterName,
+    kubeConfig: kubeConfig
+  });
 
   yield call(waitForControllerDeployment);
 
