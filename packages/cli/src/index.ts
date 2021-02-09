@@ -250,16 +250,18 @@ function parseCmdlineArgs() {
     default: ""
   });
 
-  parserDestroy.add_argument("--region", {
-    help:
-      "Set the AWS region to destroy in. Only needed when the automatic " +
-      "region detection fails (when the corresponding EKS cluster " +
-      "cannot be found or inspected). Not yet supported for GCP.",
-    type: "str",
-    metavar: "REGION",
-    dest: "region",
-    default: ""
-  });
+  for (const p of [parserDestroy, parserUpgrade]) {
+    p.add_argument("--region", {
+      help:
+        "Set the cluster AWS region. Only needed when the automatic " +
+        "region detection fails (when the corresponding EKS cluster " +
+        "cannot be found or inspected). Not yet supported for GCP.",
+      type: "str",
+      metavar: "REGION",
+      dest: "region",
+      default: ""
+    });
+  }
 
   CLIARGS = mainParser.parse_args();
 
