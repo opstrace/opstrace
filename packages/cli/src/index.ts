@@ -59,7 +59,7 @@ interface CliOptsInterface {
   logLevel: "debug" | "info" | "warning" | "error";
   holdController: boolean;
   showVersion: boolean;
-  regionToDestroyIn: string;
+  region: string;
   assumeYes: boolean;
   kubeconfigFilePath: string; // emtpy means: not set
 }
@@ -257,7 +257,7 @@ function parseCmdlineArgs() {
       "cannot be found or inspected). Not yet supported for GCP.",
     type: "str",
     metavar: "REGION",
-    dest: "regionToDestroyIn",
+    dest: "region",
     default: ""
   });
 

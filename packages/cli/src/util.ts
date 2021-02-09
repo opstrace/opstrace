@@ -191,27 +191,22 @@ export function timestampForFilenames(ts: ZonedDateTime): string {
  * - use what was provided via --region on cmdline
  * - error out if --region was not provided
  */
-export async function awsGetRegionToDestroyIn(): Promise<string> {
-  if (cli.CLIARGS.regionToDestroyIn !== "") {
-    log.debug(
-      "region to destroy in from cli args: %s",
-      cli.CLIARGS.regionToDestroyIn
-    );
+export async function awsGetClusterRegion(): Promise<string> {
+  if (cli.CLIARGS.region !== "") {
+    log.debug("region to destroy in from cli args: %s", cli.CLIARGS.region);
 
-    if (!KNOWN_AWS_REGIONS.includes(cli.CLIARGS.regionToDestroyIn)) {
+    if (!KNOWN_AWS_REGIONS.includes(cli.CLIARGS.region)) {
       const knownRegionString = KNOWN_AWS_REGIONS.join(", ");
       die(
-        `The provided AWS region (${cli.CLIARGS.regionToDestroyIn}) is not ` +
+        `The provided AWS region (${cli.CLIARGS.region}) is not ` +
           `known. Choose one of ${knownRegionString}.`
       );
     }
 
-    return cli.CLIARGS.regionToDestroyIn;
+    return cli.CLIARGS.region;
   }
 
-  log.info(
-    "try to identify AWS region to initiate destroy operation in: look up EKS clusters"
-  );
+  log.info("starting look up of EKS cluster accross AWS regions");
   const ocnRegionMap: Record<string, string> = {};
   for (const c of await list.listOpstraceClustersOnEKS()) {
     ocnRegionMap[c.opstraceClusterName] = c.awsRegion;
@@ -220,7 +215,7 @@ export async function awsGetRegionToDestroyIn(): Promise<string> {
   if (cli.CLIARGS.clusterName in ocnRegionMap) {
     const r = ocnRegionMap[cli.CLIARGS.clusterName];
     log.info(
-      "identified AWS region to destroy in (found EKS cluster %s): %s",
+      "identified AWS region (found EKS cluster %s): %s",
       cli.CLIARGS.clusterName,
       r
     );
@@ -244,12 +239,12 @@ export async function awsGetRegionToDestroyIn(): Promise<string> {
   //    discovered and cleaned up after.
   die(
     `No EKS cluster found for cluster name '${cli.CLIARGS.clusterName}. ` +
-      "Cannot determine region to destroy in. " +
+      "Cannot determine cluster region. " +
       "Please specify the region with the --region command line argument."
   );
 }
 
-export function gcpGetRegionToDestroyIn() {
+export function gcpGetClusterRegion() {
   // TODO: either find a _smart_ way to look this up (for example: when the
   // corresponding GKE cluster exists then we can look up the region for that
   // cluster) or otherwise we might have to require this as user-given

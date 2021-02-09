@@ -27,12 +27,12 @@ export async function destroy(): Promise<void> {
   if (cli.CLIARGS.cloudProvider == "gcp") {
     const gcpopts = util.gcpValidateCredFileAndGetDetailOrError();
     gcpProjectID = gcpopts.projectId;
-    gcpRegion = util.gcpGetRegionToDestroyIn();
+    gcpRegion = util.gcpGetClusterRegion();
   }
 
   let awsRegion: string | undefined;
   if (cli.CLIARGS.cloudProvider == "aws") {
-    awsRegion = await util.awsGetRegionToDestroyIn();
+    awsRegion = await util.awsGetClusterRegion();
   }
 
   // The "destroy config" concept is deliberately chaotic for now. user-given
