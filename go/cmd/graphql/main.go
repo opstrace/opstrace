@@ -181,7 +181,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 		err := decoder.Decode(&yamlCredential)
 		if err != nil {
 			if err != io.EOF {
-				log.Debugf("Decoding exporter input at index=%d failed: %s", len(inserts)+len(updates), err)
+				log.Debugf("Decoding credential input at index=%d failed: %s", len(inserts)+len(updates), err)
 				http.Error(w, fmt.Sprintf(
 					"Decoding credential input at index=%d failed: %s", len(inserts)+len(updates), err,
 				), http.StatusBadRequest)
