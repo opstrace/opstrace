@@ -43,6 +43,8 @@ func main() {
 	flag.StringVar(&loglevel, "loglevel", "info", "error|info|debug")
 	var listenAddress string
 	flag.StringVar(&listenAddress, "listen", "", "")
+	var tenantName string
+	flag.StringVar(&tenantName, "tenantname", "", "")
 
 	flag.Parse()
 
@@ -74,8 +76,13 @@ func main() {
 		log.Fatalf("missing required HASURA_GRAPHQL_ADMIN_SECRET")
 	}
 
-	credentialClient = graphql.NewCredentialAccess(graphqlEndpointURL, graphqlSecret)
-	exporterClient = graphql.NewExporterAccess(graphqlEndpointURL, graphqlSecret)
+	if tenantName == "" {
+		log.Fatalf("missing required --tenantname")
+	}
+	log.Infof("tenant name: %s", tenantName)
+
+	credentialClient = graphql.NewCredentialAccess(tenantName, graphqlEndpointURL, graphqlSecret)
+	exporterClient = graphql.NewExporterAccess(tenantName, graphqlEndpointURL, graphqlSecret)
 
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
@@ -121,23 +128,14 @@ type CredentialInfo struct {
 }
 
 func listCredentials(w http.ResponseWriter, r *http.Request) {
-	tenant, err := getTenant(r)
+	resp, err := credentialClient.List()
 	if err != nil {
-		log.Warn("List credentials: Invalid tenant")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Warnf("Listing credentials failed: %s", err)
+		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 
-	resp, err := credentialClient.List(tenant)
-	if err != nil {
-		log.Warnf("Listing credentials for tenant %s failed: %s", tenant, err)
-		http.Error(w, fmt.Sprintf(
-			"Listing credentials for tenant %s failed: %s", tenant, err,
-		), http.StatusInternalServerError)
-		return
-	}
-
-	log.Debugf("Listing %d credentials for tenant %s", len(resp.Credential), tenant)
+	log.Debugf("Listing %d credentials", len(resp.Credential))
 
 	encoder := yaml.NewEncoder(w)
 	for _, credential := range resp.Credential {
@@ -158,25 +156,16 @@ type Credential struct {
 }
 
 func writeCredentials(w http.ResponseWriter, r *http.Request) {
-	tenant, err := getTenant(r)
-	if err != nil {
-		log.Warn("Write credentials: Invalid tenant")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	decoder := yaml.NewDecoder(r.Body)
 	// Return error for unrecognized or duplicate fields in the input
 	decoder.SetStrict(true)
 
 	// Collect list of existing names so that we can decide between insert vs update
 	existingTypes := make(map[string]string)
-	resp, err := credentialClient.List(tenant)
+	resp, err := credentialClient.List()
 	if err != nil {
-		log.Warnf("Listing credentials for tenant %s failed: %s", tenant, err)
-		http.Error(w, fmt.Sprintf(
-			"Listing credentials for tenant %s failed: %s", tenant, err,
-		), http.StatusInternalServerError)
+		log.Warnf("Listing credentials failed: %s", err)
+		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	for _, credential := range resp.Credential {
@@ -192,7 +181,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 		err := decoder.Decode(&yamlCredential)
 		if err != nil {
 			if err != io.EOF {
-				log.Debugf("Decoding credential input at index=%d failed: %s", len(inserts)+len(updates), err)
+				log.Debugf("Decoding exporter input at index=%d failed: %s", len(inserts)+len(updates), err)
 				http.Error(w, fmt.Sprintf(
 					"Decoding credential input at index=%d failed: %s", len(inserts)+len(updates), err,
 				), http.StatusBadRequest)
@@ -244,7 +233,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing credentials: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		err := credentialClient.Insert(tenant, inserts)
+		err := credentialClient.Insert(inserts)
 		if err != nil {
 			log.Warnf("Insert: %d credentials failed: %s", len(inserts), err)
 			http.Error(w, fmt.Sprintf("Creating %d credentials failed: %s", len(inserts), err), http.StatusInternalServerError)
@@ -253,7 +242,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			err := credentialClient.Update(tenant, update)
+			err := credentialClient.Update(update)
 			if err != nil {
 				log.Warnf("Update: Credential %s failed: %s", update.Name, err)
 				http.Error(w, fmt.Sprintf("Updating credential %s failed: %s", update.Name, err), http.StatusInternalServerError)
@@ -320,22 +309,16 @@ func validateCredValue(credName string, credType string, credValue interface{}) 
 
 func getCredential(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
-	tenant, err := getTenant(r)
-	if err != nil {
-		log.Warnf("Get: Invalid tenant for credential %s", name)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	log.Debugf("Getting credential: %s/%s", tenant, name)
+	log.Debugf("Getting credential: %s", name)
 
-	resp, err := credentialClient.Get(tenant, name)
+	resp, err := credentialClient.Get(name)
 	if err != nil {
-		log.Warnf("Get: Credential %s/%s failed: %s", tenant, name, err)
+		log.Warnf("Get: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Getting credential failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	if resp == nil {
-		log.Debugf("Get: Credential %s/%s not found", tenant, name)
+		log.Debugf("Get: Credential %s not found", name)
 		http.Error(w, fmt.Sprintf("Credential not found: %s", name), http.StatusNotFound)
 		return
 	}
@@ -351,23 +334,17 @@ func getCredential(w http.ResponseWriter, r *http.Request) {
 
 func deleteCredential(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
-	tenant, err := getTenant(r)
-	if err != nil {
-		log.Warnf("Delete: Invalid tenant for credential %s", name)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	log.Debugf("Deleting credential: %s/%s", tenant, name)
+	log.Debugf("Deleting credential: %s", name)
 
-	resp, err := credentialClient.Delete(tenant, name)
+	resp, err := credentialClient.Delete(name)
 	if err != nil {
-		log.Warnf("Delete: Credential %s/%s failed: %s", tenant, name, err)
+		log.Warnf("Delete: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Deleting credential failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	if resp == nil {
-		log.Debugf("Delete: Credential %s/%s not found", tenant, name)
-		http.Error(w, fmt.Sprintf("Credential not found: %s/%s", tenant, name), http.StatusNotFound)
+		log.Debugf("Delete: Credential %s not found", name)
+		http.Error(w, fmt.Sprintf("Credential not found: %s", name), http.StatusNotFound)
 		return
 	}
 
@@ -386,21 +363,14 @@ type ExporterInfo struct {
 }
 
 func listExporters(w http.ResponseWriter, r *http.Request) {
-	tenant, err := getTenant(r)
+	resp, err := exporterClient.List()
 	if err != nil {
-		log.Warn("List exporters: Invalid tenant")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Warnf("Listing exporters failed: %s", err)
+		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 
-	resp, err := exporterClient.List(tenant)
-	if err != nil {
-		log.Warnf("Listing exporters for tenant %s failed: %s", tenant, err)
-		http.Error(w, fmt.Sprintf("Listing exporters for tenant %s failed: %s", tenant, err), http.StatusInternalServerError)
-		return
-	}
-
-	log.Debugf("Listing %d exporters for tenant %s", len(resp.Exporter), tenant)
+	log.Debugf("Listing %d exporters", len(resp.Exporter))
 
 	encoder := yaml.NewEncoder(w)
 	for _, exporter := range resp.Exporter {
@@ -431,23 +401,16 @@ type Exporter struct {
 }
 
 func writeExporters(w http.ResponseWriter, r *http.Request) {
-	tenant, err := getTenant(r)
-	if err != nil {
-		log.Warn("Write exporters: Invalid tenant")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	decoder := yaml.NewDecoder(r.Body)
 	// Return error for unrecognized or duplicate fields in the input
 	decoder.SetStrict(true)
 
 	// Collect list of existing names so that we can decide between insert vs update
 	existingTypes := make(map[string]string)
-	resp, err := exporterClient.List(tenant)
+	resp, err := exporterClient.List()
 	if err != nil {
-		log.Warnf("Listing exporters failed for tenant %s: %s", tenant, err)
-		http.Error(w, fmt.Sprintf("Listing exporters for tenant %s failed: %s", tenant, err), http.StatusInternalServerError)
+		log.Warnf("Listing exporters failed: %s", err)
+		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	for _, exporter := range resp.Exporter {
@@ -550,7 +513,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing exporters: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		err := exporterClient.Insert(tenant, inserts)
+		err := exporterClient.Insert(inserts)
 		if err != nil {
 			log.Warnf("Insert: %d exporters failed: %s", len(inserts), err)
 			http.Error(w, fmt.Sprintf("Creating %d exporters failed: %s", len(inserts), err), http.StatusInternalServerError)
@@ -559,7 +522,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			err := exporterClient.Update(tenant, update)
+			err := exporterClient.Update(update)
 			if err != nil {
 				log.Warnf("Update: Exporter %s failed: %s", update.Name, err)
 				http.Error(w, fmt.Sprintf("Updating exporter %s failed: %s", update.Name, err), http.StatusInternalServerError)
@@ -572,6 +535,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 // Searches through the provided object tree for any maps with interface keys (from YAML),
 // and converts those keys to strings (required for JSON).
 func recurseMapStringKeys(in interface{}) (interface{}, error) {
+	// TODO convert to map[string]interface{}
 	switch inType := in.(type) {
 	case map[interface{}]interface{}: // yaml type for maps. needs string keys to work with JSON
 		// Ensure the map keys are converted, RECURSE into values to find nested maps
@@ -606,23 +570,17 @@ func recurseMapStringKeys(in interface{}) (interface{}, error) {
 
 func getExporter(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
-	tenant, err := getTenant(r)
-	if err != nil {
-		log.Warnf("Get: Invalid tenant for exporter %s", name)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	log.Debugf("Getting exporter: %s/%s", tenant, name)
+	log.Debugf("Getting exporter: %s", name)
 
-	resp, err := exporterClient.Get(tenant, name)
+	resp, err := exporterClient.Get(name)
 	if err != nil {
-		log.Warnf("Get: Exporter %s/%s failed: %s", tenant, name, err)
+		log.Warnf("Get: Exporter %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Getting exporter failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	if resp == nil {
-		log.Debugf("Get: Exporter %s/%s not found", tenant, name)
-		http.Error(w, fmt.Sprintf("Exporter not found: %s/%s", tenant, name), http.StatusNotFound)
+		log.Debugf("Get: Exporter %s not found", name)
+		http.Error(w, fmt.Sprintf("Exporter not found: %s", name), http.StatusNotFound)
 		return
 	}
 
@@ -650,23 +608,17 @@ func getExporter(w http.ResponseWriter, r *http.Request) {
 
 func deleteExporter(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
-	tenant, err := getTenant(r)
-	if err != nil {
-		log.Warnf("Delete: Invalid tenant for exporter %s", name)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	log.Debugf("Deleting exporter: %s/%s", tenant, name)
+	log.Debugf("Deleting exporter: %s", name)
 
-	resp, err := exporterClient.Delete(tenant, name)
+	resp, err := exporterClient.Delete(name)
 	if err != nil {
-		log.Warnf("Delete: Exporter %s/%s failed: %s", tenant, name, err)
+		log.Warnf("Delete: Exporter %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Deleting exporter failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	if resp == nil {
-		log.Debugf("Delete: Exporter %s/%s not found", tenant, name)
-		http.Error(w, fmt.Sprintf("Exporter not found: %s/%s", tenant, name), http.StatusNotFound)
+		log.Debugf("Delete: Exporter %s not found", name)
+		http.Error(w, fmt.Sprintf("Exporter not found: %s", name), http.StatusNotFound)
 		return
 	}
 
@@ -674,19 +626,9 @@ func deleteExporter(w http.ResponseWriter, r *http.Request) {
 	encoder.Encode(ExporterInfo{Name: resp.DeleteExporterByPk.Name})
 }
 
-func getTenant(r *http.Request) (string, error) {
-	tenants, ok := r.Header["X-Scope-Orgid"]
-	if !ok {
-		return "", fmt.Errorf("missing tenant ID in request to %s", r.URL)
-	}
-	if len(tenants) != 1 || len(tenants[0]) == 0 {
-		return "", fmt.Errorf("invalid tenant ID in request to %s", r.URL)
-	}
-	return tenants[0], nil
-}
-
 // Returns a string representation of the current time in UTC, suitable for passing to Hasura as a timestamptz
 // See also https://hasura.io/blog/postgres-date-time-data-types-on-graphql-fd926e86ee87/
 func nowTimestamp() graphql.Timestamptz {
+	// TODO see if RFC3339 is accepted
 	return graphql.Timestamptz(time.Now().Format(time.RFC3339))
 }

@@ -21,12 +21,14 @@ import (
 )
 
 type CredentialAccess struct {
+	tenant        String
 	client        *Client
 	graphqlSecret string
 }
 
-func NewCredentialAccess(graphqlURL *url.URL, graphqlSecret string) CredentialAccess {
+func NewCredentialAccess(tenant string, graphqlURL *url.URL, graphqlSecret string) CredentialAccess {
 	return CredentialAccess{
+		String(tenant),
 		NewClient(graphqlURL.String()),
 		graphqlSecret,
 	}
@@ -44,8 +46,8 @@ type FixedGetCredentialsResponse struct {
 	} `json:"Credential"`
 }
 
-func (c *CredentialAccess) List(tenant string) (*FixedGetCredentialsResponse, error) {
-	req, err := NewGetCredentialsRequest(c.client.Url, &GetCredentialsVariables{Tenant: String(tenant)})
+func (c *CredentialAccess) List() (*FixedGetCredentialsResponse, error) {
+	req, err := NewGetCredentialsRequest(c.client.Url, &GetCredentialsVariables{Tenant: c.tenant})
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +77,8 @@ type FixedGetCredentialResponse struct {
 	} `json:"Credential_By_Pk"`
 }
 
-func (c *CredentialAccess) Get(tenant string, name string) (*FixedGetCredentialResponse, error) {
-	req, err := NewGetCredentialRequest(c.client.Url, &GetCredentialVariables{Tenant: String(tenant), Name: String(name)})
+func (c *CredentialAccess) Get(name string) (*FixedGetCredentialResponse, error) {
+	req, err := NewGetCredentialRequest(c.client.Url, &GetCredentialVariables{Tenant: c.tenant, Name: String(name)})
 	if err != nil {
 		return nil, err
 	}
@@ -107,11 +109,8 @@ type FixedDeleteCredentialResponse struct {
 	} `json:"Delete_Credential_By_Pk"`
 }
 
-func (c *CredentialAccess) Delete(tenant string, name string) (*FixedDeleteCredentialResponse, error) {
-	req, err := NewDeleteCredentialRequest(
-		c.client.Url,
-		&DeleteCredentialVariables{Tenant: String(tenant), Name: String(name)},
-	)
+func (c *CredentialAccess) Delete(name string) (*FixedDeleteCredentialResponse, error) {
+	req, err := NewDeleteCredentialRequest(c.client.Url, &DeleteCredentialVariables{Tenant: c.tenant, Name: String(name)})
 	if err != nil {
 		return nil, err
 	}
@@ -135,12 +134,11 @@ func (c *CredentialAccess) Delete(tenant string, name string) (*FixedDeleteCrede
 }
 
 // Insert inserts one or more credentials, returns an error if any already exists.
-func (c *CredentialAccess) Insert(tenant string, inserts []CredentialInsertInput) error {
+func (c *CredentialAccess) Insert(inserts []CredentialInsertInput) error {
 	// Ensure the inserts each have the correct tenant name
 	insertsWithTenant := make([]CredentialInsertInput, 0)
-	tenantg := String(tenant)
 	for _, insert := range inserts {
-		insert.Tenant = &tenantg
+		insert.Tenant = &c.tenant
 		insertsWithTenant = append(insertsWithTenant, insert)
 	}
 
@@ -155,9 +153,9 @@ func (c *CredentialAccess) Insert(tenant string, inserts []CredentialInsertInput
 }
 
 // Update updates an existing credential, returns an error if a credential of the same tenant/name doesn't exist.
-func (c *CredentialAccess) Update(tenant string, update UpdateCredentialVariables) error {
+func (c *CredentialAccess) Update(update UpdateCredentialVariables) error {
 	// Ensure the update has the correct tenant name
-	update.Tenant = String(tenant)
+	update.Tenant = c.tenant
 
 	req, err := NewUpdateCredentialRequest(c.client.Url, &update)
 	if err != nil {
