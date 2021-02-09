@@ -21,14 +21,12 @@ import (
 )
 
 type ExporterAccess struct {
-	tenant        String
 	client        *Client
 	graphqlSecret string
 }
 
-func NewExporterAccess(tenant string, graphqlURL *url.URL, graphqlSecret string) ExporterAccess {
+func NewExporterAccess(graphqlURL *url.URL, graphqlSecret string) ExporterAccess {
 	return ExporterAccess{
-		String(tenant),
 		NewClient(graphqlURL.String()),
 		graphqlSecret,
 	}
@@ -48,8 +46,8 @@ type FixedGetExportersResponse struct {
 	} `json:"Exporter"`
 }
 
-func (c *ExporterAccess) List() (*FixedGetExportersResponse, error) {
-	req, err := NewGetExportersRequest(c.client.Url, &GetExportersVariables{Tenant: c.tenant})
+func (c *ExporterAccess) List(tenant string) (*FixedGetExportersResponse, error) {
+	req, err := NewGetExportersRequest(c.client.Url, &GetExportersVariables{Tenant: String(tenant)})
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +79,8 @@ type FixedGetExporterResponse struct {
 	} `json:"Exporter_By_Pk"` // fix missing underscores
 }
 
-func (c *ExporterAccess) Get(name string) (*FixedGetExporterResponse, error) {
-	req, err := NewGetExporterRequest(c.client.Url, &GetExporterVariables{Tenant: c.tenant, Name: String(name)})
+func (c *ExporterAccess) Get(tenant string, name string) (*FixedGetExporterResponse, error) {
+	req, err := NewGetExporterRequest(c.client.Url, &GetExporterVariables{Tenant: String(tenant), Name: String(name)})
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +111,11 @@ type FixedDeleteExporterResponse struct {
 	} `json:"Delete_Exporter_By_Pk"` // fix missing underscores
 }
 
-func (c *ExporterAccess) Delete(name string) (*FixedDeleteExporterResponse, error) {
-	req, err := NewDeleteExporterRequest(c.client.Url, &DeleteExporterVariables{Tenant: c.tenant, Name: String(name)})
+func (c *ExporterAccess) Delete(tenant string, name string) (*FixedDeleteExporterResponse, error) {
+	req, err := NewDeleteExporterRequest(
+		c.client.Url,
+		&DeleteExporterVariables{Tenant: String(tenant), Name: String(name)},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -138,11 +139,12 @@ func (c *ExporterAccess) Delete(name string) (*FixedDeleteExporterResponse, erro
 }
 
 // Insert inserts one or more exporters, returns an error if any already exists.
-func (c *ExporterAccess) Insert(inserts []ExporterInsertInput) error {
+func (c *ExporterAccess) Insert(tenant string, inserts []ExporterInsertInput) error {
 	// Ensure the inserts each have the correct tenant name
 	insertsWithTenant := make([]ExporterInsertInput, 0)
+	tenantg := String(tenant)
 	for _, insert := range inserts {
-		insert.Tenant = &c.tenant
+		insert.Tenant = &tenantg
 		insertsWithTenant = append(insertsWithTenant, insert)
 	}
 
@@ -157,9 +159,9 @@ func (c *ExporterAccess) Insert(inserts []ExporterInsertInput) error {
 }
 
 // Update updates an existing exporter, returns an error if a exporter of the same tenant/name doesn't exist.
-func (c *ExporterAccess) Update(update UpdateExporterVariables) error {
+func (c *ExporterAccess) Update(tenant string, update UpdateExporterVariables) error {
 	// Ensure the update has the correct tenant name
-	update.Tenant = c.tenant
+	update.Tenant = String(tenant)
 
 	req, err := NewUpdateExporterRequest(c.client.Url, &update)
 	if err != nil {

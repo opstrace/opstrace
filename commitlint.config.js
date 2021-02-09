@@ -36,6 +36,7 @@ module.exports = {
         "docs", // any documentation change
         "feat", // user-facing feature addition. Makes most sense in a semver world which we are not yet in.
         "fix", // fix for user-facing issue in the opstrace system (fix user-facing bug). Makes most sense in a semver world which we are not yet in.
+        "graphql", // change to graphql api project
         "installer", // change in installer (cluster creation)
         "looker", // change to looker project
         "loki", // change to loki (config change for example)

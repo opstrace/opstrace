@@ -15,7 +15,7 @@ export GO111MODULE=on
 export GOPRIVATE=github.com/opstrace
 
 .PHONY: clean
-clean: clean-cortex clean-loki clean-ddapi
+clean: clean-cortex clean-loki clean-ddapi clean-graphql
 
 .PHONY: clean-cortex
 clean-cortex:
@@ -29,8 +29,12 @@ clean-loki:
 clean-ddapi:
 	rm -f ddapi
 
+.PHONY: clean-graphql
+clean-graphql:
+	rm -f graphql-api
+
 .PHONY: build-image
-build-image: build-image-cortex build-image-loki build-image-ddapi
+build-image: build-image-cortex build-image-loki build-image-ddapi build-image-graphql
 
 define get_docker_image_name
 	$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
@@ -64,8 +68,14 @@ build-image-ddapi: DOCKER_IMAGE_NAME = ddapi
 build-image-ddapi:
 	$(call build_docker_image)
 
+.PHONY: build-image-graphql
+build-image-graphql: DOCKERFILE = Dockerfile.graphql
+build-image-graphql: DOCKER_IMAGE_NAME = graphql-api
+build-image-graphql:
+	$(call build_docker_image)
+
 .PHONY: publish
-publish: publish-cortex publish-loki publish-ddapi
+publish: publish-cortex publish-loki publish-ddapi publish-graphql
 
 define publish_docker_image
 	docker push $(call get_docker_image_name)
@@ -86,8 +96,13 @@ publish-ddapi: DOCKER_IMAGE_NAME = ddapi
 publish-ddapi:
 	$(call publish_docker_image)
 
+.PHONY: publish-graphql
+publish-graphql: DOCKER_IMAGE_NAME = graphql-api
+publish-graphql:
+	$(call publish_docker_image)
+
 .PHONY: build
-build: build-cortex build-loki build-ddapi
+build: build-cortex build-loki build-ddapi build-graphql
 
 .PHONY: build-cortex
 build-cortex: cortex-api
@@ -106,6 +121,12 @@ build-ddapi: ddapi
 
 ddapi:
 	go build -o ddapi ./cmd/ddapi/ddapi.go
+
+.PHONY: build-graphql
+build-graphql: graphql-api
+
+graphql-api:
+	go build -o graphql-api ./cmd/graphql/main.go
 
 
 .PHONY: unit-tests
