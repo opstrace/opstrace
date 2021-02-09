@@ -25,7 +25,10 @@ import {
 
 import { SECOND, log } from "@opstrace/utils";
 import { GKECluster, RUNNING, ERROR } from "./types";
+import { generateKubeconfigStringForGkeCluster } from "./util";
 import { ClusterManagerClient } from "@google-cloud/container/build/src/v1";
+import { KubeConfig } from "@kubernetes/client-node";
+import { getKubeConfig } from "@opstrace/kubernetes";
 
 const container = google.container("v1");
 
@@ -272,5 +275,40 @@ export function* ensureGKEDoesNotExist(
         return;
       }
     }
+  }
+}
+
+export async function getGKEKubeconfig(
+  clusterName: string
+): Promise<KubeConfig | undefined> {
+  const gkeCluster = await doesGKEClusterExist({
+    opstraceClusterName: clusterName
+  });
+  if (gkeCluster === false) {
+    log.info(
+      "GKE cluster corresponding to Opstrace cluster '%s' does not seem to exist.",
+      clusterName
+    );
+    return undefined;
+  }
+
+  const kstring = generateKubeconfigStringForGkeCluster(
+    await getGcpProjectId(),
+    gkeCluster
+  );
+
+  // Handle the case where the cluster fails to provision. In this situation we want
+  // to proceed with infrastructure cleanup anyway.
+  try {
+    return getKubeConfig({
+      loadFromCluster: false,
+      kubeconfig: kstring
+    });
+  } catch (e) {
+    log.warning(
+      "Failed to fetch kubeconfig for GKE cluster: %s. Proceeding with infraestructure cleanup.",
+      e.message
+    );
+    return undefined;
   }
 }

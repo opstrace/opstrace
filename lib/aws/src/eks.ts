@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import { EKS, EC2 } from "aws-sdk";
 import { log } from "@opstrace/utils";
 
-import { eksClient, awsPromErrFilter } from "./util";
+import { KubeConfig } from "@kubernetes/client-node";
+
+import { getKubeConfig } from "@opstrace/kubernetes";
+
+import {
+  eksClient,
+  awsPromErrFilter,
+  generateKubeconfigStringForEksCluster
+} from "./util";
 import { AWSApiError } from "./types";
 import { AWSResource } from "./resource";
 
@@ -192,4 +202,43 @@ export async function ensureEKSExists({
 
 export async function destroyEKS(opstraceClusterName: string): Promise<void> {
   return await new EKSRes(opstraceClusterName).teardown();
+}
+
+export async function getEKSKubeconfig(
+  awsRegion: string,
+  clusterName: string
+): Promise<KubeConfig | undefined> {
+  const eksCluster = await doesEKSClusterExist({
+    opstraceClusterName: clusterName
+  });
+  if (eksCluster === false) {
+    log.info(
+      "EKS cluster corresponding to Opstrace cluster '%s' does not seem to exist.",
+      clusterName
+    );
+    return undefined;
+  }
+
+  // This assert statement might help more than doing
+  // `destroyConfig.awsRegion!`.  When we get here this property must not be
+  // `undefined`. With the current code paths it won't be, upon refactoring
+  // this assert statement is hopefully more useful than the exclamation mark.
+  assert(awsRegion);
+
+  const kstring = generateKubeconfigStringForEksCluster(awsRegion, eksCluster);
+
+  // Handle the case where the cluster fails to provision. In this situation we want
+  // to proceed with infrastructure cleanup anyway.
+  try {
+    return getKubeConfig({
+      loadFromCluster: false,
+      kubeconfig: kstring
+    });
+  } catch (e) {
+    log.warning(
+      "Failed to fetch kubeconfig for EKS cluster: %s. Proceeding with infraestructure cleanup.",
+      e.message
+    );
+    return undefined;
+  }
 }

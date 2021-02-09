@@ -13,27 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { strict as assert } from "assert";
 
 import { select, fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
 import createSagaMiddleware from "redux-saga";
 
 import { KubeConfig } from "@kubernetes/client-node";
+import { k8sListNamespacesOrError } from "@opstrace/kubernetes";
 
-import { getKubeConfig, k8sListNamespacesOrError } from "@opstrace/kubernetes";
+import { getGKEKubeconfig } from "@opstrace/gcp";
 
-import {
-  generateKubeconfigStringForGkeCluster,
-  getGcpProjectId,
-  doesGKEClusterExist
-} from "@opstrace/gcp";
-
-import {
-  generateKubeconfigStringForEksCluster,
-  doesEKSClusterExist,
-  setAWSRegion
-} from "@opstrace/aws";
+import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
 import { log, SECOND, retryUponAnyError } from "@opstrace/utils";
 import { CONTROLLER_NAME } from "@opstrace/controller";
@@ -86,90 +76,17 @@ export function setDestroyConfig(c: DestroyConfigInterface): void {
 
 export { destroyConfig };
 
-async function getGKEKubeconfig(
-  destroyConfig: DestroyConfigInterface
-): Promise<KubeConfig | undefined> {
-  const gkeCluster = await doesGKEClusterExist({
-    opstraceClusterName: destroyConfig.clusterName
-  });
-  if (gkeCluster === false) {
-    log.info(
-      "GKE cluster corresponding to Opstrace cluster '%s' does not seem to exist.",
-      destroyConfig.clusterName
-    );
-    return undefined;
-  }
-
-  const kstring = generateKubeconfigStringForGkeCluster(
-    await getGcpProjectId(),
-    gkeCluster
-  );
-
-  // Handle the case where the cluster fails to provision. In this situation we want
-  // to proceed with infrastructure cleanup anyway.
-  try {
-    return getKubeConfig({
-      loadFromCluster: false,
-      kubeconfig: kstring
-    });
-  } catch (e) {
-    log.warning(
-      "Failed to fetch kubeconfig for GKE cluster: %s. Proceeding with infraestructure cleanup.",
-      e.message
-    );
-    return undefined;
-  }
-}
-
-async function getEKSKubeconfig(
-  destroyConfig: DestroyConfigInterface
-): Promise<KubeConfig | undefined> {
-  const eksCluster = await doesEKSClusterExist({
-    opstraceClusterName: destroyConfig.clusterName
-  });
-  if (eksCluster === false) {
-    log.info(
-      "EKS cluster corresponding to Opstrace cluster '%s' does not seem to exist.",
-      destroyConfig.clusterName
-    );
-    return undefined;
-  }
-
-  // This assert statement might help more than doing
-  // `destroyConfig.awsRegion!`.  When we get here this property must not be
-  // `undefined`. With the current code paths it won't be, upon refactoring
-  // this assert statement is hopefully more useful than the exclamation mark.
-  assert(destroyConfig.awsRegion);
-
-  const kstring = generateKubeconfigStringForEksCluster(
-    destroyConfig.awsRegion,
-    eksCluster
-  );
-
-  // Handle the case where the cluster fails to provision. In this situation we want
-  // to proceed with infrastructure cleanup anyway.
-  try {
-    return getKubeConfig({
-      loadFromCluster: false,
-      kubeconfig: kstring
-    });
-  } catch (e) {
-    log.warning(
-      "Failed to fetch kubeconfig for EKS cluster: %s. Proceeding with infraestructure cleanup.",
-      e.message
-    );
-    return undefined;
-  }
-}
-
 async function getKubecfgIfk8sClusterExists(
   destroyConfig: DestroyConfigInterface
 ): Promise<KubeConfig | undefined> {
   switch (destroyConfig.cloudProvider) {
     case "gcp":
-      return getGKEKubeconfig(destroyConfig);
+      return getGKEKubeconfig(destroyConfig.clusterName);
     case "aws":
-      return getEKSKubeconfig(destroyConfig);
+      return getEKSKubeconfig(
+        destroyConfig.awsRegion!,
+        destroyConfig.clusterName
+      );
     default:
       throw Error("must never be here");
   }
