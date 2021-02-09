@@ -225,8 +225,6 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 	}
 	defer resp.Body.Close()
 
-	log.Infof("cortex HTTP response code: %v", resp.StatusCode)
-
 	bodybytes, readerr := ioutil.ReadAll(resp.Body)
 
 	if readerr != nil {
@@ -234,13 +232,12 @@ func (ddcp *DDCortexProxy) postPromWriteRequestAndHandleErrors(w http.ResponseWr
 		return readerr
 	}
 
-	bodytext := string(bodybytes)
-	log.Infof("cortex HTTP response body: %v", bodytext)
-
 	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
 		// Signal to the caller that the write to Cortex was successful.
 		return nil
 	} else {
+		bodytext := string(bodybytes)
+		log.Infof("cortex HTTP response code: %v, HTTP response body: %v", resp.StatusCode, bodytext)
 		// TODO: think about how to translate Cortex error codes into errors
 		// that mean something to the DD agent? For now, forward the error
 		// response as-is.
