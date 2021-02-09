@@ -17,14 +17,21 @@
 import { all, AllEffect } from "redux-saga/effects";
 
 import { KubeConfig } from "@kubernetes/client-node";
-import { createResource } from "@opstrace/kubernetes";
+import { createResource, updateResource } from "@opstrace/kubernetes";
+import { log } from "@opstrace/utils";
 
 import { ControllerResources } from "../resources/controller";
+
+export enum ControllerResourcesDeploymentStrategy {
+  Create = 1,
+  Update
+}
 
 export function* deployControllerResources(config: {
   controllerImage: string;
   opstraceClusterName: string;
   kubeConfig: KubeConfig;
+  deploymentStrategy: ControllerResourcesDeploymentStrategy;
 }): Generator<AllEffect<Promise<void>[]>, void, unknown> {
   const resources = ControllerResources(config)
     .get()
@@ -34,5 +41,25 @@ export function* deployControllerResources(config: {
       return r;
     });
 
-  yield all([resources.map(createResource)]);
+  resources.forEach(r => {
+    log.debug(JSON.stringify(r));
+  });
+
+  switch (config.deploymentStrategy) {
+    case ControllerResourcesDeploymentStrategy.Create: {
+      log.debug("creating controller resources");
+      yield all([resources.map(createResource)]);
+      break;
+    }
+
+    case ControllerResourcesDeploymentStrategy.Update: {
+      log.debug("updating controller resources");
+      yield all([resources.map(updateResource)]);
+      break;
+    }
+
+    default: {
+      throw new Error("invalid controller resource deployment strategy");
+    }
+  }
 }

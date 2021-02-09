@@ -55,7 +55,10 @@ import {
   ControllerConfigType,
   controllerConfigSchema
 } from "@opstrace/controller-config";
-import { deployControllerResources } from "@opstrace/controller";
+import {
+  ControllerResourcesDeploymentStrategy,
+  deployControllerResources
+} from "@opstrace/controller";
 
 import { rootReducer } from "./reducer";
 import { ensureGCPInfraExists } from "./gcp";
@@ -301,7 +304,8 @@ function* createClusterCore() {
   yield call(deployControllerResources, {
     controllerImage: ccfg.controller_image,
     opstraceClusterName: ccfg.cluster_name,
-    kubeConfig
+    kubeConfig: kubeConfig,
+    deploymentStrategy: ControllerResourcesDeploymentStrategy.Create
   });
 
   log.info("starting k8s informers");
