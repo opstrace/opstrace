@@ -39,7 +39,7 @@ import * as cryp from "./crypto";
 import * as ucc from "./ucc";
 import * as util from "./util";
 import * as schemas from "./schemas";
-import { BUILD_INFO } from "./buildinfo";
+import { BUILD_INFO } from "@opstrace/buildinfo";
 
 type PubkeyPemType = string;
 type TenantApiTokensType = Dict<string>;

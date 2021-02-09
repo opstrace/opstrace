@@ -77,6 +77,7 @@
     "build:uninstaller": "yarn workspace @opstrace/uninstaller build",
     "watch:upgrader": "yarn workspace @opstrace/upgrader watch",
     "build:upgrader": "yarn workspace @opstrace/upgrader build",
+    "build:buildinfo": "yarn workspace @opstrace/buildinfo build",
     "watch:cli": "yarn workspace @opstrace/cli watch",
     "build:cli": "yarn workspace @opstrace/cli build",
     "build:ui": "yarn workspace @opstrace/app build",

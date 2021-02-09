@@ -1,0 +1,21 @@
+{
+  "name": "@opstrace/buildinfo",
+  "version": "0.0.0",
+  "description": "Opstrace CLI",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "repository": "https://github.com/opstrace/opstrace.git",
+  "author": "Opstrace, Inc.",
+  "license": "Apache-2.0",
+  "private": true,
+  "bin": {
+    "opstrace": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
+    "clean": "rimraf build .cache tsconfig.tsbuildinfo",
+    "prebuild": "yarn clean",
+    "lint": "eslint . --ext .ts"
+  }
+}

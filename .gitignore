@@ -47,7 +47,7 @@ go/loki-api
 
 tenant-api-token-*
 opstrace_cli_*.log
-packages/cli/src/buildinfo.ts
+packages/buildinfo/src/buildinfo.ts
 
 .idea
 *.iml
