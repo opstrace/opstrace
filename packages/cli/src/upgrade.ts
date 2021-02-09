@@ -15,6 +15,7 @@
  */
 
 import { log } from "@opstrace/utils";
+import { upgradeCluster, setUpgradeConfig } from "@opstrace/upgrader";
 
 import * as cli from "./index";
 import * as util from "./util";
@@ -24,5 +25,27 @@ export async function upgrade(): Promise<void> {
     `About to upgrade cluster ${cli.CLIARGS.clusterName} (${cli.CLIARGS.cloudProvider}).`
   );
 
+  let gcpProjectID: string | undefined;
+  let gcpRegion: string | undefined;
+  if (cli.CLIARGS.cloudProvider == "gcp") {
+    const gcpopts = util.gcpValidateCredFileAndGetDetailOrError();
+    gcpProjectID = gcpopts.projectId;
+    gcpRegion = util.gcpGetClusterRegion();
+  }
+
+  let awsRegion: string | undefined;
+  if (cli.CLIARGS.cloudProvider == "aws") {
+    awsRegion = await util.awsGetClusterRegion();
+  }
+
+  setUpgradeConfig({
+    cloudProvider: cli.CLIARGS.cloudProvider,
+    clusterName: cli.CLIARGS.clusterName,
+    gcpProjectID: gcpProjectID,
+    gcpRegion: gcpRegion,
+    awsRegion: awsRegion
+  });
+
   await util.promptForProceed();
+  await upgradeCluster(util.smErrorLastResort);
 }
