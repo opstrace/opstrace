@@ -18,14 +18,15 @@ Terminal B:
 opstrace/packages/app$ yarn console
 ```
 
-Terminal C:
+Terminal C (requires that a tenant named `tenant-foo` be created):
 ```
 opstrace/go/cmd/graphql$ go build && \
 GRAPHQL_ENDPOINT=http://127.0.0.1:8080/v1/graphql \
 HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret \
 ./graphql \
   --loglevel debug \
-  --listen "127.0.0.1:8989"
+  --listen "127.0.0.1:8989" \
+  --tenantname tenant-foo
 ```
 
 ## Example usage
@@ -48,22 +49,22 @@ type: gcp-service-account
 # gcp-service-account must contain valid json:
 value: |-
   {"json": "goes-here"}
-' | curl -v -XPOST -H "X-Scope-OrgID: tenant-foo" --data-binary @- http://127.0.0.1:8989/api/v1/credentials/
+' | curl -v -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/credentials/
 ```
 
 Get all
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/
+curl -v http://127.0.0.1:8989/api/v1/credentials/
 ```
 
 Get foo
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/foo
+curl -v http://127.0.0.1:8989/api/v1/credentials/foo
 ```
 
 Delete foo
 ```
-curl -v -XDELETE -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/foo
+curl -v -XDELETE http://127.0.0.1:8989/api/v1/credentials/foo
 ```
 
 ### Exporters
@@ -103,20 +104,20 @@ config:
   - proj2
   monitoring.metrics-interval: '5m' # optional
   monitoring.metrics-offset: '0s' # optional
-' | curl -v -XPOST -H "X-Scope-OrgID: tenant-foo" --data-binary @- http://127.0.0.1:8989/api/v1/exporters/
+' | curl -v -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/exporters/
 ```
 
 Get all
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/
+curl -v http://127.0.0.1:8989/api/v1/exporters/
 ```
 
 Get foo
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/foo
+curl -v http://127.0.0.1:8989/api/v1/exporters/foo
 ```
 
 Delete foo
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" -XDELETE http://127.0.0.1:8989/api/v1/exporters/foo
+curl -v -XDELETE http://127.0.0.1:8989/api/v1/exporters/foo
 ```
