@@ -43,6 +43,7 @@ import * as create from "./create";
 import * as destroy from "./destroy";
 import * as list from "./list";
 import * as status from "./status";
+import * as upgrade from "./upgrade";
 import * as util from "./util";
 import { BUILD_INFO } from "./buildinfo";
 
@@ -93,6 +94,11 @@ async function main() {
 
   if (CLIARGS.command == "status") {
     await status.status();
+    throw new ExitSuccess();
+  }
+
+  if (CLIARGS.command == "upgrade") {
+    await upgrade.upgrade();
     throw new ExitSuccess();
   }
 
@@ -151,6 +157,9 @@ function parseCmdlineArgs() {
   const parserStatus = subparsers.add_parser("status", {
     help: "Check the status of an Opstrace cluster (experimental, no promises)."
   });
+  const parserUpgrade = subparsers.add_parser("upgrade", {
+    help: "Upgrade an existing Opstrace cluster."
+  });
 
   // The --log-level switch must work when not using a sub command, but also
   // for each sub command.
@@ -159,6 +168,7 @@ function parseCmdlineArgs() {
     parserDestroy,
     parserList,
     parserStatus,
+    parserUpgrade,
     mainParser
   ]) {
     p.add_argument("--log-level", {
@@ -171,7 +181,13 @@ function parseCmdlineArgs() {
     });
   }
 
-  for (const p of [parserCreate, parserDestroy, parserList, parserStatus]) {
+  for (const p of [
+    parserCreate,
+    parserDestroy,
+    parserList,
+    parserStatus,
+    parserUpgrade
+  ]) {
     p.add_argument("cloudProvider", {
       help: "The cloud provider to act on (aws, gcp).", // potentially make this a little more specific depending on `create`, `list`, ...
       type: "str",
@@ -180,8 +196,8 @@ function parseCmdlineArgs() {
     });
   }
 
-  // add cluster name arg only for `create` and `destroy`
-  for (const p of [parserCreate, parserDestroy, parserStatus]) {
+  // add cluster name arg
+  for (const p of [parserCreate, parserDestroy, parserStatus, parserUpgrade]) {
     p.add_argument("clusterName", {
       help:
         "The Opstrace cluster name ([a-z0-9-_], no more than 13 characters).",
@@ -202,7 +218,7 @@ function parseCmdlineArgs() {
   }
 
   // Add --yes to relevant parsers.
-  for (const p of [parserCreate, parserDestroy]) {
+  for (const p of [parserCreate, parserDestroy, parserUpgrade]) {
     // only long option to keep cmd expressive. apt-get has `-y, --yes,
     // --assume-yes`, documented with " Automatic yes to prompts; assume "yes" as
     // answer to all prompts and run non-interactively."
