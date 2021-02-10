@@ -133,9 +133,9 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	// Dev mode: log some details
-	// apiKey := r.URL.Query().Get("api_key")
-	// log.Infof("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
+	// Log detail on debug level. In particular the request body.
+	apiKey := r.URL.Query().Get("api_key")
+	log.Debugf("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
 
 	promTimeSeriesFragments, terr := TranslateDDSeriesJSON(bodybytes)
 	if terr != nil {
