@@ -31,11 +31,14 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/opstrace/opstrace/go/pkg/graphql"
+	"github.com/opstrace/opstrace/go/pkg/middleware"
 )
 
 var (
-	credentialClient graphql.CredentialAccess
-	exporterClient   graphql.ExporterAccess
+	credentialAccess         graphql.CredentialAccess
+	exporterAccess           graphql.ExporterAccess
+	tenantName               string
+	disableAPIAuthentication bool
 )
 
 func main() {
@@ -43,8 +46,9 @@ func main() {
 	flag.StringVar(&loglevel, "loglevel", "info", "error|info|debug")
 	var listenAddress string
 	flag.StringVar(&listenAddress, "listen", "", "")
-	var tenantName string
+
 	flag.StringVar(&tenantName, "tenantname", "", "")
+	flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
 
 	flag.Parse()
 
@@ -81,8 +85,12 @@ func main() {
 	}
 	log.Infof("tenant name: %s", tenantName)
 
-	credentialClient = graphql.NewCredentialAccess(tenantName, graphqlEndpointURL, graphqlSecret)
-	exporterClient = graphql.NewExporterAccess(tenantName, graphqlEndpointURL, graphqlSecret)
+	credentialAccess = graphql.NewCredentialAccess(tenantName, graphqlEndpointURL, graphqlSecret)
+	exporterAccess = graphql.NewExporterAccess(tenantName, graphqlEndpointURL, graphqlSecret)
+
+	if !disableAPIAuthentication {
+		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+	}
 
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
@@ -107,14 +115,26 @@ func setupAPI(
 	getFunc func(http.ResponseWriter, *http.Request),
 	deleteFunc func(http.ResponseWriter, *http.Request),
 ) {
-	router.HandleFunc("", listFunc).Methods("GET")
-	router.HandleFunc("/", listFunc).Methods("GET")
-	router.HandleFunc("", writeFunc).Methods("POST")
-	router.HandleFunc("/", writeFunc).Methods("POST")
-	router.HandleFunc("/{name}", getFunc).Methods("GET")
-	router.HandleFunc("/{name}/", getFunc).Methods("GET")
-	router.HandleFunc("/{name}", deleteFunc).Methods("DELETE")
-	router.HandleFunc("/{name}/", deleteFunc).Methods("DELETE")
+	// Ensure that each call is authenticated before proceeding
+	router.HandleFunc("", authenticateTenantThenCall(listFunc)).Methods("GET")
+	router.HandleFunc("/", authenticateTenantThenCall(listFunc)).Methods("GET")
+	router.HandleFunc("", authenticateTenantThenCall(writeFunc)).Methods("POST")
+	router.HandleFunc("/", authenticateTenantThenCall(writeFunc)).Methods("POST")
+	router.HandleFunc("/{name}", authenticateTenantThenCall(getFunc)).Methods("GET")
+	router.HandleFunc("/{name}/", authenticateTenantThenCall(getFunc)).Methods("GET")
+	router.HandleFunc("/{name}", authenticateTenantThenCall(deleteFunc)).Methods("DELETE")
+	router.HandleFunc("/{name}/", authenticateTenantThenCall(deleteFunc)).Methods("DELETE")
+}
+
+// Wraps `f` in a preceding check that authenticates the request headers for the expected tenant name.
+// The check is skipped if `disableAPIAuthentication` is true.
+func authenticateTenantThenCall(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !disableAPIAuthentication && !middleware.DataAPIRequestAuthenticator(w, r, tenantName) {
+			return
+		}
+		f(w, r)
+	}
 }
 
 // Information about a credential. Custom type which omits the tenant field.
@@ -128,7 +148,7 @@ type CredentialInfo struct {
 }
 
 func listCredentials(w http.ResponseWriter, r *http.Request) {
-	resp, err := credentialClient.List()
+	resp, err := credentialAccess.List()
 	if err != nil {
 		log.Warnf("Listing credentials failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
@@ -162,7 +182,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 
 	// Collect list of existing names so that we can decide between insert vs update
 	existingTypes := make(map[string]string)
-	resp, err := credentialClient.List()
+	resp, err := credentialAccess.List()
 	if err != nil {
 		log.Warnf("Listing credentials failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
@@ -191,7 +211,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 		}
 		name := graphql.String(yamlCredential.Name)
 		credType := graphql.String(yamlCredential.Type)
-		value, err := validateCredValue(yamlCredential.Name, yamlCredential.Type, yamlCredential.Value)
+		value, err := convertCredValue(yamlCredential.Name, yamlCredential.Type, yamlCredential.Value)
 		if err != nil {
 			log.Debugf("Invalid credential value format: %s", err)
 			http.Error(w, fmt.Sprintf("Credential format validation failed: %s", err), http.StatusBadRequest)
@@ -233,7 +253,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing credentials: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		err := credentialClient.Insert(inserts)
+		err := credentialAccess.Insert(inserts)
 		if err != nil {
 			log.Warnf("Insert: %d credentials failed: %s", len(inserts), err)
 			http.Error(w, fmt.Sprintf("Creating %d credentials failed: %s", len(inserts), err), http.StatusInternalServerError)
@@ -242,7 +262,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			err := credentialClient.Update(update)
+			err := credentialAccess.Update(update)
 			if err != nil {
 				log.Warnf("Update: Credential %s failed: %s", update.Name, err)
 				http.Error(w, fmt.Sprintf("Updating credential %s failed: %s", update.Name, err), http.StatusInternalServerError)
@@ -257,61 +277,11 @@ type AWSCredentialValue struct {
 	AwsSecretAccessKey string `json:"AWS_SECRET_ACCESS_KEY"`
 }
 
-func validateCredValue(credName string, credType string, credValue interface{}) (*graphql.Json, error) {
-	switch credType {
-	case "aws-key":
-		// Expect regular YAML fields (not as a nested string)
-		errfmt := "expected %s credential '%s' value to contain YAML string fields: " +
-			"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (%s)"
-		switch v := credValue.(type) {
-		case map[interface{}]interface{}:
-			if len(v) != 2 {
-				return nil, fmt.Errorf(errfmt, credType, credName, "wrong size")
-			}
-			key, keyok := v["AWS_ACCESS_KEY_ID"]
-			val, valok := v["AWS_SECRET_ACCESS_KEY"]
-			if len(v) != 2 || !keyok || !valok {
-				return nil, fmt.Errorf(errfmt, credType, credName, "missing fields")
-			}
-			keystr, keyok := key.(string)
-			valstr, valok := val.(string)
-			if !keyok || !valok {
-				return nil, fmt.Errorf(errfmt, credType, credName, "non-string fields")
-			}
-			json, err := json.Marshal(AWSCredentialValue{
-				AwsAccessKeyID:     keystr,
-				AwsSecretAccessKey: valstr,
-			})
-			if err != nil {
-				return nil, fmt.Errorf(errfmt, credType, credName, "failed to reserialize as JSON")
-			}
-			gjson := graphql.Json(json)
-			return &gjson, nil
-		default:
-			return nil, fmt.Errorf(errfmt, credType, credName, "expected a map")
-		}
-	case "gcp-service-account":
-		// Expect string containing a valid JSON payload
-		switch v := credValue.(type) {
-		case string:
-			if !json.Valid([]byte(v)) {
-				return nil, fmt.Errorf("%s credential '%s' value is not a valid JSON string", credType, credName)
-			}
-			gjson := graphql.Json(v)
-			return &gjson, nil
-		default:
-			return nil, fmt.Errorf("expected %s credential '%s' value to be a JSON string", credType, credName)
-		}
-	default:
-		return nil, fmt.Errorf("unsupported credential type: %s (expected aws-key or gcp-service-account)", credType)
-	}
-}
-
 func getCredential(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Getting credential: %s", name)
 
-	resp, err := credentialClient.Get(name)
+	resp, err := credentialAccess.Get(name)
 	if err != nil {
 		log.Warnf("Get: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Getting credential failed: %s", err), http.StatusInternalServerError)
@@ -336,7 +306,7 @@ func deleteCredential(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Deleting credential: %s", name)
 
-	resp, err := credentialClient.Delete(name)
+	resp, err := credentialAccess.Delete(name)
 	if err != nil {
 		log.Warnf("Delete: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Deleting credential failed: %s", err), http.StatusInternalServerError)
@@ -363,7 +333,7 @@ type ExporterInfo struct {
 }
 
 func listExporters(w http.ResponseWriter, r *http.Request) {
-	resp, err := exporterClient.List()
+	resp, err := exporterAccess.List()
 	if err != nil {
 		log.Warnf("Listing exporters failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
@@ -407,7 +377,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 
 	// Collect list of existing names so that we can decide between insert vs update
 	existingTypes := make(map[string]string)
-	resp, err := exporterClient.List()
+	resp, err := exporterAccess.List()
 	if err != nil {
 		log.Warnf("Listing exporters failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
@@ -423,24 +393,49 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 	var updates []graphql.UpdateExporterVariables
 	for {
 		var yamlExporter Exporter
-		err := decoder.Decode(&yamlExporter)
-		if err != nil {
+		if err := decoder.Decode(&yamlExporter); err != nil {
 			if err != io.EOF {
-				log.Debugf("Decoding exporter input at index=%d failed: %s", len(inserts)+len(updates), err)
-				http.Error(w, fmt.Sprintf(
-					"Decoding exporter input at index=%d failed: %s", len(inserts)+len(updates), err,
-				), http.StatusBadRequest)
+				msg := fmt.Sprintf("Decoding exporter input at index=%d failed: %s", len(inserts)+len(updates), err)
+				log.Debug(msg)
+				http.Error(w, msg, http.StatusBadRequest)
 				return
 			}
 			break
 		}
-		name := graphql.String(yamlExporter.Name)
+
 		var credential *graphql.String
 		if yamlExporter.Credential == "" {
+			if err := validateExporterTypes(yamlExporter.Type, nil); err != nil {
+				msg := fmt.Sprintf("Invalid exporter input %s: %s", yamlExporter.Name, err)
+				log.Debug(msg)
+				http.Error(w, msg, http.StatusBadRequest)
+				return
+			}
 			credential = nil
 		} else {
-			// TODO could validate that the referenced credential has the correct type for this exporter
-			// for example, require that cloudwatch exporters are configured with aws-key credentials
+			// Check that the credential exists and a compatible type.
+			// If the credential didn't exist, then the graphql insert would fail anyway due to a missing relation,
+			// but type mismatches are not validated by graphql.
+			cred, err := credentialAccess.Get(yamlExporter.Credential)
+			if err != nil {
+				msg := fmt.Sprintf(
+					"Failed to read credential %s referenced in new exporter %s",
+					yamlExporter.Credential, yamlExporter.Name,
+				)
+				log.Debug(msg)
+				http.Error(w, msg, http.StatusBadRequest)
+				return
+			} else if cred == nil {
+				msg := fmt.Sprintf("Missing credential %s referenced in exporter %s", yamlExporter.Credential, yamlExporter.Name)
+				log.Debug(msg)
+				http.Error(w, msg, http.StatusBadRequest)
+				return
+			} else if err := validateExporterTypes(yamlExporter.Type, &cred.CredentialByPk.Type); err != nil {
+				msg := fmt.Sprintf("Invalid exporter input %s: %s", yamlExporter.Name, err)
+				log.Debug(msg)
+				http.Error(w, msg, http.StatusBadRequest)
+				return
+			}
 			gcredential := graphql.String(yamlExporter.Credential)
 			credential = &gcredential
 		}
@@ -474,6 +469,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		name := graphql.String(yamlExporter.Name)
 		if existingType, ok := existingTypes[yamlExporter.Name]; ok {
 			// Explicitly check and complain if the user tries to change the exporter type
 			if yamlExporter.Type != "" && existingType != yamlExporter.Type {
@@ -513,8 +509,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing exporters: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		err := exporterClient.Insert(inserts)
-		if err != nil {
+		if err := exporterAccess.Insert(inserts); err != nil {
 			log.Warnf("Insert: %d exporters failed: %s", len(inserts), err)
 			http.Error(w, fmt.Sprintf("Creating %d exporters failed: %s", len(inserts), err), http.StatusInternalServerError)
 			return
@@ -522,8 +517,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			err := exporterClient.Update(update)
-			if err != nil {
+			if err := exporterAccess.Update(update); err != nil {
 				log.Warnf("Update: Exporter %s failed: %s", update.Name, err)
 				http.Error(w, fmt.Sprintf("Updating exporter %s failed: %s", update.Name, err), http.StatusInternalServerError)
 				return
@@ -535,7 +529,6 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 // Searches through the provided object tree for any maps with interface keys (from YAML),
 // and converts those keys to strings (required for JSON).
 func recurseMapStringKeys(in interface{}) (interface{}, error) {
-	// TODO convert to map[string]interface{}
 	switch inType := in.(type) {
 	case map[interface{}]interface{}: // yaml type for maps. needs string keys to work with JSON
 		// Ensure the map keys are converted, RECURSE into values to find nested maps
@@ -572,7 +565,7 @@ func getExporter(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Getting exporter: %s", name)
 
-	resp, err := exporterClient.Get(name)
+	resp, err := exporterAccess.Get(name)
 	if err != nil {
 		log.Warnf("Get: Exporter %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Getting exporter failed: %s", err), http.StatusInternalServerError)
@@ -585,8 +578,7 @@ func getExporter(w http.ResponseWriter, r *http.Request) {
 	}
 
 	configJSON := make(map[string]interface{})
-	err = json.Unmarshal([]byte(resp.ExporterByPk.Config), &configJSON)
-	if err != nil {
+	if err = json.Unmarshal([]byte(resp.ExporterByPk.Config), &configJSON); err != nil {
 		// give up and pass-through the json
 		log.Warnf(
 			"Failed to decode JSON config for exporter %s (err: %s): %s",
@@ -610,7 +602,7 @@ func deleteExporter(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Deleting exporter: %s", name)
 
-	resp, err := exporterClient.Delete(name)
+	resp, err := exporterAccess.Delete(name)
 	if err != nil {
 		log.Warnf("Delete: Exporter %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Deleting exporter failed: %s", err), http.StatusInternalServerError)
@@ -629,6 +621,5 @@ func deleteExporter(w http.ResponseWriter, r *http.Request) {
 // Returns a string representation of the current time in UTC, suitable for passing to Hasura as a timestamptz
 // See also https://hasura.io/blog/postgres-date-time-data-types-on-graphql-fd926e86ee87/
 func nowTimestamp() graphql.Timestamptz {
-	// TODO see if RFC3339 is accepted
 	return graphql.Timestamptz(time.Now().Format(time.RFC3339))
 }

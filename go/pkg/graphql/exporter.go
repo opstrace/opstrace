@@ -15,22 +15,18 @@
 package graphql
 
 import (
-	"encoding/json"
-	"net/http"
 	"net/url"
 )
 
 type ExporterAccess struct {
-	tenant        String
-	client        *Client
-	graphqlSecret string
+	tenant String
+	access *graphqlAccess
 }
 
 func NewExporterAccess(tenant string, graphqlURL *url.URL, graphqlSecret string) ExporterAccess {
 	return ExporterAccess{
 		String(tenant),
-		NewClient(graphqlURL.String()),
-		graphqlSecret,
+		newGraphqlAccess(graphqlURL, graphqlSecret),
 	}
 }
 
@@ -49,19 +45,13 @@ type FixedGetExportersResponse struct {
 }
 
 func (c *ExporterAccess) List() (*FixedGetExportersResponse, error) {
-	req, err := NewGetExportersRequest(c.client.Url, &GetExportersVariables{Tenant: c.tenant})
-	if err != nil {
-		return nil, err
-	}
-	c.addSecret(req.Request)
-
-	resp, err := execute(c.client.Client, req.Request)
+	req, err := NewGetExportersRequest(c.access.URL, &GetExportersVariables{Tenant: c.tenant})
 	if err != nil {
 		return nil, err
 	}
 
 	var result FixedGetExportersResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
+	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -82,24 +72,14 @@ type FixedGetExporterResponse struct {
 }
 
 func (c *ExporterAccess) Get(name string) (*FixedGetExporterResponse, error) {
-	req, err := NewGetExporterRequest(c.client.Url, &GetExporterVariables{Tenant: c.tenant, Name: String(name)})
-	if err != nil {
-		return nil, err
-	}
-	c.addSecret(req.Request)
-
-	resp, err := execute(c.client.Client, req.Request)
+	req, err := NewGetExporterRequest(c.access.URL, &GetExporterVariables{Tenant: c.tenant, Name: String(name)})
 	if err != nil {
 		return nil, err
 	}
 
 	var result FixedGetExporterResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
+	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
-	}
-	if result.ExporterByPk.Name == "" {
-		// Not found
-		return nil, nil
 	}
 	return &result, nil
 }
@@ -114,20 +94,13 @@ type FixedDeleteExporterResponse struct {
 }
 
 func (c *ExporterAccess) Delete(name string) (*FixedDeleteExporterResponse, error) {
-	req, err := NewDeleteExporterRequest(c.client.Url, &DeleteExporterVariables{Tenant: c.tenant, Name: String(name)})
-	if err != nil {
-		return nil, err
-	}
-	c.addSecret(req.Request)
-
-	resp, err := execute(c.client.Client, req.Request)
+	req, err := NewDeleteExporterRequest(c.access.URL, &DeleteExporterVariables{Tenant: c.tenant, Name: String(name)})
 	if err != nil {
 		return nil, err
 	}
 
-	// Use custom type to deserialize since the generated one is broken
 	var result FixedDeleteExporterResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
+	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
 	if result.DeleteExporterByPk.Name == "" {
@@ -146,14 +119,13 @@ func (c *ExporterAccess) Insert(inserts []ExporterInsertInput) error {
 		insertsWithTenant = append(insertsWithTenant, insert)
 	}
 
-	req, err := NewCreateExportersRequest(c.client.Url, &CreateExportersVariables{Exporters: &insertsWithTenant})
+	req, err := NewCreateExportersRequest(c.access.URL, &CreateExportersVariables{Exporters: &insertsWithTenant})
 	if err != nil {
 		return err
 	}
-	c.addSecret(req.Request)
 
-	_, err = req.Execute(c.client.Client)
-	return err
+	var result CreateExportersResponse
+	return c.access.Execute(req.Request, &result)
 }
 
 // Update updates an existing exporter, returns an error if a exporter of the same tenant/name doesn't exist.
@@ -161,19 +133,11 @@ func (c *ExporterAccess) Update(update UpdateExporterVariables) error {
 	// Ensure the update has the correct tenant name
 	update.Tenant = c.tenant
 
-	req, err := NewUpdateExporterRequest(c.client.Url, &update)
+	req, err := NewUpdateExporterRequest(c.access.URL, &update)
 	if err != nil {
 		return err
 	}
-	c.addSecret(req.Request)
 
-	_, err = req.Execute(c.client.Client)
-	return err
-}
-
-// addSecret adds the required HTTP header for talking to the Hasura graphql server.
-func (c *ExporterAccess) addSecret(req *http.Request) {
-	if c.graphqlSecret != "" {
-		req.Header.Add("x-hasura-admin-secret", c.graphqlSecret)
-	}
+	var result UpdateExporterResponse
+	return c.access.Execute(req.Request, &result)
 }

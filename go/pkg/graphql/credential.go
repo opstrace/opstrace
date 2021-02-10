@@ -15,22 +15,18 @@
 package graphql
 
 import (
-	"encoding/json"
-	"net/http"
 	"net/url"
 )
 
 type CredentialAccess struct {
-	tenant        String
-	client        *Client
-	graphqlSecret string
+	tenant String
+	access *graphqlAccess
 }
 
 func NewCredentialAccess(tenant string, graphqlURL *url.URL, graphqlSecret string) CredentialAccess {
 	return CredentialAccess{
 		String(tenant),
-		NewClient(graphqlURL.String()),
-		graphqlSecret,
+		newGraphqlAccess(graphqlURL, graphqlSecret),
 	}
 }
 
@@ -41,25 +37,19 @@ type FixedGetCredentialsResponse struct {
 		Tenant    string `json:"Tenant"`
 		Name      string `json:"Name"`
 		Type      string `json:"Type"`
-		CreatedAt string `json:"Created_At"`
-		UpdatedAt string `json:"Updated_At"`
+		CreatedAt string `json:"Created_At"` // fix missing underscore
+		UpdatedAt string `json:"Updated_At"` // fix missing underscore
 	} `json:"Credential"`
 }
 
 func (c *CredentialAccess) List() (*FixedGetCredentialsResponse, error) {
-	req, err := NewGetCredentialsRequest(c.client.Url, &GetCredentialsVariables{Tenant: c.tenant})
-	if err != nil {
-		return nil, err
-	}
-	c.addSecret(req.Request)
-
-	resp, err := execute(c.client.Client, req.Request)
+	req, err := NewGetCredentialsRequest(c.access.URL, &GetCredentialsVariables{Tenant: c.tenant})
 	if err != nil {
 		return nil, err
 	}
 
 	var result FixedGetCredentialsResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
+	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -72,25 +62,19 @@ type FixedGetCredentialResponse struct {
 		Tenant    string `json:"Tenant"`
 		Name      string `json:"Name"`
 		Type      string `json:"Type"`
-		CreatedAt string `json:"Created_At"`
-		UpdatedAt string `json:"Updated_At"`
-	} `json:"Credential_By_Pk"`
+		CreatedAt string `json:"Created_At"` // fix missing underscore
+		UpdatedAt string `json:"Updated_At"` // fix missing underscore
+	} `json:"Credential_By_Pk"` // fix missing underscore
 }
 
 func (c *CredentialAccess) Get(name string) (*FixedGetCredentialResponse, error) {
-	req, err := NewGetCredentialRequest(c.client.Url, &GetCredentialVariables{Tenant: c.tenant, Name: String(name)})
-	if err != nil {
-		return nil, err
-	}
-	c.addSecret(req.Request)
-
-	resp, err := execute(c.client.Client, req.Request)
+	req, err := NewGetCredentialRequest(c.access.URL, &GetCredentialVariables{Tenant: c.tenant, Name: String(name)})
 	if err != nil {
 		return nil, err
 	}
 
 	var result FixedGetCredentialResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
+	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
 	if result.CredentialByPk.Name == "" {
@@ -106,24 +90,18 @@ type FixedDeleteCredentialResponse struct {
 	DeleteCredentialByPk struct {
 		Tenant string `json:"Tenant"`
 		Name   string `json:"Name"`
-	} `json:"Delete_Credential_By_Pk"`
+	} `json:"Delete_Credential_By_Pk"` // fix missing underscore
 }
 
 func (c *CredentialAccess) Delete(name string) (*FixedDeleteCredentialResponse, error) {
-	req, err := NewDeleteCredentialRequest(c.client.Url, &DeleteCredentialVariables{Tenant: c.tenant, Name: String(name)})
-	if err != nil {
-		return nil, err
-	}
-	c.addSecret(req.Request)
-
-	resp, err := execute(c.client.Client, req.Request)
+	req, err := NewDeleteCredentialRequest(c.access.URL, &DeleteCredentialVariables{Tenant: c.tenant, Name: String(name)})
 	if err != nil {
 		return nil, err
 	}
 
 	// Use custom type to deserialize since the generated one is broken
 	var result FixedDeleteCredentialResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
+	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
 	if result.DeleteCredentialByPk.Name == "" {
@@ -142,14 +120,13 @@ func (c *CredentialAccess) Insert(inserts []CredentialInsertInput) error {
 		insertsWithTenant = append(insertsWithTenant, insert)
 	}
 
-	req, err := NewCreateCredentialsRequest(c.client.Url, &CreateCredentialsVariables{Credentials: &insertsWithTenant})
+	req, err := NewCreateCredentialsRequest(c.access.URL, &CreateCredentialsVariables{Credentials: &insertsWithTenant})
 	if err != nil {
 		return err
 	}
-	c.addSecret(req.Request)
 
-	_, err = req.Execute(c.client.Client)
-	return err
+	var result CreateCredentialsResponse
+	return c.access.Execute(req.Request, &result)
 }
 
 // Update updates an existing credential, returns an error if a credential of the same tenant/name doesn't exist.
@@ -157,19 +134,11 @@ func (c *CredentialAccess) Update(update UpdateCredentialVariables) error {
 	// Ensure the update has the correct tenant name
 	update.Tenant = c.tenant
 
-	req, err := NewUpdateCredentialRequest(c.client.Url, &update)
+	req, err := NewUpdateCredentialRequest(c.access.URL, &update)
 	if err != nil {
 		return err
 	}
-	c.addSecret(req.Request)
 
-	_, err = req.Execute(c.client.Client)
-	return err
-}
-
-// addSecret adds the required HTTP header for talking to the Hasura graphql server.
-func (c *CredentialAccess) addSecret(req *http.Request) {
-	if c.graphqlSecret != "" {
-		req.Header.Add("x-hasura-admin-secret", c.graphqlSecret)
-	}
+	var result UpdateCredentialResponse
+	return c.access.Execute(req.Request, &result)
 }
