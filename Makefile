@@ -287,7 +287,7 @@ check-license-headers:
 		-not -path '*/.npm/*' \
 		-not -path './build/*' \
 		-type d -exec bash -c \
-		$$'echo "dir: {}"; shopt -s extglob \n addlicense -c "Opstrace, Inc." -l apache {}/@(*.ts|*.tsx|*.json|*.go|*.css)' \;
+		$$'echo "dir: {}"; shopt -s extglob \n addlicense -c "Opstrace, Inc." -y "2019-2021" -l apache {}/@(*.ts|*.tsx|*.json|*.go|*.css)' \;
 	# Show the changes. This returns non-zero when there is a diff.
 	git --no-pager diff --exit-code
 
