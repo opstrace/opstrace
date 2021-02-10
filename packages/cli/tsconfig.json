@@ -13,6 +13,8 @@
     { "path": "../config" },
     { "path": "../tenants" },
     { "path": "../installer" },
-    { "path": "../uninstaller" }
+    { "path": "../uninstaller" },
+    { "path": "../buildinfo" },
+    { "path": "../upgrader" }
   ]
 }

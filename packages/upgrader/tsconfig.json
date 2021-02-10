@@ -11,6 +11,7 @@
     { "path": "../../lib/dns" },
     { "path": "../../lib/kubernetes" },
     { "path": "../config" },
-    { "path": "../controller" }
+    { "path": "../controller" },
+    { "path": "../buildinfo" }
   ]
 }
