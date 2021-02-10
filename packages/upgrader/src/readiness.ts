@@ -29,7 +29,6 @@ import { State } from "./reducer";
 
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* waitForControllerDeployment() {
-
   // Exit if controller deployment does not exist.
   const state: State = yield select();
   const { Deployments } = state.kubernetes.cluster;
@@ -70,6 +69,8 @@ export function* waitForControllerDeployment() {
   //    }
   //  },
 
+  const previousGeneration = cd.spec.status!.observedGeneration!;
+
   while (true) {
     const state: State = yield select();
     const { Deployments } = state.kubernetes.cluster;
@@ -95,6 +96,12 @@ export function* waitForControllerDeployment() {
 
     if (cd.spec.status.conditions === undefined) {
       log.info("controller deployment: no condition updates yet, wait");
+      yield delay(3000);
+      continue;
+    }
+
+    if (cd.spec.status!.observedGeneration! === previousGeneration) {
+      log.debug("controller deployment as not started the rollout");
       yield delay(3000);
       continue;
     }
