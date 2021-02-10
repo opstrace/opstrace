@@ -1,10 +1,8 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "rootDir": "src",
-        "outDir": "build"
-    },
-    "references": [
-        { "path": "../utils" }
-      ]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "build"
+  },
+  "references": [{ "path": "../utils" }, { "path": "../kubernetes" }]
 }
