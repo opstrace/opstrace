@@ -26,6 +26,8 @@ import {
 } from "@opstrace/kubernetes";
 
 import { CONTROLLER_NAME } from "@opstrace/controller-config";
+import { handleFailedCertificate } from "./certificates";
+
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* waitForControllerDeployment() {
   while (true) {
@@ -155,7 +157,8 @@ export function* installationProgressReporter() {
       DaemonSets,
       Deployments,
       StatefulSets,
-      Certificates
+      Certificates,
+      CertificateRequests
     } = state.kubernetes.cluster;
 
     if (
@@ -222,6 +225,22 @@ export function* installationProgressReporter() {
     ) {
       break;
     }
+
+    //
+    // Note: workaround for https://github.com/opstrace/opstrace/issue/151 until
+    // https://github.com/jetstack/cert-manager/issues/3594 is resolved.
+    //
+    // If the https-cert certificate is in the failed state then delete it. The
+    // controller will recreate the resource thereby triggering a restart of the
+    // certificate request process.
+    //
+    // We also delete the CertificateRequest otherwise cert-manager will see that
+    // the certificate already has a request in flight and will not recreate it.
+    //
+    handleFailedCertificate(
+      Certificates.resources,
+      CertificateRequests.resources
+    );
 
     yield delay(5 * SECOND);
   }
