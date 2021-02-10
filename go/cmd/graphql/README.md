@@ -26,7 +26,8 @@ HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret \
 ./graphql \
   --loglevel debug \
   --listen "127.0.0.1:8989" \
-  --tenantname tenant-foo
+  --tenantname tenant-foo \
+  --disable-api-authn
 ```
 
 ## Example usage
@@ -35,7 +36,7 @@ The credential and exporter APIs are nearly identical, but with different payloa
 
 ### Credentials
 
-Upsert
+Upsert (will fail if types are unsupported or invalid format)
 ```
 echo 'name: foo
 type: aws-key
@@ -69,7 +70,7 @@ curl -v -XDELETE http://127.0.0.1:8989/api/v1/credentials/foo
 
 ### Exporters
 
-Upsert (will fail if referenced `credential`s aren't present)
+Upsert (will fail if referenced `credential`s aren't present or are incompatible types)
 ```
 echo 'name: foo
 type: cloudwatch

@@ -126,7 +126,7 @@ ddapi:
 build-graphql: graphql-api
 
 graphql-api:
-	go build -o graphql-api ./cmd/graphql/main.go
+	go build -o graphql-api ./cmd/graphql/
 
 
 .PHONY: unit-tests
