@@ -41,10 +41,6 @@ export function* deployControllerResources(config: {
       return r;
     });
 
-  resources.forEach(r => {
-    log.debug(JSON.stringify(r));
-  });
-
   switch (config.deploymentStrategy) {
     case ControllerResourcesDeploymentStrategy.Create: {
       log.debug("creating controller resources");
