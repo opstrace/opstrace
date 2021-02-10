@@ -84,6 +84,7 @@ func main() {
 
 	// Expose a Prometheus scrape endpoint.
 	router.Handle("/metrics", promhttp.Handler())
+	router.Use(middleware.PrometheusMetrics("dd_api"))
 
 	log.Infof("starting HTTP server on %s", listenAddress)
 	log.Fatal(http.ListenAndServe(listenAddress, router))
