@@ -165,7 +165,7 @@ function* upgradeClusterAttemptWithTimeout() {
 function* rootTaskUpgrade() {
   // Note: a longish delay between attempts with the intention to give upgrade
   // attempts some time to take effect holistically (sometimes, that is our
-  // impression, deletion of an individual resource might be confirmed
+  // impression, upgrade of an individual resource might be confirmed
   // synchronously, but after all still takes a while to be properly reflected
   // across all views).
   yield call(retryUponAnyError, {
