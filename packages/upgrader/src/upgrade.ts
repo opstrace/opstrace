@@ -28,8 +28,7 @@ import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 import { State } from "./reducer";
 
 //
-// Set the controller deployment image version to the one defined in
-//
+// Set the controller deployment image version to the one defined in buildinfo.
 //
 ///eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* upgradeControllerDeployment(config: {
