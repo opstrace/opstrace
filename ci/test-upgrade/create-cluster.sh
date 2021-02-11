@@ -11,7 +11,8 @@ source secrets/aws-dev-svc-acc-env.sh
 # Run opstrace installer locally. The installer will deploy the controller into
 # the cluster and wait until deployments are 'ready'.
 echo "--- creating cluster"
-cat ci/cluster-config.yaml | ./from/opstrace create ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
+./from/opstrace create ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
+    --cluster-config ci/cluster-config.yaml \
     --log-level=debug \
     --yes
 
