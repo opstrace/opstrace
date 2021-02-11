@@ -28,6 +28,7 @@ module.exports = {
         "chore", // small routine tasks, very localized refactors
         "ci", // change to automated CI pipeline
         "cli", // change to the cluster management CLI (create, destroy, ..., )
+        "config", // change to config api project
         "cortex", // change to cortex (config change for example)
         "go", // change to golang modules/projects (unit test setup, makefile, etc)
         "ddapi", // change to dd api project
@@ -36,7 +37,6 @@ module.exports = {
         "docs", // any documentation change
         "feat", // user-facing feature addition. Makes most sense in a semver world which we are not yet in.
         "fix", // fix for user-facing issue in the opstrace system (fix user-facing bug). Makes most sense in a semver world which we are not yet in.
-        "graphql", // change to graphql api project
         "installer", // change in installer (cluster creation)
         "looker", // change to looker project
         "loki", // change to loki (config change for example)

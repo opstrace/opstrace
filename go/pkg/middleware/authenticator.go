@@ -32,6 +32,27 @@ import (
 // for multiple public keys, each identified by a key id.
 var authtokenVerificationPubKey *rsa.PublicKey
 
+// Verifies that the tenant name embedded in the request's Authorization header is valid and matches the
+// expectedTenantName and returns true, or writes a 401 error to the response and returns false if the
+// tenant was invalid, not found, or didn't match expectedTenantName.
+func DataAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedTenantName string) bool {
+	authTokenUnverified, ok := getAPIAuthTokenUnverified(w, r)
+	if !ok {
+		return false
+	}
+	return compareRequestAuthenticator(w, authTokenUnverified, expectedTenantName)
+}
+
+// Returns the tenant name embedded in the request's Authorization header and returns (tenantName, true),
+// or writes a 401 error to the response and returns ('', false) if the tenant was invalid or not found.
+func DataAPIRequestTenantName(w http.ResponseWriter, r *http.Request) (string, bool) {
+	authTokenUnverified, ok := getAPIAuthTokenUnverified(w, r)
+	if !ok {
+		return "", false
+	}
+	return getRequestAuthenticator(w, authTokenUnverified)
+}
+
 // Expect HTTP request to have a header of the shape
 //
 //      `Authorization: Bearer <AUTHTOKEN>` set.
@@ -40,21 +61,21 @@ var authtokenVerificationPubKey *rsa.PublicKey
 // Emit error HTTP responses and return `false` upon any failure. Return `true`
 // only when the authentication proof is valid and matches the expected
 // Opstrace tenant name.
-func DataAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedTenantName string) bool {
+func getAPIAuthTokenUnverified(w http.ResponseWriter, r *http.Request) (string, bool) {
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
 	av := r.Header.Get("Authorization")
 	if av == "" {
-		return exit401(w, "Authorization header missing")
+		return "", exit401(w, "Authorization header missing")
 	}
 	asplits := strings.Split(av, "Bearer ")
 
 	if len(asplits) != 2 {
-		return exit401(w, "Authorization header format invalid. Expecting `Authorization: Bearer <AUTHTOKEN>`")
+		return "", exit401(w, "Authorization header format invalid. Expecting `Authorization: Bearer <AUTHTOKEN>`")
 	}
 
 	authTokenUnverified := asplits[1]
-	return requestAuthenticator(w, authTokenUnverified, expectedTenantName)
+	return authTokenUnverified, true
 }
 
 // Expect HTTP request to have URL containing a query parameter
@@ -77,10 +98,10 @@ func DDAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedT
 	}
 
 	authTokenUnverified := apikey
-	return requestAuthenticator(w, authTokenUnverified, expectedTenantName)
+	return compareRequestAuthenticator(w, authTokenUnverified, expectedTenantName)
 }
 
-func requestAuthenticator(w http.ResponseWriter, authTokenUnverified string, expectedTenantName string) bool {
+func getRequestAuthenticator(w http.ResponseWriter, authTokenUnverified string) (string, bool) {
 	// Perform RFC 7519-compliant JWT verification (standard claims, such as
 	// exp and nbf, but also cryptographic signature verification). Expect a
 	// set of standard claims to be present (`sub`, `iss` and the likes), and
@@ -92,7 +113,7 @@ func requestAuthenticator(w http.ResponseWriter, authTokenUnverified string, exp
 		log.Infof("jwt verification failed: %s", parseerr)
 		// See below: must exit here, because `tokenstruct.Valid` may not
 		// be accessible. See #282.
-		return exit401(w, "bad authentication token")
+		return "", exit401(w, "bad authentication token")
 	}
 
 	// The `err` check above should be enough, but the documentation for
@@ -102,7 +123,7 @@ func requestAuthenticator(w http.ResponseWriter, authTokenUnverified string, exp
 	// why there are two checks and exit routes now.
 	if !(tokenstruct.Valid) {
 		log.Infof("jwt verification failed: %s", parseerr)
-		return exit401(w, "bad authentication token")
+		return "", exit401(w, "bad authentication token")
 	}
 
 	// https://godoc.org/github.com/dgrijalva/jwt-go#StandardClaims
@@ -114,11 +135,20 @@ func requestAuthenticator(w http.ResponseWriter, authTokenUnverified string, exp
 	ssplits := strings.Split(claims.Subject, "tenant-")
 	if len(ssplits) != 2 {
 		log.Infof("invalid subject (tenant- prefix missing)")
-		return exit401(w, "bad authentication token")
+		return "", exit401(w, "bad authentication token")
 	}
 
 	tenantNameFromToken := ssplits[1]
-	// log.Debugf("authenticated for tenant: %s", tenantName)
+	// log.Debugf("authenticated for tenant: %s", tenantNameFromToken)
+
+	return tenantNameFromToken, true
+}
+
+func compareRequestAuthenticator(w http.ResponseWriter, authTokenUnverified string, expectedTenantName string) bool {
+	tenantNameFromToken, ok := getRequestAuthenticator(w, authTokenUnverified)
+	if !ok {
+		return false
+	}
 
 	if expectedTenantName != tenantNameFromToken {
 		return exit401(w, fmt.Sprintf("bad authentication token: unexpected tenant: %s",

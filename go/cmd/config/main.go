@@ -30,14 +30,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
+	"github.com/opstrace/opstrace/go/pkg/config"
 	"github.com/opstrace/opstrace/go/pkg/graphql"
 	"github.com/opstrace/opstrace/go/pkg/middleware"
 )
 
 var (
-	credentialAccess         graphql.CredentialAccess
-	exporterAccess           graphql.ExporterAccess
-	tenantName               string
+	credentialAccess         config.CredentialAccess
+	exporterAccess           config.ExporterAccess
 	disableAPIAuthentication bool
 )
 
@@ -47,7 +47,6 @@ func main() {
 	var listenAddress string
 	flag.StringVar(&listenAddress, "listen", "", "")
 
-	flag.StringVar(&tenantName, "tenantname", "", "")
 	flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
 
 	flag.Parse()
@@ -80,15 +79,14 @@ func main() {
 		log.Fatalf("missing required HASURA_GRAPHQL_ADMIN_SECRET")
 	}
 
-	if tenantName == "" {
-		log.Fatalf("missing required --tenantname")
-	}
-	log.Infof("tenant name: %s", tenantName)
+	credentialAccess = config.NewCredentialAccess(graphqlEndpointURL, graphqlSecret)
+	exporterAccess = config.NewExporterAccess(graphqlEndpointURL, graphqlSecret)
 
-	credentialAccess = graphql.NewCredentialAccess(tenantName, graphqlEndpointURL, graphqlSecret)
-	exporterAccess = graphql.NewExporterAccess(tenantName, graphqlEndpointURL, graphqlSecret)
-
-	if !disableAPIAuthentication {
+	if disableAPIAuthentication {
+		log.Info("authentication disabled, use 'X-Tenant' header in requests to specify tenant")
+	} else {
+		// Requires API_AUTHTOKEN_VERIFICATION_PUBKEY
+		log.Info("authentication enabled")
 		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
 	}
 
@@ -110,30 +108,43 @@ func main() {
 // The paths are configured to be exact, with optional trailing slashes.
 func setupAPI(
 	router *mux.Router,
-	listFunc func(http.ResponseWriter, *http.Request),
-	writeFunc func(http.ResponseWriter, *http.Request),
-	getFunc func(http.ResponseWriter, *http.Request),
-	deleteFunc func(http.ResponseWriter, *http.Request),
+	listFunc func(string, http.ResponseWriter, *http.Request),
+	writeFunc func(string, http.ResponseWriter, *http.Request),
+	getFunc func(string, http.ResponseWriter, *http.Request),
+	deleteFunc func(string, http.ResponseWriter, *http.Request),
 ) {
 	// Ensure that each call is authenticated before proceeding
-	router.HandleFunc("", authenticateTenantThenCall(listFunc)).Methods("GET")
-	router.HandleFunc("/", authenticateTenantThenCall(listFunc)).Methods("GET")
-	router.HandleFunc("", authenticateTenantThenCall(writeFunc)).Methods("POST")
-	router.HandleFunc("/", authenticateTenantThenCall(writeFunc)).Methods("POST")
-	router.HandleFunc("/{name}", authenticateTenantThenCall(getFunc)).Methods("GET")
-	router.HandleFunc("/{name}/", authenticateTenantThenCall(getFunc)).Methods("GET")
-	router.HandleFunc("/{name}", authenticateTenantThenCall(deleteFunc)).Methods("DELETE")
-	router.HandleFunc("/{name}/", authenticateTenantThenCall(deleteFunc)).Methods("DELETE")
+	router.HandleFunc("", getTenantThenCall(listFunc)).Methods("GET")
+	router.HandleFunc("/", getTenantThenCall(listFunc)).Methods("GET")
+	router.HandleFunc("", getTenantThenCall(writeFunc)).Methods("POST")
+	router.HandleFunc("/", getTenantThenCall(writeFunc)).Methods("POST")
+	router.HandleFunc("/{name}", getTenantThenCall(getFunc)).Methods("GET")
+	router.HandleFunc("/{name}/", getTenantThenCall(getFunc)).Methods("GET")
+	router.HandleFunc("/{name}", getTenantThenCall(deleteFunc)).Methods("DELETE")
+	router.HandleFunc("/{name}/", getTenantThenCall(deleteFunc)).Methods("DELETE")
 }
 
 // Wraps `f` in a preceding check that authenticates the request headers for the expected tenant name.
 // The check is skipped if `disableAPIAuthentication` is true.
-func authenticateTenantThenCall(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+func getTenantThenCall(f func(string, http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !disableAPIAuthentication && !middleware.DataAPIRequestAuthenticator(w, r, tenantName) {
-			return
+		var tenantName string
+		if disableAPIAuthentication {
+			// Testing: Read tenant from `X-Tenant` header
+			tenantName = r.Header.Get("X-Tenant")
+			if tenantName == "" {
+				http.Error(w, "Missing X-Tenant header specifying tenant to test", http.StatusBadRequest)
+				return
+			}
+		} else {
+			// Production: Read/validate tenant from bearer token
+			var ok bool
+			tenantName, ok = middleware.DataAPIRequestTenantName(w, r)
+			if !ok {
+				return
+			}
 		}
-		f(w, r)
+		f(tenantName, w, r)
 	}
 }
 
@@ -147,8 +158,8 @@ type CredentialInfo struct {
 	UpdatedAt string `yaml:"updated_at,omitempty"`
 }
 
-func listCredentials(w http.ResponseWriter, r *http.Request) {
-	resp, err := credentialAccess.List()
+func listCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
+	resp, err := credentialAccess.List(tenant)
 	if err != nil {
 		log.Warnf("Listing credentials failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
@@ -175,14 +186,14 @@ type Credential struct {
 	Value interface{} `yaml:"value"` // nested yaml, or payload string, depending on type
 }
 
-func writeCredentials(w http.ResponseWriter, r *http.Request) {
+func writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 	decoder := yaml.NewDecoder(r.Body)
 	// Return error for unrecognized or duplicate fields in the input
 	decoder.SetStrict(true)
 
 	// Collect list of existing names so that we can decide between insert vs update
 	existingTypes := make(map[string]string)
-	resp, err := credentialAccess.List()
+	resp, err := credentialAccess.List(tenant)
 	if err != nil {
 		log.Warnf("Listing credentials failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
@@ -253,7 +264,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing credentials: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		err := credentialAccess.Insert(inserts)
+		err := credentialAccess.Insert(tenant, inserts)
 		if err != nil {
 			log.Warnf("Insert: %d credentials failed: %s", len(inserts), err)
 			http.Error(w, fmt.Sprintf("Creating %d credentials failed: %s", len(inserts), err), http.StatusInternalServerError)
@@ -262,7 +273,7 @@ func writeCredentials(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			err := credentialAccess.Update(update)
+			err := credentialAccess.Update(tenant, update)
 			if err != nil {
 				log.Warnf("Update: Credential %s failed: %s", update.Name, err)
 				http.Error(w, fmt.Sprintf("Updating credential %s failed: %s", update.Name, err), http.StatusInternalServerError)
@@ -277,11 +288,11 @@ type AWSCredentialValue struct {
 	AwsSecretAccessKey string `json:"AWS_SECRET_ACCESS_KEY"`
 }
 
-func getCredential(w http.ResponseWriter, r *http.Request) {
+func getCredential(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Getting credential: %s", name)
 
-	resp, err := credentialAccess.Get(name)
+	resp, err := credentialAccess.Get(tenant, name)
 	if err != nil {
 		log.Warnf("Get: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Getting credential failed: %s", err), http.StatusInternalServerError)
@@ -302,11 +313,11 @@ func getCredential(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func deleteCredential(w http.ResponseWriter, r *http.Request) {
+func deleteCredential(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Deleting credential: %s", name)
 
-	resp, err := credentialAccess.Delete(name)
+	resp, err := credentialAccess.Delete(tenant, name)
 	if err != nil {
 		log.Warnf("Delete: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Deleting credential failed: %s", err), http.StatusInternalServerError)
@@ -332,8 +343,8 @@ type ExporterInfo struct {
 	UpdatedAt  string      `yaml:"updated_at,omitempty"`
 }
 
-func listExporters(w http.ResponseWriter, r *http.Request) {
-	resp, err := exporterAccess.List()
+func listExporters(tenant string, w http.ResponseWriter, r *http.Request) {
+	resp, err := exporterAccess.List(tenant)
 	if err != nil {
 		log.Warnf("Listing exporters failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
@@ -370,14 +381,14 @@ type Exporter struct {
 	Config     interface{} `yaml:"config"` // nested yaml
 }
 
-func writeExporters(w http.ResponseWriter, r *http.Request) {
+func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 	decoder := yaml.NewDecoder(r.Body)
 	// Return error for unrecognized or duplicate fields in the input
 	decoder.SetStrict(true)
 
 	// Collect list of existing names so that we can decide between insert vs update
 	existingTypes := make(map[string]string)
-	resp, err := exporterAccess.List()
+	resp, err := exporterAccess.List(tenant)
 	if err != nil {
 		log.Warnf("Listing exporters failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
@@ -416,7 +427,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 			// Check that the credential exists and a compatible type.
 			// If the credential didn't exist, then the graphql insert would fail anyway due to a missing relation,
 			// but type mismatches are not validated by graphql.
-			cred, err := credentialAccess.Get(yamlExporter.Credential)
+			cred, err := credentialAccess.Get(tenant, yamlExporter.Credential)
 			if err != nil {
 				msg := fmt.Sprintf(
 					"Failed to read credential %s referenced in new exporter %s",
@@ -509,7 +520,7 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing exporters: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		if err := exporterAccess.Insert(inserts); err != nil {
+		if err := exporterAccess.Insert(tenant, inserts); err != nil {
 			log.Warnf("Insert: %d exporters failed: %s", len(inserts), err)
 			http.Error(w, fmt.Sprintf("Creating %d exporters failed: %s", len(inserts), err), http.StatusInternalServerError)
 			return
@@ -517,8 +528,8 @@ func writeExporters(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			if err := exporterAccess.Update(update); err != nil {
-				log.Warnf("Update: Exporter %s failed: %s", update.Name, err)
+			if err := exporterAccess.Update(tenant, update); err != nil {
+				log.Warnf("Update: Exporter %s/%s failed: %s", tenant, update.Name, err)
 				http.Error(w, fmt.Sprintf("Updating exporter %s failed: %s", update.Name, err), http.StatusInternalServerError)
 				return
 			}
@@ -561,18 +572,18 @@ func recurseMapStringKeys(in interface{}) (interface{}, error) {
 	}
 }
 
-func getExporter(w http.ResponseWriter, r *http.Request) {
+func getExporter(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Getting exporter: %s", name)
 
-	resp, err := exporterAccess.Get(name)
+	resp, err := exporterAccess.Get(tenant, name)
 	if err != nil {
-		log.Warnf("Get: Exporter %s failed: %s", name, err)
+		log.Warnf("Get: Exporter %s/%s failed: %s", tenant, name, err)
 		http.Error(w, fmt.Sprintf("Getting exporter failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	if resp == nil {
-		log.Debugf("Get: Exporter %s not found", name)
+		log.Debugf("Get: Exporter %s/%s not found", tenant, name)
 		http.Error(w, fmt.Sprintf("Exporter not found: %s", name), http.StatusNotFound)
 		return
 	}
@@ -598,18 +609,18 @@ func getExporter(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func deleteExporter(w http.ResponseWriter, r *http.Request) {
+func deleteExporter(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
-	log.Debugf("Deleting exporter: %s", name)
+	log.Debugf("Deleting exporter: %s/%s", tenant, name)
 
-	resp, err := exporterAccess.Delete(name)
+	resp, err := exporterAccess.Delete(tenant, name)
 	if err != nil {
-		log.Warnf("Delete: Exporter %s failed: %s", name, err)
+		log.Warnf("Delete: Exporter %s/%s failed: %s", tenant, name, err)
 		http.Error(w, fmt.Sprintf("Deleting exporter failed: %s", err), http.StatusInternalServerError)
 		return
 	}
 	if resp == nil {
-		log.Debugf("Delete: Exporter %s not found", name)
+		log.Debugf("Delete: Exporter %s/%s not found", tenant, name)
 		http.Error(w, fmt.Sprintf("Exporter not found: %s", name), http.StatusNotFound)
 		return
 	}
