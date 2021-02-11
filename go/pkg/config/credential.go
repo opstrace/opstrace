@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package graphql
+package config
 
 import (
 	"net/url"
+
+	"github.com/opstrace/opstrace/go/pkg/graphql"
 )
 
 type CredentialAccess struct {
-	tenant String
-	access *graphqlAccess
+	access *graphql.GraphqlAccess
 }
 
-func NewCredentialAccess(tenant string, graphqlURL *url.URL, graphqlSecret string) CredentialAccess {
+func NewCredentialAccess(graphqlURL *url.URL, graphqlSecret string) CredentialAccess {
 	return CredentialAccess{
-		String(tenant),
-		newGraphqlAccess(graphqlURL, graphqlSecret),
+		graphql.NewGraphqlAccess(graphqlURL, graphqlSecret),
 	}
 }
 
@@ -42,8 +42,11 @@ type FixedGetCredentialsResponse struct {
 	} `json:"Credential"`
 }
 
-func (c *CredentialAccess) List() (*FixedGetCredentialsResponse, error) {
-	req, err := NewGetCredentialsRequest(c.access.URL, &GetCredentialsVariables{Tenant: c.tenant})
+func (c *CredentialAccess) List(tenant string) (*FixedGetCredentialsResponse, error) {
+	req, err := graphql.NewGetCredentialsRequest(
+		c.access.URL,
+		&graphql.GetCredentialsVariables{Tenant: graphql.String(tenant)},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +70,11 @@ type FixedGetCredentialResponse struct {
 	} `json:"Credential_By_Pk"` // fix missing underscore
 }
 
-func (c *CredentialAccess) Get(name string) (*FixedGetCredentialResponse, error) {
-	req, err := NewGetCredentialRequest(c.access.URL, &GetCredentialVariables{Tenant: c.tenant, Name: String(name)})
+func (c *CredentialAccess) Get(tenant string, name string) (*FixedGetCredentialResponse, error) {
+	req, err := graphql.NewGetCredentialRequest(
+		c.access.URL,
+		&graphql.GetCredentialVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +99,11 @@ type FixedDeleteCredentialResponse struct {
 	} `json:"Delete_Credential_By_Pk"` // fix missing underscore
 }
 
-func (c *CredentialAccess) Delete(name string) (*FixedDeleteCredentialResponse, error) {
-	req, err := NewDeleteCredentialRequest(c.access.URL, &DeleteCredentialVariables{Tenant: c.tenant, Name: String(name)})
+func (c *CredentialAccess) Delete(tenant string, name string) (*FixedDeleteCredentialResponse, error) {
+	req, err := graphql.NewDeleteCredentialRequest(
+		c.access.URL,
+		&graphql.DeleteCredentialVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -112,33 +121,37 @@ func (c *CredentialAccess) Delete(name string) (*FixedDeleteCredentialResponse, 
 }
 
 // Insert inserts one or more credentials, returns an error if any already exists.
-func (c *CredentialAccess) Insert(inserts []CredentialInsertInput) error {
+func (c *CredentialAccess) Insert(tenant string, inserts []graphql.CredentialInsertInput) error {
 	// Ensure the inserts each have the correct tenant name
-	insertsWithTenant := make([]CredentialInsertInput, 0)
+	gtenant := graphql.String(tenant)
+	insertsWithTenant := make([]graphql.CredentialInsertInput, 0)
 	for _, insert := range inserts {
-		insert.Tenant = &c.tenant
+		insert.Tenant = &gtenant
 		insertsWithTenant = append(insertsWithTenant, insert)
 	}
 
-	req, err := NewCreateCredentialsRequest(c.access.URL, &CreateCredentialsVariables{Credentials: &insertsWithTenant})
+	req, err := graphql.NewCreateCredentialsRequest(
+		c.access.URL,
+		&graphql.CreateCredentialsVariables{Credentials: &insertsWithTenant},
+	)
 	if err != nil {
 		return err
 	}
 
-	var result CreateCredentialsResponse
+	var result graphql.CreateCredentialsResponse
 	return c.access.Execute(req.Request, &result)
 }
 
 // Update updates an existing credential, returns an error if a credential of the same tenant/name doesn't exist.
-func (c *CredentialAccess) Update(update UpdateCredentialVariables) error {
+func (c *CredentialAccess) Update(tenant string, update graphql.UpdateCredentialVariables) error {
 	// Ensure the update has the correct tenant name
-	update.Tenant = c.tenant
+	update.Tenant = graphql.String(tenant)
 
-	req, err := NewUpdateCredentialRequest(c.access.URL, &update)
+	req, err := graphql.NewUpdateCredentialRequest(c.access.URL, &update)
 	if err != nil {
 		return err
 	}
 
-	var result UpdateCredentialResponse
+	var result graphql.UpdateCredentialResponse
 	return c.access.Execute(req.Request, &result)
 }

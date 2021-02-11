@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package graphql
+package config
 
 import (
 	"net/url"
+
+	"github.com/opstrace/opstrace/go/pkg/graphql"
 )
 
 type ExporterAccess struct {
-	tenant String
-	access *graphqlAccess
+	access *graphql.GraphqlAccess
 }
 
-func NewExporterAccess(tenant string, graphqlURL *url.URL, graphqlSecret string) ExporterAccess {
+func NewExporterAccess(graphqlURL *url.URL, graphqlSecret string) ExporterAccess {
 	return ExporterAccess{
-		String(tenant),
-		newGraphqlAccess(graphqlURL, graphqlSecret),
+		graphql.NewGraphqlAccess(graphqlURL, graphqlSecret),
 	}
 }
 
@@ -44,8 +44,11 @@ type FixedGetExportersResponse struct {
 	} `json:"Exporter"`
 }
 
-func (c *ExporterAccess) List() (*FixedGetExportersResponse, error) {
-	req, err := NewGetExportersRequest(c.access.URL, &GetExportersVariables{Tenant: c.tenant})
+func (c *ExporterAccess) List(tenant string) (*FixedGetExportersResponse, error) {
+	req, err := graphql.NewGetExportersRequest(
+		c.access.URL,
+		&graphql.GetExportersVariables{Tenant: graphql.String(tenant)},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +74,11 @@ type FixedGetExporterResponse struct {
 	} `json:"Exporter_By_Pk"` // fix missing underscores
 }
 
-func (c *ExporterAccess) Get(name string) (*FixedGetExporterResponse, error) {
-	req, err := NewGetExporterRequest(c.access.URL, &GetExporterVariables{Tenant: c.tenant, Name: String(name)})
+func (c *ExporterAccess) Get(tenant string, name string) (*FixedGetExporterResponse, error) {
+	req, err := graphql.NewGetExporterRequest(
+		c.access.URL,
+		&graphql.GetExporterVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +86,10 @@ func (c *ExporterAccess) Get(name string) (*FixedGetExporterResponse, error) {
 	var result FixedGetExporterResponse
 	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
+	}
+	if result.ExporterByPk.Name == "" {
+		// Not found
+		return nil, nil
 	}
 	return &result, nil
 }
@@ -93,8 +103,11 @@ type FixedDeleteExporterResponse struct {
 	} `json:"Delete_Exporter_By_Pk"` // fix missing underscores
 }
 
-func (c *ExporterAccess) Delete(name string) (*FixedDeleteExporterResponse, error) {
-	req, err := NewDeleteExporterRequest(c.access.URL, &DeleteExporterVariables{Tenant: c.tenant, Name: String(name)})
+func (c *ExporterAccess) Delete(tenant string, name string) (*FixedDeleteExporterResponse, error) {
+	req, err := graphql.NewDeleteExporterRequest(
+		c.access.URL,
+		&graphql.DeleteExporterVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -111,33 +124,37 @@ func (c *ExporterAccess) Delete(name string) (*FixedDeleteExporterResponse, erro
 }
 
 // Insert inserts one or more exporters, returns an error if any already exists.
-func (c *ExporterAccess) Insert(inserts []ExporterInsertInput) error {
+func (c *ExporterAccess) Insert(tenant string, inserts []graphql.ExporterInsertInput) error {
 	// Ensure the inserts each have the correct tenant name
-	insertsWithTenant := make([]ExporterInsertInput, 0)
+	gtenant := graphql.String(tenant)
+	insertsWithTenant := make([]graphql.ExporterInsertInput, 0)
 	for _, insert := range inserts {
-		insert.Tenant = &c.tenant
+		insert.Tenant = &gtenant
 		insertsWithTenant = append(insertsWithTenant, insert)
 	}
 
-	req, err := NewCreateExportersRequest(c.access.URL, &CreateExportersVariables{Exporters: &insertsWithTenant})
+	req, err := graphql.NewCreateExportersRequest(
+		c.access.URL,
+		&graphql.CreateExportersVariables{Exporters: &insertsWithTenant},
+	)
 	if err != nil {
 		return err
 	}
 
-	var result CreateExportersResponse
+	var result graphql.CreateExportersResponse
 	return c.access.Execute(req.Request, &result)
 }
 
 // Update updates an existing exporter, returns an error if a exporter of the same tenant/name doesn't exist.
-func (c *ExporterAccess) Update(update UpdateExporterVariables) error {
+func (c *ExporterAccess) Update(tenant string, update graphql.UpdateExporterVariables) error {
 	// Ensure the update has the correct tenant name
-	update.Tenant = c.tenant
+	update.Tenant = graphql.String(tenant)
 
-	req, err := NewUpdateExporterRequest(c.access.URL, &update)
+	req, err := graphql.NewUpdateExporterRequest(c.access.URL, &update)
 	if err != nil {
 		return err
 	}
 
-	var result UpdateExporterResponse
+	var result graphql.UpdateExporterResponse
 	return c.access.Execute(req.Request, &result)
 }

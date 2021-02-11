@@ -20,14 +20,14 @@ import (
 	"net/url"
 )
 
-type graphqlAccess struct {
+type GraphqlAccess struct {
 	URL    string
 	client *http.Client
 	secret string
 }
 
-func newGraphqlAccess(url *url.URL, secret string) *graphqlAccess {
-	return &graphqlAccess{
+func NewGraphqlAccess(url *url.URL, secret string) *GraphqlAccess {
+	return &GraphqlAccess{
 		url.String(),
 		&http.Client{},
 		secret,
@@ -35,7 +35,7 @@ func newGraphqlAccess(url *url.URL, secret string) *graphqlAccess {
 }
 
 // Execute adds the secret onto the request, executes it, and deserializes the response into `result`.
-func (g *graphqlAccess) Execute(req *http.Request, result interface{}) error {
+func (g *GraphqlAccess) Execute(req *http.Request, result interface{}) error {
 	if g.secret != "" {
 		req.Header.Add("x-hasura-admin-secret", g.secret)
 	}
