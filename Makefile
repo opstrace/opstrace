@@ -508,12 +508,26 @@ rebuild-looker-container-images:
 	@echo "--- building looker container image"
 	make -C test/test-remote/containers/looker image
 
+
+.PHONY: kubectl-cluster-info
+kubectl-cluster-info:
+	docker run --tty --interactive --rm \
+		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-u $(shell id -u):${DOCKER_GID_HOST} \
+		-v /etc/passwd:/etc/passwd \
+		-e KUBECONFIG=/kubeconfig/config \
+		-e AWS_ACCESS_KEY_ID \
+		-e AWS_SECRET_ACCESS_KEY \
+		--dns $(shell ci/dns_cache.sh) \
+		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
+		kubectl cluster-info
+
 #
 # * Overrides `/build/test-remote/node_modules` with an empty volume to ensure
 #   `node_modules` from the host are not shared with the container.
 #
 .PHONY: test-remote
-test-remote:
+test-remote: kubectl-cluster-info
 	@# Mount ~/.kube into container: the testrunner requires kubectl to be
 	@# available and properly configured in the cluster.
 	@#
@@ -529,10 +543,8 @@ test-remote:
 	@echo "* Expects kubectl to be configured against to-be-tested cluster"
 	@# Dump cluster-info outside container, for debugging
 	@echo "--- running test-remote"
-	kubectl cluster-info
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	@echo "* Start NodeJS/Mocha testrunner in container"
-	source ./secrets/aws-dev-svc-acc-env.sh && \
 	docker run --tty --interactive --rm \
 		--net=host \
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test-remote \
@@ -567,11 +579,9 @@ test-remote:
 #     suite/test name. `make test-remote-ui` runs all tests that match.
 #     Note: `--invert, -i  Inverts --grep and --fgrep matches`.
 .PHONY: test-remote-ui
-test-remote-ui:
+test-remote-ui: kubectl-cluster-info
 	echo "--- running test-remote-ui"
-	kubectl cluster-info
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
-	source ./secrets/aws-dev-svc-acc-env.sh && \
 	docker run --tty --interactive --rm \
 		--net=host \
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test-remote \
