@@ -474,6 +474,30 @@ export async function sendMetricsWithPromContainer(
   const dockerDNS = readDockerDNSSettings();
   log.info(`docker container dns settings: ${dockerDNS}`);
 
+  const mounts: Docker.MountConfig = [
+    {
+      Type: "bind",
+      Source: promConfigFilePath,
+      Target: "/etc/prometheus/prometheus.yml",
+      ReadOnly: true
+    },
+    {
+      Type: "bind",
+      Source: "/tmp",
+      Target: "/tmp",
+      ReadOnly: false
+    }
+  ];
+
+  if (apiTokenFilePath !== undefined) {
+    mounts.push({
+      Type: "bind",
+      Source: apiTokenFilePath!,
+      Target: apiTokenFilePath!,
+      ReadOnly: true
+    });
+  }
+
   const cont = await docker.createContainer({
     Image: "prom/prometheus:v2.21.0",
     AttachStdin: false,
@@ -487,20 +511,7 @@ export async function sendMetricsWithPromContainer(
     ],
     HostConfig: {
       NetworkMode: "host",
-      Mounts: [
-        {
-          Type: "bind",
-          Source: promConfigFilePath,
-          Target: "/etc/prometheus/prometheus.yml",
-          ReadOnly: true
-        },
-        {
-          Type: "bind",
-          Source: "/tmp",
-          Target: "/tmp",
-          ReadOnly: false
-        }
-      ],
+      Mounts: mounts,
       Dns: readDockerDNSSettings()
     }
   });
@@ -678,6 +689,24 @@ export async function sendLogsWithFluentDContainer(
   const dockerDNS = readDockerDNSSettings();
   log.info(`docker container dns settings: ${dockerDNS}`);
 
+  const mounts: Docker.MountConfig = [
+    {
+      Type: "bind",
+      Source: "/tmp",
+      Target: "/tmp",
+      ReadOnly: false
+    }
+  ];
+
+  if (apiTokenFilePath !== undefined) {
+    mounts.push({
+      Type: "bind",
+      Source: apiTokenFilePath!,
+      Target: apiTokenFilePath!,
+      ReadOnly: true
+    });
+  }
+
   const cont = await docker.createContainer({
     // use the same container as is used in the opstrace cluster for collecting
     // and pushing system logs.
@@ -689,14 +718,7 @@ export async function sendLogsWithFluentDContainer(
     Cmd: ["fluentd", "-c", fluentdConfigFilePath],
     HostConfig: {
       NetworkMode: "host",
-      Mounts: [
-        {
-          Type: "bind",
-          Source: "/tmp",
-          Target: "/tmp",
-          ReadOnly: false
-        }
-      ],
+      Mounts: mounts,
       Dns: readDockerDNSSettings()
     }
   });
