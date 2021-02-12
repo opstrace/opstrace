@@ -1,3 +1,17 @@
+# Copyright 2019-2021 Opstrace, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Dot not ignore errors in piped commands. The goal is to have `make` error
 # out upon critical errors like missing files. Example for a critical error
 # being swallowed:
@@ -101,6 +115,7 @@ dependencies: setup-addlicense tsc cli-pkg
 cli: cli-tsc cli-pkg
 
 
+# Files specific to Opstrace, Inc. development.
 .PHONY: fetch-secrets
 fetch-secrets:
 	@echo "--- fetching secrets"
@@ -109,7 +124,6 @@ fetch-secrets:
 	--include "aws-credentials.json" \
 	--include "aws-dev-svc-acc-env.sh" \
 	--include "docker-credentials.json" \
-	--include "saas-secrets-token.json" \
 	--include "ci.id_rsa" \
 	--include "ci.id_rsa.pub" \
 	--include "opstrace-collection-cluster-authtoken-secrets.yaml" \
@@ -120,7 +134,8 @@ fetch-secrets:
 	--include "gcp-svc-acc-ci-shard-ccc.json" \
 	--include "gcp-svc-acc-ci-shard-ddd.json" \
 	--include "gcp-svc-acc-ci-shard-eee.json" \
-	--include "gcp-svc-acc-ci-shard-fff.json"
+	--include "gcp-svc-acc-ci-shard-fff.json" \
+	--include "gcp-svc-acc-cost-test-1.json"
 	chmod 600 secrets/ci.id_rsa
 
 
