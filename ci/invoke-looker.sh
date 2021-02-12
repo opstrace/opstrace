@@ -6,10 +6,18 @@ export LOOKER_IMAGE_NAME="opstrace/looker:${CHECKOUT_VERSION_STRING}"
 export TENANT_DEFAULT_LOKI_API_BASE_URL="https://loki.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 export TENANT_DEFAULT_CORTEX_API_BASE_URL="https://cortex.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
+export TENANT_DEFAULT_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
+export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
+
 DNSIP="$(ci/dns_cache.sh)"
 # Do _not_ quote $COMMON_ARGS when using it (it's in fact not a single arg, but
 # multiple args).
-COMMON_ARGS="-v ${OPSTRACE_BUILD_DIR}:/rundir -v /tmp:/tmp --dns ${DNSIP} ${LOOKER_IMAGE_NAME}"
+COMMON_ARGS="-v ${OPSTRACE_BUILD_DIR}:/rundir \
+-v /tmp:/tmp \
+-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
+-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
+--dns ${DNSIP} \
+${LOOKER_IMAGE_NAME}"
 
 # Test metrics mode of looker (super hacky)
 # do not show output in main build log (it's a lot!)
