@@ -74,6 +74,14 @@ endif
 
 KERNEL_NAME := $(shell uname -s | tr A-Z a-z)
 
+#
+# Path to the files with authentication tokens. They will be mounted inside the
+# container that runs test-remote* targets.
+#
+TENANT_DEFAULT_API_TOKEN_FILEPATH ?= "${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
+TENANT_SYSTEM_API_TOKEN_FILEPATH ?= "${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
+
+
 $(info --------------------------------------------------------------)
 $(info OPSTRACE_CLUSTER_NAME is $(OPSTRACE_CLUSTER_NAME))
 $(info OPSTRACE_BUILD_DIR is $(OPSTRACE_BUILD_DIR))
@@ -566,6 +574,8 @@ test-remote: kubectl-cluster-info
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-default \
+		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-system \
 		-v /build/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
@@ -575,8 +585,8 @@ test-remote: kubectl-cluster-info
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
-		-e TENANT_DEFAULT_API_TOKEN_FILEPATH \
-		-e TENANT_SYSTEM_API_TOKEN_FILEPATH \
+		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=/tmp/tenant-api-token-default \
+		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=/tmp/tenant-api-token-system \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		--dns $(shell ci/dns_cache.sh) \
@@ -603,6 +613,8 @@ test-remote-ui: kubectl-cluster-info
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-default \
+		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-system \
 		-v /build/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
@@ -612,8 +624,8 @@ test-remote-ui: kubectl-cluster-info
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
-		-e TENANT_DEFAULT_API_TOKEN_FILEPATH \
-		-e TENANT_SYSTEM_API_TOKEN_FILEPATH \
+		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=/tmp/tenant-api-token-default \
+		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=/tmp/tenant-api-token-system \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		-e DEBUG=pw:api \

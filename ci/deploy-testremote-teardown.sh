@@ -248,10 +248,6 @@ source ci/check-deployed-docker-images.sh
 
 echo "+++ run test-remote"
 
-# `test-remote` needs these two env vars
-export TENANT_DEFAULT_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
-export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
-
 set +e
 make test-remote
 EXITCODE_MAKE_TESTREMOTE=$?
