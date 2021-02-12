@@ -8,6 +8,9 @@ make rebuild-looker-container-images
 
 make ci-fetch-secrets
 
+make ci-testupgrade-fetch-cli-artifacts
+make ci-testupgrade-dns-service-credentials
+
 teardown() {
     LAST_EXIT_CODE=$?
 
@@ -18,9 +21,12 @@ trap "teardown" EXIT
 # Override the target kubeconfig directory to point to the checkout directory.
 export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/.kube
 
-make ci-testupgrade-fetch-cli-artifacts
-make ci-testupgrade-dns-service-credentials
 make ci-testupgrade-create-cluster
-make test-remote || true
+
+make test-remote
+make test-remote-ui
+
 make ci-testupgrade-upgrade-cluster
-make test-remote || true
+
+make test-remote
+make test-remote-ui
