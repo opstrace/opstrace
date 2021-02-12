@@ -19,16 +19,17 @@ import { KubeConfig } from "@kubernetes/client-node";
 import { ResourceCollection } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
 
-import { LokiAPIResources } from "./loki";
+import { ConfigAPIResources } from "./config";
 import { CortexAPIResources } from "./cortex";
 import { DDAPIResources } from "./dd";
+import { LokiAPIResources } from "./loki";
 
 // This does not serve an API, right?
 // Maybe we should move this out of resources/apis or rename resources/apis
 import { SystemLogAgentResources } from "./systemlogs";
 
 /* Translate node count into replica count*/
-export function nodecountToReplicacount(nodecount: number) {
+export function nodecountToReplicacount(nodecount: number): number {
   const NC_RC_MAP: Record<string, number> = {
     "1": 1,
     "2": 2,
@@ -50,6 +51,10 @@ export function APIResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
+  // Single instance 'application' namespace: allow access to hasura-admin-secret
+  collection.add(ConfigAPIResources(state, kubeConfig, "application"));
+
+  // Per-tenant resources
   state.tenants.list.tenants.forEach(tenant => {
     collection.add(SystemLogAgentResources(state, tenant, kubeConfig));
     collection.add(LokiAPIResources(state, tenant, kubeConfig));
