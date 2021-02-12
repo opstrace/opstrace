@@ -21,6 +21,9 @@ import { useCommandService } from "client/services/Command";
 import { addTenant } from "state/tenant/actions";
 import { useDispatch } from "react-redux";
 
+// eslint-disable-next-line no-useless-escape
+const subdomainValidator = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/;
+
 const AddTenantPicker = () => {
   const dispatch = useDispatch();
 
@@ -40,7 +43,7 @@ const AddTenantPicker = () => {
         }
       ],
       onSelected: (option, tenant) => {
-        if (option.id === "yes" && tenant) {
+        if (option.id === "yes" && tenant && subdomainValidator.test(tenant)) {
           dispatch(addTenant(tenant));
         }
       }
