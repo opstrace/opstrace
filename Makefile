@@ -574,8 +574,8 @@ test-remote: kubectl-cluster-info
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
-		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-default \
-		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-system \
+		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
+		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-v /build/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
@@ -585,8 +585,8 @@ test-remote: kubectl-cluster-info
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
-		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=/tmp/tenant-api-token-default \
-		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=/tmp/tenant-api-token-system \
+		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=${TENANT_DEFAULT_API_TOKEN_FILEPATH}\
+		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		--dns $(shell ci/dns_cache.sh) \
@@ -613,8 +613,8 @@ test-remote-ui: kubectl-cluster-info
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
-		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-default \
-		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:/tmp/tenant-api-token-system \
+		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
+		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-v /build/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
@@ -624,8 +624,8 @@ test-remote-ui: kubectl-cluster-info
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
-		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=/tmp/tenant-api-token-default \
-		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=/tmp/tenant-api-token-system \
+		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=${TENANT_DEFAULT_API_TOKEN_FILEPATH}\
+		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		-e DEBUG=pw:api \
