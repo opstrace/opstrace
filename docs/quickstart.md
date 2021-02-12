@@ -84,7 +84,8 @@ export OPSTRACE_NAME=<choose_a_name>
 The name will globally identify you in our domain as `$OPSTRACE_NAME.opstrace.io`, which we provide for you by default as a convenience.
 
 Then, you'll create a simple [configuration file](./references/cluster-configuration.md) with the most basic options.
-Note that we define two tenants named `staging` and `prod` that are separate from the `system` tenant that hosts internal metrics; we will later send our application metrics to `staging` to demonstrate how data can be isolated between logical units such as deployment environments.
+Note that we define two tenants named `staging` and `prod` that are separate from the `system` tenant that hosts internal metrics about Opstrace.
+We will send our application metrics to `staging` to demonstrate how data can be isolated between logical units such as deployment environments.
 Learn more about tenant isolation in our [key concepts references](./references/concepts.md#tenants).
 
 ```bash
@@ -286,7 +287,7 @@ Now, let's query the logs:
 
 As you can see, the data we sent to Opstrace in step 3 is indeed ingested as expected.
 
-You can also see that the `prod` tenant is completely empty, completely separated from `staging`:
+You can also see that the `prod` tenant is empty, completely separated from `staging`:
 
 ```text
 https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
