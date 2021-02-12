@@ -476,6 +476,8 @@ ci-%: checkenv-builddir
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-e AWS_SHARED_CREDENTIALS_FILE=/awsconfig/credentials \
 	-e AWS_CLI_REGION \
+	-e AWS_ACCESS_KEY_ID \
+	-e AWS_SECRET_ACCESS_KEY \
 	-e HOME=/build \
 	-e OPSTRACE_CLUSTER_NAME \
 	-e OPSTRACE_BUILD_DIR \
