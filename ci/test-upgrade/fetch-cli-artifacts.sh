@@ -2,9 +2,6 @@
 
 set -eou pipefail
 
-# Note: sourcing this file exports AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-source secrets/aws-dev-svc-acc-env.sh
-
 echo "--- finding last two available cli versions"
 #
 # Read the last two available cli versions into a bash array

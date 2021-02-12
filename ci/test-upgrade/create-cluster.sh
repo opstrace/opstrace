@@ -5,9 +5,6 @@ set -eou pipefail
 # Import helper functions.
 source ci/utils.sh
 
-# Note: sourcing this file exports AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-source secrets/aws-dev-svc-acc-env.sh
-
 # Run opstrace installer locally. The installer will deploy the controller into
 # the cluster and wait until deployments are 'ready'.
 echo "--- creating cluster"
