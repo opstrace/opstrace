@@ -84,13 +84,14 @@ export OPSTRACE_NAME=<choose_a_name>
 The name will globally identify you in our domain as `$OPSTRACE_NAME.opstrace.io`, which we provide for you by default as a convenience.
 
 Then, you'll create a simple [configuration file](./references/cluster-configuration.md) with the most basic options.
-Note that we define a tenant named `myteam` to send our application metrics to, which is separate from the `system` tenant that hosts internal metrics.
+Note that we define two tenants named `staging` and `prod` that are separate from the `system` tenant that hosts internal metrics; we will later send our application metrics to `staging` to demonstrate how data can be isolated between logical units such as deployment environments.
 Learn more about tenant isolation in our [key concepts references](./references/concepts.md#tenants).
 
 ```bash
 cat <<EOF > opstrace-config.yaml
 tenants:
-  - myteam
+  - staging
+  - prod
 env_label: quickstart
 node_count: 3
 cert_issuer: letsencrypt-prod
@@ -140,7 +141,7 @@ Create a file with the Prometheus configuration to send data to Opstrace:
 ```bash
 cat <<EOF > prometheus.yml
   remote_write:
-    - url: "https://cortex.myteam.$OPSTRACE_NAME.opstrace.io/api/v1/push"
+    - url: "https://cortex.staging.$OPSTRACE_NAME.opstrace.io/api/v1/push"
       bearer_token_file: /var/run/tenant/token
       queue_config:
         batch_send_deadline: 5s
@@ -186,7 +187,7 @@ cat <<EOF > fluentd.conf
 
 <match *>
   @type loki
-  url https://loki.myteam.$OPSTRACE_NAME.opstrace.io
+  url https://loki.staging.$OPSTRACE_NAME.opstrace.io
   flush_interval 5s
   bearer_token_file /var/run/tenant/token
   extra_labels { "label": "quickstart" }
@@ -211,14 +212,14 @@ services:
       - "24224:24224/udp"
     volumes:
       - ${PWD}/fluentd.conf:/fluentd/etc/fluent.conf
-      - ${PWD}/tenant-api-token-myteam:/var/run/tenant/token
+      - ${PWD}/tenant-api-token-staging:/var/run/tenant/token
   prometheus:
     depends_on:
       - fluentd
     image: prom/prometheus:v2.22.1
     volumes:
       - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ${PWD}/tenant-api-token-myteam:/var/run/tenant/token
+      - ${PWD}/tenant-api-token-staging:/var/run/tenant/token
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     logging:
@@ -264,10 +265,10 @@ You now have dummy (random) metrics and associated logs (simulating a real app y
 
 ## Step 3: Validate the data
 
-Let's view the data using the Grafana "explore" view:
+Let's view the data in our `staging` tenant using the Grafana "explore" view:
 
 ```text
-https://myteam.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
+https://staging.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
 ```
 
 1. To query these metrics, first select the "metrics" data source in the upper left-hand corner.
@@ -284,6 +285,12 @@ Now, let's query the logs:
 1. Switch the data source in the upper left-hand corner to "Logs". You will see the same label filter applied to the log data.
 
 As you can see, the data we sent to Opstrace in step 3 is indeed ingested as expected.
+
+You can also see that the `prod` tenant is completely empty, completely separated from `staging`:
+
+```text
+https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
+```
 
 ## Step 4: Add users and tenants
 
