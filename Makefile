@@ -222,16 +222,22 @@ cli-pkg:
 	yarn run pkg packages/cli/package.json --public \
 		--targets node14-$${TPLATFORM}-x64 \
 		--output build/bin/opstrace \
-		--options stack-trace-limit=100
+		--options stack-trace-limit=100 && \
+        set +o xtrace && \
+        echo "Successfully built CLI for $${TPLATFORM}: ./build/bin/opstrace"
 
 .PHONY: cli-pkg-macos
 cli-pkg-macos:
 	@# pkg-build CLI for macos (use this in CI -- linux -- to create macos
 	@# builds.
-	mkdir -p build/bin/macos && yarn run pkg packages/cli/package.json --public \
+	mkdir -p build/bin/macos && \
+	set -o xtrace && \
+        yarn run pkg packages/cli/package.json --public \
 		--targets node14-macos-x64 \
 		--output build/bin/macos/opstrace \
-		--options stack-trace-limit=100
+		--options stack-trace-limit=100 && \
+        set +o xtrace && \
+        echo "Successfully built CLI for macos: ./build/bin/macos/opstrace"
 
 
 .PHONY: generate-aws-api-call-list
