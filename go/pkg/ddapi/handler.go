@@ -94,6 +94,74 @@ func checkJSONContentType(r *http.Request) error {
 	return fmt.Errorf("unexpected content-type header (expecting: application/json)")
 }
 
+func (ddcp *DDCortexProxy) CheckPostHandler(w http.ResponseWriter, r *http.Request) {
+	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
+	bodybytes, rerr := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if rerr != nil {
+		logErrorEmit500(w, fmt.Errorf("error while reading request body: %v", rerr))
+		return
+	}
+
+	if r.Header.Get("Content-Encoding") == "deflate" {
+		var zerr error
+		bodybytes, zerr = ZlibDecode(bodybytes)
+		if zerr != nil {
+			// Most likely bad input (bad request).
+			logErrorEmit400(w, fmt.Errorf("bad request: error while zlib-decoding request body: %v", zerr))
+			return
+		}
+	}
+
+	// Log detail on debug level. In particular the request body.
+	apiKey := r.URL.Query().Get("api_key")
+	log.Debugf("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
+
+	promTimeSeriesFragments, terr := TranslateDDCheckRunJSON(bodybytes)
+	if terr != nil {
+		// Most likely bad input (bad request).
+		logErrorEmit400(w, fmt.Errorf("bad request: error while translating body: %v", terr))
+		return
+	}
+
+	writeRequest := &prompb.WriteRequest{
+		Timeseries: promTimeSeriesFragments,
+	}
+
+	log.Debugf("Prom write request: %s", writeRequest)
+
+	// Serialize struct into protobuf message (byte sequence).
+	pbmsgbytes, perr := proto.Marshal(writeRequest)
+	if perr != nil {
+		logErrorEmit500(w, fmt.Errorf("error while constructing Prometheus protobuf message: %v", perr))
+		return
+	}
+
+	// Snappy-compress the byte sequence.
+	spbmsgbytes := snappy.Encode(nil, pbmsgbytes)
+	// log.Debugf("snappy-compressed pb msg: %s", spbmsgbytes)
+
+	writeerr := ddcp.postPromWriteRequestAndHandleErrors(w, spbmsgbytes)
+
+	if writeerr != nil {
+		// That's the signal to terminate request processing. Error details can
+		// be ignored (rely on `postPromWriteRequestAndHandleErrors()` to have
+		// taken proper action, including logging).
+		return
+	}
+
+	// Make the DD agent's HTTP client happy.
+	w.Header().Set("Content-Type", "application/json")
+	// Emit 202 response
+	w.WriteHeader(http.StatusAccepted)
+	w.Write([]byte("{\"status\": \"ok\"}"))
+}
+
 func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
 	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
 		// Error response has already been written. Terminate request handling.
@@ -134,8 +202,8 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Log detail on debug level. In particular the request body.
-	apiKey := r.URL.Query().Get("api_key")
-	log.Debugf("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
+	// apiKey := r.URL.Query().Get("api_key")
+	// log.Debugf("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
 
 	promTimeSeriesFragments, terr := TranslateDDSeriesJSON(bodybytes)
 	if terr != nil {
