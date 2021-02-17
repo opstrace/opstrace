@@ -20,6 +20,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	json "github.com/json-iterator/go"
 	"github.com/prometheus/common/log"
@@ -131,10 +132,11 @@ func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// problem).
 		if checkupdate.Status > 0 && checkupdate.Message != "" {
 			log.Infof(
-				"Message for check %s with status %v (timestamp: %v): %s",
+				"Message for check `%s` with status `%v` (timestamp: %v -- %s): %s",
 				checkupdate.Name,
 				checkupdate.Status,
 				checkupdate.Timestamp,
+				time.Unix(checkupdate.Timestamp, 0).UTC(),
 				checkupdate.Message,
 			)
 		}
