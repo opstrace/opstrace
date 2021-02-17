@@ -64,6 +64,7 @@ func main() {
 		log.Fatalf("bad remote_write URL: %s", uerr)
 	}
 
+	log.Infof("log level: %s", loglevel)
 	log.Infof("Prometheus remote_write endpoint: %s", remoteWriteURL)
 	log.Infof("listen address: %s", listenAddress)
 	log.Infof("tenant name: %s", tenantName)
@@ -81,6 +82,10 @@ func main() {
 	// fragments. Served by DD at /api/v1/series. See
 	// https://docs.datadoghq.com/api/v1/metrics/#submit-metrics
 	router.PathPrefix("/api/v1/series").HandlerFunc(ddcp.SeriesPostHandler).Methods(http.MethodPost)
+
+	// DD API for service checks. See
+	// https://docs.datadoghq.com/api/latest/service-checks/
+	router.PathPrefix("/api/v1/check_run").HandlerFunc(ddcp.CheckPostHandler).Methods(http.MethodPost)
 
 	// Expose a Prometheus scrape endpoint.
 	router.Handle("/metrics", promhttp.Handler())
