@@ -74,6 +74,8 @@ endif
 
 KERNEL_NAME := $(shell uname -s | tr A-Z a-z)
 
+GOLANG_BUILD_CACHE ?= ${HOME}/.cache/go-build
+
 #
 # Path to the files with authentication tokens. They will be mounted inside the
 # container that runs test-remote* targets.
@@ -484,6 +486,7 @@ ci-%: checkenv-builddir
 	docker run -ti \
 	--net=host \
 	-v /tmp:/tmp \
+	-v ${GOLANG_BUILD_CACHE}:/go \
 	-v ${OPSTRACE_BUILD_DIR}:/build \
 	-v ${PWD}:/checkout-readonly:ro \
 	-v ${HOME}/.aws:/awsconfig:ro \
