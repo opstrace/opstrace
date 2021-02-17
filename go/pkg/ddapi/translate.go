@@ -175,21 +175,13 @@ func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			promLabelset = append(promLabelset, &l)
 		}
 
-		// Inspiration from
-		// https://github.com/open-telemetry/opentelemetry-go-contrib/blob/v0.15.0/exporters/metric/cortex/cortex.go#L385
-
 		// Note that every service check update comes with a status value of 0,
 		// 1, 2 or 3 and with a timestamp. Consider this to be the data point
 		// we want to store. That is, expect precisely one data point.
-
-		promSamples := make([]prompb.Sample, 0, 1)
-		s := prompb.Sample{
-			Value: float64(checkupdate.Status),
-			// A DD sample timestamp represents seconds since epoch. The
-			// prompb.Sample.Timestamp represents milliseconds since epoch.
+		promSamples := []prompb.Sample{{
+			Value:     float64(checkupdate.Status),
 			Timestamp: checkupdate.Timestamp * 1000,
-		}
-		promSamples = append(promSamples, s)
+		}}
 
 		// Construct the Prometheus protobuf time series fragment, comprised of
 		// a set of labels and a set of samples.
