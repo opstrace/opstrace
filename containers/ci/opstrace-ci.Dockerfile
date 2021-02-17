@@ -84,7 +84,6 @@ RUN curl -fsSLO https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && 
     rm -f go${GOLANG_VERSION}.linux-amd64.tar.gz
 
 ENV GOPATH /go
-RUN mkdir -p $GOPATH/src $GOPATH/bin && chmod -R 777 $GOPATH
 
 ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
 
