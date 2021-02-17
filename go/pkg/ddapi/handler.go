@@ -164,7 +164,7 @@ func (ddcp *DDCortexProxy) HandlerCommonAfterJSONTranslate(
 	w.Write([]byte("{\"status\": \"ok\"}"))
 }
 
-func (ddcp *DDCortexProxy) CheckPostHandler(w http.ResponseWriter, r *http.Request) {
+func (ddcp *DDCortexProxy) HandlerCheckPost(w http.ResponseWriter, r *http.Request) {
 	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
 		// Error response has already been written. Terminate request handling.
 		return
@@ -189,7 +189,7 @@ func (ddcp *DDCortexProxy) CheckPostHandler(w http.ResponseWriter, r *http.Reque
 	ddcp.HandlerCommonAfterJSONTranslate(w, r, promTimeSeriesFragments)
 }
 
-func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
+func (ddcp *DDCortexProxy) HandlerSeriesPost(w http.ResponseWriter, r *http.Request) {
 	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
 		// Error response has already been written. Terminate request handling.
 		return
