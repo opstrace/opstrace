@@ -94,5 +94,6 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 # Set up markdownlint in the container image so that we can lint right away! :)
 RUN npm install -g markdownlint-cli@0.26.0
 
-# Set up `addlicense` so that we can use that right away
-RUN (cd /tmp && go get github.com/google/addlicense)
+# Set up `addlicense` so that we can use that right away. Install it to
+# /usr/local.
+RUN (cd /tmp && GOPATH=/usr/local/ go get github.com/google/addlicense)
