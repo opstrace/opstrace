@@ -117,9 +117,26 @@ func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			// to keep cardinality minimal.
 			"instance": checkupdate.Hostname,
 			"job":      "ddagent",
-			// Store message as label value for now. May need processing in the
-			// future.
-			"message": checkupdate.Message,
+			// Do not store message as label value for now. This creates a
+			// separate time series for the same service check -- which is
+			// not the simplest thing we can do for starters. Instead, document
+			// that the `message` associated with a service check gauge update
+			// is not entering the system. A reasonable limitation for the
+			// initiatal state.
+			// "message": checkupdate.Message,
+		}
+
+		// As we would (for now) otherwise drop the mesasge, be nice and at
+		// least log the message when status is non-zero (indicating a
+		// problem).
+		if checkupdate.Status > 0 && checkupdate.Message != "" {
+			log.Infof(
+				"Message for check %s with status %v (timestamp: %v): %s",
+				checkupdate.Name,
+				checkupdate.Status,
+				checkupdate.Timestamp,
+				checkupdate.Message,
+			)
 		}
 
 		// Translate tags into label k/v pairs. Upon unexpected tag
