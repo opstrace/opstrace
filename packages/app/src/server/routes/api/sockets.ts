@@ -23,7 +23,7 @@ import { ActionType, isActionOf } from "typesafe-actions";
 import env from "server/env";
 import * as actions from "state/clients/websocket/actions";
 import ModuleClient from "server/moduleClient";
-import { log } from "@opstrace/utils/src/log";
+import { log } from "@opstrace/utils";
 
 type WebsocketEvents = ActionType<typeof actions>;
 
@@ -84,7 +84,7 @@ class SocketClient {
       action.payload.output
     );
     // broadcast to all watching this file that new content is available (including self)
-    this.emit(room, actions.compilerUpdated({fileId: action.payload.fileId}));
+    this.emit(room, actions.compilerUpdated({ fileId: action.payload.fileId }));
   }
 
   onFileEdit(socket: Socket, action: ReturnType<typeof actions.edit>) {
