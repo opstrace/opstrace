@@ -246,6 +246,32 @@ func (suite *Suite) TestHandlerSeriesPost_OutOfOrderSamples() {
 	)
 }
 
+func (suite *Suite) TestHandlerSeriesPost_NonMonotonicSamples() {
+	// Test case where the points in the JSON doc are not ordered in time.
+	// The translation layer is expected to sort them in time before
+	// constructing the Prom write request.
+	jsonText1 := `
+	{
+		"series": [{
+			"metric": "unit.test.metric.aaa",
+			"points": [[1610030001, 1], [1610030000, 2], [1610030002, 3]],
+			"type": "rate",
+			"interval": 10
+			}
+		]
+	}
+	`
+	// Valid URL, valid method. Invalid data (duplicate timestamps)
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series",
+		strings.NewReader(jsonText1),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	suite.ddcp.HandlerSeriesPost(w, req)
+	expectInsertSuccessResponse(w, suite.T())
+}
 func expectInsertSuccessResponse(w *httptest.ResponseRecorder, t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, 202, resp.StatusCode)
