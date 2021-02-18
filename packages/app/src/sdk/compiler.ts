@@ -442,13 +442,13 @@ async function generateDts(sourceFiles: string[]) {
   }
 }
 
-const workerLoaderRegex = /^worker-loader\!(.+)/;
+const workerLoaderRegex = /^worker-loader!(.+)/;
 
 const workerLoader: esbuild.Plugin = {
   name: "worker-loader",
   setup(build) {
     build.onResolve({ filter: workerLoaderRegex }, args => {
-      let workerPath = args.path.replace(/^worker-loader\!/, "");
+      let workerPath = args.path.replace(/^worker-loader!/, "");
 
       if (workerPath.startsWith(".")) {
         return {
@@ -463,7 +463,7 @@ const workerLoader: esbuild.Plugin = {
     });
 
     build.onLoad({ filter: /.*/, namespace: "worker-loader" }, async args => {
-      let workerPath = args.path.replace(/^worker-loader\!/, "");
+      let workerPath = args.path.replace(/^worker-loader!/, "");
       let filePath = workerPath;
 
       if (![".js"].includes(path.extname(workerPath))) {

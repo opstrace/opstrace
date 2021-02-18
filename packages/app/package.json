@@ -264,6 +264,7 @@
     "lib:gen": "ts-node src/sdk/compiler.ts",
     "lib:watch": "ts-node src/sdk/compiler.ts --watch"
   },
+  "eslintIgnore": ["src/workers/monaco-typescript-4.1.1/**/*", "src/workers/opscript/**/*"],
   "proxy": {
     "/_": {
       "target": "http://localhost:3001",
@@ -318,6 +319,7 @@
       "^client/(.*)$": "<rootDir>/src/client/$1",
       "^server/(.*)$": "<rootDir>/src/server/$1",
       "^state/(.*)$": "<rootDir>/src/state/$1",
+      "^workers$": "<rootDir>/src/workers/index",
       "^workers/(.*)$": "<rootDir>/src/workers/$1",
       "^react-native$": "react-native-web",
       "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",

@@ -18,7 +18,7 @@ import React from "react";
 
 import { PickerOption, usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
-import { useLatestBranchTypescriptFiles } from "state/file/hooks/useFiles";
+import { useLatestBranchFiles } from "state/file/hooks/useFiles";
 import { requestOpenFileWithParams } from "state/file/actions";
 import { getFileUri } from "state/file/utils/uri";
 import { useCurrentBranch } from "state/branch/hooks/useBranches";
@@ -36,7 +36,7 @@ function fileToPickerOption(file: TextFileModel): PickerOption {
 const ModulePicker = () => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const files = useLatestBranchTypescriptFiles();
+  const files = useLatestBranchFiles();
   const currentBranch = useCurrentBranch();
 
   const { activatePickerWithText } = usePickerService(

@@ -422,8 +422,7 @@ interface MyCompletionItem extends languages.CompletionItem {
   offset: number;
 }
 
-export class SuggestAdapter
-  extends Adapter
+export class SuggestAdapter extends Adapter
   implements languages.CompletionItemProvider {
   public get triggerCharacters(): string[] {
     return ["."];
@@ -576,8 +575,7 @@ function tagToString(tag: ts.JSDocTagInfo): string {
   return tagLabel;
 }
 
-export class SignatureHelpAdapter
-  extends Adapter
+export class SignatureHelpAdapter extends Adapter
   implements languages.SignatureHelpProvider {
   public signatureHelpTriggerCharacters = ["(", ","];
 
@@ -641,8 +639,7 @@ export class SignatureHelpAdapter
 
 // --- hover ------
 
-export class QuickInfoAdapter
-  extends Adapter
+export class QuickInfoAdapter extends Adapter
   implements languages.HoverProvider {
   public async provideHover(
     model: editor.ITextModel,
@@ -682,8 +679,7 @@ export class QuickInfoAdapter
 
 // --- occurrences ------
 
-export class OccurrencesAdapter
-  extends Adapter
+export class OccurrencesAdapter extends Adapter
   implements languages.DocumentHighlightProvider {
   public async provideDocumentHighlights(
     model: editor.ITextModel,
@@ -766,8 +762,7 @@ export class DefinitionAdapter extends Adapter {
 
 // --- references ------
 
-export class ReferenceAdapter
-  extends Adapter
+export class ReferenceAdapter extends Adapter
   implements languages.ReferenceProvider {
   constructor(
     private readonly _libFiles: LibFiles,
@@ -820,8 +815,7 @@ export class ReferenceAdapter
 
 // --- outline ------
 
-export class OutlineAdapter
-  extends Adapter
+export class OutlineAdapter extends Adapter
   implements languages.DocumentSymbolProvider {
   public async provideDocumentSymbols(
     model: editor.ITextModel,
@@ -952,8 +946,7 @@ export abstract class FormatHelper extends Adapter {
   }
 }
 
-export class FormatAdapter
-  extends FormatHelper
+export class FormatAdapter extends FormatHelper
   implements languages.DocumentRangeFormattingEditProvider {
   public async provideDocumentRangeFormattingEdits(
     model: editor.ITextModel,
@@ -986,8 +979,7 @@ export class FormatAdapter
   }
 }
 
-export class FormatOnTypeAdapter
-  extends FormatHelper
+export class FormatOnTypeAdapter extends FormatHelper
   implements languages.OnTypeFormattingEditProvider {
   get autoFormatTriggerCharacters() {
     return [";", "}", "\n"];
@@ -1020,8 +1012,7 @@ export class FormatOnTypeAdapter
 
 // --- code actions ------
 
-export class CodeActionAdaptor
-  extends FormatHelper
+export class CodeActionAdaptor extends FormatHelper
   implements languages.CodeActionProvider {
   public async provideCodeActions(
     model: editor.ITextModel,
