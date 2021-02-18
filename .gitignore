@@ -32,7 +32,7 @@ tsconfig.tsbuildinfo
 **/build
 **/declarations
 **/tmp-lib
-**/packages/app/lib
+packages/app/lib
 **/lib/utils/lib
 # jest coverage directory
 coverage/
