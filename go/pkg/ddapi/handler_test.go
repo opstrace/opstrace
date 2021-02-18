@@ -272,6 +272,32 @@ func (suite *Suite) TestHandlerSeriesPost_NonMonotonicSamples() {
 	suite.ddcp.HandlerSeriesPost(w, req)
 	expectInsertSuccessResponse(w, suite.T())
 }
+
+func (suite *Suite) TestHandlerCheckPost_InsertOneSample() {
+	jsonText := `
+	[
+	  {
+		"check": "unit.test.check.aaa",
+		"host_name": "x1carb6",
+		"timestamp": 1613495770,
+		"status": 0,
+		"message": "",
+		"tags": ["check:disk"]
+	  }
+	]
+	`
+	// Valid URL, valid method. Invalid data (duplicate timestamps)
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/check_run",
+		strings.NewReader(jsonText),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	suite.ddcp.HandlerCheckPost(w, req)
+	expectInsertSuccessResponse(w, suite.T())
+}
+
 func expectInsertSuccessResponse(w *httptest.ResponseRecorder, t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, 202, resp.StatusCode)
