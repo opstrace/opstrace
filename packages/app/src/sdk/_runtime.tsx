@@ -79,33 +79,33 @@ const GeneralSkeleton = () => (
   <Skeleton variant="rect" width="100%" height="100%" />
 );
 
+const Loading = (
+  <Layout>
+    <Row>
+      <GeneralSkeleton />
+      <GeneralSkeleton />
+    </Row>
+    <Row>
+      <Column>
+        <GeneralSkeleton />
+      </Column>
+      <Column>
+        <GeneralSkeleton />
+      </Column>
+    </Row>
+  </Layout>
+);
+
 const RuntimeRenderer = (props: {
   mod: any;
   error: Error | null;
 }): JSX.Element => {
-  const loading = (
-    <Layout>
-      <Row>
-        <GeneralSkeleton />
-        <GeneralSkeleton />
-      </Row>
-      <Row>
-        <Column>
-          <GeneralSkeleton />
-        </Column>
-        <Column>
-          <GeneralSkeleton />
-        </Column>
-      </Row>
-    </Layout>
-  );
-
   const MainModule = useMemo(() => {
     if (props.error) {
       return <GlobalErrorComponent error={props.error} />;
     }
     if (!props.mod) {
-      return loading;
+      return Loading;
     }
     if (typeof props.mod !== "function") {
       return <GlobalErrorComponent />;

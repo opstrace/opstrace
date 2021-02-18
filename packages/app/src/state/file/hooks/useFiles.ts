@@ -25,7 +25,7 @@ import {
   useCurrentBranchName
 } from "state/branch/hooks/useBranches";
 
-const getFiles = createSelector(
+export const getFiles = createSelector(
   (state: State) => state.files.filesByBranch,
   files => files
 );
@@ -134,7 +134,7 @@ export function useBranchFiles() {
 /**
  * get all of the latest ts files for each module.
  */
-export function useLatestBranchTypescriptFiles() {
+export function useLatestBranchFiles() {
   const files = useBranchFiles();
 
   if (!files) {

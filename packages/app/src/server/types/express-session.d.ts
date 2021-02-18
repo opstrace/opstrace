@@ -15,7 +15,7 @@
  */
 import "express";
 import { Session } from "express-session";
-import http from "http";
+import "http";
 
 declare module "express-session" {
   interface SessionData {
@@ -26,13 +26,13 @@ declare module "express-session" {
   }
 }
 
-declare module "http" {  
+declare module "http" {
   interface IncomingMessage {
     session: Session & {
       email: string;
       username: string;
       avatar: string;
       opaqueUserId: string;
-    }
+    };
   }
 }

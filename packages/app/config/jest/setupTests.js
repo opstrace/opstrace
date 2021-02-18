@@ -20,3 +20,10 @@ require("regenerator-runtime/runtime");
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 require("@testing-library/jest-dom/extend-expect");
+
+// Mock our workers file because Jest will have a hard time resolving our workers
+jest.mock("workers", () => {
+  return {
+    getOpScriptWorker: () => {}
+  };
+});
