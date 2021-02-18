@@ -103,7 +103,7 @@ The docker-compose environment includes a pgadmin instance for inspecting Postgr
 ### Troubleshooting
 
 __Killed: error Command failed with exit code 137.__: This usually means your default memory for docker is too low. See docker documentation on increasing the default memory. For MacOS users, you can
-navigate to: Docker for Mac > Preferences > resources and increase the memory setting >= 4GB.
+navigate to: Docker for Mac > Preferences > resources and increase the memory setting >= 4GB. Recommended to allocate 10GB and 6 cpus.
 
 ## Test Build and Deploy
 
