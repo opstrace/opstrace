@@ -107,22 +107,36 @@ export function* ensureCloudSQLExists({
   // To save us some errors in our logs, just wait a bit here.
   // Would be nice to find a clean way to wait for the peering to be complete
   // but I couldn't find anything to help me with that.
-  yield delay(10 * SECOND);
+  let attemptNumber = 0;
+  const sqlInstanceCreationDeadline = Date.now() + 2 * 60 * SECOND; // 2 mins.
 
   log.info(`Ensure SQLInstance exists`);
-  const existingInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
-    ensureSQLInstanceExists,
-    { instance, opstraceClusterName }
-  );
 
-  if (!existingInstance.name) {
-    throw Error("SQLInstance did not return a name");
+  while (sqlInstanceCreationDeadline > Date.now()) {
+    log.info(`Attempt ${attemptNumber++} to create SQLInstance`);
+    yield delay(10 * SECOND);
+
+    try {
+      const existingInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
+        ensureSQLInstanceExists,
+        { instance, opstraceClusterName }
+      );
+
+      if (!existingInstance.name) {
+        throw Error("SQLInstance did not return a name");
+      }
+
+      log.info(`Ensure SQLDatabase exists`);
+      yield call(ensureSQLDatabaseExists, { opstraceClusterName });
+
+      return existingInstance;
+    } catch (err) {
+      log.debug("Creating SQLInstance failed, retrying: %s", err);
+    }
   }
-
-  log.info(`Ensure SQLDatabase exists`);
-  yield call(ensureSQLDatabaseExists, { opstraceClusterName });
-
-  return existingInstance;
+  throw Error(
+    `SQLInstance creation deadline hit after ${attemptNumber} attempts`
+  );
 }
 
 export function* ensureCloudSQLDoesNotExist({
