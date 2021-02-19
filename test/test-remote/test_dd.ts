@@ -319,7 +319,7 @@ suite("DD API test suite", function () {
   });
 
   test("dd_api_run_agent_container_query_sysuptime", async function () {
-    const now = ZonedDateTime.now();
+    // const now = ZonedDateTime.now();
 
     // The DD agent container is currently configured to send metrics to the DD
     // API endpoint for the 'default' tenant.
