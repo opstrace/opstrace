@@ -66,21 +66,6 @@ if (!REDIS_HOST && !isDevEnvironment) {
   throw Error("must provide env vars: REDIS_HOST");
 }
 
-const S3_ENDPOINT = process.env.S3_ENDPOINT;
-if (!S3_ENDPOINT) {
-  throw Error("must provide env vars: S3_ENDPOINT");
-}
-
-const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
-if (!S3_BUCKET_NAME) {
-  throw Error("must provide env vars: S3_BUCKET_NAME");
-}
-
-const S3_BUCKET_REGION = process.env.S3_BUCKET_REGION;
-if (!S3_BUCKET_REGION) {
-  throw Error("must provide env vars: S3_BUCKET_REGION");
-}
-
 const envars = {
   PORT,
   REDIS_HOST,
@@ -88,9 +73,6 @@ const envars = {
   AUTH0_DOMAIN,
   AUTH0_CLIENT_ID,
   UI_DOMAIN,
-  S3_ENDPOINT,
-  S3_BUCKET_NAME,
-  S3_BUCKET_REGION,
   DOMAIN,
   COOKIE_SECRET,
   GRAPHQL_ENDPOINT_HOST,
