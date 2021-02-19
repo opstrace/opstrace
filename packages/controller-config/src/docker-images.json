@@ -1,7 +1,7 @@
 {
   "addonResizer": "k8s.gcr.io/addon-resizer:1.8.4",
-  "certManagerCAInjector": "quay.io/jetstack/cert-manager-cainjector:v1.1.0",
-  "certManagerController": "quay.io/jetstack/cert-manager-controller:v1.1.0",
+  "certManagerCAInjector": "quay.io/jetstack/cert-manager-cainjector:v1.2.0",
+  "certManagerController": "quay.io/jetstack/cert-manager-controller:v1.2.0",
   "configApi": "opstrace/config-api:d4de7ba3a503780c7f5ffd1fba5ff073d662dba2",
   "cortex": "cortexproject/cortex:master-d9125be",
   "cortexApiProxy": "opstrace/cortex-api:f04cb9669fb32561f81b56a7b0dd864b",
