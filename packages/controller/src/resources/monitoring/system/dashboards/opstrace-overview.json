@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "id": 36,
+  "id": 24,
   "links": [],
   "panels": [
     {
@@ -26,149 +26,6 @@
         "w": 24,
         "x": 0,
         "y": 0
-      },
-      "id": 37,
-      "panels": [],
-      "title": "TCO KPIs",
-      "type": "row"
-    },
-    {
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "decimals": 1,
-          "mappings": [],
-          "max": 25000000,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 22000000
-              },
-              {
-                "color": "red",
-                "value": 25000000
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 1
-      },
-      "id": 49,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["mean"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.4",
-      "targets": [
-        {
-          "expr": "sum(cortex_ingester_memory_series{job=~\"cortex.ingester\"}\n/ on(namespace) group_left\nmax by (namespace) (cortex_distributor_replication_factor{job=~\"cortex.distributor\"}))",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "[METRICS] Active Metric Series",
-      "type": "stat"
-    },
-    {
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "decimals": 1,
-          "mappings": [],
-          "max": 50000000000,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 45000000010
-              },
-              {
-                "color": "red",
-                "value": 50000000000
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
-      },
-      "id": 51,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["delta"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.4",
-      "targets": [
-        {
-          "expr": "sum(loki_distributor_lines_received_total)",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "[LOGS] Log Entry Rate (per dashboard interval)",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
       },
       "id": 26,
       "panels": [],
@@ -200,7 +57,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 10
+        "y": 1
       },
       "hiddenSeries": false,
       "id": 18,
@@ -240,7 +97,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[METRICS] API proxy, /api/prom/push, POST requests, rate by status code, (5m mean)",
+      "title": "[METRICS] API proxy, /api/prom/push, POST requests, rate by status code, (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -301,7 +158,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 10
+        "y": 1
       },
       "hiddenSeries": false,
       "id": 20,
@@ -348,7 +205,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS] API proxy /loki/api/v1/push, POSTs, rate by status code (5m mean)",
+      "title": "[LOGS] API proxy /loki/api/v1/push, POSTs, rate by status code (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -414,7 +271,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 9
       },
       "hiddenSeries": false,
       "id": 2,
@@ -513,7 +370,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 9
       },
       "hiddenSeries": false,
       "id": 22,
@@ -545,13 +402,13 @@
         {
           "expr": "sum(rate(loki_distributor_lines_received_total[5m]))",
           "interval": "",
-          "legendFormat": "log entry rate",
+          "legendFormat": "entry rate",
           "refId": "A"
         },
         {
-          "expr": "avg(sum(rate(loki_distributor_lines_received_total[12h])))",
+          "expr": "sum(rate(loki_distributor_bytes_received_total[5m]))/sum(rate(loki_distributor_lines_received_total[5m]))",
           "interval": "",
-          "legendFormat": "log entry rate (12hr mean)",
+          "legendFormat": "bytes per entry",
           "refId": "B"
         }
       ],
@@ -559,12 +416,13 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS]  distributor: tenant: ingest rate before rejection (5m mean)",
+      "title": "[LOGS]  Rate of log entries vs. bytes per entry (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
+      "transformations": [],
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -584,7 +442,7 @@
         },
         {
           "format": "short",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -616,7 +474,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 26
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 16,
@@ -733,7 +591,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 26
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 32,
@@ -863,7 +721,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 34
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 64,
@@ -959,7 +817,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 34
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 62,
@@ -1059,7 +917,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 42
+        "y": 33
       },
       "hiddenSeries": false,
       "id": 46,
@@ -1162,7 +1020,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 42
+        "y": 33
       },
       "hiddenSeries": false,
       "id": 47,
@@ -1260,7 +1118,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 50
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 59,
@@ -1359,7 +1217,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 50
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 60,
@@ -1444,7 +1302,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 49
       },
       "id": 24,
       "panels": [],
@@ -1470,7 +1328,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 59
+        "y": 50
       },
       "hiddenSeries": false,
       "id": 4,
@@ -1585,7 +1443,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 59
+        "y": 50
       },
       "hiddenSeries": false,
       "id": 10,
@@ -1691,7 +1549,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 67
+        "y": 58
       },
       "hiddenSeries": false,
       "id": 6,
@@ -1801,7 +1659,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 67
+        "y": 58
       },
       "hiddenSeries": false,
       "id": 8,
@@ -1911,7 +1769,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 75
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 28,
@@ -2016,7 +1874,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 75
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 30,
@@ -2118,7 +1976,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 83
+        "y": 74
       },
       "hiddenSeries": false,
       "id": 57,
@@ -2232,7 +2090,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 83
+        "y": 74
       },
       "hiddenSeries": false,
       "id": 55,
@@ -2317,6 +2175,198 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 82
+      },
+      "hiddenSeries": false,
+      "id": 66,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n",
+          "interval": "",
+          "legendFormat": "",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[METRICS] PVC Storage Used Percentage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 82
+      },
+      "hiddenSeries": false,
+      "id": 67,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n",
+          "interval": "",
+          "legendFormat": "",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[LOGS] PVC Storage Used Percentage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
           "custom": {},
           "links": []
         },
@@ -2328,7 +2378,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 91
+        "y": 90
       },
       "hiddenSeries": false,
       "id": 12,
@@ -2457,7 +2507,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 100
+        "y": 99
       },
       "hiddenSeries": false,
       "id": 14,
@@ -2543,7 +2593,7 @@
     "list": []
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
