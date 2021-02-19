@@ -168,7 +168,8 @@ export async function startDDagentContainer() {
   const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
 
   // It's known that this may take a while after DD agent startup.
-  const maxWaitSeconds = 40;
+  // Note: also see https://github.com/opstrace/opstrace/issues/384
+  const maxWaitSeconds = 120;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   log.info(
     "Waiting for needle to appear in container log, deadline in %s s. Needle: %s",
@@ -211,12 +212,9 @@ export async function startDDagentContainer() {
     if (mtime() > deadline) {
       log.info("deadline hit");
       await terminateContainer();
-
-      // NOTE for now, expected to hit the deadline. See
-      // https://github.com/opstrace/opstrace/issues/393
-      // throw new Error(
-      //   "DD agent container setup failed: deadline hit waiting for log needle"
-      // );
+      throw new Error(
+        "DD agent container setup failed: deadline hit waiting for log needle"
+      );
     }
     const fileHeadBytes = await readFirstNBytes(outerrfilePath, 10 ** 5);
     if (fileHeadBytes.includes(Buffer.from(logNeedle, "utf-8"))) {
@@ -318,63 +316,56 @@ suite("DD API test suite", function () {
     assert.strictEqual(resultArray[0]["values"].length > 5, true);
   });
 
-  test("dd_api_run_agent_container_query_sysuptime", async function () {
-    // const now = ZonedDateTime.now();
+  // test("dd_api_run_agent_container_query_sysuptime", async function () {
+  //   const now = ZonedDateTime.now();
 
-    // The DD agent container is currently configured to send metrics to the DD
-    // API endpoint for the 'default' tenant.
-    const terminateContainer = await startDDagentContainer();
+  //   // The DD agent container is currently configured to send metrics to the DD
+  //   // API endpoint for the 'default' tenant.
+  //   const terminateContainer = await startDDagentContainer();
 
-    // NOTE for now, expected to hit the deadline. See
-    // https://github.com/opstrace/opstrace/issues/393
+  //   // Wait for some more samples to be pushed. Terminate contaienr before
+  //   // starting the query phase, so that the termination happens more or less
+  //   // reliably (regardless of errors during query phase).
+  //   await sleep(15);
+  //   await terminateContainer();
+  //   const searchStart = now.minusMinutes(45);
+  //   const searchEnd = now.plusMinutes(10);
 
-    // Wait for some more samples to be pushed. Terminate contaienr before
-    // starting the query phase, so that the termination happens more or less
-    // reliably (regardless of errors during query phase).
-    await sleep(15);
-    await terminateContainer();
+  //   // Note that this current setup does not insert a unique metric stream,
+  //   // i.e. if the test passes it does only guarantee that the insertion
+  //   // succeeded when the cluster is fresh (when this test was not run before
+  //   // against the same cluster. TODO: think about how to set a unique label
+  //   // here.
+  //   const queryParams = {
+  //     // This implicitly checks for two labels to be set by the translation
+  //     // layer. Change with care!
+  //     query: `system_uptime{job="ddagent", type="gauge"}`,
+  //     start: searchStart.toEpochSecond().toString(),
+  //     end: searchEnd.toEpochSecond().toString(),
+  //     step: "60s"
+  //   };
 
-    // NOTE for now, expected to hit the deadline. See
-    // https://github.com/opstrace/opstrace/issues/393
+  //   const resultArray = await waitForCortexQueryResult(
+  //     TENANT_DEFAULT_CORTEX_API_BASE_URL,
+  //     queryParams
+  //   );
 
-    // const searchStart = now.minusMinutes(45);
-    // const searchEnd = now.plusMinutes(10);
+  //   log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
 
-    // // Note that this current setup does not insert a unique metric stream,
-    // // i.e. if the test passes it does only guarantee that the insertion
-    // // succeeded when the cluster is fresh (when this test was not run before
-    // // against the same cluster. TODO: think about how to set a unique label
-    // // here.
-    // const queryParams = {
-    //   // This implicitly checks for two labels to be set by the translation
-    //   // layer. Change with care!
-    //   query: `system_uptime{job="ddagent", type="gauge"}`,
-    //   start: searchStart.toEpochSecond().toString(),
-    //   end: searchEnd.toEpochSecond().toString(),
-    //   step: "60s"
-    // };
+  //   assert(resultArray[0].values.length > 1);
+  //   // confirm that there is just one stream (set of labels)
+  //   assert(resultArray.length == 1);
 
-    // const resultArray = await waitForCortexQueryResult(
-    //   TENANT_DEFAULT_CORTEX_API_BASE_URL,
-    //   queryParams
-    // );
+  //   // Expected structure:
+  //   // "metric": {
+  //   //   "__name__": "system_uptime",
+  //   //   "instance": "x1carb6",
+  //   //   "job": "ddagent",
+  //   //   "source_type_name": "System",
+  //   //   "type": "gauge"
+  //   // },
+  //   assert(resultArray[0].metric.source_type_name === "System");
 
-    // log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
-
-    // assert(resultArray[0].values.length > 1);
-    // // confirm that there is just one stream (set of labels)
-    // assert(resultArray.length == 1);
-
-    // // Expected structure:
-    // // "metric": {
-    // //   "__name__": "system_uptime",
-    // //   "instance": "x1carb6",
-    // //   "job": "ddagent",
-    // //   "source_type_name": "System",
-    // //   "type": "gauge"
-    // // },
-    // assert(resultArray[0].metric.source_type_name === "System");
-
-    // log.info("values seen: %s", JSON.stringify(resultArray[0].values, null, 2));
-  });
+  //   log.info("values seen: %s", JSON.stringify(resultArray[0].values, null, 2));
+  // });
 });
