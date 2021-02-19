@@ -168,7 +168,8 @@ export async function startDDagentContainer() {
   const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
 
   // It's known that this may take a while after DD agent startup.
-  const maxWaitSeconds = 40;
+  // Note: also see https://github.com/opstrace/opstrace/issues/384
+  const maxWaitSeconds = 120;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   log.info(
     "Waiting for needle to appear in container log, deadline in %s s. Needle: %s",
