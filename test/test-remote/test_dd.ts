@@ -53,7 +53,7 @@ function ddApiSeriesUrl() {
 }
 
 function copyLEcertToHost() {
-  const src = `${__dirname}/containers/fakelerootx1.pem`;
+  const src = `${__dirname}/containers/letsencrypt-stg-root-x1.pem`;
   const dst = createTempfile("le-staging-root-ca", ".pem");
   log.info("copy %s to %s", src, dst);
   fs.copyFileSync(src, dst);
@@ -70,11 +70,11 @@ export async function startDDagentContainer() {
   // Prepare for mounting Let's Encrypt Staging root CA into the DD agent
   // container (the goal is that the Golang-based HTTP client used in the DD
   // agent discovers it when doing HTTP requests). Note: the path
-  // `${__dirname}/containers/fakelerootx1.pem` is valid _in the container_
-  // running the test runner, but not on the host running the test runner
-  // container. For being able to mount this file into the DD agent container,
-  // first copy it to a location that's known to be shared between the test
-  // runner container and the host.
+  // `${__dirname}/containers/letsencrypt-stg-root-x1.pem` is valid _in the
+  // container_ running the test runner, but not on the host running the test
+  // runner container. For being able to mount this file into the DD agent
+  // container, first copy it to a location that's known to be shared between
+  // the test runner container and the host.
   const leStagingRootCAFilePathOnHost = copyLEcertToHost();
 
   // Use magic DD agent environment variables to point the DD agent to
@@ -316,56 +316,56 @@ suite("DD API test suite", function () {
     assert.strictEqual(resultArray[0]["values"].length > 5, true);
   });
 
-  // test("dd_api_run_agent_container_query_sysuptime", async function () {
-  //   const now = ZonedDateTime.now();
+  test("dd_api_run_agent_container_query_sysuptime", async function () {
+    const now = ZonedDateTime.now();
 
-  //   // The DD agent container is currently configured to send metrics to the DD
-  //   // API endpoint for the 'default' tenant.
-  //   const terminateContainer = await startDDagentContainer();
+    // The DD agent container is currently configured to send metrics to the DD
+    // API endpoint for the 'default' tenant.
+    const terminateContainer = await startDDagentContainer();
 
-  //   // Wait for some more samples to be pushed. Terminate contaienr before
-  //   // starting the query phase, so that the termination happens more or less
-  //   // reliably (regardless of errors during query phase).
-  //   await sleep(15);
-  //   await terminateContainer();
-  //   const searchStart = now.minusMinutes(45);
-  //   const searchEnd = now.plusMinutes(10);
+    // Wait for some more samples to be pushed. Terminate contaienr before
+    // starting the query phase, so that the termination happens more or less
+    // reliably (regardless of errors during query phase).
+    await sleep(15);
+    await terminateContainer();
+    const searchStart = now.minusMinutes(45);
+    const searchEnd = now.plusMinutes(10);
 
-  //   // Note that this current setup does not insert a unique metric stream,
-  //   // i.e. if the test passes it does only guarantee that the insertion
-  //   // succeeded when the cluster is fresh (when this test was not run before
-  //   // against the same cluster. TODO: think about how to set a unique label
-  //   // here.
-  //   const queryParams = {
-  //     // This implicitly checks for two labels to be set by the translation
-  //     // layer. Change with care!
-  //     query: `system_uptime{job="ddagent", type="gauge"}`,
-  //     start: searchStart.toEpochSecond().toString(),
-  //     end: searchEnd.toEpochSecond().toString(),
-  //     step: "60s"
-  //   };
+    // Note that this current setup does not insert a unique metric stream,
+    // i.e. if the test passes it does only guarantee that the insertion
+    // succeeded when the cluster is fresh (when this test was not run before
+    // against the same cluster. TODO: think about how to set a unique label
+    // here.
+    const queryParams = {
+      // This implicitly checks for two labels to be set by the translation
+      // layer. Change with care!
+      query: `system_uptime{job="ddagent", type="gauge"}`,
+      start: searchStart.toEpochSecond().toString(),
+      end: searchEnd.toEpochSecond().toString(),
+      step: "60s"
+    };
 
-  //   const resultArray = await waitForCortexQueryResult(
-  //     TENANT_DEFAULT_CORTEX_API_BASE_URL,
-  //     queryParams
-  //   );
+    const resultArray = await waitForCortexQueryResult(
+      TENANT_DEFAULT_CORTEX_API_BASE_URL,
+      queryParams
+    );
 
-  //   log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
+    log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
 
-  //   assert(resultArray[0].values.length > 1);
-  //   // confirm that there is just one stream (set of labels)
-  //   assert(resultArray.length == 1);
+    assert(resultArray[0].values.length > 1);
+    // confirm that there is just one stream (set of labels)
+    assert(resultArray.length == 1);
 
-  //   // Expected structure:
-  //   // "metric": {
-  //   //   "__name__": "system_uptime",
-  //   //   "instance": "x1carb6",
-  //   //   "job": "ddagent",
-  //   //   "source_type_name": "System",
-  //   //   "type": "gauge"
-  //   // },
-  //   assert(resultArray[0].metric.source_type_name === "System");
+    // Expected structure:
+    // "metric": {
+    //   "__name__": "system_uptime",
+    //   "instance": "x1carb6",
+    //   "job": "ddagent",
+    //   "source_type_name": "System",
+    //   "type": "gauge"
+    // },
+    assert(resultArray[0].metric.source_type_name === "System");
 
-  //   log.info("values seen: %s", JSON.stringify(resultArray[0].values, null, 2));
-  // });
+    log.info("values seen: %s", JSON.stringify(resultArray[0].values, null, 2));
+  });
 });
