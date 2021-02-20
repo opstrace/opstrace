@@ -29,8 +29,8 @@ import UserPicker from "./UserPicker";
 import AddUserDialog from "./AddUserDialog";
 import DeleteUserDialog from "./DeleteUserDialog";
 import TenantPicker from "./TenantPicker";
-import AddTenantDialog from "./AddTenantDialog";
-import DeleteTenantDialog from "./DeleteTenantDialog";
+// import AddTenantDialog from "./AddTenantDialog";
+// import DeleteTenantDialog from "./DeleteTenantDialog";
 import UserList from "./UserList";
 import TenantList from "./TenantList";
 
@@ -71,9 +71,9 @@ const ClusterSidebar = () => {
     activatePickerWithText("add user: ");
   }, [activatePickerWithText]);
 
-  const addTenant = useCallback(() => {
-    activatePickerWithText("add tenant: ");
-  }, [activatePickerWithText]);
+  // const addTenant = useCallback(() => {
+  //   activatePickerWithText("add tenant: ");
+  // }, [activatePickerWithText]);
 
   const onUserSelect = useCallback(
     (selected: User) => {
@@ -93,11 +93,11 @@ const ClusterSidebar = () => {
       <AddIcon />
     </IconButton>
   );
-  const tenantActions = (
-    <IconButton size="small" onClick={addTenant}>
-      <AddIcon />
-    </IconButton>
-  );
+  // const tenantActions = (
+  //   <IconButton size="small" onClick={addTenant}>
+  //     <AddIcon />
+  //   </IconButton>
+  // );
 
   return (
     <>
@@ -105,14 +105,14 @@ const ClusterSidebar = () => {
       <AddUserDialog />
       <DeleteUserDialog />
       <TenantPicker />
-      <AddTenantDialog />
-      <DeleteTenantDialog />
+      {/* <AddTenantDialog /> */}
+      {/* <DeleteTenantDialog /> */}
       <SideBar>
         <SideBarContainer
           title="Tenants"
           minHeight={100}
           flexGrow={1}
-          actions={tenantActions}
+          // actions={tenantActions}
         >
           <TenantList
             selectedTenantIndex={selectedTenantIndex}
