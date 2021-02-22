@@ -210,19 +210,55 @@ func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
 	return authtokenVerificationPubKey, nil
 }
 
-func ReadAuthTokenVerificationKeyFromEnvOrCrash() {
-	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEY")
+func ReadKeySetJSONFromEnvOrCrash() {
+	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEYS")
 
 	if !present {
-		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY must be set. Exit.")
+		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEYS must be set. Exit.")
 		os.Exit(1)
 	}
 
 	if data == "" {
-		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY must not be empty. Exit.")
+		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEYS must not be empty. Exit.")
 		os.Exit(1)
 	}
 
+	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEYS value: %s", data)
+
+	// Declared an empty interface
+	var keys map[string]string
+	// Unmarshal or Decode the JSON to the interface.
+	jerr := json.Unmarshal([]byte(data), &keys)
+	if jerr != nil {
+		log.Errorf("error while JSON-parsing API_AUTHTOKEN_VERIFICATION_PUBKEYS: %s", jerr)
+		os.Exit(1)
+	}
+
+	for kidFromConfig, pemstring := range keys {
+		log.Infof("parse PEM bytes for key with ID %s", kidFromConfig)
+		// We're interested in processing the (PEM) bytes underneath the string
+		// value.
+		pubkey, err := parseRSAPubKeyPEMBytes([]byte(pemstring))
+		if err != nil {
+			log.Errorf("%s", err)
+			os.Exit(1)
+		}
+
+		kidFromKey := keyIDfromPEM(pemstring)
+		log.Infof("calculated key ID from PEM data: %s", kidFromKey)
+		if kidFromKey != kidFromConfig {
+			log.Errorf("key ID from config (%s) does not match key ID calculated from key (%s)", kidFromConfig, kidFromKey)
+			os.Exit(1)
+		}
+
+		log.Infof(
+			"Parsed RSA public key. Modulus size: %d bits",
+			pubkey.Size()*8)
+
+		// Store in global authenticator key set.
+		authtokenVerificationPubKeys[kidFromConfig] = pubkey
+	}
+}
 	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY value: %s", data)
 
 	// `os.LookupEnv` returns a string. We're interested in processing the
