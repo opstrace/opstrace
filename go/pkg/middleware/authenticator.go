@@ -286,7 +286,7 @@ func compareRequestAuthenticator(w http.ResponseWriter, authTokenUnverified stri
 	return true
 }
 
-func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
+func keyLookupCallback(unveriftoken *jwt.Token) (*rsa.PublicKey, error) {
 	// Receives the parsed, but unverified JWT payload. Can inspect claims to
 	// decide which public key for verification to use. Use this to enforce the
 	// RS256 signing method for now.
@@ -297,7 +297,21 @@ func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
 		return nil, fmt.Errorf(err)
 	}
 
-	return authtokenVerificationPubKeyFallback, nil
+	kid, kidset := unveriftoken.Header["kid"]
+
+	if kidset {
+		pkey, keyknown := authtokenVerificationPubKeys[fmt.Sprintf("%s", kid)]
+		if keyknown {
+			return pkey, nil
+		} else {
+			err := fmt.Sprintf("jwt verif: unknown kid: %s", kid)
+			log.Info(err)
+			return nil, fmt.Errorf(err)
+		}
+	} else {
+		// Key ID not set in auth token. Use fallback.
+		return authtokenVerificationPubKeyFallback, nil
+	}
 }
 
 func ReadKeySetJSONFromEnvOrCrash() {
