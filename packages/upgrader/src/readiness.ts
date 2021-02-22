@@ -23,7 +23,7 @@ import {
   activeStatefulsets,
   activeCertificates
 } from "@opstrace/kubernetes";
-import { CONTROLLER_NAME } from "@opstrace/controller";
+import { CONTROLLER_NAME } from "@opstrace/controller-config";
 
 import { State } from "./reducer";
 

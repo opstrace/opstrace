@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-export * from "./actions";
-export * from "./helpers";
-export * from "./reducer";
-export * from "./types";
-export * from "./tasks";
-export * from "./errors";
-export * from "./docker-images";
-
-export { CONTROLLER_NAME } from "./resources/controller";
+/**
+ * Generates a random 75 char long string of alphanumeric characters
+ */
+export function generateSecretValue(): string {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
+}

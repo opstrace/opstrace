@@ -18,21 +18,9 @@ import { State } from "./reducer";
 import { ControllerConfigType } from "@opstrace/controller-config";
 import { Tenant } from "@opstrace/tenants";
 
+export { generateSecretValue } from "@opstrace/controller-config";
+
 export const DEVELOPMENT = "development";
-/**
- * Generates a random 75 char long string of alphanumeric characters
- */
-export function generateSecretValue(): string {
-  return (
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15)
-  );
-}
 /**
  * currentVersion returns the version of this controller.
  * If running with --development, currentVersion will return "development"
