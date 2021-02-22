@@ -72,6 +72,7 @@ func main() {
 
 	if !disableAPIAuthentication {
 		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+		middleware.ReadKeySetJSONFromEnvOrCrash()
 	}
 
 	ddcp := ddapi.NewDDCortexProxy(tenantName, remoteWriteURL, disableAPIAuthentication)

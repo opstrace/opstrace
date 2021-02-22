@@ -16,7 +16,9 @@ package middleware
 
 import (
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"net/http"
@@ -24,9 +26,9 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	json "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 )
-
 
 /*
 
@@ -115,6 +117,9 @@ indentation.
 // Use a single key for now. Further down the road there should be support
 // for multiple public keys, each identified by a key id.
 var authtokenVerificationPubKey *rsa.PublicKey
+
+// map for key set. Key of map: key ID (sha1 of PEM bytes?)
+var authtokenVerificationPubKeys map[string]*rsa.PublicKey
 
 // HTTP Request header used by GetTenant when disableAPIAuthentication is true and requireTenantName is nil.
 // This is only meant for use in testing, and lines up with the tenant HTTP header used by Cortex and Loki.
@@ -344,6 +349,7 @@ func ReadKeySetJSONFromEnvOrCrash() {
 		authtokenVerificationPubKeys[kidFromConfig] = pubkey
 	}
 }
+
 func keyIDfromPEM(pemstring string) string {
 	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
 	h := sha1.New()
@@ -353,6 +359,24 @@ func keyIDfromPEM(pemstring string) string {
 	h.Write([]byte(strings.TrimSpace(pemstring)))
 	return hex.EncodeToString(h.Sum(nil))
 }
+
+func LegacyReadAuthTokenVerificationKeyFromEnv() {
+	// Upgrade consideration: support for one pubkey -> support for multiple
+	// pubkeys: legacy auth tokens don't encode a key id. Read legacy env var,
+	// do not fail if not set. If set: store key as fallback, for tokens that
+	// do not encode a key id. That way, an Opstrace cluster state is supported
+	// that is in mixed state (with valid auth tokens of both types).
+	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEY")
+
+	if !present {
+		log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY is not set")
+		return
+	}
+
+	if data == "" {
+		log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY is empty")
+		return
+	}
 
 	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY value: %s", data)
 
