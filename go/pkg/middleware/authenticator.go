@@ -116,7 +116,7 @@ indentation.
 
 // Use a single key for now. Further down the road there should be support
 // for multiple public keys, each identified by a key id.
-var authtokenVerificationPubKey *rsa.PublicKey
+var authtokenVerificationPubKeyFallback *rsa.PublicKey
 
 // map for key set. Key of map: key ID (sha1 of PEM bytes?)
 var authtokenVerificationPubKeys map[string]*rsa.PublicKey
@@ -297,7 +297,7 @@ func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
 		return nil, fmt.Errorf(err)
 	}
 
-	return authtokenVerificationPubKey, nil
+	return authtokenVerificationPubKeyFallback, nil
 }
 
 func ReadKeySetJSONFromEnvOrCrash() {
@@ -324,6 +324,9 @@ func ReadKeySetJSONFromEnvOrCrash() {
 		os.Exit(1)
 	}
 
+	// Initialize map
+	authtokenVerificationPubKeys = make(map[string]*rsa.PublicKey)
+
 	for kidFromConfig, pemstring := range keys {
 		log.Infof("parse PEM bytes for key with ID %s", kidFromConfig)
 		// We're interested in processing the (PEM) bytes underneath the string
@@ -340,6 +343,7 @@ func ReadKeySetJSONFromEnvOrCrash() {
 			log.Errorf("key ID from config (%s) does not match key ID calculated from key (%s)", kidFromConfig, kidFromKey)
 			os.Exit(1)
 		}
+		log.Infof("key ID confirmed")
 
 		log.Infof(
 			"Parsed RSA public key. Modulus size: %d bits",
@@ -389,10 +393,8 @@ func LegacyReadAuthTokenVerificationKeyFromEnv() {
 	}
 
 	// Set module global for subsequent consumption by authenticator logic.
-	authtokenVerificationPubKey = pubkey
-	log.Infof(
-		"Got RSA public key from env var API_AUTHTOKEN_VERIFICATION_PUBKEY. Modulus size: %d bits",
-		pubkey.Size()*8)
+	authtokenVerificationPubKeyFallback = pubkey
+	log.Infof("Successfully read RSA public key from legacy env var API_AUTHTOKEN_VERIFICATION_PUBKEY")
 }
 
 func parseRSAPubKeyPEMBytes(data []byte) (*rsa.PublicKey, error) {
@@ -417,10 +419,8 @@ func parseRSAPubKeyPEMBytes(data []byte) (*rsa.PublicKey, error) {
 		return nil, fmt.Errorf("pubkey is not of type RSA")
 	}
 
-	// Set module global for subsequent consumption by authenticator logic.
-	authtokenVerificationPubKey = pubkey
 	log.Infof(
-		"Got RSA public key from env var API_AUTHTOKEN_VERIFICATION_PUBKEY. Modulus size: %d bits",
+		"Deserialized RSA public key with modulus size: %d bits",
 		pubkey.Size()*8)
 
 	return pubkey, nil
