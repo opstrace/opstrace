@@ -62,7 +62,8 @@ func main() {
 	}
 
 	if !disableAPIAuthentication {
-		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+		middleware.LegacyReadAuthTokenVerificationKeyFromEnv()
+		middleware.ReadKeySetJSONFromEnvOrCrash()
 	}
 
 	log.Infof("cortex querier URL: %s", cortexqurl)
