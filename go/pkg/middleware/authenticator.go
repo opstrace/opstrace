@@ -18,7 +18,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -226,29 +225,12 @@ func ReadAuthTokenVerificationKeyFromEnvOrCrash() {
 
 	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY value: %s", data)
 
-	// `os.LookupEnv` returns a string. We're interested in getting the bytes
-	// underneath it.
-	pubPem, _ := pem.Decode([]byte(data))
-
-	badFormatMsg := "Unexpected key format. Expected: PEM-encoded X.509 SubjectPublicKeyInfo"
-
-	if pubPem == nil {
-		log.Error(badFormatMsg)
-		panic(errors.New(badFormatMsg))
-	}
-
-	parsedkey, err := x509.ParsePKIXPublicKey(pubPem.Bytes)
+	// `os.LookupEnv` returns a string. We're interested in processing the
+	// bytes underneath it.
+	pubkey, err := parseRSAPubKeyPEMBytes([]byte(data))
 	if err != nil {
-		log.Error(badFormatMsg)
-		panic(err)
-	}
-
-	// ParsePKIXPublicKey() above can deserialize various key types (RSA,
-	// ECDSA, DSA). Use type assertion, support RSA only here for now.
-	var pubkey *rsa.PublicKey
-	var ok bool
-	if pubkey, ok = parsedkey.(*rsa.PublicKey); !ok {
-		panic(errors.New("pubkey is not of type RSA"))
+		log.Errorf("%s", err)
+		os.Exit(1)
 	}
 
 	// Set module global for subsequent consumption by authenticator logic.
@@ -256,4 +238,35 @@ func ReadAuthTokenVerificationKeyFromEnvOrCrash() {
 	log.Infof(
 		"Got RSA public key from env var API_AUTHTOKEN_VERIFICATION_PUBKEY. Modulus size: %d bits",
 		pubkey.Size()*8)
+}
+
+func parseRSAPubKeyPEMBytes(data []byte) (*rsa.PublicKey, error) {
+	pubPem, _ := pem.Decode(data)
+
+	badFormatMsg := "Unexpected key format. Expected: PEM-encoded X.509 SubjectPublicKeyInfo"
+
+	if pubPem == nil {
+		return nil, fmt.Errorf(badFormatMsg)
+	}
+
+	parsedkey, err := x509.ParsePKIXPublicKey(pubPem.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf(badFormatMsg)
+	}
+
+	// ParsePKIXPublicKey() above can deserialize various key types (RSA,
+	// ECDSA, DSA). Use type assertion, support RSA only here for now.
+	var pubkey *rsa.PublicKey
+	var ok bool
+	if pubkey, ok = parsedkey.(*rsa.PublicKey); !ok {
+		return nil, fmt.Errorf("pubkey is not of type RSA")
+	}
+
+	// Set module global for subsequent consumption by authenticator logic.
+	authtokenVerificationPubKey = pubkey
+	log.Infof(
+		"Got RSA public key from env var API_AUTHTOKEN_VERIFICATION_PUBKEY. Modulus size: %d bits",
+		pubkey.Size()*8)
+
+	return pubkey, nil
 }
