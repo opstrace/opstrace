@@ -1075,6 +1075,162 @@ func (client *Client) GetTenants() (*GetTenantsResponse, error) {
 }
 
 //
+// query GetTenantConfig($tenant_name: String, $key: String)
+//
+
+type GetTenantConfigVariables struct {
+	TenantName *String `json:"tenant_name,omitempty"`
+	Key        *String `json:"key,omitempty"`
+}
+
+type GetTenantConfigResponse struct {
+	TenantConfig []struct {
+		TenantName string `json:"TenantName"`
+		Key        string `json:"Key"`
+		Data       string `json:"Data"`
+		CreatedAt  string `json:"CreatedAt"`
+		UpdatedAt  string `json:"UpdatedAt"`
+	} `json:"TenantConfig"`
+}
+
+type GetTenantConfigRequest struct {
+	*http.Request
+}
+
+func NewGetTenantConfigRequest(url string, vars *GetTenantConfigVariables) (*GetTenantConfigRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetTenantConfig($tenant_name: String, $key: String) {
+  tenant_config(where: {tenant_name: {_eq: $tenant_name}, key: {_eq: $key}}) {
+    tenant_name
+    key
+    data
+    created_at
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetTenantConfigRequest{req}, nil
+}
+
+func (req *GetTenantConfigRequest) Execute(client *http.Client) (*GetTenantConfigResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetTenantConfigResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetTenantConfig(url string, client *http.Client, vars *GetTenantConfigVariables) (*GetTenantConfigResponse, error) {
+	req, err := NewGetTenantConfigRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetTenantConfig(vars *GetTenantConfigVariables) (*GetTenantConfigResponse, error) {
+	return GetTenantConfig(client.Url, client.Client, vars)
+}
+
+//
+// mutation UpsertTenantConfig($data: jsonb, $key: String, $tenant_name: String, $timestamp: timestamptz)
+//
+
+type UpsertTenantConfigVariables struct {
+	Data       *Jsonb       `json:"data,omitempty"`
+	Key        *String      `json:"key,omitempty"`
+	TenantName *String      `json:"tenant_name,omitempty"`
+	Timestamp  *Timestamptz `json:"timestamp,omitempty"`
+}
+
+type UpsertTenantConfigResponse struct {
+	InsertTenantConfig struct {
+		Returning []struct {
+			TenantName string `json:"TenantName"`
+			Data       string `json:"Data"`
+			Key        string `json:"Key"`
+			CreatedAt  string `json:"CreatedAt"`
+			UpdatedAt  string `json:"UpdatedAt"`
+		} `json:"Returning"`
+	} `json:"InsertTenantConfig"`
+}
+
+type UpsertTenantConfigRequest struct {
+	*http.Request
+}
+
+func NewUpsertTenantConfigRequest(url string, vars *UpsertTenantConfigVariables) (*UpsertTenantConfigRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpsertTenantConfig($data: jsonb, $key: String, $tenant_name: String, $timestamp: timestamptz) {
+  insert_tenant_config(objects: {data: $data, key: $key, tenant_name: $tenant_name, created_at: $timestamp, updated_at: $timestamp}, on_conflict: {update_columns: [data, updated_at], constraint: tenant_config_tenant_name_key_key, where: {updated_at: {_lt: $timestamp}}}) {
+    returning {
+      tenant_name
+      data
+      key
+      created_at
+      updated_at
+    }
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpsertTenantConfigRequest{req}, nil
+}
+
+func (req *UpsertTenantConfigRequest) Execute(client *http.Client) (*UpsertTenantConfigResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpsertTenantConfigResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpsertTenantConfig(url string, client *http.Client, vars *UpsertTenantConfigVariables) (*UpsertTenantConfigResponse, error) {
+	req, err := NewUpsertTenantConfigRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpsertTenantConfig(vars *UpsertTenantConfigVariables) (*UpsertTenantConfigResponse, error) {
+	return UpsertTenantConfig(client.Url, client.Client, vars)
+}
+
+//
 // mutation CreateUser($email: String!, $username: String!, $avatar: String!)
 //
 
@@ -1503,6 +1659,7 @@ type Boolean bool
 type String string
 type ID string
 type Json string
+type Jsonb string
 type Timestamp string
 type Timestamptz string
 type UUID string
@@ -1692,6 +1849,35 @@ const (
 	OrderByDesc           OrderBy = "desc"
 	OrderByDescNullsFirst OrderBy = "desc_nulls_first"
 	OrderByDescNullsLast  OrderBy = "desc_nulls_last"
+)
+
+type TenantConfigConstraint string
+
+const (
+	TenantConfigConstraintTenantConfigPkey             TenantConfigConstraint = "tenant_config_pkey"
+	TenantConfigConstraintTenantConfigTenantNameKeyKey TenantConfigConstraint = "tenant_config_tenant_name_key_key"
+)
+
+type TenantConfigSelectColumn string
+
+const (
+	TenantConfigSelectColumnCreatedAt  TenantConfigSelectColumn = "created_at"
+	TenantConfigSelectColumnData       TenantConfigSelectColumn = "data"
+	TenantConfigSelectColumnID         TenantConfigSelectColumn = "id"
+	TenantConfigSelectColumnKey        TenantConfigSelectColumn = "key"
+	TenantConfigSelectColumnTenantName TenantConfigSelectColumn = "tenant_name"
+	TenantConfigSelectColumnUpdatedAt  TenantConfigSelectColumn = "updated_at"
+)
+
+type TenantConfigUpdateColumn string
+
+const (
+	TenantConfigUpdateColumnCreatedAt  TenantConfigUpdateColumn = "created_at"
+	TenantConfigUpdateColumnData       TenantConfigUpdateColumn = "data"
+	TenantConfigUpdateColumnID         TenantConfigUpdateColumn = "id"
+	TenantConfigUpdateColumnKey        TenantConfigUpdateColumn = "key"
+	TenantConfigUpdateColumnTenantName TenantConfigUpdateColumn = "tenant_name"
+	TenantConfigUpdateColumnUpdatedAt  TenantConfigUpdateColumn = "updated_at"
 )
 
 type TenantConstraint string
@@ -2188,6 +2374,23 @@ type JsonComparisonExp struct {
 	Nin    *[]Json  `json:"_nin,omitempty"`
 }
 
+type JsonbComparisonExp struct {
+	ContainedIn *Jsonb    `json:"_contained_in,omitempty"`
+	Contains    *Jsonb    `json:"_contains,omitempty"`
+	Eq          *Jsonb    `json:"_eq,omitempty"`
+	Gt          *Jsonb    `json:"_gt,omitempty"`
+	Gte         *Jsonb    `json:"_gte,omitempty"`
+	HasKey      *String   `json:"_has_key,omitempty"`
+	HasKeysAll  *[]String `json:"_has_keys_all,omitempty"`
+	HasKeysAny  *[]String `json:"_has_keys_any,omitempty"`
+	In          *[]Jsonb  `json:"_in,omitempty"`
+	IsNull      *Boolean  `json:"_is_null,omitempty"`
+	Lt          *Jsonb    `json:"_lt,omitempty"`
+	Lte         *Jsonb    `json:"_lte,omitempty"`
+	Neq         *Jsonb    `json:"_neq,omitempty"`
+	Nin         *[]Jsonb  `json:"_nin,omitempty"`
+}
+
 type ModuleAggregateOrderBy struct {
 	Count *OrderBy          `json:"count,omitempty"`
 	Max   *ModuleMaxOrderBy `json:"max,omitempty"`
@@ -2379,6 +2582,107 @@ type TenantBoolExp struct {
 	Exporters   *ExporterBoolExp        `json:"exporters,omitempty"`
 	Name        *StringComparisonExp    `json:"name,omitempty"`
 	Type        *StringComparisonExp    `json:"type,omitempty"`
+}
+
+type TenantConfigAggregateOrderBy struct {
+	Count *OrderBy                `json:"count,omitempty"`
+	Max   *TenantConfigMaxOrderBy `json:"max,omitempty"`
+	Min   *TenantConfigMinOrderBy `json:"min,omitempty"`
+}
+
+type TenantConfigAppendInput struct {
+	Data *Jsonb `json:"data,omitempty"`
+}
+
+type TenantConfigArrRelInsertInput struct {
+	Data       *[]TenantConfigInsertInput `json:"data,omitempty"`
+	OnConflict *TenantConfigOnConflict    `json:"on_conflict,omitempty"`
+}
+
+type TenantConfigBoolExp struct {
+	And        *[]TenantConfigBoolExp    `json:"_and,omitempty"`
+	Not        *TenantConfigBoolExp      `json:"_not,omitempty"`
+	Or         *[]TenantConfigBoolExp    `json:"_or,omitempty"`
+	CreatedAt  *TimestamptzComparisonExp `json:"created_at,omitempty"`
+	Data       *JsonbComparisonExp       `json:"data,omitempty"`
+	ID         *UuidComparisonExp        `json:"id,omitempty"`
+	Key        *StringComparisonExp      `json:"key,omitempty"`
+	TenantName *StringComparisonExp      `json:"tenant_name,omitempty"`
+	UpdatedAt  *TimestamptzComparisonExp `json:"updated_at,omitempty"`
+}
+
+type TenantConfigDeleteAtPathInput struct {
+	Data *[]String `json:"data,omitempty"`
+}
+
+type TenantConfigDeleteElemInput struct {
+	Data *Int `json:"data,omitempty"`
+}
+
+type TenantConfigDeleteKeyInput struct {
+	Data *String `json:"data,omitempty"`
+}
+
+type TenantConfigInsertInput struct {
+	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
+	Data       *Jsonb       `json:"data,omitempty"`
+	ID         *UUID        `json:"id,omitempty"`
+	Key        *String      `json:"key,omitempty"`
+	TenantName *String      `json:"tenant_name,omitempty"`
+	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
+}
+
+type TenantConfigMaxOrderBy struct {
+	CreatedAt  *OrderBy `json:"created_at,omitempty"`
+	ID         *OrderBy `json:"id,omitempty"`
+	Key        *OrderBy `json:"key,omitempty"`
+	TenantName *OrderBy `json:"tenant_name,omitempty"`
+	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
+}
+
+type TenantConfigMinOrderBy struct {
+	CreatedAt  *OrderBy `json:"created_at,omitempty"`
+	ID         *OrderBy `json:"id,omitempty"`
+	Key        *OrderBy `json:"key,omitempty"`
+	TenantName *OrderBy `json:"tenant_name,omitempty"`
+	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
+}
+
+type TenantConfigObjRelInsertInput struct {
+	Data       TenantConfigInsertInput `json:"data"`
+	OnConflict *TenantConfigOnConflict `json:"on_conflict,omitempty"`
+}
+
+type TenantConfigOnConflict struct {
+	Constraint    TenantConfigConstraint      `json:"constraint"`
+	UpdateColumns *[]TenantConfigUpdateColumn `json:"update_columns,omitempty"`
+	Where         *TenantConfigBoolExp        `json:"where,omitempty"`
+}
+
+type TenantConfigOrderBy struct {
+	CreatedAt  *OrderBy `json:"created_at,omitempty"`
+	Data       *OrderBy `json:"data,omitempty"`
+	ID         *OrderBy `json:"id,omitempty"`
+	Key        *OrderBy `json:"key,omitempty"`
+	TenantName *OrderBy `json:"tenant_name,omitempty"`
+	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
+}
+
+type TenantConfigPkColumnsInput struct {
+	ID UUID `json:"id"`
+}
+
+type TenantConfigPrependInput struct {
+	Data *Jsonb `json:"data,omitempty"`
+}
+
+type TenantConfigSetInput struct {
+	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
+	Data       *Jsonb       `json:"data,omitempty"`
+	ID         *UUID        `json:"id,omitempty"`
+	Key        *String      `json:"key,omitempty"`
+	TenantName *String      `json:"tenant_name,omitempty"`
+	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
 }
 
 type TenantInsertInput struct {
@@ -2912,6 +3216,8 @@ type MutationRoot struct {
 	DeleteModuleVersionByPk  *ModuleVersion                  `json:"delete_module_version_by_pk,omitempty"`
 	DeleteTenant             *TenantMutationResponse         `json:"delete_tenant,omitempty"`
 	DeleteTenantByPk         *Tenant                         `json:"delete_tenant_by_pk,omitempty"`
+	DeleteTenantConfig       *TenantConfigMutationResponse   `json:"delete_tenant_config,omitempty"`
+	DeleteTenantConfigByPk   *TenantConfig                   `json:"delete_tenant_config_by_pk,omitempty"`
 	DeleteUser               *UserMutationResponse           `json:"delete_user,omitempty"`
 	DeleteUserByPk           *User                           `json:"delete_user_by_pk,omitempty"`
 	DeleteUserPreference     *UserPreferenceMutationResponse `json:"delete_user_preference,omitempty"`
@@ -2929,6 +3235,8 @@ type MutationRoot struct {
 	InsertModuleVersion      *ModuleVersionMutationResponse  `json:"insert_module_version,omitempty"`
 	InsertModuleVersionOne   *ModuleVersion                  `json:"insert_module_version_one,omitempty"`
 	InsertTenant             *TenantMutationResponse         `json:"insert_tenant,omitempty"`
+	InsertTenantConfig       *TenantConfigMutationResponse   `json:"insert_tenant_config,omitempty"`
+	InsertTenantConfigOne    *TenantConfig                   `json:"insert_tenant_config_one,omitempty"`
 	InsertTenantOne          *Tenant                         `json:"insert_tenant_one,omitempty"`
 	InsertUser               *UserMutationResponse           `json:"insert_user,omitempty"`
 	InsertUserOne            *User                           `json:"insert_user_one,omitempty"`
@@ -2948,6 +3256,8 @@ type MutationRoot struct {
 	UpdateModuleVersionByPk  *ModuleVersion                  `json:"update_module_version_by_pk,omitempty"`
 	UpdateTenant             *TenantMutationResponse         `json:"update_tenant,omitempty"`
 	UpdateTenantByPk         *Tenant                         `json:"update_tenant_by_pk,omitempty"`
+	UpdateTenantConfig       *TenantConfigMutationResponse   `json:"update_tenant_config,omitempty"`
+	UpdateTenantConfigByPk   *TenantConfig                   `json:"update_tenant_config_by_pk,omitempty"`
 	UpdateUser               *UserMutationResponse           `json:"update_user,omitempty"`
 	UpdateUserByPk           *User                           `json:"update_user_by_pk,omitempty"`
 	UpdateUserPreference     *UserPreferenceMutationResponse `json:"update_user_preference,omitempty"`
@@ -2976,6 +3286,9 @@ type QueryRoot struct {
 	Tenant                  *[]Tenant               `json:"tenant,omitempty"`
 	TenantAggregate         TenantAggregate         `json:"tenant_aggregate"`
 	TenantByPk              *Tenant                 `json:"tenant_by_pk,omitempty"`
+	TenantConfig            *[]TenantConfig         `json:"tenant_config,omitempty"`
+	TenantConfigAggregate   TenantConfigAggregate   `json:"tenant_config_aggregate"`
+	TenantConfigByPk        *TenantConfig           `json:"tenant_config_by_pk,omitempty"`
 	User                    *[]User                 `json:"user,omitempty"`
 	UserAggregate           UserAggregate           `json:"user_aggregate"`
 	UserByPk                *User                   `json:"user_by_pk,omitempty"`
@@ -3006,6 +3319,9 @@ type SubscriptionRoot struct {
 	Tenant                  *[]Tenant               `json:"tenant,omitempty"`
 	TenantAggregate         TenantAggregate         `json:"tenant_aggregate"`
 	TenantByPk              *Tenant                 `json:"tenant_by_pk,omitempty"`
+	TenantConfig            *[]TenantConfig         `json:"tenant_config,omitempty"`
+	TenantConfigAggregate   TenantConfigAggregate   `json:"tenant_config_aggregate"`
+	TenantConfigByPk        *TenantConfig           `json:"tenant_config_by_pk,omitempty"`
 	User                    *[]User                 `json:"user,omitempty"`
 	UserAggregate           UserAggregate           `json:"user_aggregate"`
 	UserByPk                *User                   `json:"user_by_pk,omitempty"`
@@ -3033,6 +3349,47 @@ type TenantAggregateFields struct {
 	Count *Int             `json:"count,omitempty"`
 	Max   *TenantMaxFields `json:"max,omitempty"`
 	Min   *TenantMinFields `json:"min,omitempty"`
+}
+
+type TenantConfig struct {
+	CreatedAt  Timestamptz `json:"created_at"`
+	Data       Jsonb       `json:"data"`
+	ID         UUID        `json:"id"`
+	Key        String      `json:"key"`
+	TenantName String      `json:"tenant_name"`
+	UpdatedAt  Timestamptz `json:"updated_at"`
+}
+
+type TenantConfigAggregate struct {
+	Aggregate *TenantConfigAggregateFields `json:"aggregate,omitempty"`
+	Nodes     *[]TenantConfig              `json:"nodes,omitempty"`
+}
+
+type TenantConfigAggregateFields struct {
+	Count *Int                   `json:"count,omitempty"`
+	Max   *TenantConfigMaxFields `json:"max,omitempty"`
+	Min   *TenantConfigMinFields `json:"min,omitempty"`
+}
+
+type TenantConfigMaxFields struct {
+	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
+	ID         *UUID        `json:"id,omitempty"`
+	Key        *String      `json:"key,omitempty"`
+	TenantName *String      `json:"tenant_name,omitempty"`
+	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
+}
+
+type TenantConfigMinFields struct {
+	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
+	ID         *UUID        `json:"id,omitempty"`
+	Key        *String      `json:"key,omitempty"`
+	TenantName *String      `json:"tenant_name,omitempty"`
+	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
+}
+
+type TenantConfigMutationResponse struct {
+	AffectedRows Int             `json:"affected_rows"`
+	Returning    *[]TenantConfig `json:"returning,omitempty"`
 }
 
 type TenantMaxFields struct {

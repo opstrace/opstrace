@@ -15,7 +15,7 @@
  */
 
 import React, { useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import Skeleton from "@material-ui/lab/Skeleton";
 import Avatar from "@material-ui/core/Avatar";
 import { useDispatch } from "react-redux";
@@ -37,6 +37,8 @@ import useCurrentUser from "state/user/hooks/useCurrentUser";
 import useTenantList from "state/tenant/hooks/useTenantList";
 import { ExternalLink } from "client/components/Link";
 
+import AlertManagerConfig from "./tenant/alertManagerConfig";
+
 const AttributeKey = (props: { children: React.ReactNode }) => (
   <Box pt={2} pb={2}>
     <Typography variant="h6" color="textSecondary">
@@ -51,7 +53,12 @@ const AttributeValue = (props: { children: React.ReactNode }) => (
 );
 
 const Cluster = () => {
-  const params = useParams<{ id?: string; tenant?: string }>();
+  const params = useParams<{
+    id?: string;
+    tenant?: string;
+    section?: string;
+  }>();
+  const history = useHistory();
   const users = useUserList();
   const tenants = useTenantList();
   const currentUser = useCurrentUser();
@@ -114,6 +121,19 @@ const Cluster = () => {
     },
     [selectedTenant?.name]
   );
+
+  // TODO: NTW - there is not always a selectedTenant, so need to upgrade command services to be conditional depending on the
+  // context and/or split this into seperate components and move this definition with it
+  useCommandService({
+    id: "alert-manager-config",
+    description: "Alert Manager Config",
+    handler: e => {
+      e.keyboardEvent?.preventDefault();
+      history.push(
+        `/cluster/tenants/${selectedTenant.name}/alertManagerConfig`
+      );
+    }
+  });
 
   const cmdService = useCommandService();
 
@@ -204,66 +224,70 @@ const Cluster = () => {
           </Box>
         </Box>
       );
-    }
-
-    if (selectedTenant) {
-      return (
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
-          <Box maxWidth={700}>
-            <Card p={3}>
-              <CardHeader
-                titleTypographyProps={{ variant: "h5" }}
-                action={
-                  <Box ml={3} display="flex" flexWrap="wrap">
-                    <Box p={1}>
-                      <Button
-                        variant="outlined"
-                        size="medium"
-                        disabled={selectedTenant.type === "SYSTEM"}
-                        onClick={() =>
-                          activatePickerWithText("delete tenant directly?: ")
-                        }
-                      >
-                        Delete
-                      </Button>
+    } else if (selectedTenant) {
+      if (params.section === "alertManagerConfig") {
+        return <AlertManagerConfig tenant={selectedTenant} />;
+      } else {
+        return (
+          <Box
+            width="100%"
+            height="100%"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            flexWrap="wrap"
+            p={1}
+          >
+            <Box maxWidth={700}>
+              <Card p={3}>
+                <CardHeader
+                  titleTypographyProps={{ variant: "h5" }}
+                  action={
+                    <Box ml={3} display="flex" flexWrap="wrap">
+                      <Box p={1}>
+                        <Button
+                          variant="outlined"
+                          size="medium"
+                          disabled={selectedTenant.type === "SYSTEM"}
+                          onClick={() =>
+                            activatePickerWithText("delete tenant directly?: ")
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    </Box>
+                  }
+                  title={selectedTenant.name}
+                />
+                <CardContent>
+                  <Box display="flex">
+                    <Box display="flex" flexDirection="column">
+                      <AttributeKey>Grafana:</AttributeKey>
+                      <AttributeKey>Created:</AttributeKey>
+                    </Box>
+                    <Box display="flex" flexDirection="column" flexGrow={1}>
+                      <AttributeValue>
+                        <ExternalLink
+                          href={`${window.location.protocol}//${selectedTenant.name}.${window.location.host}`}
+                        >
+                          {`${selectedTenant.name}.${window.location.host}`}
+                        </ExternalLink>
+                      </AttributeValue>
+                      <AttributeValue>
+                        {selectedTenant.created_at}
+                      </AttributeValue>
                     </Box>
                   </Box>
-                }
-                title={selectedTenant.name}
-              />
-              <CardContent>
-                <Box display="flex">
-                  <Box display="flex" flexDirection="column">
-                    <AttributeKey>Grafana:</AttributeKey>
-                    <AttributeKey>Created:</AttributeKey>
-                  </Box>
-                  <Box display="flex" flexDirection="column" flexGrow={1}>
-                    <AttributeValue>
-                      <ExternalLink
-                        href={`${window.location.protocol}//${selectedTenant.name}.${window.location.host}`}
-                      >
-                        {`${selectedTenant.name}.${window.location.host}`}
-                      </ExternalLink>
-                    </AttributeValue>
-                    <AttributeValue>{selectedTenant.created_at}</AttributeValue>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-            <Typography color="textSecondary">
-              New tenants can take 5 minutes to provision with dns propagation
-            </Typography>
+                </CardContent>
+              </Card>
+              <Typography color="textSecondary">
+                New tenants can take 5 minutes to provision with dns propagation
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      );
+        );
+      }
     }
 
     return (

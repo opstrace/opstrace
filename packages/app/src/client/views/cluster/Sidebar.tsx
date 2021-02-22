@@ -33,6 +33,7 @@ import AddTenantDialog from "./AddTenantDialog";
 import DeleteTenantDialog from "./DeleteTenantDialog";
 import UserList from "./UserList";
 import TenantList from "./TenantList";
+// import SetSlackApiUrlDialog from "./tenant/alertManagerConfig/SetSlackApiUrlDialog";
 
 const ClusterSidebar = () => {
   const [selectedUserIndex, setSelectedUserIndex] = useState<number>(-1);
@@ -107,6 +108,7 @@ const ClusterSidebar = () => {
       <TenantPicker />
       <AddTenantDialog />
       <DeleteTenantDialog />
+      {/*<SetSlackApiUrlDialog />*/}
       <SideBar>
         <SideBarContainer
           title="Tenants"

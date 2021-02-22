@@ -21,11 +21,13 @@ import { reducer as moduleVersionReducer } from "./moduleVersion/reducer";
 import { reducer as fileReducer } from "./file/reducer";
 import { reducer as userReducer } from "./user/reducer";
 import { reducer as tenantReducer } from "./tenant/reducer";
+import { reducer as alertManagerConfigReducer } from "./alertManagerConfig/reducer";
 
 export const mainReducers = {
   users: userReducer,
   files: fileReducer,
   tenants: tenantReducer,
+  alertManagerConfig: alertManagerConfigReducer,
   branches: branchReducer,
   modules: moduleReducer,
   moduleVersions: moduleVersionReducer

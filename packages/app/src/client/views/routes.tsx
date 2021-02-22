@@ -103,6 +103,11 @@ const AuthenticatedRoutes = () => {
           component={ClusterView}
         />
         <Route
+          key="/cluster/tenants/:tenant/:section"
+          path="/cluster/tenants/:tenant/:section"
+          component={ClusterView}
+        />
+        <Route
           key="/cluster/tenants/:tenant"
           path="/cluster/tenants/:tenant"
           component={ClusterView}

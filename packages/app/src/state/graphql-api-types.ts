@@ -30,6 +30,7 @@ export type Scalars = {
   Int: number;
   Float: number;
   json: any;
+  jsonb: any;
   timestamp: any;
   timestamptz: any;
   uuid: any;
@@ -1010,6 +1011,29 @@ export type Json_Comparison_Exp = {
   _nin?: Maybe<Array<Scalars["json"]>>;
 };
 
+/** expression to compare columns of type jsonb. All fields are combined with logical 'AND'. */
+export type Jsonb_Comparison_Exp = {
+  /** is the column contained in the given json value */
+  _contained_in?: Maybe<Scalars["jsonb"]>;
+  /** does the column contain the given json value at the top level */
+  _contains?: Maybe<Scalars["jsonb"]>;
+  _eq?: Maybe<Scalars["jsonb"]>;
+  _gt?: Maybe<Scalars["jsonb"]>;
+  _gte?: Maybe<Scalars["jsonb"]>;
+  /** does the string exist as a top-level key in the column */
+  _has_key?: Maybe<Scalars["String"]>;
+  /** do all of these strings exist as top-level keys in the column */
+  _has_keys_all?: Maybe<Array<Scalars["String"]>>;
+  /** do any of these strings exist as top-level keys in the column */
+  _has_keys_any?: Maybe<Array<Scalars["String"]>>;
+  _in?: Maybe<Array<Scalars["jsonb"]>>;
+  _is_null?: Maybe<Scalars["Boolean"]>;
+  _lt?: Maybe<Scalars["jsonb"]>;
+  _lte?: Maybe<Scalars["jsonb"]>;
+  _neq?: Maybe<Scalars["jsonb"]>;
+  _nin?: Maybe<Array<Scalars["jsonb"]>>;
+};
+
 /** columns and relationships of "module" */
 export type Module = {
   /** An object relationship */
@@ -1474,6 +1498,10 @@ export type Mutation_Root = {
   delete_tenant?: Maybe<Tenant_Mutation_Response>;
   /** delete single row from the table: "tenant" */
   delete_tenant_by_pk?: Maybe<Tenant>;
+  /** delete data from the table: "tenant_config" */
+  delete_tenant_config?: Maybe<Tenant_Config_Mutation_Response>;
+  /** delete single row from the table: "tenant_config" */
+  delete_tenant_config_by_pk?: Maybe<Tenant_Config>;
   /** delete data from the table: "user" */
   delete_user?: Maybe<User_Mutation_Response>;
   /** delete single row from the table: "user" */
@@ -1508,6 +1536,10 @@ export type Mutation_Root = {
   insert_module_version_one?: Maybe<Module_Version>;
   /** insert data into the table: "tenant" */
   insert_tenant?: Maybe<Tenant_Mutation_Response>;
+  /** insert data into the table: "tenant_config" */
+  insert_tenant_config?: Maybe<Tenant_Config_Mutation_Response>;
+  /** insert a single row into the table: "tenant_config" */
+  insert_tenant_config_one?: Maybe<Tenant_Config>;
   /** insert a single row into the table: "tenant" */
   insert_tenant_one?: Maybe<Tenant>;
   /** insert data into the table: "user" */
@@ -1546,6 +1578,10 @@ export type Mutation_Root = {
   update_tenant?: Maybe<Tenant_Mutation_Response>;
   /** update single row of the table: "tenant" */
   update_tenant_by_pk?: Maybe<Tenant>;
+  /** update data of the table: "tenant_config" */
+  update_tenant_config?: Maybe<Tenant_Config_Mutation_Response>;
+  /** update single row of the table: "tenant_config" */
+  update_tenant_config_by_pk?: Maybe<Tenant_Config>;
   /** update data of the table: "user" */
   update_user?: Maybe<User_Mutation_Response>;
   /** update single row of the table: "user" */
@@ -1631,6 +1667,16 @@ export type Mutation_RootDelete_TenantArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Tenant_By_PkArgs = {
   name: Scalars["String"];
+};
+
+/** mutation root */
+export type Mutation_RootDelete_Tenant_ConfigArgs = {
+  where: Tenant_Config_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootDelete_Tenant_Config_By_PkArgs = {
+  id: Scalars["uuid"];
 };
 
 /** mutation root */
@@ -1729,6 +1775,18 @@ export type Mutation_RootInsert_Module_Version_OneArgs = {
 export type Mutation_RootInsert_TenantArgs = {
   objects: Array<Tenant_Insert_Input>;
   on_conflict?: Maybe<Tenant_On_Conflict>;
+};
+
+/** mutation root */
+export type Mutation_RootInsert_Tenant_ConfigArgs = {
+  objects: Array<Tenant_Config_Insert_Input>;
+  on_conflict?: Maybe<Tenant_Config_On_Conflict>;
+};
+
+/** mutation root */
+export type Mutation_RootInsert_Tenant_Config_OneArgs = {
+  object: Tenant_Config_Insert_Input;
+  on_conflict?: Maybe<Tenant_Config_On_Conflict>;
 };
 
 /** mutation root */
@@ -1846,6 +1904,28 @@ export type Mutation_RootUpdate_Tenant_By_PkArgs = {
 };
 
 /** mutation root */
+export type Mutation_RootUpdate_Tenant_ConfigArgs = {
+  _append?: Maybe<Tenant_Config_Append_Input>;
+  _delete_at_path?: Maybe<Tenant_Config_Delete_At_Path_Input>;
+  _delete_elem?: Maybe<Tenant_Config_Delete_Elem_Input>;
+  _delete_key?: Maybe<Tenant_Config_Delete_Key_Input>;
+  _prepend?: Maybe<Tenant_Config_Prepend_Input>;
+  _set?: Maybe<Tenant_Config_Set_Input>;
+  where: Tenant_Config_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootUpdate_Tenant_Config_By_PkArgs = {
+  _append?: Maybe<Tenant_Config_Append_Input>;
+  _delete_at_path?: Maybe<Tenant_Config_Delete_At_Path_Input>;
+  _delete_elem?: Maybe<Tenant_Config_Delete_Elem_Input>;
+  _delete_key?: Maybe<Tenant_Config_Delete_Key_Input>;
+  _prepend?: Maybe<Tenant_Config_Prepend_Input>;
+  _set?: Maybe<Tenant_Config_Set_Input>;
+  pk_columns: Tenant_Config_Pk_Columns_Input;
+};
+
+/** mutation root */
 export type Mutation_RootUpdate_UserArgs = {
   _set?: Maybe<User_Set_Input>;
   where: User_Bool_Exp;
@@ -1929,6 +2009,12 @@ export type Query_Root = {
   tenant_aggregate: Tenant_Aggregate;
   /** fetch data from the table: "tenant" using primary key columns */
   tenant_by_pk?: Maybe<Tenant>;
+  /** fetch data from the table: "tenant_config" */
+  tenant_config: Array<Tenant_Config>;
+  /** fetch aggregated fields from the table: "tenant_config" */
+  tenant_config_aggregate: Tenant_Config_Aggregate;
+  /** fetch data from the table: "tenant_config" using primary key columns */
+  tenant_config_by_pk?: Maybe<Tenant_Config>;
   /** fetch data from the table: "user" */
   user: Array<User>;
   /** fetch aggregated fields from the table: "user" */
@@ -2112,6 +2198,29 @@ export type Query_RootTenant_By_PkArgs = {
 };
 
 /** query root */
+export type Query_RootTenant_ConfigArgs = {
+  distinct_on?: Maybe<Array<Tenant_Config_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Tenant_Config_Order_By>>;
+  where?: Maybe<Tenant_Config_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootTenant_Config_AggregateArgs = {
+  distinct_on?: Maybe<Array<Tenant_Config_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Tenant_Config_Order_By>>;
+  where?: Maybe<Tenant_Config_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootTenant_Config_By_PkArgs = {
+  id: Scalars["uuid"];
+};
+
+/** query root */
 export type Query_RootUserArgs = {
   distinct_on?: Maybe<Array<User_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
@@ -2201,6 +2310,12 @@ export type Subscription_Root = {
   tenant_aggregate: Tenant_Aggregate;
   /** fetch data from the table: "tenant" using primary key columns */
   tenant_by_pk?: Maybe<Tenant>;
+  /** fetch data from the table: "tenant_config" */
+  tenant_config: Array<Tenant_Config>;
+  /** fetch aggregated fields from the table: "tenant_config" */
+  tenant_config_aggregate: Tenant_Config_Aggregate;
+  /** fetch data from the table: "tenant_config" using primary key columns */
+  tenant_config_by_pk?: Maybe<Tenant_Config>;
   /** fetch data from the table: "user" */
   user: Array<User>;
   /** fetch aggregated fields from the table: "user" */
@@ -2384,6 +2499,29 @@ export type Subscription_RootTenant_By_PkArgs = {
 };
 
 /** subscription root */
+export type Subscription_RootTenant_ConfigArgs = {
+  distinct_on?: Maybe<Array<Tenant_Config_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Tenant_Config_Order_By>>;
+  where?: Maybe<Tenant_Config_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootTenant_Config_AggregateArgs = {
+  distinct_on?: Maybe<Array<Tenant_Config_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Tenant_Config_Order_By>>;
+  where?: Maybe<Tenant_Config_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootTenant_Config_By_PkArgs = {
+  id: Scalars["uuid"];
+};
+
+/** subscription root */
 export type Subscription_RootUserArgs = {
   distinct_on?: Maybe<Array<User_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
@@ -2523,6 +2661,223 @@ export type Tenant_Bool_Exp = {
   name?: Maybe<String_Comparison_Exp>;
   type?: Maybe<String_Comparison_Exp>;
 };
+
+/** columns and relationships of "tenant_config" */
+export type Tenant_Config = {
+  created_at: Scalars["timestamptz"];
+  data: Scalars["jsonb"];
+  id: Scalars["uuid"];
+  key: Scalars["String"];
+  tenant_name: Scalars["String"];
+  updated_at: Scalars["timestamptz"];
+};
+
+/** columns and relationships of "tenant_config" */
+export type Tenant_ConfigDataArgs = {
+  path?: Maybe<Scalars["String"]>;
+};
+
+/** aggregated selection of "tenant_config" */
+export type Tenant_Config_Aggregate = {
+  aggregate?: Maybe<Tenant_Config_Aggregate_Fields>;
+  nodes: Array<Tenant_Config>;
+};
+
+/** aggregate fields of "tenant_config" */
+export type Tenant_Config_Aggregate_Fields = {
+  count?: Maybe<Scalars["Int"]>;
+  max?: Maybe<Tenant_Config_Max_Fields>;
+  min?: Maybe<Tenant_Config_Min_Fields>;
+};
+
+/** aggregate fields of "tenant_config" */
+export type Tenant_Config_Aggregate_FieldsCountArgs = {
+  columns?: Maybe<Array<Tenant_Config_Select_Column>>;
+  distinct?: Maybe<Scalars["Boolean"]>;
+};
+
+/** order by aggregate values of table "tenant_config" */
+export type Tenant_Config_Aggregate_Order_By = {
+  count?: Maybe<Order_By>;
+  max?: Maybe<Tenant_Config_Max_Order_By>;
+  min?: Maybe<Tenant_Config_Min_Order_By>;
+};
+
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Tenant_Config_Append_Input = {
+  data?: Maybe<Scalars["jsonb"]>;
+};
+
+/** input type for inserting array relation for remote table "tenant_config" */
+export type Tenant_Config_Arr_Rel_Insert_Input = {
+  data: Array<Tenant_Config_Insert_Input>;
+  on_conflict?: Maybe<Tenant_Config_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "tenant_config". All fields are combined with a logical 'AND'. */
+export type Tenant_Config_Bool_Exp = {
+  _and?: Maybe<Array<Maybe<Tenant_Config_Bool_Exp>>>;
+  _not?: Maybe<Tenant_Config_Bool_Exp>;
+  _or?: Maybe<Array<Maybe<Tenant_Config_Bool_Exp>>>;
+  created_at?: Maybe<Timestamptz_Comparison_Exp>;
+  data?: Maybe<Jsonb_Comparison_Exp>;
+  id?: Maybe<Uuid_Comparison_Exp>;
+  key?: Maybe<String_Comparison_Exp>;
+  tenant_name?: Maybe<String_Comparison_Exp>;
+  updated_at?: Maybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tenant_config" */
+export enum Tenant_Config_Constraint {
+  /** unique or primary key constraint */
+  TenantConfigPkey = "tenant_config_pkey",
+  /** unique or primary key constraint */
+  TenantConfigTenantNameKeyKey = "tenant_config_tenant_name_key_key"
+}
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Tenant_Config_Delete_At_Path_Input = {
+  data?: Maybe<Array<Maybe<Scalars["String"]>>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Tenant_Config_Delete_Elem_Input = {
+  data?: Maybe<Scalars["Int"]>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Tenant_Config_Delete_Key_Input = {
+  data?: Maybe<Scalars["String"]>;
+};
+
+/** input type for inserting data into table "tenant_config" */
+export type Tenant_Config_Insert_Input = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  data?: Maybe<Scalars["jsonb"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
+  tenant_name?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** aggregate max on columns */
+export type Tenant_Config_Max_Fields = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
+  tenant_name?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** order by max() on columns of table "tenant_config" */
+export type Tenant_Config_Max_Order_By = {
+  created_at?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
+  tenant_name?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tenant_Config_Min_Fields = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
+  tenant_name?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** order by min() on columns of table "tenant_config" */
+export type Tenant_Config_Min_Order_By = {
+  created_at?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
+  tenant_name?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** response of any mutation on the table "tenant_config" */
+export type Tenant_Config_Mutation_Response = {
+  /** number of affected rows by the mutation */
+  affected_rows: Scalars["Int"];
+  /** data of the affected rows by the mutation */
+  returning: Array<Tenant_Config>;
+};
+
+/** input type for inserting object relation for remote table "tenant_config" */
+export type Tenant_Config_Obj_Rel_Insert_Input = {
+  data: Tenant_Config_Insert_Input;
+  on_conflict?: Maybe<Tenant_Config_On_Conflict>;
+};
+
+/** on conflict condition type for table "tenant_config" */
+export type Tenant_Config_On_Conflict = {
+  constraint: Tenant_Config_Constraint;
+  update_columns: Array<Tenant_Config_Update_Column>;
+  where?: Maybe<Tenant_Config_Bool_Exp>;
+};
+
+/** ordering options when selecting data from "tenant_config" */
+export type Tenant_Config_Order_By = {
+  created_at?: Maybe<Order_By>;
+  data?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
+  tenant_name?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** primary key columns input for table: "tenant_config" */
+export type Tenant_Config_Pk_Columns_Input = {
+  id: Scalars["uuid"];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Tenant_Config_Prepend_Input = {
+  data?: Maybe<Scalars["jsonb"]>;
+};
+
+/** select columns of table "tenant_config" */
+export enum Tenant_Config_Select_Column {
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Data = "data",
+  /** column name */
+  Id = "id",
+  /** column name */
+  Key = "key",
+  /** column name */
+  TenantName = "tenant_name",
+  /** column name */
+  UpdatedAt = "updated_at"
+}
+
+/** input type for updating data in table "tenant_config" */
+export type Tenant_Config_Set_Input = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  data?: Maybe<Scalars["jsonb"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
+  tenant_name?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** update columns of table "tenant_config" */
+export enum Tenant_Config_Update_Column {
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Data = "data",
+  /** column name */
+  Id = "id",
+  /** column name */
+  Key = "key",
+  /** column name */
+  TenantName = "tenant_name",
+  /** column name */
+  UpdatedAt = "updated_at"
+}
 
 /** unique or primary key constraints on table "tenant" */
 export enum Tenant_Constraint {
@@ -3267,6 +3622,38 @@ export type SubscribeToTenantListSubscription = {
   tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
 };
 
+export type GetTenantConfigQueryVariables = Exact<{
+  tenant_name?: Maybe<Scalars["String"]>;
+  key?: Maybe<Scalars["String"]>;
+}>;
+
+export type GetTenantConfigQuery = {
+  tenant_config: Array<
+    Pick<
+      Tenant_Config,
+      "tenant_name" | "key" | "data" | "created_at" | "updated_at"
+    >
+  >;
+};
+
+export type UpsertTenantConfigMutationVariables = Exact<{
+  data?: Maybe<Scalars["jsonb"]>;
+  key?: Maybe<Scalars["String"]>;
+  tenant_name?: Maybe<Scalars["String"]>;
+  timestamp?: Maybe<Scalars["timestamptz"]>;
+}>;
+
+export type UpsertTenantConfigMutation = {
+  insert_tenant_config?: Maybe<{
+    returning: Array<
+      Pick<
+        Tenant_Config,
+        "tenant_name" | "data" | "key" | "created_at" | "updated_at"
+      >
+    >;
+  }>;
+};
+
 export type CreateUserMutationVariables = Exact<{
   email: Scalars["String"];
   username: Scalars["String"];
@@ -3570,6 +3957,50 @@ export const SubscribeToTenantListDocument = gql`
       name
       created_at
       type
+    }
+  }
+`;
+export const GetTenantConfigDocument = gql`
+  query GetTenantConfig($tenant_name: String, $key: String) {
+    tenant_config(
+      where: { tenant_name: { _eq: $tenant_name }, key: { _eq: $key } }
+    ) {
+      tenant_name
+      key
+      data
+      created_at
+      updated_at
+    }
+  }
+`;
+export const UpsertTenantConfigDocument = gql`
+  mutation UpsertTenantConfig(
+    $data: jsonb
+    $key: String
+    $tenant_name: String
+    $timestamp: timestamptz
+  ) {
+    insert_tenant_config(
+      objects: {
+        data: $data
+        key: $key
+        tenant_name: $tenant_name
+        created_at: $timestamp
+        updated_at: $timestamp
+      }
+      on_conflict: {
+        update_columns: [data, updated_at]
+        constraint: tenant_config_tenant_name_key_key
+        where: { updated_at: { _lt: $timestamp } }
+      }
+    ) {
+      returning {
+        tenant_name
+        data
+        key
+        created_at
+        updated_at
+      }
     }
   }
 `;
@@ -4003,6 +4434,38 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<SubscribeToTenantListSubscription>(
           print(SubscribeToTenantListDocument),
+          variables
+        )
+      );
+    },
+    GetTenantConfig(
+      variables?: GetTenantConfigQueryVariables
+    ): Promise<{
+      data?: GetTenantConfigQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetTenantConfigQuery>(
+          print(GetTenantConfigDocument),
+          variables
+        )
+      );
+    },
+    UpsertTenantConfig(
+      variables?: UpsertTenantConfigMutationVariables
+    ): Promise<{
+      data?: UpsertTenantConfigMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<UpsertTenantConfigMutation>(
+          print(UpsertTenantConfigDocument),
           variables
         )
       );

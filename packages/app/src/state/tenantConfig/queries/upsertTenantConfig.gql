@@ -1,0 +1,29 @@
+mutation UpsertTenantConfig(
+  $data: jsonb
+  $key: String
+  $tenant_name: String
+  $timestamp: timestamptz
+) {
+  insert_tenant_config(
+    objects: {
+      data: $data
+      key: $key
+      tenant_name: $tenant_name
+      created_at: $timestamp
+      updated_at: $timestamp
+    }
+    on_conflict: {
+      update_columns: [data, updated_at]
+      constraint: tenant_config_tenant_name_key_key
+      where: { updated_at: { _lt: $timestamp } }
+    }
+  ) {
+    returning {
+      tenant_name
+      data
+      key
+      created_at
+      updated_at
+    }
+  }
+}
