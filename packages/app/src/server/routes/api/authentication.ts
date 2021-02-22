@@ -18,9 +18,10 @@ import express from "express";
 import jwt from "express-jwt";
 import jwksRsa from "jwks-rsa";
 import { log } from "@opstrace/utils/lib/log";
-import graphqlClient from "state/graphqlClient";
+import graphqlClient from "state/clients/graphqlClient";
 import env from "server/env";
 import { GeneralServerError, UnexpectedServerError } from "server/errors";
+import authRequired from "server/middleware/auth";
 
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against
@@ -58,7 +59,7 @@ function createAuthHandler(): express.Router {
     try {
       const userMeta = await graphqlClient.GetUser({ email: req.body.email });
       const firstUser = userMeta.data?.user_aggregate.aggregate?.count === 0;
-      const existingUser = userMeta.data?.user_by_pk;
+      const existingUser = userMeta.data?.user_by_pk?.active;
 
       if (firstUser) {
         // first user
@@ -88,14 +89,10 @@ function createAuthHandler(): express.Router {
   });
 
   // Allow clients to request data about the current user
-  auth.get("/session", async (req, res) => {
-    if (req.session.email) {
-      res.status(200).json({
-        uid: req.session.opaqueUserId
-      });
-      return;
-    }
-    res.sendStatus(401);
+  auth.get("/session", authRequired, async (req, res) => {
+    res.status(200).json({
+      uid: req.session.opaqueUserId
+    });
   });
 
   auth.get("/logout", (req, res) => {
@@ -114,14 +111,10 @@ function createAuthHandler(): express.Router {
     });
   });
 
-  auth.get("/nginx-ingress/webhook", (req, res) => {
-    if (req.session.email) {
-      res.setHeader("X-Auth-Request-User", req.session.email);
-      res.setHeader("X-Auth-Request-Email", req.session.email);
-      res.sendStatus(200);
-      return;
-    }
-    res.sendStatus(401);
+  auth.get("/nginx-ingress/webhook", authRequired, (req, res) => {
+    res.setHeader("X-Auth-Request-User", req.session.email!);
+    res.setHeader("X-Auth-Request-Email", req.session.email!);
+    res.sendStatus(200);
   });
 
   // add a catch all for misconfigured auth requests

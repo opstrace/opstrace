@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES6",
-    "lib": ["es6", "dom"],
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
@@ -19,7 +18,8 @@
     "paths": {
       "client/*": ["client/*"],
       "server/*": ["server/*"],
-      "state/*": ["state/*"]
+      "state/*": ["state/*"],
+      "workers/*": ["workers/*"]
     }
   },
   "include": ["src/**/*", "src/**/*.json"],

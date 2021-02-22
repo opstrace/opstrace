@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToModuleVersionsSubscription } from "state/graphqlClient";
+import { SubscribeToModuleVersionsSubscription } from "state/clients/graphqlClient";
 
 export type ModuleVersion = SubscribeToModuleVersionsSubscription["module_version"][0];
 export type ModuleVersions = SubscribeToModuleVersionsSubscription["module_version"];

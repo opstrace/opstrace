@@ -1,11 +1,11 @@
 # Copyright 2019-2021 Opstrace, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,7 @@ DOCKER_REPO ?= opstrace
 # with a different suffix (e.g. `ci`) in the CI environment so that the
 # version string attached to build artifacts reveals the environment that the
 # build artifact was created in.
-CHECKOUT_VERSION_STRING ?= $(shell git rev-parse --short=9 HEAD)-dev
+export CHECKOUT_VERSION_STRING ?= $(shell git rev-parse --short=9 HEAD)-dev
 
 # Assume that the host has a unix group `docker` that has write access to
 # `/var/run/docker.sock`. When running non-root processes in containers that
@@ -48,18 +48,18 @@ CHECKOUT_VERSION_STRING ?= $(shell git rev-parse --short=9 HEAD)-dev
 DOCKER_GID_HOST ?= $(shell command -v getent > /dev/null 2>&1 && getent group docker | awk -F: '{print $$3}')
 
 # Allow this to be set via environment, default for local dev setup.
-OPSTRACE_KUBE_CONFIG_HOST ?= ${HOME}/.kube
+export OPSTRACE_KUBE_CONFIG_HOST ?= ${HOME}/.kube
 
 # For the local dev setup set the build dir to be the absolute path to cwd. For
 # example, that is required to make `make test-remote` work when started
 # locally. Note(JP): I think this might be in conflict with some other
 # thinking, question that, test things.
-OPSTRACE_BUILD_DIR ?= $(shell pwd)
+export OPSTRACE_BUILD_DIR ?= $(shell pwd)
 
 # Name of the cloud platform. Supported values are gcp and aws.
-OPSTRACE_CLOUD_PROVIDER ?= gcp
+export OPSTRACE_CLOUD_PROVIDER ?= gcp
 
-OPSTRACE_GCP_PROJECT_ID ?= vast-pad-240918
+export OPSTRACE_GCP_PROJECT_ID ?= vast-pad-240918
 
 # Defaults for GCP cloud platform (does not work for AWS)
 ifeq (gcp,$(OPSTRACE_CLOUD_PROVIDER))
@@ -78,8 +78,8 @@ KERNEL_NAME := $(shell uname -s | tr A-Z a-z)
 # Path to the files with authentication tokens. They will be mounted inside the
 # container that runs test-remote* targets.
 #
-TENANT_DEFAULT_API_TOKEN_FILEPATH ?= "${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
-TENANT_SYSTEM_API_TOKEN_FILEPATH ?= "${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
+export TENANT_DEFAULT_API_TOKEN_FILEPATH ?= "${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
+export TENANT_SYSTEM_API_TOKEN_FILEPATH ?= "${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
 
 
 $(info --------------------------------------------------------------)
@@ -595,6 +595,10 @@ test-remote: kubectl-cluster-info
 		--workdir /build/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		yarn run mocha --grep test_ui --invert
+
+.PHONY: test-remote-looker
+test-remote-looker:
+	bash ci/invoke-looker.sh
 
 # Note(JP): dirty duplication. This is supposed to be the _exact_ same as the
 # test-remote target abvove, but instead of

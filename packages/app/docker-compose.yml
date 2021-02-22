@@ -63,3 +63,10 @@ services:
       retries: 3
     logging:
       driver: none
+  redis:
+    image: bitnami/redis:6.0.9
+    environment:
+      - REDIS_PASSWORD=myredispassword
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - 6379:6379

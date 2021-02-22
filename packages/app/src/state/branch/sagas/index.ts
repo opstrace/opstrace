@@ -13,51 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all, spawn, call, takeEvery, select } from "redux-saga/effects";
+import { all, spawn, call, takeEvery, put, select } from "redux-saga/effects";
 import subscriptionManager from "./subscription";
 import * as actions from "../actions";
-import navigateToFile from "state/file/utils/navigation";
-import { getCurrentlySelectedFile } from "state/file/hooks/useFiles";
+import graphqlClient from "state/clients/graphqlClient";
+import navigateToBranch from "../utils/navigation";
 import { State } from "state/reducer";
-
-function* listenForBranchChange() {
-  yield takeEvery(actions.setCurrentBranch, handleBranchChange);
-}
-
-function* handleBranchChange(
-  action: ReturnType<typeof actions.setCurrentBranch>
-) {
-  const state: State = yield select();
-  const currentFile = getCurrentlySelectedFile(state);
-  // update the url
-  if (currentFile) {
-    navigateToFile(
-      currentFile.file,
-      action.payload.history,
-      action.payload.name
-    );
-  }
-}
-
-function* listenForBranchCreateRequest() {
-  yield takeEvery(actions.createBranch.request, handleBranchCreateRequest);
-}
-
-function* handleBranchCreateRequest(
-  action: ReturnType<typeof actions.createBranch.request>
-) {
-  const state: State = yield select();
-  const currentFile = getCurrentlySelectedFile(state);
-  // clone the files in the existing module
-  if (currentFile) {
-  }
-}
+import { getOpenFileParams } from "state/file/hooks/useFiles";
+import { requestOpenFileWithParams } from "state/file/actions";
 
 export default function* branchTaskManager() {
   const sagas = [
     subscriptionManager,
-    listenForBranchChange,
-    listenForBranchCreateRequest
+    branchChangeListener,
+    createBranchListener,
+    deleteBranchListener
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
@@ -76,4 +46,68 @@ export default function* branchTaskManager() {
       })
     )
   );
+}
+
+function* branchChangeListener() {
+  yield takeEvery(actions.setCurrentBranch, changeBranch);
+}
+
+function* changeBranch(action: ReturnType<typeof actions.setCurrentBranch>) {
+  const state: State = yield select();
+  if (action.payload.name === state.branches.currentBranchName) {
+    return;
+  }
+
+  navigateToBranch(action.payload.name, action.payload.history);
+  const selectedFileParams = getOpenFileParams(state);
+  if (
+    !(
+      selectedFileParams.requestedModuleName &&
+      selectedFileParams.requestedModuleScope &&
+      selectedFileParams.requestedFilePath
+    )
+  ) {
+    // don't try to open the file on the new branch if we don't have a file open before switching branches.
+    return;
+  }
+  yield put(
+    requestOpenFileWithParams({
+      history: action.payload.history,
+      params: {
+        selectedFilePath: selectedFileParams.requestedFilePath,
+        selectedModuleName: selectedFileParams.requestedModuleName,
+        selectedModuleScope: selectedFileParams.requestedModuleScope,
+        selectedModuleVersion: "latest" // use latest because it will pick something that has the best chance of existing
+      }
+    })
+  );
+}
+
+function* createBranchListener() {
+  yield takeEvery(actions.createBranch, createBranch);
+}
+
+function* createBranch(action: ReturnType<typeof actions.createBranch>) {
+  try {
+    yield graphqlClient.CreateBranch({
+      name: action.payload.name
+    });
+    navigateToBranch(action.payload.name, action.payload.history);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function* deleteBranchListener() {
+  yield takeEvery(actions.deleteBranch, deleteBranch);
+}
+
+function* deleteBranch(action: ReturnType<typeof actions.deleteBranch>) {
+  try {
+    yield graphqlClient.DeleteBranch({
+      name: action.payload.name
+    });
+  } catch (err) {
+    console.error(err);
+  }
 }

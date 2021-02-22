@@ -14,228 +14,147 @@
  * limitations under the License.
  */
 import axios from "axios";
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 
-import getWorkerApi, {
-  EditorDecorations
-} from "client/components/Editor/lib/workers";
+import socket from "state/clients/websocket";
+import { getFileUri, getMonacoFileUri } from "./utils/uri";
+import * as actions from "state/clients/websocket/actions";
+import LiveClient from "./LiveClient";
 
-import { sleep } from "state/utils/time";
-import { getTextEditorOptions, getRange } from "./utils/monaco";
-import { File, Files, IPossiblyForkedFile, onErrorHandler } from "./types";
-import {
-  getFileUri,
-  getMonacoFileUri,
-  getMonacoFileUriString
-} from "./utils/uri";
+interface File {
+  id: string;
+  path: string;
+  contents: string;
+  branch_name: string;
+  module_name: string;
+  module_scope: string;
+  module_version: string;
+}
 
-class TextFileModel implements IPossiblyForkedFile {
-  public file: File;
-  // file this file was forked from
-  public baseFile?: File;
-  // latest version of base file (if this doesn't equal this.baseFile then rebaseReuired is true)
-  public latestBaseFile?: File;
-  // if latestBaseFile is newer than baseFile
-  public rebaseRequired: boolean;
-  public isNewModule: boolean;
-  public isNewFile: boolean;
-  // track if this file is deleted so when we merge with main, we can remove it
-  public isDeletedFile: boolean;
-  // only possible in live mode, and indicates that file has deviated from baseFile
-  public isModifiedFile: boolean;
+class TextFileModel {
+  // the file
+  file: File;
   // all files are live if not on main branch
-  public live: boolean;
+  live: boolean;
   // all files that are not live are readOnly
-  public readOnly: boolean;
+  readOnly: boolean;
   // monaco text model
-  public monacoModel?: monaco.editor.ITextModel;
-
-  // --- private ---
-  private contents: string | null;
-  private decorations: EditorDecorations = [];
-  private memoizedMonacoDecorations: string[] = [];
+  model: monaco.editor.ITextModel;
+  // monaco editor instance. Set only when this model is focussed in the editor
+  private editor?: monaco.editor.ICodeEditor;
+  private contents?: string;
+  private monacoEditorViewState?: monaco.editor.ICodeEditorViewState | null;
+  private liveClient?: LiveClient;
+  // empty array will always be the same object which is handy for react to prevent unnecessary updates
+  private _emptyArray = [];
   private disposables: monaco.IDisposable[] = [];
-  private node?: HTMLDivElement;
-  private editor?: monaco.editor.IStandaloneCodeEditor;
-  private editorHeight: number = 0;
-  private editorWidth: number = 0;
-  private onErrorHandler?: onErrorHandler;
+  private viewerListeners = new Set<() => void>();
 
-  constructor(pff: IPossiblyForkedFile, contents?: string) {
-    this.file = pff.file;
-    this.rebaseRequired = pff.rebaseRequired;
-    this.isNewFile = pff.isNewFile;
-    this.isDeletedFile = pff.isDeletedFile;
-    this.isNewModule = pff.isNewModule;
-    this.isModifiedFile = pff.isModifiedFile;
-    this.baseFile = pff.baseFile;
-    this.latestBaseFile = pff.latestBaseFile;
-    this.live = pff.file.branch_name !== "main";
+  constructor(file: File) {
+    this.file = file;
+    this.live = file.module_version === "latest" && file.branch_name !== "main";
     this.readOnly = !this.live;
-
-    this.contents = contents ? contents : null;
-
-    this.initialize();
-  }
-
-  private async initialize() {
-    if (!this.contents) {
-      this.contents = await this.getContents();
-    }
-
-    if (this.contents === null) {
-      // there was an error loading the file
-      return;
-    }
-    const monacoUri = getMonacoFileUri(this.file);
-    const existingModel = monaco.editor.getModel(monacoUri);
-    if (!this.live) {
-      if (existingModel) {
-        this.monacoModel = existingModel;
-      } else {
-        this.monacoModel = monaco.editor.createModel(
-          this.contents,
-          "modulescript",
-          monacoUri
-        );
-      }
-    } else {
-    }
-    if (this.monacoModel) {
-      this.disposables.push(
-        this.monacoModel.onDidChangeContent(() => this.updateDecorations())
-      );
-    }
-    if (this.node) {
-      this._render();
-    }
-  }
-
-  private async updateDecorations() {
-    await this.getDecorations();
-    this.applyDecorations();
-  }
-
-  private applyDecorations() {
-    if (!this.editor || !this.monacoModel) {
-      return;
-    }
-    this.memoizedMonacoDecorations = this.editor.deltaDecorations(
-      this.memoizedMonacoDecorations,
-      this.decorations.map(({ start, end, options }) => ({
-        range: getRange(this.monacoModel!, start, end),
-        options
-      }))
+    this.contents = file.contents;
+    this.model = monaco.editor.createModel(
+      file.contents || "",
+      "typescript",
+      getMonacoFileUri(this.file)
     );
+    this.maybeSetupLiveClient();
+
+    this.model.updateOptions({ tabSize: 2 });
   }
 
-  private async getDecorations() {
-    if (!this.monacoModel) {
-      this.decorations = [];
-    }
-    const api = await getWorkerApi();
-    const fileName = getMonacoFileUriString(this.file);
-    let decorations = await api.getDecorations(fileName);
-    if (decorations === null) {
-      // try again
-      await sleep(50);
-      decorations = await api.getDecorations(fileName);
-    }
-    this.decorations = decorations || [];
-  }
-
-  public updateEditorLayout({
-    height,
-    width
-  }: {
-    height: number;
-    width: number;
-  }) {
-    this.editorHeight = height;
-    this.editorWidth = width;
-    this._updateEditorLayout();
-  }
-
-  private _updateEditorLayout() {
-    if (this.editor) {
-      this.editor.layout({
-        width: this.editorWidth,
-        height: this.editorHeight
+  private maybeSetupLiveClient() {
+    if (this.contents && this.live && !this.liveClient) {
+      this.liveClient = new LiveClient({
+        model: this.model,
+        file: this.file,
+        onViewersChanged: () => this.onViewersChanged()
       });
     }
   }
 
-  public async render(node: HTMLDivElement) {
-    if (this.node && node !== this.node) {
-      this.editor?.dispose();
-      console.log("disposing editor and recreating.");
+  async attachEditor(editor: monaco.editor.ICodeEditor) {
+    // Load contents and establish a live client
+    await this.loadContents();
+    this.editor = editor;
+    this.liveClient?.attachEditor(editor);
+    // Restore the view state we last left this file in
+    if (this.monacoEditorViewState) {
+      this.editor.restoreViewState(this.monacoEditorViewState);
     }
-    this.node = node;
-    return this._render();
   }
 
-  private async _render() {
-    if (!this.monacoModel || this.editor) {
-      console.log("returning early in _render");
-      return;
+  detachEditor() {
+    // Store the view state in case we return to this file
+    this.monacoEditorViewState = this.editor?.saveViewState();
+    this.editor = undefined;
+    this.liveClient?.detachEditor();
+  }
+
+  get viewers() {
+    if (!this.liveClient) {
+      return this._emptyArray;
     }
-    this.editor = monaco.editor.create(
-      this.node!,
-      getTextEditorOptions({ readOnly: this.readOnly, model: this.monacoModel })
-    );
-    this._updateEditorLayout();
-    await this.updateDecorations();
+    return this.liveClient.viewers;
   }
 
-  public onFileStoreChange(files: Files) {
-    // check rebaseRequired
-    console.log(files);
+  async loadContents() {
+    if (this.contents) return;
+
+    const contents = await this.getContents();
+    if (contents) {
+      this.contents = contents;
+      this.model.setValue(contents);
+      this.maybeSetupLiveClient();
+    }
   }
 
-  public dispose() {
+  onViewersChange(callback: () => void) {
+    this.viewerListeners.add(callback);
+    return () => {
+      this.viewerListeners.delete(callback);
+    };
+  }
+
+  private onViewersChanged() {
+    for (const cb of this.viewerListeners) {
+      cb();
+    }
+  }
+
+  dispose() {
+    socket.emit(actions.unsubscribeFile(this.file.id));
+    this.liveClient?.dispose();
+    this.liveClient = undefined;
     this.disposables.forEach(d => {
       try {
         d.dispose();
-      } catch (err) {
-        // trying to dispose something already disposed
-      }
+      } catch (err) {}
     });
-    this.monacoModel?.dispose();
-    this.editor?.dispose();
-    this.node = undefined;
-    this.onErrorHandler = undefined;
+    this.model.dispose();
   }
 
-  private emitError(error: Error) {
-    this.onErrorHandler && this.onErrorHandler(error);
-  }
-
-  private getResourceURI(latest: boolean) {
-    return `/modules/${getFileUri(this.file, {
-      useLatest: latest,
+  private getResourceURI(file: File) {
+    return `/modules/${getFileUri(file, {
+      branch: this.file.branch_name,
       ext: true
     })}`;
   }
 
-  private async loadFromAPI(latest: boolean) {
+  private async loadFromAPI(file: File) {
     try {
-      const res = await axios.get<string>(this.getResourceURI(latest));
+      const res = await axios.get<string>(this.getResourceURI(file));
       return res.data;
     } catch (err) {
-      this.emitError(err);
+      console.error("loading file failed", err);
     }
     return null;
   }
 
   private async getContents() {
-    if (this.contents) {
-      return this.contents;
-    }
-    if (!this.live) {
-      return await this.loadFromAPI(false);
-    }
-    //TODO live mode
-    return "";
+    return await this.loadFromAPI(this.file);
   }
 }
 

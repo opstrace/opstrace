@@ -14,49 +14,77 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from "react";
-import AutoSizer, { Size } from "react-virtualized-auto-sizer";
-
-import EditorSkeleton from "../lib/components/EditorSkeleton";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ModuleEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
+import { getTextEditorOptions } from "state/file/utils/monaco";
+import { useFocusedOpenFile } from "state/file/hooks/useFiles";
 
-function AutoSizingEditor(props: ModuleEditorProps) {
-  return (
-    <AutoSizer>
-      {({ height, width }: Size) => {
-        return <ModuleEditor {...props} height={height} width={width} />;
-      }}
-    </AutoSizer>
-  );
-}
+const emptyMonacoFileUri = monaco.Uri.parse("file://empty.tsx");
+const emptyModel = monaco.editor.createModel(
+  "",
+  "typescript",
+  emptyMonacoFileUri
+);
 
-type ResizableModuleEditorProps = ModuleEditorProps & {
-  height: number;
-  width: number;
-};
-
-function ModuleEditor({
-  textFileModel,
-  height,
-  width
-}: ResizableModuleEditorProps) {
+function ModuleEditor({ height, width, visible }: ModuleEditorProps) {
   const [ready, setReady] = useState(false);
-  const editorContainer = useCallback(
-    async node => {
-      if (node && textFileModel) {
-        await textFileModel.render(node);
-        setReady(true);
-      }
-    },
-    [textFileModel]
-  );
+  const editor = useRef<null | monaco.editor.ICodeEditor>(null);
+  const focussedFile = useFocusedOpenFile();
 
-  useEffect(() => {
-    if (width !== undefined && height !== undefined && textFileModel) {
-      textFileModel.updateEditorLayout({ width, height });
+  // Track our current model in a ref
+  const currentModel = useRef<monaco.editor.IModel>(
+    focussedFile?.model || emptyModel
+  );
+  const readOnly = useRef<boolean>(!focussedFile?.live || true);
+
+  const editorContainer = useCallback(async node => {
+    if (node) {
+      editor.current = monaco.editor.create(
+        node,
+        getTextEditorOptions({
+          readOnly: readOnly.current,
+          model: currentModel.current
+        })
+      );
+      setReady(true);
     }
-  }, [width, height, textFileModel]);
+    if (!node) {
+      editor.current?.dispose();
+      editor.current = null;
+    }
+  }, []);
+
+  // Update editor layout when width/height changes
+  useEffect(() => {
+    if (width !== undefined && height !== undefined && editor.current) {
+      editor.current.layout({ width, height });
+    }
+  }, [width, height]);
+
+  // Update the editor model when focussedFile changes
+  useEffect(() => {
+    const prevFocussedFile = focussedFile;
+
+    if (focussedFile && editor.current) {
+      currentModel.current = focussedFile.model;
+      editor.current.setModel(focussedFile.model);
+      editor.current.updateOptions({ readOnly: !focussedFile.live });
+      focussedFile.attachEditor(editor.current);
+    }
+    return () => {
+      prevFocussedFile?.detachEditor();
+    };
+  }, [focussedFile]);
+
+  // Dispose all the things when this component unmounts
+  useEffect(() => {
+    return () => {
+      editor.current?.dispose();
+      editor.current = null;
+    };
+  }, []);
 
   return (
     <>
@@ -66,12 +94,12 @@ function ModuleEditor({
         style={{
           height,
           width,
-          opacity: ready ? 1 : 0
+          opacity: ready ? 1 : 0,
+          display: visible ? "block" : "none"
         }}
       />
-      {ready ? null : <EditorSkeleton />}
     </>
   );
 }
 
-export default React.memo(AutoSizingEditor);
+export default React.memo(ModuleEditor);

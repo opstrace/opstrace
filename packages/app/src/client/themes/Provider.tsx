@@ -15,7 +15,7 @@
  */
 
 import React, { useCallback } from "react";
-import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiThemeProvider, StylesProvider } from "@material-ui/core/styles";
@@ -55,7 +55,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-class ThemeProvider extends React.Component<Props> {
+class ThemeProvider extends React.PureComponent<Props> {
   render() {
     const { children, theme } = this.props;
 

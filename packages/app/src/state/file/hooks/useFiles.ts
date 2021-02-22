@@ -15,21 +15,18 @@
  */
 import { useEffect } from "react";
 import { createSelector } from "reselect";
-import semverGt from "semver/functions/gt";
 
 import { useDispatch, useSelector, State } from "state/provider";
 import { subscribe, unsubscribe } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-import { useLatestMainVersionForModule } from "state/moduleVersion/hooks/useModuleVersions";
-import { getCurrentBranch } from "state/branch/hooks/useBranches";
-import { getFileUri } from "../utils/uri";
-import { isTypescriptFile } from "../utils/fileType";
-import getPossiblyForkedFilesForModuleVersion from "../utils/possiblyForkedFiles";
-import { File, IPossiblyForkedFile } from "../types";
+import {
+  getCurrentBranch,
+  useCurrentBranchName
+} from "state/branch/hooks/useBranches";
 
-const getFiles = createSelector(
-  (state: State) => state.files.files,
+export const getFiles = createSelector(
+  (state: State) => state.files.filesByBranch,
   files => files
 );
 
@@ -44,18 +41,29 @@ export const getOpenFileParams = createSelector(
     requestedModuleName: fileState.selectedModuleName,
     requestedModuleScope: fileState.selectedModuleScope,
     requestedModuleVersion: fileState.selectedModuleVersion,
-    requestedFilePath: fileState.selectedFilePath
+    requestedFilePath: fileState.selectedFilePath,
+    requestOpenFilePending: fileState.requestOpenFilePending
   })
 );
 
 const getCurrentlySelectedFileId = (state: State) => state.files.selectedFileId;
+const getLoadingState = (state: State) => state.files.loaded;
+
+const hasBranchLoaded = createSelector(
+  getLoadingState,
+  getCurrentBranch,
+  (loadedBranches, currentBranch) =>
+    currentBranch?.name &&
+    loadedBranches["main"] &&
+    loadedBranches[currentBranch.name]
+);
 
 export const getCurrentlySelectedFile = createSelector(
-  (state: State) => state.files.loading,
+  hasBranchLoaded,
   getOpenFiles,
   getCurrentlySelectedFileId,
-  (loadingFiles, openFiles, selectedFileId) => {
-    if (loadingFiles) {
+  (loaded, openFiles, selectedFileId) => {
+    if (!loaded) {
       return undefined;
     }
     return openFiles.find(f => f.file.id === selectedFileId) || null;
@@ -63,29 +71,23 @@ export const getCurrentlySelectedFile = createSelector(
 );
 
 export const getCurrentBranchFiles = createSelector(
-  (state: State) => state.files.loading,
+  hasBranchLoaded,
   getFiles,
   getCurrentBranch,
-  (loading, files, currentBranch) => {
-    if (loading || currentBranch === undefined) {
+  (loaded, files, currentBranch) => {
+    if (!loaded || currentBranch === undefined) {
       return undefined;
     }
     if (currentBranch === null) {
       return null;
     }
-    return files.filter(
-      f => f.branch_name === currentBranch?.name || f.branch_name === "main"
-    );
-  }
-);
+    const branchFiles = files[currentBranch.name];
 
-export const getBranchTypescriptFiles = createSelector(
-  getCurrentBranchFiles,
-  files => {
-    if (!files) {
-      return files;
+    if (currentBranch.name === "main") {
+      return Object.values(branchFiles);
     }
-    return files.filter(isTypescriptFile);
+
+    return Object.values(branchFiles).concat(Object.values(files["main"]));
   }
 );
 
@@ -97,93 +99,79 @@ export function useFocusedOpenFile() {
   return useSelector(getCurrentlySelectedFile);
 }
 
+export function useOpenFiles() {
+  return useSelector(getOpenFiles);
+}
+/**
+ * Return all files from current branch and main branch,
+ * with all current branch files at the beginning of the returned array
+ */
 export function useBranchFiles() {
   const currentBranchFiles = useSelector(getCurrentBranchFiles);
+  const currentBranchName = useCurrentBranchName();
 
   const dispatch = useDispatch();
 
   useEffect(() => {
     const subId = getSubscriptionID();
-    dispatch(subscribe(subId));
+    const _currentBranchName = currentBranchName;
+    dispatch(subscribe({ branch: "main", subId }));
 
+    if (_currentBranchName !== "main") {
+      dispatch(subscribe({ branch: _currentBranchName, subId }));
+    }
     return () => {
-      dispatch(unsubscribe(subId));
+      dispatch(unsubscribe({ branch: "main", subId }));
+      if (_currentBranchName !== "main") {
+        dispatch(unsubscribe({ branch: _currentBranchName, subId }));
+      }
     };
-  }, [dispatch]);
+  }, [dispatch, currentBranchName]);
 
   return currentBranchFiles;
-}
-
-export function useBranchTypescriptFiles() {
-  const files = useBranchFiles();
-  if (!files) {
-    return files;
-  }
-
-  return files.filter(isTypescriptFile);
 }
 
 /**
  * get all of the latest ts files for each module.
  */
-export function useLatestBranchTypescriptFiles() {
-  const files = useBranchTypescriptFiles();
-
-  const latest = new Map<string, File>();
+export function useLatestBranchFiles() {
+  const files = useBranchFiles();
 
   if (!files) {
     return files;
   }
 
-  files.forEach(f => {
-    const uri = getFileUri(f, { useLatest: true });
-    const version = latest.get(uri);
+  const latestFiles = files.filter(f => f.file.module_version === "latest");
 
-    if (!version) {
-      latest.set(uri, f);
-      return;
-    }
-
-    if (semverGt(f.module_version, version.module_version)) {
-      latest.set(uri, f);
-    }
-  });
-
-  return { files: [...latest.values()], tsFileCount: files.length };
+  return { files: latestFiles, tsFileCount: files.length };
 }
 
 /**
- * get all ts files for a module version, on the current branch.
+ * get all files for a module version, on the current branch.
  *
  * returns an object for each file with all necessary data to
  * handle how to show or rebase the file.
  */
-export function useBranchTypescriptFilesForModuleVersion(
+export function useBranchFilesForModuleVersion(
   moduleName: string,
   moduleScope: string,
   version: string
-): IPossiblyForkedFile[] | null | undefined {
-  const files = useBranchTypescriptFiles();
-  // find latest version of module on main branch
-  const latestMainVersion = useLatestMainVersionForModule(
-    moduleName,
-    moduleScope
-  );
-  // is a new module if we couldn't find a version of it on main
-  const isNewModule = !latestMainVersion;
+) {
+  const files = useBranchFiles();
 
   if (!files) {
     return files;
   }
 
-  const moduleFiles = files.filter(
-    f => f.module_name === moduleName && f.module_scope === moduleScope
+  const moduleVersionFiles = files.filter(
+    tf =>
+      tf.file.module_name === moduleName &&
+      tf.file.module_scope === moduleScope &&
+      tf.file.module_version === version
   );
-
-  return getPossiblyForkedFilesForModuleVersion(
-    moduleFiles,
-    isNewModule,
-    version,
-    latestMainVersion?.version
+  // filter out any duplications between current branch and main branch
+  return moduleVersionFiles.filter(
+    (a, idx) =>
+      idx === moduleVersionFiles.findIndex(b => b.file.path === a.file.path)
   );
 }

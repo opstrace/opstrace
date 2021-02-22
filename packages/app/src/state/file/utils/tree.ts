@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import { sanitizeScope, sanitizeFilePath } from "state/utils/sanitize";
-import { IDirectory, IPossiblyForkedFile } from "../types";
-
+import TextFileModel from "../TextFileModel";
+import { IDirectory } from "../types";
 /**
  * Builds a file tree from array of files
  */
-export function getFileTree(files: IPossiblyForkedFile[] | null | undefined) {
+export function getFileTree(files: TextFileModel[] | null | undefined) {
   if (!files) {
     return {
       path: "",
@@ -29,19 +29,18 @@ export function getFileTree(files: IPossiblyForkedFile[] | null | undefined) {
     };
   }
   const tree = files.reduce<IDirectory>(
-    (dir, pff) => {
+    (dir, textFile) => {
+      const { file } = textFile;
       let cwd = dir;
 
       // add the module name to the beginning of the path
       // example with scope => @opstrace/prometheus
       // example without scope => prometheus
-      const moduleDirs = pff.file.module_scope
-        ? [`@${sanitizeScope(pff.file.module_scope)}`, pff.file.module_name]
-        : [pff.file.module_name];
+      const moduleDirs = file.module_scope
+        ? [`@${sanitizeScope(file.module_scope)}`, file.module_name]
+        : [file.module_name];
 
-      const dirs = moduleDirs.concat(
-        sanitizeFilePath(pff.file.path).split("/")
-      );
+      const dirs = moduleDirs.concat(sanitizeFilePath(file.path).split("/"));
       // pop the filename off
       dirs.pop();
 
@@ -63,7 +62,7 @@ export function getFileTree(files: IPossiblyForkedFile[] | null | undefined) {
         }
       });
       // add file
-      cwd.files.push(pff);
+      cwd.files.push(file);
 
       return dir;
     },
@@ -76,37 +75,4 @@ export function getFileTree(files: IPossiblyForkedFile[] | null | undefined) {
   );
 
   return tree;
-}
-
-export function getFilePathObjects(
-  tree: IDirectory,
-  moduleScope: string,
-  moduleName: string,
-  path: string
-) {
-  const parts: (IDirectory | IPossiblyForkedFile)[] = [];
-  const filePathParts = sanitizeFilePath(path).split("/");
-  const pathParts = moduleScope
-    ? [moduleScope, moduleName, ...filePathParts]
-    : [moduleName, ...filePathParts];
-
-  // pop the filename off and discard because we don't need it
-  pathParts.pop();
-
-  let cwd = tree;
-  pathParts.forEach(name => {
-    const childDirectory = cwd.directories.find(d => d.name === name);
-    if (childDirectory) {
-      parts.push(childDirectory);
-      cwd = childDirectory;
-    }
-  });
-  const file = cwd.files.find(
-    f => sanitizeFilePath(f.file.path) === sanitizeFilePath(path)
-  );
-  if (file) {
-    parts.push(file);
-  }
-
-  return parts;
 }

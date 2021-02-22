@@ -147,6 +147,72 @@ func (client *Client) CreateBranch(vars *CreateBranchVariables) (*CreateBranchRe
 }
 
 //
+// mutation DeleteBranch($name: String!)
+//
+
+type DeleteBranchVariables struct {
+	Name String `json:"name"`
+}
+
+type DeleteBranchResponse struct {
+	DeleteBranchByPk struct {
+		Name string `json:"Name"`
+	} `json:"DeleteBranchByPk"`
+}
+
+type DeleteBranchRequest struct {
+	*http.Request
+}
+
+func NewDeleteBranchRequest(url string, vars *DeleteBranchVariables) (*DeleteBranchRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation DeleteBranch($name: String!) {
+  delete_branch_by_pk(name: $name) {
+    name
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &DeleteBranchRequest{req}, nil
+}
+
+func (req *DeleteBranchRequest) Execute(client *http.Client) (*DeleteBranchResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result DeleteBranchResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func DeleteBranch(url string, client *http.Client, vars *DeleteBranchVariables) (*DeleteBranchResponse, error) {
+	req, err := NewDeleteBranchRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) DeleteBranch(vars *DeleteBranchVariables) (*DeleteBranchResponse, error) {
+	return DeleteBranch(client.Url, client.Client, vars)
+}
+
+//
 // mutation CreateCredentials($credentials: [credential_insert_input!]!)
 //
 
@@ -878,6 +944,650 @@ func (client *Client) UpdateExporter(vars *UpdateExporterVariables) (*UpdateExpo
 }
 
 //
+// query GetCompiledOutput($id: uuid!)
+//
+
+type GetCompiledOutputVariables struct {
+	ID UUID `json:"id"`
+}
+
+type GetCompiledOutputResponse struct {
+	FileByPk struct {
+		Js            string `json:"Js"`
+		Dts           string `json:"Dts"`
+		Map           string `json:"Map"`
+		CompileErrors string `json:"CompileErrors"`
+	} `json:"FileByPk"`
+}
+
+type GetCompiledOutputRequest struct {
+	*http.Request
+}
+
+func NewGetCompiledOutputRequest(url string, vars *GetCompiledOutputVariables) (*GetCompiledOutputRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetCompiledOutput($id: uuid!) {
+  file_by_pk(id: $id) {
+    js
+    dts
+    map
+    compile_errors
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetCompiledOutputRequest{req}, nil
+}
+
+func (req *GetCompiledOutputRequest) Execute(client *http.Client) (*GetCompiledOutputResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetCompiledOutputResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetCompiledOutput(url string, client *http.Client, vars *GetCompiledOutputVariables) (*GetCompiledOutputResponse, error) {
+	req, err := NewGetCompiledOutputRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetCompiledOutput(vars *GetCompiledOutputVariables) (*GetCompiledOutputResponse, error) {
+	return GetCompiledOutput(client.Url, client.Client, vars)
+}
+
+//
+// query GetFile($id: uuid!)
+//
+
+type GetFileVariables struct {
+	ID UUID `json:"id"`
+}
+
+type GetFileResponse struct {
+	FileByPk struct {
+		ID            string `json:"ID"`
+		Ext           string `json:"Ext"`
+		Path          string `json:"Path"`
+		ModuleName    string `json:"ModuleName"`
+		ModuleScope   string `json:"ModuleScope"`
+		ModuleVersion string `json:"ModuleVersion"`
+		CreatedAt     string `json:"CreatedAt"`
+		BranchName    string `json:"BranchName"`
+		BaseFileId    string `json:"BaseFileId"`
+		MarkDeleted   string `json:"MarkDeleted"`
+		Contents      string `json:"Contents"`
+	} `json:"FileByPk"`
+}
+
+type GetFileRequest struct {
+	*http.Request
+}
+
+func NewGetFileRequest(url string, vars *GetFileVariables) (*GetFileRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetFile($id: uuid!) {
+  file_by_pk(id: $id) {
+    id
+    ext
+    path
+    module_name
+    module_scope
+    module_version
+    created_at
+    branch_name
+    base_file_id
+    mark_deleted
+    contents
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetFileRequest{req}, nil
+}
+
+func (req *GetFileRequest) Execute(client *http.Client) (*GetFileResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetFileResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetFile(url string, client *http.Client, vars *GetFileVariables) (*GetFileResponse, error) {
+	req, err := NewGetFileRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetFile(vars *GetFileVariables) (*GetFileResponse, error) {
+	return GetFile(client.Url, client.Client, vars)
+}
+
+//
+// query GetFileId($branch: String, $module: String, $scope: String, $version: String, $path: String)
+//
+
+type GetFileIdVariables struct {
+	Branch  *String `json:"branch,omitempty"`
+	Module  *String `json:"module,omitempty"`
+	Scope   *String `json:"scope,omitempty"`
+	Version *String `json:"version,omitempty"`
+	Path    *String `json:"path,omitempty"`
+}
+
+type GetFileIdResponse struct {
+	File []struct {
+		ID         string `json:"ID"`
+		BranchName string `json:"BranchName"`
+	} `json:"File"`
+}
+
+type GetFileIdRequest struct {
+	*http.Request
+}
+
+func NewGetFileIdRequest(url string, vars *GetFileIdVariables) (*GetFileIdRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetFileId($branch: String, $module: String, $scope: String, $version: String, $path: String) {
+  file(where: {_or: [{branch_name: {_eq: $branch}, module_name: {_eq: $module}, module_scope: {_eq: $scope}, module_version: {_eq: $version}, path: {_eq: $path}}, {branch_name: {_eq: "main"}, module_name: {_eq: $module}, module_scope: {_eq: $scope}, module_version: {_eq: $version}, path: {_eq: $path}}]}) {
+    id
+    branch_name
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetFileIdRequest{req}, nil
+}
+
+func (req *GetFileIdRequest) Execute(client *http.Client) (*GetFileIdResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetFileIdResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetFileId(url string, client *http.Client, vars *GetFileIdVariables) (*GetFileIdResponse, error) {
+	req, err := NewGetFileIdRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetFileId(vars *GetFileIdVariables) (*GetFileIdResponse, error) {
+	return GetFileId(client.Url, client.Client, vars)
+}
+
+//
+// mutation UpdateContents($id: uuid!, $contents: String!, $js: String!, $dts: String!, $map: String!, $errors: jsonb!)
+//
+
+type UpdateContentsVariables struct {
+	ID       UUID   `json:"id"`
+	Contents String `json:"contents"`
+	Js       String `json:"js"`
+	Dts      String `json:"dts"`
+	Map      String `json:"map"`
+	Errors   Jsonb  `json:"errors"`
+}
+
+type UpdateContentsResponse struct {
+	UpdateFileByPk struct {
+		ID string `json:"ID"`
+	} `json:"UpdateFileByPk"`
+}
+
+type UpdateContentsRequest struct {
+	*http.Request
+}
+
+func NewUpdateContentsRequest(url string, vars *UpdateContentsVariables) (*UpdateContentsRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpdateContents($id: uuid!, $contents: String!, $js: String!, $dts: String!, $map: String!, $errors: jsonb!) {
+  update_file_by_pk(pk_columns: {id: $id}, _set: {contents: $contents, js: $js, dts: $dts, map: $map, compile_errors: $errors}) {
+    id
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpdateContentsRequest{req}, nil
+}
+
+func (req *UpdateContentsRequest) Execute(client *http.Client) (*UpdateContentsResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpdateContentsResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateContents(url string, client *http.Client, vars *UpdateContentsVariables) (*UpdateContentsResponse, error) {
+	req, err := NewUpdateContentsRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpdateContents(vars *UpdateContentsVariables) (*UpdateContentsResponse, error) {
+	return UpdateContents(client.Url, client.Client, vars)
+}
+
+//
+// mutation CreateModule($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!)
+//
+
+type CreateModuleVariables struct {
+	Name    String             `json:"name"`
+	Scope   String             `json:"scope"`
+	Branch  String             `json:"branch"`
+	Version String             `json:"version"`
+	Files   *[]FileInsertInput `json:"files,omitempty"`
+}
+
+type CreateModuleResponse struct {
+	InsertModuleOne struct {
+		CreatedAt string `json:"CreatedAt"`
+	} `json:"InsertModuleOne"`
+	InsertModuleVersion struct {
+		Returning []struct {
+			CreatedAt string `json:"CreatedAt"`
+		} `json:"Returning"`
+	} `json:"InsertModuleVersion"`
+	InsertFile struct {
+		Returning []struct {
+			ID string `json:"ID"`
+		} `json:"Returning"`
+	} `json:"InsertFile"`
+}
+
+type CreateModuleRequest struct {
+	*http.Request
+}
+
+func NewCreateModuleRequest(url string, vars *CreateModuleVariables) (*CreateModuleRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation CreateModule($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!) {
+  insert_module_one(object: {name: $name, scope: $scope, branch_name: $branch}) {
+    created_at
+  }
+  insert_module_version(objects: [{module_name: $name, module_scope: $scope, branch_name: $branch, version: $version}, {module_name: $name, module_scope: $scope, branch_name: $branch, version: "latest"}]) {
+    returning {
+      created_at
+    }
+  }
+  insert_file(objects: $files) {
+    returning {
+      id
+    }
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &CreateModuleRequest{req}, nil
+}
+
+func (req *CreateModuleRequest) Execute(client *http.Client) (*CreateModuleResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result CreateModuleResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func CreateModule(url string, client *http.Client, vars *CreateModuleVariables) (*CreateModuleResponse, error) {
+	req, err := NewCreateModuleRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) CreateModule(vars *CreateModuleVariables) (*CreateModuleResponse, error) {
+	return CreateModule(client.Url, client.Client, vars)
+}
+
+//
+// query GetModule($name: String!, $scope: String!, $branch: String!)
+//
+
+type GetModuleVariables struct {
+	Name   String `json:"name"`
+	Scope  String `json:"scope"`
+	Branch String `json:"branch"`
+}
+
+type GetModuleResponse struct {
+	ModuleByPk struct {
+		CreatedAt string `json:"CreatedAt"`
+	} `json:"ModuleByPk"`
+	BranchByPk struct {
+		Protected string `json:"Protected"`
+	} `json:"BranchByPk"`
+}
+
+type GetModuleRequest struct {
+	*http.Request
+}
+
+func NewGetModuleRequest(url string, vars *GetModuleVariables) (*GetModuleRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetModule($name: String!, $scope: String!, $branch: String!) {
+  module_by_pk(branch_name: $branch, name: $name, scope: $scope) {
+    created_at
+  }
+  branch_by_pk(name: $branch) {
+    protected
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetModuleRequest{req}, nil
+}
+
+func (req *GetModuleRequest) Execute(client *http.Client) (*GetModuleResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetModuleResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetModule(url string, client *http.Client, vars *GetModuleVariables) (*GetModuleResponse, error) {
+	req, err := NewGetModuleRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetModule(vars *GetModuleVariables) (*GetModuleResponse, error) {
+	return GetModule(client.Url, client.Client, vars)
+}
+
+//
+// mutation CreateVersionedFiles($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!)
+//
+
+type CreateVersionedFilesVariables struct {
+	Name    String             `json:"name"`
+	Scope   String             `json:"scope"`
+	Branch  String             `json:"branch"`
+	Version String             `json:"version"`
+	Files   *[]FileInsertInput `json:"files,omitempty"`
+}
+
+type CreateVersionedFilesResponse struct {
+	InsertModuleVersion struct {
+		Returning []struct {
+			CreatedAt string `json:"CreatedAt"`
+		} `json:"Returning"`
+	} `json:"InsertModuleVersion"`
+	InsertFile struct {
+		Returning []struct {
+			ID string `json:"ID"`
+		} `json:"Returning"`
+	} `json:"InsertFile"`
+}
+
+type CreateVersionedFilesRequest struct {
+	*http.Request
+}
+
+func NewCreateVersionedFilesRequest(url string, vars *CreateVersionedFilesVariables) (*CreateVersionedFilesRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation CreateVersionedFiles($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!) {
+  insert_module_version(objects: [{module_name: $name, module_scope: $scope, branch_name: $branch, version: $version}]) {
+    returning {
+      created_at
+    }
+  }
+  insert_file(objects: $files) {
+    returning {
+      id
+    }
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &CreateVersionedFilesRequest{req}, nil
+}
+
+func (req *CreateVersionedFilesRequest) Execute(client *http.Client) (*CreateVersionedFilesResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result CreateVersionedFilesResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func CreateVersionedFiles(url string, client *http.Client, vars *CreateVersionedFilesVariables) (*CreateVersionedFilesResponse, error) {
+	req, err := NewCreateVersionedFilesRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) CreateVersionedFiles(vars *CreateVersionedFilesVariables) (*CreateVersionedFilesResponse, error) {
+	return CreateVersionedFiles(client.Url, client.Client, vars)
+}
+
+//
+// query GetModuleVersionFiles($branch: String, $name: String, $scope: String, $version: String)
+//
+
+type GetModuleVersionFilesVariables struct {
+	Branch  *String `json:"branch,omitempty"`
+	Name    *String `json:"name,omitempty"`
+	Scope   *String `json:"scope,omitempty"`
+	Version *String `json:"version,omitempty"`
+}
+
+type GetModuleVersionFilesResponse struct {
+	File []struct {
+		ID            string `json:"ID"`
+		Ext           string `json:"Ext"`
+		Path          string `json:"Path"`
+		ModuleName    string `json:"ModuleName"`
+		ModuleScope   string `json:"ModuleScope"`
+		ModuleVersion string `json:"ModuleVersion"`
+		CreatedAt     string `json:"CreatedAt"`
+		BranchName    string `json:"BranchName"`
+		BaseFileId    string `json:"BaseFileId"`
+		MarkDeleted   string `json:"MarkDeleted"`
+		Contents      string `json:"Contents"`
+	} `json:"File"`
+	ModuleVersion []struct {
+		Version string `json:"Version"`
+	} `json:"ModuleVersion"`
+}
+
+type GetModuleVersionFilesRequest struct {
+	*http.Request
+}
+
+func NewGetModuleVersionFilesRequest(url string, vars *GetModuleVersionFilesVariables) (*GetModuleVersionFilesRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetModuleVersionFiles($branch: String, $name: String, $scope: String, $version: String) {
+  file(where: {_and: {branch_name: {_eq: $branch}, module_version: {_eq: $version}, module_scope: {_eq: $scope}, module_name: {_eq: $name}}}) {
+    id
+    ext
+    path
+    module_name
+    module_scope
+    module_version
+    created_at
+    branch_name
+    base_file_id
+    mark_deleted
+    contents
+  }
+  module_version(limit: 1, order_by: {created_at: desc}, where: {_and: {branch_name: {_eq: $branch}, module_scope: {_eq: $scope}, module_name: {_eq: $name}}}) {
+    version
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetModuleVersionFilesRequest{req}, nil
+}
+
+func (req *GetModuleVersionFilesRequest) Execute(client *http.Client) (*GetModuleVersionFilesResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetModuleVersionFilesResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetModuleVersionFiles(url string, client *http.Client, vars *GetModuleVersionFilesVariables) (*GetModuleVersionFilesResponse, error) {
+	req, err := NewGetModuleVersionFilesRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetModuleVersionFiles(vars *GetModuleVersionFilesVariables) (*GetModuleVersionFilesResponse, error) {
+	return GetModuleVersionFiles(client.Url, client.Client, vars)
+}
+
+//
 // mutation CreateTenants($tenants: [tenant_insert_input!]!)
 //
 
@@ -1310,9 +2020,10 @@ type DeleteUserVariables struct {
 }
 
 type DeleteUserResponse struct {
-	DeleteUserByPk struct {
-		Email string `json:"Email"`
-	} `json:"DeleteUserByPk"`
+	UpdateUserByPk struct {
+		Email    string `json:"Email"`
+		OpaqueId string `json:"OpaqueId"`
+	} `json:"UpdateUserByPk"`
 }
 
 type DeleteUserRequest struct {
@@ -1327,8 +2038,9 @@ func NewDeleteUserRequest(url string, vars *DeleteUserVariables) (*DeleteUserReq
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
 		Query: `mutation DeleteUser($email: String!) {
-  delete_user_by_pk(email: $email) {
+  update_user_by_pk(_set: {active: false}, pk_columns: {email: $email}) {
     email
+    opaque_id
   }
 }`,
 	})
@@ -1376,6 +2088,7 @@ type GetCurrentUserResponse struct {
 		Email      string `json:"Email"`
 		Avatar     string `json:"Avatar"`
 		Username   string `json:"Username"`
+		Active     string `json:"Active"`
 		Preference struct {
 			DarkMode string `json:"DarkMode"`
 		} `json:"Preference"`
@@ -1393,6 +2106,7 @@ func NewGetCurrentUserRequest(url string) (*GetCurrentUserRequest, error) {
     email
     avatar
     username
+    active
     preference {
       dark_mode
     }
@@ -1447,6 +2161,7 @@ type GetUserResponse struct {
 		Email    string `json:"Email"`
 		Avatar   string `json:"Avatar"`
 		Username string `json:"Username"`
+		Active   string `json:"Active"`
 	} `json:"UserByPk"`
 	UserAggregate struct {
 		Aggregate struct {
@@ -1471,8 +2186,9 @@ func NewGetUserRequest(url string, vars *GetUserVariables) (*GetUserRequest, err
     email
     avatar
     username
+    active
   }
-  user_aggregate {
+  user_aggregate(where: {active: {_eq: true}}) {
     aggregate {
       count
     }
@@ -1512,6 +2228,74 @@ func GetUser(url string, client *http.Client, vars *GetUserVariables) (*GetUserR
 
 func (client *Client) GetUser(vars *GetUserVariables) (*GetUserResponse, error) {
 	return GetUser(client.Url, client.Client, vars)
+}
+
+//
+// mutation ReactivateUser($email: String!)
+//
+
+type ReactivateUserVariables struct {
+	Email String `json:"email"`
+}
+
+type ReactivateUserResponse struct {
+	UpdateUserByPk struct {
+		Email    string `json:"Email"`
+		OpaqueId string `json:"OpaqueId"`
+	} `json:"UpdateUserByPk"`
+}
+
+type ReactivateUserRequest struct {
+	*http.Request
+}
+
+func NewReactivateUserRequest(url string, vars *ReactivateUserVariables) (*ReactivateUserRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation ReactivateUser($email: String!) {
+  update_user_by_pk(_set: {active: true}, pk_columns: {email: $email}) {
+    email
+    opaque_id
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &ReactivateUserRequest{req}, nil
+}
+
+func (req *ReactivateUserRequest) Execute(client *http.Client) (*ReactivateUserResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result ReactivateUserResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func ReactivateUser(url string, client *http.Client, vars *ReactivateUserVariables) (*ReactivateUserResponse, error) {
+	req, err := NewReactivateUserRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) ReactivateUser(vars *ReactivateUserVariables) (*ReactivateUserResponse, error) {
+	return ReactivateUser(client.Url, client.Client, vars)
 }
 
 //
@@ -1766,10 +2550,14 @@ type FileSelectColumn string
 const (
 	FileSelectColumnBaseFileId    FileSelectColumn = "base_file_id"
 	FileSelectColumnBranchName    FileSelectColumn = "branch_name"
+	FileSelectColumnCompileErrors FileSelectColumn = "compile_errors"
+	FileSelectColumnContents      FileSelectColumn = "contents"
 	FileSelectColumnCreatedAt     FileSelectColumn = "created_at"
+	FileSelectColumnDts           FileSelectColumn = "dts"
 	FileSelectColumnExt           FileSelectColumn = "ext"
 	FileSelectColumnID            FileSelectColumn = "id"
-	FileSelectColumnIsModified    FileSelectColumn = "is_modified"
+	FileSelectColumnJs            FileSelectColumn = "js"
+	FileSelectColumnMap           FileSelectColumn = "map"
 	FileSelectColumnMarkDeleted   FileSelectColumn = "mark_deleted"
 	FileSelectColumnModuleName    FileSelectColumn = "module_name"
 	FileSelectColumnModuleScope   FileSelectColumn = "module_scope"
@@ -1782,10 +2570,14 @@ type FileUpdateColumn string
 const (
 	FileUpdateColumnBaseFileId    FileUpdateColumn = "base_file_id"
 	FileUpdateColumnBranchName    FileUpdateColumn = "branch_name"
+	FileUpdateColumnCompileErrors FileUpdateColumn = "compile_errors"
+	FileUpdateColumnContents      FileUpdateColumn = "contents"
 	FileUpdateColumnCreatedAt     FileUpdateColumn = "created_at"
+	FileUpdateColumnDts           FileUpdateColumn = "dts"
 	FileUpdateColumnExt           FileUpdateColumn = "ext"
 	FileUpdateColumnID            FileUpdateColumn = "id"
-	FileUpdateColumnIsModified    FileUpdateColumn = "is_modified"
+	FileUpdateColumnJs            FileUpdateColumn = "js"
+	FileUpdateColumnMap           FileUpdateColumn = "map"
 	FileUpdateColumnMarkDeleted   FileUpdateColumn = "mark_deleted"
 	FileUpdateColumnModuleName    FileUpdateColumn = "module_name"
 	FileUpdateColumnModuleScope   FileUpdateColumn = "module_scope"
@@ -1936,6 +2728,7 @@ const (
 type UserSelectColumn string
 
 const (
+	UserSelectColumnActive             UserSelectColumn = "active"
 	UserSelectColumnAvatar             UserSelectColumn = "avatar"
 	UserSelectColumnCreatedAt          UserSelectColumn = "created_at"
 	UserSelectColumnEmail              UserSelectColumn = "email"
@@ -1948,6 +2741,7 @@ const (
 type UserUpdateColumn string
 
 const (
+	UserUpdateColumnActive             UserUpdateColumn = "active"
 	UserUpdateColumnAvatar             UserUpdateColumn = "avatar"
 	UserUpdateColumnCreatedAt          UserUpdateColumn = "created_at"
 	UserUpdateColumnEmail              UserUpdateColumn = "email"
@@ -2267,6 +3061,10 @@ type FileAggregateOrderBy struct {
 	Min   *FileMinOrderBy `json:"min,omitempty"`
 }
 
+type FileAppendInput struct {
+	CompileErrors *Jsonb `json:"compile_errors,omitempty"`
+}
+
 type FileArrRelInsertInput struct {
 	Data       *[]FileInsertInput `json:"data,omitempty"`
 	OnConflict *FileOnConflict    `json:"on_conflict,omitempty"`
@@ -2279,10 +3077,14 @@ type FileBoolExp struct {
 	BaseFileId    *UuidComparisonExp      `json:"base_file_id,omitempty"`
 	Branch        *BranchBoolExp          `json:"branch,omitempty"`
 	BranchName    *StringComparisonExp    `json:"branch_name,omitempty"`
+	CompileErrors *JsonbComparisonExp     `json:"compile_errors,omitempty"`
+	Contents      *StringComparisonExp    `json:"contents,omitempty"`
 	CreatedAt     *TimestampComparisonExp `json:"created_at,omitempty"`
+	Dts           *StringComparisonExp    `json:"dts,omitempty"`
 	Ext           *StringComparisonExp    `json:"ext,omitempty"`
 	ID            *UuidComparisonExp      `json:"id,omitempty"`
-	IsModified    *BooleanComparisonExp   `json:"is_modified,omitempty"`
+	Js            *StringComparisonExp    `json:"js,omitempty"`
+	Map           *StringComparisonExp    `json:"map,omitempty"`
 	MarkDeleted   *BooleanComparisonExp   `json:"mark_deleted,omitempty"`
 	Module        *ModuleBoolExp          `json:"module,omitempty"`
 	ModuleName    *StringComparisonExp    `json:"module_name,omitempty"`
@@ -2292,14 +3094,30 @@ type FileBoolExp struct {
 	Version       *ModuleVersionBoolExp   `json:"version,omitempty"`
 }
 
+type FileDeleteAtPathInput struct {
+	CompileErrors *[]String `json:"compile_errors,omitempty"`
+}
+
+type FileDeleteElemInput struct {
+	CompileErrors *Int `json:"compile_errors,omitempty"`
+}
+
+type FileDeleteKeyInput struct {
+	CompileErrors *String `json:"compile_errors,omitempty"`
+}
+
 type FileInsertInput struct {
 	BaseFileId    *UUID                           `json:"base_file_id,omitempty"`
 	Branch        *BranchObjRelInsertInput        `json:"branch,omitempty"`
 	BranchName    *String                         `json:"branch_name,omitempty"`
+	CompileErrors *Jsonb                          `json:"compile_errors,omitempty"`
+	Contents      *String                         `json:"contents,omitempty"`
 	CreatedAt     *Timestamp                      `json:"created_at,omitempty"`
+	Dts           *String                         `json:"dts,omitempty"`
 	Ext           *String                         `json:"ext,omitempty"`
 	ID            *UUID                           `json:"id,omitempty"`
-	IsModified    *Boolean                        `json:"is_modified,omitempty"`
+	Js            *String                         `json:"js,omitempty"`
+	Map           *String                         `json:"map,omitempty"`
 	MarkDeleted   *Boolean                        `json:"mark_deleted,omitempty"`
 	Module        *ModuleObjRelInsertInput        `json:"module,omitempty"`
 	ModuleName    *String                         `json:"module_name,omitempty"`
@@ -2312,9 +3130,13 @@ type FileInsertInput struct {
 type FileMaxOrderBy struct {
 	BaseFileId    *OrderBy `json:"base_file_id,omitempty"`
 	BranchName    *OrderBy `json:"branch_name,omitempty"`
+	Contents      *OrderBy `json:"contents,omitempty"`
 	CreatedAt     *OrderBy `json:"created_at,omitempty"`
+	Dts           *OrderBy `json:"dts,omitempty"`
 	Ext           *OrderBy `json:"ext,omitempty"`
 	ID            *OrderBy `json:"id,omitempty"`
+	Js            *OrderBy `json:"js,omitempty"`
+	Map           *OrderBy `json:"map,omitempty"`
 	ModuleName    *OrderBy `json:"module_name,omitempty"`
 	ModuleScope   *OrderBy `json:"module_scope,omitempty"`
 	ModuleVersion *OrderBy `json:"module_version,omitempty"`
@@ -2324,9 +3146,13 @@ type FileMaxOrderBy struct {
 type FileMinOrderBy struct {
 	BaseFileId    *OrderBy `json:"base_file_id,omitempty"`
 	BranchName    *OrderBy `json:"branch_name,omitempty"`
+	Contents      *OrderBy `json:"contents,omitempty"`
 	CreatedAt     *OrderBy `json:"created_at,omitempty"`
+	Dts           *OrderBy `json:"dts,omitempty"`
 	Ext           *OrderBy `json:"ext,omitempty"`
 	ID            *OrderBy `json:"id,omitempty"`
+	Js            *OrderBy `json:"js,omitempty"`
+	Map           *OrderBy `json:"map,omitempty"`
 	ModuleName    *OrderBy `json:"module_name,omitempty"`
 	ModuleScope   *OrderBy `json:"module_scope,omitempty"`
 	ModuleVersion *OrderBy `json:"module_version,omitempty"`
@@ -2348,10 +3174,14 @@ type FileOrderBy struct {
 	BaseFileId    *OrderBy              `json:"base_file_id,omitempty"`
 	Branch        *BranchOrderBy        `json:"branch,omitempty"`
 	BranchName    *OrderBy              `json:"branch_name,omitempty"`
+	CompileErrors *OrderBy              `json:"compile_errors,omitempty"`
+	Contents      *OrderBy              `json:"contents,omitempty"`
 	CreatedAt     *OrderBy              `json:"created_at,omitempty"`
+	Dts           *OrderBy              `json:"dts,omitempty"`
 	Ext           *OrderBy              `json:"ext,omitempty"`
 	ID            *OrderBy              `json:"id,omitempty"`
-	IsModified    *OrderBy              `json:"is_modified,omitempty"`
+	Js            *OrderBy              `json:"js,omitempty"`
+	Map           *OrderBy              `json:"map,omitempty"`
 	MarkDeleted   *OrderBy              `json:"mark_deleted,omitempty"`
 	Module        *ModuleOrderBy        `json:"module,omitempty"`
 	ModuleName    *OrderBy              `json:"module_name,omitempty"`
@@ -2365,13 +3195,21 @@ type FilePkColumnsInput struct {
 	ID UUID `json:"id"`
 }
 
+type FilePrependInput struct {
+	CompileErrors *Jsonb `json:"compile_errors,omitempty"`
+}
+
 type FileSetInput struct {
 	BaseFileId    *UUID      `json:"base_file_id,omitempty"`
 	BranchName    *String    `json:"branch_name,omitempty"`
+	CompileErrors *Jsonb     `json:"compile_errors,omitempty"`
+	Contents      *String    `json:"contents,omitempty"`
 	CreatedAt     *Timestamp `json:"created_at,omitempty"`
+	Dts           *String    `json:"dts,omitempty"`
 	Ext           *String    `json:"ext,omitempty"`
 	ID            *UUID      `json:"id,omitempty"`
-	IsModified    *Boolean   `json:"is_modified,omitempty"`
+	Js            *String    `json:"js,omitempty"`
+	Map           *String    `json:"map,omitempty"`
 	MarkDeleted   *Boolean   `json:"mark_deleted,omitempty"`
 	ModuleName    *String    `json:"module_name,omitempty"`
 	ModuleScope   *String    `json:"module_scope,omitempty"`
@@ -2840,6 +3678,7 @@ type UserBoolExp struct {
 	And                *[]UserBoolExp            `json:"_and,omitempty"`
 	Not                *UserBoolExp              `json:"_not,omitempty"`
 	Or                 *[]UserBoolExp            `json:"_or,omitempty"`
+	Active             *BooleanComparisonExp     `json:"active,omitempty"`
 	Avatar             *StringComparisonExp      `json:"avatar,omitempty"`
 	CreatedAt          *TimestamptzComparisonExp `json:"created_at,omitempty"`
 	Email              *StringComparisonExp      `json:"email,omitempty"`
@@ -2852,6 +3691,7 @@ type UserBoolExp struct {
 }
 
 type UserInsertInput struct {
+	Active             *Boolean                         `json:"active,omitempty"`
 	Avatar             *String                          `json:"avatar,omitempty"`
 	CreatedAt          *Timestamptz                     `json:"created_at,omitempty"`
 	Email              *String                          `json:"email,omitempty"`
@@ -2895,6 +3735,7 @@ type UserOnConflict struct {
 }
 
 type UserOrderBy struct {
+	Active                   *OrderBy                        `json:"active,omitempty"`
 	Avatar                   *OrderBy                        `json:"avatar,omitempty"`
 	CreatedAt                *OrderBy                        `json:"created_at,omitempty"`
 	Email                    *OrderBy                        `json:"email,omitempty"`
@@ -2971,6 +3812,7 @@ type UserPreferenceSetInput struct {
 }
 
 type UserSetInput struct {
+	Active             *Boolean     `json:"active,omitempty"`
 	Avatar             *String      `json:"avatar,omitempty"`
 	CreatedAt          *Timestamptz `json:"created_at,omitempty"`
 	Email              *String      `json:"email,omitempty"`
@@ -3129,10 +3971,14 @@ type File struct {
 	BaseFileId    *UUID          `json:"base_file_id,omitempty"`
 	Branch        Branch         `json:"branch"`
 	BranchName    String         `json:"branch_name"`
+	CompileErrors *Jsonb         `json:"compile_errors,omitempty"`
+	Contents      String         `json:"contents"`
 	CreatedAt     Timestamp      `json:"created_at"`
+	Dts           *String        `json:"dts,omitempty"`
 	Ext           String         `json:"ext"`
 	ID            UUID           `json:"id"`
-	IsModified    Boolean        `json:"is_modified"`
+	Js            *String        `json:"js,omitempty"`
+	Map           *String        `json:"map,omitempty"`
 	MarkDeleted   Boolean        `json:"mark_deleted"`
 	Module        *Module        `json:"module,omitempty"`
 	ModuleName    String         `json:"module_name"`
@@ -3156,9 +4002,13 @@ type FileAggregateFields struct {
 type FileMaxFields struct {
 	BaseFileId    *UUID      `json:"base_file_id,omitempty"`
 	BranchName    *String    `json:"branch_name,omitempty"`
+	Contents      *String    `json:"contents,omitempty"`
 	CreatedAt     *Timestamp `json:"created_at,omitempty"`
+	Dts           *String    `json:"dts,omitempty"`
 	Ext           *String    `json:"ext,omitempty"`
 	ID            *UUID      `json:"id,omitempty"`
+	Js            *String    `json:"js,omitempty"`
+	Map           *String    `json:"map,omitempty"`
 	ModuleName    *String    `json:"module_name,omitempty"`
 	ModuleScope   *String    `json:"module_scope,omitempty"`
 	ModuleVersion *String    `json:"module_version,omitempty"`
@@ -3168,9 +4018,13 @@ type FileMaxFields struct {
 type FileMinFields struct {
 	BaseFileId    *UUID      `json:"base_file_id,omitempty"`
 	BranchName    *String    `json:"branch_name,omitempty"`
+	Contents      *String    `json:"contents,omitempty"`
 	CreatedAt     *Timestamp `json:"created_at,omitempty"`
+	Dts           *String    `json:"dts,omitempty"`
 	Ext           *String    `json:"ext,omitempty"`
 	ID            *UUID      `json:"id,omitempty"`
+	Js            *String    `json:"js,omitempty"`
+	Map           *String    `json:"map,omitempty"`
 	ModuleName    *String    `json:"module_name,omitempty"`
 	ModuleScope   *String    `json:"module_scope,omitempty"`
 	ModuleVersion *String    `json:"module_version,omitempty"`
@@ -3520,6 +4374,7 @@ type TenantMutationResponse struct {
 }
 
 type User struct {
+	Active                   Boolean                 `json:"active"`
 	Avatar                   *String                 `json:"avatar,omitempty"`
 	CreatedAt                Timestamptz             `json:"created_at"`
 	Email                    String                  `json:"email"`

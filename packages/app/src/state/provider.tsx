@@ -16,7 +16,7 @@
 
 import React, { useRef } from "react";
 import { Provider } from "react-redux";
-import createMainStore from "./store";
+import getStore from "./store";
 
 // re-export these, but can also use directly from "react-redux"
 export { useSelector, useDispatch } from "react-redux";
@@ -24,7 +24,7 @@ export { useSelector, useDispatch } from "react-redux";
 export type { State } from "./reducer";
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const store = useRef(createMainStore());
+  const store = useRef(getStore());
 
   return <Provider store={store.current}>{children}</Provider>;
 }

@@ -20,6 +20,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	json "github.com/json-iterator/go"
 	"github.com/prometheus/common/log"
@@ -65,18 +66,135 @@ type ddSeriesFragment struct {
 	SourceTypeName string    `json:"source_type_name,omitempty"`
 }
 
-type ddSeriesFragments struct {
+// Type corresponding to JSON document structure expected to be POSTed to
+// /api/v1/series.
+type ddSeriesFragmentsSubmitBody struct {
 	Fragments []*ddSeriesFragment `json:"series"`
 }
 
-var invalidCharRE = regexp.MustCompile(`[^a-zA-Z0-9_:]`)
+type ddServiceCheck struct {
+	Name      string   `json:"check"`
+	Hostname  string   `json:"host_name"`
+	Timestamp int64    `json:"timestamp"`
+	Status    int64    `json:"status"`
+	Message   string   `json:"message"`
+	Tags      []string `json:"tags"`
+}
+
+// Type corresponding to JSON document structure expected to be POSTed to
+// /api/v1/check_run.
+type ddServiceChecksSubmitBody []*ddServiceCheck
+
+var metricNameinvalidCharRE = regexp.MustCompile(`[^a-zA-Z0-9_:]`)
 
 func sanitizeMetricName(value string) string {
-	return invalidCharRE.ReplaceAllString(value, "_")
+	return metricNameinvalidCharRE.ReplaceAllString(value, "_")
 }
 
 func sanitizeLabelName(value string) string {
-	return invalidCharRE.ReplaceAllString(value, "_")
+	return metricNameinvalidCharRE.ReplaceAllString(value, "_")
+}
+
+func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
+	// Attempt to deserialize entire JSON document, using the type definitions
+	// above.
+	var checkupdates ddServiceChecksSubmitBody
+	jerr := json.Unmarshal(doc, &checkupdates)
+	if jerr != nil {
+		return nil, fmt.Errorf("invalid JSON doc: %v", jerr)
+	}
+
+	promTimeSeriesFragments := make([]*prompb.TimeSeries, 0, len(checkupdates))
+	for _, checkupdate := range checkupdates {
+		// Build up label set as a map to ensure uniqueness of keys.
+		labels := map[string]string{
+			// A time series fragment corresponds to a specific metric with a
+			// name. Store this metric name in the corresponding (reserved)
+			// Prometheus label. Replace disallowed characters with
+			// underscores; this typically affects the . separators.
+			"__name__": sanitizeMetricName(checkupdate.Name),
+			// In the Prometheus world, host is 'instance'. Maybe also add
+			// `host` label later again carrying the same value. For now, try
+			// to keep cardinality minimal.
+			"instance": checkupdate.Hostname,
+			"job":      "ddagent",
+			// Do not store message as label value for now. This creates a
+			// separate time series for the same service check -- which is
+			// not the simplest thing we can do for starters. Instead, document
+			// that the `message` associated with a service check gauge update
+			// is not entering the system. A reasonable limitation for the
+			// initiatal state.
+			// "message": checkupdate.Message,
+		}
+
+		// As we would (for now) otherwise drop the mesasge, be nice and at
+		// least log the message when status is non-zero (indicating a
+		// problem).
+		if checkupdate.Status > 0 && checkupdate.Message != "" {
+			log.Infof(
+				"Message for check `%s` with status `%v` (timestamp: %v -- %s): %s",
+				checkupdate.Name,
+				checkupdate.Status,
+				checkupdate.Timestamp,
+				time.Unix(checkupdate.Timestamp, 0).UTC(),
+				checkupdate.Message,
+			)
+		}
+
+		// Translate tags into label k/v pairs. Upon unexpected tag
+		// structure, log a warning but otherwise proceed. Examples:
+		// `check:memory`, check:cpu
+		for _, tag := range checkupdate.Tags {
+			t := strings.SplitN(tag, ":", 2)
+
+			if len(t) != 2 {
+				log.Warnf("Invalid tag %s for check: %s", tag, checkupdate.Name)
+				continue
+			}
+
+			// Prefix the tag name so that the source of this label is known
+			// (and can be queried for, with guarantees) and so that it can't
+			// override an "important" label, such as "instance".
+			tname := "ddtag_" + sanitizeLabelName(t[0])
+			tvalue := t[1]
+			labels[tname] = tvalue
+		}
+
+		// Create slice from `labels` map, with values being of type
+		// prompb.Label. For `prompb.TimeSeries` construction below. Skip
+		// prompb.Label construction for empty values (for example,
+		// `fragment.Device` may be empty).
+		promLabelset := make([]*prompb.Label, 0, len(labels))
+		for k, v := range labels {
+			if len(v) == 0 {
+				continue
+			}
+
+			l := prompb.Label{
+				Name:  k,
+				Value: v,
+			}
+			promLabelset = append(promLabelset, &l)
+		}
+
+		// Note that every service check update comes with a status value of 0,
+		// 1, 2 or 3 and with a timestamp. Consider this to be the data point
+		// we want to store. That is, expect precisely one data point.
+		promSamples := []prompb.Sample{{
+			Value:     float64(checkupdate.Status),
+			Timestamp: checkupdate.Timestamp * 1000,
+		}}
+
+		// Construct the Prometheus protobuf time series fragment, comprised of
+		// a set of labels and a set of samples.
+		pts := prompb.TimeSeries{
+			Samples: promSamples,
+			Labels:  promLabelset,
+		}
+
+		promTimeSeriesFragments = append(promTimeSeriesFragments, &pts)
+	}
+	return promTimeSeriesFragments, nil
 }
 
 /*
@@ -119,7 +237,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 	// Attempt to deserialize entire JSON document, using the type definitions
 	// above including the custom deserialization function
 	// ddPoint.UnmarshalJSON().
-	var sfragments ddSeriesFragments
+	var sfragments ddSeriesFragmentsSubmitBody
 	jerr := json.Unmarshal(doc, &sfragments)
 	if jerr != nil {
 		return nil, fmt.Errorf("invalid JSON doc: %v", jerr)

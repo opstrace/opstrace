@@ -94,25 +94,12 @@ func checkJSONContentType(r *http.Request) error {
 	return fmt.Errorf("unexpected content-type header (expecting: application/json)")
 }
 
-func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Request) {
-	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
-		// Error response has already been written. Terminate request handling.
-		return
-	}
-
-	// Log raw request detail (with compressed body)
-	// dump, err := httputil.DumpRequest(r, false)
-	// if err != nil {
-	// 	log.Error(err)
-	// 	http.Error(w, err.Error(), 500)
-	// 	return
-	// }
-	// log.Info(string(dump))
-
+/* Common request validation and processing for the URL handlers below. */
+func (ddcp *DDCortexProxy) ReadAndValidateRequest(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 	cterr := checkJSONContentType(r)
 	if cterr != nil {
 		logErrorEmit400(w, fmt.Errorf("bad request: %v", cterr))
-		return
+		return nil, fmt.Errorf("content type error")
 	}
 
 	bodybytes, rerr := ioutil.ReadAll(r.Body)
@@ -120,7 +107,7 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 
 	if rerr != nil {
 		logErrorEmit500(w, fmt.Errorf("error while reading request body: %v", rerr))
-		return
+		return nil, fmt.Errorf("body read error")
 	}
 
 	if r.Header.Get("Content-Encoding") == "deflate" {
@@ -129,28 +116,29 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 		if zerr != nil {
 			// Most likely bad input (bad request).
 			logErrorEmit400(w, fmt.Errorf("bad request: error while zlib-decoding request body: %v", zerr))
-			return
+			return nil, fmt.Errorf("zlib decode error")
 		}
 	}
 
 	// Log detail on debug level. In particular the request body.
-	apiKey := r.URL.Query().Get("api_key")
-	log.Debugf("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
+	// apiKey := r.URL.Query().Get("api_key")
+	// log.Debugf("url='%s', apikey='%s', body='%s'", r.URL.Path, apiKey, string(bodybytes))
 
-	promTimeSeriesFragments, terr := TranslateDDSeriesJSON(bodybytes)
-	if terr != nil {
-		// Most likely bad input (bad request).
-		logErrorEmit400(w, fmt.Errorf("bad request: error while translating body: %v", terr))
-		return
-	}
+	return bodybytes, nil
+}
 
+func (ddcp *DDCortexProxy) HandlerCommonAfterJSONTranslate(
+	w http.ResponseWriter,
+	r *http.Request,
+	ptsf []*prompb.TimeSeries,
+) {
+	// Create Prometheus/Cortex "write request", and serialize it into
+	// protobuf message (a byte sequence).
 	writeRequest := &prompb.WriteRequest{
-		Timeseries: promTimeSeriesFragments,
+		Timeseries: ptsf,
 	}
 
-	log.Debugf("Prom write request: %s", writeRequest)
-
-	// Serialize struct into protobuf message (byte sequence).
+	// log.Debugf("Prom write request: %s", writeRequest)
 	pbmsgbytes, perr := proto.Marshal(writeRequest)
 	if perr != nil {
 		logErrorEmit500(w, fmt.Errorf("error while constructing Prometheus protobuf message: %v", perr))
@@ -159,8 +147,8 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 
 	// Snappy-compress the byte sequence.
 	spbmsgbytes := snappy.Encode(nil, pbmsgbytes)
-	// log.Debugf("snappy-compressed pb msg: %s", spbmsgbytes)
 
+	// Attempt to write this to Cortex via HTTP.
 	writeerr := ddcp.postPromWriteRequestAndHandleErrors(w, spbmsgbytes)
 
 	if writeerr != nil {
@@ -170,11 +158,57 @@ func (ddcp *DDCortexProxy) SeriesPostHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// Make the DD agent's HTTP client happy.
+	// Make the DD agent's HTTP client happy: emit 202 response.
 	w.Header().Set("Content-Type", "application/json")
-	// Emit 202 response
 	w.WriteHeader(http.StatusAccepted)
 	w.Write([]byte("{\"status\": \"ok\"}"))
+}
+
+func (ddcp *DDCortexProxy) HandlerCheckPost(w http.ResponseWriter, r *http.Request) {
+	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
+	bodybytes, err := ddcp.ReadAndValidateRequest(w, r)
+	if err != nil {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
+	promTimeSeriesFragments, terr := TranslateDDCheckRunJSON(bodybytes)
+	if terr != nil {
+		// Most likely bad input (bad request).
+		logErrorEmit400(w, fmt.Errorf("bad request: error while translating body: %v", terr))
+		// Log request body to facilitate debugging what was 'wrong' with the
+		// request.
+		log.Infof("Request body was: %s", string(bodybytes))
+		return
+	}
+
+	ddcp.HandlerCommonAfterJSONTranslate(w, r, promTimeSeriesFragments)
+}
+
+func (ddcp *DDCortexProxy) HandlerSeriesPost(w http.ResponseWriter, r *http.Request) {
+	if ddcp.authenticatorEnabled && !middleware.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
+	bodybytes, err := ddcp.ReadAndValidateRequest(w, r)
+	if err != nil {
+		// Error response has already been written. Terminate request handling.
+		return
+	}
+
+	promTimeSeriesFragments, terr := TranslateDDSeriesJSON(bodybytes)
+	if terr != nil {
+		// Most likely bad input (bad request).
+		logErrorEmit400(w, fmt.Errorf("bad request: error while translating body: %v", terr))
+		return
+	}
+
+	ddcp.HandlerCommonAfterJSONTranslate(w, r, promTimeSeriesFragments)
 }
 
 /*

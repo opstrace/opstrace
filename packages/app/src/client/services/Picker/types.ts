@@ -33,6 +33,9 @@ export type PickerProvider = {
   disableFilter?: boolean;
   // Disable input
   disableInput?: boolean;
+  // Validate input as user is typing
+  textValidator?: RegExp;
+  textValidationFailedMessage?: string;
   activationPrefix: string;
   onSelected: (option: PickerOption, inputText?: string) => void;
   options: PickerOption[];

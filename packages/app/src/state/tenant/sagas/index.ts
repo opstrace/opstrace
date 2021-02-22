@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all, take, call, spawn } from "redux-saga/effects";
+import { all, call, spawn, takeEvery } from "redux-saga/effects";
 import * as actions from "../actions";
-import graphqlClient from "state/graphqlClient";
+import graphqlClient from "state/clients/graphqlClient";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
 
 export default function* tenantTaskManager() {
-  const sagas = [tenantListSubscriptionManager, addTenant, deleteTenant];
+  const sagas = [
+    tenantListSubscriptionManager,
+    addTenantListener,
+    deleteTenantListener
+  ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
   // https://redux-saga.js.org/docs/advanced/RootSaga.html
@@ -40,36 +44,34 @@ export default function* tenantTaskManager() {
   );
 }
 
-function* addTenant() {
-  while (true) {
-    const action: ReturnType<typeof actions.addTenant> = yield take(
-      actions.addTenant
-    );
-    try {
-      yield graphqlClient.CreateTenants({
-        tenants: [
-          {
-            name: action.payload
-          }
-        ]
-      });
-    } catch (err) {
-      console.error(err);
-    }
+function* addTenantListener() {
+  yield takeEvery(actions.addTenant, addTenant);
+}
+
+function* addTenant(action: ReturnType<typeof actions.addTenant>) {
+  try {
+    yield graphqlClient.CreateTenants({
+      tenants: [
+        {
+          name: action.payload
+        }
+      ]
+    });
+  } catch (err) {
+    console.error(err);
   }
 }
 
-function* deleteTenant() {
-  while (true) {
-    const action: ReturnType<typeof actions.deleteTenant> = yield take(
-      actions.deleteTenant
-    );
-    try {
-      yield graphqlClient.DeleteTenant({
-        name: action.payload
-      });
-    } catch (err) {
-      console.error(err);
-    }
+function* deleteTenantListener() {
+  yield takeEvery(actions.deleteTenant, deleteTenant);
+}
+
+function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
+  try {
+    yield graphqlClient.DeleteTenant({
+      name: action.payload
+    });
+  } catch (err) {
+    console.error(err);
   }
 }

@@ -72,16 +72,11 @@ function createGraphqlHandler(): express.Router {
   const graphql = express.Router();
 
   graphql.use("/", (req, res) => {
-    if (!(req.session && req.session.email)) {
-      res.sendStatus(401);
-      return;
-    }
-
     graphqlProxy.web(
       req,
       res,
       {
-        headers: getHasuraSessionHeaders(req.session.email)
+        headers: getHasuraSessionHeaders(req.session.email!)
       },
       (err: Error) => {
         log.warning("error in http graphql proxy upstream (ignoring): %s", err);

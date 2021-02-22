@@ -23,7 +23,8 @@ import { EARLY_PREVIEW } from "client/flags";
 // I think this imports the default export from ./login which is actually
 // the `LoginPage` object with the <Auth0Provider>...
 import LoginView from "./login";
-import ModuleView from "./module";
+import SelectedModule from "./module/SelectedModule";
+import Modules from "./module/Modules";
 import ChatView from "./chat";
 import HistoryView from "./history";
 import ClusterView from "./cluster";
@@ -32,54 +33,35 @@ import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
 import { ActivityBar } from "./common/ActivityBar";
 
-const scopedModulePathParams =
-  ":mode(-|e)/:branch/@:scope/:name/:version/:path*";
-const modulePathParams = ":mode(-|e)/:branch/:name/:version/:path*";
+export const scopedModulePathParams = ":branch/@:scope/:name@:version/:path*";
+export const modulePathParams = ":branch/:name@:version/:path*";
 
-const ModuleRoutes = () => (
-  <>
-    <Route
-      key={`/module/${scopedModulePathParams}`}
-      path={`/module/${scopedModulePathParams}`}
-      component={ModuleView}
-    />
-    <Route
-      key={`/module/${modulePathParams}`}
-      path={`/module/${modulePathParams}`}
-      component={ModuleView}
-    />
-  </>
-);
-
-const ChatRoutes = () => (
-  <>
-    <Route
-      key={`/chat/${scopedModulePathParams}`}
-      path={`/chat/${scopedModulePathParams}`}
-      component={ChatView}
-    />
-    <Route
-      key={`/chat/${modulePathParams}`}
-      path={`/chat/${modulePathParams}`}
-      component={ChatView}
-    />
-  </>
-);
-
-const HistoryRoutes = () => (
-  <>
-    <Route
-      key={`/history/${scopedModulePathParams}`}
-      path={`/history/${scopedModulePathParams}`}
-      component={HistoryView}
-    />
-    <Route
-      key={`/history/${modulePathParams}`}
-      path={`/history/${modulePathParams}`}
-      component={HistoryView}
-    />
-  </>
-);
+// Not used yet
+export const ChatRoutes = () => [
+  <Route
+    key={`/chat/${scopedModulePathParams}`}
+    path={`/chat/${scopedModulePathParams}`}
+    component={ChatView}
+  />,
+  <Route
+    key={`/chat/${modulePathParams}`}
+    path={`/chat/${modulePathParams}`}
+    component={ChatView}
+  />
+];
+// Not used yet
+export const HistoryRoutes = () => [
+  <Route
+    key={`/history/${scopedModulePathParams}`}
+    path={`/history/${scopedModulePathParams}`}
+    component={HistoryView}
+  />,
+  <Route
+    key={`/history/${modulePathParams}`}
+    path={`/history/${modulePathParams}`}
+    component={HistoryView}
+  />
+];
 
 const AuthenticatedRoutes = () => {
   return (
@@ -88,9 +70,32 @@ const AuthenticatedRoutes = () => {
           At some point we can refactor the ActivityBar so that we pass tabs in from here, to make all route configuration central and within this file. */}
       <ActivityBar />
       <Switch>
-        {EARLY_PREVIEW && ModuleRoutes}
-        {EARLY_PREVIEW && ChatRoutes}
-        {EARLY_PREVIEW && HistoryRoutes}
+        {/* Module routes */}
+        {EARLY_PREVIEW && (
+          <Route
+            key={`/module/${scopedModulePathParams}`}
+            path={`/module/${scopedModulePathParams}`}
+            component={SelectedModule}
+          />
+        )}
+        {EARLY_PREVIEW && (
+          <Route
+            key={`/module/${modulePathParams}`}
+            path={`/module/${modulePathParams}`}
+            component={SelectedModule}
+          />
+        )}
+        {EARLY_PREVIEW && (
+          <Route
+            key={`/module/:branch`}
+            path={`/module/:branch`}
+            component={Modules}
+          />
+        )}
+        {EARLY_PREVIEW && (
+          <Redirect exact key="/module" from="/module" to="/module/main" />
+        )}
+
         <Redirect
           exact
           key="/cluster"
@@ -122,7 +127,11 @@ const AuthenticatedRoutes = () => {
 const Routes = () => {
   return (
     <Switch>
-      <Redirect exact key="/" from="/" to="/cluster" />
+      {EARLY_PREVIEW ? (
+        <Redirect exact key="/" from="/" to="/module/main" />
+      ) : (
+        <Redirect exact key="/" from="/" to="/cluster" />
+      )}
       <Route
         exact
         key="/login"
@@ -146,4 +155,4 @@ const Routes = () => {
   );
 };
 
-export default Routes;
+export default React.memo(Routes);

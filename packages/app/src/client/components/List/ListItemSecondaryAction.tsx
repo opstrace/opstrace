@@ -20,8 +20,6 @@ import MuiListItemSecondaryAction, {
   ListItemSecondaryActionProps
 } from "@material-ui/core/ListItemSecondaryAction";
 
-const ListItemSecondaryAction = (props: ListItemSecondaryActionProps) => (
-  <MuiListItemSecondaryAction {...props} />
-);
-
-export default ListItemSecondaryAction;
+export const ListItemSecondaryAction = (
+  props: ListItemSecondaryActionProps
+) => <MuiListItemSecondaryAction {...props} />;

@@ -21,7 +21,7 @@ import express from "express";
 import delay from "delay";
 import { createLightship } from "lightship";
 import http from "http";
-import { log, setLogger, buildLogger } from "@opstrace/utils/lib/log";
+import { log, setLogger, buildLogger } from "@opstrace/utils";
 import path from "path";
 import bodyParser from "body-parser";
 
@@ -93,7 +93,6 @@ function createServer() {
     }
     next();
   });
-
   // all api routes will be prefixed with _/ which gets us around the service worker cache
   // we don't want these responses cached long term by the service worker
   app.use("/_", api());

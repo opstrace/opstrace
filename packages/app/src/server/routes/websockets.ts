@@ -18,9 +18,12 @@ import url from "url";
 import express from "express";
 import sessionParser from "server/middleware/session";
 import { graphqlProxy, getHasuraSessionHeaders } from "./api/graphql";
+import createWebsocketServer from "./api/sockets";
 import { log } from "@opstrace/utils/lib/log";
 
 export default function setupWebsocketHandling(server: http.Server) {
+  createWebsocketServer(server);
+
   // Listen for upgrade requests and handle appropriately
   server.on("upgrade", function upgrade(req, socket, head) {
     const pathname = url.parse(req.url).pathname;
@@ -49,6 +52,15 @@ export default function setupWebsocketHandling(server: http.Server) {
             );
           }
         );
+      });
+    } else if (pathname === "/_/socket/") {
+      sessionParser(req, {} as express.Response, () => {
+        if (!(req.session && req.session.email)) {
+          // This will show in the browser console (using the apolloClient) as "failed: HTTP Authentication failed; no valid credentials available"
+          socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+          socket.destroy();
+          return;
+        }
       });
     } else {
       log.info("denying socket upgrade request to unknown endpoint");

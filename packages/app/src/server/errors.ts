@@ -15,6 +15,7 @@
  */
 
 type OriginalError = null | { name: string; message: string; stack?: string };
+type ValidationError = Error & { errors: string[] };
 
 export class ServerError extends Error {
   public originalError: OriginalError;
@@ -56,5 +57,16 @@ export class UnexpectedServerError extends ServerError {
     super(500, err.message, err);
     this.stack = err.stack || "";
     this.name = "UnexpectedServerError";
+  }
+}
+
+export class PayloadValidationError extends ServerError {
+  static isInstance(err: any): err is PayloadValidationError {
+    return err.name === "PayloadValidationError";
+  }
+  constructor(err: ValidationError) {
+    const msg = (err.errors || ["Validation failed"]).join(", ");
+    super(400, msg, err);
+    this.name = "PayloadValidationError";
   }
 }

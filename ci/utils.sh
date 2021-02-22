@@ -49,10 +49,12 @@ check_certificate() {
     # Timeout the command after 10 seconds in case it's stuck. Redirect stderr
     # to stdout (for `timeout` and `openssl`), do the grep filter on stdout, but
     # also show all output on stderr via a tee shunt.
+    # For the grep text, also see
+    # https://github.com/opstrace/opstrace/issues/386
     timeout --kill-after=10 10 \
     openssl s_client -showcerts -connect "${1}"  </dev/null \
     | openssl x509 -noout -issuer \
-    |& tee /dev/stderr | grep "Fake LE Intermediate"
+    |& tee /dev/stderr | grep "O = (STAGING) Let's Encrypt, CN = (STAGING) Artificial Apricot"
 }
 
 retry_check_certificate() {

@@ -14,6 +14,8 @@ out
 .build
 .log
 yarn-error.log
+id.jwt
+access.jwt
 
 opstrace-config.yaml
 prometheus.yml
@@ -28,11 +30,10 @@ tsconfig.tsbuildinfo
 **/out
 **/dist
 **/build
-**/datasources/lib
-**/stdlib/lib
+**/declarations
+**/tmp-lib
+packages/app/lib
 **/lib/utils/lib
-**/module_cache
-**/modules/**/lib
 # jest coverage directory
 coverage/
 

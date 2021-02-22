@@ -26,7 +26,10 @@ import { sanitizeScope } from "state/utils/sanitize";
 
 const getVersions = (state: State) => state.moduleVersions.versions;
 
-export const makeVersionsForModuleSelector = (name: string, scope: string) =>
+export const makeSortedVersionsForModuleSelector = (
+  name: string,
+  scope: string
+) =>
   createSelector(
     (state: State) => state.moduleVersions.loading,
     getCurrentBranch,
@@ -38,14 +41,42 @@ export const makeVersionsForModuleSelector = (name: string, scope: string) =>
       if (!currentBranch) {
         return currentBranch;
       }
-      return versions
+      const latestVersions = versions
         .filter(
           v =>
+            v.version === "latest" &&
             v.module_name === name &&
             v.module_scope === scope &&
             (v.branch_name === currentBranch?.name || v.branch_name === "main")
         )
-        .sort((a, b) => semverCompare(b.version, a.version));
+        .sort((a, b) => {
+          // push all main branch versions to the end
+          if (a.branch_name === "main") {
+            return 1;
+          }
+          if (a.branch_name === b.branch_name) {
+            return 0;
+          }
+          return -1;
+        });
+
+      const allModuleVersions = latestVersions.concat(
+        versions
+          .filter(v => v.version !== "latest")
+          .filter(
+            v =>
+              v.module_name === name &&
+              v.module_scope === scope &&
+              (v.branch_name === currentBranch?.name ||
+                v.branch_name === "main")
+          )
+          .sort((a, b) => semverCompare(b.version, a.version))
+      );
+      // filter out any duplications between current branch and main branch
+      return allModuleVersions.filter(
+        (v, idx) =>
+          idx === allModuleVersions.findIndex(b => b.version === v.version)
+      );
     }
   );
 
@@ -57,7 +88,7 @@ export function useSortedVersionsForModule(name: string, scope: string) {
   const _scope = sanitizeScope(scope);
   // ensure we only create the selector once for the same inputs
   const versionsSelector = useMemo(
-    () => makeVersionsForModuleSelector(name, _scope),
+    () => makeSortedVersionsForModuleSelector(name, _scope),
     [name, _scope]
   );
   const moduleVersions = useSelector(versionsSelector);

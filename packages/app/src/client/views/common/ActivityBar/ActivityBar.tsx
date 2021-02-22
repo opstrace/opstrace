@@ -22,8 +22,8 @@ import Avatar from "@material-ui/core/Avatar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import CodeIcon from "@material-ui/icons/Code";
-import ChatIcon from "@material-ui/icons/Chat";
-import HistoryIcon from "@material-ui/icons/History";
+// import ChatIcon from "@material-ui/icons/Chat";
+// import HistoryIcon from "@material-ui/icons/History";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Box from "client/components/Box/Box";
 import { ITheme } from "client/themes";
@@ -34,7 +34,7 @@ import useCurrentUser from "state/user/hooks/useCurrentUser";
 import { useCommandService } from "client/services/Command";
 
 export const ActivityBarTabs = EARLY_PREVIEW
-  ? ["/module", "/chat", "/history", "/registry", "/cluster"]
+  ? ["/module", "/cluster"] //"/chat", "/history",
   : ["/cluster"];
 
 const getDividerColor = (theme: ITheme) => theme.palette.divider;
@@ -71,6 +71,18 @@ const ActivityBar = () => {
         // A user would have to be super fast to hit this - very unlikely, but protect against it all the same.
         return;
       }
+      if (
+        ActivityBarTabs[activeTabIndex] === "/cluster" ||
+        ActivityBarTabs[index] === "/cluster"
+      ) {
+        // Since we're navigating to or from /cluster, we want to clear the url of all subresources
+        history.push({
+          ...history.location,
+          pathname: ActivityBarTabs[index]
+        });
+        return;
+      }
+      // Keep all subresources and replace the tab part of the url
       const tabRegex = new RegExp(`^${ActivityBarTabs[activeTabIndex]}`);
       history.push({
         ...history.location,
@@ -127,6 +139,15 @@ const ActivityBar = () => {
         <Tabs
           orientation="vertical"
           variant="standard"
+          indicatorColor="primary"
+          TabIndicatorProps={{
+            style: {
+              transitionDuration: "unset",
+              left: "0px",
+              width: "3px",
+              right: "unset"
+            }
+          }}
           value={
             activeTabIndex === null || activeTabIndex < 0 ? 0 : activeTabIndex
           }
@@ -134,8 +155,8 @@ const ActivityBar = () => {
           aria-label="activity-bar"
         >
           {EARLY_PREVIEW && <Tab icon={<CodeIcon />} />}
-          {EARLY_PREVIEW && <Tab icon={<ChatIcon />} />}
-          {EARLY_PREVIEW && <Tab icon={<HistoryIcon />} />}
+          {/* {EARLY_PREVIEW && <Tab icon={<ChatIcon />} />}
+          {EARLY_PREVIEW && <Tab icon={<HistoryIcon />} />} */}
           <Tab icon={<SettingsIcon />} />
         </Tabs>
       </Box>

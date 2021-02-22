@@ -21,6 +21,7 @@ import fileManager from "./file/sagas";
 import userManager from "./user/sagas";
 import tenantManager from "./tenant/sagas";
 import tenantConfigManager from "./tenantConfig/sagas";
+import sandboxManager from "./sandbox/sagas";
 
 export default function* main() {
   const sagas = [
@@ -30,14 +31,15 @@ export default function* main() {
     fileManager,
     userManager,
     tenantManager,
-    tenantConfigManager
+    tenantConfigManager,
+    sandboxManager
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
   // https://redux-saga.js.org/docs/advanced/RootSaga.html
   yield all(
     sagas.map(saga =>
-      spawn(function*() {
+      spawn(function* () {
         while (true) {
           try {
             yield call(saga);

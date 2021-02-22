@@ -14,32 +14,26 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef } from "react";
-import { useDispatch, batch } from "react-redux";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 
 import { Box } from "client/components/Box";
-import { useOpenFileRequestParams } from "state/file/hooks/useFiles";
-import {
-  useCurrentBranchName,
-  useCurrentBranch
-} from "state/branch/hooks/useBranches";
+import { useCurrentBranch } from "state/branch/hooks/useBranches";
 import { ModulePicker } from "client/components/ModulePicker";
 import { requestOpenFileWithParams } from "state/file/actions";
 import { setCurrentBranch } from "state/branch/actions";
 import { sanitizeFilePath, sanitizeScope } from "state/utils/sanitize";
 import { useCommandService } from "client/services/Command";
-import { setEditingMode } from "state/file/utils/navigation";
+import { isEditMode, setEditingMode } from "state/file/utils/navigation";
 import { SplitPane } from "client/components/SplitPane";
-import { ModuleEditor } from "client/components/Editor";
-import { useFocusedOpenFile } from "state/file/hooks/useFiles";
+import { ModuleEditorGroup } from "client/components/Editor";
 import Layout from "client/layout/MainContent";
 
-import ModuleOutput from "./ModuleOutput";
+import Sandbox from "./Sandbox";
 
 const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
-  const { mode, branch, scope = "", name, version, path } = useParams<{
-    mode: string;
+  const { branch, scope = "", name, version, path } = useParams<{
     branch: string;
     scope?: string;
     name: string;
@@ -49,66 +43,28 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
   const sanitizedPath = sanitizeFilePath(path);
   const sanitizedScope = sanitizeScope(scope);
 
-  const currentBranchName = useCurrentBranchName();
   const currentBranch = useCurrentBranch();
 
-  const {
-    requestedModuleName,
-    requestedModuleScope,
-    requestedModuleVersion,
-    requestedFilePath
-  } = useOpenFileRequestParams();
   const dispatch = useDispatch();
   const history = useHistory();
-  const processedInitialLoad = useRef(false);
-  const editing = mode === "e";
-
+  const editing = isEditMode(history);
   // when we first land here we need to check the route params
   // and ensure we request to open the file represented by
   // the route we're on
   useEffect(() => {
-    if (processedInitialLoad.current) {
-      return;
-    }
-    processedInitialLoad.current = true;
-
-    batch(() => {
-      if (branch !== currentBranchName) {
-        dispatch(setCurrentBranch({ name: branch, history }));
-      }
-      if (
-        sanitizedScope !== requestedModuleScope ||
-        name !== requestedModuleName ||
-        version !== requestedModuleVersion ||
-        sanitizedPath !== requestedFilePath
-      ) {
-        dispatch(
-          requestOpenFileWithParams({
-            history,
-            params: {
-              selectedModuleName: name,
-              selectedModuleVersion: version,
-              selectedFilePath: sanitizedPath,
-              selectedModuleScope: sanitizedScope
-            }
-          })
-        );
-      }
-    });
-  }, [
-    history,
-    dispatch,
-    branch,
-    name,
-    version,
-    sanitizedScope,
-    sanitizedPath,
-    currentBranchName,
-    requestedModuleName,
-    requestedModuleScope,
-    requestedModuleVersion,
-    requestedFilePath
-  ]);
+    dispatch(setCurrentBranch({ name: branch, history }));
+    dispatch(
+      requestOpenFileWithParams({
+        history,
+        params: {
+          selectedModuleName: name,
+          selectedModuleVersion: version,
+          selectedFilePath: sanitizedPath,
+          selectedModuleScope: sanitizedScope
+        }
+      })
+    );
+  }, [history, dispatch, branch, name, version, sanitizedScope, sanitizedPath]);
 
   useCommandService(
     {
@@ -124,34 +80,54 @@ const ModuleLayout = ({ sidebar }: { sidebar: React.ReactNode }) => {
     [editing, history]
   );
 
-  const file = useFocusedOpenFile();
+  // We have to keep track of any drag events on the SplitPane and show an overlay
+  // so the drag event doesn't get lost when hovering over a child iframe
+  const [dragging, setDragging] = useState(false);
+  const onDrag = useCallback((dragging: boolean) => {
+    if (dragging) {
+      setDragging(true);
+    } else {
+      setDragging(false);
+    }
+  }, []);
 
-  const getModuleContent = () => {
+  const ModuleContent = useMemo(() => {
     if (currentBranch === null) {
       return "branch doesn't exist";
     }
 
-    if (editing) {
-      return (
-        <SplitPane split="vertical" size={700} minSize={100}>
-          {/* Editor if in editor mode */}
-          <Box position="absolute" left={0} right={0} top={0} bottom={0}>
-            <ModuleEditor textFileModel={file} />
-          </Box>
-          <ModuleOutput textFileModel={file} />
-        </SplitPane>
-      );
-    }
-
-    return <ModuleOutput textFileModel={file} />;
-  };
+    return (
+      <SplitPane
+        onDrag={onDrag}
+        split="vertical"
+        size={editing ? 700 : 0}
+        minSize={100}
+      >
+        {/* Editor if in editor mode */}
+        <Box position="absolute" left={0} right={0} top={0} bottom={0}>
+          <ModuleEditorGroup />
+        </Box>
+        <Sandbox />
+      </SplitPane>
+    );
+  }, [editing, currentBranch, onDrag]);
 
   return (
     <>
       <ModulePicker />
-      <Layout sidebar={sidebar}>{getModuleContent()}</Layout>
+      <Layout onDrag={onDrag} sidebar={sidebar}>
+        {ModuleContent}
+      </Layout>
+      <Box
+        position="absolute"
+        top={0}
+        bottom={0}
+        left={0}
+        right={0}
+        display={dragging ? "box" : "none"}
+      ></Box>
     </>
   );
 };
 
-export default ModuleLayout;
+export default React.memo(ModuleLayout);

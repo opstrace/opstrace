@@ -25,13 +25,15 @@ type UserState = {
   currentUserIdLoaded: boolean;
   loading: boolean;
   users: Users;
+  activeUsers: Users;
 };
 
 const UserInitialState: UserState = {
   currentUserId: "",
   loading: true,
   currentUserIdLoaded: false,
-  users: []
+  users: [],
+  activeUsers: []
 };
 
 export const reducer = createReducer<UserState, UserActions>(UserInitialState)
@@ -74,6 +76,7 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
     (state, action): UserState => ({
       ...state,
       users: action.payload,
+      activeUsers: action.payload.filter(u => u.active),
       loading: false
     })
   );

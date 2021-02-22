@@ -23,12 +23,17 @@ COPY packages/controller /build/packages/controller/
 COPY packages/config /build/packages/config/
 COPY packages/tenants /build/packages/tenants/
 COPY packages/controller-config /build/packages/controller-config/
+# Copy the graphql types generated from Hasura, because the build command for the controller
+# will copy them into the controller package. We could split the Graphql bits into a separate
+# package which we could import in controller and app, but this is simpler for now.
+COPY packages/app/src/state/graphql-api-types.ts /build/packages/app/src/state/graphql-api-types.ts
 
 WORKDIR /build/packages/controller
 
 ENV NODE_OPTIONS "--max-old-space-size=1536"
 RUN yarn --frozen-lockfile
-RUN yarn run tsc -b
+# Call the build command because it contains more than just tsc -b
+RUN yarn build
 
 # Second stage, lean image w/o build tooling and ideally w/o unnecessary deps.
 FROM node:14.15.1-buster-slim AS prod-stage

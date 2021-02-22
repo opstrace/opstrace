@@ -15,7 +15,6 @@
  */
 
 // import type { editor } from "monaco-editor/esm/vs/editor/editor.api";
-import { SubscribeToFilesSubscription } from "state/graphqlClient";
 
 export type ChangeHandler = (
   value: string,
@@ -26,28 +25,51 @@ export type EditorOptions = NonNullable<
   Parameters<typeof monaco.editor.create>[1]
 >;
 
-export type File = SubscribeToFilesSubscription["file"][0];
-export type Files = SubscribeToFilesSubscription["file"];
-
 // use this same id to unsubscribe
 export type SubscriptionID = number;
 
 export interface IDirectory {
   directories: IDirectory[];
-  files: IPossiblyForkedFile[];
+  files: { id: string; path: string }[];
   path: string;
   name: string;
 }
 
-export interface IPossiblyForkedFile {
-  baseFile?: File;
-  latestBaseFile?: File;
-  rebaseRequired: boolean;
-  isNewModule: boolean;
-  isNewFile: boolean;
-  isDeletedFile: boolean;
-  isModifiedFile: boolean;
-  file: File;
-}
-
 export type onErrorHandler = (e: Error) => void;
+
+export type Viewer = {
+  email: string;
+  color: number[];
+  isEditor: boolean;
+  selection: UserSelection;
+};
+
+export type Selection = {
+  selection: number[];
+  cursorPosition: number;
+};
+
+export type UserSelection = {
+  primary: Selection;
+  secondary: Selection[];
+  source: string;
+};
+
+export type ViewerSelection = {
+  userId: string;
+  name: string;
+  selection: UserSelection;
+  color: number[];
+};
+
+type TextOperationOffset = number;
+
+type DeleteTextOp = number;
+
+type InsertTextOp = string;
+
+type TextOp = InsertTextOp | DeleteTextOp;
+
+type TextOperation = [TextOperationOffset, TextOp];
+
+export type TextOperations = TextOperation[];

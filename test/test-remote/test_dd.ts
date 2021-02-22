@@ -34,7 +34,6 @@ import {
   createTempfile,
   mtimeDeadlineInSeconds,
   mtime,
-  //mtimeDiffSeconds,
   sleep,
   readFirstNBytes
 } from "./testutils";
@@ -53,7 +52,7 @@ function ddApiSeriesUrl() {
 }
 
 function copyLEcertToHost() {
-  const src = `${__dirname}/containers/fakelerootx1.pem`;
+  const src = `${__dirname}/containers/letsencrypt-stg-root-x1.pem`;
   const dst = createTempfile("le-staging-root-ca", ".pem");
   log.info("copy %s to %s", src, dst);
   fs.copyFileSync(src, dst);
@@ -70,11 +69,11 @@ export async function startDDagentContainer() {
   // Prepare for mounting Let's Encrypt Staging root CA into the DD agent
   // container (the goal is that the Golang-based HTTP client used in the DD
   // agent discovers it when doing HTTP requests). Note: the path
-  // `${__dirname}/containers/fakelerootx1.pem` is valid _in the container_
-  // running the test runner, but not on the host running the test runner
-  // container. For being able to mount this file into the DD agent container,
-  // first copy it to a location that's known to be shared between the test
-  // runner container and the host.
+  // `${__dirname}/containers/letsencrypt-stg-root-x1.pem` is valid _in the
+  // container_ running the test runner, but not on the host running the test
+  // runner container. For being able to mount this file into the DD agent
+  // container, first copy it to a location that's known to be shared between
+  // the test runner container and the host.
   const leStagingRootCAFilePathOnHost = copyLEcertToHost();
 
   // Use magic DD agent environment variables to point the DD agent to
@@ -165,10 +164,13 @@ export async function startDDagentContainer() {
   // Expect a special log messaged emitted by the DD agent to confirm that time
   // series fragments were successfully POSTed (2xx-acked) to the Opstrace
   // cluster's DD API implementation.
-  const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
+  // The first confirmation may either be for /series or for /check_run, see
+  // https://github.com/opstrace/opstrace/issues/405
+  const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1`;
 
   // It's known that this may take a while after DD agent startup.
-  const maxWaitSeconds = 40;
+  // Note: also see https://github.com/opstrace/opstrace/issues/384
+  const maxWaitSeconds = 120;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   log.info(
     "Waiting for needle to appear in container log, deadline in %s s. Needle: %s",
@@ -322,7 +324,7 @@ suite("DD API test suite", function () {
     // API endpoint for the 'default' tenant.
     const terminateContainer = await startDDagentContainer();
 
-    // Wait for some more samples to be pushed. Terminate contaienr before
+    // Wait for some more samples to be pushed. Terminate container before
     // starting the query phase, so that the termination happens more or less
     // reliably (regardless of errors during query phase).
     await sleep(15);
@@ -332,11 +334,11 @@ suite("DD API test suite", function () {
 
     // Note that this current setup does not insert a unique metric stream,
     // i.e. if the test passes it does only guarantee that the insertion
-    // succeeded when the cluster is fresh (when this test was not run before
-    // against the same cluster. TODO: think about how to set a unique label
+    // succeeded when the cluster is fresh (when this test was not run before,
+    // against the same cluster). TODO: think about how to set a unique label
     // here.
     const queryParams = {
-      // This implicitly checks for two labels to be set by the translation
+      // This implicitly tests for two labels to be set by the translation
       // layer. Change with care!
       query: `system_uptime{job="ddagent", type="gauge"}`,
       start: searchStart.toEpochSecond().toString(),

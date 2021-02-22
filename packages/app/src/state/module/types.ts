@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToModulesSubscription } from "state/graphqlClient";
+
+import { SubscribeToModulesSubscription } from "state/clients/graphqlClient";
 
 export type Module = SubscribeToModulesSubscription["module"][0];
 export type Modules = SubscribeToModulesSubscription["module"];
 
 // use this same id to unsubscribe
 export type SubscriptionID = number;
+
+export const moduleNameRegex = /^[A-Za-z0-9-_]+$/;
+export const moduleScopeRegex = /^[A-Za-z0-9-_]*$/;

@@ -71,7 +71,8 @@ func main() {
 	log.Infof("tenant name: %s", tenantName)
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
 
-	reverseProxy := middleware.NewReverseProxy(tenantName, lokiqurl, lokidurl, disableAPIAuthentication)
+	reverseProxy := middleware.NewReverseProxy(tenantName, lokiqurl, lokidurl,
+		lokiqurl, lokiqurl, disableAPIAuthentication) // dirty: pass the querier since there is no ruler nor alertmanager
 
 	// mux matches based on registration order, not prefix length.
 	router := mux.NewRouter()

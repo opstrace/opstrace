@@ -14,36 +14,56 @@
  * limitations under the License.
  */
 import { History } from "history";
-
-import { File } from "../types";
 import { getFileUri } from "./uri";
 
 export default function navigateToFile(
-  file: File,
+  file: {
+    module_version: string;
+    module_scope: string;
+    module_name: string;
+    branch_name: string;
+    path: string;
+  },
   history: History,
-  overrideWithBranch?: string
+  overrideWithBranch?: string,
+  latest?: boolean
 ) {
   const parts = history.location.pathname.replace(/^\//, "").split("/");
 
   const tab = (parts.length && parts.shift()) || "module";
-  const mode = (parts.length && parts.shift()) || "-";
 
   history.push({
     ...history.location,
-    pathname: `/${tab}/${mode}/${getFileUri(file, {
-      branch: overrideWithBranch || file.branch_name
+    pathname: `/${tab}/${getFileUri(file, {
+      branch: overrideWithBranch || file.branch_name,
+      useLatest: latest
     })}`
   });
 }
 
-export function setEditingMode(history: History, editing: boolean) {
-  const parts = history.location.pathname.replace(/^\//, "").split("/");
+const editParam = "edit";
 
-  const tab = (parts.length && parts.shift()) || "module";
-  parts.length && parts.shift();
+export function isEditMode(history: History) {
+  const queryParams = new URLSearchParams(history.location.search);
+  return queryParams.has(editParam);
+}
+
+export function setEditingMode(history: History, editing: boolean) {
+  const queryParams = new URLSearchParams(history.location.search);
+  if (editing && queryParams.has(editParam)) {
+    return;
+  }
+  if (!editing && !queryParams.has(editParam)) {
+    return;
+  }
+  if (editing) {
+    queryParams.set(editParam, "true");
+  } else {
+    queryParams.delete(editParam);
+  }
 
   history.push({
     ...history.location,
-    pathname: `/${tab}/${editing ? "e" : "-"}/${parts.join("/")}`
+    search: queryParams.toString()
   });
 }

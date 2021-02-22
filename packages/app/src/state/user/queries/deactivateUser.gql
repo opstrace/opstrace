@@ -1,0 +1,6 @@
+mutation DeleteUser($email: String!) {
+  update_user_by_pk(_set: { active: false }, pk_columns: { email: $email }) {
+    email
+    opaque_id
+  }
+}

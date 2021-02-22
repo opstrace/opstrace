@@ -13,26 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all, select, take, call, spawn } from "redux-saga/effects";
+import { all, select, take, call, spawn, takeEvery } from "redux-saga/effects";
 import * as actions from "../actions";
-import graphqlClient, { User } from "state/graphqlClient";
+import graphqlClient, { User } from "state/clients/graphqlClient";
 
 import userListSubscriptionManager from "./userListSubscription";
 import { getCurrentUser } from "../hooks/useCurrentUser";
+import { State } from "state/reducer";
+import { getUserList } from "../hooks/useUserList";
 
 export default function* userTaskManager() {
   const sagas = [
     userListSubscriptionManager,
     persistDarkModePreference,
-    addUser,
-    deleteUser
+    addUserListener,
+    deleteUserListener
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
   // https://redux-saga.js.org/docs/advanced/RootSaga.html
   yield all(
     sagas.map(saga =>
-      spawn(function*() {
+      spawn(function* () {
         while (true) {
           try {
             yield call(saga);
@@ -46,12 +48,24 @@ export default function* userTaskManager() {
   );
 }
 
-function* addUser() {
-  while (true) {
-    const action: ReturnType<typeof actions.addUser> = yield take(
-      actions.addUser
+function* addUserListener() {
+  yield takeEvery(actions.addUser, addUser);
+}
+
+function* addUser(action: ReturnType<typeof actions.addUser>) {
+  try {
+    const state: State = yield select();
+    const registeredUsers = getUserList(state);
+    const existingDeactivatedUser = registeredUsers.find(
+      user => user.email === action.payload && !user.active
     );
-    try {
+    // We set users as inactive instead of deleting so that all the history
+    // created by them is not disrupted/lost
+    if (existingDeactivatedUser) {
+      yield graphqlClient.ReactivateUser({
+        email: action.payload
+      });
+    } else {
       yield graphqlClient.CreateUser({
         email: action.payload,
         avatar: "",
@@ -59,24 +73,25 @@ function* addUser() {
         // when the user logs in for the first time
         username: action.payload
       });
-    } catch (err) {
-      console.error(err);
     }
+  } catch (err) {
+    console.error(err);
   }
 }
 
-function* deleteUser() {
-  while (true) {
-    const action: ReturnType<typeof actions.deleteUser> = yield take(
-      actions.deleteUser
-    );
-    try {
-      yield graphqlClient.DeleteUser({
-        email: action.payload
-      });
-    } catch (err) {
-      console.error(err);
-    }
+function* deleteUserListener() {
+  yield takeEvery(actions.deleteUser, deleteUser);
+}
+
+function* deleteUser(action: ReturnType<typeof actions.deleteUser>) {
+  try {
+    // When we "delete" a user, we actually set the user as inactive instead of deleting so that all the history
+    // created by them is not disrupted/lost
+    yield graphqlClient.DeleteUser({
+      email: action.payload
+    });
+  } catch (err) {
+    console.error(err);
   }
 }
 

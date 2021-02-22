@@ -19,55 +19,46 @@ import IconButton from "@material-ui/core/IconButton";
 import AddIcon from "@material-ui/icons/Add";
 
 import { SideBar, SideBarContainer } from "client/components/SideBar";
-import { useCommandService } from "client/services/Command";
 import { ModuleTreeViewContainer } from "client/components/TreeView";
 
 import BranchSelector from "client/views/common/BranchSelector";
+import { usePickerService } from "client/services/Picker";
+import CreateModuleDialog from "client/views/common/CreateModuleDialog";
 
-const ModuleSidebar = () => {
-  const createNewBranch = useCallback(() => {
-    console.log("calling createBranch");
-  }, []);
+function ModuleSidebar() {
+  const { activatePickerWithText } = usePickerService();
 
-  const createNewModule = useCallback(() => {
-    console.log("calling createModule");
-  }, []);
+  const createBranch = useCallback(() => {
+    activatePickerWithText("create branch: ");
+  }, [activatePickerWithText]);
 
-  useCommandService(
-    {
-      id: "create-module",
-      description: "Create Module",
-      category: "Module",
-      handler: e => {
-        e.keyboardEvent?.preventDefault();
-        createNewModule();
-      }
-    },
-    [createNewModule]
-  );
+  const createModule = useCallback(() => {
+    activatePickerWithText("create module: ");
+  }, [activatePickerWithText]);
 
   const branchActions = (
-    <IconButton size="small" onClick={createNewBranch}>
+    <IconButton size="small" onClick={createBranch}>
       <AddIcon />
     </IconButton>
   );
 
   const moduleActions = (
-    <IconButton size="small" onClick={createNewModule}>
+    <IconButton size="small" onClick={createModule}>
       <AddIcon />
     </IconButton>
   );
 
   return (
     <SideBar>
-      <SideBarContainer title="Branches" actions={branchActions}>
+      <CreateModuleDialog />
+      <SideBarContainer title="Branches" actions={branchActions} minHeight={50}>
         <BranchSelector />
       </SideBarContainer>
-      <SideBarContainer title="Modules" actions={moduleActions}>
+      <SideBarContainer title="Modules" actions={moduleActions} flexGrow={1}>
         <ModuleTreeViewContainer />
       </SideBarContainer>
     </SideBar>
   );
-};
+}
 
 export default ModuleSidebar;

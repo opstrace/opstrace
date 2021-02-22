@@ -13,14 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { put, call, take, fork, cancelled, cancel } from "redux-saga/effects";
+import {
+  put,
+  call,
+  take,
+  takeEvery,
+  fork,
+  cancelled,
+  cancel
+} from "redux-saga/effects";
 import { Task, eventChannel, EventChannel } from "redux-saga";
 import { ActionType } from "typesafe-actions";
 import {
-  SubscribeToFilesSubscription,
-  SubscribeToFilesDocument
-} from "state/graphqlClient";
-import subscriptionClient from "state/graphqlClient/subscriptionClient";
+  SubscribeToBranchFilesSubscription,
+  SubscribeToBranchFilesDocument
+} from "state/clients/graphqlClient";
+import subscriptionClient from "state/clients/graphqlClient/subscriptionClient";
 import * as actions from "../actions";
 import { SubscriptionID } from "../types";
 
@@ -51,48 +59,59 @@ export function* executeActionsChannel(channel: any) {
   }
 }
 
+function getSubId({
+  branch,
+  subId
+}: {
+  branch: string;
+  subId: SubscriptionID;
+}): string {
+  return `${branch}|${subId}`;
+}
+
 export default function* fileSubscriptionManager() {
-  let activeSubscription: Task | undefined;
+  let activeSubscriptions: Map<string, Task> = new Map();
   // track all subscribers so we only cancel the subscription
   // once everybody has unsubscribed
-  const subscribers = new Set<SubscriptionID>();
+  const subscribers = new Set<string>();
 
-  // Fork a subscribe handler
-  yield fork(function* () {
-    while (true) {
-      // wait for a subscribe action
-      const action: ReturnType<typeof actions.subscribe> = yield take(
-        actions.subscribe
-      );
-      // add to tracked subscribers
-      subscribers.add(action.payload);
+  yield takeEvery(actions.subscribe, function* (
+    action: ReturnType<typeof actions.subscribe>
+  ) {
+    // add to tracked subscribers
+    subscribers.add(getSubId(action.payload));
 
-      if (activeSubscription) {
-        // already subscribed
-        return;
-      }
-
-      const channel = yield call(fileSubscriptionEventChannel);
-
-      // Fork the subscription task
-      activeSubscription = yield fork(executeActionsChannel, channel);
+    if (activeSubscriptions.get(action.payload.branch)) {
+      // already subscribed
+      return;
     }
+
+    const channel = yield call(
+      fileSubscriptionEventChannel,
+      action.payload.branch
+    );
+
+    // Fork the subscription task
+    activeSubscriptions.set(
+      action.payload.branch,
+      yield fork(executeActionsChannel, channel)
+    );
   });
 
-  // Fork an unsubscribe handler
-  yield fork(function* () {
-    while (true) {
-      // wait for the unsubscribe action and then cancel the subscription task
-      const action: ReturnType<typeof actions.unsubscribe> = yield take(
-        actions.unsubscribe
-      );
-      // remove from subscribers
-      subscribers.delete(action.payload);
-      // Cancel active subscription if there are no subscribers
-      if (activeSubscription && subscribers.size === 0) {
-        yield cancel(activeSubscription);
-        activeSubscription = undefined;
-      }
+  yield takeEvery(actions.unsubscribe, function* (
+    action: ReturnType<typeof actions.unsubscribe>
+  ) {
+    // remove from subscribers
+    subscribers.delete(getSubId(action.payload));
+    // Cancel active subscription if there are no subscribers
+    const activeSubscription = activeSubscriptions.get(action.payload.branch);
+    if (
+      activeSubscription &&
+      [...subscribers].filter(s => s.startsWith(action.payload.branch))
+        .length === 0
+    ) {
+      yield cancel(activeSubscription);
+      activeSubscriptions.delete(action.payload.branch);
     }
   });
 }
@@ -100,16 +119,23 @@ export default function* fileSubscriptionManager() {
 /**
  * Execute the graphql subscription
  */
-export function fileSubscriptionEventChannel(): EventChannel<Actions> {
+export function fileSubscriptionEventChannel(
+  branch: string
+): EventChannel<Actions> {
   return eventChannel(emitter => {
     const subscription = subscriptionClient
-      .subscribe<SubscribeToFilesSubscription>({
-        query: SubscribeToFilesDocument
+      .subscribe<SubscribeToBranchFilesSubscription>({
+        query: SubscribeToBranchFilesDocument,
+        variables: {
+          branch
+        }
       })
       .subscribe({
         next: res => {
-          if (res.data?.file) {
-            emitter(actions.set(res.data?.file));
+          if (res.data?.branch_by_pk?.files) {
+            emitter(
+              actions.set({ branch, files: res.data?.branch_by_pk?.files })
+            );
           }
         }
       });

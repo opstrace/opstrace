@@ -64,7 +64,7 @@ func (suite *Suite) TestDDProxyHandler_MissingCTH() {
 	)
 
 	w := httptest.NewRecorder()
-	suite.ddcp.SeriesPostHandler(w, req)
+	suite.ddcp.HandlerSeriesPost(w, req)
 
 	resp := w.Result()
 	assert.Equal(suite.T(), 400, resp.StatusCode)
@@ -93,7 +93,7 @@ func (suite *Suite) TestDDProxyHandler_BadCTH() {
 	)
 	req.Header.Set("Content-Type", "application/vnd.api+json")
 	w := httptest.NewRecorder()
-	suite.ddcp.SeriesPostHandler(w, req)
+	suite.ddcp.HandlerSeriesPost(w, req)
 
 	resp := w.Result()
 
@@ -114,7 +114,7 @@ func (suite *Suite) TestDDProxyHandler_EmptyBody() {
 	req := httptest.NewRequest("POST", "http://localhost/api/v1/series", nil)
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
-	suite.ddcp.SeriesPostHandler(w, req)
+	suite.ddcp.HandlerSeriesPost(w, req)
 
 	resp := w.Result()
 
@@ -140,7 +140,7 @@ func (suite *Suite) TestDDProxyHandler_InsertOneSample() {
 		sampleCount: 1,
 	}
 
-	suite.ddcp.SeriesPostHandler(
+	suite.ddcp.HandlerSeriesPost(
 		w,
 		genSubmitRequest(tsfragment.toJSON()),
 	)
@@ -160,7 +160,7 @@ func (suite *Suite) TestDDProxyHandler_InsertZeroSamples() {
 
 	// Note: the resulting JSON doc really has an empty JSON sample array:
 	// "points": [],
-	suite.ddcp.SeriesPostHandler(
+	suite.ddcp.HandlerSeriesPost(
 		w,
 		genSubmitRequest(tsfragment.toJSON()),
 	)
@@ -181,7 +181,7 @@ func (suite *Suite) TestDDProxyHandler_InsertManySamples() {
 		sampleValueIncrement: 1,
 	}
 
-	suite.ddcp.SeriesPostHandler(
+	suite.ddcp.HandlerSeriesPost(
 		w,
 		genSubmitRequest(tsfragment.toJSON()),
 	)
@@ -209,7 +209,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	)
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
-	suite.ddcp.SeriesPostHandler(w, req)
+	suite.ddcp.HandlerSeriesPost(w, req)
 	resp := w.Result()
 	assert.Equal(suite.T(), 202, resp.StatusCode)
 
@@ -232,7 +232,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	)
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
-	suite.ddcp.SeriesPostHandler(w, req)
+	suite.ddcp.HandlerSeriesPost(w, req)
 	resp = w.Result()
 
 	// Expect bad request, because there's no JSON body in the request.
@@ -353,7 +353,7 @@ func TestDDProxyAuthenticator_noapikey(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	ddcp.SeriesPostHandler(w, req)
+	ddcp.HandlerSeriesPost(w, req)
 	resp := w.Result()
 	assert.Equal(t, 401, resp.StatusCode)
 	// Confirm that a helpful error message is in the body.
@@ -377,7 +377,7 @@ func TestDDProxyAuthenticator_badtoken(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	ddcp.SeriesPostHandler(w, req)
+	ddcp.HandlerSeriesPost(w, req)
 	resp := w.Result()
 	assert.Equal(t, 401, resp.StatusCode)
 	// Confirm that a helpful error message is in the body.

@@ -138,5 +138,9 @@ export const Scrollable: React.FC<ScrollableProps> = ({
     }}
   />
 );
+const Scroll = React.memo(Scrollable);
 
-export default React.memo(Scrollable);
+function MemoScrollable(props: ScrollableProps) {
+  return <Scroll {...props} />;
+}
+export default MemoScrollable;

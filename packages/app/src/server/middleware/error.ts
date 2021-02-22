@@ -29,7 +29,7 @@ const catchErrorsMiddleware = (
 ) => {
   if (err) {
     if (err.stack) {
-      log.error(err);
+      log.error("unexpected error: ", err);
       // wrap error in generic
       return handleError(new UnexpectedServerError(err), res);
     }

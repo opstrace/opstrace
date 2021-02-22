@@ -3,6 +3,7 @@ query GetCurrentUser {
     email
     avatar
     username
+    active
     preference {
       dark_mode
     }

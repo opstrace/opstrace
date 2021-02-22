@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToBranchesSubscription } from "state/graphqlClient";
+
+import { SubscribeToBranchesSubscription } from "state/clients/graphqlClient";
 
 export type Branch = SubscribeToBranchesSubscription["branch"][0];
 export type Branches = SubscribeToBranchesSubscription["branch"];
 
 // use this same id to unsubscribe
 export type SubscriptionID = number;
+
+export const branchNameRegex = /^[A-Za-z0-9-_]+$/;

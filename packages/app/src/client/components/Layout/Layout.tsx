@@ -15,60 +15,58 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Row from "./Row";
-import * as constants from "./constants";
 import styled from "styled-components";
+import AutoSizer from "react-virtualized-auto-sizer";
 
-type WrapperProps = {
-  visible: boolean;
-};
+import { Scrollable } from "client/components/Scrollable";
+import { Box } from "client/components/Box";
+import * as constants from "./constants";
+import Row from "./Row";
 
-const Wrapper = styled.div<WrapperProps>(props => ({
+const Wrapper = styled.div<{}>(props => ({
   display: "flex",
   flexDirection: "column",
   flexGrow: 1,
-  flexWrap: "wrap",
-  opacity: props.visible ? 1 : 0
+  flexWrap: "wrap"
 }));
 
 export type LayoutProps = {
-  minHeight: number;
-  width: number;
   children: React.ReactElement<any> | React.ReactElement<any>[];
 };
 
 /**
- * Layout is used internally (not exposed to modules directly).
- *
- * It's purpose is to manage the layout of Row and Container components to ensure
+ * Layout is used to manage the layout of Row and Columns to ensure
  * the space is divided appropriately and laid out in a sensible, consistent
  * manner for various viewports sizes.
  */
-const Layout = (props: LayoutProps) => {
-  const children = React.Children.map(props.children, child => {
-    if (child.type === Row) {
-      return child;
-    }
+const AutoSizedLayout = (props: LayoutProps) => (
+  <Box width="100%" height="100%" className="Layout">
+    <AutoSizer style={{ width: "100%", height: "100%" }}>
+      {({ width, height }) => (
+        <Box width="100%" height="100%">
+          <Scrollable>
+            <Box p={0} justifyContent="left" alignItems="normal">
+              <Layout minHeight={height} width={width}>
+                {props.children}
+              </Layout>
+            </Box>
+          </Scrollable>
+        </Box>
+      )}
+    </AutoSizer>
+  </Box>
+);
 
-    return <Row>{child}</Row>;
-  });
+const Layout = (props: LayoutProps & { minHeight: number; width: number }) => {
+  const childrenCount = React.Children.count(props.children);
+
   const nodeRef = useRef<null | HTMLDivElement>(null);
-
   const roughChildHeight = () =>
-    props.minHeight / children.length < constants.MIN_ITEM_HEIGHT
+    props.minHeight / childrenCount < constants.MIN_ITEM_HEIGHT
       ? constants.MIN_ITEM_HEIGHT
-      : props.minHeight / children.length;
+      : props.minHeight / childrenCount;
 
   const [minChildHeight, setMinChildHeight] = useState(roughChildHeight());
-  const [visible, setVisible] = useState(false);
-
-  // Hide any initial flickering of recalculating the layout
-  useEffect(() => {
-    if (nodeRef.current && !visible) {
-      // set visible on next RAF
-      setTimeout(() => setVisible(true));
-    }
-  }, [minChildHeight, visible]);
 
   useEffect(() => {
     /**
@@ -82,6 +80,7 @@ const Layout = (props: LayoutProps) => {
       if (!node) {
         return;
       }
+
       if (node.clientHeight > props.minHeight) {
         const shrinkage = node.clientHeight / props.minHeight;
         // shrink current minChildHeight
@@ -90,7 +89,7 @@ const Layout = (props: LayoutProps) => {
         setMinChildHeight(
           newHeight < constants.MIN_ITEM_HEIGHT
             ? constants.MIN_ITEM_HEIGHT
-            : newHeight
+            : Math.round(newHeight)
         );
       } else {
         const expansion = props.minHeight / node.clientHeight;
@@ -100,7 +99,7 @@ const Layout = (props: LayoutProps) => {
         setMinChildHeight(
           newHeight < constants.MIN_ITEM_HEIGHT
             ? constants.MIN_ITEM_HEIGHT
-            : newHeight
+            : Math.round(newHeight)
         );
       }
     };
@@ -115,13 +114,27 @@ const Layout = (props: LayoutProps) => {
     }
   }, []);
 
+  let shouldWrapInRow = false;
+
+  const children = React.Children.map(props.children, (child, idx) => {
+    if (child.type !== Row) {
+      shouldWrapInRow = true;
+    }
+    return React.cloneElement(child, {
+      minHeight: minChildHeight,
+      key: idx
+    });
+  });
+
   return (
-    <Wrapper ref={layoutRef} className="Layout" visible={visible}>
-      {children.map(child =>
-        React.cloneElement(child, { minHeight: minChildHeight })
+    <Wrapper ref={layoutRef} className="RowWrapper">
+      {shouldWrapInRow ? (
+        <Row minHeight={minChildHeight}>{children}</Row>
+      ) : (
+        children
       )}
     </Wrapper>
   );
 };
 
-export default Layout;
+export default AutoSizedLayout;

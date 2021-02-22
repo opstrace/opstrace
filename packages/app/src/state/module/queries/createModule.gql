@@ -1,0 +1,38 @@
+mutation CreateModule(
+  $name: String!
+  $scope: String!
+  $branch: String!
+  $version: String!
+  $files: [file_insert_input!]!
+) {
+  insert_module_one(
+    object: { name: $name, scope: $scope, branch_name: $branch }
+  ) {
+    created_at
+  }
+  insert_module_version(
+    objects: [
+      {
+        module_name: $name
+        module_scope: $scope
+        branch_name: $branch
+        version: $version
+      }
+      {
+        module_name: $name
+        module_scope: $scope
+        branch_name: $branch
+        version: "latest"
+      }
+    ]
+  ) {
+    returning {
+      created_at
+    }
+  }
+  insert_file(objects: $files) {
+    returning {
+      id
+    }
+  }
+}

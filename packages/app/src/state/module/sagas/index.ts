@@ -13,9 +13,93 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all } from "redux-saga/effects";
+import { all, spawn, call, takeEvery, select, put } from "redux-saga/effects";
 import subscriptionManager from "./subscription";
+import * as actions from "../actions";
+import { State } from "state/reducer";
+import { requestOpenFileWithParams } from "state/file/actions";
+import graphqlClient from "state/clients/graphqlClient";
 
 export default function* moduleTaskManager() {
-  yield all([subscriptionManager()]);
+  const sagas = [subscriptionManager, createModuleListener];
+
+  yield all(
+    sagas.map(saga =>
+      spawn(function* () {
+        while (true) {
+          try {
+            yield call(saga);
+            break;
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      })
+    )
+  );
+}
+
+function* createModuleListener() {
+  yield takeEvery(actions.createModule, createModule);
+}
+
+function* createModule(action: ReturnType<typeof actions.createModule>) {
+  try {
+    const state: State = yield select();
+    const scope = "";
+    const branch = state.branches.currentBranchName;
+    const name = action.payload.name;
+    const initialfileVersion = "0.0.1";
+    const mainFileContents = `/**
+* ###################
+* 
+* Main ⬇️
+* 
+* ###################
+*/
+
+// Always export a default function
+export default function main() {
+  return "I'm new";
+}
+`;
+
+    yield call(graphqlClient.CreateModule, {
+      name,
+      scope,
+      branch,
+      version: initialfileVersion,
+      files: [
+        {
+          path: "main",
+          module_version: "latest",
+          branch_name: branch,
+          module_name: name,
+          module_scope: scope,
+          contents: mainFileContents
+        },
+        {
+          path: "main",
+          module_version: initialfileVersion,
+          branch_name: branch,
+          module_name: name,
+          module_scope: scope,
+          contents: mainFileContents
+        }
+      ]
+    });
+    yield put(
+      requestOpenFileWithParams({
+        history: action.payload.history,
+        params: {
+          selectedFilePath: "main",
+          selectedModuleName: action.payload.name,
+          selectedModuleScope: scope,
+          selectedModuleVersion: "latest"
+        }
+      })
+    );
+  } catch (err) {
+    console.error(err);
+  }
 }

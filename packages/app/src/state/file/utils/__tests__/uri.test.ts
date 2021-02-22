@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import "monaco-editor";
 import {
   getModuleNameFromFile,
   getFileUri,
@@ -26,14 +27,14 @@ const mockFile = {
   is_modified: false,
   mark_deleted: false,
   module_name: "module-1",
-  module_scope: "/foo/bar",
+  module_scope: "foo",
   module_version: "0.1",
   path: "/test",
   ext: "ts"
 };
 
 test("getModuleNameFromFile returns correct module name", () => {
-  expect(getModuleNameFromFile(mockFile)).toEqual("@/foo/bar/module-1");
+  expect(getModuleNameFromFile(mockFile)).toEqual("@foo/module-1");
 });
 
 test("getModuleNameFromFile returns correct module name if file hasn't module_scope", () => {
@@ -43,7 +44,7 @@ test("getModuleNameFromFile returns correct module name if file hasn't module_sc
 });
 
 test("getFileUri returns correct path", () => {
-  expect(getFileUri(mockFile)).toEqual("@/foo/bar/module-1/0.1/test");
+  expect(getFileUri(mockFile)).toEqual("@foo/module-1@0.1/test");
 });
 
 test("getFileUri returns correct path with latest version", () => {
@@ -51,9 +52,7 @@ test("getFileUri returns correct path with latest version", () => {
     useLatest: true
   };
 
-  expect(getFileUri(mockFile, options)).toEqual(
-    "@/foo/bar/module-1/latest/test"
-  );
+  expect(getFileUri(mockFile, options)).toEqual("@foo/module-1@latest/test");
 });
 
 test("getFileUri returns correct path with files ext", () => {
@@ -61,9 +60,7 @@ test("getFileUri returns correct path with files ext", () => {
     ext: true
   };
 
-  expect(getFileUri(mockFile, options)).toEqual(
-    "@/foo/bar/module-1/0.1/test.ts"
-  );
+  expect(getFileUri(mockFile, options)).toEqual("@foo/module-1@0.1/test.tsx");
 });
 
 test("getFileUri returns correct path with given version", () => {
@@ -71,7 +68,7 @@ test("getFileUri returns correct path with given version", () => {
     version: "1.5"
   };
 
-  expect(getFileUri(mockFile, options)).toEqual("@/foo/bar/module-1/1.5/test");
+  expect(getFileUri(mockFile, options)).toEqual("@foo/module-1@1.5/test");
 });
 
 test("getFileUri returns correct path with given branch", () => {
@@ -79,11 +76,11 @@ test("getFileUri returns correct path with given branch", () => {
     branch: "new"
   };
 
-  expect(getFileUri(mockFile, options)).toEqual(
-    "new/@/foo/bar/module-1/0.1/test"
-  );
+  expect(getFileUri(mockFile, options)).toEqual("new/@foo/module-1@0.1/test");
 });
 
 test("getMonacoFileUriString returns correct path", () => {
-  expect(getMonacoFileUriString(mockFile)).toEqual("module://file-1.ts");
+  expect(getMonacoFileUriString(mockFile)).toEqual(
+    "/branch-1/@foo/module-1@0.1/test.tsx"
+  );
 });

@@ -1,0 +1,31 @@
+query GetFileId(
+  $branch: String
+  $module: String
+  $scope: String
+  $version: String
+  $path: String
+) {
+  file(
+    where: {
+      _or: [
+        {
+          branch_name: { _eq: $branch }
+          module_name: { _eq: $module }
+          module_scope: { _eq: $scope }
+          module_version: { _eq: $version }
+          path: { _eq: $path }
+        }
+        {
+          branch_name: { _eq: "main" }
+          module_name: { _eq: $module }
+          module_scope: { _eq: $scope }
+          module_version: { _eq: $version }
+          path: { _eq: $path }
+        }
+      ]
+    }
+  ) {
+    id
+    branch_name
+  }
+}

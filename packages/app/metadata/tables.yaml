@@ -147,98 +147,37 @@
           branch_name: branch_name
           module_name: module_name
   insert_permissions:
-  - role: user
-    permission:
-      check: {}
-      columns:
-      - path
-      - id
-      - created_at
-      - module_version
-      - module_name
-      - branch_name
-      - ext
-      - module_scope
-      - base_file_id
-      - mark_deleted
-      - is_modified
-      backend_only: false
   - role: user_admin
     permission:
       check: {}
       columns:
-      - is_modified
-      - mark_deleted
+      - base_file_id
       - branch_name
+      - contents
       - ext
+      - id
+      - mark_deleted
       - module_name
       - module_scope
       - module_version
       - path
-      - created_at
-      - base_file_id
-      - id
       backend_only: false
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - is_modified
-      - mark_deleted
-      - branch_name
-      - ext
-      - module_name
-      - module_scope
-      - module_version
-      - path
-      - created_at
-      - base_file_id
-      - id
-      filter: {}
-  - role: user_admin
-    permission:
-      columns:
-      - is_modified
-      - mark_deleted
-      - branch_name
-      - ext
-      - module_name
-      - module_scope
-      - module_version
-      - path
-      - created_at
-      - base_file_id
-      - id
-      filter: {}
-  update_permissions:
-  - role: user
-    permission:
-      columns:
-      - base_file_id
-      - branch_name
-      - ext
-      - is_modified
-      - mark_deleted
-      - module_name
-      - module_scope
-      - module_version
-      - path
-      filter: {}
-      check: null
   - role: user_admin
     permission:
       columns:
       - base_file_id
       - branch_name
+      - contents
+      - created_at
       - ext
-      - is_modified
+      - id
       - mark_deleted
       - module_name
       - module_scope
       - module_version
       - path
       filter: {}
-      check: null
 - table:
     schema: public
     name: module
@@ -268,13 +207,15 @@
           name: module_name
           scope: module_scope
   insert_permissions:
-  - role: user
+  - role: user_admin
     permission:
-      check: {}
+      check:
+        branch:
+          protected:
+            _eq: false
       columns:
-      - name
-      - created_at
       - branch_name
+      - name
       - scope
       backend_only: false
   select_permissions:
@@ -285,6 +226,14 @@
       - name
       - scope
       - created_at
+      filter: {}
+  - role: user_admin
+    permission:
+      columns:
+      - branch_name
+      - created_at
+      - name
+      - scope
       filter: {}
 - table:
     schema: public
@@ -331,10 +280,10 @@
       check: {}
       columns:
       - branch_name
+      - created_at
       - module_name
       - module_scope
       - version
-      - created_at
       backend_only: false
   select_permissions:
   - role: user
@@ -350,10 +299,10 @@
     permission:
       columns:
       - branch_name
+      - created_at
       - module_name
       - module_scope
       - version
-      - created_at
       filter: {}
 - table:
     schema: public
@@ -485,6 +434,7 @@
   - role: user_admin
     permission:
       columns:
+      - active
       - avatar
       - created_at
       - email
@@ -506,13 +456,10 @@
   - role: user_admin
     permission:
       columns:
+      - active
       - username
       filter: {}
       check: null
-  delete_permissions:
-  - role: user_admin
-    permission:
-      filter: {}
 - table:
     schema: public
     name: user_preference

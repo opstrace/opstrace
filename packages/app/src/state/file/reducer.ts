@@ -16,27 +16,37 @@
 
 import { createReducer, ActionType } from "typesafe-actions";
 
-import { Files } from "./types";
 import * as actions from "./actions";
 import TextFileModel from "./TextFileModel";
+import { getFileUri } from "./utils/uri";
 
 type FilesActions = ActionType<typeof actions>;
 
+export interface FilesByBranch {
+  [branch: string]: { [path: string]: TextFileModel };
+}
+
 type FilesState = {
-  files: Files;
+  filesByBranch: FilesByBranch;
+  requestOpenFilePending: boolean;
   selectedFileId?: string;
   selectedFilePath?: string;
   selectedModuleName?: string;
   selectedModuleScope?: string;
   selectedModuleVersion?: string;
   openFiles: TextFileModel[];
-  loading: boolean;
+  openFileBrowsingHistory: string[];
+  loaded: {
+    [branch: string]: boolean;
+  };
 };
 
 const FilesInitialState: FilesState = {
-  files: [],
+  filesByBranch: {},
   openFiles: [],
-  loading: true
+  openFileBrowsingHistory: [],
+  loaded: {},
+  requestOpenFilePending: false
 };
 
 export const reducer = createReducer<FilesState, FilesActions>(
@@ -45,10 +55,24 @@ export const reducer = createReducer<FilesState, FilesActions>(
   .handleAction(
     actions.set,
     (state, action): FilesState => {
+      const filesByPath: { [key: string]: TextFileModel } = {};
+      const files = action.payload.files;
+      const branch = action.payload.branch;
+      const branchFiles = state.filesByBranch[branch] || {};
+
+      files.forEach(file => {
+        const path = getFileUri(file, { branch, ext: true });
+        const existingFile = branchFiles[path];
+
+        filesByPath[path] = existingFile
+          ? existingFile
+          : new TextFileModel({ branch_name: branch, ...file });
+      });
+
       return {
         ...state,
-        files: action.payload,
-        loading: false
+        filesByBranch: { ...state.filesByBranch, [branch]: filesByPath },
+        loaded: { ...state.loaded, [branch]: true }
       };
     }
   )
@@ -57,62 +81,59 @@ export const reducer = createReducer<FilesState, FilesActions>(
     (state, action): FilesState => {
       return {
         ...state,
-        ...action.payload
+        ...action.payload,
+        requestOpenFilePending: true
       };
     }
   )
   .handleAction(
     actions.openFile,
     (state, action): FilesState => {
-      const alreadyOpen = state.openFiles.find(
-        f => f.file.id === action.payload.file.id
-      );
+      const fileId = action.payload.file.id;
+      const alreadyOpen = state.openFiles.find(f => f.file.id === fileId);
 
       const openFiles = alreadyOpen
         ? state.openFiles
-        : [...state.openFiles, new TextFileModel(action.payload)];
+        : [...state.openFiles, action.payload];
 
-      // ensure it's the last item in the array
-      if (alreadyOpen) {
-        const idx = openFiles.findIndex(
-          f => f.file.id === action.payload.file.id
-        );
-        openFiles.splice(idx, 1);
-        openFiles.push(alreadyOpen);
-      }
+      const browsingHistory = state.openFileBrowsingHistory
+        .filter(id => id !== fileId)
+        .concat([fileId]);
 
-      const trimmedOpenFiles = openFiles.slice(
-        Math.max(openFiles.length - 5, 0)
+      const filesToKeepOpen = browsingHistory.slice(
+        Math.max(browsingHistory.length - 5, 0)
       );
-      // dispose the open files we've just trimmed from the array
-      openFiles
-        .filter(a => !trimmedOpenFiles.find(b => a === b))
-        .forEach(openFile => openFile.dispose());
+
+      const trimmedOpenFiles = openFiles.filter(a =>
+        filesToKeepOpen.find(b => a.file.id === b)
+      );
 
       return {
         ...state,
         // limit number of open files to 5 for now
         openFiles: trimmedOpenFiles,
+        openFileBrowsingHistory: filesToKeepOpen,
         selectedFileId: action.payload.file.id,
         selectedFilePath: action.payload.file.path,
         selectedModuleName: action.payload.file.module_name,
         selectedModuleScope: action.payload.file.module_scope,
-        selectedModuleVersion: action.payload.file.module_version
+        selectedModuleVersion: action.payload.file.module_version,
+        requestOpenFilePending: false
       };
     }
   )
   .handleAction(
     actions.closeFile,
     (state, action): FilesState => {
-      const fileToClose = state.openFiles.find(
-        f => f.file.id === action.payload
-      );
-      if (fileToClose) {
-        fileToClose.dispose();
+      // Always leave one file open
+      if (state.openFiles.length === 1) {
+        return state;
       }
+
       const openFiles = state.openFiles.filter(
         f => f.file.id !== action.payload
       );
+
       const selectedFileId =
         state.selectedFileId === action.payload
           ? openFiles[openFiles.length - 1].file.id
@@ -120,6 +141,9 @@ export const reducer = createReducer<FilesState, FilesActions>(
 
       return {
         ...state,
+        openFileBrowsingHistory: state.openFileBrowsingHistory.filter(
+          id => id !== action.payload
+        ),
         selectedFileId,
         openFiles
       };

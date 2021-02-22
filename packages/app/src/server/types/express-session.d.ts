@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import "express";
-import "express-session";
+import { Session } from "express-session";
+import "http";
 
 declare module "express-session" {
   interface SessionData {
@@ -22,5 +23,16 @@ declare module "express-session" {
     username: string;
     avatar: string;
     opaqueUserId: string;
+  }
+}
+
+declare module "http" {
+  interface IncomingMessage {
+    session: Session & {
+      email: string;
+      username: string;
+      avatar: string;
+      opaqueUserId: string;
+    };
   }
 }

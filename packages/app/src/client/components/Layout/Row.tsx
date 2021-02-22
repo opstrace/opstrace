@@ -28,20 +28,23 @@ const Wrapper = styled.div`
 
 export type RowProps = {
   minHeight?: number;
-  children: React.ReactElement<any> | React.ReactElement<any>[];
+  children: React.ReactElement | React.ReactElement[];
 };
 
 const Row = (props: RowProps) => {
-  const children = React.Children.map(props.children, (child, idx) => {
-    if (child.type !== Column) {
+  let children = React.Children.map(props.children, (c, idx) => {
+    if (c.type !== Column) {
       // wrap in an Column component
       return (
         <Column key={idx} minHeight={props.minHeight}>
-          {child}
+          {c}
         </Column>
       );
     }
-    return React.cloneElement(child, { minHeight: props.minHeight, key: idx });
+    return React.cloneElement(c, {
+      minHeight: props.minHeight,
+      key: idx
+    });
   });
 
   return (
