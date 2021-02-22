@@ -23,6 +23,7 @@
     "copyGraphqlSdk": "cp ../app/src/state/graphql-api-types.ts ./src/dbSDK.ts"
   },
   "dependencies": {
+    "@apollo/client": "^3.2.5",
     "@opstrace/config": "^0.0.0",
     "@opstrace/controller-config": "^0.0.0",
     "@opstrace/kubernetes": "^0.0.0",
@@ -35,6 +36,7 @@
     "js-yaml": "^3.14.0",
     "redux": "^4.0.4",
     "redux-saga": "^1.1.3",
+    "subscriptions-transport-ws": "^0.9.18",
     "typed-redux-saga": "^1.3.1",
     "url-join-ts": "^1.0.5"
   },

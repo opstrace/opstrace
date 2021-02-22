@@ -16,7 +16,9 @@
 
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { onError } from "@apollo/client/link/error";
-import { ApolloClient, InMemoryCache, from } from "@apollo/client";
+// Import from apollo/client/core, not apollo/client, to avoid React dependency.
+// See https://github.com/apollographql/apollo-client/issues/7318#issuecomment-734422428
+import { ApolloClient, InMemoryCache, from } from "@apollo/client/core";
 import ws from "ws";
 
 const endpoint = process.env.GRAPHQL_ENDPOINT;
@@ -29,9 +31,10 @@ if (endpoint && !adminSecret) {
 }
 
 export type PromiseReturnType<T> = T extends PromiseLike<infer U> ? U : T;
-export type ClientResponse<T extends (args?: any) => {}> = PromiseReturnType<
-  ReturnType<T>
->;
+export type ClientResponse<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends (args?: any) => Record<string, any>
+> = PromiseReturnType<ReturnType<T>>;
 
 export interface Subscription {
   unsubscribe(): void;
