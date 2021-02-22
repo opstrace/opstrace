@@ -1,0 +1,11 @@
+query GetTenantConfig($tenant_name: String, $key: String) {
+  tenant_config(
+    where: { tenant_name: { _eq: $tenant_name }, key: { _eq: $key } }
+  ) {
+    tenant_name
+    key
+    data
+    created_at
+    updated_at
+  }
+}

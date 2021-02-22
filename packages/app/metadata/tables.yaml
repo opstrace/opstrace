@@ -397,6 +397,48 @@
           _ne: SYSTEM
 - table:
     schema: public
+    name: tenant_config
+  insert_permissions:
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - id
+      - tenant_name
+      - key
+      - data
+      - created_at
+      - updated_at
+      backend_only: false
+  select_permissions:
+  - role: user_admin
+    permission:
+      columns:
+      - data
+      - key
+      - tenant_name
+      - created_at
+      - updated_at
+      - id
+      filter: {}
+  update_permissions:
+  - role: user_admin
+    permission:
+      columns:
+      - data
+      - key
+      - tenant_name
+      - created_at
+      - updated_at
+      - id
+      filter: {}
+      check: null
+  delete_permissions:
+  - role: user_admin
+    permission:
+      filter: {}
+- table:
+    schema: public
     name: user
   object_relationships:
   - name: preference

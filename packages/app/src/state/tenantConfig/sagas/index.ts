@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { spawn, all, call } from "@redux-saga/core/effects";
-import branchManager from "./branch/sagas";
-import moduleManager from "./module/sagas";
-import moduleVersionManager from "./moduleVersion/sagas";
-import fileManager from "./file/sagas";
-import userManager from "./user/sagas";
-import tenantManager from "./tenant/sagas";
-import tenantConfigManager from "./tenantConfig/sagas";
 
-export default function* main() {
-  const sagas = [
-    branchManager,
-    moduleManager,
-    moduleVersionManager,
-    fileManager,
-    userManager,
-    tenantManager,
-    tenantConfigManager
-  ];
+import { all, take, call, spawn } from "redux-saga/effects";
+import * as actions from "../actions";
+import graphqlClient from "state/graphqlClient";
+
+export default function* tenantConfigTaskManager() {
+  const sagas = [upsertTenantConfig];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
   // https://redux-saga.js.org/docs/advanced/RootSaga.html
@@ -49,4 +37,20 @@ export default function* main() {
       })
     )
   );
+}
+
+function* upsertTenantConfig() {
+  while (true) {
+    const action: ReturnType<typeof actions.upsertTenantConfig> = yield take(
+      actions.upsertTenantConfig
+    );
+    try {
+      yield graphqlClient.UpsertTenantConfig({
+        ...action.payload,
+        timestamp: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
 }
