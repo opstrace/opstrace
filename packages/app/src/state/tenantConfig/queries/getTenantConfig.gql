@@ -5,6 +5,7 @@ query GetTenantConfig($tenant_name: String, $key: String) {
     tenant_name
     key
     data
+    schema_version
     created_at
     updated_at
   }

@@ -25,7 +25,7 @@ export default function* tenantConfigTaskManager() {
   // https://redux-saga.js.org/docs/advanced/RootSaga.html
   yield all(
     sagas.map(saga =>
-      spawn(function*() {
+      spawn(function* () {
         while (true) {
           try {
             yield call(saga);
@@ -47,6 +47,7 @@ function* upsertTenantConfig() {
     try {
       yield graphqlClient.UpsertTenantConfig({
         ...action.payload,
+        schema_version: action.payload.schema_version || 1,
         timestamp: new Date().toISOString()
       });
     } catch (err) {

@@ -20,4 +20,5 @@ export const upsertTenantConfig = createAction("UPSERT_TENANT_CONFIG")<{
   tenant_name: string;
   key: string;
   data: object;
+  schema_version?: number;
 }>();

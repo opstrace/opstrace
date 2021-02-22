@@ -1085,11 +1085,12 @@ type GetTenantConfigVariables struct {
 
 type GetTenantConfigResponse struct {
 	TenantConfig []struct {
-		TenantName string `json:"TenantName"`
-		Key        string `json:"Key"`
-		Data       string `json:"Data"`
-		CreatedAt  string `json:"CreatedAt"`
-		UpdatedAt  string `json:"UpdatedAt"`
+		TenantName    string `json:"TenantName"`
+		Key           string `json:"Key"`
+		Data          string `json:"Data"`
+		SchemaVersion string `json:"SchemaVersion"`
+		CreatedAt     string `json:"CreatedAt"`
+		UpdatedAt     string `json:"UpdatedAt"`
 	} `json:"TenantConfig"`
 }
 
@@ -1109,6 +1110,7 @@ func NewGetTenantConfigRequest(url string, vars *GetTenantConfigVariables) (*Get
     tenant_name
     key
     data
+    schema_version
     created_at
     updated_at
   }
@@ -1150,14 +1152,15 @@ func (client *Client) GetTenantConfig(vars *GetTenantConfigVariables) (*GetTenan
 }
 
 //
-// mutation UpsertTenantConfig($data: jsonb, $key: String, $tenant_name: String, $timestamp: timestamptz)
+// mutation UpsertTenantConfig($data: jsonb, $key: String, $tenant_name: String, $timestamp: timestamptz, $schema_version: Int)
 //
 
 type UpsertTenantConfigVariables struct {
-	Data       *Jsonb       `json:"data,omitempty"`
-	Key        *String      `json:"key,omitempty"`
-	TenantName *String      `json:"tenant_name,omitempty"`
-	Timestamp  *Timestamptz `json:"timestamp,omitempty"`
+	Data          *Jsonb       `json:"data,omitempty"`
+	Key           *String      `json:"key,omitempty"`
+	TenantName    *String      `json:"tenant_name,omitempty"`
+	Timestamp     *Timestamptz `json:"timestamp,omitempty"`
+	SchemaVersion *Int         `json:"schema_version,omitempty"`
 }
 
 type UpsertTenantConfigResponse struct {
@@ -1183,8 +1186,8 @@ func NewUpsertTenantConfigRequest(url string, vars *UpsertTenantConfigVariables)
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation UpsertTenantConfig($data: jsonb, $key: String, $tenant_name: String, $timestamp: timestamptz) {
-  insert_tenant_config(objects: {data: $data, key: $key, tenant_name: $tenant_name, created_at: $timestamp, updated_at: $timestamp}, on_conflict: {update_columns: [data, updated_at], constraint: tenant_config_tenant_name_key_key, where: {updated_at: {_lt: $timestamp}}}) {
+		Query: `mutation UpsertTenantConfig($data: jsonb, $key: String, $tenant_name: String, $timestamp: timestamptz, $schema_version: Int) {
+  insert_tenant_config(objects: {data: $data, key: $key, tenant_name: $tenant_name, schema_version: $schema_version, created_at: $timestamp, updated_at: $timestamp}, on_conflict: {update_columns: [data, schema_version, updated_at], constraint: tenant_config_tenant_name_key_key, where: {updated_at: {_lt: $timestamp}}}) {
     returning {
       tenant_name
       data
@@ -1861,23 +1864,25 @@ const (
 type TenantConfigSelectColumn string
 
 const (
-	TenantConfigSelectColumnCreatedAt  TenantConfigSelectColumn = "created_at"
-	TenantConfigSelectColumnData       TenantConfigSelectColumn = "data"
-	TenantConfigSelectColumnID         TenantConfigSelectColumn = "id"
-	TenantConfigSelectColumnKey        TenantConfigSelectColumn = "key"
-	TenantConfigSelectColumnTenantName TenantConfigSelectColumn = "tenant_name"
-	TenantConfigSelectColumnUpdatedAt  TenantConfigSelectColumn = "updated_at"
+	TenantConfigSelectColumnCreatedAt     TenantConfigSelectColumn = "created_at"
+	TenantConfigSelectColumnData          TenantConfigSelectColumn = "data"
+	TenantConfigSelectColumnID            TenantConfigSelectColumn = "id"
+	TenantConfigSelectColumnKey           TenantConfigSelectColumn = "key"
+	TenantConfigSelectColumnSchemaVersion TenantConfigSelectColumn = "schema_version"
+	TenantConfigSelectColumnTenantName    TenantConfigSelectColumn = "tenant_name"
+	TenantConfigSelectColumnUpdatedAt     TenantConfigSelectColumn = "updated_at"
 )
 
 type TenantConfigUpdateColumn string
 
 const (
-	TenantConfigUpdateColumnCreatedAt  TenantConfigUpdateColumn = "created_at"
-	TenantConfigUpdateColumnData       TenantConfigUpdateColumn = "data"
-	TenantConfigUpdateColumnID         TenantConfigUpdateColumn = "id"
-	TenantConfigUpdateColumnKey        TenantConfigUpdateColumn = "key"
-	TenantConfigUpdateColumnTenantName TenantConfigUpdateColumn = "tenant_name"
-	TenantConfigUpdateColumnUpdatedAt  TenantConfigUpdateColumn = "updated_at"
+	TenantConfigUpdateColumnCreatedAt     TenantConfigUpdateColumn = "created_at"
+	TenantConfigUpdateColumnData          TenantConfigUpdateColumn = "data"
+	TenantConfigUpdateColumnID            TenantConfigUpdateColumn = "id"
+	TenantConfigUpdateColumnKey           TenantConfigUpdateColumn = "key"
+	TenantConfigUpdateColumnSchemaVersion TenantConfigUpdateColumn = "schema_version"
+	TenantConfigUpdateColumnTenantName    TenantConfigUpdateColumn = "tenant_name"
+	TenantConfigUpdateColumnUpdatedAt     TenantConfigUpdateColumn = "updated_at"
 )
 
 type TenantConstraint string
@@ -1966,6 +1971,18 @@ type BooleanComparisonExp struct {
 	Lte    *Boolean   `json:"_lte,omitempty"`
 	Neq    *Boolean   `json:"_neq,omitempty"`
 	Nin    *[]Boolean `json:"_nin,omitempty"`
+}
+
+type IntComparisonExp struct {
+	Eq     *Int     `json:"_eq,omitempty"`
+	Gt     *Int     `json:"_gt,omitempty"`
+	Gte    *Int     `json:"_gte,omitempty"`
+	In     *[]Int   `json:"_in,omitempty"`
+	IsNull *Boolean `json:"_is_null,omitempty"`
+	Lt     *Int     `json:"_lt,omitempty"`
+	Lte    *Int     `json:"_lte,omitempty"`
+	Neq    *Int     `json:"_neq,omitempty"`
+	Nin    *[]Int   `json:"_nin,omitempty"`
 }
 
 type StringComparisonExp struct {
@@ -2585,9 +2602,17 @@ type TenantBoolExp struct {
 }
 
 type TenantConfigAggregateOrderBy struct {
-	Count *OrderBy                `json:"count,omitempty"`
-	Max   *TenantConfigMaxOrderBy `json:"max,omitempty"`
-	Min   *TenantConfigMinOrderBy `json:"min,omitempty"`
+	Avg        *TenantConfigAvgOrderBy        `json:"avg,omitempty"`
+	Count      *OrderBy                       `json:"count,omitempty"`
+	Max        *TenantConfigMaxOrderBy        `json:"max,omitempty"`
+	Min        *TenantConfigMinOrderBy        `json:"min,omitempty"`
+	Stddev     *TenantConfigStddevOrderBy     `json:"stddev,omitempty"`
+	StddevPop  *TenantConfigStddevPopOrderBy  `json:"stddev_pop,omitempty"`
+	StddevSamp *TenantConfigStddevSampOrderBy `json:"stddev_samp,omitempty"`
+	Sum        *TenantConfigSumOrderBy        `json:"sum,omitempty"`
+	VarPop     *TenantConfigVarPopOrderBy     `json:"var_pop,omitempty"`
+	VarSamp    *TenantConfigVarSampOrderBy    `json:"var_samp,omitempty"`
+	Variance   *TenantConfigVarianceOrderBy   `json:"variance,omitempty"`
 }
 
 type TenantConfigAppendInput struct {
@@ -2599,16 +2624,21 @@ type TenantConfigArrRelInsertInput struct {
 	OnConflict *TenantConfigOnConflict    `json:"on_conflict,omitempty"`
 }
 
+type TenantConfigAvgOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+}
+
 type TenantConfigBoolExp struct {
-	And        *[]TenantConfigBoolExp    `json:"_and,omitempty"`
-	Not        *TenantConfigBoolExp      `json:"_not,omitempty"`
-	Or         *[]TenantConfigBoolExp    `json:"_or,omitempty"`
-	CreatedAt  *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Data       *JsonbComparisonExp       `json:"data,omitempty"`
-	ID         *UuidComparisonExp        `json:"id,omitempty"`
-	Key        *StringComparisonExp      `json:"key,omitempty"`
-	TenantName *StringComparisonExp      `json:"tenant_name,omitempty"`
-	UpdatedAt  *TimestamptzComparisonExp `json:"updated_at,omitempty"`
+	And           *[]TenantConfigBoolExp    `json:"_and,omitempty"`
+	Not           *TenantConfigBoolExp      `json:"_not,omitempty"`
+	Or            *[]TenantConfigBoolExp    `json:"_or,omitempty"`
+	CreatedAt     *TimestamptzComparisonExp `json:"created_at,omitempty"`
+	Data          *JsonbComparisonExp       `json:"data,omitempty"`
+	ID            *UuidComparisonExp        `json:"id,omitempty"`
+	Key           *StringComparisonExp      `json:"key,omitempty"`
+	SchemaVersion *IntComparisonExp         `json:"schema_version,omitempty"`
+	TenantName    *StringComparisonExp      `json:"tenant_name,omitempty"`
+	UpdatedAt     *TimestamptzComparisonExp `json:"updated_at,omitempty"`
 }
 
 type TenantConfigDeleteAtPathInput struct {
@@ -2623,29 +2653,36 @@ type TenantConfigDeleteKeyInput struct {
 	Data *String `json:"data,omitempty"`
 }
 
+type TenantConfigIncInput struct {
+	SchemaVersion *Int `json:"schema_version,omitempty"`
+}
+
 type TenantConfigInsertInput struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Data       *Jsonb       `json:"data,omitempty"`
-	ID         *UUID        `json:"id,omitempty"`
-	Key        *String      `json:"key,omitempty"`
-	TenantName *String      `json:"tenant_name,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
+	CreatedAt     *Timestamptz `json:"created_at,omitempty"`
+	Data          *Jsonb       `json:"data,omitempty"`
+	ID            *UUID        `json:"id,omitempty"`
+	Key           *String      `json:"key,omitempty"`
+	SchemaVersion *Int         `json:"schema_version,omitempty"`
+	TenantName    *String      `json:"tenant_name,omitempty"`
+	UpdatedAt     *Timestamptz `json:"updated_at,omitempty"`
 }
 
 type TenantConfigMaxOrderBy struct {
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	ID         *OrderBy `json:"id,omitempty"`
-	Key        *OrderBy `json:"key,omitempty"`
-	TenantName *OrderBy `json:"tenant_name,omitempty"`
-	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
+	CreatedAt     *OrderBy `json:"created_at,omitempty"`
+	ID            *OrderBy `json:"id,omitempty"`
+	Key           *OrderBy `json:"key,omitempty"`
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+	TenantName    *OrderBy `json:"tenant_name,omitempty"`
+	UpdatedAt     *OrderBy `json:"updated_at,omitempty"`
 }
 
 type TenantConfigMinOrderBy struct {
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	ID         *OrderBy `json:"id,omitempty"`
-	Key        *OrderBy `json:"key,omitempty"`
-	TenantName *OrderBy `json:"tenant_name,omitempty"`
-	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
+	CreatedAt     *OrderBy `json:"created_at,omitempty"`
+	ID            *OrderBy `json:"id,omitempty"`
+	Key           *OrderBy `json:"key,omitempty"`
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+	TenantName    *OrderBy `json:"tenant_name,omitempty"`
+	UpdatedAt     *OrderBy `json:"updated_at,omitempty"`
 }
 
 type TenantConfigObjRelInsertInput struct {
@@ -2660,12 +2697,13 @@ type TenantConfigOnConflict struct {
 }
 
 type TenantConfigOrderBy struct {
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	Data       *OrderBy `json:"data,omitempty"`
-	ID         *OrderBy `json:"id,omitempty"`
-	Key        *OrderBy `json:"key,omitempty"`
-	TenantName *OrderBy `json:"tenant_name,omitempty"`
-	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
+	CreatedAt     *OrderBy `json:"created_at,omitempty"`
+	Data          *OrderBy `json:"data,omitempty"`
+	ID            *OrderBy `json:"id,omitempty"`
+	Key           *OrderBy `json:"key,omitempty"`
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+	TenantName    *OrderBy `json:"tenant_name,omitempty"`
+	UpdatedAt     *OrderBy `json:"updated_at,omitempty"`
 }
 
 type TenantConfigPkColumnsInput struct {
@@ -2677,12 +2715,41 @@ type TenantConfigPrependInput struct {
 }
 
 type TenantConfigSetInput struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Data       *Jsonb       `json:"data,omitempty"`
-	ID         *UUID        `json:"id,omitempty"`
-	Key        *String      `json:"key,omitempty"`
-	TenantName *String      `json:"tenant_name,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
+	CreatedAt     *Timestamptz `json:"created_at,omitempty"`
+	Data          *Jsonb       `json:"data,omitempty"`
+	ID            *UUID        `json:"id,omitempty"`
+	Key           *String      `json:"key,omitempty"`
+	SchemaVersion *Int         `json:"schema_version,omitempty"`
+	TenantName    *String      `json:"tenant_name,omitempty"`
+	UpdatedAt     *Timestamptz `json:"updated_at,omitempty"`
+}
+
+type TenantConfigStddevOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+}
+
+type TenantConfigStddevPopOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+}
+
+type TenantConfigStddevSampOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+}
+
+type TenantConfigSumOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+}
+
+type TenantConfigVarPopOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+}
+
+type TenantConfigVarSampOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
+}
+
+type TenantConfigVarianceOrderBy struct {
+	SchemaVersion *OrderBy `json:"schema_version,omitempty"`
 }
 
 type TenantInsertInput struct {
@@ -3352,12 +3419,13 @@ type TenantAggregateFields struct {
 }
 
 type TenantConfig struct {
-	CreatedAt  Timestamptz `json:"created_at"`
-	Data       Jsonb       `json:"data"`
-	ID         UUID        `json:"id"`
-	Key        String      `json:"key"`
-	TenantName String      `json:"tenant_name"`
-	UpdatedAt  Timestamptz `json:"updated_at"`
+	CreatedAt     Timestamptz `json:"created_at"`
+	Data          Jsonb       `json:"data"`
+	ID            UUID        `json:"id"`
+	Key           String      `json:"key"`
+	SchemaVersion Int         `json:"schema_version"`
+	TenantName    String      `json:"tenant_name"`
+	UpdatedAt     Timestamptz `json:"updated_at"`
 }
 
 type TenantConfigAggregate struct {
@@ -3366,30 +3434,72 @@ type TenantConfigAggregate struct {
 }
 
 type TenantConfigAggregateFields struct {
-	Count *Int                   `json:"count,omitempty"`
-	Max   *TenantConfigMaxFields `json:"max,omitempty"`
-	Min   *TenantConfigMinFields `json:"min,omitempty"`
+	Avg        *TenantConfigAvgFields        `json:"avg,omitempty"`
+	Count      *Int                          `json:"count,omitempty"`
+	Max        *TenantConfigMaxFields        `json:"max,omitempty"`
+	Min        *TenantConfigMinFields        `json:"min,omitempty"`
+	Stddev     *TenantConfigStddevFields     `json:"stddev,omitempty"`
+	StddevPop  *TenantConfigStddevPopFields  `json:"stddev_pop,omitempty"`
+	StddevSamp *TenantConfigStddevSampFields `json:"stddev_samp,omitempty"`
+	Sum        *TenantConfigSumFields        `json:"sum,omitempty"`
+	VarPop     *TenantConfigVarPopFields     `json:"var_pop,omitempty"`
+	VarSamp    *TenantConfigVarSampFields    `json:"var_samp,omitempty"`
+	Variance   *TenantConfigVarianceFields   `json:"variance,omitempty"`
+}
+
+type TenantConfigAvgFields struct {
+	SchemaVersion *Float `json:"schema_version,omitempty"`
 }
 
 type TenantConfigMaxFields struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	ID         *UUID        `json:"id,omitempty"`
-	Key        *String      `json:"key,omitempty"`
-	TenantName *String      `json:"tenant_name,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
+	CreatedAt     *Timestamptz `json:"created_at,omitempty"`
+	ID            *UUID        `json:"id,omitempty"`
+	Key           *String      `json:"key,omitempty"`
+	SchemaVersion *Int         `json:"schema_version,omitempty"`
+	TenantName    *String      `json:"tenant_name,omitempty"`
+	UpdatedAt     *Timestamptz `json:"updated_at,omitempty"`
 }
 
 type TenantConfigMinFields struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	ID         *UUID        `json:"id,omitempty"`
-	Key        *String      `json:"key,omitempty"`
-	TenantName *String      `json:"tenant_name,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
+	CreatedAt     *Timestamptz `json:"created_at,omitempty"`
+	ID            *UUID        `json:"id,omitempty"`
+	Key           *String      `json:"key,omitempty"`
+	SchemaVersion *Int         `json:"schema_version,omitempty"`
+	TenantName    *String      `json:"tenant_name,omitempty"`
+	UpdatedAt     *Timestamptz `json:"updated_at,omitempty"`
 }
 
 type TenantConfigMutationResponse struct {
 	AffectedRows Int             `json:"affected_rows"`
 	Returning    *[]TenantConfig `json:"returning,omitempty"`
+}
+
+type TenantConfigStddevFields struct {
+	SchemaVersion *Float `json:"schema_version,omitempty"`
+}
+
+type TenantConfigStddevPopFields struct {
+	SchemaVersion *Float `json:"schema_version,omitempty"`
+}
+
+type TenantConfigStddevSampFields struct {
+	SchemaVersion *Float `json:"schema_version,omitempty"`
+}
+
+type TenantConfigSumFields struct {
+	SchemaVersion *Int `json:"schema_version,omitempty"`
+}
+
+type TenantConfigVarPopFields struct {
+	SchemaVersion *Float `json:"schema_version,omitempty"`
+}
+
+type TenantConfigVarSampFields struct {
+	SchemaVersion *Float `json:"schema_version,omitempty"`
+}
+
+type TenantConfigVarianceFields struct {
+	SchemaVersion *Float `json:"schema_version,omitempty"`
 }
 
 type TenantMaxFields struct {

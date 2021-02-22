@@ -403,34 +403,37 @@
     permission:
       check: {}
       columns:
-      - id
-      - tenant_name
-      - key
-      - data
       - created_at
+      - data
+      - id
+      - key
+      - schema_version
+      - tenant_name
       - updated_at
       backend_only: false
   select_permissions:
   - role: user_admin
     permission:
       columns:
-      - data
-      - key
-      - tenant_name
       - created_at
-      - updated_at
+      - data
       - id
+      - key
+      - schema_version
+      - tenant_name
+      - updated_at
       filter: {}
   update_permissions:
   - role: user_admin
     permission:
       columns:
-      - data
-      - key
-      - tenant_name
       - created_at
-      - updated_at
+      - data
       - id
+      - key
+      - schema_version
+      - tenant_name
+      - updated_at
       filter: {}
       check: null
   delete_permissions:

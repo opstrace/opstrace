@@ -3,17 +3,19 @@ mutation UpsertTenantConfig(
   $key: String
   $tenant_name: String
   $timestamp: timestamptz
+  $schema_version: Int
 ) {
   insert_tenant_config(
     objects: {
       data: $data
       key: $key
       tenant_name: $tenant_name
+      schema_version: $schema_version
       created_at: $timestamp
       updated_at: $timestamp
     }
     on_conflict: {
-      update_columns: [data, updated_at]
+      update_columns: [data, schema_version, updated_at]
       constraint: tenant_config_tenant_name_key_key
       where: { updated_at: { _lt: $timestamp } }
     }

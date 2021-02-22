@@ -33,6 +33,19 @@ export type Boolean_Comparison_Exp = {
   _nin?: Maybe<Array<Scalars["Boolean"]>>;
 };
 
+/** expression to compare columns of type Int. All fields are combined with logical 'AND'. */
+export type Int_Comparison_Exp = {
+  _eq?: Maybe<Scalars["Int"]>;
+  _gt?: Maybe<Scalars["Int"]>;
+  _gte?: Maybe<Scalars["Int"]>;
+  _in?: Maybe<Array<Scalars["Int"]>>;
+  _is_null?: Maybe<Scalars["Boolean"]>;
+  _lt?: Maybe<Scalars["Int"]>;
+  _lte?: Maybe<Scalars["Int"]>;
+  _neq?: Maybe<Scalars["Int"]>;
+  _nin?: Maybe<Array<Scalars["Int"]>>;
+};
+
 /** expression to compare columns of type String. All fields are combined with logical 'AND'. */
 export type String_Comparison_Exp = {
   _eq?: Maybe<Scalars["String"]>;
@@ -1893,6 +1906,7 @@ export type Mutation_RootUpdate_Tenant_ConfigArgs = {
   _delete_at_path?: Maybe<Tenant_Config_Delete_At_Path_Input>;
   _delete_elem?: Maybe<Tenant_Config_Delete_Elem_Input>;
   _delete_key?: Maybe<Tenant_Config_Delete_Key_Input>;
+  _inc?: Maybe<Tenant_Config_Inc_Input>;
   _prepend?: Maybe<Tenant_Config_Prepend_Input>;
   _set?: Maybe<Tenant_Config_Set_Input>;
   where: Tenant_Config_Bool_Exp;
@@ -1904,6 +1918,7 @@ export type Mutation_RootUpdate_Tenant_Config_By_PkArgs = {
   _delete_at_path?: Maybe<Tenant_Config_Delete_At_Path_Input>;
   _delete_elem?: Maybe<Tenant_Config_Delete_Elem_Input>;
   _delete_key?: Maybe<Tenant_Config_Delete_Key_Input>;
+  _inc?: Maybe<Tenant_Config_Inc_Input>;
   _prepend?: Maybe<Tenant_Config_Prepend_Input>;
   _set?: Maybe<Tenant_Config_Set_Input>;
   pk_columns: Tenant_Config_Pk_Columns_Input;
@@ -2652,6 +2667,7 @@ export type Tenant_Config = {
   data: Scalars["jsonb"];
   id: Scalars["uuid"];
   key: Scalars["String"];
+  schema_version: Scalars["Int"];
   tenant_name: Scalars["String"];
   updated_at: Scalars["timestamptz"];
 };
@@ -2669,9 +2685,17 @@ export type Tenant_Config_Aggregate = {
 
 /** aggregate fields of "tenant_config" */
 export type Tenant_Config_Aggregate_Fields = {
+  avg?: Maybe<Tenant_Config_Avg_Fields>;
   count?: Maybe<Scalars["Int"]>;
   max?: Maybe<Tenant_Config_Max_Fields>;
   min?: Maybe<Tenant_Config_Min_Fields>;
+  stddev?: Maybe<Tenant_Config_Stddev_Fields>;
+  stddev_pop?: Maybe<Tenant_Config_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tenant_Config_Stddev_Samp_Fields>;
+  sum?: Maybe<Tenant_Config_Sum_Fields>;
+  var_pop?: Maybe<Tenant_Config_Var_Pop_Fields>;
+  var_samp?: Maybe<Tenant_Config_Var_Samp_Fields>;
+  variance?: Maybe<Tenant_Config_Variance_Fields>;
 };
 
 /** aggregate fields of "tenant_config" */
@@ -2682,9 +2706,17 @@ export type Tenant_Config_Aggregate_FieldsCountArgs = {
 
 /** order by aggregate values of table "tenant_config" */
 export type Tenant_Config_Aggregate_Order_By = {
+  avg?: Maybe<Tenant_Config_Avg_Order_By>;
   count?: Maybe<Order_By>;
   max?: Maybe<Tenant_Config_Max_Order_By>;
   min?: Maybe<Tenant_Config_Min_Order_By>;
+  stddev?: Maybe<Tenant_Config_Stddev_Order_By>;
+  stddev_pop?: Maybe<Tenant_Config_Stddev_Pop_Order_By>;
+  stddev_samp?: Maybe<Tenant_Config_Stddev_Samp_Order_By>;
+  sum?: Maybe<Tenant_Config_Sum_Order_By>;
+  var_pop?: Maybe<Tenant_Config_Var_Pop_Order_By>;
+  var_samp?: Maybe<Tenant_Config_Var_Samp_Order_By>;
+  variance?: Maybe<Tenant_Config_Variance_Order_By>;
 };
 
 /** append existing jsonb value of filtered columns with new jsonb value */
@@ -2698,6 +2730,16 @@ export type Tenant_Config_Arr_Rel_Insert_Input = {
   on_conflict?: Maybe<Tenant_Config_On_Conflict>;
 };
 
+/** aggregate avg on columns */
+export type Tenant_Config_Avg_Fields = {
+  schema_version?: Maybe<Scalars["Float"]>;
+};
+
+/** order by avg() on columns of table "tenant_config" */
+export type Tenant_Config_Avg_Order_By = {
+  schema_version?: Maybe<Order_By>;
+};
+
 /** Boolean expression to filter rows from the table "tenant_config". All fields are combined with a logical 'AND'. */
 export type Tenant_Config_Bool_Exp = {
   _and?: Maybe<Array<Maybe<Tenant_Config_Bool_Exp>>>;
@@ -2707,6 +2749,7 @@ export type Tenant_Config_Bool_Exp = {
   data?: Maybe<Jsonb_Comparison_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
   key?: Maybe<String_Comparison_Exp>;
+  schema_version?: Maybe<Int_Comparison_Exp>;
   tenant_name?: Maybe<String_Comparison_Exp>;
   updated_at?: Maybe<Timestamptz_Comparison_Exp>;
 };
@@ -2734,12 +2777,18 @@ export type Tenant_Config_Delete_Key_Input = {
   data?: Maybe<Scalars["String"]>;
 };
 
+/** input type for incrementing integer column in table "tenant_config" */
+export type Tenant_Config_Inc_Input = {
+  schema_version?: Maybe<Scalars["Int"]>;
+};
+
 /** input type for inserting data into table "tenant_config" */
 export type Tenant_Config_Insert_Input = {
   created_at?: Maybe<Scalars["timestamptz"]>;
   data?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
+  schema_version?: Maybe<Scalars["Int"]>;
   tenant_name?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamptz"]>;
 };
@@ -2749,6 +2798,7 @@ export type Tenant_Config_Max_Fields = {
   created_at?: Maybe<Scalars["timestamptz"]>;
   id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
+  schema_version?: Maybe<Scalars["Int"]>;
   tenant_name?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamptz"]>;
 };
@@ -2758,6 +2808,7 @@ export type Tenant_Config_Max_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   key?: Maybe<Order_By>;
+  schema_version?: Maybe<Order_By>;
   tenant_name?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
 };
@@ -2767,6 +2818,7 @@ export type Tenant_Config_Min_Fields = {
   created_at?: Maybe<Scalars["timestamptz"]>;
   id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
+  schema_version?: Maybe<Scalars["Int"]>;
   tenant_name?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamptz"]>;
 };
@@ -2776,6 +2828,7 @@ export type Tenant_Config_Min_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   key?: Maybe<Order_By>;
+  schema_version?: Maybe<Order_By>;
   tenant_name?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
 };
@@ -2807,6 +2860,7 @@ export type Tenant_Config_Order_By = {
   data?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   key?: Maybe<Order_By>;
+  schema_version?: Maybe<Order_By>;
   tenant_name?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
 };
@@ -2832,6 +2886,8 @@ export enum Tenant_Config_Select_Column {
   /** column name */
   Key = "key",
   /** column name */
+  SchemaVersion = "schema_version",
+  /** column name */
   TenantName = "tenant_name",
   /** column name */
   UpdatedAt = "updated_at"
@@ -2843,8 +2899,49 @@ export type Tenant_Config_Set_Input = {
   data?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
+  schema_version?: Maybe<Scalars["Int"]>;
   tenant_name?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** aggregate stddev on columns */
+export type Tenant_Config_Stddev_Fields = {
+  schema_version?: Maybe<Scalars["Float"]>;
+};
+
+/** order by stddev() on columns of table "tenant_config" */
+export type Tenant_Config_Stddev_Order_By = {
+  schema_version?: Maybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tenant_Config_Stddev_Pop_Fields = {
+  schema_version?: Maybe<Scalars["Float"]>;
+};
+
+/** order by stddev_pop() on columns of table "tenant_config" */
+export type Tenant_Config_Stddev_Pop_Order_By = {
+  schema_version?: Maybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tenant_Config_Stddev_Samp_Fields = {
+  schema_version?: Maybe<Scalars["Float"]>;
+};
+
+/** order by stddev_samp() on columns of table "tenant_config" */
+export type Tenant_Config_Stddev_Samp_Order_By = {
+  schema_version?: Maybe<Order_By>;
+};
+
+/** aggregate sum on columns */
+export type Tenant_Config_Sum_Fields = {
+  schema_version?: Maybe<Scalars["Int"]>;
+};
+
+/** order by sum() on columns of table "tenant_config" */
+export type Tenant_Config_Sum_Order_By = {
+  schema_version?: Maybe<Order_By>;
 };
 
 /** update columns of table "tenant_config" */
@@ -2858,10 +2955,42 @@ export enum Tenant_Config_Update_Column {
   /** column name */
   Key = "key",
   /** column name */
+  SchemaVersion = "schema_version",
+  /** column name */
   TenantName = "tenant_name",
   /** column name */
   UpdatedAt = "updated_at"
 }
+
+/** aggregate var_pop on columns */
+export type Tenant_Config_Var_Pop_Fields = {
+  schema_version?: Maybe<Scalars["Float"]>;
+};
+
+/** order by var_pop() on columns of table "tenant_config" */
+export type Tenant_Config_Var_Pop_Order_By = {
+  schema_version?: Maybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Tenant_Config_Var_Samp_Fields = {
+  schema_version?: Maybe<Scalars["Float"]>;
+};
+
+/** order by var_samp() on columns of table "tenant_config" */
+export type Tenant_Config_Var_Samp_Order_By = {
+  schema_version?: Maybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Tenant_Config_Variance_Fields = {
+  schema_version?: Maybe<Scalars["Float"]>;
+};
+
+/** order by variance() on columns of table "tenant_config" */
+export type Tenant_Config_Variance_Order_By = {
+  schema_version?: Maybe<Order_By>;
+};
 
 /** unique or primary key constraints on table "tenant" */
 export enum Tenant_Constraint {
@@ -3615,7 +3744,12 @@ export type GetTenantConfigQuery = {
   tenant_config: Array<
     Pick<
       Tenant_Config,
-      "tenant_name" | "key" | "data" | "created_at" | "updated_at"
+      | "tenant_name"
+      | "key"
+      | "data"
+      | "schema_version"
+      | "created_at"
+      | "updated_at"
     >
   >;
 };
@@ -3625,6 +3759,7 @@ export type UpsertTenantConfigMutationVariables = Exact<{
   key?: Maybe<Scalars["String"]>;
   tenant_name?: Maybe<Scalars["String"]>;
   timestamp?: Maybe<Scalars["timestamptz"]>;
+  schema_version?: Maybe<Scalars["Int"]>;
 }>;
 
 export type UpsertTenantConfigMutation = {
@@ -3952,6 +4087,7 @@ export const GetTenantConfigDocument = gql`
       tenant_name
       key
       data
+      schema_version
       created_at
       updated_at
     }
@@ -3963,17 +4099,19 @@ export const UpsertTenantConfigDocument = gql`
     $key: String
     $tenant_name: String
     $timestamp: timestamptz
+    $schema_version: Int
   ) {
     insert_tenant_config(
       objects: {
         data: $data
         key: $key
         tenant_name: $tenant_name
+        schema_version: $schema_version
         created_at: $timestamp
         updated_at: $timestamp
       }
       on_conflict: {
-        update_columns: [data, updated_at]
+        update_columns: [data, schema_version, updated_at]
         constraint: tenant_config_tenant_name_key_key
         where: { updated_at: { _lt: $timestamp } }
       }
