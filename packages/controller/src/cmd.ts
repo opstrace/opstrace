@@ -83,7 +83,7 @@ function* core() {
   log.info(`fetching tenants`);
   yield call(fetchTenants, kubeConfig);
 
-  log.info(`starting kubernetes informers`);
+  log.info(`starting kubernetes and graphql informers`);
   yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);

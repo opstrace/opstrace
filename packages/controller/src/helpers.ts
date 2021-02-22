@@ -58,8 +58,12 @@ export const getControllerConfig = (state: State): ControllerConfigType => {
   return state.config.config;
 };
 
+
+export const toTenantNamespace = (tenantName: string): string =>
+  `${tenantName}-tenant`;
+
 export const getTenantNamespace = (tenant: Tenant): string =>
-  `${tenant.name}-tenant`;
+  toTenantNamespace(tenant.name);
 
 /**
  * Get the queue endpoint.

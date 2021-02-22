@@ -3232,12 +3232,28 @@ export type GetCredentialsQuery = {
   >;
 };
 
+export type GetCredentialsDumpQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetCredentialsDumpQuery = {
+  credential: Array<
+    Pick<
+      Credential,
+      "tenant" | "name" | "type" | "value" | "created_at" | "updated_at"
+    >
+  >;
+};
+
 export type SubscribeToCredentialListSubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
 
 export type SubscribeToCredentialListSubscription = {
-  credential: Array<Pick<Credential, "name" | "tenant" | "type" | "value">>;
+  credential: Array<
+    Pick<
+      Credential,
+      "name" | "tenant" | "type" | "value" | "created_at" | "updated_at"
+    >
+  >;
 };
 
 export type UpdateCredentialMutationVariables = Exact<{
@@ -3295,6 +3311,23 @@ export type GetExportersQueryVariables = Exact<{
 }>;
 
 export type GetExportersQuery = {
+  exporter: Array<
+    Pick<
+      Exporter,
+      | "tenant"
+      | "name"
+      | "type"
+      | "credential"
+      | "config"
+      | "created_at"
+      | "updated_at"
+    >
+  >;
+};
+
+export type GetExportersDumpQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetExportersDumpQuery = {
   exporter: Array<
     Pick<
       Exporter,
@@ -3674,6 +3707,18 @@ export const GetCredentialsDocument = gql`
     }
   }
 `;
+export const GetCredentialsDumpDocument = gql`
+  query GetCredentialsDump {
+    credential {
+      tenant
+      name
+      type
+      value
+      created_at
+      updated_at
+    }
+  }
+`;
 export const SubscribeToCredentialListDocument = gql`
   subscription SubscribeToCredentialList {
     credential {
@@ -3681,6 +3726,8 @@ export const SubscribeToCredentialListDocument = gql`
       tenant
       type
       value
+      created_at
+      updated_at
     }
   }
 `;
@@ -3734,6 +3781,19 @@ export const GetExporterDocument = gql`
 export const GetExportersDocument = gql`
   query GetExporters($tenant: String!) {
     exporter(where: { tenant: { _eq: $tenant } }) {
+      tenant
+      name
+      type
+      credential
+      config
+      created_at
+      updated_at
+    }
+  }
+`;
+export const GetExportersDumpDocument = gql`
+  query GetExportersDump {
+    exporter {
       tenant
       name
       type
@@ -4277,6 +4337,22 @@ export function getSdk(
         )
       );
     },
+    GetCredentialsDump(
+      variables?: GetCredentialsDumpQueryVariables
+    ): Promise<{
+      data?: GetCredentialsDumpQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetCredentialsDumpQuery>(
+          print(GetCredentialsDumpDocument),
+          variables
+        )
+      );
+    },
     SubscribeToCredentialList(
       variables?: SubscribeToCredentialListSubscriptionVariables
     ): Promise<{
@@ -4369,6 +4445,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<GetExportersQuery>(
           print(GetExportersDocument),
+          variables
+        )
+      );
+    },
+    GetExportersDump(
+      variables?: GetExportersDumpQueryVariables
+    ): Promise<{
+      data?: GetExportersDumpQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetExportersDumpQuery>(
+          print(GetExportersDumpDocument),
           variables
         )
       );
