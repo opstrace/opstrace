@@ -25,7 +25,7 @@ import {
   activeCertificates
 } from "@opstrace/kubernetes";
 
-import { CONTROLLER_NAME } from "@opstrace/controller";
+import { CONTROLLER_NAME } from "@opstrace/controller-config";
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* waitForControllerDeployment() {
   while (true) {

@@ -22,7 +22,7 @@ import {
   ControllerResourcesDeploymentStrategy,
   CONTROLLER_NAME,
   deployControllerResources
-} from "@opstrace/controller";
+} from "@opstrace/controller-config";
 import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
 import { State } from "./reducer";

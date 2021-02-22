@@ -53,12 +53,10 @@ import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
   set as updateControllerConfig,
   ControllerConfigType,
-  controllerConfigSchema
-} from "@opstrace/controller-config";
-import {
+  controllerConfigSchema,
   ControllerResourcesDeploymentStrategy,
   deployControllerResources
-} from "@opstrace/controller";
+} from "@opstrace/controller-config";
 
 import { rootReducer } from "./reducer";
 import { ensureGCPInfraExists } from "./gcp";

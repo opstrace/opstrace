@@ -23,7 +23,6 @@
     "@opstrace/utils": "^0.0.0",
     "@opstrace/config": "^0.0.0",
     "@opstrace/kubernetes": "^0.0.0",
-    "@opstrace/controller": "^0.0.0",
     "@opstrace/aws": "^0.0.0",
     "@opstrace/controller-config": "^0.0.0"
   }

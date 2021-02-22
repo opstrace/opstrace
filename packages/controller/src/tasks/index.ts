@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export * from "./general";
 export * from "./reconciliation";
 export * from "./informers";
 export * from "./wait";
