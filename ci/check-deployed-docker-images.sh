@@ -13,10 +13,40 @@ echo "${DEPLOYED_IMAGES}"
 echo
 
 #
-# Get the expected list of deployed docker images from docker-images.json into a
-# bash array.
+# List of images that are not expected to be included in the main containers list.
+# - postgresql-client: Only in initContainers which we aren't checking
+# - cloudwatch-exporter: Not deployed in initial cluster, only added after user adds a cloudwatch exporter
+# - stackdriver-exporter: Not deployed in initial cluster, only added after user adds a stackdriver exporter
+# - local-volume-provisioner: Not deployed on AWS
 #
-readarray -t EXPECTED_IMAGES < <(jq -r ' . | to_entries[] | .value ' packages/controller-config/src/docker-images.json)
+UNEXPECTED_IMAGES=("tmaier/postgresql-client" "prom/cloudwatch-exporter" "prometheuscommunity/stackdriver-exporter")
+if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+    UNEXPECTED_IMAGES+=("quay.io/external_storage/local-volume-provisioner")
+fi
+
+#
+# Get the expected list of deployed docker images from docker-images.json into a
+# bash array, then filter out the UNEXPECTED_IMAGES.
+#
+readarray -t ALL_IMAGES < <(jq -r ' . | to_entries[] | .value ' packages/controller-config/src/docker-images.json)
+for img in "${ALL_IMAGES[@]}"; do
+    SKIP=''
+    for unexpected in "${UNEXPECTED_IMAGES[@]}"; do
+        if [[ "$img" == *"$unexpected"* ]]; then
+            echo "Skip: $img (vs $unexpected)"
+            SKIP='y'
+            break
+        fi
+    done
+    if [ -n "$SKIP" ]; then
+        continue
+    fi
+    EXPECTED_IMAGES+=($img)
+done
+echo
+echo "Expected images from docker-images.json"
+( IFS=$'\n'; echo "${EXPECTED_IMAGES[*]}" )
+echo
 
 #
 # Iterate over list of expected images and check if they are in the list of
@@ -24,23 +54,9 @@ readarray -t EXPECTED_IMAGES < <(jq -r ' . | to_entries[] | .value ' packages/co
 # at least one is not found.
 #
 FAIL=0
-for img in "${EXPECTED_IMAGES[@]}"
-do
-    # AWS doesn't deploy the local-volume-provisioner image so we need to skip
-    # it
-    if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-        if [[ "${img}" == *"local-volume-provisioner"* ]]; then
-            continue
-        fi
-    fi
-
-    # skip the check for init container images as the above check does not catch them
-    if [[ "${img}" == *"tmaier/postgresql-client"* ]]; then
-        continue
-    fi
-
+for img in "${EXPECTED_IMAGES[@]}"; do
     if ! grep -q ${img} <<< "${DEPLOYED_IMAGES}" ; then
-        echo "ERROR: image ${img} was not deployed"
+        echo "ERROR: expected image ${img} was not deployed"
         FAIL=1
     fi
 done
