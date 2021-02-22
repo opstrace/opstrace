@@ -34,7 +34,6 @@ import {
   createTempfile,
   mtimeDeadlineInSeconds,
   mtime,
-  //mtimeDiffSeconds,
   sleep,
   readFirstNBytes
 } from "./testutils";
@@ -165,7 +164,9 @@ export async function startDDagentContainer() {
   // Expect a special log messaged emitted by the DD agent to confirm that time
   // series fragments were successfully POSTed (2xx-acked) to the Opstrace
   // cluster's DD API implementation.
-  const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
+  // The first confirmation may either be for /series or for /check_run, see
+  // https://github.com/opstrace/opstrace/issues/405
+  const logNeedle = `Successfully posted payload to "${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1`;
 
   // It's known that this may take a while after DD agent startup.
   // Note: also see https://github.com/opstrace/opstrace/issues/384
@@ -323,7 +324,7 @@ suite("DD API test suite", function () {
     // API endpoint for the 'default' tenant.
     const terminateContainer = await startDDagentContainer();
 
-    // Wait for some more samples to be pushed. Terminate contaienr before
+    // Wait for some more samples to be pushed. Terminate container before
     // starting the query phase, so that the termination happens more or less
     // reliably (regardless of errors during query phase).
     await sleep(15);
@@ -333,11 +334,11 @@ suite("DD API test suite", function () {
 
     // Note that this current setup does not insert a unique metric stream,
     // i.e. if the test passes it does only guarantee that the insertion
-    // succeeded when the cluster is fresh (when this test was not run before
-    // against the same cluster. TODO: think about how to set a unique label
+    // succeeded when the cluster is fresh (when this test was not run before,
+    // against the same cluster). TODO: think about how to set a unique label
     // here.
     const queryParams = {
-      // This implicitly checks for two labels to be set by the translation
+      // This implicitly tests for two labels to be set by the translation
       // layer. Change with care!
       query: `system_uptime{job="ddagent", type="gauge"}`,
       start: searchStart.toEpochSecond().toString(),
