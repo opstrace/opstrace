@@ -71,7 +71,7 @@ func main() {
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
 
 	if !disableAPIAuthentication {
-		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+		middleware.LegacyReadAuthTokenVerificationKeyFromEnv()
 		middleware.ReadKeySetJSONFromEnvOrCrash()
 	}
 
