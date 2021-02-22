@@ -62,7 +62,8 @@ func main() {
 	}
 
 	if !disableAPIAuthentication {
-		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+		middleware.LegacyReadAuthTokenVerificationKeyFromEnv()
+		middleware.ReadKeySetJSONFromEnvOrCrash()
 	}
 
 	log.Infof("loki querier URL: %s", lokiqurl)

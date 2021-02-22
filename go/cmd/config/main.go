@@ -86,7 +86,8 @@ func main() {
 	} else {
 		// Requires API_AUTHTOKEN_VERIFICATION_PUBKEY
 		log.Info("authentication enabled")
-		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+		middleware.LegacyReadAuthTokenVerificationKeyFromEnv()
+		middleware.ReadKeySetJSONFromEnvOrCrash()
 	}
 
 	router := mux.NewRouter()

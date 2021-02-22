@@ -16,6 +16,7 @@ package middleware
 
 import (
 	"crypto/rsa"
+	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
 	"crypto/sha1"
 	"crypto/x509"
 	"encoding/hex"
@@ -286,7 +287,11 @@ func compareRequestAuthenticator(w http.ResponseWriter, authTokenUnverified stri
 	return true
 }
 
-func keyLookupCallback(unveriftoken *jwt.Token) (*rsa.PublicKey, error) {
+/*
+First return value is *rsa.PublicKey, but need to specify as type interface{}
+for compat with jwt lib.
+*/
+func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
 	// Receives the parsed, but unverified JWT payload. Can inspect claims to
 	// decide which public key for verification to use. Use this to enforce the
 	// RS256 signing method for now.
