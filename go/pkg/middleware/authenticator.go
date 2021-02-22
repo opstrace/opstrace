@@ -259,6 +259,16 @@ func ReadKeySetJSONFromEnvOrCrash() {
 		authtokenVerificationPubKeys[kidFromConfig] = pubkey
 	}
 }
+func keyIDfromPEM(pemstring string) string {
+	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
+	h := sha1.New()
+	// Trim leading and trailing whitespace from PEM string, take underlying
+	// bytes and build the SHA1 hash from it -- represent it in hex form as
+	// a string.
+	h.Write([]byte(strings.TrimSpace(pemstring)))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
 	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY value: %s", data)
 
 	// `os.LookupEnv` returns a string. We're interested in processing the
