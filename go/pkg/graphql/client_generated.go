@@ -503,6 +503,73 @@ func (client *Client) GetCredentials(vars *GetCredentialsVariables) (*GetCredent
 }
 
 //
+// query GetCredentialsDump
+//
+
+type GetCredentialsDumpResponse struct {
+	Credential []struct {
+		Tenant    string `json:"Tenant"`
+		Name      string `json:"Name"`
+		Type      string `json:"Type"`
+		Value     string `json:"Value"`
+		CreatedAt string `json:"CreatedAt"`
+		UpdatedAt string `json:"UpdatedAt"`
+	} `json:"Credential"`
+}
+
+type GetCredentialsDumpRequest struct {
+	*http.Request
+}
+
+func NewGetCredentialsDumpRequest(url string) (*GetCredentialsDumpRequest, error) {
+	b, err := json.Marshal(&GraphQLOperation{
+		Query: `query GetCredentialsDump {
+  credential {
+    tenant
+    name
+    type
+    value
+    created_at
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetCredentialsDumpRequest{req}, nil
+}
+
+func (req *GetCredentialsDumpRequest) Execute(client *http.Client) (*GetCredentialsDumpResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetCredentialsDumpResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetCredentialsDump(url string, client *http.Client) (*GetCredentialsDumpResponse, error) {
+	req, err := NewGetCredentialsDumpRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetCredentialsDump() (*GetCredentialsDumpResponse, error) {
+	return GetCredentialsDump(client.Url, client.Client)
+}
+
+//
 // mutation UpdateCredential($tenant: String!, $name: String!, $value: json!, $updated_at: timestamptz!)
 //
 
@@ -1490,6 +1557,75 @@ func CreateVersionedFiles(url string, client *http.Client, vars *CreateVersioned
 
 func (client *Client) CreateVersionedFiles(vars *CreateVersionedFilesVariables) (*CreateVersionedFilesResponse, error) {
 	return CreateVersionedFiles(client.Url, client.Client, vars)
+}
+
+//
+// query GetExportersDump
+//
+
+type GetExportersDumpResponse struct {
+	Exporter []struct {
+		Tenant     string `json:"Tenant"`
+		Name       string `json:"Name"`
+		Type       string `json:"Type"`
+		Credential string `json:"Credential"`
+		Config     string `json:"Config"`
+		CreatedAt  string `json:"CreatedAt"`
+		UpdatedAt  string `json:"UpdatedAt"`
+	} `json:"Exporter"`
+}
+
+type GetExportersDumpRequest struct {
+	*http.Request
+}
+
+func NewGetExportersDumpRequest(url string) (*GetExportersDumpRequest, error) {
+	b, err := json.Marshal(&GraphQLOperation{
+		Query: `query GetExportersDump {
+  exporter {
+    tenant
+    name
+    type
+    credential
+    config
+    created_at
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetExportersDumpRequest{req}, nil
+}
+
+func (req *GetExportersDumpRequest) Execute(client *http.Client) (*GetExportersDumpResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetExportersDumpResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetExportersDump(url string, client *http.Client) (*GetExportersDumpResponse, error) {
+	req, err := NewGetExportersDumpRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetExportersDump() (*GetExportersDumpResponse, error) {
+	return GetExportersDump(client.Url, client.Client)
 }
 
 //

@@ -26,6 +26,8 @@ import {
 import * as k8s from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { log, debugLogErrorDetail } from "@opstrace/utils";
+import * as graphqlCredentials from "../reducers/graphql/credentials";
+import * as graphqlExporters from "../reducers/graphql/exporters";
 
 export function* runInformers(
   kubeConfig: KubeConfig
@@ -65,7 +67,9 @@ export function* runInformers(
       k8s.V1ServicemonitorResource.startInformer(kubeConfig, channel),
       k8s.V1CertificateResource.startInformer(kubeConfig, channel),
       k8s.V1ClusterissuerResource.startInformer(kubeConfig, channel),
-      k8s.V1IssuerResource.startInformer(kubeConfig, channel)
+      k8s.V1IssuerResource.startInformer(kubeConfig, channel),
+      graphqlCredentials.startInformer(channel),
+      graphqlExporters.startInformer(channel)
     ];
 
     // return the unsubscribe function for eventChannel. This will be called when the channel

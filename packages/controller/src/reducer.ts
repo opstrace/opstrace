@@ -53,6 +53,11 @@ import {
   V1OrderReducer
 } from "@opstrace/kubernetes";
 
+import {
+  credentials,
+  exporters
+} from "./reducers/graphql";
+
 export const rootReducers = {
   tenants: tenantReducer,
   config: configReducer,
@@ -90,7 +95,11 @@ export const rootReducers = {
       Issuers: V1IssuerReducer,
       Orders: V1OrderReducer
     })
-  })
+  }),
+  graphql: combineReducers({
+    Credentials: credentials.reducer,
+    Exporters: exporters.reducer
+  }),
 };
 
 export const rootReducer = combineReducers(rootReducers);
