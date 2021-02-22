@@ -58,8 +58,8 @@ const toKubeResources = (
     "opstrace.com/exporter-version": "1",
   };
 
-  var resources: Array<K8sResource> = [];
-  var podSpec: V1PodSpec;
+  const resources: Array<K8sResource> = [];
+  let podSpec: V1PodSpec;
   if (exporter.type == "cloudwatch") {
     resources.push(
       new ConfigMap(
@@ -114,7 +114,7 @@ const toKubeResources = (
     // - STACKDRIVER_EXPORTER_WEB_LISTEN_ADDRESS must be ":9255" (default)
     // - STACKDRIVER_EXPORTER_WEB_TELEMETRY_PATH must be "/metrics" (default)
     // To enforce this, we always set these envvars, and block the user from overriding them.
-    var env: Array<V1EnvVar> = [];
+    const env: Array<V1EnvVar> = [];
     if (exporter.credential) {
       env.push({
         name: "GOOGLE_APPLICATION_CREDENTIALS",
@@ -130,7 +130,7 @@ const toKubeResources = (
       value: "/metrics",
     });
 
-    var bannedEnv = new Set<string>();
+    const bannedEnv = new Set<string>();
     env.forEach(e => bannedEnv.add(e.name));
 
     // For now we just pass through all configuration options as envvars.

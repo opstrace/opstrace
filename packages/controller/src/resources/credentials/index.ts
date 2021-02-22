@@ -42,7 +42,7 @@ const toKubeSecret = (
   credential: Credential,
   kubeConfig: KubeConfig,
 ): Secret | null => {
-  var data: { [key: string]: string };
+  let data: { [key: string]: string };
   if (credential.type == "aws-key") {
     // Pass through the key_id and access_key as distinct string values, which can then be used as envvars
     // {"AWS_ACCESS_KEY_ID": "id", "AWS_SECRET_ACCESS_KEY": "secret"}
