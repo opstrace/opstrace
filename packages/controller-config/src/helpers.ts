@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-export * from "./apis";
-export * from "./app";
-export * from "./cortex";
-export * from "./credentials";
-export * from "./exporters";
-export * from "./ingress";
-export * from "./loki";
-export * from "./memcache";
-export * from "./monitoring";
-export * from "./redis";
-export * from "./storage";
-export * from "./tenants";
+/**
+ * Generates a random 75 char long string of alphanumeric characters
+ */
+export function generateSecretValue(): string {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
+}

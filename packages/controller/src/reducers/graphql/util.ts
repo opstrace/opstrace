@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-export * from "./apis";
-export * from "./app";
-export * from "./cortex";
-export * from "./credentials";
-export * from "./exporters";
-export * from "./ingress";
-export * from "./loki";
-export * from "./memcache";
-export * from "./monitoring";
-export * from "./redis";
-export * from "./storage";
-export * from "./tenants";
+export interface ResourceCache<T> {
+  loaded: boolean;
+  error: Error | null;
+  resources: T[];
+}

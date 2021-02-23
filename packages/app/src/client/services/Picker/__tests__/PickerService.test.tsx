@@ -22,6 +22,8 @@ import light from "../../../themes/light";
 import { PickerState } from "../types";
 import { actions } from "../reducer";
 
+import '@testing-library/jest-dom'
+
 const selectFirstProviderOption = jest.fn();
 const selectSecondProviderOption = jest.fn();
 

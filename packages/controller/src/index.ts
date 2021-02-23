@@ -15,4 +15,3 @@
  */
 
 export * from "./tasks";
-export { CONTROLLER_NAME } from "./resources/controller";

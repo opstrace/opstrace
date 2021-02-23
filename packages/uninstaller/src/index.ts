@@ -26,9 +26,9 @@ import { getGKEKubeconfig } from "@opstrace/gcp";
 import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
 import { log, SECOND, retryUponAnyError } from "@opstrace/utils";
-import { CONTROLLER_NAME } from "@opstrace/controller";
 
 import {
+  CONTROLLER_NAME,
   set as saveControllerConfig,
   fetch as getControllerConfig
 } from "@opstrace/controller-config";

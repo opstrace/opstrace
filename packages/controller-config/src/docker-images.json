@@ -6,6 +6,8 @@
   "cortex": "cortexproject/cortex:v1.7.0-rc.2",
   "cortexApiProxy": "opstrace/cortex-api:f04cb9669fb32561f81b56a7b0dd864b",
   "ddApi": "opstrace/ddapi:fd813ccbf9a09d32c4c57cb0fac6b7949be71a92",
+  "exporterCloudwatch": "prom/cloudwatch-exporter:cloudwatch_exporter-0.10.0",
+  "exporterStackdriver": "prometheuscommunity/stackdriver-exporter:v0.11.0",
   "externalDNS": "k8s.gcr.io/external-dns/external-dns:v0.7.4",
   "systemlogFluentd": "opstrace/systemlog-fluentd:fe6d0d84-dev",
   "grafana": "grafana/grafana:7.3.4-ubuntu",
@@ -21,7 +23,7 @@
   "nodeExporter": "quay.io/prometheus/node-exporter:v0.18.1",
   "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
   "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1",
-  "graphqlEngine": "opstrace/graphql:7232833b5b41ed1793caff32ca128926",
+  "graphqlEngine": "opstrace/graphql:03c7137f0baa0dac3565a398426d3026",
   "app": "opstrace/app:7232833b5b41ed1793caff32ca128926",
   "redis": "bitnami/redis:6.0.9",
   "postgresClient": "tmaier/postgresql-client@sha256:3702d3bff09b18e1d173cdf5887d6e4fea5feac0a521becf4a27559992e44ff3"

@@ -34,16 +34,18 @@ import {
 
 import { KubeConfig } from "@kubernetes/client-node";
 
-import { StorageResources } from "../resources/storage";
-import { MemcacheResources } from "../resources/memcache";
-import { LokiResources } from "../resources/loki";
-import { MonitoringResources } from "../resources/monitoring";
 import { APIResources } from "../resources/apis";
-import { CortexResources } from "../resources/cortex";
-import { IngressResources } from "../resources/ingress";
-import { TenantResources } from "../resources/tenants";
 import { OpstraceApplicationResources } from "../resources/app";
+import { CortexResources } from "../resources/cortex";
+import { CredentialResources } from "../resources/credentials";
+import { ExporterResources } from "../resources/exporters";
+import { IngressResources } from "../resources/ingress";
+import { LokiResources } from "../resources/loki";
+import { MemcacheResources } from "../resources/memcache";
+import { MonitoringResources } from "../resources/monitoring";
 import { RedisResources } from "../resources/redis";
+import { StorageResources } from "../resources/storage";
+import { TenantResources } from "../resources/tenants";
 
 import { getControllerConfig } from "../helpers";
 
@@ -81,6 +83,8 @@ export function* reconciliationLoop(
     desired.add(OpstraceApplicationResources(state, kubeConfig, "application"));
     desired.add(RedisResources(state, kubeConfig, "application"));
     desired.add(TenantResources(state, kubeConfig));
+    desired.add(CredentialResources(state, kubeConfig));
+    desired.add(ExporterResources(state, kubeConfig));
 
     yield call(reconcile, desired, reduceCollection(actualCollection));
   }

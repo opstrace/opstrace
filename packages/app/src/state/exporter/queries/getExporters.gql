@@ -1,3 +1,4 @@
+# Returns exporter configurations for a single tenant.
 query GetExporters($tenant: String!) {
   exporter(where: {tenant: {_eq: $tenant}}) {
     tenant
