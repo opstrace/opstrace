@@ -27,7 +27,8 @@ import SelectedModule from "./module/SelectedModule";
 import Modules from "./module/Modules";
 import ChatView from "./chat";
 import HistoryView from "./history";
-import ClusterView from "./cluster";
+import UserDetail from "./cluster/UserDetail";
+import TenantDetail from "./cluster/TenantDetail";
 import HelpDialog from "./help";
 import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
@@ -105,12 +106,12 @@ const AuthenticatedRoutes = () => {
         <Route
           key="/cluster/users/:id"
           path="/cluster/users/:id"
-          component={ClusterView}
+          component={UserDetail}
         />
         <Route
           key="/cluster/tenants/:tenant"
           path="/cluster/tenants/:tenant"
-          component={ClusterView}
+          component={TenantDetail}
         />
         <Route key="*" path="*" component={NotFound} />
       </Switch>
