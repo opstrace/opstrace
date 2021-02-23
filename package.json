@@ -60,7 +60,7 @@
     "**/**/lodash": "^4.17.19",
     "**/**/object-path": "^0.11.5",
     "**/**/serialize-javascript": "^3.1.0",
-    "**/**/yargs-parser": "^13.1.2"
+    "**/**/yargs-parser": "^20.2.6"
   },
   "scripts": {
     "clean": "yarn wsrun -c clean && rimraf .cache tsconfig.tsbuildinfo",

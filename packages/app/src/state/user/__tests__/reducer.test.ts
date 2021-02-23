@@ -20,7 +20,8 @@ const mockState = {
   currentUserId: "",
   loading: true,
   currentUserIdLoaded: false,
-  users: []
+  users: [],
+  activeUsers: []
 };
 
 test("return mock state", () => {
@@ -48,9 +49,11 @@ test("handle setDarkMode action", () => {
         role: "",
         opaque_id: "test1",
         created_at: "20202-11-11",
-        preference: { dark_mode: false }
+        preference: { dark_mode: false },
+        active: false
       }
-    ]
+    ],
+    activeUsers: []
   };
   const reducer = UserReducer(testState, actions.setDarkMode(true));
 
@@ -65,14 +68,16 @@ test("handle setUserList action", () => {
       role: "",
       opaque_id: "test1",
       created_at: "20202-11-11",
-      preference: { dark_mode: false }
+      preference: { dark_mode: false },
+      active: true
     },
     {
       email: "test2@test.com",
       username: "test2",
       role: "",
       opaque_id: "test2",
-      created_at: "20202-11-12"
+      created_at: "20202-11-12",
+      active: false
     }
   ];
 
