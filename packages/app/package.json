@@ -98,6 +98,7 @@
     "hotkeys-js": "^3.8.1",
     "husky": "^4.3.0",
     "identity-obj-proxy": "3.0.0",
+    "js-yaml": "^4.0.0",
     "jwks-rsa": "^1.11.0",
     "lightship": "^6.1.0",
     "lodash": "^4.17.20",

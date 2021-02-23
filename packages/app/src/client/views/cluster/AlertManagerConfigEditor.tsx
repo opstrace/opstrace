@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Skeleton from "@material-ui/lab/Skeleton";
 //import { useDispatch } from "react-redux";
@@ -23,6 +23,8 @@ import { Box } from "client/components/Box";
 
 import Layout from "client/layout/MainContent";
 import SideBar from "./Sidebar";
+import { YamlEditor } from "client/components/Editor";
+import { yaml } from "workers";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 //import { Button } from "client/components/Button";
@@ -31,7 +33,24 @@ import useTenantList from "state/tenant/hooks/useTenantList";
 const TenantDetail = () => {
   const params = useParams<{ tenant: string }>();
   const tenants = useTenantList();
+  const model = monaco.editor.createModel(
+    `
+  hello
+  `,
+    "yaml"
+  );
+
   //const dispatch = useDispatch();
+  useEffect(() => {
+    yaml &&
+      yaml.yamlDefaults.setDiagnosticsOptions({
+        validate: true,
+        enableSchemaRequest: true,
+        hover: true,
+        completion: true,
+        schemas: []
+      });
+  }, []);
 
   const selectedTenant = useMemo(
     () => tenants.find(t => t.name === params.tenant),
@@ -63,7 +82,9 @@ const TenantDetail = () => {
                 title={`${selectedTenant.name} / Alerts Manager Configuration`}
               />
               <CardContent>
-                <Box display="flex"></Box>
+                <Box display="flex">
+                  <YamlEditor model={model} />
+                </Box>
               </CardContent>
             </Card>
           </Box>

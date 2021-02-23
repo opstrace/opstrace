@@ -16,6 +16,7 @@
 
 import React, { useCallback, useEffect, useRef } from "react";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
+
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import { YamlEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
@@ -31,7 +32,7 @@ function AutoSizingYamlEditor({ model }: { model: monaco.editor.ITextModel }) {
   );
 }
 
-function YamlEditor({ height, width, model }: YamlEditorProps) {
+function YamlEditor({ height, width, model }: YamlEditorProps & Size) {
   const editor = useRef<null | monaco.editor.ICodeEditor>(null);
 
   const editorContainer = useCallback(async node => {

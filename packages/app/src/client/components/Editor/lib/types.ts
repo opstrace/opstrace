@@ -24,6 +24,4 @@ export type ModuleEditorProps = {
 
 export type YamlEditorProps = {
   model: monaco.editor.ITextModel;
-  height: number;
-  width: number;
 };
