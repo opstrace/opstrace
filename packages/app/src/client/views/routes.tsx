@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ChatView from "./chat";
 import HistoryView from "./history";
 import UserDetail from "./cluster/UserDetail";
 import TenantDetail from "./cluster/TenantDetail";
+import AlertManagerConfigEditor from "./cluster/AlertManagerConfigEditor";
 import HelpDialog from "./help";
 import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
@@ -107,6 +108,11 @@ const AuthenticatedRoutes = () => {
           key="/cluster/users/:id"
           path="/cluster/users/:id"
           component={UserDetail}
+        />
+        <Route
+          key="/cluster/tenants/:tenant/alert-manager-config"
+          path="/cluster/tenants/:tenant/alert-manager-config"
+          component={AlertManagerConfigEditor}
         />
         <Route
           key="/cluster/tenants/:tenant"

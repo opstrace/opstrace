@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,13 @@ import SideBar from "./Sidebar";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 import { usePickerService } from "client/services/Picker";
+import { useHistory } from "react-router-dom";
 import useTenantList from "state/tenant/hooks/useTenantList";
 import { ExternalLink } from "client/components/Link";
 
 const TenantDetail = () => {
   const params = useParams<{ tenant: string }>();
+  const history = useHistory();
   const tenants = useTenantList();
   const dispatch = useDispatch();
 
@@ -93,6 +95,19 @@ const TenantDetail = () => {
                 titleTypographyProps={{ variant: "h5" }}
                 action={
                   <Box ml={3} display="flex" flexWrap="wrap">
+                    <Box p={1}>
+                      <Button
+                        variant="outlined"
+                        size="medium"
+                        onClick={() =>
+                          history.push(
+                            `/cluster/tenants/${selectedTenant.name}/alert-manager-config`
+                          )
+                        }
+                      >
+                        Alerts
+                      </Button>
+                    </Box>
                     <Box p={1}>
                       <Button
                         variant="outlined"
