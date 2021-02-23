@@ -62,12 +62,12 @@ const AlertManagerConfigForm = (props: FormProps) => {
     <FormContext.Provider
       value={{
         data: formData,
-        tenantName: props.tenantName,
+        tenantName: props.tenant.name,
         changeEvent: onChange,
         submitEvent: onSave
       }}
     >
-      <Form tenantName="tree_tops" />
+      <Form />
       <Grid>
         <TemplateYaml data={formData} />
       </Grid>

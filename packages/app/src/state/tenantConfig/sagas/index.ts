@@ -16,7 +16,7 @@
 
 import { all, take, call, spawn } from "redux-saga/effects";
 import * as actions from "../actions";
-import graphqlClient from "state/graphqlClient";
+import graphqlClient from "state/clients/graphqlClient";
 
 export default function* tenantConfigTaskManager() {
   const sagas = [upsertTenantConfig];

@@ -17,23 +17,23 @@
 import { mergeDeepLeft } from "ramda";
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { AlertManagerConfig } from "./types";
+import { AlertManagerBasicConfig } from "./types";
 import { defaultBasicState } from "./defaultState";
 import * as actions from "./actions";
 
 type AmcActions = ActionType<typeof actions>;
 
-const InitialState: AlertManagerConfig = defaultBasicState();
+const InitialState: AlertManagerBasicConfig = defaultBasicState();
 
-export const reducer = createReducer<AlertManagerConfig, AmcActions>(
+export const reducer = createReducer<AlertManagerBasicConfig, AmcActions>(
   InitialState
 )
   .handleAction(
     actions.setSlackApiUrl,
-    (state, action): AlertManagerConfig =>
+    (state, action): AlertManagerBasicConfig =>
       mergeDeepLeft(state, { slack: { apiUrl: action.payload } })
   )
   .handleAction(
     actions.setAlertManagerConfig,
-    (state, action): AlertManagerConfig => action.payload
+    (state, action): AlertManagerBasicConfig => action.payload
   );

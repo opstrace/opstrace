@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-import { GetTenantConfigQuery } from "state/graphqlClient";
+import { GetTenantConfigQuery } from "state/clients/graphqlClient";
 
 export type TenantConfig = GetTenantConfigQuery["tenant_config"][0];

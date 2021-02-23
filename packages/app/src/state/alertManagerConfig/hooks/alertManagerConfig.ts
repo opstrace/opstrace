@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// import graphqlClient from "state/graphqlClient";
+// import graphqlClient from "state/clients/graphqlClient";
 import { useSelector, State } from "state/provider";
 import { defaultBasicState } from "state/alertManagerConfig/defaultState";
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import { createAction } from "typesafe-actions";
-import { AlertManagerConfig, Secret } from "./types";
+import { AlertManagerBasicConfig, Secret } from "./types";
 
-export const setAlertManagerConfig = createAction("SET_ALERT_MANAGER_CONFIG")<
-  AlertManagerConfig
->();
+export const setAlertManagerConfig = createAction(
+  "SET_ALERT_MANAGER_CONFIG"
+)<AlertManagerBasicConfig>();
 export const setSlackApiUrl = createAction("SET_SLACK_API_URL")<Secret>();
