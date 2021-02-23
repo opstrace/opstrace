@@ -30,7 +30,6 @@ export function getGKEClusterConfig(
     env: ccfg.env_label
   };
 
-  // const k8sVersion = "1.18";
   const masterAuthorizedNetworks = [
     {
       displayName: "all",
@@ -50,13 +49,13 @@ export function getGKEClusterConfig(
     opstrace_cluster_name: ccfg.cluster_name
   };
 
+  // https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#Cluster
   return {
     network: ccfg.cluster_name,
     subnetwork: ccfg.cluster_name,
-    // initialClusterVersion: k8sVersion, (only set this once we move back to the REGULAR channel)
+    initialClusterVersion: "1.18", // "1.X": picks the highest valid patch+gke.N patch in the 1.X version
     releaseChannel: {
-      channel: "RAPID" // v1.18 currently only available in the rapid channel (NOTE: Rapid channel has automatic upgrades
-      // that cannot be disabled.)
+      channel: "REGULAR"
     },
     loggingService: "none",
     monitoringService: "none",
