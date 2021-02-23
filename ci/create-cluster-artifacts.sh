@@ -16,6 +16,12 @@ kubectl describe --namespace=kube-system deployment.apps/opstrace-controller \
 kubectl logs statefulset.apps/prometheus-system-prometheus \
  --container prometheus --namespace=system-tenant > clusterlogs_systemprom-${OPSTRACE_CLUSTER_NAME}.log
 
+# Fluentd collects and pushes system logs into Loki.
+kubectl get all --namespace=system-tenant 2>/dev/null | awk '{print $1}' | \
+    grep 'pod/systemlog' | while read PNAME; do echo "get logs for $PNAME" | \
+    tee /dev/stderr ; kubectl logs $PNAME --namespace=system-tenant --all-containers=true; done \
+    > clusterlogs_fluentd-${OPSTRACE_CLUSTER_NAME}.log
+
 kubectl get all --namespace=loki 2>/dev/null | awk '{print $1}' | \
     grep 'pod/' | while read PNAME; do echo "get logs for $PNAME" | \
     tee /dev/stderr ; kubectl logs $PNAME --namespace=loki --all-containers=true; done \
