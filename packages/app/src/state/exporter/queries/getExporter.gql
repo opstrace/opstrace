@@ -1,4 +1,4 @@
-// Returns exporter configuration for a single entry.
+# Returns exporter configuration for a single entry.
 query GetExporter($tenant: String!, $name: String!) {
   exporter_by_pk(tenant: $tenant, name: $name) {
     tenant
