@@ -18,10 +18,17 @@ import "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/esm/vs/editor/edcore.main";
 import "monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution";
 /* eslint-disable import/no-webpack-loader-syntax */
+/*
+  ts-ignore these imports that use worker-loader:
+  Cannot find module 'worker-loader!monaco-yaml/lib/esm/yaml.worker' or its corresponding type declarations
+*/
 //@ts-ignore
 import EditorWorker from "worker-loader!monaco-editor/esm/vs/editor/editor.worker.js";
 //@ts-ignore
 import OpScriptWebWorker from "worker-loader!./opscript/opscript.worker";
+//@ts-ignore
+import YamlWorker from "worker-loader!monaco-yaml/lib/esm/yaml.worker";
+
 // Register our typescript language features
 import {
   getTypeScriptWorker,
@@ -76,6 +83,9 @@ opScriptDefaults.setCompilerOptions({
   getWorker: function (_: any, label: string) {
     if (label === "typescript") {
       return new OpScriptWebWorker();
+    }
+    if (label === "yaml") {
+      return new YamlWorker();
     }
     return new EditorWorker();
   }

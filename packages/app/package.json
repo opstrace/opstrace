@@ -106,6 +106,7 @@
     "monaco-editor": "0.21.2",
     "monaco-editor-core": "0.21.2",
     "monaco-editor-webpack-plugin": "^2.0.0",
+    "monaco-yaml": "^2.5.1",
     "new-github-issue-url": "^0.2.1",
     "polished": "^3.6.6",
     "qs": "^6.9.4",
@@ -264,7 +265,10 @@
     "lib:gen": "ts-node src/sdk/compiler.ts",
     "lib:watch": "ts-node src/sdk/compiler.ts --watch"
   },
-  "eslintIgnore": ["src/workers/monaco-typescript-4.1.1/**/*", "src/workers/opscript/**/*"],
+  "eslintIgnore": [
+    "src/workers/monaco-typescript-4.1.1/**/*",
+    "src/workers/opscript/**/*"
+  ],
   "proxy": {
     "/_": {
       "target": "http://localhost:3001",

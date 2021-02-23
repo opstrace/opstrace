@@ -21,3 +21,9 @@ export type ModuleEditorProps = {
   height: number;
   width: number;
 };
+
+export type YamlEditorProps = {
+  model: monaco.editor.ITextModel;
+  height: number;
+  width: number;
+};
