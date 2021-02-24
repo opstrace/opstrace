@@ -30,7 +30,7 @@ import { setLogger, buildLogger, log } from "@opstrace/utils";
 // on the logger
 setLogger(
   buildLogger({
-    stderrLevel: "info",
+    stderrLevel: process.env.LOG_LEVEL || "info",
     filePath: undefined
   })
 );
