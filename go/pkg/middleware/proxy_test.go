@@ -33,9 +33,9 @@ func createProxyUpstream(tenantName string, t *testing.T) (*url.URL, func()) {
 	// proxies to be tested. Any request to / checks the X-Scope-Orgid header
 	// and writes the tenant name to the response.
 	router := mux.NewRouter()
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, tenantName, r.Header.Get("X-Scope-Orgid"))
-		fmt.Fprintln(w, tenantName)
+		fmt.Fprintf(w, "%s %s", r.URL.String(), tenantName)
 	})
 
 	backend := httptest.NewServer(router)
@@ -56,26 +56,68 @@ func TestReverseProxy_healthy(t *testing.T) {
 
 	// Reuse the same backend for both the querier and distributor requests.
 	disableAPIAuth := true
-	rp := NewReverseProxy(tenantName, upstreamURL, upstreamURL, upstreamURL, upstreamURL, disableAPIAuth)
+	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", upstreamURL, nil, disableAPIAuth)
 
 	// Create a request to the proxy (not to the backend/upstream). The URL
 	// does not really matter because we're bypassing the actual router.
 	req := httptest.NewRequest("GET", "http://localhost", nil)
-
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-		assert.Equal(t, 200, resp.StatusCode)
-		// Check that the proxy's upstream has indeed written the response.
-		assert.Equal(t, tenantName, getStrippedBody(resp))
-	}
-
 	w := httptest.NewRecorder()
-	rp.HandleWithDistributorProxy(w, req)
-	checker(w)
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	assert.Equal(t, 200, resp.StatusCode)
+	// Check that the proxy's upstream has indeed written the response.
+	assert.Equal(t, "/ test", getStrippedBody(resp))
 
+	req = httptest.NewRequest("GET", "http://localhost/robots.txt", nil)
 	w = httptest.NewRecorder()
-	rp.HandleWithQuerierProxy(w, req)
-	checker(w)
+	rp.HandleWithProxy(w, req)
+	resp = w.Result()
+	assert.Equal(t, 200, resp.StatusCode)
+	// Check that the proxy's upstream has indeed written the response.
+	assert.Equal(t, "/robots.txt test", getStrippedBody(resp))
+}
+
+func TestReverseProxy_pathreplace(t *testing.T) {
+	tenantName := "test"
+	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
+	defer upstreamClose()
+
+	// Reuse the same backend for both the querier and distributor requests.
+	pathReplacement := func(requrl *url.URL) (string,string) {
+		if strings.HasPrefix(requrl.Path, "/replaceme") {
+			return strings.Replace(requrl.Path, "/replaceme", "/foo", 1), strings.Replace(requrl.RawPath, "/replaceme", "/foo", 1)
+		}
+		return requrl.Path, requrl.RawPath
+	}
+	disableAPIAuth := true
+	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", upstreamURL, &pathReplacement, disableAPIAuth)
+
+	// /replaceme => /foo
+	req := httptest.NewRequest("GET", "http://localhost/replaceme", nil)
+	w := httptest.NewRecorder()
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	assert.Equal(t, 200, resp.StatusCode)
+	// Check that the proxy's upstream has indeed written the response.
+	assert.Equal(t, "/foo test", getStrippedBody(resp))
+
+	// /replaceme/bar => /foo/bar
+	req = httptest.NewRequest("GET", "http://localhost/replaceme/bar", nil)
+	w = httptest.NewRecorder()
+	rp.HandleWithProxy(w, req)
+	resp = w.Result()
+	assert.Equal(t, 200, resp.StatusCode)
+	// Check that the proxy's upstream has indeed written the response.
+	assert.Equal(t, "/foo/bar test", getStrippedBody(resp))
+
+	// /other/bar => /other/bar (no change)
+	req = httptest.NewRequest("GET", "http://localhost/other/bar", nil)
+	w = httptest.NewRecorder()
+	rp.HandleWithProxy(w, req)
+	resp = w.Result()
+	assert.Equal(t, 200, resp.StatusCode)
+	// Check that the proxy's upstream has indeed written the response.
+	assert.Equal(t, "/other/bar test", getStrippedBody(resp))
 }
 
 func TestReverseProxy_unhealthy(t *testing.T) {
@@ -91,33 +133,22 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	// we can reuse the same backend to send both the querier and distributor
 	// requests
 	disableAPIAuth := true
-	rp := NewReverseProxy(tenantName, u, u, u, u, disableAPIAuth)
+	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", u, nil, disableAPIAuth)
 	// create a request to the test backend
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-
-		if resp.StatusCode != http.StatusBadGateway {
-			t.Errorf("want 502 Bad Gateway got %v", resp.StatusCode)
-		}
-
-		// Confirm that the original error message (for why the request could
-		// not be proxied) is contained in the response body.
-		assert.Regexp(
-			t,
-			regexp.MustCompile("^dial tcp .* connect: connection refused$"),
-			getStrippedBody(resp),
-		)
-	}
-
 	w := httptest.NewRecorder()
-	rp.HandleWithDistributorProxy(w, req)
-	checker(w)
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	assert.Equal(t, http.StatusBadGateway, resp.StatusCode)
 
-	w = httptest.NewRecorder()
-	rp.HandleWithQuerierProxy(w, req)
-	checker(w)
+	// Confirm that the original error message (for why the request could
+	// not be proxied) is contained in the response body.
+	assert.Regexp(
+		t,
+		regexp.MustCompile("^dial tcp .* connect: connection refused$"),
+		getStrippedBody(resp),
+	)
 }
 
 func TestReverseProxyAuthenticator_noheader(t *testing.T) {
@@ -127,30 +158,23 @@ func TestReverseProxyAuthenticator_noheader(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	rp := NewReverseProxy("test", fakeURL, fakeURL, fakeURL, fakeURL, disableAPIAuth)
+	tenantName := "test"
+	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", fakeURL, nil, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-		// Expect 401 response because no authentication proof is set.
-		assert.Equal(t, 401, resp.StatusCode)
-
-		// Confirm that a helpful error message is in the body.
-		assert.Equal(
-			t,
-			"Authorization header missing",
-			getStrippedBody(resp),
-		)
-	}
-
 	w := httptest.NewRecorder()
-	rp.HandleWithDistributorProxy(w, req)
-	checker(w)
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	// Expect 401 response because no authentication proof is set.
+	assert.Equal(t, 401, resp.StatusCode)
 
-	w = httptest.NewRecorder()
-	rp.HandleWithQuerierProxy(w, req)
-	checker(w)
+	// Confirm that a helpful error message is in the body.
+	assert.Equal(
+		t,
+		"Authorization header missing",
+		getStrippedBody(resp),
+	)
 }
 
 func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
@@ -160,31 +184,20 @@ func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	rp := NewReverseProxy("test", fakeURL, fakeURL, fakeURL, fakeURL, disableAPIAuth)
+	tenantName := "test"
+	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", fakeURL, nil, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 	req.Header.Set("Authorization", "Bearer foobarbadtoken")
 
-	checker := func(w *httptest.ResponseRecorder) {
-		resp := w.Result()
-		// Expect 401 response because no authentication proof is set.
-		assert.Equal(t, 401, resp.StatusCode)
-
-		// Confirm that a helpful error message is in the body.
-		assert.Equal(
-			t,
-			"bad authentication token",
-			getStrippedBody(resp),
-		)
-	}
-
 	w := httptest.NewRecorder()
-	rp.HandleWithDistributorProxy(w, req)
-	checker(w)
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	// Expect 401 response because no authentication proof is set.
+	assert.Equal(t, 401, resp.StatusCode)
 
-	w = httptest.NewRecorder()
-	rp.HandleWithQuerierProxy(w, req)
-	checker(w)
+	// Confirm that a helpful error message is in the body.
+	assert.Equal(t, "bad authentication token", getStrippedBody(resp))
 }
 
 // Read all response body bytes, and return response body as string, with

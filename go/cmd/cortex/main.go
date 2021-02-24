@@ -73,8 +73,8 @@ func main() {
 
 	// See: https://github.com/cortexproject/cortex/blob/master/docs/api/_index.md
 	cortexTenantHeader := "X-Scope-OrgID"
-	querierProxy := middleware.NewTenantReverseProxy(&tenantName, cortexTenantHeader, cortexqurl, disableAPIAuthentication)
-	distributorProxy := middleware.NewTenantReverseProxy(&tenantName, cortexTenantHeader, cortexdurl, disableAPIAuthentication)
+	querierProxy := middleware.NewTenantReverseProxy(&tenantName, cortexTenantHeader, cortexqurl, nil, disableAPIAuthentication)
+	distributorProxy := middleware.NewTenantReverseProxy(&tenantName, cortexTenantHeader, cortexdurl, nil, disableAPIAuthentication)
 
 	// mux matches based on registration order, not prefix length.
 	router := mux.NewRouter()

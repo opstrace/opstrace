@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -94,10 +95,28 @@ func main() {
 	// Cortex: Alertmanager and ruler
 	// See: https://github.com/cortexproject/cortex/blob/master/docs/api/_index.md
 	cortexTenantHeader := "X-Scope-OrgID"
-	cortexRulerProxy := middleware.NewTenantReverseProxy(nil, cortexTenantHeader, cortexRulerURL, disableAPIAuthentication)
-	router.PathPrefix("/api/v1/ruler").HandlerFunc(cortexRulerProxy.HandleWithProxy)
+	cortexRulerPathReplacement := func(requrl *url.URL) (string,string) {
+		if strings.HasPrefix(requrl.Path, "/api/v1/ruler") {
+			// Route /api/v1/ruler* requests to /ruler* on the backend
+			return replacePaths(requrl, "/api/v1/ruler", "/ruler")
+		}
+		return requrl.Path, requrl.RawPath
+	}
+	cortexRulerProxy := middleware.NewTenantReverseProxy(nil, cortexTenantHeader, cortexRulerURL, &cortexRulerPathReplacement, disableAPIAuthentication)
+	router.PathPrefix("/api/v1/ruler").HandlerFunc(cortexRulerProxy.HandleWithProxy) // TODO route to /ruler
 	router.PathPrefix("/api/v1/rules").HandlerFunc(cortexRulerProxy.HandleWithProxy)
-	cortexAlertmanagerProxy := middleware.NewTenantReverseProxy(nil, cortexTenantHeader, cortexAlertmanagerURL, disableAPIAuthentication)
+	cortexAlertmanagerPathReplacement := func(requrl *url.URL) (string,string) {
+		if strings.HasPrefix(requrl.Path, "/api/v1/alertmanager") {
+			// Route /api/v1/alertmanager* requests to /alertmanager* on the backend
+			return replacePaths(requrl, "/api/v1/alertmanager", "/alertmanager")
+		}
+		if strings.HasPrefix(requrl.Path, "/api/v1/multitenant_alertmanager") {
+			// Route /api/v1/multitenant_alertmanager* requests to /multitenant_alertmanager* on the backend
+			return replacePaths(requrl, "/api/v1/multitenant_alertmanager", "/multitenant_alertmanager")
+		}
+		return requrl.Path, requrl.RawPath
+	}
+	cortexAlertmanagerProxy := middleware.NewTenantReverseProxy(nil, cortexTenantHeader, cortexAlertmanagerURL, &cortexAlertmanagerPathReplacement, disableAPIAuthentication)
 	router.PathPrefix("/api/v1/alerts").HandlerFunc(cortexAlertmanagerProxy.HandleWithProxy)
 	// May want to move these back to /alertmanager and /multitenant_alertmanager if the /api/v1 prefix becomes an issue.
 	// This would require updating the K8s Ingress to route /alertmanager and /multitenant_alertmanager here.
@@ -111,6 +130,10 @@ func main() {
 	setupConfigAPI(exporters, listExporters, writeExporters, getExporter, deleteExporter)
 
 	log.Fatalf("terminated: %v", http.ListenAndServe(listenAddress, router))
+}
+
+func replacePaths(url *url.URL, from string, to string) (string, string) {
+	return strings.Replace(url.Path, from, to, 1), strings.Replace(url.RawPath, from, to, 1)
 }
 
 func envEndpointURL(envName string, defaultEndpoint *string) *url.URL {
