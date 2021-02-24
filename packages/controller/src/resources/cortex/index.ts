@@ -1189,7 +1189,7 @@ export function CortexResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "10Gi"
+                    storage: "30Gi"
                   }
                 }
               }
@@ -1362,7 +1362,7 @@ export function CortexResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "10Gi"
+                    storage: "30Gi"
                   }
                 }
               }
@@ -1535,7 +1535,7 @@ export function CortexResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "10Gi"
+                    storage: "30Gi"
                   }
                 }
               }
