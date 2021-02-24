@@ -17,7 +17,7 @@
 import { urlJoin } from "url-join-ts";
 import * as yaml from "js-yaml";
 import { strict as assert } from "assert";
-import { getBucketName } from "@opstrace/utils";
+import { getBucketName, roundDownToOdd } from "@opstrace/utils";
 import { State } from "../../reducer";
 import { getNodeCount, getControllerConfig } from "../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
@@ -60,7 +60,7 @@ export function CortexResources(
   const config = {
     memcachedResults: {
       replicas: select(getNodeCount(state), [
-        { "<=": 4, choose: 2 },
+        { "<=": 5, choose: 2 },
         { "<=": 9, choose: 3 },
         {
           "<=": Infinity,
@@ -82,8 +82,12 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -100,8 +104,16 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -118,8 +130,16 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -148,8 +168,16 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -171,15 +199,28 @@ export function CortexResources(
         //   memory: "50Mi"
         // }
       },
-      replicas: min(
-        3,
-        select(getNodeCount(state), [
-          {
-            "<=": Infinity,
-            choose: getNodeCount(state)
-          }
-        ])
-      )
+      replicas: select(getNodeCount(state), [
+        {
+          "<=": 4,
+          choose: 3
+        },
+        {
+          "<=": 6,
+          choose: 5
+        },
+        {
+          "<=": 8,
+          choose: 7
+        },
+        {
+          "<=": 10,
+          choose: 9
+        },
+        {
+          "<=": Infinity,
+          choose: roundDownToOdd(getNodeCount(state) / 2)
+        }
+      ])
     },
     env: []
   };
