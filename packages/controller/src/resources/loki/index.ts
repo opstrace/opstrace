@@ -31,7 +31,7 @@ import {
   ServiceAccount
 } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
-import { min, select, getBucketName } from "@opstrace/utils";
+import { roundDownToOdd, select, getBucketName } from "@opstrace/utils";
 import { getControllerConfig, getNodeCount } from "../../helpers";
 import { DockerImages } from "@opstrace/controller-config";
 
@@ -62,15 +62,28 @@ export function LokiResources(
         //     memory: "100Mi"
         //   }
       },
-      replicas: min(
-        3,
-        select(getNodeCount(state), [
-          {
-            "<=": Infinity,
-            choose: getNodeCount(state)
-          }
-        ])
-      )
+      replicas: select(getNodeCount(state), [
+        {
+          "<=": 4,
+          choose: 3
+        },
+        {
+          "<=": 6,
+          choose: 5
+        },
+        {
+          "<=": 8,
+          choose: 7
+        },
+        {
+          "<=": 10,
+          choose: 9
+        },
+        {
+          "<=": Infinity,
+          choose: roundDownToOdd(getNodeCount(state) / 2)
+        }
+      ])
     },
     distributor: {
       resources: {
@@ -85,8 +98,16 @@ export function LokiResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -103,8 +124,16 @@ export function LokiResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
