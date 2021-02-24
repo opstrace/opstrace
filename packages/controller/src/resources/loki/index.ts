@@ -714,6 +714,9 @@ export function LokiResources(
                   ]
                 }
               ],
+              // https://cortexmetrics.io/docs/guides/running-cortex-on-kubernetes/#take-extra-care-with-ingesters
+              // The link is for cortex ingesters but loki ingesters share the same architecture.
+              terminationGracePeriodSeconds: 2400,
               volumes: [
                 {
                   configMap: {
