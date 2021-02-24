@@ -113,7 +113,9 @@ export function LokiResources(
 
   const lokiConfig = {
     server: {
-      http_listen_port: 1080
+      http_listen_port: 1080,
+      grpc_server_max_recv_msg_size: 41943040, // default (4 MB) * 10
+      grpc_server_max_send_msg_size: 41943040 // default (4 MB) * 10
     },
     auth_enabled: true,
     chunk_store_config: {
