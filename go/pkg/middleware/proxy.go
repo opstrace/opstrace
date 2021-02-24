@@ -1,4 +1,4 @@
-// Copyright 2020 Opstrace, Inc.
+// Copyright 2021 Opstrace, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,80 +22,42 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ReverseProxy struct {
-	tenantName           string
-	revproxyQuerier      *httputil.ReverseProxy
-	revproxyDistributor  *httputil.ReverseProxy
-	revproxyRuler        *httputil.ReverseProxy
-	revproxyAlertmanager *httputil.ReverseProxy
-	authenticatorEnabled bool
+// TenantReverseProxy is a proxy that adds a specified tenant name as an HTTP request header.
+//
+// If tenantName is non-nil, then all requests are expected to be for that tenant, and the
+// Authentication header/Bearer token will be checked for a matching tenant if !disableAPIAuthentication.
+//
+// If tenantName is nil, then the tenant will be extracted from the requests on a per-request basis,
+// either from the Authentication header/Bearer token, or from a custom "X-Scope-OrgID" header if
+// disableAPIAuthentication is true.
+type TenantReverseProxy struct {
+	tenantName               *string
+	headerName               string
+	revproxy                 *httputil.ReverseProxy
+	disableAPIAuthentication bool
 }
 
-func NewReverseProxy(
-	tenantName string,
-	querierURL,
-	distributorURL,
-	rulerURL,
-	alertmanagerURL *url.URL,
-	disableAPIAuthentication bool) *ReverseProxy {
-	rp := &ReverseProxy{
-		tenantName: tenantName,
-		// See:
-		// https://github.com/cortexproject/cortex/blob/master/docs/apis.md
-		// https://github.com/grafana/loki/blob/master/docs/api.md#microservices-mode
-		revproxyQuerier:      httputil.NewSingleHostReverseProxy(querierURL),
-		revproxyDistributor:  httputil.NewSingleHostReverseProxy(distributorURL),
-		revproxyRuler:        httputil.NewSingleHostReverseProxy(rulerURL),
-		revproxyAlertmanager: httputil.NewSingleHostReverseProxy(alertmanagerURL),
-		authenticatorEnabled: !disableAPIAuthentication,
-	}
-
-	rp.revproxyQuerier.ErrorHandler = proxyErrorHandler
-	rp.revproxyDistributor.ErrorHandler = proxyErrorHandler
-	rp.revproxyRuler.ErrorHandler = proxyErrorHandler
-	rp.revproxyAlertmanager.ErrorHandler = proxyErrorHandler
-
-	return rp
+func NewTenantReverseProxy(
+	tenantName *string,
+	headerName string,
+	backendURL *url.URL,
+	disableAPIAuthentication bool) *TenantReverseProxy {
+	revproxy := httputil.NewSingleHostReverseProxy(backendURL)
+	trp := &TenantReverseProxy{tenantName, headerName, revproxy, disableAPIAuthentication}
+	trp.revproxy.ErrorHandler = proxyErrorHandler
+	return trp
 }
 
-func (rp *ReverseProxy) HandleWithQuerierProxy(w http.ResponseWriter, r *http.Request) {
-	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
+func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Request) {
+	tenantName, ok := GetTenant(w, r, trp.tenantName, trp.disableAPIAuthentication)
+	if !ok {
 		// Error response has already been written. Terminate request handling.
 		return
 	}
 
-	r.Header.Add("X-Scope-OrgID", rp.tenantName)
-	rp.revproxyQuerier.ServeHTTP(w, r)
-}
-
-func (rp *ReverseProxy) HandleWithDistributorProxy(w http.ResponseWriter, r *http.Request) {
-	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
-		// Error response has already been written. Terminate request handling.
-		return
-	}
-
-	r.Header.Add("X-Scope-OrgID", rp.tenantName)
-	rp.revproxyDistributor.ServeHTTP(w, r)
-}
-
-func (rp *ReverseProxy) HandleWithRulerProxy(w http.ResponseWriter, r *http.Request) {
-	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
-		// Error response has already been written. Terminate request handling.
-		return
-	}
-
-	r.Header.Add("X-Scope-OrgID", rp.tenantName)
-	rp.revproxyRuler.ServeHTTP(w, r)
-}
-
-func (rp *ReverseProxy) HandleWithAlertmanagerProxy(w http.ResponseWriter, r *http.Request) {
-	if rp.authenticatorEnabled && !DataAPIRequestAuthenticator(w, r, rp.tenantName) {
-		// Error response has already been written. Terminate request handling.
-		return
-	}
-
-	r.Header.Add("X-Scope-OrgID", rp.tenantName)
-	rp.revproxyAlertmanager.ServeHTTP(w, r)
+	// Add the tenant in the request header and then forward the request to the backend.
+	r.Header.Add(trp.headerName, tenantName)
+	trp.revproxy.ServeHTTP(w, r)
 }
 
 func proxyErrorHandler(resp http.ResponseWriter, r *http.Request, proxyerr error) {

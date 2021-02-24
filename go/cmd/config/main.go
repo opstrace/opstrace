@@ -62,28 +62,26 @@ func main() {
 	}
 	log.Infof("listen address: %s", listenAddress)
 
-	graphqlEndpoint := os.Getenv("GRAPHQL_ENDPOINT")
-	if graphqlEndpoint == "" {
-		// Try default (dev environment)
-		graphqlEndpoint = "http://localhost:8080/v1/graphql"
-		log.Warnf("missing GRAPHQL_ENDPOINT, trying %s", graphqlEndpoint)
-	}
-	graphqlEndpointURL, uerr := url.Parse(graphqlEndpoint)
-	if uerr != nil {
-		log.Fatalf("bad GRAPHQL_ENDPOINT: %s", uerr)
-	}
-	log.Infof("graphql URL: %v", graphqlEndpointURL)
+	cortexDefault := "http://localhost"
+	cortexRulerURL := envEndpointURL("CORTEX_RULER_ENDPOINT", &cortexDefault)
+	log.Infof("cortex ruler URL: %v", cortexRulerURL)
+	cortexAlertmanagerURL := envEndpointURL("CORTEX_ALERTMANAGER_ENDPOINT", &cortexDefault)
+	log.Infof("cortex alertmanager URL: %v", cortexAlertmanagerURL)
+
+	graphqlDefault := "http://localhost:8080/v1/graphql"
+	graphqlURL := envEndpointURL("GRAPHQL_ENDPOINT", &graphqlDefault)
+	log.Infof("graphql URL: %v", graphqlURL)
 
 	graphqlSecret := os.Getenv("HASURA_GRAPHQL_ADMIN_SECRET")
 	if graphqlSecret == "" {
 		log.Fatalf("missing required HASURA_GRAPHQL_ADMIN_SECRET")
 	}
 
-	credentialAccess = config.NewCredentialAccess(graphqlEndpointURL, graphqlSecret)
-	exporterAccess = config.NewExporterAccess(graphqlEndpointURL, graphqlSecret)
+	credentialAccess = config.NewCredentialAccess(graphqlURL, graphqlSecret)
+	exporterAccess = config.NewExporterAccess(graphqlURL, graphqlSecret)
 
 	if disableAPIAuthentication {
-		log.Info("authentication disabled, use 'X-Tenant' header in requests to specify tenant")
+		log.Infof("authentication disabled, use '%s' header in requests to specify tenant", middleware.TEST_TENANT_HEADER)
 	} else {
 		// Requires API_AUTHTOKEN_VERIFICATION_PUBKEY
 		log.Info("authentication enabled")
@@ -93,20 +91,50 @@ func main() {
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
 
-	// Specify exact paths, but manually allow with and without a trailing '/'
+	// Cortex: Alertmanager and ruler
+	// See: https://github.com/cortexproject/cortex/blob/master/docs/api/_index.md
+	cortexTenantHeader := "X-Scope-OrgID"
+	cortexRulerProxy := middleware.NewTenantReverseProxy(nil, cortexTenantHeader, cortexRulerURL, disableAPIAuthentication)
+	router.PathPrefix("/api/v1/ruler").HandlerFunc(cortexRulerProxy.HandleWithProxy)
+	router.PathPrefix("/api/v1/rules").HandlerFunc(cortexRulerProxy.HandleWithProxy)
+	cortexAlertmanagerProxy := middleware.NewTenantReverseProxy(nil, cortexTenantHeader, cortexAlertmanagerURL, disableAPIAuthentication)
+	router.PathPrefix("/api/v1/alerts").HandlerFunc(cortexAlertmanagerProxy.HandleWithProxy)
+	// May want to move these back to /alertmanager and /multitenant_alertmanager if the /api/v1 prefix becomes an issue.
+	// This would require updating the K8s Ingress to route /alertmanager and /multitenant_alertmanager here.
+	router.PathPrefix("/api/v1/alertmanager").HandlerFunc(cortexAlertmanagerProxy.HandleWithProxy)
+	router.PathPrefix("/api/v1/multitenant_alertmanager").HandlerFunc(cortexAlertmanagerProxy.HandleWithProxy)
 
+	// Credentials/exporters: Specify exact paths, but manually allow with and without a trailing '/'
 	credentials := router.PathPrefix("/api/v1/credentials").Subrouter()
-	setupAPI(credentials, listCredentials, writeCredentials, getCredential, deleteCredential)
-
+	setupConfigAPI(credentials, listCredentials, writeCredentials, getCredential, deleteCredential)
 	exporters := router.PathPrefix("/api/v1/exporters").Subrouter()
-	setupAPI(exporters, listExporters, writeExporters, getExporter, deleteExporter)
+	setupConfigAPI(exporters, listExporters, writeExporters, getExporter, deleteExporter)
 
 	log.Fatalf("terminated: %v", http.ListenAndServe(listenAddress, router))
 }
 
+func envEndpointURL(envName string, defaultEndpoint *string) *url.URL {
+	endpoint := os.Getenv(envName)
+	if endpoint == "" {
+		if defaultEndpoint == nil {
+			log.Fatalf("missing required %s", envName)
+		} else {
+			// Try default (dev/testing)
+			endpoint = *defaultEndpoint
+			log.Warnf("missing %s, trying %s", envName, endpoint)
+		}
+	}
+
+	endpointURL, uerr := url.Parse(endpoint)
+	if uerr != nil {
+		log.Fatalf("bad %s: %s", envName, uerr)
+	}
+	return endpointURL
+}
+
 // setupAPI configures GET/POST/DELETE endpoints for the provided handler callbacks.
 // The paths are configured to be exact, with optional trailing slashes.
-func setupAPI(
+func setupConfigAPI(
 	router *mux.Router,
 	listFunc func(string, http.ResponseWriter, *http.Request),
 	writeFunc func(string, http.ResponseWriter, *http.Request),
@@ -128,21 +156,9 @@ func setupAPI(
 // The check is skipped if `disableAPIAuthentication` is true.
 func getTenantThenCall(f func(string, http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var tenantName string
-		if disableAPIAuthentication {
-			// Testing: Read tenant from `X-Tenant` header
-			tenantName = r.Header.Get("X-Tenant")
-			if tenantName == "" {
-				http.Error(w, "Missing X-Tenant header specifying tenant to test", http.StatusBadRequest)
-				return
-			}
-		} else {
-			// Production: Read/validate tenant from bearer token
-			var ok bool
-			tenantName, ok = middleware.DataAPIRequestTenantName(w, r)
-			if !ok {
-				return
-			}
+		tenantName, ok := middleware.GetTenant(w, r, nil, disableAPIAuthentication)
+		if !ok {
+			return
 		}
 		f(tenantName, w, r)
 	}

@@ -71,21 +71,23 @@ func main() {
 	log.Infof("tenant name: %s", tenantName)
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
 
-	reverseProxy := middleware.NewReverseProxy(tenantName, lokiqurl, lokidurl,
-		lokiqurl, lokiqurl, disableAPIAuthentication) // dirty: pass the querier since there is no ruler nor alertmanager
+	// See: https://github.com/grafana/loki/blob/master/docs/api.md#microservices-mode
+	lokiTenantHeader := "X-Scope-OrgID"
+	querierProxy := middleware.NewTenantReverseProxy(&tenantName, lokiTenantHeader, lokiqurl, disableAPIAuthentication)
+	distributorProxy := middleware.NewTenantReverseProxy(&tenantName, lokiTenantHeader, lokidurl, disableAPIAuthentication)
 
 	// mux matches based on registration order, not prefix length.
 	router := mux.NewRouter()
 
 	// The intended push path.
-	router.PathPrefix("/loki/api/v1/push").HandlerFunc(reverseProxy.HandleWithDistributorProxy)
+	router.PathPrefix("/loki/api/v1/push").HandlerFunc(distributorProxy.HandleWithProxy)
 
 	// Maybe we should not expose this?
 	// From loki API docs: WARNING: /api/prom/push is DEPRECATED; use /loki/api/v1/push instead.
 	// router.PathPrefix("/api/prom/push").HandlerFunc(reverseProxy.HandleWithDistributorProxy)
 
 	// The intended query / readout path(s)
-	router.PathPrefix("/loki/api/v1/").HandlerFunc(reverseProxy.HandleWithQuerierProxy)
+	router.PathPrefix("/loki/api/v1/").HandlerFunc(querierProxy.HandleWithProxy)
 
 	// I think we can outcomment this one here, too. Want to encourage to use
 	// /loki/api/v1/ for readout.

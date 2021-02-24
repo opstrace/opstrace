@@ -42,8 +42,8 @@ precacheAndRoute(self.__precacheManifest);
 // This assumes /app-shell has been precached.
 const handler = createHandlerBoundToURL("/app-shell");
 const navigationRoute = new NavigationRoute(handler, {
-  // make sure we don't cache routes to our api
-  denylist: [new RegExp("^/_/"), new RegExp("^/modules/.*/latest/")]
+  // make sure we don't cache routes to our apis
+  denylist: [new RegExp("^/_/"), new RegExp("^/modules/.*/latest/"), new RegExp("^/api/")]
 });
 registerRoute(navigationRoute);
 
