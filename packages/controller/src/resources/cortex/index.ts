@@ -1176,20 +1176,6 @@ export function CortexResources(
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-                  // https://github.com/cortexproject/cortex-helm-chart/blob/14ee59e7b3e8772f19a12ab16979e5143f51ae92/values.yaml#L245-L249
-                  livenessProbe: {
-                    httpGet: {
-                      path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 80 as any,
-                      scheme: "HTTP"
-                    },
-                    initialDelaySeconds: 45,
-                    timeoutSeconds: 1,
-                    periodSeconds: 10,
-                    successThreshold: 1,
-                    failureThreshold: 3
-                  },
                   resources: config.ingester.resources,
                   volumeMounts: [
                     {
