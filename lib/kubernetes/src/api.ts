@@ -18,7 +18,9 @@ import { K8sResource } from "./common";
 import { kubernetesError } from "./utils";
 import { log } from "@opstrace/utils";
 
-const dryRunKubeApiWrites = process.env.DRY_RUN_KUBERNETES_API_WRITES!!;
+const dryRunKubeApiWrites = process.env.DRY_RUN_KUBERNETES_API_WRITES
+  ? true
+  : false;
 
 export const createResource = async (resource: K8sResource): Promise<void> => {
   log.debug(
