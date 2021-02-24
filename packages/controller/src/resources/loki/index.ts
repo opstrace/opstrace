@@ -705,20 +705,6 @@ export function LokiResources(
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-                  // https://github.com/grafana/loki/blob/6d85c7c212f95c7fbf902b467edc46a5ec3555fd/production/helm/loki/values.yaml#L117-L121
-                  livenessProbe: {
-                    httpGet: {
-                      path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 1080 as any,
-                      scheme: "HTTP"
-                    },
-                    initialDelaySeconds: 45,
-                    timeoutSeconds: 1,
-                    periodSeconds: 10,
-                    successThreshold: 1,
-                    failureThreshold: 3
-                  },
                   resources: deploymentConfig.distributor.resources,
                   volumeMounts: [
                     {
