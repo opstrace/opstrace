@@ -15,7 +15,7 @@
  */
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { Tenants } from "./types";
+import { Tenant, Tenants } from "./types";
 import * as actions from "./actions";
 
 type TenantActions = ActionType<typeof actions>;
@@ -32,11 +32,43 @@ const TenantInitialState: TenantState = {
 
 export const reducer = createReducer<TenantState, TenantActions>(
   TenantInitialState
-).handleAction(
-  actions.setTenantList,
-  (state, action): TenantState => ({
-    ...state,
-    tenants: action.payload,
-    loading: false
-  })
-);
+)
+  .handleAction(
+    actions.setTenantList,
+    (state, action): TenantState => ({
+      ...state,
+      tenants: action.payload,
+      loading: false
+    })
+  )
+  .handleAction(
+    actions.alertmanagerConfigLoaded,
+    (state, action): TenantState => {
+      // console.log("alertmanagerConfigLoaded", action.payload);
+      const tenants = state.tenants.map((tenant: Tenant) => {
+        if (tenant.name === action.payload.tenantName)
+          return { ...tenant, alertmanager_config: action.payload.config };
+        else return tenant;
+      });
+
+      return {
+        ...state,
+        tenants
+      };
+    }
+  )
+  .handleAction(
+    actions.saveAlertmanagerConfig,
+    (state, action): TenantState => {
+      const tenants = state.tenants.map((tenant: Tenant) => {
+        if (tenant.name === action.payload.tenantName)
+          return { ...tenant, alertmanager_config: action.payload.config };
+        else return tenant;
+      });
+
+      return {
+        ...state,
+        tenants
+      };
+    }
+  );

@@ -2552,6 +2552,7 @@ export type Subscription_RootUser_Preference_By_PkArgs = {
 
 /** columns and relationships of "tenant" */
 export type Tenant = {
+  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at: Scalars["timestamp"];
   /** An array relationship */
   credentials: Array<Credential>;
@@ -2638,6 +2639,7 @@ export type Tenant_Bool_Exp = {
   _and?: Maybe<Array<Maybe<Tenant_Bool_Exp>>>;
   _not?: Maybe<Tenant_Bool_Exp>;
   _or?: Maybe<Array<Maybe<Tenant_Bool_Exp>>>;
+  alertmanager_config?: Maybe<String_Comparison_Exp>;
   created_at?: Maybe<Timestamp_Comparison_Exp>;
   credentials?: Maybe<Credential_Bool_Exp>;
   exporters?: Maybe<Exporter_Bool_Exp>;
@@ -2653,6 +2655,7 @@ export enum Tenant_Constraint {
 
 /** input type for inserting data into table "tenant" */
 export type Tenant_Insert_Input = {
+  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   credentials?: Maybe<Credential_Arr_Rel_Insert_Input>;
   exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
@@ -2662,6 +2665,7 @@ export type Tenant_Insert_Input = {
 
 /** aggregate max on columns */
 export type Tenant_Max_Fields = {
+  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
@@ -2669,6 +2673,7 @@ export type Tenant_Max_Fields = {
 
 /** order by max() on columns of table "tenant" */
 export type Tenant_Max_Order_By = {
+  alertmanager_config?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
@@ -2676,6 +2681,7 @@ export type Tenant_Max_Order_By = {
 
 /** aggregate min on columns */
 export type Tenant_Min_Fields = {
+  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
@@ -2683,6 +2689,7 @@ export type Tenant_Min_Fields = {
 
 /** order by min() on columns of table "tenant" */
 export type Tenant_Min_Order_By = {
+  alertmanager_config?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
@@ -2711,6 +2718,7 @@ export type Tenant_On_Conflict = {
 
 /** ordering options when selecting data from "tenant" */
 export type Tenant_Order_By = {
+  alertmanager_config?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   credentials_aggregate?: Maybe<Credential_Aggregate_Order_By>;
   exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
@@ -2726,6 +2734,8 @@ export type Tenant_Pk_Columns_Input = {
 /** select columns of table "tenant" */
 export enum Tenant_Select_Column {
   /** column name */
+  AlertmanagerConfig = "alertmanager_config",
+  /** column name */
   CreatedAt = "created_at",
   /** column name */
   Name = "name",
@@ -2735,6 +2745,7 @@ export enum Tenant_Select_Column {
 
 /** input type for updating data in table "tenant" */
 export type Tenant_Set_Input = {
+  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
@@ -2742,6 +2753,8 @@ export type Tenant_Set_Input = {
 
 /** update columns of table "tenant" */
 export enum Tenant_Update_Column {
+  /** column name */
+  AlertmanagerConfig = "alertmanager_config",
   /** column name */
   CreatedAt = "created_at",
   /** column name */
@@ -3551,6 +3564,23 @@ export type GetTenantsQuery = {
   tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
 };
 
+export type LoadAlertmanagerConfigQueryVariables = Exact<{
+  tenant_name: Scalars["String"];
+}>;
+
+export type LoadAlertmanagerConfigQuery = {
+  tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
+};
+
+export type SaveAlertmanagerConfigMutationVariables = Exact<{
+  tenant_name: Scalars["String"];
+  new_config: Scalars["String"];
+}>;
+
+export type SaveAlertmanagerConfigMutation = {
+  update_tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
+};
+
 export type SubscribeToTenantListSubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
@@ -4100,6 +4130,23 @@ export const GetTenantsDocument = gql`
       name
       created_at
       type
+    }
+  }
+`;
+export const LoadAlertmanagerConfigDocument = gql`
+  query LoadAlertmanagerConfig($tenant_name: String!) {
+    tenant_by_pk(name: $tenant_name) {
+      alertmanager_config
+    }
+  }
+`;
+export const SaveAlertmanagerConfigDocument = gql`
+  mutation SaveAlertmanagerConfig($tenant_name: String!, $new_config: String!) {
+    update_tenant_by_pk(
+      pk_columns: { name: $tenant_name }
+      _set: { alertmanager_config: $new_config }
+    ) {
+      alertmanager_config
     }
   }
 `;
@@ -4707,6 +4754,38 @@ export function getSdk(
     }> {
       return withWrapper(() =>
         client.rawRequest<GetTenantsQuery>(print(GetTenantsDocument), variables)
+      );
+    },
+    LoadAlertmanagerConfig(
+      variables: LoadAlertmanagerConfigQueryVariables
+    ): Promise<{
+      data?: LoadAlertmanagerConfigQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<LoadAlertmanagerConfigQuery>(
+          print(LoadAlertmanagerConfigDocument),
+          variables
+        )
+      );
+    },
+    SaveAlertmanagerConfig(
+      variables: SaveAlertmanagerConfigMutationVariables
+    ): Promise<{
+      data?: SaveAlertmanagerConfigMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<SaveAlertmanagerConfigMutation>(
+          print(SaveAlertmanagerConfigDocument),
+          variables
+        )
       );
     },
     SubscribeToTenantList(

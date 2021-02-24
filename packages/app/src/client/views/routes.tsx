@@ -29,7 +29,7 @@ import ChatView from "./chat";
 import HistoryView from "./history";
 import UserDetail from "./cluster/UserDetail";
 import TenantDetail from "./cluster/TenantDetail";
-import AlertManagerConfigEditor from "./cluster/AlertManagerConfigEditor";
+import AlertmanagerConfigEditor from "./cluster/AlertmanagerConfigEditor";
 import HelpDialog from "./help";
 import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
@@ -112,7 +112,7 @@ const AuthenticatedRoutes = () => {
         <Route
           key="/cluster/tenants/:tenant/alert-manager-config"
           path="/cluster/tenants/:tenant/alert-manager-config"
-          component={AlertManagerConfigEditor}
+          component={AlertmanagerConfigEditor}
         />
         <Route
           key="/cluster/tenants/:tenant"

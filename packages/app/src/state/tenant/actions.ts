@@ -16,9 +16,9 @@
 import { createAction } from "typesafe-actions";
 import { SubscriptionID, Tenants } from "./types";
 
-export const subscribeToTenantList = createAction("SUBSCRIBE_TENANT_LIST")<
-  SubscriptionID
->();
+export const subscribeToTenantList = createAction(
+  "SUBSCRIBE_TENANT_LIST"
+)<SubscriptionID>();
 
 export const unsubscribeFromTenantList = createAction(
   "UNSUBSCRIBE_TENANT_LIST"
@@ -26,3 +26,17 @@ export const unsubscribeFromTenantList = createAction(
 export const setTenantList = createAction("SET_TENANT_LIST")<Tenants>();
 export const deleteTenant = createAction("DELETE_TENANT")<string>();
 export const addTenant = createAction("ADD_TENANT")<string>();
+
+export const loadAlertmanagerConfig = createAction(
+  "LOAD_ALERTMANAGER_CONFIG"
+)<string>();
+export const alertmanagerConfigLoaded = createAction(
+  "ALERTMANAGER_CONFIG_LOADED"
+)<{
+  tenantName: string;
+  config: string;
+}>();
+export const saveAlertmanagerConfig = createAction("SAVE_ALERTMANAGER_CONFIG")<{
+  tenantName: string;
+  config: string;
+}>();

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToTenantListSubscription } from "state/clients/graphqlClient";
 
-type TenantVirtualFields = {
-  alertmanager_config?: string;
-};
-
-export type Tenant = SubscribeToTenantListSubscription["tenant"][0] &
-  TenantVirtualFields;
-
-export type Tenants = Tenant[];
-
-// use this same id to unsubscribe
-export type SubscriptionID = number;
+export { default as useAlertmanagerConfig } from "./useAlertmanagerConfig";
+export { default as useTenant } from "./useTenant";

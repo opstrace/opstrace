@@ -939,6 +939,75 @@ func (client *Client) GetExporters(vars *GetExportersVariables) (*GetExportersRe
 }
 
 //
+// query GetExportersDump
+//
+
+type GetExportersDumpResponse struct {
+	Exporter []struct {
+		Tenant     string `json:"Tenant"`
+		Name       string `json:"Name"`
+		Type       string `json:"Type"`
+		Credential string `json:"Credential"`
+		Config     string `json:"Config"`
+		CreatedAt  string `json:"CreatedAt"`
+		UpdatedAt  string `json:"UpdatedAt"`
+	} `json:"Exporter"`
+}
+
+type GetExportersDumpRequest struct {
+	*http.Request
+}
+
+func NewGetExportersDumpRequest(url string) (*GetExportersDumpRequest, error) {
+	b, err := json.Marshal(&GraphQLOperation{
+		Query: `query GetExportersDump {
+  exporter {
+    tenant
+    name
+    type
+    credential
+    config
+    created_at
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetExportersDumpRequest{req}, nil
+}
+
+func (req *GetExportersDumpRequest) Execute(client *http.Client) (*GetExportersDumpResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetExportersDumpResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetExportersDump(url string, client *http.Client) (*GetExportersDumpResponse, error) {
+	req, err := NewGetExportersDumpRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetExportersDump() (*GetExportersDumpResponse, error) {
+	return GetExportersDump(client.Url, client.Client)
+}
+
+//
 // mutation UpdateExporter($tenant: String!, $name: String!, $config: json!, $credential: String, $updated_at: timestamptz!)
 //
 
@@ -1560,75 +1629,6 @@ func (client *Client) CreateVersionedFiles(vars *CreateVersionedFilesVariables) 
 }
 
 //
-// query GetExportersDump
-//
-
-type GetExportersDumpResponse struct {
-	Exporter []struct {
-		Tenant     string `json:"Tenant"`
-		Name       string `json:"Name"`
-		Type       string `json:"Type"`
-		Credential string `json:"Credential"`
-		Config     string `json:"Config"`
-		CreatedAt  string `json:"CreatedAt"`
-		UpdatedAt  string `json:"UpdatedAt"`
-	} `json:"Exporter"`
-}
-
-type GetExportersDumpRequest struct {
-	*http.Request
-}
-
-func NewGetExportersDumpRequest(url string) (*GetExportersDumpRequest, error) {
-	b, err := json.Marshal(&GraphQLOperation{
-		Query: `query GetExportersDump {
-  exporter {
-    tenant
-    name
-    type
-    credential
-    config
-    created_at
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetExportersDumpRequest{req}, nil
-}
-
-func (req *GetExportersDumpRequest) Execute(client *http.Client) (*GetExportersDumpResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetExportersDumpResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetExportersDump(url string, client *http.Client) (*GetExportersDumpResponse, error) {
-	req, err := NewGetExportersDumpRequest(url)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetExportersDump() (*GetExportersDumpResponse, error) {
-	return GetExportersDump(client.Url, client.Client)
-}
-
-//
 // query GetModuleVersionFiles($branch: String, $name: String, $scope: String, $version: String)
 //
 
@@ -1918,6 +1918,139 @@ func GetTenants(url string, client *http.Client) (*GetTenantsResponse, error) {
 
 func (client *Client) GetTenants() (*GetTenantsResponse, error) {
 	return GetTenants(client.Url, client.Client)
+}
+
+//
+// query LoadAlertmanagerConfig($tenant_name: String!)
+//
+
+type LoadAlertmanagerConfigVariables struct {
+	TenantName String `json:"tenant_name"`
+}
+
+type LoadAlertmanagerConfigResponse struct {
+	TenantByPk struct {
+		AlertmanagerConfig string `json:"AlertmanagerConfig"`
+	} `json:"TenantByPk"`
+}
+
+type LoadAlertmanagerConfigRequest struct {
+	*http.Request
+}
+
+func NewLoadAlertmanagerConfigRequest(url string, vars *LoadAlertmanagerConfigVariables) (*LoadAlertmanagerConfigRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query LoadAlertmanagerConfig($tenant_name: String!) {
+  tenant_by_pk(name: $tenant_name) {
+    alertmanager_config
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &LoadAlertmanagerConfigRequest{req}, nil
+}
+
+func (req *LoadAlertmanagerConfigRequest) Execute(client *http.Client) (*LoadAlertmanagerConfigResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result LoadAlertmanagerConfigResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func LoadAlertmanagerConfig(url string, client *http.Client, vars *LoadAlertmanagerConfigVariables) (*LoadAlertmanagerConfigResponse, error) {
+	req, err := NewLoadAlertmanagerConfigRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) LoadAlertmanagerConfig(vars *LoadAlertmanagerConfigVariables) (*LoadAlertmanagerConfigResponse, error) {
+	return LoadAlertmanagerConfig(client.Url, client.Client, vars)
+}
+
+//
+// mutation SaveAlertmanagerConfig($tenant_name: String!, $new_config: String!)
+//
+
+type SaveAlertmanagerConfigVariables struct {
+	TenantName String `json:"tenant_name"`
+	NewConfig  String `json:"new_config"`
+}
+
+type SaveAlertmanagerConfigResponse struct {
+	UpdateTenantByPk struct {
+		AlertmanagerConfig string `json:"AlertmanagerConfig"`
+	} `json:"UpdateTenantByPk"`
+}
+
+type SaveAlertmanagerConfigRequest struct {
+	*http.Request
+}
+
+func NewSaveAlertmanagerConfigRequest(url string, vars *SaveAlertmanagerConfigVariables) (*SaveAlertmanagerConfigRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation SaveAlertmanagerConfig($tenant_name: String!, $new_config: String!) {
+  update_tenant_by_pk(pk_columns: {name: $tenant_name}, _set: {alertmanager_config: $new_config}) {
+    alertmanager_config
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &SaveAlertmanagerConfigRequest{req}, nil
+}
+
+func (req *SaveAlertmanagerConfigRequest) Execute(client *http.Client) (*SaveAlertmanagerConfigResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result SaveAlertmanagerConfigResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func SaveAlertmanagerConfig(url string, client *http.Client, vars *SaveAlertmanagerConfigVariables) (*SaveAlertmanagerConfigResponse, error) {
+	req, err := NewSaveAlertmanagerConfigRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) SaveAlertmanagerConfig(vars *SaveAlertmanagerConfigVariables) (*SaveAlertmanagerConfigResponse, error) {
+	return SaveAlertmanagerConfig(client.Url, client.Client, vars)
 }
 
 //
@@ -2632,17 +2765,19 @@ const (
 type TenantSelectColumn string
 
 const (
-	TenantSelectColumnCreatedAt TenantSelectColumn = "created_at"
-	TenantSelectColumnName      TenantSelectColumn = "name"
-	TenantSelectColumnType      TenantSelectColumn = "type"
+	TenantSelectColumnAlertmanagerConfig TenantSelectColumn = "alertmanager_config"
+	TenantSelectColumnCreatedAt          TenantSelectColumn = "created_at"
+	TenantSelectColumnName               TenantSelectColumn = "name"
+	TenantSelectColumnType               TenantSelectColumn = "type"
 )
 
 type TenantUpdateColumn string
 
 const (
-	TenantUpdateColumnCreatedAt TenantUpdateColumn = "created_at"
-	TenantUpdateColumnName      TenantUpdateColumn = "name"
-	TenantUpdateColumnType      TenantUpdateColumn = "type"
+	TenantUpdateColumnAlertmanagerConfig TenantUpdateColumn = "alertmanager_config"
+	TenantUpdateColumnCreatedAt          TenantUpdateColumn = "created_at"
+	TenantUpdateColumnName               TenantUpdateColumn = "name"
+	TenantUpdateColumnType               TenantUpdateColumn = "type"
 )
 
 type UserConstraint string
@@ -3363,34 +3498,38 @@ type TenantArrRelInsertInput struct {
 }
 
 type TenantBoolExp struct {
-	And         *[]TenantBoolExp        `json:"_and,omitempty"`
-	Not         *TenantBoolExp          `json:"_not,omitempty"`
-	Or          *[]TenantBoolExp        `json:"_or,omitempty"`
-	CreatedAt   *TimestampComparisonExp `json:"created_at,omitempty"`
-	Credentials *CredentialBoolExp      `json:"credentials,omitempty"`
-	Exporters   *ExporterBoolExp        `json:"exporters,omitempty"`
-	Name        *StringComparisonExp    `json:"name,omitempty"`
-	Type        *StringComparisonExp    `json:"type,omitempty"`
+	And                *[]TenantBoolExp        `json:"_and,omitempty"`
+	Not                *TenantBoolExp          `json:"_not,omitempty"`
+	Or                 *[]TenantBoolExp        `json:"_or,omitempty"`
+	AlertmanagerConfig *StringComparisonExp    `json:"alertmanager_config,omitempty"`
+	CreatedAt          *TimestampComparisonExp `json:"created_at,omitempty"`
+	Credentials        *CredentialBoolExp      `json:"credentials,omitempty"`
+	Exporters          *ExporterBoolExp        `json:"exporters,omitempty"`
+	Name               *StringComparisonExp    `json:"name,omitempty"`
+	Type               *StringComparisonExp    `json:"type,omitempty"`
 }
 
 type TenantInsertInput struct {
-	CreatedAt   *Timestamp                   `json:"created_at,omitempty"`
-	Credentials *CredentialArrRelInsertInput `json:"credentials,omitempty"`
-	Exporters   *ExporterArrRelInsertInput   `json:"exporters,omitempty"`
-	Name        *String                      `json:"name,omitempty"`
-	Type        *String                      `json:"type,omitempty"`
+	AlertmanagerConfig *String                      `json:"alertmanager_config,omitempty"`
+	CreatedAt          *Timestamp                   `json:"created_at,omitempty"`
+	Credentials        *CredentialArrRelInsertInput `json:"credentials,omitempty"`
+	Exporters          *ExporterArrRelInsertInput   `json:"exporters,omitempty"`
+	Name               *String                      `json:"name,omitempty"`
+	Type               *String                      `json:"type,omitempty"`
 }
 
 type TenantMaxOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Type      *OrderBy `json:"type,omitempty"`
+	AlertmanagerConfig *OrderBy `json:"alertmanager_config,omitempty"`
+	CreatedAt          *OrderBy `json:"created_at,omitempty"`
+	Name               *OrderBy `json:"name,omitempty"`
+	Type               *OrderBy `json:"type,omitempty"`
 }
 
 type TenantMinOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Type      *OrderBy `json:"type,omitempty"`
+	AlertmanagerConfig *OrderBy `json:"alertmanager_config,omitempty"`
+	CreatedAt          *OrderBy `json:"created_at,omitempty"`
+	Name               *OrderBy `json:"name,omitempty"`
+	Type               *OrderBy `json:"type,omitempty"`
 }
 
 type TenantObjRelInsertInput struct {
@@ -3405,6 +3544,7 @@ type TenantOnConflict struct {
 }
 
 type TenantOrderBy struct {
+	AlertmanagerConfig   *OrderBy                    `json:"alertmanager_config,omitempty"`
 	CreatedAt            *OrderBy                    `json:"created_at,omitempty"`
 	CredentialsAggregate *CredentialAggregateOrderBy `json:"credentials_aggregate,omitempty"`
 	ExportersAggregate   *ExporterAggregateOrderBy   `json:"exporters_aggregate,omitempty"`
@@ -3417,9 +3557,10 @@ type TenantPkColumnsInput struct {
 }
 
 type TenantSetInput struct {
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	Name      *String    `json:"name,omitempty"`
-	Type      *String    `json:"type,omitempty"`
+	AlertmanagerConfig *String    `json:"alertmanager_config,omitempty"`
+	CreatedAt          *Timestamp `json:"created_at,omitempty"`
+	Name               *String    `json:"name,omitempty"`
+	Type               *String    `json:"type,omitempty"`
 }
 
 type TimestampComparisonExp struct {
@@ -4023,6 +4164,7 @@ type SubscriptionRoot struct {
 }
 
 type Tenant struct {
+	AlertmanagerConfig   *String             `json:"alertmanager_config,omitempty"`
 	CreatedAt            Timestamp           `json:"created_at"`
 	Credentials          *[]Credential       `json:"credentials,omitempty"`
 	CredentialsAggregate CredentialAggregate `json:"credentials_aggregate"`
@@ -4044,15 +4186,17 @@ type TenantAggregateFields struct {
 }
 
 type TenantMaxFields struct {
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	Name      *String    `json:"name,omitempty"`
-	Type      *String    `json:"type,omitempty"`
+	AlertmanagerConfig *String    `json:"alertmanager_config,omitempty"`
+	CreatedAt          *Timestamp `json:"created_at,omitempty"`
+	Name               *String    `json:"name,omitempty"`
+	Type               *String    `json:"type,omitempty"`
 }
 
 type TenantMinFields struct {
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	Name      *String    `json:"name,omitempty"`
-	Type      *String    `json:"type,omitempty"`
+	AlertmanagerConfig *String    `json:"alertmanager_config,omitempty"`
+	CreatedAt          *Timestamp `json:"created_at,omitempty"`
+	Name               *String    `json:"name,omitempty"`
+	Type               *String    `json:"type,omitempty"`
 }
 
 type TenantMutationResponse struct {

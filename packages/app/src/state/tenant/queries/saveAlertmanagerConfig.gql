@@ -1,0 +1,10 @@
+# TODO: NTW - swap out with a call to the action when that is available
+
+mutation SaveAlertmanagerConfig($tenant_name: String!, $new_config: String!) {
+  update_tenant_by_pk(
+    pk_columns: { name: $tenant_name }
+    _set: { alertmanager_config: $new_config }
+  ) {
+    alertmanager_config
+  }
+}

@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all, call, spawn, takeEvery } from "redux-saga/effects";
+import { all, call, spawn, takeEvery, take, put } from "redux-saga/effects";
 import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
+// import { selectAlertmanagerConfig } from "state/tenant/hooks/useAlertmanagerConfig";
 
 export default function* tenantTaskManager() {
   const sagas = [
     tenantListSubscriptionManager,
     addTenantListener,
-    deleteTenantListener
+    deleteTenantListener,
+    loadAlertmanagerConfigListener,
+    saveAlertmanagerConfig
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
@@ -73,5 +76,49 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
     });
   } catch (err) {
     console.error(err);
+  }
+}
+
+function* loadAlertmanagerConfigListener() {
+  yield takeEvery(actions.loadAlertmanagerConfig, loadAlertmanagerConfig);
+}
+
+function* loadAlertmanagerConfig(
+  action: ReturnType<typeof actions.loadAlertmanagerConfig>
+) {
+  try {
+    const response = yield graphqlClient.LoadAlertmanagerConfig({
+      tenant_name: action.payload
+    });
+
+    if (response.data?.tenant_by_pk?.alertmanager_config)
+      yield put({
+        type: "ALERTMANAGER_CONFIG_LOADED",
+        payload: {
+          tenantName: action.payload,
+          config: response.data?.tenant_by_pk?.alertmanager_config
+        }
+      });
+    else
+      console.log("loadAlertmanagerConfig#failure", response, action.payload);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function* saveAlertmanagerConfig() {
+  while (true) {
+    const action: ReturnType<
+      typeof actions.saveAlertmanagerConfig
+    > = yield take(actions.saveAlertmanagerConfig);
+
+    try {
+      yield graphqlClient.SaveAlertmanagerConfig({
+        tenant_name: action.payload.tenantName,
+        new_config: action.payload.config
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

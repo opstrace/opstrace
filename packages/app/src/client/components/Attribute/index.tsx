@@ -20,17 +20,20 @@ import { Box } from "client/components/Box";
 
 import Typography from "client/components/Typography/Typography";
 
-const Key = (props: { children: ReactNode }) => (
+export const Key = (props: { children: ReactNode }) => (
   <Box pt={2} pb={2}>
     <Typography variant="h6" color="textSecondary">
       {props.children}
     </Typography>
   </Box>
 );
-const Value = (props: { children: ReactNode }) => (
+
+export const Value = (props: { children: ReactNode }) => (
   <Box p={3} pt={2} pb={2}>
     <Typography variant="h6">{props.children}</Typography>
   </Box>
 );
 
-export default { Key, Value };
+const attribute = { Key, Value };
+
+export default attribute;

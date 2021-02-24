@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import React, { useMemo, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useDispatch } from "state/provider";
+
 import Skeleton from "@material-ui/lab/Skeleton";
 //import { useDispatch } from "react-redux";
 
@@ -27,20 +29,29 @@ import { YamlEditor } from "client/components/Editor";
 import { yaml } from "workers";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
-//import { Button } from "client/components/Button";
-import useTenantList from "state/tenant/hooks/useTenantList";
+import { Button } from "client/components/Button";
+import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
+import {
+  // loadAlertmanagerConfig,
+  saveAlertmanagerConfig
+} from "state/tenant/actions";
 
-const TenantDetail = () => {
-  const params = useParams<{ tenant: string }>();
-  const tenants = useTenantList();
-  const model = monaco.editor.createModel(
-    `
-  hello
-  `,
-    "yaml"
-  );
+// import { Tenant } from "state/tenant/types";
 
-  //const dispatch = useDispatch();
+type EditorProps = {
+  config: string;
+  onChange: Function;
+};
+
+const Editor = ({ config, onChange }: EditorProps) => {
+  const model = monaco.editor.createModel(config, "yaml");
+
+  // console.log("editor render", model.getValue());
+
+  model.onDidChangeContent(data => {
+    onChange(model.getValue());
+  });
+
   useEffect(() => {
     yaml &&
       yaml.yamlDefaults.setDiagnosticsOptions({
@@ -52,12 +63,27 @@ const TenantDetail = () => {
       });
   }, []);
 
-  const selectedTenant = useMemo(
-    () => tenants.find(t => t.name === params.tenant),
-    [params.tenant, tenants]
-  );
+  return <YamlEditor model={model} />;
+};
 
-  if (!selectedTenant)
+const AlertmanagerConfigEditor = () => {
+  const params = useParams<{ tenant: string }>();
+  const tenant = useTenant(params.tenant);
+  const savedConfig = useAlertmanagerConfig(params.tenant) || "";
+  const [config, setConfig] = useState(savedConfig);
+  const dispatch = useDispatch();
+
+  // console.log("config", config, ",", savedConfig);
+  useEffect(() => {
+    // console.log("useEffect", savedConfig);
+    setConfig(savedConfig);
+    // return () => {
+    //   console.log("unmount");
+    //   setConfig("");
+    // };
+  }, [savedConfig]);
+
+  if (!tenant)
     return (
       <Layout sidebar={SideBar}>
         <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
@@ -79,13 +105,27 @@ const TenantDetail = () => {
             <Card p={3}>
               <CardHeader
                 titleTypographyProps={{ variant: "h5" }}
-                title={`${selectedTenant.name} / Alerts Manager Configuration`}
+                title={`${tenant.name} / Alertmanager Configuration`}
               />
               <CardContent>
-                <Box display="flex">
-                  <YamlEditor model={model} />
+                <Box display="flex" height="500px" width="700px">
+                  <Editor config={config} onChange={setConfig} />
                 </Box>
               </CardContent>
+              <Button
+                variant="contained"
+                state="primary"
+                onClick={() => {
+                  dispatch(
+                    saveAlertmanagerConfig({
+                      tenantName: tenant.name,
+                      config: config
+                    })
+                  );
+                }}
+              >
+                publish
+              </Button>
             </Card>
           </Box>
         </Box>
@@ -93,4 +133,4 @@ const TenantDetail = () => {
     );
 };
 
-export default TenantDetail;
+export default AlertmanagerConfigEditor;
