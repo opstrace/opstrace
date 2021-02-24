@@ -17,7 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "iteration": 1589836921383,
+  "iteration": 1614165921105,
   "links": [],
   "panels": [
     {
@@ -32,7 +32,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -59,9 +60,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -71,7 +73,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (status_code) (rate(cortex_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.cortex-api\",method=\"POST\",route=\"api_prom_push\"}[$timewindow]))",
+          "expr": "sum by (status_code) (rate(cortex_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.cortex-api\",method=\"POST\",route=\"api_v1_push\"}[$timewindow]))",
           "interval": "",
           "legendFormat": "{{status_code}}",
           "refId": "A"
@@ -81,7 +83,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "API proxy /api/prom/push, POSTs, rate by status code ($timewindow mean)",
+      "title": "API proxy /api/v1/push, POSTs, rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -122,267 +124,108 @@
       }
     },
     {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
+      "aliasColors": {
+        "{status_code=\"204\"}": "semi-dark-green",
+        "{status_code=\"400\"}": "dark-orange",
+        "{status_code=\"500\"}": "red"
       },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateSpectral",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "tsbuckets",
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "metrics",
-      "description": "I think this total duration includes reading the request body.",
+      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
+      "fill": 3,
+      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 7,
         "x": 9,
         "y": 0
       },
-      "heatmap": {},
-      "hideZeroBuckets": true,
-      "highlightCards": true,
-      "id": 22,
+      "hiddenSeries": false,
+      "id": 46,
       "legend": {
-        "show": true
-      },
-      "reverseYBuckets": false,
-      "targets": [
-        {
-          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"GET\",status_code=\"200\",route=~\"api_prom_api_v1_query\"}[$timewindow]))",
-          "format": "heatmap",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{le}}",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "API proxy /api/prom/api/v1/query, 200-acked GETs, request duration, event rate [1/s] ($timewindow mean)",
-      "tooltip": {
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": true,
         "show": true,
-        "showHistogram": true
+        "total": false,
+        "values": true
       },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": 0,
-        "format": "s",
-        "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "upper",
-      "yBucketNumber": null,
-      "yBucketSize": null
-    },
-    {
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 0
-      },
-      "id": 41,
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["delta"],
-          "values": false
-        }
+        "alertThreshold": true
       },
-      "pluginVersion": "7.1.0-dba5f43fpre",
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
       "targets": [
         {
-          "expr": "sum(cortex_chunk_store_stored_chunks_total)",
+          "expr": "sum by (code) (rate(grafana_datasource_request_duration_seconds_sum{namespace=\"$tenant-tenant\", datasource=\"metrics\"}[$timewindow]) / rate(grafana_datasource_request_duration_seconds_count{namespace=\"$tenant-tenant\", datasource=\"metrics\"}[$timewindow]))\n",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
+      "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "Chunks Stored Total",
-      "type": "stat"
-    },
-    {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
+      "title": "Queries through Grafana, request duration ($timewindow mean) by status code",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
       },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateSpectral",
-        "exponent": 0.5,
-        "mode": "spectrum"
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
       },
-      "dataFormat": "tsbuckets",
-      "datasource": "metrics",
-      "description": "I think this total duration includes reading the request body.",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 9,
-        "x": 0,
-        "y": 6
-      },
-      "heatmap": {},
-      "hideZeroBuckets": true,
-      "highlightCards": true,
-      "id": 2,
-      "legend": {
-        "show": true
-      },
-      "reverseYBuckets": false,
-      "targets": [
+      "yaxes": [
         {
-          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"POST\",status_code=~\"200|202\",route=\"api_prom_push\"}[$timewindow]))",
-          "format": "heatmap",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{le}}",
-          "refId": "A"
+          "$$hashKey": "object:123",
+          "decimals": 2,
+          "format": "short",
+          "label": "duration [s]",
+          "logBase": 1,
+          "max": null,
+          "min": "0.0001",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:124",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "API proxy /api/prom/push, 204-acked POSTs, request duration, event rate [1/s] ($timewindow mean)",
-      "tooltip": {
-        "show": true,
-        "showHistogram": true
-      },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": 0,
-        "format": "s",
-        "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "upper",
-      "yBucketNumber": null,
-      "yBucketSize": null
-    },
-    {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
-      },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateSpectral",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "tsbuckets",
-      "datasource": "metrics",
-      "description": "I think this total duration includes reading the request body.",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 7,
-        "x": 9,
-        "y": 6
-      },
-      "heatmap": {},
-      "hideZeroBuckets": true,
-      "highlightCards": true,
-      "id": 29,
-      "legend": {
-        "show": true
-      },
-      "reverseYBuckets": false,
-      "targets": [
-        {
-          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"GET\",status_code=\"200\",route=~\"api_prom_api_v1_query_range\"}[$timewindow]))",
-          "format": "heatmap",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{le}}",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "API proxy /api/prom/api/v1/query_range, 200-acked GETs, request duration, event rate [1/s] ($timewindow mean)",
-      "tooltip": {
-        "show": true,
-        "showHistogram": true
-      },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": 0,
-        "format": "s",
-        "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "upper",
-      "yBucketNumber": null,
-      "yBucketSize": null
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -393,7 +236,8 @@
       "description": "100 % is one CPU core",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -403,7 +247,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 0
       },
       "hiddenSeries": false,
       "id": 25,
@@ -420,9 +264,10 @@
       "linewidth": 1,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -432,7 +277,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"cortex\", container_name=\"ingester\"}[$timewindow])*100)",
+          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"cortex\", container=\"ingester\"}[$timewindow])*100)",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -484,113 +329,75 @@
       }
     },
     {
-      "aliasColors": {
-        "byte rate": "semi-dark-purple"
+      "cards": {
+        "cardPadding": null,
+        "cardRound": null
       },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
+      "color": {
+        "cardColor": "#b4ff00",
+        "colorScale": "sqrt",
+        "colorScheme": "interpolateSpectral",
+        "exponent": 0.5,
+        "mode": "spectrum"
+      },
+      "dataFormat": "tsbuckets",
       "datasource": "metrics",
-      "description": "before rejection, validation?",
+      "description": "I think this total duration includes reading the request body.",
       "fieldConfig": {
         "defaults": {
           "custom": {}
         },
         "overrides": []
       },
-      "fill": 2,
-      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 9,
         "x": 0,
-        "y": 12
+        "y": 6
       },
-      "hiddenSeries": false,
-      "id": 16,
+      "heatmap": {},
+      "hideZeroBuckets": true,
+      "highlightCards": true,
+      "id": 2,
       "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": true,
-        "max": true,
-        "min": false,
-        "rightSide": false,
-        "show": true,
-        "total": false,
-        "values": true
+        "show": true
       },
-      "lines": true,
-      "linewidth": 2,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "reverseYBuckets": false,
       "targets": [
         {
-          "expr": "sum(rate(cortex_distributor_received_samples_total{user=\"$tenant\"}[$timewindow]))",
+          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"POST\",status_code=~\"200|202\",route=\"api_v1_push\"}[$timewindow]))",
+          "format": "heatmap",
+          "instant": false,
           "interval": "",
-          "legendFormat": "recv sample rate",
+          "legendFormat": "{{le}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(rate(cortex_distributor_non_ha_samples_received_total[$timewindow]))",
-          "interval": "",
-          "legendFormat": "recv sample rate (\"non-HA\")",
-          "refId": "B"
         }
       ],
-      "thresholds": [],
       "timeFrom": null,
-      "timeRegions": [],
       "timeShift": null,
-      "title": "distributor: tenant: $tenant, sample recv rate ($timewindow mean)",
+      "title": "API proxy /api/v1/push, 2xx-acked POSTs, request duration, event rate [1/s] ($timewindow mean)",
       "tooltip": {
-        "shared": true,
-        "sort": 1,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
         "show": true,
-        "values": []
+        "showHistogram": true
       },
-      "yaxes": [
-        {
-          "$$hashKey": "object:448",
-          "decimals": 1,
-          "format": "short",
-          "label": "receive rate [1/s]",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:449",
-          "decimals": 1,
-          "format": "Bps",
-          "label": "byte rate [Bytes/s]",
-          "logBase": 10,
-          "max": null,
-          "min": "0",
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "type": "heatmap",
+      "xAxis": {
+        "show": true
+      },
+      "xBucketNumber": null,
+      "xBucketSize": null,
+      "yAxis": {
+        "decimals": 0,
+        "format": "s",
+        "logBase": 1,
+        "max": null,
+        "min": null,
+        "show": true,
+        "splitFactor": null
+      },
+      "yBucketBound": "upper",
+      "yBucketNumber": null,
+      "yBucketSize": null
     },
     {
       "aliasColors": {
@@ -604,7 +411,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -614,7 +422,7 @@
         "h": 6,
         "w": 7,
         "x": 9,
-        "y": 12
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 21,
@@ -631,9 +439,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -702,7 +511,8 @@
       "description": "For context see https://www.bwplotka.dev/2019/golang-memory-monitoring/",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -712,7 +522,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 12
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 27,
@@ -729,9 +539,10 @@
       "linewidth": 1,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -741,7 +552,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "container_memory_working_set_bytes{namespace=\"cortex\", container_name=\"ingester\"}",
+          "expr": "container_memory_working_set_bytes{namespace=\"cortex\", container=\"ingester\"}",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -800,10 +611,294 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
-      "description": "the counter is increased while reading the request body, before validation, and before passing things on to the ingester.",
+      "description": "before rejection, validation?",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 2,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 0,
+        "y": 12
+      },
+      "hiddenSeries": false,
+      "id": 16,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(rate(cortex_distributor_received_samples_total{user=\"$tenant\"}[$timewindow]))",
+          "interval": "",
+          "legendFormat": "recv sample rate",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(cortex_distributor_non_ha_samples_received_total[$timewindow]))",
+          "interval": "",
+          "legendFormat": "recv sample rate (\"non-HA\")",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "distributor: tenant: $tenant, sample recv rate ($timewindow mean)",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:448",
+          "decimals": 1,
+          "format": "short",
+          "label": "receive rate [1/s]",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:449",
+          "decimals": 1,
+          "format": "Bps",
+          "label": "byte rate [Bytes/s]",
+          "logBase": 10,
+          "max": null,
+          "min": "0",
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cards": {
+        "cardPadding": null,
+        "cardRound": null
+      },
+      "color": {
+        "cardColor": "#b4ff00",
+        "colorScale": "sqrt",
+        "colorScheme": "interpolateSpectral",
+        "exponent": 0.5,
+        "mode": "spectrum"
+      },
+      "dataFormat": "tsbuckets",
+      "datasource": "metrics",
+      "description": "I think this total duration includes reading the request body.",
       "fieldConfig": {
         "defaults": {
           "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 9,
+        "y": 12
+      },
+      "heatmap": {},
+      "hideZeroBuckets": true,
+      "highlightCards": true,
+      "id": 29,
+      "legend": {
+        "show": true
+      },
+      "reverseYBuckets": false,
+      "targets": [
+        {
+          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"GET\",status_code=\"200\",route=~\"api_v1_query\"}[$timewindow]))",
+          "format": "heatmap",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "API proxy /api/v1/query, 200-acked GETs, request duration, event rate [1/s] ($timewindow mean)",
+      "tooltip": {
+        "show": true,
+        "showHistogram": true
+      },
+      "type": "heatmap",
+      "xAxis": {
+        "show": true
+      },
+      "xBucketNumber": null,
+      "xBucketSize": null,
+      "yAxis": {
+        "decimals": 0,
+        "format": "s",
+        "logBase": 1,
+        "max": null,
+        "min": null,
+        "show": true,
+        "splitFactor": null
+      },
+      "yBucketBound": "upper",
+      "yBucketNumber": null,
+      "yBucketSize": null
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "description": "100 % is one CPU core",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 2,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 12
+      },
+      "hiddenSeries": false,
+      "id": 26,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null as zero",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
+      "targets": [
+        {
+          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"cortex\", container=\"distributor\"}[$timewindow])*100)",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "distributor CPU util (%), all tenants (mean over $timewindow)",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:1114",
+          "decimals": 1,
+          "format": "short",
+          "label": "CPU util [%]",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:1115",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "byte rate": "semi-dark-purple"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "description": "the counter is increased while reading the request body, before validation, and before passing things on to the ingester.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -832,9 +927,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -909,7 +1005,8 @@
       "description": "unclear what that is",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -938,9 +1035,10 @@
       "linewidth": 3,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1006,10 +1104,11 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
-      "description": "100 % is one CPU core",
+      "description": "For context see https://www.bwplotka.dev/2019/golang-memory-monitoring/",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1022,7 +1121,7 @@
         "y": 18
       },
       "hiddenSeries": false,
-      "id": 26,
+      "id": 28,
       "legend": {
         "avg": false,
         "current": false,
@@ -1036,9 +1135,10 @@
       "linewidth": 1,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1048,7 +1148,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"cortex\", container_name=\"distributor\"}[$timewindow])*100)",
+          "expr": "container_memory_working_set_bytes{namespace=\"cortex\", container=\"distributor\"}",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -1059,7 +1159,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "distributor CPU util (%), all tenants (mean over $timewindow)",
+      "title": "distributor mem (WSS)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1077,8 +1177,8 @@
         {
           "$$hashKey": "object:1114",
           "decimals": 1,
-          "format": "short",
-          "label": "CPU util [%]",
+          "format": "bytes",
+          "label": "WSS",
           "logBase": 1,
           "max": null,
           "min": "0",
@@ -1112,7 +1212,8 @@
       "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1139,9 +1240,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1202,6 +1304,103 @@
       }
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "description": "Includes blocks marked for deletion, but not partial blocks",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 9,
+        "y": 24
+      },
+      "hiddenSeries": false,
+      "id": 43,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "cortex_bucket_blocks_count{namespace=\"cortex\", user=\"$tenant\"}",
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "compactors: total number of blocks in storage bucket, for tenant $tenant",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "aliasColors": {
         "sum(rate(cortex_distributor_ingester_append_failures_total[2m]))": "dark-red",
         "{instance=\"10.28.0.9:80\"}": "super-light-red",
@@ -1212,10 +1411,11 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
-      "description": "",
+      "description": "unclear what that is",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1223,12 +1423,12 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 6,
-        "w": 7,
-        "x": 9,
+        "w": 8,
+        "x": 16,
         "y": 24
       },
       "hiddenSeries": false,
-      "id": 37,
+      "id": 12,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -1244,9 +1444,10 @@
       "linewidth": 3,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1256,7 +1457,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (reason) (rate(cortex_ingester_flush_reasons{job=\"cortex.ingester\"}[$timewindow]))",
+          "expr": "sum(rate(cortex_ingester_ingested_samples_failures_total[$timewindow]))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1266,10 +1467,10 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "ingester: rate of flushes by reason",
+      "title": "ingester, all tenants,  sample failure rate (?) ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 2,
+        "sort": 0,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1283,12 +1484,12 @@
       "yaxes": [
         {
           "$$hashKey": "object:1443",
-          "decimals": 3,
-          "format": "none",
-          "label": "rate [1/s]",
-          "logBase": 10,
+          "decimals": 1,
+          "format": "short",
+          "label": "error rate [1/s]",
+          "logBase": 1,
           "max": null,
-          "min": "0.001",
+          "min": "0",
           "show": true
         },
         {
@@ -1312,108 +1513,10 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
-      "description": "For context see https://www.bwplotka.dev/2019/golang-memory-monitoring/",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 2,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 24
-      },
-      "hiddenSeries": false,
-      "id": 28,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null as zero",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
-      "targets": [
-        {
-          "expr": "container_memory_working_set_bytes{namespace=\"cortex\", container_name=\"distributor\"}",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{instance}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "distributor mem (WSS)",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1114",
-          "decimals": 1,
-          "format": "bytes",
-          "label": "WSS",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1115",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1440,9 +1543,10 @@
       "linewidth": 4,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1508,13 +1612,14 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "custom": {}
         },
         "overrides": []
       },
-      "fill": 3,
+      "fill": 1,
       "fillGradient": 0,
       "gridPos": {
         "h": 6,
@@ -1523,427 +1628,24 @@
         "y": 30
       },
       "hiddenSeries": false,
-      "id": 14,
+      "id": 44,
       "legend": {
-        "avg": false,
-        "current": true,
-        "max": true,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 4,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(rate(cortex_ingester_chunk_stored_bytes_total{user=\"$tenant\"}[$timewindow]))",
-          "interval": "",
-          "legendFormat": "stored byte rate",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "ingester: total data rate stored in chunks, tenant: $tenant (mean over $timewindow)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 1,
-          "format": "Bps",
-          "label": "data rate [Bytes/s]",
-          "logBase": 10,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "{status_code=\"204\"}": "semi-dark-green",
-        "{status_code=\"400\"}": "semi-dark-red",
-        "{status_code=\"500\"}": "red"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 4,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 30
-      },
-      "hiddenSeries": false,
-      "id": 31,
-      "legend": {
-        "avg": false,
-        "current": true,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum by (status_code, operation) (rate(cortex_bigtable_request_duration_seconds_count{namespace=\"cortex\", job=\"cortex.ingester\"}[$timewindow]))",
-          "interval": "",
-          "legendFormat": "{{status_code}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "ingester: all tenants, Bigtable request rate by status code and operation",
-      "tooltip": {
-        "shared": true,
-        "sort": 1,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:715",
-          "decimals": 4,
-          "format": "short",
-          "label": "rate [1/s]",
-          "logBase": 10,
-          "max": null,
-          "min": "0.001",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:716",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "{status_code=\"204\"}": "semi-dark-green",
-        "{status_code=\"400\"}": "semi-dark-red",
-        "{status_code=\"500\"}": "red"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 4,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 9,
-        "x": 0,
-        "y": 36
-      },
-      "hiddenSeries": false,
-      "id": 35,
-      "legend": {
-        "avg": false,
-        "current": true,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "cortex_ingester_memory_series",
-          "interval": "",
-          "legendFormat": "{{instance}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "ingesters: number of series in memory",
-      "tooltip": {
-        "shared": true,
-        "sort": 1,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:715",
-          "decimals": 0,
-          "format": "short",
-          "label": "count",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:716",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 3,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 7,
-        "x": 9,
-        "y": 36
-      },
-      "hiddenSeries": false,
-      "id": 32,
-      "legend": {
-        "avg": false,
-        "current": true,
-        "max": true,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 4,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum by (instance) (rate(cortex_ingester_chunks_stored_total{user=\"$tenant\"}[$timewindow]))",
-          "interval": "",
-          "legendFormat": "{{instance}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "ingester: chunk store rate, tenant: $tenant (mean over $timewindow)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1755",
-          "decimals": 2,
-          "format": "short",
-          "label": "rate [1/s]",
-          "logBase": 10,
-          "max": null,
-          "min": "0.01",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1756",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "sum(rate(cortex_distributor_ingester_append_failures_total[2m]))": "dark-red",
-        "{instance=\"10.28.0.9:80\"}": "super-light-red",
-        "{instance=\"10.28.1.10:80\"}": "semi-dark-red",
-        "{instance=\"10.28.2.9:80\"}": "dark-red"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "description": "unclear what that is",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 5,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 36
-      },
-      "hiddenSeries": false,
-      "id": 12,
-      "legend": {
-        "alignAsTable": false,
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
-        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
       },
       "lines": true,
-      "linewidth": 3,
+      "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1953,9 +1655,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(cortex_ingester_ingested_samples_failures_total[$timewindow]))",
+          "expr": "cortex_ingester_shipper_uploads_total{namespace=\"cortex\"}",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{pod}}",
+          "queryType": "randomWalk",
           "refId": "A"
         }
       ],
@@ -1963,7 +1666,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "ingester, all tenants,  sample failure rate (?) ($timewindow mean)",
+      "title": "ingesters: total number of uploaded TSDB blocks, all tenants",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1979,194 +1682,20 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:1443",
-          "decimals": 1,
-          "format": "short",
-          "label": "error rate [1/s]",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1444",
           "format": "short",
           "label": null,
           "logBase": 1,
           "max": null,
           "min": null,
           "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
-      },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateSpectral",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "tsbuckets",
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 9,
-        "x": 0,
-        "y": 42
-      },
-      "heatmap": {},
-      "hideZeroBuckets": true,
-      "highlightCards": true,
-      "id": 20,
-      "legend": {
-        "show": true
-      },
-      "reverseYBuckets": false,
-      "targets": [
-        {
-          "expr": "sum  by (le) (rate(cortex_ingester_chunk_size_bytes_bucket{job=\"cortex.ingester\"}[2m]))",
-          "format": "heatmap",
-          "interval": "",
-          "legendFormat": "{{le}}",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "ingester: distribution of chunk sizes when flushed, all tenants, event rate [1/s] ($timewindow mean)",
-      "tooltip": {
-        "show": true,
-        "showHistogram": false
-      },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": 1,
-        "format": "decbytes",
-        "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "upper",
-      "yBucketNumber": null,
-      "yBucketSize": null
-    },
-    {
-      "aliasColors": {
-        "{status_code=\"204\"}": "semi-dark-green",
-        "{status_code=\"400\"}": "semi-dark-red",
-        "{status_code=\"500\"}": "red"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 4,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 7,
-        "x": 9,
-        "y": 42
-      },
-      "hiddenSeries": false,
-      "id": 36,
-      "legend": {
-        "avg": false,
-        "current": true,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "cortex_ingester_memory_chunks",
-          "interval": "",
-          "legendFormat": "{{instance}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "ingesters: number of chunks in memory",
-      "tooltip": {
-        "shared": true,
-        "sort": 1,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:715",
-          "decimals": 0,
-          "format": "short",
-          "label": "count",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
         },
         {
-          "$$hashKey": "object:716",
           "format": "short",
           "label": null,
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": false
+          "show": true
         }
       ],
       "yaxis": {
@@ -2187,7 +1716,8 @@
       "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -2197,7 +1727,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 42
+        "y": 30
       },
       "hiddenSeries": false,
       "id": 30,
@@ -2214,9 +1744,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2277,6 +1808,214 @@
       }
     },
     {
+      "aliasColors": {
+        "{status_code=\"204\"}": "semi-dark-green",
+        "{status_code=\"400\"}": "semi-dark-red",
+        "{status_code=\"500\"}": "red"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 4,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 0,
+        "y": 36
+      },
+      "hiddenSeries": false,
+      "id": 35,
+      "legend": {
+        "avg": false,
+        "current": true,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "cortex_ingester_memory_series",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "ingesters: number of series in memory",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:715",
+          "decimals": 0,
+          "format": "short",
+          "label": "count",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:716",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "{status_code=\"204\"}": "semi-dark-green",
+        "{status_code=\"400\"}": "semi-dark-red",
+        "{status_code=\"500\"}": "red"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 4,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 9,
+        "y": 36
+      },
+      "hiddenSeries": false,
+      "id": 36,
+      "legend": {
+        "avg": false,
+        "current": true,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "cortex_ingester_tsdb_head_chunks",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "ingesters: total number of chunks in the TSDB head block, all tenants",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:715",
+          "decimals": 0,
+          "format": "short",
+          "label": "count",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:716",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -2284,7 +2023,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -2294,7 +2034,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 48
+        "y": 36
       },
       "hiddenSeries": false,
       "id": 39,
@@ -2311,9 +2051,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2371,44 +2112,138 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "aliasColors": {
+        "{status_code=\"204\"}": "semi-dark-green",
+        "{status_code=\"400\"}": "semi-dark-red",
+        "{status_code=\"500\"}": "red"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 4,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 9,
+        "y": 42
+      },
+      "hiddenSeries": false,
+      "id": 45,
+      "legend": {
+        "avg": false,
+        "current": true,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "cortex_ingester_tsdb_storage_blocks_bytes",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "ingesters: total number of chunks in the TSDB head block, all tenants",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:715",
+          "decimals": 0,
+          "format": "short",
+          "label": "count",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:716",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 25,
+  "schemaVersion": 26,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": null,
         "current": {
-          "selected": true,
-          "tags": [],
-          "text": "default",
-          "value": "default"
+          "selected": false,
+          "text": "v3",
+          "value": "v3"
         },
+        "error": null,
         "hide": 0,
-        "includeAll": false,
         "label": "Tenant",
-        "multi": false,
         "name": "tenant",
         "options": [
           {
-            "$$hashKey": "object:55",
             "selected": true,
-            "text": "default",
-            "value": "default"
-          },
-          {
-            "$$hashKey": "object:56",
-            "selected": false,
-            "text": "system",
-            "value": "system"
+            "text": "v3",
+            "value": "v3"
           }
         ],
-        "query": "default, system",
+        "query": "v3",
         "skipUrlSync": false,
-        "type": "custom"
+        "type": "textbox"
       },
       {
         "auto": false,
@@ -2416,15 +2251,16 @@
         "auto_min": "10s",
         "current": {
           "selected": false,
-          "text": "4m",
-          "value": "4m"
+          "text": "1m",
+          "value": "1m"
         },
+        "error": null,
         "hide": 0,
         "label": "Time window width",
         "name": "timewindow",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "1m",
             "value": "1m"
           },
@@ -2439,7 +2275,7 @@
             "value": "3m"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "4m",
             "value": "4m"
           },
@@ -2450,6 +2286,7 @@
           }
         ],
         "query": "1m, 2m, 3m, 4m, 5m",
+        "queryValue": "",
         "refresh": 2,
         "skipUrlSync": false,
         "type": "interval"
@@ -2477,5 +2314,5 @@
   "timezone": "",
   "title": "Cortex / Overview",
   "uid": "c72shqQZz",
-  "version": 2
+  "version": 1
 }
