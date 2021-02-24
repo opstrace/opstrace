@@ -201,6 +201,10 @@ export function CortexResources(
         enable_ha_tracker: false
       }
     },
+    server: {
+      grpc_server_max_recv_msg_size: 41943040, // default (4 MB) * 10
+      grpc_server_max_send_msg_siz: 41943040 // default (4 MB) * 10
+    },
     memberlist: {
       // https://github.com/cortexproject/cortex/blob/master/docs/configuration/config-file-reference.md#memberlist_config
       // https://grafana.com/docs/loki/latest/configuration/#memberlist_config
