@@ -1196,6 +1196,8 @@ export function CortexResources(
                 }
               ],
               serviceAccountName: serviceAccountName,
+              // https://cortexmetrics.io/docs/guides/running-cortex-on-kubernetes/#take-extra-care-with-ingesters
+              terminationGracePeriodSeconds: 2400,
               volumes: [
                 {
                   configMap: {
