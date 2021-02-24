@@ -225,7 +225,7 @@ export function CortexResources(
       store_gateway_addresses: `store-gateway.${namespace}.svc.cluster.local:9095`
     },
     query_range: {
-      split_queries_by_day: true,
+      split_queries_by_interval: "24h",
       align_queries_with_step: true,
       cache_results: true,
       results_cache: {
