@@ -32,7 +32,7 @@ import * as list from "./list";
  * messages.
  */
 export function validateClusterNameOrDie(cn: string): void {
-  if (cn.length > 13) {
+  if (cn.length > 23) {
     die(`cluster name must not be longer than 13 characters`);
   }
 
