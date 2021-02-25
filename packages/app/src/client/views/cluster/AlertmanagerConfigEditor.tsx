@@ -147,10 +147,10 @@ const validateYaml = (config: string) => {
   console.log(doc);
   schema
     .isValid(doc)
-    .then(function (valid) {
+    .then(function (valid: boolean) {
       console.log("valid", valid);
     })
-    .catch(function (err) {
+    .catch(function (err: object) {
       console.log("error", err);
     });
 };

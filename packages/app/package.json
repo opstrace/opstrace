@@ -136,7 +136,8 @@
     "typesafe-actions": "^5.1.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
-    "worker-loader": "^3.0.7"
+    "worker-loader": "^3.0.7",
+    "yup": "^0.32.9"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
