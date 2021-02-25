@@ -31,15 +31,10 @@ import { yaml } from "workers";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
-import {
-  // loadAlertmanagerConfig,
-  saveAlertmanagerConfig
-} from "state/tenant/actions";
+import { saveAlertmanagerConfig } from "state/tenant/actions";
 
 import { schema } from "./alertmanagerConfigSchema";
 import * as yamlParser from "js-yaml";
-
-// import { Tenant } from "state/tenant/types";
 
 type EditorProps = {
   config: string;
@@ -50,10 +45,6 @@ const Editor = ({ config, onChange }: EditorProps) => {
   const model = useRef<monaco.editor.IModel | null>(null);
 
   useEffect(() => {
-    model.current = monaco.editor.createModel(config, "yaml");
-    model.current.onDidChangeContent(data => {
-      onChange(model.current?.getValue() || "");
-    });
     yaml &&
       yaml.yamlDefaults.setDiagnosticsOptions({
         validate: true,
@@ -65,7 +56,13 @@ const Editor = ({ config, onChange }: EditorProps) => {
   }, []);
 
   useEffect(() => {
-    if (model.current?.getValue() !== config) model.current?.setValue(config);
+    if (!model.current) {
+      model.current = monaco.editor.createModel(config, "yaml");
+      model.current.onDidChangeContent(data => {
+        onChange(model.current?.getValue() || "");
+      });
+    } else if (model.current?.getValue() !== config)
+      model.current?.setValue(config);
   }, [config]);
 
   if (model.current === null) return null;
@@ -82,14 +79,8 @@ const AlertmanagerConfigEditor = () => {
   const [config, setConfig] = useState(savedConfig);
   const dispatch = useDispatch();
 
-  // console.log("config", config, ",", savedConfig);
   useEffect(() => {
-    // console.log("useEffect", savedConfig);
     setConfig(savedConfig);
-    // return () => {
-    //   console.log("unmount");
-    //   setConfig("");
-    // };
   }, [savedConfig]);
 
   if (!tenant)
