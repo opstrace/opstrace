@@ -118,7 +118,7 @@ export const renderedClusterConfigSchema = clusterConfigFileSchema.concat(
         .required()
         .matches(CLUSTER_NAME_REGEX)
         .min(2)
-        .max(23), // was 13 at some point, trying something larger now (set of constraints now clearly known)
+        .max(23), // was 13 at some point, trying something larger now (set of constraints not clearly known)
       cloud_provider: yup
         .mixed<"gcp" | "aws">()
         .oneOf(["aws", "gcp"])

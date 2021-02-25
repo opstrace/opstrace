@@ -47,9 +47,10 @@ export function* destroyGCPInfra(): Generator<
     projectId: destroyConfig.gcpProjectID,
     role: "roles/dns.admin"
   });
-  // Note(JP): naming convention changed in Feb 2021.
-  // Previously, the account was called *-cert-manager.
-  // Make this newer installer compatible with older clusters.
+  // Note(JP): naming convention changed in Feb 2021. Previously, the account
+  // was called *-cert-manager. Make this newer uninstaller compatible with
+  // clusters created with and older installer (so that the *-cert-manager is
+  // deleted if it exists).
   yield call(ensureServiceAccountDoesNotExist, {
     // name-based convention, sync with installer
     name: `${destroyConfig.clusterName}-cert-manager`,
