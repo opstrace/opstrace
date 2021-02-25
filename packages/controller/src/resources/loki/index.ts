@@ -98,12 +98,20 @@ export function LokiResources(
       },
       replicas: select(getNodeCount(state), [
         {
-          "<=": 6,
+          "<=": 4,
           choose: 3
         },
         {
-          "<=": 9,
+          "<=": 6,
           choose: 5
+        },
+        {
+          "<=": 8,
+          choose: 7
+        },
+        {
+          "<=": 10,
+          choose: 9
         },
         {
           "<=": Infinity,
