@@ -61,6 +61,9 @@ const toKubeResources = (
   const resources: Array<K8sResource> = [];
   let podSpec: V1PodSpec;
   if (exporter.type == "cloudwatch") {
+    // TODO: The exporter pod is NOT automatically restarted if this ConfigMap changes.
+    // Will want to ensure that the pod is restarted if this ConfigMap is updated.
+    // See e.g. https://github.com/jimmidyson/configmap-reload/
     resources.push(
       new ConfigMap(
         {
@@ -99,6 +102,31 @@ const toKubeResources = (
           }]
           : [],
         ports: [{ name: "metrics", containerPort: 9106 }],
+        volumeMounts: [{ name: "config", mountPath: "/config" }],
+      },{
+        name: "config-watcher",
+        image: DockerImages.exporterCloudwatch,
+        env: [{
+          name: "WATCH_FILE",
+          value: "/config/config.yml"
+        },{
+          name: "WATCH_POLL_DELAY_SECS",
+          value: "60"
+        }],
+        // When the ConfigMap is updated, the config volume should get updated automatically after a minute or two,
+        // but there's nothing to ensure that the exporter process sees the new config.
+        // As a workaround, we have this bash sidecar that polls for the config to change, then exits to restart the pod.
+        // See also: https://github.com/jimmidyson/configmap-reload (but our exporter doesn't listen to webhooks)
+        command: [
+          "/bin/bash",
+          "-c",
+          "ORIG_SHA=\"$(sha256sum $WATCH_FILE)\"\n\
+while [ \"$(sha256sum $WATCH_FILE)\" = \"$ORIG_SHA\" ]; do\n\
+    echo \"$(date +%Y-%m-%d/%H:%M:%S) No change to $WATCH_FILE\"\n\
+    sleep $WATCH_POLL_DELAY_SECS\n\
+done\n\
+echo \"$(date +%Y-%m-%d/%H:%M:%S) $WATCH_FILE SHA has changed, exiting\""
+        ],
         volumeMounts: [{ name: "config", mountPath: "/config" }],
       }],
       volumes: [{
