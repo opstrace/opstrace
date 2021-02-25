@@ -158,7 +158,12 @@ export function* ensureGCPInfraExists(
   // Create a Google service account to be used by cert-manager.
   log.info(`Ensuring cert-manager service account exists`);
   const certManagerSA = yield call(ensureServiceAccountExists, {
-    name: `${ccfg.cluster_name}-cert-manager`,
+    // service account name ("account ID") in GCP must be at least 6 and at
+    // most 30 characters. `ccfg.cluster_name` is at most 23 characters at the
+    // time of writing. 23 plus 7 (len('-crtmgr')) is 30. Good.
+    // Note: this is a name-based convention, the uninstaller relies on this
+    // convention.
+    name: `${ccfg.cluster_name}-crtmgr`,
     projectId: gcpProjectID,
     role: "roles/dns.admin",
     kubernetesServiceAccount: "ingress/cert-manager"
