@@ -35,13 +35,15 @@ function AutoSizingYamlEditor({ model }: { model: monaco.editor.ITextModel }) {
 function YamlEditor({ height, width, model }: YamlEditorProps & Size) {
   const editor = useRef<null | monaco.editor.ICodeEditor>(null);
 
+  const currentModel = useRef<monaco.editor.IModel>(model);
+
   const editorContainer = useCallback(async node => {
     if (node) {
       editor.current = monaco.editor.create(
         node,
         getTextEditorOptions({
           readOnly: false,
-          model
+          model: currentModel.current
         })
       );
     }

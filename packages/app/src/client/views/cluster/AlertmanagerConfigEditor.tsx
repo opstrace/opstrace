@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "state/provider";
 
@@ -36,6 +36,9 @@ import {
   saveAlertmanagerConfig
 } from "state/tenant/actions";
 
+import { schema } from "./alertmanagerConfigSchema";
+import * as yamlParser from "js-yaml";
+
 // import { Tenant } from "state/tenant/types";
 
 type EditorProps = {
@@ -44,15 +47,13 @@ type EditorProps = {
 };
 
 const Editor = ({ config, onChange }: EditorProps) => {
-  const model = monaco.editor.createModel(config, "yaml");
-
-  // console.log("editor render", model.getValue());
-
-  model.onDidChangeContent(data => {
-    onChange(model.getValue());
-  });
+  const model = useRef<monaco.editor.IModel | null>(null);
 
   useEffect(() => {
+    model.current = monaco.editor.createModel(config, "yaml");
+    model.current.onDidChangeContent(data => {
+      onChange(model.current?.getValue() || "");
+    });
     yaml &&
       yaml.yamlDefaults.setDiagnosticsOptions({
         validate: true,
@@ -63,7 +64,15 @@ const Editor = ({ config, onChange }: EditorProps) => {
       });
   }, []);
 
-  return <YamlEditor model={model} />;
+  useEffect(() => {
+    if (model.current?.getValue() !== config) model.current?.setValue(config);
+  }, [config]);
+
+  if (model.current === null) return null;
+
+  console.log("editor render", model.current.getValue());
+
+  return <YamlEditor model={model.current} />;
 };
 
 const AlertmanagerConfigEditor = () => {
@@ -126,11 +135,33 @@ const AlertmanagerConfigEditor = () => {
               >
                 publish
               </Button>
+              <Button
+                variant="contained"
+                state="secondary"
+                onClick={() => {
+                  validateYaml(config);
+                }}
+              >
+                validate
+              </Button>
             </Card>
           </Box>
         </Box>
       </Layout>
     );
+};
+
+const validateYaml = (config: string) => {
+  const doc = yamlParser.load(config);
+  console.log(doc);
+  schema
+    .isValid(doc)
+    .then(function (valid) {
+      console.log("valid", valid);
+    })
+    .catch(function (err) {
+      console.log("error", err);
+    });
 };
 
 export default AlertmanagerConfigEditor;
