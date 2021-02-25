@@ -118,9 +118,7 @@ export const renderedClusterConfigSchema = clusterConfigFileSchema.concat(
         .required()
         .matches(CLUSTER_NAME_REGEX)
         .min(2)
-        .max(13), // Note(JP): what's our rational here? Reply(Mat): If I remember correctly, this came from the limit
-      // imposed for BigTable instance names - they had a strict char limit. This is no longer applicable
-      // so we might want to increase the limit.
+        .max(23), // was 13 at some point, trying something larger now (set of constraints now clearly known)
       cloud_provider: yup
         .mixed<"gcp" | "aws">()
         .oneOf(["aws", "gcp"])
