@@ -49,56 +49,23 @@ const tlsConfig = yup
 const httpConfig = yup
   .object({
     basic_auth: yup
-      .object()
-      .when(["bearer_token", "bearer_token_file"], {
-        is: (bearer_token: string | null, bearer_token_file: string | null) =>
-          bearer_token || bearer_token_file,
-        then: yup.object().notRequired().nullable(),
-        otherwise: yup.object().required()
-      })
-      .shape({
+      .object({
         username: yup.string(),
-        password: yup.string().when("password_file", {
-          is: (password_file: string | null) => password_file,
-          then: yup.object().notRequired().nullable(),
-          otherwise: yup.object().required()
-        }),
-        password_file: yup.string().when("password", {
-          is: (password: string | null) => password,
-          then: yup.object().notRequired().nullable(),
-          otherwise: yup.object().required()
-        })
+        password: yup.string(),
+        password_file: yup.string()
       })
-      .nullable()
-      .default(null)
       .meta({
         comment:
           "Sets the `Authorization` header with the configured username and password."
       }),
-    bearer_token: yup
-      .string()
-      .when(["basic_auth", "bearer_token_file"], {
-        is: (basic_auth: object | null, bearer_token_file: string | null) =>
-          basic_auth || bearer_token_file,
-        then: yup.string().notRequired().nullable(),
-        otherwise: yup.string().required()
-      })
-      .meta({
-        comment:
-          "Sets the `Authorization` header with the configured bearer token."
-      }),
-    bearer_token_file: yup
-      .string()
-      .when(["basic_auth", "bearer_token"], {
-        is: (basic_auth: object | null, bearer_token: string | null) =>
-          basic_auth || bearer_token,
-        then: yup.string().notRequired().nullable(),
-        otherwise: yup.string().required()
-      })
-      .meta({
-        comment:
-          "Sets the `Authorization` header with the bearer token read from the configured file."
-      }),
+    bearer_token: yup.string().meta({
+      comment:
+        "Sets the `Authorization` header with the configured bearer token."
+    }),
+    bearer_token_file: yup.string().meta({
+      comment:
+        "Sets the `Authorization` header with the bearer token read from the configured file."
+    }),
     tls_config: tlsConfig,
     proxy_url: yup.string()
   })
@@ -108,21 +75,9 @@ const httpConfig = yup
 const slackConfigAction = yup.object({
   text: yup.string().required(),
   type: yup.string().required(),
-  url: yup.string().when(["name", "value"], {
-    is: (name: string | null, value: string | null) => name || value,
-    then: yup.string().notRequired().nullable(),
-    otherwise: yup.string().url().required()
-  }),
-  name: yup.string().when(["url"], {
-    is: (url: string | null) => url,
-    then: yup.string().notRequired().nullable(),
-    otherwise: yup.string().required()
-  }),
-  value: yup.string().when(["url"], {
-    is: (url: string | null) => url,
-    then: yup.string().notRequired().nullable(),
-    otherwise: yup.string().required()
-  }),
+  url: yup.string(),
+  name: yup.string(),
+  value: yup.string(),
   confirm: yup
     .object({
       text: yup.string().required(),
@@ -215,7 +170,7 @@ This effectively disables aggregation entirely, passing through all alerts as-is
   .default(null);
 
 // can't use "route" in the definition of route :-)
-route = route.shape({ routes: yup.array().of(route).required() });
+route = route.shape({ routes: yup.array().of(route) });
 
 const receiver = yup
   .object({
@@ -230,6 +185,6 @@ const receiver = yup
 // eslint-disable-next-line
 export const schema = yup.object({
   global: global.required(),
-  routes: yup.array().of(route).required(),
+  route: route.required(),
   receivers: yup.array().of(receiver).required()
 });

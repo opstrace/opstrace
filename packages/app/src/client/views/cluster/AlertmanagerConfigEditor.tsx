@@ -144,15 +144,13 @@ const AlertmanagerConfigEditor = () => {
 
 const validateYaml = (config: string) => {
   const doc = yamlParser.load(config);
-  console.log(doc);
-  schema
-    .isValid(doc)
-    .then(function (valid: boolean) {
-      console.log("valid", valid);
-    })
-    .catch(function (err: object) {
-      console.log("error", err);
-    });
+  schema.isValid(doc).then(function (valid: boolean) {
+    console.log("valid", valid);
+  });
+  // .validate(doc)
+  // .catch(function (err: object) {
+  //   console.log("error", err);
+  // });
 };
 
 export default AlertmanagerConfigEditor;
