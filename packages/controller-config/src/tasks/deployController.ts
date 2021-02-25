@@ -33,7 +33,7 @@ export function* deployControllerResources(config: {
   kubeConfig: KubeConfig;
   deploymentStrategy: ControllerResourcesDeploymentStrategy;
 }): Generator<AllEffect<Promise<void>[]>, void, unknown> {
-  const resources = ControllerResources(config)
+  let resources = ControllerResources(config)
     .get()
     .map(r => {
       // Protect these resources so we don't ever terminate them in the reconcile loop
@@ -50,6 +50,10 @@ export function* deployControllerResources(config: {
 
     case ControllerResourcesDeploymentStrategy.Update: {
       log.debug("updating controller resources");
+      // Do not create a new secret when upgrading. This would create a mismatch between the secret
+      // that is attached to the controller and the secret that is attached to hasura
+      resources = resources.filter(r => r.name !== "hasura-admin-secret");
+
       yield all([resources.map(updateResource)]);
       break;
     }
