@@ -59,6 +59,13 @@ export function* destroyGCPInfra(): Generator<
   });
 
   log.info(`Ensure external-dns service account deletion`);
+
+  yield call(ensureServiceAccountDoesNotExist, {
+    name: `${destroyConfig.clusterName}-extdns`,
+    projectId: destroyConfig.gcpProjectID,
+    role: "roles/dns.admin"
+  });
+  // for backwards compat (name changed from *-external-dns to -extdns)
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-external-dns`,
     projectId: destroyConfig.gcpProjectID,
