@@ -329,7 +329,9 @@ export function CortexResources(
     blocks_storage: {
       tsdb: {
         dir: "/cortex/tsdb",
-        wal_compression_enabled: true
+        wal_compression_enabled: true,
+        block_ranges_period: "2h", //default
+        retention_period: "6h" //default
       },
       backend: storageBackend,
       bucket_store: {
