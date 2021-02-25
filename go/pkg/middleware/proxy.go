@@ -81,13 +81,12 @@ func NewReverseProxyDynamicTenant(
 
 // Replaces the internal ReverseProxy with one that will apply the provided backendPathReplacement
 // to request paths.
-// TODO: what about updating response payloads, e.g. if the response has links/references to be updated to the new path?
+// This does not currently support rewriting responses, which may be needed for any HTML with embedded URLs.
 func (trp *TenantReverseProxy) ReplacePaths(reqPathReplacement func(*url.URL) string) *TenantReverseProxy {
 	if reqPathReplacement != nil {
 		// Requests: Update URL path with replacement
 		trp.revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
 	}
-	// TODO responses: Update response payload with replacement
 	return trp
 }
 
@@ -98,8 +97,10 @@ func pathReplacementDirector(backendURL *url.URL, reqPathReplacement func(*url.U
 		req.URL.Scheme = backendURL.Scheme
 		req.URL.Host = backendURL.Host
 
-		// CUSTOM vs stock NewSingleHostReverseProxy.Director
+		// CUSTOM PATH LOGIC vs stock NewSingleHostReverseProxy.Director, which only supports appends
+		origPath := req.URL.Path
 		req.URL.Path = reqPathReplacement(req.URL)
+		log.Debugf("Redirecting req=%s to dest=%s%s", origPath, backendURL.Host, req.URL.Path)
 		if req.URL.RawPath != "" {
 			// Also update RawPath with escaped version of replacement
 			req.URL.RawPath = url.PathEscape(req.URL.Path)
