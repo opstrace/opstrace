@@ -54,7 +54,7 @@ https://github.com/stretchr/testify/pull/655#issuecomment-588500729
 
 const TenantName = "test"
 
-func (suite *Suite) TestDDProxyHandler_MissingCTH() {
+func (suite *Suite) TestHandlerSeriesPost_MissingCTH() {
 	// Valid JSON in body, valid URL, valid method. Invalid: missing
 	// content-type header.
 	req := httptest.NewRequest(
@@ -83,7 +83,7 @@ func (suite *Suite) TestDDProxyHandler_MissingCTH() {
 	)
 }
 
-func (suite *Suite) TestDDProxyHandler_BadCTH() {
+func (suite *Suite) TestHandlerSeriesPost_BadCTH() {
 	// Valid JSON in body, valid URL, valid method. Invalid: unexpected
 	// CT header
 	req := httptest.NewRequest(
@@ -109,7 +109,7 @@ func (suite *Suite) TestDDProxyHandler_BadCTH() {
 	)
 }
 
-func (suite *Suite) TestDDProxyHandler_EmptyBody() {
+func (suite *Suite) TestHandlerSeriesPost_EmptyBody() {
 	// Valid URL, valid method, valid CT header, invalid: missing body
 	req := httptest.NewRequest("POST", "http://localhost/api/v1/series", nil)
 	req.Header.Set("Content-Type", "application/json")
@@ -130,7 +130,7 @@ func (suite *Suite) TestDDProxyHandler_EmptyBody() {
 	)
 }
 
-func (suite *Suite) TestDDProxyHandler_InsertOneSample() {
+func (suite *Suite) TestHandlerSeriesPost_InsertOneSample() {
 	testname := suite.T().Name()
 	w := httptest.NewRecorder()
 
@@ -148,7 +148,7 @@ func (suite *Suite) TestDDProxyHandler_InsertOneSample() {
 	expectInsertSuccessResponse(w, suite.T())
 }
 
-func (suite *Suite) TestDDProxyHandler_InsertZeroSamples() {
+func (suite *Suite) TestHandlerSeriesPost_InsertZeroSamples() {
 	testname := suite.T().Name()
 	w := httptest.NewRecorder()
 
@@ -170,7 +170,7 @@ func (suite *Suite) TestDDProxyHandler_InsertZeroSamples() {
 	expectInsertSuccessResponse(w, suite.T())
 }
 
-func (suite *Suite) TestDDProxyHandler_InsertManySamples() {
+func (suite *Suite) TestHandlerSeriesPost_InsertManySamples() {
 	testname := suite.T().Name()
 	w := httptest.NewRecorder()
 
@@ -189,7 +189,7 @@ func (suite *Suite) TestDDProxyHandler_InsertManySamples() {
 	expectInsertSuccessResponse(w, suite.T())
 }
 
-func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
+func (suite *Suite) TestHandlerSeriesPost_OutOfOrderSamples() {
 	jsonText1 := `
 	{
 		"series": [{
@@ -210,8 +210,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	suite.ddcp.HandlerSeriesPost(w, req)
-	resp := w.Result()
-	assert.Equal(suite.T(), 202, resp.StatusCode)
+	expectInsertSuccessResponse(w, suite.T())
 
 	// same request, but sample older than the previous one
 	jsonText2 := `
@@ -233,7 +232,7 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
 	suite.ddcp.HandlerSeriesPost(w, req)
-	resp = w.Result()
+	resp := w.Result()
 
 	// Expect bad request, because there's no JSON body in the request.
 	assert.Equal(suite.T(), 400, resp.StatusCode)
@@ -245,6 +244,58 @@ func (suite *Suite) TestDDProxyHandler_OutOfOrderSamples() {
 		regexp.MustCompile(".*sample timestamp out of order; .*, incoming timestamp: 1610030000 .*$"),
 		getStrippedBody(resp),
 	)
+}
+
+func (suite *Suite) TestHandlerSeriesPost_NonMonotonicSamples() {
+	// Test case where the points in the JSON doc are not ordered in time.
+	// The translation layer is expected to sort them in time before
+	// constructing the Prom write request.
+	jsonText1 := `
+	{
+		"series": [{
+			"metric": "unit.test.metric.aaa",
+			"points": [[1610030001, 1], [1610030000, 2], [1610030002, 3]],
+			"type": "rate",
+			"interval": 10
+			}
+		]
+	}
+	`
+	// Valid URL, valid method. Invalid data (duplicate timestamps)
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/series",
+		strings.NewReader(jsonText1),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	suite.ddcp.HandlerSeriesPost(w, req)
+	expectInsertSuccessResponse(w, suite.T())
+}
+
+func (suite *Suite) TestHandlerCheckPost_InsertOneSample() {
+	jsonText := `
+	[
+	  {
+		"check": "unit.test.check.aaa",
+		"host_name": "x1carb6",
+		"timestamp": 1613495770,
+		"status": 0,
+		"message": "",
+		"tags": ["check:disk"]
+	  }
+	]
+	`
+	// Valid URL, valid method. Invalid data (duplicate timestamps)
+	req := httptest.NewRequest(
+		"POST",
+		"http://localhost/api/v1/check_run",
+		strings.NewReader(jsonText),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	suite.ddcp.HandlerCheckPost(w, req)
+	expectInsertSuccessResponse(w, suite.T())
 }
 
 func expectInsertSuccessResponse(w *httptest.ResponseRecorder, t *testing.T) {
@@ -336,11 +387,11 @@ func (suite *Suite) TearDownSuite() {
 }
 
 // For 'go test' to run this suite, create a stdlib `testing` test function.
-func TestSubmitSeriesHandlerWithCortex(t *testing.T) {
+func TestSuiteWithCortexCont_Series(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
 
-func TestDDProxyAuthenticator_noapikey(t *testing.T) {
+func TestHandlerSeriesPostAuthenticator_noapikey(t *testing.T) {
 	// Instantiate proxy with enabled authenticator
 	disableAPIAuthentication := false
 	ddcp := NewDDCortexProxy(TenantName, "http://localhost", disableAPIAuthentication)
@@ -364,7 +415,7 @@ func TestDDProxyAuthenticator_noapikey(t *testing.T) {
 	)
 }
 
-func TestDDProxyAuthenticator_badtoken(t *testing.T) {
+func TestHandlerSeriesPostAuthenticator_badtoken(t *testing.T) {
 	// Instantiate proxy with enabled authenticator
 	disableAPIAuthentication := false
 	ddcp := NewDDCortexProxy(TenantName, "http://localhost", disableAPIAuthentication)

@@ -201,6 +201,10 @@ export function CortexResources(
         enable_ha_tracker: false
       }
     },
+    server: {
+      grpc_server_max_recv_msg_size: 41943040, // default (4 MB) * 10
+      grpc_server_max_send_msg_size: 41943040 // default (4 MB) * 10
+    },
     memberlist: {
       // https://github.com/cortexproject/cortex/blob/master/docs/configuration/config-file-reference.md#memberlist_config
       // https://grafana.com/docs/loki/latest/configuration/#memberlist_config
@@ -225,7 +229,7 @@ export function CortexResources(
       store_gateway_addresses: `store-gateway.${namespace}.svc.cluster.local:9095`
     },
     query_range: {
-      split_queries_by_day: true,
+      split_queries_by_interval: "24h",
       align_queries_with_step: true,
       cache_results: true,
       results_cache: {
