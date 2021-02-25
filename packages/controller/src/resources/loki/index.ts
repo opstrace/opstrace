@@ -853,7 +853,7 @@ export function LokiResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "30Gi"
+                    storage: "10Gi"
                   }
                 }
               }
@@ -879,7 +879,7 @@ export function LokiResources(
           accessModes: ["ReadWriteOnce"],
           resources: {
             requests: {
-              storage: "30Gi"
+              storage: "10Gi"
             }
           }
         }
@@ -1122,7 +1122,7 @@ export function LokiResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "30Gi"
+                    storage: "10Gi"
                   }
                 }
               }
