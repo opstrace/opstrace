@@ -74,6 +74,9 @@ async function createServiceAccount({
     name: `projects/${projectId}`,
     accountId: accountId
   };
+  // Account ID must be at least 6 and at most 30 chars, otherwise
+  // API error: The account ID \"cicluster-bk-3667-998-g-cert-manager\" does not have a length
+  // between 6 and 30.
   const sa = await iam.projects.serviceAccounts.create(params);
   return sa.data;
 }
