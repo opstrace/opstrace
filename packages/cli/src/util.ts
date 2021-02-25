@@ -33,7 +33,9 @@ import * as list from "./list";
  */
 export function validateClusterNameOrDie(cn: string): void {
   if (cn.length > 23) {
-    die(`cluster name must not be longer than 13 characters`);
+    die(
+      `cluster name must not be longer than 23 characters (is: ${cn.length})`
+    );
   }
 
   if (cn.length < 2) {
