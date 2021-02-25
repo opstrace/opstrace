@@ -21,8 +21,6 @@ import { selectTenant } from "./useTenant";
 import { loadAlertmanagerConfig } from "state/tenant/actions";
 
 export const selectAlertmanagerConfig = (state: State, tenantName: string) => {
-  // console.log(">>", getTenantList(state), tenantName);
-
   return selectTenant(getTenantList(state), tenantName)?.alertmanager_config;
 };
 /**
@@ -35,8 +33,6 @@ export default function useAlertmanagerConfig(tenantName: string) {
     selectAlertmanagerConfig(state, tenantName)
   );
   const dispatch = useDispatch();
-
-  // console.log("useAlertmanagerConfig", tenantName, config);
 
   if (!config) dispatch(loadAlertmanagerConfig(tenantName));
 

@@ -44,7 +44,6 @@ export const reducer = createReducer<TenantState, TenantActions>(
   .handleAction(
     actions.alertmanagerConfigLoaded,
     (state, action): TenantState => {
-      // console.log("alertmanagerConfigLoaded", action.payload);
       const tenants = state.tenants.map((tenant: Tenant) => {
         if (tenant.name === action.payload.tenantName)
           return { ...tenant, alertmanager_config: action.payload.config };

@@ -99,8 +99,6 @@ function* loadAlertmanagerConfig(
           config: response.data?.tenant_by_pk?.alertmanager_config
         }
       });
-    else
-      console.log("loadAlertmanagerConfig#failure", response, action.payload);
   } catch (err) {
     console.error(err);
   }
