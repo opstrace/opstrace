@@ -244,7 +244,7 @@ export function CortexResources(
     api: {
       // Serve Alertmanager UI at this custom location, matching the path served by the config-api pod.
       // SEE ALSO: go/cmd/config/main.go
-      alertmanager_http_prefix: "/api/v1/alertmanager",
+      alertmanager_http_prefix: "/api/v1/alertmanager"
     },
     auth_enabled: true,
     distributor: {
@@ -381,6 +381,7 @@ export function CortexResources(
         }
       }
     },
+    purger: { enable: true },
     storage: {
       engine: "blocks"
     },
