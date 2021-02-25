@@ -49,7 +49,7 @@ export function* destroyGCPInfra(): Generator<
   });
   // Note(JP): naming convention changed in Feb 2021. Previously, the account
   // was called *-cert-manager. Make this newer uninstaller compatible with
-  // clusters created with and older installer (so that the *-cert-manager is
+  // clusters created with an older installer (so that the *-cert-manager is
   // deleted if it exists).
   yield call(ensureServiceAccountDoesNotExist, {
     // name-based convention, sync with installer
