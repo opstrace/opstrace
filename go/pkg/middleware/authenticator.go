@@ -30,7 +30,7 @@ import (
 
 // HTTP Request header used by GetTenant when disableAPIAuthentication is true and requireTenantName is nil.
 // This is only meant for use in testing, and lines up with the tenant HTTP header used by Cortex and Loki.
-const TEST_TENANT_HEADER = "X-Scope-OrgID"
+const TestTenantHeader = "X-Scope-OrgID"
 
 // Use a single key for now. Further down the road there should be support
 // for multiple public keys, each identified by a key id.
@@ -42,15 +42,20 @@ var authtokenVerificationPubKey *rsa.PublicKey
 // If expectedTenantName is non-nil, then all requests are required to have a matching tenant,
 // otherwise the tenant may vary per-request and is extracted from the verified Authorization header.
 //
-// If disableAPIAuthentication is true, then the provided expectedTenantName or X-Scope-OrgID is used without any verification.
-func GetTenant(w http.ResponseWriter, r *http.Request, expectedTenantName *string, disableAPIAuthentication bool) (string, bool) {
+// If disableAPIAuthentication is true, then the expectedTenantName or X-Scope-OrgID is used without verification.
+func GetTenant(
+	w http.ResponseWriter,
+	r *http.Request,
+	expectedTenantName *string,
+	disableAPIAuthentication bool,
+) (string, bool) {
 	if expectedTenantName == nil {
 		// Tenant may vary on a per-request basis to this endpoint
 		if disableAPIAuthentication {
 			// TESTING: No single expected tenant, so check for tenant in the X-Scope-OrgID header
-			tenantName := r.Header.Get(TEST_TENANT_HEADER)
+			tenantName := r.Header.Get(TestTenantHeader)
 			if tenantName == "" {
-				exit401(w, fmt.Sprintf("missing test %s header specifying tenant", TEST_TENANT_HEADER))
+				exit401(w, fmt.Sprintf("missing test %s header specifying tenant", TestTenantHeader))
 				return "", false
 			}
 			return tenantName, true

@@ -73,8 +73,18 @@ func main() {
 
 	// See: https://github.com/grafana/loki/blob/master/docs/api.md#microservices-mode
 	lokiTenantHeader := "X-Scope-OrgID"
-	querierProxy := middleware.NewTenantReverseProxy(&tenantName, lokiTenantHeader, lokiqurl, nil, disableAPIAuthentication)
-	distributorProxy := middleware.NewTenantReverseProxy(&tenantName, lokiTenantHeader, lokidurl, nil, disableAPIAuthentication)
+	querierProxy := middleware.NewReverseProxyFixedTenant(
+		tenantName,
+		lokiTenantHeader,
+		lokiqurl,
+		disableAPIAuthentication,
+	)
+	distributorProxy := middleware.NewReverseProxyFixedTenant(
+		tenantName,
+		lokiTenantHeader,
+		lokidurl,
+		disableAPIAuthentication,
+	)
 
 	// mux matches based on registration order, not prefix length.
 	router := mux.NewRouter()

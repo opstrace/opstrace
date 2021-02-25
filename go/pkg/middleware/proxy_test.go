@@ -28,13 +28,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const tenantName string = "test"
+const headerName string = "X-Scope-Orgid"
+
 func createProxyUpstream(tenantName string, t *testing.T) (*url.URL, func()) {
 	// Create an actual HTTP server to be used as upstream (backend) for the
 	// proxies to be tested. Any request to / checks the X-Scope-Orgid header
 	// and writes the tenant name to the response.
 	router := mux.NewRouter()
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, tenantName, r.Header.Get("X-Scope-Orgid"))
+		assert.Equal(t, tenantName, r.Header.Get(headerName))
 		fmt.Fprintf(w, "%s %s", r.URL.String(), tenantName)
 	})
 
@@ -50,13 +53,12 @@ func createProxyUpstream(tenantName string, t *testing.T) (*url.URL, func()) {
 }
 
 func TestReverseProxy_healthy(t *testing.T) {
-	tenantName := "test"
 	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
 	defer upstreamClose()
 
 	// Reuse the same backend for both the querier and distributor requests.
 	disableAPIAuth := true
-	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", upstreamURL, nil, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, headerName, upstreamURL, disableAPIAuth)
 
 	// Create a request to the proxy (not to the backend/upstream). The URL
 	// does not really matter because we're bypassing the actual router.
@@ -78,19 +80,23 @@ func TestReverseProxy_healthy(t *testing.T) {
 }
 
 func TestReverseProxy_pathreplace(t *testing.T) {
-	tenantName := "test"
 	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
 	defer upstreamClose()
 
 	// Reuse the same backend for both the querier and distributor requests.
-	pathReplacement := func(requrl *url.URL) (string,string) {
+	pathReplacement := func(requrl *url.URL) string {
 		if strings.HasPrefix(requrl.Path, "/replaceme") {
-			return strings.Replace(requrl.Path, "/replaceme", "/foo", 1), strings.Replace(requrl.RawPath, "/replaceme", "/foo", 1)
+			return strings.Replace(requrl.Path, "/replaceme", "/foo", 1)
 		}
-		return requrl.Path, requrl.RawPath
+		return requrl.Path
 	}
 	disableAPIAuth := true
-	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", upstreamURL, &pathReplacement, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(
+		tenantName,
+		headerName,
+		upstreamURL,
+		disableAPIAuth,
+	).ReplacePaths(pathReplacement)
 
 	// /replaceme => /foo
 	req := httptest.NewRequest("GET", "http://localhost/replaceme", nil)
@@ -121,8 +127,6 @@ func TestReverseProxy_pathreplace(t *testing.T) {
 }
 
 func TestReverseProxy_unhealthy(t *testing.T) {
-	tenantName := "test"
-
 	// set a url for the querier and distributor so that it always fail to
 	// simulate an error reaching the backend
 	u, err := url.Parse("http://localhost:0")
@@ -133,7 +137,7 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	// we can reuse the same backend to send both the querier and distributor
 	// requests
 	disableAPIAuth := true
-	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", u, nil, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, headerName, u, disableAPIAuth)
 	// create a request to the test backend
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
@@ -158,8 +162,7 @@ func TestReverseProxyAuthenticator_noheader(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	tenantName := "test"
-	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", fakeURL, nil, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, headerName, fakeURL, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
@@ -184,8 +187,7 @@ func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	tenantName := "test"
-	rp := NewTenantReverseProxy(&tenantName, "X-Scope-Orgid", fakeURL, nil, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, headerName, fakeURL, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 	req.Header.Set("Authorization", "Bearer foobarbadtoken")

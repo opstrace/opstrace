@@ -18,7 +18,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -38,18 +37,23 @@ import (
 type TenantReverseProxy struct {
 	tenantName               *string
 	headerName               string
+	backendURL               *url.URL
 	revproxy                 *httputil.ReverseProxy
 	disableAPIAuthentication bool
 }
 
-func NewTenantReverseProxy(
-	tenantName *string,
+func NewReverseProxyFixedTenant(
+	tenantName string,
 	headerName string,
 	backendURL *url.URL,
-	backendPathReplacement *func(*url.URL) (string,string),
 	disableAPIAuthentication bool) *TenantReverseProxy {
-	revproxy := &httputil.ReverseProxy{Director: director(backendURL, backendPathReplacement)}
-	trp := &TenantReverseProxy{tenantName, headerName, revproxy, disableAPIAuthentication}
+	trp := &TenantReverseProxy{
+		&tenantName,
+		headerName,
+		backendURL,
+		httputil.NewSingleHostReverseProxy(backendURL),
+		disableAPIAuthentication,
+	}
 	trp.revproxy.ErrorHandler = proxyErrorHandler
 	if backendURL.Path != "" && backendURL.Path != "/" {
 		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
@@ -57,17 +61,50 @@ func NewTenantReverseProxy(
 	return trp
 }
 
-// Copied from httputil.NewSingleHostReverseProxy with tweaks to url.Path handling to support non-append overrides
-func director(backendURL *url.URL, backendPathReplacement *func(*url.URL) (string,string)) func(req *http.Request) {
+func NewReverseProxyDynamicTenant(
+	headerName string,
+	backendURL *url.URL,
+	disableAPIAuthentication bool) *TenantReverseProxy {
+	trp := &TenantReverseProxy{
+		nil,
+		headerName,
+		backendURL,
+		httputil.NewSingleHostReverseProxy(backendURL),
+		disableAPIAuthentication,
+	}
+	trp.revproxy.ErrorHandler = proxyErrorHandler
+	if backendURL.Path != "" && backendURL.Path != "/" {
+		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
+	}
+	return trp
+}
+
+// Replaces the internal ReverseProxy with one that will apply the provided backendPathReplacement
+// to request paths.
+// TODO: what about updating response payloads, e.g. if the response has links/references to be updated to the new path?
+func (trp *TenantReverseProxy) ReplacePaths(reqPathReplacement func(*url.URL) string) *TenantReverseProxy {
+	if reqPathReplacement != nil {
+		// Requests: Update URL path with replacement
+		trp.revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
+	}
+	// TODO responses: Update response payload with replacement
+	return trp
+}
+
+// Copied from httputil.NewSingleHostReverseProxy with tweaks to url.Path handling to support non-append overrides.
+func pathReplacementDirector(backendURL *url.URL, reqPathReplacement func(*url.URL) string) func(req *http.Request) {
 	targetQuery := backendURL.RawQuery
 	return func(req *http.Request) {
 		req.URL.Scheme = backendURL.Scheme
 		req.URL.Host = backendURL.Host
-		// Apply path replacement if provided. Otherwise the path is passed-through as-is.
-		// (Specifically, we ignore non-empty backendURL.Path)
-		if (backendPathReplacement != nil) {
-			req.URL.Path, req.URL.RawPath = (*backendPathReplacement)(req.URL)
+
+		// CUSTOM vs stock NewSingleHostReverseProxy.Director
+		req.URL.Path = reqPathReplacement(req.URL)
+		if req.URL.RawPath != "" {
+			// Also update RawPath with escaped version of replacement
+			req.URL.RawPath = url.PathEscape(req.URL.Path)
 		}
+
 		if targetQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = targetQuery + req.URL.RawQuery
 		} else {
@@ -78,37 +115,6 @@ func director(backendURL *url.URL, backendPathReplacement *func(*url.URL) (strin
 			req.Header.Set("User-Agent", "")
 		}
 	}
-}
-
-func joinURLPath(a, b *url.URL) (path, rawpath string) {
-	if a.RawPath == "" && b.RawPath == "" {
-		return singleJoiningSlash(a.Path, b.Path), ""
-	}
-	// Same as singleJoiningSlash, but uses EscapedPath to determine
-	// whether a slash should be added
-	apath := a.EscapedPath()
-	bpath := b.EscapedPath()
-	aslash := strings.HasSuffix(apath, "/")
-	bslash := strings.HasPrefix(bpath, "/")
-	switch {
-	case aslash && bslash:
-		return a.Path + b.Path[1:], apath + bpath[1:]
-	case !aslash && !bslash:
-		return a.Path + "/" + b.Path, apath + "/" + bpath
-	}
-	return a.Path + b.Path, apath + bpath
-}
-
-func singleJoiningSlash(a, b string) string {
-	aslash := strings.HasSuffix(a, "/")
-	bslash := strings.HasPrefix(b, "/")
-	switch {
-	case aslash && bslash:
-		return a + b[1:]
-	case !aslash && !bslash:
-		return a + "/" + b
-	}
-	return a + b
 }
 
 func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Request) {
