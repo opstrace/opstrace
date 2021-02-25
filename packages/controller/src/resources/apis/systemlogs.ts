@@ -186,8 +186,8 @@ export function SystemLogAgentResources(
                   ],
                   resources: {
                     limits: {
-                      cpu: "8",
-                      memory: "10Gi"
+                      cpu: "200m",
+                      memory: "200Mi"
                     },
                     requests: {
                       cpu: "50m",
