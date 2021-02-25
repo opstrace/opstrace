@@ -174,7 +174,8 @@ export function* ensureGCPInfraExists(
   // Create a Google service account to be used by external-dns.
   log.info(`Ensuring external-dns service account exists`);
   const externalDNSSA = yield call(ensureServiceAccountExists, {
-    name: `${ccfg.cluster_name}-external-dns`,
+    // max length for svc acc name: 30, cluster name is max 23.
+    name: `${ccfg.cluster_name}-extdns`,
     projectId: gcpProjectID,
     role: "roles/dns.admin",
     kubernetesServiceAccount: "ingress/external-dns"
