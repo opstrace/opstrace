@@ -29,7 +29,7 @@ HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret \
   --disable-api-authn
 ```
 
-In normal use, the config service extracts the tenant name from the bearer token that must be provided with requests. When instead testing with `--disable-api-authn`, the service requires that we provide the tenant name using an `X-Tenant` header, as provided in the examples below.
+In normal use, the config service extracts the tenant name from the bearer token that must be provided with requests. When instead testing with `--disable-api-authn`, the service requires that we provide the tenant name using an `X-Scope-OrgID` header, as provided in the examples below.
 
 ## Example usage
 
@@ -51,22 +51,22 @@ type: gcp-service-account
 # gcp-service-account must contain valid json:
 value: |-
   {"json": "goes-here"}
-' | curl -v -H "X-Tenant: tenant-foo" -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/credentials/
+' | curl -v -H "X-Scope-OrgID: tenant-foo" -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/credentials/
 ```
 
 Get all
 ```
-curl -v -H "X-Tenant: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/
+curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/
 ```
 
 Get foo
 ```
-curl -v -H "X-Tenant: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/foo
+curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/foo
 ```
 
 Delete foo
 ```
-curl -v -H "X-Tenant: tenant-foo" -XDELETE http://127.0.0.1:8989/api/v1/credentials/foo
+curl -v -H "X-Scope-OrgID: tenant-foo" -XDELETE http://127.0.0.1:8989/api/v1/credentials/foo
 ```
 
 ### Exporters
@@ -106,20 +106,20 @@ config:
   - proj2
   monitoring.metrics-interval: '5m' # optional
   monitoring.metrics-offset: '0s' # optional
-' | curl -v -H "X-Tenant: tenant-foo" -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/exporters/
+' | curl -v -H "X-Scope-OrgID: tenant-foo" -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/exporters/
 ```
 
 Get all
 ```
-curl -v -H "X-Tenant: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/
+curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/
 ```
 
 Get foo
 ```
-curl -v -H "X-Tenant: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/foo
+curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/foo
 ```
 
 Delete foo
 ```
-curl -v -H "X-Tenant: tenant-foo" -XDELETE http://127.0.0.1:8989/api/v1/exporters/foo
+curl -v -H "X-Scope-OrgID: tenant-foo" -XDELETE http://127.0.0.1:8989/api/v1/exporters/foo
 ```

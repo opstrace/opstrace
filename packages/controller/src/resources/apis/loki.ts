@@ -62,6 +62,7 @@ export function LokiAPIResources(
   const lokiApiProxyCliArgs = [
     "-listen=:8080",
     `-tenantname=${tenant.name}`,
+    // Upstream endpoints for the opstrace loki proxy
     `-loki-querier-url=${lokiQuerierUrl}`,
     `-loki-distributor-url=${lokiDistributorUrl}`
   ];

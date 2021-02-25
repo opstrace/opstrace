@@ -186,11 +186,17 @@ export function CortexResources(
 
   const storageBackend = target === "gcp" ? "gcs" : "s3";
 
+  // Cortex config schema: https://cortexmetrics.io/docs/configuration/configuration-file/
   const cortexConfig = {
     // HTTP path prefix for Cortex API: default is /api/prom which we do not like
     // in front of e.g. /api/v1/query. Note that the "Prometheus API" is served
     // at api.prometheus_http_prefix.
     http_prefix: "",
+    api: {
+      // Serve Alertmanager UI at this custom location, matching the path served by the config-api pod.
+      // SEE ALSO: go/cmd/config/main.go
+      alertmanager_http_prefix: "/api/v1/alertmanager",
+    },
     auth_enabled: true,
     distributor: {
       shard_by_all_labels: true,
