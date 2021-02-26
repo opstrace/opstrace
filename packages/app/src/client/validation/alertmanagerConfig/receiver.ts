@@ -4,7 +4,10 @@ import { emailConfig } from "./emailConfig";
 import { slackConfig } from "./slackConfig";
 import { pagerDutyConfig } from "./pagerDutyConfig";
 import { pushoverConfig } from "./pushoverConfig";
+import { opsgenieConfig } from "./opsgenieConfig";
+import { victoropsConfig } from "./victoropsConfig";
 import { webhookConfig } from "./webhookConfig";
+import { wechatConfig } from "./wechatConfig";
 
 export const receiver = yup
   .object({
@@ -13,7 +16,10 @@ export const receiver = yup
     slack_configs: yup.array().of(slackConfig),
     pager_duty_configs: yup.array().of(pagerDutyConfig),
     pushover_duty_configs: yup.array().of(pushoverConfig),
-    webhook_configs: yup.array().of(webhookConfig)
+    opsgenie_configs: yup.array().of(opsgenieConfig),
+    victorops_configs: yup.array().of(victoropsConfig),
+    webhook_configs: yup.array().of(webhookConfig),
+    wechat_configs: yup.array().of(wechatConfig)
   })
   .nullable()
   .default(null)

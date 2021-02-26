@@ -26,7 +26,7 @@ export const pagerDutyConfig = yup.object({
     comment:
       "The PagerDuty integration key (when using PagerDuty integration type `Prometheus`)."
   }),
-  url: yup.string().meta({
+  url: yup.string().url().meta({
     comment: "The URL to send API requests to",
     default: "global.pagerduty_url"
   }),
@@ -59,8 +59,16 @@ export const pagerDutyConfig = yup.object({
         "A set of arbitrary key/value pairs that provide further detail about the incident.",
       example: "<string>: <tmpl_string>"
     }),
-  images: yup.array().of(imageConfig).meta({ comment: "Images to attach to the incident." }),
-  links: yup.array().of(linkConfig).meta({ comment: "Links to attach to the incident." })
-  links: yup.array().of(httpConfig).meta({ comment: "The HTTP client's configuration.", default: "global.http_config" })
+  images: yup
+    .array()
+    .of(imageConfig)
+    .meta({ comment: "Images to attach to the incident." }),
+  links: yup
+    .array()
+    .of(linkConfig)
+    .meta({ comment: "Links to attach to the incident." }),
+  http_config: yup.array().of(httpConfig).meta({
+    comment: "The HTTP client's configuration.",
+    default: "global.http_config"
+  })
 });
-

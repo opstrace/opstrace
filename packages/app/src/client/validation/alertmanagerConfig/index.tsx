@@ -67,7 +67,7 @@ const global = yup.object({
     .url()
     .default("https://qyapi.weixin.qq.com/cgi-bin/"),
   wechat_api_secret: yup.string(),
-  wechat_api_corp_id: yup.string().url(),
+  wechat_api_corp_id: yup.string(),
 
   http_config: httpConfig.meta({
     comment: "The default HTTP client configuration"

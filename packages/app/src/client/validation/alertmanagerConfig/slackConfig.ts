@@ -26,9 +26,9 @@ export const slackConfig = yup
       .boolean()
       .default(false)
       .meta({ comment: "Whether or not to notify about resolved alerts." }),
-    api_url: yup.string().meta({
+    api_url: yup.string().url().meta({
       comment: "The Slack webhook URL.",
-      default: "default = global.slack_api_url"
+      default: "global.slack_api_url"
     }),
     channel: yup
       .string()
@@ -51,9 +51,7 @@ export const slackConfig = yup
         .object({
           title: yup.string().required(),
           value: yup.string().required(),
-          short: yup
-            .boolean()
-            .meta({ default: "default = slack_config.short_fields" })
+          short: yup.boolean().meta({ default: "slack_config.short_fields" })
         })
         .nullable()
         .default(null)
@@ -74,7 +72,7 @@ export const slackConfig = yup
     thumb_url: yup.string(),
     http_config: httpConfig.meta({
       comment: "The HTTP client's configuration.",
-      default: "default = global.http_config"
+      default: "global.http_config"
     })
   })
   .nullable()
