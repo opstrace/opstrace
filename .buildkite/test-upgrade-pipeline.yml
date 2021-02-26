@@ -2,7 +2,7 @@ steps:
   - label: "🔨 main upgrade test (AWS)"
     key: "maintest-upgrade-aws"
     env:
-      OPSTRACE_CLUSTER_NAME: "bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
+      OPSTRACE_CLUSTER_NAME: "upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
       OPSTRACE_CLOUD_PROVIDER: "aws"
       AWS_CLI_REGION: "us-west-2"
     command:
