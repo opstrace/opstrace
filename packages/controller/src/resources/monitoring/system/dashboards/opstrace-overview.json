@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "id": 11,
+  "id": 20,
   "links": [],
   "panels": [
     {
@@ -985,7 +985,7 @@
       "title": "Queries through Grafana, request duration (5m mean) by namespace, status code",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -998,14 +998,17 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:90",
+          "decimals": 2,
           "format": "short",
-          "label": null,
+          "label": "duration [s]",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0.0001",
           "show": true
         },
         {
+          "$$hashKey": "object:91",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1920,8 +1923,8 @@
       "timeShift": null,
       "title": "Container CPU (by namespace)",
       "tooltip": {
-        "shared": false,
-        "sort": 0,
+        "shared": true,
+        "sort": 2,
         "value_type": "individual"
       },
       "transformations": [],
@@ -1936,7 +1939,7 @@
       "yaxes": [
         {
           "format": "s",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -2031,8 +2034,8 @@
       "timeShift": null,
       "title": "Container Mem (by namespace)",
       "tooltip": {
-        "shared": false,
-        "sort": 0,
+        "shared": true,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -2046,7 +2049,7 @@
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
+          "label": "bytes",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -2141,7 +2144,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "s",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -2238,8 +2241,8 @@
       },
       "yaxes": [
         {
-          "format": "short",
-          "label": null,
+          "format": "bytes",
+          "label": "bytes",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -2288,7 +2291,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -2309,9 +2312,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_cfs_throttled_seconds_total[5m])) by (namespace)",
+          "expr": "sum(rate(container_cpu_cfs_throttled_seconds_total[5m])) by (pod)",
           "interval": "",
-          "legendFormat": "{{namespace}}",
+          "legendFormat": "{{pod}}",
           "refId": "B"
         }
       ],
@@ -2584,7 +2587,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
