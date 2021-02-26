@@ -330,7 +330,8 @@ export function CortexResources(
       tsdb: {
         dir: "/cortex/tsdb",
         wal_compression_enabled: true,
-        block_ranges_period: "2h0m0s", //default
+        // Note list_of_durations type, and e.g. "2h0m0s" does not validate as a single value
+        block_ranges_period: "2h0m0s,", //default
         retention_period: "6h" //default
       },
       backend: storageBackend,
