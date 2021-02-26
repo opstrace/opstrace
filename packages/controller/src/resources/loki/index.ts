@@ -910,6 +910,9 @@ export function LokiResources(
           // no more than one compactor instance at any given time, see
           // boltdb shipper docs
           replicas: 1,
+          strategy: {
+            type: "Recreate"
+          },
           selector: {
             matchLabels: {
               name: "compactor"
