@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "id": 24,
+  "id": 11,
   "links": [],
   "panels": [
     {
@@ -77,7 +77,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -178,7 +178,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -380,7 +380,7 @@
         "y": 9
       },
       "hiddenSeries": false,
-      "id": 72,
+      "id": 73,
       "legend": {
         "avg": false,
         "current": false,
@@ -490,7 +490,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 2,
@@ -510,7 +510,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -589,7 +589,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 22,
@@ -609,7 +609,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -693,7 +693,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 16,
@@ -713,7 +713,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -810,7 +810,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 17
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 32,
@@ -830,7 +830,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -928,6 +928,103 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "hiddenSeries": false,
+      "id": 72,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (namespace,code) (rate(grafana_datasource_request_duration_seconds_sum{datasource=\"metrics\"}[5m]) / rate(grafana_datasource_request_duration_seconds_count{datasource=\"metrics\"}[5m]))",
+          "interval": "",
+          "legendFormat": "{{namespace}}: {{status_code}}",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Queries through Grafana, request duration (5m mean) by namespace, status code",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -940,7 +1037,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 64,
@@ -960,7 +1057,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1036,7 +1133,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 62,
@@ -1056,7 +1153,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1136,7 +1233,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 33
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 46,
@@ -1157,7 +1254,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1239,7 +1336,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 33
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 47,
@@ -1259,7 +1356,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1337,7 +1434,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 41
+        "y": 57
       },
       "hiddenSeries": false,
       "id": 59,
@@ -1357,7 +1454,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1436,7 +1533,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 41
+        "y": 57
       },
       "hiddenSeries": false,
       "id": 60,
@@ -1456,7 +1553,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1521,7 +1618,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 65
       },
       "id": 24,
       "panels": [],
@@ -1547,7 +1644,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 50
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 4,
@@ -1567,7 +1664,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1662,7 +1759,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 50
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 10,
@@ -1682,7 +1779,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1768,7 +1865,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 58
+        "y": 74
       },
       "hiddenSeries": false,
       "id": 6,
@@ -1788,7 +1885,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1878,7 +1975,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 58
+        "y": 74
       },
       "hiddenSeries": false,
       "id": 8,
@@ -1898,7 +1995,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1987,7 +2084,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 66
+        "y": 82
       },
       "hiddenSeries": false,
       "id": 69,
@@ -2007,7 +2104,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2084,7 +2181,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 66
+        "y": 82
       },
       "hiddenSeries": false,
       "id": 70,
@@ -2104,7 +2201,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2182,7 +2279,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 66
+        "y": 90
       },
       "hiddenSeries": false,
       "id": 28,
@@ -2202,7 +2299,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2287,7 +2384,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 74
+        "y": 90
       },
       "hiddenSeries": false,
       "id": 55,
@@ -2307,7 +2404,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2382,7 +2479,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 82
+        "y": 98
       },
       "hiddenSeries": false,
       "id": 66,
@@ -2402,7 +2499,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2478,7 +2575,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 82
+        "y": 98
       },
       "hiddenSeries": false,
       "id": 67,
@@ -2498,7 +2595,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2575,7 +2672,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 90
+        "y": 106
       },
       "hiddenSeries": false,
       "id": 12,
@@ -2595,7 +2692,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2704,7 +2801,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 99
+        "y": 115
       },
       "hiddenSeries": false,
       "id": 14,
@@ -2724,7 +2821,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2783,7 +2880,7 @@
     }
   ],
   "refresh": "10s",
-  "schemaVersion": 26,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -2809,5 +2906,5 @@
   "timezone": "",
   "title": "Opstrace Overview Dashboard",
   "uid": "GqFJrOxGk",
-  "version": 1
+  "version": 2
 }
