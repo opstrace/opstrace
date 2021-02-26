@@ -331,7 +331,8 @@ export function CortexResources(
         dir: "/cortex/tsdb",
         wal_compression_enabled: true,
         // Note list_of_durations type, and e.g. "2h0m0s" does not validate as a single value
-        block_ranges_period: "2h0m0s,", //default
+        // "2h0m0s," also does not. How to provide a list with a single value?
+        // block_ranges_period: "2h0m0s,", //default
         retention_period: "6h" //default
       },
       backend: storageBackend,
