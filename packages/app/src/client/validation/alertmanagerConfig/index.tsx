@@ -19,28 +19,25 @@ import * as yup from "yup";
 import { httpConfig } from "./common";
 import { route } from "./route";
 import { receiver } from "./receiver";
+import { inhibitRule } from "./inhibitRule";
 
 const global = yup.object({
   smtp_from: yup
     .string()
     .meta({ comment: "The default SMTP From header field." }),
-  smtp_smarthost: yup
-    .string()
-    .meta({
-      comment:
-        "The default SMTP smarthost used for sending emails, including port number. Port number usually is 25, or 587 for SMTP over TLS (sometimes referred to as STARTTLS).",
-      example: "smtp.example.org:587"
-    }),
+  smtp_smarthost: yup.string().meta({
+    comment:
+      "The default SMTP smarthost used for sending emails, including port number. Port number usually is 25, or 587 for SMTP over TLS (sometimes referred to as STARTTLS).",
+    example: "smtp.example.org:587"
+  }),
   smtp_hello: yup
     .string()
     .default("localhost")
     .meta({ comment: "The default hostname to identify to the SMTP server." }),
-  smtp_auth_username: yup
-    .string()
-    .meta({
-      comment:
-        "SMTP Auth using CRAM-MD5, LOGIN and PLAIN. If empty, Alertmanager doesn't authenticate to the SMTP server."
-    }),
+  smtp_auth_username: yup.string().meta({
+    comment:
+      "SMTP Auth using CRAM-MD5, LOGIN and PLAIN. If empty, Alertmanager doesn't authenticate to the SMTP server."
+  }),
   smtp_auth_password: yup
     .string()
     .meta({ comment: "SMTP Auth using LOGIN and PLAIN." }),
@@ -68,6 +65,13 @@ const global = yup.object({
 // @ts-ignore
 export const schema = yup.object({
   global: global.required(),
-  route: route.required(),
-  receivers: yup.array().of(receiver).required()
+  templates: yup.array().of(yup.string()).meta({
+    comment:
+      "Files from which custom notification template definitions are read. # The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'."
+  }),
+  route: route
+    .required()
+    .meta({ comment: "The root node of the routing tree." }),
+  receivers: yup.array().of(receiver).required(),
+  inhibitRules: yup.array().of(inhibitRule)
 });
