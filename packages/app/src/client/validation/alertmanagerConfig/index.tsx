@@ -49,6 +49,25 @@ const global = yup.object({
   }),
 
   slack_api_url: yup.string().url(),
+  victorops_api_key: yup.string(),
+  victorops_api_url: yup
+    .string()
+    .url()
+    .default(
+      "https://alert.victorops.com/integrations/generic/20131114/alert/"
+    ),
+  pagerduty_url: yup
+    .string()
+    .url()
+    .default("https://events.pagerduty.com/v2/enqueue"),
+  opsgenie_api_key: yup.string(),
+  opsgenie_api_url: yup.string().url().default("https://api.opsgenie.com/"),
+  wechat_api_url: yup
+    .string()
+    .url()
+    .default("https://qyapi.weixin.qq.com/cgi-bin/"),
+  wechat_api_secret: yup.string(),
+  wechat_api_corp_id: yup.string().url(),
 
   http_config: httpConfig.meta({
     comment: "The default HTTP client configuration"
