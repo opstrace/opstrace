@@ -24,6 +24,7 @@ export const slackConfig = yup
   .object({
     send_resolved: yup
       .boolean()
+      .default(false)
       .meta({ comment: "Whether or not to notify about resolved alerts." }),
     api_url: yup.string().meta({
       comment: "The Slack webhook URL.",

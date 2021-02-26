@@ -5,6 +5,7 @@ import { httpConfig } from "./common";
 export const webhookConfig = yup.object({
   send_resolved: yup
     .boolean()
+    .default(false)
     .meta({ comment: "Whether or not to notify about resolved alerts." }),
   url: yup.string().meta({
     comment: "The endpoint to send HTTP POST requests to."
