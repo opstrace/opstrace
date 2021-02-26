@@ -67,8 +67,6 @@ const Editor = ({ config, onChange }: EditorProps) => {
 
   if (model.current === null) return null;
 
-  console.log("editor render", model.current.getValue());
-
   return <YamlEditor model={model.current} />;
 };
 
@@ -76,11 +74,13 @@ const AlertmanagerConfigEditor = () => {
   const params = useParams<{ tenant: string }>();
   const tenant = useTenant(params.tenant);
   const savedConfig = useAlertmanagerConfig(params.tenant) || "";
-  const [config, setConfig] = useState(savedConfig);
+  const [config, setConfig] = useState<string>(savedConfig);
+  const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
     setConfig(savedConfig);
+    setConfigValid(null);
   }, [savedConfig]);
 
   if (!tenant)
@@ -130,11 +130,17 @@ const AlertmanagerConfigEditor = () => {
                 variant="contained"
                 state="secondary"
                 onClick={() => {
-                  validateYaml(config);
+                  // validateYaml(config);
+                  schema
+                    .isValid(yamlParser.load(config))
+                    .then(function (valid: boolean) {
+                      setConfigValid(valid);
+                    });
                 }}
               >
                 validate
               </Button>
+              <span>{" " + configValidToStr(configValid)}</span>
             </Card>
           </Box>
         </Box>
@@ -142,15 +148,21 @@ const AlertmanagerConfigEditor = () => {
     );
 };
 
-const validateYaml = (config: string) => {
-  const doc = yamlParser.load(config);
-  schema.isValid(doc).then(function (valid: boolean) {
-    console.log("valid", valid);
-  });
-  // .validate(doc)
-  // .catch(function (err: object) {
-  //   console.log("error", err);
-  // });
+const configValidToStr = (isValid: boolean | null) => {
+  if (isValid === true) return "Valid Config";
+  else if (isValid === false) return "Config not valid";
+  return "";
 };
+
+// const validateYaml = (config: string) => {
+//   const doc = yamlParser.load(config);
+//   schema.isValid(doc).then(function (valid: boolean) {
+//     console.log("valid", valid);
+//   });
+//   // .validate(doc)
+//   // .catch(function (err: object) {
+//   //   console.log("error", err);
+//   // });
+// };
 
 export default AlertmanagerConfigEditor;
