@@ -37,7 +37,7 @@ steps:
     depends_on:
       - "unit-tests"
     env:
-      OPSTRACE_CLUSTER_NAME: "cicluster-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
       OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-gcp"
       OPSTRACE_CLOUD_PROVIDER: "gcp"
     command:
@@ -50,7 +50,7 @@ steps:
     depends_on:
       - "unit-tests"
     env:
-      OPSTRACE_CLUSTER_NAME: "cicluster-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
+      OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
       OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-aws"
       OPSTRACE_CLOUD_PROVIDER: "aws"
     command:
