@@ -18,7 +18,10 @@ This effectively disables aggregation entirely, passing through all alerts as-is
     match: yup.object()
   })
   .nullable()
-  .default(null);
+  .default(null)
+  .meta({
+    url: "https://www.prometheus.io/docs/alerting/latest/configuration/#route"
+  });
 
 // can't use "route" in the definition of route :-)
 route = route.shape({ routes: yup.array().of(route) });

@@ -63,15 +63,19 @@ const global = yup.object({
 // TODO: NTW - work out what to specify here as:
 // "The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed. ts(7056)"
 // @ts-ignore
-export const schema = yup.object({
-  global: global.required(),
-  templates: yup.array().of(yup.string()).meta({
-    comment:
-      "Files from which custom notification template definitions are read. # The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'."
-  }),
-  route: route
-    .required()
-    .meta({ comment: "The root node of the routing tree." }),
-  receivers: yup.array().of(receiver).required(),
-  inhibitRules: yup.array().of(inhibitRule)
-});
+export const schema = yup
+  .object({
+    global: global.required(),
+    templates: yup.array().of(yup.string()).meta({
+      comment:
+        "Files from which custom notification template definitions are read. # The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'."
+    }),
+    route: route
+      .required()
+      .meta({ comment: "The root node of the routing tree." }),
+    receivers: yup.array().of(receiver).required(),
+    inhibitRules: yup.array().of(inhibitRule)
+  })
+  .meta({
+    url: "https://www.prometheus.io/docs/alerting/latest/configuration/"
+  });

@@ -12,4 +12,8 @@ export const receiver = yup
     webhook_configs: yup.array().of(webhookConfig)
   })
   .nullable()
-  .default(null);
+  .default(null)
+  .meta({
+    url:
+      "https://www.prometheus.io/docs/alerting/latest/configuration/#receiver"
+  });
