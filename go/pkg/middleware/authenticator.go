@@ -1,4 +1,4 @@
-// Copyright 2020 Opstrace, Inc.
+// Copyright 2021 Opstrace, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,9 +28,59 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// HTTP Request header used by GetTenant when disableAPIAuthentication is true and requireTenantName is nil.
+// This is only meant for use in testing, and lines up with the tenant HTTP header used by Cortex and Loki.
+const TestTenantHeader = "X-Scope-OrgID"
+
 // Use a single key for now. Further down the road there should be support
 // for multiple public keys, each identified by a key id.
 var authtokenVerificationPubKey *rsa.PublicKey
+
+// Validates and returns the tenant name embedded in the request's Authorization header and returns (tenantName, true),
+// or writes a 401 error to the response and returns ('', false) if the tenant was invalid or not found.
+//
+// If expectedTenantName is non-nil, then all requests are required to have a matching tenant,
+// otherwise the tenant may vary per-request and is extracted from the verified Authorization header.
+//
+// If disableAPIAuthentication is true, then the expectedTenantName or X-Scope-OrgID is used without verification.
+func GetTenant(
+	w http.ResponseWriter,
+	r *http.Request,
+	expectedTenantName *string,
+	disableAPIAuthentication bool,
+) (string, bool) {
+	if expectedTenantName == nil {
+		// Tenant may vary on a per-request basis to this endpoint
+		if disableAPIAuthentication {
+			// TESTING: No single expected tenant, so check for tenant in the X-Scope-OrgID header
+			tenantName := r.Header.Get(TestTenantHeader)
+			if tenantName == "" {
+				exit401(w, fmt.Sprintf("missing test %s header specifying tenant", TestTenantHeader))
+				return "", false
+			}
+			return tenantName, true
+		} else {
+			// Read/validate tenant from signed bearer token
+			authTokenUnverified, ok := getAPIAuthTokenUnverified(w, r)
+			if !ok {
+				return "", false
+			}
+			return getRequestAuthenticator(w, authTokenUnverified)
+		}
+	} else {
+		// Tenant must match configured value across all requests to this endpoint
+		if disableAPIAuthentication {
+			// TESTING: Just assume the expected tenant
+			return *expectedTenantName, true
+		} else {
+			// Validate the Authentication/Bearer token in the request and check that it has the expected tenant.
+			if !DataAPIRequestAuthenticator(w, r, *expectedTenantName) {
+				return "", false
+			}
+			return *expectedTenantName, true
+		}
+	}
+}
 
 // Verifies that the tenant name embedded in the request's Authorization header is valid and matches the
 // expectedTenantName and returns true, or writes a 401 error to the response and returns false if the
@@ -41,16 +91,6 @@ func DataAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expecte
 		return false
 	}
 	return compareRequestAuthenticator(w, authTokenUnverified, expectedTenantName)
-}
-
-// Returns the tenant name embedded in the request's Authorization header and returns (tenantName, true),
-// or writes a 401 error to the response and returns ('', false) if the tenant was invalid or not found.
-func DataAPIRequestTenantName(w http.ResponseWriter, r *http.Request) (string, bool) {
-	authTokenUnverified, ok := getAPIAuthTokenUnverified(w, r)
-	if !ok {
-		return "", false
-	}
-	return getRequestAuthenticator(w, authTokenUnverified)
 }
 
 // Expect HTTP request to have a header of the shape

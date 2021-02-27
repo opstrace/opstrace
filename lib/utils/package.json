@@ -16,10 +16,10 @@
     "lint": "eslint --ext .ts src/"
   },
   "dependencies": {
-    "@types/deep-diff": "^1.0.0",
-    "deep-diff": "^1.0.2",
-    "moment": "^2.24.0",
+    "@types/diff": "^5.0.0",
+    "diff": "^5.0.0",
     "got": "11.8.1",
+    "moment": "^2.24.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {

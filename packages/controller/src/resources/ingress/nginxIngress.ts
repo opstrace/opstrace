@@ -200,6 +200,11 @@ export function NginxIngressResources(
                         containerPort: endpointConfig.https
                       }
                     ],
+                    resources: {
+                      limits: {
+                        cpu: "500m"
+                      }
+                    },
                     livenessProbe: {
                       failureThreshold: 3,
                       httpGet: {

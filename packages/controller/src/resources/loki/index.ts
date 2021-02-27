@@ -31,7 +31,7 @@ import {
   ServiceAccount
 } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
-import { min, select, getBucketName } from "@opstrace/utils";
+import { roundDownToOdd, select, getBucketName } from "@opstrace/utils";
 import { getControllerConfig, getNodeCount } from "../../helpers";
 import { DockerImages } from "@opstrace/controller-config";
 
@@ -62,15 +62,28 @@ export function LokiResources(
         //     memory: "100Mi"
         //   }
       },
-      replicas: min(
-        3,
-        select(getNodeCount(state), [
-          {
-            "<=": Infinity,
-            choose: getNodeCount(state)
-          }
-        ])
-      )
+      replicas: select(getNodeCount(state), [
+        {
+          "<=": 4,
+          choose: 3
+        },
+        {
+          "<=": 6,
+          choose: 5
+        },
+        {
+          "<=": 8,
+          choose: 7
+        },
+        {
+          "<=": 10,
+          choose: 9
+        },
+        {
+          "<=": Infinity,
+          choose: roundDownToOdd(getNodeCount(state) / 2)
+        }
+      ])
     },
     distributor: {
       resources: {
@@ -85,8 +98,24 @@ export function LokiResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 4,
+          choose: 3
+        },
+        {
+          "<=": 6,
+          choose: 5
+        },
+        {
+          "<=": 8,
+          choose: 7
+        },
+        {
+          "<=": 10,
+          choose: 9
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -103,8 +132,16 @@ export function LokiResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -676,20 +713,6 @@ export function LokiResources(
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-                  // https://github.com/grafana/loki/blob/6d85c7c212f95c7fbf902b467edc46a5ec3555fd/production/helm/loki/values.yaml#L117-L121
-                  livenessProbe: {
-                    httpGet: {
-                      path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 1080 as any,
-                      scheme: "HTTP"
-                    },
-                    initialDelaySeconds: 45,
-                    timeoutSeconds: 1,
-                    periodSeconds: 10,
-                    successThreshold: 1,
-                    failureThreshold: 3
-                  },
                   resources: deploymentConfig.distributor.resources,
                   volumeMounts: [
                     {
@@ -699,6 +722,9 @@ export function LokiResources(
                   ]
                 }
               ],
+              // https://cortexmetrics.io/docs/guides/running-cortex-on-kubernetes/#take-extra-care-with-ingesters
+              // The link is for cortex ingesters but loki ingesters share the same architecture.
+              terminationGracePeriodSeconds: 2400,
               volumes: [
                 {
                   configMap: {
@@ -884,6 +910,9 @@ export function LokiResources(
           // no more than one compactor instance at any given time, see
           // boltdb shipper docs
           replicas: 1,
+          strategy: {
+            type: "Recreate"
+          },
           selector: {
             matchLabels: {
               name: "compactor"
@@ -926,7 +955,7 @@ export function LokiResources(
                       port: 1080 as any,
                       scheme: "HTTP"
                     },
-                    initialDelaySeconds: 15,
+                    initialDelaySeconds: 45,
                     timeoutSeconds: 1,
                     periodSeconds: 10,
                     successThreshold: 1,
@@ -939,7 +968,7 @@ export function LokiResources(
                       port: 1080 as any,
                       scheme: "HTTP"
                     },
-                    initialDelaySeconds: 15,
+                    initialDelaySeconds: 45,
                     timeoutSeconds: 1,
                     periodSeconds: 10,
                     successThreshold: 1,
@@ -1042,25 +1071,13 @@ export function LokiResources(
                       port: 1080 as any,
                       scheme: "HTTP"
                     },
-                    initialDelaySeconds: 15,
+                    initialDelaySeconds: 45,
                     timeoutSeconds: 1,
                     periodSeconds: 10,
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-                  livenessProbe: {
-                    httpGet: {
-                      path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 1080 as any,
-                      scheme: "HTTP"
-                    },
-                    initialDelaySeconds: 15,
-                    timeoutSeconds: 1,
-                    periodSeconds: 10,
-                    successThreshold: 1,
-                    failureThreshold: 3
-                  },
+
                   resources: deploymentConfig.querier.resources,
                   volumeMounts: [
                     {

@@ -66,16 +66,13 @@ export function CortexAPIResources(
   const name = `${api}-api`;
   const cortexQuerierUrl = "http://query-frontend.cortex.svc.cluster.local";
   const cortexDistributorUrl = "http://distributor.cortex.svc.cluster.local";
-  const cortexRulerUrl = "http://ruler.cortex.svc.cluster.local";
-  const cortexAlertmanagerUrl = "http://alertmanager.cortex.svc.cluster.local";
 
   const cortexApiProxyCliArgs = [
     "-listen=:8080",
     `-tenantname=${tenant.name}`,
+    // Upstream endpoints for the opstrace cortex proxy
     `-cortex-querier-url=${cortexQuerierUrl}`,
-    `-cortex-distributor-url=${cortexDistributorUrl}`,
-    `-cortex-ruler-url=${cortexRulerUrl}`,
-    `-cortex-alertmanager-url=${cortexAlertmanagerUrl}`
+    `-cortex-distributor-url=${cortexDistributorUrl}`
   ];
 
   let cortexApiProxyEnv: V1EnvVar[];

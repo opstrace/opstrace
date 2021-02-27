@@ -16,7 +16,6 @@
 
 import {
   Deployment,
-  Ingress,
   ResourceCollection,
   Service,
   V1ServicemonitorResource,
@@ -26,26 +25,22 @@ import { State } from "../../reducer";
 import { KubeConfig, V1EnvVar } from "@kubernetes/client-node";
 import {
   getControllerConfig,
-  getDomain
 } from "../../helpers";
 import {
   DockerImages,
   ControllerConfigType
 } from "@opstrace/controller-config";
 
-export function ConfigAPIResources(
+export function OpstraceAPIResources(
   state: State,
   kubeConfig: KubeConfig,
   namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const domain = getDomain(state);
-
   const controllerConfig: ControllerConfigType = getControllerConfig(state);
 
-  const api = "config";
-  const name = `${api}-api`;
+  const name = `opstrace-api`;
 
   const probeConfig = {
     httpGet: {
@@ -66,7 +61,15 @@ export function ConfigAPIResources(
   const commandEnv: V1EnvVar[] = [
     {
       name: "GRAPHQL_ENDPOINT",
-      value: `http://graphql.application.svc.cluster.local:8080/v1/graphql`
+      value: `http://graphql.${namespace}.svc.cluster.local:8080/v1/graphql`
+    },
+    {
+      name: "CORTEX_RULER_ENDPOINT",
+      value: "http://ruler.cortex.svc.cluster.local"
+    },
+    {
+      name: "CORTEX_ALERTMANAGER_ENDPOINT",
+      value: "http://alertmanager.cortex.svc.cluster.local"
     },
     {
       name: "HASURA_GRAPHQL_ADMIN_SECRET",
@@ -99,25 +102,25 @@ export function ConfigAPIResources(
           name,
           namespace,
           labels: {
-            "k8s-app": name
+            app: name
           }
         },
         spec: {
           replicas: 1,
           selector: {
             matchLabels: {
-              "k8s-app": name
+              app: name
             }
           },
           template: {
             metadata: {
               labels: {
-                "k8s-app": name
+                app: name
               }
             },
             spec: {
               affinity: withPodAntiAffinityRequired({
-                "k8s-app": name
+                app: name
               }),
               containers: [
                 {
@@ -154,7 +157,7 @@ export function ConfigAPIResources(
         metadata: {
           name,
           labels: {
-            "k8s-app": name,
+            app: name,
             job: `${namespace}.${name}`
           },
           namespace
@@ -170,56 +173,8 @@ export function ConfigAPIResources(
             }
           ],
           selector: {
-            "k8s-app": name
+            app: name
           }
-        }
-      },
-      kubeConfig
-    )
-  );
-
-  // No per-tenant ingress hosts at the moment.
-  // We could someday add per-tenant Ingresses, but they would be in other namespaces...
-  const apiHost = `${api}.${domain}`
-  collection.add(
-    new Ingress(
-      {
-        apiVersion: "networking.k8s.io/v1beta1",
-        kind: "Ingress",
-        metadata: {
-          name: `${api}`,
-          namespace,
-          annotations: {
-            "kubernetes.io/ingress.class": "api",
-            "external-dns.alpha.kubernetes.io/ttl": "30",
-            "nginx.ingress.kubernetes.io/client-body-buffer-size": "10m"
-          }
-        },
-        spec: {
-          tls: [
-            {
-              hosts: [apiHost],
-              secretName: "https-cert"
-            }
-          ],
-          rules: [
-            {
-              host: apiHost,
-              http: {
-                paths: [
-                  {
-                    backend: {
-                      serviceName: name,
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      servicePort: 8080 as any
-                    },
-                    pathType: "ImplementationSpecific",
-                    path: "/"
-                  }
-                ]
-              }
-            }
-          ]
         }
       },
       kubeConfig
@@ -233,7 +188,7 @@ export function ConfigAPIResources(
         kind: "ServiceMonitor",
         metadata: {
           labels: {
-            "k8s-app": name,
+            app: name,
             tenant: "system"
           },
           name,
@@ -253,7 +208,7 @@ export function ConfigAPIResources(
           },
           selector: {
             matchLabels: {
-              "k8s-app": name
+              app: name
             }
           }
         }

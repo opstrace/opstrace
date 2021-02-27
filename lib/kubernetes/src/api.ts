@@ -18,8 +18,19 @@ import { K8sResource } from "./common";
 import { kubernetesError } from "./utils";
 import { log } from "@opstrace/utils";
 
+const dryRunKubeApiWrites = process.env.DRY_RUN_KUBERNETES_API_WRITES
+  ? true
+  : false;
+
 export const createResource = async (resource: K8sResource): Promise<void> => {
-  log.debug("createResource for %s(ns: %s)", resource.name, resource.namespace);
+  log.debug(
+    `createResource for %s(ns: %s) [dryrun=${dryRunKubeApiWrites}]`,
+    resource.name,
+    resource.namespace
+  );
+  if (dryRunKubeApiWrites) {
+    return;
+  }
   try {
     await resource.create();
   } catch (e) {
@@ -39,24 +50,51 @@ export const createResource = async (resource: K8sResource): Promise<void> => {
 };
 
 export const deleteResource = async (resource: K8sResource): Promise<void> => {
+  log.debug(
+    `deleteResource for %s(ns: %s) [dryrun=${dryRunKubeApiWrites}]`,
+    resource.name,
+    resource.namespace
+  );
+  if (dryRunKubeApiWrites) {
+    return;
+  }
   try {
     await resource.delete();
   } catch (e) {
     const err = kubernetesError(e);
     if (err.statusCode !== 404) {
-      log.error(err.message);
+      log.info(
+        "api err during deleteResource for %s(ns: %s): %s",
+        resource.name,
+        resource.namespace,
+        err.message
+      );
+    } else {
+      log.debug("deleteResource(): ignored 404 error");
     }
   }
   return;
 };
 
 export const updateResource = async (resource: K8sResource): Promise<void> => {
-  log.debug("updateResource for %s(ns: %s)", resource.name, resource.namespace);
+  log.debug(
+    `updateResource for %s(ns: %s) [dryrun=${dryRunKubeApiWrites}]`,
+    resource.name,
+    resource.namespace
+  );
+  if (dryRunKubeApiWrites) {
+    return;
+  }
   try {
     await resource.update();
   } catch (e) {
     const err = kubernetesError(e);
-    log.error(err.message);
+    log.info(
+      "api err during updateResource for %s(ns: %s): %s",
+      resource.name,
+      resource.namespace,
+      err.message
+    );
   }
   return;
 };

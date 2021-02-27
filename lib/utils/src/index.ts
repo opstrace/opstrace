@@ -23,7 +23,7 @@ export * from "./httpclient";
 export * from "./naming";
 export * from "./sagas";
 export * from "./errors";
-export * from "./diff";
+export * from "./diffutils";
 export {
   sleep,
   mtime,

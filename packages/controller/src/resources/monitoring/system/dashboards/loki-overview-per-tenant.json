@@ -1748,34 +1748,33 @@
       {
         "allValue": null,
         "current": {
-          "$$hashKey": "object:55",
           "selected": true,
-          "text": "default",
-          "value": "default"
+          "text": "All",
+          "value": "$__all"
         },
+        "datasource": "metrics",
+        "definition": "label_values(kube_pod_container_info{image=~\".*cortex.*\"}, namespace)",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Tenant",
-        "multi": false,
+        "multi": true,
         "name": "tenant",
-        "options": [
-          {
-            "$$hashKey": "object:55",
-            "selected": true,
-            "text": "default",
-            "value": "default"
-          },
-          {
-            "$$hashKey": "object:56",
-            "selected": false,
-            "text": "system",
-            "value": "system"
-          }
-        ],
-        "query": "default, system",
-        "queryValue": "",
+        "options": [],
+        "query": {
+          "query": "label_values(kube_pod_container_info{image=~\".*cortex.*\"}, namespace)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/(.*)-tenant/",
         "skipUrlSync": false,
-        "type": "custom"
+        "sort": 2,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       },
       {
         "auto": false,

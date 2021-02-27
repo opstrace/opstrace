@@ -35,7 +35,7 @@ import {
 import { KubeConfig } from "@kubernetes/client-node";
 
 import { APIResources } from "../resources/apis";
-import { OpstraceApplicationResources } from "../resources/app";
+import { ApplicationResources } from "../resources/app";
 import { CortexResources } from "../resources/cortex";
 import { CredentialResources } from "../resources/credentials";
 import { ExporterResources } from "../resources/exporters";
@@ -80,7 +80,7 @@ export function* reconciliationLoop(
     desired.add(MemcacheResources(state, kubeConfig, "cortex"));
     desired.add(CortexResources(state, kubeConfig, "cortex"));
     desired.add(IngressResources(state, kubeConfig, "ingress"));
-    desired.add(OpstraceApplicationResources(state, kubeConfig, "application"));
+    desired.add(ApplicationResources(state, kubeConfig, "application"));
     desired.add(RedisResources(state, kubeConfig, "application"));
     desired.add(TenantResources(state, kubeConfig));
     desired.add(CredentialResources(state, kubeConfig));

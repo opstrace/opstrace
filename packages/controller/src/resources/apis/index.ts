@@ -19,7 +19,6 @@ import { KubeConfig } from "@kubernetes/client-node";
 import { ResourceCollection } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
 
-import { ConfigAPIResources } from "./config";
 import { CortexAPIResources } from "./cortex";
 import { DDAPIResources } from "./dd";
 import { LokiAPIResources } from "./loki";
@@ -50,9 +49,6 @@ export function APIResources(
   kubeConfig: KubeConfig
 ): ResourceCollection {
   const collection = new ResourceCollection();
-
-  // Single instance 'application' namespace: allow access to hasura-admin-secret
-  collection.add(ConfigAPIResources(state, kubeConfig, "application"));
 
   // Per-tenant resources
   state.tenants.list.tenants.forEach(tenant => {

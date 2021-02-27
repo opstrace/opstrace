@@ -42,12 +42,30 @@ export function* destroyGCPInfra(): Generator<
 
   log.info(`Ensure cert-manager service account deletion`);
   yield call(ensureServiceAccountDoesNotExist, {
+    // name-based convention, sync with installer
+    name: `${destroyConfig.clusterName}-crtmgr`,
+    projectId: destroyConfig.gcpProjectID,
+    role: "roles/dns.admin"
+  });
+  // Note(JP): naming convention changed in Feb 2021. Previously, the account
+  // was called *-cert-manager. Make this newer uninstaller compatible with
+  // clusters created with an older installer (so that the *-cert-manager is
+  // deleted if it exists).
+  yield call(ensureServiceAccountDoesNotExist, {
+    // name-based convention, sync with installer
     name: `${destroyConfig.clusterName}-cert-manager`,
     projectId: destroyConfig.gcpProjectID,
     role: "roles/dns.admin"
   });
 
   log.info(`Ensure external-dns service account deletion`);
+
+  yield call(ensureServiceAccountDoesNotExist, {
+    name: `${destroyConfig.clusterName}-extdns`,
+    projectId: destroyConfig.gcpProjectID,
+    role: "roles/dns.admin"
+  });
+  // for backwards compat (name changed from *-external-dns to -extdns)
   yield call(ensureServiceAccountDoesNotExist, {
     name: `${destroyConfig.clusterName}-external-dns`,
     projectId: destroyConfig.gcpProjectID,

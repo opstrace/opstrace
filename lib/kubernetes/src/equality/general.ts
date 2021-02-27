@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { entries, log, diff } from "@opstrace/utils";
+import { entries, logDiff } from "@opstrace/utils";
 import { K8sResource } from "../common";
 import {
   DeploymentType,
@@ -81,9 +81,5 @@ export const hasMountedVolume = (
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 export function logDifference(name: string, desired: any, existing: any): void {
-  log.info(
-    "%s change in spec: %s",
-    name,
-    JSON.stringify(diff(desired, existing), null, 2)
-  );
+  logDiff(existing, desired);
 }

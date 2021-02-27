@@ -17,7 +17,7 @@
 import { urlJoin } from "url-join-ts";
 import * as yaml from "js-yaml";
 import { strict as assert } from "assert";
-import { getBucketName } from "@opstrace/utils";
+import { getBucketName, roundDownToOdd } from "@opstrace/utils";
 import { State } from "../../reducer";
 import { getNodeCount, getControllerConfig } from "../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
@@ -60,7 +60,7 @@ export function CortexResources(
   const config = {
     memcachedResults: {
       replicas: select(getNodeCount(state), [
-        { "<=": 4, choose: 2 },
+        { "<=": 5, choose: 2 },
         { "<=": 9, choose: 3 },
         {
           "<=": Infinity,
@@ -82,8 +82,12 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -100,8 +104,16 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -118,8 +130,16 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 6,
+          choose: 3
+        },
+        {
+          "<=": 9,
+          choose: 5
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -148,8 +168,24 @@ export function CortexResources(
       },
       replicas: select(getNodeCount(state), [
         {
+          "<=": 4,
+          choose: 3
+        },
+        {
+          "<=": 6,
+          choose: 5
+        },
+        {
+          "<=": 8,
+          choose: 7
+        },
+        {
+          "<=": 10,
+          choose: 9
+        },
+        {
           "<=": Infinity,
-          choose: getNodeCount(state)
+          choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
     },
@@ -171,26 +207,45 @@ export function CortexResources(
         //   memory: "50Mi"
         // }
       },
-      replicas: min(
-        3,
-        select(getNodeCount(state), [
-          {
-            "<=": Infinity,
-            choose: getNodeCount(state)
-          }
-        ])
-      )
+      replicas: select(getNodeCount(state), [
+        {
+          "<=": 4,
+          choose: 3
+        },
+        {
+          "<=": 6,
+          choose: 5
+        },
+        {
+          "<=": 8,
+          choose: 7
+        },
+        {
+          "<=": 10,
+          choose: 9
+        },
+        {
+          "<=": Infinity,
+          choose: roundDownToOdd(getNodeCount(state) / 2)
+        }
+      ])
     },
     env: []
   };
 
   const storageBackend = target === "gcp" ? "gcs" : "s3";
 
+  // Cortex config schema: https://cortexmetrics.io/docs/configuration/configuration-file/
   const cortexConfig = {
     // HTTP path prefix for Cortex API: default is /api/prom which we do not like
     // in front of e.g. /api/v1/query. Note that the "Prometheus API" is served
     // at api.prometheus_http_prefix.
     http_prefix: "",
+    api: {
+      // Serve Alertmanager UI at this custom location, matching the path served by the config-api pod.
+      // SEE ALSO: go/cmd/config/main.go
+      alertmanager_http_prefix: "/api/v1/alertmanager"
+    },
     auth_enabled: true,
     distributor: {
       shard_by_all_labels: true,
@@ -274,7 +329,11 @@ export function CortexResources(
     blocks_storage: {
       tsdb: {
         dir: "/cortex/tsdb",
-        wal_compression_enabled: true
+        wal_compression_enabled: true,
+        // Note list_of_durations type, and e.g. "2h0m0s" does not validate as a single value
+        // "2h0m0s," also does not. How to provide a list with a single value?
+        // block_ranges_period: "2h0m0s,", //default
+        retention_period: "6h" //default
       },
       backend: storageBackend,
       bucket_store: {
@@ -324,6 +383,7 @@ export function CortexResources(
         }
       }
     },
+    purger: { enable: true },
     storage: {
       engine: "blocks"
     },
@@ -1135,20 +1195,6 @@ export function CortexResources(
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-                  // https://github.com/cortexproject/cortex-helm-chart/blob/14ee59e7b3e8772f19a12ab16979e5143f51ae92/values.yaml#L245-L249
-                  livenessProbe: {
-                    httpGet: {
-                      path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 80 as any,
-                      scheme: "HTTP"
-                    },
-                    initialDelaySeconds: 45,
-                    timeoutSeconds: 1,
-                    periodSeconds: 10,
-                    successThreshold: 1,
-                    failureThreshold: 3
-                  },
                   resources: config.ingester.resources,
                   volumeMounts: [
                     {
@@ -1163,6 +1209,8 @@ export function CortexResources(
                 }
               ],
               serviceAccountName: serviceAccountName,
+              // https://cortexmetrics.io/docs/guides/running-cortex-on-kubernetes/#take-extra-care-with-ingesters
+              terminationGracePeriodSeconds: 2400,
               volumes: [
                 {
                   configMap: {
@@ -1189,7 +1237,7 @@ export function CortexResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "10Gi"
+                    storage: "30Gi"
                   }
                 }
               }
@@ -1362,7 +1410,7 @@ export function CortexResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "10Gi"
+                    storage: "30Gi"
                   }
                 }
               }
@@ -1535,7 +1583,7 @@ export function CortexResources(
                 accessModes: ["ReadWriteOnce"],
                 resources: {
                   requests: {
-                    storage: "10Gi"
+                    storage: "30Gi"
                   }
                 }
               }

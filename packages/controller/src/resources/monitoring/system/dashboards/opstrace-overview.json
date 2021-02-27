@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "id": 36,
+  "id": 20,
   "links": [],
   "panels": [
     {
@@ -26,149 +26,6 @@
         "w": 24,
         "x": 0,
         "y": 0
-      },
-      "id": 37,
-      "panels": [],
-      "title": "TCO KPIs",
-      "type": "row"
-    },
-    {
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "decimals": 1,
-          "mappings": [],
-          "max": 25000000,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 22000000
-              },
-              {
-                "color": "red",
-                "value": 25000000
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 1
-      },
-      "id": 49,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["mean"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.4",
-      "targets": [
-        {
-          "expr": "sum(cortex_ingester_memory_series{job=~\"cortex.ingester\"}\n/ on(namespace) group_left\nmax by (namespace) (cortex_distributor_replication_factor{job=~\"cortex.distributor\"}))",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "[METRICS] Active Metric Series",
-      "type": "stat"
-    },
-    {
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "decimals": 1,
-          "mappings": [],
-          "max": 50000000000,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 45000000010
-              },
-              {
-                "color": "red",
-                "value": 50000000000
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
-      },
-      "id": 51,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["delta"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.4",
-      "targets": [
-        {
-          "expr": "sum(loki_distributor_lines_received_total)",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "[LOGS] Log Entry Rate (per dashboard interval)",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
       },
       "id": 26,
       "panels": [],
@@ -200,7 +57,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 10
+        "y": 1
       },
       "hiddenSeries": false,
       "id": 18,
@@ -220,7 +77,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -240,7 +97,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[METRICS] API proxy, /api/prom/push, POST requests, rate by status code, (5m mean)",
+      "title": "[METRICS] API proxy, /api/prom/push, POST requests, rate by status code, (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -301,7 +158,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 10
+        "y": 1
       },
       "hiddenSeries": false,
       "id": 20,
@@ -321,7 +178,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -348,7 +205,226 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS] API proxy /loki/api/v1/push, POSTs, rate by status code (5m mean)",
+      "title": "[LOGS] API proxy /loki/api/v1/push, POSTs, rate by status code (5m mean) ALL tenants",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": ["Time", "400", "500", "502", "204"]
+          }
+        }
+      ],
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "rate [1/s]",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": 2,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": true,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "200": "green",
+        "400": "orange",
+        "429": "light-orange",
+        "500": "red",
+        "502": "dark-red"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 3,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "hiddenSeries": false,
+      "id": 71,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (namespace,status_code) (rate(cortex_api_proxy_request_duration_seconds_count{container=\"cortex-api\",method=\"POST\",route=\"api_v1_push\"}[5m]))",
+          "interval": "",
+          "legendFormat": "{{namespace}}: {{status_code}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[METRICS] API proxy, /api/prom/push, POST requests, rate by status code, (5m mean) BY tenants",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "rate [1/s]",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "Error: 400": "orange",
+        "Error: 500": "red",
+        "Error: 502": "dark-red",
+        "Success: 204": "green"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 3,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "hiddenSeries": false,
+      "id": 73,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (namespace,status_code) (rate(loki_api_proxy_request_duration_seconds_count{container=\"loki-api\",method=\"POST\",route=\"loki_api_v1_push\",status_code=~\"^2.*\"}[5m]))",
+          "interval": "",
+          "legendFormat": "{{namespace}}: {{status_code}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (namespace,status_code) (rate(loki_api_proxy_request_duration_seconds_count{container=\"loki-api\",method=\"POST\",route=\"loki_api_v1_push\",status_code!~\"^2.*\"}[5m]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{namespace}}: {{status_code}}",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[LOGS] API proxy /loki/api/v1/push, POSTs, rate by status code (5m mean) BY tenants",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -414,7 +490,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 2,
@@ -434,7 +510,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -513,7 +589,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 22,
@@ -533,7 +609,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -545,13 +621,13 @@
         {
           "expr": "sum(rate(loki_distributor_lines_received_total[5m]))",
           "interval": "",
-          "legendFormat": "log entry rate",
+          "legendFormat": "entry rate",
           "refId": "A"
         },
         {
-          "expr": "avg(sum(rate(loki_distributor_lines_received_total[12h])))",
+          "expr": "sum(rate(loki_distributor_bytes_received_total[5m]))/sum(rate(loki_distributor_lines_received_total[5m]))",
           "interval": "",
-          "legendFormat": "log entry rate (12hr mean)",
+          "legendFormat": "bytes per entry",
           "refId": "B"
         }
       ],
@@ -559,12 +635,13 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS]  distributor: tenant: ingest rate before rejection (5m mean)",
+      "title": "[LOGS]  Rate of log entries vs. bytes per entry (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
+      "transformations": [],
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -584,7 +661,7 @@
         },
         {
           "format": "short",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -616,7 +693,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 26
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 16,
@@ -636,7 +713,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -733,7 +810,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 26
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 32,
@@ -753,7 +830,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -851,6 +928,106 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "hiddenSeries": false,
+      "id": 72,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (namespace,code) (rate(grafana_datasource_request_duration_seconds_sum{datasource=\"metrics\"}[5m]) / rate(grafana_datasource_request_duration_seconds_count{datasource=\"metrics\"}[5m]))",
+          "interval": "",
+          "legendFormat": "{{namespace}}: {{status_code}}",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Queries through Grafana, request duration (5m mean) by namespace, status code",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:90",
+          "decimals": 2,
+          "format": "short",
+          "label": "duration [s]",
+          "logBase": 1,
+          "max": null,
+          "min": "0.0001",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:91",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -863,7 +1040,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 34
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 64,
@@ -883,7 +1060,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -959,7 +1136,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 34
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 62,
@@ -979,7 +1156,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1059,7 +1236,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 42
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 46,
@@ -1080,7 +1257,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1162,7 +1339,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 42
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 47,
@@ -1182,7 +1359,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1260,7 +1437,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 50
+        "y": 57
       },
       "hiddenSeries": false,
       "id": 59,
@@ -1280,7 +1457,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1359,7 +1536,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 50
+        "y": 57
       },
       "hiddenSeries": false,
       "id": 60,
@@ -1379,7 +1556,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1444,7 +1621,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 65
       },
       "id": 24,
       "panels": [],
@@ -1470,7 +1647,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 59
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 4,
@@ -1490,7 +1667,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1585,7 +1762,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 59
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 10,
@@ -1605,7 +1782,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1691,7 +1868,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 67
+        "y": 74
       },
       "hiddenSeries": false,
       "id": 6,
@@ -1711,7 +1888,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1744,10 +1921,10 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Container CPU",
+      "title": "Container CPU (by namespace)",
       "tooltip": {
-        "shared": false,
-        "sort": 0,
+        "shared": true,
+        "sort": 2,
         "value_type": "individual"
       },
       "transformations": [],
@@ -1762,7 +1939,7 @@
       "yaxes": [
         {
           "format": "s",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1801,7 +1978,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 67
+        "y": 74
       },
       "hiddenSeries": false,
       "id": 8,
@@ -1821,7 +1998,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1855,10 +2032,10 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Container Mem ",
+      "title": "Container Mem (by namespace)",
       "tooltip": {
-        "shared": false,
-        "sort": 0,
+        "shared": true,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1872,7 +2049,7 @@
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
+          "label": "bytes",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1881,6 +2058,200 @@
         {
           "format": "short",
           "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 82
+      },
+      "hiddenSeries": false,
+      "id": 69,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(namespace_pod_container:container_cpu_usage_seconds_total:sum_rate) by (pod)",
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Container CPU (by Pod)",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "s",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 82
+      },
+      "hiddenSeries": false,
+      "id": 70,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(container_memory_working_set_bytes{container!=\"\"}) by (pod)",
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Container Mem (by Pod)",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "label": "bytes",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1911,7 +2282,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 75
+        "y": 90
       },
       "hiddenSeries": false,
       "id": 28,
@@ -1920,7 +2291,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -1931,7 +2302,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1941,9 +2312,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_cfs_throttled_seconds_total[5m])) by (namespace)",
+          "expr": "sum(rate(container_cpu_cfs_throttled_seconds_total[5m])) by (pod)",
           "interval": "",
-          "legendFormat": "{{namespace}}",
+          "legendFormat": "{{pod}}",
           "refId": "B"
         }
       ],
@@ -2016,223 +2387,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 75
-      },
-      "hiddenSeries": false,
-      "id": 30,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.4",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(container_memory_swap) by (namespace)",
-          "interval": "",
-          "legendFormat": "{{namespace}}",
-          "refId": "A"
-        },
-        {
-          "expr": "instance:node_memory_swap_io_pages:rate1m",
-          "interval": "",
-          "legendFormat": "{{instance}}",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Memory Swap (container + instance)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 83
-      },
-      "hiddenSeries": false,
-      "id": 57,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.4",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(kube_pod_container_status_running)",
-          "interval": "",
-          "legendFormat": "RUNNING",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(kube_pod_container_status_terminated)",
-          "interval": "",
-          "legendFormat": "TERMINATED",
-          "refId": "B"
-        },
-        {
-          "expr": "sum(kube_pod_container_status_ready)",
-          "interval": "",
-          "legendFormat": "READY",
-          "refId": "C"
-        },
-        {
-          "expr": "sum(kube_pod_container_status_waiting)",
-          "interval": "",
-          "legendFormat": "WAITING",
-          "refId": "D"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "[INFRA] Pod States",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "metrics",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 83
+        "y": 90
       },
       "hiddenSeries": false,
       "id": 55,
@@ -2241,7 +2396,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -2252,7 +2407,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2272,7 +2427,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[INFRA] Pod Restart Rate (all tenants)",
+      "title": "Pod Restart Rate",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -2293,6 +2448,198 @@
           "logBase": 1,
           "max": null,
           "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 98
+      },
+      "hiddenSeries": false,
+      "id": 66,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n",
+          "interval": "",
+          "legendFormat": "",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[METRICS] PVC Storage Used Percentage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 98
+      },
+      "hiddenSeries": false,
+      "id": 67,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n",
+          "interval": "",
+          "legendFormat": "",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[LOGS] PVC Storage Used Percentage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
           "show": true
         },
         {
@@ -2328,7 +2675,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 91
+        "y": 106
       },
       "hiddenSeries": false,
       "id": 12,
@@ -2348,7 +2695,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2457,7 +2804,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 100
+        "y": 115
       },
       "hiddenSeries": false,
       "id": 14,
@@ -2477,7 +2824,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.3.4",
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2536,14 +2883,14 @@
     }
   ],
   "refresh": "10s",
-  "schemaVersion": 26,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
@@ -2562,5 +2909,5 @@
   "timezone": "",
   "title": "Opstrace Overview Dashboard",
   "uid": "GqFJrOxGk",
-  "version": 1
+  "version": 2
 }
