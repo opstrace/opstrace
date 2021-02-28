@@ -43,7 +43,7 @@ export default function setupWebsocketHandling(server: http.Server) {
           head,
           {
             ignorePath: true,
-            headers: getHasuraSessionHeaders(req.session.email)
+            headers: getHasuraSessionHeaders(req.session.userId)
           },
           (err: Error) => {
             log.warning(

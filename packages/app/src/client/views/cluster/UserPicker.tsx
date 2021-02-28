@@ -22,12 +22,10 @@ import { useHistory } from "react-router-dom";
 import useUserList from "state/user/hooks/useUserList";
 import { User } from "state/user/types";
 
-function userToPickerOption(user: User): PickerOption {
-  return {
-    text: user.email,
-    id: user.opaque_id
-  };
-}
+export const userToPickerOption = (user: User): PickerOption => ({
+  text: user.email,
+  id: user.id
+});
 
 const UserPicker = () => {
   const history = useHistory();

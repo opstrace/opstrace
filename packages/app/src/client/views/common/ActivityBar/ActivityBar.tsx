@@ -105,7 +105,7 @@ const ActivityBar = () => {
   };
 
   const navigateToCurrentUser = useCallback(() => {
-    history.push(`/cluster/users/${currentUser?.opaque_id}`);
+    history.push(`/cluster/users/${currentUser?.id}`);
   }, [currentUser, history]);
 
   useEffect(() => {

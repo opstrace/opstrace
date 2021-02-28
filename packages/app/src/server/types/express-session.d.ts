@@ -22,7 +22,7 @@ declare module "express-session" {
     email: string;
     username: string;
     avatar: string;
-    opaqueUserId: string;
+    userId: string;
   }
 }
 
@@ -32,7 +32,7 @@ declare module "http" {
       email: string;
       username: string;
       avatar: string;
-      opaqueUserId: string;
+      userId: string;
     };
   }
 }

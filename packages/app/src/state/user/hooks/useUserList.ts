@@ -18,7 +18,17 @@ import { useDispatch, useSelector, State } from "state/provider";
 import { subscribeToUserList, unsubscribeFromUserList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-export const getUserList = (state: State) => state.users.activeUsers;
+type GetUserListOptions = {
+  includeInactive: boolean;
+};
+
+export const getUserList = (
+  state: State,
+  options: GetUserListOptions | null = null
+) => {
+  return options?.includeInactive ? state.users.users : state.users.activeUsers;
+};
+
 /**
  * Subscribes to users and will update on
  * any changes. Automatically unsubscribeFromUserLists

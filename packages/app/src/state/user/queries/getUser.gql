@@ -1,9 +1,13 @@
-query GetUser($email: String!) {
-  user_by_pk(email: $email) {
+query GetUser($id: uuid!) {
+  user_by_pk(id: $id) {
+    id
     email
     avatar
     username
     active
+    preference {
+      dark_mode
+    }
   }
   user_aggregate(where: { active: { _eq: true } }) {
     aggregate {

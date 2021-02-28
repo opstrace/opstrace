@@ -49,14 +49,12 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
     actions.setDarkMode,
     (state, action): UserState => {
       // Make the changes optimistically
-      const currentUser = state.users.find(
-        u => u.opaque_id === state.currentUserId
-      );
+      const currentUser = state.users.find(u => u.id === state.currentUserId);
       if (!currentUser) {
         return state;
       }
       const users = state.users
-        .filter(u => u.opaque_id !== state.currentUserId)
+        .filter(u => u.id !== state.currentUserId)
         .concat({
           ...currentUser,
           preference: {

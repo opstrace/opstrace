@@ -74,7 +74,7 @@ test("getCurrentUser selector", () => {
     email: "test1@test.com",
     username: "test1",
     role: "",
-    opaque_id: "test1",
+    id: "test1",
     created_at: "20202-11-11",
     preference: { dark_mode: false }
   };
@@ -82,7 +82,7 @@ test("getCurrentUser selector", () => {
     email: "test2@test.com",
     username: "test2",
     role: "",
-    opaque_id: "test2",
+    id: "test2",
     created_at: "20202-11-12"
   };
   const subState = {
@@ -102,7 +102,7 @@ test("getUsers selector", () => {
     email: "test1@test.com",
     username: "test1",
     role: "",
-    opaque_id: "test1",
+    id: "test1",
     created_at: "20202-11-11",
     preference: { dark_mode: false }
   };
@@ -110,7 +110,7 @@ test("getUsers selector", () => {
     email: "test2@test.com",
     username: "test2",
     role: "",
-    opaque_id: "test2",
+    id: "test2",
     created_at: "20202-11-12"
   };
   const subState = {
@@ -136,7 +136,7 @@ test("getCurrentUserIdLoaded selector", () => {
           email: "test2@test.com",
           username: "test2",
           role: "",
-          opaque_id: "test2",
+          id: "test2",
           created_at: "20202-11-12"
         }
       ]

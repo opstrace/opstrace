@@ -1751,7 +1751,7 @@ export type Mutation_RootDelete_UserArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_User_By_PkArgs = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** mutation root */
@@ -1761,7 +1761,7 @@ export type Mutation_RootDelete_User_PreferenceArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_User_Preference_By_PkArgs = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** mutation root */
@@ -2252,7 +2252,7 @@ export type Query_RootUser_AggregateArgs = {
 
 /** query root */
 export type Query_RootUser_By_PkArgs = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** query root */
@@ -2275,7 +2275,7 @@ export type Query_RootUser_Preference_AggregateArgs = {
 
 /** query root */
 export type Query_RootUser_Preference_By_PkArgs = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** subscription root */
@@ -2524,7 +2524,7 @@ export type Subscription_RootUser_AggregateArgs = {
 
 /** subscription root */
 export type Subscription_RootUser_By_PkArgs = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** subscription root */
@@ -2547,7 +2547,7 @@ export type Subscription_RootUser_Preference_AggregateArgs = {
 
 /** subscription root */
 export type Subscription_RootUser_Preference_By_PkArgs = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** columns and relationships of "tenant" */
@@ -2782,7 +2782,7 @@ export type User = {
   avatar?: Maybe<Scalars["String"]>;
   created_at: Scalars["timestamptz"];
   email: Scalars["String"];
-  opaque_id: Scalars["uuid"];
+  id: Scalars["uuid"];
   /** An object relationship */
   preference?: Maybe<User_Preference>;
   role: Scalars["String"];
@@ -2853,7 +2853,7 @@ export type User_Bool_Exp = {
   avatar?: Maybe<String_Comparison_Exp>;
   created_at?: Maybe<Timestamptz_Comparison_Exp>;
   email?: Maybe<String_Comparison_Exp>;
-  opaque_id?: Maybe<Uuid_Comparison_Exp>;
+  id?: Maybe<Uuid_Comparison_Exp>;
   preference?: Maybe<User_Preference_Bool_Exp>;
   role?: Maybe<String_Comparison_Exp>;
   session_last_updated?: Maybe<Timestamptz_Comparison_Exp>;
@@ -2864,6 +2864,10 @@ export type User_Bool_Exp = {
 /** unique or primary key constraints on table "user" */
 export enum User_Constraint {
   /** unique or primary key constraint */
+  UserEmailKey = "user_email_key",
+  /** unique or primary key constraint */
+  UserIdKey = "user_id_key",
+  /** unique or primary key constraint */
   UserPkey = "user_pkey"
 }
 
@@ -2873,7 +2877,7 @@ export type User_Insert_Input = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
-  opaque_id?: Maybe<Scalars["uuid"]>;
+  id?: Maybe<Scalars["uuid"]>;
   preference?: Maybe<User_Preference_Obj_Rel_Insert_Input>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
@@ -2886,7 +2890,7 @@ export type User_Max_Fields = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
-  opaque_id?: Maybe<Scalars["uuid"]>;
+  id?: Maybe<Scalars["uuid"]>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
@@ -2897,7 +2901,7 @@ export type User_Max_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
-  opaque_id?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
   role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
   username?: Maybe<Order_By>;
@@ -2908,7 +2912,7 @@ export type User_Min_Fields = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
-  opaque_id?: Maybe<Scalars["uuid"]>;
+  id?: Maybe<Scalars["uuid"]>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
@@ -2919,7 +2923,7 @@ export type User_Min_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
-  opaque_id?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
   role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
   username?: Maybe<Order_By>;
@@ -2952,7 +2956,7 @@ export type User_Order_By = {
   avatar?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   email?: Maybe<Order_By>;
-  opaque_id?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
   preference?: Maybe<User_Preference_Order_By>;
   role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
@@ -2962,15 +2966,16 @@ export type User_Order_By = {
 
 /** primary key columns input for table: "user" */
 export type User_Pk_Columns_Input = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** columns and relationships of "user_preference" */
 export type User_Preference = {
   dark_mode: Scalars["Boolean"];
-  email: Scalars["String"];
+  id: Scalars["uuid"];
   /** An object relationship */
   user: User;
+  user_id: Scalars["uuid"];
 };
 
 /** aggregated selection of "user_preference" */
@@ -3011,41 +3016,51 @@ export type User_Preference_Bool_Exp = {
   _not?: Maybe<User_Preference_Bool_Exp>;
   _or?: Maybe<Array<Maybe<User_Preference_Bool_Exp>>>;
   dark_mode?: Maybe<Boolean_Comparison_Exp>;
-  email?: Maybe<String_Comparison_Exp>;
+  id?: Maybe<Uuid_Comparison_Exp>;
   user?: Maybe<User_Bool_Exp>;
+  user_id?: Maybe<Uuid_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "user_preference" */
 export enum User_Preference_Constraint {
   /** unique or primary key constraint */
-  UserPreferencePkey = "user_preference_pkey"
+  UserPreferenceIdKey = "user_preference_id_key",
+  /** unique or primary key constraint */
+  UserPreferencePkey = "user_preference_pkey",
+  /** unique or primary key constraint */
+  UserPreferenceUserIdKey = "user_preference_user_id_key"
 }
 
 /** input type for inserting data into table "user_preference" */
 export type User_Preference_Insert_Input = {
   dark_mode?: Maybe<Scalars["Boolean"]>;
-  email?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["uuid"]>;
   user?: Maybe<User_Obj_Rel_Insert_Input>;
+  user_id?: Maybe<Scalars["uuid"]>;
 };
 
 /** aggregate max on columns */
 export type User_Preference_Max_Fields = {
-  email?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  user_id?: Maybe<Scalars["uuid"]>;
 };
 
 /** order by max() on columns of table "user_preference" */
 export type User_Preference_Max_Order_By = {
-  email?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  user_id?: Maybe<Order_By>;
 };
 
 /** aggregate min on columns */
 export type User_Preference_Min_Fields = {
-  email?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  user_id?: Maybe<Scalars["uuid"]>;
 };
 
 /** order by min() on columns of table "user_preference" */
 export type User_Preference_Min_Order_By = {
-  email?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  user_id?: Maybe<Order_By>;
 };
 
 /** response of any mutation on the table "user_preference" */
@@ -3072,13 +3087,14 @@ export type User_Preference_On_Conflict = {
 /** ordering options when selecting data from "user_preference" */
 export type User_Preference_Order_By = {
   dark_mode?: Maybe<Order_By>;
-  email?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
   user?: Maybe<User_Order_By>;
+  user_id?: Maybe<Order_By>;
 };
 
 /** primary key columns input for table: "user_preference" */
 export type User_Preference_Pk_Columns_Input = {
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 };
 
 /** select columns of table "user_preference" */
@@ -3086,13 +3102,16 @@ export enum User_Preference_Select_Column {
   /** column name */
   DarkMode = "dark_mode",
   /** column name */
-  Email = "email"
+  Id = "id",
+  /** column name */
+  UserId = "user_id"
 }
 
 /** input type for updating data in table "user_preference" */
 export type User_Preference_Set_Input = {
   dark_mode?: Maybe<Scalars["Boolean"]>;
-  email?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  user_id?: Maybe<Scalars["uuid"]>;
 };
 
 /** update columns of table "user_preference" */
@@ -3100,7 +3119,9 @@ export enum User_Preference_Update_Column {
   /** column name */
   DarkMode = "dark_mode",
   /** column name */
-  Email = "email"
+  Id = "id",
+  /** column name */
+  UserId = "user_id"
 }
 
 /** select columns of table "user" */
@@ -3114,7 +3135,7 @@ export enum User_Select_Column {
   /** column name */
   Email = "email",
   /** column name */
-  OpaqueId = "opaque_id",
+  Id = "id",
   /** column name */
   Role = "role",
   /** column name */
@@ -3129,7 +3150,7 @@ export type User_Set_Input = {
   avatar?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamptz"]>;
   email?: Maybe<Scalars["String"]>;
-  opaque_id?: Maybe<Scalars["uuid"]>;
+  id?: Maybe<Scalars["uuid"]>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
   username?: Maybe<Scalars["String"]>;
@@ -3146,7 +3167,7 @@ export enum User_Update_Column {
   /** column name */
   Email = "email",
   /** column name */
-  OpaqueId = "opaque_id",
+  Id = "id",
   /** column name */
   Role = "role",
   /** column name */
@@ -3566,51 +3587,77 @@ export type CreateUserMutationVariables = Exact<{
 }>;
 
 export type CreateUserMutation = {
-  insert_user_preference_one?: Maybe<Pick<User_Preference, "email">>;
+  insert_user_preference_one?: Maybe<{
+    user: Pick<
+      User,
+      | "id"
+      | "email"
+      | "username"
+      | "role"
+      | "active"
+      | "avatar"
+      | "created_at"
+      | "session_last_updated"
+    >;
+  }>;
 };
 
-export type DeleteUserMutationVariables = Exact<{
-  email: Scalars["String"];
+export type DeactivateUserMutationVariables = Exact<{
+  id: Scalars["uuid"];
 }>;
 
-export type DeleteUserMutation = {
-  update_user_by_pk?: Maybe<Pick<User, "email" | "opaque_id">>;
+export type DeactivateUserMutation = {
+  update_user_by_pk?: Maybe<Pick<User, "id" | "active">>;
 };
 
 export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetCurrentUserQuery = {
   user: Array<
-    Pick<User, "email" | "avatar" | "username" | "active"> & {
+    Pick<User, "id" | "email" | "avatar" | "username" | "active"> & {
       preference?: Maybe<Pick<User_Preference, "dark_mode">>;
     }
   >;
 };
 
 export type GetUserQueryVariables = Exact<{
-  email: Scalars["String"];
+  id: Scalars["uuid"];
 }>;
 
 export type GetUserQuery = {
-  user_by_pk?: Maybe<Pick<User, "email" | "avatar" | "username" | "active">>;
+  user_by_pk?: Maybe<
+    Pick<User, "id" | "email" | "avatar" | "username" | "active"> & {
+      preference?: Maybe<Pick<User_Preference, "dark_mode">>;
+    }
+  >;
   user_aggregate: { aggregate?: Maybe<Pick<User_Aggregate_Fields, "count">> };
 };
 
-export type ReactivateUserMutationVariables = Exact<{
+export type GetUserByEmailQueryVariables = Exact<{
   email: Scalars["String"];
+}>;
+
+export type GetUserByEmailQuery = {
+  user: Array<Pick<User, "id" | "email" | "avatar" | "username" | "active">>;
+};
+
+export type ReactivateUserMutationVariables = Exact<{
+  id: Scalars["uuid"];
 }>;
 
 export type ReactivateUserMutation = {
-  update_user_by_pk?: Maybe<Pick<User, "email" | "opaque_id">>;
+  update_user_by_pk?: Maybe<Pick<User, "id" | "active">>;
 };
 
 export type SetDarkModeMutationVariables = Exact<{
-  email: Scalars["String"];
-  darkMode: Scalars["Boolean"];
+  user_id: Scalars["uuid"];
+  dark_mode?: Maybe<Scalars["Boolean"]>;
 }>;
 
 export type SetDarkModeMutation = {
-  update_user_preference_by_pk?: Maybe<Pick<User_Preference, "dark_mode">>;
+  update_user_preference?: Maybe<{
+    returning: Array<Pick<User_Preference, "dark_mode">>;
+  }>;
 };
 
 export type SubscribeToUserListSubscriptionVariables = Exact<{
@@ -3621,27 +3668,38 @@ export type SubscribeToUserListSubscription = {
   user: Array<
     Pick<
       User,
-      | "role"
+      | "id"
       | "email"
-      | "avatar"
-      | "active"
       | "username"
       | "session_last_updated"
+      | "role"
+      | "active"
+      | "avatar"
       | "created_at"
-      | "opaque_id"
     > & { preference?: Maybe<Pick<User_Preference, "dark_mode">> }
   >;
 };
 
 export type UpdateUserMutationVariables = Exact<{
+  id: Scalars["uuid"];
   email: Scalars["String"];
-  username: Scalars["String"];
   avatar: Scalars["String"];
-  time: Scalars["timestamptz"];
+  username: Scalars["String"];
 }>;
 
 export type UpdateUserMutation = {
-  update_user_by_pk?: Maybe<Pick<User, "email" | "opaque_id">>;
+  update_user_by_pk?: Maybe<
+    Pick<User, "id" | "email" | "username" | "avatar" | "session_last_updated">
+  >;
+};
+
+export type UpdateUserSessionMutationVariables = Exact<{
+  id: Scalars["uuid"];
+  timestamp: Scalars["timestamptz"];
+}>;
+
+export type UpdateUserSessionMutation = {
+  update_user_by_pk?: Maybe<Pick<User, "id" | "session_last_updated">>;
 };
 
 export const CreateBranchDocument = gql`
@@ -4117,24 +4175,41 @@ export const CreateUserDocument = gql`
     insert_user_preference_one(
       object: {
         dark_mode: true
-        user: { data: { avatar: $avatar, email: $email, username: $username } }
+        user: {
+          data: {
+            email: $email
+            username: $username
+            active: true
+            avatar: $avatar
+          }
+        }
       }
     ) {
-      email
+      user {
+        id
+        email
+        username
+        role
+        active
+        avatar
+        created_at
+        session_last_updated
+      }
     }
   }
 `;
-export const DeleteUserDocument = gql`
-  mutation DeleteUser($email: String!) {
-    update_user_by_pk(_set: { active: false }, pk_columns: { email: $email }) {
-      email
-      opaque_id
+export const DeactivateUserDocument = gql`
+  mutation DeactivateUser($id: uuid!) {
+    update_user_by_pk(_set: { active: false }, pk_columns: { id: $id }) {
+      id
+      active
     }
   }
 `;
 export const GetCurrentUserDocument = gql`
   query GetCurrentUser {
     user {
+      id
       email
       avatar
       username
@@ -4146,12 +4221,16 @@ export const GetCurrentUserDocument = gql`
   }
 `;
 export const GetUserDocument = gql`
-  query GetUser($email: String!) {
-    user_by_pk(email: $email) {
+  query GetUser($id: uuid!) {
+    user_by_pk(id: $id) {
+      id
       email
       avatar
       username
       active
+      preference {
+        dark_mode
+      }
     }
     user_aggregate(where: { active: { _eq: true } }) {
       aggregate {
@@ -4160,59 +4239,85 @@ export const GetUserDocument = gql`
     }
   }
 `;
-export const ReactivateUserDocument = gql`
-  mutation ReactivateUser($email: String!) {
-    update_user_by_pk(_set: { active: true }, pk_columns: { email: $email }) {
+export const GetUserByEmailDocument = gql`
+  query GetUserByEmail($email: String!) {
+    user(
+      where: { email: { _eq: $email } }
+      limit: 1
+      order_by: { created_at: asc }
+    ) {
+      id
       email
-      opaque_id
+      avatar
+      username
+      active
+    }
+  }
+`;
+export const ReactivateUserDocument = gql`
+  mutation ReactivateUser($id: uuid!) {
+    update_user_by_pk(pk_columns: { id: $id }, _set: { active: true }) {
+      id
+      active
     }
   }
 `;
 export const SetDarkModeDocument = gql`
-  mutation SetDarkMode($email: String!, $darkMode: Boolean!) {
-    update_user_preference_by_pk(
-      pk_columns: { email: $email }
-      _set: { dark_mode: $darkMode }
+  mutation SetDarkMode($user_id: uuid!, $dark_mode: Boolean = true) {
+    update_user_preference(
+      where: { user_id: { _eq: $user_id } }
+      _set: { dark_mode: $dark_mode }
     ) {
-      dark_mode
+      returning {
+        dark_mode
+      }
     }
   }
 `;
 export const SubscribeToUserListDocument = gql`
   subscription SubscribeToUserList {
     user {
-      role
+      id
       email
-      avatar
-      active
       username
       session_last_updated
-      created_at
-      opaque_id
+      role
+      active
+      avatar
       preference {
         dark_mode
       }
+      created_at
     }
   }
 `;
 export const UpdateUserDocument = gql`
   mutation UpdateUser(
+    $id: uuid!
     $email: String!
-    $username: String!
     $avatar: String!
-    $time: timestamptz!
+    $username: String!
   ) {
     update_user_by_pk(
-      _set: {
-        username: $username
-        email: $email
-        avatar: $avatar
-        session_last_updated: $time
-      }
-      pk_columns: { email: $email }
+      pk_columns: { id: $id }
+      _set: { email: $email, avatar: $avatar, username: $username }
     ) {
+      id
       email
-      opaque_id
+      username
+      avatar
+      session_last_updated
+    }
+  }
+`;
+export const UpdateUserSessionDocument = gql`
+  mutation UpdateUserSession($id: uuid!, $timestamp: timestamptz!) {
+    update_user_by_pk(
+      pk_columns: { id: $id }
+      _set: { session_last_updated: $timestamp }
+    ) {
+      id
+      session_last_updated
     }
   }
 `;
@@ -4741,18 +4846,18 @@ export function getSdk(
         )
       );
     },
-    DeleteUser(
-      variables: DeleteUserMutationVariables
+    DeactivateUser(
+      variables: DeactivateUserMutationVariables
     ): Promise<{
-      data?: DeleteUserMutation | undefined;
+      data?: DeactivateUserMutation | undefined;
       extensions?: any;
       headers: Headers;
       status: number;
       errors?: GraphQLError[] | undefined;
     }> {
       return withWrapper(() =>
-        client.rawRequest<DeleteUserMutation>(
-          print(DeleteUserDocument),
+        client.rawRequest<DeactivateUserMutation>(
+          print(DeactivateUserDocument),
           variables
         )
       );
@@ -4784,6 +4889,22 @@ export function getSdk(
     }> {
       return withWrapper(() =>
         client.rawRequest<GetUserQuery>(print(GetUserDocument), variables)
+      );
+    },
+    GetUserByEmail(
+      variables: GetUserByEmailQueryVariables
+    ): Promise<{
+      data?: GetUserByEmailQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetUserByEmailQuery>(
+          print(GetUserByEmailDocument),
+          variables
+        )
       );
     },
     ReactivateUser(
@@ -4846,6 +4967,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<UpdateUserMutation>(
           print(UpdateUserDocument),
+          variables
+        )
+      );
+    },
+    UpdateUserSession(
+      variables: UpdateUserSessionMutationVariables
+    ): Promise<{
+      data?: UpdateUserSessionMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<UpdateUserSessionMutation>(
+          print(UpdateUserSessionDocument),
           variables
         )
       );

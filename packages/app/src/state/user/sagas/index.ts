@@ -55,15 +55,16 @@ function* addUserListener() {
 function* addUser(action: ReturnType<typeof actions.addUser>) {
   try {
     const state: State = yield select();
-    const registeredUsers = getUserList(state);
+    const registeredUsers = getUserList(state, { includeInactive: true });
     const existingDeactivatedUser = registeredUsers.find(
       user => user.email === action.payload && !user.active
     );
+
     // We set users as inactive instead of deleting so that all the history
     // created by them is not disrupted/lost
     if (existingDeactivatedUser) {
       yield graphqlClient.ReactivateUser({
-        email: action.payload
+        id: existingDeactivatedUser.id
       });
     } else {
       yield graphqlClient.CreateUser({
@@ -87,8 +88,8 @@ function* deleteUser(action: ReturnType<typeof actions.deleteUser>) {
   try {
     // When we "delete" a user, we actually set the user as inactive instead of deleting so that all the history
     // created by them is not disrupted/lost
-    yield graphqlClient.DeleteUser({
-      email: action.payload
+    yield graphqlClient.DeactivateUser({
+      id: action.payload
     });
   } catch (err) {
     console.error(err);
@@ -101,13 +102,13 @@ function* persistDarkModePreference() {
       actions.setDarkMode
     );
     const user: User | undefined = yield select(getCurrentUser);
-    if (!user?.email) {
+    if (!user?.id) {
       return;
     }
     try {
       yield graphqlClient.SetDarkMode({
-        email: user.email,
-        darkMode: action.payload
+        user_id: user.id,
+        dark_mode: action.payload
       });
     } catch (err) {
       console.error(err);

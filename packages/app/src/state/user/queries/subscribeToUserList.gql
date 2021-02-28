@@ -1,15 +1,15 @@
 subscription SubscribeToUserList {
   user {
-    role
+    id
     email
-    avatar
-    active
     username
     session_last_updated
-    created_at
-    opaque_id
+    role
+    active
+    avatar
     preference {
       dark_mode
     }
+    created_at
   }
 }

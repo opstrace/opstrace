@@ -31,7 +31,7 @@ export const getUsersLoading = (state: State) => state.users.loading;
 export const getCurrentUser = createSelector(
   getUsers,
   getCurrentUserId,
-  (users, currentUserId) => users.find(u => u.opaque_id === currentUserId)
+  (users, currentUserId) => users.find(u => u.id === currentUserId)
 );
 
 export const getCurrentUserLoaded = createSelector(
@@ -56,11 +56,10 @@ export default function useCurrentUser() {
   useEffect(() => {
     const subId = getSubscriptionID();
     dispatch(subscribeToUserList(subId));
-
     return () => {
       dispatch(unsubscribeFromUserList(subId));
     };
-  }, [dispatch, currentUser?.email]);
+  }, [dispatch, currentUser?.id]);
 
   return currentUser;
 }

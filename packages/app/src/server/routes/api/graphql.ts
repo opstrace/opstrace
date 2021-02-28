@@ -19,9 +19,9 @@ import querystring from "querystring";
 import env from "server/env";
 import { log } from "@opstrace/utils/lib/log";
 
-export function getHasuraSessionHeaders(email: string) {
+export function getHasuraSessionHeaders(id: string) {
   return {
-    "X-Hasura-User-Id": email,
+    "X-Hasura-User-Id": id,
     "X-Hasura-Role": "user_admin", // Set every user by default to "user_admin" in community edition.
     "X-Hasura-Admin-Secret": env.HASURA_GRAPHQL_ADMIN_SECRET
   };
@@ -76,7 +76,7 @@ function createGraphqlHandler(): express.Router {
       req,
       res,
       {
-        headers: getHasuraSessionHeaders(req.session.email!)
+        headers: getHasuraSessionHeaders(req.session.userId!)
       },
       (err: Error) => {
         log.warning("error in http graphql proxy upstream (ignoring): %s", err);

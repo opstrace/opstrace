@@ -47,7 +47,7 @@ test("handle setDarkMode action", () => {
         email: "test1@test.com",
         username: "test1",
         role: "",
-        opaque_id: "test1",
+        id: "test1",
         created_at: "20202-11-11",
         preference: { dark_mode: false },
         active: false
@@ -66,7 +66,7 @@ test("handle setUserList action", () => {
       email: "test1@test.com",
       username: "test1",
       role: "",
-      opaque_id: "test1",
+      id: "test1",
       created_at: "20202-11-11",
       preference: { dark_mode: false },
       active: true
@@ -75,7 +75,7 @@ test("handle setUserList action", () => {
       email: "test2@test.com",
       username: "test2",
       role: "",
-      opaque_id: "test2",
+      id: "test2",
       created_at: "20202-11-12",
       active: false
     }

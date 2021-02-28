@@ -1,8 +1,10 @@
-mutation SetDarkMode($email: String!, $darkMode: Boolean!) {
-  update_user_preference_by_pk(
-    pk_columns: { email: $email }
-    _set: { dark_mode: $darkMode }
+mutation SetDarkMode($user_id: uuid!, $dark_mode: Boolean = true) {
+  update_user_preference(
+    where: { user_id: { _eq: $user_id } }
+    _set: { dark_mode: $dark_mode }
   ) {
-    dark_mode
+    returning {
+      dark_mode
+    }
   }
 }

@@ -119,14 +119,14 @@ function EditorViewers() {
     user.avatar ? (
       <ColoredAvatar
         color={color}
-        key={`viewer:${user.opaque_id}`}
+        key={`viewer:${user.id}`}
         alt={user.username}
         src={user.avatar}
       />
     ) : (
       <ColoredAvatar
         color={color}
-        key={`viewer:${user.opaque_id}`}
+        key={`viewer:${user.id}`}
         alt={user.username}
       >
         {user.username.slice(0, 1).toUpperCase()}
@@ -170,7 +170,7 @@ function EditorViewers() {
           const { user, isEditor, color } = viewer;
           return isEditor ? (
             <Badge
-              key={`editing:${user.opaque_id}`}
+              key={`editing:${user.id}`}
               overlap="circle"
               anchorOrigin={{
                 vertical: "bottom",
