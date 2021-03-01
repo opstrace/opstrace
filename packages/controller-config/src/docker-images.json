@@ -15,7 +15,7 @@
   "kubeRBACProxy": "quay.io/coreos/kube-rbac-proxy:v0.4.1",
   "kubeStateMetrics": "quay.io/coreos/kube-state-metrics:v1.7.2",
   "localVolumeProvisioner": "quay.io/external_storage/local-volume-provisioner:v2.2.0",
-  "loki": "grafana/loki:master-03aaa34",
+  "loki": "grafana/loki:master-cb59069",
   "lokiApiProxy": "opstrace/loki-api:7633d73fc9cf6af5d2caaa25d90fe242",
   "memcached": "memcached:1.6.6-alpine",
   "memcachedExporter": "prom/memcached-exporter:v0.6.0",
