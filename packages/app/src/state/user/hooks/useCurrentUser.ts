@@ -31,7 +31,7 @@ export const getUsersLoading = (state: State) => state.users.loading;
 export const getCurrentUser = createSelector(
   getUsers,
   getCurrentUserId,
-  (users, currentUserId) => users.find(u => u.id === currentUserId)
+  (users, currentUserId) => users[currentUserId]
 );
 
 export const getCurrentUserLoaded = createSelector(

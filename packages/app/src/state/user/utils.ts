@@ -13,11 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToUserListSubscription } from "state/clients/graphqlClient";
 
-export type User = SubscribeToUserListSubscription["user"][0];
-export type Users = User[];
-export type UserRecords = Record<string, User>;
-
-// use this same id to unsubscribe
-export type SubscriptionID = number;
+import { User } from "./types";
+export const isActive = (user: User, _id: string): boolean => user.active;

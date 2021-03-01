@@ -17,6 +17,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, State } from "state/provider";
 import { subscribeToUserList, unsubscribeFromUserList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
+import { Users } from "state/user/types";
+import { values } from "ramda";
 
 type GetUserListOptions = {
   includeInactive: boolean;
@@ -26,7 +28,9 @@ export const getUserList = (
   state: State,
   options: GetUserListOptions | null = null
 ) => {
-  return options?.includeInactive ? state.users.users : state.users.activeUsers;
+  return values(
+    options?.includeInactive ? state.users.allUsers : state.users.users
+  ) as Users;
 };
 
 /**

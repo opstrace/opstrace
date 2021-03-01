@@ -15,8 +15,10 @@
  */
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { Users } from "./types";
+import { UserRecords } from "./types";
 import * as actions from "./actions";
+import { pluck, zipObj, pickBy, mergeDeepLeft } from "ramda";
+import { isActive } from "state/user/utils";
 
 type UserActions = ActionType<typeof actions>;
 
@@ -24,16 +26,16 @@ type UserState = {
   currentUserId: string;
   currentUserIdLoaded: boolean;
   loading: boolean;
-  users: Users;
-  activeUsers: Users;
+  allUsers: UserRecords;
+  users: UserRecords;
 };
 
 const UserInitialState: UserState = {
   currentUserId: "",
   loading: true,
   currentUserIdLoaded: false,
-  users: [],
-  activeUsers: []
+  allUsers: {},
+  users: {}
 };
 
 export const reducer = createReducer<UserState, UserActions>(UserInitialState)
@@ -48,33 +50,30 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
   .handleAction(
     actions.setDarkMode,
     (state, action): UserState => {
-      // Make the changes optimistically
-      const currentUser = state.users.find(u => u.id === state.currentUserId);
-      if (!currentUser) {
-        return state;
-      }
-      const users = state.users
-        .filter(u => u.id !== state.currentUserId)
-        .concat({
-          ...currentUser,
-          preference: {
-            ...currentUser.preference,
-            dark_mode: action.payload
-          }
-        });
+      if (!state.currentUserIdLoaded) return state;
 
-      return {
-        ...state,
-        users
-      };
+      return mergeDeepLeft(state, {
+        users: {
+          [state.currentUserId]: { preferences: { dark_mode: action.payload } }
+        },
+        allUsers: {
+          [state.currentUserId]: { preferences: { dark_mode: action.payload } }
+        }
+      });
     }
   )
   .handleAction(
     actions.setUserList,
-    (state, action): UserState => ({
-      ...state,
-      users: action.payload,
-      activeUsers: action.payload.filter(u => u.active),
-      loading: false
-    })
+    (state, action): UserState => {
+      const users: UserRecords = zipObj(pluck("id")(action.payload))(
+        action.payload
+      );
+
+      return {
+        ...state,
+        allUsers: users,
+        users: pickBy<UserRecords>(isActive)(users),
+        loading: false
+      };
+    }
   );
