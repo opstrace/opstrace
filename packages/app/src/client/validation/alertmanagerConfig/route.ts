@@ -1,3 +1,19 @@
+/**
+ * Copyright 2021 Opstrace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as yup from "yup";
 
 import { labelName } from "./common";
@@ -32,20 +48,14 @@ This effectively disables aggregation entirely, passing through all alerts as-is
       comment:
         "How long to initially wait to send a notification for a group of alerts. Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group. (Usually ~0s to few minutes.)"
     }),
-    group_interval: yup
-      .string()
-      .default("5m")
-      .meta({
-        comment:
-          "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent. (Usually ~5m or more.)"
-      }),
-    repeat_interval: yup
-      .string()
-      .default("4h")
-      .meta({
-        comment:
-          "How long to wait before sending a notification again if it has already been sent successfully for an alert. (Usually ~3h or more)."
-      })
+    group_interval: yup.string().default("5m").meta({
+      comment:
+        "How long to wait before sending a notification about new alerts that are added to a group of alerts for which an initial notification has already been sent. (Usually ~5m or more.)"
+    }),
+    repeat_interval: yup.string().default("4h").meta({
+      comment:
+        "How long to wait before sending a notification again if it has already been sent successfully for an alert. (Usually ~3h or more)."
+    })
   })
   .nullable()
   .default(null)
