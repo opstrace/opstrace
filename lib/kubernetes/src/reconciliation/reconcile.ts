@@ -74,7 +74,8 @@ import {
   hasIngressChanged,
   hasAlertManagerChanged,
   hasPrometheusChanged,
-  hasCertificateChanged
+  hasCertificateChanged,
+  hasClusterRoleChanged
 } from "../equality";
 
 import { entries } from "@opstrace/utils";
@@ -552,7 +553,10 @@ export function* reconcile(
         return;
       }
       if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
+        if (
+          haveLabelsChanged(r, existing) ||
+          hasClusterRoleChanged(r, existing)
+        ) {
           updateCollection.push(r);
         }
       }
