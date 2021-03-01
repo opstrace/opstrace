@@ -2787,29 +2787,7 @@ export type User = {
   preference?: Maybe<User_Preference>;
   role: Scalars["String"];
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
-  /** An array relationship */
-  user_preferences: Array<User_Preference>;
-  /** An aggregated array relationship */
-  user_preferences_aggregate: User_Preference_Aggregate;
   username: Scalars["String"];
-};
-
-/** columns and relationships of "user" */
-export type UserUser_PreferencesArgs = {
-  distinct_on?: Maybe<Array<User_Preference_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<User_Preference_Order_By>>;
-  where?: Maybe<User_Preference_Bool_Exp>;
-};
-
-/** columns and relationships of "user" */
-export type UserUser_Preferences_AggregateArgs = {
-  distinct_on?: Maybe<Array<User_Preference_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<User_Preference_Order_By>>;
-  where?: Maybe<User_Preference_Bool_Exp>;
 };
 
 /** aggregated selection of "user" */
@@ -2857,7 +2835,6 @@ export type User_Bool_Exp = {
   preference?: Maybe<User_Preference_Bool_Exp>;
   role?: Maybe<String_Comparison_Exp>;
   session_last_updated?: Maybe<Timestamptz_Comparison_Exp>;
-  user_preferences?: Maybe<User_Preference_Bool_Exp>;
   username?: Maybe<String_Comparison_Exp>;
 };
 
@@ -2881,7 +2858,6 @@ export type User_Insert_Input = {
   preference?: Maybe<User_Preference_Obj_Rel_Insert_Input>;
   role?: Maybe<Scalars["String"]>;
   session_last_updated?: Maybe<Scalars["timestamptz"]>;
-  user_preferences?: Maybe<User_Preference_Arr_Rel_Insert_Input>;
   username?: Maybe<Scalars["String"]>;
 };
 
@@ -2960,7 +2936,6 @@ export type User_Order_By = {
   preference?: Maybe<User_Preference_Order_By>;
   role?: Maybe<Order_By>;
   session_last_updated?: Maybe<Order_By>;
-  user_preferences_aggregate?: Maybe<User_Preference_Aggregate_Order_By>;
   username?: Maybe<Order_By>;
 };
 
@@ -2974,8 +2949,8 @@ export type User_Preference = {
   dark_mode: Scalars["Boolean"];
   id: Scalars["uuid"];
   /** An object relationship */
-  user: User;
-  user_id: Scalars["uuid"];
+  user?: Maybe<User>;
+  user_id?: Maybe<Scalars["uuid"]>;
 };
 
 /** aggregated selection of "user_preference" */
@@ -3588,16 +3563,18 @@ export type CreateUserMutationVariables = Exact<{
 
 export type CreateUserMutation = {
   insert_user_preference_one?: Maybe<{
-    user: Pick<
-      User,
-      | "id"
-      | "email"
-      | "username"
-      | "role"
-      | "active"
-      | "avatar"
-      | "created_at"
-      | "session_last_updated"
+    user?: Maybe<
+      Pick<
+        User,
+        | "id"
+        | "email"
+        | "username"
+        | "role"
+        | "active"
+        | "avatar"
+        | "created_at"
+        | "session_last_updated"
+      >
     >;
   }>;
 };
@@ -3608,6 +3585,17 @@ export type DeactivateUserMutationVariables = Exact<{
 
 export type DeactivateUserMutation = {
   update_user_by_pk?: Maybe<Pick<User, "id" | "active">>;
+};
+
+export type GetActiveUserForAuthQueryVariables = Exact<{
+  email: Scalars["String"];
+}>;
+
+export type GetActiveUserForAuthQuery = {
+  user: Array<Pick<User, "id" | "email" | "avatar" | "username" | "active">>;
+  active_user_count: {
+    aggregate?: Maybe<Pick<User_Aggregate_Fields, "count">>;
+  };
 };
 
 export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never }>;
@@ -3630,15 +3618,6 @@ export type GetUserQuery = {
       preference?: Maybe<Pick<User_Preference, "dark_mode">>;
     }
   >;
-  user_aggregate: { aggregate?: Maybe<Pick<User_Aggregate_Fields, "count">> };
-};
-
-export type GetUserByEmailQueryVariables = Exact<{
-  email: Scalars["String"];
-}>;
-
-export type GetUserByEmailQuery = {
-  user: Array<Pick<User, "id" | "email" | "avatar" | "username" | "active">>;
 };
 
 export type ReactivateUserMutationVariables = Exact<{
@@ -4206,6 +4185,26 @@ export const DeactivateUserDocument = gql`
     }
   }
 `;
+export const GetActiveUserForAuthDocument = gql`
+  query GetActiveUserForAuth($email: String!) {
+    user(
+      where: { email: { _eq: $email }, active: { _eq: true } }
+      limit: 1
+      order_by: { created_at: asc }
+    ) {
+      id
+      email
+      avatar
+      username
+      active
+    }
+    active_user_count: user_aggregate(where: { active: { _eq: true } }) {
+      aggregate {
+        count
+      }
+    }
+  }
+`;
 export const GetCurrentUserDocument = gql`
   query GetCurrentUser {
     user {
@@ -4231,26 +4230,6 @@ export const GetUserDocument = gql`
       preference {
         dark_mode
       }
-    }
-    user_aggregate(where: { active: { _eq: true } }) {
-      aggregate {
-        count
-      }
-    }
-  }
-`;
-export const GetUserByEmailDocument = gql`
-  query GetUserByEmail($email: String!) {
-    user(
-      where: { email: { _eq: $email } }
-      limit: 1
-      order_by: { created_at: asc }
-    ) {
-      id
-      email
-      avatar
-      username
-      active
     }
   }
 `;
@@ -4862,6 +4841,22 @@ export function getSdk(
         )
       );
     },
+    GetActiveUserForAuth(
+      variables: GetActiveUserForAuthQueryVariables
+    ): Promise<{
+      data?: GetActiveUserForAuthQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetActiveUserForAuthQuery>(
+          print(GetActiveUserForAuthDocument),
+          variables
+        )
+      );
+    },
     GetCurrentUser(
       variables?: GetCurrentUserQueryVariables
     ): Promise<{
@@ -4889,22 +4884,6 @@ export function getSdk(
     }> {
       return withWrapper(() =>
         client.rawRequest<GetUserQuery>(print(GetUserDocument), variables)
-      );
-    },
-    GetUserByEmail(
-      variables: GetUserByEmailQueryVariables
-    ): Promise<{
-      data?: GetUserByEmailQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<GetUserByEmailQuery>(
-          print(GetUserByEmailDocument),
-          variables
-        )
       );
     },
     ReactivateUser(

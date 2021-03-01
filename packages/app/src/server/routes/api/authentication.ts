@@ -58,20 +58,22 @@ function createAuthHandler(): express.Router {
     }
     // check if user exists in db
     try {
-      const findResponse = await graphqlClient.GetUserByEmail({ email: email });
-      let user = findResponse.data?.user[0];
+      const response = await graphqlClient.GetActiveUserForAuth({
+        email: email
+      });
+      let activeUserCount = response.data?.active_user_count?.aggregate?.count;
+      let user = response.data?.user[0];
 
-      if (!user) {
-        // if we didn't find a user, lets create one
+      if (activeUserCount === 0) {
+        // if there are no active users then the first in gets setup with a user record, all subsequent "users" from auth0 are blocked
         const createResponse = await graphqlClient.CreateUser({
           email,
           username,
           avatar
         });
 
-        user = createResponse.data?.insert_user_preference_one?.user;
-      } else if (!user.active) {
-        // only active users can log in
+        user = <any>createResponse.data?.insert_user_preference_one?.user;
+      } else if (!user) {
         return next(new GeneralServerError(401, "Unauthorized"));
       } else {
         await graphqlClient.UpdateUserSession({
@@ -81,7 +83,7 @@ function createAuthHandler(): express.Router {
       }
 
       // block login attempt if we somehow got to here without a valid active user
-      if (!user || !user.id || !user.active)
+      if (!user || !user.active)
         return next(new GeneralServerError(401, "Unauthorized"));
 
       req.session.userId = user.id;

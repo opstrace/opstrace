@@ -1,0 +1,18 @@
+query GetActiveUserForAuth($email: String!) {
+  user(
+    where: { email: { _eq: $email }, active: { _eq: true } }
+    limit: 1
+    order_by: { created_at: asc }
+  ) {
+    id
+    email
+    avatar
+    username
+    active
+  }
+  active_user_count: user_aggregate(where: { active: { _eq: true } }) {
+    aggregate {
+      count
+    }
+  }
+}

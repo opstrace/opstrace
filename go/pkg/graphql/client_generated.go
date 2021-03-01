@@ -2075,6 +2075,90 @@ func (client *Client) DeactivateUser(vars *DeactivateUserVariables) (*Deactivate
 }
 
 //
+// query GetActiveUserForAuth($email: String!)
+//
+
+type GetActiveUserForAuthVariables struct {
+	Email String `json:"email"`
+}
+
+type GetActiveUserForAuthResponse struct {
+	User []struct {
+		ID       string `json:"ID"`
+		Email    string `json:"Email"`
+		Avatar   string `json:"Avatar"`
+		Username string `json:"Username"`
+		Active   string `json:"Active"`
+	} `json:"User"`
+	UserAggregate struct {
+		Aggregate struct {
+			Count string `json:"Count"`
+		} `json:"Aggregate"`
+	} `json:"UserAggregate"`
+}
+
+type GetActiveUserForAuthRequest struct {
+	*http.Request
+}
+
+func NewGetActiveUserForAuthRequest(url string, vars *GetActiveUserForAuthVariables) (*GetActiveUserForAuthRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetActiveUserForAuth($email: String!) {
+  user(where: {email: {_eq: $email}, active: {_eq: true}}, limit: 1, order_by: {created_at: asc}) {
+    id
+    email
+    avatar
+    username
+    active
+  }
+  active_user_count: user_aggregate(where: {active: {_eq: true}}) {
+    aggregate {
+      count
+    }
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetActiveUserForAuthRequest{req}, nil
+}
+
+func (req *GetActiveUserForAuthRequest) Execute(client *http.Client) (*GetActiveUserForAuthResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetActiveUserForAuthResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetActiveUserForAuth(url string, client *http.Client, vars *GetActiveUserForAuthVariables) (*GetActiveUserForAuthResponse, error) {
+	req, err := NewGetActiveUserForAuthRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetActiveUserForAuth(vars *GetActiveUserForAuthVariables) (*GetActiveUserForAuthResponse, error) {
+	return GetActiveUserForAuth(client.Url, client.Client, vars)
+}
+
+//
 // query GetCurrentUser
 //
 
@@ -2164,11 +2248,6 @@ type GetUserResponse struct {
 			DarkMode string `json:"DarkMode"`
 		} `json:"Preference"`
 	} `json:"UserByPk"`
-	UserAggregate struct {
-		Aggregate struct {
-			Count string `json:"Count"`
-		} `json:"Aggregate"`
-	} `json:"UserAggregate"`
 }
 
 type GetUserRequest struct {
@@ -2191,11 +2270,6 @@ func NewGetUserRequest(url string, vars *GetUserVariables) (*GetUserRequest, err
     active
     preference {
       dark_mode
-    }
-  }
-  user_aggregate(where: {active: {_eq: true}}) {
-    aggregate {
-      count
     }
   }
 }`,
@@ -2233,80 +2307,6 @@ func GetUser(url string, client *http.Client, vars *GetUserVariables) (*GetUserR
 
 func (client *Client) GetUser(vars *GetUserVariables) (*GetUserResponse, error) {
 	return GetUser(client.Url, client.Client, vars)
-}
-
-//
-// query GetUserByEmail($email: String!)
-//
-
-type GetUserByEmailVariables struct {
-	Email String `json:"email"`
-}
-
-type GetUserByEmailResponse struct {
-	User []struct {
-		ID       string `json:"ID"`
-		Email    string `json:"Email"`
-		Avatar   string `json:"Avatar"`
-		Username string `json:"Username"`
-		Active   string `json:"Active"`
-	} `json:"User"`
-}
-
-type GetUserByEmailRequest struct {
-	*http.Request
-}
-
-func NewGetUserByEmailRequest(url string, vars *GetUserByEmailVariables) (*GetUserByEmailRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetUserByEmail($email: String!) {
-  user(where: {email: {_eq: $email}}, limit: 1, order_by: {created_at: asc}) {
-    id
-    email
-    avatar
-    username
-    active
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetUserByEmailRequest{req}, nil
-}
-
-func (req *GetUserByEmailRequest) Execute(client *http.Client) (*GetUserByEmailResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetUserByEmailResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetUserByEmail(url string, client *http.Client, vars *GetUserByEmailVariables) (*GetUserByEmailResponse, error) {
-	req, err := NewGetUserByEmailRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetUserByEmail(vars *GetUserByEmailVariables) (*GetUserByEmailResponse, error) {
-	return GetUserByEmail(client.Url, client.Client, vars)
 }
 
 //
@@ -3656,7 +3656,6 @@ type UserBoolExp struct {
 	Preference         *UserPreferenceBoolExp    `json:"preference,omitempty"`
 	Role               *StringComparisonExp      `json:"role,omitempty"`
 	SessionLastUpdated *TimestamptzComparisonExp `json:"session_last_updated,omitempty"`
-	UserPreferences    *UserPreferenceBoolExp    `json:"user_preferences,omitempty"`
 	Username           *StringComparisonExp      `json:"username,omitempty"`
 }
 
@@ -3669,7 +3668,6 @@ type UserInsertInput struct {
 	Preference         *UserPreferenceObjRelInsertInput `json:"preference,omitempty"`
 	Role               *String                          `json:"role,omitempty"`
 	SessionLastUpdated *Timestamptz                     `json:"session_last_updated,omitempty"`
-	UserPreferences    *UserPreferenceArrRelInsertInput `json:"user_preferences,omitempty"`
 	Username           *String                          `json:"username,omitempty"`
 }
 
@@ -3705,16 +3703,15 @@ type UserOnConflict struct {
 }
 
 type UserOrderBy struct {
-	Active                   *OrderBy                        `json:"active,omitempty"`
-	Avatar                   *OrderBy                        `json:"avatar,omitempty"`
-	CreatedAt                *OrderBy                        `json:"created_at,omitempty"`
-	Email                    *OrderBy                        `json:"email,omitempty"`
-	ID                       *OrderBy                        `json:"id,omitempty"`
-	Preference               *UserPreferenceOrderBy          `json:"preference,omitempty"`
-	Role                     *OrderBy                        `json:"role,omitempty"`
-	SessionLastUpdated       *OrderBy                        `json:"session_last_updated,omitempty"`
-	UserPreferencesAggregate *UserPreferenceAggregateOrderBy `json:"user_preferences_aggregate,omitempty"`
-	Username                 *OrderBy                        `json:"username,omitempty"`
+	Active             *OrderBy               `json:"active,omitempty"`
+	Avatar             *OrderBy               `json:"avatar,omitempty"`
+	CreatedAt          *OrderBy               `json:"created_at,omitempty"`
+	Email              *OrderBy               `json:"email,omitempty"`
+	ID                 *OrderBy               `json:"id,omitempty"`
+	Preference         *UserPreferenceOrderBy `json:"preference,omitempty"`
+	Role               *OrderBy               `json:"role,omitempty"`
+	SessionLastUpdated *OrderBy               `json:"session_last_updated,omitempty"`
+	Username           *OrderBy               `json:"username,omitempty"`
 }
 
 type UserPkColumnsInput struct {
@@ -4254,17 +4251,15 @@ type TenantMutationResponse struct {
 }
 
 type User struct {
-	Active                   Boolean                 `json:"active"`
-	Avatar                   *String                 `json:"avatar,omitempty"`
-	CreatedAt                Timestamptz             `json:"created_at"`
-	Email                    String                  `json:"email"`
-	ID                       UUID                    `json:"id"`
-	Preference               *UserPreference         `json:"preference,omitempty"`
-	Role                     String                  `json:"role"`
-	SessionLastUpdated       *Timestamptz            `json:"session_last_updated,omitempty"`
-	UserPreferences          *[]UserPreference       `json:"user_preferences,omitempty"`
-	UserPreferencesAggregate UserPreferenceAggregate `json:"user_preferences_aggregate"`
-	Username                 String                  `json:"username"`
+	Active             Boolean         `json:"active"`
+	Avatar             *String         `json:"avatar,omitempty"`
+	CreatedAt          Timestamptz     `json:"created_at"`
+	Email              String          `json:"email"`
+	ID                 UUID            `json:"id"`
+	Preference         *UserPreference `json:"preference,omitempty"`
+	Role               String          `json:"role"`
+	SessionLastUpdated *Timestamptz    `json:"session_last_updated,omitempty"`
+	Username           String          `json:"username"`
 }
 
 type UserAggregate struct {
@@ -4306,8 +4301,8 @@ type UserMutationResponse struct {
 type UserPreference struct {
 	DarkMode Boolean `json:"dark_mode"`
 	ID       UUID    `json:"id"`
-	User     User    `json:"user"`
-	UserId   UUID    `json:"user_id"`
+	User     *User   `json:"user,omitempty"`
+	UserId   *UUID   `json:"user_id,omitempty"`
 }
 
 type UserPreferenceAggregate struct {

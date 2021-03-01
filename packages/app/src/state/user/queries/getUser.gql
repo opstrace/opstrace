@@ -9,9 +9,4 @@ query GetUser($id: uuid!) {
       dark_mode
     }
   }
-  user_aggregate(where: { active: { _eq: true } }) {
-    aggregate {
-      count
-    }
-  }
 }
