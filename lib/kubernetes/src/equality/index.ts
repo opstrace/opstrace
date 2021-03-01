@@ -28,6 +28,7 @@ import {
   SecretType,
   ServiceType,
   ConfigMapType,
+  ClusterRoleType,
   V1ServicemonitorResourceType,
   V1PrometheusruleResourceType,
   V1PrometheusResourceType,
@@ -310,4 +311,19 @@ export const hasAlertManagerChanged = (
   }
 
   return false;
+};
+
+export const hasClusterRoleChanged = (
+  desired: ClusterRoleType,
+  existing: ClusterRoleType
+): boolean => {
+  if (!isDeepStrictEqual(desired.spec, existing.spec)) {
+    logDifference(
+      `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec,
+      existing.spec
+    );
+    return false;
+  }
+  return true;
 };
