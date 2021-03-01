@@ -15,7 +15,7 @@
  */
 
 /**
- * taken from https://github.com/jetstack/cert-manager/releases/download/v1.0.3/cert-manager.yaml
+ * taken from https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.yaml
  *
  * 1. copy the correct yaml
  * 2. covert to json (https://www.convertjson.com/yaml-to-json.htm)
@@ -57,6 +57,7 @@ export const certificaterequests = {
     },
     group: "cert-manager.io",
     names: {
+      categories: ["cert-manager"],
       kind: "CertificateRequest",
       listKind: "CertificateRequestList",
       plural: "certificaterequests",
@@ -86,7 +87,7 @@ export const certificaterequests = {
           },
           {
             description:
-              "CreationTimestamp is a timestamp representing the server time when\nthis object was created. It is not guaranteed to be set in happens-before\norder across separate operations. Clients may not set this value. It is represented\nin RFC3339 form and is in UTC.",
+              "CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",
             jsonPath: ".metadata.creationTimestamp",
             name: "Age",
             type: "date"
@@ -96,16 +97,16 @@ export const certificaterequests = {
         schema: {
           openAPIV3Schema: {
             description:
-              "A CertificateRequest is used to request a signed certificate\nfrom one of the configured issuers. \n All fields within the CertificateRequest's\n`spec` are immutable after creation. A CertificateRequest will either succeed\nor fail, as denoted by its `status.state` field. \n A CertificateRequest\nis a 'one-shot' resource, meaning it represents a single point in time request\nfor a certificate and cannot be re-used.",
+              "A CertificateRequest is used to request a signed certificate from one of the configured issuers. \n All fields within the CertificateRequest's `spec` are immutable after creation. A CertificateRequest will either succeed or fail, as denoted by its `status.state` field. \n A CertificateRequest is a one-shot resource, meaning it represents a single point in time request for a certificate and cannot be re-used.",
             properties: {
               apiVersion: {
                 description:
-                  "APIVersion defines the versioned schema of this representation\nof an object. Servers should convert recognized schemas to the latest\ninternal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+                  "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
                 type: "string"
               },
               kind: {
                 description:
-                  "Kind is a string value representing the REST resource this\nobject represents. Servers may infer this from the endpoint the client\nsubmits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+                  "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
                 type: "string"
               },
               metadata: {
@@ -117,23 +118,23 @@ export const certificaterequests = {
                 properties: {
                   csr: {
                     description:
-                      "The PEM-encoded x509 certificate signing request to be\nsubmitted to the CA for signing.",
+                      "The PEM-encoded x509 certificate signing request to be submitted to the CA for signing.",
                     format: "byte",
                     type: "string"
                   },
                   duration: {
                     description:
-                      "The requested 'duration' (i.e. lifetime) of the Certificate.\nThis option may be ignored/overridden by some issuer types.",
+                      "The requested 'duration' (i.e. lifetime) of the Certificate. This option may be ignored/overridden by some issuer types.",
                     type: "string"
                   },
                   isCA: {
                     description:
-                      "IsCA will request to mark the certificate as valid for\ncertificate signing when submitting to the issuer. This will automatically\nadd the `cert sign` usage to the list of `usages`.",
+                      "IsCA will request to mark the certificate as valid for certificate signing when submitting to the issuer. This will automatically add the `cert sign` usage to the list of `usages`.",
                     type: "boolean"
                   },
                   issuerRef: {
                     description:
-                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If\nthe 'kind' field is not set, or set to 'Issuer', an Issuer resource\nwith the given name in the same namespace as the CertificateRequest\nwill be used.  If the 'kind' field is set to 'ClusterIssuer', a\nClusterIssuer with the provided name will be used. The 'name' field\nin this stanza is required at all times. The group field refers\nto the API group of the issuer which defaults to 'cert-manager.io'\nif empty.",
+                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If the `kind` field is not set, or set to `Issuer`, an Issuer resource with the given name in the same namespace as the CertificateRequest will be used.  If the `kind` field is set to `ClusterIssuer`, a ClusterIssuer with the provided name will be used. The `name` field in this stanza is required at all times. The group field refers to the API group of the issuer which defaults to `cert-manager.io` if empty.",
                     properties: {
                       group: {
                         description: "Group of the resource being referred to.",
@@ -153,10 +154,10 @@ export const certificaterequests = {
                   },
                   usages: {
                     description:
-                      "Usages is the set of x509 usages that are requested for\nthe certificate. Defaults to `digital signature` and `key encipherment`\nif not specified.",
+                      "Usages is the set of x509 usages that are requested for the certificate. Defaults to `digital signature` and `key encipherment` if not specified.",
                     items: {
                       description:
-                        'KeyUsage specifies valid usage contexts for keys.\nSee: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12\nValid KeyUsage values are as follows: "signing", "digital signature",\n"content commitment", "key encipherment", "key agreement", "data\nencipherment", "cert sign", "crl sign", "encipher only", "decipher\nonly", "any", "server auth", "client auth", "code signing", "email\nprotection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec\nuser", "timestamping", "ocsp signing", "microsoft sgc", "netscape\nsgc"',
+                        'KeyUsage specifies valid usage contexts for keys. See: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12 Valid KeyUsage values are as follows: "signing", "digital signature", "content commitment", "key encipherment", "key agreement", "data encipherment", "cert sign", "crl sign", "encipher only", "decipher only", "any", "server auth", "client auth", "code signing", "email protection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec user", "timestamping", "ocsp signing", "microsoft sgc", "netscape sgc"',
                       enum: [
                         "signing",
                         "digital signature",
@@ -192,52 +193,52 @@ export const certificaterequests = {
               },
               status: {
                 description:
-                  "Status of the CertificateRequest. This is set and managed\nautomatically.",
+                  "Status of the CertificateRequest. This is set and managed automatically.",
                 properties: {
                   ca: {
                     description:
-                      "The PEM encoded x509 certificate of the signer, also\nknown as the CA (Certificate Authority). This is set on a best-effort\nbasis by different issuers. If not set, the CA is assumed to be\nunknown/not available.",
+                      "The PEM encoded x509 certificate of the signer, also known as the CA (Certificate Authority). This is set on a best-effort basis by different issuers. If not set, the CA is assumed to be unknown/not available.",
                     format: "byte",
                     type: "string"
                   },
                   certificate: {
                     description:
-                      "The PEM encoded x509 certificate resulting from the certificate\nsigning request. If not set, the CertificateRequest has either not\nbeen completed or has failed. More information on failure can be\nfound by checking the `conditions` field.",
+                      "The PEM encoded x509 certificate resulting from the certificate signing request. If not set, the CertificateRequest has either not been completed or has failed. More information on failure can be found by checking the `conditions` field.",
                     format: "byte",
                     type: "string"
                   },
                   conditions: {
                     description:
-                      "List of status conditions to indicate the status of a\nCertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
+                      "List of status conditions to indicate the status of a CertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
                     items: {
                       description:
-                        "CertificateRequestCondition contains condition information\nfor a CertificateRequest.",
+                        "CertificateRequestCondition contains condition information for a CertificateRequest.",
                       properties: {
                         lastTransitionTime: {
                           description:
-                            "LastTransitionTime is the timestamp corresponding\nto the last status change of this condition.",
+                            "LastTransitionTime is the timestamp corresponding to the last status change of this condition.",
                           format: "date-time",
                           type: "string"
                         },
                         message: {
                           description:
-                            "Message is a human readable description of the\ndetails of the last transition, complementing reason.",
+                            "Message is a human readable description of the details of the last transition, complementing reason.",
                           type: "string"
                         },
                         reason: {
                           description:
-                            "Reason is a brief machine readable explanation\nfor the condition's last transition.",
+                            "Reason is a brief machine readable explanation for the condition's last transition.",
                           type: "string"
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False',\n'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready',\n'InvalidRequest').",
+                            "Type of the condition, known values are (`Ready`, `InvalidRequest`).",
                           type: "string"
                         }
                       },
@@ -248,7 +249,7 @@ export const certificaterequests = {
                   },
                   failureTime: {
                     description:
-                      "FailureTime stores the time that this CertificateRequest\nfailed. This is used to influence garbage collection and back-off.",
+                      "FailureTime stores the time that this CertificateRequest failed. This is used to influence garbage collection and back-off.",
                     format: "date-time",
                     type: "string"
                   }
@@ -286,7 +287,7 @@ export const certificaterequests = {
           },
           {
             description:
-              "CreationTimestamp is a timestamp representing the server time when\nthis object was created. It is not guaranteed to be set in happens-before\norder across separate operations. Clients may not set this value. It is represented\nin RFC3339 form and is in UTC.",
+              "CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",
             jsonPath: ".metadata.creationTimestamp",
             name: "Age",
             type: "date"
@@ -296,16 +297,16 @@ export const certificaterequests = {
         schema: {
           openAPIV3Schema: {
             description:
-              "A CertificateRequest is used to request a signed certificate\nfrom one of the configured issuers. \n All fields within the CertificateRequest's\n`spec` are immutable after creation. A CertificateRequest will either succeed\nor fail, as denoted by its `status.state` field. \n A CertificateRequest\nis a 'one-shot' resource, meaning it represents a single point in time request\nfor a certificate and cannot be re-used.",
+              "A CertificateRequest is used to request a signed certificate from one of the configured issuers. \n All fields within the CertificateRequest's `spec` are immutable after creation. A CertificateRequest will either succeed or fail, as denoted by its `status.state` field. \n A CertificateRequest is a one-shot resource, meaning it represents a single point in time request for a certificate and cannot be re-used.",
             properties: {
               apiVersion: {
                 description:
-                  "APIVersion defines the versioned schema of this representation\nof an object. Servers should convert recognized schemas to the latest\ninternal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+                  "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
                 type: "string"
               },
               kind: {
                 description:
-                  "Kind is a string value representing the REST resource this\nobject represents. Servers may infer this from the endpoint the client\nsubmits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+                  "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
                 type: "string"
               },
               metadata: {
@@ -317,23 +318,23 @@ export const certificaterequests = {
                 properties: {
                   csr: {
                     description:
-                      "The PEM-encoded x509 certificate signing request to be\nsubmitted to the CA for signing.",
+                      "The PEM-encoded x509 certificate signing request to be submitted to the CA for signing.",
                     format: "byte",
                     type: "string"
                   },
                   duration: {
                     description:
-                      "The requested 'duration' (i.e. lifetime) of the Certificate.\nThis option may be ignored/overridden by some issuer types.",
+                      "The requested 'duration' (i.e. lifetime) of the Certificate. This option may be ignored/overridden by some issuer types.",
                     type: "string"
                   },
                   isCA: {
                     description:
-                      "IsCA will request to mark the certificate as valid for\ncertificate signing when submitting to the issuer. This will automatically\nadd the `cert sign` usage to the list of `usages`.",
+                      "IsCA will request to mark the certificate as valid for certificate signing when submitting to the issuer. This will automatically add the `cert sign` usage to the list of `usages`.",
                     type: "boolean"
                   },
                   issuerRef: {
                     description:
-                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If\nthe 'kind' field is not set, or set to 'Issuer', an Issuer resource\nwith the given name in the same namespace as the CertificateRequest\nwill be used.  If the 'kind' field is set to 'ClusterIssuer', a\nClusterIssuer with the provided name will be used. The 'name' field\nin this stanza is required at all times. The group field refers\nto the API group of the issuer which defaults to 'cert-manager.io'\nif empty.",
+                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If the `kind` field is not set, or set to `Issuer`, an Issuer resource with the given name in the same namespace as the CertificateRequest will be used.  If the `kind` field is set to `ClusterIssuer`, a ClusterIssuer with the provided name will be used. The `name` field in this stanza is required at all times. The group field refers to the API group of the issuer which defaults to `cert-manager.io` if empty.",
                     properties: {
                       group: {
                         description: "Group of the resource being referred to.",
@@ -353,10 +354,10 @@ export const certificaterequests = {
                   },
                   usages: {
                     description:
-                      "Usages is the set of x509 usages that are requested for\nthe certificate. Defaults to `digital signature` and `key encipherment`\nif not specified.",
+                      "Usages is the set of x509 usages that are requested for the certificate. Defaults to `digital signature` and `key encipherment` if not specified.",
                     items: {
                       description:
-                        'KeyUsage specifies valid usage contexts for keys.\nSee: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12\nValid KeyUsage values are as follows: "signing", "digital signature",\n"content commitment", "key encipherment", "key agreement", "data\nencipherment", "cert sign", "crl sign", "encipher only", "decipher\nonly", "any", "server auth", "client auth", "code signing", "email\nprotection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec\nuser", "timestamping", "ocsp signing", "microsoft sgc", "netscape\nsgc"',
+                        'KeyUsage specifies valid usage contexts for keys. See: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12 Valid KeyUsage values are as follows: "signing", "digital signature", "content commitment", "key encipherment", "key agreement", "data encipherment", "cert sign", "crl sign", "encipher only", "decipher only", "any", "server auth", "client auth", "code signing", "email protection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec user", "timestamping", "ocsp signing", "microsoft sgc", "netscape sgc"',
                       enum: [
                         "signing",
                         "digital signature",
@@ -392,52 +393,52 @@ export const certificaterequests = {
               },
               status: {
                 description:
-                  "Status of the CertificateRequest. This is set and managed\nautomatically.",
+                  "Status of the CertificateRequest. This is set and managed automatically.",
                 properties: {
                   ca: {
                     description:
-                      "The PEM encoded x509 certificate of the signer, also\nknown as the CA (Certificate Authority). This is set on a best-effort\nbasis by different issuers. If not set, the CA is assumed to be\nunknown/not available.",
+                      "The PEM encoded x509 certificate of the signer, also known as the CA (Certificate Authority). This is set on a best-effort basis by different issuers. If not set, the CA is assumed to be unknown/not available.",
                     format: "byte",
                     type: "string"
                   },
                   certificate: {
                     description:
-                      "The PEM encoded x509 certificate resulting from the certificate\nsigning request. If not set, the CertificateRequest has either not\nbeen completed or has failed. More information on failure can be\nfound by checking the `conditions` field.",
+                      "The PEM encoded x509 certificate resulting from the certificate signing request. If not set, the CertificateRequest has either not been completed or has failed. More information on failure can be found by checking the `conditions` field.",
                     format: "byte",
                     type: "string"
                   },
                   conditions: {
                     description:
-                      "List of status conditions to indicate the status of a\nCertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
+                      "List of status conditions to indicate the status of a CertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
                     items: {
                       description:
-                        "CertificateRequestCondition contains condition information\nfor a CertificateRequest.",
+                        "CertificateRequestCondition contains condition information for a CertificateRequest.",
                       properties: {
                         lastTransitionTime: {
                           description:
-                            "LastTransitionTime is the timestamp corresponding\nto the last status change of this condition.",
+                            "LastTransitionTime is the timestamp corresponding to the last status change of this condition.",
                           format: "date-time",
                           type: "string"
                         },
                         message: {
                           description:
-                            "Message is a human readable description of the\ndetails of the last transition, complementing reason.",
+                            "Message is a human readable description of the details of the last transition, complementing reason.",
                           type: "string"
                         },
                         reason: {
                           description:
-                            "Reason is a brief machine readable explanation\nfor the condition's last transition.",
+                            "Reason is a brief machine readable explanation for the condition's last transition.",
                           type: "string"
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False',\n'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready',\n'InvalidRequest').",
+                            "Type of the condition, known values are (`Ready`, `InvalidRequest`).",
                           type: "string"
                         }
                       },
@@ -448,7 +449,7 @@ export const certificaterequests = {
                   },
                   failureTime: {
                     description:
-                      "FailureTime stores the time that this CertificateRequest\nfailed. This is used to influence garbage collection and back-off.",
+                      "FailureTime stores the time that this CertificateRequest failed. This is used to influence garbage collection and back-off.",
                     format: "date-time",
                     type: "string"
                   }
@@ -486,7 +487,7 @@ export const certificaterequests = {
           },
           {
             description:
-              "CreationTimestamp is a timestamp representing the server time when\nthis object was created. It is not guaranteed to be set in happens-before\norder across separate operations. Clients may not set this value. It is represented\nin RFC3339 form and is in UTC.",
+              "CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",
             jsonPath: ".metadata.creationTimestamp",
             name: "Age",
             type: "date"
@@ -496,16 +497,16 @@ export const certificaterequests = {
         schema: {
           openAPIV3Schema: {
             description:
-              "A CertificateRequest is used to request a signed certificate\nfrom one of the configured issuers. \n All fields within the CertificateRequest's\n`spec` are immutable after creation. A CertificateRequest will either succeed\nor fail, as denoted by its `status.state` field. \n A CertificateRequest\nis a 'one-shot' resource, meaning it represents a single point in time request\nfor a certificate and cannot be re-used.",
+              "A CertificateRequest is used to request a signed certificate from one of the configured issuers. \n All fields within the CertificateRequest's `spec` are immutable after creation. A CertificateRequest will either succeed or fail, as denoted by its `status.state` field. \n A CertificateRequest is a one-shot resource, meaning it represents a single point in time request for a certificate and cannot be re-used.",
             properties: {
               apiVersion: {
                 description:
-                  "APIVersion defines the versioned schema of this representation\nof an object. Servers should convert recognized schemas to the latest\ninternal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+                  "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
                 type: "string"
               },
               kind: {
                 description:
-                  "Kind is a string value representing the REST resource this\nobject represents. Servers may infer this from the endpoint the client\nsubmits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+                  "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
                 type: "string"
               },
               metadata: {
@@ -517,17 +518,17 @@ export const certificaterequests = {
                 properties: {
                   duration: {
                     description:
-                      "The requested 'duration' (i.e. lifetime) of the Certificate.\nThis option may be ignored/overridden by some issuer types.",
+                      "The requested 'duration' (i.e. lifetime) of the Certificate. This option may be ignored/overridden by some issuer types.",
                     type: "string"
                   },
                   isCA: {
                     description:
-                      "IsCA will request to mark the certificate as valid for\ncertificate signing when submitting to the issuer. This will automatically\nadd the `cert sign` usage to the list of `usages`.",
+                      "IsCA will request to mark the certificate as valid for certificate signing when submitting to the issuer. This will automatically add the `cert sign` usage to the list of `usages`.",
                     type: "boolean"
                   },
                   issuerRef: {
                     description:
-                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If\nthe 'kind' field is not set, or set to 'Issuer', an Issuer resource\nwith the given name in the same namespace as the CertificateRequest\nwill be used.  If the 'kind' field is set to 'ClusterIssuer', a\nClusterIssuer with the provided name will be used. The 'name' field\nin this stanza is required at all times. The group field refers\nto the API group of the issuer which defaults to 'cert-manager.io'\nif empty.",
+                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If the `kind` field is not set, or set to `Issuer`, an Issuer resource with the given name in the same namespace as the CertificateRequest will be used.  If the `kind` field is set to `ClusterIssuer`, a ClusterIssuer with the provided name will be used. The `name` field in this stanza is required at all times. The group field refers to the API group of the issuer which defaults to `cert-manager.io` if empty.",
                     properties: {
                       group: {
                         description: "Group of the resource being referred to.",
@@ -547,16 +548,16 @@ export const certificaterequests = {
                   },
                   request: {
                     description:
-                      "The PEM-encoded x509 certificate signing request to be\nsubmitted to the CA for signing.",
+                      "The PEM-encoded x509 certificate signing request to be submitted to the CA for signing.",
                     format: "byte",
                     type: "string"
                   },
                   usages: {
                     description:
-                      "Usages is the set of x509 usages that are requested for\nthe certificate. Defaults to `digital signature` and `key encipherment`\nif not specified.",
+                      "Usages is the set of x509 usages that are requested for the certificate. Defaults to `digital signature` and `key encipherment` if not specified.",
                     items: {
                       description:
-                        'KeyUsage specifies valid usage contexts for keys.\nSee: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12\nValid KeyUsage values are as follows: "signing", "digital signature",\n"content commitment", "key encipherment", "key agreement", "data\nencipherment", "cert sign", "crl sign", "encipher only", "decipher\nonly", "any", "server auth", "client auth", "code signing", "email\nprotection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec\nuser", "timestamping", "ocsp signing", "microsoft sgc", "netscape\nsgc"',
+                        'KeyUsage specifies valid usage contexts for keys. See: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12 Valid KeyUsage values are as follows: "signing", "digital signature", "content commitment", "key encipherment", "key agreement", "data encipherment", "cert sign", "crl sign", "encipher only", "decipher only", "any", "server auth", "client auth", "code signing", "email protection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec user", "timestamping", "ocsp signing", "microsoft sgc", "netscape sgc"',
                       enum: [
                         "signing",
                         "digital signature",
@@ -592,52 +593,52 @@ export const certificaterequests = {
               },
               status: {
                 description:
-                  "Status of the CertificateRequest. This is set and managed\nautomatically.",
+                  "Status of the CertificateRequest. This is set and managed automatically.",
                 properties: {
                   ca: {
                     description:
-                      "The PEM encoded x509 certificate of the signer, also\nknown as the CA (Certificate Authority). This is set on a best-effort\nbasis by different issuers. If not set, the CA is assumed to be\nunknown/not available.",
+                      "The PEM encoded x509 certificate of the signer, also known as the CA (Certificate Authority). This is set on a best-effort basis by different issuers. If not set, the CA is assumed to be unknown/not available.",
                     format: "byte",
                     type: "string"
                   },
                   certificate: {
                     description:
-                      "The PEM encoded x509 certificate resulting from the certificate\nsigning request. If not set, the CertificateRequest has either not\nbeen completed or has failed. More information on failure can be\nfound by checking the `conditions` field.",
+                      "The PEM encoded x509 certificate resulting from the certificate signing request. If not set, the CertificateRequest has either not been completed or has failed. More information on failure can be found by checking the `conditions` field.",
                     format: "byte",
                     type: "string"
                   },
                   conditions: {
                     description:
-                      "List of status conditions to indicate the status of a\nCertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
+                      "List of status conditions to indicate the status of a CertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
                     items: {
                       description:
-                        "CertificateRequestCondition contains condition information\nfor a CertificateRequest.",
+                        "CertificateRequestCondition contains condition information for a CertificateRequest.",
                       properties: {
                         lastTransitionTime: {
                           description:
-                            "LastTransitionTime is the timestamp corresponding\nto the last status change of this condition.",
+                            "LastTransitionTime is the timestamp corresponding to the last status change of this condition.",
                           format: "date-time",
                           type: "string"
                         },
                         message: {
                           description:
-                            "Message is a human readable description of the\ndetails of the last transition, complementing reason.",
+                            "Message is a human readable description of the details of the last transition, complementing reason.",
                           type: "string"
                         },
                         reason: {
                           description:
-                            "Reason is a brief machine readable explanation\nfor the condition's last transition.",
+                            "Reason is a brief machine readable explanation for the condition's last transition.",
                           type: "string"
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False',\n'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready',\n'InvalidRequest').",
+                            "Type of the condition, known values are (`Ready`, `InvalidRequest`).",
                           type: "string"
                         }
                       },
@@ -648,7 +649,7 @@ export const certificaterequests = {
                   },
                   failureTime: {
                     description:
-                      "FailureTime stores the time that this CertificateRequest\nfailed. This is used to influence garbage collection and back-off.",
+                      "FailureTime stores the time that this CertificateRequest failed. This is used to influence garbage collection and back-off.",
                     format: "date-time",
                     type: "string"
                   }
@@ -687,7 +688,7 @@ export const certificaterequests = {
           },
           {
             description:
-              "CreationTimestamp is a timestamp representing the server time when\nthis object was created. It is not guaranteed to be set in happens-before\norder across separate operations. Clients may not set this value. It is represented\nin RFC3339 form and is in UTC.",
+              "CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.",
             jsonPath: ".metadata.creationTimestamp",
             name: "Age",
             type: "date"
@@ -697,16 +698,16 @@ export const certificaterequests = {
         schema: {
           openAPIV3Schema: {
             description:
-              "A CertificateRequest is used to request a signed certificate\nfrom one of the configured issuers. \n All fields within the CertificateRequest's\n`spec` are immutable after creation. A CertificateRequest will either succeed\nor fail, as denoted by its `status.state` field. \n A CertificateRequest\nis a 'one-shot' resource, meaning it represents a single point in time request\nfor a certificate and cannot be re-used.",
+              "A CertificateRequest is used to request a signed certificate from one of the configured issuers. \n All fields within the CertificateRequest's `spec` are immutable after creation. A CertificateRequest will either succeed or fail, as denoted by its `status.state` field. \n A CertificateRequest is a one-shot resource, meaning it represents a single point in time request for a certificate and cannot be re-used.",
             properties: {
               apiVersion: {
                 description:
-                  "APIVersion defines the versioned schema of this representation\nof an object. Servers should convert recognized schemas to the latest\ninternal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+                  "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
                 type: "string"
               },
               kind: {
                 description:
-                  "Kind is a string value representing the REST resource this\nobject represents. Servers may infer this from the endpoint the client\nsubmits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+                  "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
                 type: "string"
               },
               metadata: {
@@ -718,17 +719,17 @@ export const certificaterequests = {
                 properties: {
                   duration: {
                     description:
-                      "The requested 'duration' (i.e. lifetime) of the Certificate.\nThis option may be ignored/overridden by some issuer types.",
+                      "The requested 'duration' (i.e. lifetime) of the Certificate. This option may be ignored/overridden by some issuer types.",
                     type: "string"
                   },
                   isCA: {
                     description:
-                      "IsCA will request to mark the certificate as valid for\ncertificate signing when submitting to the issuer. This will automatically\nadd the `cert sign` usage to the list of `usages`.",
+                      "IsCA will request to mark the certificate as valid for certificate signing when submitting to the issuer. This will automatically add the `cert sign` usage to the list of `usages`.",
                     type: "boolean"
                   },
                   issuerRef: {
                     description:
-                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If\nthe 'kind' field is not set, or set to 'Issuer', an Issuer resource\nwith the given name in the same namespace as the CertificateRequest\nwill be used.  If the 'kind' field is set to 'ClusterIssuer', a\nClusterIssuer with the provided name will be used. The 'name' field\nin this stanza is required at all times. The group field refers\nto the API group of the issuer which defaults to 'cert-manager.io'\nif empty.",
+                      "IssuerRef is a reference to the issuer for this CertificateRequest.  If the `kind` field is not set, or set to `Issuer`, an Issuer resource with the given name in the same namespace as the CertificateRequest will be used.  If the `kind` field is set to `ClusterIssuer`, a ClusterIssuer with the provided name will be used. The `name` field in this stanza is required at all times. The group field refers to the API group of the issuer which defaults to `cert-manager.io` if empty.",
                     properties: {
                       group: {
                         description: "Group of the resource being referred to.",
@@ -748,16 +749,16 @@ export const certificaterequests = {
                   },
                   request: {
                     description:
-                      "The PEM-encoded x509 certificate signing request to be\nsubmitted to the CA for signing.",
+                      "The PEM-encoded x509 certificate signing request to be submitted to the CA for signing.",
                     format: "byte",
                     type: "string"
                   },
                   usages: {
                     description:
-                      "Usages is the set of x509 usages that are requested for\nthe certificate. If usages are set they SHOULD be encoded inside\nthe CSR spec Defaults to `digital signature` and `key encipherment`\nif not specified.",
+                      "Usages is the set of x509 usages that are requested for the certificate. If usages are set they SHOULD be encoded inside the CSR spec Defaults to `digital signature` and `key encipherment` if not specified.",
                     items: {
                       description:
-                        'KeyUsage specifies valid usage contexts for keys.\nSee: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12\nValid KeyUsage values are as follows: "signing", "digital signature",\n"content commitment", "key encipherment", "key agreement", "data\nencipherment", "cert sign", "crl sign", "encipher only", "decipher\nonly", "any", "server auth", "client auth", "code signing", "email\nprotection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec\nuser", "timestamping", "ocsp signing", "microsoft sgc", "netscape\nsgc"',
+                        'KeyUsage specifies valid usage contexts for keys. See: https://tools.ietf.org/html/rfc5280#section-4.2.1.3      https://tools.ietf.org/html/rfc5280#section-4.2.1.12 Valid KeyUsage values are as follows: "signing", "digital signature", "content commitment", "key encipherment", "key agreement", "data encipherment", "cert sign", "crl sign", "encipher only", "decipher only", "any", "server auth", "client auth", "code signing", "email protection", "s/mime", "ipsec end system", "ipsec tunnel", "ipsec user", "timestamping", "ocsp signing", "microsoft sgc", "netscape sgc"',
                       enum: [
                         "signing",
                         "digital signature",
@@ -793,52 +794,52 @@ export const certificaterequests = {
               },
               status: {
                 description:
-                  "Status of the CertificateRequest. This is set and managed\nautomatically.",
+                  "Status of the CertificateRequest. This is set and managed automatically.",
                 properties: {
                   ca: {
                     description:
-                      "The PEM encoded x509 certificate of the signer, also\nknown as the CA (Certificate Authority). This is set on a best-effort\nbasis by different issuers. If not set, the CA is assumed to be\nunknown/not available.",
+                      "The PEM encoded x509 certificate of the signer, also known as the CA (Certificate Authority). This is set on a best-effort basis by different issuers. If not set, the CA is assumed to be unknown/not available.",
                     format: "byte",
                     type: "string"
                   },
                   certificate: {
                     description:
-                      "The PEM encoded x509 certificate resulting from the certificate\nsigning request. If not set, the CertificateRequest has either not\nbeen completed or has failed. More information on failure can be\nfound by checking the `conditions` field.",
+                      "The PEM encoded x509 certificate resulting from the certificate signing request. If not set, the CertificateRequest has either not been completed or has failed. More information on failure can be found by checking the `conditions` field.",
                     format: "byte",
                     type: "string"
                   },
                   conditions: {
                     description:
-                      "List of status conditions to indicate the status of a\nCertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
+                      "List of status conditions to indicate the status of a CertificateRequest. Known condition types are `Ready` and `InvalidRequest`.",
                     items: {
                       description:
-                        "CertificateRequestCondition contains condition information\nfor a CertificateRequest.",
+                        "CertificateRequestCondition contains condition information for a CertificateRequest.",
                       properties: {
                         lastTransitionTime: {
                           description:
-                            "LastTransitionTime is the timestamp corresponding\nto the last status change of this condition.",
+                            "LastTransitionTime is the timestamp corresponding to the last status change of this condition.",
                           format: "date-time",
                           type: "string"
                         },
                         message: {
                           description:
-                            "Message is a human readable description of the\ndetails of the last transition, complementing reason.",
+                            "Message is a human readable description of the details of the last transition, complementing reason.",
                           type: "string"
                         },
                         reason: {
                           description:
-                            "Reason is a brief machine readable explanation\nfor the condition's last transition.",
+                            "Reason is a brief machine readable explanation for the condition's last transition.",
                           type: "string"
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False',\n'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready',\n'InvalidRequest').",
+                            "Type of the condition, known values are (`Ready`, `InvalidRequest`).",
                           type: "string"
                         }
                       },
@@ -849,7 +850,7 @@ export const certificaterequests = {
                   },
                   failureTime: {
                     description:
-                      "FailureTime stores the time that this CertificateRequest\nfailed. This is used to influence garbage collection and back-off.",
+                      "FailureTime stores the time that this CertificateRequest failed. This is used to influence garbage collection and back-off.",
                     format: "date-time",
                     type: "string"
                   }

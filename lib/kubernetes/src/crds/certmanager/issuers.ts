@@ -15,7 +15,7 @@
  */
 
 /**
- * taken from https://github.com/jetstack/cert-manager/releases/download/v1.0.3/cert-manager.yaml
+ * taken from https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.yaml
  *
  * 1. copy the correct yaml
  * 2. covert to json (https://www.convertjson.com/yaml-to-json.htm)
@@ -56,6 +56,7 @@ export const issuers = {
     },
     group: "cert-manager.io",
     names: {
+      categories: ["cert-manager"],
       kind: "Issuer",
       listKind: "IssuerList",
       plural: "issuers",
@@ -119,6 +120,11 @@ export const issuers = {
                         description:
                           "Email is the email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails. This field may be updated after the account is initially registered.",
                         type: "string"
+                      },
+                      enableDurationFeature: {
+                        description:
+                          "Enables requesting a Not After date on certificates that matches the duration of the certificate. This is not supported by all ACME servers like Let's Encrypt. If set to true when the ACME server does not support it it will create an error on the Order. Defaults to false.",
+                        type: "boolean"
                       },
                       externalAccountBinding: {
                         description:
@@ -358,7 +364,7 @@ export const issuers = {
                                   ],
                                   type: "object"
                                 },
-                                cloudDNS: {
+                                clouddns: {
                                   description:
                                     "Use the Google Cloud DNS API to manage DNS01 challenge records.",
                                   properties: {
@@ -1386,6 +1392,14 @@ export const issuers = {
                         },
                         type: "array"
                       },
+                      ocspServers: {
+                        description:
+                          'The OCSP server list is an X.509 v3 extension that defines a list of URLs of OCSP responders. The OCSP responders can be queried for the revocation status of an issued certificate. If not set, the certificate wil be issued with no OCSP servers set. For example, an OCSP server URL could be "http://ocsp.int-x3.letsencrypt.org".',
+                        items: {
+                          type: "string"
+                        },
+                        type: "array"
+                      },
                       secretName: {
                         description:
                           "SecretName is the name of the secret used to sign Certificates issued by this Issuer.",
@@ -1661,13 +1675,13 @@ export const issuers = {
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False', 'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready').",
+                            "Type of the condition, known values are (`Ready`).",
                           type: "string"
                         }
                       },
@@ -1746,6 +1760,11 @@ export const issuers = {
                           "Email is the email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails. This field may be updated after the account is initially registered.",
                         type: "string"
                       },
+                      enableDurationFeature: {
+                        description:
+                          "Enables requesting a Not After date on certificates that matches the duration of the certificate. This is not supported by all ACME servers like Let's Encrypt. If set to true when the ACME server does not support it it will create an error on the Order. Defaults to false.",
+                        type: "boolean"
+                      },
                       externalAccountBinding: {
                         description:
                           "ExternalAccountBinding is a reference to a CA external account of the ACME server. If set, upon registration cert-manager will attempt to associate the given external account credentials with the registered ACME account.",
@@ -1984,7 +2003,7 @@ export const issuers = {
                                   ],
                                   type: "object"
                                 },
-                                cloudDNS: {
+                                clouddns: {
                                   description:
                                     "Use the Google Cloud DNS API to manage DNS01 challenge records.",
                                   properties: {
@@ -3012,6 +3031,14 @@ export const issuers = {
                         },
                         type: "array"
                       },
+                      ocspServers: {
+                        description:
+                          'The OCSP server list is an X.509 v3 extension that defines a list of URLs of OCSP responders. The OCSP responders can be queried for the revocation status of an issued certificate. If not set, the certificate wil be issued with no OCSP servers set. For example, an OCSP server URL could be "http://ocsp.int-x3.letsencrypt.org".',
+                        items: {
+                          type: "string"
+                        },
+                        type: "array"
+                      },
                       secretName: {
                         description:
                           "SecretName is the name of the secret used to sign Certificates issued by this Issuer.",
@@ -3287,13 +3314,13 @@ export const issuers = {
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False', 'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready').",
+                            "Type of the condition, known values are (`Ready`).",
                           type: "string"
                         }
                       },
@@ -3371,6 +3398,11 @@ export const issuers = {
                         description:
                           "Email is the email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails. This field may be updated after the account is initially registered.",
                         type: "string"
+                      },
+                      enableDurationFeature: {
+                        description:
+                          "Enables requesting a Not After date on certificates that matches the duration of the certificate. This is not supported by all ACME servers like Let's Encrypt. If set to true when the ACME server does not support it it will create an error on the Order. Defaults to false.",
+                        type: "boolean"
                       },
                       externalAccountBinding: {
                         description:
@@ -4638,6 +4670,14 @@ export const issuers = {
                         },
                         type: "array"
                       },
+                      ocspServers: {
+                        description:
+                          'The OCSP server list is an X.509 v3 extension that defines a list of URLs of OCSP responders. The OCSP responders can be queried for the revocation status of an issued certificate. If not set, the certificate wil be issued with no OCSP servers set. For example, an OCSP server URL could be "http://ocsp.int-x3.letsencrypt.org".',
+                        items: {
+                          type: "string"
+                        },
+                        type: "array"
+                      },
                       secretName: {
                         description:
                           "SecretName is the name of the secret used to sign Certificates issued by this Issuer.",
@@ -4913,13 +4953,13 @@ export const issuers = {
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False', 'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready').",
+                            "Type of the condition, known values are (`Ready`).",
                           type: "string"
                         }
                       },
@@ -4999,6 +5039,11 @@ export const issuers = {
                           "Email is the email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails. This field may be updated after the account is initially registered.",
                         type: "string"
                       },
+                      enableDurationFeature: {
+                        description:
+                          "Enables requesting a Not After date on certificates that matches the duration of the certificate. This is not supported by all ACME servers like Let's Encrypt. If set to true when the ACME server does not support it it will create an error on the Order. Defaults to false.",
+                        type: "boolean"
+                      },
                       externalAccountBinding: {
                         description:
                           "ExternalAccountBinding is a reference to a CA external account of the ACME server. If set, upon registration cert-manager will attempt to associate the given external account credentials with the registered ACME account.",
@@ -6265,6 +6310,14 @@ export const issuers = {
                         },
                         type: "array"
                       },
+                      ocspServers: {
+                        description:
+                          'The OCSP server list is an X.509 v3 extension that defines a list of URLs of OCSP responders. The OCSP responders can be queried for the revocation status of an issued certificate. If not set, the certificate wil be issued with no OCSP servers set. For example, an OCSP server URL could be "http://ocsp.int-x3.letsencrypt.org".',
+                        items: {
+                          type: "string"
+                        },
+                        type: "array"
+                      },
                       secretName: {
                         description:
                           "SecretName is the name of the secret used to sign Certificates issued by this Issuer.",
@@ -6540,13 +6593,13 @@ export const issuers = {
                         },
                         status: {
                           description:
-                            "Status of the condition, one of ('True', 'False', 'Unknown').",
+                            "Status of the condition, one of (`True`, `False`, `Unknown`).",
                           enum: ["True", "False", "Unknown"],
                           type: "string"
                         },
                         type: {
                           description:
-                            "Type of the condition, known values are ('Ready').",
+                            "Type of the condition, known values are (`Ready`).",
                           type: "string"
                         }
                       },

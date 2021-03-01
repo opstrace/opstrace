@@ -15,7 +15,7 @@
  */
 
 /**
- * taken from https://github.com/jetstack/cert-manager/releases/download/v1.0.3/cert-manager.yaml
+ * taken from https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.yaml
  *
  * 1. copy the correct yaml
  * 2. covert to json (https://www.convertjson.com/yaml-to-json.htm)
@@ -57,6 +57,7 @@ export const challenges = {
     },
     group: "acme.cert-manager.io",
     names: {
+      categories: ["cert-manager", "cert-manager-acme"],
       kind: "Challenge",
       listKind: "ChallengeList",
       plural: "challenges",
@@ -307,7 +308,7 @@ export const challenges = {
                             required: ["resourceGroupName", "subscriptionID"],
                             type: "object"
                           },
-                          cloudDNS: {
+                          clouddns: {
                             description:
                               "Use the Google Cloud DNS API to manage DNS01 challenge records.",
                             properties: {
@@ -1597,7 +1598,7 @@ export const challenges = {
                             required: ["resourceGroupName", "subscriptionID"],
                             type: "object"
                           },
-                          cloudDNS: {
+                          clouddns: {
                             description:
                               "Use the Google Cloud DNS API to manage DNS01 challenge records.",
                             properties: {

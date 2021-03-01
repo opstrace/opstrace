@@ -25,8 +25,8 @@ export * from "./v1PodMonitor";
 export * from "./v1Prometheus";
 export * from "./v1PrometheusRule";
 export * from "./v1ServiceMonitor";
-export * from "./v1probe"
-export * from "./v1thanosruler"
+export * from "./v1probe";
+export * from "./v1thanosruler";
 
 export * from "./v1alpha2certificate";
 export * from "./v1alpha3certificate";
