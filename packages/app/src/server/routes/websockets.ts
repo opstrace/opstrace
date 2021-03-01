@@ -31,12 +31,26 @@ export default function setupWebsocketHandling(server: http.Server) {
     if (pathname === "/_/graphql") {
       // https://github.com/websockets/ws/blob/master/examples/express-session-parse/index.js
       sessionParser(req, {} as express.Response, () => {
-        if (!(req.session && req.session.email)) {
+        if (!(req.session && req.session.userId)) {
           // This will show in the browser console (using the apolloClient) as "failed: HTTP Authentication failed; no valid credentials available"
           socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
           socket.destroy();
           return;
         }
+
+        // // NTW: user sessions have been upgrade to use user.id instead of user.email
+        // // if a user with an old session comes along clear their session info making them login again
+        // if (!req.session.userId && req.session.email) {
+        //   req.session.destroy(() => {
+        //     req.session &&
+        //       log.info("migrating session for user: %s", req.session.email);
+
+        //     socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+        //     socket.destroy();
+        //   });
+        //   return;
+        // }
+
         graphqlProxy.ws(
           req,
           socket,
@@ -55,7 +69,7 @@ export default function setupWebsocketHandling(server: http.Server) {
       });
     } else if (pathname === "/_/socket/") {
       sessionParser(req, {} as express.Response, () => {
-        if (!(req.session && req.session.email)) {
+        if (!(req.session && req.session.userId)) {
           // This will show in the browser console (using the apolloClient) as "failed: HTTP Authentication failed; no valid credentials available"
           socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
           socket.destroy();

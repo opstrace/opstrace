@@ -19,20 +19,20 @@ import "http";
 
 declare module "express-session" {
   interface SessionData {
+    userId: string;
     email: string;
     username: string;
     avatar: string;
-    userId: string;
   }
 }
 
 declare module "http" {
   interface IncomingMessage {
     session: Session & {
+      userId: string;
       email: string;
       username: string;
       avatar: string;
-      userId: string;
     };
   }
 }

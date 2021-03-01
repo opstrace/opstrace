@@ -22,7 +22,7 @@ export default function authRequired(
   res: express.Response,
   next: express.NextFunction
 ) {
-  if (req.session && req.session.email) {
+  if (req.session && req.session.userId) {
     return next();
   }
   res.status(401).send("not authorized");

@@ -19,9 +19,9 @@ import querystring from "querystring";
 import env from "server/env";
 import { log } from "@opstrace/utils/lib/log";
 
-export function getHasuraSessionHeaders(id: string) {
+export function getHasuraSessionHeaders(userId: string) {
   return {
-    "X-Hasura-User-Id": id,
+    "X-Hasura-User-Id": userId,
     "X-Hasura-Role": "user_admin", // Set every user by default to "user_admin" in community edition.
     "X-Hasura-Admin-Secret": env.HASURA_GRAPHQL_ADMIN_SECRET
   };

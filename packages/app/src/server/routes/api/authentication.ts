@@ -121,7 +121,7 @@ function createAuthHandler(): express.Router {
   });
 
   auth.get("/nginx-ingress/webhook", authRequired, (req, res) => {
-    res.setHeader("X-Auth-Request-User", req.session.email!);
+    res.setHeader("X-Auth-Request-User", req.session.userId!);
     res.setHeader("X-Auth-Request-Email", req.session.email!);
     res.sendStatus(200);
   });
