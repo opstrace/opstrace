@@ -38,19 +38,6 @@ export default function setupWebsocketHandling(server: http.Server) {
           return;
         }
 
-        // // NTW: user sessions have been upgrade to use user.id instead of user.email
-        // // if a user with an old session comes along clear their session info making them login again
-        // if (!req.session.userId && req.session.email) {
-        //   req.session.destroy(() => {
-        //     req.session &&
-        //       log.info("migrating session for user: %s", req.session.email);
-
-        //     socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-        //     socket.destroy();
-        //   });
-        //   return;
-        // }
-
         graphqlProxy.ws(
           req,
           socket,
