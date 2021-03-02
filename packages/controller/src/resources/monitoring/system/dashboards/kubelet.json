@@ -2118,7 +2118,7 @@
         "multi": false,
         "name": "instance",
         "options": [],
-        "query": "label_values(kubelet_runtime_operations{job=\"kubelet\"}, instance)",
+        "query": "label_values(kubelet_runtime_operations_total{job=\"kubelet\"}, instance)",
         "refresh": 2,
         "regex": "",
         "sort": 0,
