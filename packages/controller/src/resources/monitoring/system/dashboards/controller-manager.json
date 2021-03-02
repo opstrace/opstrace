@@ -504,7 +504,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{job=\"apiserver\", instance=~\"$instance\", verb=\"POST\"}[5m])) by (verb, url, le))",
+              "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_duration_seconds_bucket{job=\"apiserver\", instance=~\"$instance\", verb=\"POST\"}[5m])) by (verb, url, le))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{verb}} {{url}}",
@@ -596,7 +596,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{job=\"apiserver\", instance=~\"$instance\", verb=\"GET\"}[5m])) by (verb, url, le))",
+              "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_duration_seconds_bucket{job=\"apiserver\", instance=~\"$instance\", verb=\"GET\"}[5m])) by (verb, url, le))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{verb}} {{url}}",
