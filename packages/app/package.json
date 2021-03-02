@@ -76,6 +76,7 @@
     "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",
     "date-fns": "^2.15.0",
+    "deep-diff": "^1.0.2",
     "deepmerge": "^4.2.2",
     "delay": "^4.4.0",
     "dot-object": "^2.1.4",
