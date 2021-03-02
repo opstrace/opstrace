@@ -16,30 +16,41 @@
 
 import * as yup from "yup";
 
-import { emailConfig } from "./emailConfig";
-import { slackConfig } from "./slackConfig";
-import { pagerDutyConfig } from "./pagerDutyConfig";
-import { pushoverConfig } from "./pushoverConfig";
-import { opsgenieConfig } from "./opsgenieConfig";
-import { victoropsConfig } from "./victoropsConfig";
-import { webhookConfig } from "./webhookConfig";
-import { wechatConfig } from "./wechatConfig";
+import { emailConfigSchema, EmailConfig } from "./emailConfig";
+import { slackConfigSchema, SlackConfig } from "./slackConfig";
+import { pagerDutyConfigSchema, PagerDutyConfig } from "./pagerDutyConfig";
+import { pushoverConfigSchema, PushoverConfig } from "./pushoverConfig";
+import { opsgenieConfigSchema, OpsgenieConfig } from "./opsgenieConfig";
+import { victoropsConfigSchema, VictorOps } from "./victoropsConfig";
+import { webhookConfigSchema, WebhookConfig } from "./webhookConfig";
+import { wechatConfigSchema, WechatConfig } from "./wechatConfig";
 
-export const receiver = yup
+export type Receiver = {
+  name: string;
+  email_configs?: EmailConfig[];
+  slack_configs?: SlackConfig[];
+  pager_duty_configs?: PagerDutyConfig[];
+  pushover_duty_configs?: PushoverConfig[];
+  opsgenie_configs?: OpsgenieConfig[];
+  victorops_configs?: VictorOps[];
+  webhook_configs?: WebhookConfig[];
+  wechat_configs?: WechatConfig[];
+};
+
+export const receiverSchema: yup.SchemaOf<Receiver> = yup
   .object({
-    name: yup.string().required(),
-    email_configs: yup.array().of(emailConfig),
-    slack_configs: yup.array().of(slackConfig),
-    pager_duty_configs: yup.array().of(pagerDutyConfig),
-    pushover_duty_configs: yup.array().of(pushoverConfig),
-    opsgenie_configs: yup.array().of(opsgenieConfig),
-    victorops_configs: yup.array().of(victoropsConfig),
-    webhook_configs: yup.array().of(webhookConfig),
-    wechat_configs: yup.array().of(wechatConfig)
+    name: yup.string().defined(),
+    email_configs: yup.array().of(emailConfigSchema).notRequired(),
+    slack_configs: yup.array().of(slackConfigSchema).notRequired(),
+    pager_duty_configs: yup.array().of(pagerDutyConfigSchema).notRequired(),
+    pushover_duty_configs: yup.array().of(pushoverConfigSchema).notRequired(),
+    opsgenie_configs: yup.array().of(opsgenieConfigSchema).notRequired(),
+    victorops_configs: yup.array().of(victoropsConfigSchema).notRequired(),
+    webhook_configs: yup.array().of(webhookConfigSchema).notRequired(),
+    wechat_configs: yup.array().of(wechatConfigSchema).notRequired()
   })
-  .nullable()
-  .default(null)
   .meta({
     url:
       "https://www.prometheus.io/docs/alerting/latest/configuration/#receiver"
-  });
+  })
+  .noUnknown();

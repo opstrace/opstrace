@@ -16,29 +16,38 @@
 
 import * as yup from "yup";
 
-import { httpConfig } from "./common";
+import { httpConfigSchema, HttpConfig } from "./common";
 
-export const webhookConfig = yup
+export type WebhookConfig = {
+  send_resolved?: boolean;
+  url?: string;
+  max_alerts?: number;
+  http_config?: HttpConfig;
+};
+
+export const webhookConfigSchema: yup.SchemaOf<WebhookConfig> = yup
   .object({
-    send_resolved: yup
-      .boolean()
-      .default(true)
-      .meta({ comment: "Whether or not to notify about resolved alerts." }),
+    send_resolved: yup.boolean().default(true).meta({
+      comment: "Whether or not to notify about resolved alerts."
+    }),
     url: yup.string().url().meta({
       comment: "The endpoint to send HTTP POST requests to."
-    }),
-    http_config: httpConfig.meta({
-      comment: "The HTTP client's configuration.",
-      default: "default = global.http_config"
     }),
     max_alerts: yup.number().integer().positive().default(0).meta({
       comment:
         "The maximum number of alerts to include in a single webhook message. Alerts above this threshold are truncated. When leaving this at its default value of 0, all alerts are included."
-    })
+    }),
+    http_config: httpConfigSchema
+      .meta({
+        comment: "The HTTP client's configuration.",
+        default: "default = global.http_config"
+      })
+      .notRequired()
   })
   .meta({
     urls: [
       "https://www.prometheus.io/docs/alerting/latest/configuration/#webhook_config",
       "https://www.prometheus.io/docs/operating/integrations/#alertmanager-webhook-receiver"
     ]
-  });
+  })
+  .noUnknown();

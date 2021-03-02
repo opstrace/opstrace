@@ -18,7 +18,15 @@ import * as yup from "yup";
 
 import { subdomainValidator } from "client/utils/regex";
 
-export const tlsConfig = yup
+export type TlsConfig = {
+  ca_file?: string;
+  cert_file?: string;
+  key_file?: string;
+  server_name?: string;
+  insecure_skip_verify?: boolean;
+};
+
+export const tlsConfigSchema: yup.SchemaOf<TlsConfig> = yup
   .object({
     ca_file: yup.string().meta({
       comment: "CA certificate to validate the server certificate with."
@@ -39,23 +47,38 @@ export const tlsConfig = yup
       }),
     insecure_skip_verify: yup.boolean().default(false)
   })
-  .nullable()
-  .default(null);
+  .noUnknown();
 
-export const labelName = yup.string().matches(/[a-zA-Z_][a-zA-Z0-9_]*/);
+export const labelNameSchema = yup.string().matches(/[a-zA-Z_][a-zA-Z0-9_]*/);
 
-export const httpConfig = yup
+type BasicAuth = {
+  username?: string;
+  password?: string;
+  password_file?: string;
+};
+
+const basicAuthSchema: yup.SchemaOf<BasicAuth> = yup
   .object({
-    basic_auth: yup
-      .object({
-        username: yup.string(),
-        password: yup.string(),
-        password_file: yup.string()
-      })
-      .meta({
-        comment:
-          "Sets the `Authorization` header with the configured username and password."
-      }),
+    username: yup.string(),
+    password: yup.string(),
+    password_file: yup.string()
+  })
+  .meta({
+    comment:
+      "Sets the `Authorization` header with the configured username and password."
+  });
+
+export type HttpConfig = {
+  basic_auth?: BasicAuth;
+  bearer_token?: string;
+  bearer_token_file?: string;
+  tls_config?: TlsConfig;
+  proxy_url?: string;
+};
+
+export const httpConfigSchema: yup.SchemaOf<HttpConfig> = yup
+  .object({
+    basic_auth: basicAuthSchema.notRequired(),
     bearer_token: yup.string().meta({
       comment:
         "Sets the `Authorization` header with the configured bearer token."
@@ -64,8 +87,7 @@ export const httpConfig = yup
       comment:
         "Sets the `Authorization` header with the bearer token read from the configured file."
     }),
-    tls_config: tlsConfig,
+    tls_config: tlsConfigSchema.notRequired(),
     proxy_url: yup.string()
   })
-  .nullable()
-  .default(null);
+  .noUnknown();

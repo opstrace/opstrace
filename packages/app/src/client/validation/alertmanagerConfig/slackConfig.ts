@@ -16,45 +16,100 @@
 
 import * as yup from "yup";
 
-import { httpConfig } from "./common";
+import { httpConfigSchema, HttpConfig } from "./common";
 
-const slackConfigAction = yup.object({
-  text: yup.string().required(),
-  type: yup.string().required(),
+type SlackConfigActionConfirm = {
+  text: string;
+  dismiss_text?: string;
+  ok_text?: string;
+  title?: string;
+};
+
+const slackConfigActionConfirmSchema: yup.SchemaOf<SlackConfigActionConfirm> = yup
+  .object({
+    text: yup.string().defined(),
+    dismiss_text: yup.string().default(""),
+    ok_text: yup.string().default(""),
+    title: yup.string().default("")
+  })
+  .noUnknown();
+
+type SlackConfigAction = {
+  text: string;
+  type: string;
+  url?: string;
+  name?: string;
+  value?: string;
+  confirm?: SlackConfigActionConfirm;
+  style?: string;
+};
+
+const slackConfigActionSchema: yup.SchemaOf<SlackConfigAction> = yup.object({
+  text: yup.string().defined(),
+  type: yup.string().defined(),
   url: yup.string(),
   name: yup.string(),
   value: yup.string(),
-  confirm: yup
-    .object({
-      text: yup.string().required(),
-      dismiss_text: yup.string().default(""),
-      ok_text: yup.string().default(""),
-      title: yup.string().default("")
-    })
-    .nullable()
-    .default(null),
+  confirm: slackConfigActionConfirmSchema.notRequired(),
   style: yup.string().default("")
 });
 
-export const slackConfig = yup
+type SlackConfigField = {
+  title: string;
+  value: string;
+  short?: boolean;
+};
+
+const slackConfigFieldSchema: yup.SchemaOf<SlackConfigField> = yup
   .object({
-    send_resolved: yup
-      .boolean()
-      .default(false)
-      .meta({ comment: "Whether or not to notify about resolved alerts." }),
+    title: yup.string().defined(),
+    value: yup.string().defined(),
+    short: yup.boolean().meta({ default: "slack_config.short_fields" })
+  })
+  .noUnknown();
+
+export type SlackConfig = {
+  send_resolved?: boolean;
+  api_url?: string;
+  channel: string;
+  icon_emoji?: string;
+  icon_url?: string;
+  link_names?: boolean;
+  username?: string;
+  actions?: SlackConfigAction[];
+  callback_id?: string;
+  color?: string;
+  fallback?: string;
+  fields?: SlackConfigField[];
+  footer?: string;
+  mrkdwn_in?: string[];
+  pretext?: string;
+  short_fields?: boolean;
+  text?: string;
+  title?: string;
+  title_link?: string;
+  image_url?: string;
+  thumb_url?: string;
+  http_config?: HttpConfig;
+};
+
+export const slackConfigSchema: yup.SchemaOf<SlackConfig> = yup
+  .object({
+    send_resolved: yup.boolean().default(false).meta({
+      comment: "Whether or not to notify about resolved alerts."
+    }),
     api_url: yup.string().url().meta({
       comment: "The Slack webhook URL.",
       default: "global.slack_api_url"
     }),
-    channel: yup
-      .string()
-      .required()
-      .meta({ comment: "The channel or user to send notifications to." }),
+    channel: yup.string().defined().meta({
+      comment: "The channel or user to send notifications to."
+    }),
     icon_emoji: yup.string(),
     icon_url: yup.string(),
     link_names: yup.boolean().default(false),
     username: yup.string().default('{{ template "slack.default.username" . }}'),
-    actions: yup.array().of(slackConfigAction),
+    actions: yup.array().of(slackConfigActionSchema).notRequired(),
     callback_id: yup
       .string()
       .default('{{ template "slack.default.callbackid" . }}'),
@@ -62,16 +117,7 @@ export const slackConfig = yup
       .string()
       .default('{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'),
     fallback: yup.string().default('{{ template "slack.default.fallback" . }}'),
-    fields: yup.array().of(
-      yup
-        .object({
-          title: yup.string().required(),
-          value: yup.string().required(),
-          short: yup.boolean().meta({ default: "slack_config.short_fields" })
-        })
-        .nullable()
-        .default(null)
-    ),
+    fields: yup.array().of(slackConfigFieldSchema).notRequired(),
     footer: yup.string().default('{{ template "slack.default.footer" . }}'),
     mrkdwn_in: yup
       .array()
@@ -86,10 +132,11 @@ export const slackConfig = yup
       .default('{{ template "slack.default.titlelink" . }}'),
     image_url: yup.string(),
     thumb_url: yup.string(),
-    http_config: httpConfig.meta({
-      comment: "The HTTP client's configuration.",
-      default: "global.http_config"
-    })
+    http_config: httpConfigSchema
+      .meta({
+        comment: "The HTTP client's configuration.",
+        default: "global.http_config"
+      })
+      .notRequired()
   })
-  .nullable()
-  .default(null);
+  .noUnknown();

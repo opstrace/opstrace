@@ -16,85 +16,101 @@
 
 import * as yup from "yup";
 
-import { httpConfig } from "./common";
-import { route } from "./route";
-import { receiver } from "./receiver";
-import { inhibitRule } from "./inhibitRule";
+import { httpConfigSchema } from "./common";
+import { routeSchema, Route } from "./route";
+import { receiverSchema, Receiver } from "./receiver";
+import { inhibitRuleSchema, InhibitRule } from "./inhibitRule";
 
-const global = yup.object({
-  smtp_from: yup
-    .string()
-    .meta({ comment: "The default SMTP From header field." }),
-  smtp_smarthost: yup.string().meta({
-    comment:
-      "The default SMTP smarthost used for sending emails, including port number. Port number usually is 25, or 587 for SMTP over TLS (sometimes referred to as STARTTLS).",
-    example: "smtp.example.org:587"
-  }),
-  smtp_hello: yup
-    .string()
-    .default("localhost")
-    .meta({ comment: "The default hostname to identify to the SMTP server." }),
-  smtp_auth_username: yup.string().meta({
-    comment:
-      "SMTP Auth using CRAM-MD5, LOGIN and PLAIN. If empty, Alertmanager doesn't authenticate to the SMTP server."
-  }),
-  smtp_auth_password: yup
-    .string()
-    .meta({ comment: "SMTP Auth using LOGIN and PLAIN." }),
-  smtp_auth_identity: yup.string().meta({ comment: "SMTP Auth using PLAIN." }),
-  smtp_auth_secret: yup.string().meta({ comment: "SMTP Auth using CRAM-MD5." }),
-  smtp_require_tls: yup.boolean().default(true).meta({
-    comment:
-      "The SMTP TLS requirement. Note that Go does not support unencrypted connections to remote SMTP endpoints."
-  }),
-
-  slack_api_url: yup.string().url(),
-  victorops_api_key: yup.string(),
-  victorops_api_url: yup
-    .string()
-    .url()
-    .default(
-      "https://alert.victorops.com/integrations/generic/20131114/alert/"
-    ),
-  pagerduty_url: yup
-    .string()
-    .url()
-    .default("https://events.pagerduty.com/v2/enqueue"),
-  opsgenie_api_key: yup.string(),
-  opsgenie_api_url: yup.string().url().default("https://api.opsgenie.com/"),
-  wechat_api_url: yup
-    .string()
-    .url()
-    .default("https://qyapi.weixin.qq.com/cgi-bin/"),
-  wechat_api_secret: yup.string(),
-  wechat_api_corp_id: yup.string(),
-
-  http_config: httpConfig.meta({
-    comment: "The default HTTP client configuration"
-  }),
-
-  resolve_timeout: yup.string().default("5m").meta({
-    comment:
-      "ResolveTimeout is the default value used by alertmanager if the alert does not include EndsAt, after this time passes it can declare the alert as resolved if it has not been updated. This has no impact on alerts from Prometheus, as they always include EndsAt."
-  })
-});
-
-// TODO: NTW - work out what to specify here as:
-// "The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed. ts(7056)"
-// @ts-ignore
-export const schema = yup
+const global = yup
   .object({
-    global: global.required(),
-    templates: yup.array().of(yup.string()).meta({
+    smtp_from: yup
+      .string()
+      .meta({ comment: "The default SMTP From header field." }),
+    smtp_smarthost: yup.string().meta({
       comment:
-        "Files from which custom notification template definitions are read. # The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'."
+        "The default SMTP smarthost used for sending emails, including port number. Port number usually is 25, or 587 for SMTP over TLS (sometimes referred to as STARTTLS).",
+      example: "smtp.example.org:587"
     }),
-    route: route
-      .required()
+    smtp_hello: yup.string().default("localhost").meta({
+      comment: "The default hostname to identify to the SMTP server."
+    }),
+    smtp_auth_username: yup.string().meta({
+      comment:
+        "SMTP Auth using CRAM-MD5, LOGIN and PLAIN. If empty, Alertmanager doesn't authenticate to the SMTP server."
+    }),
+    smtp_auth_password: yup
+      .string()
+      .meta({ comment: "SMTP Auth using LOGIN and PLAIN." }),
+    smtp_auth_identity: yup
+      .string()
+      .meta({ comment: "SMTP Auth using PLAIN." }),
+    smtp_auth_secret: yup
+      .string()
+      .meta({ comment: "SMTP Auth using CRAM-MD5." }),
+    smtp_require_tls: yup.boolean().default(true).meta({
+      comment:
+        "The SMTP TLS requirement. Note that Go does not support unencrypted connections to remote SMTP endpoints."
+    }),
+
+    slack_api_url: yup.string().url(),
+    victorops_api_key: yup.string(),
+    victorops_api_url: yup
+      .string()
+      .url()
+      .default(
+        "https://alert.victorops.com/integrations/generic/20131114/alert/"
+      ),
+    pagerduty_url: yup
+      .string()
+      .url()
+      .default("https://events.pagerduty.com/v2/enqueue"),
+    opsgenie_api_key: yup.string(),
+    opsgenie_api_url: yup.string().url().default("https://api.opsgenie.com/"),
+    wechat_api_url: yup
+      .string()
+      .url()
+      .default("https://qyapi.weixin.qq.com/cgi-bin/"),
+    wechat_api_secret: yup.string(),
+    wechat_api_corp_id: yup.string(),
+
+    http_config: httpConfigSchema.meta({
+      comment: "The default HTTP client configuration"
+    }),
+
+    resolve_timeout: yup.string().default("5m").meta({
+      comment:
+        "ResolveTimeout is the default value used by alertmanager if the alert does not include EndsAt, after this time passes it can declare the alert as resolved if it has not been updated. This has no impact on alerts from Prometheus, as they always include EndsAt."
+    })
+  })
+  .noUnknown();
+
+type AlertmanagerConfig = {
+  global: object;
+  templates?: string[];
+  route: Route;
+  receivers: Receiver[];
+  inhibitRules?: InhibitRule[];
+};
+
+export const alertManagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
+  .object({
+    global: global.defined(),
+    templates: yup
+      .array()
+      .of(yup.string())
+      .meta({
+        comment:
+          "Files from which custom notification template definitions are read. # The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'."
+      })
+      .notRequired(),
+    route: routeSchema
+      .defined()
       .meta({ comment: "The root node of the routing tree." }),
-    receivers: yup.array().of(receiver).required(),
-    inhibitRules: yup.array().of(inhibitRule)
+    // @ts-ignore
+    receivers: yup.array().of(receiverSchema).defined(),
+    inhibitRules: yup.array().of(inhibitRuleSchema).notRequired()
   })
   .meta({
     url: "https://www.prometheus.io/docs/alerting/latest/configuration/"
-  });
+  })
+  .noUnknown();

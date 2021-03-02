@@ -33,7 +33,7 @@ import { Button } from "client/components/Button";
 import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
 import { saveAlertmanagerConfig } from "state/tenant/actions";
 
-import { schema } from "client/validation/alertmanagerConfig";
+import { alertManagerConfigSchema } from "client/validation/alertmanagerConfig";
 import * as yamlParser from "js-yaml";
 
 type EditorProps = {
@@ -131,7 +131,7 @@ const AlertmanagerConfigEditor = () => {
                 state="secondary"
                 onClick={() => {
                   // validateYaml(config);
-                  schema
+                  alertManagerConfigSchema
                     .isValid(yamlParser.load(config))
                     .then(function (valid: boolean) {
                       setConfigValid(valid);
