@@ -16,12 +16,34 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema } from "./common";
+import { httpConfigSchema, HttpConfig } from "./common";
 import { routeSchema, Route } from "./route";
 import { receiverSchema, Receiver } from "./receiver";
 import { inhibitRuleSchema, InhibitRule } from "./inhibitRule";
 
-const global = yup
+type Global = {
+  smtp_from?: string;
+  smtp_smarthost?: string;
+  smtp_hello?: string;
+  smtp_auth_username?: string;
+  smtp_auth_password?: string;
+  smtp_auth_identity?: string;
+  smtp_auth_secret?: string;
+  smtp_require_tls?: boolean;
+  slack_api_url?: string;
+  victorops_api_key?: string;
+  victorops_api_url?: string;
+  pagerduty_url?: string;
+  opsgenie_api_key?: string;
+  opsgenie_api_url?: string;
+  wechat_api_url?: string;
+  wechat_api_secret?: string;
+  wechat_api_corp_id?: string;
+  http_config?: HttpConfig;
+  resolve_timeout?: string;
+};
+
+const globalSchema: yup.SchemaOf<Global> = yup
   .object({
     smtp_from: yup
       .string()
@@ -73,9 +95,11 @@ const global = yup
     wechat_api_secret: yup.string(),
     wechat_api_corp_id: yup.string(),
 
-    http_config: httpConfigSchema.meta({
-      comment: "The default HTTP client configuration"
-    }),
+    http_config: httpConfigSchema
+      .meta({
+        comment: "The default HTTP client configuration"
+      })
+      .notRequired(),
 
     resolve_timeout: yup.string().default("5m").meta({
       comment:
@@ -85,7 +109,7 @@ const global = yup
   .noUnknown();
 
 type AlertmanagerConfig = {
-  global: object;
+  global?: Global;
   templates?: string[];
   route: Route;
   receivers: Receiver[];
@@ -94,7 +118,7 @@ type AlertmanagerConfig = {
 
 export const alertManagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
   .object({
-    global: global.defined(),
+    global: globalSchema.notRequired(),
     templates: yup
       .array()
       .of(yup.string())
