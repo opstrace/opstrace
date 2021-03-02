@@ -2232,7 +2232,7 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "$datasource",
+        "datasource": "metrics",
         "error": null,
         "hide": 0,
         "label": "Tenant",
