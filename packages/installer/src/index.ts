@@ -170,7 +170,9 @@ function* createClusterCore() {
     tlsCertificateIssuer: ccfg.cert_issuer,
     uiSourceIpFirewallRules: firewallConf.ui,
     apiSourceIpFirewallRules: firewallConf.api,
-    data_api_authn_pubkey_pem: ccfg.data_api_authn_pubkey_pem,
+    //data_api_authn_pubkey_pem: ccfg.data_api_authn_pubkey_pem,
+    tenant_api_authenticator_pubkey_set_json:
+      ccfg.tenant_api_authenticator_pubkey_set_json,
     disable_data_api_authentication: ccfg.data_api_authentication_disabled
   };
 

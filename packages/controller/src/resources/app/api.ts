@@ -23,9 +23,7 @@ import {
 } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
 import { KubeConfig, V1EnvVar } from "@kubernetes/client-node";
-import {
-  getControllerConfig,
-} from "../../helpers";
+import { getControllerConfig } from "../../helpers";
 import {
   DockerImages,
   ControllerConfigType
@@ -55,9 +53,7 @@ export function OpstraceAPIResources(
     failureThreshold: 3
   };
 
-  const commandArgs = [
-    "-listen=:8080",
-  ]
+  const commandArgs = ["-listen=:8080"];
   const commandEnv: V1EnvVar[] = [
     {
       name: "GRAPHQL_ENDPOINT",
@@ -80,17 +76,15 @@ export function OpstraceAPIResources(
         }
       }
     }
-  ]
+  ];
 
   if (controllerConfig.disable_data_api_authentication) {
     commandArgs.push("-disable-api-authn");
   } else {
-    commandEnv.push(
-      {
-        name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
-        value: controllerConfig.data_api_authn_pubkey_pem
-      }
-    );
+    commandEnv.push({
+      name: "API_AUTHTOKEN_VERIFICATION_PUBKEY_SET",
+      value: controllerConfig.tenant_api_authenticator_pubkey_set_json
+    });
   }
 
   collection.add(
