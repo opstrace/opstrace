@@ -4,60 +4,62 @@
     "Record<string,string>": {
       "description": "Construct a type with a set of properties K of type T",
       "type": "object"
+    },
+    "tls_config": {
+      "properties": {
+        "ca_file": {
+          "type": "string"
+        },
+        "cert_file": {
+          "type": "string"
+        },
+        "insecure_skip_verify": {
+          "type": "boolean"
+        },
+        "key_file": {
+          "type": "string"
+        },
+        "server_name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "http_config": {
+      "properties": {
+        "basic_auth": {
+          "properties": {
+            "password": {
+              "type": "string"
+            },
+            "password_file": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "bearer_token": {
+          "type": "string"
+        },
+        "bearer_token_file": {
+          "type": "string"
+        },
+        "proxy_url": {
+          "type": "string"
+        },
+        "tls_config": { "$ref": "#/definitions/tls_config" }
+      },
+      "type": "object"
     }
   },
   "description": "Copyright 2021 Opstrace, Inc.\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n     http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.",
   "properties": {
     "global": {
       "properties": {
-        "http_config": {
-          "properties": {
-            "basic_auth": {
-              "properties": {
-                "password": {
-                  "type": "string"
-                },
-                "password_file": {
-                  "type": "string"
-                },
-                "username": {
-                  "type": "string"
-                }
-              },
-              "type": "object"
-            },
-            "bearer_token": {
-              "type": "string"
-            },
-            "bearer_token_file": {
-              "type": "string"
-            },
-            "proxy_url": {
-              "type": "string"
-            },
-            "tls_config": {
-              "properties": {
-                "ca_file": {
-                  "type": "string"
-                },
-                "cert_file": {
-                  "type": "string"
-                },
-                "insecure_skip_verify": {
-                  "type": "boolean"
-                },
-                "key_file": {
-                  "type": "string"
-                },
-                "server_name": {
-                  "type": "string"
-                }
-              },
-              "type": "object"
-            }
-          },
-          "type": "object"
-        },
+        "http_config": { "$ref": "#/definitions/http_config" },
         "opsgenie_api_key": {
           "type": "string"
         },
@@ -183,26 +185,7 @@
                 "text": {
                   "type": "string"
                 },
-                "tls_config": {
-                  "properties": {
-                    "ca_file": {
-                      "type": "string"
-                    },
-                    "cert_file": {
-                      "type": "string"
-                    },
-                    "insecure_skip_verify": {
-                      "type": "boolean"
-                    },
-                    "key_file": {
-                      "type": "string"
-                    },
-                    "server_name": {
-                      "type": "string"
-                    }
-                  },
-                  "type": "object"
-                },
+                "tls_config": { "$ref": "#/definitions/tls_config" },
                 "to": {
                   "type": "string"
                 }
@@ -229,54 +212,7 @@
                 "details": {
                   "$ref": "#/definitions/Record<string,string>"
                 },
-                "http_config": {
-                  "properties": {
-                    "basic_auth": {
-                      "properties": {
-                        "password": {
-                          "type": "string"
-                        },
-                        "password_file": {
-                          "type": "string"
-                        },
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    },
-                    "bearer_token": {
-                      "type": "string"
-                    },
-                    "bearer_token_file": {
-                      "type": "string"
-                    },
-                    "proxy_url": {
-                      "type": "string"
-                    },
-                    "tls_config": {
-                      "properties": {
-                        "ca_file": {
-                          "type": "string"
-                        },
-                        "cert_file": {
-                          "type": "string"
-                        },
-                        "insecure_skip_verify": {
-                          "type": "boolean"
-                        },
-                        "key_file": {
-                          "type": "string"
-                        },
-                        "server_name": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                },
+                "http_config": { "$ref": "#/definitions/http_config" },
                 "message": {
                   "type": "string"
                 },
@@ -336,54 +272,7 @@
                 "details": {
                   "$ref": "#/definitions/Record<string,string>"
                 },
-                "http_config": {
-                  "properties": {
-                    "basic_auth": {
-                      "properties": {
-                        "password": {
-                          "type": "string"
-                        },
-                        "password_file": {
-                          "type": "string"
-                        },
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    },
-                    "bearer_token": {
-                      "type": "string"
-                    },
-                    "bearer_token_file": {
-                      "type": "string"
-                    },
-                    "proxy_url": {
-                      "type": "string"
-                    },
-                    "tls_config": {
-                      "properties": {
-                        "ca_file": {
-                          "type": "string"
-                        },
-                        "cert_file": {
-                          "type": "string"
-                        },
-                        "insecure_skip_verify": {
-                          "type": "boolean"
-                        },
-                        "key_file": {
-                          "type": "string"
-                        },
-                        "server_name": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                },
+                "http_config": { "$ref": "#/definitions/http_config" },
                 "images": {
                   "items": {
                     "properties": {
@@ -441,54 +330,7 @@
                 "expire": {
                   "type": "string"
                 },
-                "http_config": {
-                  "properties": {
-                    "basic_auth": {
-                      "properties": {
-                        "password": {
-                          "type": "string"
-                        },
-                        "password_file": {
-                          "type": "string"
-                        },
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    },
-                    "bearer_token": {
-                      "type": "string"
-                    },
-                    "bearer_token_file": {
-                      "type": "string"
-                    },
-                    "proxy_url": {
-                      "type": "string"
-                    },
-                    "tls_config": {
-                      "properties": {
-                        "ca_file": {
-                          "type": "string"
-                        },
-                        "cert_file": {
-                          "type": "string"
-                        },
-                        "insecure_skip_verify": {
-                          "type": "boolean"
-                        },
-                        "key_file": {
-                          "type": "string"
-                        },
-                        "server_name": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                },
+                "http_config": { "$ref": "#/definitions/http_config" },
                 "message": {
                   "type": "string"
                 },
@@ -596,54 +438,7 @@
                 "footer": {
                   "type": "string"
                 },
-                "http_config": {
-                  "properties": {
-                    "basic_auth": {
-                      "properties": {
-                        "password": {
-                          "type": "string"
-                        },
-                        "password_file": {
-                          "type": "string"
-                        },
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    },
-                    "bearer_token": {
-                      "type": "string"
-                    },
-                    "bearer_token_file": {
-                      "type": "string"
-                    },
-                    "proxy_url": {
-                      "type": "string"
-                    },
-                    "tls_config": {
-                      "properties": {
-                        "ca_file": {
-                          "type": "string"
-                        },
-                        "cert_file": {
-                          "type": "string"
-                        },
-                        "insecure_skip_verify": {
-                          "type": "boolean"
-                        },
-                        "key_file": {
-                          "type": "string"
-                        },
-                        "server_name": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                },
+                "http_config": { "$ref": "#/definitions/http_config" },
                 "icon_emoji": {
                   "type": "string"
                 },
@@ -703,54 +498,7 @@
                 "entity_display_name": {
                   "type": "string"
                 },
-                "http_config": {
-                  "properties": {
-                    "basic_auth": {
-                      "properties": {
-                        "password": {
-                          "type": "string"
-                        },
-                        "password_file": {
-                          "type": "string"
-                        },
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    },
-                    "bearer_token": {
-                      "type": "string"
-                    },
-                    "bearer_token_file": {
-                      "type": "string"
-                    },
-                    "proxy_url": {
-                      "type": "string"
-                    },
-                    "tls_config": {
-                      "properties": {
-                        "ca_file": {
-                          "type": "string"
-                        },
-                        "cert_file": {
-                          "type": "string"
-                        },
-                        "insecure_skip_verify": {
-                          "type": "boolean"
-                        },
-                        "key_file": {
-                          "type": "string"
-                        },
-                        "server_name": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                },
+                "http_config": { "$ref": "#/definitions/http_config" },
                 "message_type": {
                   "type": "string"
                 },
@@ -774,54 +522,7 @@
           "webhook_configs": {
             "items": {
               "properties": {
-                "http_config": {
-                  "properties": {
-                    "basic_auth": {
-                      "properties": {
-                        "password": {
-                          "type": "string"
-                        },
-                        "password_file": {
-                          "type": "string"
-                        },
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    },
-                    "bearer_token": {
-                      "type": "string"
-                    },
-                    "bearer_token_file": {
-                      "type": "string"
-                    },
-                    "proxy_url": {
-                      "type": "string"
-                    },
-                    "tls_config": {
-                      "properties": {
-                        "ca_file": {
-                          "type": "string"
-                        },
-                        "cert_file": {
-                          "type": "string"
-                        },
-                        "insecure_skip_verify": {
-                          "type": "boolean"
-                        },
-                        "key_file": {
-                          "type": "string"
-                        },
-                        "server_name": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                },
+                "http_config": { "$ref": "#/definitions/http_config" },
                 "max_alerts": {
                   "type": "number"
                 },
