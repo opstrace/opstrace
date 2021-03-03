@@ -45,14 +45,6 @@ export function generateJWTforTenantAPI(
     initialize();
   }
 
-  const options = {
-    audience: `opstrace-cluster-${opstraceClusterName}`,
-    algorithm: "RS256" as const,
-    expiresIn: "10y",
-    issuer: "opstrace-cli",
-    subject: `tenant-${tenantName}`
-  };
-
   // auth0/node-jsonwebtoken does not seem to support the native nodejs
   // private key object (crypto.KeyObject) for signing, also see
   // https://github.com/auth0/node-jsonwebtoken/issues/750
@@ -61,10 +53,27 @@ export function generateJWTforTenantAPI(
     format: "pem"
   }) as string;
 
+  const pubkeyId = keyIDfromPEM(keypairForSession.pubkeyPem);
+
+  // Opstrace-specific spec:
+  //  audience: required, special string
+  //  subject: special format, `tenant-` prefix to tenant name
+  //  keyid: required, refers to public key correspondig to priv key used
+  //         for signing
+  const options: jwt.SignOptions = {
+    audience: `opstrace-cluster-${opstraceClusterName}`,
+    algorithm: "RS256" as const,
+    expiresIn: "10y",
+    issuer: "opstrace-cli",
+    subject: `tenant-${tenantName}`,
+    keyid: pubkeyId // added in 2nd gen tokens March 03
+  };
+
   const token: string = jwt.sign({}, privkeyPem, options);
   log.info(
-    "generated API authentication token (JWT) for tenant %s",
-    tenantName
+    "generated tenant API authentication token for tenant `%s` to be verified with key %s",
+    tenantName,
+    pubkeyId
   );
 
   return token;
