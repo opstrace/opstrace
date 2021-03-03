@@ -17,7 +17,7 @@
 import { createReducer, ActionType } from "typesafe-actions";
 import { UserRecords } from "./types";
 import * as actions from "./actions";
-import { pluck, zipObj, pickBy, mergeDeepLeft } from "ramda";
+import * as R from "ramda";
 import { isActive } from "state/user/utils";
 
 type UserActions = ActionType<typeof actions>;
@@ -52,7 +52,7 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
     (state, action): UserState => {
       if (!state.currentUserIdLoaded) return state;
 
-      return mergeDeepLeft(state, {
+      return R.mergeDeepLeft(state, {
         users: {
           [state.currentUserId]: { preferences: { dark_mode: action.payload } }
         },
@@ -65,15 +65,23 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
   .handleAction(
     actions.setUserList,
     (state, action): UserState => {
-      const users: UserRecords = zipObj(pluck("id")(action.payload))(
-        action.payload
+      const userIds: string[] = R.pluck("id", action.payload);
+      const deletedUserIds: string[] = R.pipe(
+        R.keys,
+        R.without(userIds)
+      )(state.allUsers);
+
+      const users: UserRecords = R.zipObj(userIds, action.payload);
+      const allUsers: UserRecords = R.omit(
+        deletedUserIds,
+        R.mergeDeepLeft(users, state.allUsers)
       );
 
       return {
-        ...state,
-        allUsers: users,
-        users: pickBy<UserRecords>(isActive)(users),
-        loading: false
+        ...R.pick(["currentUserId", "currentUserIdLoaded"], state),
+        loading: false,
+        allUsers: allUsers,
+        users: R.pickBy<UserRecords>(isActive)(allUsers)
       };
     }
   );
