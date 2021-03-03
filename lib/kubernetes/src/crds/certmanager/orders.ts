@@ -15,7 +15,7 @@
  */
 
 /**
- * taken from https://github.com/jetstack/cert-manager/releases/download/v1.0.3/cert-manager.yaml
+ * taken from https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.yaml
  *
  * 1. copy the correct yaml
  * 2. covert to json (https://www.convertjson.com/yaml-to-json.htm)
@@ -56,6 +56,7 @@ export const orders = {
     },
     group: "acme.cert-manager.io",
     names: {
+      categories: ["cert-manager", "cert-manager-acme"],
       kind: "Order",
       listKind: "OrderList",
       plural: "orders",
@@ -113,7 +114,7 @@ export const orders = {
                 properties: {
                   commonName: {
                     description:
-                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames`. This field must match the corresponding field on the DER encoded CSR.",
+                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames` or `ipAddresses`. This field must match the corresponding field on the DER encoded CSR.",
                     type: "string"
                   },
                   csr: {
@@ -125,6 +126,19 @@ export const orders = {
                   dnsNames: {
                     description:
                       "DNSNames is a list of DNS names that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
+                    items: {
+                      type: "string"
+                    },
+                    type: "array"
+                  },
+                  duration: {
+                    description:
+                      "Duration is the duration for the not after date for the requested certificate. this is set on order creation as pe the ACME spec.",
+                    type: "string"
+                  },
+                  ipAddresses: {
+                    description:
+                      "IPAddresses is a list of IP addresses that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
                     items: {
                       type: "string"
                     },
@@ -151,7 +165,7 @@ export const orders = {
                     type: "object"
                   }
                 },
-                required: ["csr", "dnsNames", "issuerRef"],
+                required: ["csr", "issuerRef"],
                 type: "object"
               },
               status: {
@@ -331,7 +345,7 @@ export const orders = {
                 properties: {
                   commonName: {
                     description:
-                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames`. This field must match the corresponding field on the DER encoded CSR.",
+                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames` or `ipAddresses`. This field must match the corresponding field on the DER encoded CSR.",
                     type: "string"
                   },
                   csr: {
@@ -343,6 +357,19 @@ export const orders = {
                   dnsNames: {
                     description:
                       "DNSNames is a list of DNS names that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
+                    items: {
+                      type: "string"
+                    },
+                    type: "array"
+                  },
+                  duration: {
+                    description:
+                      "Duration is the duration for the not after date for the requested certificate. this is set on order creation as pe the ACME spec.",
+                    type: "string"
+                  },
+                  ipAddresses: {
+                    description:
+                      "IPAddresses is a list of IP addresses that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
                     items: {
                       type: "string"
                     },
@@ -369,7 +396,7 @@ export const orders = {
                     type: "object"
                   }
                 },
-                required: ["csr", "dnsNames", "issuerRef"],
+                required: ["csr", "issuerRef"],
                 type: "object"
               },
               status: {
@@ -549,12 +576,25 @@ export const orders = {
                 properties: {
                   commonName: {
                     description:
-                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames`. This field must match the corresponding field on the DER encoded CSR.",
+                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames` or `ipAddresses`. This field must match the corresponding field on the DER encoded CSR.",
                     type: "string"
                   },
                   dnsNames: {
                     description:
                       "DNSNames is a list of DNS names that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
+                    items: {
+                      type: "string"
+                    },
+                    type: "array"
+                  },
+                  duration: {
+                    description:
+                      "Duration is the duration for the not after date for the requested certificate. this is set on order creation as pe the ACME spec.",
+                    type: "string"
+                  },
+                  ipAddresses: {
+                    description:
+                      "IPAddresses is a list of IP addresses that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
                     items: {
                       type: "string"
                     },
@@ -587,7 +627,7 @@ export const orders = {
                     type: "string"
                   }
                 },
-                required: ["dnsNames", "issuerRef", "request"],
+                required: ["issuerRef", "request"],
                 type: "object"
               },
               status: {
@@ -767,12 +807,25 @@ export const orders = {
                 properties: {
                   commonName: {
                     description:
-                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames`. This field must match the corresponding field on the DER encoded CSR.",
+                      "CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames` or `ipAddresses`. This field must match the corresponding field on the DER encoded CSR.",
                     type: "string"
                   },
                   dnsNames: {
                     description:
                       "DNSNames is a list of DNS names that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
+                    items: {
+                      type: "string"
+                    },
+                    type: "array"
+                  },
+                  duration: {
+                    description:
+                      "Duration is the duration for the not after date for the requested certificate. this is set on order creation as pe the ACME spec.",
+                    type: "string"
+                  },
+                  ipAddresses: {
+                    description:
+                      "IPAddresses is a list of IP addresses that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.",
                     items: {
                       type: "string"
                     },
@@ -805,7 +858,7 @@ export const orders = {
                     type: "string"
                   }
                 },
-                required: ["dnsNames", "issuerRef", "request"],
+                required: ["issuerRef", "request"],
                 type: "object"
               },
               status: {

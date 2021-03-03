@@ -621,6 +621,11 @@ export function CertManagerResources(
             apiGroups: [""],
             resources: ["secrets"],
             verbs: ["get", "list", "watch"]
+          },
+          {
+            apiGroups: ["networking.k8s.io"],
+            resources: ["ingresses"],
+            verbs: ["get", "list", "watch", "create", "delete", "update"]
           }
         ]
       },
@@ -672,6 +677,16 @@ export function CertManagerResources(
             apiGroups: [""],
             resources: ["events"],
             verbs: ["create", "patch"]
+          },
+          {
+            apiGroups: ["networking.k8s.io"],
+            resources: ["ingresses"],
+            verbs: ["get", "list", "watch"]
+          },
+          {
+            apiGroups: ["networking.k8s.io"],
+            resources: ["ingresses/finalizers"],
+            verbs: ["update"]
           }
         ]
       },
