@@ -36,28 +36,42 @@ import { saveAlertmanagerConfig } from "state/tenant/actions";
 import { alertManagerConfigSchema } from "client/validation/alertmanagerConfig";
 import * as yamlParser from "js-yaml";
 
+import alertmanagerConfigSchema from "client/validation/alertmanagerConfig/schema.json";
+
 type EditorProps = {
+  filename: string;
   config: string;
   onChange: Function;
 };
 
-const Editor = ({ config, onChange }: EditorProps) => {
+const Editor = ({ filename, config, onChange }: EditorProps) => {
   const model = useRef<monaco.editor.IModel | null>(null);
 
   useEffect(() => {
+    console.log(alertmanagerConfigSchema);
     yaml &&
       yaml.yamlDefaults.setDiagnosticsOptions({
         validate: true,
         enableSchemaRequest: true,
         hover: true,
         completion: true,
-        schemas: []
+        schemas: [
+          {
+            uri: "http://opstrace.com/alertmanager-schema.json", // id of the first schema
+            fileMatch: [filename], // associate with our model
+            schema: alertmanagerConfigSchema
+          }
+        ]
       });
   }, []);
 
   useEffect(() => {
     if (!model.current) {
-      model.current = monaco.editor.createModel(config, "yaml");
+      model.current = monaco.editor.createModel(
+        config,
+        "yaml",
+        monaco.Uri.parse(filename)
+      );
       model.current.onDidChangeContent(data => {
         onChange(model.current?.getValue() || "");
       });
@@ -109,7 +123,11 @@ const AlertmanagerConfigEditor = () => {
               />
               <CardContent>
                 <Box display="flex" height="500px" width="700px">
-                  <Editor config={config} onChange={setConfig} />
+                  <Editor
+                    filename={`${tenant.name}-alertmanagerConfig.yaml`}
+                    config={config}
+                    onChange={setConfig}
+                  />
                 </Box>
               </CardContent>
               <Button
