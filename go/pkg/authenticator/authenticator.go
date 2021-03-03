@@ -15,20 +15,10 @@
 package authenticator
 
 import (
-	"crypto/rsa"
-	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
-
 	"fmt"
 	"net/http"
 	"strings"
 )
-
-// Use a single key for now. Further down the road there should be support
-// for multiple public keys, each identified by a key id.
-var authtokenVerificationPubKeyFallback *rsa.PublicKey
-
-// map for key set. Key of map: key ID (sha1 of PEM bytes?)
-var authtokenVerificationPubKeys map[string]*rsa.PublicKey
 
 // HTTP Request header used by GetTenant when disableAPIAuthentication is true and requireTenantName is nil.
 // This is only meant for use in testing, and lines up with the tenant HTTP header used by Cortex and Loki.

@@ -16,6 +16,10 @@ package authenticator
 
 import (
 	"crypto/rsa"
+	// Disable warning for using sha1: a cryptographically secure hash is not
+	// needed here: an cluster admin generates and manages key pairs, and only
+	// trusted admin is supposed to add or remove keys from the key set.
+	//nolint: gosec
 	"crypto/sha1"
 	"encoding/hex"
 	"os"
@@ -24,6 +28,13 @@ import (
 	json "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 )
+
+// Use a single key for now. Further down the road there should be support
+// for multiple public keys, each identified by a key id.
+var authtokenVerificationPubKeyFallback *rsa.PublicKey
+
+// map for key set. Key of map: key ID (sha1 of PEM bytes?)
+var authtokenVerificationPubKeys map[string]*rsa.PublicKey
 
 func keyIDfromPEM(pemstring string) string {
 	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
@@ -35,6 +46,12 @@ func keyIDfromPEM(pemstring string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+/*
+Read set of public keys from environment variable
+API_AUTHTOKEN_VERIFICATION_PUBKEYS. If key deserialization fails, log an error
+and exit the process with a non-zero exit code.
+
+*/
 func ReadKeySetJSONFromEnvOrCrash() {
 	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEYS")
 

@@ -97,6 +97,6 @@ $ python build-key-config-json.py public.pem public2.pem
 }
 ```
 
-Note: when injecting this JSON doc via environment then keep the JSON doc on a single line (no literal newline char).
+Note: when injecting this JSON doc via environment through a `docker run` layer then keep the JSON doc on a single line (no literal newline char).
 In the Python program above, this means removing `indent=2`.
 You can always pretty-print that JSON with `| jq`.
