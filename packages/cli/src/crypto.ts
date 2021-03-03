@@ -124,7 +124,7 @@ function generateRSAkeypair(): RSAKeypair {
   };
 }
 
-function keyIDfromPEM(pemstring: string): string {
+export function keyIDfromPEM(pemstring: string): string {
   // See specification for key ID derivation in authenticator's README.
   const hash = crypto.createHash("sha1");
   // Trim leading and trailing whitespace from PEM string, take underlying
