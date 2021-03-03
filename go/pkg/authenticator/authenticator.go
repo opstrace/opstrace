@@ -129,7 +129,7 @@ func DDAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedT
 	return compareRequestAuthenticator(w, authTokenUnverified, expectedTenantName)
 }
 
-// Maybe call this authenticateOrWriteErrorResponse()
+// Maybe call this authenticateOrWriteErrorResponse().
 func getRequestAuthenticator(w http.ResponseWriter, authTokenUnverified string) (string, bool) {
 	tenantNameFromToken, verr := validateAuthTokenGetTenantName(authTokenUnverified)
 

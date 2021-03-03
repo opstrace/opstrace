@@ -22,6 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+//nolint:lll // ignore long lines
 var keysetEnvValTwoPubkeys = `
 {
 	"0773cd2a09713115bca465a5b12171cab7aecfe5": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAytbw9TvWedKzygbivO8t\n/6ZNT6uZxPAhNGITamwdgppvyf+7aHECHHAYgiqdI2bBRe8m+0+cHUceOwziewr7\nEClawdC61qGLp6Lw17nf8yM08ALSyAR976NCgCDFZ9Zxl5AAlfiyez88MFyjzXWC\nLmHWH02f9rs52PkYteXdhHe2nMvPNVKgWm1UUhEf80lFrFB51p7EkPmT8TW2lZ9p\nq2SnXQLi555ffaxOMos5tLx/Dji79q1Js5RzYCqrv0l+Wnr4IkSqYKSLrFnC/1ek\nAgM0R6DMFYRHGNnwGhNELPhd4DQKRUdNhEu0SLy0qSPpoTDpwgvXpcmOjUIUmRZU\nrwIDAQAB\n-----END PUBLIC KEY-----",
