@@ -87,7 +87,8 @@
         "routes": {
           "items": {
             "properties": { "$ref": "#/definitions/route" }
-          }
+          },
+          "type": "array"
         }
       },
       "type": "object"
