@@ -21,9 +21,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-
-	"github.com/dgrijalva/jwt-go"
-	log "github.com/sirupsen/logrus"
 )
 
 // Use a single key for now. Further down the road there should be support
@@ -142,46 +139,15 @@ func DDAPIRequestAuthenticator(w http.ResponseWriter, r *http.Request, expectedT
 	return compareRequestAuthenticator(w, authTokenUnverified, expectedTenantName)
 }
 
+// Maybe call this authenticateOrWriteErrorResponse()
 func getRequestAuthenticator(w http.ResponseWriter, authTokenUnverified string) (string, bool) {
-	// Perform RFC 7519-compliant JWT verification (standard claims, such as
-	// exp and nbf, but also cryptographic signature verification). Expect a
-	// set of standard claims to be present (`sub`, `iss` and the likes), and
-	// custom claims to not be present.
-	tokenstruct, parseerr := jwt.ParseWithClaims(
-		authTokenUnverified, &jwt.StandardClaims{}, keyLookupCallback)
+	tenantNameFromToken, verr := validateAuthTokenGetTenantName(authTokenUnverified)
 
-	if parseerr != nil {
-		log.Infof("jwt verification failed: %s", parseerr)
-		// See below: must exit here, because `tokenstruct.Valid` may not
-		// be accessible. See #282.
-		return "", exit401(w, "bad authentication token")
+	if verr != nil {
+		return "", exit401(w, verr.Error())
 	}
 
-	// The `err` check above should be enough, but the documentation for
-	// `jwt-go` is kind of bad and most code examples check this `Valid`
-	// property, too. Update(JP): accessing `tokenstruct.Valid` can result in a
-	// segmentation fault here when `parseerr` above is not `nil`! That is
-	// why there are two checks and exit routes now.
-	if !(tokenstruct.Valid) {
-		log.Infof("jwt verification failed: %s", parseerr)
-		return "", exit401(w, "bad authentication token")
-	}
-
-	// https://godoc.org/github.com/dgrijalva/jwt-go#StandardClaims
-	claims := tokenstruct.Claims.(*jwt.StandardClaims)
-	// log.Infof("claims: %+v", claims)
-
-	// Custom convention: encode Opstrace tenant name in subject, expect
-	// a specific prefix.
-	ssplits := strings.Split(claims.Subject, "tenant-")
-	if len(ssplits) != 2 {
-		log.Infof("invalid subject (tenant- prefix missing)")
-		return "", exit401(w, "bad authentication token")
-	}
-
-	tenantNameFromToken := ssplits[1]
-	// log.Debugf("authenticated for tenant: %s", tenantNameFromToken)
-
+	// Maybe change signature to return an error as second param, and nil here.
 	return tenantNameFromToken, true
 }
 
@@ -196,36 +162,4 @@ func compareRequestAuthenticator(w http.ResponseWriter, authTokenUnverified stri
 			tenantNameFromToken))
 	}
 	return true
-}
-
-/*
-First return value is *rsa.PublicKey, but need to specify as type interface{}
-for compat with jwt lib.
-*/
-func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
-	// Receives the parsed, but unverified JWT payload. Can inspect claims to
-	// decide which public key for verification to use. Use this to enforce the
-	// RS256 signing method for now.
-
-	if unveriftoken.Header["alg"] != "RS256" {
-		err := fmt.Sprintf("jwt verif: invalid alg: %s", unveriftoken.Header["alg"])
-		log.Info(err)
-		return nil, fmt.Errorf(err)
-	}
-
-	kid, kidset := unveriftoken.Header["kid"]
-
-	if kidset {
-		pkey, keyknown := authtokenVerificationPubKeys[fmt.Sprintf("%s", kid)]
-		if keyknown {
-			return pkey, nil
-		} else {
-			err := fmt.Sprintf("jwt verif: unknown kid: %s", kid)
-			log.Info(err)
-			return nil, fmt.Errorf(err)
-		}
-	} else {
-		// Key ID not set in auth token. Use fallback.
-		return authtokenVerificationPubKeyFallback, nil
-	}
 }
