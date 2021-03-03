@@ -18,9 +18,7 @@ import (
 	"crypto/rsa"
 	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
 	"crypto/sha1"
-	"crypto/x509"
 	"encoding/hex"
-	"encoding/pem"
 	"fmt"
 	"net/http"
 	"os"
@@ -350,7 +348,7 @@ func ReadKeySetJSONFromEnvOrCrash() {
 		log.Infof("parse PEM bytes for key with ID %s", kidFromConfig)
 		// We're interested in processing the (PEM) bytes underneath the string
 		// value.
-		pubkey, err := parseRSAPubKeyPEMBytes([]byte(pemstring))
+		pubkey, err := deserializeRSAPubKeyFromPEMBytes([]byte(pemstring))
 		if err != nil {
 			log.Errorf("%s", err)
 			os.Exit(1)
@@ -405,7 +403,7 @@ func LegacyReadAuthTokenVerificationKeyFromEnv() {
 
 	// `os.LookupEnv` returns a string. We're interested in processing the
 	// bytes underneath it.
-	pubkey, err := parseRSAPubKeyPEMBytes([]byte(data))
+	pubkey, err := deserializeRSAPubKeyFromPEMBytes([]byte(data))
 	if err != nil {
 		log.Errorf("%s", err)
 		os.Exit(1)
@@ -414,33 +412,4 @@ func LegacyReadAuthTokenVerificationKeyFromEnv() {
 	// Set module global for subsequent consumption by authenticator logic.
 	authtokenVerificationPubKeyFallback = pubkey
 	log.Infof("Successfully read RSA public key from legacy env var API_AUTHTOKEN_VERIFICATION_PUBKEY")
-}
-
-func parseRSAPubKeyPEMBytes(data []byte) (*rsa.PublicKey, error) {
-	pubPem, _ := pem.Decode(data)
-
-	badFormatMsg := "Unexpected key format. Expected: PEM-encoded X.509 SubjectPublicKeyInfo"
-
-	if pubPem == nil {
-		return nil, fmt.Errorf(badFormatMsg)
-	}
-
-	parsedkey, err := x509.ParsePKIXPublicKey(pubPem.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf(badFormatMsg)
-	}
-
-	// ParsePKIXPublicKey() above can deserialize various key types (RSA,
-	// ECDSA, DSA). Use type assertion, support RSA only here for now.
-	var pubkey *rsa.PublicKey
-	var ok bool
-	if pubkey, ok = parsedkey.(*rsa.PublicKey); !ok {
-		return nil, fmt.Errorf("pubkey is not of type RSA")
-	}
-
-	log.Infof(
-		"Deserialized RSA public key with modulus size: %d bits",
-		pubkey.Size()*8)
-
-	return pubkey, nil
 }
