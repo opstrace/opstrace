@@ -126,6 +126,7 @@ export const renderedClusterConfigSchema = clusterConfigFileSchema.concat(
       // Can be empty when `disable_data_api_authentication` is true.
       // Ideally, allow empty string, but not undefined. This is harder to
       // to than it should be. https://stackoverflow.com/a/63944333/145400
+      // interesting: https://stackoverflow.com/a/65185329/145400
       tenant_api_authenticator_pubkey_set_json: yup.string()
     })
     .noUnknown()
