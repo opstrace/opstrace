@@ -16,14 +16,8 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema, HttpConfig } from "./common";
-
-export type WebhookConfig = {
-  send_resolved?: boolean;
-  url?: string;
-  max_alerts?: number;
-  http_config?: HttpConfig;
-};
+import { WebhookConfig } from "./types";
+import { httpConfigSchema } from "./common";
 
 export const webhookConfigSchema: yup.SchemaOf<WebhookConfig> = yup
   .object({

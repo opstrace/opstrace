@@ -16,26 +16,16 @@
 
 import * as yup from "yup";
 
-import { emailConfigSchema, EmailConfig } from "./emailConfig";
-import { slackConfigSchema, SlackConfig } from "./slackConfig";
-import { pagerDutyConfigSchema, PagerDutyConfig } from "./pagerDutyConfig";
-import { pushoverConfigSchema, PushoverConfig } from "./pushoverConfig";
-import { opsgenieConfigSchema, OpsgenieConfig } from "./opsgenieConfig";
-import { victoropsConfigSchema, VictorOps } from "./victoropsConfig";
-import { webhookConfigSchema, WebhookConfig } from "./webhookConfig";
-import { wechatConfigSchema, WechatConfig } from "./wechatConfig";
+import { Receiver } from "./types";
 
-export type Receiver = {
-  name: string;
-  email_configs?: EmailConfig[];
-  slack_configs?: SlackConfig[];
-  pager_duty_configs?: PagerDutyConfig[];
-  pushover_duty_configs?: PushoverConfig[];
-  opsgenie_configs?: OpsgenieConfig[];
-  victorops_configs?: VictorOps[];
-  webhook_configs?: WebhookConfig[];
-  wechat_configs?: WechatConfig[];
-};
+import { emailConfigSchema } from "./emailConfig";
+import { slackConfigSchema } from "./slackConfig";
+import { pagerDutyConfigSchema } from "./pagerDutyConfig";
+import { pushoverConfigSchema } from "./pushoverConfig";
+import { opsgenieConfigSchema } from "./opsgenieConfig";
+import { victoropsConfigSchema } from "./victoropsConfig";
+import { webhookConfigSchema } from "./webhookConfig";
+import { wechatConfigSchema } from "./wechatConfig";
 
 export const receiverSchema: yup.SchemaOf<Receiver> = yup
   .object({

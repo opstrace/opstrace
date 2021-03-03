@@ -16,19 +16,8 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema, HttpConfig } from "./common";
-
-export type VictorOps = {
-  send_resolved?: boolean;
-  api_key?: string;
-  api_url?: string;
-  routing_key: string;
-  message_type?: string;
-  entity_display_name?: string;
-  state_message?: string;
-  monitoring_tool?: string;
-  http_config?: HttpConfig;
-};
+import { VictorOps } from "./types";
+import { httpConfigSchema } from "./common";
 
 export const victoropsConfigSchema: yup.SchemaOf<VictorOps> = yup
   .object({

@@ -17,14 +17,7 @@
 import * as yup from "yup";
 
 import { subdomainValidator } from "client/utils/regex";
-
-export type TlsConfig = {
-  ca_file?: string;
-  cert_file?: string;
-  key_file?: string;
-  server_name?: string;
-  insecure_skip_verify?: boolean;
-};
+import { TlsConfig, BasicAuth, HttpConfig } from "./types";
 
 export const tlsConfigSchema: yup.SchemaOf<TlsConfig> = yup
   .object({
@@ -51,12 +44,6 @@ export const tlsConfigSchema: yup.SchemaOf<TlsConfig> = yup
 
 export const labelNameSchema = yup.string().matches(/[a-zA-Z_][a-zA-Z0-9_]*/);
 
-type BasicAuth = {
-  username?: string;
-  password?: string;
-  password_file?: string;
-};
-
 const basicAuthSchema: yup.SchemaOf<BasicAuth> = yup
   .object({
     username: yup.string(),
@@ -67,14 +54,6 @@ const basicAuthSchema: yup.SchemaOf<BasicAuth> = yup
     comment:
       "Sets the `Authorization` header with the configured username and password."
   });
-
-export type HttpConfig = {
-  basic_auth?: BasicAuth;
-  bearer_token?: string;
-  bearer_token_file?: string;
-  tls_config?: TlsConfig;
-  proxy_url?: string;
-};
 
 export const httpConfigSchema: yup.SchemaOf<HttpConfig> = yup
   .object({

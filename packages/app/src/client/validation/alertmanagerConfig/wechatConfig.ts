@@ -16,17 +16,7 @@
 
 import * as yup from "yup";
 
-export type WechatConfig = {
-  send_resolved?: boolean;
-  api_secret?: string;
-  api_url?: string;
-  corp_id?: string;
-  message?: string;
-  agent_id?: string;
-  to_user?: string;
-  to_party?: string;
-  to_tag?: string;
-};
+import { WechatConfig } from "./types";
 
 export const wechatConfigSchema: yup.SchemaOf<WechatConfig> = yup
   .object({

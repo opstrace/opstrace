@@ -16,18 +16,8 @@
 
 import * as yup from "yup";
 
+import { Route } from "./types";
 import { labelNameSchema } from "./common";
-
-export type Route = {
-  receiver?: string;
-  group_by?: string[];
-  continue?: boolean;
-  match?: Record<string, string>;
-  match_re?: Record<string, string>;
-  group_wait?: string;
-  group_interval?: string;
-  repeat_interval?: string;
-};
 
 let routeSchema: yup.SchemaOf<Route> = yup
   .object({

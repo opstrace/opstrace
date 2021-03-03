@@ -16,14 +16,13 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema, HttpConfig } from "./common";
-
-type SlackConfigActionConfirm = {
-  text: string;
-  dismiss_text?: string;
-  ok_text?: string;
-  title?: string;
-};
+import {
+  SlackConfigActionConfirm,
+  SlackConfigAction,
+  SlackConfigField,
+  SlackConfig
+} from "./types";
+import { httpConfigSchema } from "./common";
 
 const slackConfigActionConfirmSchema: yup.SchemaOf<SlackConfigActionConfirm> = yup
   .object({
@@ -33,16 +32,6 @@ const slackConfigActionConfirmSchema: yup.SchemaOf<SlackConfigActionConfirm> = y
     title: yup.string().default("")
   })
   .noUnknown();
-
-type SlackConfigAction = {
-  text: string;
-  type: string;
-  url?: string;
-  name?: string;
-  value?: string;
-  confirm?: SlackConfigActionConfirm;
-  style?: string;
-};
 
 const slackConfigActionSchema: yup.SchemaOf<SlackConfigAction> = yup.object({
   text: yup.string().defined(),
@@ -54,12 +43,6 @@ const slackConfigActionSchema: yup.SchemaOf<SlackConfigAction> = yup.object({
   style: yup.string().default("")
 });
 
-type SlackConfigField = {
-  title: string;
-  value: string;
-  short?: boolean;
-};
-
 const slackConfigFieldSchema: yup.SchemaOf<SlackConfigField> = yup
   .object({
     title: yup.string().defined(),
@@ -67,31 +50,6 @@ const slackConfigFieldSchema: yup.SchemaOf<SlackConfigField> = yup
     short: yup.boolean().meta({ default: "slack_config.short_fields" })
   })
   .noUnknown();
-
-export type SlackConfig = {
-  send_resolved?: boolean;
-  api_url?: string;
-  channel: string;
-  icon_emoji?: string;
-  icon_url?: string;
-  link_names?: boolean;
-  username?: string;
-  actions?: SlackConfigAction[];
-  callback_id?: string;
-  color?: string;
-  fallback?: string;
-  fields?: SlackConfigField[];
-  footer?: string;
-  mrkdwn_in?: string[];
-  pretext?: string;
-  short_fields?: boolean;
-  text?: string;
-  title?: string;
-  title_link?: string;
-  image_url?: string;
-  thumb_url?: string;
-  http_config?: HttpConfig;
-};
 
 export const slackConfigSchema: yup.SchemaOf<SlackConfig> = yup
   .object({

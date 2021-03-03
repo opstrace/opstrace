@@ -16,32 +16,11 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema, HttpConfig } from "./common";
-import { routeSchema, Route } from "./route";
-import { receiverSchema, Receiver } from "./receiver";
-import { inhibitRuleSchema, InhibitRule } from "./inhibitRule";
-
-type Global = {
-  smtp_from?: string;
-  smtp_smarthost?: string;
-  smtp_hello?: string;
-  smtp_auth_username?: string;
-  smtp_auth_password?: string;
-  smtp_auth_identity?: string;
-  smtp_auth_secret?: string;
-  smtp_require_tls?: boolean;
-  slack_api_url?: string;
-  victorops_api_key?: string;
-  victorops_api_url?: string;
-  pagerduty_url?: string;
-  opsgenie_api_key?: string;
-  opsgenie_api_url?: string;
-  wechat_api_url?: string;
-  wechat_api_secret?: string;
-  wechat_api_corp_id?: string;
-  http_config?: HttpConfig;
-  resolve_timeout?: string;
-};
+import { Global, AlertmanagerConfig } from "./types";
+import { httpConfigSchema } from "./common";
+import { routeSchema } from "./route";
+import { receiverSchema } from "./receiver";
+import { inhibitRuleSchema } from "./inhibitRule";
 
 const globalSchema: yup.SchemaOf<Global> = yup
   .object({
@@ -107,14 +86,6 @@ const globalSchema: yup.SchemaOf<Global> = yup
     })
   })
   .noUnknown();
-
-type AlertmanagerConfig = {
-  global?: Global;
-  templates?: string[];
-  route: Route;
-  receivers: Receiver[];
-  inhibitRules?: InhibitRule[];
-};
 
 export const alertManagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
   .object({

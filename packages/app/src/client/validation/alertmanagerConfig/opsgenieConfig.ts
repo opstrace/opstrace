@@ -16,16 +16,10 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema, HttpConfig } from "./common";
+import { OpsgenieResponderConfig, OpsgenieConfig } from "./types";
+import { httpConfigSchema } from "./common";
 
-type ResponderConfig = {
-  id?: string;
-  name?: string;
-  username?: string;
-  type: "team" | "user" | "escalation" | "schedule";
-};
-
-const responderConfig: yup.SchemaOf<ResponderConfig> = yup
+const opsgenieResponderConfig: yup.SchemaOf<OpsgenieResponderConfig> = yup
   .object({
     id: yup.string(),
     name: yup.string(),
@@ -39,21 +33,6 @@ const responderConfig: yup.SchemaOf<ResponderConfig> = yup
     comment: "Exactly one of id, name and username should be defined."
   })
   .noUnknown();
-
-export type OpsgenieConfig = {
-  send_resolved?: boolean;
-  api_key?: string;
-  api_url?: string;
-  message?: string;
-  description?: string;
-  source?: string;
-  details?: Record<string, string>;
-  responders: ResponderConfig[];
-  tags?: string;
-  note?: string;
-  priority?: string;
-  http_config?: HttpConfig;
-};
 
 export const opsgenieConfigSchema: yup.SchemaOf<OpsgenieConfig> = yup
   .object({
@@ -89,7 +68,7 @@ export const opsgenieConfigSchema: yup.SchemaOf<OpsgenieConfig> = yup
       .notRequired(),
     responders: yup
       .array()
-      .of(responderConfig)
+      .of(opsgenieResponderConfig)
       .meta({
         comment: "List of responders responsible for notifications."
       })

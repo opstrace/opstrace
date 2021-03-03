@@ -16,19 +16,8 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema, HttpConfig } from "./common";
-
-export type PushoverConfig = {
-  send_resolved?: boolean;
-  user_key: string;
-  title?: string;
-  message?: string;
-  url?: string;
-  priority?: string;
-  retry?: string;
-  expire?: string;
-  http_config?: HttpConfig;
-};
+import { PushoverConfig } from "./types";
+import { httpConfigSchema } from "./common";
 
 export const pushoverConfigSchema: yup.SchemaOf<PushoverConfig> = yup
   .object({

@@ -16,15 +16,8 @@
 
 import * as yup from "yup";
 
+import { InhibitRule } from "./types";
 import { labelNameSchema } from "./common";
-
-export type InhibitRule = {
-  target_match?: Record<string, string>;
-  target_match_re?: Record<string, string>;
-  source_match?: Record<string, string>;
-  source_match_re?: Record<string, string>;
-  equal?: string[];
-};
 
 export const inhibitRuleSchema: yup.SchemaOf<InhibitRule> = yup
   .object({

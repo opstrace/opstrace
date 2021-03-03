@@ -16,24 +16,8 @@
 
 import * as yup from "yup";
 
-import { tlsConfigSchema, TlsConfig } from "./common";
-
-export type EmailConfig = {
-  send_resolved?: boolean;
-  to: string;
-  from?: string;
-  smarthost?: string;
-  hello?: string;
-  auth_username?: string;
-  auth_password?: string;
-  auth_secret?: string;
-  auth_identity?: string;
-  require_tls?: boolean;
-  tls_config?: TlsConfig;
-  html?: string;
-  text?: string;
-  headers?: Record<string, string>;
-};
+import { EmailConfig } from "./types";
+import { tlsConfigSchema } from "./common";
 
 export const emailConfigSchema: yup.SchemaOf<EmailConfig> = yup
   .object({

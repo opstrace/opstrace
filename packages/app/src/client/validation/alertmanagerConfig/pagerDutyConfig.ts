@@ -16,15 +16,14 @@
 
 import * as yup from "yup";
 
-import { httpConfigSchema, HttpConfig } from "./common";
+import {
+  PagerDutyImageConfig,
+  PagerDutyLinkConfig,
+  PagerDutyConfig
+} from "./types";
+import { httpConfigSchema } from "./common";
 
-type ImageConfig = {
-  href?: string;
-  source?: string;
-  alt?: string;
-};
-
-const imageConfigSchema: yup.SchemaOf<ImageConfig> = yup
+const pagerDutyImageConfigSchema: yup.SchemaOf<PagerDutyImageConfig> = yup
   .object({
     href: yup.string(),
     source: yup.string(),
@@ -32,32 +31,12 @@ const imageConfigSchema: yup.SchemaOf<ImageConfig> = yup
   })
   .noUnknown();
 
-type LinkConfig = {
-  href?: string;
-  text?: string;
-};
-
-const linkConfigSchema: yup.SchemaOf<LinkConfig> = yup
+const pagerDutyLinkConfigSchema: yup.SchemaOf<PagerDutyLinkConfig> = yup
   .object({
     href: yup.string(),
     text: yup.string()
   })
   .noUnknown();
-
-export type PagerDutyConfig = {
-  send_resolved?: boolean;
-  routing_key: string;
-  service_key: string;
-  url?: string;
-  client?: string;
-  client_url?: string;
-  description?: string;
-  severity?: string;
-  details?: Record<string, string>;
-  images?: ImageConfig[];
-  links?: LinkConfig[];
-  http_config?: HttpConfig;
-};
 
 export const pagerDutyConfigSchema: yup.SchemaOf<PagerDutyConfig> = yup
   .object({
@@ -113,12 +92,12 @@ export const pagerDutyConfigSchema: yup.SchemaOf<PagerDutyConfig> = yup
       .notRequired(),
     images: yup
       .array()
-      .of(imageConfigSchema)
+      .of(pagerDutyImageConfigSchema)
       .meta({ comment: "Images to attach to the incident." })
       .notRequired(),
     links: yup
       .array()
-      .of(linkConfigSchema)
+      .of(pagerDutyLinkConfigSchema)
       .meta({ comment: "Links to attach to the incident." })
       .notRequired(),
     http_config: httpConfigSchema
