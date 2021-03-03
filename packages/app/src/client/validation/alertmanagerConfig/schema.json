@@ -25,22 +25,23 @@
       },
       "type": "object"
     },
+    "basic_auth": {
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "password_file": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "http_config": {
       "properties": {
-        "basic_auth": {
-          "properties": {
-            "password": {
-              "type": "string"
-            },
-            "password_file": {
-              "type": "string"
-            },
-            "username": {
-              "type": "string"
-            }
-          },
-          "type": "object"
-        },
+        "basic_auth": { "$ref": "#/definitions/basic_auth" },
         "bearer_token": {
           "type": "string"
         },
@@ -51,6 +52,43 @@
           "type": "string"
         },
         "tls_config": { "$ref": "#/definitions/tls_config" }
+      },
+      "type": "object"
+    },
+    "route": {
+      "properties": {
+        "continue": {
+          "type": "boolean"
+        },
+        "group_by": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "group_interval": {
+          "type": "string"
+        },
+        "group_wait": {
+          "type": "string"
+        },
+        "match": {
+          "$ref": "#/definitions/Record<string,string>"
+        },
+        "match_re": {
+          "$ref": "#/definitions/Record<string,string>"
+        },
+        "receiver": {
+          "type": "string"
+        },
+        "repeat_interval": {
+          "type": "string"
+        },
+        "routes": {
+          "items": {
+            "properties": { "$ref": "#/definitions/route" }
+          }
+        }
       },
       "type": "object"
     }
@@ -577,38 +615,7 @@
       },
       "type": "array"
     },
-    "route": {
-      "properties": {
-        "continue": {
-          "type": "boolean"
-        },
-        "group_by": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "group_interval": {
-          "type": "string"
-        },
-        "group_wait": {
-          "type": "string"
-        },
-        "match": {
-          "$ref": "#/definitions/Record<string,string>"
-        },
-        "match_re": {
-          "$ref": "#/definitions/Record<string,string>"
-        },
-        "receiver": {
-          "type": "string"
-        },
-        "repeat_interval": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
+    "route": { "$ref": "#/definitions/route" },
     "templates": {
       "items": {
         "type": "string"
