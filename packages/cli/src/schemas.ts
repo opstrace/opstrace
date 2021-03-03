@@ -123,14 +123,10 @@ export const renderedClusterConfigSchema = clusterConfigFileSchema.concat(
         .mixed<"gcp" | "aws">()
         .oneOf(["aws", "gcp"])
         .required(),
-      // can be empty when `disable_data_api_authentication` is true
-      // allow empty string, but not undefined:
-      // https://stackoverflow.com/a/63944333/145400
-      //data_api_authn_pubkey_pem: yup.string().typeError().strict(true)
-      tenant_api_authenticator_pubkey_set_json: yup
-        .string()
-        .typeError()
-        .strict(true)
+      // Can be empty when `disable_data_api_authentication` is true.
+      // Ideally, allow empty string, but not undefined. This is harder to
+      // to than it should be. https://stackoverflow.com/a/63944333/145400
+      tenant_api_authenticator_pubkey_set_json: yup.string()
     })
     .noUnknown()
     .defined()
