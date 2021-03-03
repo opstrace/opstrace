@@ -103,7 +103,7 @@ export const alertManagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
       .meta({ comment: "The root node of the routing tree." }),
     // @ts-ignore
     receivers: yup.array().of(receiverSchema).defined(),
-    inhibitRules: yup.array().of(inhibitRuleSchema).notRequired()
+    inhibit_rules: yup.array().of(inhibitRuleSchema).notRequired()
   })
   .meta({
     url: "https://www.prometheus.io/docs/alerting/latest/configuration/"

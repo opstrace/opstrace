@@ -155,7 +155,7 @@
       },
       "type": "object"
     },
-    "inhibitRules": {
+    "inhibit_rules": {
       "items": {
         "properties": {
           "equal": {
