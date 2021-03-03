@@ -53,26 +53,26 @@ and exit the process with a non-zero exit code.
 
 */
 func ReadKeySetJSONFromEnvOrCrash() {
-	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEYS")
+	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET")
 
 	if !present {
-		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEYS must be set. Exit.")
+		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET must be set. Exit.")
 		os.Exit(1)
 	}
 
 	if data == "" {
-		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEYS must not be empty. Exit.")
+		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET must not be empty. Exit.")
 		os.Exit(1)
 	}
 
-	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEYS value: %s", data)
+	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET value: %s", data)
 
 	// Declared an empty interface
 	var keys map[string]string
 	// Unmarshal or Decode the JSON to the interface.
 	jerr := json.Unmarshal([]byte(data), &keys)
 	if jerr != nil {
-		log.Errorf("error while JSON-parsing API_AUTHTOKEN_VERIFICATION_PUBKEYS: %s", jerr)
+		log.Errorf("error while JSON-parsing API_AUTHTOKEN_VERIFICATION_PUBKEY_SET: %s", jerr)
 		os.Exit(1)
 	}
 

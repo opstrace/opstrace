@@ -30,7 +30,7 @@ var keysetEnvValTwoPubkeys = `
 }`
 
 func TestKeysetFromEnv_TwoKeys(t *testing.T) {
-	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEYS", keysetEnvValTwoPubkeys)
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", keysetEnvValTwoPubkeys)
 
 	log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
 	log.Infof("fallback key:\n%v", authtokenVerificationPubKeyFallback)
