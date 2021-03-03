@@ -41,7 +41,7 @@ import * as util from "./util";
 import * as schemas from "./schemas";
 import { BUILD_INFO } from "@opstrace/buildinfo";
 
-type PubkeyPemType = string;
+type KeysetPemType = string;
 type TenantApiTokensType = Dict<string>;
 
 export async function create(): Promise<void> {
@@ -56,7 +56,7 @@ export async function create(): Promise<void> {
 
   // `tenantApiTokens`: sensitive data, watch out.
   const [
-    data_api_authn_pubkey_pem,
+    tenant_api_authenticator_pubkey_set_json,
     tenantApiTokens
   ] = genCryptoMaterialForAPIAuth(userClusterConfig);
 
@@ -79,7 +79,7 @@ export async function create(): Promise<void> {
       gcp: infraConfigGCP,
       cloud_provider: cli.CLIARGS.cloudProvider,
       cluster_name: cli.CLIARGS.clusterName,
-      data_api_authn_pubkey_pem: data_api_authn_pubkey_pem
+      tenant_api_authenticator_pubkey_set_json: tenant_api_authenticator_pubkey_set_json
     }
   };
 
@@ -153,9 +153,11 @@ function writeTenantApiTokenFiles(tenantApiTokens: Dict<string>) {
 
 function genCryptoMaterialForAPIAuth(
   ucc: schemas.ClusterConfigFileSchemaType
-): [PubkeyPemType, TenantApiTokensType] {
+): [KeysetPemType, TenantApiTokensType] {
   const tenantApiTokens: Dict<string> = {};
-  let data_api_authn_pubkey_pem = "";
+
+  // Empty string: when authenticator is deactivated.
+  let tenant_api_authenticator_pubkey_set_json = "";
 
   if (!ucc.data_api_authentication_disabled) {
     const tnames = [...ucc.tenants];
@@ -170,7 +172,20 @@ function genCryptoMaterialForAPIAuth(
       tenantApiTokens[tenantName] = t;
     }
 
-    data_api_authn_pubkey_pem = cryp.getPubkeyAsPem();
+    const data_api_authn_pubkey_pem = cryp.getPubkeyAsPem();
+
+    const keyId = cryp.keyIDfromPEM(data_api_authn_pubkey_pem);
+
+    // The key set is required to be a mapping between keyID (string) and
+    // PEM-encoded pubkey (string).
+    const keyset = {
+      [keyId]: data_api_authn_pubkey_pem
+    };
+
+    // The corresponding configuration parameter value is expected to be a
+    // string, namely the above `keyset` mapping in JSON-encoded form *without
+    // literal newline chars*.
+    tenant_api_authenticator_pubkey_set_json = JSON.stringify(keyset);
 
     log.info(
       "serialized public key for data API auth token (JWT) verification"
@@ -187,5 +202,5 @@ function genCryptoMaterialForAPIAuth(
   }
 
   // when api auth disabled: empty values: ["", {}]
-  return [data_api_authn_pubkey_pem, tenantApiTokens];
+  return [tenant_api_authenticator_pubkey_set_json, tenantApiTokens];
 }
