@@ -75,6 +75,7 @@ async function checkClusterStatus() {
     cli.CLIARGS.cloudProvider
   );
 
+  // this is here just to compile, right?
   const ccfg: NewRenderedClusterConfigType = {
     ...userClusterConfig,
     ...{
@@ -82,7 +83,7 @@ async function checkClusterStatus() {
       gcp: infraConfigGCP,
       cloud_provider: cli.CLIARGS.cloudProvider,
       cluster_name: cli.CLIARGS.clusterName,
-      data_api_authn_pubkey_pem: ""
+      tenant_api_authenticator_pubkey_set_json: ""
     }
   };
   setClusterConfig(ccfg);
