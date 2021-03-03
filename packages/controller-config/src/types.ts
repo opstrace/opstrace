@@ -31,7 +31,11 @@ export const controllerConfigSchema = yup
     dnsName: yup.string().required(),
     terminate: yup.bool().default(false),
     // https://stackoverflow.com/a/63944333/145400
-    data_api_authn_pubkey_pem: yup.string().typeError().strict(true),
+    // data_api_authn_pubkey_pem: yup.string().typeError().strict(true),
+    tenant_api_authenticator_pubkey_set_json: yup
+      .string()
+      .typeError()
+      .strict(true),
     disable_data_api_authentication: yup.bool().required(),
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),

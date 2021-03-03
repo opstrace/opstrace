@@ -56,7 +56,7 @@ export interface NewRenderedClusterConfigType {
   cluster_name: string;
   cloud_provider: "aws" | "gcp";
   cert_issuer: "letsencrypt-prod" | "letsencrypt-staging";
-  data_api_authn_pubkey_pem: string;
+  tenant_api_authenticator_pubkey_set_json: string;
   controller_image: string;
   tenants: string[];
   env_label: string;
