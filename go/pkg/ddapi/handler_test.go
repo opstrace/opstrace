@@ -347,6 +347,8 @@ func (suite *Suite) SetupSuite() {
 	ctx, cont, url, err := startCortex(suite.tmpdir)
 	if err != nil {
 		suite.T().Errorf("failed to launch cortex: %v", err)
+		// ideally we can return an error here and the test runner would
+		// not run the tests in this suite.
 		return
 	}
 	suite.cortexContainerContext, suite.cortexContainer, suite.cortexPushURL = ctx, cont, url

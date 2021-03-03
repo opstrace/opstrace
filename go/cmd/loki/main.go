@@ -23,6 +23,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/opstrace/opstrace/go/pkg/authenticator"
 	"github.com/opstrace/opstrace/go/pkg/middleware"
 )
 
@@ -62,8 +63,8 @@ func main() {
 	}
 
 	if !disableAPIAuthentication {
-		middleware.LegacyReadAuthTokenVerificationKeyFromEnv()
-		middleware.ReadKeySetJSONFromEnvOrCrash()
+		authenticator.LegacyReadAuthTokenVerificationKeyFromEnv()
+		authenticator.ReadKeySetJSONFromEnvOrCrash()
 	}
 
 	log.Infof("loki querier URL: %s", lokiqurl)
