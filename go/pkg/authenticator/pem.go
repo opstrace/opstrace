@@ -30,6 +30,7 @@ format (which is what OpenSSL uses when writing a public key to a "PEM file").
 Assume byte sequence `data` to be ascii-encoded PEM text.
 
 This is how the expected format looks like:
+
     $ openssl rsa -in keypair.pem -out public.pem -pubout
     $ cat public.pem
     -----BEGIN PUBLIC KEY-----
@@ -39,8 +40,10 @@ This is how the expected format looks like:
     kQIDAQAB
     -----END PUBLIC KEY-----
 
-See https://stackoverflow.com/a/29707204/145400
-for a lovely serialization format discussion.
+See https://stackoverflow.com/a/29707204/145400 for a lovely discussion about
+the X.509 SubjectPublicKeyInfo PEM serialization format, and how the difference
+between `BEGIN PUBLIC KEY` (supported here) and `BEGIN RSA PUBLIC KEY` (not
+supported here) matters a lot.
 */
 func deserializeRSAPubKeyFromPEMBytes(data []byte) (*rsa.PublicKey, error) {
 	pubPem, _ := pem.Decode(data)
