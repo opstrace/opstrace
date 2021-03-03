@@ -23,6 +23,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/opstrace/opstrace/go/pkg/authenticator"
 	"github.com/opstrace/opstrace/go/pkg/ddapi"
 	"github.com/opstrace/opstrace/go/pkg/middleware"
 )
@@ -71,8 +72,8 @@ func main() {
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
 
 	if !disableAPIAuthentication {
-		middleware.LegacyReadAuthTokenVerificationKeyFromEnv()
-		middleware.ReadKeySetJSONFromEnvOrCrash()
+		authenticator.LegacyReadAuthTokenVerificationKeyFromEnv()
+		authenticator.ReadKeySetJSONFromEnvOrCrash()
 	}
 
 	ddcp := ddapi.NewDDCortexProxy(tenantName, remoteWriteURL, disableAPIAuthentication)
