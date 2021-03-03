@@ -98,6 +98,10 @@ func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
 			return nil, fmt.Errorf(err)
 		}
 	} else {
+		log.Info("Key ID not set in auth token. Use fallback.")
+		if authtokenVerificationPubKeyFallback == nil {
+			log.Warning("Fallback key not specified!")
+		}
 		// Key ID not set in auth token. Use fallback.
 		return authtokenVerificationPubKeyFallback, nil
 	}
