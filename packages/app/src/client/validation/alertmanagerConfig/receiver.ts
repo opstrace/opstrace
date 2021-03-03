@@ -33,7 +33,7 @@ export const receiverSchema: yup.SchemaOf<Receiver> = yup
     email_configs: yup.array().of(emailConfigSchema).notRequired(),
     slack_configs: yup.array().of(slackConfigSchema).notRequired(),
     pager_duty_configs: yup.array().of(pagerDutyConfigSchema).notRequired(),
-    pushover_duty_configs: yup.array().of(pushoverConfigSchema).notRequired(),
+    pushover_configs: yup.array().of(pushoverConfigSchema).notRequired(),
     opsgenie_configs: yup.array().of(opsgenieConfigSchema).notRequired(),
     victorops_configs: yup.array().of(victoropsConfigSchema).notRequired(),
     webhook_configs: yup.array().of(webhookConfigSchema).notRequired(),

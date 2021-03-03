@@ -19,7 +19,7 @@ export type AlertmanagerConfig = {
   templates?: string[];
   route: Route;
   receivers: Receiver[];
-  inhibitRules?: InhibitRule[];
+  inhibit_rules?: InhibitRule[];
 };
 
 export type Global = {
@@ -82,7 +82,7 @@ export type Receiver = {
   email_configs?: EmailConfig[];
   slack_configs?: SlackConfig[];
   pager_duty_configs?: PagerDutyConfig[];
-  pushover_duty_configs?: PushoverConfig[];
+  pushover_configs?: PushoverConfig[];
   opsgenie_configs?: OpsgenieConfig[];
   victorops_configs?: VictorOps[];
   webhook_configs?: WebhookConfig[];
