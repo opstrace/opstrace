@@ -2419,10 +2419,10 @@
   resolved "https://registry.yarnpkg.com/@js-joda/core/-/core-3.2.0.tgz#3e61e21b7b2b8a6be746df1335cf91d70db2a273"
   integrity sha512-PMqgJ0sw5B7FKb2d5bWYIoxjri+QlW/Pys7+Rw82jSH0QN3rB05jZ/VrrsUdh1w4+i2kw9JOejXGq/KhDOX7Kg==
 
-"@kubernetes/client-node@0.13.0":
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/@kubernetes/client-node/-/client-node-0.13.0.tgz#fb8e5559dacbfbb12f51ae2f3bfea166a0a60aee"
-  integrity sha512-gtsf/YG/mdi8BhIFbNA9BXxgwi3X6zYP0TKwqYaMm3hAlv320Awx8SpS1+ZjBVb6P8vRbDgzwApNVH22nDiB+A==
+"@kubernetes/client-node@0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@kubernetes/client-node/-/client-node-0.14.0.tgz#a02806f3b6fdb68fb51d451ee8ff01faa446f557"
+  integrity sha512-/37JHuEUAQ5GQ4kLKBmCYvGgf5W1KZWKreKGWFYH8VvT2Hl/o0aJZasu2w0EHEfmE11JCn0X9arVmOTyVCYvww==
   dependencies:
     "@types/js-yaml" "^3.12.1"
     "@types/node" "^10.12.0"
