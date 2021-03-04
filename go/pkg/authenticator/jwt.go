@@ -27,11 +27,11 @@ func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) 
 	// exp and nbf, but also cryptographic signature verification). Expect a
 	// set of standard claims to be present (`sub`, `iss` and the likes), and
 	// custom claims to not be present.
-	tokenstruct, parseerr := jwt.ParseWithClaims(
+	tokenstruct, veriferr := jwt.ParseWithClaims(
 		authTokenUnverified, &jwt.StandardClaims{}, keyLookupCallback)
 
-	if parseerr != nil {
-		log.Infof("jwt verification failed: %s", parseerr)
+	if veriferr != nil {
+		log.Infof("jwt verification failed: %s", veriferr)
 		// See below: must exit here, because `tokenstruct.Valid` may not
 		// be accessible. See #282.
 		return "", fmt.Errorf("bad authentication token")
@@ -40,10 +40,10 @@ func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) 
 	// The `err` check above should be enough, but the documentation for
 	// `jwt-go` is kind of bad and most code examples check this `Valid`
 	// property, too. Update(JP): accessing `tokenstruct.Valid` can result in a
-	// segmentation fault here when `parseerr` above is not `nil`! That is
+	// segmentation fault here when `veriferr` above is not `nil`! That is
 	// why there are two checks and exit routes now.
 	if !(tokenstruct.Valid) {
-		log.Infof("jwt verification failed: %s", parseerr)
+		log.Infof("jwt verification failed: %s", veriferr)
 		return "", fmt.Errorf("bad authentication token")
 	}
 
@@ -71,38 +71,54 @@ func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) 
 	return tenantNameFromToken, nil
 }
 
+// func logAndReturnErr(errstr string) error {
+// 	log.Info(errstr)
+// 	return fmt.Errorf(errstr)
+// }
+
 /*
-First return value is *rsa.PublicKey, but need to specify as type interface{}
-for compat with jwt lib.
+First return value is of type `*rsa.PublicKey`. However, need to specify as
+type `interface{}` for compat with jwt lib.
 */
 func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
 	// Receives the parsed, but unverified JWT payload. Can inspect claims to
 	// decide which public key for verification to use. Use this to enforce the
 	// RS256 signing method for now.
 
-	if unveriftoken.Header["alg"] != "RS256" {
-		err := fmt.Sprintf("jwt verif: invalid alg: %s", unveriftoken.Header["alg"])
-		log.Info(err)
-		return nil, fmt.Errorf(err)
-	}
-
+	unverfClaimsStr := fmt.Sprintf("%v", unveriftoken.Claims)
 	kid, kidset := unveriftoken.Header["kid"]
 
+	if unveriftoken.Header["alg"] != "RS256" {
+		return nil, fmt.Errorf(
+			"jwt verif: invalid alg: %s (unverif. claims: %v)",
+			unveriftoken.Header["alg"],
+			unverfClaimsStr,
+		)
+	}
+
 	if kidset {
-		pkey, keyknown := authtokenVerificationPubKeys[fmt.Sprintf("%s", kid)]
+		kidStr := fmt.Sprintf("%s", kid)
+		pkey, keyknown := authtokenVerificationPubKeys[kidStr]
+
 		if keyknown {
+			// A public key with the key ID as referred to by this unverified
+			// authentication token is configured for the authenticator. That's
+			// the happy path. Use that key to cryptographically verify the
+			// token.
 			return pkey, nil
 		} else {
-			err := fmt.Sprintf("jwt verif: unknown kid: %s", kid)
-			log.Info(err)
-			return nil, fmt.Errorf(err)
+			// This could be an accident or a malicious token.
+			return nil, fmt.Errorf("jwt verif: unknown kid: %s", kidStr)
 		}
 	} else {
-		log.Info("Key ID not set in auth token. Use fallback.")
 		if authtokenVerificationPubKeyFallback == nil {
-			log.Warning("Fallback key not specified!")
+			return nil, fmt.Errorf(
+				"kid not set in auth token, fallback key not set, consider token invalid (unverif. claims: %v)",
+				unverfClaimsStr,
+			)
 		}
-		// Key ID not set in auth token. Use fallback.
+
+		log.Info("kid not set in auth token, use fallback key (is configured)")
 		return authtokenVerificationPubKeyFallback, nil
 	}
 }
