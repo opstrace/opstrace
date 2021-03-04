@@ -29,22 +29,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Use a single key for now. Further down the road there should be support
-// for multiple public keys, each identified by a key id.
-var authtokenVerificationPubKeyFallback *rsa.PublicKey
-
-// map for key set. Key of map: key ID (sha1 of PEM bytes?)
+// Map for key set (the set of public keys considered for token verification).
+// Map key: key ID corresponding to public key.
 var authtokenVerificationPubKeys map[string]*rsa.PublicKey
 
-// func getSomeKey() *rsa.PublicKey {
-// 	// Require map to be initialized, with at least one item. Get a 'random'
-// 	// key if there's more than one in the map: Golang map iteration order is
-// 	// 'random'. This is just a helper for tests so far.
-// 	for kid := range authtokenVerificationPubKeys {
-// 		return authtokenVerificationPubKeys[kid]
-// 	}
-// 	return nil
-// }
+var authtokenVerificationPubKeyFallback *rsa.PublicKey
 
 func keyIDfromPEM(pemstring string) string {
 	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
@@ -56,6 +45,11 @@ func keyIDfromPEM(pemstring string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+/*
+Read set of public keys from environment variables.
+If key deserialization fails, log an error
+and exit the process with a non-zero exit code.
+*/
 func ReadConfigFromEnvOrCrash() {
 	legacyReadAuthTokenVerificationKeyFromEnv()
 	readKeySetJSONFromEnvOrCrash()
@@ -63,9 +57,8 @@ func ReadConfigFromEnvOrCrash() {
 
 /*
 Read set of public keys from environment variable
-API_AUTHTOKEN_VERIFICATION_PUBKEYS. If key deserialization fails, log an error
+API_AUTHTOKEN_VERIFICATION_PUBKEY_SET. If key deserialization fails, log an error
 and exit the process with a non-zero exit code.
-
 */
 func readKeySetJSONFromEnvOrCrash() {
 	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET")
@@ -82,9 +75,7 @@ func readKeySetJSONFromEnvOrCrash() {
 
 	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET value: %s", data)
 
-	// Declared an empty interface
 	var keys map[string]string
-	// Unmarshal or Decode the JSON to the interface.
 	jerr := json.Unmarshal([]byte(data), &keys)
 	if jerr != nil {
 		log.Errorf("error while JSON-parsing API_AUTHTOKEN_VERIFICATION_PUBKEY_SET: %s", jerr)

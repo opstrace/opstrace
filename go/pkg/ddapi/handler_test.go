@@ -349,7 +349,10 @@ func (suite *Suite) SetupSuite() {
 	if err != nil {
 		suite.T().Errorf("failed to launch cortex: %v", err)
 		// ideally we can return an error here and the test runner would
-		// not run the tests in this suite.
+		// not run the tests in this suite. this happens e.g. when the docker
+		// daemon is not running, i.e. a common problem when executing these
+		// tests locally. should show a nice error message then and leave
+		// test suite early maybe.
 		return
 	}
 	suite.cortexContainerContext, suite.cortexContainer, suite.cortexPushURL = ctx, cont, url
