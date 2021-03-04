@@ -52,14 +52,16 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
     (state, action): UserState => {
       if (!state.currentUserIdLoaded) return state;
 
-      return R.mergeDeepLeft(state, {
+      const newState = R.mergeDeepRight(state, {
         users: {
-          [state.currentUserId]: { preferences: { dark_mode: action.payload } }
+          [state.currentUserId]: { preference: { dark_mode: action.payload } }
         },
         allUsers: {
-          [state.currentUserId]: { preferences: { dark_mode: action.payload } }
+          [state.currentUserId]: { preference: { dark_mode: action.payload } }
         }
       });
+
+      return newState;
     }
   )
   .handleAction(

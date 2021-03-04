@@ -52,7 +52,8 @@ test("useCurrentUser hook", () => {
     currentUserId: "",
     loading: true,
     currentUserIdLoaded: false,
-    users: []
+    allUsers: {},
+    users: {}
   };
 
   const dispatchMock = jest.fn();
@@ -90,7 +91,8 @@ test("getCurrentUser selector", () => {
       currentUserId: "test2",
       loading: true,
       currentUserIdLoaded: false,
-      users: [user1, user2]
+      allUsers: { test1: user1, test2: user2 },
+      users: { test1: user1, test2: user2 }
     }
   };
   const state = mainReducer(subState as CombinedState<any>, mockAction);
@@ -118,11 +120,12 @@ test("getUsers selector", () => {
       currentUserId: "test2",
       loading: true,
       currentUserIdLoaded: false,
-      users: [user1, user2]
+      allUsers: { test1: user1, test2: user2 },
+      users: { test1: user1, test2: user2 }
     }
   };
   const state = mainReducer(subState as CombinedState<any>, mockAction);
-  expect(getUsers(state)).toEqual([user1, user2]);
+  expect(getUsers(state)).toEqual({ test1: user1, test2: user2 });
 });
 
 test("getCurrentUserIdLoaded selector", () => {
@@ -131,15 +134,15 @@ test("getCurrentUserIdLoaded selector", () => {
       currentUserId: "test2",
       loading: true,
       currentUserIdLoaded: false,
-      users: [
-        {
+      users: {
+        test2: {
           email: "test2@test.com",
           username: "test2",
           role: "",
           id: "test2",
           created_at: "20202-11-12"
         }
-      ]
+      }
     }
   };
 
@@ -153,7 +156,8 @@ test("getUsersLoading selector", () => {
       currentUserId: "test2",
       loading: true,
       currentUserIdLoaded: false,
-      users: []
+      allUsers: {},
+      users: {}
     }
   };
 
@@ -167,7 +171,8 @@ test("getCurrentUserLoaded selector", () => {
       currentUserId: "test2",
       loading: true,
       currentUserIdLoaded: false,
-      users: []
+      allUsers: {},
+      users: {}
     }
   };
 
@@ -181,7 +186,8 @@ test("getCurrentUserId selector", () => {
       currentUserId: "test2",
       loading: true,
       currentUserIdLoaded: false,
-      users: []
+      allUsers: {},
+      users: {}
     }
   };
 
