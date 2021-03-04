@@ -62,16 +62,15 @@ func main() {
 		log.Fatalf("bad cortex distributor URL: %s", uerr)
 	}
 
-	if !disableAPIAuthentication {
-		authenticator.LegacyReadAuthTokenVerificationKeyFromEnv()
-		authenticator.ReadKeySetJSONFromEnvOrCrash()
-	}
-
 	log.Infof("cortex querier URL: %s", cortexqurl)
 	log.Infof("cortex distributor URL: %s", cortexdurl)
 	log.Infof("listen address: %s", listenAddress)
 	log.Infof("tenant name: %s", tenantName)
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
+
+	if !disableAPIAuthentication {
+		authenticator.ReadConfigFromEnvOrCrash()
+	}
 
 	// See: https://github.com/cortexproject/cortex/blob/master/docs/api/_index.md
 	cortexTenantHeader := "X-Scope-OrgID"

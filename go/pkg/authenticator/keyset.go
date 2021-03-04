@@ -36,6 +36,16 @@ var authtokenVerificationPubKeyFallback *rsa.PublicKey
 // map for key set. Key of map: key ID (sha1 of PEM bytes?)
 var authtokenVerificationPubKeys map[string]*rsa.PublicKey
 
+// func getSomeKey() *rsa.PublicKey {
+// 	// Require map to be initialized, with at least one item. Get a 'random'
+// 	// key if there's more than one in the map: Golang map iteration order is
+// 	// 'random'. This is just a helper for tests so far.
+// 	for kid := range authtokenVerificationPubKeys {
+// 		return authtokenVerificationPubKeys[kid]
+// 	}
+// 	return nil
+// }
+
 func keyIDfromPEM(pemstring string) string {
 	//nolint: gosec // a strong hash is not needed here, md5 would also do it.
 	h := sha1.New()
@@ -46,13 +56,18 @@ func keyIDfromPEM(pemstring string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+func ReadConfigFromEnvOrCrash() {
+	legacyReadAuthTokenVerificationKeyFromEnv()
+	readKeySetJSONFromEnvOrCrash()
+}
+
 /*
 Read set of public keys from environment variable
 API_AUTHTOKEN_VERIFICATION_PUBKEYS. If key deserialization fails, log an error
 and exit the process with a non-zero exit code.
 
 */
-func ReadKeySetJSONFromEnvOrCrash() {
+func readKeySetJSONFromEnvOrCrash() {
 	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET")
 
 	if !present {
@@ -106,7 +121,7 @@ func ReadKeySetJSONFromEnvOrCrash() {
 	}
 }
 
-func LegacyReadAuthTokenVerificationKeyFromEnv() {
+func legacyReadAuthTokenVerificationKeyFromEnv() {
 	// Upgrade consideration: support for one pubkey -> support for multiple
 	// pubkeys: legacy auth tokens don't encode a key id. Read legacy env var,
 	// do not fail if not set. If set: store key as fallback, for tokens that

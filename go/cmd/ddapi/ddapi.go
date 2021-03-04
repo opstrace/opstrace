@@ -72,8 +72,7 @@ func main() {
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
 
 	if !disableAPIAuthentication {
-		authenticator.LegacyReadAuthTokenVerificationKeyFromEnv()
-		authenticator.ReadKeySetJSONFromEnvOrCrash()
+		authenticator.ReadConfigFromEnvOrCrash()
 	}
 
 	ddcp := ddapi.NewDDCortexProxy(tenantName, remoteWriteURL, disableAPIAuthentication)
