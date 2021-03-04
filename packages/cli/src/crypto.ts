@@ -71,7 +71,7 @@ export function generateJWTforTenantAPI(
 
   const token: string = jwt.sign({}, privkeyPem, options);
   log.info(
-    "generated tenant API authentication token for tenant `%s` to be verified with key %s",
+    "generated tenant API authentication token for tenant `%s`, to be verified with key %s",
     tenantName,
     pubkeyId
   );
@@ -114,7 +114,7 @@ function generateRSAkeypair(): RSAKeypair {
   const modulusLengthBits = 2048;
 
   log.info(
-    "Generate RSA keypair. Modulus length (bits): %s",
+    "generate new RSA keypair. Modulus length (bits): %s",
     modulusLengthBits
   );
 

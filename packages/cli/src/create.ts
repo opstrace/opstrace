@@ -173,11 +173,16 @@ function genCryptoMaterialForAPIAuth(
     }
 
     const data_api_authn_pubkey_pem = cryp.getPubkeyAsPem();
-
     const keyId = cryp.keyIDfromPEM(data_api_authn_pubkey_pem);
+    log.info(
+      "serialized public key (id: %s) for tenant API token verification",
+      keyId
+    );
 
     // The key set is required to be a mapping between keyID (string) and
     // PEM-encoded pubkey (string).
+    // Note: upon _continutation_, this key should be added to the existing
+    // key set.
     const keyset = {
       [keyId]: data_api_authn_pubkey_pem
     };
@@ -187,12 +192,9 @@ function genCryptoMaterialForAPIAuth(
     // literal newline chars*.
     tenant_api_authenticator_pubkey_set_json = JSON.stringify(keyset);
 
-    log.info(
-      "serialized public key for data API auth token (JWT) verification"
-    );
-
     log.debug(
-      "public key in PEM-encoded X.509 SubjectPublicKeyInfo/OpenSSL format:\n%s",
+      "public key (id: %s) in PEM-encoded X.509 SubjectPublicKeyInfo/OpenSSL format:\n%s",
+      keyId,
       data_api_authn_pubkey_pem
     );
   } else {
