@@ -1,6 +1,6 @@
-mutation ReactivateUser($email: String!) {
-  update_user_by_pk(_set: { active: true }, pk_columns: { email: $email }) {
-    email
-    opaque_id
+mutation ReactivateUser($id: uuid!) {
+  update_user_by_pk(pk_columns: { id: $id }, _set: { active: true }) {
+    id
+    active
   }
 }

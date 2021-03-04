@@ -1,19 +1,17 @@
 mutation UpdateUser(
+  $id: uuid!
   $email: String!
-  $username: String!
   $avatar: String!
-  $time: timestamptz!
+  $username: String!
 ) {
   update_user_by_pk(
-    _set: {
-      username: $username
-      email: $email
-      avatar: $avatar
-      session_last_updated: $time
-    }
-    pk_columns: { email: $email }
+    pk_columns: { id: $id }
+    _set: { email: $email, avatar: $avatar, username: $username }
   ) {
+    id
     email
-    opaque_id
+    username
+    avatar
+    session_last_updated
   }
 }

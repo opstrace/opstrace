@@ -1,5 +1,6 @@
 query GetCurrentUser {
   user {
+    id
     email
     avatar
     username

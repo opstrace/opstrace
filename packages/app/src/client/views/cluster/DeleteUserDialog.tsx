@@ -20,24 +20,17 @@ import useUserList from "state/user/hooks/useUserList";
 import { deleteUser } from "state/user/actions";
 import { usePickerService, PickerOption } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
-import { User } from "state/user/types";
 import { useDispatch } from "react-redux";
-
-function userToPickerOption(user: User): PickerOption {
-  return {
-    text: user.email,
-    id: user.email
-  };
-}
+import { userToPickerOption } from "./UserPicker";
 
 const DeleteUserPicker = () => {
   const users = useUserList();
-  const [email, setSelectedEmail] = useState<string>("");
+  const [user, setSelectedUser] = useState<PickerOption | null>();
   const dispatch = useDispatch();
 
   const { activatePickerWithText } = usePickerService(
     {
-      title: `Delete ${email}?`,
+      title: `Delete ${user?.text}?`,
       activationPrefix: "delete user?:",
       disableFilter: true,
       disableInput: true,
@@ -52,12 +45,10 @@ const DeleteUserPicker = () => {
         }
       ],
       onSelected: option => {
-        if (option.id === "yes" && email) {
-          dispatch(deleteUser(email));
-        }
+        if (option.id === "yes" && user) dispatch(deleteUser(user.id));
       }
     },
-    [email]
+    [user]
   );
 
   usePickerService(
@@ -66,7 +57,7 @@ const DeleteUserPicker = () => {
       activationPrefix: "delete user:",
       options: users ? users.map(userToPickerOption) : [],
       onSelected: option => {
-        setSelectedEmail(option.id);
+        setSelectedUser(option);
         activatePickerWithText("delete user?: ");
       }
     },

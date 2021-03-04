@@ -2065,7 +2065,16 @@ type CreateUserVariables struct {
 
 type CreateUserResponse struct {
 	InsertUserPreferenceOne struct {
-		Email string `json:"Email"`
+		User struct {
+			ID                 string `json:"ID"`
+			Email              string `json:"Email"`
+			Username           string `json:"Username"`
+			Role               string `json:"Role"`
+			Active             string `json:"Active"`
+			Avatar             string `json:"Avatar"`
+			CreatedAt          string `json:"CreatedAt"`
+			SessionLastUpdated string `json:"SessionLastUpdated"`
+		} `json:"User"`
 	} `json:"InsertUserPreferenceOne"`
 }
 
@@ -2081,8 +2090,17 @@ func NewCreateUserRequest(url string, vars *CreateUserVariables) (*CreateUserReq
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
 		Query: `mutation CreateUser($email: String!, $username: String!, $avatar: String!) {
-  insert_user_preference_one(object: {dark_mode: true, user: {data: {avatar: $avatar, email: $email, username: $username}}}) {
-    email
+  insert_user_preference_one(object: {dark_mode: true, user: {data: {email: $email, username: $username, active: true, avatar: $avatar}}}) {
+    user {
+      id
+      email
+      username
+      role
+      active
+      avatar
+      created_at
+      session_last_updated
+    }
   }
 }`,
 	})
@@ -2122,35 +2140,35 @@ func (client *Client) CreateUser(vars *CreateUserVariables) (*CreateUserResponse
 }
 
 //
-// mutation DeleteUser($email: String!)
+// mutation DeactivateUser($id: uuid!)
 //
 
-type DeleteUserVariables struct {
-	Email String `json:"email"`
+type DeactivateUserVariables struct {
+	ID UUID `json:"id"`
 }
 
-type DeleteUserResponse struct {
+type DeactivateUserResponse struct {
 	UpdateUserByPk struct {
-		Email    string `json:"Email"`
-		OpaqueId string `json:"OpaqueId"`
+		ID     string `json:"ID"`
+		Active string `json:"Active"`
 	} `json:"UpdateUserByPk"`
 }
 
-type DeleteUserRequest struct {
+type DeactivateUserRequest struct {
 	*http.Request
 }
 
-func NewDeleteUserRequest(url string, vars *DeleteUserVariables) (*DeleteUserRequest, error) {
+func NewDeactivateUserRequest(url string, vars *DeactivateUserVariables) (*DeactivateUserRequest, error) {
 	variables, err := json.Marshal(vars)
 	if err != nil {
 		return nil, err
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation DeleteUser($email: String!) {
-  update_user_by_pk(_set: {active: false}, pk_columns: {email: $email}) {
-    email
-    opaque_id
+		Query: `mutation DeactivateUser($id: uuid!) {
+  update_user_by_pk(_set: {active: false}, pk_columns: {id: $id}) {
+    id
+    active
   }
 }`,
 	})
@@ -2162,31 +2180,115 @@ func NewDeleteUserRequest(url string, vars *DeleteUserVariables) (*DeleteUserReq
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return &DeleteUserRequest{req}, nil
+	return &DeactivateUserRequest{req}, nil
 }
 
-func (req *DeleteUserRequest) Execute(client *http.Client) (*DeleteUserResponse, error) {
+func (req *DeactivateUserRequest) Execute(client *http.Client) (*DeactivateUserResponse, error) {
 	resp, err := execute(client, req.Request)
 	if err != nil {
 		return nil, err
 	}
-	var result DeleteUserResponse
+	var result DeactivateUserResponse
 	if err := json.Unmarshal(resp.Data, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func DeleteUser(url string, client *http.Client, vars *DeleteUserVariables) (*DeleteUserResponse, error) {
-	req, err := NewDeleteUserRequest(url, vars)
+func DeactivateUser(url string, client *http.Client, vars *DeactivateUserVariables) (*DeactivateUserResponse, error) {
+	req, err := NewDeactivateUserRequest(url, vars)
 	if err != nil {
 		return nil, err
 	}
 	return req.Execute(client)
 }
 
-func (client *Client) DeleteUser(vars *DeleteUserVariables) (*DeleteUserResponse, error) {
-	return DeleteUser(client.Url, client.Client, vars)
+func (client *Client) DeactivateUser(vars *DeactivateUserVariables) (*DeactivateUserResponse, error) {
+	return DeactivateUser(client.Url, client.Client, vars)
+}
+
+//
+// query GetActiveUserForAuth($email: String!)
+//
+
+type GetActiveUserForAuthVariables struct {
+	Email String `json:"email"`
+}
+
+type GetActiveUserForAuthResponse struct {
+	User []struct {
+		ID       string `json:"ID"`
+		Email    string `json:"Email"`
+		Avatar   string `json:"Avatar"`
+		Username string `json:"Username"`
+		Active   string `json:"Active"`
+	} `json:"User"`
+	UserAggregate struct {
+		Aggregate struct {
+			Count string `json:"Count"`
+		} `json:"Aggregate"`
+	} `json:"UserAggregate"`
+}
+
+type GetActiveUserForAuthRequest struct {
+	*http.Request
+}
+
+func NewGetActiveUserForAuthRequest(url string, vars *GetActiveUserForAuthVariables) (*GetActiveUserForAuthRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetActiveUserForAuth($email: String!) {
+  user(where: {email: {_eq: $email}, active: {_eq: true}}, limit: 1, order_by: {created_at: asc}) {
+    id
+    email
+    avatar
+    username
+    active
+  }
+  active_user_count: user_aggregate(where: {active: {_eq: true}}) {
+    aggregate {
+      count
+    }
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetActiveUserForAuthRequest{req}, nil
+}
+
+func (req *GetActiveUserForAuthRequest) Execute(client *http.Client) (*GetActiveUserForAuthResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetActiveUserForAuthResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetActiveUserForAuth(url string, client *http.Client, vars *GetActiveUserForAuthVariables) (*GetActiveUserForAuthResponse, error) {
+	req, err := NewGetActiveUserForAuthRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetActiveUserForAuth(vars *GetActiveUserForAuthVariables) (*GetActiveUserForAuthResponse, error) {
+	return GetActiveUserForAuth(client.Url, client.Client, vars)
 }
 
 //
@@ -2195,6 +2297,7 @@ func (client *Client) DeleteUser(vars *DeleteUserVariables) (*DeleteUserResponse
 
 type GetCurrentUserResponse struct {
 	User []struct {
+		ID         string `json:"ID"`
 		Email      string `json:"Email"`
 		Avatar     string `json:"Avatar"`
 		Username   string `json:"Username"`
@@ -2213,6 +2316,7 @@ func NewGetCurrentUserRequest(url string) (*GetCurrentUserRequest, error) {
 	b, err := json.Marshal(&GraphQLOperation{
 		Query: `query GetCurrentUser {
   user {
+    id
     email
     avatar
     username
@@ -2259,25 +2363,24 @@ func (client *Client) GetCurrentUser() (*GetCurrentUserResponse, error) {
 }
 
 //
-// query GetUser($email: String!)
+// query GetUser($id: uuid!)
 //
 
 type GetUserVariables struct {
-	Email String `json:"email"`
+	ID UUID `json:"id"`
 }
 
 type GetUserResponse struct {
 	UserByPk struct {
-		Email    string `json:"Email"`
-		Avatar   string `json:"Avatar"`
-		Username string `json:"Username"`
-		Active   string `json:"Active"`
+		ID         string `json:"ID"`
+		Email      string `json:"Email"`
+		Avatar     string `json:"Avatar"`
+		Username   string `json:"Username"`
+		Active     string `json:"Active"`
+		Preference struct {
+			DarkMode string `json:"DarkMode"`
+		} `json:"Preference"`
 	} `json:"UserByPk"`
-	UserAggregate struct {
-		Aggregate struct {
-			Count string `json:"Count"`
-		} `json:"Aggregate"`
-	} `json:"UserAggregate"`
 }
 
 type GetUserRequest struct {
@@ -2291,16 +2394,15 @@ func NewGetUserRequest(url string, vars *GetUserVariables) (*GetUserRequest, err
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `query GetUser($email: String!) {
-  user_by_pk(email: $email) {
+		Query: `query GetUser($id: uuid!) {
+  user_by_pk(id: $id) {
+    id
     email
     avatar
     username
     active
-  }
-  user_aggregate(where: {active: {_eq: true}}) {
-    aggregate {
-      count
+    preference {
+      dark_mode
     }
   }
 }`,
@@ -2341,17 +2443,17 @@ func (client *Client) GetUser(vars *GetUserVariables) (*GetUserResponse, error) 
 }
 
 //
-// mutation ReactivateUser($email: String!)
+// mutation ReactivateUser($id: uuid!)
 //
 
 type ReactivateUserVariables struct {
-	Email String `json:"email"`
+	ID UUID `json:"id"`
 }
 
 type ReactivateUserResponse struct {
 	UpdateUserByPk struct {
-		Email    string `json:"Email"`
-		OpaqueId string `json:"OpaqueId"`
+		ID     string `json:"ID"`
+		Active string `json:"Active"`
 	} `json:"UpdateUserByPk"`
 }
 
@@ -2366,10 +2468,10 @@ func NewReactivateUserRequest(url string, vars *ReactivateUserVariables) (*React
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation ReactivateUser($email: String!) {
-  update_user_by_pk(_set: {active: true}, pk_columns: {email: $email}) {
-    email
-    opaque_id
+		Query: `mutation ReactivateUser($id: uuid!) {
+  update_user_by_pk(pk_columns: {id: $id}, _set: {active: true}) {
+    id
+    active
   }
 }`,
 	})
@@ -2409,18 +2511,20 @@ func (client *Client) ReactivateUser(vars *ReactivateUserVariables) (*Reactivate
 }
 
 //
-// mutation SetDarkMode($email: String!, $darkMode: Boolean!)
+// mutation SetDarkMode($user_id: uuid!, $dark_mode: Boolean = true)
 //
 
 type SetDarkModeVariables struct {
-	Email    String  `json:"email"`
-	DarkMode Boolean `json:"darkMode"`
+	UserId   UUID     `json:"user_id"`
+	DarkMode *Boolean `json:"dark_mode,omitempty"`
 }
 
 type SetDarkModeResponse struct {
-	UpdateUserPreferenceByPk struct {
-		DarkMode string `json:"DarkMode"`
-	} `json:"UpdateUserPreferenceByPk"`
+	UpdateUserPreference struct {
+		Returning []struct {
+			DarkMode string `json:"DarkMode"`
+		} `json:"Returning"`
+	} `json:"UpdateUserPreference"`
 }
 
 type SetDarkModeRequest struct {
@@ -2434,9 +2538,11 @@ func NewSetDarkModeRequest(url string, vars *SetDarkModeVariables) (*SetDarkMode
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation SetDarkMode($email: String!, $darkMode: Boolean!) {
-  update_user_preference_by_pk(pk_columns: {email: $email}, _set: {dark_mode: $darkMode}) {
-    dark_mode
+		Query: `mutation SetDarkMode($user_id: uuid!, $dark_mode: Boolean = true) {
+  update_user_preference(where: {user_id: {_eq: $user_id}}, _set: {dark_mode: $dark_mode}) {
+    returning {
+      dark_mode
+    }
   }
 }`,
 	})
@@ -2476,20 +2582,23 @@ func (client *Client) SetDarkMode(vars *SetDarkModeVariables) (*SetDarkModeRespo
 }
 
 //
-// mutation UpdateUser($email: String!, $username: String!, $avatar: String!, $time: timestamptz!)
+// mutation UpdateUser($id: uuid!, $email: String!, $avatar: String!, $username: String!)
 //
 
 type UpdateUserVariables struct {
-	Email    String      `json:"email"`
-	Username String      `json:"username"`
-	Avatar   String      `json:"avatar"`
-	Time     Timestamptz `json:"time"`
+	ID       UUID   `json:"id"`
+	Email    String `json:"email"`
+	Avatar   String `json:"avatar"`
+	Username String `json:"username"`
 }
 
 type UpdateUserResponse struct {
 	UpdateUserByPk struct {
-		Email    string `json:"Email"`
-		OpaqueId string `json:"OpaqueId"`
+		ID                 string `json:"ID"`
+		Email              string `json:"Email"`
+		Username           string `json:"Username"`
+		Avatar             string `json:"Avatar"`
+		SessionLastUpdated string `json:"SessionLastUpdated"`
 	} `json:"UpdateUserByPk"`
 }
 
@@ -2504,10 +2613,13 @@ func NewUpdateUserRequest(url string, vars *UpdateUserVariables) (*UpdateUserReq
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation UpdateUser($email: String!, $username: String!, $avatar: String!, $time: timestamptz!) {
-  update_user_by_pk(_set: {username: $username, email: $email, avatar: $avatar, session_last_updated: $time}, pk_columns: {email: $email}) {
+		Query: `mutation UpdateUser($id: uuid!, $email: String!, $avatar: String!, $username: String!) {
+  update_user_by_pk(pk_columns: {id: $id}, _set: {email: $email, avatar: $avatar, username: $username}) {
+    id
     email
-    opaque_id
+    username
+    avatar
+    session_last_updated
   }
 }`,
 	})
@@ -2544,6 +2656,75 @@ func UpdateUser(url string, client *http.Client, vars *UpdateUserVariables) (*Up
 
 func (client *Client) UpdateUser(vars *UpdateUserVariables) (*UpdateUserResponse, error) {
 	return UpdateUser(client.Url, client.Client, vars)
+}
+
+//
+// mutation UpdateUserSession($id: uuid!, $timestamp: timestamptz!)
+//
+
+type UpdateUserSessionVariables struct {
+	ID        UUID        `json:"id"`
+	Timestamp Timestamptz `json:"timestamp"`
+}
+
+type UpdateUserSessionResponse struct {
+	UpdateUserByPk struct {
+		ID                 string `json:"ID"`
+		SessionLastUpdated string `json:"SessionLastUpdated"`
+	} `json:"UpdateUserByPk"`
+}
+
+type UpdateUserSessionRequest struct {
+	*http.Request
+}
+
+func NewUpdateUserSessionRequest(url string, vars *UpdateUserSessionVariables) (*UpdateUserSessionRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpdateUserSession($id: uuid!, $timestamp: timestamptz!) {
+  update_user_by_pk(pk_columns: {id: $id}, _set: {session_last_updated: $timestamp}) {
+    id
+    session_last_updated
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpdateUserSessionRequest{req}, nil
+}
+
+func (req *UpdateUserSessionRequest) Execute(client *http.Client) (*UpdateUserSessionResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpdateUserSessionResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateUserSession(url string, client *http.Client, vars *UpdateUserSessionVariables) (*UpdateUserSessionResponse, error) {
+	req, err := NewUpdateUserSessionRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpdateUserSession(vars *UpdateUserSessionVariables) (*UpdateUserSessionResponse, error) {
+	return UpdateUserSession(client.Url, client.Client, vars)
 }
 
 //
@@ -2783,27 +2964,33 @@ const (
 type UserConstraint string
 
 const (
-	UserConstraintUserPkey UserConstraint = "user_pkey"
+	UserConstraintUserEmailKey UserConstraint = "user_email_key"
+	UserConstraintUserIdKey    UserConstraint = "user_id_key"
+	UserConstraintUserPkey     UserConstraint = "user_pkey"
 )
 
 type UserPreferenceConstraint string
 
 const (
-	UserPreferenceConstraintUserPreferencePkey UserPreferenceConstraint = "user_preference_pkey"
+	UserPreferenceConstraintUserPreferenceIdKey     UserPreferenceConstraint = "user_preference_id_key"
+	UserPreferenceConstraintUserPreferencePkey      UserPreferenceConstraint = "user_preference_pkey"
+	UserPreferenceConstraintUserPreferenceUserIdKey UserPreferenceConstraint = "user_preference_user_id_key"
 )
 
 type UserPreferenceSelectColumn string
 
 const (
 	UserPreferenceSelectColumnDarkMode UserPreferenceSelectColumn = "dark_mode"
-	UserPreferenceSelectColumnEmail    UserPreferenceSelectColumn = "email"
+	UserPreferenceSelectColumnID       UserPreferenceSelectColumn = "id"
+	UserPreferenceSelectColumnUserId   UserPreferenceSelectColumn = "user_id"
 )
 
 type UserPreferenceUpdateColumn string
 
 const (
 	UserPreferenceUpdateColumnDarkMode UserPreferenceUpdateColumn = "dark_mode"
-	UserPreferenceUpdateColumnEmail    UserPreferenceUpdateColumn = "email"
+	UserPreferenceUpdateColumnID       UserPreferenceUpdateColumn = "id"
+	UserPreferenceUpdateColumnUserId   UserPreferenceUpdateColumn = "user_id"
 )
 
 type UserSelectColumn string
@@ -2813,7 +3000,7 @@ const (
 	UserSelectColumnAvatar             UserSelectColumn = "avatar"
 	UserSelectColumnCreatedAt          UserSelectColumn = "created_at"
 	UserSelectColumnEmail              UserSelectColumn = "email"
-	UserSelectColumnOpaqueId           UserSelectColumn = "opaque_id"
+	UserSelectColumnID                 UserSelectColumn = "id"
 	UserSelectColumnRole               UserSelectColumn = "role"
 	UserSelectColumnSessionLastUpdated UserSelectColumn = "session_last_updated"
 	UserSelectColumnUsername           UserSelectColumn = "username"
@@ -2826,7 +3013,7 @@ const (
 	UserUpdateColumnAvatar             UserUpdateColumn = "avatar"
 	UserUpdateColumnCreatedAt          UserUpdateColumn = "created_at"
 	UserUpdateColumnEmail              UserUpdateColumn = "email"
-	UserUpdateColumnOpaqueId           UserUpdateColumn = "opaque_id"
+	UserUpdateColumnID                 UserUpdateColumn = "id"
 	UserUpdateColumnRole               UserUpdateColumn = "role"
 	UserUpdateColumnSessionLastUpdated UserUpdateColumn = "session_last_updated"
 	UserUpdateColumnUsername           UserUpdateColumn = "username"
@@ -3606,11 +3793,10 @@ type UserBoolExp struct {
 	Avatar             *StringComparisonExp      `json:"avatar,omitempty"`
 	CreatedAt          *TimestamptzComparisonExp `json:"created_at,omitempty"`
 	Email              *StringComparisonExp      `json:"email,omitempty"`
-	OpaqueId           *UuidComparisonExp        `json:"opaque_id,omitempty"`
+	ID                 *UuidComparisonExp        `json:"id,omitempty"`
 	Preference         *UserPreferenceBoolExp    `json:"preference,omitempty"`
 	Role               *StringComparisonExp      `json:"role,omitempty"`
 	SessionLastUpdated *TimestamptzComparisonExp `json:"session_last_updated,omitempty"`
-	UserPreferences    *UserPreferenceBoolExp    `json:"user_preferences,omitempty"`
 	Username           *StringComparisonExp      `json:"username,omitempty"`
 }
 
@@ -3619,11 +3805,10 @@ type UserInsertInput struct {
 	Avatar             *String                          `json:"avatar,omitempty"`
 	CreatedAt          *Timestamptz                     `json:"created_at,omitempty"`
 	Email              *String                          `json:"email,omitempty"`
-	OpaqueId           *UUID                            `json:"opaque_id,omitempty"`
+	ID                 *UUID                            `json:"id,omitempty"`
 	Preference         *UserPreferenceObjRelInsertInput `json:"preference,omitempty"`
 	Role               *String                          `json:"role,omitempty"`
 	SessionLastUpdated *Timestamptz                     `json:"session_last_updated,omitempty"`
-	UserPreferences    *UserPreferenceArrRelInsertInput `json:"user_preferences,omitempty"`
 	Username           *String                          `json:"username,omitempty"`
 }
 
@@ -3631,7 +3816,7 @@ type UserMaxOrderBy struct {
 	Avatar             *OrderBy `json:"avatar,omitempty"`
 	CreatedAt          *OrderBy `json:"created_at,omitempty"`
 	Email              *OrderBy `json:"email,omitempty"`
-	OpaqueId           *OrderBy `json:"opaque_id,omitempty"`
+	ID                 *OrderBy `json:"id,omitempty"`
 	Role               *OrderBy `json:"role,omitempty"`
 	SessionLastUpdated *OrderBy `json:"session_last_updated,omitempty"`
 	Username           *OrderBy `json:"username,omitempty"`
@@ -3641,7 +3826,7 @@ type UserMinOrderBy struct {
 	Avatar             *OrderBy `json:"avatar,omitempty"`
 	CreatedAt          *OrderBy `json:"created_at,omitempty"`
 	Email              *OrderBy `json:"email,omitempty"`
-	OpaqueId           *OrderBy `json:"opaque_id,omitempty"`
+	ID                 *OrderBy `json:"id,omitempty"`
 	Role               *OrderBy `json:"role,omitempty"`
 	SessionLastUpdated *OrderBy `json:"session_last_updated,omitempty"`
 	Username           *OrderBy `json:"username,omitempty"`
@@ -3659,20 +3844,19 @@ type UserOnConflict struct {
 }
 
 type UserOrderBy struct {
-	Active                   *OrderBy                        `json:"active,omitempty"`
-	Avatar                   *OrderBy                        `json:"avatar,omitempty"`
-	CreatedAt                *OrderBy                        `json:"created_at,omitempty"`
-	Email                    *OrderBy                        `json:"email,omitempty"`
-	OpaqueId                 *OrderBy                        `json:"opaque_id,omitempty"`
-	Preference               *UserPreferenceOrderBy          `json:"preference,omitempty"`
-	Role                     *OrderBy                        `json:"role,omitempty"`
-	SessionLastUpdated       *OrderBy                        `json:"session_last_updated,omitempty"`
-	UserPreferencesAggregate *UserPreferenceAggregateOrderBy `json:"user_preferences_aggregate,omitempty"`
-	Username                 *OrderBy                        `json:"username,omitempty"`
+	Active             *OrderBy               `json:"active,omitempty"`
+	Avatar             *OrderBy               `json:"avatar,omitempty"`
+	CreatedAt          *OrderBy               `json:"created_at,omitempty"`
+	Email              *OrderBy               `json:"email,omitempty"`
+	ID                 *OrderBy               `json:"id,omitempty"`
+	Preference         *UserPreferenceOrderBy `json:"preference,omitempty"`
+	Role               *OrderBy               `json:"role,omitempty"`
+	SessionLastUpdated *OrderBy               `json:"session_last_updated,omitempty"`
+	Username           *OrderBy               `json:"username,omitempty"`
 }
 
 type UserPkColumnsInput struct {
-	Email String `json:"email"`
+	ID UUID `json:"id"`
 }
 
 type UserPreferenceAggregateOrderBy struct {
@@ -3691,22 +3875,26 @@ type UserPreferenceBoolExp struct {
 	Not      *UserPreferenceBoolExp   `json:"_not,omitempty"`
 	Or       *[]UserPreferenceBoolExp `json:"_or,omitempty"`
 	DarkMode *BooleanComparisonExp    `json:"dark_mode,omitempty"`
-	Email    *StringComparisonExp     `json:"email,omitempty"`
+	ID       *UuidComparisonExp       `json:"id,omitempty"`
 	User     *UserBoolExp             `json:"user,omitempty"`
+	UserId   *UuidComparisonExp       `json:"user_id,omitempty"`
 }
 
 type UserPreferenceInsertInput struct {
 	DarkMode *Boolean               `json:"dark_mode,omitempty"`
-	Email    *String                `json:"email,omitempty"`
+	ID       *UUID                  `json:"id,omitempty"`
 	User     *UserObjRelInsertInput `json:"user,omitempty"`
+	UserId   *UUID                  `json:"user_id,omitempty"`
 }
 
 type UserPreferenceMaxOrderBy struct {
-	Email *OrderBy `json:"email,omitempty"`
+	ID     *OrderBy `json:"id,omitempty"`
+	UserId *OrderBy `json:"user_id,omitempty"`
 }
 
 type UserPreferenceMinOrderBy struct {
-	Email *OrderBy `json:"email,omitempty"`
+	ID     *OrderBy `json:"id,omitempty"`
+	UserId *OrderBy `json:"user_id,omitempty"`
 }
 
 type UserPreferenceObjRelInsertInput struct {
@@ -3722,17 +3910,19 @@ type UserPreferenceOnConflict struct {
 
 type UserPreferenceOrderBy struct {
 	DarkMode *OrderBy     `json:"dark_mode,omitempty"`
-	Email    *OrderBy     `json:"email,omitempty"`
+	ID       *OrderBy     `json:"id,omitempty"`
 	User     *UserOrderBy `json:"user,omitempty"`
+	UserId   *OrderBy     `json:"user_id,omitempty"`
 }
 
 type UserPreferencePkColumnsInput struct {
-	Email String `json:"email"`
+	ID UUID `json:"id"`
 }
 
 type UserPreferenceSetInput struct {
 	DarkMode *Boolean `json:"dark_mode,omitempty"`
-	Email    *String  `json:"email,omitempty"`
+	ID       *UUID    `json:"id,omitempty"`
+	UserId   *UUID    `json:"user_id,omitempty"`
 }
 
 type UserSetInput struct {
@@ -3740,7 +3930,7 @@ type UserSetInput struct {
 	Avatar             *String      `json:"avatar,omitempty"`
 	CreatedAt          *Timestamptz `json:"created_at,omitempty"`
 	Email              *String      `json:"email,omitempty"`
-	OpaqueId           *UUID        `json:"opaque_id,omitempty"`
+	ID                 *UUID        `json:"id,omitempty"`
 	Role               *String      `json:"role,omitempty"`
 	SessionLastUpdated *Timestamptz `json:"session_last_updated,omitempty"`
 	Username           *String      `json:"username,omitempty"`
@@ -4205,17 +4395,15 @@ type TenantMutationResponse struct {
 }
 
 type User struct {
-	Active                   Boolean                 `json:"active"`
-	Avatar                   *String                 `json:"avatar,omitempty"`
-	CreatedAt                Timestamptz             `json:"created_at"`
-	Email                    String                  `json:"email"`
-	OpaqueId                 UUID                    `json:"opaque_id"`
-	Preference               *UserPreference         `json:"preference,omitempty"`
-	Role                     String                  `json:"role"`
-	SessionLastUpdated       *Timestamptz            `json:"session_last_updated,omitempty"`
-	UserPreferences          *[]UserPreference       `json:"user_preferences,omitempty"`
-	UserPreferencesAggregate UserPreferenceAggregate `json:"user_preferences_aggregate"`
-	Username                 String                  `json:"username"`
+	Active             Boolean         `json:"active"`
+	Avatar             *String         `json:"avatar,omitempty"`
+	CreatedAt          Timestamptz     `json:"created_at"`
+	Email              String          `json:"email"`
+	ID                 UUID            `json:"id"`
+	Preference         *UserPreference `json:"preference,omitempty"`
+	Role               String          `json:"role"`
+	SessionLastUpdated *Timestamptz    `json:"session_last_updated,omitempty"`
+	Username           String          `json:"username"`
 }
 
 type UserAggregate struct {
@@ -4233,7 +4421,7 @@ type UserMaxFields struct {
 	Avatar             *String      `json:"avatar,omitempty"`
 	CreatedAt          *Timestamptz `json:"created_at,omitempty"`
 	Email              *String      `json:"email,omitempty"`
-	OpaqueId           *UUID        `json:"opaque_id,omitempty"`
+	ID                 *UUID        `json:"id,omitempty"`
 	Role               *String      `json:"role,omitempty"`
 	SessionLastUpdated *Timestamptz `json:"session_last_updated,omitempty"`
 	Username           *String      `json:"username,omitempty"`
@@ -4243,7 +4431,7 @@ type UserMinFields struct {
 	Avatar             *String      `json:"avatar,omitempty"`
 	CreatedAt          *Timestamptz `json:"created_at,omitempty"`
 	Email              *String      `json:"email,omitempty"`
-	OpaqueId           *UUID        `json:"opaque_id,omitempty"`
+	ID                 *UUID        `json:"id,omitempty"`
 	Role               *String      `json:"role,omitempty"`
 	SessionLastUpdated *Timestamptz `json:"session_last_updated,omitempty"`
 	Username           *String      `json:"username,omitempty"`
@@ -4256,8 +4444,9 @@ type UserMutationResponse struct {
 
 type UserPreference struct {
 	DarkMode Boolean `json:"dark_mode"`
-	Email    String  `json:"email"`
-	User     User    `json:"user"`
+	ID       UUID    `json:"id"`
+	User     *User   `json:"user,omitempty"`
+	UserId   *UUID   `json:"user_id,omitempty"`
 }
 
 type UserPreferenceAggregate struct {
@@ -4272,11 +4461,13 @@ type UserPreferenceAggregateFields struct {
 }
 
 type UserPreferenceMaxFields struct {
-	Email *String `json:"email,omitempty"`
+	ID     *UUID `json:"id,omitempty"`
+	UserId *UUID `json:"user_id,omitempty"`
 }
 
 type UserPreferenceMinFields struct {
-	Email *String `json:"email,omitempty"`
+	ID     *UUID `json:"id,omitempty"`
+	UserId *UUID `json:"user_id,omitempty"`
 }
 
 type UserPreferenceMutationResponse struct {

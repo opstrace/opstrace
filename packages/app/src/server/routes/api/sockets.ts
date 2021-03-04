@@ -69,7 +69,7 @@ class SocketClient {
   ) {
     const room = this.getFileRoom(action.payload.fileId);
     // inject email and broadcast to all others watching this file
-    action.payload.email = socket.request.session.email;
+    action.payload.email = socket.request.session.email; // TODO: NTW - should this be userId instead of email?
     this.emit(room, action, socket);
   }
 

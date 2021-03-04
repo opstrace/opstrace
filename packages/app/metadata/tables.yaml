@@ -364,45 +364,39 @@
           schema: public
           name: user_preference
         column_mapping:
-          email: email
-  array_relationships:
-  - name: user_preferences
-    using:
-      foreign_key_constraint_on:
-        column: email
-        table:
-          schema: public
-          name: user_preference
+          id: user_id
   insert_permissions:
   - role: user_admin
     permission:
       check: {}
       columns:
+      - active
       - avatar
       - email
+      - role
       - username
       backend_only: false
   select_permissions:
   - role: user
     permission:
       columns:
+      - id
       - avatar
       - created_at
       - email
-      - opaque_id
       - role
       - username
       filter:
-        email:
+        id:
           _eq: X-Hasura-User-Id
   - role: user_admin
     permission:
       columns:
+      - id
       - active
       - avatar
       - created_at
       - email
-      - opaque_id
       - role
       - session_last_updated
       - username
@@ -414,7 +408,7 @@
       - avatar
       - username
       filter:
-        email:
+        id:
           _eq: X-Hasura-User-Id
       check: null
   - role: user_admin
@@ -430,29 +424,28 @@
   object_relationships:
   - name: user
     using:
-      foreign_key_constraint_on: email
+      foreign_key_constraint_on: user_id
   insert_permissions:
   - role: user_admin
     permission:
       check: {}
       columns:
       - dark_mode
-      - email
+      - user_id
       backend_only: false
   select_permissions:
   - role: user
     permission:
       columns:
-      - email
       - dark_mode
       filter:
-        email:
+        user_id:
           _eq: X-Hasura-User-Id
   - role: user_admin
     permission:
       columns:
       - dark_mode
-      - email
+      - user_id
       filter: {}
   update_permissions:
   - role: user
@@ -460,7 +453,7 @@
       columns:
       - dark_mode
       filter:
-        email:
+        user_id:
           _eq: X-Hasura-User-Id
       check: null
   - role: user_admin
@@ -468,7 +461,7 @@
       columns:
       - dark_mode
       filter:
-        email:
+        user_id:
           _eq: X-Hasura-User-Id
       check: null
   delete_permissions:

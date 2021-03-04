@@ -41,9 +41,13 @@ const UserDetail = () => {
   const currentUser = useCurrentUser();
   const dispatch = useDispatch();
 
-  const selectedUser = useMemo(
-    () => users.find(u => u.opaque_id === params.id),
-    [params.id, users]
+  const selectedUser = useMemo(() => users.find(u => u.id === params.id), [
+    params.id,
+    users
+  ]);
+  const selectedTenant = useMemo(
+    () => tenants.find(t => t.name === params.tenant),
+    [params.tenant, tenants]
   );
 
   const { activatePickerWithText } = usePickerService(
@@ -63,12 +67,11 @@ const UserDetail = () => {
         }
       ],
       onSelected: option => {
-        if (option.id === "yes" && selectedUser?.email) {
-          dispatch(deleteUser(selectedUser?.email));
-        }
+        if (option.id === "yes" && selectedUser?.id)
+          dispatch(deleteUser(selectedUser?.id));
       }
     },
-    [selectedUser?.email]
+    [selectedUser?.id]
   );
 
   const cmdService = useCommandService();

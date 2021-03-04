@@ -1,0 +1,9 @@
+mutation UpdateUserSession($id: uuid!, $timestamp: timestamptz!) {
+  update_user_by_pk(
+    pk_columns: { id: $id }
+    _set: { session_last_updated: $timestamp }
+  ) {
+    id
+    session_last_updated
+  }
+}

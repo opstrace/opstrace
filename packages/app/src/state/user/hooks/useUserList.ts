@@ -17,8 +17,22 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, State } from "state/provider";
 import { subscribeToUserList, unsubscribeFromUserList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
+import { Users } from "state/user/types";
+import { values } from "ramda";
 
-export const getUserList = (state: State) => state.users.activeUsers;
+type GetUserListOptions = {
+  includeInactive: boolean;
+};
+
+export const getUserList = (
+  state: State,
+  options: GetUserListOptions | null = null
+) => {
+  return values(
+    options?.includeInactive ? state.users.allUsers : state.users.users
+  ) as Users;
+};
+
 /**
  * Subscribes to users and will update on
  * any changes. Automatically unsubscribeFromUserLists
