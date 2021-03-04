@@ -45,9 +45,13 @@ export function CortexResources(
   const { name, infrastructureName, target, region, gcp } = getControllerConfig(
     state
   );
-  const bucketName = getBucketName({
+  const dataBucketName = getBucketName({
     clusterName: infrastructureName,
     suffix: "cortex"
+  });
+  const configBucketName = getBucketName({
+    clusterName: infrastructureName,
+    suffix: "cortex-config"
   });
 
   // TODO centralize these URLs
@@ -243,7 +247,7 @@ export function CortexResources(
     http_prefix: "",
     api: {
       // Serve Alertmanager UI at this custom location, matching the path served by the config-api pod.
-      // SEE ALSO: go/cmd/config/main.go
+      // SEE ALSO: go/cmd/config/main.go, and alertmanager.external_url and ruler.alertmanager_url below
       alertmanager_http_prefix: "/api/v1/alertmanager"
     },
     auth_enabled: true,
@@ -359,10 +363,10 @@ export function CortexResources(
         }
       },
       gcs: {
-        bucket_name: bucketName
+        bucket_name: dataBucketName
       },
       s3: {
-        bucket_name: bucketName,
+        bucket_name: dataBucketName,
         endpoint: `s3.${region}.amazonaws.com`
       }
     },
@@ -393,30 +397,38 @@ export function CortexResources(
         migrations_dir: "/migrations"
       }
     },
+
     alertmanager: {
       enable_api: true,
-      storage: {
-        type: "configdb", // better to be explicit even if this is the default
-        configdb: {
-          configs_api_url: `http://configs.${namespace}.svc.cluster.local:80`
-        }
+      cluster: {
+        peers: `alertmanager.${namespace}.svc.cluster.local:9094`
       },
-      sharding_enabled: true,
+      // Disabled for now. As of March 4 2021 this isn't ready yet per cortex team.
+      sharding_enabled: false,
       sharding_ring: {
         kvstore: {
           store: "memberlist"
         }
       },
-      external_url: "/api/prom/alertmanager"
+      // Endpoint for talking to underlying per-tenant prometheus alertmanager instances.
+      // This is as opposed to the system-wide cortex APIs at the root.
+      // This is passed to prometheus and must align with api.alertmanager_http_prefix and ruler.alertmanager_url
+      external_url: "/api/v1/alertmanager"
     },
+    // Using the new thanos-based storage for alertmanager configs
+    alertmanager_storage: {
+      backend: storageBackend,
+      gcs: {
+        bucket_name: configBucketName
+      },
+      s3: {
+        bucket_name: configBucketName,
+        endpoint: `s3.${region}.amazonaws.com`
+      }
+    },
+
     ruler: {
       enable_api: true,
-      storage: {
-        type: "configdb", // better to be explicit even if this is the default
-        configdb: {
-          configs_api_url: `http://configs.${namespace}.svc.cluster.local:80`
-        }
-      },
       enable_sharding: true,
       sharding_strategy: "shuffle-sharding",
       ring: {
@@ -424,7 +436,20 @@ export function CortexResources(
           store: "memberlist"
         }
       },
-      alertmanager_url: `http://alertmanager.${namespace}.svc.cluster.local/api/prom/alertmanager/`
+      // Must align with api.alertmanager_http_prefix and alertmanager.external_url
+      // (This version needs to include the alertmanager hostname to send alerts to)
+      alertmanager_url: `http://alertmanager.${namespace}.svc.cluster.local/api/v1/alertmanager/`
+    },
+    // Using the new thanos-based storage for rule configs
+    ruler_storage: {
+      backend: storageBackend,
+      gcs: {
+        bucket_name: configBucketName
+      },
+      s3: {
+        bucket_name: configBucketName,
+        endpoint: `s3.${region}.amazonaws.com`
+      }
     }
   };
 
@@ -2125,6 +2150,8 @@ export function CortexResources(
                   ]
                 }
               ],
+              // For access to config storage on GCP
+              serviceAccountName: serviceAccountName,
               volumes: [
                 {
                   configMap: {
@@ -2240,7 +2267,10 @@ export function CortexResources(
                   imagePullPolicy: "IfNotPresent",
                   args: [
                     "-target=alertmanager",
-                    "-config.file=/etc/cortex/config.yaml"
+                    "-config.file=/etc/cortex/config.yaml",
+                    // Avoid running legacy endpoints at "/*", which breaks "/api/v1/alerts" for submitting alertmanager configs.
+                    // TODO remove this workaround after the cortex image has this fix: https://github.com/cortexproject/cortex/pull/3905
+                    "-http.prefix=/api/legacy"
                   ],
                   env: config.env,
                   ports: [
@@ -2261,6 +2291,8 @@ export function CortexResources(
                   ]
                 }
               ],
+              // For access to config storage on GCP
+              serviceAccountName: serviceAccountName,
               volumes: [
                 {
                   configMap: {

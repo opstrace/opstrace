@@ -88,6 +88,15 @@ export function* ensureGCPInfraExists(
     region: ccfg.gcp.region
   });
 
+  yield call(ensureBucketExists, {
+    bucketName: getBucketName({
+      clusterName: ccfg.cluster_name,
+      suffix: "cortex-config"
+    }),
+    retentionDays: null, // no TTL this bucket: configs should not expire
+    region: ccfg.gcp.region
+  });
+
   log.info(`Ensuring VPC exists`);
   yield call(ensureNetworkExists, ccfg.cluster_name);
 

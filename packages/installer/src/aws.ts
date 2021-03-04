@@ -136,9 +136,13 @@ export function* ensureAWSInfraExists(): Generator<
     clusterName: ccfg.cluster_name,
     suffix: "loki"
   });
-  const cortexBucketName = getBucketName({
+  const cortexDataBucketName = getBucketName({
     clusterName: ccfg.cluster_name,
     suffix: "cortex"
+  });
+  const cortexConfigBucketName = getBucketName({
+    clusterName: ccfg.cluster_name,
+    suffix: "cortex-config"
   });
 
   // create s3 buckets and vpc concurrently
@@ -158,8 +162,19 @@ export function* ensureAWSInfraExists(): Generator<
     yield fork([
       new S3BucketRes(
         ccfg.cluster_name,
-        cortexBucketName,
+        cortexDataBucketName,
         ccfg.metric_retention_days,
+        ccfg.tenants
+      ),
+      "setup"
+    ])
+  );
+  tasks.push(
+    yield fork([
+      new S3BucketRes(
+        ccfg.cluster_name,
+        cortexConfigBucketName,
+        0, // no TTL this bucket: configs should not expire
         ccfg.tenants
       ),
       "setup"
@@ -414,11 +429,11 @@ export function* ensureAWSInfraExists(): Generator<
     })
   });
 
-  // Cortex Bucket Policy
-  const CortexS3PolicyName = `${cortexBucketName}-s3`;
-  log.info(`Ensuring ${CortexS3PolicyName} policy exists`);
-  const cortexBucketPolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
-    PolicyName: CortexS3PolicyName,
+  // Cortex Data Bucket Policy
+  const CortexDataS3PolicyName = `${cortexDataBucketName}-s3`;
+  log.info(`Ensuring ${CortexDataS3PolicyName} policy exists`);
+  const cortexDataBucketPolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
+    PolicyName: CortexDataS3PolicyName,
     PolicyDocument: JSON.stringify({
       Version: "2012-10-17",
       Statement: [
@@ -426,13 +441,37 @@ export function* ensureAWSInfraExists(): Generator<
           Sid: "ListObjectsInBucket",
           Effect: "Allow",
           Action: ["s3:ListBucket"],
-          Resource: [`arn:aws:s3:::${cortexBucketName}`]
+          Resource: [`arn:aws:s3:::${cortexDataBucketName}`]
         },
         {
           Sid: "AllObjectActions",
           Effect: "Allow",
           Action: "s3:*Object",
-          Resource: [`arn:aws:s3:::${cortexBucketName}/*`]
+          Resource: [`arn:aws:s3:::${cortexDataBucketName}/*`]
+        }
+      ]
+    })
+  });
+
+  // Cortex Config Policy
+  const CortexConfigS3PolicyName = `${cortexConfigBucketName}-s3`;
+  log.info(`Ensuring ${CortexConfigS3PolicyName} policy exists`);
+  const cortexConfigBucketPolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
+    PolicyName: CortexConfigS3PolicyName,
+    PolicyDocument: JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Sid: "ListObjectsInBucket",
+          Effect: "Allow",
+          Action: ["s3:ListBucket"],
+          Resource: [`arn:aws:s3:::${cortexConfigBucketName}`]
+        },
+        {
+          Sid: "AllObjectActions",
+          Effect: "Allow",
+          Action: "s3:*Object",
+          Resource: [`arn:aws:s3:::${cortexConfigBucketName}/*`]
         }
       ]
     })
@@ -510,7 +549,8 @@ export function* ensureAWSInfraExists(): Generator<
     },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: route53Policy.Arn! },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: lokiBucketPolicy.Arn! },
-    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexBucketPolicy.Arn! },
+    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexDataBucketPolicy.Arn! },
+    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexConfigBucketPolicy.Arn! },
     // Attach route53 policy to cert manager role
     { RoleName: certManagerRole.RoleName, PolicyArn: route53Policy.Arn! }
   ];
