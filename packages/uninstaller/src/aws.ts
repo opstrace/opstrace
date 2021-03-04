@@ -71,9 +71,13 @@ export function* destroyAWSInfra(): Generator<
     clusterName: destroyConfig.clusterName,
     suffix: "loki"
   });
-  const cortexBucketName = getBucketName({
+  const cortexDataBucketName = getBucketName({
     clusterName: destroyConfig.clusterName,
     suffix: "cortex"
+  });
+  const cortexConfigBucketName = getBucketName({
+    clusterName: destroyConfig.clusterName,
+    suffix: "cortex-config"
   });
 
   const InstanceProfileName = `${destroyConfig.clusterName}-instance-profile`;
@@ -129,7 +133,7 @@ export function* destroyAWSInfra(): Generator<
   const taskGroup2 = [];
 
   taskGroup2.push(
-    yield fork(detachPoliciesFromRoles, cortexBucketName, lokiBucketName)
+    yield fork(detachPoliciesFromRoles, cortexDataBucketName, cortexConfigBucketName, lokiBucketName)
   );
 
   for (const rname of [
@@ -251,10 +255,11 @@ export function* destroyAWSInfra(): Generator<
   log.info(
     "S3 has been instructed to wipe the data buckets behind the scenes, " +
       "asynchronously. This process may take a day or longer. After " +
-      "completion, two empty S3 buckets will be left behind which you " +
-      "have to delete manually: %s, %s",
+      "completion, three empty S3 buckets will be left behind which you " +
+      "have to delete manually: %s, %s, %s",
     lokiBucketName,
-    cortexBucketName
+    cortexDataBucketName,
+    cortexConfigBucketName
   );
 }
 
@@ -305,14 +310,16 @@ function* startSecurityGroupDeletionTasks() {
 }
 
 function* detachPoliciesFromRoles(
-  cortexBucketName: string,
+  cortexDataBucketName: string,
+  cortexConfigBucketName: string,
   lokiBucketName: string
 ) {
   const EKSWorkerNodesRoleName = `${destroyConfig.clusterName}-eks-nodes`;
   const EKSClusterRoleName = `${destroyConfig.clusterName}-eks-controlplane`;
   const CertManagerRoleName = `${destroyConfig.clusterName}-cert-manager`;
   const EKSServiceLinkedRolePolicyName = `${destroyConfig.clusterName}-eks-linked-service`;
-  const CortexS3PolicyName = `${cortexBucketName}-s3`;
+  const CortexDataS3PolicyName = `${cortexDataBucketName}-s3`;
+  const CortexConfigS3PolicyName = `${cortexConfigBucketName}-s3`;
   const LokiS3PolicyName = `${lokiBucketName}-s3`;
   const Route53ExternalDNSPolicyName = `${destroyConfig.clusterName}-externaldns`;
 
@@ -359,7 +366,8 @@ function* detachPoliciesFromRoles(
   const pols2 = yield call(getIamPoliciesByNames, [
     Route53ExternalDNSPolicyName,
     LokiS3PolicyName,
-    CortexS3PolicyName
+    CortexDataS3PolicyName,
+    CortexConfigS3PolicyName
   ]);
   for (const pol of pols2) {
     eksWorkerNodeRolePolicies.push({
@@ -393,7 +401,8 @@ function* detachPoliciesFromRoles(
   // Delete policies concurrently.
   const policiesToDelete = [
     EKSServiceLinkedRolePolicyName,
-    CortexS3PolicyName,
+    CortexDataS3PolicyName,
+    CortexConfigS3PolicyName,
     LokiS3PolicyName,
     Route53ExternalDNSPolicyName
   ];
