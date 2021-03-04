@@ -85,10 +85,10 @@ func main() {
 	if disableAPIAuthentication {
 		log.Infof("authentication disabled, use '%s' header in requests to specify tenant", authenticator.TestTenantHeader)
 	} else {
-		// Requires API_AUTHTOKEN_VERIFICATION_PUBKEY
 		log.Info("authentication enabled")
-		authenticator.LegacyReadAuthTokenVerificationKeyFromEnv()
-		authenticator.ReadKeySetJSONFromEnvOrCrash()
+		if !disableAPIAuthentication {
+			authenticator.ReadConfigFromEnvOrCrash()
+		}
 	}
 
 	router := mux.NewRouter()
