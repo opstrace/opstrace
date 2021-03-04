@@ -350,7 +350,7 @@ class LiveClient {
     }
     this.isEditor = this.currentUser?.email === editor;
     if (this.isEditor) {
-      this.clearViewerSelections(this.currentUser.opaque_id);
+      this.clearViewerSelections(this.currentUser.id);
     }
     this.viewers = viewers.map((v, idx) => {
       const existingViewer = this.viewers.find(ev => ev.email === v);
@@ -438,7 +438,7 @@ class LiveClient {
     existingViewer.selection = selection;
     // Filter out ourselves. We don't want to highlight our own selections because our editor does that for us
     const viewerSelections = this.getSelections().filter(
-      s => s.userId !== this.currentUser?.opaque_id
+      s => s.userId !== this.currentUser?.id
     );
     this.cleanViewerSelections(viewerSelections);
 
@@ -592,7 +592,7 @@ class LiveClient {
 
       if (user && viewer.selection) {
         selections.push({
-          userId: user.opaque_id,
+          userId: user.id,
           color: viewer.color,
           name: user.username || user.email,
           selection: viewer.selection

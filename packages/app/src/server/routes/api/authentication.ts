@@ -22,6 +22,7 @@ import graphqlClient from "state/clients/graphqlClient";
 import env from "server/env";
 import { GeneralServerError, UnexpectedServerError } from "server/errors";
 import authRequired from "server/middleware/auth";
+// import { User } from "state/user/types";
 
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against
@@ -57,28 +58,38 @@ function createAuthHandler(): express.Router {
     }
     // check if user exists in db
     try {
-      const userMeta = await graphqlClient.GetUser({ email: req.body.email });
-      const firstUser = userMeta.data?.user_aggregate.aggregate?.count === 0;
-      const existingUser = userMeta.data?.user_by_pk?.active;
+      const response = await graphqlClient.GetActiveUserForAuth({
+        email: email
+      });
+      let activeUserCount = response.data?.active_user_count?.aggregate?.count;
+      let user = response.data?.user[0];
 
-      if (firstUser) {
-        // first user
-        await graphqlClient.CreateUser({ email, username, avatar });
-      } else if (!existingUser) {
+      if (activeUserCount === 0) {
+        // if there are no active users then the first in gets setup with a user record, all subsequent "users" from auth0 are blocked
+        const createResponse = await graphqlClient.CreateUser({
+          email,
+          username,
+          avatar
+        });
+
+        user = <any>createResponse.data?.insert_user_preference_one?.user;
+      } else if (!user) {
         return next(new GeneralServerError(401, "Unauthorized"));
+      } else {
+        await graphqlClient.UpdateUserSession({
+          id: user.id,
+          timestamp: new Date().toISOString()
+        });
       }
 
-      const userResp = await graphqlClient.UpdateUser({
-        email,
-        username,
-        avatar,
-        time: new Date().toISOString()
-      });
+      // block login attempt if we somehow got to here without a valid active user
+      if (!user || !user.active)
+        return next(new GeneralServerError(401, "Unauthorized"));
 
+      req.session.userId = user.id;
       req.session.email = email;
       req.session.username = username;
       req.session.avatar = avatar;
-      req.session.opaqueUserId = userResp.data?.update_user_by_pk?.opaque_id;
 
       log.info("updating session with: %s", req.body);
     } catch (err) {
@@ -91,7 +102,7 @@ function createAuthHandler(): express.Router {
   // Allow clients to request data about the current user
   auth.get("/session", authRequired, async (req, res) => {
     res.status(200).json({
-      uid: req.session.opaqueUserId
+      uid: req.session.userId
     });
   });
 
@@ -112,7 +123,7 @@ function createAuthHandler(): express.Router {
   });
 
   auth.get("/nginx-ingress/webhook", authRequired, (req, res) => {
-    res.setHeader("X-Auth-Request-User", req.session.email!);
+    res.setHeader("X-Auth-Request-User", req.session.userId!);
     res.setHeader("X-Auth-Request-Email", req.session.email!);
     res.sendStatus(200);
   });

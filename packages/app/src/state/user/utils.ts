@@ -14,16 +14,5 @@
  * limitations under the License.
  */
 
-import express from "express";
-
-// This middleware ensures the client is authenticated
-export default function authRequired(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) {
-  if (req.session && req.session.userId) {
-    return next();
-  }
-  res.status(401).send("not authorized");
-}
+import { User } from "./types";
+export const isActive = (user: User, _id: string): boolean => user.active;

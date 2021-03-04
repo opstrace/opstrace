@@ -17,6 +17,7 @@ import { SubscribeToUserListSubscription } from "state/clients/graphqlClient";
 
 export type User = SubscribeToUserListSubscription["user"][0];
 export type Users = User[];
+export type UserRecords = Record<string, User>;
 
 // use this same id to unsubscribe
 export type SubscriptionID = number;

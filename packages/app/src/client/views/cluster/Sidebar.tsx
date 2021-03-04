@@ -44,7 +44,7 @@ const ClusterSidebar = () => {
   const history = useHistory();
 
   useEffect(() => {
-    const idx = users.findIndex(u => u.opaque_id === params.id);
+    const idx = users.findIndex(u => u.id === params.id);
     if (idx > -1) {
       setSelectedUserIndex(idx);
       setSelectedTenantIndex(-1);
@@ -58,7 +58,7 @@ const ClusterSidebar = () => {
     // handle case where the id is invalid
     if (params.id && idx < 0 && users.length) {
       // navigate to first user in the list by default
-      history.push(`/cluster/users/${users[0].opaque_id}`);
+      history.push(`/cluster/users/${users[0].id}`);
     }
     // handle case where the tenant is invalid
     if (params.tenant && tidx < 0 && tenants.length) {
@@ -77,7 +77,7 @@ const ClusterSidebar = () => {
 
   const onUserSelect = useCallback(
     (selected: User) => {
-      history.push(`/cluster/users/${selected.opaque_id}`);
+      history.push(`/cluster/users/${selected.id}`);
     },
     [history]
   );

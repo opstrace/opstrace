@@ -20,8 +20,8 @@ const mockState = {
   currentUserId: "",
   loading: true,
   currentUserIdLoaded: false,
-  users: [],
-  activeUsers: []
+  allUsers: {},
+  users: {}
 };
 
 test("return mock state", () => {
@@ -38,50 +38,47 @@ test("handle setCurrentUser action", () => {
 });
 
 test("handle setDarkMode action", () => {
+  const user1 = {
+    email: "test1@test.com",
+    username: "test1",
+    role: "",
+    id: "test1",
+    created_at: "20202-11-11",
+    preference: { dark_mode: false },
+    active: false
+  };
   const testState = {
     currentUserId: "test1",
-    loading: true,
-    currentUserIdLoaded: false,
-    users: [
-      {
-        email: "test1@test.com",
-        username: "test1",
-        role: "",
-        opaque_id: "test1",
-        created_at: "20202-11-11",
-        preference: { dark_mode: false },
-        active: false
-      }
-    ],
-    activeUsers: []
+    loading: false,
+    currentUserIdLoaded: true,
+    users: { test1: user1 },
+    allUsers: { test1: user1 }
   };
   const reducer = UserReducer(testState, actions.setDarkMode(true));
-
-  expect(reducer.users[0].preference?.dark_mode).toBeTruthy();
+  expect(reducer.users.test1.preference?.dark_mode).toBeTruthy();
 });
 
 test("handle setUserList action", () => {
-  const usersList = [
-    {
-      email: "test1@test.com",
-      username: "test1",
-      role: "",
-      opaque_id: "test1",
-      created_at: "20202-11-11",
-      preference: { dark_mode: false },
-      active: true
-    },
-    {
-      email: "test2@test.com",
-      username: "test2",
-      role: "",
-      opaque_id: "test2",
-      created_at: "20202-11-12",
-      active: false
-    }
-  ];
+  const user1 = {
+    email: "test1@test.com",
+    username: "test1",
+    role: "",
+    id: "test1",
+    created_at: "20202-11-11",
+    preference: { dark_mode: false },
+    active: true
+  };
+  const user2 = {
+    email: "test2@test.com",
+    username: "test2",
+    role: "",
+    id: "test2",
+    created_at: "20202-11-12",
+    active: false
+  };
 
-  const reducer = UserReducer(mockState, actions.setUserList(usersList));
+  const reducer = UserReducer(mockState, actions.setUserList([user1, user2]));
 
-  expect(reducer.users).toEqual(usersList);
+  expect(reducer.allUsers).toEqual({ test1: user1, test2: user2 });
+  expect(reducer.users).toEqual({ test1: user1 });
 });

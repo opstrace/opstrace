@@ -2,9 +2,25 @@ mutation CreateUser($email: String!, $username: String!, $avatar: String!) {
   insert_user_preference_one(
     object: {
       dark_mode: true
-      user: { data: { avatar: $avatar, email: $email, username: $username } }
+      user: {
+        data: {
+          email: $email
+          username: $username
+          active: true
+          avatar: $avatar
+        }
+      }
     }
   ) {
-    email
+    user {
+      id
+      email
+      username
+      role
+      active
+      avatar
+      created_at
+      session_last_updated
+    }
   }
 }
