@@ -33,7 +33,7 @@ export const controllerConfigSchema = yup
     // https://stackoverflow.com/a/63944333/145400 `data_api_authn_pubkey_pem`
     // is optional, is a legacy controller config option, a noop right now
     // (future: set fallback key for authenticator).
-    data_api_authn_pubkey_pem: yup.string(),
+    data_api_authn_pubkey_pem: yup.string().optional(),
     tenant_api_authenticator_pubkey_set_json: yup
       .string()
       .typeError()
