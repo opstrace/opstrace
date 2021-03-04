@@ -32,6 +32,28 @@ WORKDIR /build/packages/controller
 
 ENV NODE_OPTIONS "--max-old-space-size=1536"
 RUN yarn --frozen-lockfile
+
+# NTW: [2021.03.04] Yarn seems to have stopped recursively building our packages for some currently
+# unknown reason, doing this manually in this precise order is required for `yarn tsc -b` to work when
+# building the Controller
+
+WORKDIR /build/lib/utils
+RUN yarn build
+WORKDIR /build/lib/kubernetes
+RUN yarn build
+WORKDIR /build/packages/tenants
+RUN yarn build
+WORKDIR /build/lib/gcp
+RUN yarn build
+WORKDIR /build/packages/config
+RUN yarn build
+WORKDIR /build/lib/aws
+RUN yarn build
+WORKDIR /build/packages/controller-config
+RUN yarn build
+
+WORKDIR /build/packages/controller
+
 # Call the build command because it contains more than just tsc -b
 RUN yarn build
 
