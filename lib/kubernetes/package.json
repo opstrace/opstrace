@@ -18,7 +18,7 @@
     "test": "node scripts/test.js --coverage"
   },
   "dependencies": {
-    "@kubernetes/client-node": "0.13.0",
+    "@kubernetes/client-node": "0.14.0",
     "@opstrace/utils": "^0.0.0",
     "glob": "^7.1.6",
     "js-yaml": "^3.13.1",
