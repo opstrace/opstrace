@@ -22,15 +22,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//nolint:lll // ignore long lines
-var keysetEnvValTwoPubkeys = `
-{
-	"0773cd2a09713115bca465a5b12171cab7aecfe5": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAytbw9TvWedKzygbivO8t\n/6ZNT6uZxPAhNGITamwdgppvyf+7aHECHHAYgiqdI2bBRe8m+0+cHUceOwziewr7\nEClawdC61qGLp6Lw17nf8yM08ALSyAR976NCgCDFZ9Zxl5AAlfiyez88MFyjzXWC\nLmHWH02f9rs52PkYteXdhHe2nMvPNVKgWm1UUhEf80lFrFB51p7EkPmT8TW2lZ9p\nq2SnXQLi555ffaxOMos5tLx/Dji79q1Js5RzYCqrv0l+Wnr4IkSqYKSLrFnC/1ek\nAgM0R6DMFYRHGNnwGhNELPhd4DQKRUdNhEu0SLy0qSPpoTDpwgvXpcmOjUIUmRZU\nrwIDAQAB\n-----END PUBLIC KEY-----",
-	"df99d68cf04b53c2697e4b537d6236a7a1ee79e9": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtJRlJmDqKfCO513D3pwV\n39VZh00MidESK0IQr6NQrG4DgL5H67VHuGZb4utdygQqqLxE6+cJfTi79Tlr7dmH\nWlgOxJ0swQLmjOgVAV4rowoYHj/L6dpFZzIseqwcqi5Rt4fyQm3FyMOCHX+mIRp6\ns1yV6/TfCe1OTz8ueS9WaSOROhtfv4Lh+DH2jwclT6PEEQtQjdBqxdlhFhptyWZf\nUldIEIwX1Cf8PrJpbUXNC7Vyr+iWC765hXwMq5w33jAS+s6E2QBs0UDUSp4Hgo1n\n53h7nGazgse5s6lCBddeclvOhEIWYRn4CXAbZsNntwOwveehou1l4RykMN34lNip\nDwIDAQAB\n-----END PUBLIC KEY-----"
-}`
-
 func TestKeysetFromEnv_TwoKeys(t *testing.T) {
-	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", keysetEnvValTwoPubkeys)
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", TestKeysetEnvValTwoPubkeys)
 
 	log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
 	log.Infof("fallback key:\n%v", authtokenVerificationPubKeyFallback)
@@ -40,7 +33,7 @@ func TestKeysetFromEnv_TwoKeys(t *testing.T) {
 		authtokenVerificationPubKeys,
 		"map authtokenVerificationPubKeys expected to be empty",
 	)
-	ReadKeySetJSONFromEnvOrCrash()
+	readKeySetJSONFromEnvOrCrash()
 
 	log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
 	log.Infof("fallback key:\n%v", authtokenVerificationPubKeyFallback)
