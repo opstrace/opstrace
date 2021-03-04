@@ -30,8 +30,10 @@ export const controllerConfigSchema = yup
     metricRetention: yup.number().required("must specify metric retention"),
     dnsName: yup.string().required(),
     terminate: yup.bool().default(false),
-    // https://stackoverflow.com/a/63944333/145400
-    // data_api_authn_pubkey_pem: yup.string().typeError().strict(true),
+    // https://stackoverflow.com/a/63944333/145400 `data_api_authn_pubkey_pem`
+    // is optional, is a legacy controller config option, a noop right now
+    // (future: set fallback key for authenticator).
+    data_api_authn_pubkey_pem: yup.string(),
     tenant_api_authenticator_pubkey_set_json: yup
       .string()
       .typeError()
