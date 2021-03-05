@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": 12,
-  "iteration": 1614269031097,
+  "iteration": 1614957522635,
   "links": [],
   "panels": [
     {
@@ -2229,14 +2229,17 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "system",
+          "value": "system"
         },
         "datasource": "metrics",
+        "definition": "",
+        "description": null,
         "error": null,
         "hide": 0,
+        "includeAll": false,
         "label": "Tenant",
-        "multi": true,
+        "multi": false,
         "name": "tenant",
         "options": [],
         "query": {
