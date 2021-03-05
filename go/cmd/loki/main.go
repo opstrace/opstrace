@@ -23,6 +23,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/opstrace/opstrace/go/pkg/authenticator"
 	"github.com/opstrace/opstrace/go/pkg/middleware"
 )
 
@@ -61,15 +62,15 @@ func main() {
 		log.Fatalf("bad loki distributor URL: %s", uerr)
 	}
 
-	if !disableAPIAuthentication {
-		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
-	}
-
 	log.Infof("loki querier URL: %s", lokiqurl)
 	log.Infof("loki distributor URL: %s", lokidurl)
 	log.Infof("listen address: %s", listenAddress)
 	log.Infof("tenant name: %s", tenantName)
 	log.Infof("API authentication enabled: %v", !disableAPIAuthentication)
+
+	if !disableAPIAuthentication {
+		authenticator.ReadConfigFromEnvOrCrash()
+	}
 
 	// See: https://github.com/grafana/loki/blob/master/docs/api.md#microservices-mode
 	lokiTenantHeader := "X-Scope-OrgID"

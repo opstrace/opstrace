@@ -71,8 +71,8 @@ export function LokiAPIResources(
   if (!controllerConfig.disable_data_api_authentication) {
     lokiApiProxyEnv = [
       {
-        name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
-        value: controllerConfig.data_api_authn_pubkey_pem
+        name: "API_AUTHTOKEN_VERIFICATION_PUBKEY_SET",
+        value: controllerConfig.tenant_api_authenticator_pubkey_set_json
       }
     ];
   } else {

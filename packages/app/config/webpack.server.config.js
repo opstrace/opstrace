@@ -133,7 +133,11 @@ module.exports = {
     "fsevents",
     "react",
     "react-dom",
-    "react-native"
+    "react-native",
+    {
+      "utf-8-validate": "commonjs utf-8-validate",
+      bufferutil: "commonjs bufferutil"
+    }
   ],
   resolve: {
     modules: ["node_modules", paths.appNodeModules, paths.appSrc],

@@ -45,7 +45,12 @@ export class S3BucketRes extends AWSResource<true> {
 
     this.bname = bucketName;
 
-    // Don't forget the system tenant
+    if (retentionPeriod === 0) {
+      // Retention period disabled, skip configuration of lifecycle rules
+      return;
+    }
+
+    // Don't forget the system tenant in the lifecycle rules
     const tnames = [...tenants];
     tnames.push("system");
 
@@ -118,6 +123,9 @@ export class S3BucketRes extends AWSResource<true> {
 
   private async lifecycleRulesAreApplied(): Promise<boolean> {
     try {
+      if (this.lifecycleRules.length === 0) {
+        return true;
+      }
       const resp = await awsPromErrFilter(
         s3Client()
           .getBucketLifecycleConfiguration({
@@ -178,17 +186,19 @@ export class S3BucketRes extends AWSResource<true> {
         throw e;
       }
     } finally {
-      // Apply lifecycle configuration rules to the bucket.
-      await awsPromErrFilter(
-        s3Client()
-          .putBucketLifecycleConfiguration({
-            Bucket: this.bname,
-            LifecycleConfiguration: {
-              Rules: this.lifecycleRules
-            }
-          })
-          .promise()
-      );
+      if (this.lifecycleRules.length !== 0) {
+        // Apply lifecycle configuration rules to the bucket.
+        await awsPromErrFilter(
+          s3Client()
+            .putBucketLifecycleConfiguration({
+              Bucket: this.bname,
+              LifecycleConfiguration: {
+                Rules: this.lifecycleRules
+              }
+            })
+            .promise()
+        );
+      }
     }
 
     return true;

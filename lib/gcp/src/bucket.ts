@@ -96,7 +96,7 @@ export function* ensureBucketExists({
   region
 }: {
   bucketName: string;
-  retentionDays: number;
+  retentionDays: number | null;
   region: string;
 }): Generator<CallEffect, unknown, unknown> {
   const storage = new gcs.Storage();
@@ -118,11 +118,13 @@ export function* ensureBucketExists({
         location: region,
         storage
       });
-      yield call(setBucketLifecycle, {
-        name: bucketName,
-        days: retentionDays,
-        storage
-      });
+      if (retentionDays !== null) {
+        yield call(setBucketLifecycle, {
+          name: bucketName,
+          days: retentionDays,
+          storage
+        });
+      }
     } catch (e) {
       if (!e.code || (e.code && e.code !== 409)) {
         throw e;

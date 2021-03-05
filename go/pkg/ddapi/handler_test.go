@@ -25,6 +25,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/opstrace/opstrace/go/pkg/authenticator"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -347,6 +348,11 @@ func (suite *Suite) SetupSuite() {
 	ctx, cont, url, err := startCortex(suite.tmpdir)
 	if err != nil {
 		suite.T().Errorf("failed to launch cortex: %v", err)
+		// ideally we can return an error here and the test runner would
+		// not run the tests in this suite. this happens e.g. when the docker
+		// daemon is not running, i.e. a common problem when executing these
+		// tests locally. should show a nice error message then and leave
+		// test suite early maybe.
 		return
 	}
 	suite.cortexContainerContext, suite.cortexContainer, suite.cortexPushURL = ctx, cont, url
@@ -415,7 +421,7 @@ func TestHandlerSeriesPostAuthenticator_noapikey(t *testing.T) {
 	)
 }
 
-func TestHandlerSeriesPostAuthenticator_badtoken(t *testing.T) {
+func TestHandlerSeriesPostAuthenticator_badtokenstructure(t *testing.T) {
 	// Instantiate proxy with enabled authenticator
 	disableAPIAuthentication := false
 	ddcp := NewDDCortexProxy(TenantName, "http://localhost", disableAPIAuthentication)
@@ -432,6 +438,70 @@ func TestHandlerSeriesPostAuthenticator_badtoken(t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, 401, resp.StatusCode)
 	// Confirm that a helpful error message is in the body.
+	assert.Equal(
+		t,
+		"bad authentication token",
+		getStrippedBody(resp),
+	)
+}
+
+// These are actually authenticator tests which happen to be conveniently
+// implemented in the ddapi test suite.
+func TestHandlerSeriesPostAuthenticator_badtokenNoKidNoFallback(t *testing.T) {
+	//nolint:lll,gosec // ignore long lines, and these are not interesting creds
+	badtoken := "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MTEzOTQ4MDksImV4cCI6MTkyNjk3MDgwOSwiYXVkIjoib3BzdHJhY2UtY2x1c3Rlci1qcGRldiIsImlzcyI6Im9wc3RyYWNlLWNsaSIsInN1YiI6InRlbmFudC1kZWZhdWx0In0.kJIZqPTELbDjGojgQMN_DO2cZ1eR8R0Gdd6rPagqsUvmS6BdrCpf68rH5v_2xp8jtNWE_RMYGHg7E2x-S23S1H6FUhP48pgTk9Dc37mZPncSMJtdhYhvq6StDKdGkUxswHwh-p8fraS0TwobH1Lg6LmaE4Eaaj9PLLjp96z1XbiUDyAH95CsPDheNu4BiNxm5Ho_YQ63R5I2U0tpxLAApFqF0qU1pIuTL5_Q5uSUBMWjqYhokO3qK54Q8wCzGRoKQMYn52Vrj88j0-KM13k0Grg8_Ro5zO8huL1dthRPnprtFHoYHKgyyZsTmHGAlelkAMeKNkLylOu924le8b2gug"
+
+	// Instantiate proxy with enabled authenticator
+	disableAPIAuthentication := false
+
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", authenticator.TestKeysetEnvValTwoPubkeys)
+
+	authenticator.ReadConfigFromEnvOrCrash()
+	// log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
+	// log.Infof("fallback key:\n%v", authtokenVerificationPubKeyFallback)
+
+	ddcp := NewDDCortexProxy(TenantName, "http://localhost", disableAPIAuthentication)
+
+	req := httptest.NewRequest(
+		"POST",
+		fmt.Sprintf("http://localhost/api/v1/series?api_key=%s", badtoken),
+		strings.NewReader("{}"),
+	)
+
+	w := httptest.NewRecorder()
+
+	ddcp.HandlerSeriesPost(w, req)
+	resp := w.Result()
+	assert.Equal(t, 401, resp.StatusCode)
+
+	// The error is represented in a very generic way in the response, for
+	// security reasons. In the log, expect
+	// "jwt verification failed: kid not set in auth token, fallback key not set"
+	assert.Equal(
+		t,
+		"bad authentication token",
+		getStrippedBody(resp),
+	)
+
+	// Now set fallback key, and re-initialize the authenticator's
+	// key config.
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY", authenticator.TestPubKey)
+	authenticator.ReadConfigFromEnvOrCrash()
+
+	// And repeat -- expect same outcome, but different error behind the
+	// scenes! A pubkey that does _not_ match the priv key that was used
+	// for signing the token.
+	w = httptest.NewRecorder()
+
+	ddcp.HandlerSeriesPost(w, req)
+	resp = w.Result()
+	assert.Equal(t, 401, resp.StatusCode)
+
+	// The error is represented in a very generic way in the response, for
+	// security reasons. In the log, expect
+	// time="2021-03-04T16:19:42+01:00" level=info msg="kid not set in auth token, use fallback key (is configured)"
+	// time="2021-03-04T16:19:42+01:00" level=info msg="jwt verification failed: crypto/rsa: verification error"
+	// time="2021-03-04T16:19:42+01:00" level=info msg="emit 401. Err: bad authentication token"
 	assert.Equal(
 		t,
 		"bad authentication token",

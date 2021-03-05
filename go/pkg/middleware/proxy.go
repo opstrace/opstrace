@@ -20,6 +20,8 @@ import (
 	"net/url"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/opstrace/opstrace/go/pkg/authenticator"
 )
 
 // TenantReverseProxy is a proxy that adds a specified tenant name as an HTTP request header.
@@ -119,7 +121,7 @@ func pathReplacementDirector(backendURL *url.URL, reqPathReplacement func(*url.U
 }
 
 func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Request) {
-	tenantName, ok := GetTenant(w, r, trp.tenantName, trp.disableAPIAuthentication)
+	tenantName, ok := authenticator.GetTenant(w, r, trp.tenantName, trp.disableAPIAuthentication)
 	if !ok {
 		// Error response has already been written. Terminate request handling.
 		return
@@ -141,22 +143,4 @@ func proxyErrorHandler(resp http.ResponseWriter, r *http.Request, proxyerr error
 	if werr != nil {
 		log.Errorf("writing response failed: %v", werr)
 	}
-}
-
-func exit401(resp http.ResponseWriter, errmsg string) bool {
-	// `errmsg` is written to response body and should therefore be short and
-	// not undermine security. Useful hints: yes (such as "authentication token
-	// missing" or "unexpected Authorization header format"). No security hints
-	// such as "signature verification failed".
-
-	// 401 is canonical for "not authenticated" although the corresponding
-	// name is 'Unauthorized'
-	resp.WriteHeader(http.StatusUnauthorized)
-	log.Infof("emit 401. Err: %s", errmsg)
-
-	_, werr := resp.Write([]byte(errmsg))
-	if werr != nil {
-		log.Errorf("writing response failed: %v", werr)
-	}
-	return false
 }

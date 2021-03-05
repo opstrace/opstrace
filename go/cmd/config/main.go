@@ -31,6 +31,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
+	"github.com/opstrace/opstrace/go/pkg/authenticator"
 	"github.com/opstrace/opstrace/go/pkg/config"
 	"github.com/opstrace/opstrace/go/pkg/graphql"
 	"github.com/opstrace/opstrace/go/pkg/middleware"
@@ -82,11 +83,12 @@ func main() {
 	exporterAccess = config.NewExporterAccess(graphqlURL, graphqlSecret)
 
 	if disableAPIAuthentication {
-		log.Infof("authentication disabled, use '%s' header in requests to specify tenant", middleware.TestTenantHeader)
+		log.Infof("authentication disabled, use '%s' header in requests to specify tenant", authenticator.TestTenantHeader)
 	} else {
-		// Requires API_AUTHTOKEN_VERIFICATION_PUBKEY
 		log.Info("authentication enabled")
-		middleware.ReadAuthTokenVerificationKeyFromEnvOrCrash()
+		if !disableAPIAuthentication {
+			authenticator.ReadConfigFromEnvOrCrash()
+		}
 	}
 
 	router := mux.NewRouter()
@@ -199,7 +201,7 @@ func setupConfigAPI(
 // The check is skipped if `disableAPIAuthentication` is true.
 func getTenantThenCall(f func(string, http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tenantName, ok := middleware.GetTenant(w, r, nil, disableAPIAuthentication)
+		tenantName, ok := authenticator.GetTenant(w, r, nil, disableAPIAuthentication)
 		if !ok {
 			return
 		}
