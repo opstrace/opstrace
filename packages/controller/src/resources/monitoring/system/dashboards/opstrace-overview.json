@@ -12,6 +12,7 @@
       }
     ]
   },
+  "allowUiUpdates": true,
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
