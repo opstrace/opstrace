@@ -613,7 +613,13 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "$$hashKey": "object:225",
+          "alias": "/.*Total.*/",
+          "yaxis": 2
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -629,13 +635,20 @@
           "interval": "",
           "legendFormat": "bytes per entry",
           "refId": "B"
+        },
+        {
+          "expr": "sum(rate(loki_distributor_bytes_received_total[5m]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Total bytes per second",
+          "refId": "C"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS]  Rate of log entries vs. bytes per entry (5m mean) ALL tenants",
+      "title": "[LOGS]  Rate of log entries vs. bytes per entry; total bytes per second (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -652,6 +665,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:195",
           "format": "short",
           "label": "rate [1/s]",
           "logBase": 1,
@@ -660,7 +674,8 @@
           "show": true
         },
         {
-          "format": "short",
+          "$$hashKey": "object:196",
+          "format": "binBps",
           "label": "",
           "logBase": 1,
           "max": null,
@@ -840,20 +855,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "job:loki_request_duration_seconds:50quantile{job=\"loki.ingester\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "{{job}} p50",
-          "refId": "A"
-        },
-        {
-          "expr": "job:loki_request_duration_seconds:99quantile{job=\"loki.ingester\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "{{job}} p99",
-          "refId": "B"
-        },
-        {
           "expr": "histogram_quantile(0.99, sum by (le) (job_route:loki_request_duration_seconds_bucket:sum_rate{job=\"loki.ingester\"})) ",
           "interval": "",
           "legendFormat": "p99",
@@ -885,7 +886,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS]  job:loki_request_duration_seconds (p50, p99)",
+      "title": "[LOGS] Loki request latency (p50, p95, p99)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -901,7 +902,7 @@
       },
       "yaxes": [
         {
-          "format": "ms",
+          "format": "s",
           "label": null,
           "logBase": 10,
           "max": null,
