@@ -17,7 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "iteration": 1589819190745,
+  "iteration": 1614956929981,
   "links": [],
   "panels": [
     {
@@ -32,7 +32,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -59,9 +60,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -158,7 +160,7 @@
       "reverseYBuckets": false,
       "targets": [
         {
-          "expr": "sum by (le) (rate(loki_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.loki-api\",method=\"GET\",status_code=\"200\",route=\"api_prom_query\"}[$timewindow]))",
+          "expr": "sum by (le) (rate(loki_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.loki-api\",method=\"GET\",status_code=\"200\",route=~\"loki_api_v1_query_.*\"}[$timewindow]))",
           "format": "heatmap",
           "instant": false,
           "interval": "",
@@ -168,7 +170,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "API proxy, /api/prom/query, 200-acked GETs, total request processing duration, event rate [1/s] ()",
+      "title": "API proxy, /loki/api/v1/query[_range], 200-acked GETs, total request processing duration, event rate [1/s] ()",
       "tooltip": {
         "show": true,
         "showHistogram": true
@@ -201,7 +203,8 @@
       "description": "100 % is one CPU core",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -228,9 +231,10 @@
       "linewidth": 1,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -240,7 +244,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"loki\", container_name=\"ingester\"}[$timewindow])*100)",
+          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"loki\", container=\"ingester\"}[$timewindow])*100)",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -374,7 +378,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -401,9 +406,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -413,7 +419,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (route, status_code) (rate(loki_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.loki-api\", method=\"GET\", route=~\"api_prom_query.*\"}[$timewindow]))",
+          "expr": "sum by (route, status_code) (rate(loki_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.loki-api\", method=\"GET\", route=~\"loki_api_v1_query.*\"}[$timewindow]))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -423,7 +429,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "API proxy /api/prom/query, GETs, rate by status code ($timewindow mean)",
+      "title": "API proxy /loki/api/v1/query[_range], GETs, rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -472,7 +478,8 @@
       "description": "For context see https://www.bwplotka.dev/2019/golang-memory-monitoring/",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -499,9 +506,10 @@
       "linewidth": 1,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -511,7 +519,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "container_memory_working_set_bytes{namespace=\"loki\", container_name=\"ingester\"}",
+          "expr": "container_memory_working_set_bytes{namespace=\"loki\", container=\"ingester\"}",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -573,7 +581,8 @@
       "description": "the counter is increased while reading the request body, before validation, and before passing things on to the ingester.",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -602,9 +611,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -677,7 +687,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -704,9 +715,10 @@
       "linewidth": 4,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -773,7 +785,8 @@
       "description": "100 % is one CPU core",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -800,9 +813,10 @@
       "linewidth": 1,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -812,7 +826,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"loki\", container_name=\"distributor\"}[$timewindow])*100)",
+          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{namespace=\"loki\", container=\"distributor\"}[$timewindow])*100)",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -874,7 +888,8 @@
       "description": "the counter is increased while reading the request body, before validation, and before passing things on to the ingester.",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -903,9 +918,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -980,7 +996,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1007,9 +1024,10 @@
       "linewidth": 2,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1079,7 +1097,8 @@
       "description": "For context see https://www.bwplotka.dev/2019/golang-memory-monitoring/",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1106,9 +1125,10 @@
       "linewidth": 1,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1118,7 +1138,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "container_memory_working_set_bytes{namespace=\"loki\", container_name=\"distributor\"}",
+          "expr": "container_memory_working_set_bytes{namespace=\"loki\", container=\"distributor\"}",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -1182,7 +1202,8 @@
       "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1209,9 +1230,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1285,7 +1307,8 @@
       "description": "ingester append failure rate is measured in the distributor",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1314,9 +1337,10 @@
       "linewidth": 3,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1382,7 +1406,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1409,9 +1434,10 @@
       "linewidth": 2,
       "nullPointMode": "null as zero",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1480,7 +1506,8 @@
       "datasource": "metrics",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1507,9 +1534,10 @@
       "linewidth": 4,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1651,7 +1679,8 @@
       "description": "What does this metric _really_ mean?",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1678,9 +1707,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1740,7 +1770,7 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 25,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1749,8 +1779,13 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "tags": [],
+          "text": [
+            "loadtest"
+          ],
+          "value": [
+            "loadtest"
+          ]
         },
         "datasource": "metrics",
         "definition": "label_values(kube_pod_container_info{image=~\".*cortex.*\"}, namespace)",
@@ -1782,20 +1817,22 @@
         "auto_min": "10s",
         "current": {
           "selected": false,
-          "text": "2m",
-          "value": "2m"
+          "text": "1m",
+          "value": "1m"
         },
+        "description": null,
+        "error": null,
         "hide": 0,
         "label": "Time window width",
         "name": "timewindow",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "1m",
             "value": "1m"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "2m",
             "value": "2m"
           },
@@ -1816,6 +1853,7 @@
           }
         ],
         "query": "1m, 2m, 3m, 4m, 5m",
+        "queryValue": "",
         "refresh": 2,
         "skipUrlSync": false,
         "type": "interval"
