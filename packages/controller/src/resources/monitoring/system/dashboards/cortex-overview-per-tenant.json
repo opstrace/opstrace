@@ -453,7 +453,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (status_code) (rate(cortex_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.cortex-api\",method=\"GET\",route=~\"api_prom_api_v1_query.*\"}[$timewindow]))",
+          "expr": "sum by (status_code) (rate(cortex_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.cortex-api\",method=\"GET\",route=~\"api_v1_query.*\"}[$timewindow]))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -463,7 +463,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "API proxy /api/prom/query[_range], GETs, rate by status code ($timewindow mean)",
+      "title": "API proxy /api/v1/query[_range], GETs, rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -752,7 +752,7 @@
       "reverseYBuckets": false,
       "targets": [
         {
-          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"GET\",status_code=\"200\",route=~\"api_v1_query\"}[$timewindow]))",
+          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"GET\",status_code=\"200\",route=~\"api_v1_query.*\"}[$timewindow]))",
           "format": "heatmap",
           "instant": false,
           "interval": "",
@@ -762,7 +762,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "API proxy /api/v1/query, 200-acked GETs, request duration, event rate [1/s] ($timewindow mean)",
+      "title": "API proxy /api/v1/query[_range], 200-acked GETs, request duration, event rate [1/s] ($timewindow mean)",
       "tooltip": {
         "show": true,
         "showHistogram": true
