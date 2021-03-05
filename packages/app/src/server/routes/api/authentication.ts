@@ -72,7 +72,7 @@ function createAuthHandler(): express.Router {
           avatar
         });
 
-        user = <any>createResponse.data?.insert_user_preference_one?.user;
+        user = createResponse.data?.insert_user_preference_one?.user as any;
       } else if (!user) {
         return next(new GeneralServerError(401, "Unauthorized"));
       } else {
