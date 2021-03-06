@@ -46,31 +46,47 @@ func keyIDfromPEM(pemstring string) string {
 }
 
 /*
-Read set of public keys from environment variables.
-If key deserialization fails, log an error
-and exit the process with a non-zero exit code.
+Read set of public keys for authentication token verification from environment.
+If key deserialization fails or if no key is configured, log an error and exit
+the process with a non-zero exit code.
 */
 func ReadConfigFromEnvOrCrash() {
-	legacyReadAuthTokenVerificationKeyFromEnv()
+	legacyReadAuthTokenVerificationKeyFromEnvOrCrash()
 	readKeySetJSONFromEnvOrCrash()
+
+	// No verification key configured? Bad configuration state. Exit process
+	// non-zero.
+	if len(authtokenVerificationPubKeys) == 0 {
+		if authtokenVerificationPubKeyFallback == nil {
+			log.Error("authenticator: bad config: key set not configured and no fallback key set.")
+			os.Exit(1)
+		}
+	}
 }
 
 /*
 Read set of public keys from environment variable
-API_AUTHTOKEN_VERIFICATION_PUBKEY_SET. If key deserialization fails, log an error
-and exit the process with a non-zero exit code.
+API_AUTHTOKEN_VERIFICATION_PUBKEY_SET.
+
+If key deserialization fails, log an error and exit the process with a non-zero
+exit code.
+
+If the environment variable is empty or not set, use an empty key set.
 */
 func readKeySetJSONFromEnvOrCrash() {
+	// Initialize map (make it empty!)
+	authtokenVerificationPubKeys = make(map[string]*rsa.PublicKey)
+
 	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET")
 
 	if !present {
-		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET must be set. Exit.")
-		os.Exit(1)
+		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET is not set.")
+		return
 	}
 
 	if data == "" {
-		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET must not be empty. Exit.")
-		os.Exit(1)
+		log.Errorf("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET is empty.")
+		return
 	}
 
 	log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET value: %s", data)
@@ -81,9 +97,6 @@ func readKeySetJSONFromEnvOrCrash() {
 		log.Errorf("error while JSON-parsing API_AUTHTOKEN_VERIFICATION_PUBKEY_SET: %s", jerr)
 		os.Exit(1)
 	}
-
-	// Initialize map
-	authtokenVerificationPubKeys = make(map[string]*rsa.PublicKey)
 
 	for kidFromConfig, pemstring := range keys {
 		log.Infof("parse PEM bytes for key with ID %s", kidFromConfig)
@@ -112,7 +125,7 @@ func readKeySetJSONFromEnvOrCrash() {
 	}
 }
 
-func legacyReadAuthTokenVerificationKeyFromEnv() {
+func legacyReadAuthTokenVerificationKeyFromEnvOrCrash() {
 	// Upgrade consideration: support for one pubkey -> support for multiple
 	// pubkeys: legacy auth tokens don't encode a key id. Read legacy env var,
 	// do not fail if not set. If set: store key as fallback, for tokens that
@@ -121,12 +134,12 @@ func legacyReadAuthTokenVerificationKeyFromEnv() {
 	data, present := os.LookupEnv("API_AUTHTOKEN_VERIFICATION_PUBKEY")
 
 	if !present {
-		log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY is not set")
+		log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY is not set, don't use fallback key")
 		return
 	}
 
 	if data == "" {
-		log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY is empty")
+		log.Infof("API_AUTHTOKEN_VERIFICATION_PUBKEY is empty, don't use fallback key")
 		return
 	}
 
@@ -136,11 +149,12 @@ func legacyReadAuthTokenVerificationKeyFromEnv() {
 	// bytes underneath it.
 	pubkey, err := deserializeRSAPubKeyFromPEMBytes([]byte(data))
 	if err != nil {
+		// This is a permanent configuration error, crash the process.
 		log.Errorf("%s", err)
 		os.Exit(1)
 	}
 
 	// Set module global for subsequent consumption by authenticator logic.
 	authtokenVerificationPubKeyFallback = pubkey
-	log.Infof("Successfully read RSA public key from legacy env var API_AUTHTOKEN_VERIFICATION_PUBKEY")
+	log.Infof("read RSA public key from legacy env var API_AUTHTOKEN_VERIFICATION_PUBKEY, using as fallback key")
 }

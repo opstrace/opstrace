@@ -44,3 +44,14 @@ func TestKeysetFromEnv_TwoKeys(t *testing.T) {
 		"map authtokenVerificationPubKeys expected to not be empty",
 	)
 }
+
+func TestKeysetFromEnv_EmtpySetButFallback(t *testing.T) {
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", "")
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY", TestPubKey)
+
+	// This is now expected to _not_ crash, becuse a fallback key is
+	// configured.
+	ReadConfigFromEnvOrCrash()
+	log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
+	log.Infof("fallback key:\n%v", authtokenVerificationPubKeyFallback)
+}
