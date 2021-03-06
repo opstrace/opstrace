@@ -161,10 +161,16 @@ function parseCmdlineArgs() {
     help: "Upgrade an existing Opstrace cluster."
   });
 
+  const parserCreateTAAuthtoken = subparsers.add_parser("sign-tenant-token", {
+    help:
+      "Create and sign a tenant API authentication token using a custom private key (wip, experimental)."
+  });
+
   // The --log-level switch must work when not using a sub command, but also
   // for each sub command.
   for (const p of [
     parserCreate,
+    parserCreateTAAuthtoken,
     parserDestroy,
     parserList,
     parserStatus,
@@ -200,7 +206,7 @@ function parseCmdlineArgs() {
   for (const p of [parserCreate, parserDestroy, parserStatus, parserUpgrade]) {
     p.add_argument("clusterName", {
       help:
-        "The Opstrace cluster name ([a-z0-9-_], no more than 13 characters).",
+        "The Opstrace cluster name ([a-z0-9-_], no more than 23 characters).",
       type: "str",
       metavar: "CLUSTER_NAME"
     });
@@ -250,6 +256,39 @@ function parseCmdlineArgs() {
     default: ""
   });
 
+  configureParserCreateTAAuthtoken(parserCreateTAAuthtoken);
+
+  // About those next two args: that's just brainstorm, maybe do not build
+  // that... Maybe _always_ drop that private key. maybe only provide one
+  // qualified method that involves: generating a new keypair, configuring the
+  // authenticator with the pub key, and then creating new authentication
+  // tokens with the priv key
+
+  // parserCreate.add_argument("--tenant-api-authenticator-privkey-file", {
+  //   help:
+  //     "Instead of generating a fresh RSA key pair, use this private key to " +
+  //     "sign tenant API authentication tokens. " +
+  //     "Extract public key and configure authenticator with it. File path " +
+  //     "must point to a PEM RSA private key file using the " +
+  //     "PKCS#8 (RFC 3447) serialization format. (experimental, noop)",
+  //   type: "str",
+  //   metavar: "PATH",
+  //   dest: "tenantApiAuthenticatorPrivkeyFilepath",
+  //   default: ""
+  // });
+
+  // parserCreate.add_argument("--write-tenant-api-authenticator-privkey", {
+  //   help:
+  //     "Write the RSA private key used for signing tenant API authentication " +
+  //     "tokens to this file. If not specified, the private key is dropped and " +
+  //     "lost. The private key is written to a PEM file using using the " +
+  //     "PKCS#8 (RFC 3447) serialization format. (experimental, noop)",
+  //   type: "str",
+  //   metavar: "PATH",
+  //   dest: "tenantApiAuthenticatorPrivkeyFilepath",
+  //   default: ""
+  // });
+
   for (const p of [parserDestroy, parserUpgrade]) {
     p.add_argument("--region", {
       help:
@@ -297,6 +336,28 @@ function parseCmdlineArgs() {
 
   log.info("logging to file: %s", logFileName);
   log.debug("cli args:\n%s", JSON.stringify(CLIARGS, null, 2));
+}
+
+// Mutate parser in place.
+function configureParserCreateTAAuthtoken(parser: argparse.ArgumentParser) {
+  parser.add_argument("clusterName", {
+    help:
+      "The name of the cluster to generate the token for. " +
+      "Be sure to set it correctly, otherwise the token will not be accepted.",
+    type: "str",
+    metavar: "CLUSTER_NAME"
+  });
+
+  parser.add_argument("tenantApiAuthenticatorPrivkeyFilepath", {
+    help:
+      "Use this private key to sign tenant API authentication token. " +
+      "The path must point to a PEM RSA private key file using the " +
+      "PKCS#8 (RFC 3447) serialization format.",
+    type: "str",
+    metavar: "PRIV_KEY_FILE_PATH",
+    //dest: "tenantApiAuthenticatorPrivkeyFilepath",
+    default: ""
+  });
 }
 
 /**
