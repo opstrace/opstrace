@@ -1,6 +1,47 @@
-actions: []
+actions:
+- name: getAlertmanager
+  definition:
+    kind: synchronous
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
+- name: updateAlertmanager
+  definition:
+    kind: synchronous
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
+- name: validateCredential
+  definition:
+    kind: synchronous
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
+- name: validateExporter
+  definition:
+    kind: synchronous
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
 custom_types:
-  enums: []
-  input_objects: []
-  objects: []
+  enums:
+  - name: ErrorType
+  input_objects:
+  - name: AlertmanagerInput
+  objects:
+  - name: Alertmanager
+  - name: AlertmanagerUpdateResponse
+  - name: ValidateOutput
   scalars: []

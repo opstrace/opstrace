@@ -44,7 +44,7 @@ export function OpstraceAPIResources(
     httpGet: {
       path: "/metrics",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      port: 8080 as any,
+      port: "action" as any,
       scheme: "HTTP"
     },
     timeoutSeconds: 1,
@@ -53,7 +53,10 @@ export function OpstraceAPIResources(
     failureThreshold: 3
   };
 
-  const commandArgs = ["-listen=:8080"];
+  const commandArgs = [
+    "-config=:8080",
+    "-action=:8081",
+  ];
   const commandEnv: V1EnvVar[] = [
     {
       name: "GRAPHQL_ENDPOINT",
@@ -73,6 +76,15 @@ export function OpstraceAPIResources(
         secretKeyRef: {
           name: "hasura-admin-secret",
           key: "HASURA_ADMIN_SECRET"
+        }
+      }
+    },
+    {
+      name: "HASURA_ACTION_SECRET",
+      valueFrom: {
+        secretKeyRef: {
+          name: "hasura-action-secret",
+          key: "HASURA_CONFIG_API_SECRET"
         }
       }
     }
@@ -128,6 +140,11 @@ export function OpstraceAPIResources(
                       name: "http",
                       protocol: "TCP",
                       containerPort: 8080
+                    },
+                    {
+                      name: "action",
+                      protocol: "TCP",
+                      containerPort: 8081
                     }
                   ],
                   readinessProbe: probeConfig,
@@ -163,7 +180,14 @@ export function OpstraceAPIResources(
               port: 8080,
               protocol: "TCP",
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              targetPort: 8080 as any
+              targetPort: "http" as any
+            },
+            {
+              name: "action",
+              port: 8081,
+              protocol: "TCP",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              targetPort: "action" as any
             }
           ],
           selector: {
@@ -193,7 +217,7 @@ export function OpstraceAPIResources(
             {
               interval: "30s",
               path: "/metrics",
-              port: "http"
+              port: "action"
             }
           ],
           jobLabel: "job",

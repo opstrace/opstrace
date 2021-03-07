@@ -1,2 +1,69 @@
+# Common types
 
+enum ErrorType {
+  # Failed to communicate with the underlying service
+  SERVICE_OFFLINE,
+  # Other error returned by the underlying service
+  SERVICE_ERROR,
+  # The underlying service rejected the configuration
+  VALIDATION_FAILED,
+}
 
+# getAlertmanager
+
+type Query {
+  getAlertmanager(tenant_id: String!): Alertmanager
+}
+
+type Alertmanager {
+  tenant_id: String!
+  config: String
+  online: Boolean!
+}
+
+# updateAlertmanager
+
+type Mutation {
+  updateAlertmanager(tenant_id: String!, input: AlertmanagerInput): AlertmanagerUpdateResponse
+}
+
+input AlertmanagerInput {
+  config: String!
+}
+
+# NOTE: Unable to use nested response types in Hasura Actions, so using a flat response for now.
+#       See also https://github.com/hasura/graphql-engine/issues/4796
+# TODO: Is this fixed by switching to Remote Schemas instead?
+type AlertmanagerUpdateResponse {
+  # False if the update failed for any reason, see error_* fields for details
+  success: Boolean!
+
+  # Must be set if success=false
+  error_type: ErrorType
+  # Must be set if success=false
+  error_message: String
+  # Optional if success=false, message returned by underlying service
+  error_raw_response: String
+}
+
+# validateCredential/validateExporter
+
+type Mutation {
+  validateCredential(tenant_id: String!, content: String!): ValidateOutput
+}
+
+type Mutation {
+  validateExporter(tenant_id: String!, content: String!): ValidateOutput
+}
+
+type ValidateOutput {
+  # False if the validation failed for any reason, see error_* fields for details
+  success: Boolean!
+
+  # Must be set if success=false
+  error_type: ErrorType
+  # Must be set if success=false
+  error_message: String
+  # Optional if success=false, message returned by underlying service
+  error_raw_response: String
+}
