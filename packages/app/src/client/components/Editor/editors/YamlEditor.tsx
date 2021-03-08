@@ -15,14 +15,14 @@
  */
 
 import React, { useCallback, useEffect, useRef } from "react";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
+import {editor} from "monaco-editor/esm/vs/editor/editor.api";
 
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import { YamlEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
 import { getTextEditorOptions } from "state/file/utils/monaco";
 
-function AutoSizingYamlEditor({ model }: { model: monaco.editor.ITextModel }) {
+function AutoSizingYamlEditor({ model }: { model: editor.ITextModel }) {
   return (
     <AutoSizer>
       {({ height, width }: Size) => {
@@ -33,38 +33,37 @@ function AutoSizingYamlEditor({ model }: { model: monaco.editor.ITextModel }) {
 }
 
 function YamlEditor({ height, width, model }: YamlEditorProps & Size) {
-  const editor = useRef<null | monaco.editor.ICodeEditor>(null);
-
-  const currentModel = useRef<monaco.editor.IModel>(model);
+  const editorRef = useRef<null | editor.ICodeEditor>(null);
+  const currentModelRef = useRef<editor.IModel>(model);
 
   const editorContainer = useCallback(async node => {
     if (node) {
-      editor.current = monaco.editor.create(
+      editorRef.current = editor.create(
         node,
         getTextEditorOptions({
           readOnly: false,
-          model: currentModel.current
+          model: currentModelRef.current
         })
       );
     }
-    if (!node) {
-      editor.current?.dispose();
-      editor.current = null;
+    else {
+      editorRef.current?.dispose();
+      editorRef.current = null;
     }
   }, []);
 
   // Update editor layout when width/height changes
   useEffect(() => {
-    if (width !== undefined && height !== undefined && editor.current) {
-      editor.current.layout({ width, height });
+    if (width !== undefined && height !== undefined && editorRef.current) {
+      editorRef.current.layout({ width, height });
     }
   }, [width, height]);
 
   // Dispose all the things when this component unmounts
   useEffect(() => {
     return () => {
-      editor.current?.dispose();
-      editor.current = null;
+      editorRef.current?.dispose();
+      editorRef.current = null;
     };
   }, []);
 

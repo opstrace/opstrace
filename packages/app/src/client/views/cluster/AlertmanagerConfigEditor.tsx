@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "state/provider";
 
@@ -33,22 +33,23 @@ import { Button } from "client/components/Button";
 import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
 import { saveAlertmanagerConfig } from "state/tenant/actions";
 
-import { alertManagerConfigSchema } from "client/validation/alertmanagerConfig";
+import { alertmanagerConfigSchema } from "client/validation/alertmanagerConfig";
 import * as yamlParser from "js-yaml";
 
-import alertmanagerConfigSchema from "client/validation/alertmanagerConfig/schema.json";
+import jsonSchema from "client/validation/alertmanagerConfig/schema.json";
 
 type EditorProps = {
   filename: string;
   config: string;
-  onChange: Function;
+  onChange?: Function;
 };
 
 const Editor = ({ filename, config, onChange }: EditorProps) => {
   const model = useRef<monaco.editor.IModel | null>(null);
 
+  console.log("Editor", "render", filename, config)
+
   useEffect(() => {
-    console.log(alertmanagerConfigSchema);
     yaml &&
       yaml.yamlDefaults.setDiagnosticsOptions({
         validate: true,
@@ -59,7 +60,7 @@ const Editor = ({ filename, config, onChange }: EditorProps) => {
           {
             uri: "http://opstrace.com/alertmanager-schema.json", // id of the first schema
             fileMatch: [filename], // associate with our model
-            schema: alertmanagerConfigSchema
+            schema: jsonSchema
           }
         ]
       });
@@ -73,7 +74,7 @@ const Editor = ({ filename, config, onChange }: EditorProps) => {
         monaco.Uri.parse(filename)
       );
       model.current.onDidChangeContent(data => {
-        onChange(model.current?.getValue() || "");
+        if (onChange) onChange(model.current?.getValue() || "");
       });
     } else if (model.current?.getValue() !== config)
       model.current?.setValue(config);
@@ -88,14 +89,37 @@ const AlertmanagerConfigEditor = () => {
   const params = useParams<{ tenant: string }>();
   const tenant = useTenant(params.tenant);
   const savedConfig = useAlertmanagerConfig(params.tenant) || "";
-  const [config, setConfig] = useState<string>(savedConfig);
+  const configRef = useRef(savedConfig)
   const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setConfig(savedConfig);
-    setConfigValid(null);
-  }, [savedConfig]);
+  console.log("AlertmanagerConfigEditor", "render", configRef.current);
+
+  const handleConfigChange = useCallback((newConfig) => {
+    console.log("handleConfigChange", "called", newConfig);
+    configRef.current = newConfig
+  }, [savedConfig])
+
+  const handleSave = useCallback(() => {
+    if (tenant) {
+      dispatch(
+        saveAlertmanagerConfig({
+          tenantName: tenant.name,
+          config: configRef.current
+        })
+      )
+    }
+  }, [tenant?.name])
+
+  const handleValidation = useCallback(() => {
+    // validateYaml(config);
+    console.log("handleValidation", configRef.current)
+    alertmanagerConfigSchema
+      .isValid(yamlParser.load(configRef.current))
+      .then(function (valid: boolean) {
+        setConfigValid(valid);
+      });
+  }, [tenant?.name])
 
   if (!tenant)
     return (
@@ -125,36 +149,22 @@ const AlertmanagerConfigEditor = () => {
                 <Box display="flex" height="500px" width="700px">
                   <Editor
                     filename={`${tenant.name}-alertmanagerConfig.yaml`}
-                    config={config}
-                    onChange={setConfig}
+                    config={savedConfig}
+                    onChange={handleConfigChange}
                   />
                 </Box>
               </CardContent>
               <Button
                 variant="contained"
                 state="primary"
-                onClick={() => {
-                  dispatch(
-                    saveAlertmanagerConfig({
-                      tenantName: tenant.name,
-                      config: config
-                    })
-                  );
-                }}
+                onClick={handleSave}
               >
                 publish
               </Button>
               <Button
                 variant="contained"
                 state="secondary"
-                onClick={() => {
-                  // validateYaml(config);
-                  alertManagerConfigSchema
-                    .isValid(yamlParser.load(config))
-                    .then(function (valid: boolean) {
-                      setConfigValid(valid);
-                    });
-                }}
+                onClick={handleValidation}
               >
                 validate
               </Button>
@@ -171,16 +181,5 @@ const configValidToStr = (isValid: boolean | null) => {
   else if (isValid === false) return "Config not valid";
   return "";
 };
-
-// const validateYaml = (config: string) => {
-//   const doc = yamlParser.load(config);
-//   schema.isValid(doc).then(function (valid: boolean) {
-//     console.log("valid", valid);
-//   });
-//   // .validate(doc)
-//   // .catch(function (err: object) {
-//   //   console.log("error", err);
-//   // });
-// };
 
 export default AlertmanagerConfigEditor;

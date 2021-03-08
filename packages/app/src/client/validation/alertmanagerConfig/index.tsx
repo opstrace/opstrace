@@ -87,7 +87,7 @@ const globalSchema: yup.SchemaOf<Global> = yup
   })
   .noUnknown();
 
-export const alertManagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
+export const alertmanagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
   .object({
     global: globalSchema.notRequired(),
     templates: yup

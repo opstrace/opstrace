@@ -45,10 +45,6 @@ const UserDetail = () => {
     params.id,
     users
   ]);
-  const selectedTenant = useMemo(
-    () => tenants.find(t => t.name === params.tenant),
-    [params.tenant, tenants]
-  );
 
   const { activatePickerWithText } = usePickerService(
     {
