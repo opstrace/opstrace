@@ -45,9 +45,7 @@ type EditorProps = {
 };
 
 const Editor = ({ filename, config, onChange }: EditorProps) => {
-  const model = useRef<monaco.editor.IModel | null>(null);
-
-  console.log("Editor", "render", filename, config)
+  const modelRef = useRef<monaco.editor.IModel | null>(null);
 
   useEffect(() => {
     yaml &&
@@ -58,31 +56,37 @@ const Editor = ({ filename, config, onChange }: EditorProps) => {
         completion: true,
         schemas: [
           {
-            uri: "http://opstrace.com/alertmanager-schema.json", // id of the first schema
-            fileMatch: [filename], // associate with our model
+            uri: "http://opstrace.com/alertmanager-schema.json",
+            fileMatch: ["*"],
             schema: jsonSchema
           }
         ]
       });
+
   }, []);
 
+   useEffect(() => {
+      const fileUri = monaco.Uri.parse(filename);
+      modelRef.current =
+        monaco.editor.getModel(fileUri) ||
+        monaco.editor.createModel("", "yaml", fileUri);
+   }, [filename]);
+
   useEffect(() => {
-    if (!model.current) {
-      model.current = monaco.editor.createModel(
-        config,
-        "yaml",
-        monaco.Uri.parse(filename)
-      );
-      model.current.onDidChangeContent(data => {
-        if (onChange) onChange(model.current?.getValue() || "");
+    if (modelRef) {
+      modelRef.current?.onDidChangeContent(data => {
+        if (onChange && modelRef?.current) onChange(modelRef.current.getValue());
       });
-    } else if (model.current?.getValue() !== config)
-      model.current?.setValue(config);
+    }
+  }, [onChange])
+
+  useEffect(() => {
+    modelRef.current?.setValue(config)
   }, [config]);
 
-  if (model.current === null) return null;
+  if (modelRef.current === null) return null;
 
-  return <YamlEditor model={model.current} />;
+  return <YamlEditor model={modelRef.current} />;
 };
 
 const AlertmanagerConfigEditor = () => {
@@ -93,10 +97,7 @@ const AlertmanagerConfigEditor = () => {
   const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
-  console.log("AlertmanagerConfigEditor", "render", configRef.current);
-
   const handleConfigChange = useCallback((newConfig) => {
-    console.log("handleConfigChange", "called", newConfig);
     configRef.current = newConfig
   }, [savedConfig])
 
@@ -112,8 +113,6 @@ const AlertmanagerConfigEditor = () => {
   }, [tenant?.name])
 
   const handleValidation = useCallback(() => {
-    // validateYaml(config);
-    console.log("handleValidation", configRef.current)
     alertmanagerConfigSchema
       .isValid(yamlParser.load(configRef.current))
       .then(function (valid: boolean) {
@@ -148,17 +147,13 @@ const AlertmanagerConfigEditor = () => {
               <CardContent>
                 <Box display="flex" height="500px" width="700px">
                   <Editor
-                    filename={`${tenant.name}-alertmanagerConfig.yaml`}
+                    filename="alertmanager-config.yaml"
                     config={savedConfig}
                     onChange={handleConfigChange}
                   />
                 </Box>
               </CardContent>
-              <Button
-                variant="contained"
-                state="primary"
-                onClick={handleSave}
-              >
+              <Button variant="contained" state="primary" onClick={handleSave}>
                 publish
               </Button>
               <Button
