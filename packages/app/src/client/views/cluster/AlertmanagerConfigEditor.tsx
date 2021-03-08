@@ -14,80 +14,26 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "state/provider";
 
+import * as yamlParser from "js-yaml";
+
 import Skeleton from "@material-ui/lab/Skeleton";
-//import { useDispatch } from "react-redux";
 
 import { Box } from "client/components/Box";
 
 import Layout from "client/layout/MainContent";
 import SideBar from "./Sidebar";
 import { YamlEditor } from "client/components/Editor";
-import { yaml } from "workers";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
 import { saveAlertmanagerConfig } from "state/tenant/actions";
 
-import { alertmanagerConfigSchema } from "client/validation/alertmanagerConfig";
-import * as yamlParser from "js-yaml";
-
-import jsonSchema from "client/validation/alertmanagerConfig/schema.json";
-
-type EditorProps = {
-  filename: string;
-  config: string;
-  onChange?: Function;
-};
-
-const Editor = ({ filename, config, onChange }: EditorProps) => {
-  const modelRef = useRef<monaco.editor.IModel | null>(null);
-
-  useEffect(() => {
-    yaml &&
-      yaml.yamlDefaults.setDiagnosticsOptions({
-        validate: true,
-        enableSchemaRequest: true,
-        hover: true,
-        completion: true,
-        schemas: [
-          {
-            uri: "http://opstrace.com/alertmanager-schema.json",
-            fileMatch: ["*"],
-            schema: jsonSchema
-          }
-        ]
-      });
-
-  }, []);
-
-   useEffect(() => {
-      const fileUri = monaco.Uri.parse(filename);
-      modelRef.current =
-        monaco.editor.getModel(fileUri) ||
-        monaco.editor.createModel("", "yaml", fileUri);
-   }, [filename]);
-
-  useEffect(() => {
-    if (modelRef) {
-      modelRef.current?.onDidChangeContent(data => {
-        if (onChange && modelRef?.current) onChange(modelRef.current.getValue());
-      });
-    }
-  }, [onChange])
-
-  useEffect(() => {
-    modelRef.current?.setValue(config)
-  }, [config]);
-
-  if (modelRef.current === null) return null;
-
-  return <YamlEditor model={modelRef.current} />;
-};
+import { alertmanagerConfigSchema, jsonSchema } from "client/validation/alertmanagerConfig";
 
 const AlertmanagerConfigEditor = () => {
   const params = useParams<{ tenant: string }>();
@@ -146,9 +92,10 @@ const AlertmanagerConfigEditor = () => {
               />
               <CardContent>
                 <Box display="flex" height="500px" width="700px">
-                  <Editor
+                  <YamlEditor
                     filename="alertmanager-config.yaml"
-                    config={savedConfig}
+                    jsonSchema={jsonSchema}
+                    data={savedConfig}
                     onChange={handleConfigChange}
                   />
                 </Box>

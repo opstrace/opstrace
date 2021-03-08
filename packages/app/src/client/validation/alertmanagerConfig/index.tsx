@@ -22,6 +22,8 @@ import { routeSchema } from "./route";
 import { receiverSchema } from "./receiver";
 import { inhibitRuleSchema } from "./inhibitRule";
 
+import jsonSchema from "client/validation/alertmanagerConfig/schema.json";
+
 const globalSchema: yup.SchemaOf<Global> = yup
   .object({
     smtp_from: yup
@@ -87,7 +89,7 @@ const globalSchema: yup.SchemaOf<Global> = yup
   })
   .noUnknown();
 
-export const alertmanagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
+const alertmanagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
   .object({
     global: globalSchema.notRequired(),
     templates: yup
@@ -109,3 +111,5 @@ export const alertmanagerConfigSchema: yup.SchemaOf<AlertmanagerConfig> = yup
     url: "https://www.prometheus.io/docs/alerting/latest/configuration/"
   })
   .noUnknown();
+
+  export { alertmanagerConfigSchema, jsonSchema };

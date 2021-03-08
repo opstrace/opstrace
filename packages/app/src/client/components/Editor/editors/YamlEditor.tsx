@@ -16,23 +16,73 @@
 
 import React, { useCallback, useEffect, useRef } from "react";
 import {editor} from "monaco-editor/esm/vs/editor/editor.api";
+import { yaml } from "workers";
 
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import { YamlEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
 import { getTextEditorOptions } from "state/file/utils/monaco";
 
-function AutoSizingYamlEditor({ model }: { model: editor.ITextModel }) {
-  return (
-    <AutoSizer>
-      {({ height, width }: Size) => {
-        return <YamlEditor height={height} width={width} model={model} />;
-      }}
-    </AutoSizer>
-  );
+const YamlEditor = ({ filename, jsonSchema, data, onChange }: YamlEditorProps) => {
+  const modelRef = useRef<monaco.editor.IModel | null>(null);
+
+  useEffect(() => {
+    yaml &&
+      yaml.yamlDefaults.setDiagnosticsOptions({
+        validate: true,
+        enableSchemaRequest: true,
+        hover: true,
+        completion: true,
+        schemas: [
+          {
+            uri: "http://opstrace.com/alertmanager-schema.json",
+            fileMatch: ["*"],
+            schema: jsonSchema
+          }
+        ]
+      });
+
+  }, []);
+
+   useEffect(() => {
+      const fileUri = monaco.Uri.parse(filename);
+      modelRef.current =
+        monaco.editor.getModel(fileUri) ||
+        monaco.editor.createModel("", "yaml", fileUri);
+   }, [filename]);
+
+  useEffect(() => {
+    if (modelRef) {
+      modelRef.current?.onDidChangeContent(data => {
+        if (onChange && modelRef?.current) onChange(modelRef.current.getValue());
+      });
+    }
+  }, [onChange])
+
+  useEffect(() => {
+    modelRef.current?.setValue(data)
+  }, [data]);
+
+  if (modelRef?.current) return <AutoSizingEditor model={modelRef.current} />
+  else return null // TODO: show loading component here?
+
+};
+
+function AutoSizingEditor({ model }: { model: editor.ITextModel }) {
+  return <AutoSizer>
+    {({ height, width }: Size) => {
+      return (
+        <BaseEditor height={height} width={width} model={model} />
+      );
+    }}
+  </AutoSizer>
 }
 
-function YamlEditor({ height, width, model }: YamlEditorProps & Size) {
+type BaseEditorProps = {
+  model: monaco.editor.ITextModel;
+};
+
+function BaseEditor({ height, width, model }: BaseEditorProps & Size) {
   const editorRef = useRef<null | editor.ICodeEditor>(null);
   const currentModelRef = useRef<editor.IModel>(model);
 
@@ -81,4 +131,4 @@ function YamlEditor({ height, width, model }: YamlEditorProps & Size) {
   );
 }
 
-export default React.memo(AutoSizingYamlEditor);
+export default YamlEditor;

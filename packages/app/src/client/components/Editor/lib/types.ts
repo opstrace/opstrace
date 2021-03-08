@@ -23,5 +23,8 @@ export type ModuleEditorProps = {
 };
 
 export type YamlEditorProps = {
-  model: monaco.editor.ITextModel;
+  filename: string;
+  jsonSchema?: object;
+  data: string;
+  onChange?: Function;
 };
