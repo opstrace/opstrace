@@ -16,7 +16,7 @@
 
 import fs from "fs";
 
-import { log, Dict, die } from "@opstrace/utils";
+import { log, Dict, die, keyIDfromPEM } from "@opstrace/utils";
 import { setAWSRegion } from "@opstrace/aws";
 import { GCPAuthOptions } from "@opstrace/gcp";
 
@@ -173,7 +173,7 @@ function genCryptoMaterialForAPIAuth(
     }
 
     const data_api_authn_pubkey_pem = cryp.getPubkeyAsPem();
-    const keyId = cryp.keyIDfromPEM(data_api_authn_pubkey_pem);
+    const keyId = keyIDfromPEM(data_api_authn_pubkey_pem);
     log.info(
       "serialized public key (id: %s) for tenant API token verification",
       keyId
