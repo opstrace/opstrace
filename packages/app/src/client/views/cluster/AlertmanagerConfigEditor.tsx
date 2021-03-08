@@ -45,10 +45,10 @@ const AlertmanagerConfigEditor = () => {
 
   const handleConfigChange = useCallback((newConfig) => {
     configRef.current = newConfig
-  }, [savedConfig])
+  }, [])
 
   const handleSave = useCallback(() => {
-    if (tenant) {
+    if (tenant?.name) {
       dispatch(
         saveAlertmanagerConfig({
           tenantName: tenant.name,
@@ -56,7 +56,7 @@ const AlertmanagerConfigEditor = () => {
         })
       )
     }
-  }, [tenant?.name])
+  }, [tenant?.name, dispatch])
 
   const handleValidation = useCallback(() => {
     alertmanagerConfigSchema
@@ -64,7 +64,7 @@ const AlertmanagerConfigEditor = () => {
       .then(function (valid: boolean) {
         setConfigValid(valid);
       });
-  }, [tenant?.name])
+  }, [])
 
   if (!tenant)
     return (

@@ -41,8 +41,7 @@ const YamlEditor = ({ filename, jsonSchema, data, onChange }: YamlEditorProps) =
           }
         ]
       });
-
-  }, []);
+  }, [jsonSchema]);
 
    useEffect(() => {
       const fileUri = monaco.Uri.parse(filename);
