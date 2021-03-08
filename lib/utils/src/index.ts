@@ -24,6 +24,7 @@ export * from "./naming";
 export * from "./sagas";
 export * from "./errors";
 export * from "./diffutils";
+export * from "./pubkey";
 export {
   sleep,
   mtime,
