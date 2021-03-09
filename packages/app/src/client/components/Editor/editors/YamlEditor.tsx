@@ -15,7 +15,7 @@
  */
 
 import React, { useCallback, useEffect, useRef } from "react";
-import {editor} from "monaco-editor/esm/vs/editor/editor.api";
+import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import { yaml } from "workers";
 
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
@@ -25,6 +25,7 @@ import { getTextEditorOptions } from "state/file/utils/monaco";
 
 const YamlEditor = ({ filename, jsonSchema, data, onChange }: YamlEditorProps) => {
   const modelRef = useRef<monaco.editor.IModel | null>(null);
+  const subscriptionRef = useRef<monaco.IDisposable | null>(null)
 
   useEffect(() => {
     yaml &&
@@ -43,20 +44,30 @@ const YamlEditor = ({ filename, jsonSchema, data, onChange }: YamlEditorProps) =
       });
   }, [jsonSchema]);
 
-   useEffect(() => {
+  useEffect(() => {
       const fileUri = monaco.Uri.parse(filename);
       modelRef.current =
         monaco.editor.getModel(fileUri) ||
         monaco.editor.createModel("", "yaml", fileUri);
+      // return () => {
+      //   modelRef.current?.dispose();
+      //   modelRef.current = null;
+      // };
    }, [filename]);
 
   useEffect(() => {
-    if (modelRef) {
-      modelRef.current?.onDidChangeContent(data => {
-        if (onChange && modelRef?.current) onChange(modelRef.current.getValue());
+    if (modelRef?.current && onChange) {
+      subscriptionRef.current = modelRef.current?.onDidChangeContent(() => {
+        if (modelRef?.current)
+          onChange(modelRef.current.getValue(), filename);
       });
     }
-  }, [onChange])
+    return () => {
+      subscriptionRef.current?.dispose();
+      subscriptionRef.current = null;
+    }
+
+  }, [onChange, filename])
 
   useEffect(() => {
     modelRef.current?.setValue(data)
