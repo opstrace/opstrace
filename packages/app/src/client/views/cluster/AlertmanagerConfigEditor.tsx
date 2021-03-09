@@ -20,7 +20,7 @@ import { useDispatch } from "state/provider";
 import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import * as yamlParser from "js-yaml";
 
-import { debounce } from "lodash"
+import { debounce } from "lodash";
 
 import Skeleton from "@material-ui/lab/Skeleton";
 
@@ -35,55 +35,74 @@ import { Button } from "client/components/Button";
 import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
 import { saveAlertmanagerConfig } from "state/tenant/actions";
 
-import { alertmanagerConfigSchema, jsonSchema } from "client/validation/alertmanagerConfig";
+import {
+  alertmanagerConfigSchema,
+  jsonSchema
+} from "client/validation/alertmanagerConfig";
+
+type validationCheckOptions = {
+  useModelMarkers: boolean;
+};
 
 const AlertmanagerConfigEditor = () => {
   const params = useParams<{ tenant: string }>();
   const tenant = useTenant(params.tenant);
   const savedConfig = useAlertmanagerConfig(params.tenant) || "";
-  const configRef = useRef(savedConfig)
+  const configRef = useRef(savedConfig);
   const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
-  const validationCheck : (filename: string) => void = (
-    filename => {
-      const markers = editor.getModelMarkers({
-        resource: monaco.Uri.parse(filename)
-      });
+  const validationCheck: (
+    filename: string,
+    options?: validationCheckOptions
+  ) => void = (filename, options) => {
+    const markers = options?.useModelMarkers
+      ? editor.getModelMarkers({
+          resource: monaco.Uri.parse(filename)
+        })
+      : [];
 
-      if (markers.length === 0) {
-        let parsedData = null;
+    if (markers.length === 0) {
+      let parsedData = null;
 
-        try {
-          parsedData = yamlParser.load(configRef.current, {
-            schema: yamlParser.FAILSAFE_SCHEMA,
+      try {
+        parsedData = yamlParser.load(configRef.current, {
+          schema: yamlParser.JSON_SCHEMA
+        });
+
+        alertmanagerConfigSchema
+          .validate(parsedData, { strict: true })
+          .then((value: object) => {
+            console.log("yaml match yup schema", value);
+            setConfigValid(true);
+          })
+          .catch((err: { name: string; errors: string[] }) => {
+            console.log("yaml is not valid", err.errors);
+            setConfigValid(false);
           });
-
-          alertmanagerConfigSchema
-            .isValid(parsedData)
-            .then(function (valid: boolean) {
-              setConfigValid(valid);
-            });
-        } catch (e) {
-          setConfigValid(false);
-        }
+      } catch (e) {
+        console.log("unable to parse yaml", e);
+        setConfigValid(false);
       }
-      else
-        setConfigValid(false)
+    } else {
+      console.log("model markers found", markers);
+      setConfigValid(false);
     }
-  )
+  };
 
-  const validationCheckOnChangeStart = debounce(validationCheck, 1000, {
+  const validationCheckOnChangeStart = debounce(validationCheck, 300, {
     leading: true,
     trailing: false
   });
-  const checkValidationOnChangePause = debounce(validationCheck, 1000, { maxWait: 5000 });
+  const checkValidationOnChangePause = debounce(validationCheck, 500, {
+    maxWait: 5000
+  });
 
   const handleConfigChange = useCallback((newConfig, filename) => {
-    configRef.current = newConfig
+    configRef.current = newConfig;
     validationCheckOnChangeStart(filename);
     checkValidationOnChangePause(filename);
-  }, [])
+  }, []);
 
   const handleSave = useCallback(() => {
     if (tenant?.name) {
@@ -92,9 +111,9 @@ const AlertmanagerConfigEditor = () => {
           tenantName: tenant.name,
           config: configRef.current
         })
-      )
+      );
     }
-  }, [tenant?.name, dispatch])
+  }, [tenant?.name, dispatch]);
 
   if (!tenant)
     return (
