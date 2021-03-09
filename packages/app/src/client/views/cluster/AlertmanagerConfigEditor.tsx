@@ -32,6 +32,7 @@ import { YamlEditor } from "client/components/Editor";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
+
 import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
 import { saveAlertmanagerConfig } from "state/tenant/actions";
 
@@ -52,53 +53,53 @@ const AlertmanagerConfigEditor = () => {
   const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
-  const validationCheck: (
-    filename: string,
-    options?: validationCheckOptions
-  ) => void = (filename, options) => {
-    const markers = options?.useModelMarkers
-      ? editor.getModelMarkers({
-          resource: monaco.Uri.parse(filename)
-        })
-      : [];
-
-    if (markers.length === 0) {
-      let parsedData = null;
-
-      try {
-        parsedData = yamlParser.load(configRef.current, {
-          schema: yamlParser.JSON_SCHEMA
-        });
-
-        alertmanagerConfigSchema
-          .validate(parsedData, { strict: true })
-          .then((value: object) => {
-            console.log("yaml match yup schema", value);
-            setConfigValid(true);
+  const handleConfigChange = useCallback((newConfig, filename) => {
+    const validationCheck: (
+      filename: string,
+      options?: validationCheckOptions
+    ) => void = (filename, options) => {
+      const markers = options?.useModelMarkers
+        ? editor.getModelMarkers({
+            resource: monaco.Uri.parse(filename)
           })
-          .catch((err: { name: string; errors: string[] }) => {
-            console.log("yaml is not valid", err.errors);
-            setConfigValid(false);
+        : [];
+
+      if (markers.length === 0) {
+        let parsedData = null;
+
+        try {
+          parsedData = yamlParser.load(configRef.current, {
+            schema: yamlParser.JSON_SCHEMA
           });
-      } catch (e) {
-        console.log("unable to parse yaml", e);
+
+          alertmanagerConfigSchema
+            .validate(parsedData, { strict: true })
+            .then((value: object) => {
+              console.log("yaml match yup schema", value);
+              setConfigValid(true);
+            })
+            .catch((err: { name: string; errors: string[] }) => {
+              console.log("yaml is not valid", err.errors);
+              setConfigValid(false);
+            });
+        } catch (e) {
+          console.log("unable to parse yaml", e);
+          setConfigValid(false);
+        }
+      } else {
+        console.log("model markers found", markers);
         setConfigValid(false);
       }
-    } else {
-      console.log("model markers found", markers);
-      setConfigValid(false);
-    }
-  };
+    };
 
-  const validationCheckOnChangeStart = debounce(validationCheck, 300, {
-    leading: true,
-    trailing: false
-  });
-  const checkValidationOnChangePause = debounce(validationCheck, 500, {
-    maxWait: 5000
-  });
+    const validationCheckOnChangeStart = debounce(validationCheck, 300, {
+      leading: true,
+      trailing: false
+    });
+    const checkValidationOnChangePause = debounce(validationCheck, 500, {
+      maxWait: 5000
+    });
 
-  const handleConfigChange = useCallback((newConfig, filename) => {
     configRef.current = newConfig;
     validationCheckOnChangeStart(filename);
     checkValidationOnChangePause(filename);
