@@ -9,10 +9,12 @@ echo "--- wipe-bk-tmp-dir"
 # underneath them).
 
 set -o xtrace
+
 # Actual artifacts (docker images, etc) are meant to be produced by the
 # preamble step. The `node_modules` dir in the prebuild dir is expected to be
-# larger than 1 GB -- and it must be safe to wipe it right after the preamble.
-
+# larger than 1 GB -- and it must be safe to wipe it when this CI step starts.
+# At the time of writing, this has to be invoked after the preamble and after
+# the unit test stage, which both operate on the prebuild directory.
 rm -rf "${OPSTRACE_PREBUILD_DIR}/node_modules"
 
 # note(jp): remove this again, can take ~10 minutes easily otherwise
@@ -56,6 +58,6 @@ set +e
 ls -ahltr /tmp
 set -e
 
-# note(jp): remove this again, can take ~10 minutes easily otherwise
+# note(jp): remove this again when it becomes too expensive
 echo "expensive: the N largest files and directories in /tmp"
 du -ha /tmp | sort -r -h | head -n 100 || true
