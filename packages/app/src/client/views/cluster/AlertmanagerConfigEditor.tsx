@@ -17,8 +17,10 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "state/provider";
-
+import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import * as yamlParser from "js-yaml";
+
+import { debounce } from "lodash"
 
 import Skeleton from "@material-ui/lab/Skeleton";
 
@@ -43,8 +45,44 @@ const AlertmanagerConfigEditor = () => {
   const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
-  const handleConfigChange = useCallback((newConfig) => {
+  const validationCheck : (filename: string) => void = (
+    filename => {
+      const markers = editor.getModelMarkers({
+        resource: monaco.Uri.parse(filename)
+      });
+
+      if (markers.length === 0) {
+        let parsedData = null;
+
+        try {
+          parsedData = yamlParser.load(configRef.current, {
+            schema: yamlParser.FAILSAFE_SCHEMA,
+          });
+
+          alertmanagerConfigSchema
+            .isValid(parsedData)
+            .then(function (valid: boolean) {
+              setConfigValid(valid);
+            });
+        } catch (e) {
+          setConfigValid(false);
+        }
+      }
+      else
+        setConfigValid(false)
+    }
+  )
+
+  const validationCheckOnChangeStart = debounce(validationCheck, 1000, {
+    leading: true,
+    trailing: false
+  });
+  const checkValidationOnChangePause = debounce(validationCheck, 1000, { maxWait: 5000 });
+
+  const handleConfigChange = useCallback((newConfig, filename) => {
     configRef.current = newConfig
+    validationCheckOnChangeStart(filename);
+    checkValidationOnChangePause(filename);
   }, [])
 
   const handleSave = useCallback(() => {
@@ -57,14 +95,6 @@ const AlertmanagerConfigEditor = () => {
       )
     }
   }, [tenant?.name, dispatch])
-
-  const handleValidation = useCallback(() => {
-    alertmanagerConfigSchema
-      .isValid(yamlParser.load(configRef.current))
-      .then(function (valid: boolean) {
-        setConfigValid(valid);
-      });
-  }, [])
 
   if (!tenant)
     return (
@@ -100,28 +130,19 @@ const AlertmanagerConfigEditor = () => {
                   />
                 </Box>
               </CardContent>
-              <Button variant="contained" state="primary" onClick={handleSave}>
-                publish
-              </Button>
               <Button
                 variant="contained"
-                state="secondary"
-                onClick={handleValidation}
+                state="primary"
+                disabled={!configValid}
+                onClick={handleSave}
               >
-                validate
+                publish
               </Button>
-              <span>{" " + configValidToStr(configValid)}</span>
             </Card>
           </Box>
         </Box>
       </Layout>
     );
-};
-
-const configValidToStr = (isValid: boolean | null) => {
-  if (isValid === true) return "Valid Config";
-  else if (isValid === false) return "Config not valid";
-  return "";
 };
 
 export default AlertmanagerConfigEditor;
