@@ -292,10 +292,15 @@ export class DNSClient {
   }
 
   /**
-   * Perform HTTP request. If response body contains data, JSON-decode and
-   * return the resulting object. If the response body does not contain data
-   * (length 0), return `undefined`. Perform HTTP request error handling, see
-   * below.
+   * Perform HTTP request. If response is good (expected):
+   *
+   *  - if it is a 2xx response containing a response body: JSON-decode and
+   *    return the resulting object.
+   *  - if the response body does not contain data (length 0), return
+   *    `undefined`. This may also happen for expected 404 responses (e.g.
+   *    DELETE an unknown cluster entry (is already deleted))
+   *
+   * Perform HTTP request error handling, see below.
    */
   private async requestAndHandleErrors(
     method: "GET" | "DELETE" | "POST" | "PUT",
@@ -329,12 +334,26 @@ export class DNSClient {
         return undefined;
       } catch (e) {
         if (e instanceof got.RequestError) {
+          debugLogHTTPResponse(e.response);
+
+          // In the future, a DELETE may result in a 404 when the cluster isn't
+          // configured (already deleted) for the user that makes this request.
+          if (e.response?.statusCode === 404 && method === "DELETE") {
+            if (e.response?.body !== undefined) {
+              const bodytext = e.response?.body as string;
+              if (bodytext.includes("ERR_ENTITY_NOT_FOUND_FOR_USER")) {
+                log.info("%s: cluster already deleted for user");
+
+                // Good response, caller not interested in response body.
+                return undefined;
+              }
+            }
+          }
+
           // Emit as warning, not yet sure if that's fatal.
           // `e.code` may be `undefined`. `e.message` may be
           // "Response code 401 (Unauthorized)".
           log.warning("%s failed: %s", action, e.message);
-
-          debugLogHTTPResponse(e.response);
 
           if (e.response?.statusCode === 403) {
             die("DNS setup failed with a permanent error (403 HTTP response).");
