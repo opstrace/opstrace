@@ -17,13 +17,13 @@
 import * as yup from "yup";
 
 import {
-  PagerDutyImageConfig,
-  PagerDutyLinkConfig,
-  PagerDutyConfig
+  PagerdutyImageConfig,
+  PagerdutyLinkConfig,
+  PagerdutyConfig
 } from "./types";
 import { httpConfigSchema } from "./common";
 
-const pagerDutyImageConfigSchema: yup.SchemaOf<PagerDutyImageConfig> = yup
+const pagerdutyImageConfigSchema: yup.SchemaOf<PagerdutyImageConfig> = yup
   .object({
     href: yup.string(),
     source: yup.string(),
@@ -31,25 +31,25 @@ const pagerDutyImageConfigSchema: yup.SchemaOf<PagerDutyImageConfig> = yup
   })
   .noUnknown();
 
-const pagerDutyLinkConfigSchema: yup.SchemaOf<PagerDutyLinkConfig> = yup
+const pagerdutyLinkConfigSchema: yup.SchemaOf<PagerdutyLinkConfig> = yup
   .object({
     href: yup.string(),
     text: yup.string()
   })
   .noUnknown();
 
-export const pagerDutyConfigSchema: yup.SchemaOf<PagerDutyConfig> = yup
+export const pagerdutyConfigSchema: yup.SchemaOf<PagerdutyConfig> = yup
   .object({
     send_resolved: yup.boolean().default(true).meta({
       comment: "Whether or not to notify about resolved alerts."
     }),
-    routing_key: yup.string().defined().meta({
+    routing_key: yup.string().meta({
       comment:
-        "The following two options are mutually exclusive. The PagerDuty integration key (when using PagerDuty integration type `Events API v2`)."
+        "The PagerDuty integration key (when using PagerDuty integration type `Events API v2`). Mutually exclusive from `service_key`."
     }),
-    service_key: yup.string().defined().meta({
+    service_key: yup.string().meta({
       comment:
-        "The PagerDuty integration key (when using PagerDuty integration type `Prometheus`)."
+        "The PagerDuty integration key (when using PagerDuty integration type `Prometheus`). Mutually exclusive from `routing_key`."
     }),
     url: yup.string().url().meta({
       comment: "The URL to send API requests to",
@@ -92,12 +92,12 @@ export const pagerDutyConfigSchema: yup.SchemaOf<PagerDutyConfig> = yup
       .notRequired(),
     images: yup
       .array()
-      .of(pagerDutyImageConfigSchema)
+      .of(pagerdutyImageConfigSchema)
       .meta({ comment: "Images to attach to the incident." })
       .notRequired(),
     links: yup
       .array()
-      .of(pagerDutyLinkConfigSchema)
+      .of(pagerdutyLinkConfigSchema)
       .meta({ comment: "Links to attach to the incident." })
       .notRequired(),
     http_config: httpConfigSchema

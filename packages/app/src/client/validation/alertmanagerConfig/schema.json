@@ -180,7 +180,7 @@
       },
       "type": "object"
     },
-    "pager_duty_config": {
+    "pagerduty_config": {
       "properties": {
         "client": {
           "type": "string"
@@ -594,8 +594,8 @@
             "items": { "$ref": "#/definitions/opsgenie_config" },
             "type": "array"
           },
-          "pager_duty_configs": {
-            "items": { "$ref": "#/definitions/pager_duty_config" },
+          "pagerduty_configs": {
+            "items": { "$ref": "#/definitions/pagerduty_config" },
             "type": "array"
           },
           "pushover_configs": {

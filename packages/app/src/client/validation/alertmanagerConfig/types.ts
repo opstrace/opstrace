@@ -81,7 +81,7 @@ export type Receiver = {
   name: string;
   email_configs?: EmailConfig[];
   slack_configs?: SlackConfig[];
-  pager_duty_configs?: PagerDutyConfig[];
+  pagerduty_configs?: PagerdutyConfig[];
   pushover_configs?: PushoverConfig[];
   opsgenie_configs?: OpsgenieConfig[];
   victorops_configs?: VictorOps[];
@@ -128,29 +128,29 @@ export type OpsgenieConfig = {
   http_config?: HttpConfig;
 };
 
-export type PagerDutyImageConfig = {
+export type PagerdutyImageConfig = {
   href?: string;
   source?: string;
   alt?: string;
 };
 
-export type PagerDutyLinkConfig = {
+export type PagerdutyLinkConfig = {
   href?: string;
   text?: string;
 };
 
-export type PagerDutyConfig = {
+export type PagerdutyConfig = {
   send_resolved?: boolean;
-  routing_key: string;
-  service_key: string;
+  routing_key?: string;
+  service_key?: string;
   url?: string;
   client?: string;
   client_url?: string;
   description?: string;
   severity?: string;
   details?: Record<string, string>;
-  images?: PagerDutyImageConfig[];
-  links?: PagerDutyLinkConfig[];
+  images?: PagerdutyImageConfig[];
+  links?: PagerdutyLinkConfig[];
   http_config?: HttpConfig;
 };
 

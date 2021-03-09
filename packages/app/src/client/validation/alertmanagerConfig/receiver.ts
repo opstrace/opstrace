@@ -20,7 +20,7 @@ import { Receiver } from "./types";
 
 import { emailConfigSchema } from "./emailConfig";
 import { slackConfigSchema } from "./slackConfig";
-import { pagerDutyConfigSchema } from "./pagerDutyConfig";
+import { pagerdutyConfigSchema } from "./pagerdutyConfig";
 import { pushoverConfigSchema } from "./pushoverConfig";
 import { opsgenieConfigSchema } from "./opsgenieConfig";
 import { victoropsConfigSchema } from "./victoropsConfig";
@@ -32,7 +32,7 @@ export const receiverSchema: yup.SchemaOf<Receiver> = yup
     name: yup.string().defined(),
     email_configs: yup.array().of(emailConfigSchema).notRequired(),
     slack_configs: yup.array().of(slackConfigSchema).notRequired(),
-    pager_duty_configs: yup.array().of(pagerDutyConfigSchema).notRequired(),
+    pagerduty_configs: yup.array().of(pagerdutyConfigSchema).notRequired(),
     pushover_configs: yup.array().of(pushoverConfigSchema).notRequired(),
     opsgenie_configs: yup.array().of(opsgenieConfigSchema).notRequired(),
     victorops_configs: yup.array().of(victoropsConfigSchema).notRequired(),
