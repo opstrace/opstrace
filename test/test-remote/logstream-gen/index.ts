@@ -395,9 +395,14 @@ function parseCmdlineArgs() {
 
   if (CFG.bearer_token_file !== "") {
     try {
-      BEARER_TOKEN = fs.readFileSync(CFG.bearer_token_file, {
-        encoding: "utf8"
-      });
+      // Strip leading and trailing whitespace. Otherwise, for example a
+      // trailing newline (as it's written by any sane editor like e.g. vim)
+      // would result in an invalid file.
+      BEARER_TOKEN = fs
+        .readFileSync(CFG.bearer_token_file, {
+          encoding: "utf8"
+        })
+        .trim();
     } catch (err) {
       log.error(
         "failed to read file %s: %s",
@@ -1266,13 +1271,13 @@ function setupPromExporter() {
 
   const httpapp = express();
 
-  httpapp.get("/metrics", function (
-    req: express.Request,
-    res: express.Response
-  ) {
-    log.info("handling request to /metrics");
-    res.send(promclient.register.metrics());
-  });
+  httpapp.get(
+    "/metrics",
+    function (req: express.Request, res: express.Response) {
+      log.info("handling request to /metrics");
+      res.send(promclient.register.metrics());
+    }
+  );
 
   const httpserver = httpapp.listen(CFG.http_server_port, () =>
     log.info("HTTP server listening on port %s", CFG.http_server_port)
