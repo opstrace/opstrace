@@ -19,7 +19,7 @@ import * as yup from "yup";
 import { Route } from "./types";
 import { labelNameSchema } from "./common";
 
-let routeSchema: yup.SchemaOf<Route> = yup
+const routeSchema: yup.SchemaOf<Route> = yup
   .object({
     receiver: yup.string(),
     group_by: yup
@@ -66,7 +66,15 @@ This effectively disables aggregation entirely, passing through all alerts as-is
     repeat_interval: yup.string().default("4h").meta({
       comment:
         "How long to wait before sending a notification again if it has already been sent successfully for an alert. (Usually ~3h or more)."
-    })
+    }),
+    routes: yup.lazy(() =>
+      yup
+        .array()
+        .of(routeSchema)
+        .default(undefined)
+        .meta({ comment: "Zero or more child routes." })
+        .notRequired()
+    )
   })
   .meta({
     url: "https://www.prometheus.io/docs/alerting/latest/configuration/#route"
@@ -74,12 +82,12 @@ This effectively disables aggregation entirely, passing through all alerts as-is
   .noUnknown();
 
 // can't use "route" in the definition of route :-)
-routeSchema = routeSchema.shape({
-  routes: yup
-    .array()
-    .of(routeSchema)
-    .meta({ comment: "Zero or more child routes." })
-    .notRequired()
-});
+// routeSchema = routeSchema.shape({
+//   routes: yup
+//     .array()
+//     .of(routeSchema)
+//     .meta({ comment: "Zero or more child routes." })
+//     .notRequired()
+// });
 
 export { routeSchema };
