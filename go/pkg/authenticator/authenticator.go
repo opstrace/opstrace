@@ -20,17 +20,42 @@ import (
 	"strings"
 )
 
-// HTTP Request header used by GetTenant when disableAPIAuthentication is true and requireTenantName is nil.
-// This is only meant for use in testing, and lines up with the tenant HTTP header used by Cortex and Loki.
+// HTTP Request header used by GetTenant when disableAPIAuthentication is true
+// and requireTenantName is nil. This is only meant for use in testing, and
+// lines up with the tenant HTTP header used by Cortex and Loki.
 const TestTenantHeader = "X-Scope-OrgID"
 
-// Validates and returns the tenant name embedded in the request's Authorization header and returns (tenantName, true),
-// or writes a 401 error to the response and returns ('', false) if the tenant was invalid or not found.
-//
-// If expectedTenantName is non-nil, then all requests are required to have a matching tenant,
-// otherwise the tenant may vary per-request and is extracted from the verified Authorization header.
-//
-// If disableAPIAuthentication is true, then the expectedTenantName or X-Scope-OrgID is used without verification.
+/*
+Return 2-tuple `(tenantName: string, ok: bool)`.
+
+If `ok` is `false` then do not use tenant name (empty string).
+
+embedded in the request's Authorization header and
+returns (tenantName, true), or writes a 401 error to the response and returns
+('', false) if the tenant was invalid or not found.
+
+If expectedTenantName is non-nil, then all requests are required to have a
+matching tenant, otherwise the tenant may vary per-request and is extracted
+from the verified Authorization header.
+
+If disableAPIAuthentication is true, then the expectedTenantName or
+X-Scope-OrgID is used without verification.
+
+expected.. |  disableAPIAuthentication | behavior
+--------------------------------------------------------------------------
+ set       |  false (proof required)   | production setting: common
+           |                           |   authn proof tenant name must match
+           |                           |
+ set       |  true (no proof req)      | production setting: not so common
+           |                           |   authn proof tenant name ignored
+           |                           |
+ not set   |  false (proof req)        | production setting:
+           |                           |  deployment supports more than one tenant
+           |                           |  tenant name inferred from (verified) authn proof
+           |                           |
+ not set   |  true (no proof req)      | testing setting:
+           |                           |  tenant name read from X-Scope-OrgID header
+*/
 func GetTenant(
 	w http.ResponseWriter,
 	r *http.Request,

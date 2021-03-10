@@ -22,6 +22,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+/*
+The error message corresponding to the error returned in the 2-tuple is meant
+to be exposed in an HTTP response. That is, it must not expose too much detail
+(trade-off between debuggability / devX and security).
+*/
 func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) {
 	// Perform RFC 7519-compliant JWT verification (standard claims, such as
 	// exp and nbf, but also cryptographic signature verification). Expect a
@@ -70,11 +75,6 @@ func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) 
 
 	return tenantNameFromToken, nil
 }
-
-// func logAndReturnErr(errstr string) error {
-// 	log.Info(errstr)
-// 	return fmt.Errorf(errstr)
-// }
 
 /*
 First return value is of type `*rsa.PublicKey`. However, need to specify as
