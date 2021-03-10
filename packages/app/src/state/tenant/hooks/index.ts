@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { default as useAlertmanagerConfig } from "./useAlertmanagerConfig";
+export { default as useAlertmanager } from "./useAlertmanager";
 export { default as useTenant } from "./useTenant";

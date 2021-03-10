@@ -15,8 +15,13 @@
  */
 import { SubscribeToTenantListSubscription } from "state/clients/graphqlClient";
 
+type Alertmanager = {
+  config: string;
+  online: boolean;
+}
+
 type TenantVirtualFields = {
-  alertmanager_config?: string;
+  alertmanager?: Alertmanager;
 };
 
 export type Tenant = SubscribeToTenantListSubscription["tenant"][0] &

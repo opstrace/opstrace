@@ -3554,27 +3554,18 @@ export type DeleteTenantMutation = {
   delete_tenant_by_pk?: Maybe<Pick<Tenant, "name">>;
 };
 
+export type GetAlertmanagerQueryVariables = Exact<{
+  tenant_id: Scalars["String"];
+}>;
+
+export type GetAlertmanagerQuery = {
+  tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
+};
+
 export type GetTenantsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetTenantsQuery = {
   tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
-};
-
-export type LoadAlertmanagerConfigQueryVariables = Exact<{
-  tenant_name: Scalars["String"];
-}>;
-
-export type LoadAlertmanagerConfigQuery = {
-  tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
-};
-
-export type SaveAlertmanagerConfigMutationVariables = Exact<{
-  tenant_name: Scalars["String"];
-  new_config: Scalars["String"];
-}>;
-
-export type SaveAlertmanagerConfigMutation = {
-  update_tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
 };
 
 export type SubscribeToTenantListSubscriptionVariables = Exact<{
@@ -3583,6 +3574,15 @@ export type SubscribeToTenantListSubscriptionVariables = Exact<{
 
 export type SubscribeToTenantListSubscription = {
   tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
+};
+
+export type SaveAlertmanagerMutationVariables = Exact<{
+  tenant_id: Scalars["String"];
+  config: Scalars["String"];
+}>;
+
+export type SaveAlertmanagerMutation = {
+  update_tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
 };
 
 export type CreateUserMutationVariables = Exact<{
@@ -4161,6 +4161,13 @@ export const DeleteTenantDocument = gql`
     }
   }
 `;
+export const GetAlertmanagerDocument = gql`
+  query GetAlertmanager($tenant_id: String!) {
+    tenant_by_pk(name: $tenant_id) {
+      alertmanager_config
+    }
+  }
+`;
 export const GetTenantsDocument = gql`
   query GetTenants {
     tenant {
@@ -4170,29 +4177,22 @@ export const GetTenantsDocument = gql`
     }
   }
 `;
-export const LoadAlertmanagerConfigDocument = gql`
-  query LoadAlertmanagerConfig($tenant_name: String!) {
-    tenant_by_pk(name: $tenant_name) {
-      alertmanager_config
-    }
-  }
-`;
-export const SaveAlertmanagerConfigDocument = gql`
-  mutation SaveAlertmanagerConfig($tenant_name: String!, $new_config: String!) {
-    update_tenant_by_pk(
-      pk_columns: { name: $tenant_name }
-      _set: { alertmanager_config: $new_config }
-    ) {
-      alertmanager_config
-    }
-  }
-`;
 export const SubscribeToTenantListDocument = gql`
   subscription SubscribeToTenantList {
     tenant {
       name
       created_at
       type
+    }
+  }
+`;
+export const SaveAlertmanagerDocument = gql`
+  mutation SaveAlertmanager($tenant_id: String!, $config: String!) {
+    update_tenant_by_pk(
+      pk_columns: { name: $tenant_id }
+      _set: { alertmanager_config: $config }
+    ) {
+      alertmanager_config
     }
   }
 `;
@@ -4827,6 +4827,22 @@ export function getSdk(
         )
       );
     },
+    GetAlertmanager(
+      variables: GetAlertmanagerQueryVariables
+    ): Promise<{
+      data?: GetAlertmanagerQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetAlertmanagerQuery>(
+          print(GetAlertmanagerDocument),
+          variables
+        )
+      );
+    },
     GetTenants(
       variables?: GetTenantsQueryVariables
     ): Promise<{
@@ -4838,38 +4854,6 @@ export function getSdk(
     }> {
       return withWrapper(() =>
         client.rawRequest<GetTenantsQuery>(print(GetTenantsDocument), variables)
-      );
-    },
-    LoadAlertmanagerConfig(
-      variables: LoadAlertmanagerConfigQueryVariables
-    ): Promise<{
-      data?: LoadAlertmanagerConfigQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<LoadAlertmanagerConfigQuery>(
-          print(LoadAlertmanagerConfigDocument),
-          variables
-        )
-      );
-    },
-    SaveAlertmanagerConfig(
-      variables: SaveAlertmanagerConfigMutationVariables
-    ): Promise<{
-      data?: SaveAlertmanagerConfigMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SaveAlertmanagerConfigMutation>(
-          print(SaveAlertmanagerConfigDocument),
-          variables
-        )
       );
     },
     SubscribeToTenantList(
@@ -4884,6 +4868,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<SubscribeToTenantListSubscription>(
           print(SubscribeToTenantListDocument),
+          variables
+        )
+      );
+    },
+    SaveAlertmanager(
+      variables: SaveAlertmanagerMutationVariables
+    ): Promise<{
+      data?: SaveAlertmanagerMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<SaveAlertmanagerMutation>(
+          print(SaveAlertmanagerDocument),
           variables
         )
       );

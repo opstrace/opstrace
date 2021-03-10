@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { pick, mergeDeepRight } from "ramda";
+
 import { createReducer, ActionType } from "typesafe-actions";
 import { Tenant, Tenants } from "./types";
 import * as actions from "./actions";
@@ -42,32 +44,25 @@ export const reducer = createReducer<TenantState, TenantActions>(
     })
   )
   .handleAction(
-    actions.alertmanagerConfigLoaded,
+    actions.alertmanagerLoaded,
     (state, action): TenantState => {
+
       const tenants = state.tenants.map((tenant: Tenant) => {
-        if (tenant.name === action.payload.tenantName)
-          return { ...tenant, alertmanager_config: action.payload.config };
+        if (tenant.name === action.payload.tenantId)
+          return mergeDeepRight(tenant, {alertmanager: pick(["config", "online"])(action.payload)})
         else return tenant;
       });
-
-      return {
-        ...state,
-        tenants
-      };
+      return {...state, tenants}
     }
   )
   .handleAction(
-    actions.saveAlertmanagerConfig,
+    actions.updateAlertmanager,
     (state, action): TenantState => {
       const tenants = state.tenants.map((tenant: Tenant) => {
-        if (tenant.name === action.payload.tenantName)
-          return { ...tenant, alertmanager_config: action.payload.config };
+        if (tenant.name === action.payload.tenantId)
+          return mergeDeepRight(tenant, {alertmanager: {online: true, config: action.payload.config}})
         else return tenant;
       });
-
-      return {
-        ...state,
-        tenants
-      };
+      return {...state, tenants}
     }
   );

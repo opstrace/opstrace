@@ -18,23 +18,23 @@ import { useSelector, useDispatch, State } from "state/provider";
 import { getTenantList } from "./useTenantList";
 import { selectTenant } from "./useTenant";
 
-import { loadAlertmanagerConfig } from "state/tenant/actions";
+import { getAlertmanager } from "state/tenant/actions";
 
-export const selectAlertmanagerConfig = (state: State, tenantName: string) => {
-  return selectTenant(getTenantList(state), tenantName)?.alertmanager_config;
+export const selectAlertmanager = (state: State, tenantName: string) => {
+  return selectTenant(getTenantList(state), tenantName)?.alertmanager;
 };
 /**
  * Subscribes to tenants and will update on
  * any changes. Automatically unsubscribeFromTenantLists
  * on unmount.
  */
-export default function useAlertmanagerConfig(tenantName: string) {
-  const config = useSelector((state: State) =>
-    selectAlertmanagerConfig(state, tenantName)
+export default function useAlertmanager(tenantName: string) {
+  const data = useSelector((state: State) =>
+    selectAlertmanager(state, tenantName)
   );
   const dispatch = useDispatch();
 
-  if (!config) dispatch(loadAlertmanagerConfig(tenantName));
+  if (!data) dispatch(getAlertmanager(tenantName));
 
-  return config;
+  return data;
 }

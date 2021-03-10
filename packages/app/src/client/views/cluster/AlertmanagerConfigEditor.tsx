@@ -33,8 +33,8 @@ import { YamlEditor } from "client/components/Editor";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 
-import { useTenant, useAlertmanagerConfig } from "state/tenant/hooks";
-import { saveAlertmanagerConfig } from "state/tenant/actions";
+import { useTenant, useAlertmanager } from "state/tenant/hooks";
+import { updateAlertmanager } from "state/tenant/actions";
 
 import {
   alertmanagerConfigSchema,
@@ -48,7 +48,7 @@ type validationCheckOptions = {
 const AlertmanagerConfigEditor = () => {
   const params = useParams<{ tenant: string }>();
   const tenant = useTenant(params.tenant);
-  const savedConfig = useAlertmanagerConfig(params.tenant) || "";
+  const savedConfig = useAlertmanager(params.tenant)?.config || "";
   const configRef = useRef(savedConfig);
   const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
@@ -75,19 +75,15 @@ const AlertmanagerConfigEditor = () => {
           alertmanagerConfigSchema
             .validate(parsedData, { strict: true })
             .then((value: object) => {
-              console.log("yaml match yup schema", value);
               setConfigValid(true);
             })
             .catch((err: { name: string; errors: string[] }) => {
-              console.log("yaml is not valid", err.errors);
               setConfigValid(false);
             });
         } catch (e) {
-          console.log("unable to parse yaml", e);
           setConfigValid(false);
         }
       } else {
-        console.log("model markers found", markers);
         setConfigValid(false);
       }
     };
@@ -108,8 +104,8 @@ const AlertmanagerConfigEditor = () => {
   const handleSave = useCallback(() => {
     if (tenant?.name) {
       dispatch(
-        saveAlertmanagerConfig({
-          tenantName: tenant.name,
+        updateAlertmanager({
+          tenantId: tenant.name,
           config: configRef.current
         })
       );

@@ -1,7 +1,7 @@
 # TODO: NTW - swap out with a call to the action when that is available
 
-query LoadAlertmanagerConfig($tenant_name: String!) {
-  tenant_by_pk(name: $tenant_name) {
+query GetAlertmanager($tenant_id: String!) {
+  tenant_by_pk(name: $tenant_id) {
     alertmanager_config
   }
 }

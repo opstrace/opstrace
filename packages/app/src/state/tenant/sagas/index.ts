@@ -18,15 +18,14 @@ import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
-// import { selectAlertmanagerConfig } from "state/tenant/hooks/useAlertmanagerConfig";
 
 export default function* tenantTaskManager() {
   const sagas = [
     tenantListSubscriptionManager,
     addTenantListener,
     deleteTenantListener,
-    loadAlertmanagerConfigListener,
-    saveAlertmanagerConfig
+    getAlertmanagerListener,
+    updateAlertmanager
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
@@ -79,24 +78,23 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
   }
 }
 
-function* loadAlertmanagerConfigListener() {
-  yield takeEvery(actions.loadAlertmanagerConfig, loadAlertmanagerConfig);
+function* getAlertmanagerListener() {
+  yield takeEvery(actions.getAlertmanager, getAlertmanager);
 }
 
-function* loadAlertmanagerConfig(
-  action: ReturnType<typeof actions.loadAlertmanagerConfig>
-) {
+function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
   try {
-    const response = yield graphqlClient.LoadAlertmanagerConfig({
-      tenant_name: action.payload
+    const response = yield graphqlClient.GetAlertmanager({
+      tenant_id: action.payload
     });
 
     if (response.data?.tenant_by_pk?.alertmanager_config)
       yield put({
-        type: "ALERTMANAGER_CONFIG_LOADED",
+        type: "ALERTMANAGER_LOADED",
         payload: {
-          tenantName: action.payload,
-          config: response.data?.tenant_by_pk?.alertmanager_config
+          tenantId: action.payload,
+          config: response.data?.tenant_by_pk?.alertmanager_config,
+          online: true
         }
       });
   } catch (err) {
@@ -104,16 +102,16 @@ function* loadAlertmanagerConfig(
   }
 }
 
-function* saveAlertmanagerConfig() {
+function* updateAlertmanager() {
   while (true) {
-    const action: ReturnType<
-      typeof actions.saveAlertmanagerConfig
-    > = yield take(actions.saveAlertmanagerConfig);
+    const action: ReturnType<typeof actions.updateAlertmanager> = yield take(
+      actions.updateAlertmanager
+    );
 
     try {
-      yield graphqlClient.SaveAlertmanagerConfig({
-        tenant_name: action.payload.tenantName,
-        new_config: action.payload.config
+      yield graphqlClient.SaveAlertmanager({
+        tenant_id: action.payload.tenantId,
+        config: action.payload.config
       });
     } catch (err) {
       console.error(err);
