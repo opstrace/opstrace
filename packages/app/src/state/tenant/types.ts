@@ -15,7 +15,7 @@
  */
 import { SubscribeToTenantListSubscription } from "state/clients/graphqlClient";
 
-type Alertmanager = {
+export type Alertmanager = {
   config: string;
   online?: boolean;
 }

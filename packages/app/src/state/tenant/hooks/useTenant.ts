@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import { createSelector } from "reselect";
 import { useSelector, State } from "state/provider";
-import { Tenants } from "state/tenant/types";
-import { getTenantList } from "./useTenantList";
 
-export const selectTenant = (tenants: Tenants, tenantName: string) =>
-  tenants.find(t => t.name === tenantName);
+export const selectTenant = createSelector(
+  (state, _) => state.tenants.tenants,
+  (_: State, tenantName: string) => tenantName,
+  (tenants, tenantName: string) => tenants[tenantName]
+);
 
 export default function useTenant(tenantName: string) {
-  return useSelector((state: State) =>
-    selectTenant(getTenantList(state), tenantName)
-  );
+  return useSelector((state: State) => selectTenant(state, tenantName));
 }
