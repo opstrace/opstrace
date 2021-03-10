@@ -60,7 +60,9 @@ steps:
       - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-aws/bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"
     key: "cleanup-tmp"
-    depends_on: "preamble"
+    depends_on:
+      - "preamble"
+      - "unit-tests"
     allow_dependency_failure: true
     command:
       - source ci/wipe-bk-tmp-dir.sh

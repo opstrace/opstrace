@@ -1786,7 +1786,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{job=\"kubelet\", instance=~\"$instance\"}[5m])) by (instance, verb, url, le))",
+              "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_duration_seconds_bucket{job=\"kubelet\", instance=~\"$instance\"}[5m])) by (instance, verb, url, le))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{instance}} {{verb}} {{url}}",
@@ -2118,7 +2118,7 @@
         "multi": false,
         "name": "instance",
         "options": [],
-        "query": "label_values(kubelet_runtime_operations{job=\"kubelet\"}, instance)",
+        "query": "label_values(kubelet_runtime_operations_total{job=\"kubelet\"}, instance)",
         "refresh": 2,
         "regex": "",
         "sort": 0,

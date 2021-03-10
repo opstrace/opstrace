@@ -613,7 +613,13 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "$$hashKey": "object:225",
+          "alias": "/.*Total.*/",
+          "yaxis": 2
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -629,13 +635,20 @@
           "interval": "",
           "legendFormat": "bytes per entry",
           "refId": "B"
+        },
+        {
+          "expr": "sum(rate(loki_distributor_bytes_received_total[5m]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Total bytes per second",
+          "refId": "C"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS]  Rate of log entries vs. bytes per entry (5m mean) ALL tenants",
+      "title": "[LOGS]  Rate of log entries vs. bytes per entry; total bytes per second (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -652,6 +665,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:195",
           "format": "short",
           "label": "rate [1/s]",
           "logBase": 1,
@@ -660,7 +674,8 @@
           "show": true
         },
         {
-          "format": "short",
+          "$$hashKey": "object:196",
+          "format": "binBps",
           "label": "",
           "logBase": 1,
           "max": null,
@@ -840,20 +855,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "job:loki_request_duration_seconds:50quantile{job=\"loki.ingester\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "{{job}} p50",
-          "refId": "A"
-        },
-        {
-          "expr": "job:loki_request_duration_seconds:99quantile{job=\"loki.ingester\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "{{job}} p99",
-          "refId": "B"
-        },
-        {
           "expr": "histogram_quantile(0.99, sum by (le) (job_route:loki_request_duration_seconds_bucket:sum_rate{job=\"loki.ingester\"})) ",
           "interval": "",
           "legendFormat": "p99",
@@ -885,7 +886,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS]  job:loki_request_duration_seconds (p50, p99)",
+      "title": "[LOGS] Loki request latency (p50, p95, p99)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -901,7 +902,7 @@
       },
       "yaxes": [
         {
-          "format": "ms",
+          "format": "s",
           "label": null,
           "logBase": 10,
           "max": null,
@@ -1081,7 +1082,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[Metrics] Total number of Operations",
+      "title": "[METRICS] Total number of Operations",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1656,7 +1657,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -1771,7 +1772,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -2369,6 +2370,227 @@
       }
     },
     {
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": null,
+            "displayMode": "auto",
+            "filterable": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": []
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "__name__"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 20
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "endpoint"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 40
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "container"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 40
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instance"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 40
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 90
+      },
+      "id": 75,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Time"
+          }
+        ]
+      },
+      "pluginVersion": "7.4.3",
+      "targets": [
+        {
+          "expr": "kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\"}\n",
+          "format": "table",
+          "interval": "",
+          "legendFormat": "",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "[WIP] Memory - OOMKills",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 98
+      },
+      "hiddenSeries": false,
+      "id": 76,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null as zero",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(kube_pod_container_status_running)",
+          "interval": "",
+          "legendFormat": "RUNNING",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(kube_pod_container_status_terminated)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "TERMINATED",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(kube_pod_container_status_ready)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "READY",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(kube_pod_container_status_waiting)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "WAITING",
+          "refId": "D"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Pod States (log)",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:319",
+          "format": "short",
+          "label": null,
+          "logBase": 10,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:320",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -2387,7 +2609,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 90
+        "y": 98
       },
       "hiddenSeries": false,
       "id": 55,
@@ -2482,7 +2704,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 98
+        "y": 106
       },
       "hiddenSeries": false,
       "id": 66,
@@ -2578,7 +2800,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 98
+        "y": 106
       },
       "hiddenSeries": false,
       "id": 67,
@@ -2675,7 +2897,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 106
+        "y": 114
       },
       "hiddenSeries": false,
       "id": 12,
@@ -2804,7 +3026,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 115
+        "y": 123
       },
       "hiddenSeries": false,
       "id": 14,

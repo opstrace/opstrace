@@ -28,6 +28,7 @@ export type Tenant = SubscribeToTenantListSubscription["tenant"][0] &
   TenantVirtualFields;
 
 export type Tenants = Tenant[];
+export type TenantRecords = Record<string, Tenant>;
 
 // use this same id to unsubscribe
 export type SubscriptionID = number;

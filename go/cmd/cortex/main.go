@@ -15,9 +15,13 @@
 package main
 
 import (
+	"bytes"
 	"flag"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -100,5 +104,25 @@ func main() {
 
 	router.Handle("/metrics", promhttp.Handler())
 	router.Use(middleware.PrometheusMetrics("cortex_api_proxy"))
+
+	// Hook into reverse proxy for flexible treatment of responses to requests
+	// to `/api/v1/push`.
+	distributorProxy.Revproxy.ModifyResponse = CortexPushRewrite429
+
 	log.Fatalf("terminated: %s", http.ListenAndServe(listenAddress, router))
+}
+
+func CortexPushRewrite429(resp *http.Response) (err error) {
+	if strings.Contains(resp.Request.URL.Path, "/api/v1/push") {
+		if resp.StatusCode == 429 {
+			resp.StatusCode = 503
+			errmsg := "429-to-503"
+			bodybytes := []byte(errmsg)
+			resp.Body = ioutil.NopCloser(bytes.NewReader(bodybytes))
+			resp.ContentLength = int64(len(bodybytes))
+			resp.Header.Set("Content-Length", strconv.Itoa(len(bodybytes)))
+		}
+	}
+
+	return nil
 }

@@ -24,23 +24,46 @@ import (
 	"github.com/opstrace/opstrace/go/pkg/authenticator"
 )
 
-// TenantReverseProxy is a proxy that adds a specified tenant name as an HTTP request header.
+// TenantReverseProxy is an HTTP reverse proxy that communicates the static or
+// dynamic tenant name tenant name via an HTTP request header to its upstream
+// (backend).
 //
-// If tenantName is non-nil, then all requests are expected to be for that tenant, and the
-// Authentication header/Bearer token will be checked for a matching tenant if !disableAPIAuthentication.
+// tenantName |  disableAPIAuthentication | behavior
+//  --------------------------------------------------------------------------
+//  set       |  false (proof required)   | production setting: common
+//            |                           |   authn proof tenant name must match
+//            |                           |
+//  set       |  true (no proof req)      | production setting: not so common
+//            |                           |   authn proof tenant name ignored
+//            |                           |
+//  not set   |  false (proof req)        | production setting:
+//            |                           |  deployment supports more than one tenant
+//            |                           |  tenant name inferred from (verified) authn proof
+//            |                           |
+//  not set   |  true (no proof req)      | testing setting:
+//            |                           |  tenant name read from X-Scope-OrgID header
+
+// If `tenantName` is non-nil, then all requests coming in at the frontend side
+// of the reverse proxy are treated to be for that tenant
+
+// `disableAPIAuthentication` controls the underlying authenticator for
+// Opstrace tenant API authentication tokens.Iif !disableAPIAuthentication,
+// incoming requests at the frontend side are required to carry
+// cryptographically valid authentication proof.
 //
-// If tenantName is nil, then the tenant will be extracted from the requests on a per-request basis,
-// either from the Authentication header/Bearer token, or from a custom "X-Scope-OrgID" header if
-// disableAPIAuthentication is true.
+// If `tenantName` is nil, the tenant name is extracted from each HTTP request,
+// either from the  tenant API authentication token, or from a custom
+// "X-Scope-OrgID" header if disableAPIAuthentication is true.
 //
-// If backendPathReplacement is non-nil, then it will be invoked with the request URL, and the request
-// Path and RawPath (respectively) will be updated with its return values.
-// This is to allow e.g. /api/v1/* -> /foo/* redirects but can be used for any replacement.
+// If backendPathReplacement is non-nil, then it is expected to be a function.
+// It will be invoked with the request URL, and the request Path and RawPath
+// (respectively) will be updated with its return values. This is to allow e.g.
+// /api/v1/* -> /foo/* rewrites, but can be used for any replacement.
 type TenantReverseProxy struct {
 	tenantName               *string
 	headerName               string
 	backendURL               *url.URL
-	revproxy                 *httputil.ReverseProxy
+	Revproxy                 *httputil.ReverseProxy
 	disableAPIAuthentication bool
 }
 
@@ -56,7 +79,7 @@ func NewReverseProxyFixedTenant(
 		httputil.NewSingleHostReverseProxy(backendURL),
 		disableAPIAuthentication,
 	}
-	trp.revproxy.ErrorHandler = proxyErrorHandler
+	trp.Revproxy.ErrorHandler = proxyErrorHandler
 	if backendURL.Path != "" && backendURL.Path != "/" {
 		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
 	}
@@ -74,7 +97,7 @@ func NewReverseProxyDynamicTenant(
 		httputil.NewSingleHostReverseProxy(backendURL),
 		disableAPIAuthentication,
 	}
-	trp.revproxy.ErrorHandler = proxyErrorHandler
+	trp.Revproxy.ErrorHandler = proxyErrorHandler
 	if backendURL.Path != "" && backendURL.Path != "/" {
 		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
 	}
@@ -87,7 +110,7 @@ func NewReverseProxyDynamicTenant(
 func (trp *TenantReverseProxy) ReplacePaths(reqPathReplacement func(*url.URL) string) *TenantReverseProxy {
 	if reqPathReplacement != nil {
 		// Requests: Update URL path with replacement
-		trp.revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
+		trp.Revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
 	}
 	return trp
 }
@@ -129,7 +152,7 @@ func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Re
 
 	// Add the tenant in the request header and then forward the request to the backend.
 	r.Header.Add(trp.headerName, tenantName)
-	trp.revproxy.ServeHTTP(w, r)
+	trp.Revproxy.ServeHTTP(w, r)
 }
 
 func proxyErrorHandler(resp http.ResponseWriter, r *http.Request, proxyerr error) {

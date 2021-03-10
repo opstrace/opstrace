@@ -14,35 +14,40 @@
  * limitations under the License.
  */
 
-import { pick, mergeDeepRight } from "ramda";
+import { pluck, zipObj, pick, mergeDeepRight } from "ramda";
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { Tenant, Tenants } from "./types";
+import { Tenant, TenantRecords } from "./types";
+
 import * as actions from "./actions";
 
 type TenantActions = ActionType<typeof actions>;
 
 type TenantState = {
   loading: boolean;
-  tenants: Tenants;
+  tenants: TenantRecords;
 };
 
 const TenantInitialState: TenantState = {
   loading: true,
-  tenants: []
+  tenants: {}
 };
 
 export const reducer = createReducer<TenantState, TenantActions>(
   TenantInitialState
 )
   .handleAction(
-    actions.setTenantList,
-    (state, action): TenantState => ({
+  actions.setTenantList,
+  (state, action): TenantState => {
+    const tenantIds: string[] = pluck("name", action.payload);
+    const tenants: TenantRecords = zipObj(tenantIds, action.payload);
+    return {
       ...state,
-      tenants: action.payload,
+      tenants: tenants,
       loading: false
-    })
-  )
+    };
+  }
+)
   .handleAction(
     actions.alertmanagerLoaded,
     (state, action): TenantState => {
