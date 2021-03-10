@@ -61,7 +61,6 @@ func GetTenant(
 	expectedTenantName *string,
 	disableAPIAuthentication bool,
 ) (string, bool) {
-
 	if expectedTenantName != nil {
 		if !disableAPIAuthentication {
 			// Authenticate and expect specific tenant. Otherwise send 401 response.

@@ -45,7 +45,7 @@ func getAuthTokenUnverifiedFromHeaderOr401(w http.ResponseWriter, r *http.Reques
 	return authTokenUnverified, true
 }
 
-/* Write 401 response and return false */
+/* Write 401 response and return false. */
 func exit401(resp http.ResponseWriter, errmsg string) bool {
 	// `errmsg` is written to response body and should therefore be short and
 	// not undermine security. Useful hints: yes (such as "authentication token
