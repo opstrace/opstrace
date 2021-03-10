@@ -202,6 +202,35 @@ func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
 	assert.Equal(t, "bad authentication token", getStrippedBody(resp))
 }
 
+// func TestReverseProxy_CortexPushRewrite429(t *testing.T) {
+// 	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
+// 	defer upstreamClose()
+
+// 	// Reuse the same backend for both the querier and distributor requests.
+// 	disableAPIAuth := true
+// 	rp := NewReverseProxyFixedTenant(tenantName, headerName, upstreamURL, disableAPIAuth)
+
+// 	rp.Revproxy.ModifyResponse = cortexproxy.CortexPushRewrite429
+
+// 	// Create a request to the proxy (not to the backend/upstream). The URL
+// 	// does not really matter because we're bypassing the actual router.
+// 	req := httptest.NewRequest("GET", "http://localhost", nil)
+// 	w := httptest.NewRecorder()
+// 	rp.HandleWithProxy(w, req)
+// 	resp := w.Result()
+// 	assert.Equal(t, 200, resp.StatusCode)
+// 	// Check that the proxy's upstream has indeed written the response.
+// 	assert.Equal(t, "/ test", getStrippedBody(resp))
+
+// 	req = httptest.NewRequest("GET", "http://localhost/robots.txt", nil)
+// 	w = httptest.NewRecorder()
+// 	rp.HandleWithProxy(w, req)
+// 	resp = w.Result()
+// 	assert.Equal(t, 200, resp.StatusCode)
+// 	// Check that the proxy's upstream has indeed written the response.
+// 	assert.Equal(t, "/robots.txt test", getStrippedBody(resp))
+// }
+
 // Read all response body bytes, and return response body as string, with
 // leading and trailing whitespace stripped.
 func getStrippedBody(resp *http.Response) string {
