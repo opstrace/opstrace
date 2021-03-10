@@ -23,8 +23,8 @@
   "nodeExporter": "quay.io/prometheus/node-exporter:v0.18.1",
   "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
   "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.42.1",
-  "graphqlEngine": "opstrace/graphql:c09a69df189c78baad21401baa08e00f",
-  "app": "opstrace/app:c09a69df189c78baad21401baa08e00f",
+  "graphqlEngine": "opstrace/graphql:c50456d6e19ba4b5fd16779b38fd1d1d",
+  "app": "opstrace/app:c50456d6e19ba4b5fd16779b38fd1d1d",
   "redis": "bitnami/redis:6.0.9",
   "postgresClient": "tmaier/postgresql-client@sha256:3702d3bff09b18e1d173cdf5887d6e4fea5feac0a521becf4a27559992e44ff3"
 }
