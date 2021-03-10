@@ -154,12 +154,26 @@ func (h *HasuraHandler) handler(w http.ResponseWriter, r *http.Request) {
 				// Query succeeded, config parsing/validation failed
 				errType = actions.ValidationFailedType
 				errMsg = "Alertmanager config validation failed"
-				errRaw = err.Error()
+				// Try to include original content returned by cortex
+				errRawBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil || len(errRawBytes) == 0 {
+					// Give up and just give generic "cortex returned <code> response"
+					errRaw = err.Error()
+				} else {
+					errRaw = string(errRawBytes)
+				}
 			default:
 				// Other HTTP error (e.g. storage error)
 				errType = actions.ServiceErrorType
 				errMsg = "Error when updating Alertmanager config"
-				errRaw = err.Error()
+				// Try to include original content returned by cortex
+				errRawBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil || len(errRawBytes) == 0 {
+					// Give up and just give generic "cortex returned <code> response"
+					errRaw = err.Error()
+				} else {
+					errRaw = string(errRawBytes)
+				}
 			}
 			response = actions.AlertmanagerUpdateResponse{
 				Success:          false,
