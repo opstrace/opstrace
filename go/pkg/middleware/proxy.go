@@ -40,7 +40,7 @@ type TenantReverseProxy struct {
 	tenantName               *string
 	headerName               string
 	backendURL               *url.URL
-	revproxy                 *httputil.ReverseProxy
+	Revproxy                 *httputil.ReverseProxy
 	disableAPIAuthentication bool
 }
 
@@ -56,7 +56,7 @@ func NewReverseProxyFixedTenant(
 		httputil.NewSingleHostReverseProxy(backendURL),
 		disableAPIAuthentication,
 	}
-	trp.revproxy.ErrorHandler = proxyErrorHandler
+	trp.Revproxy.ErrorHandler = proxyErrorHandler
 	if backendURL.Path != "" && backendURL.Path != "/" {
 		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
 	}
@@ -74,7 +74,7 @@ func NewReverseProxyDynamicTenant(
 		httputil.NewSingleHostReverseProxy(backendURL),
 		disableAPIAuthentication,
 	}
-	trp.revproxy.ErrorHandler = proxyErrorHandler
+	trp.Revproxy.ErrorHandler = proxyErrorHandler
 	if backendURL.Path != "" && backendURL.Path != "/" {
 		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
 	}
@@ -87,7 +87,7 @@ func NewReverseProxyDynamicTenant(
 func (trp *TenantReverseProxy) ReplacePaths(reqPathReplacement func(*url.URL) string) *TenantReverseProxy {
 	if reqPathReplacement != nil {
 		// Requests: Update URL path with replacement
-		trp.revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
+		trp.Revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
 	}
 	return trp
 }
@@ -129,7 +129,7 @@ func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Re
 
 	// Add the tenant in the request header and then forward the request to the backend.
 	r.Header.Add(trp.headerName, tenantName)
-	trp.revproxy.ServeHTTP(w, r)
+	trp.Revproxy.ServeHTTP(w, r)
 }
 
 func proxyErrorHandler(resp http.ResponseWriter, r *http.Request, proxyerr error) {
