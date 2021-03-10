@@ -109,7 +109,7 @@ function* updateAlertmanager() {
     );
 
     try {
-      yield graphqlClient.SaveAlertmanager({
+      yield graphqlClient.UpdateAlertmanager({
         tenant_id: action.payload.tenantId,
         config: action.payload.config
       });

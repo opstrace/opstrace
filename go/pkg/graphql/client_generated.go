@@ -1987,32 +1987,32 @@ func (client *Client) GetTenants() (*GetTenantsResponse, error) {
 }
 
 //
-// mutation SaveAlertmanager($tenant_id: String!, $config: String!)
+// mutation UpdateAlertmanager($tenant_id: String!, $config: String!)
 //
 
-type SaveAlertmanagerVariables struct {
+type UpdateAlertmanagerVariables struct {
 	TenantId String `json:"tenant_id"`
 	Config   String `json:"config"`
 }
 
-type SaveAlertmanagerResponse struct {
+type UpdateAlertmanagerResponse struct {
 	UpdateTenantByPk struct {
 		AlertmanagerConfig string `json:"AlertmanagerConfig"`
 	} `json:"UpdateTenantByPk"`
 }
 
-type SaveAlertmanagerRequest struct {
+type UpdateAlertmanagerRequest struct {
 	*http.Request
 }
 
-func NewSaveAlertmanagerRequest(url string, vars *SaveAlertmanagerVariables) (*SaveAlertmanagerRequest, error) {
+func NewUpdateAlertmanagerRequest(url string, vars *UpdateAlertmanagerVariables) (*UpdateAlertmanagerRequest, error) {
 	variables, err := json.Marshal(vars)
 	if err != nil {
 		return nil, err
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation SaveAlertmanager($tenant_id: String!, $config: String!) {
+		Query: `mutation UpdateAlertmanager($tenant_id: String!, $config: String!) {
   update_tenant_by_pk(pk_columns: {name: $tenant_id}, _set: {alertmanager_config: $config}) {
     alertmanager_config
   }
@@ -2026,31 +2026,31 @@ func NewSaveAlertmanagerRequest(url string, vars *SaveAlertmanagerVariables) (*S
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return &SaveAlertmanagerRequest{req}, nil
+	return &UpdateAlertmanagerRequest{req}, nil
 }
 
-func (req *SaveAlertmanagerRequest) Execute(client *http.Client) (*SaveAlertmanagerResponse, error) {
+func (req *UpdateAlertmanagerRequest) Execute(client *http.Client) (*UpdateAlertmanagerResponse, error) {
 	resp, err := execute(client, req.Request)
 	if err != nil {
 		return nil, err
 	}
-	var result SaveAlertmanagerResponse
+	var result UpdateAlertmanagerResponse
 	if err := json.Unmarshal(resp.Data, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func SaveAlertmanager(url string, client *http.Client, vars *SaveAlertmanagerVariables) (*SaveAlertmanagerResponse, error) {
-	req, err := NewSaveAlertmanagerRequest(url, vars)
+func UpdateAlertmanager(url string, client *http.Client, vars *UpdateAlertmanagerVariables) (*UpdateAlertmanagerResponse, error) {
+	req, err := NewUpdateAlertmanagerRequest(url, vars)
 	if err != nil {
 		return nil, err
 	}
 	return req.Execute(client)
 }
 
-func (client *Client) SaveAlertmanager(vars *SaveAlertmanagerVariables) (*SaveAlertmanagerResponse, error) {
-	return SaveAlertmanager(client.Url, client.Client, vars)
+func (client *Client) UpdateAlertmanager(vars *UpdateAlertmanagerVariables) (*UpdateAlertmanagerResponse, error) {
+	return UpdateAlertmanager(client.Url, client.Client, vars)
 }
 
 //

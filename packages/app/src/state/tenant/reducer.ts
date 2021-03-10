@@ -17,7 +17,7 @@
 import { pluck, zipObj, pick, mergeDeepRight } from "ramda";
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { Tenant, TenantRecords } from "./types";
+import { TenantRecords } from "./types";
 
 import * as actions from "./actions";
 
@@ -37,37 +37,38 @@ export const reducer = createReducer<TenantState, TenantActions>(
   TenantInitialState
 )
   .handleAction(
-  actions.setTenantList,
-  (state, action): TenantState => {
-    const tenantIds: string[] = pluck("name", action.payload);
-    const tenants: TenantRecords = zipObj(tenantIds, action.payload);
-    return {
-      ...state,
-      tenants: tenants,
-      loading: false
-    };
-  }
-)
+    actions.setTenantList,
+    (state, action): TenantState => {
+      const tenantIds: string[] = pluck("name", action.payload);
+      const tenants: TenantRecords = zipObj(tenantIds, action.payload);
+      return {
+        ...state,
+        tenants: tenants,
+        loading: false
+      };
+    }
+  )
   .handleAction(
     actions.alertmanagerLoaded,
     (state, action): TenantState => {
-
-      const tenants = state.tenants.map((tenant: Tenant) => {
-        if (tenant.name === action.payload.tenantId)
-          return mergeDeepRight(tenant, {alertmanager: pick(["config", "online"])(action.payload)})
-        else return tenant;
+      return mergeDeepRight(state, {
+        tenants: {
+          [action.payload.tenantId]: {
+            alertmanager: pick(["config", "online"])(action.payload)
+          }
+        }
       });
-      return {...state, tenants}
     }
   )
   .handleAction(
     actions.updateAlertmanager,
     (state, action): TenantState => {
-      const tenants = state.tenants.map((tenant: Tenant) => {
-        if (tenant.name === action.payload.tenantId)
-          return mergeDeepRight(tenant, {alertmanager: {online: true, config: action.payload.config}})
-        else return tenant;
+      return mergeDeepRight(state, {
+        tenants: {
+          [action.payload.tenantId]: {
+            alertmanager: pick(["config"])(action.payload)
+          }
+        }
       });
-      return {...state, tenants}
     }
   );

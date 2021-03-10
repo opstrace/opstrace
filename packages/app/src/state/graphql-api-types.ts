@@ -3576,12 +3576,12 @@ export type SubscribeToTenantListSubscription = {
   tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
 };
 
-export type SaveAlertmanagerMutationVariables = Exact<{
+export type UpdateAlertmanagerMutationVariables = Exact<{
   tenant_id: Scalars["String"];
   config: Scalars["String"];
 }>;
 
-export type SaveAlertmanagerMutation = {
+export type UpdateAlertmanagerMutation = {
   update_tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
 };
 
@@ -4186,8 +4186,8 @@ export const SubscribeToTenantListDocument = gql`
     }
   }
 `;
-export const SaveAlertmanagerDocument = gql`
-  mutation SaveAlertmanager($tenant_id: String!, $config: String!) {
+export const UpdateAlertmanagerDocument = gql`
+  mutation UpdateAlertmanager($tenant_id: String!, $config: String!) {
     update_tenant_by_pk(
       pk_columns: { name: $tenant_id }
       _set: { alertmanager_config: $config }
@@ -4872,18 +4872,18 @@ export function getSdk(
         )
       );
     },
-    SaveAlertmanager(
-      variables: SaveAlertmanagerMutationVariables
+    UpdateAlertmanager(
+      variables: UpdateAlertmanagerMutationVariables
     ): Promise<{
-      data?: SaveAlertmanagerMutation | undefined;
+      data?: UpdateAlertmanagerMutation | undefined;
       extensions?: any;
       headers: Headers;
       status: number;
       errors?: GraphQLError[] | undefined;
     }> {
       return withWrapper(() =>
-        client.rawRequest<SaveAlertmanagerMutation>(
-          print(SaveAlertmanagerDocument),
+        client.rawRequest<UpdateAlertmanagerMutation>(
+          print(UpdateAlertmanagerDocument),
           variables
         )
       );
