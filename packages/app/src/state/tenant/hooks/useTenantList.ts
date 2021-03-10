@@ -17,8 +17,12 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, State } from "state/provider";
 import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
+import { Tenants } from "state/tenant/types";
+import { values } from "ramda";
 
-export const getTenantList = (state: State) => state.tenants.tenants;
+export const getTenantList = (state: State) =>
+  values(state.tenants.tenants) as Tenants;
+
 /**
  * Subscribes to tenants and will update on
  * any changes. Automatically unsubscribeFromTenantLists
@@ -31,7 +35,6 @@ export default function useTenantList() {
   useEffect(() => {
     const subId = getSubscriptionID();
     dispatch(subscribeToTenantList(subId));
-
     return () => {
       dispatch(unsubscribeFromTenantList(subId));
     };

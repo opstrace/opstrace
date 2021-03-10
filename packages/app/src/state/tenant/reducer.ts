@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
+import * as R from "ramda";
+
 import { createReducer, ActionType } from "typesafe-actions";
-import { Tenants } from "./types";
+import { TenantRecords } from "./types";
 import * as actions from "./actions";
 
 type TenantActions = ActionType<typeof actions>;
 
 type TenantState = {
   loading: boolean;
-  tenants: Tenants;
+  tenants: TenantRecords;
 };
 
 const TenantInitialState: TenantState = {
   loading: true,
-  tenants: []
+  tenants: {}
 };
 
 export const reducer = createReducer<TenantState, TenantActions>(
   TenantInitialState
 ).handleAction(
   actions.setTenantList,
-  (state, action): TenantState => ({
-    ...state,
-    tenants: action.payload,
-    loading: false
-  })
+  (state, action): TenantState => {
+    const tenantIds: string[] = R.pluck("name", action.payload);
+    const tenants: TenantRecords = R.zipObj(tenantIds, action.payload);
+    return {
+      ...state,
+      tenants: tenants,
+      loading: false
+    };
+  }
 );
