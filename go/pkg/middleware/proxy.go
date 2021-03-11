@@ -144,7 +144,7 @@ func pathReplacementDirector(backendURL *url.URL, reqPathReplacement func(*url.U
 }
 
 func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Request) {
-	tenantName, ok := authenticator.GetTenant(w, r, trp.tenantName, trp.disableAPIAuthentication)
+	tenantName, ok := authenticator.GetTenantNameOr401(w, r, trp.tenantName, trp.disableAPIAuthentication)
 	if !ok {
 		// Error response has already been written. Terminate request handling.
 		return
