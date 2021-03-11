@@ -124,7 +124,7 @@ function* updateAlertmanager() {
     try {
       yield graphqlClient.UpdateAlertmanager({
         tenant_id: action.payload.tenantId,
-        config: cortexConfig
+        input: { config: cortexConfig }
       });
     } catch (err) {
       console.error(err);

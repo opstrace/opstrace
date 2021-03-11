@@ -1868,9 +1868,10 @@ type GetAlertmanagerVariables struct {
 }
 
 type GetAlertmanagerResponse struct {
-	TenantByPk struct {
-		AlertmanagerConfig string `json:"AlertmanagerConfig"`
-	} `json:"TenantByPk"`
+	GetAlertmanager struct {
+		Config string `json:"Config"`
+		Online string `json:"Online"`
+	} `json:"GetAlertmanager"`
 }
 
 type GetAlertmanagerRequest struct {
@@ -1885,8 +1886,9 @@ func NewGetAlertmanagerRequest(url string, vars *GetAlertmanagerVariables) (*Get
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
 		Query: `query GetAlertmanager($tenant_id: String!) {
-  tenant_by_pk(name: $tenant_id) {
-    alertmanager_config
+  getAlertmanager(tenant_id: $tenant_id) {
+    config
+    online
   }
 }`,
 	})
@@ -1987,18 +1989,21 @@ func (client *Client) GetTenants() (*GetTenantsResponse, error) {
 }
 
 //
-// mutation UpdateAlertmanager($tenant_id: String!, $config: String!)
+// mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!)
 //
 
 type UpdateAlertmanagerVariables struct {
-	TenantId String `json:"tenant_id"`
-	Config   String `json:"config"`
+	TenantId String            `json:"tenant_id"`
+	Input    AlertmanagerInput `json:"input"`
 }
 
 type UpdateAlertmanagerResponse struct {
-	UpdateTenantByPk struct {
-		AlertmanagerConfig string `json:"AlertmanagerConfig"`
-	} `json:"UpdateTenantByPk"`
+	UpdateAlertmanager struct {
+		Success          string `json:"Success"`
+		ErrorType        string `json:"ErrorType"`
+		ErrorMessage     string `json:"ErrorMessage"`
+		ErrorRawResponse string `json:"ErrorRawResponse"`
+	} `json:"UpdateAlertmanager"`
 }
 
 type UpdateAlertmanagerRequest struct {
@@ -2012,9 +2017,12 @@ func NewUpdateAlertmanagerRequest(url string, vars *UpdateAlertmanagerVariables)
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation UpdateAlertmanager($tenant_id: String!, $config: String!) {
-  update_tenant_by_pk(pk_columns: {name: $tenant_id}, _set: {alertmanager_config: $config}) {
-    alertmanager_config
+		Query: `mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!) {
+  updateAlertmanager(tenant_id: $tenant_id, input: $input) {
+    success
+    error_type
+    error_message
+    error_raw_response
   }
 }`,
 	})
@@ -2746,6 +2754,14 @@ type UUID string
 // Enums
 //
 
+type ErrorType string
+
+const (
+	ErrorTypeSERVICEERROR     ErrorType = "SERVICE_ERROR"
+	ErrorTypeSERVICEOFFLINE   ErrorType = "SERVICE_OFFLINE"
+	ErrorTypeVALIDATIONFAILED ErrorType = "VALIDATION_FAILED"
+)
+
 type BranchConstraint string
 
 const (
@@ -2946,19 +2962,17 @@ const (
 type TenantSelectColumn string
 
 const (
-	TenantSelectColumnAlertmanagerConfig TenantSelectColumn = "alertmanager_config"
-	TenantSelectColumnCreatedAt          TenantSelectColumn = "created_at"
-	TenantSelectColumnName               TenantSelectColumn = "name"
-	TenantSelectColumnType               TenantSelectColumn = "type"
+	TenantSelectColumnCreatedAt TenantSelectColumn = "created_at"
+	TenantSelectColumnName      TenantSelectColumn = "name"
+	TenantSelectColumnType      TenantSelectColumn = "type"
 )
 
 type TenantUpdateColumn string
 
 const (
-	TenantUpdateColumnAlertmanagerConfig TenantUpdateColumn = "alertmanager_config"
-	TenantUpdateColumnCreatedAt          TenantUpdateColumn = "created_at"
-	TenantUpdateColumnName               TenantUpdateColumn = "name"
-	TenantUpdateColumnType               TenantUpdateColumn = "type"
+	TenantUpdateColumnCreatedAt TenantUpdateColumn = "created_at"
+	TenantUpdateColumnName      TenantUpdateColumn = "name"
+	TenantUpdateColumnType      TenantUpdateColumn = "type"
 )
 
 type UserConstraint string
@@ -3022,6 +3036,10 @@ const (
 //
 // Inputs
 //
+
+type AlertmanagerInput struct {
+	Config String `json:"config"`
+}
 
 type BooleanComparisonExp struct {
 	Eq     *Boolean   `json:"_eq,omitempty"`
@@ -3685,38 +3703,34 @@ type TenantArrRelInsertInput struct {
 }
 
 type TenantBoolExp struct {
-	And                *[]TenantBoolExp        `json:"_and,omitempty"`
-	Not                *TenantBoolExp          `json:"_not,omitempty"`
-	Or                 *[]TenantBoolExp        `json:"_or,omitempty"`
-	AlertmanagerConfig *StringComparisonExp    `json:"alertmanager_config,omitempty"`
-	CreatedAt          *TimestampComparisonExp `json:"created_at,omitempty"`
-	Credentials        *CredentialBoolExp      `json:"credentials,omitempty"`
-	Exporters          *ExporterBoolExp        `json:"exporters,omitempty"`
-	Name               *StringComparisonExp    `json:"name,omitempty"`
-	Type               *StringComparisonExp    `json:"type,omitempty"`
+	And         *[]TenantBoolExp        `json:"_and,omitempty"`
+	Not         *TenantBoolExp          `json:"_not,omitempty"`
+	Or          *[]TenantBoolExp        `json:"_or,omitempty"`
+	CreatedAt   *TimestampComparisonExp `json:"created_at,omitempty"`
+	Credentials *CredentialBoolExp      `json:"credentials,omitempty"`
+	Exporters   *ExporterBoolExp        `json:"exporters,omitempty"`
+	Name        *StringComparisonExp    `json:"name,omitempty"`
+	Type        *StringComparisonExp    `json:"type,omitempty"`
 }
 
 type TenantInsertInput struct {
-	AlertmanagerConfig *String                      `json:"alertmanager_config,omitempty"`
-	CreatedAt          *Timestamp                   `json:"created_at,omitempty"`
-	Credentials        *CredentialArrRelInsertInput `json:"credentials,omitempty"`
-	Exporters          *ExporterArrRelInsertInput   `json:"exporters,omitempty"`
-	Name               *String                      `json:"name,omitempty"`
-	Type               *String                      `json:"type,omitempty"`
+	CreatedAt   *Timestamp                   `json:"created_at,omitempty"`
+	Credentials *CredentialArrRelInsertInput `json:"credentials,omitempty"`
+	Exporters   *ExporterArrRelInsertInput   `json:"exporters,omitempty"`
+	Name        *String                      `json:"name,omitempty"`
+	Type        *String                      `json:"type,omitempty"`
 }
 
 type TenantMaxOrderBy struct {
-	AlertmanagerConfig *OrderBy `json:"alertmanager_config,omitempty"`
-	CreatedAt          *OrderBy `json:"created_at,omitempty"`
-	Name               *OrderBy `json:"name,omitempty"`
-	Type               *OrderBy `json:"type,omitempty"`
+	CreatedAt *OrderBy `json:"created_at,omitempty"`
+	Name      *OrderBy `json:"name,omitempty"`
+	Type      *OrderBy `json:"type,omitempty"`
 }
 
 type TenantMinOrderBy struct {
-	AlertmanagerConfig *OrderBy `json:"alertmanager_config,omitempty"`
-	CreatedAt          *OrderBy `json:"created_at,omitempty"`
-	Name               *OrderBy `json:"name,omitempty"`
-	Type               *OrderBy `json:"type,omitempty"`
+	CreatedAt *OrderBy `json:"created_at,omitempty"`
+	Name      *OrderBy `json:"name,omitempty"`
+	Type      *OrderBy `json:"type,omitempty"`
 }
 
 type TenantObjRelInsertInput struct {
@@ -3731,7 +3745,6 @@ type TenantOnConflict struct {
 }
 
 type TenantOrderBy struct {
-	AlertmanagerConfig   *OrderBy                    `json:"alertmanager_config,omitempty"`
 	CreatedAt            *OrderBy                    `json:"created_at,omitempty"`
 	CredentialsAggregate *CredentialAggregateOrderBy `json:"credentials_aggregate,omitempty"`
 	ExportersAggregate   *ExporterAggregateOrderBy   `json:"exporters_aggregate,omitempty"`
@@ -3744,10 +3757,9 @@ type TenantPkColumnsInput struct {
 }
 
 type TenantSetInput struct {
-	AlertmanagerConfig *String    `json:"alertmanager_config,omitempty"`
-	CreatedAt          *Timestamp `json:"created_at,omitempty"`
-	Name               *String    `json:"name,omitempty"`
-	Type               *String    `json:"type,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Name      *String    `json:"name,omitempty"`
+	Type      *String    `json:"type,omitempty"`
 }
 
 type TimestampComparisonExp struct {
@@ -3951,6 +3963,26 @@ type UuidComparisonExp struct {
 //
 // Objects
 //
+
+type Alertmanager struct {
+	Config   *String `json:"config,omitempty"`
+	Online   Boolean `json:"online"`
+	TenantId String  `json:"tenant_id"`
+}
+
+type AlertmanagerUpdateResponse struct {
+	ErrorMessage     *String    `json:"error_message,omitempty"`
+	ErrorRawResponse *String    `json:"error_raw_response,omitempty"`
+	ErrorType        *ErrorType `json:"error_type,omitempty"`
+	Success          Boolean    `json:"success"`
+}
+
+type ValidateOutput struct {
+	ErrorMessage     *String    `json:"error_message,omitempty"`
+	ErrorRawResponse *String    `json:"error_raw_response,omitempty"`
+	ErrorType        *ErrorType `json:"error_type,omitempty"`
+	Success          Boolean    `json:"success"`
+}
 
 type Branch struct {
 	CreatedAt         Timestamptz            `json:"created_at"`
@@ -4273,6 +4305,7 @@ type MutationRoot struct {
 	InsertUserOne            *User                           `json:"insert_user_one,omitempty"`
 	InsertUserPreference     *UserPreferenceMutationResponse `json:"insert_user_preference,omitempty"`
 	InsertUserPreferenceOne  *UserPreference                 `json:"insert_user_preference_one,omitempty"`
+	UpdateAlertmanager       *AlertmanagerUpdateResponse     `json:"updateAlertmanager,omitempty"`
 	UpdateBranch             *BranchMutationResponse         `json:"update_branch,omitempty"`
 	UpdateBranchByPk         *Branch                         `json:"update_branch_by_pk,omitempty"`
 	UpdateCredential         *CredentialMutationResponse     `json:"update_credential,omitempty"`
@@ -4291,6 +4324,8 @@ type MutationRoot struct {
 	UpdateUserByPk           *User                           `json:"update_user_by_pk,omitempty"`
 	UpdateUserPreference     *UserPreferenceMutationResponse `json:"update_user_preference,omitempty"`
 	UpdateUserPreferenceByPk *UserPreference                 `json:"update_user_preference_by_pk,omitempty"`
+	ValidateCredential       *ValidateOutput                 `json:"validateCredential,omitempty"`
+	ValidateExporter         *ValidateOutput                 `json:"validateExporter,omitempty"`
 }
 
 type QueryRoot struct {
@@ -4306,6 +4341,7 @@ type QueryRoot struct {
 	File                    *[]File                 `json:"file,omitempty"`
 	FileAggregate           FileAggregate           `json:"file_aggregate"`
 	FileByPk                *File                   `json:"file_by_pk,omitempty"`
+	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	Module                  *[]Module               `json:"module,omitempty"`
 	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
 	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
@@ -4336,6 +4372,7 @@ type SubscriptionRoot struct {
 	File                    *[]File                 `json:"file,omitempty"`
 	FileAggregate           FileAggregate           `json:"file_aggregate"`
 	FileByPk                *File                   `json:"file_by_pk,omitempty"`
+	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	Module                  *[]Module               `json:"module,omitempty"`
 	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
 	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
@@ -4354,7 +4391,6 @@ type SubscriptionRoot struct {
 }
 
 type Tenant struct {
-	AlertmanagerConfig   *String             `json:"alertmanager_config,omitempty"`
 	CreatedAt            Timestamp           `json:"created_at"`
 	Credentials          *[]Credential       `json:"credentials,omitempty"`
 	CredentialsAggregate CredentialAggregate `json:"credentials_aggregate"`
@@ -4376,17 +4412,15 @@ type TenantAggregateFields struct {
 }
 
 type TenantMaxFields struct {
-	AlertmanagerConfig *String    `json:"alertmanager_config,omitempty"`
-	CreatedAt          *Timestamp `json:"created_at,omitempty"`
-	Name               *String    `json:"name,omitempty"`
-	Type               *String    `json:"type,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Name      *String    `json:"name,omitempty"`
+	Type      *String    `json:"type,omitempty"`
 }
 
 type TenantMinFields struct {
-	AlertmanagerConfig *String    `json:"alertmanager_config,omitempty"`
-	CreatedAt          *Timestamp `json:"created_at,omitempty"`
-	Name               *String    `json:"name,omitempty"`
-	Type               *String    `json:"type,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Name      *String    `json:"name,omitempty"`
+	Type      *String    `json:"type,omitempty"`
 }
 
 type TenantMutationResponse struct {

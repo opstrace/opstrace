@@ -41,6 +41,23 @@ export type Scalars = {
   uuid: any;
 };
 
+export type Alertmanager = {
+  config?: Maybe<Scalars["String"]>;
+  online: Scalars["Boolean"];
+  tenant_id: Scalars["String"];
+};
+
+export type AlertmanagerInput = {
+  config: Scalars["String"];
+};
+
+export type AlertmanagerUpdateResponse = {
+  error_message?: Maybe<Scalars["String"]>;
+  error_raw_response?: Maybe<Scalars["String"]>;
+  error_type?: Maybe<ErrorType>;
+  success: Scalars["Boolean"];
+};
+
 /** expression to compare columns of type Boolean. All fields are combined with logical 'AND'. */
 export type Boolean_Comparison_Exp = {
   _eq?: Maybe<Scalars["Boolean"]>;
@@ -53,6 +70,12 @@ export type Boolean_Comparison_Exp = {
   _neq?: Maybe<Scalars["Boolean"]>;
   _nin?: Maybe<Array<Scalars["Boolean"]>>;
 };
+
+export enum ErrorType {
+  ServiceError = "SERVICE_ERROR",
+  ServiceOffline = "SERVICE_OFFLINE",
+  ValidationFailed = "VALIDATION_FAILED"
+}
 
 /** expression to compare columns of type String. All fields are combined with logical 'AND'. */
 export type String_Comparison_Exp = {
@@ -71,6 +94,13 @@ export type String_Comparison_Exp = {
   _nlike?: Maybe<Scalars["String"]>;
   _nsimilar?: Maybe<Scalars["String"]>;
   _similar?: Maybe<Scalars["String"]>;
+};
+
+export type ValidateOutput = {
+  error_message?: Maybe<Scalars["String"]>;
+  error_raw_response?: Maybe<Scalars["String"]>;
+  error_type?: Maybe<ErrorType>;
+  success: Scalars["Boolean"];
 };
 
 /** columns and relationships of "branch" */
@@ -1629,6 +1659,8 @@ export type Mutation_Root = {
   insert_user_preference?: Maybe<User_Preference_Mutation_Response>;
   /** insert a single row into the table: "user_preference" */
   insert_user_preference_one?: Maybe<User_Preference>;
+  /** perform the action: "updateAlertmanager" */
+  updateAlertmanager?: Maybe<AlertmanagerUpdateResponse>;
   /** update data of the table: "branch" */
   update_branch?: Maybe<Branch_Mutation_Response>;
   /** update single row of the table: "branch" */
@@ -1665,6 +1697,10 @@ export type Mutation_Root = {
   update_user_preference?: Maybe<User_Preference_Mutation_Response>;
   /** update single row of the table: "user_preference" */
   update_user_preference_by_pk?: Maybe<User_Preference>;
+  /** perform the action: "validateCredential" */
+  validateCredential?: Maybe<ValidateOutput>;
+  /** perform the action: "validateExporter" */
+  validateExporter?: Maybe<ValidateOutput>;
 };
 
 /** mutation root */
@@ -1873,6 +1909,12 @@ export type Mutation_RootInsert_User_Preference_OneArgs = {
 };
 
 /** mutation root */
+export type Mutation_RootUpdateAlertmanagerArgs = {
+  input?: Maybe<AlertmanagerInput>;
+  tenant_id: Scalars["String"];
+};
+
+/** mutation root */
 export type Mutation_RootUpdate_BranchArgs = {
   _set?: Maybe<Branch_Set_Input>;
   where: Branch_Bool_Exp;
@@ -1990,6 +2032,18 @@ export type Mutation_RootUpdate_User_Preference_By_PkArgs = {
   pk_columns: User_Preference_Pk_Columns_Input;
 };
 
+/** mutation root */
+export type Mutation_RootValidateCredentialArgs = {
+  content: Scalars["String"];
+  tenant_id: Scalars["String"];
+};
+
+/** mutation root */
+export type Mutation_RootValidateExporterArgs = {
+  content: Scalars["String"];
+  tenant_id: Scalars["String"];
+};
+
 /** column ordering options */
 export enum Order_By {
   /** in the ascending order, nulls last */
@@ -2032,6 +2086,8 @@ export type Query_Root = {
   file_aggregate: File_Aggregate;
   /** fetch data from the table: "file" using primary key columns */
   file_by_pk?: Maybe<File>;
+  /** perform the action: "getAlertmanager" */
+  getAlertmanager?: Maybe<Alertmanager>;
   /** fetch data from the table: "module" */
   module: Array<Module>;
   /** fetch aggregated fields from the table: "module" */
@@ -2156,6 +2212,11 @@ export type Query_RootFile_AggregateArgs = {
 /** query root */
 export type Query_RootFile_By_PkArgs = {
   id: Scalars["uuid"];
+};
+
+/** query root */
+export type Query_RootGetAlertmanagerArgs = {
+  tenant_id: Scalars["String"];
 };
 
 /** query root */
@@ -2304,6 +2365,8 @@ export type Subscription_Root = {
   file_aggregate: File_Aggregate;
   /** fetch data from the table: "file" using primary key columns */
   file_by_pk?: Maybe<File>;
+  /** perform the action: "getAlertmanager" */
+  getAlertmanager?: Maybe<Alertmanager>;
   /** fetch data from the table: "module" */
   module: Array<Module>;
   /** fetch aggregated fields from the table: "module" */
@@ -2431,6 +2494,11 @@ export type Subscription_RootFile_By_PkArgs = {
 };
 
 /** subscription root */
+export type Subscription_RootGetAlertmanagerArgs = {
+  tenant_id: Scalars["String"];
+};
+
+/** subscription root */
 export type Subscription_RootModuleArgs = {
   distinct_on?: Maybe<Array<Module_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
@@ -2552,7 +2620,6 @@ export type Subscription_RootUser_Preference_By_PkArgs = {
 
 /** columns and relationships of "tenant" */
 export type Tenant = {
-  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at: Scalars["timestamp"];
   /** An array relationship */
   credentials: Array<Credential>;
@@ -2639,7 +2706,6 @@ export type Tenant_Bool_Exp = {
   _and?: Maybe<Array<Maybe<Tenant_Bool_Exp>>>;
   _not?: Maybe<Tenant_Bool_Exp>;
   _or?: Maybe<Array<Maybe<Tenant_Bool_Exp>>>;
-  alertmanager_config?: Maybe<String_Comparison_Exp>;
   created_at?: Maybe<Timestamp_Comparison_Exp>;
   credentials?: Maybe<Credential_Bool_Exp>;
   exporters?: Maybe<Exporter_Bool_Exp>;
@@ -2655,7 +2721,6 @@ export enum Tenant_Constraint {
 
 /** input type for inserting data into table "tenant" */
 export type Tenant_Insert_Input = {
-  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   credentials?: Maybe<Credential_Arr_Rel_Insert_Input>;
   exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
@@ -2665,7 +2730,6 @@ export type Tenant_Insert_Input = {
 
 /** aggregate max on columns */
 export type Tenant_Max_Fields = {
-  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
@@ -2673,7 +2737,6 @@ export type Tenant_Max_Fields = {
 
 /** order by max() on columns of table "tenant" */
 export type Tenant_Max_Order_By = {
-  alertmanager_config?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
@@ -2681,7 +2744,6 @@ export type Tenant_Max_Order_By = {
 
 /** aggregate min on columns */
 export type Tenant_Min_Fields = {
-  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
@@ -2689,7 +2751,6 @@ export type Tenant_Min_Fields = {
 
 /** order by min() on columns of table "tenant" */
 export type Tenant_Min_Order_By = {
-  alertmanager_config?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
@@ -2718,7 +2779,6 @@ export type Tenant_On_Conflict = {
 
 /** ordering options when selecting data from "tenant" */
 export type Tenant_Order_By = {
-  alertmanager_config?: Maybe<Order_By>;
   created_at?: Maybe<Order_By>;
   credentials_aggregate?: Maybe<Credential_Aggregate_Order_By>;
   exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
@@ -2734,8 +2794,6 @@ export type Tenant_Pk_Columns_Input = {
 /** select columns of table "tenant" */
 export enum Tenant_Select_Column {
   /** column name */
-  AlertmanagerConfig = "alertmanager_config",
-  /** column name */
   CreatedAt = "created_at",
   /** column name */
   Name = "name",
@@ -2745,7 +2803,6 @@ export enum Tenant_Select_Column {
 
 /** input type for updating data in table "tenant" */
 export type Tenant_Set_Input = {
-  alertmanager_config?: Maybe<Scalars["String"]>;
   created_at?: Maybe<Scalars["timestamp"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
@@ -2753,8 +2810,6 @@ export type Tenant_Set_Input = {
 
 /** update columns of table "tenant" */
 export enum Tenant_Update_Column {
-  /** column name */
-  AlertmanagerConfig = "alertmanager_config",
   /** column name */
   CreatedAt = "created_at",
   /** column name */
@@ -3559,7 +3614,7 @@ export type GetAlertmanagerQueryVariables = Exact<{
 }>;
 
 export type GetAlertmanagerQuery = {
-  tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
+  getAlertmanager?: Maybe<Pick<Alertmanager, "config" | "online">>;
 };
 
 export type GetTenantsQueryVariables = Exact<{ [key: string]: never }>;
@@ -3578,11 +3633,16 @@ export type SubscribeToTenantListSubscription = {
 
 export type UpdateAlertmanagerMutationVariables = Exact<{
   tenant_id: Scalars["String"];
-  config: Scalars["String"];
+  input: AlertmanagerInput;
 }>;
 
 export type UpdateAlertmanagerMutation = {
-  update_tenant_by_pk?: Maybe<Pick<Tenant, "alertmanager_config">>;
+  updateAlertmanager?: Maybe<
+    Pick<
+      AlertmanagerUpdateResponse,
+      "success" | "error_type" | "error_message" | "error_raw_response"
+    >
+  >;
 };
 
 export type CreateUserMutationVariables = Exact<{
@@ -4163,8 +4223,9 @@ export const DeleteTenantDocument = gql`
 `;
 export const GetAlertmanagerDocument = gql`
   query GetAlertmanager($tenant_id: String!) {
-    tenant_by_pk(name: $tenant_id) {
-      alertmanager_config
+    getAlertmanager(tenant_id: $tenant_id) {
+      config
+      online
     }
   }
 `;
@@ -4187,12 +4248,12 @@ export const SubscribeToTenantListDocument = gql`
   }
 `;
 export const UpdateAlertmanagerDocument = gql`
-  mutation UpdateAlertmanager($tenant_id: String!, $config: String!) {
-    update_tenant_by_pk(
-      pk_columns: { name: $tenant_id }
-      _set: { alertmanager_config: $config }
-    ) {
-      alertmanager_config
+  mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!) {
+    updateAlertmanager(tenant_id: $tenant_id, input: $input) {
+      success
+      error_type
+      error_message
+      error_raw_response
     }
   }
 `;

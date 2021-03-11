@@ -1,10 +1,8 @@
-# TODO: NTW - swap out with a call to the action when that is available
-
-mutation UpdateAlertmanager($tenant_id: String!, $config: String!) {
-  update_tenant_by_pk(
-    pk_columns: { name: $tenant_id }
-    _set: { alertmanager_config: $config }
-  ) {
-    alertmanager_config
+mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!) {
+  updateAlertmanager(tenant_id: $tenant_id, input: $input) {
+    success
+    error_type
+    error_message
+    error_raw_response
   }
 }
