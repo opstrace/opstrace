@@ -16,7 +16,6 @@ package middleware
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -29,15 +28,21 @@ import (
 )
 
 const tenantName string = "test"
-const headerName string = "X-Scope-Orgid"
+const tenantHeaderName string = "X-Scope-Orgid"
 
-func createProxyUpstream(tenantName string, t *testing.T) (*url.URL, func()) {
-	// Create an actual HTTP server to be used as upstream (backend) for the
-	// proxies to be tested. Any request to / checks the X-Scope-Orgid header
-	// and writes the tenant name to the response.
+/*
+Create an HTTP server to be used as upstream (backend) for the proxies to be
+tested.
+
+This server responds to requests to the path /.
+
+It checks the value of the `X-Scope-Orgid` (well, `tenantHeaderName`)` header
+and writes the tenant name to the response.
+*/
+func createUpstreamTenantEcho(tenantName string, t *testing.T) (*url.URL, func()) {
 	router := mux.NewRouter()
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, tenantName, r.Header.Get(headerName))
+		assert.Equal(t, tenantName, r.Header.Get(tenantHeaderName))
 		fmt.Fprintf(w, "%s %s", r.URL.String(), tenantName)
 	})
 
@@ -53,12 +58,12 @@ func createProxyUpstream(tenantName string, t *testing.T) (*url.URL, func()) {
 }
 
 func TestReverseProxy_healthy(t *testing.T) {
-	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
+	upstreamURL, upstreamClose := createUpstreamTenantEcho(tenantName, t)
 	defer upstreamClose()
 
 	// Reuse the same backend for both the querier and distributor requests.
 	disableAPIAuth := true
-	rp := NewReverseProxyFixedTenant(tenantName, headerName, upstreamURL, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, tenantHeaderName, upstreamURL, disableAPIAuth)
 
 	// Create a request to the proxy (not to the backend/upstream). The URL
 	// does not really matter because we're bypassing the actual router.
@@ -68,7 +73,7 @@ func TestReverseProxy_healthy(t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, 200, resp.StatusCode)
 	// Check that the proxy's upstream has indeed written the response.
-	assert.Equal(t, "/ test", getStrippedBody(resp))
+	assert.Equal(t, "/ test", GetStrippedBody(resp))
 
 	req = httptest.NewRequest("GET", "http://localhost/robots.txt", nil)
 	w = httptest.NewRecorder()
@@ -76,11 +81,11 @@ func TestReverseProxy_healthy(t *testing.T) {
 	resp = w.Result()
 	assert.Equal(t, 200, resp.StatusCode)
 	// Check that the proxy's upstream has indeed written the response.
-	assert.Equal(t, "/robots.txt test", getStrippedBody(resp))
+	assert.Equal(t, "/robots.txt test", GetStrippedBody(resp))
 }
 
 func TestReverseProxy_pathreplace(t *testing.T) {
-	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
+	upstreamURL, upstreamClose := createUpstreamTenantEcho(tenantName, t)
 	defer upstreamClose()
 
 	// Reuse the same backend for both the querier and distributor requests.
@@ -93,7 +98,7 @@ func TestReverseProxy_pathreplace(t *testing.T) {
 	disableAPIAuth := true
 	rp := NewReverseProxyFixedTenant(
 		tenantName,
-		headerName,
+		tenantHeaderName,
 		upstreamURL,
 		disableAPIAuth,
 	).ReplacePaths(pathReplacement)
@@ -105,7 +110,7 @@ func TestReverseProxy_pathreplace(t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, 200, resp.StatusCode)
 	// Check that the proxy's upstream has indeed written the response.
-	assert.Equal(t, "/foo test", getStrippedBody(resp))
+	assert.Equal(t, "/foo test", GetStrippedBody(resp))
 
 	// /replaceme/bar => /foo/bar
 	req = httptest.NewRequest("GET", "http://localhost/replaceme/bar", nil)
@@ -114,7 +119,7 @@ func TestReverseProxy_pathreplace(t *testing.T) {
 	resp = w.Result()
 	assert.Equal(t, 200, resp.StatusCode)
 	// Check that the proxy's upstream has indeed written the response.
-	assert.Equal(t, "/foo/bar test", getStrippedBody(resp))
+	assert.Equal(t, "/foo/bar test", GetStrippedBody(resp))
 
 	// /other/bar => /other/bar (no change)
 	req = httptest.NewRequest("GET", "http://localhost/other/bar", nil)
@@ -123,7 +128,7 @@ func TestReverseProxy_pathreplace(t *testing.T) {
 	resp = w.Result()
 	assert.Equal(t, 200, resp.StatusCode)
 	// Check that the proxy's upstream has indeed written the response.
-	assert.Equal(t, "/other/bar test", getStrippedBody(resp))
+	assert.Equal(t, "/other/bar test", GetStrippedBody(resp))
 }
 
 func TestReverseProxy_unhealthy(t *testing.T) {
@@ -137,7 +142,7 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	// we can reuse the same backend to send both the querier and distributor
 	// requests
 	disableAPIAuth := true
-	rp := NewReverseProxyFixedTenant(tenantName, headerName, u, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, tenantHeaderName, u, disableAPIAuth)
 	// create a request to the test backend
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
@@ -151,7 +156,7 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	assert.Regexp(
 		t,
 		regexp.MustCompile("^dial tcp .* connect: connection refused$"),
-		getStrippedBody(resp),
+		GetStrippedBody(resp),
 	)
 }
 
@@ -162,7 +167,7 @@ func TestReverseProxyAuthenticator_noheader(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	rp := NewReverseProxyFixedTenant(tenantName, headerName, fakeURL, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, tenantHeaderName, fakeURL, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 
@@ -176,7 +181,7 @@ func TestReverseProxyAuthenticator_noheader(t *testing.T) {
 	assert.Equal(
 		t,
 		"Authorization header missing",
-		getStrippedBody(resp),
+		GetStrippedBody(resp),
 	)
 }
 
@@ -187,7 +192,7 @@ func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
 
 	// No need for a proxy backend here because the request is expected to be
 	// processed in the proxy only, not going beyond the authenticator stage.
-	rp := NewReverseProxyFixedTenant(tenantName, headerName, fakeURL, disableAPIAuth)
+	rp := NewReverseProxyFixedTenant(tenantName, tenantHeaderName, fakeURL, disableAPIAuth)
 
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 	req.Header.Set("Authorization", "Bearer foobarbadtoken")
@@ -199,44 +204,5 @@ func TestReverseProxyAuthenticator_badtoken(t *testing.T) {
 	assert.Equal(t, 401, resp.StatusCode)
 
 	// Confirm that a helpful error message is in the body.
-	assert.Equal(t, "bad authentication token", getStrippedBody(resp))
-}
-
-// func TestReverseProxy_CortexPushRewrite429(t *testing.T) {
-// 	upstreamURL, upstreamClose := createProxyUpstream(tenantName, t)
-// 	defer upstreamClose()
-
-// 	// Reuse the same backend for both the querier and distributor requests.
-// 	disableAPIAuth := true
-// 	rp := NewReverseProxyFixedTenant(tenantName, headerName, upstreamURL, disableAPIAuth)
-
-// 	rp.Revproxy.ModifyResponse = cortexproxy.CortexPushRewrite429
-
-// 	// Create a request to the proxy (not to the backend/upstream). The URL
-// 	// does not really matter because we're bypassing the actual router.
-// 	req := httptest.NewRequest("GET", "http://localhost", nil)
-// 	w := httptest.NewRecorder()
-// 	rp.HandleWithProxy(w, req)
-// 	resp := w.Result()
-// 	assert.Equal(t, 200, resp.StatusCode)
-// 	// Check that the proxy's upstream has indeed written the response.
-// 	assert.Equal(t, "/ test", getStrippedBody(resp))
-
-// 	req = httptest.NewRequest("GET", "http://localhost/robots.txt", nil)
-// 	w = httptest.NewRecorder()
-// 	rp.HandleWithProxy(w, req)
-// 	resp = w.Result()
-// 	assert.Equal(t, 200, resp.StatusCode)
-// 	// Check that the proxy's upstream has indeed written the response.
-// 	assert.Equal(t, "/robots.txt test", getStrippedBody(resp))
-// }
-
-// Read all response body bytes, and return response body as string, with
-// leading and trailing whitespace stripped.
-func getStrippedBody(resp *http.Response) string {
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(fmt.Errorf("readAll error: %v", err))
-	}
-	return strings.TrimSpace(string(rbody))
+	assert.Equal(t, "bad authentication token", GetStrippedBody(resp))
 }
