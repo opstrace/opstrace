@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { all, call, spawn, takeEvery, take, put } from "redux-saga/effects";
 import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
@@ -78,22 +79,33 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
   }
 }
 
+const ALERTMANAGER_CONFIG_CORTEX_HEADER = `
+template_files:
+  default_template: |
+    {{ define "__alertmanager" }}AlertManager{{ end }}
+    {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}
+alertmanager_config: |
+  `;
+
 function* getAlertmanagerListener() {
   yield takeEvery(actions.getAlertmanager, getAlertmanager);
 }
-
 function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
   try {
     const response = yield graphqlClient.GetAlertmanager({
       tenant_id: action.payload
     });
 
+    const prometheusConfig = response.data?.tenant_by_pk?.alertmanager_config
+      .replace(ALERTMANAGER_CONFIG_CORTEX_HEADER, "")
+      .replace(/(\n  )+/g, "\n");
+
     if (response.data?.tenant_by_pk?.alertmanager_config)
       yield put({
         type: "ALERTMANAGER_LOADED",
         payload: {
           tenantId: action.payload,
-          config: response.data?.tenant_by_pk?.alertmanager_config,
+          config: prometheusConfig,
           online: true
         }
       });
@@ -108,10 +120,15 @@ function* updateAlertmanager() {
       actions.updateAlertmanager
     );
 
+    const cortexConfig = `${ALERTMANAGER_CONFIG_CORTEX_HEADER}${action.payload.config.replace(
+      /(\n)+/g,
+      "\n  "
+    )}`;
+
     try {
       yield graphqlClient.UpdateAlertmanager({
         tenant_id: action.payload.tenantId,
-        config: action.payload.config
+        config: cortexConfig
       });
     } catch (err) {
       console.error(err);
