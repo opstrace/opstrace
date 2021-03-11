@@ -22,7 +22,7 @@ import { getAlertmanager } from "state/tenant/actions";
 
 export const selectAlertmanager = createSelector(
   selectTenant,
-  tenant => tenant.alertmanager
+  tenant => tenant?.alertmanager
 );
 
 export default function useAlertmanager(tenantName: string) {
