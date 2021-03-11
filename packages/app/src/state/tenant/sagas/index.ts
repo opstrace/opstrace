@@ -80,12 +80,7 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
 }
 
 const ALERTMANAGER_CONFIG_CORTEX_HEADER = `
-template_files:
-  default_template: |
-    {{ define "__alertmanager" }}AlertManager{{ end }}
-    {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}
-alertmanager_config: |
-  `;
+template_files:\n\tdefault_template: |\n\t\t{{ define "__alertmanager" }}AlertManager{{ end }}\n\t\t{{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}\nalertmanager_config: |`;
 
 function* getAlertmanagerListener() {
   yield takeEvery(actions.getAlertmanager, getAlertmanager);
@@ -98,7 +93,8 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
 
     const prometheusConfig = response.data?.tenant_by_pk?.alertmanager_config
       .replace(ALERTMANAGER_CONFIG_CORTEX_HEADER, "")
-      .replace(/(\n  )+/g, "\n");
+      .replace("\n\t", "") // replace leading set with nothing as we don't want a blank line at the begining of the config
+      .replace(/(\n\t)+/g, "\n");
 
     if (response.data?.tenant_by_pk?.alertmanager_config)
       yield put({
@@ -120,9 +116,9 @@ function* updateAlertmanager() {
       actions.updateAlertmanager
     );
 
-    const cortexConfig = `${ALERTMANAGER_CONFIG_CORTEX_HEADER}${action.payload.config.replace(
+    const cortexConfig = `${ALERTMANAGER_CONFIG_CORTEX_HEADER}\n\t${action.payload.config.replace(
       /(\n)+/g,
-      "\n  "
+      "\n\t"
     )}`;
 
     try {
