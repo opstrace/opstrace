@@ -25,7 +25,8 @@ GRAPHQL_ENDPOINT=http://127.0.0.1:8080/v1/graphql \
 HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret \
 ./config \
   --loglevel debug \
-  --listen "127.0.0.1:8989" \
+  --config "127.0.0.1:8989" \
+  --action "127.0.0.1:8990" \
   --disable-api-authn
 ```
 
