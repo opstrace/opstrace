@@ -165,7 +165,7 @@ func (ddcp *DDCortexProxy) HandlerCommonAfterJSONTranslate(
 }
 
 func (ddcp *DDCortexProxy) HandlerCheckPost(w http.ResponseWriter, r *http.Request) {
-	if ddcp.authenticatorEnabled && !authenticator.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
+	if ddcp.authenticatorEnabled && !authenticator.AuthenticateSpecificTenantByDDQueryParamOr401(w, r, ddcp.tenantName) {
 		// Error response has already been written. Terminate request handling.
 		return
 	}
@@ -190,7 +190,7 @@ func (ddcp *DDCortexProxy) HandlerCheckPost(w http.ResponseWriter, r *http.Reque
 }
 
 func (ddcp *DDCortexProxy) HandlerSeriesPost(w http.ResponseWriter, r *http.Request) {
-	if ddcp.authenticatorEnabled && !authenticator.DDAPIRequestAuthenticator(w, r, ddcp.tenantName) {
+	if ddcp.authenticatorEnabled && !authenticator.AuthenticateSpecificTenantByDDQueryParamOr401(w, r, ddcp.tenantName) {
 		// Error response has already been written. Terminate request handling.
 		return
 	}
