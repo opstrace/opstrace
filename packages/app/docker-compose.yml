@@ -28,9 +28,9 @@ services:
   graphql:
     image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
     ports:
-      - "8080:8080"
+      - 8080:8080
     depends_on:
-      - "postgres"
+      - postgres
     restart: always
     volumes:
       - ./migrations:/hasura-migrations
@@ -47,22 +47,49 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecret
       ## https://hasura.io/docs/1.0/graphql/core/guides/telemetry.html
       HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+      ## Referenced by Hasura actions.yaml
+      ACTION_CONFIG_API_ENDPOINT: http://config:8082
+      ACTION_CONFIG_API_SECRET: myactionsecret
+  # Config service for Hasura Actions that call into it
+  config:
+    image: opstrace/config-api:64546e387bb9469f61fde1ca45ca726daada4417
+    command:
+      - -config=:8081
+      - -action=:8082
+      - -disable-api-authn
+    ports:
+      - 8081:8081
+      - 8082:8082
+    environment:
+      GRAPHQL_ENDPOINT: http://graphql:8080
+      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecret
+      HASURA_ACTION_SECRET: myactionsecret
+      # Some config APIs talk to cortex. Can optionally run a kubectl port-forward to test them:
+      #  kubectl port-forward -n cortex --address=0.0.0.0 deployment/ruler 9000:80
+      CORTEX_RULER_ENDPOINT: http://172.17.0.1:9000 # docker0 virtual interface ip
+      #  kubectl port-forward -n cortex --address=0.0.0.0 deployment/alertmanager 9001:80
+      CORTEX_ALERTMANAGER_ENDPOINT: http://172.17.0.1:9001 # docker0 virtual interface ip
   # S3 service for storing modules
   s3:
     image: minio/minio
     ports:
-      - "9000:9000"
+      - 9000:9000
     environment:
       MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
       MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     command: server /data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://minio:9000/minio/health/live
       interval: 30s
       timeout: 20s
       retries: 3
     logging:
       driver: none
+  # Used by app directly
   redis:
     image: bitnami/redis:6.0.9
     environment:

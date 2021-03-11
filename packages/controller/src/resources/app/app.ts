@@ -177,6 +177,27 @@ export function OpstraceApplicationResources(
   hasuraAdminSecret.setImmutable();
   collection.add(hasuraAdminSecret);
 
+  const hasuraActionSecret = new Secret(
+    {
+      apiVersion: "v1",
+      data: {
+        // Shared between graphql and config-api
+        HASURA_CONFIG_API_SECRET: Buffer.from(generateSecretValue()).toString("base64")
+      },
+      kind: "Secret",
+      metadata: {
+        name: "hasura-action-secret",
+        namespace: namespace
+      }
+    },
+    kubeConfig
+  );
+  // We don't want this value to change once it exists either.
+  // The value of this secret can always be updated manually in the cluster if needs be (kubectl delete <name> -n application) and the controller will create a new one.
+  // The corresponding deployment pods that consume it will need to be restarted also to get the new env var containing the new secret.
+  hasuraActionSecret.setImmutable();
+  collection.add(hasuraActionSecret);
+
   collection.add(
     new Deployment(
       {
@@ -415,6 +436,19 @@ export function OpstraceApplicationResources(
                     {
                       name: "HASURA_GRAPHQL_ENABLED_LOG_TYPES",
                       value: "startup, http-log, websocket-log"
+                    },
+                    {
+                      name: "ACTION_CONFIG_API_ENDPOINT",
+                      value: `http://opstrace-api.${namespace}.svc.cluster.local:8081`,
+                    },
+                    {
+                      name: "ACTION_CONFIG_API_SECRET",
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: "hasura-action-secret",
+                          key: "HASURA_CONFIG_API_SECRET"
+                        }
+                      }
                     }
                   ],
                   ports: [

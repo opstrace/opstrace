@@ -34,6 +34,11 @@ var (
 	}
 )
 
+type AWSCredentialValue struct {
+	AwsAccessKeyID     string `json:"AWS_ACCESS_KEY_ID"`
+	AwsSecretAccessKey string `json:"AWS_SECRET_ACCESS_KEY"`
+}
+
 // Accepts and validates a credential YAML value for writing to graphql as JSON.
 func convertCredValue(credName string, credType string, credValue interface{}) (*graphql.Json, error) {
 	switch credType {
