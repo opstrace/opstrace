@@ -39,12 +39,12 @@ type AWSCredentialValue struct {
 	AwsSecretAccessKey string `json:"AWS_SECRET_ACCESS_KEY"`
 }
 
-// Accepts and validates a credential YAML value for writing to graphql as JSON.
+// Accepts and validates a credential value for writing to graphql as JSON.
 func convertCredValue(credName string, credType string, credValue interface{}) (*graphql.Json, error) {
 	switch credType {
 	case "aws-key":
-		// Expect regular YAML fields (not as a nested string)
-		errfmt := "expected %s credential '%s' value to contain YAML string fields: " +
+		// Expect regular object fields (not as a nested string)
+		errfmt := "expected %s credential '%s' value to contain string fields: " +
 			"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (%s)"
 		switch v := credValue.(type) {
 		case map[interface{}]interface{}:
@@ -71,7 +71,7 @@ func convertCredValue(credName string, credType string, credValue interface{}) (
 			gjson := graphql.Json(json)
 			return &gjson, nil
 		default:
-			return nil, fmt.Errorf(errfmt, credType, credName, "expected a map")
+			return nil, fmt.Errorf(errfmt, credType, credName, fmt.Sprintf("expected a map, got %s", v))
 		}
 	case "gcp-service-account":
 		// Expect string containing a valid JSON payload
@@ -83,7 +83,7 @@ func convertCredValue(credName string, credType string, credValue interface{}) (
 			gjson := graphql.Json(v)
 			return &gjson, nil
 		default:
-			return nil, fmt.Errorf("expected %s credential '%s' value to be a JSON string", credType, credName)
+			return nil, fmt.Errorf("expected %s credential '%s' value to be a JSON string, got %s", credType, credName, v)
 		}
 	default:
 		keys := make([]string, len(validCredentialTypes))

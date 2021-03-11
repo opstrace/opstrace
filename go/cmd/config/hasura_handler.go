@@ -24,7 +24,6 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 
 	"github.com/opstrace/opstrace/go/cmd/config/actions"
 )
@@ -232,13 +231,19 @@ func (h *HasuraHandler) validateCredential(request actions.ValidateCredentialPay
 		return actions.ValidateError(actions.ServiceErrorType, "listing credentials failed", err.Error())
 	}
 
-	var yamlCredential Credential
-	err = yaml.UnmarshalStrict([]byte(request.Input.Content), &yamlCredential)
+	// Combine the graphql fields into a Credential object for validation
+	var jsonValue interface{}
+	err = json.Unmarshal([]byte(request.Input.Value), &jsonValue)
 	if err != nil {
-		return actions.ValidateError(actions.ValidationFailedType, "decoding yaml content failed", err.Error())
+		return actions.ValidateError(actions.ValidationFailedType, "decoding json credential value failed", err.Error())
+	}
+	credential := Credential{
+		Name:  request.Input.Name,
+		Type:  request.Input.Type,
+		Value: jsonValue,
 	}
 
-	_, _, err = validateCredential(existingTypes, yamlCredential)
+	_, _, err = validateCredential(existingTypes, credential)
 	if err != nil {
 		return actions.ValidateError(actions.ValidationFailedType, "config validation failed", err.Error())
 	}
@@ -254,13 +259,26 @@ func (h *HasuraHandler) validateExporter(request actions.ValidateExporterPayload
 		return actions.ValidateError(actions.ServiceErrorType, "listing exporters failed", err.Error())
 	}
 
-	var yamlExporter Exporter
-	err = yaml.UnmarshalStrict([]byte(request.Input.Content), &yamlExporter)
+	// Combine the graphql fields into an Exporter object for validation
+	var credential string
+	if request.Input.Credential == nil {
+		credential = ""
+	} else {
+		credential = *request.Input.Credential
+	}
+	var jsonConfig interface{}
+	err = json.Unmarshal([]byte(request.Input.Config), &jsonConfig)
 	if err != nil {
-		return actions.ValidateError(actions.ValidationFailedType, "decoding yaml content failed", err.Error())
+		return actions.ValidateError(actions.ValidationFailedType, "decoding json exporter config failed", err.Error())
+	}
+	exporter := Exporter{
+		Name:       request.Input.Name,
+		Type:       request.Input.Type,
+		Credential: credential,
+		Config:     jsonConfig,
 	}
 
-	_, _, err = validateExporter(request.Input.TenantID, existingTypes, yamlExporter)
+	_, _, err = validateExporter(request.Input.TenantID, existingTypes, exporter)
 	if err != nil {
 		return actions.ValidateError(actions.ValidationFailedType, "config validation failed", err.Error())
 	}

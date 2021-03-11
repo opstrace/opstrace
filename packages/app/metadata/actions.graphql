@@ -48,12 +48,12 @@ type AlertmanagerUpdateResponse {
 
 # validateCredential/validateExporter
 
-type Mutation {
-  validateCredential(tenant_id: String!, content: String!): ValidateOutput
+type Query {
+  validateCredential(tenant_id: String!, name: String!, type: String!, value: json!): ValidateOutput
 }
 
-type Mutation {
-  validateExporter(tenant_id: String!, content: String!): ValidateOutput
+type Query {
+  validateExporter(tenant_id: String!, name: String!, type: String!, config: json!, credential: String!): ValidateOutput
 }
 
 type ValidateOutput {
