@@ -327,7 +327,6 @@
     permission:
       check: {}
       columns:
-      - alertmanager_config
       - name
       - type
       backend_only: false
@@ -335,7 +334,6 @@
   - role: user_admin
     permission:
       columns:
-      - alertmanager_config
       - created_at
       - name
       - type
@@ -343,8 +341,7 @@
   update_permissions:
   - role: user_admin
     permission:
-      columns:
-      - alertmanager_config
+      columns: []
       filter: {}
       check: null
   delete_permissions:
