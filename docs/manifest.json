@@ -31,6 +31,10 @@
             {
               "title": "Instrumenting a K8s Cluster",
               "path": "/docs/guides/user/instrumenting-a-k8s-cluster.md"
+            },
+            {
+              "title": "Monitoring an Application Running on Kubernetes",
+              "path": "/docs/guides/user/monitoring-a-k8s-application.md"
             }
           ]
         },

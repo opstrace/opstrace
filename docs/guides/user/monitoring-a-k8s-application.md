@@ -1,4 +1,4 @@
-# Monitoring an Application Running in Kubernetes on AWS
+# Monitoring an Application Running in Kubernetes
 
 In this guide we will show you how to monitor an application running in Kubernetes using your Opstrace cluster.
 You will:
