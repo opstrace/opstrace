@@ -17,6 +17,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -112,11 +113,22 @@ func main() {
 	log.Fatalf("terminated: %s", http.ListenAndServe(listenAddress, router))
 }
 
+/*
+Context: https://github.com/opstrace/opstrace/issues/464
+*/
 func CortexPushRewrite429(resp *http.Response) (err error) {
 	if strings.Contains(resp.Request.URL.Path, "/api/v1/push") {
 		if resp.StatusCode == 429 {
+			// Read original error message from (original) response body.
+			origBodyBytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				log.Warnf("CortexPushRewrite429: could not read resp body: %s", err)
+			}
+
+			// Now set new response status code, and tweak the error message.
+			// Note(JP): does the old resp.Body need to be close()d?
 			resp.StatusCode = 503
-			errmsg := "429-to-503"
+			errmsg := fmt.Sprintf("429-to-503: %s", string(origBodyBytes))
 			bodybytes := []byte(errmsg)
 			resp.Body = ioutil.NopCloser(bytes.NewReader(bodybytes))
 			resp.ContentLength = int64(len(bodybytes))

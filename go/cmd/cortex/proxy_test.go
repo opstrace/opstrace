@@ -38,7 +38,7 @@ func createUpstream429Responder() (*url.URL, func()) {
 	router := mux.NewRouter()
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusTooManyRequests)
-		w.Write([]byte("429 error response"))
+		w.Write([]byte("original 429 error response"))
 	})
 
 	backend := httptest.NewServer(router)
@@ -67,7 +67,7 @@ func TestReverseProxy_CortexPushRewrite429(t *testing.T) {
 	rp.HandleWithProxy(w, req)
 	resp := w.Result()
 	assert.Equal(t, 503, resp.StatusCode)
-	assert.Equal(t, "429-to-503", middleware.GetStrippedBody(resp))
+	assert.Equal(t, "429-to-503: original 429 error response", middleware.GetStrippedBody(resp))
 
 	// Test without `/api/v1/push`, confirm that response is left intact.
 	req = httptest.NewRequest("GET", "http://localhost/", nil)
