@@ -61,12 +61,17 @@ type UpdateAlertmanagerArgs struct {
 
 type ValidateCredentialArgs struct {
 	TenantID string `json:"tenant_id"`
-	Content  string `json:"content"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	Value    string `json:"value"`
 }
 
 type ValidateExporterArgs struct {
-	TenantID string `json:"tenant_id"`
-	Content  string `json:"content"`
+	TenantID   string  `json:"tenant_id"`
+	Name       string  `json:"name"`
+	Type       string  `json:"type"`
+	Config     string  `json:"config"`
+	Credential *string `json:"credential,omitempty"`
 }
 
 type GetAlertmanagerPayload struct {
