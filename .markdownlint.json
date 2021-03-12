@@ -22,7 +22,9 @@
       "VS Code",
       "Opstrace",
       "Prometheus",
-      "Promtail"
+      "Promtail",
+      "Stackdriver",
+      "CloudWatch"
     ]
   }
 }
