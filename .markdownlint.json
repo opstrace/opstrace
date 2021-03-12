@@ -10,21 +10,21 @@
   "proper-names": {
     "code_blocks": false,
     "names": [
-      "hello@opstrace.com",
-      "legal@opstrace.com",
-      "privacy@opstrace.com",
-      "security@opstrace.com",
-      "opstrace.com",
-      "opstrace.com/docs",
       "Alertmanager",
       "Auth0",
+      "CloudWatch",
       "Grafana",
-      "VS Code",
       "Opstrace",
       "Prometheus",
       "Promtail",
       "Stackdriver",
-      "CloudWatch"
+      "VS Code",
+      "hello@opstrace.com",
+      "legal@opstrace.com",
+      "opstrace.com",
+      "opstrace.com/docs",
+      "privacy@opstrace.com",
+      "security@opstrace.com"
     ]
   }
 }
