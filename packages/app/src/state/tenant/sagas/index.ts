@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all, call, spawn, takeEvery } from "redux-saga/effects";
+
+import { all, call, spawn, takeEvery, take, put } from "redux-saga/effects";
 import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
+import { split } from "ramda";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
 
@@ -23,7 +25,9 @@ export default function* tenantTaskManager() {
   const sagas = [
     tenantListSubscriptionManager,
     addTenantListener,
-    deleteTenantListener
+    deleteTenantListener,
+    getAlertmanagerListener,
+    updateAlertmanager
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
@@ -73,5 +77,73 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
     });
   } catch (err) {
     console.error(err);
+  }
+}
+
+function* getAlertmanagerListener() {
+  yield takeEvery(actions.getAlertmanager, getAlertmanager);
+}
+
+function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
+  try {
+    const response = yield graphqlClient.GetAlertmanager({
+      tenant_id: action.payload
+    });
+
+    if (response.data?.getAlertmanager?.config) {
+      const [header, rawConfig] = split(
+        "alertmanager_config: |",
+        response.data?.getAlertmanager?.config
+      );
+      const config = rawConfig
+        .replace("\n  ", "") // replace leading set with nothing as we don't want a blank line at the begining of the config
+        .replace(/(\n {2})+/g, "\n");
+
+      yield put({
+        type: "ALERTMANAGER_LOADED",
+        payload: {
+          tenantId: action.payload,
+          header: header,
+          config: config,
+          online: true
+        }
+      });
+    } else {
+      yield put({
+        type: "ALERTMANAGER_LOADED",
+        payload: {
+          tenantId: action.payload,
+          header: "templates: {}",
+          config: "",
+          online: true
+        }
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function* updateAlertmanager() {
+  while (true) {
+    const action: ReturnType<typeof actions.updateAlertmanager> = yield take(
+      actions.updateAlertmanager
+    );
+
+    try {
+      const config = `${
+        action.payload.header
+      }alertmanager_config: |\n  ${action.payload.config.replace(
+        /(\n)+/g,
+        "\n  "
+      )}`;
+
+      yield graphqlClient.UpdateAlertmanager({
+        tenant_id: action.payload.tenantId,
+        input: { config }
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

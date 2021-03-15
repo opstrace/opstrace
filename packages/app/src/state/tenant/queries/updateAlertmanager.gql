@@ -1,0 +1,8 @@
+mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!) {
+  updateAlertmanager(tenant_id: $tenant_id, input: $input) {
+    success
+    error_type
+    error_message
+    error_raw_response
+  }
+}

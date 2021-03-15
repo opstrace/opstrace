@@ -20,9 +20,7 @@ import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
 import { addTenant } from "state/tenant/actions";
 import { useDispatch } from "react-redux";
-
-// eslint-disable-next-line no-useless-escape
-const subdomainValidator = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/;
+import { subdomainValidator } from "client/utils/regex";
 
 const AddTenantPicker = () => {
   const dispatch = useDispatch();

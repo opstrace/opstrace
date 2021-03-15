@@ -21,12 +21,12 @@ import Avatar from "@material-ui/core/Avatar";
 import { useDispatch } from "react-redux";
 
 import { Box } from "client/components/Box";
+import Attribute from "client/components/Attribute";
+
 import { deleteUser } from "state/user/actions";
-import { deleteTenant } from "state/tenant/actions";
 
 import useUserList from "state/user/hooks/useUserList";
 import Layout from "client/layout/MainContent";
-import Typography from "client/components/Typography/Typography";
 import SideBar from "./Sidebar";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -34,26 +34,10 @@ import { Button } from "client/components/Button";
 import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
 import useCurrentUser from "state/user/hooks/useCurrentUser";
-import useTenantList from "state/tenant/hooks/useTenantList";
-import { ExternalLink } from "client/components/Link";
 
-const AttributeKey = (props: { children: React.ReactNode }) => (
-  <Box pt={2} pb={2}>
-    <Typography variant="h6" color="textSecondary">
-      {props.children}
-    </Typography>
-  </Box>
-);
-const AttributeValue = (props: { children: React.ReactNode }) => (
-  <Box p={3} pt={2} pb={2}>
-    <Typography variant="h6">{props.children}</Typography>
-  </Box>
-);
-
-const Cluster = () => {
-  const params = useParams<{ id?: string; tenant?: string }>();
+const UserDetail = () => {
+  const params = useParams<{ id: string }>();
   const users = useUserList();
-  const tenants = useTenantList();
   const currentUser = useCurrentUser();
   const dispatch = useDispatch();
 
@@ -61,10 +45,6 @@ const Cluster = () => {
     params.id,
     users
   ]);
-  const selectedTenant = useMemo(
-    () => tenants.find(t => t.name === params.tenant),
-    [params.tenant, tenants]
-  );
 
   const { activatePickerWithText } = usePickerService(
     {
@@ -89,36 +69,18 @@ const Cluster = () => {
     },
     [selectedUser?.id]
   );
-  usePickerService(
-    {
-      title: `Delete ${selectedTenant?.name}?`,
-      activationPrefix: "delete tenant directly?:",
-      disableFilter: true,
-      disableInput: true,
-      options: [
-        {
-          id: "yes",
-          text: `yes`
-        },
-        {
-          id: "no",
-          text: "no"
-        }
-      ],
-      onSelected: option => {
-        if (option.id === "yes" && selectedTenant?.name) {
-          dispatch(deleteTenant(selectedTenant?.name));
-        }
-      }
-    },
-    [selectedTenant?.name]
-  );
 
   const cmdService = useCommandService();
 
-  const getContent = () => {
-    if (selectedUser) {
-      return (
+  if (!selectedUser)
+    return (
+      <Layout sidebar={SideBar}>
+        <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
+      </Layout>
+    );
+  else
+    return (
+      <Layout sidebar={SideBar}>
         <Box
           width="100%"
           height="100%"
@@ -180,99 +142,30 @@ const Cluster = () => {
               <CardContent>
                 <Box display="flex">
                   <Box display="flex" flexDirection="column">
-                    <AttributeKey>Role:</AttributeKey>
-                    <AttributeKey>Username:</AttributeKey>
-                    <AttributeKey>Email:</AttributeKey>
-                    <AttributeKey>Last Login:</AttributeKey>
-                    <AttributeKey>Created:</AttributeKey>
+                    <Attribute.Key>Role:</Attribute.Key>
+                    <Attribute.Key>Username:</Attribute.Key>
+                    <Attribute.Key>Email:</Attribute.Key>
+                    <Attribute.Key>Last Login:</Attribute.Key>
+                    <Attribute.Key>Created:</Attribute.Key>
                   </Box>
                   <Box display="flex" flexDirection="column" flexGrow={1}>
-                    <AttributeValue>{selectedUser.role}</AttributeValue>
-                    <AttributeValue>{selectedUser.username}</AttributeValue>
-                    <AttributeValue>{selectedUser.email}</AttributeValue>
-                    <AttributeValue>
+                    <Attribute.Value>{selectedUser.role}</Attribute.Value>
+                    <Attribute.Value>{selectedUser.username}</Attribute.Value>
+                    <Attribute.Value>{selectedUser.email}</Attribute.Value>
+                    <Attribute.Value>
                       {selectedUser.session_last_updated
                         ? selectedUser.session_last_updated
                         : "-"}
-                    </AttributeValue>
-                    <AttributeValue>{selectedUser.created_at}</AttributeValue>
+                    </Attribute.Value>
+                    <Attribute.Value>{selectedUser.created_at}</Attribute.Value>
                   </Box>
                 </Box>
               </CardContent>
             </Card>
           </Box>
         </Box>
-      );
-    }
-
-    if (selectedTenant) {
-      return (
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
-          <Box maxWidth={700}>
-            <Card p={3}>
-              <CardHeader
-                titleTypographyProps={{ variant: "h5" }}
-                action={
-                  <Box ml={3} display="flex" flexWrap="wrap">
-                    <Box p={1}>
-                      <Button
-                        variant="outlined"
-                        size="medium"
-                        disabled={selectedTenant.type === "SYSTEM"}
-                        onClick={() =>
-                          activatePickerWithText("delete tenant directly?: ")
-                        }
-                      >
-                        Delete
-                      </Button>
-                    </Box>
-                  </Box>
-                }
-                title={selectedTenant.name}
-              />
-              <CardContent>
-                <Box display="flex">
-                  <Box display="flex" flexDirection="column">
-                    <AttributeKey>Grafana:</AttributeKey>
-                    <AttributeKey>Created:</AttributeKey>
-                  </Box>
-                  <Box display="flex" flexDirection="column" flexGrow={1}>
-                    <AttributeValue>
-                      <ExternalLink
-                        href={`${window.location.protocol}//${selectedTenant.name}.${window.location.host}`}
-                      >
-                        {`${selectedTenant.name}.${window.location.host}`}
-                      </ExternalLink>
-                    </AttributeValue>
-                    <AttributeValue>{selectedTenant.created_at}</AttributeValue>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-            <Typography color="textSecondary">
-              New tenants can take 5 minutes to provision with dns propagation
-            </Typography>
-          </Box>
-        </Box>
-      );
-    }
-
-    return (
-      <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
+      </Layout>
     );
-  };
-
-  const content = getContent();
-
-  return <Layout sidebar={SideBar}>{content}</Layout>;
 };
 
-export default Cluster;
+export default UserDetail;

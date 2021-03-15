@@ -1860,6 +1860,74 @@ func (client *Client) DeleteTenant(vars *DeleteTenantVariables) (*DeleteTenantRe
 }
 
 //
+// query GetAlertmanager($tenant_id: String!)
+//
+
+type GetAlertmanagerVariables struct {
+	TenantId String `json:"tenant_id"`
+}
+
+type GetAlertmanagerResponse struct {
+	GetAlertmanager struct {
+		Config string `json:"Config"`
+		Online string `json:"Online"`
+	} `json:"GetAlertmanager"`
+}
+
+type GetAlertmanagerRequest struct {
+	*http.Request
+}
+
+func NewGetAlertmanagerRequest(url string, vars *GetAlertmanagerVariables) (*GetAlertmanagerRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetAlertmanager($tenant_id: String!) {
+  getAlertmanager(tenant_id: $tenant_id) {
+    config
+    online
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetAlertmanagerRequest{req}, nil
+}
+
+func (req *GetAlertmanagerRequest) Execute(client *http.Client) (*GetAlertmanagerResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetAlertmanagerResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetAlertmanager(url string, client *http.Client, vars *GetAlertmanagerVariables) (*GetAlertmanagerResponse, error) {
+	req, err := NewGetAlertmanagerRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetAlertmanager(vars *GetAlertmanagerVariables) (*GetAlertmanagerResponse, error) {
+	return GetAlertmanager(client.Url, client.Client, vars)
+}
+
+//
 // query GetTenants
 //
 
@@ -1918,6 +1986,79 @@ func GetTenants(url string, client *http.Client) (*GetTenantsResponse, error) {
 
 func (client *Client) GetTenants() (*GetTenantsResponse, error) {
 	return GetTenants(client.Url, client.Client)
+}
+
+//
+// mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!)
+//
+
+type UpdateAlertmanagerVariables struct {
+	TenantId String            `json:"tenant_id"`
+	Input    AlertmanagerInput `json:"input"`
+}
+
+type UpdateAlertmanagerResponse struct {
+	UpdateAlertmanager struct {
+		Success          string `json:"Success"`
+		ErrorType        string `json:"ErrorType"`
+		ErrorMessage     string `json:"ErrorMessage"`
+		ErrorRawResponse string `json:"ErrorRawResponse"`
+	} `json:"UpdateAlertmanager"`
+}
+
+type UpdateAlertmanagerRequest struct {
+	*http.Request
+}
+
+func NewUpdateAlertmanagerRequest(url string, vars *UpdateAlertmanagerVariables) (*UpdateAlertmanagerRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!) {
+  updateAlertmanager(tenant_id: $tenant_id, input: $input) {
+    success
+    error_type
+    error_message
+    error_raw_response
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpdateAlertmanagerRequest{req}, nil
+}
+
+func (req *UpdateAlertmanagerRequest) Execute(client *http.Client) (*UpdateAlertmanagerResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpdateAlertmanagerResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateAlertmanager(url string, client *http.Client, vars *UpdateAlertmanagerVariables) (*UpdateAlertmanagerResponse, error) {
+	req, err := NewUpdateAlertmanagerRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpdateAlertmanager(vars *UpdateAlertmanagerVariables) (*UpdateAlertmanagerResponse, error) {
+	return UpdateAlertmanager(client.Url, client.Client, vars)
 }
 
 //
@@ -2613,6 +2754,14 @@ type UUID string
 // Enums
 //
 
+type ErrorType string
+
+const (
+	ErrorTypeSERVICEERROR     ErrorType = "SERVICE_ERROR"
+	ErrorTypeSERVICEOFFLINE   ErrorType = "SERVICE_OFFLINE"
+	ErrorTypeVALIDATIONFAILED ErrorType = "VALIDATION_FAILED"
+)
+
 type BranchConstraint string
 
 const (
@@ -2887,6 +3036,10 @@ const (
 //
 // Inputs
 //
+
+type AlertmanagerInput struct {
+	Config String `json:"config"`
+}
 
 type BooleanComparisonExp struct {
 	Eq     *Boolean   `json:"_eq,omitempty"`
@@ -3811,6 +3964,26 @@ type UuidComparisonExp struct {
 // Objects
 //
 
+type Alertmanager struct {
+	Config   *String `json:"config,omitempty"`
+	Online   Boolean `json:"online"`
+	TenantId String  `json:"tenant_id"`
+}
+
+type AlertmanagerUpdateResponse struct {
+	ErrorMessage     *String    `json:"error_message,omitempty"`
+	ErrorRawResponse *String    `json:"error_raw_response,omitempty"`
+	ErrorType        *ErrorType `json:"error_type,omitempty"`
+	Success          Boolean    `json:"success"`
+}
+
+type ValidateOutput struct {
+	ErrorMessage     *String    `json:"error_message,omitempty"`
+	ErrorRawResponse *String    `json:"error_raw_response,omitempty"`
+	ErrorType        *ErrorType `json:"error_type,omitempty"`
+	Success          Boolean    `json:"success"`
+}
+
 type Branch struct {
 	CreatedAt         Timestamptz            `json:"created_at"`
 	Files             *[]File                `json:"files,omitempty"`
@@ -4132,6 +4305,7 @@ type MutationRoot struct {
 	InsertUserOne            *User                           `json:"insert_user_one,omitempty"`
 	InsertUserPreference     *UserPreferenceMutationResponse `json:"insert_user_preference,omitempty"`
 	InsertUserPreferenceOne  *UserPreference                 `json:"insert_user_preference_one,omitempty"`
+	UpdateAlertmanager       *AlertmanagerUpdateResponse     `json:"updateAlertmanager,omitempty"`
 	UpdateBranch             *BranchMutationResponse         `json:"update_branch,omitempty"`
 	UpdateBranchByPk         *Branch                         `json:"update_branch_by_pk,omitempty"`
 	UpdateCredential         *CredentialMutationResponse     `json:"update_credential,omitempty"`
@@ -4165,6 +4339,7 @@ type QueryRoot struct {
 	File                    *[]File                 `json:"file,omitempty"`
 	FileAggregate           FileAggregate           `json:"file_aggregate"`
 	FileByPk                *File                   `json:"file_by_pk,omitempty"`
+	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	Module                  *[]Module               `json:"module,omitempty"`
 	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
 	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
@@ -4180,6 +4355,8 @@ type QueryRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
+	ValidateCredential      *ValidateOutput         `json:"validateCredential,omitempty"`
+	ValidateExporter        *ValidateOutput         `json:"validateExporter,omitempty"`
 }
 
 type SubscriptionRoot struct {
@@ -4195,6 +4372,7 @@ type SubscriptionRoot struct {
 	File                    *[]File                 `json:"file,omitempty"`
 	FileAggregate           FileAggregate           `json:"file_aggregate"`
 	FileByPk                *File                   `json:"file_by_pk,omitempty"`
+	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	Module                  *[]Module               `json:"module,omitempty"`
 	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
 	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
@@ -4210,6 +4388,8 @@ type SubscriptionRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
+	ValidateCredential      *ValidateOutput         `json:"validateCredential,omitempty"`
+	ValidateExporter        *ValidateOutput         `json:"validateExporter,omitempty"`
 }
 
 type Tenant struct {

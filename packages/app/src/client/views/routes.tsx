@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import SelectedModule from "./module/SelectedModule";
 import Modules from "./module/Modules";
 import ChatView from "./chat";
 import HistoryView from "./history";
-import ClusterView from "./cluster";
+import UserDetail from "./cluster/UserDetail";
+import TenantDetail from "./cluster/TenantDetail";
+import AlertmanagerConfigEditor from "./cluster/AlertmanagerConfigEditor";
 import HelpDialog from "./help";
 import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
@@ -105,12 +107,17 @@ const AuthenticatedRoutes = () => {
         <Route
           key="/cluster/users/:id"
           path="/cluster/users/:id"
-          component={ClusterView}
+          component={UserDetail}
+        />
+        <Route
+          key="/cluster/tenants/:tenantId/alert-manager-config"
+          path="/cluster/tenants/:tenantId/alert-manager-config"
+          component={AlertmanagerConfigEditor}
         />
         <Route
           key="/cluster/tenants/:tenant"
           path="/cluster/tenants/:tenant"
-          component={ClusterView}
+          component={TenantDetail}
         />
         <Route key="*" path="*" component={NotFound} />
       </Switch>

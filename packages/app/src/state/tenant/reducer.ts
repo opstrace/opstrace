@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import * as R from "ramda";
+import { pluck, zipObj, pick, mergeDeepRight } from "ramda";
 
 import { createReducer, ActionType } from "typesafe-actions";
 import { TenantRecords } from "./types";
+
 import * as actions from "./actions";
 
 type TenantActions = ActionType<typeof actions>;
@@ -34,15 +35,36 @@ const TenantInitialState: TenantState = {
 
 export const reducer = createReducer<TenantState, TenantActions>(
   TenantInitialState
-).handleAction(
-  actions.setTenantList,
-  (state, action): TenantState => {
-    const tenantIds: string[] = R.pluck("name", action.payload);
-    const tenants: TenantRecords = R.zipObj(tenantIds, action.payload);
-    return {
-      ...state,
-      tenants: tenants,
-      loading: false
-    };
-  }
-);
+)
+  .handleAction(
+    actions.setTenantList,
+    (state, action): TenantState => {
+      const tenantIds: string[] = pluck("name", action.payload);
+      const tenants: TenantRecords = zipObj(tenantIds, action.payload);
+      return mergeDeepRight(state, { loading: false, tenants: tenants });
+    }
+  )
+  .handleAction(
+    actions.alertmanagerLoaded,
+    (state, action): TenantState => {
+      return mergeDeepRight(state, {
+        tenants: {
+          [action.payload.tenantId]: {
+            alertmanager: pick(["header", "config", "online"])(action.payload)
+          }
+        }
+      });
+    }
+  )
+  .handleAction(
+    actions.updateAlertmanager,
+    (state, action): TenantState => {
+      return mergeDeepRight(state, {
+        tenants: {
+          [action.payload.tenantId]: {
+            alertmanager: pick(["header", "config"])(action.payload)
+          }
+        }
+      });
+    }
+  );

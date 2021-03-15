@@ -78,6 +78,7 @@
     "hotkeys-js": "^3.8.1",
     "husky": "^4.3.0",
     "identity-obj-proxy": "3.0.0",
+    "js-yaml": "^4.0.0",
     "jwks-rsa": "^1.12.3",
     "lightship": "^6.1.0",
     "lodash": "^4.17.21",
@@ -86,6 +87,7 @@
     "monaco-editor": "0.21.3",
     "monaco-editor-core": "0.21.3",
     "monaco-editor-webpack-plugin": "^2.1.0",
+    "monaco-yaml": "^2.5.1",
     "new-github-issue-url": "^0.2.1",
     "polished": "^3.6.6",
     "qs": "^6.9.4",
@@ -117,7 +119,8 @@
     "typesafe-actions": "^5.1.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
-    "worker-loader": "^3.0.7"
+    "worker-loader": "^3.0.7",
+    "yup": "^0.32.9"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
@@ -253,7 +256,10 @@
     "metadata:export": "yarn hasura metadata export --admin-secret myadminsecret",
     "types:watch": "HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret graphql-codegen --config codegen.js --watch",
     "console": "hasura console --admin-secret myadminsecret",
+    "console:remote": "HASURA_GRAPHQL_ENDPOINT=http://127.0.0.1:8090 HASURA_GRAPHQL_ADMIN_SECRET=$(kubectl get secrets -n kube-system -o json hasura-admin-secret | jq -r .data.HASURA_ADMIN_SECRET | base64 -d) hasura console --no-browser",
     "services:start": "docker-compose up",
+    "server:start:remote": "GRAPHQL_ENDPOINT=http://127.0.0.1:8090/v1/graphql GRAPHQL_ENDPOINT_PORT=8090 HASURA_GRAPHQL_ADMIN_SECRET=$(kubectl get secrets -n kube-system -o json hasura-admin-secret | jq -r .data.HASURA_ADMIN_SECRET | base64 -d) NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
+    "services:graphql:remote": "kubectl port-forward -n application deployment/graphql 8090:8080",
     "lib:gen": "ts-node src/sdk/compiler.ts",
     "lib:watch": "ts-node src/sdk/compiler.ts --watch"
   },

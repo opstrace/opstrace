@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToTenantListSubscription } from "state/clients/graphqlClient";
 
-export type Alertmanager = {
-  header: string;
-  config: string;
-  online?: boolean;
-};
+import { createSelector } from "reselect";
+import { useSelector, State } from "state/provider";
 
-type TenantVirtualFields = {
-  alertmanager?: Alertmanager;
-};
+export const selectTenant = createSelector(
+  (state, _) => state.tenants.tenants,
+  (_: State, tenantName: string) => tenantName,
+  (tenants, tenantName: string) => tenants[tenantName]
+);
 
-export type Tenant = SubscribeToTenantListSubscription["tenant"][0] &
-  TenantVirtualFields;
-
-export type Tenants = Tenant[];
-export type TenantRecords = Record<string, Tenant>;
-
-// use this same id to unsubscribe
-export type SubscriptionID = number;
+export default function useTenant(tenantName: string) {
+  return useSelector((state: State) => selectTenant(state, tenantName));
+}
