@@ -253,7 +253,8 @@ export class TimeseriesFragmentPushMessage {
       }
 
       // All other HTTP responses: treat as transient problems
-      log.info("Treat as transient problem, retry");
+      log.info("Treat as transient problem. Wait shortly, and retry");
+      await sleep(3.0);
     }
     throw new Error(`Failed to POST ${this} after ${maxRetries} attempts`);
   }
