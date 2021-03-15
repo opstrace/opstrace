@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 import { useEffect } from "react";
+import { values } from "ramda";
+import { createSelector } from "reselect";
 import { useDispatch, useSelector, State } from "state/provider";
+
 import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
-import { Tenants } from "state/tenant/types";
-import { values } from "ramda";
 
-export const getTenantList = (state: State) =>
-  values(state.tenants.tenants) as Tenants;
+const selectTenantList = createSelector(
+  (state: State) => state.tenants.tenants,
+  tenants => values(tenants)
+);
 
 /**
  * Subscribes to tenants and will update on
@@ -29,7 +32,7 @@ export const getTenantList = (state: State) =>
  * on unmount.
  */
 export default function useTenantList() {
-  const tenants = useSelector(getTenantList);
+  const tenants = useSelector(selectTenantList);
   const dispatch = useDispatch();
 
   useEffect(() => {

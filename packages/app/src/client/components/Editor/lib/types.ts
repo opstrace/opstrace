@@ -21,3 +21,10 @@ export type ModuleEditorProps = {
   height: number;
   width: number;
 };
+
+export type YamlEditorProps = {
+  filename: string;
+  jsonSchema?: object;
+  data: string;
+  onChange?: Function;
+};

@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SubscribeToTenantListSubscription } from "state/clients/graphqlClient";
 
-export type Alertmanager = {
-  header: string;
-  config: string;
-  online?: boolean;
-};
+import React, { ReactNode } from "react";
 
-type TenantVirtualFields = {
-  alertmanager?: Alertmanager;
-};
+import { Box } from "client/components/Box";
 
-export type Tenant = SubscribeToTenantListSubscription["tenant"][0] &
-  TenantVirtualFields;
+import Typography from "client/components/Typography/Typography";
 
-export type Tenants = Tenant[];
-export type TenantRecords = Record<string, Tenant>;
+export const Key = (props: { children: ReactNode }) => (
+  <Box pt={2} pb={2}>
+    <Typography variant="h6" color="textSecondary">
+      {props.children}
+    </Typography>
+  </Box>
+);
 
-// use this same id to unsubscribe
-export type SubscriptionID = number;
+export const Value = (props: { children: ReactNode }) => (
+  <Box p={3} pt={2} pb={2}>
+    <Typography variant="h6">{props.children}</Typography>
+  </Box>
+);
+
+const attribute = { Key, Value };
+
+export default attribute;
