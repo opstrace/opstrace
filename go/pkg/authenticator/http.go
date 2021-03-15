@@ -23,10 +23,10 @@ import (
 
 // Expect HTTP request to have a header of the shape
 //
-//      `Authorization: Bearer <AUTHTOKEN>` set.
+//      `Authorization: Bearer <AUTHTOKEN>`
 //
-// Extract (and do _not_ verify authentication token from in HTTP request.
-// Emit error HTTP responses and return `false` upon any failure.
+// set. Extract (and do _not_ verify) the authentication token. Emit error
+// HTTP response and return `false` upon any failure.
 func getAuthTokenUnverifiedFromHeaderOr401(w http.ResponseWriter, r *http.Request) (string, bool) {
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
@@ -44,15 +44,20 @@ func getAuthTokenUnverifiedFromHeaderOr401(w http.ResponseWriter, r *http.Reques
 	return authTokenUnverified, true
 }
 
-/* Write 401 response and return false. */
-func exit401(resp http.ResponseWriter, errmsg string) bool {
-	// `errmsg` is written to response body and should therefore be short and
-	// not undermine security. Useful hints: yes (such as "authentication token
-	// missing" or "unexpected Authorization header format"). No security hints
-	// such as "signature verification failed".
+/* Write 401 response and return false.
 
-	// 401 is canonical for "not authenticated" although the corresponding
-	// name is 'Unauthorized'
+The return value is just for convenience: write `return exit401()` in the
+caller instead of `exit401(); return false`.
+
+`errmsg` is written to response body and should therefore be short and not
+undermine security. Useful hints: yes (such as "authentication token missing"
+or "unexpected Authorization header format"). No security hints such as
+"signature verification failed".
+
+Note that HTTP status code 401 is canonical for "not authenticated" although
+the corresponding name is 'Unauthorized'.
+*/
+func exit401(resp http.ResponseWriter, errmsg string) bool {
 	resp.WriteHeader(http.StatusUnauthorized)
 	log.Infof("emit 401. Err: %s", errmsg)
 
