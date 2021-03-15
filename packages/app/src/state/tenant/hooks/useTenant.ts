@@ -18,9 +18,11 @@ import { createSelector } from "reselect";
 import { useSelector, State } from "state/provider";
 
 export const selectTenant = createSelector(
+  (state: State) => state.tenants.loading,
   (state, _) => state.tenants.tenants,
   (_: State, tenantName: string) => tenantName,
-  (tenants, tenantName: string) => tenants[tenantName]
+  (loading, tenants, tenantName: string) =>
+    loading ? null : tenants[tenantName]
 );
 
 export default function useTenant(tenantName: string) {

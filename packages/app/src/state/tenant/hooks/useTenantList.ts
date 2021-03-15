@@ -22,8 +22,9 @@ import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
 const selectTenantList = createSelector(
+  (state: State) => state.tenants.loading,
   (state: State) => state.tenants.tenants,
-  tenants => values(tenants)
+  (loading, tenants) => (loading ? [] : values(tenants))
 );
 
 /**
