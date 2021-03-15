@@ -225,7 +225,7 @@ func setupConfigAPI(
 // The check is skipped if `disableAPIAuthentication` is true.
 func getTenantThenCall(f func(string, http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tenantName, ok := authenticator.GetTenant(w, r, nil, disableAPIAuthentication)
+		tenantName, ok := authenticator.GetTenantNameOr401(w, r, nil, disableAPIAuthentication)
 		if !ok {
 			return
 		}
