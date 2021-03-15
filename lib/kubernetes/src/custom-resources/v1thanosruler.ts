@@ -14,8 +14,7 @@ import {
   K8sResource,
   isSameObject,
   ResourceCache,
-  VoidAuth
-} from "../common";
+  VoidAuth } from "../common";
 import { IncomingMessage } from "http";
 import {
   V1Status,
@@ -407,7 +406,7 @@ export interface V1Thanosruler {
      */
     alertmanagersUrl?: string[];
     /**
-     * Containers allows injecting additional containers or modifying operator generated containers. This can be used to allow adding an authentication proxy to a ThanosRuler pod or to change the behavior of an operator generated container. Containers described here modify an operator generated container if they share the same name and modifications are done via a strategic merge patch. The current container names are: `thanos-ruler` and `rules-configmap-reloader`. Overriding containers is entirely outside the scope of what the maintainers will support and by doing so, you accept that this behaviour may break at any time without notice.
+     * Containers allows injecting additional containers or modifying operator generated containers. This can be used to allow adding an authentication proxy to a ThanosRuler pod or to change the behavior of an operator generated container. Containers described here modify an operator generated container if they share the same name and modifications are done via a strategic merge patch. The current container names are: `thanos-ruler` and `config-reloader`. Overriding containers is entirely outside the scope of what the maintainers will support and by doing so, you accept that this behaviour may break at any time without notice.
      */
     containers?: {
       /**
@@ -477,7 +476,7 @@ export interface V1Thanosruler {
             /**
              * Specifies the output format of the exposed resources, defaults to "1"
              */
-            divisor?: string;
+            divisor?: number | string;
             /**
              * Required: resource to select
              */
@@ -900,13 +899,13 @@ export interface V1Thanosruler {
          * Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
          */
         limits?: {
-          [k: string]: string;
+          [k: string]: number | string;
         };
         /**
          * Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
          */
         requests?: {
-          [k: string]: string;
+          [k: string]: number | string;
         };
         [k: string]: any;
       };
@@ -1171,7 +1170,7 @@ export interface V1Thanosruler {
      */
     grpcServerTlsConfig?: {
       /**
-       * Stuct containing the CA cert to use for the targets.
+       * Struct containing the CA cert to use for the targets.
        */
       ca?: {
         /**
@@ -1379,7 +1378,7 @@ export interface V1Thanosruler {
             /**
              * Specifies the output format of the exposed resources, defaults to "1"
              */
-            divisor?: string;
+            divisor?: number | string;
             /**
              * Required: resource to select
              */
@@ -1802,13 +1801,13 @@ export interface V1Thanosruler {
          * Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
          */
         limits?: {
-          [k: string]: string;
+          [k: string]: number | string;
         };
         /**
          * Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
          */
         requests?: {
-          [k: string]: string;
+          [k: string]: number | string;
         };
         [k: string]: any;
       };
@@ -2081,7 +2080,7 @@ export interface V1Thanosruler {
       [k: string]: string;
     };
     /**
-     * ObjectStorageConfig configures object storage in Thanos.
+     * ObjectStorageConfig configures object storage in Thanos. Alternative to ObjectStorageConfigFile, and lower order priority.
      */
     objectStorageConfig?: {
       /**
@@ -2098,6 +2097,10 @@ export interface V1Thanosruler {
       optional?: boolean;
       [k: string]: any;
     };
+    /**
+     * ObjectStorageConfigFile specifies the path of the object storage configuration file. When used alongside with ObjectStorageConfig, ObjectStorageConfigFile takes precedence.
+     */
+    objectStorageConfigFile?: string;
     /**
      * When a ThanosRuler deployment is paused, no actions except for deletion will be performed on the underlying objects.
      */
@@ -2180,13 +2183,13 @@ export interface V1Thanosruler {
        * Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
        */
       limits?: {
-        [k: string]: string;
+        [k: string]: number | string;
       };
       /**
        * Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
        */
       requests?: {
-        [k: string]: string;
+        [k: string]: number | string;
       };
       [k: string]: any;
     };
@@ -2367,7 +2370,7 @@ export interface V1Thanosruler {
         /**
          * Total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir
          */
-        sizeLimit?: string;
+        sizeLimit?: number | string;
         [k: string]: any;
       };
       /**
@@ -2438,13 +2441,13 @@ export interface V1Thanosruler {
              * Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
              */
             limits?: {
-              [k: string]: string;
+              [k: string]: number | string;
             };
             /**
              * Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
              */
             requests?: {
-              [k: string]: string;
+              [k: string]: number | string;
             };
             [k: string]: any;
           };
@@ -2504,7 +2507,7 @@ export interface V1Thanosruler {
            * Represents the actual resources of the underlying volume.
            */
           capacity?: {
-            [k: string]: string;
+            [k: string]: number | string;
           };
           /**
            * Current Condition of persistent volume claim. If underlying persistent volume is being resized then the Condition will be set to 'ResizeStarted'.
@@ -2567,6 +2570,54 @@ export interface V1Thanosruler {
        * Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty, otherwise just a regular string.
        */
       value?: string;
+      [k: string]: any;
+    }[];
+    /**
+     * If specified, the pod's topology spread constraints.
+     */
+    topologySpreadConstraints?: {
+      /**
+       * LabelSelector is used to find matching pods. Pods that match this label selector are counted to determine the number of pods in their corresponding topology domain.
+       */
+      labelSelector?: {
+        /**
+         * matchExpressions is a list of label selector requirements. The requirements are ANDed.
+         */
+        matchExpressions?: {
+          /**
+           * key is the label key that the selector applies to.
+           */
+          key: string;
+          /**
+           * operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+           */
+          operator: string;
+          /**
+           * values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+           */
+          values?: string[];
+          [k: string]: any;
+        }[];
+        /**
+         * matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+         */
+        matchLabels?: {
+          [k: string]: string;
+        };
+        [k: string]: any;
+      };
+      /**
+       * MaxSkew describes the degree to which pods may be unevenly distributed. It's the maximum permitted difference between the number of matching pods in any two topology domains of a given topology type. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 1/1/0: | zone1 | zone2 | zone3 | |   P   |   P   |       | - if MaxSkew is 1, incoming pod can only be scheduled to zone3 to become 1/1/1; scheduling it onto zone1(zone2) would make the ActualSkew(2-0) on zone1(zone2) violate MaxSkew(1). - if MaxSkew is 2, incoming pod can be scheduled onto any zone. It's a required field. Default value is 1 and 0 is not allowed.
+       */
+      maxSkew: number;
+      /**
+       * TopologyKey is the key of node labels. Nodes that have a label with this key and identical values are considered to be in the same topology. We consider each <key, value> as a "bucket", and try to put balanced number of pods into each bucket. It's a required field.
+       */
+      topologyKey: string;
+      /**
+       * WhenUnsatisfiable indicates how to deal with a pod if it doesn't satisfy the spread constraint. - DoNotSchedule (default) tells the scheduler not to schedule it - ScheduleAnyway tells the scheduler to still schedule it It's considered as "Unsatisfiable" if and only if placing incoming pod on any topology violates "MaxSkew". For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 3/1/1: | zone1 | zone2 | zone3 | | P P P |   P   |   P   | If WhenUnsatisfiable is set to DoNotSchedule, incoming pod can only be scheduled to zone2(zone3) to become 3/2/1(3/1/2) as ActualSkew(2-1) on zone2(zone3) satisfies MaxSkew(1). In other words, the cluster can still be imbalanced, but scheduler won't make it *more* imbalanced. It's a required field.
+       */
+      whenUnsatisfiable: string;
       [k: string]: any;
     }[];
     /**
@@ -2840,7 +2891,7 @@ export interface V1Thanosruler {
             /**
              * Specifies the output format of the exposed resources, defaults to "1"
              */
-            divisor?: string;
+            divisor?: number | string;
             /**
              * Required: resource to select
              */
@@ -2862,7 +2913,7 @@ export interface V1Thanosruler {
         /**
          * Total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir
          */
-        sizeLimit?: string;
+        sizeLimit?: number | string;
         [k: string]: any;
       };
       /**
@@ -3220,7 +3271,7 @@ export interface V1Thanosruler {
                 /**
                  * Specifies the output format of the exposed resources, defaults to "1"
                  */
-                divisor?: string;
+                divisor?: number | string;
                 /**
                  * Required: resource to select
                  */
@@ -3536,77 +3587,73 @@ export interface V1Thanosruler {
 
 export interface V1ThanosrulerList {
   /**
-   * APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources
-   */
-  apiVersion?: string;
-  /**
+    * APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources
+    */
+   apiVersion?: string;
+   /**
    * Items is the list of ControllerRevisions
    */
-  items: Array<V1Thanosruler>;
-  /**
+   items: Array<V1Thanosruler>;
+   /**
    * Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds
    */
-  kind?: string;
-  metadata?: V1ListMeta;
+   kind?: string;
+   metadata?: V1ListMeta;
 }
 
-let defaultBasePath = "http://localhost";
+let defaultBasePath = 'http://localhost';
 
 export enum V1ThanosrulerApiApiKeys {
-  BearerToken
+    BearerToken,
 }
 
 export class V1ThanosrulerApi {
   protected _basePath = defaultBasePath;
-  protected _defaultHeaders: any = {};
-  protected _useQuerystring: boolean = false;
+  protected _defaultHeaders : any = {};
+  protected _useQuerystring : boolean = false;
 
   protected authentications = {
-    default: <Authentication>new VoidAuth(),
-    BearerToken: new ApiKeyAuth("header", "authorization")
-  };
+      'default': <Authentication>new VoidAuth(),
+      'BearerToken': new ApiKeyAuth('header', 'authorization'),
+  }
 
   protected interceptors: Interceptor[] = [];
 
   constructor(basePath?: string);
-  constructor(
-    basePathOrUsername: string,
-    password?: string,
-    basePath?: string
-  ) {
-    if (password) {
-      if (basePath) {
-        this.basePath = basePath;
+  constructor(basePathOrUsername: string, password?: string, basePath?: string) {
+      if (password) {
+          if (basePath) {
+              this.basePath = basePath;
+          }
+      } else {
+          if (basePathOrUsername) {
+              this.basePath = basePathOrUsername
+          }
       }
-    } else {
-      if (basePathOrUsername) {
-        this.basePath = basePathOrUsername;
-      }
-    }
   }
 
   set useQuerystring(value: boolean) {
-    this._useQuerystring = value;
+      this._useQuerystring = value;
   }
 
   set basePath(basePath: string) {
-    this._basePath = basePath;
+      this._basePath = basePath;
   }
 
   set defaultHeaders(defaultHeaders: any) {
-    this._defaultHeaders = defaultHeaders;
+      this._defaultHeaders = defaultHeaders;
   }
 
   get defaultHeaders() {
-    return this._defaultHeaders;
+      return this._defaultHeaders;
   }
 
   get basePath() {
-    return this._basePath;
+      return this._basePath;
   }
 
   public setDefaultAuthentication(auth: Authentication) {
-    this.authentications.default = auth;
+      this.authentications.default = auth;
   }
 
   public setApiKey(key: V1ThanosrulerApiApiKeys, value: string) {
@@ -3614,62 +3661,44 @@ export class V1ThanosrulerApi {
   }
 
   public addInterceptor(interceptor: Interceptor) {
-    this.interceptors.push(interceptor);
-  }
+      this.interceptors.push(interceptor);
+  } 
 
   /**
    * create a V1Thanosruler
    * @param namespace object name and auth scope, such as for teams and projects
-   * @param body
+   * @param body 
    * @param includeUninitialized If true, partially initialized resources are included in the response.
    * @param pretty If &#39;true&#39;, then the output is pretty printed.
    * @param dryRun When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
-   */
-  public async createNamespacedV1Thanosruler(
-    namespace: string,
-    body: V1Thanosruler,
-    includeUninitialized?: boolean,
-    pretty?: string,
-    dryRun?: string,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Thanosruler }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers".replace(
-        "{" + "namespace" + "}",
-        encodeURIComponent(String(namespace))
-      );
+   */  
+  public async createNamespacedV1Thanosruler (namespace: string, body: V1Thanosruler, includeUninitialized?: boolean, pretty?: string, dryRun?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Thanosruler;  }> {
+    const localVarPath = this.basePath + '/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers'
+        .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling createNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling createNamespacedV1Thanosruler.');
     }
 
     // verify required parameter 'body' is not null or undefined
     if (body === null || body === undefined) {
-      throw new Error(
-        "Required parameter body was null or undefined when calling createNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter body was null or undefined when calling createNamespacedV1Thanosruler.');
     }
 
     if (includeUninitialized !== undefined) {
-      localVarQueryParameters["includeUninitialized"] = includeUninitialized;
+        localVarQueryParameters['includeUninitialized'] = includeUninitialized;
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+        localVarQueryParameters['pretty'] = pretty;
     }
 
     if (dryRun !== undefined) {
-      localVarQueryParameters["dryRun"] = dryRun;
+        localVarQueryParameters['dryRun'] = dryRun;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -3677,50 +3706,40 @@ export class V1ThanosrulerApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "POST",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true,
-      body: body
+        method: 'POST',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
+        body: body
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{ response: IncomingMessage; body: V1Thanosruler }>(
-        (resolve, reject) => {
-          localVarRequest(localVarRequestOptions, (error, response, body) => {
-            if (error) {
-              reject(error);
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              if (
-                response.statusCode &&
-                response.statusCode >= 200 &&
-                response.statusCode <= 299
-              ) {
-                resolve({ response: response, body: body });
-              } else {
-                reject({ response: response, body: body });
-              }
+                localVarRequestOptions.form = localVarFormParams;
             }
-          });
         }
-      );
+        return new Promise<{ response: IncomingMessage; body: V1Thanosruler;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
+        });
     });
   }
 
@@ -3732,53 +3751,34 @@ export class V1ThanosrulerApi {
    * @param exact Should the export be exact.  Exact export maintains cluster-specific fields like &#39;Namespace&#39;.
    * @param _export Should this value be exported.  Export strips fields that a user can not specify.
    */
-  public async readNamespacedV1Thanosruler(
-    name: string,
-    namespace: string,
-    pretty?: string,
-    exact?: boolean,
-    _export?: boolean,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Thanosruler }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers/{name}"
-        .replace("{" + "name" + "}", encodeURIComponent(String(name)))
-        .replace(
-          "{" + "namespace" + "}",
-          encodeURIComponent(String(namespace))
-        );
+  public async readNamespacedV1Thanosruler (name: string, namespace: string, pretty?: string, exact?: boolean, _export?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Thanosruler;  }> {
+    const localVarPath = this.basePath + '/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers/{name}'
+      .replace('{' + 'name' + '}', encodeURIComponent(String(name)))
+      .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'name' is not null or undefined
     if (name === null || name === undefined) {
-      throw new Error(
-        "Required parameter name was null or undefined when calling readNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter name was null or undefined when calling readNamespacedV1Thanosruler.');
     }
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling readNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling readNamespacedV1Thanosruler.');
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+      localVarQueryParameters['pretty'] = pretty;
     }
 
     if (exact !== undefined) {
-      localVarQueryParameters["exact"] = exact;
+        localVarQueryParameters['exact'] = exact;
     }
 
     if (_export !== undefined) {
-      localVarQueryParameters["export"] = _export;
+        localVarQueryParameters['export'] = _export;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -3786,49 +3786,39 @@ export class V1ThanosrulerApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "GET",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true
+        method: 'GET',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{ response: IncomingMessage; body: V1Thanosruler }>(
-        (resolve, reject) => {
-          localVarRequest(localVarRequestOptions, (error, response, body) => {
-            if (error) {
-              reject(error);
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              if (
-                response.statusCode &&
-                response.statusCode >= 200 &&
-                response.statusCode <= 299
-              ) {
-                resolve({ response: response, body: body });
-              } else {
-                reject({ response: response, body: body });
-              }
+                localVarRequestOptions.form = localVarFormParams;
             }
-          });
         }
-      );
+        return new Promise<{ response: IncomingMessage; body: V1Thanosruler;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
+        });
     });
   }
 
@@ -3836,60 +3826,39 @@ export class V1ThanosrulerApi {
    * partially update the specified V1Thanosruler
    * @param name name of the V1Thanosruler
    * @param namespace object name and auth scope, such as for teams and projects
-   * @param body
+   * @param body 
    * @param pretty If &#39;true&#39;, then the output is pretty printed.
    * @param dryRun When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
    */
-  public async patchNamespacedV1Thanosruler(
-    name: string,
-    namespace: string,
-    body: object,
-    pretty?: string,
-    dryRun?: string,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Thanosruler }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers/{name}"
-        .replace("{" + "name" + "}", encodeURIComponent(String(name)))
-        .replace(
-          "{" + "namespace" + "}",
-          encodeURIComponent(String(namespace))
-        );
+  public async patchNamespacedV1Thanosruler (name: string, namespace: string, body: object, pretty?: string, dryRun?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Thanosruler;  }> {
+    const localVarPath = this.basePath + '/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers/{name}'
+        .replace('{' + 'name' + '}', encodeURIComponent(String(name)))
+        .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'name' is not null or undefined
     if (name === null || name === undefined) {
-      throw new Error(
-        "Required parameter name was null or undefined when calling patchNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter name was null or undefined when calling patchNamespacedV1Thanosruler.');
     }
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling patchNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling patchNamespacedV1Thanosruler.');
     }
 
     // verify required parameter 'body' is not null or undefined
     if (body === null || body === undefined) {
-      throw new Error(
-        "Required parameter body was null or undefined when calling patchNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter body was null or undefined when calling patchNamespacedV1Thanosruler.');
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+        localVarQueryParameters['pretty'] = pretty;
     }
 
     if (dryRun !== undefined) {
-      localVarQueryParameters["dryRun"] = dryRun;
+        localVarQueryParameters['dryRun'] = dryRun;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -3897,50 +3866,40 @@ export class V1ThanosrulerApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "PATCH",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true,
-      body: body
+        method: 'PATCH',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
+        body: body
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{ response: IncomingMessage; body: V1Thanosruler }>(
-        (resolve, reject) => {
-          localVarRequest(localVarRequestOptions, (error, response, body) => {
-            if (error) {
-              reject(error);
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              if (
-                response.statusCode &&
-                response.statusCode >= 200 &&
-                response.statusCode <= 299
-              ) {
-                resolve({ response: response, body: body });
-              } else {
-                reject({ response: response, body: body });
-              }
+                localVarRequestOptions.form = localVarFormParams;
             }
-          });
         }
-      );
+        return new Promise<{ response: IncomingMessage; body: V1Thanosruler;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
+        });
     });
   }
 
@@ -3953,66 +3912,44 @@ export class V1ThanosrulerApi {
    * @param gracePeriodSeconds The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
    * @param orphanDependents Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the &quot;orphan&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both.
    * @param propagationPolicy Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground.
-   * @param body
-   */
-  public async deleteNamespacedV1Thanosruler(
-    name: string,
-    namespace: string,
-    pretty?: string,
-    dryRun?: string,
-    gracePeriodSeconds?: number,
-    orphanDependents?: boolean,
-    propagationPolicy?: string,
-    body?: any,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Status }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers/{name}"
-        .replace("{" + "name" + "}", encodeURIComponent(String(name)))
-        .replace(
-          "{" + "namespace" + "}",
-          encodeURIComponent(String(namespace))
-        );
+   * @param body 
+   */  
+  public async deleteNamespacedV1Thanosruler (name: string, namespace: string, pretty?: string, dryRun?: string, gracePeriodSeconds?: number, orphanDependents?: boolean, propagationPolicy?: string, body?: any, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Status;  }> {
+    const localVarPath = this.basePath + '/apis/monitoring.coreos.com/v1/namespaces/{namespace}/thanosrulers/{name}'
+        .replace('{' + 'name' + '}', encodeURIComponent(String(name)))
+        .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'name' is not null or undefined
     if (name === null || name === undefined) {
-      throw new Error(
-        "Required parameter name was null or undefined when calling deleteNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter name was null or undefined when calling deleteNamespacedV1Thanosruler.');
     }
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling deleteNamespacedV1Thanosruler."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling deleteNamespacedV1Thanosruler.');
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+        localVarQueryParameters['pretty'] = pretty;
     }
 
     if (dryRun !== undefined) {
-      localVarQueryParameters["dryRun"] = dryRun;
+        localVarQueryParameters['dryRun'] = dryRun;
     }
 
     if (gracePeriodSeconds !== undefined) {
-      localVarQueryParameters["gracePeriodSeconds"] = gracePeriodSeconds;
+        localVarQueryParameters['gracePeriodSeconds'] = gracePeriodSeconds;
     }
 
     if (orphanDependents !== undefined) {
-      localVarQueryParameters["orphanDependents"] = orphanDependents;
+        localVarQueryParameters['orphanDependents'] = orphanDependents;
     }
 
     if (propagationPolicy !== undefined) {
-      localVarQueryParameters["propagationPolicy"] = propagationPolicy;
+        localVarQueryParameters['propagationPolicy'] = propagationPolicy;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -4020,51 +3957,41 @@ export class V1ThanosrulerApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "DELETE",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true,
-      body: {}
+        method: 'DELETE',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
+        body: {}
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{ response: IncomingMessage; body: V1Status }>(
-        (resolve, reject) => {
-          localVarRequest(localVarRequestOptions, (error, response, body) => {
-            if (error) {
-              reject(error);
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              body = ObjectSerializer.deserialize(body, "V1Status");
-              if (
-                response.statusCode &&
-                response.statusCode >= 200 &&
-                response.statusCode <= 299
-              ) {
-                resolve({ response: response, body: body });
-              } else {
-                reject({ response: response, body: body });
-              }
+                localVarRequestOptions.form = localVarFormParams;
             }
-          });
         }
-      );
+        return new Promise<{ response: IncomingMessage; body: V1Status;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    body = ObjectSerializer.deserialize(body, "V1Status");
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
+        });
     });
   }
 
@@ -4080,122 +4007,95 @@ export class V1ThanosrulerApi {
    * @param timeoutSeconds Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
    * @param watch Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
    */
-  public async listV1ThanosrulerForAllNamespaces(
-    allowWatchBookmarks?: boolean,
-    _continue?: string,
-    fieldSelector?: string,
-    labelSelector?: string,
-    limit?: number,
-    pretty?: string,
-    resourceVersion?: string,
-    timeoutSeconds?: number,
-    watch?: boolean,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1ThanosrulerList }> {
-    const localVarPath =
-      this.basePath + "/apis/monitoring.coreos.com/v1/thanosrulers";
-    let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
-    let localVarFormParams: any = {};
+  public async listV1ThanosrulerForAllNamespaces (allowWatchBookmarks?: boolean, _continue?: string, fieldSelector?: string, labelSelector?: string, limit?: number, pretty?: string, resourceVersion?: string, timeoutSeconds?: number, watch?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1ThanosrulerList;  }> {
+      const localVarPath = this.basePath + '/apis/monitoring.coreos.com/v1/thanosrulers';
+      let localVarQueryParameters: any = {};
+      let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
+      let localVarFormParams: any = {};
 
-    if (allowWatchBookmarks !== undefined) {
-      localVarQueryParameters["allowWatchBookmarks"] = allowWatchBookmarks;
-    }
-
-    if (_continue !== undefined) {
-      localVarQueryParameters["continue"] = _continue;
-    }
-
-    if (fieldSelector !== undefined) {
-      localVarQueryParameters["fieldSelector"] = fieldSelector;
-    }
-
-    if (labelSelector !== undefined) {
-      localVarQueryParameters["labelSelector"] = labelSelector;
-    }
-
-    if (limit !== undefined) {
-      localVarQueryParameters["limit"] = limit;
-    }
-
-    if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
-    }
-
-    if (resourceVersion !== undefined) {
-      localVarQueryParameters["resourceVersion"] = resourceVersion;
-    }
-
-    if (timeoutSeconds !== undefined) {
-      localVarQueryParameters["timeoutSeconds"] = timeoutSeconds;
-    }
-
-    if (watch !== undefined) {
-      localVarQueryParameters["watch"] = watch;
-    }
-
-    (<any>Object).assign(localVarHeaderParams, options.headers);
-
-    let localVarUseFormData = false;
-
-    let localVarRequestOptions: localVarRequest.Options = {
-      method: "GET",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true
-    };
-
-    let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
-
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
-    return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
+      if (allowWatchBookmarks !== undefined) {
+          localVarQueryParameters['allowWatchBookmarks'] = allowWatchBookmarks;
       }
-      return new Promise<{
-        response: IncomingMessage;
-        body: V1ThanosrulerList;
-      }>((resolve, reject) => {
-        localVarRequest(localVarRequestOptions, (error, response, body) => {
-          if (error) {
-            reject(error);
-          } else {
-            if (
-              response.statusCode &&
-              response.statusCode >= 200 &&
-              response.statusCode <= 299
-            ) {
-              resolve({ response: response, body: body });
-            } else {
-              reject({ response: response, body: body });
-            }
+
+      if (_continue !== undefined) {
+          localVarQueryParameters['continue'] = _continue;
+      }
+
+      if (fieldSelector !== undefined) {
+          localVarQueryParameters['fieldSelector'] = fieldSelector;
+      }
+
+      if (labelSelector !== undefined) {
+          localVarQueryParameters['labelSelector'] = labelSelector;
+      }
+
+      if (limit !== undefined) {
+          localVarQueryParameters['limit'] = limit;
+      }
+
+      if (pretty !== undefined) {
+          localVarQueryParameters['pretty'] = pretty;
+      }
+
+      if (resourceVersion !== undefined) {
+          localVarQueryParameters['resourceVersion'] = resourceVersion;
+      }
+
+      if (timeoutSeconds !== undefined) {
+          localVarQueryParameters['timeoutSeconds'] = timeoutSeconds;
+      }
+
+      if (watch !== undefined) {
+          localVarQueryParameters['watch'] = watch;
+      }
+
+      (<any>Object).assign(localVarHeaderParams, options.headers);
+
+      let localVarUseFormData = false;
+
+      let localVarRequestOptions: localVarRequest.Options = {
+          method: 'GET',
+          qs: localVarQueryParameters,
+          headers: localVarHeaderParams,
+          uri: localVarPath,
+          useQuerystring: this._useQuerystring,
+          json: true,
+      };
+
+      let authenticationPromise = Promise.resolve();
+      authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
+
+      authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+      return authenticationPromise.then(() => {
+          if (Object.keys(localVarFormParams).length) {
+              if (localVarUseFormData) {
+                  (<any>localVarRequestOptions).formData = localVarFormParams;
+              } else {
+                  localVarRequestOptions.form = localVarFormParams;
+              }
           }
-        });
+          return new Promise<{ response: IncomingMessage; body: V1ThanosrulerList;  }>((resolve, reject) => {
+              localVarRequest(localVarRequestOptions, (error, response, body) => {
+                  if (error) {
+                      reject(error);
+                  } else {
+                      if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                          resolve({ response: response, body: body });
+                      } else {
+                          reject({ response: response, body: body });
+                      }
+                  }
+              });
+          });
       });
-    });
-  }
-}
+  }};
 
 export type V1ThanosrulerResourceType = V1ThanosrulerResource;
 export type V1ThanosrulerResources = V1ThanosrulerResourceType[];
 
-export const isV1ThanosrulerResource = <
-  (r: K8sResource) => r is V1ThanosrulerResourceType
->(resource => resource instanceof V1ThanosrulerResource);
+export const isV1ThanosrulerResource = <(r: K8sResource) => r is V1ThanosrulerResourceType>(
+  (resource => resource instanceof V1ThanosrulerResource)
+);
 
 export const V1ThanosrulerActions = {
   fetch: createAsyncAction(
@@ -4203,21 +4103,12 @@ export const V1ThanosrulerActions = {
     "FETCH_K8S_V1THANOSRULERS_SUCCESS",
     "FETCH_K8S_V1THANOSRULERS_FAILURE"
   )<{}, { resources: V1ThanosrulerResources }, { error: Error }>(),
-  onUpdated: createAction(
-    "ON_UPDATED_K8S_V1THANOSRULER"
-  )<V1ThanosrulerResourceType>(),
-  onAdded: createAction(
-    "ON_ADDED_K8S_V1THANOSRULER"
-  )<V1ThanosrulerResourceType>(),
-  onDestroyed: createAction(
-    "ON_DESTROYED_K8S_V1THANOSRULER"
-  )<V1ThanosrulerResourceType>()
+  onUpdated: createAction("ON_UPDATED_K8S_V1THANOSRULER")<V1ThanosrulerResourceType>(),
+  onAdded: createAction("ON_ADDED_K8S_V1THANOSRULER")<V1ThanosrulerResourceType>(),
+  onDestroyed: createAction("ON_DESTROYED_K8S_V1THANOSRULER")<V1ThanosrulerResourceType>()
 };
-export type V1ThanosrulerResourceActions = ActionType<
-  typeof V1ThanosrulerActions
->;
-export interface V1ThanosrulerResourceState
-  extends ResourceCache<V1ThanosrulerResourceType> {}
+export type V1ThanosrulerResourceActions = ActionType<typeof V1ThanosrulerActions>;
+export interface V1ThanosrulerResourceState extends ResourceCache<V1ThanosrulerResourceType> {}
 
 const initialState: V1ThanosrulerResourceState = {
   loaded: false,
@@ -4258,7 +4149,9 @@ export const V1ThanosrulerReducer = createReducer<
     (state, action): V1ThanosrulerResourceState => ({
       ...state,
       resources: [
-        ...state.resources.filter(s => !isSameObject(s, action.payload)),
+        ...state.resources.filter(
+          s => !isSameObject(s, action.payload)
+        ),
         action.payload
       ]
     })
@@ -4267,7 +4160,9 @@ export const V1ThanosrulerReducer = createReducer<
     V1ThanosrulerActions.onDestroyed,
     (state, action): V1ThanosrulerResourceState => ({
       ...state,
-      resources: state.resources.filter(s => !isSameObject(s, action.payload))
+      resources: state.resources.filter(
+        s => !isSameObject(s, action.payload)
+      )
     })
   );
 
@@ -4299,9 +4194,7 @@ export class V1ThanosrulerResource extends K8sResource {
         const res = await client.listV1ThanosrulerForAllNamespaces();
         channel(
           V1ThanosrulerActions.fetch.success({
-            resources: res.body.items.map(
-              r => new V1ThanosrulerResource(r, kubeConfig)
-            )
+            resources: res.body.items.map(r => new V1ThanosrulerResource(r, kubeConfig))
           })
         );
       } catch (error) {
@@ -4313,24 +4206,14 @@ export class V1ThanosrulerResource extends K8sResource {
       const watchHandler = (phase: string, obj: V1Thanosruler) => {
         switch (phase) {
           case "ADDED":
-            channel(
-              V1ThanosrulerActions.onAdded(
-                new V1ThanosrulerResource(obj, kubeConfig)
-              )
-            );
+            channel(V1ThanosrulerActions.onAdded(new V1ThanosrulerResource(obj, kubeConfig)));
             break;
           case "MODIFIED":
-            channel(
-              V1ThanosrulerActions.onUpdated(
-                new V1ThanosrulerResource(obj, kubeConfig)
-              )
-            );
+            channel(V1ThanosrulerActions.onUpdated(new V1ThanosrulerResource(obj, kubeConfig)));
             break;
           case "DELETED":
             channel(
-              V1ThanosrulerActions.onDestroyed(
-                new V1ThanosrulerResource(obj, kubeConfig)
-              )
+              V1ThanosrulerActions.onDestroyed(new V1ThanosrulerResource(obj, kubeConfig))
             );
             break;
         }
@@ -4354,34 +4237,34 @@ export class V1ThanosrulerResource extends K8sResource {
     response: IncomingMessage;
     body: V1Thanosruler;
   }> {
-    return this.api.createNamespacedV1Thanosruler(
-      this.namespace,
-      this.resource
-    );
+    return this.api.createNamespacedV1Thanosruler(this.namespace, this.resource)
+    
   }
   read(): Promise<{
     response: IncomingMessage;
     body: V1Thanosruler;
   }> {
-    return this.api.readNamespacedV1Thanosruler(this.name, this.namespace);
+    return this.api.readNamespacedV1Thanosruler(this.name, this.namespace)
+    
   }
   update(): Promise<{
     response: IncomingMessage;
     body: V1Thanosruler;
   }> {
     return this.api.patchNamespacedV1Thanosruler(
-      this.name,
-      this.namespace,
-      this.resource,
-      undefined,
-      undefined,
-      { headers: { "Content-Type": "application/merge-patch+json" } }
-    );
+        this.name,
+        this.namespace,
+        this.resource,
+        undefined,
+        undefined,
+        { headers: { "Content-Type": "application/merge-patch+json" } }
+      )
+    
   }
   delete(): Promise<{
     response: IncomingMessage;
     body: V1Status;
   }> {
-    return this.api.deleteNamespacedV1Thanosruler(this.name, this.namespace);
+    return this.api.deleteNamespacedV1Thanosruler(this.name, this.namespace)
   }
 }

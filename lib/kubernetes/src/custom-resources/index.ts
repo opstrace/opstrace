@@ -20,11 +20,11 @@ export * from "./v1challenge";
 export * from "./v1clusterissuer";
 export * from "./v1issuer";
 export * from "./v1order";
-export * from "./v1Alertmanager";
-export * from "./v1PodMonitor";
-export * from "./v1Prometheus";
-export * from "./v1PrometheusRule";
-export * from "./v1ServiceMonitor";
+export * from "./v1alertmanager";
+export * from "./v1podmonitor";
+export * from "./v1prometheus";
+export * from "./v1prometheusrule";
+export * from "./v1servicemonitor";
 export * from "./v1probe";
 export * from "./v1thanosruler";
 
