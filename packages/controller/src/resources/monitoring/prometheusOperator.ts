@@ -174,7 +174,6 @@ export function PrometheusOperatorResources(
                 {
                   args: [
                     "--kubelet-service=kube-system/kubelet",
-                    // removed: https://github.com/prometheus-operator/prometheus-operator/pull/3457
                     `--prometheus-config-reloader=${DockerImages.prometheusConfigReloader}`,
                   ],
                   image: DockerImages.prometheusOperator,
