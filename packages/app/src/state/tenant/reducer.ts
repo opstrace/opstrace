@@ -41,7 +41,7 @@ export const reducer = createReducer<TenantState, TenantActions>(
     (state, action): TenantState => {
       const tenantIds: string[] = pluck("name", action.payload);
       const tenants: TenantRecords = zipObj(tenantIds, action.payload);
-      return mergeDeepRight(state, {loading: false, tenants: tenants})
+      return mergeDeepRight(state, { loading: false, tenants: tenants });
     }
   )
   .handleAction(
@@ -50,7 +50,7 @@ export const reducer = createReducer<TenantState, TenantActions>(
       return mergeDeepRight(state, {
         tenants: {
           [action.payload.tenantId]: {
-            alertmanager: pick(["config", "online"])(action.payload)
+            alertmanager: pick(["header", "config", "online"])(action.payload)
           }
         }
       });
@@ -62,7 +62,7 @@ export const reducer = createReducer<TenantState, TenantActions>(
       return mergeDeepRight(state, {
         tenants: {
           [action.payload.tenantId]: {
-            alertmanager: pick(["config"])(action.payload)
+            alertmanager: pick(["header", "config"])(action.payload)
           }
         }
       });

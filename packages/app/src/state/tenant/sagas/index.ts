@@ -17,6 +17,7 @@
 import { all, call, spawn, takeEvery, take, put } from "redux-saga/effects";
 import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
+import { split } from "ramda";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
 
@@ -79,32 +80,45 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
   }
 }
 
-const ALERTMANAGER_CONFIG_CORTEX_HEADER = `
-template_files:\n\tdefault_template: |\n\t\t{{ define "__alertmanager" }}AlertManager{{ end }}\n\t\t{{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}\nalertmanager_config: |`;
-
 function* getAlertmanagerListener() {
   yield takeEvery(actions.getAlertmanager, getAlertmanager);
 }
+
 function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
   try {
     const response = yield graphqlClient.GetAlertmanager({
       tenant_id: action.payload
     });
 
-    const prometheusConfig = response.data?.tenant_by_pk?.alertmanager_config
-      .replace(ALERTMANAGER_CONFIG_CORTEX_HEADER, "")
-      .replace("\n\t", "") // replace leading set with nothing as we don't want a blank line at the begining of the config
-      .replace(/(\n\t)+/g, "\n");
+    if (response.data?.getAlertmanager?.config) {
+      const [header, rawConfig] = split(
+        "alertmanager_config: |",
+        response.data?.getAlertmanager?.config
+      );
+      const config = rawConfig
+        .replace("\n  ", "") // replace leading set with nothing as we don't want a blank line at the begining of the config
+        .replace(/(\n  )+/g, "\n");
 
-    if (response.data?.tenant_by_pk?.alertmanager_config)
       yield put({
         type: "ALERTMANAGER_LOADED",
         payload: {
           tenantId: action.payload,
-          config: prometheusConfig,
+          header: header,
+          config: config,
           online: true
         }
       });
+    } else {
+      yield put({
+        type: "ALERTMANAGER_LOADED",
+        payload: {
+          tenantId: action.payload,
+          header: "templates: {}",
+          config: "",
+          online: true
+        }
+      });
+    }
   } catch (err) {
     console.error(err);
   }
@@ -116,15 +130,17 @@ function* updateAlertmanager() {
       actions.updateAlertmanager
     );
 
-    const cortexConfig = `${ALERTMANAGER_CONFIG_CORTEX_HEADER}\n\t${action.payload.config.replace(
-      /(\n)+/g,
-      "\n\t"
-    )}`;
-
     try {
+      const config = `${
+        action.payload.header
+      }alertmanager_config: |\n  ${action.payload.config.replace(
+        /(\n)+/g,
+        "\n  "
+      )}`;
+
       yield graphqlClient.UpdateAlertmanager({
         tenant_id: action.payload.tenantId,
-        input: { config: cortexConfig }
+        input: { config }
       });
     } catch (err) {
       console.error(err);

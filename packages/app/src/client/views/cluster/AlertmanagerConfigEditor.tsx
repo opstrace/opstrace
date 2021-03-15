@@ -48,8 +48,8 @@ type validationCheckOptions = {
 const AlertmanagerConfigEditor = () => {
   const params = useParams<{ tenant: string }>();
   const tenant = useTenant(params.tenant);
-  const savedConfig = useAlertmanager(params.tenant)?.config || "";
-  const configRef = useRef(savedConfig);
+  const alertmanager = useAlertmanager(params.tenant);
+  const configRef = useRef<string>(alertmanager?.config || "");
   const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
@@ -65,10 +65,8 @@ const AlertmanagerConfigEditor = () => {
         : [];
 
       if (markers.length === 0) {
-        let parsedData = null;
-
         try {
-          parsedData = yamlParser.load(configRef.current, {
+          const parsedData = yamlParser.load(configRef.current, {
             schema: yamlParser.JSON_SCHEMA
           });
 
@@ -106,6 +104,7 @@ const AlertmanagerConfigEditor = () => {
       dispatch(
         updateAlertmanager({
           tenantId: tenant.name,
+          header: alertmanager?.header || "",
           config: configRef.current
         })
       );
@@ -141,7 +140,7 @@ const AlertmanagerConfigEditor = () => {
                   <YamlEditor
                     filename="alertmanager-config.yaml"
                     jsonSchema={jsonSchema}
-                    data={savedConfig}
+                    data={alertmanager?.config || ""}
                     onChange={handleConfigChange}
                   />
                 </Box>

@@ -23,9 +23,14 @@ import { YamlEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
 import { getTextEditorOptions } from "state/file/utils/monaco";
 
-const YamlEditor = ({ filename, jsonSchema, data, onChange }: YamlEditorProps) => {
+const YamlEditor = ({
+  filename,
+  jsonSchema,
+  data,
+  onChange
+}: YamlEditorProps) => {
   const modelRef = useRef<monaco.editor.IModel | null>(null);
-  const subscriptionRef = useRef<monaco.IDisposable | null>(null)
+  const subscriptionRef = useRef<monaco.IDisposable | null>(null);
 
   useEffect(() => {
     yaml &&
@@ -45,47 +50,44 @@ const YamlEditor = ({ filename, jsonSchema, data, onChange }: YamlEditorProps) =
   }, [jsonSchema]);
 
   useEffect(() => {
-      const fileUri = monaco.Uri.parse(filename);
-      modelRef.current =
-        monaco.editor.getModel(fileUri) ||
-        monaco.editor.createModel("", "yaml", fileUri);
-      // return () => {
-      //   modelRef.current?.dispose();
-      //   modelRef.current = null;
-      // };
-   }, [filename]);
+    const fileUri = monaco.Uri.parse(filename);
+    modelRef.current =
+      monaco.editor.getModel(fileUri) ||
+      monaco.editor.createModel("", "yaml", fileUri);
+    // return () => {
+    //   modelRef.current?.dispose();
+    //   modelRef.current = null;
+    // };
+  }, [filename]);
 
   useEffect(() => {
     if (modelRef?.current && onChange) {
       subscriptionRef.current = modelRef.current?.onDidChangeContent(() => {
-        if (modelRef?.current)
-          onChange(modelRef.current.getValue(), filename);
+        if (modelRef?.current) onChange(modelRef.current.getValue(), filename);
       });
     }
     return () => {
       subscriptionRef.current?.dispose();
       subscriptionRef.current = null;
-    }
-
-  }, [onChange, filename])
+    };
+  }, [onChange, filename]);
 
   useEffect(() => {
-    modelRef.current?.setValue(data)
+    modelRef.current?.setValue(data);
   }, [data]);
 
-  if (modelRef?.current) return <AutoSizingEditor model={modelRef.current} />
-  else return null // TODO: show loading component here?
-
+  if (modelRef?.current) return <AutoSizingEditor model={modelRef.current} />;
+  else return null; // TODO: show loading component here?
 };
 
 function AutoSizingEditor({ model }: { model: editor.ITextModel }) {
-  return <AutoSizer>
-    {({ height, width }: Size) => {
-      return (
-        <BaseEditor height={height} width={width} model={model} />
-      );
-    }}
-  </AutoSizer>
+  return (
+    <AutoSizer>
+      {({ height, width }: Size) => {
+        return <BaseEditor height={height} width={width} model={model} />;
+      }}
+    </AutoSizer>
+  );
 }
 
 type BaseEditorProps = {
@@ -105,8 +107,7 @@ function BaseEditor({ height, width, model }: BaseEditorProps & Size) {
           model: currentModelRef.current
         })
       );
-    }
-    else {
+    } else {
       editorRef.current?.dispose();
       editorRef.current = null;
     }

@@ -27,15 +27,15 @@ export const setTenantList = createAction("SET_TENANT_LIST")<Tenants>();
 export const deleteTenant = createAction("DELETE_TENANT")<string>();
 export const addTenant = createAction("ADD_TENANT")<string>();
 
-export const getAlertmanager = createAction(
-  "GET_ALERTMANAGER"
-)<string>();
+export const getAlertmanager = createAction("GET_ALERTMANAGER")<string>();
 export const alertmanagerLoaded = createAction("ALERTMANAGER_LOADED")<{
   tenantId: string;
+  header: string;
   config: string;
   online: boolean;
 }>();
 export const updateAlertmanager = createAction("UPDATE_ALERTMANAGER")<{
   tenantId: string;
+  header: string;
   config: string;
 }>();
