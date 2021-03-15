@@ -110,8 +110,8 @@ const AuthenticatedRoutes = () => {
           component={UserDetail}
         />
         <Route
-          key="/cluster/tenants/:tenant/alert-manager-config"
-          path="/cluster/tenants/:tenant/alert-manager-config"
+          key="/cluster/tenants/:tenantId/alert-manager-config"
+          path="/cluster/tenants/:tenantId/alert-manager-config"
           component={AlertmanagerConfigEditor}
         />
         <Route

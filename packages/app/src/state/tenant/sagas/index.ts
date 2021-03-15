@@ -97,7 +97,7 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
       );
       const config = rawConfig
         .replace("\n  ", "") // replace leading set with nothing as we don't want a blank line at the begining of the config
-        .replace(/(\n  )+/g, "\n");
+        .replace(/(\n {2})+/g, "\n");
 
       yield put({
         type: "ALERTMANAGER_LOADED",
