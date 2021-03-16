@@ -57,6 +57,35 @@ It bundles React in production mode and optimizes the build for the best perform
 
 The build is minified and the filenames include the hashes.
 
+## Remote cluster development
+
+When making graphql querys that utilise Hasura Actions the full stack needs to be running, the best way to achieve this is to spin up a cluster in AWS and use the Hasura server running there rather than one locally. Instead of the usual workflow running `services:start`, `server:start` and `client:start` the needed steps are slightly different.
+
+Make sure you are correctly setup to access the cluster, for example using
+
+- `source secrets/aws-dev-svc-acc-env.sh`
+- `aws eks update-kubeconfig --name <your cluster name here> --region us-west-2`
+
+Then run all of the following commands:
+
+- `yarn services:start`
+- `yarn services:start:graphql:remote`
+- `yarn server:start:remote`
+- `yarn client:start`
+
+For accessing the remote Hasura console run the this script:
+
+- `console:remote`
+
+### What this does
+
+The `services:start:graphql:remote` starts a port forward into your cluster making the Hasura server available locally on port `8090`. For the `server` and `console` scripts to then connect to this the Hasure admin secret is extracted from the appropriate k8s secret and set as an envar.
+
+### Todo
+
+* At the moment the main `services:start` script still runs everything locally with docker-compose even though some of it is not needed.
+
+
 ## Schema development
 
 For changing the Postgres schema e.g. adding new tables or existing new tables, we will launch Hasura+Postgres in a docker-compose environment, and then locally run the Hasura console for interacting with that environment. See also [Hasura migrations docs](https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html).
