@@ -1,6 +1,6 @@
 name: Process Images
 
-on: [pull_request_target]
+on: [pull_request]
 
 jobs:
   compress:
