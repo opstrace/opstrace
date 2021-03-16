@@ -17,24 +17,23 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "state/provider";
-import { editor } from "monaco-editor/esm/vs/editor/editor.api";
-import * as yamlParser from "js-yaml";
-
 import { debounce } from "lodash";
 
-import Skeleton from "@material-ui/lab/Skeleton";
-
-import { Box } from "client/components/Box";
-
-import Layout from "client/layout/MainContent";
-import SideBar from "./Sidebar";
+import { editor } from "monaco-editor/esm/vs/editor/editor.api";
+import * as yamlParser from "js-yaml";
 import { YamlEditor } from "client/components/Editor";
 
-import { Card, CardContent, CardHeader } from "client/components/Card";
-import { Button } from "client/components/Button";
-
+import { useForm } from "state/form/hooks";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
+
+import SideBar from "./Sidebar";
+
+import Layout from "client/layout/MainContent";
+import Skeleton from "@material-ui/lab/Skeleton";
+import { Box } from "client/components/Box";
+import { Card, CardContent, CardHeader } from "client/components/Card";
+import { Button } from "client/components/Button";
 
 import {
   alertmanagerConfigSchema,
@@ -48,6 +47,7 @@ type validationCheckOptions = {
 const AlertmanagerConfigEditor = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
   const tenant = useTenant(tenantId);
+  useForm("alertmanagerConfig", tenantId);
   const alertmanager = useAlertmanager(tenantId);
   const configRef = useRef<string>(alertmanager?.config || "");
   const [configValid, setConfigValid] = useState<boolean | null>(null);

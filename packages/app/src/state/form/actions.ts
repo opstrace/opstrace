@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export default function getSubscriptionID(): number {
-  return Math.floor(Math.random() * Math.floor(100000000));
-}
+import { createAction } from "typesafe-actions";
+
+export const registerForm = createAction("REGISTER_FORM")<string>();
+export const unregisterForm = createAction("UNREGISTOR_FORM")<string>();
+
+export const updateForm = createAction("FORM")<{
+  id: string;
+  status?: string;
+  data?: object;
+}>();
+
+export const formUpdated = createAction("FORM_UPDATED")<{
+  id: string;
+}>();
