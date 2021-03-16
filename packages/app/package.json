@@ -246,6 +246,7 @@
     "client:build-debug-workbox": "node scripts/buildClient.js --workbox-debug",
     "client:test": "node scripts/test.js",
     "server:start": "NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
+    "server:start:remote": "GRAPHQL_ENDPOINT=http://127.0.0.1:8090/v1/graphql GRAPHQL_ENDPOINT_PORT=8090 HASURA_GRAPHQL_ADMIN_SECRET=$(kubectl get secrets -n kube-system -o json hasura-admin-secret | jq -r .data.HASURA_ADMIN_SECRET | base64 -d) NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
     "server:build": "NODE_ENV=production webpack --config config/webpack.server.config.js",
     "clean": "rimraf build dist .cache tsconfig.tsbuildinfo",
     "build": "yarn client:build && yarn server:build",
@@ -258,8 +259,7 @@
     "console": "hasura console --admin-secret myadminsecret",
     "console:remote": "HASURA_GRAPHQL_ENDPOINT=http://127.0.0.1:8090 HASURA_GRAPHQL_ADMIN_SECRET=$(kubectl get secrets -n kube-system -o json hasura-admin-secret | jq -r .data.HASURA_ADMIN_SECRET | base64 -d) hasura console --no-browser",
     "services:start": "docker-compose up",
-    "server:start:remote": "GRAPHQL_ENDPOINT=http://127.0.0.1:8090/v1/graphql GRAPHQL_ENDPOINT_PORT=8090 HASURA_GRAPHQL_ADMIN_SECRET=$(kubectl get secrets -n kube-system -o json hasura-admin-secret | jq -r .data.HASURA_ADMIN_SECRET | base64 -d) NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
-    "services:graphql:remote": "kubectl port-forward -n application deployment/graphql 8090:8080",
+    "services:start:graphql:remote": "kubectl port-forward -n application deployment/graphql 8090:8080",
     "lib:gen": "ts-node src/sdk/compiler.ts",
     "lib:watch": "ts-node src/sdk/compiler.ts --watch"
   },
