@@ -1,16 +1,18 @@
 name: Process Images
 
-on: [pull_request]
+on: [pull_request_target]
 
 jobs:
   compress:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Tinify Image Action
         uses: namoscato/action-tinify@v1.2.6
         with:
-          commit_user_name: "TinifyBot"
-          commit_message: "chore: compress image(s)"
           api_key: ${{ secrets.TINIFY_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_user_name: "TinifyBot"
+          commit_message: "chore: compress image(s)"
