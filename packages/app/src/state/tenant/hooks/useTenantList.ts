@@ -18,7 +18,10 @@ import { values } from "ramda";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector, State } from "state/provider";
 
-import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
+import {
+  subscribeToTenantList,
+  unsubscribeFromTenantList
+} from "state/tenant/actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
 const selectTenantList = createSelector(

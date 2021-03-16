@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export default function getSubscriptionID(): number {
-  return Math.floor(Math.random() * Math.floor(100000000));
+import { useEffect } from "react";
+import { useDispatch } from "state/provider";
+
+import { registerForm, unregisterForm } from "state/form/actions";
+import { generateFormId } from "state/form/utils";
+
+export default function useForm(type: string, code: string) {
+  const dispatch = useDispatch();
+  const id = generateFormId(type, code);
+
+  useEffect(() => {
+    dispatch(registerForm(id));
+    return () => {
+      dispatch(unregisterForm(id));
+    };
+  }, [dispatch]);
+
+  return id;
 }

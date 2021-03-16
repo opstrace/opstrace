@@ -38,4 +38,5 @@ export const updateAlertmanager = createAction("UPDATE_ALERTMANAGER")<{
   tenantId: string;
   header: string;
   config: string;
+  formId?: string;
 }>();

@@ -22,6 +22,7 @@ import { reducer as fileReducer } from "./file/reducer";
 import { reducer as userReducer } from "./user/reducer";
 import { reducer as tenantReducer } from "./tenant/reducer";
 import { reducer as sandboxReducer } from "./sandbox/reducer";
+import { reducer as formReducer } from "./form/reducer";
 
 export const mainReducers = {
   users: userReducer,
@@ -30,7 +31,8 @@ export const mainReducers = {
   branches: branchReducer,
   modules: moduleReducer,
   moduleVersions: moduleVersionReducer,
-  sandbox: sandboxReducer
+  sandbox: sandboxReducer,
+  form: formReducer
 };
 
 export const mainReducer = combineReducers(mainReducers);
