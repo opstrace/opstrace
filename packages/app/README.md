@@ -112,6 +112,7 @@ yarn console
 
 # Terminal 3) Talk to Hasura server to regenerate Typescript and Go client code automatically:
 #             - /packages/app/src/state/graphql-api-types.ts
+#             - /packages/controller/src/dbSDK.ts
 #             - /go/pkg/graphql/client_generated.go (note: addlicense doesn't update this file because it appears generated)
 yarn types:watch
 

@@ -15,12 +15,11 @@
     "assets": "**/dashboards/*.json"
   },
   "scripts": {
-    "build": "yarn copyGraphqlSdk && tsc -b",
-    "watch": "yarn copyGraphqlSdk && tsc -b -w",
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
-    "lint": "eslint . --ext .ts",
-    "copyGraphqlSdk": "cp ../app/src/state/graphql-api-types.ts ./src/dbSDK.ts"
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
     "@apollo/client": "^3.2.5",
