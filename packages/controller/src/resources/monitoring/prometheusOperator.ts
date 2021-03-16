@@ -60,7 +60,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1",
+            "app.kubernetes.io/version": "v0.46.0",
             tenant: "system"
           },
           name: "prometheus-operator",
@@ -77,7 +77,7 @@ export function PrometheusOperatorResources(
             matchLabels: {
               "app.kubernetes.io/component": "controller",
               "app.kubernetes.io/name": "prometheus-operator",
-              "app.kubernetes.io/version": "v0.42.1"
+              "app.kubernetes.io/version": "v0.46.0"
             }
           }
         }
@@ -95,7 +95,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": "v0.46.0"
           },
           name: "prometheus-operator",
           namespace
@@ -114,7 +114,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": "v0.46.0"
           },
           name: "prometheus-operator",
           namespace
@@ -148,7 +148,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": "v0.46.0"
           },
           name: "prometheus-operator",
           namespace
@@ -166,7 +166,7 @@ export function PrometheusOperatorResources(
               labels: {
                 "app.kubernetes.io/component": "controller",
                 "app.kubernetes.io/name": "prometheus-operator",
-                "app.kubernetes.io/version": "v0.42.1"
+                "app.kubernetes.io/version": "v0.46.0"
               }
             },
             spec: {
@@ -174,9 +174,7 @@ export function PrometheusOperatorResources(
                 {
                   args: [
                     "--kubelet-service=kube-system/kubelet",
-                    "--logtostderr=true",
-                    "--config-reloader-image=jimmidyson/configmap-reload:v0.4.0",
-                    "--prometheus-config-reloader=quay.io/prometheus-operator/prometheus-config-reloader:v0.42.1"
+                    `--prometheus-config-reloader=${DockerImages.prometheusConfigReloader}`,
                   ],
                   image: DockerImages.prometheusOperator,
                   name: "prometheus-operator",
@@ -207,7 +205,7 @@ export function PrometheusOperatorResources(
                     "--tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
                     "--upstream=http://127.0.0.1:8080/"
                   ],
-                  image: "quay.io/brancz/kube-rbac-proxy:v0.6.0",
+                  image: DockerImages.kubeRBACProxy,
                   name: "kube-rbac-proxy",
                   ports: [
                     {
@@ -245,7 +243,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": "v0.46.0"
           },
           name: "prometheus-operator"
         },
@@ -321,7 +319,7 @@ export function PrometheusOperatorResources(
           labels: {
             "app.kubernetes.io/component": "controller",
             "app.kubernetes.io/name": "prometheus-operator",
-            "app.kubernetes.io/version": "v0.42.1"
+            "app.kubernetes.io/version": "v0.46.0"
           },
           name: "prometheus-operator"
         },

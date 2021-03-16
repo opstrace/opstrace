@@ -32,6 +32,7 @@ import {
 import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { KubeConfig } from "@kubernetes/client-node";
+import { DockerImages } from "@opstrace/controller-config";
 
 export function PrometheusResources(
   state: State,
@@ -65,25 +66,15 @@ export function PrometheusResources(
   let promSecrets: string[] = [];
   let promBearerTokenFile: string | undefined = undefined;
 
-  const remoteWrite: { url: string; bearerTokenFile?: string } = {
-    url: `http://cortex-api.${getTenantNamespace(
-      tenant
-    )}.svc.cluster.local:8080/api/v1/push`
-  };
+  // For writes use direct cortex or authenticated proxy depending on the tenant
+  // TODO: switch non-system tenants to use proxy once they have an auth token available?
+  let remoteWrite: { url: string; bearerTokenFile?: string, headers?: {[name: string] : string} };
 
-  const remoteRead: { url: string; bearerTokenFile?: string } = {
-    url: `http://cortex-api.${getTenantNamespace(
-      tenant
-    )}.svc.cluster.local:8080/api/v1/read`
-  };
+  // Remote reads are only used by the system tenant
+  // Technically this will not work on non-system tenants, but we do not use it.
+  let remoteReads: { url: string; bearerTokenFile?: string }[];
 
-  if (tenant.type !== "SYSTEM") {
-    ruleNamespaceSelector = serviceMonitorNamespaceSelector = {
-      matchLabels: {
-        tenant: tenant.name
-      }
-    };
-  } else {
+  if (tenant.type === "SYSTEM") {
     // For the system tenant's Prometheus -- which scrapes Opstrace system
     // targets and pushes system metrics into Cortex via Prom's remote_write
     // protocol -- use the bearer_token_file mechanism to authenticate POST
@@ -92,9 +83,35 @@ export function PrometheusResources(
     promBearerTokenFile =
       "/etc/prometheus/secrets/system-tenant-api-auth-token/system_tenant_api_auth_token";
 
-    remoteWrite.bearerTokenFile = promBearerTokenFile;
-    remoteRead.bearerTokenFile = promBearerTokenFile;
+    remoteWrite = {
+      url: `http://cortex-api.${getTenantNamespace(
+        tenant
+      )}.svc.cluster.local:8080/api/v1/push`,
+      bearerTokenFile: promBearerTokenFile
+    };
+    remoteReads = [{
+      url: `http://cortex-api.${getTenantNamespace(
+        tenant
+      )}.svc.cluster.local:8080/api/v1/read`,
+      bearerTokenFile: promBearerTokenFile,
+    }];
+  } else {
+    ruleNamespaceSelector = serviceMonitorNamespaceSelector = {
+      matchLabels: {
+        tenant: tenant.name
+      }
+    };
+
+    // Non-system tenant: Communicate directly with Cortex because we lack the bearer token secret
+    // Meanwhile disable remote reads because we dont use it, and 'headers' isn't available yet
+    // See also https://github.com/prometheus-operator/prometheus-operator/pull/3457
+    remoteWrite = {
+      url: "http://distributor.cortex.svc.cluster.local/api/v1/push",
+      headers: { "X-Scope-OrgID": tenant.name },
+    };
+    remoteReads = [];
   }
+
 
   collection.add(
     new Service(
@@ -197,7 +214,7 @@ export function PrometheusResources(
           alerting: {
             alertmanagers: [
               {
-                name: `alertmanager`, // This is the alertmanager svc
+                name: "alertmanager", // This is the alertmanager svc
                 pathPrefix: "/alertmanager",
                 namespace,
                 port: "web"
@@ -205,8 +222,8 @@ export function PrometheusResources(
             ]
           },
           remoteWrite: [remoteWrite],
-          remoteRead: [remoteRead],
-          image: "quay.io/prometheus/prometheus:v2.21.0",
+          remoteRead: remoteReads,
+          image: DockerImages.prometheus,
           baseImage: "quay.io/prometheus/prometheus",
           nodeSelector: {
             "kubernetes.io/os": "linux"
@@ -232,7 +249,7 @@ export function PrometheusResources(
           serviceAccountName: name,
           serviceMonitorNamespaceSelector,
           serviceMonitorSelector,
-          version: "v2.21.0"
+          version: "v2.25.1"
         }
       },
       kubeConfig

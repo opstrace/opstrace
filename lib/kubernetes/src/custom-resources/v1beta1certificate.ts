@@ -14,8 +14,7 @@ import {
   K8sResource,
   isSameObject,
   ResourceCache,
-  VoidAuth
-} from "../common";
+  VoidAuth } from "../common";
 import { IncomingMessage } from "http";
 import {
   V1Status,
@@ -323,142 +322,118 @@ export interface V1Beta1Certificate {
 
 export interface V1Beta1CertificateList {
   /**
-   * APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources
-   */
-  apiVersion?: string;
-  /**
+    * APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources
+    */
+   apiVersion?: string;
+   /**
    * Items is the list of ControllerRevisions
    */
-  items: Array<V1Beta1Certificate>;
-  /**
+   items: Array<V1Beta1Certificate>;
+   /**
    * Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds
    */
-  kind?: string;
-  metadata?: V1ListMeta;
+   kind?: string;
+   metadata?: V1ListMeta;
 }
 
-let defaultBasePath = "http://localhost";
+let defaultBasePath = 'http://localhost';
 
 export enum V1Beta1CertificateApiApiKeys {
-  BearerToken
+    BearerToken,
 }
 
 export class V1Beta1CertificateApi {
   protected _basePath = defaultBasePath;
-  protected _defaultHeaders: any = {};
-  protected _useQuerystring: boolean = false;
+  protected _defaultHeaders : any = {};
+  protected _useQuerystring : boolean = false;
 
   protected authentications = {
-    default: <Authentication>new VoidAuth(),
-    BearerToken: new ApiKeyAuth("header", "authorization")
-  };
+      'default': <Authentication>new VoidAuth(),
+      'BearerToken': new ApiKeyAuth('header', 'authorization'),
+  }
 
   protected interceptors: Interceptor[] = [];
 
   constructor(basePath?: string);
-  constructor(
-    basePathOrUsername: string,
-    password?: string,
-    basePath?: string
-  ) {
-    if (password) {
-      if (basePath) {
-        this.basePath = basePath;
+  constructor(basePathOrUsername: string, password?: string, basePath?: string) {
+      if (password) {
+          if (basePath) {
+              this.basePath = basePath;
+          }
+      } else {
+          if (basePathOrUsername) {
+              this.basePath = basePathOrUsername
+          }
       }
-    } else {
-      if (basePathOrUsername) {
-        this.basePath = basePathOrUsername;
-      }
-    }
   }
 
   set useQuerystring(value: boolean) {
-    this._useQuerystring = value;
+      this._useQuerystring = value;
   }
 
   set basePath(basePath: string) {
-    this._basePath = basePath;
+      this._basePath = basePath;
   }
 
   set defaultHeaders(defaultHeaders: any) {
-    this._defaultHeaders = defaultHeaders;
+      this._defaultHeaders = defaultHeaders;
   }
 
   get defaultHeaders() {
-    return this._defaultHeaders;
+      return this._defaultHeaders;
   }
 
   get basePath() {
-    return this._basePath;
+      return this._basePath;
   }
 
   public setDefaultAuthentication(auth: Authentication) {
-    this.authentications.default = auth;
+      this.authentications.default = auth;
   }
 
   public setApiKey(key: V1Beta1CertificateApiApiKeys, value: string) {
-    (this.authentications as any)[
-      V1Beta1CertificateApiApiKeys[key]
-    ].apiKey = value;
+    (this.authentications as any)[V1Beta1CertificateApiApiKeys[key]].apiKey = value;
   }
 
   public addInterceptor(interceptor: Interceptor) {
-    this.interceptors.push(interceptor);
-  }
+      this.interceptors.push(interceptor);
+  } 
 
   /**
    * create a V1Beta1Certificate
    * @param namespace object name and auth scope, such as for teams and projects
-   * @param body
+   * @param body 
    * @param includeUninitialized If true, partially initialized resources are included in the response.
    * @param pretty If &#39;true&#39;, then the output is pretty printed.
    * @param dryRun When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
-   */
-  public async createNamespacedV1Beta1Certificate(
-    namespace: string,
-    body: V1Beta1Certificate,
-    includeUninitialized?: boolean,
-    pretty?: string,
-    dryRun?: string,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Beta1Certificate }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates".replace(
-        "{" + "namespace" + "}",
-        encodeURIComponent(String(namespace))
-      );
+   */  
+  public async createNamespacedV1Beta1Certificate (namespace: string, body: V1Beta1Certificate, includeUninitialized?: boolean, pretty?: string, dryRun?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Beta1Certificate;  }> {
+    const localVarPath = this.basePath + '/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates'
+        .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling createNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling createNamespacedV1Beta1Certificate.');
     }
 
     // verify required parameter 'body' is not null or undefined
     if (body === null || body === undefined) {
-      throw new Error(
-        "Required parameter body was null or undefined when calling createNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter body was null or undefined when calling createNamespacedV1Beta1Certificate.');
     }
 
     if (includeUninitialized !== undefined) {
-      localVarQueryParameters["includeUninitialized"] = includeUninitialized;
+        localVarQueryParameters['includeUninitialized'] = includeUninitialized;
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+        localVarQueryParameters['pretty'] = pretty;
     }
 
     if (dryRun !== undefined) {
-      localVarQueryParameters["dryRun"] = dryRun;
+        localVarQueryParameters['dryRun'] = dryRun;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -466,51 +441,40 @@ export class V1Beta1CertificateApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "POST",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true,
-      body: body
+        method: 'POST',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
+        body: body
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{
-        response: IncomingMessage;
-        body: V1Beta1Certificate;
-      }>((resolve, reject) => {
-        localVarRequest(localVarRequestOptions, (error, response, body) => {
-          if (error) {
-            reject(error);
-          } else {
-            if (
-              response.statusCode &&
-              response.statusCode >= 200 &&
-              response.statusCode <= 299
-            ) {
-              resolve({ response: response, body: body });
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              reject({ response: response, body: body });
+                localVarRequestOptions.form = localVarFormParams;
             }
-          }
+        }
+        return new Promise<{ response: IncomingMessage; body: V1Beta1Certificate;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
         });
-      });
     });
   }
 
@@ -522,53 +486,34 @@ export class V1Beta1CertificateApi {
    * @param exact Should the export be exact.  Exact export maintains cluster-specific fields like &#39;Namespace&#39;.
    * @param _export Should this value be exported.  Export strips fields that a user can not specify.
    */
-  public async readNamespacedV1Beta1Certificate(
-    name: string,
-    namespace: string,
-    pretty?: string,
-    exact?: boolean,
-    _export?: boolean,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Beta1Certificate }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates/{name}"
-        .replace("{" + "name" + "}", encodeURIComponent(String(name)))
-        .replace(
-          "{" + "namespace" + "}",
-          encodeURIComponent(String(namespace))
-        );
+  public async readNamespacedV1Beta1Certificate (name: string, namespace: string, pretty?: string, exact?: boolean, _export?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Beta1Certificate;  }> {
+    const localVarPath = this.basePath + '/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates/{name}'
+      .replace('{' + 'name' + '}', encodeURIComponent(String(name)))
+      .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'name' is not null or undefined
     if (name === null || name === undefined) {
-      throw new Error(
-        "Required parameter name was null or undefined when calling readNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter name was null or undefined when calling readNamespacedV1Beta1Certificate.');
     }
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling readNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling readNamespacedV1Beta1Certificate.');
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+      localVarQueryParameters['pretty'] = pretty;
     }
 
     if (exact !== undefined) {
-      localVarQueryParameters["exact"] = exact;
+        localVarQueryParameters['exact'] = exact;
     }
 
     if (_export !== undefined) {
-      localVarQueryParameters["export"] = _export;
+        localVarQueryParameters['export'] = _export;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -576,50 +521,39 @@ export class V1Beta1CertificateApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "GET",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true
+        method: 'GET',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{
-        response: IncomingMessage;
-        body: V1Beta1Certificate;
-      }>((resolve, reject) => {
-        localVarRequest(localVarRequestOptions, (error, response, body) => {
-          if (error) {
-            reject(error);
-          } else {
-            if (
-              response.statusCode &&
-              response.statusCode >= 200 &&
-              response.statusCode <= 299
-            ) {
-              resolve({ response: response, body: body });
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              reject({ response: response, body: body });
+                localVarRequestOptions.form = localVarFormParams;
             }
-          }
+        }
+        return new Promise<{ response: IncomingMessage; body: V1Beta1Certificate;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
         });
-      });
     });
   }
 
@@ -627,60 +561,39 @@ export class V1Beta1CertificateApi {
    * partially update the specified V1Beta1Certificate
    * @param name name of the V1Beta1Certificate
    * @param namespace object name and auth scope, such as for teams and projects
-   * @param body
+   * @param body 
    * @param pretty If &#39;true&#39;, then the output is pretty printed.
    * @param dryRun When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
    */
-  public async patchNamespacedV1Beta1Certificate(
-    name: string,
-    namespace: string,
-    body: object,
-    pretty?: string,
-    dryRun?: string,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Beta1Certificate }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates/{name}"
-        .replace("{" + "name" + "}", encodeURIComponent(String(name)))
-        .replace(
-          "{" + "namespace" + "}",
-          encodeURIComponent(String(namespace))
-        );
+  public async patchNamespacedV1Beta1Certificate (name: string, namespace: string, body: object, pretty?: string, dryRun?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Beta1Certificate;  }> {
+    const localVarPath = this.basePath + '/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates/{name}'
+        .replace('{' + 'name' + '}', encodeURIComponent(String(name)))
+        .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'name' is not null or undefined
     if (name === null || name === undefined) {
-      throw new Error(
-        "Required parameter name was null or undefined when calling patchNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter name was null or undefined when calling patchNamespacedV1Beta1Certificate.');
     }
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling patchNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling patchNamespacedV1Beta1Certificate.');
     }
 
     // verify required parameter 'body' is not null or undefined
     if (body === null || body === undefined) {
-      throw new Error(
-        "Required parameter body was null or undefined when calling patchNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter body was null or undefined when calling patchNamespacedV1Beta1Certificate.');
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+        localVarQueryParameters['pretty'] = pretty;
     }
 
     if (dryRun !== undefined) {
-      localVarQueryParameters["dryRun"] = dryRun;
+        localVarQueryParameters['dryRun'] = dryRun;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -688,51 +601,40 @@ export class V1Beta1CertificateApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "PATCH",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true,
-      body: body
+        method: 'PATCH',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
+        body: body
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{
-        response: IncomingMessage;
-        body: V1Beta1Certificate;
-      }>((resolve, reject) => {
-        localVarRequest(localVarRequestOptions, (error, response, body) => {
-          if (error) {
-            reject(error);
-          } else {
-            if (
-              response.statusCode &&
-              response.statusCode >= 200 &&
-              response.statusCode <= 299
-            ) {
-              resolve({ response: response, body: body });
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              reject({ response: response, body: body });
+                localVarRequestOptions.form = localVarFormParams;
             }
-          }
+        }
+        return new Promise<{ response: IncomingMessage; body: V1Beta1Certificate;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
         });
-      });
     });
   }
 
@@ -745,66 +647,44 @@ export class V1Beta1CertificateApi {
    * @param gracePeriodSeconds The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
    * @param orphanDependents Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the &quot;orphan&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both.
    * @param propagationPolicy Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground.
-   * @param body
-   */
-  public async deleteNamespacedV1Beta1Certificate(
-    name: string,
-    namespace: string,
-    pretty?: string,
-    dryRun?: string,
-    gracePeriodSeconds?: number,
-    orphanDependents?: boolean,
-    propagationPolicy?: string,
-    body?: any,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Status }> {
-    const localVarPath =
-      this.basePath +
-      "/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates/{name}"
-        .replace("{" + "name" + "}", encodeURIComponent(String(name)))
-        .replace(
-          "{" + "namespace" + "}",
-          encodeURIComponent(String(namespace))
-        );
+   * @param body 
+   */  
+  public async deleteNamespacedV1Beta1Certificate (name: string, namespace: string, pretty?: string, dryRun?: string, gracePeriodSeconds?: number, orphanDependents?: boolean, propagationPolicy?: string, body?: any, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Status;  }> {
+    const localVarPath = this.basePath + '/apis/cert-manager.io/v1beta1/namespaces/{namespace}/certificates/{name}'
+        .replace('{' + 'name' + '}', encodeURIComponent(String(name)))
+        .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
     let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
+    let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
     let localVarFormParams: any = {};
 
     // verify required parameter 'name' is not null or undefined
     if (name === null || name === undefined) {
-      throw new Error(
-        "Required parameter name was null or undefined when calling deleteNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter name was null or undefined when calling deleteNamespacedV1Beta1Certificate.');
     }
 
     // verify required parameter 'namespace' is not null or undefined
     if (namespace === null || namespace === undefined) {
-      throw new Error(
-        "Required parameter namespace was null or undefined when calling deleteNamespacedV1Beta1Certificate."
-      );
+        throw new Error('Required parameter namespace was null or undefined when calling deleteNamespacedV1Beta1Certificate.');
     }
 
     if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
+        localVarQueryParameters['pretty'] = pretty;
     }
 
     if (dryRun !== undefined) {
-      localVarQueryParameters["dryRun"] = dryRun;
+        localVarQueryParameters['dryRun'] = dryRun;
     }
 
     if (gracePeriodSeconds !== undefined) {
-      localVarQueryParameters["gracePeriodSeconds"] = gracePeriodSeconds;
+        localVarQueryParameters['gracePeriodSeconds'] = gracePeriodSeconds;
     }
 
     if (orphanDependents !== undefined) {
-      localVarQueryParameters["orphanDependents"] = orphanDependents;
+        localVarQueryParameters['orphanDependents'] = orphanDependents;
     }
 
     if (propagationPolicy !== undefined) {
-      localVarQueryParameters["propagationPolicy"] = propagationPolicy;
+        localVarQueryParameters['propagationPolicy'] = propagationPolicy;
     }
 
     (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -812,51 +692,41 @@ export class V1Beta1CertificateApi {
     let localVarUseFormData = false;
 
     let localVarRequestOptions: localVarRequest.Options = {
-      method: "DELETE",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true,
-      body: {}
+        method: 'DELETE',
+        qs: localVarQueryParameters,
+        headers: localVarHeaderParams,
+        uri: localVarPath,
+        useQuerystring: this._useQuerystring,
+        json: true,
+        body: {}
     };
 
     let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
 
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
+    authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
     return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
-      }
-      return new Promise<{ response: IncomingMessage; body: V1Status }>(
-        (resolve, reject) => {
-          localVarRequest(localVarRequestOptions, (error, response, body) => {
-            if (error) {
-              reject(error);
+        if (Object.keys(localVarFormParams).length) {
+            if (localVarUseFormData) {
+                (<any>localVarRequestOptions).formData = localVarFormParams;
             } else {
-              body = ObjectSerializer.deserialize(body, "V1Status");
-              if (
-                response.statusCode &&
-                response.statusCode >= 200 &&
-                response.statusCode <= 299
-              ) {
-                resolve({ response: response, body: body });
-              } else {
-                reject({ response: response, body: body });
-              }
+                localVarRequestOptions.form = localVarFormParams;
             }
-          });
         }
-      );
+        return new Promise<{ response: IncomingMessage; body: V1Status;  }>((resolve, reject) => {
+            localVarRequest(localVarRequestOptions, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    body = ObjectSerializer.deserialize(body, "V1Status");
+                    if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ response: response, body: body });
+                    } else {
+                        reject({ response: response, body: body });
+                    }
+                }
+            });
+        });
     });
   }
 
@@ -872,122 +742,95 @@ export class V1Beta1CertificateApi {
    * @param timeoutSeconds Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
    * @param watch Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
    */
-  public async listV1Beta1CertificateForAllNamespaces(
-    allowWatchBookmarks?: boolean,
-    _continue?: string,
-    fieldSelector?: string,
-    labelSelector?: string,
-    limit?: number,
-    pretty?: string,
-    resourceVersion?: string,
-    timeoutSeconds?: number,
-    watch?: boolean,
-    options: { headers: { [name: string]: string } } = { headers: {} }
-  ): Promise<{ response: IncomingMessage; body: V1Beta1CertificateList }> {
-    const localVarPath =
-      this.basePath + "/apis/cert-manager.io/v1beta1/certificates";
-    let localVarQueryParameters: any = {};
-    let localVarHeaderParams: any = (<any>Object).assign(
-      {},
-      this.defaultHeaders
-    );
-    let localVarFormParams: any = {};
+  public async listV1Beta1CertificateForAllNamespaces (allowWatchBookmarks?: boolean, _continue?: string, fieldSelector?: string, labelSelector?: string, limit?: number, pretty?: string, resourceVersion?: string, timeoutSeconds?: number, watch?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Beta1CertificateList;  }> {
+      const localVarPath = this.basePath + '/apis/cert-manager.io/v1beta1/certificates';
+      let localVarQueryParameters: any = {};
+      let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
+      let localVarFormParams: any = {};
 
-    if (allowWatchBookmarks !== undefined) {
-      localVarQueryParameters["allowWatchBookmarks"] = allowWatchBookmarks;
-    }
-
-    if (_continue !== undefined) {
-      localVarQueryParameters["continue"] = _continue;
-    }
-
-    if (fieldSelector !== undefined) {
-      localVarQueryParameters["fieldSelector"] = fieldSelector;
-    }
-
-    if (labelSelector !== undefined) {
-      localVarQueryParameters["labelSelector"] = labelSelector;
-    }
-
-    if (limit !== undefined) {
-      localVarQueryParameters["limit"] = limit;
-    }
-
-    if (pretty !== undefined) {
-      localVarQueryParameters["pretty"] = pretty;
-    }
-
-    if (resourceVersion !== undefined) {
-      localVarQueryParameters["resourceVersion"] = resourceVersion;
-    }
-
-    if (timeoutSeconds !== undefined) {
-      localVarQueryParameters["timeoutSeconds"] = timeoutSeconds;
-    }
-
-    if (watch !== undefined) {
-      localVarQueryParameters["watch"] = watch;
-    }
-
-    (<any>Object).assign(localVarHeaderParams, options.headers);
-
-    let localVarUseFormData = false;
-
-    let localVarRequestOptions: localVarRequest.Options = {
-      method: "GET",
-      qs: localVarQueryParameters,
-      headers: localVarHeaderParams,
-      uri: localVarPath,
-      useQuerystring: this._useQuerystring,
-      json: true
-    };
-
-    let authenticationPromise = Promise.resolve();
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.BearerToken.applyToRequest(localVarRequestOptions)
-    );
-
-    authenticationPromise = authenticationPromise.then(() =>
-      this.authentications.default.applyToRequest(localVarRequestOptions)
-    );
-    return authenticationPromise.then(() => {
-      if (Object.keys(localVarFormParams).length) {
-        if (localVarUseFormData) {
-          (<any>localVarRequestOptions).formData = localVarFormParams;
-        } else {
-          localVarRequestOptions.form = localVarFormParams;
-        }
+      if (allowWatchBookmarks !== undefined) {
+          localVarQueryParameters['allowWatchBookmarks'] = allowWatchBookmarks;
       }
-      return new Promise<{
-        response: IncomingMessage;
-        body: V1Beta1CertificateList;
-      }>((resolve, reject) => {
-        localVarRequest(localVarRequestOptions, (error, response, body) => {
-          if (error) {
-            reject(error);
-          } else {
-            if (
-              response.statusCode &&
-              response.statusCode >= 200 &&
-              response.statusCode <= 299
-            ) {
-              resolve({ response: response, body: body });
-            } else {
-              reject({ response: response, body: body });
-            }
+
+      if (_continue !== undefined) {
+          localVarQueryParameters['continue'] = _continue;
+      }
+
+      if (fieldSelector !== undefined) {
+          localVarQueryParameters['fieldSelector'] = fieldSelector;
+      }
+
+      if (labelSelector !== undefined) {
+          localVarQueryParameters['labelSelector'] = labelSelector;
+      }
+
+      if (limit !== undefined) {
+          localVarQueryParameters['limit'] = limit;
+      }
+
+      if (pretty !== undefined) {
+          localVarQueryParameters['pretty'] = pretty;
+      }
+
+      if (resourceVersion !== undefined) {
+          localVarQueryParameters['resourceVersion'] = resourceVersion;
+      }
+
+      if (timeoutSeconds !== undefined) {
+          localVarQueryParameters['timeoutSeconds'] = timeoutSeconds;
+      }
+
+      if (watch !== undefined) {
+          localVarQueryParameters['watch'] = watch;
+      }
+
+      (<any>Object).assign(localVarHeaderParams, options.headers);
+
+      let localVarUseFormData = false;
+
+      let localVarRequestOptions: localVarRequest.Options = {
+          method: 'GET',
+          qs: localVarQueryParameters,
+          headers: localVarHeaderParams,
+          uri: localVarPath,
+          useQuerystring: this._useQuerystring,
+          json: true,
+      };
+
+      let authenticationPromise = Promise.resolve();
+      authenticationPromise = authenticationPromise.then(() => this.authentications.BearerToken.applyToRequest(localVarRequestOptions));
+
+      authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+      return authenticationPromise.then(() => {
+          if (Object.keys(localVarFormParams).length) {
+              if (localVarUseFormData) {
+                  (<any>localVarRequestOptions).formData = localVarFormParams;
+              } else {
+                  localVarRequestOptions.form = localVarFormParams;
+              }
           }
-        });
+          return new Promise<{ response: IncomingMessage; body: V1Beta1CertificateList;  }>((resolve, reject) => {
+              localVarRequest(localVarRequestOptions, (error, response, body) => {
+                  if (error) {
+                      reject(error);
+                  } else {
+                      if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                          resolve({ response: response, body: body });
+                      } else {
+                          reject({ response: response, body: body });
+                      }
+                  }
+              });
+          });
       });
-    });
-  }
-}
+  }};
 
 export type V1Beta1CertificateResourceType = V1Beta1CertificateResource;
 export type V1Beta1CertificateResources = V1Beta1CertificateResourceType[];
 
-export const isV1Beta1CertificateResource = <
-  (r: K8sResource) => r is V1Beta1CertificateResourceType
->(resource => resource instanceof V1Beta1CertificateResource);
+export const isV1Beta1CertificateResource = <(r: K8sResource) => r is V1Beta1CertificateResourceType>(
+  (resource => resource instanceof V1Beta1CertificateResource)
+);
 
 export const V1Beta1CertificateActions = {
   fetch: createAsyncAction(
@@ -995,21 +838,12 @@ export const V1Beta1CertificateActions = {
     "FETCH_K8S_V1BETA1CERTIFICATES_SUCCESS",
     "FETCH_K8S_V1BETA1CERTIFICATES_FAILURE"
   )<{}, { resources: V1Beta1CertificateResources }, { error: Error }>(),
-  onUpdated: createAction(
-    "ON_UPDATED_K8S_V1BETA1CERTIFICATE"
-  )<V1Beta1CertificateResourceType>(),
-  onAdded: createAction(
-    "ON_ADDED_K8S_V1BETA1CERTIFICATE"
-  )<V1Beta1CertificateResourceType>(),
-  onDestroyed: createAction(
-    "ON_DESTROYED_K8S_V1BETA1CERTIFICATE"
-  )<V1Beta1CertificateResourceType>()
+  onUpdated: createAction("ON_UPDATED_K8S_V1BETA1CERTIFICATE")<V1Beta1CertificateResourceType>(),
+  onAdded: createAction("ON_ADDED_K8S_V1BETA1CERTIFICATE")<V1Beta1CertificateResourceType>(),
+  onDestroyed: createAction("ON_DESTROYED_K8S_V1BETA1CERTIFICATE")<V1Beta1CertificateResourceType>()
 };
-export type V1Beta1CertificateResourceActions = ActionType<
-  typeof V1Beta1CertificateActions
->;
-export interface V1Beta1CertificateResourceState
-  extends ResourceCache<V1Beta1CertificateResourceType> {}
+export type V1Beta1CertificateResourceActions = ActionType<typeof V1Beta1CertificateActions>;
+export interface V1Beta1CertificateResourceState extends ResourceCache<V1Beta1CertificateResourceType> {}
 
 const initialState: V1Beta1CertificateResourceState = {
   loaded: false,
@@ -1050,7 +884,9 @@ export const V1Beta1CertificateReducer = createReducer<
     (state, action): V1Beta1CertificateResourceState => ({
       ...state,
       resources: [
-        ...state.resources.filter(s => !isSameObject(s, action.payload)),
+        ...state.resources.filter(
+          s => !isSameObject(s, action.payload)
+        ),
         action.payload
       ]
     })
@@ -1059,7 +895,9 @@ export const V1Beta1CertificateReducer = createReducer<
     V1Beta1CertificateActions.onDestroyed,
     (state, action): V1Beta1CertificateResourceState => ({
       ...state,
-      resources: state.resources.filter(s => !isSameObject(s, action.payload))
+      resources: state.resources.filter(
+        s => !isSameObject(s, action.payload)
+      )
     })
   );
 
@@ -1091,9 +929,7 @@ export class V1Beta1CertificateResource extends K8sResource {
         const res = await client.listV1Beta1CertificateForAllNamespaces();
         channel(
           V1Beta1CertificateActions.fetch.success({
-            resources: res.body.items.map(
-              r => new V1Beta1CertificateResource(r, kubeConfig)
-            )
+            resources: res.body.items.map(r => new V1Beta1CertificateResource(r, kubeConfig))
           })
         );
       } catch (error) {
@@ -1105,24 +941,14 @@ export class V1Beta1CertificateResource extends K8sResource {
       const watchHandler = (phase: string, obj: V1Beta1Certificate) => {
         switch (phase) {
           case "ADDED":
-            channel(
-              V1Beta1CertificateActions.onAdded(
-                new V1Beta1CertificateResource(obj, kubeConfig)
-              )
-            );
+            channel(V1Beta1CertificateActions.onAdded(new V1Beta1CertificateResource(obj, kubeConfig)));
             break;
           case "MODIFIED":
-            channel(
-              V1Beta1CertificateActions.onUpdated(
-                new V1Beta1CertificateResource(obj, kubeConfig)
-              )
-            );
+            channel(V1Beta1CertificateActions.onUpdated(new V1Beta1CertificateResource(obj, kubeConfig)));
             break;
           case "DELETED":
             channel(
-              V1Beta1CertificateActions.onDestroyed(
-                new V1Beta1CertificateResource(obj, kubeConfig)
-              )
+              V1Beta1CertificateActions.onDestroyed(new V1Beta1CertificateResource(obj, kubeConfig))
             );
             break;
         }
@@ -1146,37 +972,34 @@ export class V1Beta1CertificateResource extends K8sResource {
     response: IncomingMessage;
     body: V1Beta1Certificate;
   }> {
-    return this.api.createNamespacedV1Beta1Certificate(
-      this.namespace,
-      this.resource
-    );
+    return this.api.createNamespacedV1Beta1Certificate(this.namespace, this.resource)
+    
   }
   read(): Promise<{
     response: IncomingMessage;
     body: V1Beta1Certificate;
   }> {
-    return this.api.readNamespacedV1Beta1Certificate(this.name, this.namespace);
+    return this.api.readNamespacedV1Beta1Certificate(this.name, this.namespace)
+    
   }
   update(): Promise<{
     response: IncomingMessage;
     body: V1Beta1Certificate;
   }> {
     return this.api.patchNamespacedV1Beta1Certificate(
-      this.name,
-      this.namespace,
-      this.resource,
-      undefined,
-      undefined,
-      { headers: { "Content-Type": "application/merge-patch+json" } }
-    );
+        this.name,
+        this.namespace,
+        this.resource,
+        undefined,
+        undefined,
+        { headers: { "Content-Type": "application/merge-patch+json" } }
+      )
+    
   }
   delete(): Promise<{
     response: IncomingMessage;
     body: V1Status;
   }> {
-    return this.api.deleteNamespacedV1Beta1Certificate(
-      this.name,
-      this.namespace
-    );
+    return this.api.deleteNamespacedV1Beta1Certificate(this.name, this.namespace)
   }
 }
