@@ -17,5 +17,4 @@
 /**
  * See instructions in README.md
  */
-import podmonitor from './prometheus-operator-0podmonitorCustomResourceDefinition.json';
-export { podmonitor };
+export { default as podmonitor } from './prometheus-operator-0podmonitorCustomResourceDefinition.json';

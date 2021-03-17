@@ -17,5 +17,4 @@
 /**
  * See instructions in README.md
  */
-import probe from './prometheus-operator-0probeCustomResourceDefinition.json';
-export { probe };
+export { default as probe } from './prometheus-operator-0probeCustomResourceDefinition.json';

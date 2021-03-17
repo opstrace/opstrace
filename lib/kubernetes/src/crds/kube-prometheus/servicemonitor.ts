@@ -17,5 +17,4 @@
 /**
  * See instructions in README.md
  */
-import servicemonitor from './prometheus-operator-0servicemonitorCustomResourceDefinition.json';
-export { servicemonitor };
+export { default as servicemonitor } from './prometheus-operator-0servicemonitorCustomResourceDefinition.json';

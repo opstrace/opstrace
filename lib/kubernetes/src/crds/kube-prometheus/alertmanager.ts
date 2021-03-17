@@ -17,5 +17,4 @@
 /**
  * See instructions in README.md
  */
-import alertmanager from './prometheus-operator-0alertmanagerCustomResourceDefinition.json';
-export { alertmanager };
+export { default as alertmanager } from './prometheus-operator-0alertmanagerCustomResourceDefinition.json';

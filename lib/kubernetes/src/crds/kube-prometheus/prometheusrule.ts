@@ -17,5 +17,4 @@
 /**
  * See instructions in README.md
  */
-import prometheusrule from './prometheus-operator-0prometheusruleCustomResourceDefinition.json';
-export { prometheusrule };
+export { default as prometheusrule } from './prometheus-operator-0prometheusruleCustomResourceDefinition.json';
