@@ -94,9 +94,19 @@ echo "--- build looker image"
 # `make image` is supposed to inherit the env variable CHECKOUT_VERSION_STRING
 ( cd test/test-remote/containers/looker ; make image ; make publish )
 
-# subsequent build steps are supposed to depend on actual build artifacts
-# like the pkg-based single binary CLI or Docker images. The node_modules
-# dir (expected to be more than 1 GB in size) is not needed anymore. Remove it.
+echo "--- build looker in non-isolated environment (for local dev)"
+# Note(JP): the looker build via Dockerfile is special. During local looker dev,
+# I am used to using a different build method. Which might break when it's not
+# covered by CI. Cover that here. Also see
+# https://github.com/opstrace/opstrace/issues/493
+( cd test/test-remote; yarn run tsc -v ./tsconfig.json )
+
+# subsequent build steps are supposed to depend on actual build artifacts like
+# the pkg-based single binary CLI or Docker images. The node_modules dir
+# (expected to be more than 1 GB in size) is not needed anymore. Remove it.
+# Note(JP): as of today (March 2021) we seem to install node_modules again
+# right thereafter, for the unit tests... That should probably be consolidated
+# :).
 rm -rf node_modules
 
 echo "--- the largest files and dirs in this prebuild dir:"
