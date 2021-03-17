@@ -1019,7 +1019,8 @@ async function customPostWithRetryOrError(
     }
 
     // All other HTTP responses: treat as transient problems
-    log.info("Treat as transient problem, retry");
+    log.info("Treat as transient problem, retry after sleep");
+    await sleep(3.0);
   }
   throw new Error(`Failed to POST ${pr} after ${maxRetries} attempts`);
 }
