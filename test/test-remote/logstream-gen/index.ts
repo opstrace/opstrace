@@ -202,95 +202,95 @@ function parseCmdlineArgs() {
     description: "Looker test runner"
   });
 
-  parser.addArgument("lokiurl", {
+  parser.add_argument("lokiurl", {
     help: "Loki API base URL",
     type: "string"
   });
 
-  parser.addArgument("--metrics-mode", {
+  parser.add_argument("--metrics-mode", {
     help:
       "dirty entry point into testing metrics (Cortex) instead of logs (Loki)",
     action: "storeTrue",
-    defaultValue: false
+    default: false
   });
 
   // note: maybe rename to --n-streams, because concurrency is controlled
   // differently
-  parser.addArgument("--n-concurrent-streams", {
+  parser.add_argument("--n-concurrent-streams", {
     help: "number of log streams to create per write/read cycle",
     type: "int",
     required: true
   });
 
-  parser.addArgument("--n-entries-per-stream-fragment", {
+  parser.add_argument("--n-entries-per-stream-fragment", {
     help: "number of log entries per log stream fragment",
     type: "int",
     required: true
   });
 
-  parser.addArgument("--n-chars-per-msg", {
+  parser.add_argument("--n-chars-per-msg", {
     help: "number of characters per log message",
     type: "int",
-    defaultValue: 100
+    default: 100
   });
 
   // note: looking for a more expressive name
-  parser.addArgument("--log-start-time", {
+  parser.add_argument("--log-start-time", {
     help:
       "Timestamp of first log entry in all generated log streams. ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. Default: invocation time",
     type: "string"
   });
 
-  parser.addArgument("--log-time-increment-ns", {
+  parser.add_argument("--log-time-increment-ns", {
     help:
       "time difference in nanonseconds between adjacent log entries in a log stream (between log entry timestamps)",
     type: "int",
-    defaultValue: 1
+    default: 1
   });
 
-  parser.addArgument("--metrics-time-increment-ms", {
+  parser.add_argument("--metrics-time-increment-ms", {
     help:
       "time difference in milliseconds between adjacent samples in a time series",
     type: "int",
-    defaultValue: 1
+    default: 1
   });
 
-  parser.addArgument("--max-concurrent-writes", {
+  parser.add_argument("--max-concurrent-writes", {
     help:
       "Maximum number of POST HTTP requests to perform concurrently. Default: 0 (do as many as given by --n-concurrent-streams).",
     type: "int",
-    defaultValue: 0
+    default: 0
   });
 
-  parser.addArgument("--max-concurrent-reads", {
+  parser.add_argument("--max-concurrent-reads", {
     help:
       "Maximum number of GET HTTP requests to perform concurrently during the read/validation phase. Default: 0 (do as many as given by --n-concurrent-streams).",
     type: "int",
-    defaultValue: 0
+    default: 0
   });
 
-  parser.addArgument("--compressability", {
+  parser.add_argument("--compressability", {
     help: "compressability characteristic of generated log messages",
     type: "string",
     choices: ["min", "max", "medium"],
-    defaultValue: "min"
+    default: "min"
   });
 
-  parser.addArgument("--n-cycles", {
+  parser.add_argument("--n-cycles", {
     help:
       "number of write/read cycles to perform. Every cycle generates a report.",
     type: "int",
-    defaultValue: 1
+    default: 1
   });
 
-  parser.addArgument("--change-streams-every-n-cycles", {
+  parser.add_argument("--change-streams-every-n-cycles", {
     help:
       "Use the same log stream for N cycles, then create a new set of log streams (with unique label sets)",
     type: "int",
-    defaultValue: 1
+    default: 1
   });
 
-  parser.addArgument("--label", {
+  parser.add_argument("--label", {
     help: "add a label key/value pair to all emitted log entries",
     metavar: ["KEY", "VALUE"],
     nargs: 2,
@@ -298,78 +298,78 @@ function parseCmdlineArgs() {
     dest: "additional_labels"
   });
 
-  parser.addArgument("--http-server-port", {
+  parser.add_argument("--http-server-port", {
     help: "HTTP server listen port (serves /metrics Prometheus endpoint)",
     type: "int",
-    defaultValue: 8900
+    default: 8900
   });
 
   const stopgroup = parser.addMutuallyExclusiveGroup({ required: true });
-  stopgroup.addArgument("--stream-write-n-fragments", {
+  stopgroup.add_argument("--stream-write-n-fragments", {
     help:
       "within a write/read cycle, stop write (and enter read phase) when this many fragments were written for a log stream",
     type: "int",
-    defaultValue: 0
+    default: 0
   });
 
-  stopgroup.addArgument("--stream-write-n-seconds", {
+  stopgroup.add_argument("--stream-write-n-seconds", {
     help:
       "within a write/read cycle, stop write (and enter read phase) after having written for approx. that many seconds",
     type: "int",
-    defaultValue: 0
+    default: 0
   });
 
-  parser.addArgument("--stream-write-n-seconds-jitter", {
+  parser.add_argument("--stream-write-n-seconds-jitter", {
     help:
       "add random number of seconds from interval [-J,J] to --stream-write-n-seconds ",
     metavar: "J",
     type: "float",
-    defaultValue: 0
+    default: 0
   });
 
-  parser.addArgument("--fetch-n-entries-per-query", {
+  parser.add_argument("--fetch-n-entries-per-query", {
     help:
       "Maximum number of log entries to fetch per query during read/validation phase",
 
     type: "int",
-    defaultValue: 60000
+    default: 60000
   });
 
-  parser.addArgument("--retry-post-deadline-seconds", {
+  parser.add_argument("--retry-post-deadline-seconds", {
     help: "Maximum time spent retrying POST requests, in seconds",
     type: "int",
-    defaultValue: 360
+    default: 360
   });
 
-  parser.addArgument("--retry-post-min-delay-seconds", {
+  parser.add_argument("--retry-post-min-delay-seconds", {
     help: "Minimal delay between POST request retries, in seconds",
     type: "int",
-    defaultValue: 2
+    default: 2
   });
 
-  parser.addArgument("--retry-post-max-delay-seconds", {
+  parser.add_argument("--retry-post-max-delay-seconds", {
     help: "Maximum delay between POST request retries, in seconds",
     type: "int",
-    defaultValue: 30
+    default: 30
   });
 
-  parser.addArgument("--retry-post-jitter", {
+  parser.add_argument("--retry-post-jitter", {
     help: "Relative jitter to apply for calculating the retry delay (1: max)",
     type: "float",
-    defaultValue: 0.5
+    default: 0.5
   });
 
-  parser.addArgument("--bearer-token-file", {
+  parser.add_argument("--bearer-token-file", {
     help:
       "Read authentication token from file. Add header `Authorization: Bearer <token>` to each HTTP request.",
     type: "string",
-    defaultValue: ""
+    default: ""
   });
 
-  parser.addArgument("--qsize", {
+  parser.add_argument("--qsize", {
     help: "undocumented, for JP",
     type: "int",
-    defaultValue: 1
+    default: 1
   });
 
   CFG = parser.parseArgs();

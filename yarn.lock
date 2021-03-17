@@ -3937,6 +3937,11 @@
   resolved "https://registry.yarnpkg.com/@types/argparse/-/argparse-1.0.38.tgz#a81fd8606d481f873a3800c6ebae4f1d768a56a9"
   integrity sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==
 
+"@types/argparse@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/argparse/-/argparse-2.0.5.tgz#5192f160931442a32c1c23e9480fff3f8d7cd0e4"
+  integrity sha512-m0CQ4TzFW+JdAN875vqqNO7H92jnN9hrH0bxEjJStePjfSfBDNgIlH+ieZQvBH9CuSPguFpjEzXcJHqV+fJqOQ==
+
 "@types/aria-query@^4.2.0":
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/@types/aria-query/-/aria-query-4.2.1.tgz#78b5433344e2f92e8b306c06a5622c50c245bf6b"
