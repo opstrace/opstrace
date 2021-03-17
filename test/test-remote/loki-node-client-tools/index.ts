@@ -98,7 +98,8 @@ export class LogStreamFragment {
   log stream fragment to Loki.
   */
   private entries: Array<LogStreamEntry>;
-  private charcount: number;
+  //private payloadCharcount: number;
+  private payloadBytecount: number;
   private serialized: boolean;
 
   public labels: LogStreamLabelset;
@@ -113,7 +114,11 @@ export class LogStreamFragment {
   ) {
     this.labels = labels;
     this.entries = new Array<LogStreamEntry>();
-    this.charcount = 0;
+    // Number of characters (text perspective) so far added to the fragment.
+    // this.payloadCharcount = 0;
+    // Number of bytes (after text encoding was applied, data perspective),
+    // assuming utf-8 encoding.
+    this.payloadBytecount = 0;
     this.index = index;
     this.parent = dummystream;
     this.serialized = false;
@@ -124,8 +129,12 @@ export class LogStreamFragment {
     return this.entries.length;
   }
 
-  public charCount() {
-    return this.charcount;
+  /* Return the size of the payload data in this stream fragment.
+
+  One way to do that would be to return a byte size
+  */
+  public payloadByteCount(): number {
+    return this.payloadBytecount;
   }
 
   public getEntries() {
@@ -137,7 +146,11 @@ export class LogStreamFragment {
 
   public addEntry(entry: LogStreamEntry) {
     this.entries.push(entry);
-    this.charcount += entry.text.length;
+    // Keep track of the size of the payload that was added. This might be
+    // expensive, but don't make any premature performance assupmtions here.
+    // Measure what's bottlenecking. :)
+    //this.payloadCharcount += entry.text.length;
+    this.payloadBytecount += Buffer.from(entry.text, "utf8").length;
   }
 
   public indexString(length: number) {
@@ -326,6 +339,11 @@ export class LogStreamFragmentPushRequest {
       pbentries.push(
         pbTypeEntry.create({
           timestamp: pbTypeTimestamp.create(entry.time),
+          // Note(JP): it is a bit unclear which text encoding is actually
+          // applied here. The protobuf definition has type `string`:
+          // https://github.com/grafana/loki/blob/14b2c093c19e17103e564b0aa6af0cf16ff0e5bc/pkg/logproto/types.go#L20
+          // the protobufjs library has to apply _some_ text encoding, and it's
+          // likely to be UTF-8.
           line: entry.text
         })
       );
