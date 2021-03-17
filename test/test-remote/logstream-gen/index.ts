@@ -842,8 +842,9 @@ export async function postFragments(
     );
     pushernum++;
 
-    // Smear the initial POST HTTP requests a little bit over time.
-    const delay = 0.01 + 0.005 * CFG.max_concurrent_writes;
+    // Smear the initial POST HTTP requests a tiny little bit over time.
+    // For `pushernum` towards O(100), add O(0.1 s) to O(1 s) delay.
+    const delay = 0.01 + 0.005 * pushernum;
     log.debug("create next pusher in %s s", delay.toFixed(3));
     await sleep(delay);
   }
