@@ -49,6 +49,7 @@ import {
   rndstring,
   sleep,
   mtimeDiffSeconds,
+  mtimeDeadlineInSeconds,
   mtime,
   timestampToRFC3339Nano,
   httpTimeoutSettings
@@ -65,7 +66,6 @@ interface CfgInterface {
   stream_write_n_seconds: number;
   max_concurrent_writes: number;
   max_concurrent_reads: number;
-  max_retries_post: number;
   lokiurl: string;
   invocation_id: string;
   log_start_time: string;
@@ -80,6 +80,10 @@ interface CfgInterface {
   metrics_mode: boolean;
   metrics_time_increment_ms: number;
   bearer_token_file: string;
+  retry_post_deadline_seconds: number;
+  retry_post_min_delay_seconds: number;
+  retry_post_max_delay_seconds: number;
+  retry_post_jitter: number;
 }
 
 let CFG: CfgInterface;
@@ -331,10 +335,28 @@ function parseCmdlineArgs() {
     defaultValue: 60000
   });
 
-  parser.addArgument("--max-retries-post", {
-    help: "Maximum number of retries for POST requests",
+  parser.addArgument("--retry-post-deadline-seconds", {
+    help: "Maximum time spent retrying POST requests, in seconds",
     type: "int",
-    defaultValue: 3
+    defaultValue: 360
+  });
+
+  parser.addArgument("--retry-post-min-delay-seconds", {
+    help: "Minimal delay between POST request retries, in seconds",
+    type: "int",
+    defaultValue: 2
+  });
+
+  parser.addArgument("--retry-post-max-delay-seconds", {
+    help: "Maximum delay between POST request retries, in seconds",
+    type: "int",
+    defaultValue: 30
+  });
+
+  parser.addArgument("--retry-post-jitter", {
+    help: "Relative jitter to apply for calculating the retry delay (1: max)",
+    type: "float",
+    defaultValue: 0.5
   });
 
   parser.addArgument("--bearer-token-file", {
@@ -423,6 +445,11 @@ function parseCmdlineArgs() {
       CFG.bearer_token_file,
       BEARER_TOKEN.length
     );
+  }
+
+  if (CFG.retry_post_jitter <= 0 || CFG.retry_post_jitter >= 1) {
+    log.error("retry_post_jitter must be larger than 0 and smaller than 1");
+    process.exit(1);
   }
 
   log.info("rendered config:\n%s", JSON.stringify(CFG, null, 2));
@@ -928,12 +955,86 @@ async function pushrequestPusher(
   }
 }
 
+/* Calculate delay in seconds _before_ performing the attempt `attempt`.
+
+Definition: attempt 1 is the first attempt, i.e. not a retry.
+*/
+function calcDelayBetweenPostRetries(attempt: number): number {
+  if (attempt === 1) {
+    return 0;
+  }
+
+  // Choose base delay using an exponential backoff technique. The base 1.6 is
+  // chosen based on taste, by looking at the series:
+  //
+  //   >>> [f'{b:.2f}' for b in ((1.6 ** a)/2.56 for a in range(2,10))]
+  //   ['1.00', '1.60', '2.56', '4.10', '6.55', '10.49', '16.78', '26.84']
+  //
+  // The first value is for a = 2. That is, attempt 2 (which is the _first_
+  // retry!) is performed with a base delay of 1 second.
+  const expBackoff = 1.6 ** attempt / 2.56;
+
+  // Scale this (linearly) with the minimal desired delay time, so that between
+  // the first two attempts the (unjittered) delay is precisely that time.
+  const unjitteredDelay = expBackoff * CFG.retry_post_max_delay_seconds;
+
+  // Add jitter: +/- 50 % (by default, with `CFG.retry_post_jitter` being set
+  // to 0.5) of the so far chosen backoff value.
+  const jitter = rndFloatFromInterval(
+    -CFG.retry_post_jitter * unjitteredDelay,
+    CFG.retry_post_jitter * unjitteredDelay
+  );
+  const backoffPlusJitter = expBackoff + jitter;
+  log.debug(
+    `calcDelayBetweenPostRetries: expBackoff: ${expBackoff.toFixed(2)}, ` +
+      `unjitteredDelay: ${unjitteredDelay.toFixed(2)}, jitter: ${jitter.toFixed(
+        2
+      )}  ` +
+      `-> ${backoffPlusJitter.toFixed(2)}`
+  );
+
+  if (backoffPlusJitter > CFG.retry_post_max_delay_seconds) {
+    // Rely on the idea that the individual retrying process has been random
+    // enough (accumulated enough jitter) so far, simply return this cap.
+    log.debug(
+      "calcDelayBetweenPostRetries: return cap: %s",
+      CFG.retry_post_max_delay_seconds
+    );
+    return CFG.retry_post_max_delay_seconds;
+  }
+  return backoffPlusJitter;
+}
+
 async function customPostWithRetryOrError(
   pr: LogStreamFragmentPushRequest | TimeseriesFragmentPushMessage,
   baseUrl: string
 ) {
-  const maxRetries = CFG.max_retries_post;
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  const deadline = mtimeDeadlineInSeconds(CFG.retry_post_deadline_seconds);
+  let attempt = 0;
+  while (true) {
+    attempt++;
+
+    const delay = calcDelayBetweenPostRetries(attempt);
+    if (attempt > 1) {
+      log.info(
+        "POST %s: schedule to perform attempt %s in %s s",
+        pr,
+        attempt,
+        delay.toFixed(2)
+      );
+      await sleep(delay);
+    }
+
+    const overDeadline = mtimeDiffSeconds(deadline);
+    if (overDeadline > 0) {
+      throw new Error(
+        `Failed to POST ${pr}: attempt ${attempt} would trigger ` +
+          `${overDeadline.toFixed(2)} s over the deadline (${
+            CFG.retry_post_deadline_seconds
+          } s).`
+      );
+    }
+
     setUptimeGauge();
 
     let pushpath = "/loki/api/v1/push";
@@ -965,10 +1066,6 @@ async function customPostWithRetryOrError(
         log.warning(
           `POST ${pr}: attempt ${attempt}: transient problem: ${e.message}`
         );
-
-        // Note(JP): pragmatic time constant for now
-        await sleep(1.0);
-
         // Move on to next attempt.
         continue;
       } else {
@@ -1002,8 +1099,6 @@ async function customPostWithRetryOrError(
 
     if (response.statusCode === 429) {
       log.info(`429 resp, sleep 2, body[:200]: ${response.body.slice(0, 200)}`);
-      await sleep(3.0);
-
       // Move on to next attempt.
       continue;
     }
@@ -1020,9 +1115,7 @@ async function customPostWithRetryOrError(
 
     // All other HTTP responses: treat as transient problems
     log.info("Treat as transient problem, retry after sleep");
-    await sleep(3.0);
   }
-  throw new Error(`Failed to POST ${pr} after ${maxRetries} attempts`);
 }
 
 // The Loki query system may get overwhelmed easily (emitting 500s and 502s).
