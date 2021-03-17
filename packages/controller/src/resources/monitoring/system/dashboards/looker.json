@@ -15,6 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
+  "iteration": 1615972210760,
   "links": [],
   "panels": [
     {
@@ -22,10 +23,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -33,7 +35,7 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 5,
-        "w": 8,
+        "w": 12,
         "x": 0,
         "y": 0
       },
@@ -52,9 +54,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -114,12 +117,10 @@
       }
     },
     {
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": null
-          },
+          "custom": {},
           "mappings": [],
           "noValue": "--",
           "thresholds": {
@@ -140,8 +141,8 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 9,
-        "x": 8,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
       "id": 22,
@@ -152,10 +153,13 @@
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": ["lastNotNull"],
+          "fields": "",
           "values": false
-        }
+        },
+        "text": {},
+        "textMode": "auto"
       },
-      "pluginVersion": "7.1.0-30da1078pre",
+      "pluginVersion": "7.4.3",
       "targets": [
         {
           "expr": "counter_rw_cycles{job=\"looker\"}",
@@ -174,10 +178,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -204,9 +209,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -278,7 +284,7 @@
         "mode": "spectrum"
       },
       "dataFormat": "tsbuckets",
-      "datasource": "customer-default-metrics",
+      "datasource": "tenant-loadtest-metrics",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -339,10 +345,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -369,9 +376,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -435,10 +443,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -465,9 +474,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -531,10 +541,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -561,9 +572,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -627,10 +639,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -657,9 +670,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -723,10 +737,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -753,9 +768,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -819,10 +835,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -849,9 +866,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -916,11 +934,12 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "description": "unexpected query results (communicated in an HTTP success response) result in a retrying. If a retry succeeds then looker does not crash. This counter keeps track of every unexpected query result (such as unexpected number of entries in a query result).",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -947,9 +966,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1013,10 +1033,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1043,9 +1064,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1116,11 +1138,12 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "description": "push rate of serialized & compressed LSFs vs.\npush rate of payload data (log msg size)",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1147,9 +1170,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1219,10 +1243,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "customer-default-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -1249,9 +1274,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1312,14 +1338,36 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 25,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "tenant-loadtest-metrics",
+          "value": "tenant-loadtest-metrics"
+        },
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "source",
+        "options": [],
+        "query": "prometheus",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
