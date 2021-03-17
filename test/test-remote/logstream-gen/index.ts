@@ -104,6 +104,8 @@ interface ReadStats {
   durationSeconds: number;
 }
 
+const DEFAULT_LOG_LEVEL_STDERR = "info";
+
 // let STATS_WRITE: WriteStats;
 // let STATS_READ: ReadStats;
 
@@ -205,6 +207,15 @@ function parseCmdlineArgs() {
   parser.add_argument("lokiurl", {
     help: "Loki API base URL",
     type: "string"
+  });
+
+  parser.add_argument("--log-level", {
+    help: `Set log level for output on stderr. One of: debug, info, warning, error. Default: ${DEFAULT_LOG_LEVEL_STDERR}`,
+    type: "str",
+    choices: ["debug", "info", "warning", "error"],
+    default: DEFAULT_LOG_LEVEL_STDERR,
+    metavar: "LEVEL",
+    dest: "logLevel"
   });
 
   parser.add_argument("--metrics-mode", {
