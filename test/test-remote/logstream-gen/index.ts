@@ -73,7 +73,7 @@ interface CfgInterface {
   log_start_time: string;
   log_time_increment_ns: number;
   http_server_port: number;
-  additional_labels: Array<[string, string]>;
+  additional_labels: Array<[string, string]> | undefined;
   compressability: string;
   change_streams_every_n_cycles: number;
   qsize: number;
@@ -543,7 +543,7 @@ function createNewDummyStreams(
 
     // add more labels (key/value pairs) as given by command line
     // without further validation
-    if (CFG.additional_labels.length !== 0) {
+    if (CFG.additional_labels !== undefined) {
       log.info(
         "adding additional labels: %s",
         JSON.stringify(CFG.additional_labels)
