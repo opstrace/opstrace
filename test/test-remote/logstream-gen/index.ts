@@ -57,6 +57,8 @@ import {
 
 import { Queue } from "./queue";
 
+import { log, buildLogger, setLogger } from "./log";
+
 interface CfgInterface {
   n_concurrent_streams: number;
   n_chars_per_msg: number;
@@ -66,6 +68,7 @@ interface CfgInterface {
   stream_write_n_seconds: number;
   max_concurrent_writes: number;
   max_concurrent_reads: number;
+  logLevel: string;
   lokiurl: string;
   invocation_id: string;
   log_start_time: string;
@@ -384,6 +387,11 @@ function parseCmdlineArgs() {
   });
 
   CFG = parser.parseArgs();
+  setLogger(
+    buildLogger({
+      stderrLevel: CFG.logLevel
+    })
+  );
 
   const uniqueInvocationId = `looker-${START_TIME_EPOCH}-${rndstring(10)}`;
   CFG.invocation_id = uniqueInvocationId;
