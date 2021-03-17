@@ -339,20 +339,24 @@ export function mtime(): bigint {
   return process.hrtime.bigint();
 }
 
-export function mtimeDiffSeconds(ref: bigint) {
-  // `ref` must be a value previously obtained from `mtime()`. Number()
-  // converts a BigInt to a regular Number type, allowing for translating from
-  // nanoseconds to seconds with a simple division, retaining sub-second
-  // resolution. This assumes that the measured time duration does not grow
-  // beyond 104 days.
+/*
+Return time difference of now compared to `ref` in seconds. Ret
+
+`ref` must be a value previously obtained from `mtime()`. Number()
+converts a BigInt to a regular Number type, allowing for translating from
+nanoseconds to seconds with a simple division, retaining sub-second
+resolution. This assumes that the measured time duration does not grow
+beyond 104 days.
+*/
+export function mtimeDiffSeconds(ref: bigint): number {
   return Number(process.hrtime.bigint() - ref) / 10 ** 9;
 }
 
-export function mtimeDeadlineInSeconds(seconds: number) {
+export function mtimeDeadlineInSeconds(seconds: number): bigint {
   return process.hrtime.bigint() + BigInt(seconds * 10 ** 9);
 }
 
-export function mtimeDeadlineTimeLeftSeconds(deadline: bigint) {
+export function mtimeDeadlineTimeLeftSeconds(deadline: bigint): number {
   // given a deadline as returned by `mtimeDeadlineInSeconds` calculate
   // the time left in seconds from _now_ until that deadline is hit.
   return Number(deadline - mtime()) / 10 ** 9;
