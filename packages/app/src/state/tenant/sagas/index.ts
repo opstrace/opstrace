@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { all, call, spawn, takeEvery, take, put } from "redux-saga/effects";
+import { all, call, spawn, takeEvery, put } from "redux-saga/effects";
 import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
 import { split } from "ramda";
@@ -27,7 +27,7 @@ export default function* tenantTaskManager() {
     addTenantListener,
     deleteTenantListener,
     getAlertmanagerListener,
-    updateAlertmanager
+    updateAlertmanagerListener
   ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
@@ -124,26 +124,36 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
   }
 }
 
-function* updateAlertmanager() {
-  while (true) {
-    const action: ReturnType<typeof actions.updateAlertmanager> = yield take(
-      actions.updateAlertmanager
-    );
+function* updateAlertmanagerListener() {
+  yield takeEvery(actions.updateAlertmanager, updateAlertmanager);
+}
 
-    try {
-      const config = `${
-        action.payload.header
-      }alertmanager_config: |\n  ${action.payload.config.replace(
-        /(\n)+/g,
-        "\n  "
-      )}`;
+function* updateAlertmanager(
+  action: ReturnType<typeof actions.updateAlertmanager>
+) {
+  try {
+    const config = `${
+      action.payload.header
+    }alertmanager_config: |\n  ${action.payload.config.replace(
+      /(\n)+/g,
+      "\n  "
+    )}`;
 
-      yield graphqlClient.UpdateAlertmanager({
-        tenant_id: action.payload.tenantId,
-        input: { config }
+    const response = yield graphqlClient.UpdateAlertmanager({
+      tenant_id: action.payload.tenantId,
+      input: { config }
+    });
+
+    if (action.payload.formId) {
+      yield put({
+        type: "UPDATE_FORM",
+        payload: {
+          id: action.payload.formId,
+          data: { response: response.data.updateAlertmanager }
+        }
       });
-    } catch (err) {
-      console.error(err);
     }
+  } catch (err) {
+    console.error(err);
   }
 }

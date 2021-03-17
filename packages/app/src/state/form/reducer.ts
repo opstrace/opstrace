@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { mergeDeepRight, pathOr } from "ramda";
+import { dissocPath, mergeDeepRight, hasPath, path } from "ramda";
+import { mergePath } from "ramda-adjunct";
 
 import { createReducer, ActionType } from "typesafe-actions";
 
 import * as actions from "./actions";
 import { expandFormId, newForm } from "state/form/utils";
-import { FormRecords } from "./types";
+import { FormRecords, Form } from "./types";
 
 type FormActions = ActionType<typeof actions>;
 
@@ -33,14 +34,46 @@ export const reducer = createReducer<FormState, FormActions>(FormInitialState)
     actions.registerForm,
     (state, action): FormState => {
       const { type, code } = expandFormId(action.payload);
-      const form = pathOr(newForm(type, code), [type, code])(state);
-      return mergeDeepRight(state)({ [type]: { [code]: form } });
+      if (hasPath([type, code])(state)) return state;
+      else
+        return mergePath([type, code], newForm(type, code), state) as FormState;
     }
   )
   .handleAction(
     actions.unregisterForm,
     (state, action): FormState => {
       const { type, code } = expandFormId(action.payload);
-      return mergeDeepRight(state)({ [type]: { [code]: null } });
+      return dissocPath([type, code], state);
+    }
+  )
+  .handleAction(
+    actions.updateFormStatus,
+    (state, action): FormState => {
+      const { id, status } = action.payload;
+      const { type, code } = expandFormId(id);
+      if (hasPath([type, code])(state)) return state;
+      else return mergePath([type, code], { status }, state) as FormState;
+    }
+  )
+  .handleAction(
+    actions.updateForm,
+    (state, action): FormState => {
+      const { id, status, data, replaceData } = action.payload;
+      const { type, code } = expandFormId(id);
+      const form = path<Form>([type, code])(state);
+      if (form) {
+        if (replaceData === true) {
+          return mergePath([type, code], { status, data }, state) as FormState;
+          // return mergeDeepWithKey(
+          //   (k, l, r) => (k === "data" || k === "status" ? r : l),
+          //   state
+          // )({
+          //   [type]: { [code]: { status, data } }
+          // });
+        } else
+          return mergeDeepRight(state)({
+            [type]: { [code]: { status: status || form?.status, data } }
+          });
+      } else return state;
     }
   );

@@ -26,6 +26,7 @@ export type Form = {
   code: string;
   status: string;
   data: object;
+  updatedAt: Date;
 };
 
 export type FormRecords = Record<string, Form>;
