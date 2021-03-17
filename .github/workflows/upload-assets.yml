@@ -14,8 +14,8 @@ jobs:
         uses: shallwefootball/upload-s3-action@v1.1.3
         id: S3
         with:
-          aws_key_id: ${{ secrets.AWS_ASSETS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_ASSETS_SECRET_ACCESS_KEY}}
-          aws_bucket: ${{ secrets.AWS_ASSETS_BUCKET }}
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
           source_dir: "docs/assets"
           destination_dir: ""
