@@ -812,7 +812,7 @@ export async function postFragments(
   // Give producers a tiny bit of CPU time to fill the queue so that this
   // CPU hog does not affect the first POST request timings too much.
   // Note: could also explicitly wait until queues are full.
-  await sleep(0.5);
+  await sleep(0.2);
 
   // Construct queue consumers, the "pushers" which push fragments to Loki
   // after getting them from the queues. Limit pusher coroutines to be no more
@@ -843,7 +843,9 @@ export async function postFragments(
     pushernum++;
 
     // Smear the initial POST HTTP requests a little bit over time.
-    await sleep(0.1 + 0.05 * CFG.max_concurrent_writes);
+    const delay = 0.01 + 0.005 * CFG.max_concurrent_writes;
+    log.debug("create next pusher in %s s", delay.toFixed(3));
+    await sleep(delay);
   }
 
   // Wait for producers and consumers to return.
