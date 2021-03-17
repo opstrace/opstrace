@@ -108,7 +108,7 @@
           "logBase": 10,
           "max": null,
           "min": "0",
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -365,12 +365,12 @@
       "id": 2,
       "legend": {
         "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
+        "current": true,
+        "max": true,
+        "min": true,
         "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -416,11 +416,12 @@
       "yaxes": [
         {
           "$$hashKey": "object:270",
+          "decimals": 3,
           "format": "short",
           "label": "rate [1/s]",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
-          "min": "0",
+          "min": "0.0001",
           "show": true
         },
         {
@@ -879,7 +880,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total[30s])*100",
+          "expr": "rate(process_cpu_seconds_total{job=\"looker\"}[30s])*100",
           "interval": "",
           "legendFormat": "{{looker_invocation_id}}",
           "refId": "A"
@@ -1077,15 +1078,15 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "nodejs_eventloop_lag_max_seconds",
+          "expr": "nodejs_eventloop_lag_max_seconds{job=\"looker\"}",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "max {{looker_invocation_id}}",
           "refId": "A"
         },
         {
-          "expr": "nodejs_eventloop_lag_mean_seconds",
+          "expr": "nodejs_eventloop_lag_mean_seconds{job=\"looker\"}",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "mean {{looker_invocation_id}}",
           "refId": "B"
         }
       ],
@@ -1367,7 +1368,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
