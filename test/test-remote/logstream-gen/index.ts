@@ -65,6 +65,7 @@ interface CfgInterface {
   stream_write_n_seconds: number;
   max_concurrent_writes: number;
   max_concurrent_reads: number;
+  max_retries_post: number;
   lokiurl: string;
   invocation_id: string;
   log_start_time: string;
@@ -328,6 +329,12 @@ function parseCmdlineArgs() {
 
     type: "int",
     defaultValue: 60000
+  });
+
+  parser.addArgument("--max-retries-post", {
+    help: "Maximum number of retries for POST requests",
+    type: "int",
+    defaultValue: 3
   });
 
   parser.addArgument("--bearer-token-file", {
@@ -900,7 +907,10 @@ async function pushrequestPusher(
 
       const postT0 = mtime();
       try {
-        await postWithRetryOrError(pr, lokiBaseUrl);
+        // Do not use pr.postWithRetryOrError() which is super simple,
+        // but use a custom function with CLI arg-controlled retrying
+        // parameters etc.
+        await customPostWithRetryOrError(pr, lokiBaseUrl);
       } catch (err) {
         log.crit("consider critical: %s", err);
         process.exit(1);
@@ -918,11 +928,11 @@ async function pushrequestPusher(
   }
 }
 
-async function postWithRetryOrError(
+async function customPostWithRetryOrError(
   pr: LogStreamFragmentPushRequest | TimeseriesFragmentPushMessage,
-  baseUrl: string,
-  maxRetries = 3
+  baseUrl: string
 ) {
+  const maxRetries = CFG.max_retries_post;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     setUptimeGauge();
 
