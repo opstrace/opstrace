@@ -192,6 +192,7 @@ export class DummyTimeseries {
   };
 
   private nextValue() {
+    // Note: this ignores the compressability concept so far.
     return Math.random();
   }
 
@@ -206,7 +207,7 @@ export class DummyTimeseries {
     );
   }
 
-  public currentTimeRFC3339Nano() {
+  public currentTimeRFC3339Nano(): string {
     return this.millisSinceEpochOfLastGeneratedSample.toString(); // todo: ..
   }
 
@@ -232,7 +233,7 @@ export class DummyTimeseries {
     return fragment;
   }
 
-  public generateAndGetNextFragment() {
+  public generateAndGetNextFragment(): TimeseriesFragment {
     const seriesFragment = this.generateNextFragment();
     this.nFragmentsConsumed += 1;
     return seriesFragment;
@@ -248,7 +249,7 @@ export class DummyTimeseries {
     nFragments: number,
     cortexBaseUrl: string,
     additionalHeaders?: Record<string, string>
-  ) {
+  ): Promise<void> {
     for (let i = 1; i <= nFragments; i++) {
       const fragment = this.generateAndGetNextFragment();
       const t0 = mtime();
