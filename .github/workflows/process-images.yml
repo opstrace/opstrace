@@ -10,7 +10,6 @@ jobs:
       - name: Tinify Image Action
         uses: namoscato/action-tinify@v1.2.6
         with:
-          commit_user_name: "TinifyBot"
           commit_message: "chore: compress image(s)"
           api_key: ${{ secrets.TINIFY_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
