@@ -281,9 +281,9 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (code) (rate(cortex_ingester_tsdb_wal_fsync_duration_seconds_sum{namespace=\"cortex\"}[$timewindow]) / rate(cortex_ingester_tsdb_wal_fsync_duration_seconds_count{namespace=\"cortex\"}[$timewindow]))",
+          "expr": "rate(cortex_ingester_tsdb_wal_fsync_duration_seconds_sum{namespace=\"cortex\"}[$timewindow]) / rate(cortex_ingester_tsdb_wal_fsync_duration_seconds_count{namespace=\"cortex\"}[$timewindow])",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
@@ -308,12 +308,12 @@
       "yaxes": [
         {
           "$$hashKey": "object:123",
-          "decimals": 2,
-          "format": "short",
+          "decimals": 3,
+          "format": "s",
           "label": "duration [s]",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
-          "min": "0",
+          "min": "0.000001",
           "show": true
         },
         {
