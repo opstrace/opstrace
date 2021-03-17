@@ -94,9 +94,11 @@ export class TimeseriesFragment {
     return this.samples.length;
   }
 
-  // quickndirty compile error solution
-  public charCount() {
-    return 0;
+  public payloadByteCount(): number {
+    // concept payload bytes, not including timestamp.
+    // For a Prometheus metric sample, the value is a double precision
+    // floating point number, i.e. 64 bit, i.e. 8 Bytes
+    return this.samples.length * 8;
   }
 
   public getSamples() {
