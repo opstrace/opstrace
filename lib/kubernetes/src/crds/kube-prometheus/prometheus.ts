@@ -17,5 +17,4 @@
 /**
  * See instructions in README.md
  */
-import prometheus from './prometheus-operator-0prometheusCustomResourceDefinition.json';
-export { prometheus };
+export { default as prometheus } from './prometheus-operator-0prometheusCustomResourceDefinition.json';

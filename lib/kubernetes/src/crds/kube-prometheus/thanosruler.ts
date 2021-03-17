@@ -17,5 +17,4 @@
 /**
  * See instructions in README.md
  */
-import thanosruler from './prometheus-operator-0thanosrulerCustomResourceDefinition.json';
-export { thanosruler };
+export { default as thanosruler } from './prometheus-operator-0thanosrulerCustomResourceDefinition.json';
