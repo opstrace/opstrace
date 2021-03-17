@@ -47,7 +47,7 @@ type validationCheckOptions = {
 const AlertmanagerConfigEditor = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
   const tenant = useTenant(tenantId);
-  useForm("alertmanagerConfig", tenantId);
+  const formId = useForm("alertmanagerConfig", tenantId);
   const alertmanager = useAlertmanager(tenantId);
   const configRef = useRef<string>(alertmanager?.config || "");
   const [configValid, setConfigValid] = useState<boolean | null>(null);
@@ -105,7 +105,8 @@ const AlertmanagerConfigEditor = () => {
         updateAlertmanager({
           tenantId: tenant.name,
           header: alertmanager?.header || "",
-          config: configRef.current
+          config: configRef.current,
+          formId: formId
         })
       );
     }

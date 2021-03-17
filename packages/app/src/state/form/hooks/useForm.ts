@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useEffect } from "react";
+
+import { useEffect, useMemo } from "react";
 import { useDispatch } from "state/provider";
 
 import { registerForm, unregisterForm } from "state/form/actions";
@@ -21,14 +22,14 @@ import { generateFormId } from "state/form/utils";
 
 export default function useForm(type: string, code: string) {
   const dispatch = useDispatch();
-  const id = generateFormId(type, code);
+  const id = useMemo(() => generateFormId(type, code), [type, code]);
 
   useEffect(() => {
     dispatch(registerForm(id));
     return () => {
       dispatch(unregisterForm(id));
     };
-  }, [dispatch]);
+  }, [dispatch, id]);
 
   return id;
 }

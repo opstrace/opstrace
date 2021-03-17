@@ -18,12 +18,14 @@ import { createAction } from "typesafe-actions";
 export const registerForm = createAction("REGISTER_FORM")<string>();
 export const unregisterForm = createAction("UNREGISTOR_FORM")<string>();
 
-export const updateForm = createAction("FORM")<{
+export const updateFormStatus = createAction("UPDATE_FORM_STATUS")<{
   id: string;
-  status?: string;
-  data?: object;
+  status: string;
 }>();
 
-export const formUpdated = createAction("FORM_UPDATED")<{
+export const updateForm = createAction("UPDATE_FORM")<{
   id: string;
+  status?: string;
+  data: object;
+  replaceData?: boolean;
 }>();
