@@ -17,6 +17,7 @@
 import { select, delay, SelectEffect, CallEffect } from "redux-saga/effects";
 import { CombinedState } from "redux";
 import { State } from "./reducer";
+import { K8sResource } from "@opstrace/kubernetes";
 import { log, SECOND } from "@opstrace/utils";
 
 export function* uninstallProgressReporter(): Generator<
@@ -34,14 +35,14 @@ export function* uninstallProgressReporter(): Generator<
       PersistentVolumes
     } = state.kubernetes.cluster;
 
-    const unProtectedDeployments = Deployments.resources.filter(
+    const unprotectedDeployments = Deployments.resources.filter(
       d => !d.isProtected()
     );
-    log.info(`waiting for ${unProtectedDeployments.length} Deployments`);
-    log.info(`waiting for ${DaemonSets.resources.length} DaemonSets`);
-    log.info(`waiting for ${StatefulSets.resources.length} StatefulSets`);
+    log.info(`waiting for ${unprotectedDeployments.length} Deployments: ${resourceNames(unprotectedDeployments)}`);
+    log.info(`waiting for ${DaemonSets.resources.length} DaemonSets: ${resourceNames(DaemonSets.resources)}`);
+    log.info(`waiting for ${StatefulSets.resources.length} StatefulSets: ${resourceNames(StatefulSets.resources)}`);
     log.info(
-      `waiting for ${PersistentVolumes.resources.length} PersistentVolumes`
+      `waiting for ${PersistentVolumes.resources.length} PersistentVolumes: ${resourceNames(PersistentVolumes.resources)}`
     );
 
     // Note(JP): that's an interesting exit criterion. Mhm.
@@ -51,4 +52,15 @@ export function* uninstallProgressReporter(): Generator<
 
     yield delay(10 * SECOND);
   }
+}
+
+function resourceNames(resources: K8sResource[]): string {
+  return resources
+    .map(r => `${r.namespace}/${r.name}`)
+    .sort((a, b) => {
+      if (a > b) { return 1; }
+      else if (a < b) { return -1; }
+      else { return 0; }
+    })
+    .join(", ");
 }
