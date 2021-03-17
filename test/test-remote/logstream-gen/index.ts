@@ -998,7 +998,7 @@ function calcDelayBetweenPostRetries(attempt: number): number {
 
   // Scale this (linearly) with the minimal desired delay time, so that between
   // the first two attempts the (unjittered) delay is precisely that time.
-  const unjitteredDelay = expBackoff * CFG.retry_post_max_delay_seconds;
+  const unjitteredDelay = expBackoff * CFG.retry_post_min_delay_seconds;
 
   // Add jitter: +/- 50 % (by default, with `CFG.retry_post_jitter` being set
   // to 0.5) of the so far chosen backoff value.
@@ -1006,7 +1006,7 @@ function calcDelayBetweenPostRetries(attempt: number): number {
     -CFG.retry_post_jitter * unjitteredDelay,
     CFG.retry_post_jitter * unjitteredDelay
   );
-  const backoffPlusJitter = expBackoff + jitter;
+  const backoffPlusJitter = unjitteredDelay + jitter;
   log.debug(
     `calcDelayBetweenPostRetries: expBackoff: ${expBackoff.toFixed(2)}, ` +
       `unjitteredDelay: ${unjitteredDelay.toFixed(2)}, jitter: ${jitter.toFixed(
