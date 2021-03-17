@@ -45,7 +45,6 @@ import {
 import { LokiQueryResult } from "../testutils/logs";
 
 import {
-  log,
   rndstring,
   sleep,
   mtimeDiffSeconds,
@@ -74,7 +73,7 @@ interface CfgInterface {
   log_start_time: string;
   log_time_increment_ns: number;
   http_server_port: number;
-  additional_labels: Array<[string, string]> | null;
+  additional_labels: Array<[string, string]>;
   compressability: string;
   change_streams_every_n_cycles: number;
   qsize: number;
@@ -224,7 +223,7 @@ function parseCmdlineArgs() {
   parser.add_argument("--metrics-mode", {
     help:
       "dirty entry point into testing metrics (Cortex) instead of logs (Loki)",
-    action: "storeTrue",
+    action: "store_true",
     default: false
   });
 
@@ -285,7 +284,7 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--compressability", {
     help: "compressability characteristic of generated log messages",
-    type: "string",
+    type: "str",
     choices: ["min", "max", "medium"],
     default: "min"
   });
@@ -318,7 +317,7 @@ function parseCmdlineArgs() {
     default: 8900
   });
 
-  const stopgroup = parser.addMutuallyExclusiveGroup({ required: true });
+  const stopgroup = parser.add_mutually_exclusive_group({ required: true });
   stopgroup.add_argument("--stream-write-n-fragments", {
     help:
       "within a write/read cycle, stop write (and enter read phase) when this many fragments were written for a log stream",
@@ -386,7 +385,8 @@ function parseCmdlineArgs() {
     default: 1
   });
 
-  CFG = parser.parseArgs();
+  CFG = parser.parse_args();
+
   setLogger(
     buildLogger({
       stderrLevel: CFG.logLevel
@@ -543,8 +543,11 @@ function createNewDummyStreams(
 
     // add more labels (key/value pairs) as given by command line
     // without further validation
-    if (CFG.additional_labels !== null) {
-      log.info("adding additional labels");
+    if (CFG.additional_labels.length !== 0) {
+      log.info(
+        "adding additional labels: %s",
+        JSON.stringify(CFG.additional_labels)
+      );
       for (const kvpair of CFG.additional_labels) {
         labelset[kvpair[0]] = kvpair[1];
       }
