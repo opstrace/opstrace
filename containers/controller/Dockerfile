@@ -23,10 +23,6 @@ COPY packages/controller /build/packages/controller/
 COPY packages/config /build/packages/config/
 COPY packages/tenants /build/packages/tenants/
 COPY packages/controller-config /build/packages/controller-config/
-# Copy the graphql types generated from Hasura, because the build command for the controller
-# will copy them into the controller package. We could split the Graphql bits into a separate
-# package which we could import in controller and app, but this is simpler for now.
-COPY packages/app/src/state/graphql-api-types.ts /build/packages/app/src/state/graphql-api-types.ts
 
 WORKDIR /build/packages/controller
 

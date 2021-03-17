@@ -43,6 +43,23 @@ module.exports = {
         ]
       }
     },
+    "../controller/src/dbSDK.ts": {
+      plugins: [
+        "typescript",
+        "typescript-operations",
+        "typescript-graphql-request"
+      ],
+      config: {
+        rawRequest: true,
+        skipTypename: true
+      },
+      hooks: {
+        afterOneFileWrite: [
+          "yarn run prettier --write",
+          "addlicense -c 'Opstrace, Inc.' -l apache"
+        ]
+      }
+    },
     "../../go/pkg/graphql/client_generated.go": {
       plugins: [
         "graphql-codegen-golang"

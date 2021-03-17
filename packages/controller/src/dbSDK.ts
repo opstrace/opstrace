@@ -41,6 +41,23 @@ export type Scalars = {
   uuid: any;
 };
 
+export type Alertmanager = {
+  config?: Maybe<Scalars["String"]>;
+  online: Scalars["Boolean"];
+  tenant_id: Scalars["String"];
+};
+
+export type AlertmanagerInput = {
+  config: Scalars["String"];
+};
+
+export type AlertmanagerUpdateResponse = {
+  error_message?: Maybe<Scalars["String"]>;
+  error_raw_response?: Maybe<Scalars["String"]>;
+  error_type?: Maybe<ErrorType>;
+  success: Scalars["Boolean"];
+};
+
 /** expression to compare columns of type Boolean. All fields are combined with logical 'AND'. */
 export type Boolean_Comparison_Exp = {
   _eq?: Maybe<Scalars["Boolean"]>;
@@ -53,6 +70,12 @@ export type Boolean_Comparison_Exp = {
   _neq?: Maybe<Scalars["Boolean"]>;
   _nin?: Maybe<Array<Scalars["Boolean"]>>;
 };
+
+export enum ErrorType {
+  ServiceError = "SERVICE_ERROR",
+  ServiceOffline = "SERVICE_OFFLINE",
+  ValidationFailed = "VALIDATION_FAILED"
+}
 
 /** expression to compare columns of type String. All fields are combined with logical 'AND'. */
 export type String_Comparison_Exp = {
@@ -71,6 +94,13 @@ export type String_Comparison_Exp = {
   _nlike?: Maybe<Scalars["String"]>;
   _nsimilar?: Maybe<Scalars["String"]>;
   _similar?: Maybe<Scalars["String"]>;
+};
+
+export type ValidateOutput = {
+  error_message?: Maybe<Scalars["String"]>;
+  error_raw_response?: Maybe<Scalars["String"]>;
+  error_type?: Maybe<ErrorType>;
+  success: Scalars["Boolean"];
 };
 
 /** columns and relationships of "branch" */
@@ -1629,6 +1659,8 @@ export type Mutation_Root = {
   insert_user_preference?: Maybe<User_Preference_Mutation_Response>;
   /** insert a single row into the table: "user_preference" */
   insert_user_preference_one?: Maybe<User_Preference>;
+  /** perform the action: "updateAlertmanager" */
+  updateAlertmanager?: Maybe<AlertmanagerUpdateResponse>;
   /** update data of the table: "branch" */
   update_branch?: Maybe<Branch_Mutation_Response>;
   /** update single row of the table: "branch" */
@@ -1873,6 +1905,12 @@ export type Mutation_RootInsert_User_Preference_OneArgs = {
 };
 
 /** mutation root */
+export type Mutation_RootUpdateAlertmanagerArgs = {
+  input?: Maybe<AlertmanagerInput>;
+  tenant_id: Scalars["String"];
+};
+
+/** mutation root */
 export type Mutation_RootUpdate_BranchArgs = {
   _set?: Maybe<Branch_Set_Input>;
   where: Branch_Bool_Exp;
@@ -2032,6 +2070,8 @@ export type Query_Root = {
   file_aggregate: File_Aggregate;
   /** fetch data from the table: "file" using primary key columns */
   file_by_pk?: Maybe<File>;
+  /** perform the action: "getAlertmanager" */
+  getAlertmanager?: Maybe<Alertmanager>;
   /** fetch data from the table: "module" */
   module: Array<Module>;
   /** fetch aggregated fields from the table: "module" */
@@ -2062,6 +2102,10 @@ export type Query_Root = {
   user_preference_aggregate: User_Preference_Aggregate;
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
+  /** perform the action: "validateCredential" */
+  validateCredential?: Maybe<ValidateOutput>;
+  /** perform the action: "validateExporter" */
+  validateExporter?: Maybe<ValidateOutput>;
 };
 
 /** query root */
@@ -2156,6 +2200,11 @@ export type Query_RootFile_AggregateArgs = {
 /** query root */
 export type Query_RootFile_By_PkArgs = {
   id: Scalars["uuid"];
+};
+
+/** query root */
+export type Query_RootGetAlertmanagerArgs = {
+  tenant_id: Scalars["String"];
 };
 
 /** query root */
@@ -2278,6 +2327,23 @@ export type Query_RootUser_Preference_By_PkArgs = {
   id: Scalars["uuid"];
 };
 
+/** query root */
+export type Query_RootValidateCredentialArgs = {
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
+  value: Scalars["json"];
+};
+
+/** query root */
+export type Query_RootValidateExporterArgs = {
+  config: Scalars["json"];
+  credential: Scalars["String"];
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
+};
+
 /** subscription root */
 export type Subscription_Root = {
   /** fetch data from the table: "branch" */
@@ -2304,6 +2370,8 @@ export type Subscription_Root = {
   file_aggregate: File_Aggregate;
   /** fetch data from the table: "file" using primary key columns */
   file_by_pk?: Maybe<File>;
+  /** perform the action: "getAlertmanager" */
+  getAlertmanager?: Maybe<Alertmanager>;
   /** fetch data from the table: "module" */
   module: Array<Module>;
   /** fetch aggregated fields from the table: "module" */
@@ -2334,6 +2402,10 @@ export type Subscription_Root = {
   user_preference_aggregate: User_Preference_Aggregate;
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
+  /** perform the action: "validateCredential" */
+  validateCredential?: Maybe<ValidateOutput>;
+  /** perform the action: "validateExporter" */
+  validateExporter?: Maybe<ValidateOutput>;
 };
 
 /** subscription root */
@@ -2428,6 +2500,11 @@ export type Subscription_RootFile_AggregateArgs = {
 /** subscription root */
 export type Subscription_RootFile_By_PkArgs = {
   id: Scalars["uuid"];
+};
+
+/** subscription root */
+export type Subscription_RootGetAlertmanagerArgs = {
+  tenant_id: Scalars["String"];
 };
 
 /** subscription root */
@@ -2548,6 +2625,23 @@ export type Subscription_RootUser_Preference_AggregateArgs = {
 /** subscription root */
 export type Subscription_RootUser_Preference_By_PkArgs = {
   id: Scalars["uuid"];
+};
+
+/** subscription root */
+export type Subscription_RootValidateCredentialArgs = {
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
+  value: Scalars["json"];
+};
+
+/** subscription root */
+export type Subscription_RootValidateExporterArgs = {
+  config: Scalars["json"];
+  credential: Scalars["String"];
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
 };
 
 /** columns and relationships of "tenant" */
@@ -3541,6 +3635,14 @@ export type DeleteTenantMutation = {
   delete_tenant_by_pk?: Maybe<Pick<Tenant, "name">>;
 };
 
+export type GetAlertmanagerQueryVariables = Exact<{
+  tenant_id: Scalars["String"];
+}>;
+
+export type GetAlertmanagerQuery = {
+  getAlertmanager?: Maybe<Pick<Alertmanager, "config" | "online">>;
+};
+
 export type GetTenantsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetTenantsQuery = {
@@ -3553,6 +3655,20 @@ export type SubscribeToTenantListSubscriptionVariables = Exact<{
 
 export type SubscribeToTenantListSubscription = {
   tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
+};
+
+export type UpdateAlertmanagerMutationVariables = Exact<{
+  tenant_id: Scalars["String"];
+  input: AlertmanagerInput;
+}>;
+
+export type UpdateAlertmanagerMutation = {
+  updateAlertmanager?: Maybe<
+    Pick<
+      AlertmanagerUpdateResponse,
+      "success" | "error_type" | "error_message" | "error_raw_response"
+    >
+  >;
 };
 
 export type CreateUserMutationVariables = Exact<{
@@ -4131,6 +4247,14 @@ export const DeleteTenantDocument = gql`
     }
   }
 `;
+export const GetAlertmanagerDocument = gql`
+  query GetAlertmanager($tenant_id: String!) {
+    getAlertmanager(tenant_id: $tenant_id) {
+      config
+      online
+    }
+  }
+`;
 export const GetTenantsDocument = gql`
   query GetTenants {
     tenant {
@@ -4146,6 +4270,16 @@ export const SubscribeToTenantListDocument = gql`
       name
       created_at
       type
+    }
+  }
+`;
+export const UpdateAlertmanagerDocument = gql`
+  mutation UpdateAlertmanager($tenant_id: String!, $input: AlertmanagerInput!) {
+    updateAlertmanager(tenant_id: $tenant_id, input: $input) {
+      success
+      error_type
+      error_message
+      error_raw_response
     }
   }
 `;
@@ -4780,6 +4914,22 @@ export function getSdk(
         )
       );
     },
+    GetAlertmanager(
+      variables: GetAlertmanagerQueryVariables
+    ): Promise<{
+      data?: GetAlertmanagerQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetAlertmanagerQuery>(
+          print(GetAlertmanagerDocument),
+          variables
+        )
+      );
+    },
     GetTenants(
       variables?: GetTenantsQueryVariables
     ): Promise<{
@@ -4805,6 +4955,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<SubscribeToTenantListSubscription>(
           print(SubscribeToTenantListDocument),
+          variables
+        )
+      );
+    },
+    UpdateAlertmanager(
+      variables: UpdateAlertmanagerMutationVariables
+    ): Promise<{
+      data?: UpdateAlertmanagerMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<UpdateAlertmanagerMutation>(
+          print(UpdateAlertmanagerDocument),
           variables
         )
       );
