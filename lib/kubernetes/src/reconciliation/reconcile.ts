@@ -159,760 +159,266 @@ export function* reconcile(
 
     const desiredState = reduceCollection(desired.get());
 
-    desiredState.Ingresses.forEach(r => {
-      const existing = find(r, actualState.Ingresses);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing) || hasIngressChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Ingresses.forEach(r => {
-      const shouldKeep = find(r, desiredState.Ingresses);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Ingresses,
+      actualState.Ingresses,
+      (desired, existing) => hasIngressChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.StorageClasses.forEach(r => {
-      const existing = find(r, actualState.StorageClasses);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.StorageClasses.forEach(r => {
-      const shouldKeep = find(r, desiredState.StorageClasses);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.StorageClasses,
+      actualState.StorageClasses,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.PersistentVolumeClaims.forEach(r => {
-      const existing = find(r, actualState.PersistentVolumeClaims);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.PersistentVolumeClaims.forEach(r => {
-      const shouldKeep = find(r, desiredState.PersistentVolumeClaims);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.PersistentVolumeClaims,
+      actualState.PersistentVolumeClaims,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.StatefulSets.forEach(r => {
-      const existing = find(r, actualState.StatefulSets);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasStatefulSetChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.StatefulSets.forEach(r => {
-      const shouldKeep = find(r, desiredState.StatefulSets);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.StatefulSets,
+      actualState.StatefulSets,
+      (desired, existing) => hasStatefulSetChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.ServiceAccounts.forEach(r => {
-      const existing = find(r, actualState.ServiceAccounts);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.ServiceAccounts.forEach(r => {
-      const shouldKeep = find(r, desiredState.ServiceAccounts);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.ServiceAccounts,
+      actualState.ServiceAccounts,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Services.forEach(r => {
-      const existing = find(r, actualState.Services);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing) || hasServiceChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Services.forEach(r => {
-      const shouldKeep = find(r, desiredState.Services);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Services,
+      actualState.Services,
+      (desired, existing) => hasServiceChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Secrets.forEach(r => {
-      const existing = find(r, actualState.Secrets);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing) || hasSecretChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Secrets.forEach(r => {
-      const shouldKeep = find(r, desiredState.Secrets);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Secrets,
+      actualState.Secrets,
+      (desired, existing) => hasSecretChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.RoleBindings.forEach(r => {
-      const existing = find(r, actualState.RoleBindings);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.RoleBindings.forEach(r => {
-      const shouldKeep = find(r, desiredState.RoleBindings);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.RoleBindings,
+      actualState.RoleBindings,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Roles.forEach(r => {
-      const existing = find(r, actualState.Roles);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Roles.forEach(r => {
-      const shouldKeep = find(r, desiredState.Roles);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Roles,
+      actualState.Roles,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Namespaces.forEach(r => {
-      const existing = find(r, actualState.Namespaces);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Namespaces.forEach(r => {
-      const shouldKeep = find(r, desiredState.Namespaces);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Namespaces,
+      actualState.Namespaces,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Deployments.forEach(r => {
-      const existing = find(r, actualState.Deployments);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasDeploymentChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Deployments.forEach(r => {
-      const shouldKeep = find(r, desiredState.Deployments);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Deployments,
+      actualState.Deployments,
+      (desired, existing) => hasDeploymentChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.DaemonSets.forEach(r => {
-      const existing = find(r, actualState.DaemonSets);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasDaemonSetChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.DaemonSets.forEach(r => {
-      const shouldKeep = find(r, desiredState.DaemonSets);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.DaemonSets,
+      actualState.DaemonSets,
+      (desired, existing) => hasDaemonSetChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.CustomResourceDefinitions.forEach(r => {
-      const existing = find(r, actualState.CustomResourceDefinitions);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.CustomResourceDefinitions.forEach(r => {
-      const shouldKeep = find(r, desiredState.CustomResourceDefinitions);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.CustomResourceDefinitions,
+      actualState.CustomResourceDefinitions,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.ConfigMaps.forEach(r => {
-      const existing = find(r, actualState.ConfigMaps);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasConfigMapChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.ConfigMaps.forEach(r => {
-      const shouldKeep = find(r, desiredState.ConfigMaps);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.ConfigMaps,
+      actualState.ConfigMaps,
+      (desired, existing) => hasConfigMapChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.ClusterRoleBindings.forEach(r => {
-      const existing = find(r, actualState.ClusterRoleBindings);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.ClusterRoleBindings.forEach(r => {
-      const shouldKeep = find(r, desiredState.ClusterRoleBindings);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.ClusterRoleBindings,
+      actualState.ClusterRoleBindings,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.ClusterRoles.forEach(r => {
-      const existing = find(r, actualState.ClusterRoles);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasClusterRoleChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.ClusterRoles.forEach(r => {
-      const shouldKeep = find(r, desiredState.ClusterRoles);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.ClusterRoles,
+      actualState.ClusterRoles,
+      (desired, existing) => hasClusterRoleChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.PodSecurityPolicies.forEach(r => {
-      const existing = find(r, actualState.PodSecurityPolicies);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.PodSecurityPolicies.forEach(r => {
-      const shouldKeep = find(r, desiredState.PodSecurityPolicies);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.PodSecurityPolicies,
+      actualState.PodSecurityPolicies,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.ApiServices.forEach(r => {
-      const existing = find(r, actualState.ApiServices);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.ApiServices.forEach(r => {
-      const shouldKeep = find(r, desiredState.ApiServices);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.ApiServices,
+      actualState.ApiServices,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Alertmanagers.forEach(r => {
-      const existing = find(r, actualState.Alertmanagers);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasAlertManagerChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Alertmanagers.forEach(r => {
-      const shouldKeep = find(r, desiredState.Alertmanagers);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Alertmanagers,
+      actualState.Alertmanagers,
+      (desired, existing) => hasAlertManagerChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.PodMonitors.forEach(r => {
-      const existing = find(r, actualState.PodMonitors);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.PodMonitors.forEach(r => {
-      const shouldKeep = find(r, desiredState.PodMonitors);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.PodMonitors,
+      actualState.PodMonitors,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Prometheuses.forEach(r => {
-      const existing = find(r, actualState.Prometheuses);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasPrometheusChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Prometheuses.forEach(r => {
-      const shouldKeep = find(r, desiredState.Prometheuses);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Prometheuses,
+      actualState.Prometheuses,
+      (desired, existing) => hasPrometheusChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.PrometheusRules.forEach(r => {
-      const existing = find(r, actualState.PrometheusRules);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasPrometheusRuleChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.PrometheusRules.forEach(r => {
-      const shouldKeep = find(r, desiredState.PrometheusRules);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.PrometheusRules,
+      actualState.PrometheusRules,
+      (desired, existing) => hasPrometheusRuleChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.ServiceMonitors.forEach(r => {
-      const existing = find(r, actualState.ServiceMonitors);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasServiceMonitorChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.ServiceMonitors.forEach(r => {
-      const shouldKeep = find(r, desiredState.ServiceMonitors);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.ServiceMonitors,
+      actualState.ServiceMonitors,
+      (desired, existing) => hasServiceMonitorChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Certificates.forEach(r => {
-      const existing = find(r, actualState.Certificates);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (
-          haveLabelsChanged(r, existing) ||
-          hasCertificateChanged(r, existing)
-        ) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Certificates.forEach(r => {
-      const shouldKeep = find(r, desiredState.Certificates);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Certificates,
+      actualState.Certificates,
+      (desired, existing) => hasCertificateChanged(desired, existing),
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.CertificateRequests.forEach(r => {
-      const existing = find(r, actualState.CertificateRequests);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.CertificateRequests.forEach(r => {
-      const shouldKeep = find(r, desiredState.CertificateRequests);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.CertificateRequests,
+      actualState.CertificateRequests,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Challenges.forEach(r => {
-      const existing = find(r, actualState.Challenges);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Challenges.forEach(r => {
-      const shouldKeep = find(r, desiredState.Challenges);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Challenges,
+      actualState.Challenges,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.ClusterIssuers.forEach(r => {
-      const existing = find(r, actualState.ClusterIssuers);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.ClusterIssuers.forEach(r => {
-      const shouldKeep = find(r, desiredState.ClusterIssuers);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.ClusterIssuers,
+      actualState.ClusterIssuers,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Issuers.forEach(r => {
-      const existing = find(r, actualState.Issuers);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Issuers.forEach(r => {
-      const shouldKeep = find(r, desiredState.Issuers);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Issuers,
+      actualState.Issuers,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
-    desiredState.Orders.forEach(r => {
-      const existing = find(r, actualState.Orders);
-      if (!existing) {
-        createCollection.push(r);
-        return;
-      }
-      if (!r.isImmutable()) {
-        if (haveLabelsChanged(r, existing)) {
-          updateCollection.push(r);
-        }
-      }
-    });
-    actualState.Orders.forEach(r => {
-      const shouldKeep = find(r, desiredState.Orders);
-      if (
-        !shouldKeep &&
-        r.isOurs() &&
-        !r.isTerminating() &&
-        !r.isProtected() &&
-        !r.isImmutable()
-      ) {
-        deleteCollection.push(r);
-      }
-    });
+    reconcileResourceType(
+      desiredState.Orders,
+      actualState.Orders,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
     const toUpdate = addResourcesWithVolumeUpdates(
       reduceCollection(updateCollection),
@@ -935,6 +441,49 @@ export function* reconcile(
   } catch (e) {
     log.error(`Error in reconcile loop: ${e}`);
   }
+}
+
+function reconcileResourceType<T extends K8sResource>(
+  desiredResources: T[],
+  actualResources: T[],
+  hasChangedCustom: null | ((desired: T, existing: T)=>boolean),
+  createCollection: K8sResource[],
+  deleteCollection: K8sResource[],
+  updateCollection: K8sResource[]
+) {
+  desiredResources.forEach(r => {
+    const existing = find(r, actualResources);
+    if (!existing) {
+      createCollection.push(r);
+      return;
+    }
+    if (!r.isImmutable()) {
+      if (
+        haveLabelsChanged(r, existing) ||
+        (hasChangedCustom != null && hasChangedCustom(r, existing))
+      ) {
+        // If the resource has had its opstrace annotation removed, do not modify it.
+        // This allows us to manually make changes to resources without the controller stepping on them.
+        if (existing.isOurs()) {
+          updateCollection.push(r);
+        } else {
+          log.notice(`Leaving existing ${existing.namespace}/${existing.name} as-is (missing 'opstrace' annotation)`);
+        }
+      }
+    }
+  });
+  actualResources.forEach(r => {
+    const isDesired = find(r, desiredResources);
+    if (
+      !isDesired &&
+      r.isOurs() &&
+      !r.isTerminating() &&
+      !r.isProtected() &&
+      !r.isImmutable()
+    ) {
+      deleteCollection.push(r);
+    }
+  });
 }
 
 function* applyRateLimitedApiRequests<T extends K8sResource>(
