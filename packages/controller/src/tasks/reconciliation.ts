@@ -67,7 +67,7 @@ export function* reconciliationLoop(
     });
 
     if (getControllerConfig(state).terminate) {
-      yield call(reconcile, desired, reduceCollection(actualCollection));
+      yield call(reconcile, desired, reduceCollection(actualCollection), true);
 
       continue;
     }
@@ -86,6 +86,6 @@ export function* reconciliationLoop(
     desired.add(CredentialResources(state, kubeConfig));
     desired.add(ExporterResources(state, kubeConfig));
 
-    yield call(reconcile, desired, reduceCollection(actualCollection));
+    yield call(reconcile, desired, reduceCollection(actualCollection), false);
   }
 }
