@@ -49,7 +49,6 @@ export function* runInformers(
       k8s.DaemonSet.startInformer(kubeConfig, channel),
       k8s.Deployment.startInformer(kubeConfig, channel),
       k8s.PersistentVolume.startInformer(kubeConfig, channel),
-      k8s.StatefulSet.startInformer(kubeConfig, channel),
       k8s.StatefulSet.startInformer(kubeConfig, channel)
     ];
 

@@ -116,7 +116,8 @@ export type ReconcileResourceTypes = {
 
 export function* reconcile(
   desired: ResourceCollection,
-  actual: Partial<ReconcileResourceTypes>
+  actual: Partial<ReconcileResourceTypes>,
+  isDestroyingCluster: boolean
 ): Generator<CallEffect, void, unknown> {
   const actualState: ReconcileResourceTypes = {
     Nodes: [],
@@ -163,6 +164,7 @@ export function* reconcile(
       desiredState.Ingresses,
       actualState.Ingresses,
       (desired, existing) => hasIngressChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -171,6 +173,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.StorageClasses,
       actualState.StorageClasses,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -181,6 +184,15 @@ export function* reconcile(
       desiredState.PersistentVolumeClaims,
       actualState.PersistentVolumeClaims,
       null,
+      // Operators may create their own PVCs, which sometimes do not get cleaned up automatically.
+      // Specifically, this is observed with this prometheus-operator PVC in tenant namespaces:
+      //   'prometheus-system-prometheus-db-prometheus-system-prometheus-0'
+      // Although prometheus-operator allows customizing PVC annotations, during normal operation
+      // we do not want them labeled as owned by us since we aren't managing them, but during
+      // destroy we want to ensure that they are all cleanly torn down.
+      isDestroyingCluster
+        ? _pvc => true // during cluster destroy, delete all PVCs regardless of attributes
+        : null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -190,6 +202,7 @@ export function* reconcile(
       desiredState.StatefulSets,
       actualState.StatefulSets,
       (desired, existing) => hasStatefulSetChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -198,6 +211,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.ServiceAccounts,
       actualState.ServiceAccounts,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -208,6 +222,7 @@ export function* reconcile(
       desiredState.Services,
       actualState.Services,
       (desired, existing) => hasServiceChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -217,6 +232,7 @@ export function* reconcile(
       desiredState.Secrets,
       actualState.Secrets,
       (desired, existing) => hasSecretChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -225,6 +241,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.RoleBindings,
       actualState.RoleBindings,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -235,6 +252,7 @@ export function* reconcile(
       desiredState.Roles,
       actualState.Roles,
       null,
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -243,6 +261,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.Namespaces,
       actualState.Namespaces,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -253,6 +272,7 @@ export function* reconcile(
       desiredState.Deployments,
       actualState.Deployments,
       (desired, existing) => hasDeploymentChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -262,6 +282,7 @@ export function* reconcile(
       desiredState.DaemonSets,
       actualState.DaemonSets,
       (desired, existing) => hasDaemonSetChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -270,6 +291,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.CustomResourceDefinitions,
       actualState.CustomResourceDefinitions,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -280,6 +302,7 @@ export function* reconcile(
       desiredState.ConfigMaps,
       actualState.ConfigMaps,
       (desired, existing) => hasConfigMapChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -288,6 +311,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.ClusterRoleBindings,
       actualState.ClusterRoleBindings,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -298,6 +322,7 @@ export function* reconcile(
       desiredState.ClusterRoles,
       actualState.ClusterRoles,
       (desired, existing) => hasClusterRoleChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -306,6 +331,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.PodSecurityPolicies,
       actualState.PodSecurityPolicies,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -316,6 +342,7 @@ export function* reconcile(
       desiredState.ApiServices,
       actualState.ApiServices,
       null,
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -325,6 +352,7 @@ export function* reconcile(
       desiredState.Alertmanagers,
       actualState.Alertmanagers,
       (desired, existing) => hasAlertManagerChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -333,6 +361,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.PodMonitors,
       actualState.PodMonitors,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -343,6 +372,7 @@ export function* reconcile(
       desiredState.Prometheuses,
       actualState.Prometheuses,
       (desired, existing) => hasPrometheusChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -352,6 +382,7 @@ export function* reconcile(
       desiredState.PrometheusRules,
       actualState.PrometheusRules,
       (desired, existing) => hasPrometheusRuleChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -361,6 +392,7 @@ export function* reconcile(
       desiredState.ServiceMonitors,
       actualState.ServiceMonitors,
       (desired, existing) => hasServiceMonitorChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -370,6 +402,7 @@ export function* reconcile(
       desiredState.Certificates,
       actualState.Certificates,
       (desired, existing) => hasCertificateChanged(desired, existing),
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -378,6 +411,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.CertificateRequests,
       actualState.CertificateRequests,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -388,6 +422,7 @@ export function* reconcile(
       desiredState.Challenges,
       actualState.Challenges,
       null,
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -396,6 +431,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.ClusterIssuers,
       actualState.ClusterIssuers,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -406,6 +442,7 @@ export function* reconcile(
       desiredState.Issuers,
       actualState.Issuers,
       null,
+      null,
       createCollection,
       deleteCollection,
       updateCollection
@@ -414,6 +451,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.Orders,
       actualState.Orders,
+      null,
       null,
       createCollection,
       deleteCollection,
@@ -446,7 +484,8 @@ export function* reconcile(
 function reconcileResourceType<T extends K8sResource>(
   desiredResources: T[],
   actualResources: T[],
-  hasChangedCustom: null | ((desired: T, existing: T)=>boolean),
+  customHasChanged: null | ((desired: T, existing: T) => boolean),
+  customCanDelete: null | ((resource: T) => boolean),
   createCollection: K8sResource[],
   deleteCollection: K8sResource[],
   updateCollection: K8sResource[]
@@ -459,15 +498,19 @@ function reconcileResourceType<T extends K8sResource>(
     }
     if (!r.isImmutable()) {
       if (
+        // Default: In all cases, changing labels means an update should be performed
         haveLabelsChanged(r, existing) ||
-        (hasChangedCustom != null && hasChangedCustom(r, existing))
+        // Custom: Additional type-specific checks for detecting changes
+        (customHasChanged != null && customHasChanged(r, existing))
       ) {
         // If the resource has had its opstrace annotation removed, do not modify it.
         // This allows us to manually make changes to resources without the controller stepping on them.
         if (existing.isOurs()) {
           updateCollection.push(r);
         } else {
-          log.notice(`Leaving existing ${existing.namespace}/${existing.name} as-is (missing 'opstrace' annotation)`);
+          log.notice(
+            `Leaving existing ${existing.namespace}/${existing.name} as-is (missing 'opstrace' annotation)`
+          );
         }
       }
     }
@@ -475,11 +518,14 @@ function reconcileResourceType<T extends K8sResource>(
   actualResources.forEach(r => {
     const isDesired = find(r, desiredResources);
     if (
-      !isDesired &&
-      r.isOurs() &&
-      !r.isTerminating() &&
-      !r.isProtected() &&
-      !r.isImmutable()
+      // Default: Only delete things that are owned by us and aren't special in some way
+      (!isDesired &&
+        r.isOurs() &&
+        !r.isTerminating() &&
+        !r.isProtected() &&
+        !r.isImmutable()) ||
+      // Custom: In certain circumstances, some types should be deleted even if not owned by us
+      (customCanDelete != null && customCanDelete(r))
     ) {
       deleteCollection.push(r);
     }
