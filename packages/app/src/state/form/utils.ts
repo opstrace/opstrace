@@ -32,9 +32,14 @@ export const expandFormId = (id: string): { type: string; code: string } => {
   return { type, code };
 };
 
-export const newForm = (type: string, code: string) => ({
+export const newForm = (
+  type: string,
+  code: string,
+  status: string = "active",
+  data: object = {}
+) => ({
   type,
   code,
-  status: "active",
-  data: {}
+  status,
+  data
 });

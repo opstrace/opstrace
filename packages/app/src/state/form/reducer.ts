@@ -33,10 +33,15 @@ export const reducer = createReducer<FormState, FormActions>(FormInitialState)
   .handleAction(
     actions.registerForm,
     (state, action): FormState => {
-      const { type, code } = expandFormId(action.payload);
+      const { id, status, data } = action.payload;
+      const { type, code } = expandFormId(id);
       if (hasPath([type, code])(state)) return state;
       else
-        return mergePath([type, code], newForm(type, code), state) as FormState;
+        return mergePath(
+          [type, code],
+          newForm(type, code, status, data),
+          state
+        ) as FormState;
     }
   )
   .handleAction(
@@ -72,7 +77,12 @@ export const reducer = createReducer<FormState, FormActions>(FormInitialState)
           // });
         } else
           return mergeDeepRight(state)({
-            [type]: { [code]: { status: status || form?.status, data } }
+            [type]: {
+              [code]: {
+                status: status || form?.status,
+                data: data
+              }
+            }
           });
       } else return state;
     }

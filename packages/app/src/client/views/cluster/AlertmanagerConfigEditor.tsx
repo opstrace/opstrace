@@ -23,7 +23,7 @@ import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import * as yamlParser from "js-yaml";
 import { YamlEditor } from "client/components/Editor";
 
-import { useForm } from "state/form/hooks";
+import { useForm, useFormData } from "state/form/hooks";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
 
@@ -47,7 +47,8 @@ type validationCheckOptions = {
 const AlertmanagerConfigEditor = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
   const tenant = useTenant(tenantId);
-  const formId = useForm("alertmanagerConfig", tenantId);
+  const formId = useForm({ type: "alertmanagerConfig", code: tenantId });
+  const formData = useFormData(formId);
   const alertmanager = useAlertmanager(tenantId);
   const configRef = useRef<string>(alertmanager?.config || "");
   const [configValid, setConfigValid] = useState<boolean | null>(null);
@@ -110,7 +111,7 @@ const AlertmanagerConfigEditor = () => {
         })
       );
     }
-  }, [tenant?.name, alertmanager?.header, dispatch]);
+  }, [tenant?.name, alertmanager?.header, formId, dispatch]);
 
   if (!tenant)
     return (

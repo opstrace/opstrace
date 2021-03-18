@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { default as useForm } from "./useForm";
+export * from "./useForm";
