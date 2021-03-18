@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-export type FormCode = string;
-
-export type FormKey = {
-  id: number;
-  code: FormCode;
-};
-
 export type Form = {
   type: string;
   code: string;
   status: string;
   data: object;
-  updatedAt: Date;
 };
 
 export type FormRecords = Record<string, Form>;
