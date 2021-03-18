@@ -132,7 +132,7 @@ export class DummyTimeseries {
 
     // Distinguish two special cases, also see ch1767;
     if (opts.timediffMilliSeconds < 1000) {
-      log.info("timediffMilliSeconds  < 1000, special validation");
+      log.debug("timediffMilliSeconds  < 1000, special validation");
       // Does adding one delta_t result in a fragment time width of n * 1 s?
       if (
         (opts.n_samples_per_series_fragment * opts.timediffMilliSeconds) %
@@ -141,7 +141,7 @@ export class DummyTimeseries {
       ) {
         // this means that precisely one sample is missing in a fragment for
         // it to comprise fragmentWidthSecondsForQuery.
-        log.info("sample count looks good");
+        log.debug("sample count looks good");
       } else {
         throw new Error(
           "with timediffMilliSeconds < 1000 choose sample count S so that (S + 1) * timediffMilliSeconds = N 1 s"
@@ -226,7 +226,7 @@ export class DummyTimeseries {
     }
 
     const genduration = mtimeDiffSeconds(t0);
-    log.info(
+    log.debug(
       "TimeseriesFragment addSample loop took: %s s",
       genduration.toFixed(3)
     );

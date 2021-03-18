@@ -916,7 +916,7 @@ async function pushrequestQueueProducer(
 
 async function pushrequestPusher(
   name: string,
-  lokiBaseUrl: string,
+  apiBaseUrl: string,
   prqueues: Array<Queue>
 ) {
   log.info("Created %s", name);
@@ -962,7 +962,7 @@ async function pushrequestPusher(
         // Do not use pr.postWithRetryOrError() which is super simple,
         // but use a custom function with CLI arg-controlled retrying
         // parameters etc.
-        await customPostWithRetryOrError(pr, lokiBaseUrl);
+        await customPostWithRetryOrError(pr, apiBaseUrl);
       } catch (err) {
         log.crit("consider critical: %s", err);
         process.exit(1);
