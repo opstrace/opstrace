@@ -15,21 +15,51 @@
  */
 
 import { useEffect, useMemo } from "react";
-import { useDispatch } from "state/provider";
+import { path } from "ramda";
+import { useDispatch, useSelector, State } from "state/provider";
+import { createSelector } from "reselect";
 
 import { registerForm, unregisterForm } from "state/form/actions";
-import { generateFormId } from "state/form/utils";
+import { generateFormId, expandFormId } from "state/form/utils";
+import { Form } from "state/form/types";
 
-export default function useForm(type: string, code: string) {
+type formProps = {
+  type: string;
+  code?: string;
+  status?: string;
+  data?: object;
+  unregisterOnUnmount?: boolean;
+};
+
+const useForm = ({
+  type,
+  code,
+  status,
+  data,
+  unregisterOnUnmount
+}: formProps) => {
   const dispatch = useDispatch();
   const id = useMemo(() => generateFormId(type, code), [type, code]);
 
   useEffect(() => {
-    dispatch(registerForm(id));
+    dispatch(registerForm({ id, status, data }));
     return () => {
-      dispatch(unregisterForm(id));
+      if (unregisterOnUnmount === true) dispatch(unregisterForm(id));
     };
-  }, [dispatch, id]);
+  }, [dispatch, id, status, data, unregisterOnUnmount]);
 
   return id;
-}
+};
+
+const selectForm = ({ type, code }: { type: string; code: string }) =>
+  createSelector(
+    () => type,
+    () => code,
+    (state: State) => state.form,
+    (type, code, formState) => path<Form>([type, code])(formState)?.data
+  );
+
+const useFormData = (id: string) => useSelector(selectForm(expandFormId(id)));
+
+export default useForm;
+export { useForm, useFormData };

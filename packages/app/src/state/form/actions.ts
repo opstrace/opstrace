@@ -15,7 +15,11 @@
  */
 import { createAction } from "typesafe-actions";
 
-export const registerForm = createAction("REGISTER_FORM")<string>();
+export const registerForm = createAction("REGISTER_FORM")<{
+  id: string;
+  status?: string;
+  data?: object;
+}>();
 export const unregisterForm = createAction("UNREGISTOR_FORM")<string>();
 
 export const updateFormStatus = createAction("UPDATE_FORM_STATUS")<{
