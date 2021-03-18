@@ -277,12 +277,13 @@ export class DummyTimeseries {
   // Most of FetchAndValidateOpts is ignored, just here to make this func
   // signature match DummyStream.fetchAndValidate
   public async fetchAndValidate(opts: FetchAndValidateOpts): Promise<number> {
-    log.info("DummySeries fetchAndValidate()");
+    log.info("%s fetchAndValidate()", this);
 
     const baseUrl = opts.querierBaseUrl;
     const additionalHeaders = opts.additionalHeaders;
 
     let samplesValidated = 0;
+    let fragmentsValidated = 0;
     for (const fragment of this.postedFragmentsSinceLastValidate) {
       const validated = await this.fetchAndValidateFragment(
         fragment,
@@ -290,6 +291,17 @@ export class DummyTimeseries {
         additionalHeaders
       );
       samplesValidated += validated;
+      fragmentsValidated += 1;
+
+      // Control log verbosity
+      if (fragmentsValidated % 20 === 0) {
+        log.info(
+          "%s fetchAndValidate(): %s fragments validated (%s samples)",
+          this.uniqueName,
+          fragmentsValidated,
+          samplesValidated
+        );
+      }
     }
 
     this.postedFragmentsSinceLastValidate = [];
@@ -320,7 +332,7 @@ export class DummyTimeseries {
       fragment.stats!.timeMillisSinceEpochLast / 1000.0
     );
 
-    log.info("timeRightBoundarySeconds: %s", timeRightBoundarySeconds);
+    log.debug("timeRightBoundarySeconds: %s", timeRightBoundarySeconds);
 
     const params = {
       query: `${logqlLabelString(this.labels)}[${
@@ -328,7 +340,7 @@ export class DummyTimeseries {
       }s]`,
       time: timeRightBoundarySeconds
     };
-    log.info("query params: %s", params);
+    log.debug("query params: %s", params);
     return params;
   }
 
@@ -365,7 +377,7 @@ export class DummyTimeseries {
 
     //log.info("response data: %s", JSON.stringify(data, null, 2));
 
-    log.info("number of series in query result: %s", resultArray.length);
+    log.debug("number of series in query result: %s", resultArray.length);
     if (resultArray.length != 1) {
       log.error("unexpected response data: %s", JSON.stringify(data, null, 2));
       throw Error("not precisely one series in result");
@@ -422,7 +434,7 @@ export class DummyTimeseries {
       // from a dummy series) the query is expected to return the first sample
       // of the subsequent fragment.
       if (values.length === this.n_samples_per_series_fragment + 1) {
-        log.info(
+        log.debug(
           "last sample in query result belongs to next fragment, ignore"
         );
         timestamps.pop();
@@ -439,8 +451,8 @@ export class DummyTimeseries {
       sampleCount: BigInt(values.length)
     };
 
-    log.info("fragmentStats reference: %s", fragment.stats);
-    log.info("for comparison: %s", stats);
+    log.debug("fragmentStats reference: %s", fragment.stats);
+    log.debug("for comparison: %s", stats);
 
     assert.deepEqual(fragment.stats, stats);
     this.nSamplesValidatedSoFar += BigInt(values.length);
