@@ -644,8 +644,8 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   );
 
   for (const stream of streams) {
-    log.info(
-      "stream %s: wrote %s fragments",
+    log.debug(
+      "stream %s: wrote %s fragment(s)",
       stream.uniqueName,
       stream.nFragmentsSuccessfullySentSinceLastValidate
     );
@@ -681,7 +681,7 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   );
 
   for (const stream of streams) {
-    log.info(
+    log.debug(
       "Stats of last-consumed fragment of stream %s: %s",
       stream.uniqueName,
       stream.lastFragmentConsumed?.stats //currentTimeRFC3339Nano()
@@ -828,7 +828,7 @@ export async function postFragments(
 
   let pushernum = 1;
   for (const qc of queueChunks) {
-    log.info(
+    log.debug(
       "Create a pusher coroutine consuming from %s stream(s)",
       qc.length
     );
@@ -844,7 +844,7 @@ export async function postFragments(
 
     // Smear the initial POST HTTP requests a tiny little bit over time.
     // For `pushernum` towards O(100), add O(0.1 s) to O(1 s) delay.
-    const delay = 0.01 + 0.005 * pushernum;
+    const delay = 0.01 + 0.001 * pushernum;
     log.debug("create next pusher in %s s", delay.toFixed(3));
     await sleep(delay);
   }
@@ -940,7 +940,7 @@ async function pushrequestPusher(
 
       if (pr === null) {
         // queue is empty and closed, ignore from now on.
-        log.info("%s: forget queue %s (done)", name, qidx);
+        log.debug("%s: forget queue %s (done)", name, qidx);
         prqueues.splice(qidx, 1);
         continue;
       }
