@@ -42,9 +42,14 @@ export function CortexResources(
   namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
-  const { name, infrastructureName, target, region, gcp } = getControllerConfig(
-    state
-  );
+  const {
+    name,
+    infrastructureName,
+    target,
+    region,
+    gcp,
+    metricRetentionDays
+  } = getControllerConfig(state);
   const dataBucketName = getBucketName({
     clusterName: infrastructureName,
     suffix: "cortex"
@@ -310,6 +315,12 @@ export function CortexResources(
     // limits_config
     // https://cortexmetrics.io/docs/configuration/configuration-file/#limits-config
     limits: {
+      // Delete blocks containing samples older than the specified retention
+      // period. Default is 0 (disabled). Add one day as a buffer here to be
+      // on the safe side. Note(JP): should this be the primary mechanism to
+      // delete old data from the corresponding cloud storage bucket? Should
+      // this replace the bucket lifecycle-based method?
+      compactor_blocks_retention_period: `${metricRetentionDays + 1}d`,
       ingestion_rate: 100000, // default: 25000
       ingestion_burst_size: 200000, // default: 50000
       max_series_per_user: 5000000, // The maximum number of active series per user, per ingester
