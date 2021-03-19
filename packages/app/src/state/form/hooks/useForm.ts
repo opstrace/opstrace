@@ -20,7 +20,7 @@ import { useDispatch, useSelector, State } from "state/provider";
 import { createSelector } from "reselect";
 
 import { registerForm, unregisterForm } from "state/form/actions";
-import { generateFormId, expandFormId } from "state/form/utils";
+import { generateFormId, expandFormId, newForm } from "state/form/utils";
 import { Form } from "state/form/types";
 
 type formProps = {
@@ -51,15 +51,32 @@ const useForm = ({
   return id;
 };
 
-const selectForm = ({ type, code }: { type: string; code: string }) =>
+const selectForm = (
+  {
+    type,
+    code
+  }: {
+    type: string;
+    code: string;
+  },
+  defaultData?: {}
+) =>
   createSelector(
     () => type,
     () => code,
     (state: State) => state.form,
-    (type, code, formState) => path<Form>([type, code])(formState)?.data
+    (type, code, formState) => {
+      let form = path<Form>([type, code])(formState);
+
+      if (!form && defaultData)
+        form = newForm(type, code, "unknown", defaultData);
+
+      return form;
+    }
   );
 
-const useFormData = (id: string) => useSelector(selectForm(expandFormId(id)));
+const useFormState = (id: string, defaultData?: {}) =>
+  useSelector(selectForm(expandFormId(id), defaultData));
 
 export default useForm;
-export { useForm, useFormData };
+export { useForm, useFormState };

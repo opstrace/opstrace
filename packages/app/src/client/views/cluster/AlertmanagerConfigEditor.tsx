@@ -23,7 +23,8 @@ import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import * as yamlParser from "js-yaml";
 import { YamlEditor } from "client/components/Editor";
 
-import { useForm, useFormData } from "state/form/hooks";
+import { useForm, useFormState } from "state/form/hooks";
+import { Form } from "state/form/types";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
 
@@ -34,6 +35,7 @@ import Skeleton from "@material-ui/lab/Skeleton";
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
+import { CondRender } from "client/utils/rendering";
 
 import {
   alertmanagerConfigSchema,
@@ -44,11 +46,25 @@ type validationCheckOptions = {
   useModelMarkers: boolean;
 };
 
+type FormData = {
+  remoteValidation: { success?: boolean };
+};
+
+const defaultData: FormData = {
+  remoteValidation: {
+    success: true
+  }
+};
+
 const AlertmanagerConfigEditor = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
   const tenant = useTenant(tenantId);
-  const formId = useForm({ type: "alertmanagerConfig", code: tenantId });
-  const formData = useFormData(formId);
+  const formId = useForm({
+    type: "alertmanagerConfig",
+    code: tenantId,
+    data: defaultData
+  });
+  const formState = useFormState(formId, defaultData) as Form<FormData>;
   const alertmanager = useAlertmanager(tenantId);
   const configRef = useRef<string>(alertmanager?.config || "");
   const [configValid, setConfigValid] = useState<boolean | null>(null);
@@ -155,6 +171,9 @@ const AlertmanagerConfigEditor = () => {
               >
                 publish
               </Button>
+              <CondRender unless={formState.data.remoteValidation.success}>
+                Validation Failed :-(
+              </CondRender>
             </Card>
           </Box>
         </Box>
