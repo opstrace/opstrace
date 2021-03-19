@@ -257,6 +257,8 @@ export function CortexResources(
     },
     auth_enabled: true,
     distributor: {
+      // When set to true, this allows for setting the ingester limit
+      // max_global_series_per_user
       shard_by_all_labels: true,
       pool: {
         health_check_ingesters: true
@@ -321,9 +323,24 @@ export function CortexResources(
       // delete old data from the corresponding cloud storage bucket? Should
       // this replace the bucket lifecycle-based method?
       compactor_blocks_retention_period: `${metricRetentionDays + 1}d`,
+      // Define the sample ingestion rate, enfored in the individual
+      // distributor. The idea is that this limit is applied locally, see
+      // "ingestion_rate_strategy" below.
       ingestion_rate: 100000, // default: 25000
+      // The default strategy is 'local', i.e. the effective limit can be
+      // determined by multiplying with the number of distributors at hand.
+      ingestion_rate_strategy: "local",
+      // Per-user allowed ingestion burst size (in number of samples).
       ingestion_burst_size: 200000, // default: 50000
-      max_series_per_user: 5000000, // The maximum number of active series per user, per ingester
+      // The maximum number of active series per user, across the cluster.
+      // Supported only if -distributor.shard-by-all-labels is true (which
+      // we set, above).
+      max_global_series_per_user: 10000000,
+      // The maximum number of active series per user, per ingester. As this
+      // conflicts with `max_global_series_per_user`, set this so that it hits
+      // in _later_ when ingesters are evenly loaded. Assume at least 3
+      // ingesters. That is, set this to max_global_series_per_user / 2
+      max_series_per_user: 5000000,
       accept_ha_samples: true,
       ha_cluster_label: "prometheus",
       ha_replica_label: "prometheus_replica",
