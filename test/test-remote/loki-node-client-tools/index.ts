@@ -137,14 +137,14 @@ export class LogStreamFragment {
     return this.payloadBytecount;
   }
 
-  public getEntries() {
+  public getEntries(): Array<LogStreamEntry> {
     // Return shallow copy so that mutation of the returned array does not have
     // side effects in here. However, if individual entries were to be mutated
     // this would take effect here, too.
     return [...this.entries];
   }
 
-  public addEntry(entry: LogStreamEntry) {
+  public addEntry(entry: LogStreamEntry): void {
     this.entries.push(entry);
     // Keep track of the size of the payload that was added. This might be
     // expensive, but don't make any premature performance assupmtions here.
@@ -153,13 +153,13 @@ export class LogStreamFragment {
     this.payloadBytecount += Buffer.from(entry.text, "utf8").length;
   }
 
-  public indexString(length: number) {
+  public indexString(length: number): string {
     // Return stringified and zero-padded index.
     const is: string = this.index.toString();
     return is.padStart(length, "0");
   }
 
-  public buildStatisticsAndDropData() {
+  public buildStatisticsAndDropData(): void {
     if (!this.serialized) {
       throw new Error("not yet serialized");
     }
