@@ -139,8 +139,8 @@ export class LogStreamFragment {
 
   One way to do that would be to return a byte size
   */
-  public payloadByteCount(): number {
-    return this.payloadBytecount;
+  public payloadByteCount(): bigint {
+    return BigInt(this.payloadBytecount);
   }
 
   public getEntries(): Array<LogStreamEntry> {
