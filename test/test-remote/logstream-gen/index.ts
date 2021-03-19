@@ -92,9 +92,9 @@ let CFG: CfgInterface;
 
 interface WriteStats {
   nEntriesSent: number;
-  nCharsSent: number;
+  nPayloadBytesSent: number;
   entriesSentPerSec: number;
-  megacharsSentPerSec: number;
+  megaPayloadBytesSentPerSec: number;
   durationSeconds: number;
 }
 
@@ -653,34 +653,35 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
 
   log.info("fragments POSTed in write phase: %s", nStreamFragmentsSent);
   const nEntriesSent = nStreamFragmentsSent * CFG.n_entries_per_stream_fragment;
-  let nCharsSent = nEntriesSent * CFG.n_chars_per_msg;
+  let nPayloadBytesSent = nEntriesSent * CFG.n_chars_per_msg;
 
   if (CFG.metrics_mode) {
     // Think: payload bytes sent, i.e. sample bytes excluding timestamp. In
     // Prometheus, a sample value is a double precision floating point number,
     // i.e. set this to the number of samples sent times 8 Bytes.
-    nCharsSent = nEntriesSent * 8;
+    nPayloadBytesSent = nEntriesSent * 8;
   }
 
-  const megacharsSent = nCharsSent / 10 ** 6; // int division ok?
-  const megacharsSentPerSec = megacharsSent / writeDurationSeconds;
+  const megaPayloadBytesSent = nPayloadBytesSent / 10 ** 6; // int division ok?
+  const megaPayloadBytesSentPerSec =
+    megaPayloadBytesSent / writeDurationSeconds;
 
   const stats: WriteStats = {
     nEntriesSent: nEntriesSent,
-    nCharsSent: nCharsSent,
+    nPayloadBytesSent: nPayloadBytesSent,
     entriesSentPerSec: nEntriesSent / writeDurationSeconds,
-    megacharsSentPerSec: megacharsSentPerSec,
+    megaPayloadBytesSentPerSec: megaPayloadBytesSentPerSec,
     durationSeconds: writeDurationSeconds
   };
 
   log.info(
-    "End of write phase. Entries sent: %s, Chars sent: %s million",
+    "End of write phase. Entries sent: %s, Payload bytes sent: %s million",
     nEntriesSent,
-    megacharsSent.toFixed(2)
+    megaPayloadBytesSent.toFixed(2)
   );
   log.info(
     "Log msg throughput (mean): %s million characters per second",
-    megacharsSentPerSec.toFixed(2)
+    megaPayloadBytesSentPerSec.toFixed(2)
   );
 
   for (const stream of streams) {
