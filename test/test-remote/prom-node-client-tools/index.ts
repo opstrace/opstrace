@@ -101,7 +101,7 @@ export class TimeseriesFragment {
     return this.samples.length * 8;
   }
 
-  public getSamples() {
+  public getSamples(): Array<TimeseriesSample> {
     // Return shallow copy so that mutation of the returned array does not have
     // side effects in here. However, if individual entries were to be mutated
     // this would take effect here, too.
@@ -109,24 +109,24 @@ export class TimeseriesFragment {
   }
 
   // quickndirty compat with LogStreamFragment
-  public getEntries() {
+  public getEntries(): Array<TimeseriesSample> {
     return this.getSamples();
   }
 
-  public addSample(entry: TimeseriesSample) {
+  public addSample(entry: TimeseriesSample): void {
     if (this.serialized) {
       throw new Error("cannot mutate TimeseriesFragment anymore");
     }
     this.samples.push(entry);
   }
 
-  public indexString(length: number) {
+  public indexString(length: number): string {
     // Return stringified and zero-padded index.
     const is: string = this.index.toString();
     return is.padStart(length, "0");
   }
 
-  public buildStatisticsAndDropData() {
+  public buildStatisticsAndDropData(): void {
     if (!this.serialized) {
       throw new Error("not yet serialized");
     }
