@@ -14,11 +14,26 @@
  * limitations under the License.
  */
 
-export interface Form<Data = {}> {
-  type: string;
-  code: string;
-  status: string;
-  data: Data;
-}
+import React from "react";
 
-export type FormRecords = Record<string, Form>;
+type CondRenderProps = {
+  when?: boolean;
+  unless?: boolean;
+  render?: Function;
+  content?: string | number;
+  children?: React.ReactNode;
+};
+
+export const CondRender = (props: CondRenderProps) => {
+  let shouldRender: boolean = false;
+
+  if (props.when === true || props.unless === false) shouldRender = true;
+
+  if (shouldRender) {
+    if (props.content) return props.content;
+    if (props.render) return props.render();
+    else if (props.children)
+      return <React.Fragment>{props.children}</React.Fragment>;
+    else return null;
+  } else return null;
+};

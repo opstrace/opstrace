@@ -149,7 +149,7 @@ function* updateAlertmanager(
         type: "UPDATE_FORM",
         payload: {
           id: action.payload.formId,
-          data: { cortexValidation: response.data.updateAlertmanager }
+          data: { remoteValidation: response.data.updateAlertmanager }
         }
       });
     }
