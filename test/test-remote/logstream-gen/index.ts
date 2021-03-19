@@ -656,7 +656,10 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   let nCharsSent = nEntriesSent * CFG.n_chars_per_msg;
 
   if (CFG.metrics_mode) {
-    nCharsSent = 0;
+    // Think: payload bytes sent, i.e. sample bytes excluding timestamp. In
+    // Prometheus, a sample value is a double precision floating point number,
+    // i.e. set this to the number of samples sent times 8 Bytes.
+    nCharsSent = nEntriesSent * 8;
   }
 
   const megacharsSent = nCharsSent / 10 ** 6; // int division ok?
