@@ -976,7 +976,10 @@ async function pushrequestPusher(
       COUNTER_STREAM_FRAGMENTS_PUSHED++;
       counter_fragments_pushed.inc();
       counter_log_entries_pushed.inc(CFG.n_entries_per_stream_fragment);
-      counter_log_message_bytes_pushed.inc(pr.fragment.payloadByteCount());
+      // Convert BigInt to Number and assume that the numbers are small enough.
+      counter_log_message_bytes_pushed.inc(
+        Number(pr.fragment.payloadByteCount())
+      );
       counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
       gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
     }
