@@ -33,13 +33,15 @@ import { createHttpTerminator } from "http-terminator";
 import {
   DummyStream,
   LogStreamFragmentPushRequest,
-  LogStreamLabelset
+  LogStreamLabelset,
+  DummyStreamFetchAndValidateOpts
 } from "../loki-node-client-tools";
 
 import {
   DummyTimeseries,
   TimeseriesFragment,
-  TimeseriesFragmentPushMessage
+  TimeseriesFragmentPushMessage,
+  DummyTimeseriesFetchAndValidateOpts
 } from "../prom-node-client-tools";
 
 import { LokiQueryResult } from "../testutils/logs";
@@ -729,17 +731,27 @@ async function unthrottledFetchAndValidate(
   stream: DummyStream | DummyTimeseries
 ) {
   const inspectEveryNthEntry = 200;
-  const headers: Record<string, string> = {};
-  if (BEARER_TOKEN) {
-    headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
+  // const headers: Record<string, string> = {};
+  // if (BEARER_TOKEN) {
+  //   headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
+  // }
+  if (CFG.metrics_mode) {
+    const opts: DummyTimeseriesFetchAndValidateOpts = {
+      querierBaseUrl: CFG.apibaseurl,
+      chunkSize: CFG.fetch_n_entries_per_query,
+      inspectEveryNthEntry: inspectEveryNthEntry,
+      //additionalHeaders: headers,
+      customHTTPGetFunc: httpGETRetryUntil200OrError
+    };
+    return await stream.fetchAndValidate(opts);
   }
-  return await stream.fetchAndValidate({
+  const opts: DummyStreamFetchAndValidateOpts = {
     querierBaseUrl: CFG.apibaseurl,
     chunkSize: CFG.fetch_n_entries_per_query,
     inspectEveryNthEntry: inspectEveryNthEntry,
-    additionalHeaders: headers, // only used by DummySeries.fetchAndValidate()
-    customQueryFunc: queryLokiWithRetryOrError // only ueed by DummyStream.fetchAndValidate: has custom header injection
-  });
+    customLokiQueryFunc: queryLokiWithRetryOrError // only used by DummyStream.fetchAndValidate: has custom header injection
+  };
+  return await stream.fetchAndValidate(opts);
 }
 
 async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
@@ -1163,20 +1175,23 @@ async function customPostWithRetryOrError(
 // therefore, retry a couple of times (no backoff for simplicity for now). this
 // retry loop is intended for transient TCP errors and transient HTTP errors
 // (5xx, also 429)
-async function _queryLokiRetryUntil200(
-  lokiQuerierBaseUrl: string,
-  queryParams: Record<string, string>
-) {
-  const qparms = new URLSearchParams(queryParams);
-
+async function httpGETRetryUntil200OrError(
+  url: string,
+  gotRequestOptions: any
+): Promise<GotResponse<string>> {
   const maxRetries = 10;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     setUptimeGauge();
 
     let response;
 
+    // If desired, decorate HTTP request with authentication token.
+    if (BEARER_TOKEN) {
+      gotRequestOptions.headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
+    }
+
     try {
-      response = await queryLoki(lokiQuerierBaseUrl, qparms);
+      response = await got(url, gotRequestOptions);
     } catch (e) {
       if (e instanceof got.RequestError) {
         // Note(JP): this code block is meant to handle only transient errors
@@ -1235,7 +1250,11 @@ async function _queryLokiRetryUntil200(
     log.info("Treat as transient problem, retry");
   }
   throw new Error(
-    `Failed to GET after ${maxRetries} attempts. Query params: ${queryParams}`
+    `Failed to GET after ${maxRetries} attempts. Request options: ${JSON.stringify(
+      gotRequestOptions,
+      null,
+      2
+    )}`
   );
 }
 
@@ -1248,18 +1267,26 @@ async function queryLokiWithRetryOrError(
 ): Promise<LokiQueryResult> {
   log.info("looker-specific query func");
 
-  // wrap _queryLokiRetryUntil200OrError() and inspect entry count.
+  // wrap httpGETRetryUntil200OrError() and inspect entry count.
   async function _queryAndCountEntries(
     lokiQuerierBaseUrl: string,
     queryParams: Record<string, string>
   ) {
-    // _queryLokiRetryUntil200OrError() retries internally upon transient
+    // httpGETRetryUntil200OrError() retries internally upon transient
     // problems. If no error this thrown then `response` represents a 200 HTTP
     // response.
-    const response = await _queryLokiRetryUntil200(
-      lokiQuerierBaseUrl,
-      queryParams
-    );
+
+    const url = `${CFG.apibaseurl}/loki/api/v1/query_range`;
+
+    const gotRequestOptions = {
+      retry: 0,
+      throwHttpErrors: false,
+      searchParams: new URLSearchParams(queryParams),
+      timeout: httpTimeoutSettings,
+      https: { rejectUnauthorized: false } // disable TLS server cert verification for now
+    };
+
+    const response = await httpGETRetryUntil200OrError(url, gotRequestOptions);
     const data = JSON.parse(response.body);
 
     // expect 1 stream with non-zero entries, maybe assert on that here.
@@ -1308,26 +1335,6 @@ async function queryLokiWithRetryOrError(
     `_queryAndCountEntries() failed ${maxRetries} times. ` +
       `stream: ${stream.uniqueName} chunkIndex: ${chunkIndex}`
   );
-}
-
-async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
-  const url = `${baseUrl}/loki/api/v1/query_range`;
-
-  // If desired, decorate HTTP request with authentication token.
-  const headers: Record<string, string> = {};
-  if (BEARER_TOKEN) {
-    headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
-  }
-
-  const options = {
-    retry: 0,
-    throwHttpErrors: false,
-    headers: headers,
-    searchParams: queryParams,
-    timeout: httpTimeoutSettings,
-    https: { rejectUnauthorized: false } // disable TLS server cert verification for now
-  };
-  return await got(url, options);
 }
 
 export function logHTTPResponseLight(

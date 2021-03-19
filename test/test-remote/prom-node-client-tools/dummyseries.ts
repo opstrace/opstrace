@@ -17,7 +17,7 @@
 import { strict as assert } from "assert";
 
 import { ZonedDateTime } from "@js-joda/core";
-import got from "got";
+import got, { Response as GotResponse } from "got";
 import Long from "long";
 
 import { logqlLabelString } from "../loki-node-client-tools";
@@ -49,12 +49,15 @@ export interface DummyTimeseriesOpts {
   n_samples_per_series_fragment: number;
 }
 
-interface FetchAndValidateOpts {
+export interface DummyTimeseriesFetchAndValidateOpts {
   querierBaseUrl: string;
+  additionalHeaders?: Record<string, string>;
   chunkSize?: number;
   inspectEveryNthEntry?: number | undefined;
-  customQueryFunc?: any;
-  additionalHeaders?: Record<string, string>;
+  customHTTPGetFunc?: (
+    url: string,
+    gotRequestOptions: any
+  ) => Promise<GotResponse<string>>;
 }
 
 export class DummyTimeseries {
@@ -276,20 +279,15 @@ export class DummyTimeseries {
 
   // Most of FetchAndValidateOpts is ignored, just here to make this func
   // signature match DummyStream.fetchAndValidate
-  public async fetchAndValidate(opts: FetchAndValidateOpts): Promise<number> {
+  public async fetchAndValidate(
+    opts: DummyTimeseriesFetchAndValidateOpts
+  ): Promise<number> {
     log.info("%s fetchAndValidate()", this);
-
-    const baseUrl = opts.querierBaseUrl;
-    const additionalHeaders = opts.additionalHeaders;
 
     let samplesValidated = 0;
     let fragmentsValidated = 0;
     for (const fragment of this.postedFragmentsSinceLastValidate) {
-      const validated = await this.fetchAndValidateFragment(
-        fragment,
-        baseUrl,
-        additionalHeaders
-      );
+      const validated = await this.fetchAndValidateFragment(fragment, opts);
       samplesValidated += validated;
       fragmentsValidated += 1;
 
@@ -346,22 +344,22 @@ export class DummyTimeseries {
 
   private async fetchAndValidateFragment(
     fragment: TimeseriesFragment,
-    baseUrl: string,
-    additionalHeaders?: Record<string, string>
+    opts: DummyTimeseriesFetchAndValidateOpts
   ): Promise<number> {
     // instant-query-range-vector-selector-validation-method
-    const url = `${baseUrl}/api/v1/query`;
+    const url = `${opts.querierBaseUrl}/api/v1/query`;
 
     const qparams = this.queryParamsForFragment(fragment);
     let headers: Record<string, string> = {};
-    if (additionalHeaders !== undefined) {
+    if (opts.additionalHeaders !== undefined) {
       headers = {
         ...headers,
-        ...additionalHeaders
+        ...opts.additionalHeaders
       };
     }
 
-    const options = {
+    const gotRequestOptions = {
+      retry: 0,
       throwHttpErrors: false,
       searchParams: qparams,
       headers: headers,
@@ -369,9 +367,19 @@ export class DummyTimeseries {
       https: { rejectUnauthorized: false } // disable TLS verification for now
     };
 
-    const response = await got(url, options);
-    if (response.statusCode != 200) logHTTPResponse(response);
+    let response: GotResponse<string>;
 
+    if (opts.customHTTPGetFunc !== undefined) {
+      response = await opts.customHTTPGetFunc(url, gotRequestOptions);
+    } else {
+      // Super simple GET request method w/o retrying.
+      response = await got(url, gotRequestOptions);
+      if (response.statusCode != 200) logHTTPResponse(response);
+    }
+
+    // In case of the simple request handler above, this response might
+    // represent an error response, and JSON-decoding might fail, or looking
+    // update data.result might fail. That's expected.
     const data = JSON.parse(response.body);
     const resultArray = data["data"]["result"];
 
