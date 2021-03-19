@@ -94,11 +94,19 @@ export class TimeseriesFragment {
     return this.samples.length;
   }
 
-  public payloadByteCount(): number {
-    // concept payload bytes, not including timestamp.
-    // For a Prometheus metric sample, the value is a double precision
-    // floating point number, i.e. 64 bit, i.e. 8 Bytes
-    return this.samples.length * 8;
+  /*
+  Return number of payload bytes, i.e. the sample values (timestamp is not
+  considered part of payload here.For a Prometheus metric sample, the value is
+  a double precision floating point number, i.e. 64 bit, i.e. 8 Bytes per
+  sample/etnry.
+  */
+  public payloadByteCount(): bigint {
+    if (this.stats !== undefined) {
+      return this.stats.sampleCount * BigInt(8);
+    }
+
+    log.info("NUMBER OF SAMPLES IN FRAGMENT: %s", this.samples.length);
+    return BigInt(this.samples.length) * BigInt(8);
   }
 
   public getSamples(): Array<TimeseriesSample> {
