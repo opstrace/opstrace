@@ -100,9 +100,9 @@ interface WriteStats {
 
 interface ReadStats {
   nEntriesRead: number;
-  nCharsRead: number;
+  nPayloadBytesRead: number;
   entriesReadPerSec: number;
-  megacharsReadPerSec: number;
+  megaPayloadBytesReadPerSec: number;
   durationSeconds: number;
 }
 
@@ -780,19 +780,20 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
   // TODO: build these stats on the fly during readout and expect numbers
   // to match write?
   //const nEntriesRead = STATS_WRITE.nEntriesSent;
-  let nCharsRead = nEntriesRead * CFG.n_chars_per_msg;
+  let nPayloadBytesRead = nEntriesRead * CFG.n_chars_per_msg;
 
   if (CFG.metrics_mode) {
-    nCharsRead = 0;
+    // 64 bit floating point, i.e. 8 bytes per sample
+    nPayloadBytesRead = nEntriesRead * 8;
   }
 
-  const megaCharsRead = nCharsRead / 10 ** 6;
+  const megaPayloadBytesRead = nPayloadBytesRead / 10 ** 6;
 
   const stats: ReadStats = {
     nEntriesRead: nEntriesRead,
-    nCharsRead: nCharsRead,
+    nPayloadBytesRead: nPayloadBytesRead,
     entriesReadPerSec: nEntriesRead / readDurationSeconds,
-    megacharsReadPerSec: megaCharsRead / readDurationSeconds,
+    megaPayloadBytesReadPerSec: megaPayloadBytesRead / readDurationSeconds,
     durationSeconds: readDurationSeconds
   };
   return stats;
