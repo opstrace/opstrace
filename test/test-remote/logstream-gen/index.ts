@@ -68,7 +68,7 @@ interface CfgInterface {
   max_concurrent_writes: number;
   max_concurrent_reads: number;
   logLevel: string;
-  lokiurl: string;
+  apibaseurl: string;
   invocation_id: string;
   log_start_time: string;
   log_time_increment_ns: number;
@@ -206,9 +206,9 @@ function parseCmdlineArgs() {
     description: "Looker test runner"
   });
 
-  parser.add_argument("lokiurl", {
-    help: "Loki API base URL",
-    type: "string"
+  parser.add_argument("apibaseurl", {
+    help: "Loki API base URL (Cortex API base URL in metrics mode)",
+    type: "str"
   });
 
   parser.add_argument("--log-level", {
@@ -634,7 +634,7 @@ async function performWriteReadCycle(
 async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   const fragmentsPushedBefore = COUNTER_STREAM_FRAGMENTS_PUSHED;
   const wt0 = mtime();
-  await postFragments(streams, CFG.lokiurl);
+  await postFragments(streams, CFG.apibaseurl);
 
   // A little summary about pushing all data.
   const writeDurationSeconds = mtimeDiffSeconds(wt0);
@@ -723,7 +723,7 @@ async function unthrottledFetchAndValidate(
     headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
   }
   return await stream.fetchAndValidate({
-    querierBaseUrl: CFG.lokiurl,
+    querierBaseUrl: CFG.apibaseurl,
     chunkSize: CFG.fetch_n_entries_per_query,
     inspectEveryNthEntry: inspectEveryNthEntry,
     additionalHeaders: headers, // only used by DummySeries.fetchAndValidate()
