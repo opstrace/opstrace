@@ -131,8 +131,11 @@ export class LogStreamFragment {
     this.stats = undefined;
   }
 
-  public entryCount() {
-    return this.entries.length;
+  public entryCount(): bigint {
+    if (this.stats !== undefined) {
+      return this.stats.entryCount;
+    }
+    return BigInt(this.entries.length);
   }
 
   /* Return the size of the payload data in this stream fragment.
