@@ -79,6 +79,12 @@ export class LogStreamEntry {
   }
 }
 
+interface LogStreamFragmentStats {
+  entryCount: bigint; // to stress that this is never fractional
+  timeOfFirstEntry: string;
+  timeOfLastEntry: string;
+}
+
 export class LogStreamFragment {
   /*
   A class that allows for building up a log stream fragment.
@@ -105,7 +111,7 @@ export class LogStreamFragment {
   public labels: LogStreamLabelset;
   public index: number;
   public parent: DummyStream | undefined;
-  public stats: unknown;
+  public stats: LogStreamFragmentStats | undefined;
 
   constructor(
     labels: LogStreamLabelset,
@@ -122,7 +128,7 @@ export class LogStreamFragment {
     this.index = index;
     this.parent = dummystream;
     this.serialized = false;
-    this.stats = {};
+    this.stats = undefined;
   }
 
   public entryCount() {
