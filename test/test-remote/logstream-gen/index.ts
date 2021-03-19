@@ -222,7 +222,7 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--metrics-mode", {
     help:
-      "dirty entry point into testing metrics (Cortex) instead of logs (Loki)",
+      "metrics mode (Cortex) instead of logs mode (Loki) -- metrics mode was added later in quick and dirty fashion",
     action: "store_true",
     default: false
   });
@@ -230,19 +230,21 @@ function parseCmdlineArgs() {
   // note: maybe rename to --n-streams, because concurrency is controlled
   // differently
   parser.add_argument("--n-concurrent-streams", {
-    help: "number of log streams to create per write/read cycle",
+    help:
+      "number of log streams to create per write/read cycle (or number of metric streams)",
     type: "int",
     required: true
   });
 
   parser.add_argument("--n-entries-per-stream-fragment", {
-    help: "number of log entries per log stream fragment",
+    help:
+      "number of log entries per log stream fragment (or number of metric samples per fragment)",
     type: "int",
     required: true
   });
 
   parser.add_argument("--n-chars-per-msg", {
-    help: "number of characters per log message",
+    help: "number of characters per log message (ignored in metrics mode)",
     type: "int",
     default: 100
   });
@@ -256,7 +258,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--log-time-increment-ns", {
     help:
-      "time difference in nanonseconds between adjacent log entries in a log stream (between log entry timestamps)",
+      "time difference in nanonseconds between adjacent log entries in a " +
+      "log stream (between log entry timestamps) (ignored in metrics mode)",
     type: "int",
     default: 1
   });
@@ -283,7 +286,8 @@ function parseCmdlineArgs() {
   });
 
   parser.add_argument("--compressability", {
-    help: "compressability characteristic of generated log messages",
+    help:
+      "compressability characteristic of generated log messages (ignored in metrics mode)",
     type: "str",
     choices: ["min", "max", "medium"],
     default: "min"
@@ -298,7 +302,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--change-streams-every-n-cycles", {
     help:
-      "Use the same log stream for N cycles, then create a new set of log streams (with unique label sets)",
+      "Use the same log stream for N cycles, then create a new set of " +
+      "log streams (with unique label sets)",
     type: "int",
     default: 1
   });
@@ -320,14 +325,16 @@ function parseCmdlineArgs() {
   const stopgroup = parser.add_mutually_exclusive_group({ required: true });
   stopgroup.add_argument("--stream-write-n-fragments", {
     help:
-      "within a write/read cycle, stop write (and enter read phase) when this many fragments were written for a log stream",
+      "within a write/read cycle, stop write (and enter read phase) when " +
+      "this many fragments were written for a log stream",
     type: "int",
     default: 0
   });
 
   stopgroup.add_argument("--stream-write-n-seconds", {
     help:
-      "within a write/read cycle, stop write (and enter read phase) after having written for approx. that many seconds",
+      "within a write/read cycle, stop write (and enter read phase) after " +
+      "having written for approx. that many seconds",
     type: "int",
     default: 0
   });
