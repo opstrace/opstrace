@@ -16,4 +16,16 @@
 module.exports = {
   // react-app is a good baseline to lint react code.
   extends: ["react-app"]
+  // NTW: leaving this here commented out for future reference. (it always takes me ages to find this via google)
+  // rules: {
+  //   // https://eslint.org/docs/rules/no-unused-vars#argsignorepattern
+  //   "no-unused-vars": [
+  //     "error",
+  //     { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
+  //   ],
+  //   "@typescript-eslint/no-unused-vars": [
+  //     "error",
+  //     { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
+  //   ]
+  // }
 };
