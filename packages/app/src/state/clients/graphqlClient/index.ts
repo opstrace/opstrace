@@ -15,8 +15,8 @@
  */
 
 import { GraphQLClient } from "graphql-request";
-import { getSdk } from "../../graphql-api-types";
-export * from "../../graphql-api-types";
+import { getSdk } from "state/graphql-api-types";
+export * from "state/graphql-api-types";
 
 const endpoint =
   process.env.GRAPHQL_ENDPOINT ||
