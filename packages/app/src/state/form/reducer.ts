@@ -39,7 +39,7 @@ export const reducer = createReducer<FormState, FormActions>(FormInitialState)
       else
         return mergePath(
           [type, code],
-          newForm(type, code, status, data),
+          newForm(type, code, status, data || {}),
           state
         ) as FormState;
     }

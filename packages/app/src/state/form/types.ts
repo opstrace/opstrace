@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-export interface Form<Data = {}> {
+export interface Form<DataType extends {} = {}> {
   type: string;
   code: string;
   status: string;
-  data: Data;
+  data: DataType;
 }
 
-export type FormRecords = Record<string, Form>;
+export type FormRecords<DataType extends {} = {}> = Record<
+  string,
+  Form<DataType>
+>;

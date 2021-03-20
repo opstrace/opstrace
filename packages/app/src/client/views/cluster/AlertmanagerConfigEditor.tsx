@@ -24,7 +24,6 @@ import * as yamlParser from "js-yaml";
 import { YamlEditor } from "client/components/Editor";
 
 import { useForm, useFormState } from "state/form/hooks";
-import { Form } from "state/form/types";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
 
@@ -66,10 +65,10 @@ const AlertmanagerConfigEditor = () => {
     code: tenantId,
     data: defaultData
   });
-  const formState = useFormState(formId, defaultData) as Form<FormData>;
+  const formState = useFormState<FormData>(formId, defaultData);
   const alertmanager = useAlertmanager(tenantId);
   const configRef = useRef<string>(alertmanager?.config || "");
-  const [, setConfigValid] = useState<boolean | null>(null);
+  const [configValid, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
   const handleConfigChange = useCallback((newConfig, filename) => {
@@ -131,7 +130,7 @@ const AlertmanagerConfigEditor = () => {
     }
   }, [tenant?.name, alertmanager?.header, formId, dispatch]);
 
-  if (!tenant)
+  if (!tenant || !formState)
     return (
       <Layout sidebar={SideBar}>
         <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
@@ -168,7 +167,7 @@ const AlertmanagerConfigEditor = () => {
               <Button
                 variant="contained"
                 state="primary"
-                disabled={formState.status !== "active"}
+                disabled={!configValid || formState.status !== "active"}
                 onClick={handleSave}
               >
                 publish

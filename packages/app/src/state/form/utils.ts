@@ -32,11 +32,11 @@ export const expandFormId = (id: string): { type: string; code: string } => {
   return { type, code };
 };
 
-export const newForm = (
+export const newForm = <DataType extends {} = {}>(
   type: string,
   code: string,
   status: string = "active",
-  data: object = {}
+  data: DataType
 ) => ({
   type,
   code,

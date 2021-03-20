@@ -23,21 +23,21 @@ import { registerForm, unregisterForm } from "state/form/actions";
 import { generateFormId, expandFormId, newForm } from "state/form/utils";
 import { Form } from "state/form/types";
 
-type formProps = {
+type formProps<DataType extends {} = {}> = {
   type: string;
   code?: string;
   status?: string;
-  data?: object;
+  data?: DataType;
   unregisterOnUnmount?: boolean;
 };
 
-const useForm = ({
+const useForm = <DataType extends {} = {}>({
   type,
   code,
   status,
   data,
   unregisterOnUnmount
-}: formProps) => {
+}: formProps<DataType>) => {
   const dispatch = useDispatch();
   const id = useMemo(() => generateFormId(type, code), [type, code]);
 
@@ -51,7 +51,7 @@ const useForm = ({
   return id;
 };
 
-const selectForm = (
+const selectForm = <DataType extends {}>(
   {
     type,
     code
@@ -59,24 +59,26 @@ const selectForm = (
     type: string;
     code: string;
   },
-  defaultData?: {}
+  defaultData?: DataType
 ) =>
   createSelector(
     () => type,
     () => code,
     (state: State) => state.form,
     (type, code, formState) => {
-      let form = path<Form>([type, code])(formState);
+      let form = path<Form<DataType>>([type, code])(formState);
 
       if (!form && defaultData)
-        form = newForm(type, code, "unknown", defaultData);
+        form = newForm<DataType>(type, code, "unknown", defaultData);
 
       return form;
     }
   );
 
-const useFormState = (id: string, defaultData?: {}) =>
-  useSelector(selectForm(expandFormId(id), defaultData));
+const useFormState = <DataType extends {} = {}>(
+  id: string,
+  defaultData?: DataType
+) => useSelector(selectForm<DataType>(expandFormId(id), defaultData));
 
 export default useForm;
 export { useForm, useFormState };
