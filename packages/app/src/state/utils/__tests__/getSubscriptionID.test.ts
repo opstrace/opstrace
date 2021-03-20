@@ -24,5 +24,5 @@ afterEach(() => {
 });
 
 test("getSubscriptionID returns correct value", () => {
-  expect(getSubscriptionID()).toEqual(120000);
+  expect(getSubscriptionID()).toEqual(12000000);
 });
