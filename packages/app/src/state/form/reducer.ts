@@ -56,8 +56,9 @@ export const reducer = createReducer<FormState, FormActions>(FormInitialState)
     (state, action): FormState => {
       const { id, status } = action.payload;
       const { type, code } = expandFormId(id);
-      if (hasPath([type, code])(state)) return state;
-      else return mergePath([type, code], { status }, state) as FormState;
+      if (hasPath([type, code])(state))
+        return mergePath([type, code], { status }, state) as FormState;
+      else return state;
     }
   )
   .handleAction(
