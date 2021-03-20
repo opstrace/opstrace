@@ -30,6 +30,8 @@ import { updateAlertmanager } from "state/tenant/actions";
 
 import SideBar from "./Sidebar";
 
+import { AlertmanagerUpdateResponse } from "state/graphql-api-types";
+
 import Layout from "client/layout/MainContent";
 import Skeleton from "@material-ui/lab/Skeleton";
 import { Box } from "client/components/Box";
@@ -47,7 +49,7 @@ type validationCheckOptions = {
 };
 
 type FormData = {
-  remoteValidation: { success?: boolean };
+  remoteValidation: AlertmanagerUpdateResponse;
 };
 
 const defaultData: FormData = {
@@ -67,13 +69,13 @@ const AlertmanagerConfigEditor = () => {
   const formState = useFormState(formId, defaultData) as Form<FormData>;
   const alertmanager = useAlertmanager(tenantId);
   const configRef = useRef<string>(alertmanager?.config || "");
-  const [configValid, setConfigValid] = useState<boolean | null>(null);
+  const [, setConfigValid] = useState<boolean | null>(null);
   const dispatch = useDispatch();
 
   const handleConfigChange = useCallback((newConfig, filename) => {
     const validationCheck: (
-      filename: string,
-      options?: validationCheckOptions
+      _filename: string,
+      _options?: validationCheckOptions
     ) => void = (filename, options) => {
       const markers = options?.useModelMarkers
         ? editor.getModelMarkers({
@@ -89,10 +91,10 @@ const AlertmanagerConfigEditor = () => {
 
           alertmanagerConfigSchema
             .validate(parsedData, { strict: true })
-            .then((value: object) => {
+            .then((_value: object) => {
               setConfigValid(true);
             })
-            .catch((err: { name: string; errors: string[] }) => {
+            .catch((_err: { name: string; errors: string[] }) => {
               setConfigValid(false);
             });
         } catch (e) {
@@ -166,19 +168,32 @@ const AlertmanagerConfigEditor = () => {
               <Button
                 variant="contained"
                 state="primary"
-                disabled={!configValid}
+                disabled={formState.status !== "active"}
                 onClick={handleSave}
               >
                 publish
               </Button>
-              <CondRender unless={formState.data.remoteValidation.success}>
-                Validation Failed :-(
-              </CondRender>
+              <ErrorPanel response={formState.data.remoteValidation} />
             </Card>
           </Box>
         </Box>
       </Layout>
     );
 };
+
+type ErrorPanelProps = {
+  response: AlertmanagerUpdateResponse;
+};
+
+const ErrorPanel = ({ response }: ErrorPanelProps) => (
+  <CondRender unless={response.success}>
+    <CardHeader
+      titleTypographyProps={{ variant: "h6" }}
+      title="Error: Service side validation failed"
+    />
+
+    <CardContent>{response.error_raw_response}</CardContent>
+  </CondRender>
+);
 
 export default AlertmanagerConfigEditor;

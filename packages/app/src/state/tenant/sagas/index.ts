@@ -132,6 +132,16 @@ function* updateAlertmanager(
   action: ReturnType<typeof actions.updateAlertmanager>
 ) {
   try {
+    if (action.payload.formId) {
+      yield put({
+        type: "UPDATE_FORM_STATUS",
+        payload: {
+          id: action.payload.formId,
+          status: "validating"
+        }
+      });
+    }
+
     const config = `${
       action.payload.header
     }alertmanager_config: |\n  ${action.payload.config.replace(
@@ -149,6 +159,7 @@ function* updateAlertmanager(
         type: "UPDATE_FORM",
         payload: {
           id: action.payload.formId,
+          status: "active",
           data: { remoteValidation: response.data.updateAlertmanager }
         }
       });
