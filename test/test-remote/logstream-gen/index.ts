@@ -1187,6 +1187,9 @@ async function httpGETRetryUntil200OrError(
 
     // If desired, decorate HTTP request with authentication token.
     if (BEARER_TOKEN) {
+      if (gotRequestOptions.headers === undefined) {
+        gotRequestOptions.headers = {};
+      }
       gotRequestOptions.headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
     }
 
