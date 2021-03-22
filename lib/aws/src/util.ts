@@ -46,11 +46,20 @@ function getAWSRegion() {
 // `AWS.config` *is* "the global configuration object singleton instance", see
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS.html#config-property
 
+function rndFloatFromInterval(min: number, max: number) {
+  // half-closed: [min, max)
+  return Math.random() * (max - min) + min;
+}
+
 AWS.config.update({
   httpOptions: {
     // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#httpOptions-property
-    // milliseconds
-    connectTimeout: 4000,
+    // TCP connect() timeout in milliseconds. Trade-off: 1) for good UX keep this
+    // small to keep user informed about progress, and also to actually have a
+    // certain rate of retrying which sometimes resolves network path hiccups.
+    // 2) when networks are super loaded and slow waiting for a long time might
+    // lead to success. Between (1) and (2) stay below 10 seconds.
+    connectTimeout: 6000,
     // Documented with "milliseconds of inactivity on the socket". That is,
     // this cannot be used to define a guaranteed upper limit for the duration
     // of an HTTP request/response cycle (that's good, though, just important)
@@ -62,18 +71,28 @@ AWS.config.update({
     customBackoff: function (retryCount: number, err: Error | undefined) {
       // Return the amount of time to delay, in milliseconds. Custom
       // implementation, primary reason: use this to log transient errors.
-      // Secondary reason: use a really simple retry strategy for starters.
-      // Assume that HTTP requests are fired off in the context of micro tasks
-      // which retry "forever" anyway.
+      // Secondary reason: use a custom and reasonably simple retry delay calc
+      // strategy for starters. Assume that HTTP requests are fired off in the
+      // context of micro tasks which retry "forever", and otherwise apply a
+      // global timeout -- i.e, implement a 'low' upper bound.
+
+      // simple jitter: smear out, between factor 1 and 2.
+      let waitSec = rndFloatFromInterval(1.0, 2.0) * 1.6 ** retryCount;
+
+      // Implement upper bond.
+      if (waitSec > 30) {
+        waitSec = 30;
+      }
 
       if (!err) {
         // Code path allows this, but this happens rarely or never, check old
         // logs.
         log.debug(
-          "aws-sdk-js request failed (attempt %s): no err information",
-          retryCount
+          "aws-sdk-js request failed (attempt %s): no err information (retry in %s seconds)",
+          retryCount,
+          waitSec.toFixed(2)
         );
-        return 3000;
+        return waitSec * 1000;
       }
 
       //@ts-ignore: .code is sometimes set :)
@@ -85,32 +104,34 @@ AWS.config.update({
         // timeout (when the HTTP request was sent, but the response didn't
         // arrive in a timely fashion; sadly also a misleading error message:
         // "Connection timed out after 30000ms"
-        const waitSec = 3 ** retryCount;
+
         log.info(
           "AWS API request failed (attempt %s): %s (retry in %s seconds)",
           retryCount,
           err.message,
-          waitSec
+          waitSec.toFixed(2)
         );
 
         return waitSec * 1000;
       }
 
+      // Ideally we'd log the request URL and method. The AWS SDK throws away
+      // the request information when constructing the error object here:
+      // https://github.com/aws/aws-sdk-js/blob/909cfe3dad38a21e3a4236d7d2cfa86a81681520/lib/util.js#L904
+
       // All other cases: might sadly be non-retryable errors, also see
       // https://github.com/opstrace/opstrace/issues/66
       log.debug(
-        "aws-sdk-js request failed (attempt %s): %s: %s (retryable, according to sdk: %s)",
+        "aws-sdk-js request failed (attempt %s): %s: %s (retryable, according to sdk: %s), retry in %s seconds",
         retryCount,
         err.name,
         err.message,
         //@ts-ignore: we want to log that also if undefined
-        err.retryable
+        err.retryable,
+        waitSec.toFixed(2)
       );
 
-      if (retryCount < 2) {
-        return 1000;
-      }
-      return 3000;
+      return waitSec * 1000;
     }
   }
 });
