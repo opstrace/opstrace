@@ -18,9 +18,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { findIndex, propEq } from "ramda";
 
 import useTenantList from "state/tenant/hooks/useTenantList";
-// import { usePickerService } from "client/services/Picker";
 
 import { Tenant } from "state/tenant/types";
+
 import TenantPicker from "client/views/tenant/TenantPicker";
 // import AddTenantDialog from "client/views/tenant/AddTenantDialog";
 // import DeleteTenantDialog from "client/views/tenant/DeleteTenantDialog";
@@ -35,7 +35,6 @@ type TenantPanelProps = {
 export const TenantPanel = (props: TenantPanelProps) => {
   const { active, defaultId, onSelect } = props;
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
-  // const { activatePickerWithText } = usePickerService();
   const tenants = useTenantList();
 
   useEffect(() => {
@@ -55,16 +54,6 @@ export const TenantPanel = (props: TenantPanelProps) => {
     },
     [onSelect]
   );
-
-  // const addTenant = useCallback(() => {
-  //   activatePickerWithText("add tenant: ");
-  // }, [activatePickerWithText]);
-
-  // const tenantActions = (
-  //   <IconButton size="small" onClick={addTenant}>
-  //     <AddIcon />
-  //   </IconButton>
-  // );
 
   return (
     <>
