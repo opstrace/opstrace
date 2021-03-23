@@ -15,43 +15,52 @@
  */
 
 import React from "react";
+import { useDispatch } from "react-redux";
 
-import { PickerOption, usePickerService } from "client/services/Picker";
+import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
-import { useHistory } from "react-router-dom";
-import useUserList from "state/user/hooks/useUserList";
-import { User } from "state/user/types";
 
-export const userToPickerOption = (user: User): PickerOption => ({
-  text: user.email,
-  id: user.id
-});
+import { addTenant } from "state/tenant/actions";
 
-const UserPicker = () => {
-  const history = useHistory();
-  const users = useUserList();
+import { subdomainValidator } from "client/utils/regex";
+
+const AddTenantPicker = () => {
+  const dispatch = useDispatch();
 
   const { activatePickerWithText } = usePickerService(
     {
-      activationPrefix: "user:",
-      options: users ? users.map(userToPickerOption) : [],
-      onSelected: option => {
-        history.push(`/cluster/users/${option.id}`);
+      title: "Enter tenant name",
+      activationPrefix: "add tenant:",
+      disableFilter: true,
+      options: [
+        {
+          id: "yes",
+          text: `add`
+        },
+        {
+          id: "no",
+          text: "cancel"
+        }
+      ],
+      onSelected: (option, tenant) => {
+        if (option.id === "yes" && tenant && subdomainValidator.test(tenant)) {
+          dispatch(addTenant(tenant));
+        }
       }
     },
-    [users, history]
+    []
   );
 
   useCommandService({
-    id: "select-user-picker",
-    description: "Select User",
+    id: "add-tenant-picker",
+    description: "Add Tenant",
     handler: e => {
       e.keyboardEvent?.preventDefault();
-      activatePickerWithText("user: ");
+      activatePickerWithText("add tenant: ");
     }
   });
 
   return null;
 };
 
-export default React.memo(UserPicker);
+export default React.memo(AddTenantPicker);

@@ -15,11 +15,11 @@
  */
 
 import React from "react";
+import { useDispatch } from "react-redux";
 
 import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
 import { addUser } from "state/user/actions";
-import { useDispatch } from "react-redux";
 
 // eslint-disable-next-line no-useless-escape
 const emailValidator = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;

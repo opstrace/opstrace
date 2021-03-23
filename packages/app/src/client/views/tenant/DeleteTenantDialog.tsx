@@ -15,23 +15,32 @@
  */
 
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 
-import useUserList from "state/user/hooks/useUserList";
-import { deleteUser } from "state/user/actions";
+import useTenantList from "state/tenant/hooks/useTenantList";
 import { usePickerService, PickerOption } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
-import { useDispatch } from "react-redux";
-import { userToPickerOption } from "./UserPicker";
 
-const DeleteUserPicker = () => {
-  const users = useUserList();
-  const [user, setSelectedUser] = useState<PickerOption | null>();
+import { deleteTenant } from "state/tenant/actions";
+
+import { Tenant } from "state/tenant/types";
+
+function tenantToPickerOption(tenant: Tenant): PickerOption {
+  return {
+    text: tenant.name,
+    id: tenant.name
+  };
+}
+
+const DeleteTenantPicker = () => {
+  const tenants = useTenantList();
+  const [name, setSelectedName] = useState<string>("");
   const dispatch = useDispatch();
 
   const { activatePickerWithText } = usePickerService(
     {
-      title: `Delete ${user?.text}?`,
-      activationPrefix: "delete user?:",
+      title: `Delete ${name}?`,
+      activationPrefix: "delete tenant?:",
       disableFilter: true,
       disableInput: true,
       options: [
@@ -45,39 +54,41 @@ const DeleteUserPicker = () => {
         }
       ],
       onSelected: option => {
-        if (option.id === "yes" && user) dispatch(deleteUser(user.id));
+        if (option.id === "yes" && name) {
+          dispatch(deleteTenant(name));
+        }
       }
     },
-    [user]
+    [name]
   );
 
   usePickerService(
     {
-      title: "Enter user's email",
-      activationPrefix: "delete user:",
-      options: users ? users.map(userToPickerOption) : [],
+      title: "Enter tenant name",
+      activationPrefix: "delete tenant:",
+      options: tenants ? tenants.map(tenantToPickerOption) : [],
       onSelected: option => {
-        setSelectedUser(option);
-        activatePickerWithText("delete user?: ");
+        setSelectedName(option.id);
+        activatePickerWithText("delete tenant?: ");
       }
     },
-    [users, activatePickerWithText]
+    [tenants, activatePickerWithText]
   );
 
   useCommandService(
     {
-      id: "delete-user-picker",
-      description: "Delete User",
-      disabled: users.length < 2,
+      id: "delete-tenant-picker",
+      description: "Delete Tenant",
+      disabled: tenants.length < 2,
       handler: e => {
         e.keyboardEvent?.preventDefault();
-        activatePickerWithText("delete user: ");
+        activatePickerWithText("delete tenant: ");
       }
     },
-    [users.length]
+    [tenants.length]
   );
 
   return null;
 };
 
-export default React.memo(DeleteUserPicker);
+export default React.memo(DeleteTenantPicker);

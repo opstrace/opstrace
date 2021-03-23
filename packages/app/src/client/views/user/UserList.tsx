@@ -15,11 +15,13 @@
  */
 
 import React, { useCallback } from "react";
+
+import { Users, User } from "state/user/types";
+
 import { ListItemAvatar } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 
 import { List, ButtonListItem, ListItemText } from "client/components/List";
-import { Users, User } from "state/user/types";
 
 export type UserListProps = {
   selectedUserIndex: number;

@@ -15,24 +15,23 @@
  */
 
 import React, { useMemo } from "react";
-import { useParams } from "react-router-dom";
-import Skeleton from "@material-ui/lab/Skeleton";
+import { useHistory, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { Box } from "client/components/Box";
-import Attribute from "client/components/Attribute";
+import useTenantList from "state/tenant/hooks/useTenantList";
+import { usePickerService } from "client/services/Picker";
 
 import { deleteTenant } from "state/tenant/actions";
 
-import Layout from "client/layout/MainContent";
-import Typography from "client/components/Typography/Typography";
-import SideBar from "./Sidebar";
+import SideBar from "client/views/cluster/Sidebar";
 
+import Skeleton from "@material-ui/lab/Skeleton";
+import Layout from "client/layout/MainContent";
+import { Box } from "client/components/Box";
+import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
-import { usePickerService } from "client/services/Picker";
-import { useHistory } from "react-router-dom";
-import useTenantList from "state/tenant/hooks/useTenantList";
+import Typography from "client/components/Typography/Typography";
 import { ExternalLink } from "client/components/Link";
 
 const TenantDetail = () => {
