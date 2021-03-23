@@ -15,11 +15,13 @@
  */
 
 import React, { useCallback } from "react";
+
+import { Tenants, Tenant } from "state/tenant/types";
+
 import { ListItemAvatar } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 
 import { List, ButtonListItem, ListItemText } from "client/components/List";
-import { Tenants, Tenant } from "state/tenant/types";
 
 export type TenantListProps = {
   selectedTenantIndex: number;

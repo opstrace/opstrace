@@ -16,24 +16,25 @@
 
 import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import Skeleton from "@material-ui/lab/Skeleton";
-import Avatar from "@material-ui/core/Avatar";
 import { useDispatch } from "react-redux";
 
-import { Box } from "client/components/Box";
-import Attribute from "client/components/Attribute";
+import { usePickerService } from "client/services/Picker";
+import { useCommandService } from "client/services/Command";
+import useCurrentUser from "state/user/hooks/useCurrentUser";
 
 import { deleteUser } from "state/user/actions";
 
 import useUserList from "state/user/hooks/useUserList";
 import Layout from "client/layout/MainContent";
-import SideBar from "./Sidebar";
+import SideBar from "client/views/cluster/Sidebar";
+
+import Skeleton from "@material-ui/lab/Skeleton";
+import Avatar from "@material-ui/core/Avatar";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
-import { usePickerService } from "client/services/Picker";
-import { useCommandService } from "client/services/Command";
-import useCurrentUser from "state/user/hooks/useCurrentUser";
+import { Box } from "client/components/Box";
+import Attribute from "client/components/Attribute";
 
 const UserDetail = () => {
   const params = useParams<{ id: string }>();

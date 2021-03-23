@@ -15,50 +15,47 @@
  */
 
 import React from "react";
+import { useHistory } from "react-router-dom";
 
-import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
-import { addTenant } from "state/tenant/actions";
-import { useDispatch } from "react-redux";
-import { subdomainValidator } from "client/utils/regex";
+import useTenantList from "state/tenant/hooks/useTenantList";
 
-const AddTenantPicker = () => {
-  const dispatch = useDispatch();
+import { Tenant } from "state/tenant/types";
+
+import { PickerOption, usePickerService } from "client/services/Picker";
+
+function tenantToPickerOption(tenant: Tenant): PickerOption {
+  return {
+    text: tenant.name,
+    id: tenant.name
+  };
+}
+
+const TenantPicker = () => {
+  const history = useHistory();
+  const tenants = useTenantList();
 
   const { activatePickerWithText } = usePickerService(
     {
-      title: "Enter tenant name",
-      activationPrefix: "add tenant:",
-      disableFilter: true,
-      options: [
-        {
-          id: "yes",
-          text: `add`
-        },
-        {
-          id: "no",
-          text: "cancel"
-        }
-      ],
-      onSelected: (option, tenant) => {
-        if (option.id === "yes" && tenant && subdomainValidator.test(tenant)) {
-          dispatch(addTenant(tenant));
-        }
+      activationPrefix: "tenant:",
+      options: tenants ? tenants.map(tenantToPickerOption) : [],
+      onSelected: option => {
+        history.push(`/cluster/tenants/${option.id}`);
       }
     },
-    []
+    [tenants, history]
   );
 
   useCommandService({
-    id: "add-tenant-picker",
-    description: "Add Tenant",
+    id: "select-tenant-picker",
+    description: "Select Tenant",
     handler: e => {
       e.keyboardEvent?.preventDefault();
-      activatePickerWithText("add tenant: ");
+      activatePickerWithText("tenant: ");
     }
   });
 
   return null;
 };
 
-export default React.memo(AddTenantPicker);
+export default React.memo(TenantPicker);

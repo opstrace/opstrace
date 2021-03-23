@@ -16,18 +16,18 @@
 
 import React, { useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { useDispatch } from "state/provider";
+import { useDispatch } from "react-redux";
 import { debounce } from "lodash";
-
-import { editor } from "monaco-editor/esm/vs/editor/editor.api";
-import * as yamlParser from "js-yaml";
-import { YamlEditor } from "client/components/Editor";
 
 import { useForm, useFormState } from "state/form/hooks";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
 
-import SideBar from "./Sidebar";
+import { editor } from "monaco-editor/esm/vs/editor/editor.api";
+import * as yamlParser from "js-yaml";
+import { YamlEditor } from "client/components/Editor";
+
+import SideBar from "client/views/cluster/Sidebar";
 
 import { AlertmanagerUpdateResponse } from "state/graphql-api-types";
 

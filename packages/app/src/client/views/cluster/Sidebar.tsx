@@ -25,14 +25,14 @@ import { usePickerService } from "client/services/Picker";
 import { SideBar, SideBarContainer } from "client/components/SideBar";
 import { User } from "state/user/types";
 import { Tenant } from "state/tenant/types";
-import UserPicker from "./UserPicker";
-import AddUserDialog from "./AddUserDialog";
-import DeleteUserDialog from "./DeleteUserDialog";
-import TenantPicker from "./TenantPicker";
-// import AddTenantDialog from "./AddTenantDialog";
-// import DeleteTenantDialog from "./DeleteTenantDialog";
-import UserList from "./UserList";
-import TenantList from "./TenantList";
+import UserPicker from "client/views/user/UserPicker";
+import AddUserDialog from "client/views/user/AddUserDialog";
+import DeleteUserDialog from "client/views/user/DeleteUserDialog";
+import TenantPicker from "client/views/tenant/TenantPicker";
+// import AddTenantDialog from "client/views/tenant/AddTenantDialog";
+// import DeleteTenantDialog from "client/views/tenant/DeleteTenantDialog";
+import UserList from "client/views/user/UserList";
+import TenantList from "client/views/tenant/TenantList";
 
 const ClusterSidebar = () => {
   const [selectedUserIndex, setSelectedUserIndex] = useState<number>(-1);
