@@ -34,25 +34,26 @@ type UserPanelProps = {
 };
 
 export const UserPanel = (props: UserPanelProps) => {
+  const { active, defaultId, onSelect } = props;
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const users = useUserList();
 
   useEffect(() => {
-    if (props.active && props.defaultId) {
-      const index = findIndex(propEq("id", props.defaultId))(users);
+    if (active && defaultId) {
+      const index = findIndex(propEq("id", defaultId))(users);
       if (index !== -1) setSelectedIndex(index);
-      else if (props.onSelect && users[0]) {
-        props.onSelect(users[0], 0);
+      else if (onSelect && users[0]) {
+        onSelect(users[0], 0);
       }
     }
-  }, [props.active, props.defaultId]);
+  }, [users, active, defaultId, onSelect]);
 
-  const onSelect = useCallback(
+  const selectCallback = useCallback(
     (user: User, index: number) => {
       setSelectedIndex(index);
-      if (props.onSelect) props.onSelect(user, index);
+      if (onSelect) onSelect(user, index);
     },
-    [props.onSelect]
+    [onSelect]
   );
 
   return (
@@ -62,7 +63,7 @@ export const UserPanel = (props: UserPanelProps) => {
       <DeleteUserDialog />
       <UserList
         selectedIndex={selectedIndex}
-        onSelect={onSelect}
+        onSelect={selectCallback}
         users={users}
       />
     </>
