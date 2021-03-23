@@ -322,7 +322,7 @@ export function CortexResources(
       // on the safe side. Note(JP): should this be the primary mechanism to
       // delete old data from the corresponding cloud storage bucket? Should
       // this replace the bucket lifecycle-based method?
-      compactor_blocks_retention_period: `${metricRetentionDays + 1}d`,
+      compactor_blocks_retention_period: `${(metricRetentionDays + 1) * 24}h`,
       // Define the sample ingestion rate, enfored in the individual
       // distributor. The idea is that this limit is applied locally, see
       // "ingestion_rate_strategy" below.
