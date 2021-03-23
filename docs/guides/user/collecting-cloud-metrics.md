@@ -1,7 +1,7 @@
 # Cloud Metrics
 
 Prometheus supports a wide range of exporters for getting metrics out of other systems and into Prometheus.
-We have recently added support for adding exporters for AWS CloudWatch and GCP Stackdriver directly into Opstrace.
+This guide describes how to configure managed exporters for AWS CloudWatch and GCP Stackdriver metrics within Opstrace.
 
 This functionality allows you to collect metrics from your AWS and/or GCP accounts into a single location.
 For example you can keep track of S3 disk usage, GKS node size, and ELB throughput.
@@ -188,8 +188,6 @@ Each credential within a tenant has a unique name.
 Returns credential information for all credentials configured for the tenant.
 Each entry includes credential metadata, while the credential content is not included.
 
-##### Example
-
 ```bash
 curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://me.opstrace.io/api/v1/credentials
 ```
@@ -198,8 +196,6 @@ curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://me.opstra
 
 Returns credential information for a single named credential.
 The credential content is not included.
-
-##### Example
 
 ```bash
 curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://me.opstrace.io/api/v1/credentials/foo
@@ -212,8 +208,6 @@ If a credential already exists then this will update that credential, otherwise 
 Any exporters referencing the credential will be restarted automatically to receive the change.
 
 Credential updates may not change the type of the credential, instead it must be deleted and recreated with the new type, so that any exporters referencing the credential are also recreated.
-
-##### Example
 
 ```bash
 echo '
@@ -235,8 +229,6 @@ value: |-
 Deletes the credential, making it no longer available to exporters.
 Deletion will fail if the credential is currently in use by one or more exporters.
 
-##### Example
-
 ```bash
 curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" -XDELETE https://me.opstrace.io/api/v1/credentials/foo
 ```
@@ -253,8 +245,6 @@ Each exporter within a tenant has a unique name.
 Returns a JSON list of exporter information for all exporters configured for the tenant.
 Each entry in the response includes the full exporter configuration.
 
-##### Example
-
 ```bash
 curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://me.opstrace.io/api/v1/exporters
 ```
@@ -262,8 +252,6 @@ curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://me.opstra
 #### Get exporter details
 
 Returns the exporter configuration for a single named exporter.
-
-##### Example
 
 ```bash
 curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://me.opstrace.io/api/v1/exporters/foo
@@ -274,8 +262,6 @@ curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://me.opstra
 Configures one or more exporters at a time.
 If an exporter already exists then this will update that exporter, otherwise it will be inserted.
 The query will fail if the referenced credential names do not exist or if the referenced credential’s type is incompatible with the exporter.
-
-##### Example
 
 ```bash
 echo '
@@ -302,9 +288,8 @@ config:
 #### Delete exporter
 
 Deletes the exporter, tearing it down and ending the export of the configured metrics.
-Any referenced credential is not deleted.
-
-##### Example
+Metrics that have already been exported into Opstrace are not deleted.
+Any credential referenced in the exporter configuration is not deleted.
 
 ```bash
 curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" -XDELETE https://me.opstrace.io/api/v1/exporters/foo
