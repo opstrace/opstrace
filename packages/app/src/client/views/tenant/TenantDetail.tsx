@@ -23,7 +23,7 @@ import { usePickerService } from "client/services/Picker";
 
 import { deleteTenant } from "state/tenant/actions";
 
-import SideBar from "client/views/cluster/Sidebar";
+import SideBar from "client/views/sidebar";
 
 import Skeleton from "@material-ui/lab/Skeleton";
 import Layout from "client/layout/MainContent";

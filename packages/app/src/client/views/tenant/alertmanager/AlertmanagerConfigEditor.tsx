@@ -27,7 +27,7 @@ import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import * as yamlParser from "js-yaml";
 import { YamlEditor } from "client/components/Editor";
 
-import SideBar from "client/views/cluster/Sidebar";
+import SideBar from "client/views/sidebar";
 
 import { AlertmanagerUpdateResponse } from "state/graphql-api-types";
 

@@ -24,21 +24,21 @@ import Avatar from "@material-ui/core/Avatar";
 import { List, ButtonListItem, ListItemText } from "client/components/List";
 
 export type UserListProps = {
-  selectedUserIndex: number;
+  selectedIndex: number;
   users: Users;
-  onSelect: (selectedOption: User) => void;
+  onSelect: (user: User, index: number) => void;
 };
 
 const avatarStyle = { width: 30, height: 30 };
 
 const UserList = (props: UserListProps) => {
-  const { selectedUserIndex, onSelect } = props;
+  const { selectedIndex, onSelect } = props;
 
   const renderItem = useCallback(
     ({ data, index }: { data: User; index: number }) => (
       <ButtonListItem
-        selected={index === selectedUserIndex}
-        onClick={() => onSelect(data)}
+        selected={index === selectedIndex}
+        onClick={() => onSelect(data, index)}
         key={data.email}
       >
         <ListItemAvatar>
@@ -53,7 +53,7 @@ const UserList = (props: UserListProps) => {
         <ListItemText primary={data.email} />
       </ButtonListItem>
     ),
-    [selectedUserIndex, onSelect]
+    [selectedIndex, onSelect]
   );
 
   return (
