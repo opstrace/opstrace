@@ -33,26 +33,27 @@ type TenantPanelProps = {
 };
 
 export const TenantPanel = (props: TenantPanelProps) => {
+  const { active, defaultId, onSelect } = props;
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   // const { activatePickerWithText } = usePickerService();
   const tenants = useTenantList();
 
   useEffect(() => {
-    if (props.active && props.defaultId) {
-      const index = findIndex(propEq("name", props.defaultId))(tenants);
+    if (active && defaultId) {
+      const index = findIndex(propEq("name", defaultId))(tenants);
       if (index !== -1) setSelectedIndex(index);
-      else if (props.onSelect && tenants[0]) {
-        props.onSelect(tenants[0], 0);
+      else if (onSelect && tenants[0]) {
+        onSelect(tenants[0], 0);
       }
     }
-  }, [tenants, props.active, props.defaultId]);
+  }, [tenants, onSelect, active, defaultId]);
 
-  const onSelect = useCallback(
+  const selectCallback = useCallback(
     (tenant: Tenant, index: number) => {
       setSelectedIndex(index);
-      if (props.onSelect) props.onSelect(tenant, index);
+      if (onSelect) onSelect(tenant, index);
     },
-    [props.onSelect]
+    [onSelect]
   );
 
   // const addTenant = useCallback(() => {
@@ -72,7 +73,7 @@ export const TenantPanel = (props: TenantPanelProps) => {
       {/* <DeleteTenantDialog /> */}
       <TenantList
         selectedIndex={selectedIndex}
-        onSelect={onSelect}
+        onSelect={selectCallback}
         tenants={tenants}
       />
     </>
