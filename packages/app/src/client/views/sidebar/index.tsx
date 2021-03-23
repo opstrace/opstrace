@@ -36,10 +36,6 @@ const ClusterSidebar = () => {
   const { activatePickerWithText } = usePickerService();
   const history = useHistory();
 
-  const addUser = useCallback(() => {
-    activatePickerWithText("add user: ");
-  }, [activatePickerWithText]);
-
   const onUserSelect = useCallback(
     (user: User) => {
       setActivePanel("user");
@@ -55,11 +51,20 @@ const ClusterSidebar = () => {
     [history]
   );
 
+  const addUser = useCallback(() => {
+    activatePickerWithText("add user: ");
+  }, [activatePickerWithText]);
+
   const userActions = (
     <IconButton size="small" onClick={addUser}>
       <AddIcon />
     </IconButton>
   );
+
+  // const addTenant = useCallback(() => {
+  //   activatePickerWithText("add tenant: ");
+  // }, [activatePickerWithText]);
+
   // const tenantActions = (
   //   <IconButton size="small" onClick={addTenant}>
   //     <AddIcon />
