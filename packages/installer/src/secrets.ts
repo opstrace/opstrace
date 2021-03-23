@@ -16,8 +16,9 @@
 
 import {
   KubeConfiguration,
-  Secret,
   Namespace,
+  ResourceCollection,
+  Secret,
   kubernetesError
 } from "@opstrace/kubernetes";
 
@@ -32,7 +33,10 @@ export async function storeSystemTenantApiAuthTokenAsSecret(
   authToken: string,
   kubeConfig: KubeConfiguration
 ): Promise<void> {
-  const ns = new Namespace(
+  // Use ResourceCollection to ensure that the created resources are annotated correctly
+  const collection = new ResourceCollection();
+
+  collection.add(new Namespace(
     {
       apiVersion: "v1",
       kind: "Namespace",
@@ -45,27 +49,14 @@ export async function storeSystemTenantApiAuthTokenAsSecret(
       }
     },
     kubeConfig
-  );
-
-  log.info("Try to create k8s namespace: system-tenant");
-  try {
-    await ns.create();
-  } catch (e) {
-    const err = kubernetesError(e);
-    if (err.statusCode === 409) {
-      log.info("already exists");
-    } else {
-      throw e;
-    }
-  }
+  ));
 
   // to be consumed by both, systemlog-fluentd as well as system
   // prometheus.
-  const secretName = "system-tenant-api-auth-token";
   const s = new Secret(
     {
       metadata: {
-        name: secretName,
+        name: "system-tenant-api-auth-token",
         namespace: "system-tenant"
       },
       stringData: {
@@ -74,16 +65,23 @@ export async function storeSystemTenantApiAuthTokenAsSecret(
     },
     kubeConfig
   );
+  // this secret is only configured here and isn't listed in the controller-managed assets,
+  // so we must mark it immutable to ensure it isn't deleted by the controller later
+  s.setImmutable();
+  collection.add(s);
 
-  log.info("Try to create k8s secret: %s", secretName);
-  try {
-    await s.create();
-  } catch (e) {
-    const err = kubernetesError(e);
-    if (err.statusCode === 409) {
-      log.info("already exists");
-    } else {
-      throw e;
+  // use for instead of forEach: allow await inside
+  for (const r of collection.get()) {
+    try {
+      log.info(`Try to create ${r.constructor.name}: ${r.namespace}/${r.name}`);
+      await r.create();
+    } catch (e) {
+      const err = kubernetesError(e);
+      if (err.statusCode === 409) {
+        log.info("already exists");
+      } else {
+        throw e;
+      }
     }
   }
 }
