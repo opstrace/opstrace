@@ -25,6 +25,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
+	"github.com/opstrace/opstrace/go/pkg/config"
 	"github.com/opstrace/opstrace/go/pkg/graphql"
 )
 
@@ -38,8 +39,36 @@ type ExporterInfo struct {
 	UpdatedAt  string      `yaml:"updated_at,omitempty"`
 }
 
-func listExporters(tenant string, w http.ResponseWriter, r *http.Request) {
-	resp, err := exporterAccess.List(tenant)
+// Exporter entry for validation and interaction with GraphQL.
+type Exporter struct {
+	Name       string
+	Type       string
+	Credential string
+	ConfigJSON string
+}
+
+// Raw exporter entry received from a POST request, converted to an Exporter.
+type yamlExporter struct {
+	Name       string      `yaml:"name"`
+	Type       string      `yaml:"type"`
+	Credential string      `yaml:"credential,omitempty"`
+	Config     interface{} `yaml:"config"` // nested yaml
+}
+
+type exporterAPI struct {
+	credentialAccess *config.CredentialAccess
+	exporterAccess   *config.ExporterAccess
+}
+
+func newExporterAPI(credentialAccess *config.CredentialAccess, exporterAccess *config.ExporterAccess) *exporterAPI {
+	return &exporterAPI{
+		credentialAccess,
+		exporterAccess,
+	}
+}
+
+func (e *exporterAPI) listExporters(tenant string, w http.ResponseWriter, r *http.Request) {
+	resp, err := e.exporterAccess.List(tenant)
 	if err != nil {
 		log.Warnf("Listing exporters failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
@@ -68,103 +97,13 @@ func listExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Exporter entry received from a POST request.
-type Exporter struct {
-	Name       string      `yaml:"name"`
-	Type       string      `yaml:"type"`
-	Credential string      `yaml:"credential,omitempty"`
-	Config     interface{} `yaml:"config"` // nested yaml
-}
-
-func listExporterTypes(tenant string) (map[string]string, error) {
-	// Collect map of existing name->type so that we can decide between insert vs update
-	existingTypes := make(map[string]string)
-	resp, err := exporterAccess.List(tenant)
-	if err != nil {
-		log.Warnf("Listing exporters failed: %s", err)
-		return nil, err
-	}
-	for _, exporter := range resp.Exporter {
-		existingTypes[exporter.Name] = exporter.Type
-	}
-	return existingTypes, nil
-}
-
-// Returns the JSON exporter value, whether the exporter already exists, and any validation error.
-func validateExporter(
-	tenant string,
-	existingTypes map[string]string,
-	yamlExporter Exporter,
-) (*graphql.Json, bool, error) {
-	if yamlExporter.Credential == "" {
-		if err := validateExporterTypes(yamlExporter.Type, nil); err != nil {
-			msg := fmt.Sprintf("Invalid exporter input %s: %s", yamlExporter.Name, err)
-			log.Debug(msg)
-			return nil, false, errors.New(msg)
-		}
-	} else {
-		// Check that the referenced credential exists and has a compatible type for this exporter.
-		// If the credential didn't exist, then the graphql insert would fail anyway due to a missing relation,
-		// but type mismatches are not validated by graphql.
-		cred, err := credentialAccess.Get(tenant, yamlExporter.Credential)
-		if err != nil {
-			return nil, false, fmt.Errorf(
-				"failed to read credential %s referenced in new exporter %s",
-				yamlExporter.Credential, yamlExporter.Name,
-			)
-		} else if cred == nil {
-			return nil, false, fmt.Errorf(
-				"missing credential %s referenced in exporter %s", yamlExporter.Credential, yamlExporter.Name,
-			)
-		} else if err := validateExporterTypes(yamlExporter.Type, &cred.CredentialByPk.Type); err != nil {
-			return nil, false, fmt.Errorf("invalid exporter input %s: %s", yamlExporter.Name, err)
-		}
-	}
-
-	var gconfig graphql.Json
-	switch yamlMap := yamlExporter.Config.(type) {
-	case map[interface{}]interface{}:
-		// Encode the parsed YAML config tree as JSON
-		convMap, err := recurseMapStringKeys(yamlMap)
-		if err != nil {
-			return nil, false, fmt.Errorf(
-				"Exporter '%s' config could not be encoded as JSON: %s", yamlExporter.Name, err,
-			)
-		}
-		json, err := json.Marshal(convMap)
-		if err != nil {
-			return nil, false, fmt.Errorf(
-				"Exporter '%s' config could not be encoded as JSON: %s", yamlExporter.Name, err,
-			)
-		}
-		gconfig = graphql.Json(json)
-	default:
-		return nil, false, fmt.Errorf(
-			"Exporter '%s' config is invalid (must be YAML map)", yamlExporter.Name,
-		)
-	}
-
-	var existingType string
-	var exists bool
-	if existingType, exists = existingTypes[yamlExporter.Name]; exists {
-		// Explicitly check and complain if the user tries to change the exporter type
-		if yamlExporter.Type != "" && existingType != yamlExporter.Type {
-			return nil, false, fmt.Errorf(
-				"Exporter '%s' type cannot be updated (current=%s, updated=%s)",
-				yamlExporter.Name, existingType, yamlExporter.Type,
-			)
-		}
-	}
-	return &gconfig, exists, nil
-}
-
-func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
+func (e *exporterAPI) writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 	decoder := yaml.NewDecoder(r.Body)
 	// Return error for unrecognized or duplicate fields in the input
 	decoder.SetStrict(true)
 
 	// Collect map of existing name->type so that we can decide between insert vs update
-	existingTypes, err := listExporterTypes(tenant)
+	existingTypes, err := e.listExporterTypes(tenant)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Listing exporters failed: %s", err), http.StatusInternalServerError)
 		return
@@ -175,7 +114,7 @@ func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 	var inserts []graphql.ExporterInsertInput
 	var updates []graphql.UpdateExporterVariables
 	for {
-		var yamlExporter Exporter
+		var yamlExporter yamlExporter
 		if err := decoder.Decode(&yamlExporter); err != nil {
 			if err != io.EOF {
 				msg := fmt.Sprintf("Decoding exporter input at index=%d failed: %s", len(inserts)+len(updates), err)
@@ -194,19 +133,38 @@ func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 			credential = &gcredential
 		}
 
-		gconfig, exists, err := validateExporter(tenant, existingTypes, yamlExporter)
+		config, err := convertYAMLExporterConfig(yamlExporter.Name, yamlExporter.Config)
+		if err != nil {
+			log.Debugf("Parsing exporter input at index=%d failed: %s", len(inserts)+len(updates), err)
+			http.Error(w, fmt.Sprintf(
+				"Parsing exporter input at index=%d failed: %s", len(inserts)+len(updates), err,
+			), http.StatusBadRequest)
+			return
+		}
+
+		exists, err := e.validateExporter(
+			tenant,
+			existingTypes,
+			Exporter{
+				Name:       yamlExporter.Name,
+				Type:       yamlExporter.Type,
+				Credential: yamlExporter.Credential,
+				ConfigJSON: *config,
+			},
+		)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		name := graphql.String(yamlExporter.Name)
+		gconfig := graphql.Json(*config)
 		if exists {
 			// TODO check for no-op updates and skip them (and avoid unnecessary changes to UpdatedAt)
 			updates = append(updates, graphql.UpdateExporterVariables{
 				Name:       name,
 				Credential: credential,
-				Config:     *gconfig,
+				Config:     gconfig,
 				UpdatedAt:  now,
 			})
 		} else {
@@ -215,7 +173,7 @@ func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 				Name:       &name,
 				Type:       &expType,
 				Credential: credential,
-				Config:     gconfig,
+				Config:     &gconfig,
 				CreatedAt:  &now,
 				UpdatedAt:  &now,
 			})
@@ -231,7 +189,7 @@ func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing exporters: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		if err := exporterAccess.Insert(tenant, inserts); err != nil {
+		if err := e.exporterAccess.Insert(tenant, inserts); err != nil {
 			log.Warnf("Insert: %d exporters failed: %s", len(inserts), err)
 			http.Error(w, fmt.Sprintf("Creating %d exporters failed: %s", len(inserts), err), http.StatusInternalServerError)
 			return
@@ -239,7 +197,7 @@ func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			if err := exporterAccess.Update(tenant, update); err != nil {
+			if err := e.exporterAccess.Update(tenant, update); err != nil {
 				log.Warnf("Update: Exporter %s/%s failed: %s", tenant, update.Name, err)
 				http.Error(w, fmt.Sprintf("Updating exporter %s failed: %s", update.Name, err), http.StatusInternalServerError)
 				return
@@ -248,46 +206,11 @@ func writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Searches through the provided object tree for any maps with interface keys (from YAML),
-// and converts those keys to strings (required for JSON).
-func recurseMapStringKeys(in interface{}) (interface{}, error) {
-	switch inType := in.(type) {
-	case map[interface{}]interface{}: // yaml type for maps. needs string keys to work with JSON
-		// Ensure the map keys are converted, RECURSE into values to find nested maps
-		strMap := make(map[string]interface{})
-		for k, v := range inType {
-			switch kType := k.(type) {
-			case string:
-				conv, err := recurseMapStringKeys(v)
-				if err != nil {
-					return nil, err
-				}
-				strMap[kType] = conv
-			default:
-				return nil, errors.New("map is invalid (keys must be strings)")
-			}
-		}
-		return strMap, nil
-	case []interface{}:
-		// RECURSE into entries to convert any nested maps are converted
-		for i, v := range inType {
-			conv, err := recurseMapStringKeys(v)
-			if err != nil {
-				return nil, err
-			}
-			inType[i] = conv
-		}
-		return inType, nil
-	default:
-		return in, nil
-	}
-}
-
-func getExporter(tenant string, w http.ResponseWriter, r *http.Request) {
+func (e *exporterAPI) getExporter(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Getting exporter: %s", name)
 
-	resp, err := exporterAccess.Get(tenant, name)
+	resp, err := e.exporterAccess.Get(tenant, name)
 	if err != nil {
 		log.Warnf("Get: Exporter %s/%s failed: %s", tenant, name, err)
 		http.Error(w, fmt.Sprintf("Getting exporter failed: %s", err), http.StatusInternalServerError)
@@ -320,11 +243,11 @@ func getExporter(tenant string, w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func deleteExporter(tenant string, w http.ResponseWriter, r *http.Request) {
+func (e *exporterAPI) deleteExporter(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Deleting exporter: %s/%s", tenant, name)
 
-	resp, err := exporterAccess.Delete(tenant, name)
+	resp, err := e.exporterAccess.Delete(tenant, name)
 	if err != nil {
 		log.Warnf("Delete: Exporter %s/%s failed: %s", tenant, name, err)
 		http.Error(w, fmt.Sprintf("Deleting exporter failed: %s", err), http.StatusInternalServerError)
@@ -338,4 +261,64 @@ func deleteExporter(tenant string, w http.ResponseWriter, r *http.Request) {
 
 	encoder := yaml.NewEncoder(w)
 	encoder.Encode(ExporterInfo{Name: resp.DeleteExporterByPk.Name})
+}
+
+func (e *exporterAPI) listExporterTypes(tenant string) (map[string]string, error) {
+	// Collect map of existing name->type so that we can decide between insert vs update
+	existingTypes := make(map[string]string)
+	resp, err := e.exporterAccess.List(tenant)
+	if err != nil {
+		log.Warnf("Listing exporters failed: %s", err)
+		return nil, err
+	}
+	for _, exporter := range resp.Exporter {
+		existingTypes[exporter.Name] = exporter.Type
+	}
+	return existingTypes, nil
+}
+
+// Accepts the tenant name, the name->type mapping of any existing exporters, and the new exporter payload.
+// Returns whether the exporter already exists, and any validation error.
+func (e *exporterAPI) validateExporter(
+	tenant string,
+	existingTypes map[string]string,
+	exporter Exporter,
+) (bool, error) {
+	if exporter.Credential == "" {
+		if err := validateExporterTypes(exporter.Type, nil); err != nil {
+			msg := fmt.Sprintf("Invalid exporter input %s: %s", exporter.Name, err)
+			log.Debug(msg)
+			return false, errors.New(msg)
+		}
+	} else {
+		// Check that the referenced credential exists and has a compatible type for this exporter.
+		// If the credential didn't exist, then the graphql insert would fail anyway due to a missing relation,
+		// but type mismatches are not validated by graphql.
+		cred, err := e.credentialAccess.Get(tenant, exporter.Credential)
+		if err != nil {
+			return false, fmt.Errorf(
+				"failed to read credential %s referenced in new exporter %s",
+				exporter.Credential, exporter.Name,
+			)
+		} else if cred == nil {
+			return false, fmt.Errorf(
+				"missing credential %s referenced in exporter %s", exporter.Credential, exporter.Name,
+			)
+		} else if err := validateExporterTypes(exporter.Type, &cred.CredentialByPk.Type); err != nil {
+			return false, fmt.Errorf("invalid exporter input %s: %s", exporter.Name, err)
+		}
+	}
+
+	var existingType string
+	var exists bool
+	if existingType, exists = existingTypes[exporter.Name]; exists {
+		// Explicitly check and complain if the user tries to change the exporter type
+		if exporter.Type != "" && existingType != exporter.Type {
+			return false, fmt.Errorf(
+				"Exporter '%s' type cannot be updated (current=%s, updated=%s)",
+				exporter.Name, existingType, exporter.Type,
+			)
+		}
+	}
+	return exists, nil
 }

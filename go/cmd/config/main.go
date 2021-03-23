@@ -35,12 +35,6 @@ import (
 const actionSecretHeaderName string = "X-Action-Secret"
 const cortexTenantHeaderName string = "X-Scope-OrgID"
 
-var (
-	credentialAccess         config.CredentialAccess
-	exporterAccess           config.ExporterAccess
-	disableAPIAuthentication bool
-)
-
 func main() {
 	var loglevel string
 	flag.StringVar(&loglevel, "loglevel", "info", "error|info|debug")
@@ -49,6 +43,7 @@ func main() {
 	var actionAddress string
 	flag.StringVar(&actionAddress, "action", "", "")
 
+	var disableAPIAuthentication bool
 	flag.BoolVar(&disableAPIAuthentication, "disable-api-authn", false, "")
 
 	flag.Parse()
@@ -80,16 +75,11 @@ func main() {
 		log.Fatalf("missing required HASURA_GRAPHQL_ADMIN_SECRET")
 	}
 
-	credentialAccess = config.NewCredentialAccess(graphqlURL, graphqlSecret)
-	exporterAccess = config.NewExporterAccess(graphqlURL, graphqlSecret)
-
 	if disableAPIAuthentication {
 		log.Infof("authentication disabled, use '%s' header in requests to specify tenant", authenticator.TestTenantHeader)
 	} else {
 		log.Info("authentication enabled")
-		if !disableAPIAuthentication {
-			authenticator.ReadConfigFromEnvOrCrash()
-		}
+		authenticator.ReadConfigFromEnvOrCrash()
 	}
 
 	if actionAddress != "" {
@@ -98,16 +88,22 @@ func main() {
 			log.Fatalf("missing HASURA_ACTION_SECRET, required when -action is specified")
 		}
 
-		handler := NewHasuraHandler(rulerURL, alertmanagerURL, actionSecret)
+		// Create separate access objects to avoid potential threading issues with config handler below
+		credentialAccess := config.NewCredentialAccess(graphqlURL, graphqlSecret)
+		credentialAPI := newCredentialAPI(&credentialAccess)
+		exporterAccess := config.NewExporterAccess(graphqlURL, graphqlSecret)
+		exporterAPI := newExporterAPI(&credentialAccess, &exporterAccess)
+		handler := NewHasuraHandler(alertmanagerURL, actionSecret, credentialAPI, exporterAPI)
 		// Not blocking on this one, but it will panic internally if there's a problem
-		go runActionListener(handler, actionAddress)
+		go runActionHandler(handler, actionAddress)
 	}
 
+	configHandler := buildConfigHandler(rulerURL, alertmanagerURL, graphqlURL, graphqlSecret, disableAPIAuthentication)
 	// Block on this one
-	runConfigListener(rulerURL, alertmanagerURL, configAddress)
+	log.Fatalf("terminated config listener: %v", http.ListenAndServe(configAddress, configHandler))
 }
 
-func runActionListener(handler *HasuraHandler, actionAddress string) {
+func runActionHandler(handler *HasuraHandler, actionAddress string) {
 	router := mux.NewRouter()
 	// Run metrics listener on this internal-only addresss instead of the main/ingress address.
 	router.Handle("/metrics", promhttp.Handler())
@@ -116,7 +112,13 @@ func runActionListener(handler *HasuraHandler, actionAddress string) {
 	log.Fatalf("terminated action listener: %v", http.ListenAndServe(actionAddress, router))
 }
 
-func runConfigListener(rulerURL *url.URL, alertmanagerURL *url.URL, configAddress string) {
+func buildConfigHandler(
+	rulerURL *url.URL,
+	alertmanagerURL *url.URL,
+	graphqlURL *url.URL,
+	graphqlSecret string,
+	disableAPIAuthentication bool,
+) *mux.Router {
 	router := mux.NewRouter()
 
 	// Cortex config, see: https://github.com/cortexproject/cortex/blob/master/docs/api/_index.md
@@ -165,13 +167,32 @@ func runConfigListener(rulerURL *url.URL, alertmanagerURL *url.URL, configAddres
 	router.PathPrefix("/api/v1/alertmanager").HandlerFunc(alertmanagerProxy.HandleWithProxy)
 	router.PathPrefix("/api/v1/multitenant_alertmanager").HandlerFunc(alertmanagerProxy.HandleWithProxy)
 
-	// Credentials/exporters: Specify exact paths, but manually allow with and without a trailing '/'
-	credentials := router.PathPrefix("/api/v1/credentials").Subrouter()
-	setupConfigAPI(credentials, listCredentials, writeCredentials, getCredential, deleteCredential)
-	exporters := router.PathPrefix("/api/v1/exporters").Subrouter()
-	setupConfigAPI(exporters, listExporters, writeExporters, getExporter, deleteExporter)
+	credentialAccess := config.NewCredentialAccess(graphqlURL, graphqlSecret)
+	exporterAccess := config.NewExporterAccess(graphqlURL, graphqlSecret)
 
-	log.Fatalf("terminated config listener: %v", http.ListenAndServe(configAddress, router))
+	// Credentials/exporters: Specify exact paths, but manually allow with and without a trailing '/'
+	credentialRouter := router.PathPrefix("/api/v1/credentials").Subrouter()
+	credentialAPI := newCredentialAPI(&credentialAccess)
+	setupConfigAPI(
+		credentialRouter,
+		credentialAPI.listCredentials,
+		credentialAPI.writeCredentials,
+		credentialAPI.getCredential,
+		credentialAPI.deleteCredential,
+		disableAPIAuthentication,
+	)
+	exporterRouter := router.PathPrefix("/api/v1/exporters").Subrouter()
+	exporterAPI := newExporterAPI(&credentialAccess, &exporterAccess)
+	setupConfigAPI(
+		exporterRouter,
+		exporterAPI.listExporters,
+		exporterAPI.writeExporters,
+		exporterAPI.getExporter,
+		exporterAPI.deleteExporter,
+		disableAPIAuthentication,
+	)
+
+	return router
 }
 
 func replacePathPrefix(url *url.URL, from string, to string) *string {
@@ -209,21 +230,25 @@ func setupConfigAPI(
 	writeFunc func(string, http.ResponseWriter, *http.Request),
 	getFunc func(string, http.ResponseWriter, *http.Request),
 	deleteFunc func(string, http.ResponseWriter, *http.Request),
+	disableAPIAuthentication bool,
 ) {
 	// Ensure that each call is authenticated before proceeding
-	router.HandleFunc("", getTenantThenCall(listFunc)).Methods("GET")
-	router.HandleFunc("/", getTenantThenCall(listFunc)).Methods("GET")
-	router.HandleFunc("", getTenantThenCall(writeFunc)).Methods("POST")
-	router.HandleFunc("/", getTenantThenCall(writeFunc)).Methods("POST")
-	router.HandleFunc("/{name}", getTenantThenCall(getFunc)).Methods("GET")
-	router.HandleFunc("/{name}/", getTenantThenCall(getFunc)).Methods("GET")
-	router.HandleFunc("/{name}", getTenantThenCall(deleteFunc)).Methods("DELETE")
-	router.HandleFunc("/{name}/", getTenantThenCall(deleteFunc)).Methods("DELETE")
+	router.HandleFunc("", getTenantThenCall(listFunc, disableAPIAuthentication)).Methods("GET")
+	router.HandleFunc("/", getTenantThenCall(listFunc, disableAPIAuthentication)).Methods("GET")
+	router.HandleFunc("", getTenantThenCall(writeFunc, disableAPIAuthentication)).Methods("POST")
+	router.HandleFunc("/", getTenantThenCall(writeFunc, disableAPIAuthentication)).Methods("POST")
+	router.HandleFunc("/{name}", getTenantThenCall(getFunc, disableAPIAuthentication)).Methods("GET")
+	router.HandleFunc("/{name}/", getTenantThenCall(getFunc, disableAPIAuthentication)).Methods("GET")
+	router.HandleFunc("/{name}", getTenantThenCall(deleteFunc, disableAPIAuthentication)).Methods("DELETE")
+	router.HandleFunc("/{name}/", getTenantThenCall(deleteFunc, disableAPIAuthentication)).Methods("DELETE")
 }
 
 // Wraps `f` in a preceding check that authenticates the request headers for the expected tenant name.
 // The check is skipped if `disableAPIAuthentication` is true.
-func getTenantThenCall(f func(string, http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+func getTenantThenCall(
+	f func(string, http.ResponseWriter, *http.Request),
+	disableAPIAuthentication bool,
+) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tenantName, ok := authenticator.GetTenantNameOr401(w, r, nil, disableAPIAuthentication)
 		if !ok {
