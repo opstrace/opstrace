@@ -26,7 +26,7 @@ import { deleteUser } from "state/user/actions";
 
 import useUserList from "state/user/hooks/useUserList";
 import Layout from "client/layout/MainContent";
-import SideBar from "client/views/cluster/Sidebar";
+import SideBar from "client/views/sidebar";
 
 import Skeleton from "@material-ui/lab/Skeleton";
 import Avatar from "@material-ui/core/Avatar";
