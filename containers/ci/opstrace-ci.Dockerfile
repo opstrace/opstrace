@@ -89,7 +89,7 @@ ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
 
 # Set up golanglint-ci in the container image.
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
-    sh -s -- -b /usr/local/bin v1.36.0
+    sh -s -- -b /usr/local/bin v1.38.0
 
 # Set up markdownlint in the container image so that we can lint right away! :)
 RUN npm install -g markdownlint-cli@0.26.0
