@@ -596,7 +596,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "log entry push rate",
+      "title": "sample push rate (log entries or metric samples)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1190,7 +1190,7 @@
           "refId": "A"
         },
         {
-          "expr": "rate(counter_log_message_bytes_pushed{job=\"looker\"}[30s])",
+          "expr": "rate(counter_payload_bytes_pushed{job=\"looker\"}[30s])",
           "interval": "",
           "legendFormat": "log payload, {{looker_invocation_id}}",
           "refId": "B"
@@ -1288,7 +1288,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(rate(counter_log_message_bytes_pushed{job=\"looker\"}[30s]) - rate(counter_serialized_fragments_bytes_pushed{job=\"looker\"}[30s])) / rate(counter_log_message_bytes_pushed{job=\"looker\"}[30s]) *100",
+          "expr": "(rate(counter_payload_bytes_pushed{job=\"looker\"}[30s]) - rate(counter_serialized_fragments_bytes_pushed{job=\"looker\"}[30s])) / rate(counter_payload_bytes_pushed{job=\"looker\"}[30s]) * 100",
           "interval": "",
           "legendFormat": "{{looker_invocation_id}}",
           "refId": "A"
@@ -1298,7 +1298,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "push compression factor in % (75%: on-wire data is 25 % of transmitted payload data)",
+      "title": "push compression factor in % (75%: on-wire data is 25 % of transmitted payload data w/o timestamps)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1318,7 +1318,7 @@
           "format": "percent",
           "label": "",
           "logBase": 1,
-          "max": null,
+          "max": "100",
           "min": "0",
           "show": true
         },
@@ -1368,7 +1368,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
