@@ -504,7 +504,7 @@ async function main() {
       // rely on cyclenum to start at 1, 0 % N is 0 so that in the first
       // run some dummystreams are created!
       log.info("cycle %s: create new dummystreams", cyclenum);
-      dummystreams = createNewDummyStreams(guniqueCycleId);
+      dummystreams = await createNewDummyStreams(guniqueCycleId);
     } else {
       log.info(
         "cycle %s: continue to use dummystreams of previous cycle",
@@ -533,9 +533,9 @@ async function main() {
   httpServerTerminator.terminate();
 }
 
-function createNewDummyStreams(
+async function createNewDummyStreams(
   guniqueCycleId: string
-): Array<DummyStream | DummyTimeseries> {
+): Promise<Array<DummyStream | DummyTimeseries>> {
   const streams = [];
 
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
