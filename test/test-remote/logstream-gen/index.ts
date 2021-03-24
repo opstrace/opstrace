@@ -76,7 +76,6 @@ interface CfgInterface {
   additional_labels: Array<[string, string]> | undefined;
   compressability: string;
   change_streams_every_n_cycles: number;
-  qsize: number;
   stream_write_n_seconds_jitter: number;
   fetch_n_entries_per_query: number;
   metrics_mode: boolean;
@@ -384,12 +383,6 @@ function parseCmdlineArgs() {
       "Read authentication token from file. Add header `Authorization: Bearer <token>` to each HTTP request.",
     type: "string",
     default: ""
-  });
-
-  parser.add_argument("--qsize", {
-    help: "undocumented, for JP",
-    type: "int",
-    default: 1
   });
 
   CFG = parser.parse_args();
