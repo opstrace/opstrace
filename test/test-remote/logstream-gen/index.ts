@@ -895,6 +895,13 @@ async function _produceAndPOSTpushrequest(
     const fragment = stream.generateAndGetNextFragment();
     stream.lastFragmentConsumed = fragment;
 
+    // NOTE(JP): here we can calculate the lag between the first or last sample
+    // in the fragment and the actual wall time. Matters a lot for metrics
+    // mode! Can be used to log it for starters, to let a human decide to
+    // change parameters. Can also be used to auto-correct things (in a way
+    // that allows for read validation, i.e. allowing for calculation of sample
+    // timestamps w/o keeping all data that was written).
+
     const t0 = mtime();
     const pushrequest = fragment.serialize(); //toPushrequest();
     const genduration = mtimeDiffSeconds(t0);
