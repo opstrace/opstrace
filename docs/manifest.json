@@ -31,6 +31,10 @@
             {
               "title": "Instrumenting a K8s Cluster",
               "path": "/docs/guides/user/instrumenting-a-k8s-cluster.md"
+            },
+            {
+              "title": "Collecting Cloud Metrics",
+              "path": "/docs/guides/user/collecting-cloud-metrics.md"
             }
           ]
         },
