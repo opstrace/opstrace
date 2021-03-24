@@ -608,6 +608,7 @@ async function performWriteReadCycle(
 ) {
   CYCLE_START_TIME_MONOTONIC = mtime();
   CYCLE_STOP_WRITE_AFTER_SECONDS = CFG.stream_write_n_seconds;
+
   if (CFG.stream_write_n_seconds_jitter !== 0) {
     const jitter = rndFloatFromInterval(
       -CFG.stream_write_n_seconds_jitter,
@@ -620,6 +621,7 @@ async function performWriteReadCycle(
       jitter.toFixed(2)
     );
   }
+
   const writestats = await writePhase(dummystreams);
   const readstats = await readPhase(dummystreams);
 
@@ -643,6 +645,7 @@ async function performWriteReadCycle(
 async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   const fragmentsPushedBefore = COUNTER_STREAM_FRAGMENTS_PUSHED;
   const wt0 = mtime();
+
   await postFragments(streams, CFG.apibaseurl);
 
   // A little summary about pushing all data.
@@ -811,6 +814,19 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
   return stats;
 }
 
+/*
+For each stream, send all fragments (until stop criterion is hit).
+
+For each DummyStream, create one pushrequest producer func, one pushrequest
+consumer func, connect with a queue (default queue size:1 serving as buffer,
+because pushrequest construction takes little bit of CPU time).
+
+The queue consumer function is also the function which performs the POST HTTP
+requests.
+
+For a larger number of streams (say, between 10**3 and 10**4), ....
+
+*/
 export async function postFragments(
   streams: Array<DummyStream | DummyTimeseries>,
   lokiPushBaseUrl: string
@@ -818,10 +834,7 @@ export async function postFragments(
   const actors = [];
   const queues = [];
 
-  // For each dummystream create one pushrequest producer func, one pushrequest
-  // consumer func, connect with a queue (serving as buffer, because
-  // pushrequest construction takes little bit of CPU). The queue consumer
-  // function is also the function which performs the POST HTTP requests.
+  // const semaphore = new Semaphore(CFG.max_concurrent_reads);
   for (const stream of streams) {
     // note that for N_concurrent_streams getting large the size of this queue
     // means there is a lot of CPU and mem required to fill the sum of all
