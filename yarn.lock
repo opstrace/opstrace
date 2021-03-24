@@ -11185,10 +11185,10 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.6.tgz#ff040b2b0853b23c3d31027523706f1885d76bee"
   integrity sha512-nTnJ528pbqxYanhpDYsi4Rd8MAeaBA67+RZ10CM1m3bTAVFEDcd5AuA4a6W5YkGZ1iNXHzZz8T6TBKLeBuNriQ==
 
-graphql-codegen-golang@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/graphql-codegen-golang/-/graphql-codegen-golang-0.1.1.tgz#08f6f7062a6e827e775655adfb59f6ad00e20298"
-  integrity sha512-Jhv0FZFI3vS+V9AsOjMhXF2mqTzJIqkmf8Yl6jN1ps1iBuKZtGVIKiAc1Iso2u/KEmvSh75unj6u7/JOlGvhew==
+graphql-codegen-golang@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/graphql-codegen-golang/-/graphql-codegen-golang-0.1.2.tgz#f8a53d3f07fe992ea78f5965125b87a5cd67f48b"
+  integrity sha512-mG6fj6QKU+k0MvtLFnTQNHNS2Ah4HPEEIMSS92Qs8KMBRMI+FVt3q+jEj3JjiTVdPkSJQsY8YQyVLBICk+XxAA==
   dependencies:
     "@graphql-codegen/plugin-helpers" "1.17.8"
     graphql "15.3.0"

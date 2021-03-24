@@ -30,21 +30,7 @@ func NewExporterAccess(graphqlURL *url.URL, graphqlSecret string) ExporterAccess
 	}
 }
 
-// FixedGetExportersResponse fixes missing underscores in GetExporterResponse fields.
-// Remove this if/when the generator is fixed.
-type FixedGetExportersResponse struct {
-	Exporter []struct {
-		Tenant     string `json:"Tenant"`
-		Name       string `json:"Name"`
-		Type       string `json:"Type"`
-		Credential string `json:"Credential"`
-		Config     string `json:"Config"`
-		CreatedAt  string `json:"Created_At"` // fix missing underscore
-		UpdatedAt  string `json:"Updated_At"` // fix missing underscore
-	} `json:"Exporter"`
-}
-
-func (c *ExporterAccess) List(tenant string) (*FixedGetExportersResponse, error) {
+func (c *ExporterAccess) List(tenant string) (*graphql.GetExportersResponse, error) {
 	req, err := graphql.NewGetExportersRequest(
 		c.access.URL,
 		&graphql.GetExportersVariables{Tenant: graphql.String(tenant)},
@@ -53,28 +39,14 @@ func (c *ExporterAccess) List(tenant string) (*FixedGetExportersResponse, error)
 		return nil, err
 	}
 
-	var result FixedGetExportersResponse
+	var result graphql.GetExportersResponse
 	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-// FixedGetExporterResponse fixes missing underscores in GetExporterResponse fields.
-// Remove this if/when the generator is fixed.
-type FixedGetExporterResponse struct {
-	ExporterByPk struct {
-		Tenant     string `json:"Tenant"`
-		Name       string `json:"Name"`
-		Type       string `json:"Type"`
-		Credential string `json:"Credential"`
-		Config     string `json:"Config"`
-		CreatedAt  string `json:"Created_At"` // fix missing underscore
-		UpdatedAt  string `json:"Updated_At"` // fix missing underscore
-	} `json:"Exporter_By_Pk"` // fix missing underscores
-}
-
-func (c *ExporterAccess) Get(tenant string, name string) (*FixedGetExporterResponse, error) {
+func (c *ExporterAccess) Get(tenant string, name string) (*graphql.GetExporterResponse, error) {
 	req, err := graphql.NewGetExporterRequest(
 		c.access.URL,
 		&graphql.GetExporterVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
@@ -83,7 +55,7 @@ func (c *ExporterAccess) Get(tenant string, name string) (*FixedGetExporterRespo
 		return nil, err
 	}
 
-	var result FixedGetExporterResponse
+	var result graphql.GetExporterResponse
 	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
@@ -94,16 +66,7 @@ func (c *ExporterAccess) Get(tenant string, name string) (*FixedGetExporterRespo
 	return &result, nil
 }
 
-// FixedDeleteExporterResponse fixes missing underscores in DeleteExporterResponse fields.
-// Remove this if/when the generator is fixed.
-type FixedDeleteExporterResponse struct {
-	DeleteExporterByPk struct {
-		Tenant string `json:"Tenant"`
-		Name   string `json:"Name"`
-	} `json:"Delete_Exporter_By_Pk"` // fix missing underscores
-}
-
-func (c *ExporterAccess) Delete(tenant string, name string) (*FixedDeleteExporterResponse, error) {
+func (c *ExporterAccess) Delete(tenant string, name string) (*graphql.DeleteExporterResponse, error) {
 	req, err := graphql.NewDeleteExporterRequest(
 		c.access.URL,
 		&graphql.DeleteExporterVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
@@ -112,7 +75,7 @@ func (c *ExporterAccess) Delete(tenant string, name string) (*FixedDeleteExporte
 		return nil, err
 	}
 
-	var result FixedDeleteExporterResponse
+	var result graphql.DeleteExporterResponse
 	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
