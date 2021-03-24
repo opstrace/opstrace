@@ -74,6 +74,8 @@ export class TimeseriesFragment {
   private samples: Array<TimeseriesSample>;
   private serialized: boolean;
   public labels: LabelSet;
+
+  // Sequential number for locating fragmeng in stream. Set by caller.
   public index: number;
   public parent: DummyTimeseries | undefined;
   public stats: FragmentStats | undefined;

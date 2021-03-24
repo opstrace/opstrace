@@ -394,7 +394,7 @@ export class DummyStream {
       this.n_entries_per_stream_fragment;
 
     const vt0 = mtime();
-    log.info(
+    log.debug(
       "%s: validate. Sent %s fragments since last validation. Expect %s entries. Previously validated: %s entries",
       this,
       this.nFragmentsSuccessfullySentSinceLastValidate,
