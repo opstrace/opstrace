@@ -252,7 +252,7 @@ function parseCmdlineArgs() {
   parser.add_argument("--log-start-time", {
     help:
       "Timestamp of first log entry in all generated log streams. ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. Default: invocation time",
-    type: "string"
+    type: "str"
   });
 
   parser.add_argument("--log-time-increment-ns", {
@@ -381,7 +381,7 @@ function parseCmdlineArgs() {
   parser.add_argument("--bearer-token-file", {
     help:
       "Read authentication token from file. Add header `Authorization: Bearer <token>` to each HTTP request.",
-    type: "string",
+    type: "str",
     default: ""
   });
 
