@@ -140,7 +140,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 6,
         "w": 12,
         "x": 12,
         "y": 0
@@ -172,104 +172,6 @@
       "timeShift": null,
       "title": "write/read cycles performed",
       "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${source}",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 3
-      },
-      "hiddenSeries": false,
-      "id": 18,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.3",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum by (looker_invocation_id, statuscode) (rate(counter_get_responses{job=\"looker\"}[30s]))",
-          "interval": "",
-          "legendFormat": "{{statuscode}}, {{looker_invocation_id}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "GET HTTP response rate by status code",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:270",
-          "format": "short",
-          "label": "rate [1/s]",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:271",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
     },
     {
       "cards": {
@@ -359,18 +261,18 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 6
       },
       "hiddenSeries": false,
-      "id": 2,
+      "id": 18,
       "legend": {
         "avg": false,
-        "current": true,
-        "max": true,
-        "min": true,
+        "current": false,
+        "max": false,
+        "min": false,
         "show": true,
         "total": false,
-        "values": true
+        "values": false
       },
       "lines": true,
       "linewidth": 1,
@@ -389,7 +291,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (looker_invocation_id, statuscode) (rate(counter_post_responses{job=\"looker\"}[30s]))",
+          "expr": "sum by (looker_invocation_id, statuscode) (rate(counter_get_responses{job=\"looker\"}[30s]))",
           "interval": "",
           "legendFormat": "{{statuscode}}, {{looker_invocation_id}}",
           "refId": "A"
@@ -399,7 +301,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "POST HTTP response rate by status code",
+      "title": "GET HTTP response rate by status code",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -416,12 +318,11 @@
       "yaxes": [
         {
           "$$hashKey": "object:270",
-          "decimals": 3,
           "format": "short",
           "label": "rate [1/s]",
-          "logBase": 10,
+          "logBase": 1,
           "max": null,
-          "min": "0.0001",
+          "min": "0",
           "show": true
         },
         {
@@ -553,13 +454,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 12,
         "x": 12,
-        "y": 15
+        "y": 12
       },
       "hiddenSeries": false,
-      "id": 8,
+      "id": 2,
       "legend": {
         "avg": false,
         "current": true,
@@ -586,9 +487,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(counter_post_non_http_errors{job=\"looker\"}[30s])",
+          "expr": "sum by (looker_invocation_id, statuscode) (rate(counter_post_responses{job=\"looker\"}[30s]))",
           "interval": "",
-          "legendFormat": " {{looker_invocation_id}}",
+          "legendFormat": "{{statuscode}}, {{looker_invocation_id}}",
           "refId": "A"
         }
       ],
@@ -596,7 +497,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "rate of transient errors during POST",
+      "title": "POST HTTP response rate by status code",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -612,22 +513,23 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:160",
+          "$$hashKey": "object:270",
+          "decimals": 3,
           "format": "short",
           "label": "rate [1/s]",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
-          "min": "0",
+          "min": "0.0001",
           "show": true
         },
         {
-          "$$hashKey": "object:161",
+          "$$hashKey": "object:271",
           "format": "short",
           "label": null,
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -752,10 +654,10 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 18
       },
       "hiddenSeries": false,
-      "id": 19,
+      "id": 8,
       "legend": {
         "avg": false,
         "current": true,
@@ -782,7 +684,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(counter_get_non_http_errors{job=\"looker\"}[30s])",
+          "expr": "rate(counter_post_non_http_errors{job=\"looker\"}[30s])",
           "interval": "",
           "legendFormat": " {{looker_invocation_id}}",
           "refId": "A"
@@ -792,7 +694,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "rate of transient errors during GET",
+      "title": "rate of transient errors during POST",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -936,7 +838,6 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${source}",
-      "description": "unexpected query results (communicated in an HTTP success response) result in a retrying. If a retry succeeds then looker does not crash. This counter keeps track of every unexpected query result (such as unexpected number of entries in a query result).",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -950,10 +851,10 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 23
       },
       "hiddenSeries": false,
-      "id": 23,
+      "id": 19,
       "legend": {
         "avg": false,
         "current": true,
@@ -980,7 +881,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(counter_unexpected_query_results{job=\"looker\"}[30s])",
+          "expr": "rate(counter_get_non_http_errors{job=\"looker\"}[30s])",
           "interval": "",
           "legendFormat": " {{looker_invocation_id}}",
           "refId": "A"
@@ -990,7 +891,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "rate of unexpected query results",
+      "title": "rate of transient errors during GET",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1140,6 +1041,105 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${source}",
+      "description": "unexpected query results (communicated in an HTTP success response) result in a retrying. If a retry succeeds then looker does not crash. This counter keeps track of every unexpected query result (such as unexpected number of entries in a query result).",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "hiddenSeries": false,
+      "id": 23,
+      "legend": {
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "rate(counter_unexpected_query_results{job=\"looker\"}[30s])",
+          "interval": "",
+          "legendFormat": " {{looker_invocation_id}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "rate of unexpected query results",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:160",
+          "format": "short",
+          "label": "rate [1/s]",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:161",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${source}",
       "description": "push rate of serialized & compressed LSFs vs.\npush rate of payload data (log msg size)",
       "fieldConfig": {
         "defaults": {
@@ -1154,7 +1154,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 33
       },
       "hiddenSeries": false,
       "id": 4,
@@ -1258,7 +1258,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 36
+        "y": 39
       },
       "hiddenSeries": false,
       "id": 15,
@@ -1368,7 +1368,7 @@
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
