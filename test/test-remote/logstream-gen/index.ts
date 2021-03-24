@@ -604,6 +604,8 @@ function createNewDummyStreams(
     const msg = `Initialized dummystream: ${stream}. Time of first entry in stream: ${stream.currentTimeRFC3339Nano()}`;
     if (i % 1000 == 0) {
       log.info(msg + " (999 msgs like this hidden)");
+      // Allow for more or less snappy SIGINTing this initialization step.
+      await sleep(0.0001);
     } else {
       log.debug(msg);
     }
