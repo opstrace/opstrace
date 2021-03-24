@@ -144,9 +144,11 @@ const counter_log_entries_pushed = new promclient.Counter({
   help: "number of log entries successfully pushed"
 });
 
-const counter_log_message_bytes_pushed = new promclient.Counter({
-  name: "counter_log_message_bytes_pushed",
-  help: "byte length of all pushed log messages so far (~1 char <-> 1 byte)"
+const counter_payload_bytes_pushed = new promclient.Counter({
+  name: "counter_payload_bytes_pushed",
+  help:
+    "byte length of all pushed log messages / metric samples so far " +
+    "(assumes utf-8 encoding for logs and 8 byte per sample for metrics)"
 });
 
 const counter_post_responses = new promclient.Counter({
@@ -913,9 +915,7 @@ async function _produceAndPOSTpushrequest(
     counter_log_entries_pushed.inc(CFG.n_entries_per_stream_fragment);
 
     // Convert BigInt to Number and assume that the numbers are small enough
-    counter_log_message_bytes_pushed.inc(
-      Number(pr.fragment.payloadByteCount())
-    );
+    counter_payload_bytes_pushed.inc(Number(pr.fragment.payloadByteCount()));
     counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
     gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
   }
