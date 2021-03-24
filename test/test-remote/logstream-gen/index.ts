@@ -936,6 +936,11 @@ async function _produceAndPOSTpushrequest(
     counter_fragments_pushed.inc();
     counter_log_entries_pushed.inc(CFG.n_entries_per_stream_fragment);
 
+    // NOTE: payloadByteCount() includes timestamps. For logs, the timestamp
+    // payload data (12 bytes per entry) might be small compared to the log
+    // entry data. For metrics, the timestamp data is _larger than_ the
+    // numerical sample data (8 bytes per sample).
+
     // Convert BigInt to Number and assume that the numbers are small enough
     counter_payload_bytes_pushed.inc(Number(pr.fragment.payloadByteCount()));
     counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
