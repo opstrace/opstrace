@@ -123,6 +123,9 @@ let CYCLE_STOP_WRITE_AFTER_SECONDS: number;
 // of course.
 let COUNTER_STREAM_FRAGMENTS_PUSHED = BigInt(0);
 
+let COUNTER_HTTP_RESP_LOG_THROTTLE = 0;
+let COUNTER_FRAGMENT_STATS_LOG_THROTTLE = 0;
+
 let BEARER_TOKEN: undefined | string;
 
 const counter_fragments_pushed = new promclient.Counter({
@@ -584,11 +587,12 @@ function createNewDummyStreams(
       });
     }
 
-    log.info("Initialized dummystream: %s", stream);
-    log.info(
-      "Time of first entry in stream: %s",
-      stream.currentTimeRFC3339Nano()
-    );
+    const msg = `Initialized dummystream: ${stream}. Time of first entry in stream: ${stream.currentTimeRFC3339Nano()}`;
+    if (i % 1000 == 0) {
+      log.info(msg + " (999 msgs like this hidden)");
+    } else {
+      log.debug(msg);
+    }
     streams.push(stream);
   }
   return streams;
@@ -680,12 +684,12 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   };
 
   log.info(
-    "End of write phase. Entries sent: %s, Payload bytes sent: %s million",
+    "End of write phase. Log entries / metric samples sent: %s, Payload bytes sent: %s million",
     nEntriesSent,
     megaPayloadBytesSent.toFixed(2)
   );
   log.info(
-    "Log msg throughput (mean): %s million characters per second",
+    "Payload write net throughput (mean): %s million bytes per second (assumes utf8 for logs and 8 byte per sample for metrics)",
     megaPayloadBytesSentPerSec.toFixed(2)
   );
 
@@ -708,7 +712,7 @@ async function throttledFetchAndValidate(
 
   const st0 = mtime();
   const release = await semaphore.acquire();
-  log.info(
+  log.debug(
     "fetchAndValidate held back by semaphore for %s s",
     mtimeDiffSeconds(st0).toFixed(2)
   );
@@ -882,11 +886,12 @@ async function _produceAndPOSTpushrequest(
     const pr = pushrequest;
     const name = `prProducerPOSTer for ${stream.uniqueName}`;
 
-    // Control log verbosity
-    // TODO: every fifth? No, make this dynamic, make it work for LARGE numbers.
-    if (pr.fragment.index < 5 || pr.fragment.index % 1 === 0) {
+    if (
+      COUNTER_FRAGMENT_STATS_LOG_THROTTLE < 1 ||
+      COUNTER_FRAGMENT_STATS_LOG_THROTTLE % 200 == 0
+    ) {
       log.info(
-        "%s: generated serialized fragment in %s s for stream %s (index: %s/%s size: %s MiB). POST it.",
+        "%s: generated serialized fragment in %s s for stream %s (index: %s/%s size: %s MiB). POST it (not logged for every case).",
         name,
         genduration.toFixed(2),
         pr.fragment.parent?.uniqueName,
@@ -895,6 +900,7 @@ async function _produceAndPOSTpushrequest(
         pr.dataLengthMiB.toFixed(4)
       );
     }
+    COUNTER_FRAGMENT_STATS_LOG_THROTTLE++;
 
     const postT0 = mtime();
     try {
@@ -943,16 +949,12 @@ async function pushrequestProducerAndPOSTer(
   let fragmentsPushed = 0;
 
   while (true) {
-    // Note: this was once between `stream.generateAndGetNextFragment()` and
-    // `prqueue.put(pushrequest)` and therefore easily might have "dropped" a
-    // fragment (from DummyStream pov it was emitted, but it was then never
-    // passed on to a pusher, i.e. never POSTed).
     if (CYCLE_STOP_WRITE_AFTER_SECONDS !== 0) {
       const secondsSinceCycleStart = mtimeDiffSeconds(
         CYCLE_START_TIME_MONOTONIC
       );
       if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
-        log.info(
+        log.debug(
           "prProducerPOSTer for %s: %s seconds passed: stop producer",
           stream.uniqueName,
           secondsSinceCycleStart.toFixed(2)
@@ -962,7 +964,7 @@ async function pushrequestProducerAndPOSTer(
     }
 
     if (CFG.stream_write_n_fragments == fragmentsPushed) {
-      log.info(
+      log.debug(
         "prProducerPOSTer for %s: %s fragments created and pushed: stop producer",
         stream.uniqueName,
         fragmentsPushed
@@ -1325,11 +1327,19 @@ export function logHTTPResponseLight(
 
   const t1 = (resp.timings.phases.total ?? -1000) / 1000.0;
   const t2 = (resp.timings.phases.firstByte ?? -1000) / 1000.0;
-  log.info(
-    `resp to ${resp.request.options.method} ${reqDetailForLog} -> ${
-      resp.statusCode
-    }. total time: ${t1.toFixed(2)} s. resp time: ${t2.toFixed(2)} `
-  );
+  const msg = `resp to ${resp.request.options.method} ${reqDetailForLog} -> ${
+    resp.statusCode
+  }. total time: ${t1.toFixed(2)} s. resp time: ${t2.toFixed(2)} `;
+
+  // Info-log only every Nth response -- maybe expose N through CLI.
+  const logEveryN = 400;
+  if (COUNTER_HTTP_RESP_LOG_THROTTLE % 400 == 0) {
+    log.info(`${msg} (${logEveryN - 1} msgs like this hidden)`);
+  } else {
+    log.debug(msg);
+  }
+
+  COUNTER_HTTP_RESP_LOG_THROTTLE++;
 }
 
 function logHTTPResponse(
