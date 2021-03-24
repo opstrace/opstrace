@@ -109,6 +109,8 @@ export class LogStreamFragment {
   private serialized: boolean;
 
   public labels: LogStreamLabelset;
+
+  // Sequential number for locating fragment in stream. Set by caller.
   public index: number;
   public parent: DummyStream | undefined;
   public stats: LogStreamFragmentStats | undefined;
