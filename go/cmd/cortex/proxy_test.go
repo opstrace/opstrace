@@ -31,7 +31,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/opstrace/opstrace/go/pkg/middleware"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 func createUpstream429Responder() (*url.URL, func()) {
