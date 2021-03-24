@@ -78,7 +78,7 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-19
     rm -f docker-19.03.14.tgz
 
 # Set up golang. Required to run golanglint-ci in the linter step.
-ENV GOLANG_VERSION 1.16
+ENV GOLANG_VERSION 1.16.2
 RUN curl -fsSLO https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && \
     tar -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz -C /usr/local/ && \
     rm -f go${GOLANG_VERSION}.linux-amd64.tar.gz
