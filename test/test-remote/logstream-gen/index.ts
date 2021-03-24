@@ -611,6 +611,8 @@ async function createNewDummyStreams(
     }
     streams.push(stream);
   }
+
+  log.info("stream initialization finished");
   return streams;
 }
 
@@ -635,7 +637,10 @@ async function performWriteReadCycle(
     );
   }
 
+  log.info("cycle %s: entering write phase", cyclenum);
   const writestats = await writePhase(dummystreams);
+
+  log.info("cycle %s: entering read phase", cyclenum);
   const readstats = await readPhase(dummystreams);
 
   const report = {
@@ -847,6 +852,10 @@ export async function postFragments(
   // actors, but throttle their main activity (fragment generation and
   // serialization) to N_concurrent_writes (think: upper bound between 10**2
   // and 10**3).
+  log.info(
+    "create %s pushrequestProducerAndPOSTer()",
+    CFG.n_concurrent_streams
+  );
   for (const stream of streams) {
     actors.push(pushrequestProducerAndPOSTer(stream, writeConcurSemaphore));
   }
