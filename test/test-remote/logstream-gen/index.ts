@@ -150,8 +150,8 @@ const counter_log_entries_pushed = new promclient.Counter({
 const counter_payload_bytes_pushed = new promclient.Counter({
   name: "counter_payload_bytes_pushed",
   help:
-    "byte length of all pushed log messages / metric samples so far " +
-    "(assumes utf-8 encoding for logs and 8 byte per sample for metrics)"
+    "byte length of all pushed log entries / metric samples so far " +
+    "(12 byte per timestamp, assume utf-8 encoding for logs and 8 bytes per sample for metrics)"
 });
 
 const counter_post_responses = new promclient.Counter({
@@ -705,7 +705,7 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
     megaPayloadBytesSent.toFixed(2)
   );
   log.info(
-    "Payload write net throughput (mean): %s million bytes per second (assumes utf8 for logs and 8 byte per sample for metrics)",
+    "Payload write net throughput (mean): %s million bytes per second (assumes utf8 for logs and 12+8 Bytes per sample for metrics)",
     megaPayloadBytesSentPerSec.toFixed(2)
   );
 
@@ -789,6 +789,7 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
   let nEntriesReadArr;
   try {
     // each validator returns the number of entries read (and validated)
+    // TODO: a little it of progress report here would be nice.
     nEntriesReadArr = await Promise.all(validators);
   } catch (err) {
     log.crit("error during validation: %s", err);
