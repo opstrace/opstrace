@@ -28,7 +28,6 @@ import {
 import { ButtonListItem, ListItemText } from "client/components/List";
 
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
-import InfoIcon from "@material-ui/icons/Info";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -46,17 +45,18 @@ export type PanelItem = {
   text: string;
   altText?: string;
   data: any;
+  subItems?: PanelItem[];
 };
 
 type PanelProps = {
   forceSelected?: number;
   items: PanelItem[];
   onSelect: (item: PanelItem, index: number) => void;
+  makeSubItems: (item: PanelItem, index: number) => PanelItem[];
 };
 
 export const Panel = React.memo((props: PanelProps) => {
-  const { forceSelected, items, onSelect } = props;
-  const classes = useStyles();
+  const { forceSelected, items, onSelect, makeSubItems } = props;
   const [currentTab, setCurrentTab] = useState<number>(forceSelected || -1);
 
   useEffect(() => {
@@ -72,6 +72,9 @@ export const Panel = React.memo((props: PanelProps) => {
     <List>
       {mapIndexed((item: PanelItem, index) => {
         const enabled = currentTab === index;
+        {
+          /*const subItems = item.subItems || makeSubItems(item, index);*/
+        }
         return (
           <React.Fragment key={item.id}>
             <ButtonListItem
@@ -80,12 +83,15 @@ export const Panel = React.memo((props: PanelProps) => {
               button
               onClick={() => toggleTab(item, index)}
             >
-              <PanelIcon item={item} className={classes.avatar} />
+              <PanelIcon item={item} />
               <ListItemText primary={item.text} />
               {enabled ? <ExpandLess /> : <ExpandMore />}
             </ButtonListItem>
             <Collapse in={enabled} timeout="auto" unmountOnExit>
-              <SubItem />
+              <SubItems
+                items={item.subItems || makeSubItems(item, index)}
+                parent={item}
+              />
             </Collapse>
           </React.Fragment>
         );
@@ -96,10 +102,11 @@ export const Panel = React.memo((props: PanelProps) => {
 
 type PanelIconProps = {
   item: PanelItem;
-  className: string;
+  allowNone?: boolean;
 };
 
-const PanelIcon = ({ item, className }: PanelIconProps) => {
+const PanelIcon = ({ item, allowNone }: PanelIconProps) => {
+  const classes = useStyles();
   if (item.icon) {
     const IconComponent = item.icon;
     return (
@@ -112,34 +119,49 @@ const PanelIcon = ({ item, className }: PanelIconProps) => {
       <ListItemAvatar>
         <Avatar
           alt={item.altText || item.text}
-          className={className}
+          className={classes.avatar}
           src={item.avatar}
         />
       </ListItemAvatar>
     );
-  } else {
+  } else if (allowNone !== true) {
     return (
       <ListItemAvatar>
-        <Avatar alt={item.altText || item.text} className={className}>
+        <Avatar alt={item.altText || item.text} className={classes.avatar}>
           {item.text.slice(0, 1).toUpperCase()}
         </Avatar>
       </ListItemAvatar>
     );
+  } else {
+    return null;
   }
 };
 
-type SubItemProps = {};
+type SubItemProps = {
+  items: PanelItem[];
+  parent: PanelItem;
+};
 
-const SubItem = ({}: SubItemProps) => {
+const SubItems = ({ items, parent }: SubItemProps) => {
   const classes = useStyles();
   return (
-    <List component="div" disablePadding>
-      <ButtonListItem selected={true} dense button className={classes.nested}>
-        <ListItemIcon>
-          <InfoIcon />
-        </ListItemIcon>
-        <ListItemText primary="Detail" />
-      </ButtonListItem>
+    <List>
+      {mapIndexed((item: PanelItem, index) => {
+        const enabled = false;
+        return (
+          <React.Fragment key={`${parent.id}-${item.id}`}>
+            <ButtonListItem
+              selected={enabled}
+              dense
+              button
+              className={classes.nested}
+            >
+              <PanelIcon item={item} allowNone={true} />
+              <ListItemText primary={item.text} />
+            </ButtonListItem>
+          </React.Fragment>
+        );
+      })(items)}
     </List>
   );
 };

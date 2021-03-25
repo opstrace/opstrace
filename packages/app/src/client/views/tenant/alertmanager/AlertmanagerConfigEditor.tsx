@@ -152,7 +152,7 @@ const AlertmanagerConfigEditor = () => {
             <Card p={3}>
               <CardHeader
                 titleTypographyProps={{ variant: "h5" }}
-                title={`${tenant.name} / Alertmanager Configuration`}
+                title="Alertmanager Configuration"
               />
               <CardContent>
                 <Box display="flex" height="500px" width="700px">

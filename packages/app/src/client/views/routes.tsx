@@ -110,15 +110,25 @@ const AuthenticatedRoutes = () => {
           component={UserDetail}
         />
         <Route
-          key="/cluster/tenants/:tenantId/alert-manager-config"
-          path="/cluster/tenants/:tenantId/alert-manager-config"
-          component={AlertmanagerConfigEditor}
-        />
-        <Route
-          key="/cluster/tenants/:tenant"
-          path="/cluster/tenants/:tenant"
-          component={TenantDetail}
-        />
+          key="/cluster/tenants/:tenantId"
+          path="/cluster/tenants/:tenantId"
+        >
+          <Switch>
+            <Route
+              exact
+              key="/cluster/tenants/:tenantId/alertmanager-config"
+              path="/cluster/tenants/:tenantId/alertmanager-config"
+              component={AlertmanagerConfigEditor}
+            />
+            <Route
+              exact
+              key="/cluster/tenants/:tenantId"
+              path="/cluster/tenants/:tenantId"
+              component={TenantDetail}
+            />
+            <Route key="*" path="*" component={NotFound} />
+          </Switch>
+        </Route>
         <Route key="*" path="*" component={NotFound} />
       </Switch>
       <HelpDialog />

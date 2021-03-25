@@ -29,7 +29,7 @@ import { TenantPanel } from "./TenantPanel";
 import { UserPanel } from "./UserPanel";
 
 const ClusterSidebar = () => {
-  const params = useParams<{ id?: string; tenant?: string }>();
+  const params = useParams<{ id?: string; tenantId?: string }>();
   const [activePanel, setActivePanel] = useState<string>(
     params.id ? "user" : "tenant"
   );
@@ -81,7 +81,7 @@ const ClusterSidebar = () => {
           // actions={tenantActions}
         >
           <TenantPanel
-            defaultId={activePanel === "tenant" ? params.tenant : undefined}
+            defaultId={activePanel === "tenant" ? params.tenantId : undefined}
             onSelect={onTenantSelect}
           />
         </SideBarContainer>

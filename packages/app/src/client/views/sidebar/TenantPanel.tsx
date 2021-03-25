@@ -56,6 +56,13 @@ export const TenantPanel = (props: TenantPanelProps) => {
     [onSelect]
   );
 
+  const makeSubItems = (item: PanelItem, index: number) => {
+    return [
+      { id: "detail", text: "Detail", data: {} },
+      { id: "alertmanager", text: "Alertmanager", data: {} }
+    ];
+  };
+
   return (
     <>
       <TenantPicker />
@@ -65,6 +72,7 @@ export const TenantPanel = (props: TenantPanelProps) => {
         forceSelected={selectedIndex}
         items={tenantsToItems(tenants)}
         onSelect={selectCallback}
+        makeSubItems={makeSubItems}
       />
     </>
   );
