@@ -719,6 +719,8 @@ go-unit-tests:
 ts-unit-tests:
 	@echo "--- run lib unit tests"
 	cd lib/kubernetes && CI=true yarn test
+	@echo "--- run cli unit tests"
+	cd packages/cli && CI=true yarn test
 
 .PHONY: preamble
 preamble:
