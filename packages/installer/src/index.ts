@@ -36,7 +36,7 @@ import {
   getFirewallConfig,
   getClusterConfig,
   getDnsConfig,
-  NewRenderedClusterConfigType
+  LatestClusterConfigType
 } from "@opstrace/config";
 
 import { getKubeConfig, k8sListNamespacesOrError } from "@opstrace/kubernetes";
@@ -108,7 +108,7 @@ const CREATE_ATTEMPTS = 3;
 const CREATE_ATTEMPT_TIMEOUT_SECONDS = 60 * 40;
 
 function* createClusterCore() {
-  const ccfg: NewRenderedClusterConfigType = getClusterConfig();
+  const ccfg: LatestClusterConfigType = getClusterConfig();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const gcpCredFilePath: string = process.env[
     "GOOGLE_APPLICATION_CREDENTIALS"

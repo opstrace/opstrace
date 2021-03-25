@@ -21,9 +21,9 @@ import { setAWSRegion } from "@opstrace/aws";
 import { GCPAuthOptions } from "@opstrace/gcp";
 
 import {
-  NewRenderedClusterConfigType,
-  InfraConfigTypeAWS,
-  InfraConfigTypeGCP,
+  LatestClusterConfigType,
+  LatestAWSInfraConfigType,
+  LatestGCPInfraConfigType,
   setClusterConfig,
   REGION_EKS_AMI_MAPPING
 } from "@opstrace/config";
@@ -47,8 +47,8 @@ type TenantApiTokensType = Dict<string>;
 export async function create(): Promise<void> {
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
     schemas.ClusterConfigFileSchemaType,
-    InfraConfigTypeAWS | undefined,
-    InfraConfigTypeGCP | undefined
+    LatestAWSInfraConfigType | undefined,
+    LatestGCPInfraConfigType | undefined
   ] = await ucc.uccGetAndValidate(
     cli.CLIARGS.clusterConfigFilePath,
     cli.CLIARGS.cloudProvider
@@ -72,7 +72,7 @@ export async function create(): Promise<void> {
   }
 
   // renderedClusterConfig: internal, complete
-  const renderedClusterConfig: NewRenderedClusterConfigType = {
+  const renderedClusterConfig: LatestClusterConfigType = {
     ...userClusterConfig,
     ...{
       aws: infraConfigAWS,
@@ -124,7 +124,7 @@ export async function create(): Promise<void> {
   await createCluster(util.smErrorLastResort);
 }
 
-async function promptForResourceCreation(ccfg: NewRenderedClusterConfigType) {
+async function promptForResourceCreation(ccfg: LatestClusterConfigType) {
   if (ccfg.cloud_provider === "aws") {
     const url = `https://go.opstrace.com/cli-aws-mutating-api-calls/${BUILD_INFO.VERSION_STRING}`;
     log.info(
