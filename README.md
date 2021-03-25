@@ -12,22 +12,14 @@
 # Secure observability, deployed in your own network
 
 Opstrace deploys secure, horizontally-scalable open source observability in your own cloud account, combining open APIs with the simple user experience of a large service provider.
-It's an open source alternative to big services like Datadog, SignalFX, and many others.
-
-Since **data never leaves your network**, it remains private.
-
-With **authenticated multi-tenant APIs**, each team or environment can have their own protected sandbox to work with (tenants offer authorization and rate-limiting).
-
-Storing data in your cloud provider's object store (e.g. S3) and exposing data retention primitives makes cost **controllable and up to 10x cheaper** than popular metered service providers.
 
 ## Quick Start
 
-Want to kick the tires?
-Spin up an Opstrace cluster in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
+Install Opstrace in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
 
 ## Documentation
 
-You can find the Opstrace documentation at [opstrace.com/docs](https://go.opstrace.com/docs).
+You can find the Opstrace documentation in [/docs](/docs).
 We would also like to invite you to improve these docs together with us and have a [corresponding guide](./docs/guides/contributor/writing-docs.md) for that.
 
 ## Contributing
