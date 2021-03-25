@@ -46,7 +46,7 @@ type TenantApiTokensType = Dict<string>;
 
 export async function create(): Promise<void> {
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
-    schemas.ClusterConfigFileSchemaType,
+    schemas.LatestClusterConfigFileSchemaType,
     LatestAWSInfraConfigType | undefined,
     LatestGCPInfraConfigType | undefined
   ] = await ucc.uccGetAndValidate(
@@ -90,9 +90,12 @@ export async function create(): Promise<void> {
 
   // Sanity check. It's a bug (not user error) when this fails. Make
   // corresponding checks beforehand.
-  schemas.renderedClusterConfigSchema.validateSync(renderedClusterConfig, {
-    strict: true
-  });
+  schemas.LatestRenderedClusterConfigSchema.validateSync(
+    renderedClusterConfig,
+    {
+      strict: true
+    }
+  );
 
   // make config for current context globally known in installer
   // dirty cfg-as-singleton-immutable approach
@@ -152,7 +155,7 @@ function writeTenantApiTokenFiles(tenantApiTokens: Dict<string>) {
 }
 
 function genCryptoMaterialForAPIAuth(
-  ucc: schemas.ClusterConfigFileSchemaType
+  ucc: schemas.LatestClusterConfigFileSchemaType
 ): [KeysetPemType, TenantApiTokensType] {
   const tenantApiTokens: Dict<string> = {};
 
