@@ -35,19 +35,19 @@ import Typography from "client/components/Typography/Typography";
 import { ExternalLink } from "client/components/Link";
 
 const TenantDetail = () => {
-  const params = useParams<{ tenant: string }>();
+  const params = useParams<{ tenantId: string }>();
   const history = useHistory();
   const tenants = useTenantList();
   const dispatch = useDispatch();
 
-  const selectedTenant = useMemo(
-    () => tenants.find(t => t.name === params.tenant),
-    [params.tenant, tenants]
-  );
+  const tenant = useMemo(() => tenants.find(t => t.name === params.tenantId), [
+    params.tenantId,
+    tenants
+  ]);
 
   const { activatePickerWithText } = usePickerService(
     {
-      title: `Delete ${selectedTenant?.name}?`,
+      title: `Delete ${tenant?.name}?`,
       activationPrefix: "delete tenant directly?:",
       disableFilter: true,
       disableInput: true,
@@ -62,15 +62,15 @@ const TenantDetail = () => {
         }
       ],
       onSelected: option => {
-        if (option.id === "yes" && selectedTenant?.name) {
-          dispatch(deleteTenant(selectedTenant?.name));
+        if (option.id === "yes" && tenant?.name) {
+          dispatch(deleteTenant(tenant?.name));
         }
       }
     },
-    [selectedTenant?.name]
+    [tenant?.name]
   );
 
-  if (!selectedTenant)
+  if (!tenant)
     return (
       <Layout sidebar={SideBar}>
         <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
@@ -100,7 +100,7 @@ const TenantDetail = () => {
                         size="medium"
                         onClick={() =>
                           history.push(
-                            `/cluster/tenants/${selectedTenant.name}/alert-manager-config`
+                            `/cluster/tenants/${tenant.name}/alertmanager-config`
                           )
                         }
                       >
@@ -111,7 +111,7 @@ const TenantDetail = () => {
                       <Button
                         variant="outlined"
                         size="medium"
-                        disabled={selectedTenant.type === "SYSTEM"}
+                        disabled={tenant.type === "SYSTEM"}
                         onClick={() =>
                           activatePickerWithText("delete tenant directly?: ")
                         }
@@ -121,7 +121,7 @@ const TenantDetail = () => {
                     </Box>
                   </Box>
                 }
-                title={selectedTenant.name}
+                title={tenant.name}
               />
               <CardContent>
                 <Box display="flex">
@@ -132,14 +132,12 @@ const TenantDetail = () => {
                   <Box display="flex" flexDirection="column" flexGrow={1}>
                     <Attribute.Value>
                       <ExternalLink
-                        href={`${window.location.protocol}//${selectedTenant.name}.${window.location.host}`}
+                        href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
                       >
-                        {`${selectedTenant.name}.${window.location.host}`}
+                        {`${tenant.name}.${window.location.host}`}
                       </ExternalLink>
                     </Attribute.Value>
-                    <Attribute.Value>
-                      {selectedTenant.created_at}
-                    </Attribute.Value>
+                    <Attribute.Value>{tenant.created_at}</Attribute.Value>
                   </Box>
                 </Box>
               </CardContent>
