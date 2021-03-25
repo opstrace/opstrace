@@ -15,6 +15,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { findIndex, propEq } from "ramda";
 
 import useTenantList from "state/tenant/hooks/useTenantList";
@@ -30,36 +31,44 @@ import TenantPicker from "client/views/tenant/TenantPicker";
 
 type TenantPanelProps = {
   defaultId?: string;
-  onSelect: (tenant: Tenant, index: number) => void;
 };
 
 export const TenantPanel = (props: TenantPanelProps) => {
-  const { defaultId, onSelect } = props;
+  const { defaultId } = props;
   const [selectedIndex, setSelectedIndex] = useState<number>();
   const tenants = useTenantList();
+  const history = useHistory();
 
   useEffect(() => {
     if (defaultId) {
       const newIndex = findIndex(propEq("name", defaultId))(tenants);
       setSelectedIndex(newIndex);
-      if (newIndex === -1 && onSelect && tenants[0]) {
-        onSelect(tenants[0], 0);
+      if (newIndex === -1 && tenants[0]) {
+        history.push(`/cluster/tenants/${tenants[0].name}`);
       }
     }
-  }, [tenants, onSelect, defaultId]);
+  }, [tenants, defaultId]);
 
   const selectCallback = useCallback(
-    (item: PanelItem, index: number) => {
+    (
+      item: PanelItem,
+      index: number,
+      subItem?: PanelItem,
+      subItemIndex?: number
+    ) => {
       setSelectedIndex(index);
-      if (onSelect) onSelect(item.data, index);
+      console.log("subItem click", subItem, subItemIndex);
+      if (subItem && subItem.id !== "detail")
+        history.push(`/cluster/tenants/${item.data.name}/${subItem.id}`);
+      else history.push(`/cluster/tenants/${item.data.name}`);
     },
-    [onSelect]
+    [history]
   );
 
   const makeSubItems = (item: PanelItem, index: number) => {
     return [
       { id: "detail", text: "Detail", data: {} },
-      { id: "alertmanager", text: "Alertmanager", data: {} }
+      { id: "alertmanager-config", text: "Alertmanager", data: {} }
     ];
   };
 

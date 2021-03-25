@@ -51,7 +51,12 @@ export type PanelItem = {
 type PanelProps = {
   forceSelected?: number;
   items: PanelItem[];
-  onSelect: (item: PanelItem, index: number) => void;
+  onSelect: (
+    item: PanelItem,
+    index: number,
+    subItem?: PanelItem,
+    subItemIndex?: number
+  ) => void;
   makeSubItems: (item: PanelItem, index: number) => PanelItem[];
 };
 
@@ -72,9 +77,6 @@ export const Panel = React.memo((props: PanelProps) => {
     <List>
       {mapIndexed((item: PanelItem, index) => {
         const enabled = currentTab === index;
-        {
-          /*const subItems = item.subItems || makeSubItems(item, index);*/
-        }
         return (
           <React.Fragment key={item.id}>
             <ButtonListItem
@@ -91,6 +93,9 @@ export const Panel = React.memo((props: PanelProps) => {
               <SubItems
                 items={item.subItems || makeSubItems(item, index)}
                 parent={item}
+                onClick={(subItem, subItemIndex) => {
+                  onSelect(item, index, subItem, subItemIndex);
+                }}
               />
             </Collapse>
           </React.Fragment>
@@ -140,9 +145,10 @@ const PanelIcon = ({ item, allowNone }: PanelIconProps) => {
 type SubItemProps = {
   items: PanelItem[];
   parent: PanelItem;
+  onClick: (item: PanelItem, index: number) => void;
 };
 
-const SubItems = ({ items, parent }: SubItemProps) => {
+const SubItems = ({ items, parent, onClick }: SubItemProps) => {
   const classes = useStyles();
   return (
     <List>
@@ -155,6 +161,7 @@ const SubItems = ({ items, parent }: SubItemProps) => {
               dense
               button
               className={classes.nested}
+              onClick={() => onClick(item, index)}
             >
               <PanelIcon item={item} allowNone={true} />
               <ListItemText primary={item.text} />
