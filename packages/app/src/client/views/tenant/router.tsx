@@ -20,8 +20,9 @@ import { Switch, Route } from "react-router";
 import SideBar from "client/views/sidebar";
 import Layout from "client/layout/MainContent";
 
-import TenantDetail from "client/views/tenant/TenantDetail";
-import AlertmanagerConfigEditor from "client/views/tenant/alertmanager/AlertmanagerConfigEditor";
+import TenantDetail from "./TenantDetail";
+import AlertmanagerConfigEditor from "./alertmanager/AlertmanagerConfigEditor";
+import TenantCredentials from "./Credentials";
 
 import NotFound from "client/views/404/404";
 
@@ -34,6 +35,12 @@ const TenantRouter = () => {
           key="/cluster/tenants/:tenantId/alertmanager-config"
           path="/cluster/tenants/:tenantId/alertmanager-config"
           component={AlertmanagerConfigEditor}
+        />
+        <Route
+          exact
+          key="/cluster/tenants/:tenantId/cloud-provider-metrics"
+          path="/cluster/tenants/:tenantId/cloud-provider-metrics"
+          component={TenantCredentials}
         />
         <Route
           exact

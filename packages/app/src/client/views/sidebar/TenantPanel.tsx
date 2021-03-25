@@ -47,7 +47,7 @@ export const TenantPanel = (props: TenantPanelProps) => {
         history.push(`/cluster/tenants/${tenants[0].name}`);
       }
     }
-  }, [tenants, defaultId]);
+  }, [tenants, defaultId, history]);
 
   const selectCallback = useCallback(
     (
@@ -68,7 +68,12 @@ export const TenantPanel = (props: TenantPanelProps) => {
   const makeSubItems = (item: PanelItem, index: number) => {
     return [
       { id: "detail", text: "Detail", data: {} },
-      { id: "alertmanager-config", text: "Alertmanager", data: {} }
+      {
+        id: "alertmanager-config",
+        text: "Alertmanager Configuration",
+        data: {}
+      },
+      { id: "cloud-provider-metrics", text: "Cloud Provider Metrics", data: {} }
     ];
   };
 
