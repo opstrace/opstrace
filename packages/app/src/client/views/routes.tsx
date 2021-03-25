@@ -28,8 +28,7 @@ import Modules from "./module/Modules";
 import ChatView from "./chat";
 import HistoryView from "./history";
 import UserDetail from "client/views/user/UserDetail";
-import TenantDetail from "client/views/tenant/TenantDetail";
-import AlertmanagerConfigEditor from "client/views/tenant/alertmanager/AlertmanagerConfigEditor";
+import TenantRouter from "client/views/tenant/router";
 import HelpDialog from "./help";
 import NotFound from "./404/404";
 import FullPage from "client/layout/FullPage";
@@ -110,25 +109,11 @@ const AuthenticatedRoutes = () => {
           component={UserDetail}
         />
         <Route
-          key="/cluster/tenants/:tenantId"
-          path="/cluster/tenants/:tenantId"
-        >
-          <Switch>
-            <Route
-              exact
-              key="/cluster/tenants/:tenantId/alertmanager-config"
-              path="/cluster/tenants/:tenantId/alertmanager-config"
-              component={AlertmanagerConfigEditor}
-            />
-            <Route
-              exact
-              key="/cluster/tenants/:tenantId"
-              path="/cluster/tenants/:tenantId"
-              component={TenantDetail}
-            />
-            <Route key="*" path="*" component={NotFound} />
-          </Switch>
-        </Route>
+          key="/cluster/tenants/:tenantId/:page?"
+          path="/cluster/tenants/:tenantId/:page?"
+          component={TenantRouter}
+        />
+
         <Route key="*" path="*" component={NotFound} />
       </Switch>
       <HelpDialog />
