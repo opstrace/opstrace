@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { useHistory, useParams } from "react-router-dom";
 
 import IconButton from "@material-ui/core/IconButton";
@@ -23,30 +23,20 @@ import AddIcon from "@material-ui/icons/Add";
 import { usePickerService } from "client/services/Picker";
 import { SideBar, SideBarContainer } from "client/components/SideBar";
 import { User } from "state/user/types";
-import { Tenant } from "state/tenant/types";
+// import { Tenant } from "state/tenant/types";
 
 import { TenantPanel } from "./TenantPanel";
 import { UserPanel } from "./UserPanel";
 
 const ClusterSidebar = () => {
   const params = useParams<{ id?: string; tenantId?: string; page?: string }>();
-  const [activePanel, setActivePanel] = useState<string>(
-    params.id ? "user" : "tenant"
-  );
+  const activePanel = params.id ? "user" : "tenant";
   const { activatePickerWithText } = usePickerService();
   const history = useHistory();
 
   const onUserSelect = useCallback(
     (user: User) => {
-      setActivePanel("user");
       history.push(`/cluster/users/${user.id}`);
-    },
-    [history]
-  );
-  const onTenantSelect = useCallback(
-    (tenant: Tenant, index) => {
-      setActivePanel("tenant");
-      history.push(`/cluster/tenants/${tenant.name}`);
     },
     [history]
   );
@@ -82,7 +72,6 @@ const ClusterSidebar = () => {
         >
           <TenantPanel
             defaultId={activePanel === "tenant" ? params.tenantId : undefined}
-            onSelect={onTenantSelect}
           />
         </SideBarContainer>
         <SideBarContainer title="Users" flexGrow={3} actions={userActions}>

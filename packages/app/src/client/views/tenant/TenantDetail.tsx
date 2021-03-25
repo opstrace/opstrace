@@ -15,7 +15,7 @@
  */
 
 import React, { useMemo } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 import useTenantList from "state/tenant/hooks/useTenantList";
@@ -33,7 +33,6 @@ import { ExternalLink } from "client/components/Link";
 
 const TenantDetail = () => {
   const params = useParams<{ tenantId: string }>();
-  const history = useHistory();
   const tenants = useTenantList();
   const dispatch = useDispatch();
 
@@ -88,19 +87,6 @@ const TenantDetail = () => {
               titleTypographyProps={{ variant: "h5" }}
               action={
                 <Box ml={3} display="flex" flexWrap="wrap">
-                  <Box p={1}>
-                    <Button
-                      variant="outlined"
-                      size="medium"
-                      onClick={() =>
-                        history.push(
-                          `/cluster/tenants/${tenant.name}/alertmanager-config`
-                        )
-                      }
-                    >
-                      Alerts
-                    </Button>
-                  </Box>
                   <Box p={1}>
                     <Button
                       variant="outlined"
