@@ -29,7 +29,7 @@ import { TenantPanel } from "./TenantPanel";
 import { UserPanel } from "./UserPanel";
 
 const ClusterSidebar = () => {
-  const params = useParams<{ id?: string; tenantId?: string }>();
+  const params = useParams<{ id?: string; tenantId?: string; page?: string }>();
   const [activePanel, setActivePanel] = useState<string>(
     params.id ? "user" : "tenant"
   );

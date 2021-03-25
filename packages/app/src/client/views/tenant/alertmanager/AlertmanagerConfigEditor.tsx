@@ -27,11 +27,8 @@ import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import * as yamlParser from "js-yaml";
 import { YamlEditor } from "client/components/Editor";
 
-import SideBar from "client/views/sidebar";
-
 import { AlertmanagerUpdateResponse } from "state/graphql-api-types";
 
-import Layout from "client/layout/MainContent";
 import Skeleton from "@material-ui/lab/Skeleton";
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -132,51 +129,47 @@ const AlertmanagerConfigEditor = () => {
 
   if (!tenant || !formState)
     return (
-      <Layout sidebar={SideBar}>
-        <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
-      </Layout>
+      <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
     );
   else
     return (
-      <Layout sidebar={SideBar}>
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
-          <Box maxWidth={700}>
-            <Card p={3}>
-              <CardHeader
-                titleTypographyProps={{ variant: "h5" }}
-                title="Alertmanager Configuration"
-              />
-              <CardContent>
-                <Box display="flex" height="500px" width="700px">
-                  <YamlEditor
-                    filename="alertmanager-config.yaml"
-                    jsonSchema={jsonSchema}
-                    data={alertmanager?.config || ""}
-                    onChange={handleConfigChange}
-                  />
-                </Box>
-              </CardContent>
-              <Button
-                variant="contained"
-                state="primary"
-                disabled={!configValid || formState.status !== "active"}
-                onClick={handleSave}
-              >
-                publish
-              </Button>
-              <ErrorPanel response={formState.data.remoteValidation} />
-            </Card>
-          </Box>
+      <Box
+        width="100%"
+        height="100%"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexWrap="wrap"
+        p={1}
+      >
+        <Box maxWidth={700}>
+          <Card p={3}>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title="Alertmanager Configuration"
+            />
+            <CardContent>
+              <Box display="flex" height="500px" width="700px">
+                <YamlEditor
+                  filename="alertmanager-config.yaml"
+                  jsonSchema={jsonSchema}
+                  data={alertmanager?.config || ""}
+                  onChange={handleConfigChange}
+                />
+              </Box>
+            </CardContent>
+            <Button
+              variant="contained"
+              state="primary"
+              disabled={!configValid || formState.status !== "active"}
+              onClick={handleSave}
+            >
+              publish
+            </Button>
+            <ErrorPanel response={formState.data.remoteValidation} />
+          </Card>
         </Box>
-      </Layout>
+      </Box>
     );
 };
 

@@ -23,10 +23,7 @@ import { usePickerService } from "client/services/Picker";
 
 import { deleteTenant } from "state/tenant/actions";
 
-import SideBar from "client/views/sidebar";
-
 import Skeleton from "@material-ui/lab/Skeleton";
-import Layout from "client/layout/MainContent";
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -72,82 +69,78 @@ const TenantDetail = () => {
 
   if (!tenant)
     return (
-      <Layout sidebar={SideBar}>
-        <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
-      </Layout>
+      <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
     );
   else
     return (
-      <Layout sidebar={SideBar}>
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
-          <Box maxWidth={700}>
-            <Card p={3}>
-              <CardHeader
-                titleTypographyProps={{ variant: "h5" }}
-                action={
-                  <Box ml={3} display="flex" flexWrap="wrap">
-                    <Box p={1}>
-                      <Button
-                        variant="outlined"
-                        size="medium"
-                        onClick={() =>
-                          history.push(
-                            `/cluster/tenants/${tenant.name}/alertmanager-config`
-                          )
-                        }
-                      >
-                        Alerts
-                      </Button>
-                    </Box>
-                    <Box p={1}>
-                      <Button
-                        variant="outlined"
-                        size="medium"
-                        disabled={tenant.type === "SYSTEM"}
-                        onClick={() =>
-                          activatePickerWithText("delete tenant directly?: ")
-                        }
-                      >
-                        Delete
-                      </Button>
-                    </Box>
+      <Box
+        width="100%"
+        height="100%"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexWrap="wrap"
+        p={1}
+      >
+        <Box maxWidth={700}>
+          <Card p={3}>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              action={
+                <Box ml={3} display="flex" flexWrap="wrap">
+                  <Box p={1}>
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      onClick={() =>
+                        history.push(
+                          `/cluster/tenants/${tenant.name}/alertmanager-config`
+                        )
+                      }
+                    >
+                      Alerts
+                    </Button>
                   </Box>
-                }
-                title={tenant.name}
-              />
-              <CardContent>
-                <Box display="flex">
-                  <Box display="flex" flexDirection="column">
-                    <Attribute.Key>Grafana:</Attribute.Key>
-                    <Attribute.Key>Created:</Attribute.Key>
-                  </Box>
-                  <Box display="flex" flexDirection="column" flexGrow={1}>
-                    <Attribute.Value>
-                      <ExternalLink
-                        href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
-                      >
-                        {`${tenant.name}.${window.location.host}`}
-                      </ExternalLink>
-                    </Attribute.Value>
-                    <Attribute.Value>{tenant.created_at}</Attribute.Value>
+                  <Box p={1}>
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      disabled={tenant.type === "SYSTEM"}
+                      onClick={() =>
+                        activatePickerWithText("delete tenant directly?: ")
+                      }
+                    >
+                      Delete
+                    </Button>
                   </Box>
                 </Box>
-              </CardContent>
-            </Card>
-            <Typography color="textSecondary">
-              New tenants can take 5 minutes to provision with dns propagation
-            </Typography>
-          </Box>
+              }
+              title={tenant.name}
+            />
+            <CardContent>
+              <Box display="flex">
+                <Box display="flex" flexDirection="column">
+                  <Attribute.Key>Grafana:</Attribute.Key>
+                  <Attribute.Key>Created:</Attribute.Key>
+                </Box>
+                <Box display="flex" flexDirection="column" flexGrow={1}>
+                  <Attribute.Value>
+                    <ExternalLink
+                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
+                    >
+                      {`${tenant.name}.${window.location.host}`}
+                    </ExternalLink>
+                  </Attribute.Value>
+                  <Attribute.Value>{tenant.created_at}</Attribute.Value>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+          <Typography color="textSecondary">
+            New tenants can take 5 minutes to provision with dns propagation
+          </Typography>
         </Box>
-      </Layout>
+      </Box>
     );
 };
 
