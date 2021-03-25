@@ -22,7 +22,7 @@ import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
 // For example, `us-west-2` is the _code_ describing a _region_ in AWS.
 // `us-west-2a` encodes availability zone "a" within that region.
-export const AWSInfraConfigSchemaV2 = yup
+export const AWSInfraConfigSchemaV1 = yup
   .object({
     instance_type: yup.string().default("t3.xlarge"),
     region: yup.string().oneOf(KNOWN_AWS_REGIONS).default("us-west-2"),
@@ -39,7 +39,7 @@ export const AWSInfraConfigSchemaV2 = yup
 // collections of zones" "The fully-qualified name for a zone is made up of
 // <region>-<zone>. For example, the fully qualified name for zone a in region
 // us-central1 is us-central1-a."
-export const GCPInfraConfigSchemaV2 = yup
+export const GCPInfraConfigSchemaV1 = yup
   .object({
     machine_type: yup.string().default("n1-standard-4"),
     region: yup.string().default("us-west2"),
@@ -52,10 +52,10 @@ export const GCPInfraConfigSchemaV2 = yup
   .defined();
 
 // schema for validating user-given cluster config document.
-export const ClusterConfigFileSchemaV2 = yup
+export const ClusterConfigFileSchemaV1 = yup
   .object({
     // infra-related things, provider-independent
-    node_count: yup.number().positive().integer().default(3),
+    node_count: yup.number().positive().integer().required(),
 
     // Note(JP): CONTROLLER_IMAGE_DEFAULT is supposed to be inserted by
     // CI / the build system (for any build, there is supposed to be a sane
@@ -77,10 +77,10 @@ export const ClusterConfigFileSchemaV2 = yup
     cert_issuer: yup
       .string()
       .oneOf(["letsencrypt-prod", "letsencrypt-staging"])
-      .default("letsencrypt-prod"),
+      .default("letsencrypt-staging"),
 
-    log_retention_days: yup.number().positive().integer().default(7),
-    metric_retention_days: yup.number().positive().integer().default(7),
+    log_retention: yup.number().positive().integer().default(7),
+    metric_retention: yup.number().positive().integer().default(7),
 
     data_api_authentication_disabled: yup.boolean().default(false),
     data_api_authorized_ip_ranges: yup
@@ -108,7 +108,7 @@ export const ClusterConfigFileSchemaV2 = yup
 // cluster config schema with additional properties merged-in, not contained
 // in original user-given cluster config document.
 // todo: add installer version? As interesting metadata.
-export const RenderedClusterConfigSchemaV2 = ClusterConfigFileSchemaV2.concat(
+export const RenderedClusterConfigSchemaV1 = ClusterConfigFileSchemaV1.concat(
   yup
     .object()
     .shape({
@@ -132,10 +132,9 @@ export const RenderedClusterConfigSchemaV2 = ClusterConfigFileSchemaV2.concat(
     .defined()
 );
 
-export type RenderedClusterConfigSchemaTypeV2 = yup.InferType<
-  typeof RenderedClusterConfigSchemaV2
+export type RenderedClusterConfigSchemaTypeV1 = yup.InferType<
+  typeof RenderedClusterConfigSchemaV1
 >;
-
-export type ClusterConfigFileSchemaTypeV2 = yup.InferType<
-  typeof ClusterConfigFileSchemaV2
+export type ClusterConfigFileSchemaTypeV1 = yup.InferType<
+  typeof ClusterConfigFileSchemaV1
 >;

@@ -20,9 +20,9 @@ import yaml from "js-yaml";
 
 import {
   LatestClusterConfigFileSchemaType,
-  LatestClusterConfigFileSchema,
   LatestAWSInfraConfigSchema,
-  LatestGCPInfraConfigSchema
+  LatestGCPInfraConfigSchema,
+  upgradeToLatest
 } from "./schemas";
 
 import {
@@ -69,22 +69,13 @@ export async function uccGetAndValidate(
     JSON.stringify(ucc, null, 2)
   );
 
-  // "Strict schemas skip coercion and transformation attempts, validating the value "as is"."
-  // This is mainly to error out upon unexpected parameters: to 'enforce' yup's
-  // noUnknown, see
-  // https://github.com/jquense/yup/issues/829#issuecomment-606030995
-  // https://github.com/jquense/yup/issues/697
-  try {
-    LatestClusterConfigFileSchema.validateSync(ucc, { strict: true });
-  } catch (err) {
-    die(`invalid cluster config document: ${err.message}`);
-  }
+  let uccWithDefaults: LatestClusterConfigFileSchemaType;
 
-  // validate again, this time "only" to interpolate with defaults, see
-  // https://github.com/jquense/yup/pull/961
-  const uccWithDefaults: LatestClusterConfigFileSchemaType = LatestClusterConfigFileSchema.validateSync(
-    ucc
-  );
+  try {
+    uccWithDefaults = upgradeToLatest(ucc);
+  } catch (err) {
+    die(`invalid cluster config: ${err.message}`);
+  }
 
   // now process provider-specific part of config
 

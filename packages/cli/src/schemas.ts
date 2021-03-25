@@ -14,23 +14,61 @@
  * limitations under the License.
  */
 
-import * as yup from "yup";
+
+import { log } from "@opstrace/utils";
+
+import {
+  ClusterConfigFileSchemaTypeV1, ClusterConfigFileSchemaV1
+} from "./schemasv1";
 
 import {
   AWSInfraConfigSchemaV2,
   GCPInfraConfigSchemaV2,
   ClusterConfigFileSchemaV2,
-  RenderedClusterConfigSchemaV2
+  RenderedClusterConfigSchemaV2,
+  ClusterConfigFileSchemaTypeV2,
+  RenderedClusterConfigSchemaTypeV2
 } from "./schemasv2";
 
+// const pointing to the latest schema versions
 export const LatestAWSInfraConfigSchema = AWSInfraConfigSchemaV2;
 export const LatestGCPInfraConfigSchema = GCPInfraConfigSchemaV2;
 export const LatestClusterConfigFileSchema = ClusterConfigFileSchemaV2;
 export const LatestRenderedClusterConfigSchema = RenderedClusterConfigSchemaV2;
 
-export type LatestRenderedClusterConfigSchemaType = yup.InferType<
-  typeof RenderedClusterConfigSchemaV2
->;
-export type LatestClusterConfigFileSchemaType = yup.InferType<
-  typeof ClusterConfigFileSchemaV2
->;
+// type aliases poiting to the latest version types
+export type LatestRenderedClusterConfigSchemaType = RenderedClusterConfigSchemaTypeV2;
+export type LatestClusterConfigFileSchemaType = ClusterConfigFileSchemaTypeV2;
+
+//
+export type AnyClusterConfigFileSchemaType = ClusterConfigFileSchemaTypeV1 | ClusterConfigFileSchemaTypeV2;
+
+function V1toV2(ucc: ClusterConfigFileSchemaTypeV1): ClusterConfigFileSchemaTypeV2 {
+  const { log_retention, metric_retention, ...restConfig } = ucc;
+  return {
+    ...restConfig,
+    log_retention_days: log_retention,
+    metric_retention_days: metric_retention
+  }
+}
+
+// function that takes any user cluster config and upgrades it to the latest
+// version if necessary.
+// @ts-ignore missing return type on function becaue it'll throw an error
+export function upgradeToLatest(ucc: any): LatestClusterConfigFileSchemaType {
+
+  if (LatestClusterConfigFileSchema.isValidSync(ucc, { strict: true })) {
+    // validate again, this time "only" to interpolate with defaults, see
+    // https://github.com/jquense/yup/pull/961
+    log.debug("got latest cluster config file version");
+    return LatestClusterConfigFileSchema.validateSync(ucc);
+  }
+
+  if (ClusterConfigFileSchemaV1.isValidSync(ucc, {strict: true})) {
+    log.debug("got v1 cluster config file");
+    return V1toV2(ClusterConfigFileSchemaV1.validateSync(ucc));
+  }
+
+  // Possible user error. Parse again to throw a meaningful error message.
+  LatestClusterConfigFileSchema.validateSync(ucc, {strict: true});
+}
