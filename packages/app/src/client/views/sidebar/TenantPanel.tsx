@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,38 +19,39 @@ import { findIndex, propEq } from "ramda";
 
 import useTenantList from "state/tenant/hooks/useTenantList";
 
-import { Tenant } from "state/tenant/types";
+import { Tenant, Tenants } from "state/tenant/types";
+import { tenantsToItems } from "client/views/tenant/utils";
+
+import { Panel, PanelItem } from "client/components/Panel";
 
 import TenantPicker from "client/views/tenant/TenantPicker";
 // import AddTenantDialog from "client/views/tenant/AddTenantDialog";
 // import DeleteTenantDialog from "client/views/tenant/DeleteTenantDialog";
-import TenantList from "client/views/tenant/TenantList";
 
 type TenantPanelProps = {
-  active: boolean;
   defaultId?: string;
   onSelect: (tenant: Tenant, index: number) => void;
 };
 
 export const TenantPanel = (props: TenantPanelProps) => {
-  const { active, defaultId, onSelect } = props;
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const { defaultId, onSelect } = props;
+  const [selectedIndex, setSelectedIndex] = useState<number>();
   const tenants = useTenantList();
 
   useEffect(() => {
-    if (active && defaultId) {
-      const index = findIndex(propEq("name", defaultId))(tenants);
-      if (index !== -1) setSelectedIndex(index);
-      else if (onSelect && tenants[0]) {
+    if (defaultId) {
+      const newIndex = findIndex(propEq("name", defaultId))(tenants);
+      setSelectedIndex(newIndex);
+      if (newIndex === -1 && onSelect && tenants[0]) {
         onSelect(tenants[0], 0);
       }
     }
-  }, [tenants, onSelect, active, defaultId]);
+  }, [tenants, onSelect, defaultId]);
 
   const selectCallback = useCallback(
-    (tenant: Tenant, index: number) => {
+    (item: PanelItem, index: number) => {
       setSelectedIndex(index);
-      if (onSelect) onSelect(tenant, index);
+      if (onSelect) onSelect(item.data, index);
     },
     [onSelect]
   );
@@ -60,11 +61,17 @@ export const TenantPanel = (props: TenantPanelProps) => {
       <TenantPicker />
       {/* <AddTenantDialog /> */}
       {/* <DeleteTenantDialog /> */}
-      <TenantList
-        selectedIndex={selectedIndex}
+      <Panel
+        forceSelected={selectedIndex}
+        items={tenantsToItems(tenants)}
         onSelect={selectCallback}
-        tenants={tenants}
       />
     </>
   );
+};
+
+export type TenantListProps = {
+  selectedIndex: number;
+  tenants: Tenants;
+  onSelect: (tenant: Tenant, index: number) => void;
 };

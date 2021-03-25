@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ const ClusterSidebar = () => {
     [history]
   );
   const onTenantSelect = useCallback(
-    (tenant: Tenant) => {
+    (tenant: Tenant, index) => {
       setActivePanel("tenant");
       history.push(`/cluster/tenants/${tenant.name}`);
     },
@@ -81,8 +81,7 @@ const ClusterSidebar = () => {
           // actions={tenantActions}
         >
           <TenantPanel
-            active={activePanel === "tenant"}
-            defaultId={params.tenant}
+            defaultId={activePanel === "tenant" ? params.tenant : undefined}
             onSelect={onTenantSelect}
           />
         </SideBarContainer>
