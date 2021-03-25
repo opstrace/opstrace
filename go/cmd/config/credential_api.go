@@ -23,11 +23,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
+	"github.com/opstrace/opstrace/go/pkg/config"
 	"github.com/opstrace/opstrace/go/pkg/graphql"
 )
 
 // Information about a credential. Custom type which omits the tenant field.
-// This also given some extra protection that the value isn't disclosed,
+// This also gives some extra protection that the value isn't disclosed,
 // even if it was mistakenly added to the underlying graphql interface.
 type CredentialInfo struct {
 	Name      string `yaml:"name"`
@@ -36,8 +37,32 @@ type CredentialInfo struct {
 	UpdatedAt string `yaml:"updated_at,omitempty"`
 }
 
-func listCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
-	resp, err := credentialAccess.List(tenant)
+// Full credential entry (with secret value) for validation and interaction with GraphQL.
+type Credential struct {
+	Name      string
+	Type      string
+	ValueJSON string
+}
+
+// Raw credential entry received from POST request, converted to a Credential.
+type yamlCredential struct {
+	Name  string      `yaml:"name"`
+	Type  string      `yaml:"type"`
+	Value interface{} `yaml:"value"`
+}
+
+type credentialAPI struct {
+	credentialAccess *config.CredentialAccess
+}
+
+func newCredentialAPI(credentialAccess *config.CredentialAccess) *credentialAPI {
+	return &credentialAPI{
+		credentialAccess,
+	}
+}
+
+func (c *credentialAPI) listCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
+	resp, err := c.credentialAccess.List(tenant)
 	if err != nil {
 		log.Warnf("Listing credentials failed: %s", err)
 		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
@@ -57,55 +82,13 @@ func listCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Full credential entry (with secret value) received from a POST request.
-type Credential struct {
-	Name  string      `yaml:"name"`
-	Type  string      `yaml:"type"`
-	Value interface{} `yaml:"value"` // nested yaml, or payload string, depending on type
-}
-
-func listCredentialTypes(tenant string) (map[string]string, error) {
-	// Collect map of existing name->type so that we can decide between insert vs update
-	existingTypes := make(map[string]string)
-	resp, err := credentialAccess.List(tenant)
-	if err != nil {
-		log.Warnf("Listing credentials failed: %s", err)
-		return nil, err
-	}
-	for _, credential := range resp.Credential {
-		existingTypes[credential.Name] = credential.Type
-	}
-	return existingTypes, nil
-}
-
-// Accepts the tenant name, the name->type mapping of any existin credentials, and the new credential payload.
-// Returns the JSON credential value, whether the credential already exists, and any validation error.
-func validateCredential(existingTypes map[string]string, yamlCredential Credential) (*graphql.Json, bool, error) {
-	value, err := convertCredValue(yamlCredential.Name, yamlCredential.Type, yamlCredential.Value)
-	if err != nil {
-		return nil, false, fmt.Errorf("Credential format validation failed: %s", err)
-	}
-	var existingType string
-	var exists bool
-	if existingType, exists = existingTypes[yamlCredential.Name]; exists {
-		// Explicitly check and complain if the user tries to change the credential type
-		if yamlCredential.Type != "" && existingType != yamlCredential.Type {
-			return nil, false, fmt.Errorf(
-				"Credential '%s' type cannot be updated (current=%s, updated=%s)",
-				yamlCredential.Name, existingType, yamlCredential.Type,
-			)
-		}
-	}
-	return value, exists, nil
-}
-
-func writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
+func (c *credentialAPI) writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 	decoder := yaml.NewDecoder(r.Body)
 	// Return error for unrecognized or duplicate fields in the input
 	decoder.SetStrict(true)
 
 	// Collect map of existing name->type so that we can decide between insert vs update
-	existingTypes, err := listCredentialTypes(tenant)
+	existingTypes, err := c.listCredentialTypes(tenant)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Listing credentials failed: %s", err), http.StatusInternalServerError)
 		return
@@ -116,7 +99,7 @@ func writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 	var inserts []graphql.CredentialInsertInput
 	var updates []graphql.UpdateCredentialVariables
 	for {
-		var yamlCredential Credential
+		var yamlCredential yamlCredential
 		err := decoder.Decode(&yamlCredential)
 		if err != nil {
 			if err != io.EOF {
@@ -128,25 +111,41 @@ func writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 			}
 			break
 		}
-		value, exists, err := validateCredential(existingTypes, yamlCredential)
+		value, err := convertYAMLCredValue(yamlCredential.Name, yamlCredential.Type, yamlCredential.Value)
+		if err != nil {
+			log.Debugf("Parsing credential input at index=%d failed: %s", len(inserts)+len(updates), err)
+			http.Error(w, fmt.Sprintf(
+				"Parsing credential input at index=%d failed: %s", len(inserts)+len(updates), err,
+			), http.StatusBadRequest)
+			return
+		}
+		exists, err := c.validateCredential(
+			existingTypes,
+			Credential{
+				Name:      yamlCredential.Name,
+				Type:      yamlCredential.Type,
+				ValueJSON: *value,
+			},
+		)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		name := graphql.String(yamlCredential.Name)
 		credType := graphql.String(yamlCredential.Type)
+		gvalue := graphql.Json(*value)
 		if exists {
 			// TODO check for no-op updates and skip them (and avoid unnecessary changes to UpdatedAt)
 			updates = append(updates, graphql.UpdateCredentialVariables{
 				Name:      name,
-				Value:     *value,
+				Value:     gvalue,
 				UpdatedAt: now,
 			})
 		} else {
 			inserts = append(inserts, graphql.CredentialInsertInput{
 				Name:      &name,
 				Type:      &credType,
-				Value:     value,
+				Value:     &gvalue,
 				CreatedAt: &now,
 				UpdatedAt: &now,
 			})
@@ -162,7 +161,7 @@ func writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Writing credentials: %d insert, %d update", len(inserts), len(updates))
 
 	if len(inserts) != 0 {
-		err := credentialAccess.Insert(tenant, inserts)
+		err := c.credentialAccess.Insert(tenant, inserts)
 		if err != nil {
 			log.Warnf("Insert: %d credentials failed: %s", len(inserts), err)
 			http.Error(
@@ -175,7 +174,7 @@ func writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 	}
 	if len(updates) != 0 {
 		for _, update := range updates {
-			err := credentialAccess.Update(tenant, update)
+			err := c.credentialAccess.Update(tenant, update)
 			if err != nil {
 				log.Warnf("Update: Credential %s failed: %s", update.Name, err)
 				http.Error(
@@ -189,11 +188,11 @@ func writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getCredential(tenant string, w http.ResponseWriter, r *http.Request) {
+func (c *credentialAPI) getCredential(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Getting credential: %s", name)
 
-	resp, err := credentialAccess.Get(tenant, name)
+	resp, err := c.credentialAccess.Get(tenant, name)
 	if err != nil {
 		log.Warnf("Get: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Getting credential failed: %s", err), http.StatusInternalServerError)
@@ -214,11 +213,11 @@ func getCredential(tenant string, w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func deleteCredential(tenant string, w http.ResponseWriter, r *http.Request) {
+func (c *credentialAPI) deleteCredential(tenant string, w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
 	log.Debugf("Deleting credential: %s", name)
 
-	resp, err := credentialAccess.Delete(tenant, name)
+	resp, err := c.credentialAccess.Delete(tenant, name)
 	if err != nil {
 		log.Warnf("Delete: Credential %s failed: %s", name, err)
 		http.Error(w, fmt.Sprintf("Deleting credential failed: %s", err), http.StatusInternalServerError)
@@ -232,4 +231,41 @@ func deleteCredential(tenant string, w http.ResponseWriter, r *http.Request) {
 
 	encoder := yaml.NewEncoder(w)
 	encoder.Encode(CredentialInfo{Name: resp.DeleteCredentialByPk.Name})
+}
+
+func (c *credentialAPI) listCredentialTypes(tenant string) (map[string]string, error) {
+	// Collect map of existing name->type so that we can decide between insert vs update
+	existingTypes := make(map[string]string)
+	resp, err := c.credentialAccess.List(tenant)
+	if err != nil {
+		log.Warnf("Listing credentials failed: %s", err)
+		return nil, err
+	}
+	for _, credential := range resp.Credential {
+		existingTypes[credential.Name] = credential.Type
+	}
+	return existingTypes, nil
+}
+
+// Accepts the tenant name, the name->type mapping of any existin credentials, and the new credential payload.
+// Returns whether the credential already exists, and any validation error.
+func (c *credentialAPI) validateCredential(existingTypes map[string]string, credential Credential) (bool, error) {
+	// Check that the credential value is valid JSON
+	err := validateCredentialValue(credential.Name, credential.Type, credential.ValueJSON)
+	if err != nil {
+		return false, err
+	}
+
+	// Check that the credential type is not being changed from an existing credential of the same name
+	var existingType string
+	var exists bool
+	if existingType, exists = existingTypes[credential.Name]; exists {
+		if credential.Type != "" && existingType != credential.Type {
+			return false, fmt.Errorf(
+				"Credential '%s' type cannot be updated (current=%s, updated=%s)",
+				credential.Name, existingType, credential.Type,
+			)
+		}
+	}
+	return exists, nil
 }
