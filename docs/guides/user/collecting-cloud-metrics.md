@@ -35,7 +35,7 @@ These instructions show how you can extract metrics from AWS CloudWatch and brin
 
 First we will need to set up an AWS access key with sufficient permissions for accessing CloudWatch.
 The exact process will vary depending on your local procedures around account credentials.
-The underlying [cloudwatch_exporter documentation](https://github.com/prometheus/cloudwatch_exporter#credentials-and-permissions) recommends configuring an IAM policy with `cloudwatch:ListMetrics`, `cloudwatch:GetMetricStatistics`, and `tag:GetResources` permissions.
+The underlying [cloudwatch_exporter documentation](https://github.com/prometheus/cloudwatch_exporter#user-content-credentials-and-permissions) recommends configuring an IAM policy with `cloudwatch:ListMetrics`, `cloudwatch:GetMetricStatistics`, and `tag:GetResources` permissions.
 Once an IAM account has been configured with the necessary scoped access, you should generate a key pair for the account and save it to be submitted to Opstrace.
 
 The generated key pair is submitted to Opstrace as follows.
@@ -59,7 +59,7 @@ Behind the scenes, the credentials will be stored to an internal Postgres databa
 In Prometheus terminology, an "exporter" is a process that fetches metrics from somewhere and makes them available in a form that Prometheus supports.
 Opstrace uses a stock build of the [`cloudwatch_exporter`](https://github.com/prometheus/cloudwatch_exporter) package to support exporting AWS metrics into Opstrace.
 
-The CloudWatch exporter configuration is effectively a pass-through of the underlying settings exposed by the [`cloudwatch_exporter` configuration](https://github.com/prometheus/cloudwatch_exporter#configuration), and should work the same way as documented there.
+The CloudWatch exporter configuration is effectively a pass-through of the underlying settings exposed by the [`cloudwatch_exporter` configuration](https://github.com/prometheus/cloudwatch_exporter#user-content-configuration), and should work the same way as documented there.
 In other words, anything you can do with a stock `cloudwatch_exporter` can also be done via the Opstrace exporter configuration.
 
 The main thing to determine is what metrics should be collected.
@@ -112,7 +112,7 @@ Note that "Stackdriver" is currently being rebranded as "Operations Suite", but 
 
 First we will need to set up a GCP service account with sufficient permissions for accessing Stackdriver.
 The exact process will vary depending on your local procedures around account credentials.
-The underlying [`stackdriver_exporter` documentation](https://github.com/prometheus-community/stackdriver_exporter#credentials-and-permissions) recommends configuring the service account with `roles/monitoring.viewer` access, or you can create a more granular custom role with `monitoring.metricDescriptors.list` and `monitoring.timeSeries.list` access.
+The underlying [`stackdriver_exporter` documentation](https://github.com/prometheus-community/stackdriver_exporter#user-content-credentials-and-permissions) recommends configuring the service account with `roles/monitoring.viewer` access, or you can create a more granular custom role with `monitoring.metricDescriptors.list` and `monitoring.timeSeries.list` access.
 Once the service account has been configured with the necessary scoped access, you should generate a key pair for the service account and save the resulting JSON to be submitted to Opstrace.
 
 The generated JSON key pair is submitted to Opstrace as follows.
@@ -136,7 +136,7 @@ Behind the scenes, the credentials will be stored to an internal Postgres databa
 In Prometheus terminology, an "exporter" is a process that fetches metrics from somewhere and makes them available in a form that Prometheus supports.
 Opstrace uses a stock build of the [`stackdriver_exporter`](https://github.com/prometheus-community/stackdriver_exporter) package to support exporting GCP metrics into Opstrace.
 
-The Stackdriver exporter configuration is effectively a pass-through of the underlying settings exposed by the [`stackdriver_exporter` flags](https://github.com/prometheus-community/stackdriver_exporter#flags), and should work the same way as documented there.
+The Stackdriver exporter configuration is effectively a pass-through of the underlying settings exposed by the [`stackdriver_exporter` flags](https://github.com/prometheus-community/stackdriver_exporter#user-content-flags), and should work the same way as documented there.
 In other words, anything you can do with a stock `stackdriver_exporter` can also be done via the Opstrace exporter configuration.
 
 The main thing to determine is what metrics should be collected.
