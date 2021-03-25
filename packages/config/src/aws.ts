@@ -16,7 +16,7 @@
 
 import { strict as assert } from "assert";
 
-import { NewRenderedClusterConfigType } from "./clusterconfig";
+import { LatestClusterConfigType } from "./clusterconfig";
 
 // These are AMIs for k8s 1.18
 // Also see opstrace-prelaunch/pull/1941
@@ -70,9 +70,7 @@ type AWSConfigType = {
   imageId: string;
 };
 
-export function getAWSConfig(
-  ccfg: NewRenderedClusterConfigType
-): AWSConfigType {
+export function getAWSConfig(ccfg: LatestClusterConfigType): AWSConfigType {
   // Using k3s instead of EKS will wipe a lot of these config options, which is
   // why I'm hardcoding the region, vpc, and subnets for now.
   // EKS has region/zone specific imageId so avoid computing that

@@ -15,10 +15,10 @@
  */
 
 import { GCPAuthOptions, sql_v1beta4 } from "@opstrace/gcp";
-import { NewRenderedClusterConfigType } from "./clusterconfig";
+import { LatestClusterConfigType } from "./clusterconfig";
 
 export function getCloudSQLConfig(
-  ccfg: NewRenderedClusterConfigType,
+  ccfg: LatestClusterConfigType,
   gcpAuthOptions: GCPAuthOptions
 ): sql_v1beta4.Schema$DatabaseInstance {
   if (ccfg.gcp === undefined) {

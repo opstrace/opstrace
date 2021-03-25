@@ -16,10 +16,10 @@
 
 import { GKECluster, GCPAuthOptions } from "@opstrace/gcp";
 
-import { NewRenderedClusterConfigType } from "./clusterconfig";
+import { LatestClusterConfigType } from "./clusterconfig";
 
 export function getGKEClusterConfig(
-  ccfg: NewRenderedClusterConfigType,
+  ccfg: LatestClusterConfigType,
   gcpAuthOptions: GCPAuthOptions
 ): GKECluster {
   if (ccfg.gcp === undefined) {

@@ -25,7 +25,10 @@ import {
   infraConfigSchemaAWS
 } from "./schemas";
 
-import { InfraConfigTypeGCP, InfraConfigTypeAWS } from "@opstrace/config";
+import {
+  LatestAWSInfraConfigType,
+  LatestGCPInfraConfigType
+} from "@opstrace/config";
 
 import { log, die } from "@opstrace/utils";
 
@@ -39,8 +42,8 @@ export async function uccGetAndValidate(
 ): Promise<
   [
     ClusterConfigFileSchemaType,
-    InfraConfigTypeAWS | undefined,
-    InfraConfigTypeGCP | undefined
+    LatestAWSInfraConfigType | undefined,
+    LatestGCPInfraConfigType | undefined
   ]
 > {
   let uccDoc: string;
@@ -85,8 +88,8 @@ export async function uccGetAndValidate(
 
   // now process provider-specific part of config
 
-  let infraConfigAWS: InfraConfigTypeAWS | undefined;
-  let infraConfigGCP: InfraConfigTypeGCP | undefined;
+  let infraConfigAWS: LatestAWSInfraConfigType | undefined;
+  let infraConfigGCP: LatestGCPInfraConfigType | undefined;
 
   if (cloudProvider === "aws") {
     if (uccWithDefaults.aws !== undefined) {

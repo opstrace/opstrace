@@ -60,7 +60,7 @@ import {
 import {
   getClusterConfig,
   getDnsConfig,
-  NewRenderedClusterConfigType
+  LatestClusterConfigType
 } from "@opstrace/config";
 
 import {
@@ -110,7 +110,7 @@ export function* ensureAWSInfraExists(): Generator<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
 > {
-  const ccfg: NewRenderedClusterConfigType = getClusterConfig();
+  const ccfg: LatestClusterConfigType = getClusterConfig();
   assert(ccfg.aws !== undefined);
 
   const awsConfig = getAWSConfig(ccfg);
@@ -432,50 +432,56 @@ export function* ensureAWSInfraExists(): Generator<
   // Cortex Data Bucket Policy
   const CortexDataS3PolicyName = `${cortexDataBucketName}-s3`;
   log.info(`Ensuring ${CortexDataS3PolicyName} policy exists`);
-  const cortexDataBucketPolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
-    PolicyName: CortexDataS3PolicyName,
-    PolicyDocument: JSON.stringify({
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Sid: "ListObjectsInBucket",
-          Effect: "Allow",
-          Action: ["s3:ListBucket"],
-          Resource: [`arn:aws:s3:::${cortexDataBucketName}`]
-        },
-        {
-          Sid: "AllObjectActions",
-          Effect: "Allow",
-          Action: "s3:*Object",
-          Resource: [`arn:aws:s3:::${cortexDataBucketName}/*`]
-        }
-      ]
-    })
-  });
+  const cortexDataBucketPolicy: AWS.IAM.Policy = yield call(
+    ensurePolicyExists,
+    {
+      PolicyName: CortexDataS3PolicyName,
+      PolicyDocument: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Sid: "ListObjectsInBucket",
+            Effect: "Allow",
+            Action: ["s3:ListBucket"],
+            Resource: [`arn:aws:s3:::${cortexDataBucketName}`]
+          },
+          {
+            Sid: "AllObjectActions",
+            Effect: "Allow",
+            Action: "s3:*Object",
+            Resource: [`arn:aws:s3:::${cortexDataBucketName}/*`]
+          }
+        ]
+      })
+    }
+  );
 
   // Cortex Config Policy
   const CortexConfigS3PolicyName = `${cortexConfigBucketName}-s3`;
   log.info(`Ensuring ${CortexConfigS3PolicyName} policy exists`);
-  const cortexConfigBucketPolicy: AWS.IAM.Policy = yield call(ensurePolicyExists, {
-    PolicyName: CortexConfigS3PolicyName,
-    PolicyDocument: JSON.stringify({
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Sid: "ListObjectsInBucket",
-          Effect: "Allow",
-          Action: ["s3:ListBucket"],
-          Resource: [`arn:aws:s3:::${cortexConfigBucketName}`]
-        },
-        {
-          Sid: "AllObjectActions",
-          Effect: "Allow",
-          Action: "s3:*Object",
-          Resource: [`arn:aws:s3:::${cortexConfigBucketName}/*`]
-        }
-      ]
-    })
-  });
+  const cortexConfigBucketPolicy: AWS.IAM.Policy = yield call(
+    ensurePolicyExists,
+    {
+      PolicyName: CortexConfigS3PolicyName,
+      PolicyDocument: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Sid: "ListObjectsInBucket",
+            Effect: "Allow",
+            Action: ["s3:ListBucket"],
+            Resource: [`arn:aws:s3:::${cortexConfigBucketName}`]
+          },
+          {
+            Sid: "AllObjectActions",
+            Effect: "Allow",
+            Action: "s3:*Object",
+            Resource: [`arn:aws:s3:::${cortexConfigBucketName}/*`]
+          }
+        ]
+      })
+    }
+  );
 
   // CertManager role
   const CertManagerRoleName = `${ccfg.cluster_name}-cert-manager`;
@@ -549,8 +555,14 @@ export function* ensureAWSInfraExists(): Generator<
     },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: route53Policy.Arn! },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: lokiBucketPolicy.Arn! },
-    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexDataBucketPolicy.Arn! },
-    { RoleName: EKSWorkerNodesRoleName, PolicyArn: cortexConfigBucketPolicy.Arn! },
+    {
+      RoleName: EKSWorkerNodesRoleName,
+      PolicyArn: cortexDataBucketPolicy.Arn!
+    },
+    {
+      RoleName: EKSWorkerNodesRoleName,
+      PolicyArn: cortexConfigBucketPolicy.Arn!
+    },
     // Attach route53 policy to cert manager role
     { RoleName: certManagerRole.RoleName, PolicyArn: route53Policy.Arn! }
   ];

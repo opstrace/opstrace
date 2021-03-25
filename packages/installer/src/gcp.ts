@@ -43,7 +43,7 @@ import { getBucketName, log, SECOND } from "@opstrace/utils";
 import {
   getClusterConfig,
   //RenderedClusterConfigSchemaType
-  NewRenderedClusterConfigType
+  LatestClusterConfigType
 } from "@opstrace/config";
 import { gcpProjectID } from "./index";
 import { EnsureInfraExistsResponse } from "./types";
@@ -52,7 +52,7 @@ export function* ensureGCPInfraExists(
   gcpAuthOptions: GCPAuthOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Generator<any, EnsureInfraExistsResponse, any> {
-  const ccfg: NewRenderedClusterConfigType = getClusterConfig();
+  const ccfg: LatestClusterConfigType = getClusterConfig();
 
   if (ccfg.gcp === undefined) {
     throw Error("`gcp` property expected");

@@ -14,57 +14,35 @@
  * limitations under the License.
  */
 
+import {
+  AWSInfraConfigTypeV2,
+  GCPInfraConfigTypeV2,
+  ClusterConfigVersionV2
+} from "./clusterconfigv2";
+
 // supposed to be a tidy immutable singleton in the future: write/set once,
 // read/consume from anywhere w/o the need to explicitly pass this through
 // function arguments.
-let clusterConfig: NewRenderedClusterConfigType;
+let clusterConfig: LatestClusterConfigType;
 
 // not implementing length constraint, on purpose
 export const CLUSTER_NAME_REGEX = /^[a-z0-9-_]+$/;
 
-export function setClusterConfig(c: NewRenderedClusterConfigType): void {
+export function setClusterConfig(c: LatestClusterConfigType): void {
   if (clusterConfig !== undefined) {
     throw new Error("setClusterConfig() was already called before");
   }
   clusterConfig = c;
 }
 
-export function getClusterConfig(): NewRenderedClusterConfigType {
+export function getClusterConfig(): LatestClusterConfigType {
   if (clusterConfig === undefined) {
     throw new Error("call setClusterConfig() first");
   }
   return clusterConfig;
 }
 
-export interface InfraConfigTypeAWS {
-  region: string;
-  zone_suffix: string;
-  instance_type: string;
-  eks_admin_roles: string[];
-}
-
-export interface InfraConfigTypeGCP {
-  machine_type: string;
-  region: string;
-  zone_suffix: string;
-}
-
-// Using the yup-inferred types across the code base, deep down in other packages
-// is creating a lot of pain. Use yup for user-given doc validation, but then
-// save to 'natively defined Typescript types/interfaces' asap.
-export interface NewRenderedClusterConfigType {
-  cluster_name: string;
-  cloud_provider: "aws" | "gcp";
-  cert_issuer: "letsencrypt-prod" | "letsencrypt-staging";
-  tenant_api_authenticator_pubkey_set_json: string;
-  controller_image: string;
-  tenants: string[];
-  env_label: string;
-  log_retention_days: number; // bigint to force this to integer?
-  metric_retention_days: number; // bigint to force this to integer?
-  data_api_authentication_disabled: boolean;
-  data_api_authorized_ip_ranges: string[];
-  node_count: number; // bigint to force this to integer?
-  aws: InfraConfigTypeAWS | undefined;
-  gcp: InfraConfigTypeGCP | undefined;
-}
+// type alias that points to latest config schemas
+export type LatestClusterConfigType = ClusterConfigVersionV2;
+export type LatestAWSInfraConfigType = AWSInfraConfigTypeV2;
+export type LatestGCPInfraConfigType = GCPInfraConfigTypeV2;
