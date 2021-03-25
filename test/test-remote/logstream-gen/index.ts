@@ -860,7 +860,6 @@ export async function postFragments(
     actors.push(pushrequestProducerAndPOSTer(stream, writeConcurSemaphore));
   }
 
-  // Wait for producers and consumers to return.
   await Promise.all(actors);
 }
 
