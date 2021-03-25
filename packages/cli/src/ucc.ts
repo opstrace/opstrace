@@ -19,10 +19,10 @@ import fs from "fs";
 import yaml from "js-yaml";
 
 import {
-  ClusterConfigFileSchemaType,
-  clusterConfigFileSchema,
-  infraConfigSchemaGCP,
-  infraConfigSchemaAWS
+  LatestClusterConfigFileSchemaType,
+  LatestClusterConfigFileSchema,
+  LatestAWSInfraConfigSchema,
+  LatestGCPInfraConfigSchema
 } from "./schemas";
 
 import {
@@ -41,7 +41,7 @@ export async function uccGetAndValidate(
   cloudProvider: "aws" | "gcp"
 ): Promise<
   [
-    ClusterConfigFileSchemaType,
+    LatestClusterConfigFileSchemaType,
     LatestAWSInfraConfigType | undefined,
     LatestGCPInfraConfigType | undefined
   ]
@@ -75,14 +75,14 @@ export async function uccGetAndValidate(
   // https://github.com/jquense/yup/issues/829#issuecomment-606030995
   // https://github.com/jquense/yup/issues/697
   try {
-    clusterConfigFileSchema.validateSync(ucc, { strict: true });
+    LatestClusterConfigFileSchema.validateSync(ucc, { strict: true });
   } catch (err) {
     die(`invalid cluster config document: ${err.message}`);
   }
 
   // validate again, this time "only" to interpolate with defaults, see
   // https://github.com/jquense/yup/pull/961
-  const uccWithDefaults: ClusterConfigFileSchemaType = clusterConfigFileSchema.validateSync(
+  const uccWithDefaults: LatestClusterConfigFileSchemaType = LatestClusterConfigFileSchema.validateSync(
     ucc
   );
 
@@ -100,12 +100,16 @@ export async function uccGetAndValidate(
     }
 
     try {
-      infraConfigSchemaAWS.validateSync(uccWithDefaults.aws, { strict: true });
+      LatestAWSInfraConfigSchema.validateSync(uccWithDefaults.aws, {
+        strict: true
+      });
     } catch (err) {
       die(`cluster config error: invalid value for 'aws': ${err.message}`);
     }
 
-    infraConfigAWS = infraConfigSchemaAWS.validateSync(uccWithDefaults.aws);
+    infraConfigAWS = LatestAWSInfraConfigSchema.validateSync(
+      uccWithDefaults.aws
+    );
 
     if (uccWithDefaults.gcp !== undefined) {
       log.info("Provider is AWS. `gcp` is set in config. Ignore.");
@@ -125,12 +129,16 @@ export async function uccGetAndValidate(
     }
 
     try {
-      infraConfigSchemaGCP.validateSync(uccWithDefaults.gcp, { strict: true });
+      LatestGCPInfraConfigSchema.validateSync(uccWithDefaults.gcp, {
+        strict: true
+      });
     } catch (err) {
       die(`cluster config error: invalid value for 'gcp': ${err.message}`);
     }
 
-    infraConfigGCP = infraConfigSchemaGCP.validateSync(uccWithDefaults.gcp);
+    infraConfigGCP = LatestGCPInfraConfigSchema.validateSync(
+      uccWithDefaults.gcp
+    );
 
     if (uccWithDefaults.aws !== undefined) {
       log.info("Provider is GCP. `aws` is set in config. Ignore.");

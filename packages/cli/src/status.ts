@@ -67,7 +67,7 @@ async function checkClusterStatus() {
   // Definitely technical debt leaking as an interface, needs to be
   // consolidated.
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
-    schemas.ClusterConfigFileSchemaType,
+    schemas.LatestClusterConfigFileSchemaType,
     LatestAWSInfraConfigType | undefined,
     LatestGCPInfraConfigType | undefined
   ] = await ucc.uccGetAndValidate(
