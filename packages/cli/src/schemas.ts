@@ -15,10 +15,12 @@
  */
 
 
-import { log } from "@opstrace/utils";
+import { LatestAWSInfraConfigType, LatestGCPInfraConfigType } from "@opstrace/config";
+import { die, log } from "@opstrace/utils";
 
 import {
-  ClusterConfigFileSchemaTypeV1, ClusterConfigFileSchemaV1
+  ClusterConfigFileSchemaTypeV1,
+  ClusterConfigFileSchemaV1
 } from "./schemasv1";
 
 import {
@@ -40,9 +42,7 @@ export const LatestRenderedClusterConfigSchema = RenderedClusterConfigSchemaV2;
 export type LatestRenderedClusterConfigSchemaType = RenderedClusterConfigSchemaTypeV2;
 export type LatestClusterConfigFileSchemaType = ClusterConfigFileSchemaTypeV2;
 
-//
-export type AnyClusterConfigFileSchemaType = ClusterConfigFileSchemaTypeV1 | ClusterConfigFileSchemaTypeV2;
-
+// upgrade function
 function V1toV2(ucc: ClusterConfigFileSchemaTypeV1): ClusterConfigFileSchemaTypeV2 {
   const { log_retention, metric_retention, ...restConfig } = ucc;
   return {
@@ -54,9 +54,42 @@ function V1toV2(ucc: ClusterConfigFileSchemaTypeV1): ClusterConfigFileSchemaType
 
 // function that takes any user cluster config and upgrades it to the latest
 // version if necessary.
-// @ts-ignore missing return type on function becaue it'll throw an error
-export function upgradeToLatest(ucc: any): LatestClusterConfigFileSchemaType {
+export async function upgradeToLatest(ucc: any, cloudProvider: string): Promise<[
+  LatestClusterConfigFileSchemaType,
+  LatestAWSInfraConfigType | undefined,
+  LatestGCPInfraConfigType | undefined
+]> {
+  // handle user cluster config
+  const uccWithDefaults = upgradeClusterConfigSchemaToLatest(ucc);
 
+  // handle user cloud provider config
+  let infraConfigAWS: LatestAWSInfraConfigType | undefined;
+  let infraConfigGCP: LatestGCPInfraConfigType | undefined;
+
+  switch(cloudProvider) {
+    case "aws": {
+      infraConfigAWS = upgradeAWSInfraConfigToLatest(uccWithDefaults.aws);
+      break;
+    }
+    case "gcp": {
+      infraConfigGCP = upgradeGCPInfraConfigToLatest(uccWithDefaults.gcp);
+      break;
+    }
+
+    default: {
+      die(`cloud provider not supported: ${cloudProvider}`)
+    }
+  }
+
+  // provider-specific infra config has been extracted, remove all traces
+  // from ucc
+  delete uccWithDefaults.aws;
+  delete uccWithDefaults.gcp;
+
+  return [uccWithDefaults, infraConfigAWS, infraConfigGCP];
+}
+
+function upgradeClusterConfigSchemaToLatest(ucc: any): LatestClusterConfigFileSchemaType {
   if (LatestClusterConfigFileSchema.isValidSync(ucc, { strict: true })) {
     // validate again, this time "only" to interpolate with defaults, see
     // https://github.com/jquense/yup/pull/961
@@ -65,10 +98,29 @@ export function upgradeToLatest(ucc: any): LatestClusterConfigFileSchemaType {
   }
 
   if (ClusterConfigFileSchemaV1.isValidSync(ucc, {strict: true})) {
-    log.debug("got v1 cluster config file");
+    log.debug("got v1 cluster config file, upgrading...");
     return V1toV2(ClusterConfigFileSchemaV1.validateSync(ucc));
   }
 
-  // Possible user error. Parse again to throw a meaningful error message.
-  LatestClusterConfigFileSchema.validateSync(ucc, {strict: true});
+  // Possible user error. Parse again and it'll throw a meaningful error
+  // message.
+  return LatestClusterConfigFileSchema.validateSync(ucc, {strict: true});
+}
+
+// throws an error when parsing invalid data
+function upgradeAWSInfraConfigToLatest(uic: any): LatestAWSInfraConfigType {
+  // AWSInfraConfigTypeV1 matches AWSInfraConfigTypeV2 so we don't need to do
+  // any validation
+
+  log.debug("ucc.aws: %s", JSON.stringify(uic, null, 2));
+  return LatestAWSInfraConfigSchema.validateSync(uic);
+}
+
+// throws an error when parsing invalid data
+function upgradeGCPInfraConfigToLatest(uic: any): LatestGCPInfraConfigType {
+  // GCPInfraConfigTypeV1 matches GCPInfraConfigTypeV2 so we don't need to do
+  // any validation
+
+  log.debug("ucc.gcp: %s", JSON.stringify(uic, null, 2));
+  return LatestGCPInfraConfigSchema.validateSync(uic);
 }

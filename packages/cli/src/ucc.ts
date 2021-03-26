@@ -20,8 +20,6 @@ import yaml from "js-yaml";
 
 import {
   LatestClusterConfigFileSchemaType,
-  LatestAWSInfraConfigSchema,
-  LatestGCPInfraConfigSchema,
   upgradeToLatest
 } from "./schemas";
 
@@ -69,84 +67,9 @@ export async function uccGetAndValidate(
     JSON.stringify(ucc, null, 2)
   );
 
-  let uccWithDefaults: LatestClusterConfigFileSchemaType;
-
-  try {
-    uccWithDefaults = upgradeToLatest(ucc);
-  } catch (err) {
-    die(`invalid cluster config: ${err.message}`);
-  }
-
-  // now process provider-specific part of config
-
-  let infraConfigAWS: LatestAWSInfraConfigType | undefined;
-  let infraConfigGCP: LatestGCPInfraConfigType | undefined;
-
-  if (cloudProvider === "aws") {
-    if (uccWithDefaults.aws !== undefined) {
-      log.debug("ucc.aws: %s", JSON.stringify(uccWithDefaults.aws, null, 2));
-    } else {
-      uccWithDefaults.aws = {};
-      log.info("infra config: `aws` not set: populate with defaults");
-    }
-
-    try {
-      LatestAWSInfraConfigSchema.validateSync(uccWithDefaults.aws, {
-        strict: true
-      });
-    } catch (err) {
-      die(`cluster config error: invalid value for 'aws': ${err.message}`);
-    }
-
-    infraConfigAWS = LatestAWSInfraConfigSchema.validateSync(
-      uccWithDefaults.aws
-    );
-
-    if (uccWithDefaults.gcp !== undefined) {
-      log.info("Provider is AWS. `gcp` is set in config. Ignore.");
-      delete uccWithDefaults.gcp;
-    }
-
-    // Forget user-given input, overwrite with validation/fill result.
-    //uccWithDefaults.aws = infraConfigAWS;
-  }
-
-  if (cloudProvider === "gcp") {
-    if (uccWithDefaults.gcp !== undefined) {
-      log.debug("ucc.gcp: %s", JSON.stringify(uccWithDefaults.aws, null, 2));
-    } else {
-      uccWithDefaults.gcp = {};
-      log.info("infra config: `gcp` not set: populate with defaults");
-    }
-
-    try {
-      LatestGCPInfraConfigSchema.validateSync(uccWithDefaults.gcp, {
-        strict: true
-      });
-    } catch (err) {
-      die(`cluster config error: invalid value for 'gcp': ${err.message}`);
-    }
-
-    infraConfigGCP = LatestGCPInfraConfigSchema.validateSync(
-      uccWithDefaults.gcp
-    );
-
-    if (uccWithDefaults.aws !== undefined) {
-      log.info("Provider is GCP. `aws` is set in config. Ignore.");
-      delete uccWithDefaults.aws;
-    }
-
-    // Forget user-given input, overwrite with validation/fill result.
-    //uccWithDefaults.gcp = infraConfigGCP;
-  }
-
-  // provider-specific infra config has been extracted, remove all traces
-  // from ucc
-  delete uccWithDefaults.aws;
-  delete uccWithDefaults.gcp;
-
-  log.debug("user-given cluster config validated");
-  return [uccWithDefaults, infraConfigAWS, infraConfigGCP];
+  return upgradeToLatest(ucc, cloudProvider).catch((err) => {
+    die(`invalid cluster config document: ${err.message}`);
+  });
 }
 
 function uccFromFile(clusterConfigFilePath: string) {
