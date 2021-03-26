@@ -56,7 +56,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-test("[AWS] should parse and validate latest cluster config file", async () => {
+test("[AWS] should parse and validate latest cluster config file with defaults", async () => {
   const filename = tmpDir + "/" + "aws-test.yaml";
   const configFile = `
 tenants:
@@ -64,9 +64,6 @@ tenants:
 - dev
 env_label: unit-tests
 node_count: 3
-aws:
-  eks_admin_roles:
-  - SomeRoleName
 `
   fs.writeFileSync(filename, configFile);
 
@@ -75,7 +72,6 @@ aws:
     LatestAWSInfraConfigType | undefined,
     LatestGCPInfraConfigType | undefined
   ] = await uccGetAndValidate(filename, "aws");
-
 
   expect(userClusterConfig).toEqual({
     "cert_issuer": "letsencrypt-staging",
@@ -95,9 +91,7 @@ aws:
   });
 
   expect(infraConfigAWS).toEqual({
-    "eks_admin_roles": [
-      "SomeRoleName",
-    ],
+    "eks_admin_roles": [],
     "instance_type": "t3.xlarge",
     "region": "us-west-2",
     "zone_suffix": "a",
@@ -105,7 +99,7 @@ aws:
   expect(infraConfigGCP).toBeUndefined();
 });
 
-test("[GCP] should parse and validate latest cluster config file", async () => {
+test("[GCP] should parse and validate latest cluster config file with defaults", async () => {
   const filename = tmpDir + "/" + "gcp-test.yaml";
   const configFile = `
 tenants:
@@ -168,7 +162,7 @@ random string
   expect(mockDie).toBeCalledTimes(2);
 });
 
-test("[AWS] should upgrade cluster config V1 to V2", async () => {
+test("[AWS] should upgrade cluster config V1 to V2 with defaults", async () => {
   const filename = tmpDir + "/" + "v1.yaml";
   // from v1 to v2 log_retention and metric retention was renamed to
   // log_retention_days and metric_retention_days
@@ -180,9 +174,6 @@ env_label: unit-tests
 node_count: 3
 log_retention: 14
 metric_retention: 30
-aws:
-  eks_admin_roles:
-  - SomeRoleName
 `
   fs.writeFileSync(filename, configFile);
 
@@ -210,9 +201,7 @@ aws:
   });
 
   expect(infraConfigAWS).toEqual({
-    "eks_admin_roles": [
-      "SomeRoleName",
-    ],
+    "eks_admin_roles": [],
     "instance_type": "t3.xlarge",
     "region": "us-west-2",
     "zone_suffix": "a",
@@ -220,7 +209,7 @@ aws:
   expect(infraConfigGCP).toBeUndefined();
 });
 
-test("[GCP] should upgrade cluster config V1 to V2", async () => {
+test("[GCP] should upgrade cluster config V1 to V2 with defaults", async () => {
   const filename = tmpDir + "/" + "gcp-test.yaml";
   const configFile = `
 tenants:
@@ -260,5 +249,107 @@ metric_retention: 30
     "machine_type": "n1-standard-4",
     "region": "us-west2",
     "zone_suffix": "a",
+  });
+});
+
+test("[AWS] should upgrade cluster config V1 to V2 with custom settings", async () => {
+  const filename = tmpDir + "/" + "v1.yaml";
+  // from v1 to v2 log_retention and metric retention was renamed to
+  // log_retention_days and metric_retention_days
+  const configFile = `
+tenants:
+- prod
+- dev
+env_label: unit-tests
+node_count: 3
+log_retention: 14
+metric_retention: 30
+aws:
+  eks_admin_roles:
+  - SomeRoleName
+  instance_type: test-type
+  region: eu-west-3
+  zone_suffix: z
+`
+  fs.writeFileSync(filename, configFile);
+
+  const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
+    LatestClusterConfigFileSchemaType,
+    LatestAWSInfraConfigType | undefined,
+    LatestGCPInfraConfigType | undefined
+  ] =  await uccGetAndValidate(filename, "aws");
+
+  expect(userClusterConfig).toEqual({
+    "cert_issuer": "letsencrypt-staging",
+    "controller_image": CONTROLLER_IMAGE_DEFAULT,
+    "data_api_authentication_disabled": false,
+    "data_api_authorized_ip_ranges": [
+      "0.0.0.0/0",
+    ],
+    "env_label": "unit-tests",
+    "log_retention_days": 14,
+    "metric_retention_days": 30,
+    "node_count": 3,
+    "tenants": [
+      "prod",
+      "dev",
+    ],
+  });
+
+  expect(infraConfigAWS).toEqual({
+    "eks_admin_roles": [
+      "SomeRoleName",
+    ],
+    "instance_type": "test-type",
+    "region": "eu-west-3",
+    "zone_suffix": "z",
+  });
+  expect(infraConfigGCP).toBeUndefined();
+});
+
+test("[GCP] should upgrade from cluster config V1 to V2 with custom settings", async () => {
+  const filename = tmpDir + "/" + "gcp-test.yaml";
+  const configFile = `
+tenants:
+- prod
+- dev
+env_label: unit-tests
+node_count: 3
+log_retention: 14
+metric_retention: 30
+gcp:
+  machine_type: test-type
+  region: test-region
+  zone_suffix: test-suffix
+`
+  fs.writeFileSync(filename, configFile);
+
+  const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
+    LatestClusterConfigFileSchemaType,
+    LatestAWSInfraConfigType | undefined,
+    LatestGCPInfraConfigType | undefined
+  ] = await uccGetAndValidate(filename, "gcp");
+
+  expect(userClusterConfig).toEqual({
+    "cert_issuer": "letsencrypt-staging",
+    "controller_image": CONTROLLER_IMAGE_DEFAULT,
+    "data_api_authentication_disabled": false,
+    "data_api_authorized_ip_ranges": [
+      "0.0.0.0/0",
+    ],
+    "env_label": "unit-tests",
+    "log_retention_days": 14,
+    "metric_retention_days": 30,
+    "node_count": 3,
+    "tenants": [
+      "prod",
+      "dev",
+    ],
+  });
+  expect(infraConfigAWS).toBeUndefined();
+  expect(infraConfigGCP).toEqual({
+    "machine_type": "test-type",
+    "region": "test-region",
+    "zone_suffix": "test-suffix",
   });
 });
