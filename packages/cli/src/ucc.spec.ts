@@ -18,8 +18,7 @@ import fs from 'fs';
 import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
 // mock logger and die functions
-const fakeError = new Error("fake error");
-const mockDie = jest.fn().mockImplementation(() => { throw fakeError});
+const mockDie = jest.fn().mockImplementation((e) => { throw(new Error(e)); });
 
 jest.mock("@opstrace/utils", () => ({
   log: {
@@ -147,16 +146,18 @@ random string
   `
   fs.writeFileSync(filename, configFile);
 
+  const expectedErr = new Error("invalid cluster config document: this must be a `object` type, but the final value was: `\"random string\"`.")
+
   try {
     await uccGetAndValidate(filename, "aws");
   } catch (e) {
-    expect(e).toEqual(fakeError);
+    expect(e).toEqual(expectedErr);
   }
 
   try {
     await uccGetAndValidate(filename, "gcp");
   } catch (e) {
-    expect(e).toEqual(fakeError);
+    expect(e).toEqual(expectedErr);
   }
 
   expect(mockDie).toBeCalledTimes(2);
