@@ -149,7 +149,7 @@ node_count: 3
 test("should fail to parse invalid config file", async () => {
   const filename = tmpDir + "/" + "invalid-test.yaml";
   const configFile = `
-  random string
+random string
   `
   fs.writeFileSync(filename, configFile);
 
