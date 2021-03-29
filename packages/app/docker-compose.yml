@@ -52,7 +52,7 @@ services:
       ACTION_CONFIG_API_SECRET: myactionsecret
   # Config service for Hasura Actions that call into it
   config:
-    image: opstrace/config-api:3df7d28c632083588efd8336f3607c9fa956fdaa
+    image: opstrace/config-api:28212f4f86ec129393405600702c64c3e0208d07
     command:
       - -config=:8081
       - -action=:8082
