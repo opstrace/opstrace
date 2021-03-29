@@ -136,6 +136,7 @@ export class ConfigMap extends K8sResource {
       }
       try {
         const res = await client.listConfigMapForAllNamespaces();
+        log.info("got all config maps...");
         channel(
           configMapActions.fetch.success({
             resources: res.body.items.map(r => new ConfigMap(r, kubeConfig))

@@ -26,14 +26,17 @@ import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
 import { log, SECOND, retryUponAnyError } from "@opstrace/utils";
 
-import { rootReducer /*, State */ } from "./reducer";
+import { rootReducer } from "./reducer";
 import { ClusterUpgradeTimeoutError } from "./errors";
 import { runInformers, blockUntilCacheHydrated } from "./informers";
 import {
   upgradeProgressReporter,
   waitForControllerDeployment
 } from "./readiness";
-import { upgradeControllerDeployment } from "./upgrade";
+import {
+  upgradeControllerConfigMap,
+  upgradeControllerDeployment
+} from "./upgrade";
 
 // Note: a largish number of attempts as long as micro retries are not yet
 // implemented carefully and thoughtfully.
@@ -122,6 +125,9 @@ function* triggerUpgrade(kubeConfig: KubeConfig) {
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);
+
+  // TODO: fetch and save system-tenant api token locally
+  yield call(upgradeControllerConfigMap, kubeConfig);
 
   yield call(upgradeControllerDeployment, {
     opstraceClusterName: upgradeConfig.clusterName,

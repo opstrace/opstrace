@@ -17,11 +17,16 @@
 import { select, call } from "redux-saga/effects";
 import { KubeConfig } from "@kubernetes/client-node";
 
-import { log } from "@opstrace/utils";
+import { log, die } from "@opstrace/utils";
 import {
   ControllerResourcesDeploymentStrategy,
   CONTROLLER_NAME,
-  deployControllerResources
+  deployControllerResources,
+  CONFIGMAP_NAME,
+  LatestControllerConfigType,
+  STORAGE_KEY,
+  set as updateControllerConfig,
+  upgradeControllerConfigMapToLatest
 } from "@opstrace/controller-config";
 import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
@@ -63,4 +68,31 @@ export function* upgradeControllerDeployment(config: {
     kubeConfig: config.kubeConfig,
     deploymentStrategy: ControllerResourcesDeploymentStrategy.Update
   });
+}
+
+export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
+  const state: State = yield select();
+  const cm = state.kubernetes.cluster.ConfigMaps.resources.find((cm) => cm.name === CONFIGMAP_NAME);
+  if (cm === undefined) {
+    die(`could not find Opstrace controller config map`);
+  }
+
+  const cfgJSON = JSON.parse(cm.spec.data?.[STORAGE_KEY] ?? "");
+  if (cfgJSON === "") {
+    die(`invalid Opstrace controller config map`);
+  }
+
+  log.debug(`controller config: ${JSON.stringify(cfgJSON, null, 2)}`);
+
+  let cfg: LatestControllerConfigType;
+
+  try {
+    cfg = upgradeControllerConfigMapToLatest(cfgJSON);
+  } catch (e) {
+    die(`failed to upgrade controller configuration: ${e.message}`)
+  }
+
+  log.debug(`upgraded controller config ${JSON.stringify(cfg, null, 2)}`);
+
+  yield call(updateControllerConfig, cfg, kubeConfig);
 }
