@@ -50,7 +50,8 @@ export function* runInformers(
       k8s.Deployment.startInformer(kubeConfig, channel),
       k8s.PersistentVolume.startInformer(kubeConfig, channel),
       k8s.StatefulSet.startInformer(kubeConfig, channel),
-      k8s.StatefulSet.startInformer(kubeConfig, channel)
+      k8s.StatefulSet.startInformer(kubeConfig, channel),
+      k8s.ConfigMap.startInformer(kubeConfig, channel)
     ];
 
     // return the unsubscribe function for eventChannel. This will be called when the channel
@@ -86,14 +87,16 @@ export function* blockUntilCacheHydrated(): Generator<
       DaemonSets,
       Deployments,
       PersistentVolumes,
-      StatefulSets
+      StatefulSets,
+      ConfigMaps
     } = kubernetes.cluster;
 
     if (
       DaemonSets.loaded &&
       Deployments.loaded &&
       PersistentVolumes.loaded &&
-      StatefulSets.loaded
+      StatefulSets.loaded &&
+      ConfigMaps.loaded
     ) {
       log.info(`kubernetes cache is hydrated`);
       break;
