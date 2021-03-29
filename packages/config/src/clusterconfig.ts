@@ -17,7 +17,7 @@
 import {
   AWSInfraConfigTypeV2,
   GCPInfraConfigTypeV2,
-  ClusterConfigVersionV2
+  ClusterConfigTypeV2
 } from "./clusterconfigv2";
 
 // supposed to be a tidy immutable singleton in the future: write/set once,
@@ -43,6 +43,6 @@ export function getClusterConfig(): LatestClusterConfigType {
 }
 
 // type alias that points to latest config schemas
-export type LatestClusterConfigType = ClusterConfigVersionV2;
+export type LatestClusterConfigType = ClusterConfigTypeV2;
 export type LatestAWSInfraConfigType = AWSInfraConfigTypeV2;
 export type LatestGCPInfraConfigType = GCPInfraConfigTypeV2;
