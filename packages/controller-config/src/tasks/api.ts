@@ -19,7 +19,7 @@ import { V1ConfigMap } from "@kubernetes/client-node";
 
 import { serialize, configmap, deserialize } from "../utils";
 
-import { ControllerConfigType } from "../types";
+import { LatestControllerConfigType } from "../schema";
 
 import {
   KubeConfiguration,
@@ -38,7 +38,7 @@ export function* fetch(
   kubeConfig: KubeConfiguration
 ): Generator<
   CallEffect,
-  ControllerConfigType | undefined,
+  LatestControllerConfigType | undefined,
   { body: V1ConfigMap }
 > {
   const cm = configmap(kubeConfig);
@@ -55,7 +55,7 @@ export function* fetch(
 }
 
 export function* set(
-  controllerconfig: ControllerConfigType,
+  controllerconfig: LatestControllerConfigType,
   kubeConfig: KubeConfiguration
 ): Generator<CallEffect, void, unknown> {
   const cm = serialize(controllerconfig, kubeConfig);

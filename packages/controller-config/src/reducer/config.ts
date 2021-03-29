@@ -16,13 +16,13 @@
 
 import { createReducer, ActionType } from "typesafe-actions";
 import { configMapActions } from "@opstrace/kubernetes";
-import { ControllerConfigType } from "../types";
+import { LatestControllerConfigType } from "../schema";
 import { isConfigStorage, deserialize } from "../utils";
 
 type Actions = ActionType<typeof configMapActions>;
 
 type ConfigState = {
-  config: ControllerConfigType | undefined;
+  config: LatestControllerConfigType | undefined;
   loading: boolean;
   backendExists: boolean | null;
   error: Error | null;
@@ -49,7 +49,7 @@ export const configReducer = createReducer<ConfigState, Actions>(
     configMapActions.fetch.success,
     (state, action): ConfigState => {
       const configMap = action.payload.resources.find(isConfigStorage);
-      let config: ControllerConfigType | undefined = undefined;
+      let config: LatestControllerConfigType | undefined = undefined;
       if (configMap) {
         config = deserialize(configMap);
       }

@@ -36,7 +36,7 @@ import { addApiIngress } from "./ingress";
 import { nodecountToReplicacount } from "./index";
 import {
   DockerImages,
-  ControllerConfigType
+  LatestControllerConfigType
 } from "@opstrace/controller-config";
 
 export function DDAPIResources(
@@ -56,7 +56,7 @@ export function DDAPIResources(
     resources: {}
   };
 
-  const controllerConfig: ControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
 
   const namespace = getTenantNamespace(tenant);
   const apiName = "dd";

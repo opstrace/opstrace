@@ -36,7 +36,7 @@ import { nodecountToReplicacount } from "./index";
 import { addApiIngress } from "./ingress";
 import {
   DockerImages,
-  ControllerConfigType
+  LatestControllerConfigType
 } from "@opstrace/controller-config";
 
 export function LokiAPIResources(
@@ -51,7 +51,7 @@ export function LokiAPIResources(
     resources: {}
   };
 
-  const controllerConfig: ControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
 
   const namespace = getTenantNamespace(tenant);
   const api = "loki";

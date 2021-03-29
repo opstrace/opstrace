@@ -15,7 +15,7 @@
  */
 
 import { State } from "./reducer";
-import { ControllerConfigType } from "@opstrace/controller-config";
+import { LatestControllerConfigType } from "@opstrace/controller-config";
 import { Tenant } from "@opstrace/tenants";
 
 export { generateSecretValue } from "@opstrace/controller-config";
@@ -39,7 +39,7 @@ export const iAmDesiredVersion = (version: string | undefined): boolean => {
   return version === currentVersion();
 };
 
-export const getControllerConfig = (state: State): ControllerConfigType => {
+export const getControllerConfig = (state: State): LatestControllerConfigType => {
   if (state.config.config === undefined) {
     throw Error("Controller configmap is not present or missing fields");
   }

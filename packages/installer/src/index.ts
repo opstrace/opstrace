@@ -52,10 +52,10 @@ import {
 import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
   set as updateControllerConfig,
-  ControllerConfigType,
-  controllerConfigSchema,
   ControllerResourcesDeploymentStrategy,
-  deployControllerResources
+  deployControllerResources,
+  LatestControllerConfigType,
+  LatestControllerConfigSchema
 } from "@opstrace/controller-config";
 
 import { rootReducer } from "./reducer";
@@ -149,9 +149,7 @@ function* createClusterCore() {
 
   const dnsConf = getDnsConfig(ccfg.cloud_provider);
 
-  // Fail fast if specified controller docker image cannot be found on docker
-  // hub, see https://github.com/opstrace/opstrace/issues/1298.
-  let controllerConfig: ControllerConfigType = {
+  let controllerConfig: LatestControllerConfigType = {
     name: ccfg.cluster_name,
     target: ccfg.cloud_provider,
     region: region, // not sure why that's needed
@@ -172,15 +170,8 @@ function* createClusterCore() {
     disable_data_api_authentication: ccfg.data_api_authentication_disabled
   };
 
-  log.debug("validate controller config");
-
-  // "Strict schemas skip coercion and transformation attempts, validating the value "as is"."
-  // This is mainly to error out upon unexpected parameters: to 'enforce' yup's
-  // noUnknown, see
-  // https://github.com/jquense/yup/issues/829#issuecomment-606030995
-  // https://github.com/jquense/yup/issues/697
-  controllerConfigSchema.validateSync(controllerConfig, { strict: true });
-
+  // Fail fast if specified controller docker image cannot be found on docker
+  // hub, see https://github.com/opstrace/opstrace/issues/1298.
   if (!clusterCreateConfig.holdController) {
     yield call(checkIfDockerImageExistsOrErrorOut, ccfg.controller_image);
   }
@@ -223,13 +214,14 @@ function* createClusterCore() {
     };
   }
 
-  // Update our controllerConfig with the Postgress Endpoint and revalidate for good measure
+  // Update our controllerConfig with the Postgress Endpoint and revalidate for
+  // good measure
   controllerConfig = {
     ...controllerConfig,
     postgreSQLEndpoint,
     opstraceDBName
   };
-  controllerConfigSchema.validateSync(controllerConfig, { strict: true });
+  LatestControllerConfigSchema.validateSync(controllerConfig, { strict: true });
 
   if (!kubeconfigString) {
     throw Error("couldn't compute a kubeconfig");

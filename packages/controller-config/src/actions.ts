@@ -15,7 +15,7 @@
  */
 
 import { createAsyncAction, createAction } from "typesafe-actions";
-import { ControllerConfigType } from "./types";
+import { LatestControllerConfigType } from "./schema";
 
 export const actions = {
   set: createAsyncAction(
@@ -23,9 +23,9 @@ export const actions = {
     "SET_CONFIG_SUCCESS",
     "SET_CONFIG_FAILURE"
   )<
-    { config: ControllerConfigType },
-    { config: ControllerConfigType },
-    { config: ControllerConfigType; error: Error }
+    { config: LatestControllerConfigType },
+    { config: LatestControllerConfigType },
+    { config: LatestControllerConfigType; error: Error }
   >(),
 
   destroy: createAsyncAction(
@@ -38,13 +38,13 @@ export const actions = {
     "FETCH_CONFIG_REQUEST",
     "FETCH_CONFIG_SUCCESS",
     "FETCH_CONFIG_FAILURE"
-  )<undefined, { config: ControllerConfigType }, { error: Error }>(),
+  )<undefined, { config: LatestControllerConfigType }, { error: Error }>(),
 
   subscribe: createAction("SUBSCRIBE_CONFIG")<unknown>(),
 
   unSubscribe: createAction("UNSUBSCRIBE_CONFIG")<unknown>(),
 
   onChanged: createAction("ON_CONFIG_CHANGED")<{
-    config: ControllerConfigType;
+    config: LatestControllerConfigType;
   }>()
 };
