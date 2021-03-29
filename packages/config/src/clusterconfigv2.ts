@@ -30,7 +30,7 @@ export interface GCPInfraConfigTypeV2 {
 // Using the yup-inferred types across the code base, deep down in other packages
 // is creating a lot of pain. Use yup for user-given doc validation, but then
 // save to 'natively defined Typescript types/interfaces' asap.
-export interface ClusterConfigVersionV2 {
+export interface ClusterConfigTypeV2 {
   cluster_name: string;
   cloud_provider: "aws" | "gcp";
   cert_issuer: "letsencrypt-prod" | "letsencrypt-staging";
