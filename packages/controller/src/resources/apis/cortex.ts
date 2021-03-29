@@ -36,37 +36,12 @@ import { addApiIngress } from "./ingress";
 import { nodecountToReplicacount } from "./index";
 import {
   DockerImages,
-  ControllerConfigType
+  LatestControllerConfigType
 } from "@opstrace/controller-config";
-
-import { keyIDfromPEM, log } from "@opstrace/utils";
 
 // This should really be called "Cortex API"
 // also see opstrace-prelaunch/issues/608
 // Update: said renaming effort is in progress.
-
-function generateAuthenticatorPubkeySetJSON(data_api_authn_pubkey_pem: string) {
-  // The key set is required to be a mapping between keyID (string) and
-  // PEM-encoded pubkey (string).
-  // Note: upon _continutation_, this key should be added to the existing
-  // key set.
-  const keyId = keyIDfromPEM(data_api_authn_pubkey_pem);
-  const keyset = {
-    [keyId]: data_api_authn_pubkey_pem
-  };
-
-  log.info("built authenticator key ID: %s", keyId);
-
-  // The corresponding configuration parameter value is expected to be a
-  // string, namely the above `keyset` mapping in JSON-encoded form *without
-  // literal newline chars*.
-  const tenant_api_authenticator_pubkey_set_json = JSON.stringify(keyset);
-  log.info(
-    "generated AuthenticatorPubkeySetJSON: %s",
-    tenant_api_authenticator_pubkey_set_json
-  );
-  return tenant_api_authenticator_pubkey_set_json;
-}
 
 export function CortexAPIResources(
   state: State,
@@ -82,7 +57,7 @@ export function CortexAPIResources(
     resources: {}
   };
 
-  const controllerConfig: ControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
 
   const namespace = getTenantNamespace(tenant);
 
@@ -101,32 +76,11 @@ export function CortexAPIResources(
   ];
 
   let cortexApiProxyEnv: V1EnvVar[];
-  cortexApiProxyEnv = [];
 
   if (controllerConfig.disable_data_api_authentication) {
+    cortexApiProxyEnv = [];
     cortexApiProxyCliArgs.push("-disable-api-authn");
-  }
-
-  // Support legacy controller config schema, with only
-  // `data_api_authn_pubkey_pem` being set.
-  if (controllerConfig.data_api_authn_pubkey_pem !== undefined) {
-    const pubkeypem: string = controllerConfig.data_api_authn_pubkey_pem as string;
-    if (pubkeypem.length > 0) {
-      log.info(
-        "found legacy controller config with data_api_authn_pubkey_pem parameter"
-      );
-      const keySetJSON = generateAuthenticatorPubkeySetJSON(pubkeypem);
-      cortexApiProxyEnv = [
-        {
-          name: "API_AUTHTOKEN_VERIFICATION_PUBKEY_SET",
-          value: keySetJSON
-        }
-      ];
-    }
   } else {
-    // code path for new controller config schema, with
-    // `tenant_api_authenticator_pubkey_set_json` being set and
-    // data_api_authn_pubkey_pem not being set.
     cortexApiProxyEnv = [
       {
         name: "API_AUTHTOKEN_VERIFICATION_PUBKEY_SET",

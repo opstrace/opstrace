@@ -26,7 +26,7 @@ import { KubeConfig, V1EnvVar } from "@kubernetes/client-node";
 import { getControllerConfig } from "../../helpers";
 import {
   DockerImages,
-  ControllerConfigType
+  LatestControllerConfigType
 } from "@opstrace/controller-config";
 
 export function OpstraceAPIResources(
@@ -36,7 +36,7 @@ export function OpstraceAPIResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const controllerConfig: ControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
 
   const name = `opstrace-api`;
 

@@ -17,9 +17,10 @@
 export * from "./actions";
 export * from "./helpers";
 export * from "./reducer";
-export * from "./types";
+export * from "./schema";
 export * from "./tasks";
 export * from "./errors";
 export * from "./docker-images";
 
 export { CONTROLLER_NAME } from "./resources/controller";
+export { CONFIGMAP_NAME, STORAGE_KEY } from "./utils";
