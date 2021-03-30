@@ -28,6 +28,10 @@ nvm install 14
 nvm use 14
 ```
 
+## Building locally
+
+To build locally, visit our Developer Workflows](workflows#local-checkout-build-artifacts-and-create-a-cluster) page.
+
 ## Golang and dependencies
 
 We are currently using Golang 1.15.
