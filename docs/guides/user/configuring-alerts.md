@@ -1,4 +1,4 @@
-# Configuring Scalable Alertmanager
+# Configuring Alertmanager
 
 Opstrace supports configuring Alertmanager rules and alert outputs on a per-tenant basis.
 For example, you might have an alerting rule that metric `X` must be less than 5 and an Alertmanager configuration to send a Slack message when the rule is failing.
