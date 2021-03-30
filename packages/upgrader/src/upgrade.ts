@@ -30,6 +30,11 @@ import {
 } from "@opstrace/controller-config";
 import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
+import {
+  EnsureInfraExistsResponse,
+  ensureAWSInfraExists
+} from "@opstrace/installer";
+
 import { State } from "./reducer";
 
 //
@@ -95,4 +100,18 @@ export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
   log.debug(`upgraded controller config ${JSON.stringify(cfg, null, 2)}`);
 
   yield call(updateControllerConfig, cfg, kubeConfig);
+}
+
+export function* upgradeInfra(cloudProvider: string) {
+  switch(cloudProvider) {
+    case "aws":
+      const res: EnsureInfraExistsResponse = yield call(ensureAWSInfraExists);
+      log.debug(`upgraded infra results: ${JSON.stringify(res)}`);
+      break;
+    case "gcp":
+      die(`TBD`);
+      break;
+    default:
+      die(`cloud provider not supported: ${cloudProvider}`);
+  }
 }

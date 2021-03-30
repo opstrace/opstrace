@@ -40,7 +40,8 @@ import {
 } from "./readiness";
 import {
   upgradeControllerConfigMap,
-  upgradeControllerDeployment
+  upgradeControllerDeployment,
+  upgradeInfra
 } from "./upgrade";
 import { getClusterConfig, LatestClusterConfigType } from "@opstrace/config";
 
@@ -136,6 +137,8 @@ function* triggerUpgrade(kubeConfig: KubeConfig) {
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);
+
+  yield call(upgradeInfra, upgradeConfig.cloudProvider);
 
   // TODO: fetch and save system-tenant api token locally
   yield call(upgradeControllerConfigMap, kubeConfig);
