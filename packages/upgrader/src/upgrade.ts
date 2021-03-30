@@ -104,13 +104,15 @@ export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
 
 export function* upgradeInfra(cloudProvider: string) {
   switch(cloudProvider) {
-    case "aws":
+    case "aws": {
       const res: EnsureInfraExistsResponse = yield call(ensureAWSInfraExists);
       log.debug(`upgraded infra results: ${JSON.stringify(res)}`);
       break;
-    case "gcp":
+    }
+    case "gcp": {
       die(`TBD`);
       break;
+    }
     default:
       die(`cloud provider not supported: ${cloudProvider}`);
   }
