@@ -75,6 +75,14 @@ export function LokiAPIResources(
         value: controllerConfig.tenant_api_authenticator_pubkey_set_json
       }
     ];
+
+    const data_api_authn_pubkey_pem = controllerConfig.data_api_authn_pubkey_pem ?? "";
+    if (data_api_authn_pubkey_pem !== "") {
+      lokiApiProxyEnv.push({
+        name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
+        value: data_api_authn_pubkey_pem
+      });
+    }
   } else {
     lokiApiProxyEnv = [];
     lokiApiProxyCliArgs.push("-disable-api-authn");

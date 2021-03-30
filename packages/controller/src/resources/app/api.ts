@@ -97,6 +97,14 @@ export function OpstraceAPIResources(
       name: "API_AUTHTOKEN_VERIFICATION_PUBKEY_SET",
       value: controllerConfig.tenant_api_authenticator_pubkey_set_json
     });
+
+    const data_api_authn_pubkey_pem = controllerConfig.data_api_authn_pubkey_pem ?? "";
+    if (data_api_authn_pubkey_pem !== "") {
+      commandEnv.push({
+        name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
+        value: data_api_authn_pubkey_pem
+      });
+    }
   }
 
   collection.add(

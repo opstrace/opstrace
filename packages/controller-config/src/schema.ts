@@ -60,6 +60,9 @@ function V1toV2(cfg: ControllerConfigTypeV1): ControllerConfigTypeV2 {
     ...restConfig,
     logRetentionDays: logRetention,
     metricRetentionDays: metricRetention,
+    // Legacy auth tokens don't encode a key id so set up legacy env var to
+    // continue to support older tokens.
+    data_api_authn_pubkey_pem: data_api_authn_pubkey_pem,
     tenant_api_authenticator_pubkey_set_json: tenant_api_authenticator_pubkey_set_json
   }
 }
