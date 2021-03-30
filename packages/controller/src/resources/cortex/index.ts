@@ -251,9 +251,10 @@ export function CortexResources(
     // at api.prometheus_http_prefix.
     http_prefix: "",
     api: {
-      // Serve Alertmanager UI at this custom location, matching the path served by the config-api pod.
-      // SEE ALSO: go/cmd/config/main.go, and alertmanager.external_url and ruler.alertmanager_url below
-      alertmanager_http_prefix: "/api/v1/alertmanager"
+      // Serve Alertmanager UI at this location, matching the path served by the tenant Ingresses.
+      // This is the default but we call it out explicitly here.
+      // SEE ALSO: resources/ingress/index.ts, and alertmanager.external_url and ruler.alertmanager_url below
+      alertmanager_http_prefix: "/alertmanager"
     },
     auth_enabled: true,
     distributor: {
@@ -438,10 +439,8 @@ export function CortexResources(
           store: "memberlist"
         }
       },
-      // Endpoint for talking to underlying per-tenant prometheus alertmanager instances.
-      // This is as opposed to the system-wide cortex APIs at the root.
-      // This is passed to prometheus and must align with api.alertmanager_http_prefix and ruler.alertmanager_url
-      external_url: "/api/v1/alertmanager"
+      // This is used by other prometheus components and must align with api.alertmanager_http_prefix and ruler.alertmanager_url
+      external_url: "/alertmanager"
     },
     // Using the new thanos-based storage for alertmanager configs
     alertmanager_storage: {
@@ -466,7 +465,7 @@ export function CortexResources(
       },
       // Must align with api.alertmanager_http_prefix and alertmanager.external_url
       // (This version needs to include the alertmanager hostname to send alerts to)
-      alertmanager_url: `http://alertmanager.${namespace}.svc.cluster.local/api/v1/alertmanager/`
+      alertmanager_url: `http://alertmanager.${namespace}.svc.cluster.local/alertmanager/`
     },
     // Using the new thanos-based storage for rule configs
     ruler_storage: {

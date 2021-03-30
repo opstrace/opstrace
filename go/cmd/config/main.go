@@ -142,13 +142,9 @@ func buildConfigHandler(
 
 	// Cortex Alertmanager config
 	alertmanagerPathReplacement := func(requrl *url.URL) string {
-		// NOTE: We leave /api/v1/alertmanager for the Alertmanager UI as-is.
-		// By default Cortex would serve it at /alertmanager, but we configure it via 'api.alertmanager-http-prefix'.
-		// This avoids us needing to rewrite HTTP responses to fix e.g. any absolute img/href URLs.
-		// SEE ALSO: controller/src/resources/cortex/index.ts
-
 		// Route /api/v1/multitenant_alertmanager* requests to /multitenant_alertmanager* on the backend.
-		// Unlike with /alertmanager, this doesn't appear to involve a UI and just has status endpoints.
+		// Unlike with /alertmanager, this is more of an internal status page.
+		// But we could switch it to an Ingress later if we wanted.
 		if replaced := replacePathPrefix(
 			requrl,
 			"/api/v1/multitenant_alertmanager",
@@ -163,8 +159,9 @@ func buildConfigHandler(
 		alertmanagerURL,
 		disableAPIAuthentication,
 	).ReplacePaths(alertmanagerPathReplacement)
+	// We don't route /alertmanager for the Alertmanager UI since it isn't useful via curl.
+	// The Alertmanager UI can be viewed at '<tenant>.<cluster>.opstrace.io/alertmanager/'
 	router.PathPrefix("/api/v1/alerts").HandlerFunc(alertmanagerProxy.HandleWithProxy)
-	router.PathPrefix("/api/v1/alertmanager").HandlerFunc(alertmanagerProxy.HandleWithProxy)
 	router.PathPrefix("/api/v1/multitenant_alertmanager").HandlerFunc(alertmanagerProxy.HandleWithProxy)
 
 	credentialAccess := config.NewCredentialAccess(graphqlURL, graphqlSecret)
