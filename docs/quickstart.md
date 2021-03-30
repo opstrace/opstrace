@@ -9,7 +9,7 @@ description: See it for yourself—get your hands dirty with Opstrace by install
 Try Opstrace by actually installing it inside your AWS account.
 You'll send metrics and logs to it from your local machine, and query the data to test the end-to-end flow.
 
-![quick start overview diagram](assets/opstrace-quickstart-overview-v2.png)
+![quick start overview diagram](/images/docs/opstrace-quickstart-overview-v2.png)
 
 If you want to see the quick start run through at over 10x speed, check out our video here:
 
@@ -333,5 +333,12 @@ Share the resulting file with us at [hello@opstrace.com](mailto:hello@opstrace.c
 
 That's it! 👏
 
-Congratulations, you're now an Opstrace user!
+<!-- markdownlint-disable MD044 -->
+Join our [community Slack](go.opstrace.com/community) and follow us on [Twitter @opstrace](https://twitter.com/opstrace).
+Let us know what you thought of the quick start—we like any and all feedback.
+<!-- markdownlint-enable MD044 -->
 
+To learn more about how to use Opstrace, check out our Administrator and User Guides.
+If you'd like to hack on Opstrace, feel free to [fork our repository](https://github.com/opstrace/opstrace/network/members) and set up your [dev environment](https://opstrace.com/docs/guides/contributor/setting-up-your-dev-env).
+
+Thank you. 🙏
