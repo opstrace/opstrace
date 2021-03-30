@@ -78,9 +78,9 @@ export function IngressResources(
                 "X-Auth-Request-User, X-Auth-Request-Email",
               // Include an X-Scope-OrgID header containing the tenant name in all requests.
               // This is (only) used by cortex-* services to identify the tenant.
-              // See https://github.com/kubernetes/ingress-nginx/blob/0dce5be/docs/examples/customization/configuration-snippets/ingress.yaml
+              // WARNING: Don't forget the trailing semicolon or else routes will silently fail.
               "nginx.ingress.kubernetes.io/configuration-snippet":
-                `more_set_headers "X-Scope-OrgID: ${tenant.name}"`
+                `more_set_input_headers "X-Scope-OrgID: ${tenant.name}";`
             }
           },
           spec: {
@@ -96,8 +96,8 @@ export function IngressResources(
                 http: {
                   paths: [
                     {
-                      path: "/prometheus/",
-                      pathType: "ImplementationSpecific",
+                      path: "/prometheus",
+                      pathType: "Prefix",
                       backend: {
                         serviceName: "prometheus",
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,8 +107,8 @@ export function IngressResources(
                     // An ExternalName service which points to alertmanager in the 'cortex' namespace.
                     // Our requests to this service must include the X-Scope-OrgID header for Cortex.
                     {
-                      path: "/alertmanager/",
-                      pathType: "ImplementationSpecific",
+                      path: "/alertmanager",
+                      pathType: "Prefix",
                       backend: {
                         serviceName: "cortex-alertmanager",
                         // Cortex alertmanager has ports 80 and 9094. The UI is served at port 80.
@@ -117,8 +117,8 @@ export function IngressResources(
                       }
                     },
                     {
-                      path: "/grafana/",
-                      pathType: "ImplementationSpecific",
+                      path: "/grafana",
+                      pathType: "Prefix",
                       backend: {
                         serviceName: "grafana",
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
