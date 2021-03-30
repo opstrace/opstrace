@@ -21,7 +21,7 @@ import SideBar from "client/views/sidebar";
 import Layout from "client/layout/MainContent";
 
 import TenantDetail from "client/views/tenant/TenantDetail";
-import AlertmanagerConfigEditor from "client/views/tenant/alertmanager/AlertmanagerConfigEditor";
+import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";
 
 import NotFound from "client/views/404/404";
 
