@@ -15,6 +15,8 @@
  */
 
 export * from "./common";
+export * from "./die";
+export * from "./docker";
 export * from "./time";
 export * from "./math";
 export * from "./log";
@@ -31,16 +33,6 @@ export {
   mtimeDiffSeconds,
   mtimeDeadlineInSeconds
 } from "./deadline";
-
-import * as errors from "./errors";
-
-/**
- * Shortcut for exiting the runtime with a non-zero exit code, and logging the
- * reason beforehand.
- */
-export function die(errorMessage: string): never {
-  throw new errors.ExitError(1, errorMessage);
-}
 
 export function hasUpperCase(s: string): boolean {
   return s.toLowerCase() != s;
