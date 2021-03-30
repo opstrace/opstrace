@@ -334,7 +334,7 @@ Share the resulting file with us at [hello@opstrace.com](mailto:hello@opstrace.c
 That's it! 👏
 
 <!-- markdownlint-disable MD044 -->
-Join our [community Slack](go.opstrace.com/community) and follow us on [Twitter @opstrace](https://twitter.com/opstrace).
+Join our [community Slack](https://go.opstrace.com/community) and follow us on [Twitter @opstrace](https://twitter.com/opstrace).
 Let us know what you thought of the quick start—we like any and all feedback.
 <!-- markdownlint-enable MD044 -->
 
