@@ -24,7 +24,12 @@ import { getGKEKubeconfig } from "@opstrace/gcp";
 
 import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
-import { log, SECOND, retryUponAnyError } from "@opstrace/utils";
+import {
+  log,
+  SECOND,
+  retryUponAnyError,
+  checkIfDockerImageExistsOrErrorOut
+} from "@opstrace/utils";
 
 import { rootReducer } from "./reducer";
 import { ClusterUpgradeTimeoutError } from "./errors";
@@ -116,6 +121,11 @@ function* upgradeClusterCore() {
  * Trigger soft-upgrade by bumping the controller deployment version.
  */
 function* triggerUpgrade(kubeConfig: KubeConfig) {
+
+  const ucc: LatestClusterConfigType = getClusterConfig();
+
+  yield call(checkIfDockerImageExistsOrErrorOut, ucc.controller_image);
+
   // Explicitly test the availability of the k8s api and exit if interaction
   // fails.
   yield call(k8sListNamespacesOrError, kubeConfig);
