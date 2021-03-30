@@ -46,8 +46,11 @@ export function MonitoringResources(
 
   // Per tenant resources
   state.tenants.list.tenants.forEach(tenant => {
-    // Each tenant gets Alertmanager, Prometheus, Grafana
+    // Cortex runs Alertmanager for all tenants
+    // Support routing per-tenant Ingress for Alertmanager UI to Cortex
     collection.add(AlertManagerResources(state, kubeConfig, tenant));
+
+    // Each tenant gets Prometheus, Grafana
     collection.add(GrafanaResources(state, kubeConfig, tenant));
     collection.add(PrometheusResources(state, kubeConfig, tenant));
 
