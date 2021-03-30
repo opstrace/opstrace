@@ -37,6 +37,7 @@ import {
   upgradeControllerConfigMap,
   upgradeControllerDeployment
 } from "./upgrade";
+import { getClusterConfig, LatestClusterConfigType } from "@opstrace/config";
 
 // Note: a largish number of attempts as long as micro retries are not yet
 // implemented carefully and thoughtfully.
