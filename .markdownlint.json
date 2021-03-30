@@ -10,6 +10,7 @@
   "proper-names": {
     "code_blocks": false,
     "names": [
+      "@opstrace",
       "Alertmanager",
       "Auth0",
       "CloudWatch",
@@ -21,8 +22,8 @@
       "VS Code",
       "hello@opstrace.com",
       "legal@opstrace.com",
+      "go.opstrace.com",
       "opstrace.com",
-      "opstrace.com/docs",
       "privacy@opstrace.com",
       "security@opstrace.com"
     ]
