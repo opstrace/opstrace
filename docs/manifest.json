@@ -17,7 +17,7 @@
           "title": "User Guide",
           "routes": [
             {
-              "title": "Configuring Scalable Alertmanager",
+              "title": "Configuring Alertmanager",
               "path": "/docs/guides/user/configuring-alerts.md"
             },
             {
