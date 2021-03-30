@@ -9,7 +9,7 @@ description: See it for yourself—get your hands dirty with Opstrace by install
 Try Opstrace by actually installing it inside your AWS account.
 You'll send metrics and logs to it from your local machine, and query the data to test the end-to-end flow.
 
-![quick start overview diagram](/images/docs/opstrace-quickstart-overview-v2.png)
+![quick start overview diagram](https://opstrace.com/images/docs/opstrace-quickstart-overview-v2.png)
 
 If you want to see the quick start run through at over 10x speed, check out our video here:
 
