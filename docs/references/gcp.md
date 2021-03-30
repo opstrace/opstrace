@@ -13,7 +13,7 @@ Creating an Opstrace cluster in a GCP project requires the following APIs to be 
 * Service Networking API
 * Cloud Resource Manager API
 
-We try to keep this list up to date—if in doubt, please [contact us](https://go.opstrace.com/community)!
+We try to keep this list up to date—if in doubt, please [reach out in our community](https://go.opstrace.com/community)!
 
 ## Required service account permissions
 
