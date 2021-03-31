@@ -47,7 +47,7 @@ export const TenantPanel = (props: TenantPanelProps) => {
         history.push(`/cluster/tenants/${tenants[0].name}`);
       }
     }
-  }, [tenants, defaultId]);
+  }, [tenants, defaultId, history]);
 
   const selectCallback = useCallback(
     (
