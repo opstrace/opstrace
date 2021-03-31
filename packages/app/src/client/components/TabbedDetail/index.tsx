@@ -29,14 +29,20 @@ import Box from "@material-ui/core/Box";
 type TabPanelProps = {
   active: boolean;
   tab: tabTypes.Tab;
+  opts?: {};
 };
 
-const Panel = ({ active, tab }: TabPanelProps) => {
+const Panel = ({ active, tab, opts }: TabPanelProps) => {
   const { key, content } = tab;
+  const Content = content;
 
   return (
     <div role="tabpanel" hidden={!active} id={key}>
-      {active && <Box p={3}>{content}</Box>}
+      {active && (
+        <Box p={3}>
+          <Content {...opts} />
+        </Box>
+      )}
     </div>
   );
 };
@@ -50,6 +56,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 type TabbedDetailProps = {
   tabs: tabTypes.Tabs;
+  opts?: {};
 };
 
 export const TabbedDetail = (props: TabbedDetailProps) => {
@@ -64,11 +71,11 @@ export const TabbedDetail = (props: TabbedDetailProps) => {
     <div className={classes.root}>
       <AppBar position="static">
         <Tabs value={value} onChange={handleChange}>
-          {map((tab: tabTypes.Tab) => <Tab label={tab.title} />)(props.tabs)}
+          {map((tab: tabTypes.Tab) => <Tab label={tab.label} />)(props.tabs)}
         </Tabs>
       </AppBar>
       {mapIndexed((tab: tabTypes.Tab, index: number) => (
-        <Panel active={value === index} tab={tab} />
+        <Panel active={value === index} tab={tab} opts={props.opts} />
       ))(props.tabs)}
     </div>
   );
