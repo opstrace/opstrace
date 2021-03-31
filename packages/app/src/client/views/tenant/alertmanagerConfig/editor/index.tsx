@@ -17,8 +17,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { values, any } from "ramda";
-import { isTrue } from "ramda-adjunct";
+import { values, none } from "ramda";
+import { isFalse } from "ramda-adjunct";
 
 import { useForm, useFormState } from "state/form/hooks";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
@@ -82,20 +82,21 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
     templates: alertmanager?.templates || ""
   });
 
-  const [validation, setValidation] = useState<Record<string, boolean>>({
-    default: false
-  });
+  const [validation, setValidation] = useState<Record<string, boolean>>({});
   const dispatch = useDispatch();
 
-  const validationChanged = useCallback((tabKey: string, valid: boolean) => {
-    setValidation({ ...validation, [tabKey]: valid });
-  }, []);
+  const validationChanged = useCallback(
+    (tabKey: string, valid: boolean) => {
+      setValidation({ ...validation, [tabKey]: valid });
+    },
+    [validation, setValidation]
+  );
 
   const dataUpdated = useCallback((newData: {}) => {
     dataRef.current = { ...dataRef.current, ...newData };
   }, []);
 
-  const isValid = useCallback(() => any(isTrue)(values(validation)), [
+  const isValid = useCallback(() => none(isFalse)(values(validation)), [
     validation
   ]);
 
