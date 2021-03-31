@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-import React from "react";
-
-export type Data = {
-  config: "";
-  templates: "";
+type Data = {
+  config: string;
+  templates: string;
 };
 
-type ContextData = [
-  Data,
-  (data: {}) => void,
-  (tabKey: string, valid: boolean) => void
-];
-
-const Context = React.createContext<ContextData>([
-  { config: "", templates: "" },
-  () => {},
-  (tabKey, valid) => {}
-]);
-
-export { Context };
+export type State = {
+  data: Data;
+  setData: (data: {}) => void;
+  setValidation: (tabKey: string, valid: boolean) => void;
+};

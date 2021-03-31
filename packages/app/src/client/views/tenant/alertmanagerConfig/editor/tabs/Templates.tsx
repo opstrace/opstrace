@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import React, { useRef, useCallback, useContext } from "react";
+import React, { useRef, useCallback, useEffect } from "react";
 import { debounce } from "lodash";
 
 import { editor } from "monaco-editor/esm/vs/editor/editor.api";
 import * as yamlParser from "js-yaml";
 import { YamlEditor } from "client/components/Editor";
 
-import { Context } from "client/views/tenant/alertmanagerConfig/editor/context";
+import { State } from "client/views/tenant/alertmanagerConfig/editor/types";
 
 import { Box } from "client/components/Box";
 
@@ -34,9 +34,15 @@ type validationCheckOptions = {
   useModelMarkers: boolean;
 };
 
-const Templates = () => {
-  const [data, setData, setValidation] = useContext(Context);
+const Templates = (props: State) => {
+  const { data, setData, setValidation } = props;
   const templatesRef = useRef<string>(data.templates || "");
+
+  useEffect(() => {
+    return () => {
+      setData({ templates: templatesRef.current });
+    };
+  }, [setData]);
 
   const handleChange = useCallback(
     (newTemplates, filename) => {
@@ -81,11 +87,10 @@ const Templates = () => {
       });
 
       templatesRef.current = newTemplates;
-      setData({ templates: newTemplates });
       validationCheckOnChangeStart(filename);
       checkValidationOnChangePause(filename);
     },
-    [setData, setValidation]
+    [setValidation]
   );
 
   return (
