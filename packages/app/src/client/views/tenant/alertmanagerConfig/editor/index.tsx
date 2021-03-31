@@ -59,7 +59,7 @@ const AlertmanagerConfigEditor = () => {
   const alertmanager = useAlertmanager(tenantId);
   const [data, setData] = useState({
     config: alertmanager?.config || "",
-    header: alertmanager?.header || ""
+    templates: alertmanager?.templates || ""
   });
 
   const [validation, setValidation] = useState<Record<string, boolean>>({
@@ -84,13 +84,13 @@ const AlertmanagerConfigEditor = () => {
       dispatch(
         updateAlertmanager({
           tenantId: tenant.name,
-          header: data.header,
+          templates: data.templates,
           config: data.config,
           formId: formId
         })
       );
     }
-  }, [tenant?.name, data.header, data.config, formId, isValid, dispatch]);
+  }, [tenant?.name, data.templates, data.config, formId, isValid, dispatch]);
 
   if (!tenant || !formState)
     return (
