@@ -57,7 +57,6 @@ export const TenantPanel = (props: TenantPanelProps) => {
       subItemIndex?: number
     ) => {
       setSelectedIndex(index);
-      console.log("subItem click", subItem, subItemIndex);
       if (subItem && subItem.id !== "detail")
         history.push(`/cluster/tenants/${item.data.name}/${subItem.id}`);
       else history.push(`/cluster/tenants/${item.data.name}`);
