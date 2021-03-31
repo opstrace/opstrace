@@ -36,7 +36,7 @@ type validationCheckOptions = {
 
 const Templates = () => {
   const [data, setData, setValidation] = useContext(Context);
-  const templatesRef = useRef<string>(data.header || "");
+  const templatesRef = useRef<string>(data.templates || "");
 
   const handleChange = useCallback(
     (newTemplates, filename) => {
@@ -81,7 +81,7 @@ const Templates = () => {
       });
 
       templatesRef.current = newTemplates;
-      setData({ header: newTemplates });
+      setData({ templates: newTemplates });
       validationCheckOnChangeStart(filename);
       checkValidationOnChangePause(filename);
     },
@@ -93,7 +93,7 @@ const Templates = () => {
       <YamlEditor
         filename="alertmanager-templates.yaml"
         jsonSchema={jsonSchema}
-        data={data.header || ""}
+        data={data.templates || ""}
         onChange={handleChange}
       />
     </Box>

@@ -18,7 +18,7 @@ import React from "react";
 
 export type Data = {
   config: "";
-  header: "";
+  templates: "";
 };
 
 type ContextData = [
@@ -28,7 +28,7 @@ type ContextData = [
 ];
 
 const Context = React.createContext<ContextData>([
-  { config: "", header: "" },
+  { config: "", templates: "" },
   () => {},
   (tabKey, valid) => {}
 ]);

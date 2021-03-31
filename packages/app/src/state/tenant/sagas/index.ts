@@ -91,7 +91,7 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
     });
 
     if (response.data?.getAlertmanager?.config) {
-      const [header, rawConfig] = split(
+      const [templates, rawConfig] = split(
         "alertmanager_config: |",
         response.data?.getAlertmanager?.config
       );
@@ -103,7 +103,7 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
         type: "ALERTMANAGER_LOADED",
         payload: {
           tenantId: action.payload,
-          header: header,
+          templates: templates,
           config: config,
           online: true
         }
@@ -113,7 +113,7 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
         type: "ALERTMANAGER_LOADED",
         payload: {
           tenantId: action.payload,
-          header: "templates: {}",
+          templates: "templates: {}",
           config: "",
           online: true
         }
@@ -143,7 +143,7 @@ function* updateAlertmanager(
     }
 
     const config = `${
-      action.payload.header
+      action.payload.templates
     }alertmanager_config: |\n  ${action.payload.config.replace(
       /(\n)+/g,
       "\n  "
