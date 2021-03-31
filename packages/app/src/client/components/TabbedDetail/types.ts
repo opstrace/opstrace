@@ -18,8 +18,8 @@ import React from "react";
 
 export type Tab = {
   key: string;
-  title: string;
-  content: React.ReactNode;
+  label: string;
+  content: React.FunctionComponent;
 };
 
 export type Tabs = Tab[];
