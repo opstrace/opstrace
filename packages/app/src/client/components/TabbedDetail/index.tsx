@@ -26,13 +26,13 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Box from "@material-ui/core/Box";
 
-type TabPanelProps = {
+type TabPanelProps<T> = {
   active: boolean;
   tab: tabTypes.Tab;
-  opts?: {};
+  opts?: T;
 };
 
-const Panel = ({ active, tab, opts }: TabPanelProps) => {
+function Panel<T>({ active, tab, opts }: TabPanelProps<T>) {
   const { key, content } = tab;
   const Content = content;
 
@@ -45,7 +45,7 @@ const Panel = ({ active, tab, opts }: TabPanelProps) => {
       )}
     </div>
   );
-};
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -54,12 +54,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-type TabbedDetailProps = {
+type TabbedDetailProps<T> = {
   tabs: tabTypes.Tabs;
-  opts?: {};
+  opts?: T;
 };
 
-export const TabbedDetail = (props: TabbedDetailProps) => {
+export function TabbedDetail<T = {}>(props: TabbedDetailProps<T>) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
 
@@ -75,8 +75,8 @@ export const TabbedDetail = (props: TabbedDetailProps) => {
         </Tabs>
       </AppBar>
       {mapIndexed((tab: tabTypes.Tab, index: number) => (
-        <Panel active={value === index} tab={tab} opts={props.opts} />
+        <Panel<T> active={value === index} tab={tab} opts={props.opts} />
       ))(props.tabs)}
     </div>
   );
-};
+}
