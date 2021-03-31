@@ -14,35 +14,28 @@
  * limitations under the License.
  */
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { debounce } from "lodash";
+import { values, any } from "ramda";
+import { isTrue } from "ramda-adjunct";
 
 import { useForm, useFormState } from "state/form/hooks";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
 
-import { editor } from "monaco-editor/esm/vs/editor/editor.api";
-import * as yamlParser from "js-yaml";
-import { YamlEditor } from "client/components/Editor";
-
 import { AlertmanagerUpdateResponse } from "state/graphql-api-types";
+
+import { Context, Data } from "./context";
 
 import Skeleton from "@material-ui/lab/Skeleton";
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
+
+import tabs from "./tabs";
+import { TabbedDetail } from "client/components/TabbedDetail";
 import { CondRender } from "client/utils/rendering";
-
-import {
-  alertmanagerConfigSchema,
-  jsonSchema
-} from "client/validation/alertmanagerConfig";
-
-type validationCheckOptions = {
-  useModelMarkers: boolean;
-};
 
 type FormData = {
   remoteValidation: AlertmanagerUpdateResponse;
@@ -64,68 +57,40 @@ const AlertmanagerConfigEditor = () => {
   });
   const formState = useFormState<FormData>(formId, defaultData);
   const alertmanager = useAlertmanager(tenantId);
-  const configRef = useRef<string>(alertmanager?.config || "");
-  const [configValid, setConfigValid] = useState<boolean | null>(null);
+  const [data, setData] = useState({
+    config: alertmanager?.config || "",
+    header: alertmanager?.header || ""
+  });
+
+  const [validation, setValidation] = useState<Record<string, boolean>>({
+    default: false
+  });
   const dispatch = useDispatch();
 
-  const handleConfigChange = useCallback((newConfig, filename) => {
-    const validationCheck: (
-      _filename: string,
-      _options?: validationCheckOptions
-    ) => void = (filename, options) => {
-      const markers = options?.useModelMarkers
-        ? editor.getModelMarkers({
-            resource: monaco.Uri.parse(filename)
-          })
-        : [];
+  const validationChanged = (tabKey: string, valid: boolean) => {
+    setValidation({ ...validation, [tabKey]: valid });
+  };
 
-      if (markers.length === 0) {
-        try {
-          const parsedData = yamlParser.load(configRef.current, {
-            schema: yamlParser.JSON_SCHEMA
-          });
+  const dataUpdated = (newData: {}) => {
+    setData({ ...data, ...newData });
+  };
 
-          alertmanagerConfigSchema
-            .validate(parsedData, { strict: true })
-            .then((_value: object) => {
-              setConfigValid(true);
-            })
-            .catch((_err: { name: string; errors: string[] }) => {
-              setConfigValid(false);
-            });
-        } catch (e) {
-          setConfigValid(false);
-        }
-      } else {
-        setConfigValid(false);
-      }
-    };
-
-    const validationCheckOnChangeStart = debounce(validationCheck, 300, {
-      leading: true,
-      trailing: false
-    });
-    const checkValidationOnChangePause = debounce(validationCheck, 500, {
-      maxWait: 5000
-    });
-
-    configRef.current = newConfig;
-    validationCheckOnChangeStart(filename);
-    checkValidationOnChangePause(filename);
-  }, []);
+  const isValid = useCallback(() => any(isTrue)(values(validation)), [
+    validation
+  ]);
 
   const handleSave = useCallback(() => {
-    if (tenant?.name) {
+    if (tenant?.name && isValid()) {
       dispatch(
         updateAlertmanager({
           tenantId: tenant.name,
-          header: alertmanager?.header || "",
-          config: configRef.current,
+          header: data.header,
+          config: data.config,
           formId: formId
         })
       );
     }
-  }, [tenant?.name, alertmanager?.header, formId, dispatch]);
+  }, [tenant?.name, data.header, data.config, formId, isValid, dispatch]);
 
   if (!tenant || !formState)
     return (
@@ -142,26 +107,24 @@ const AlertmanagerConfigEditor = () => {
         flexWrap="wrap"
         p={1}
       >
-        <Box maxWidth={700}>
+        <Box maxWidth={900}>
           <Card p={3}>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
               title="Alertmanager Configuration"
             />
             <CardContent>
-              <Box display="flex" height="500px" width="700px">
-                <YamlEditor
-                  filename="alertmanager-config.yaml"
-                  jsonSchema={jsonSchema}
-                  data={alertmanager?.config || ""}
-                  onChange={handleConfigChange}
-                />
-              </Box>
+              <Context.Provider
+                value={[data as Data, dataUpdated, validationChanged]}
+              >
+                <TabbedDetail tabs={tabs} />
+              </Context.Provider>
             </CardContent>
+
             <Button
               variant="contained"
               state="primary"
-              disabled={!configValid || formState.status !== "active"}
+              disabled={!isValid() || formState.status !== "active"}
               onClick={handleSave}
             >
               publish
