@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { values, any } from "ramda";
@@ -24,9 +24,10 @@ import { useForm, useFormState } from "state/form/hooks";
 import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
 
+import { Tenant, Alertmanager } from "state/tenant/types";
 import { AlertmanagerUpdateResponse } from "state/graphql-api-types";
 
-import { Context, Data } from "./context";
+import { State } from "./types";
 
 import Skeleton from "@material-ui/lab/Skeleton";
 import { Box } from "client/components/Box";
@@ -47,17 +48,36 @@ const defaultData: FormData = {
   }
 };
 
-const AlertmanagerConfigEditor = () => {
+const AlertmanagerConfigEditorLoader = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
   const tenant = useTenant(tenantId);
+  const alertmanager = useAlertmanager(tenantId);
+
+  if (!tenant || !alertmanager)
+    return (
+      <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
+    );
+  else
+    return (
+      <AlertmanagerConfigEditor tenant={tenant} alertmanager={alertmanager} />
+    );
+};
+
+type AlertmanagerConfigEditorProps = {
+  tenant: Tenant;
+  alertmanager: Alertmanager;
+};
+
+const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
+  const { tenant, alertmanager } = props;
   const formId = useForm({
     type: "alertmanagerConfig",
-    code: tenantId,
+    code: tenant.name,
     data: defaultData
   });
   const formState = useFormState<FormData>(formId, defaultData);
-  const alertmanager = useAlertmanager(tenantId);
-  const [data, setData] = useState({
+
+  const dataRef = useRef({
     config: alertmanager?.config || "",
     templates: alertmanager?.templates || ""
   });
@@ -67,13 +87,13 @@ const AlertmanagerConfigEditor = () => {
   });
   const dispatch = useDispatch();
 
-  const validationChanged = (tabKey: string, valid: boolean) => {
+  const validationChanged = useCallback((tabKey: string, valid: boolean) => {
     setValidation({ ...validation, [tabKey]: valid });
-  };
+  }, []);
 
-  const dataUpdated = (newData: {}) => {
-    setData({ ...data, ...newData });
-  };
+  const dataUpdated = useCallback((newData: {}) => {
+    dataRef.current = { ...dataRef.current, ...newData };
+  }, []);
 
   const isValid = useCallback(() => any(isTrue)(values(validation)), [
     validation
@@ -84,71 +104,73 @@ const AlertmanagerConfigEditor = () => {
       dispatch(
         updateAlertmanager({
           tenantId: tenant.name,
-          templates: data.templates,
-          config: data.config,
+          templates: dataRef.current.templates,
+          config: dataRef.current.config,
           formId: formId
         })
       );
     }
-  }, [tenant?.name, data.templates, data.config, formId, isValid, dispatch]);
+  }, [tenant?.name, formId, isValid, dispatch]);
 
-  if (!tenant || !formState)
-    return (
-      <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
-    );
-  else
-    return (
-      <Box
-        width="100%"
-        height="100%"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-        p={1}
-      >
-        <Box maxWidth={900}>
-          <Card p={3}>
-            <CardHeader
-              titleTypographyProps={{ variant: "h5" }}
-              title="Alertmanager Configuration"
+  return (
+    <Box
+      width="100%"
+      height="100%"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      flexWrap="wrap"
+      p={1}
+    >
+      <Box maxWidth={900}>
+        <Card p={3}>
+          <CardHeader
+            titleTypographyProps={{ variant: "h5" }}
+            title="Alertmanager Configuration"
+          />
+          <CardContent>
+            <TabbedDetail<State>
+              tabs={tabs}
+              opts={{
+                data: dataRef.current,
+                setData: dataUpdated,
+                setValidation: validationChanged
+              }}
             />
-            <CardContent>
-              <Context.Provider
-                value={[data as Data, dataUpdated, validationChanged]}
-              >
-                <TabbedDetail tabs={tabs} />
-              </Context.Provider>
-            </CardContent>
+          </CardContent>
 
-            <Button
-              variant="contained"
-              state="primary"
-              disabled={!isValid() || formState.status !== "active"}
-              onClick={handleSave}
-            >
-              publish
-            </Button>
-            <ErrorPanel response={formState.data.remoteValidation} />
-          </Card>
-        </Box>
+          <Button
+            variant="contained"
+            state="primary"
+            disabled={!isValid() || formState?.status !== "active"}
+            onClick={handleSave}
+          >
+            publish
+          </Button>
+          <ErrorPanel response={formState?.data.remoteValidation} />
+        </Card>
       </Box>
-    );
+    </Box>
+  );
 };
 
 type ErrorPanelProps = {
-  response: AlertmanagerUpdateResponse;
+  response?: AlertmanagerUpdateResponse;
 };
 
-const ErrorPanel = ({ response }: ErrorPanelProps) => (
-  <CondRender unless={response.success}>
-    <CardHeader
-      titleTypographyProps={{ variant: "h6" }}
-      title="Error: Service side validation failed"
-    />
+const ErrorPanel = ({ response }: ErrorPanelProps) => {
+  if (response)
+    return (
+      <CondRender unless={response.success}>
+        <CardHeader
+          titleTypographyProps={{ variant: "h6" }}
+          title="Error: Service side validation failed"
+        />
 
-    <CardContent>{response.error_raw_response}</CardContent>
-  </CondRender>
-);
+        <CardContent>{response.error_raw_response}</CardContent>
+      </CondRender>
+    );
+  else return null;
+};
 
-export default AlertmanagerConfigEditor;
+export default AlertmanagerConfigEditorLoader;
