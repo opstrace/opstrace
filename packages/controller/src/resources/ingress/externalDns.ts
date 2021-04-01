@@ -75,8 +75,7 @@ export function ExternalDnsResources(
         apiVersion: "rbac.authorization.k8s.io/v1",
         kind: "ClusterRole",
         metadata: {
-          name: "external-dns",
-          namespace
+          name: "external-dns"
         },
         rules: [
           {
