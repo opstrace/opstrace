@@ -126,6 +126,13 @@ export function OpstraceAPIResources(
               app: name
             }
           },
+          strategy: {
+            type: "RollingUpdate",
+            rollingUpdate: {
+              maxSurge: "25%" as any,
+              maxUnavailable: "25%" as any
+            }
+          },
           template: {
             metadata: {
               labels: {
