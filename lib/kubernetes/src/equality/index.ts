@@ -317,13 +317,26 @@ export const hasClusterRoleChanged = (
   desired: ClusterRoleType,
   existing: ClusterRoleType
 ): boolean => {
-  if (!isDeepStrictEqual(desired.spec, existing.spec)) {
+  // The spec in the ClusterRole resource contains the metadata field.
+  // Kubernetes adds some fields to the metadata when a resource is created.
+  // Those defaults make this check fail. Check if any of the fiels we are
+  // interested in have changed.
+  if (
+    !isDeepStrictEqual(desired.spec.aggregationRule, existing.spec.aggregationRule) ||
+    !isDeepStrictEqual(desired.spec.apiVersion, existing.spec.apiVersion) ||
+    !isDeepStrictEqual(desired.spec.kind, existing.spec.kind) ||
+    !isDeepStrictEqual(desired.spec.rules, existing.spec.rules) ||
+    !isDeepStrictEqual(desired.spec.metadata?.annotations, existing.spec.metadata?.annotations) ||
+    !isDeepStrictEqual(desired.spec.metadata?.labels, existing.spec.metadata?.labels) ||
+    !isDeepStrictEqual(desired.spec.metadata?.name, existing.spec.metadata?.name)
+  ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
       desired.spec,
       existing.spec
     );
-    return false;
+    return true;
   }
-  return true;
+
+  return false;
 };
