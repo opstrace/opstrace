@@ -99,6 +99,34 @@ export const hasDeploymentChanged = (
     return true;
   }
 
+  if (desired.spec.spec?.strategy !== undefined &&
+    !isDeepStrictEqual(
+      desired.spec.spec?.strategy,
+      existing.spec.spec?.strategy
+    )
+  ) {
+    logDifference(
+      `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec,
+      existing.spec
+    );
+    return true;
+  }
+
+  if (desired.spec.spec?.selector !== undefined &&
+    !isDeepStrictEqual(
+      desired.spec.spec?.selector,
+      existing.spec.spec?.selector
+    )
+  ) {
+    logDifference(
+      `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec,
+      existing.spec
+    );
+    return true;
+  }
+
   if (
     !Pod.isPodSpecTemplateEqual(
       desired.spec.spec?.template,

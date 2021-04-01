@@ -193,15 +193,10 @@ export class Deployment extends K8sResource {
     response: IncomingMessage;
     body: V1Deployment;
   }> {
-    return this.api.patchNamespacedDeployment(
+    return this.api.replaceNamespacedDeployment(
       this.name,
       this.namespace,
-      this.resource,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      { headers: { "Content-Type": "application/merge-patch+json" } }
+      this.resource
     );
   }
   delete(): Promise<{
