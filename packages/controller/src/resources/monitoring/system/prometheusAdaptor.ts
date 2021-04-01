@@ -114,6 +114,7 @@ export function PrometheusAdaptorResources(
             }
           },
           strategy: {
+            type: "RollingUpdate",
             rollingUpdate: {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               maxSurge: 1 as any,

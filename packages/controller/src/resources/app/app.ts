@@ -213,7 +213,11 @@ export function OpstraceApplicationResources(
         spec: {
           replicas: 1,
           strategy: {
-            type: "RollingUpdate"
+            type: "RollingUpdate",
+            rollingUpdate: {
+              maxSurge: "25%" as any,
+              maxUnavailable: "25%" as any
+            }
           },
           selector: {
             matchLabels: {
@@ -390,7 +394,11 @@ export function OpstraceApplicationResources(
         spec: {
           replicas: 1,
           strategy: {
-            type: "RollingUpdate"
+            type: "RollingUpdate",
+            rollingUpdate: {
+              maxSurge: "25%" as any,
+              maxUnavailable: "25%" as any
+            }
           },
           selector: {
             matchLabels: {
