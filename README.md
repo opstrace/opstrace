@@ -17,6 +17,31 @@ Opstrace deploys secure, horizontally-scalable open source observability in your
 
 Install Opstrace in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
 
+```bash
+cat <<EOF > config.yaml
+tenants:
+  - staging
+  - prod
+env_label: quickstart
+node_count: 3
+cert_issuer: letsencrypt-prod
+EOF
+
+opstrace create aws me -c config.yaml
+```
+
+## Community
+
+Authentic collaboration in a community setting is important to us.
+Please join us to learn more, get support, or contribute to the project.
+
+* Join our [Slack Community](https://go.opstrace.com/community)
+* Chat with us in our [GitHub Discussions](https://github.com/opstrace/opstrace/discussions)
+* Contribute a [proposal](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=thinktank:%20proposal&template=2-proposal.md&title=) or a [bug report](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=type:%20bug&template=1-bug_report.md&title=)
+* Or just send us an email at [hello@opstrace.com](mailto:hello@opstrace.com)
+
+You can find out more on [our community page](https://opstrace.com/community), including shoutouts to some of the main open source projects that we're building with.
+
 ## Documentation
 
 You can find the Opstrace documentation in [/docs](/docs).
@@ -29,7 +54,7 @@ Please join us and make some contributions, however big or small.
 
 * Start by reading the [Contributing guide](./CONTRIBUTING.md) to become familiar with the process.
 * Then review our [Development guide](./docs/guides/contributor/setting-up-your-dev-env.md) to learn how to set up your environment and build the code.
-* If you'd like a place to start and get your feet wet, explore our [`getting started` issues](https://github.com/opstrace/opstrace/labels/getting-started), or reach out in [our community discussions](https://go.opstrace.com/community).
+* If you'd like to find a place to start and get your feet wet, just reach out and ask in [our community Slack](https://go.opstrace.com/community). (It's also a good idea to try out our [quick start](https://go.opstrace.com/quickstat).)
 
 Take a look at our [high-level roadmap](./docs/references/roadmap.md) to see where we're heading, and feel free to [get in touch](https://go.opstrace.com/community) with us regarding questions and suggestions.
 
@@ -37,15 +62,7 @@ IMPORTANT NOTE: We welcome contributions from developers of all backgrounds.
 We encode that in a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project, you agree to abide by its terms.
 
-## Get In Touch
-
-* Join our [Slack Community](https://go.opstrace.com/community)
-* Chat with us in our [GitHub Discussions](https://github.com/opstrace/opstrace/discussions)
-* Contribute a [proposal](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=thinktank:%20proposal&template=2-proposal.md&title=) or a [bug report](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=type:%20bug&template=1-bug_report.md&title=)
-* Or just send us an email at [hello@opstrace.com](mailto:hello@opstrace.com)
-
 ## Security Reports
 
 We take security seriously.
 If you believe you have found a security issue in our project or any related projects, please email us at [security@opstrace.com](mailto:security@opstrace.com) to responsibly disclose the issue.
-
