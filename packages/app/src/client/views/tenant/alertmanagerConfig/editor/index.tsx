@@ -127,7 +127,7 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
         <Card p={3}>
           <CardHeader
             titleTypographyProps={{ variant: "h5" }}
-            title="Alertmanager Configuration"
+            title="Alertmanager"
           />
           <CardContent>
             <TabbedDetail<State>

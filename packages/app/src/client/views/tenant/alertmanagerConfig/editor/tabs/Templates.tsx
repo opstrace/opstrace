@@ -26,9 +26,9 @@ import { State } from "client/views/tenant/alertmanagerConfig/editor/types";
 import { Box } from "client/components/Box";
 
 import {
-  alertmanagerConfigSchema,
+  alertmanagerTemplatesSchema,
   jsonSchema
-} from "client/validation/alertmanager/config";
+} from "client/validation/alertmanager/templates";
 
 type validationCheckOptions = {
   useModelMarkers: boolean;
@@ -62,7 +62,7 @@ const Templates = (props: State) => {
               schema: yamlParser.JSON_SCHEMA
             });
 
-            alertmanagerConfigSchema
+            alertmanagerTemplatesSchema
               .validate(parsedData, { strict: true })
               .then((_value: object) => {
                 setValidation("templates", true);
