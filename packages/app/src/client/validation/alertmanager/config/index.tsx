@@ -22,7 +22,7 @@ import { routeSchema } from "./route";
 import { receiverSchema } from "./receiver";
 import { inhibitRuleSchema } from "./inhibitRule";
 
-import jsonSchema from "client/validation/alertmanagerConfig/schema.json";
+import jsonSchema from "./schema.json";
 
 const globalSchema: yup.SchemaOf<Global> = yup
   .object({
