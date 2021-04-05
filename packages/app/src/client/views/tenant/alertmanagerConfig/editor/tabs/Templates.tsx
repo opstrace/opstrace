@@ -28,7 +28,7 @@ import { Box } from "client/components/Box";
 import {
   alertmanagerConfigSchema,
   jsonSchema
-} from "client/validation/alertmanagerConfig";
+} from "client/validation/alertmanager/config";
 
 type validationCheckOptions = {
   useModelMarkers: boolean;
