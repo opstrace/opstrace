@@ -77,10 +77,12 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
   });
   const formState = useFormState<FormData>(formId, defaultData);
 
-  const dataRef = useRef({
+  const initialDataRef = useRef({
     config: alertmanager?.config || "",
     templates: alertmanager?.templates || ""
   });
+
+  const dataRef = useRef(initialDataRef.current);
 
   const [validation, setValidation] = useState<Record<string, boolean>>({});
   const dispatch = useDispatch();
@@ -132,8 +134,9 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
           <CardContent>
             <TabbedDetail<State>
               tabs={tabs}
+              onTabChange={() => (initialDataRef.current = dataRef.current)}
               opts={{
-                data: dataRef.current,
+                data: initialDataRef.current,
                 setData: dataUpdated,
                 setValidation: validationChanged
               }}

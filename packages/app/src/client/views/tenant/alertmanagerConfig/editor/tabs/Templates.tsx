@@ -87,6 +87,7 @@ const Templates = (props: State) => {
       });
 
       templatesRef.current = newTemplates;
+      setData({ templates: templatesRef.current });
       validationCheckOnChangeStart(filename);
       checkValidationOnChangePause(filename);
     },

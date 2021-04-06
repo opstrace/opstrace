@@ -87,10 +87,11 @@ const Config = (props: State) => {
       });
 
       configRef.current = newConfig;
+      setData({ config: configRef.current });
       validationCheckOnChangeStart(filename);
       checkValidationOnChangePause(filename);
     },
-    [setValidation]
+    [setValidation, setData]
   );
 
   return (
