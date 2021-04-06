@@ -29,6 +29,7 @@ import {
   ServiceType,
   ConfigMapType,
   ClusterRoleType,
+  CustomResourceDefinitionType,
   V1ServicemonitorResourceType,
   V1PrometheusruleResourceType,
   V1PrometheusResourceType,
@@ -40,6 +41,7 @@ import { logDifference } from "./general";
 import { NetworkingV1beta1IngressTLS } from "@kubernetes/client-node";
 import { V1CertificateResource } from "../custom-resources";
 import { isCertificateEqual } from "./Certificate";
+import { log } from "@opstrace/utils";
 
 export * from "./general";
 export * from "./Pod";
@@ -363,6 +365,24 @@ export const hasClusterRoleChanged = (
       desired.spec,
       existing.spec
     );
+    return true;
+  }
+
+  return false;
+};
+
+// isDeepStrictEquals doesn't handle the CRD schema very well and always reports
+// a mismatch. The workaround is to check if the annotations match. This works
+// since we add an annotation with the controller version to the CRDs.
+export const hasCustomResourceDefinitionChanged = (
+  desired: CustomResourceDefinitionType,
+  existing: CustomResourceDefinitionType
+): boolean => {
+  if (!isDeepStrictEqual(desired.spec.metadata?.annotations, existing.spec.metadata?.annotations)) {
+    // don't use logDifference because it doesn't handle very large json objects
+    // like the CRD schema and it'll stall for a few seconds for each CRD it
+    // compares
+    log.debug(`CRD ${desired.spec.metadata?.name} requires update`);
     return true;
   }
 

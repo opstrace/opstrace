@@ -75,7 +75,8 @@ import {
   hasAlertManagerChanged,
   hasPrometheusChanged,
   hasCertificateChanged,
-  hasClusterRoleChanged
+  hasClusterRoleChanged,
+  hasCustomResourceDefinitionChanged
 } from "../equality";
 
 import { entries } from "@opstrace/utils";
@@ -159,6 +160,26 @@ export function* reconcile(
     const updateCollection: K8sResource[] = [];
 
     const desiredState = reduceCollection(desired.get());
+
+    // Add an annotation with the controller version. This is used to check if
+    // the CRD requires an update since typescript fails at comparing the CRD
+    // schemas.
+    desiredState.CustomResourceDefinitions.map((e) => {
+      e.setManagementVersion();
+    });
+
+    // First thing is to ensure CRDs are reconciled otherwise we might end up
+    // trying to create resources (ex Prometheus ServiceMonitor objects) when
+    // the CRD doesn't exist yet.
+    reconcileResourceType(
+      desiredState.CustomResourceDefinitions,
+      actualState.CustomResourceDefinitions,
+      hasCustomResourceDefinitionChanged,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
 
     reconcileResourceType(
       desiredState.Ingresses,
@@ -282,16 +303,6 @@ export function* reconcile(
       desiredState.DaemonSets,
       actualState.DaemonSets,
       (desired, existing) => hasDaemonSetChanged(desired, existing),
-      null,
-      createCollection,
-      deleteCollection,
-      updateCollection
-    );
-
-    reconcileResourceType(
-      desiredState.CustomResourceDefinitions,
-      actualState.CustomResourceDefinitions,
-      null,
       null,
       createCollection,
       deleteCollection,
