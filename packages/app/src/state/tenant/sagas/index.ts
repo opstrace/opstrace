@@ -15,9 +15,10 @@
  */
 
 import { all, call, spawn, takeEvery, put } from "redux-saga/effects";
+import * as yamlParser from "js-yaml";
+
 import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
-import { split } from "ramda";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
 
@@ -91,29 +92,35 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
     });
 
     if (response.data?.getAlertmanager?.config) {
-      const [templates, rawConfig] = split(
-        "alertmanager_config: |",
-        response.data?.getAlertmanager?.config
+      const cortexConfig = yamlParser.load(
+        response.data?.getAlertmanager?.config,
+        {
+          schema: yamlParser.JSON_SCHEMA
+        }
       );
-      const config = rawConfig
-        .replace("\n  ", "") // replace leading set with nothing as we don't want a blank line at the begining of the config
-        .replace(/(\n {2})+/g, "\n");
+
+      const templates = yamlParser.dump(cortexConfig.template_files, {
+        schema: yamlParser.JSON_SCHEMA,
+        lineWidth: -1
+      });
 
       yield put({
         type: "ALERTMANAGER_LOADED",
         payload: {
           tenantId: action.payload,
           templates: templates,
-          config: config,
+          config: cortexConfig.alertmanager_config,
           online: true
         }
       });
     } else {
+      const defaultTemplate = `default_template: |\n  '{{ define "__alertmanager" }}AlertManager{{ end }}\n  {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}'`;
+
       yield put({
         type: "ALERTMANAGER_LOADED",
         payload: {
           tenantId: action.payload,
-          templates: "templates: {}",
+          templates: defaultTemplate,
           config: "",
           online: true
         }
@@ -142,12 +149,17 @@ function* updateAlertmanager(
       });
     }
 
-    const config = `${
-      action.payload.templates
-    }alertmanager_config: |\n  ${action.payload.config.replace(
-      /(\n)+/g,
-      "\n  "
-    )}`;
+    const templates = yamlParser.load(action.payload.templates, {
+      schema: yamlParser.JSON_SCHEMA
+    });
+
+    const config = yamlParser.dump(
+      { template_files: templates, alertmanager_config: action.payload.config },
+      {
+        schema: yamlParser.JSON_SCHEMA,
+        lineWidth: -1
+      }
+    );
 
     const response = yield graphqlClient.UpdateAlertmanager({
       tenant_id: action.payload.tenantId,
