@@ -224,7 +224,7 @@ export class CustomResourceDefinition extends K8sResource {
       {
         headers: { "Content-Type": "application/merge-patch+json" }
       }
-    );
+    )
   }
   delete(): Promise<{
     response: IncomingMessage;

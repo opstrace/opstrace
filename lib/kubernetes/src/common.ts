@@ -22,8 +22,10 @@
 
 import localVarRequest from "request";
 import { KubeConfig, V1Status } from "@kubernetes/client-node";
+import { BUILD_INFO } from "@opstrace/buildinfo";
 
 export const OPSTRACE_MANAGED_KEY = "opstrace";
+export const OPSTRACE_MANAGED_VERSION_KEY = "opstrace/version";
 /**
  * ResourceCache represents a "actual" list of state as retrieved from k8s.
  */
@@ -177,6 +179,12 @@ export class K8sResource implements Resource {
     this.resource.metadata.annotations[OPSTRACE_MANAGED_KEY] = protect
       ? "protected"
       : "owned";
+  }
+  setManagementVersion(): void {
+    if (!this.resource.metadata.annotations) {
+      this.resource.metadata.annotations = {};
+    }
+    this.resource.metadata.annotations[OPSTRACE_MANAGED_VERSION_KEY] = BUILD_INFO.VERSION_STRING;
   }
   setImmutable(): void {
     if (!this.resource.metadata.annotations) {
