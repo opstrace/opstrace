@@ -26,8 +26,12 @@ export const controllerConfigSchema = yup
       .oneOf(["gcp", "aws"])
       .required("must specify a target (gcp | aws)"),
     region: yup.string().required("must specify region"),
-    logRetention: yup.number().required("must specify log retention"),
-    metricRetention: yup.number().required("must specify metric retention"),
+    logRetentionDays: yup
+      .number()
+      .required("must specify log retention in number of days"),
+    metricRetentionDays: yup
+      .number()
+      .required("must specify metric retention in number of days"),
     dnsName: yup.string().required(),
     terminate: yup.bool().default(false),
     // https://stackoverflow.com/a/63944333/145400 `data_api_authn_pubkey_pem`

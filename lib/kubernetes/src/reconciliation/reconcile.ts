@@ -509,7 +509,7 @@ function reconcileResourceType<T extends K8sResource>(
           updateCollection.push(r);
         } else {
           log.notice(
-            `Leaving existing ${existing.namespace}/${existing.name} as-is (missing 'opstrace' annotation)`
+            `Leaving existing ${existing.constructor.name} ${existing.namespace}/${existing.name} as-is (missing 'opstrace' annotation)`
           );
         }
       }

@@ -74,6 +74,15 @@ endif
 
 KERNEL_NAME := $(shell uname -s | tr A-Z a-z)
 
+# When PKG_CACHE_PATH is defined this means we're running in CI. PKG_CACHE_PATH
+# is currently defined in .buildkite/pipeline.yaml. Otherwise fallback to a
+# default in the home directory.
+ifndef PKG_CACHE_PATH
+	GOLANG_BUILD_CACHE ?= ${HOME}/.cache/go-build
+else
+	GOLANG_BUILD_CACHE ?= ${PKG_CACHE_PATH}/go-build
+endif
+
 #
 # Path to the files with authentication tokens. They will be mounted inside the
 # container that runs test-remote* targets.
@@ -407,6 +416,9 @@ rebuild-ci-container-image:
 #   containers run as part of CI. It's ok that it's volatile, but after a CI
 #   run this is also where debug information (logs of all kinds) can be found.
 #
+# - Ensure GOLANG_CACHE_DIR exists before launching the container otherwise
+#   it'll be created and owned by root.
+#
 # - Philosophy: the *current directory* defines the current code, including
 #   uncommitted changes. It's not just the container image. CI container image
 #   is supposed to be rebuilt only for Node/npm/kubectl version change and the
@@ -471,6 +483,7 @@ ci-%: checkenv-builddir
 	@if [ -d "${OPSTRACE_BUILD_DIR}" ]; then \
 		echo "warning: build dir ${OPSTRACE_BUILD_DIR} already exists"; \
 	fi
+	mkdir -p "${GOLANG_BUILD_CACHE}"
 	mkdir -p "${OPSTRACE_BUILD_DIR}" && \
 	./ci/rsync.sh -avr \
 		--exclude='*node_modules*' \
@@ -484,6 +497,7 @@ ci-%: checkenv-builddir
 	docker run -ti \
 	--net=host \
 	-v /tmp:/tmp \
+	-v ${GOLANG_BUILD_CACHE}:/go \
 	-v ${OPSTRACE_BUILD_DIR}:/build \
 	-v ${PWD}:/checkout-readonly:ro \
 	-v ${HOME}/.aws:/awsconfig:ro \

@@ -83,6 +83,3 @@ export const getNodeCount = (state: State): number =>
 
 export const getPrometheusName = (tenant: Tenant): string =>
   `${tenant.name}-prometheus`;
-
-export const getAlertmanagerName = (tenant: Tenant): string =>
-  `${tenant.name}-alertmanager`;

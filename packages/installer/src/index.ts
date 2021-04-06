@@ -117,10 +117,6 @@ function* createClusterCore() {
   const firewallConf = getFirewallConfig({
     api: ccfg.data_api_authorized_ip_ranges
   });
-  const retentionConf = {
-    logs: ccfg.log_retention_days,
-    metrics: ccfg.metric_retention_days
-  };
 
   let gcpAuthOptions: GCPAuthOptions | undefined;
 
@@ -162,8 +158,8 @@ function* createClusterCore() {
     cert_issuer: ccfg.cert_issuer,
     envLabel: ccfg.env_label,
     infrastructureName: ccfg.cluster_name,
-    logRetention: retentionConf.logs,
-    metricRetention: retentionConf.metrics,
+    logRetentionDays: ccfg.log_retention_days,
+    metricRetentionDays: ccfg.metric_retention_days,
     dnsName: dnsConf.dnsName,
     terminate: false,
     controllerTerminated: false,

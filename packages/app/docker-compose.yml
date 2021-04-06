@@ -52,7 +52,7 @@ services:
       ACTION_CONFIG_API_SECRET: myactionsecret
   # Config service for Hasura Actions that call into it
   config:
-    image: opstrace/config-api:938cb92f08277c6d037ae279a6d2d9a40c68ef6b
+    image: opstrace/config-api:28212f4f86ec129393405600702c64c3e0208d07
     command:
       - -config=:8081
       - -action=:8082
@@ -61,7 +61,7 @@ services:
       - 8081:8081
       - 8082:8082
     environment:
-      GRAPHQL_ENDPOINT: http://graphql:8080
+      GRAPHQL_ENDPOINT: http://graphql:8080/v1/graphql
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecret
       HASURA_ACTION_SECRET: myactionsecret
       # Some config APIs talk to cortex. Can optionally run a kubectl port-forward to test them:

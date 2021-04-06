@@ -74,6 +74,8 @@ export class TimeseriesFragment {
   private samples: Array<TimeseriesSample>;
   private serialized: boolean;
   public labels: LabelSet;
+
+  // Sequential number for locating fragmeng in stream. Set by caller.
   public index: number;
   public parent: DummyTimeseries | undefined;
   public stats: FragmentStats | undefined;
@@ -95,18 +97,21 @@ export class TimeseriesFragment {
   }
 
   /*
-  Return number of payload bytes, i.e. the sample values (timestamp is not
-  considered part of payload here.For a Prometheus metric sample, the value is
-  a double precision floating point number, i.e. 64 bit, i.e. 8 Bytes per
-  sample/etnry.
+  Return number of payload bytes. For a Prometheus metric sample, that's 64 bit
+  (8 Bytes) per metric value, and 96 bit (12 Bytes) per metric timestamp.
+
+  A protobuf timestamp is int64 + int32, i.e 12 bytes:
+  https://github.com/protocolbuffers/protobuf/blob/4b770cabd7ff042283280bd76b6635650a04aa8a/src/google/protobuf/timestamp.proto#L136
+
+  That is, 20 Bytes per sample.
   */
   public payloadByteCount(): bigint {
     if (this.stats !== undefined) {
-      return this.stats.sampleCount * BigInt(8);
+      return this.stats.sampleCount * BigInt(20);
     }
 
     log.info("NUMBER OF SAMPLES IN FRAGMENT: %s", this.samples.length);
-    return BigInt(this.samples.length) * BigInt(8);
+    return BigInt(this.samples.length) * BigInt(20);
   }
 
   public getSamples(): Array<TimeseriesSample> {

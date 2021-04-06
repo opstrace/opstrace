@@ -29,16 +29,23 @@ import (
 )
 
 type HasuraHandler struct {
-	rulerURL        *url.URL
 	alertmanagerURL *url.URL
 	expectedSecret  string
+	exporterAPI     *exporterAPI
+	credentialAPI   *credentialAPI
 }
 
-func NewHasuraHandler(rulerURL *url.URL, alertmanagerURL *url.URL, expectedSecret string) *HasuraHandler {
+func NewHasuraHandler(
+	alertmanagerURL *url.URL,
+	expectedSecret string,
+	credentialAPI *credentialAPI,
+	exporterAPI *exporterAPI,
+) *HasuraHandler {
 	return &HasuraHandler{
-		rulerURL,
 		alertmanagerURL,
 		expectedSecret,
+		exporterAPI,
+		credentialAPI,
 	}
 }
 
@@ -226,26 +233,21 @@ func (h *HasuraHandler) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HasuraHandler) validateCredential(request actions.ValidateCredentialPayload) actions.ValidateOutput {
-	existingTypes, err := listCredentialTypes(request.Input.TenantID)
+	existingTypes, err := h.credentialAPI.listCredentialTypes(request.Input.TenantID)
 	if err != nil {
 		return actions.ValidateError(actions.ServiceErrorType, "listing credentials failed", err.Error())
 	}
 
 	// Combine the graphql fields into a Credential object for validation
-	var jsonValue interface{}
-	err = json.Unmarshal([]byte(request.Input.Value), &jsonValue)
-	if err != nil {
-		return actions.ValidateError(actions.ValidationFailedType, "decoding json credential value failed", err.Error())
-	}
 	credential := Credential{
-		Name:  request.Input.Name,
-		Type:  request.Input.Type,
-		Value: jsonValue,
+		Name:      request.Input.Name,
+		Type:      request.Input.Type,
+		ValueJSON: request.Input.Value,
 	}
 
-	_, _, err = validateCredential(existingTypes, credential)
+	_, err = h.credentialAPI.validateCredential(existingTypes, credential)
 	if err != nil {
-		return actions.ValidateError(actions.ValidationFailedType, "config validation failed", err.Error())
+		return actions.ValidateError(actions.ValidationFailedType, "credential validation failed", err.Error())
 	}
 
 	return actions.ValidateOutput{
@@ -254,7 +256,7 @@ func (h *HasuraHandler) validateCredential(request actions.ValidateCredentialPay
 }
 
 func (h *HasuraHandler) validateExporter(request actions.ValidateExporterPayload) actions.ValidateOutput {
-	existingTypes, err := listExporterTypes(request.Input.TenantID)
+	existingTypes, err := h.exporterAPI.listExporterTypes(request.Input.TenantID)
 	if err != nil {
 		return actions.ValidateError(actions.ServiceErrorType, "listing exporters failed", err.Error())
 	}
@@ -266,19 +268,14 @@ func (h *HasuraHandler) validateExporter(request actions.ValidateExporterPayload
 	} else {
 		credential = *request.Input.Credential
 	}
-	var jsonConfig interface{}
-	err = json.Unmarshal([]byte(request.Input.Config), &jsonConfig)
-	if err != nil {
-		return actions.ValidateError(actions.ValidationFailedType, "decoding json exporter config failed", err.Error())
-	}
 	exporter := Exporter{
 		Name:       request.Input.Name,
 		Type:       request.Input.Type,
 		Credential: credential,
-		Config:     jsonConfig,
+		ConfigJSON: request.Input.Config,
 	}
 
-	_, _, err = validateExporter(request.Input.TenantID, existingTypes, exporter)
+	_, err = h.exporterAPI.validateExporter(request.Input.TenantID, existingTypes, exporter)
 	if err != nil {
 		return actions.ValidateError(actions.ValidationFailedType, "config validation failed", err.Error())
 	}

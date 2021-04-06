@@ -17,6 +17,10 @@
           "title": "User Guide",
           "routes": [
             {
+              "title": "Configuring Alertmanager",
+              "path": "/docs/guides/user/configuring-alerts.md"
+            },
+            {
               "title": "Sending Metrics with Prometheus",
               "path": "/docs/guides/user/sending-metrics-with-prometheus.md"
             },
@@ -31,6 +35,10 @@
             {
               "title": "Instrumenting a K8s Cluster",
               "path": "/docs/guides/user/instrumenting-a-k8s-cluster.md"
+            },
+            {
+              "title": "Collecting Cloud Vendor Metrics",
+              "path": "/docs/guides/user/collecting-cloud-metrics.md"
             }
           ]
         },

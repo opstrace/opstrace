@@ -30,19 +30,7 @@ func NewCredentialAccess(graphqlURL *url.URL, graphqlSecret string) CredentialAc
 	}
 }
 
-// FixedGetCredentialsResponse fixes missing underscores in GetCredentialResponse fields.
-// Remove this if/when the generator is fixed.
-type FixedGetCredentialsResponse struct {
-	Credential []struct {
-		Tenant    string `json:"Tenant"`
-		Name      string `json:"Name"`
-		Type      string `json:"Type"`
-		CreatedAt string `json:"Created_At"` // fix missing underscore
-		UpdatedAt string `json:"Updated_At"` // fix missing underscore
-	} `json:"Credential"`
-}
-
-func (c *CredentialAccess) List(tenant string) (*FixedGetCredentialsResponse, error) {
+func (c *CredentialAccess) List(tenant string) (*graphql.GetCredentialsResponse, error) {
 	req, err := graphql.NewGetCredentialsRequest(
 		c.access.URL,
 		&graphql.GetCredentialsVariables{Tenant: graphql.String(tenant)},
@@ -51,26 +39,14 @@ func (c *CredentialAccess) List(tenant string) (*FixedGetCredentialsResponse, er
 		return nil, err
 	}
 
-	var result FixedGetCredentialsResponse
+	var result graphql.GetCredentialsResponse
 	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-// FixedGetCredentialResponse fixes missing underscores in GetCredentialResponse fields.
-// Remove this if/when the generator is fixed.
-type FixedGetCredentialResponse struct {
-	CredentialByPk struct {
-		Tenant    string `json:"Tenant"`
-		Name      string `json:"Name"`
-		Type      string `json:"Type"`
-		CreatedAt string `json:"Created_At"` // fix missing underscore
-		UpdatedAt string `json:"Updated_At"` // fix missing underscore
-	} `json:"Credential_By_Pk"` // fix missing underscore
-}
-
-func (c *CredentialAccess) Get(tenant string, name string) (*FixedGetCredentialResponse, error) {
+func (c *CredentialAccess) Get(tenant string, name string) (*graphql.GetCredentialResponse, error) {
 	req, err := graphql.NewGetCredentialRequest(
 		c.access.URL,
 		&graphql.GetCredentialVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
@@ -79,7 +55,7 @@ func (c *CredentialAccess) Get(tenant string, name string) (*FixedGetCredentialR
 		return nil, err
 	}
 
-	var result FixedGetCredentialResponse
+	var result graphql.GetCredentialResponse
 	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}
@@ -90,16 +66,7 @@ func (c *CredentialAccess) Get(tenant string, name string) (*FixedGetCredentialR
 	return &result, nil
 }
 
-// FixedDeleteCredentialResponse missing underscores in DeleteCredentialResponse fields.
-// Remove this if/when the generator is fixed.
-type FixedDeleteCredentialResponse struct {
-	DeleteCredentialByPk struct {
-		Tenant string `json:"Tenant"`
-		Name   string `json:"Name"`
-	} `json:"Delete_Credential_By_Pk"` // fix missing underscore
-}
-
-func (c *CredentialAccess) Delete(tenant string, name string) (*FixedDeleteCredentialResponse, error) {
+func (c *CredentialAccess) Delete(tenant string, name string) (*graphql.DeleteCredentialResponse, error) {
 	req, err := graphql.NewDeleteCredentialRequest(
 		c.access.URL,
 		&graphql.DeleteCredentialVariables{Tenant: graphql.String(tenant), Name: graphql.String(name)},
@@ -109,7 +76,7 @@ func (c *CredentialAccess) Delete(tenant string, name string) (*FixedDeleteCrede
 	}
 
 	// Use custom type to deserialize since the generated one is broken
-	var result FixedDeleteCredentialResponse
+	var result graphql.DeleteCredentialResponse
 	if err := c.access.Execute(req.Request, &result); err != nil {
 		return nil, err
 	}

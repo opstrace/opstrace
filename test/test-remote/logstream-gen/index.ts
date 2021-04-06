@@ -56,8 +56,6 @@ import {
   httpTimeoutSettings
 } from "../testutils";
 
-import { Queue } from "./queue";
-
 import { log, buildLogger, setLogger } from "./log";
 
 interface CfgInterface {
@@ -78,7 +76,6 @@ interface CfgInterface {
   additional_labels: Array<[string, string]> | undefined;
   compressability: string;
   change_streams_every_n_cycles: number;
-  qsize: number;
   stream_write_n_seconds_jitter: number;
   fetch_n_entries_per_query: number;
   metrics_mode: boolean;
@@ -126,6 +123,9 @@ let CYCLE_STOP_WRITE_AFTER_SECONDS: number;
 // of course.
 let COUNTER_STREAM_FRAGMENTS_PUSHED = BigInt(0);
 
+let COUNTER_HTTP_RESP_LOG_THROTTLE = 0;
+let COUNTER_FRAGMENT_STATS_LOG_THROTTLE = 0;
+
 let BEARER_TOKEN: undefined | string;
 
 const counter_fragments_pushed = new promclient.Counter({
@@ -147,9 +147,11 @@ const counter_log_entries_pushed = new promclient.Counter({
   help: "number of log entries successfully pushed"
 });
 
-const counter_log_message_bytes_pushed = new promclient.Counter({
-  name: "counter_log_message_bytes_pushed",
-  help: "byte length of all pushed log messages so far (~1 char <-> 1 byte)"
+const counter_payload_bytes_pushed = new promclient.Counter({
+  name: "counter_payload_bytes_pushed",
+  help:
+    "byte length of all pushed log messages / metric samples so far " +
+    "(assumes utf-8 encoding for logs and 8 byte per sample for metrics)"
 });
 
 const counter_post_responses = new promclient.Counter({
@@ -255,7 +257,7 @@ function parseCmdlineArgs() {
   parser.add_argument("--log-start-time", {
     help:
       "Timestamp of first log entry in all generated log streams. ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. Default: invocation time",
-    type: "string"
+    type: "str"
   });
 
   parser.add_argument("--log-time-increment-ns", {
@@ -384,14 +386,8 @@ function parseCmdlineArgs() {
   parser.add_argument("--bearer-token-file", {
     help:
       "Read authentication token from file. Add header `Authorization: Bearer <token>` to each HTTP request.",
-    type: "string",
+    type: "str",
     default: ""
-  });
-
-  parser.add_argument("--qsize", {
-    help: "undocumented, for JP",
-    type: "int",
-    default: 1
   });
 
   CFG = parser.parse_args();
@@ -591,11 +587,12 @@ function createNewDummyStreams(
       });
     }
 
-    log.info("Initialized dummystream: %s", stream);
-    log.info(
-      "Time of first entry in stream: %s",
-      stream.currentTimeRFC3339Nano()
-    );
+    const msg = `Initialized dummystream: ${stream}. Time of first entry in stream: ${stream.currentTimeRFC3339Nano()}`;
+    if (i % 1000 == 0) {
+      log.info(msg + " (999 msgs like this hidden)");
+    } else {
+      log.debug(msg);
+    }
     streams.push(stream);
   }
   return streams;
@@ -608,6 +605,7 @@ async function performWriteReadCycle(
 ) {
   CYCLE_START_TIME_MONOTONIC = mtime();
   CYCLE_STOP_WRITE_AFTER_SECONDS = CFG.stream_write_n_seconds;
+
   if (CFG.stream_write_n_seconds_jitter !== 0) {
     const jitter = rndFloatFromInterval(
       -CFG.stream_write_n_seconds_jitter,
@@ -620,6 +618,7 @@ async function performWriteReadCycle(
       jitter.toFixed(2)
     );
   }
+
   const writestats = await writePhase(dummystreams);
   const readstats = await readPhase(dummystreams);
 
@@ -643,6 +642,7 @@ async function performWriteReadCycle(
 async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   const fragmentsPushedBefore = COUNTER_STREAM_FRAGMENTS_PUSHED;
   const wt0 = mtime();
+
   await postFragments(streams, CFG.apibaseurl);
 
   // A little summary about pushing all data.
@@ -684,12 +684,12 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   };
 
   log.info(
-    "End of write phase. Entries sent: %s, Payload bytes sent: %s million",
+    "End of write phase. Log entries / metric samples sent: %s, Payload bytes sent: %s million",
     nEntriesSent,
     megaPayloadBytesSent.toFixed(2)
   );
   log.info(
-    "Log msg throughput (mean): %s million characters per second",
+    "Payload write net throughput (mean): %s million bytes per second (assumes utf8 for logs and 8 byte per sample for metrics)",
     megaPayloadBytesSentPerSec.toFixed(2)
   );
 
@@ -712,7 +712,7 @@ async function throttledFetchAndValidate(
 
   const st0 = mtime();
   const release = await semaphore.acquire();
-  log.info(
+  log.debug(
     "fetchAndValidate held back by semaphore for %s s",
     mtimeDiffSeconds(st0).toFixed(2)
   );
@@ -811,199 +811,175 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
   return stats;
 }
 
+/*
+For each stream, send all fragments (until stop criterion is hit).
+
+For each DummyStream, create one function that produces and POSTs pushrequests.
+A "pushrequest" is a Prometheus term for a (snappy-compressed) protobuf message
+carrying log/metric payload data.
+*/
 export async function postFragments(
   streams: Array<DummyStream | DummyTimeseries>,
   lokiPushBaseUrl: string
 ) {
   const actors = [];
-  const queues = [];
 
-  // For each dummystream create one pushrequest producer func, one pushrequest
-  // consumer func, connect with a queue (serving as buffer, because
-  // pushrequest construction takes little bit of CPU). The queue consumer
-  // function is also the function which performs the POST HTTP requests.
+  const writeConcurSemaphore = new Semaphore(CFG.max_concurrent_writes);
+
+  // Create N_concurrent_streams (think: upper bound towards 10**5 or 10**6?)
+  // actors, but throttle their main activity (fragment generation and
+  // serialization) to N_concurrent_writes (think: upper bound between 10**2
+  // and 10**3).
   for (const stream of streams) {
-    // note that for N_concurrent_streams getting large the size of this queue
-    // means there is a lot of CPU and mem required to fill the sum of all
-    // queues.
-    const q = new Queue(CFG.qsize);
-    queues.push(q);
-    // Start filling up the queue with pushrequest objects. Have one producer
-    // per queue, or in other words: one queue per stream.
-    actors.push(pushrequestQueueProducer(stream, q));
-  }
-
-  // Give producers a tiny bit of CPU time to fill the queue so that this
-  // CPU hog does not affect the first POST request timings too much.
-  // Note: could also explicitly wait until queues are full.
-  await sleep(0.2);
-
-  // Construct queue consumers, the "pushers" which push fragments to Loki
-  // after getting them from the queues. Limit pusher coroutines to be no more
-  // than CFG.max_concurrent_writes: if there are less than
-  // CFG.max_concurrent_writes streams then have one pusher per stream. If
-  // there are more streams than CFG.max_concurrent_writes then have one pusher
-  // take care of potentially more than one queue.
-  const queueChunks: Array<Array<Queue>> = chunkify(
-    queues,
-    CFG.max_concurrent_writes
-  );
-  log.info("queueChunks: %s", queueChunks.length);
-
-  let pushernum = 1;
-  for (const qc of queueChunks) {
-    log.debug(
-      "Create a pusher coroutine consuming from %s stream(s)",
-      qc.length
-    );
-
-    actors.push(
-      pushrequestPusher(
-        `pusher${pushernum}(n=${qc.length})`,
-        lokiPushBaseUrl,
-        qc
-      )
-    );
-    pushernum++;
-
-    // Smear the initial POST HTTP requests a tiny little bit over time.
-    // For `pushernum` towards O(100), add O(0.1 s) to O(1 s) delay.
-    const delay = 0.01 + 0.001 * pushernum;
-    log.debug("create next pusher in %s s", delay.toFixed(3));
-    await sleep(delay);
+    actors.push(pushrequestProducerAndPOSTer(stream, writeConcurSemaphore));
   }
 
   // Wait for producers and consumers to return.
   await Promise.all(actors);
 }
 
-async function pushrequestQueueProducer(
+// Part of the body of the while(true) {} main loop of
+// pushrequestProducerAndPOSTer().
+async function _produceAndPOSTpushrequest(
   stream: DummyStream | DummyTimeseries,
-  prqueue: Queue
+  semaphore: Semaphore
 ) {
-  let fragmentsConsumed = 0;
+  // TODO: THROTTLE
+  // TODO: metric for fragment generation duration
 
-  while (true) {
-    // Note: this was once between `stream.generateAndGetNextFragment()` and
-    // `prqueue.put(pushrequest)` and therefore easily might have "dropped" a
-    // fragment (from DummyStream pov it was emitted, but it was then never
-    // passed on to a pusher, i.e. never POSTed).
-    if (CYCLE_STOP_WRITE_AFTER_SECONDS !== 0) {
-      const secondsSinceCycleStart = mtimeDiffSeconds(
-        CYCLE_START_TIME_MONOTONIC
-      );
-      if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
-        log.info(
-          "pr producer for %s: %s seconds passed: stop producer",
-          stream.uniqueName,
-          secondsSinceCycleStart.toFixed(2)
-        );
-        prqueue.close();
-        return;
-      }
-    }
+  // Throttle, not only the number of concurrent POST requests, but also the
+  // number of concurrent fragment generators. In an earlier version,
+  // fragment generators always ran for N_concurrent_streams, preparing the
+  // serialized fragments for a potentially much smaller number of
+  // N_concurrent_writes. For N_concurrent_streams being large (say, between
+  // 10**3 and 10**4), that imposed a scaling challenge: CPU and mem
+  // requirements were 'needlessly' intense. Pro was: once a pusher was ready
+  // to make a POST request, a corresponding stream fragment was already
+  // serealized (prepared in memory). Now, in this simpler architecture,
+  // N_concurrent_writes controls. When a pusher gets ready (acquires the
+  // sema), then it first has to generate and serialize a fragment. If that
+  // ever becomes a problem, it can certainly be changed/optimized again. Pro
+  // of this new approach: Memory consumption is dominated by holding
+  // N_concurrent_writes fragments in memory (which is O(10**2) in common
+  // cases), and N_concurrent_streams can go towards O(10**5) or even
+  // O(10**6).
+  const st0 = mtime();
+  const releaseWriteSemaphore = await semaphore.acquire();
+  log.debug(
+    "pushrequestProducerAndPOSTer held back by semaphore for %s s",
+    mtimeDiffSeconds(st0).toFixed(2)
+  );
 
-    if (CFG.stream_write_n_fragments == fragmentsConsumed) {
-      log.info(
-        "pr producer for %s: %s fragments created: stop producer",
-        stream.uniqueName,
-        fragmentsConsumed
-      );
-      prqueue.close();
-      return;
-    }
-
-    // generateAndGetNextFragment() does not have a stop criterion.
+  // This function is just a way to make the block of code explicit that's
+  // protected by the semaphore.
+  async function _genAndPost() {
+    // Note: generateAndGetNextFragment() does not have a stop criterion
+    // itself, the stop criteria are defined above, based on wall time passed
+    // or the number of fragments already consumed for this stream.
     const fragment = stream.generateAndGetNextFragment();
     stream.lastFragmentConsumed = fragment;
 
     const t0 = mtime();
     const pushrequest = fragment.serialize(); //toPushrequest();
     const genduration = mtimeDiffSeconds(t0);
-    await prqueue.put(pushrequest);
-    const putduration = mtimeDiffSeconds(t0) - genduration;
 
-    // Control log verbosity
-    if (fragment.index < 5 || fragment.index % 20 === 0) {
+    const pr = pushrequest;
+    const name = `prProducerPOSTer for ${stream.uniqueName}`;
+
+    if (
+      COUNTER_FRAGMENT_STATS_LOG_THROTTLE < 1 ||
+      COUNTER_FRAGMENT_STATS_LOG_THROTTLE % 200 == 0
+    ) {
       log.info(
-        "Generated serialized fragment %s for stream %s in %s s and PUT into queue (%s s)",
-        pushrequest.fragment.indexString(3),
-        stream.uniqueName,
+        "%s: generated serialized fragment in %s s for stream %s (index: %s/%s size: %s MiB). POST it (not logged for every case).",
+        name,
         genduration.toFixed(2),
-        putduration.toFixed(2)
+        pr.fragment.parent?.uniqueName,
+        pr.fragment.indexString(3),
+        CFG.stream_write_n_fragments,
+        pr.dataLengthMiB.toFixed(4)
       );
     }
+    COUNTER_FRAGMENT_STATS_LOG_THROTTLE++;
 
-    fragmentsConsumed += 1;
+    const postT0 = mtime();
+    try {
+      // Do not use pr.postWithRetryOrError() which is super simple,
+      // but use a custom function with CLI arg-controlled retrying
+      // parameters etc.
+      await customPostWithRetryOrError(pr, CFG.apibaseurl);
+    } catch (err) {
+      log.crit("consider critical: %s", err);
+      process.exit(1);
+    }
+
+    const postDurationSeconds = mtimeDiffSeconds(postT0);
+    hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
+
+    COUNTER_STREAM_FRAGMENTS_PUSHED++;
+    counter_fragments_pushed.inc();
+    counter_log_entries_pushed.inc(CFG.n_entries_per_stream_fragment);
+
+    // Convert BigInt to Number and assume that the numbers are small enough
+    counter_payload_bytes_pushed.inc(Number(pr.fragment.payloadByteCount()));
+    counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
+    gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
   }
+
+  // Note(JP): any error in _genAndPost(), at the time of writing, should by
+  // design lead to program crash. That is, technically, there is no need to do
+  // rock-solid semaphore release upon error. But, as things may change in the
+  // future, structure the code towards proper cleanup, which is what this
+  // tight error handling block is supposed to do: catch any error, release
+  // semaphore, re-throw.
+  try {
+    await _genAndPost();
+  } catch (err) {
+    log.info("err in sem-protected, release, re-throw");
+    releaseWriteSemaphore();
+    throw err;
+  }
+  releaseWriteSemaphore();
 }
 
-async function pushrequestPusher(
-  name: string,
-  apiBaseUrl: string,
-  prqueues: Array<Queue>
+async function pushrequestProducerAndPOSTer(
+  stream: DummyStream | DummyTimeseries,
+  semaphore: Semaphore
 ) {
-  log.info("Created %s", name);
+  let fragmentsPushed = 0;
 
   while (true) {
-    if (prqueues.length === 0) {
-      log.info("%s: all queues closed. Shut down.", name);
+    if (CYCLE_STOP_WRITE_AFTER_SECONDS !== 0) {
+      const secondsSinceCycleStart = mtimeDiffSeconds(
+        CYCLE_START_TIME_MONOTONIC
+      );
+      if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
+        log.debug(
+          "prProducerPOSTer for %s: %s seconds passed: stop producer",
+          stream.uniqueName,
+          secondsSinceCycleStart.toFixed(2)
+        );
+        return;
+      }
+    }
+
+    if (CFG.stream_write_n_fragments == fragmentsPushed) {
+      log.debug(
+        "prProducerPOSTer for %s: %s fragments created and pushed: stop producer",
+        stream.uniqueName,
+        fragmentsPushed
+      );
       return;
     }
 
-    // Iterate over those queues that this pusher is supposed to consume from.
-    // When a queue is closed and empty (work is done) then remove that queue
-    // from the array of queues. As the array being iterated over is mutated
-    // during iteartion this requires special treatment, credits:
-    // https://stackoverflow.com/a/9882349/145400
-    let qidx = prqueues.length;
-    while (qidx--) {
-      const pr:
-        | LogStreamFragmentPushRequest
-        | TimeseriesFragmentPushMessage = await prqueues[qidx].get();
-
-      if (pr === null) {
-        // queue is empty and closed, ignore from now on.
-        log.debug("%s: forget queue %s (done)", name, qidx);
-        prqueues.splice(qidx, 1);
-        continue;
-      }
-
-      // Control log verbosity
-      if (pr.fragment.index < 5 || pr.fragment.index % 1 === 0) {
-        log.info(
-          "%s: got PR from q for stream %s (index: %s/%s size: %s MiB). POST it.",
-          name,
-          pr.fragment.parent?.uniqueName,
-          pr.fragment.indexString(3),
-          CFG.stream_write_n_fragments,
-          pr.dataLengthMiB.toFixed(4)
-        );
-      }
-
-      const postT0 = mtime();
-      try {
-        // Do not use pr.postWithRetryOrError() which is super simple,
-        // but use a custom function with CLI arg-controlled retrying
-        // parameters etc.
-        await customPostWithRetryOrError(pr, apiBaseUrl);
-      } catch (err) {
-        log.crit("consider critical: %s", err);
-        process.exit(1);
-      }
-
-      const postDurationSeconds = mtimeDiffSeconds(postT0);
-      hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
-      COUNTER_STREAM_FRAGMENTS_PUSHED++;
-      counter_fragments_pushed.inc();
-      counter_log_entries_pushed.inc(CFG.n_entries_per_stream_fragment);
-      // Convert BigInt to Number and assume that the numbers are small enough.
-      counter_log_message_bytes_pushed.inc(
-        Number(pr.fragment.payloadByteCount())
-      );
-      counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
-      gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
-    }
+    await _produceAndPOSTpushrequest(stream, semaphore);
+    // perspective: consumed from stream object, and also pushed out. if a
+    // fragment is consumed from a stream object and the push subsequently
+    // fails, then the program crashes. That is, by the _end of a write cycle_
+    // it is safe to inspect a stream object and ask it how many fragments were
+    // generated for it, and to then assume that the same number has actually
+    // been POSTed to the remote system.
+    fragmentsPushed += 1;
   }
 }
 
@@ -1351,11 +1327,19 @@ export function logHTTPResponseLight(
 
   const t1 = (resp.timings.phases.total ?? -1000) / 1000.0;
   const t2 = (resp.timings.phases.firstByte ?? -1000) / 1000.0;
-  log.info(
-    `resp to ${resp.request.options.method} ${reqDetailForLog} -> ${
-      resp.statusCode
-    }. total time: ${t1.toFixed(2)} s. resp time: ${t2.toFixed(2)} `
-  );
+  const msg = `resp to ${resp.request.options.method} ${reqDetailForLog} -> ${
+    resp.statusCode
+  }. total time: ${t1.toFixed(2)} s. resp time: ${t2.toFixed(2)} `;
+
+  // Info-log only every Nth response -- maybe expose N through CLI.
+  const logEveryN = 400;
+  if (COUNTER_HTTP_RESP_LOG_THROTTLE % 400 == 0) {
+    log.info(`${msg} (${logEveryN - 1} msgs like this hidden)`);
+  } else {
+    log.debug(msg);
+  }
+
+  COUNTER_HTTP_RESP_LOG_THROTTLE++;
 }
 
 function logHTTPResponse(
@@ -1450,18 +1434,6 @@ function setupPromExporter() {
 function rndFloatFromInterval(min: number, max: number) {
   // half-closed: [min, max)
   return Math.random() * (max - min) + min;
-}
-
-// credits:  https://stackoverflow.com/a/51514813/145400
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function chunkify(arr: Array<any>, nChunks: number) {
-  // create shallow copy first
-  const [...a] = arr;
-  const result = [];
-  for (let i = nChunks; i > 0; i--) {
-    result.push(a.splice(0, Math.ceil(a.length / i)));
-  }
-  return result;
 }
 
 // https://stackoverflow.com/a/6090287/145400

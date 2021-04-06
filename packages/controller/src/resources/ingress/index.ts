@@ -75,7 +75,12 @@ export function IngressResources(
                 "https://"
               )}${encodeURIComponent(tenantHost)}$escaped_request_uri`,
               "nginx.ingress.kubernetes.io/auth-response-headers":
-                "X-Auth-Request-User, X-Auth-Request-Email"
+                "X-Auth-Request-User, X-Auth-Request-Email",
+              // Include an X-Scope-OrgID header containing the tenant name in all requests.
+              // This is (only) used by cortex-* services to identify the tenant.
+              // WARNING: Don't forget the trailing semicolon or else routes will silently fail.
+              "nginx.ingress.kubernetes.io/configuration-snippet":
+                `more_set_input_headers "X-Scope-OrgID: ${tenant.name}";`
             }
           },
           spec: {
@@ -91,26 +96,29 @@ export function IngressResources(
                 http: {
                   paths: [
                     {
-                      path: "/prometheus/",
-                      pathType: "ImplementationSpecific",
+                      path: "/prometheus",
+                      pathType: "Prefix",
                       backend: {
                         serviceName: "prometheus",
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         servicePort: 9090 as any
                       }
                     },
+                    // An ExternalName service which points to alertmanager in the 'cortex' namespace.
+                    // Our requests to this service must include the X-Scope-OrgID header for Cortex.
                     {
-                      path: "/alertmanager/",
-                      pathType: "ImplementationSpecific",
+                      path: "/alertmanager",
+                      pathType: "Prefix",
                       backend: {
-                        serviceName: "alertmanager",
+                        serviceName: "cortex-alertmanager",
+                        // Cortex alertmanager has ports 80 and 9094. The UI is served at port 80.
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        servicePort: 9093 as any
+                        servicePort: 80 as any
                       }
                     },
                     {
-                      path: "/grafana/",
-                      pathType: "ImplementationSpecific",
+                      path: "/grafana",
+                      pathType: "Prefix",
                       backend: {
                         serviceName: "grafana",
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any

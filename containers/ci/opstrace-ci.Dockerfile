@@ -78,21 +78,22 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-19
     rm -f docker-19.03.14.tgz
 
 # Set up golang. Required to run golanglint-ci in the linter step.
-RUN curl -fsSLO https://golang.org/dl/go1.15.6.linux-amd64.tar.gz && \
-    tar -xzf go1.15.6.linux-amd64.tar.gz -C /usr/local/ && \
-    rm -f go1.15.6.linux-amd64.tar.gz
+ENV GOLANG_VERSION 1.16.2
+RUN curl -fsSLO https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && \
+    tar -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz -C /usr/local/ && \
+    rm -f go${GOLANG_VERSION}.linux-amd64.tar.gz
 
 ENV GOPATH /go
-RUN mkdir -p $GOPATH/src $GOPATH/bin && chmod -R 777 $GOPATH
 
 ENV PATH /usr/local/go/bin:$GOPATH/bin:$PATH
 
 # Set up golanglint-ci in the container image.
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
-    sh -s -- -b /usr/local/bin v1.31.0
+    sh -s -- -b /usr/local/bin v1.38.0
 
 # Set up markdownlint in the container image so that we can lint right away! :)
 RUN npm install -g markdownlint-cli@0.26.0
 
-# Set up `addlicense` so that we can use that right away
-RUN (cd /tmp && go get github.com/google/addlicense)
+# Set up `addlicense` so that we can use that right away. Install it to
+# /usr/local.
+RUN (cd /tmp && GOPATH=/usr/local/ go get github.com/google/addlicense)

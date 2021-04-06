@@ -69,8 +69,8 @@ export const TenantPanel = (props: TenantPanelProps) => {
     return [
       { id: "detail", text: "Detail", data: {} },
       {
-        id: "alertmanager-config",
-        text: "Alertmanager Configuration",
+        id: "alertmanager",
+        text: "Alertmanager",
         data: {}
       },
       { id: "cloud-provider-metrics", text: "Cloud Provider Metrics", data: {} }

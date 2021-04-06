@@ -282,7 +282,7 @@ export class DummyTimeseries {
   public async fetchAndValidate(
     opts: DummyTimeseriesFetchAndValidateOpts
   ): Promise<number> {
-    log.info("%s fetchAndValidate()", this);
+    log.debug("%s fetchAndValidate()", this);
 
     let samplesValidated = 0;
     let fragmentsValidated = 0;
@@ -293,7 +293,7 @@ export class DummyTimeseries {
 
       // Control log verbosity
       if (fragmentsValidated % 20 === 0) {
-        log.info(
+        log.debug(
           "%s fetchAndValidate(): %s fragments validated (%s samples)",
           this.uniqueName,
           fragmentsValidated,

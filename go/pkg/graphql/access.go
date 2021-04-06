@@ -16,6 +16,7 @@ package graphql
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -45,8 +46,13 @@ func (g *GraphqlAccess) Execute(req *http.Request, result interface{}) error {
 		return err
 	}
 
-	if err := json.Unmarshal(resp.Data, result); err != nil {
-		return err
+	if len(resp.Errors) != 0 {
+		return fmt.Errorf("query to %s failed: %s", req.URL.Path, resp.Error())
 	}
+
+	if err := json.Unmarshal(resp.Data, result); err != nil {
+		return fmt.Errorf("failed to unmarshal response JSON '%s': %s", resp.Data, err)
+	}
+
 	return nil
 }

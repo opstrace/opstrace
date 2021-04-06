@@ -67,7 +67,7 @@ const ClusterSidebar = () => {
         <SideBarContainer
           title="Tenants"
           minHeight={100}
-          flexGrow={3}
+          flexGrow={1}
           // actions={tenantActions}
         >
           <TenantPanel

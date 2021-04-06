@@ -109,6 +109,8 @@ export class LogStreamFragment {
   private serialized: boolean;
 
   public labels: LogStreamLabelset;
+
+  // Sequential number for locating fragment in stream. Set by caller.
   public index: number;
   public parent: DummyStream | undefined;
   public stats: LogStreamFragmentStats | undefined;
@@ -159,7 +161,9 @@ export class LogStreamFragment {
     // expensive, but don't make any premature performance assupmtions here.
     // Measure what's bottlenecking. :)
     //this.payloadCharcount += entry.text.length;
-    this.payloadBytecount += Buffer.from(entry.text, "utf8").length;
+    // A protobuf timestamp is int64 + int32, i.e 12 bytes:
+    // https://github.com/protocolbuffers/protobuf/blob/4b770cabd7ff042283280bd76b6635650a04aa8a/src/google/protobuf/timestamp.proto#L136
+    this.payloadBytecount += 12 + Buffer.from(entry.text, "utf8").length;
   }
 
   public indexString(length: number): string {
