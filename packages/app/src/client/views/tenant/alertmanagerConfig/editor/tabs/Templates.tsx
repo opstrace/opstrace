@@ -91,7 +91,7 @@ const Templates = (props: State) => {
       validationCheckOnChangeStart(filename);
       checkValidationOnChangePause(filename);
     },
-    [setValidation]
+    [setValidation, setData]
   );
 
   return (
