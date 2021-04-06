@@ -57,6 +57,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 type TabbedDetailProps<T> = {
   tabs: tabTypes.Tabs;
   opts?: T;
+  onTabChange?: (tab: tabTypes.Tab, index: number) => void;
 };
 
 export function TabbedDetail<T = {}>(props: TabbedDetailProps<T>) {
@@ -64,6 +65,7 @@ export function TabbedDetail<T = {}>(props: TabbedDetailProps<T>) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    if (props.onTabChange) props.onTabChange(props.tabs[newValue], newValue);
     setValue(newValue);
   };
 
