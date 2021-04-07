@@ -530,14 +530,9 @@ ci-%: checkenv-builddir
 .PHONY: rebuild-testrunner-container-images
 rebuild-testrunner-container-images:
 	@echo "--- building testrunner container image"
-	# temporarily pull repo-global yarn lock file into test/test-remote so
-	# that `yarn install` in there respects that (repo root not part of build
-	# context).
-	cp -n yarn.lock test/test-remote
-	docker build --rm --force-rm \
-		--tag opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		-f ./test/test-remote/nodejs-testrunner.Dockerfile test/test-remote/
-	rm -f test/test-remote/yarn.lock
+	docker build . --rm --force-rm \
+		-t opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
+		-f ./test/test-remote/nodejs-testrunner.Dockerfile
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
 	docker pull gcr.io/datadoghq/agent:7
@@ -562,7 +557,7 @@ kubectl-cluster-info:
 		kubectl cluster-info
 
 #
-# * Overrides `/build/test-remote/node_modules` with an empty volume to ensure
+# * Overrides `/build/test/test-remote/node_modules` with an empty volume to ensure
 #   `node_modules` from the host are not shared with the container.
 #
 .PHONY: test-remote
@@ -586,13 +581,13 @@ test-remote: kubectl-cluster-info
 	@echo "* Start NodeJS/Mocha testrunner in container"
 	docker run --tty --interactive --rm \
 		--net=host \
-		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test-remote \
+		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
-		-v /build/test-remote/node_modules \
+		-v /build/test/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
@@ -606,7 +601,7 @@ test-remote: kubectl-cluster-info
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		--dns $(shell ci/dns_cache.sh) \
-		--workdir /build/test-remote \
+		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		yarn run mocha --grep test_ui --invert
 
@@ -629,13 +624,13 @@ test-remote-ui: kubectl-cluster-info
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	docker run --tty --interactive --rm \
 		--net=host \
-		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test-remote \
+		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
-		-v /build/test-remote/node_modules \
+		-v /build/test/test-remote/node_modules \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
@@ -650,7 +645,7 @@ test-remote-ui: kubectl-cluster-info
 		-e AWS_SECRET_ACCESS_KEY \
 		-e DEBUG=pw:api \
 		--dns $(shell ci/dns_cache.sh) \
-		--workdir /build/test-remote \
+		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		yarn run mocha --grep test_ui
 
@@ -665,8 +660,8 @@ test-remote-ui: kubectl-cluster-info
 #		- outcome 3: docs diff looks good
 #
 #	outcome 1 tells CI that this pipeline can be aborted as of a bad docs change.
-# 	outcome 2 tells CI that docs change looks good, and that it should continue normally.
-#	outcome 3 tells CI that tje docs change looks good, and that CI can stop (fast path)
+#	outcome 2 tells CI that docs change looks good, and that it should continue normally.
+#	outcome 3 tells CI that the docs change looks good, and that CI can stop (fast path)
 .PHONY: check-docs-fastpath
 check-docs-fastpath:
 	bash "ci/check-docs-fastpath.sh"

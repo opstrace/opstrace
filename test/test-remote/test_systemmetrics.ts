@@ -50,7 +50,8 @@ suite("system metrics test suite", function () {
 
     const resultArray = await waitForCortexQueryResult(
       TENANT_SYSTEM_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
 
     // pragmatic criterion for starters: expect a number of values. with

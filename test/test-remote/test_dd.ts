@@ -296,7 +296,8 @@ suite("DD API test suite", function () {
 
     const resultArray = await waitForCortexQueryResult(
       TENANT_DEFAULT_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
 
     log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
@@ -348,7 +349,8 @@ suite("DD API test suite", function () {
 
     const resultArray = await waitForCortexQueryResult(
       TENANT_DEFAULT_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
 
     log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));

@@ -83,14 +83,16 @@ export declare interface Dict<T = any> {
  */
 export let CLUSTER_BASE_URL: string;
 export let TEST_REMOTE_ARTIFACT_DIRECTORY: string;
-export let TENANT_DEFAULT_LOKI_API_BASE_URL: string;
+
 export let TENANT_DEFAULT_CORTEX_API_BASE_URL: string;
 export let TENANT_DEFAULT_DD_API_BASE_URL: string;
+export let TENANT_DEFAULT_LOKI_API_BASE_URL: string;
 export let TENANT_DEFAULT_API_TOKEN_FILEPATH: string | undefined;
 
-export let TENANT_SYSTEM_LOKI_API_BASE_URL: string;
 export let TENANT_SYSTEM_CORTEX_API_BASE_URL: string;
+export let TENANT_SYSTEM_LOKI_API_BASE_URL: string;
 export let TENANT_SYSTEM_API_TOKEN_FILEPATH: string | undefined;
+
 let globalTestSuiteSetupPerformed = false;
 export function globalTestSuiteSetupOnce() {
   log.info("globalTestSuiteSetupOnce()");
@@ -374,6 +376,29 @@ export async function readFirstNBytes(
   //log.debug("read head of file: %s", fileHead);
 }
 
+// Manually applies the specified token file to the headers.
+export function enrichHeadersWithAuthTokenFile(
+  authTokenFilepath: string | undefined,
+  headers: Record<string, string>
+): Record<string, string> {
+  if (!authTokenFilepath) {
+    // shortcut: skip addition if file is not configured
+    return headers;
+  }
+  log.info("read token from %s", authTokenFilepath);
+  const tenantAuthToken = fs
+    .readFileSync(authTokenFilepath, {
+      encoding: "utf8"
+    })
+    .trim();
+  if (!tenantAuthToken) {
+    throw new Error("auth token file defined, but file is empty: ${tokenFilepath}");
+  }
+  headers["Authorization"] = `Bearer ${tenantAuthToken}`;
+  return headers;
+}
+
+// Autodetects the auth token to use based on the URL and applies it to the headers.
 export function enrichHeadersWithAuthToken(
   url: string,
   headers: Record<string, string>
@@ -390,29 +415,16 @@ export function enrichHeadersWithAuthToken(
   mapping[TENANT_SYSTEM_LOKI_API_BASE_URL] =
     TENANT_SYSTEM_API_TOKEN_FILEPATH || "";
 
-  let tenantAuthToken = "";
-
   for (const [baseurl, tokenFilepath] of Object.entries(mapping)) {
     if (url.startsWith(baseurl)) {
       if (tokenFilepath !== "") {
-        log.info("read token from %s for url %s", tokenFilepath, url);
-        tenantAuthToken = fs
-          .readFileSync(tokenFilepath, {
-            encoding: "utf8"
-          })
-          .trim();
-        if (!tenantAuthToken) {
-          throw new Error("auth token file defined, but file is empty");
-        }
-        break;
+        // Found match, add to headers and exit
+        return enrichHeadersWithAuthTokenFile(tokenFilepath, headers)
       }
     }
   }
 
-  if (tenantAuthToken !== "") {
-    headers["Authorization"] = `Bearer ${tenantAuthToken}`;
-  }
-
+  // Give up and return existing headers
   return headers;
 }
 

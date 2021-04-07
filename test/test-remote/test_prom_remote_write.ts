@@ -36,7 +36,7 @@ import {
 
 import { DummyTimeseries } from "./prom-node-client-tools";
 
-async function queryCortex(baseUrl: string, queryParams: URLSearchParams) {
+async function queryCortex(baseUrl: string, queryUrlSuffix: string, queryParams: URLSearchParams) {
   /* Notes, in no particular order:
 
   - test deprecated /api/prom/query endpoint
@@ -59,7 +59,7 @@ async function queryCortex(baseUrl: string, queryParams: URLSearchParams) {
     even when it sends a JSON document in the response body. Submit a bug
     report, and at some point test that this is not the case anymore here.
   */
-  const url = `${baseUrl}/api/v1/query_range`;
+  const url = `${baseUrl}/api/v1/${queryUrlSuffix}`;
 
   // Automagically enrich with Authorization header, if applicable.
   const headers = enrichHeadersWithAuthToken(url, {});
@@ -91,6 +91,11 @@ export interface MetricInstanaRecord {
 export async function waitForCortexQueryResult(
   baseUrl: string,
   queryParams: Record<string, string>,
+  queryUrlSuffix: string,
+  // What's our latency goal here? Upper pipeline latency limit? As of writing
+  // this code I have seen this latency to vary between about 2 seconds and 12
+  // seconds.
+  maxWaitSeconds = 30,
   logQueryResponse = false
 ) {
   log.info(
@@ -99,11 +104,6 @@ export async function waitForCortexQueryResult(
   );
   const qparms = new URLSearchParams(queryParams);
   log.info("Cortex query parameters (query string):\n%s", qparms);
-
-  // What's our latency goal here? Upper pipeline latency limit? As of writing
-  // this code I have seen this latency to vary between about 2 seconds and 12
-  // seconds.
-  const maxWaitSeconds = 30;
 
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   log.info(
@@ -123,7 +123,7 @@ export async function waitForCortexQueryResult(
     }
 
     log.debug("send query to Cortex");
-    const data = await queryCortex(baseUrl, qparms);
+    const data = await queryCortex(baseUrl, queryUrlSuffix, qparms);
     if (logQueryResponse) {
       log.info("query response data:\n%s", JSON.stringify(data, null, 2));
     }
@@ -170,7 +170,8 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
 
     const resultArray = await waitForCortexQueryResult(
       TENANT_DEFAULT_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
 
     // confirm that this was sent by the containerized prom (the "pusher
@@ -220,7 +221,8 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
 
     const resultArray = await waitForCortexQueryResult(
       TENANT_DEFAULT_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
     // this just confirms that the query response contains some data from
     // the time series that was just written. the data itself is not looked at.
