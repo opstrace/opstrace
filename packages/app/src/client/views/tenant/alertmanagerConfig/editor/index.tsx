@@ -25,7 +25,7 @@ import { useTenant, useAlertmanager } from "state/tenant/hooks";
 import { updateAlertmanager } from "state/tenant/actions";
 
 import { Tenant, Alertmanager } from "state/tenant/types";
-import { AlertmanagerUpdateResponse } from "state/graphql-api-types";
+import { StatusResponse } from "state/graphql-api-types";
 
 import { State } from "./types";
 
@@ -39,7 +39,7 @@ import { TabbedDetail } from "client/components/TabbedDetail";
 import { CondRender } from "client/utils/rendering";
 
 type FormData = {
-  remoteValidation: AlertmanagerUpdateResponse;
+  remoteValidation: StatusResponse;
 };
 
 const defaultData: FormData = {
@@ -159,7 +159,7 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
 };
 
 type ErrorPanelProps = {
-  response?: AlertmanagerUpdateResponse;
+  response?: StatusResponse;
 };
 
 const ErrorPanel = ({ response }: ErrorPanelProps) => {

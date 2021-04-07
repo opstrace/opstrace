@@ -42,6 +42,7 @@ pkg/datadog/datadog
 pkg/fluent-http/fluent-http
 pkg/loki/loki
 
+go/config-api
 go/cortex-api
 go/ddapi
 go/loki-api

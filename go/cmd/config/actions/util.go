@@ -16,6 +16,9 @@ package actions
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 )
 
 type hasuraActionInfo struct {
@@ -36,7 +39,98 @@ func GetActionName(body []byte) (string, error) {
 	return actionInfo.Action.Name, nil
 }
 
-func ValidateError(t ErrorType, message string, rawResponse string) ValidateOutput {
+func ToUpdateResponse(objectType string, httpresp *http.Response, err error) StatusResponse {
+	if err == nil {
+		return StatusResponse{
+			Success: true,
+		}
+	}
+
+	var errType ErrorType
+	var errMsg string
+	var errRaw string
+	switch {
+	case httpresp == nil:
+		// Network failure
+		errType = ServiceOfflineType
+		errMsg = fmt.Sprintf("%s update query failed", objectType)
+		errRaw = err.Error()
+	case httpresp.StatusCode == http.StatusBadRequest:
+		// Query succeeded, config parsing/validation failed
+		errType = ValidationFailedType
+		errMsg = fmt.Sprintf("%s validation failed", objectType)
+		// Try to include original content returned by cortex
+		errRawBytes, err := ioutil.ReadAll(httpresp.Body)
+		if err != nil || len(errRawBytes) == 0 {
+			// Give up and just give generic "cortex returned <code> response"
+			errRaw = err.Error()
+		} else {
+			errRaw = string(errRawBytes)
+		}
+	default:
+		// Other HTTP error (e.g. storage error)
+		errType = ServiceErrorType
+		errMsg = fmt.Sprintf("Error when updating %s", objectType)
+		// Try to include original content returned by cortex
+		errRawBytes, err := ioutil.ReadAll(httpresp.Body)
+		if err != nil || len(errRawBytes) == 0 {
+			// Give up and just give generic "cortex returned <code> response"
+			errRaw = err.Error()
+		} else {
+			errRaw = string(errRawBytes)
+		}
+	}
+	return StatusResponse{
+		Success:          false,
+		ErrorType:        &errType,
+		ErrorMessage:     &errMsg,
+		ErrorRawResponse: &errRaw,
+	}
+}
+
+func ToDeleteResponse(objectType string, httpresp *http.Response, err error) StatusResponse {
+	if err == nil {
+		return StatusResponse{
+			Success: true,
+		}
+	}
+
+	var errType ErrorType
+	var errMsg string
+	var errRaw string
+	switch {
+	case httpresp == nil:
+		// Network failure
+		errType = ServiceOfflineType
+		errMsg = fmt.Sprintf("%s delete query failed", objectType)
+		errRaw = err.Error()
+	case httpresp.StatusCode == http.StatusNotFound:
+		// Item to delete was not found, but lets treat this as a success.
+		return StatusResponse{
+			Success: true,
+		}
+	default:
+		// Other HTTP error (e.g. storage error)
+		errType = ServiceErrorType
+		errMsg = fmt.Sprintf("Error when deleting %s", objectType)
+		// Try to include original content returned by cortex
+		errRawBytes, err := ioutil.ReadAll(httpresp.Body)
+		if err != nil || len(errRawBytes) == 0 {
+			// Give up and just give generic "cortex returned <code> response"
+			errRaw = err.Error()
+		} else {
+			errRaw = string(errRawBytes)
+		}
+	}
+	return StatusResponse{
+		Success:          false,
+		ErrorType:        &errType,
+		ErrorMessage:     &errMsg,
+		ErrorRawResponse: &errRaw,
+	}
+}
+
+func ToValidateError(t ErrorType, message string, rawResponse string) StatusResponse {
 	var messagePtr *string
 	if message != "" {
 		messagePtr = &message
@@ -45,7 +139,7 @@ func ValidateError(t ErrorType, message string, rawResponse string) ValidateOutp
 	if rawResponse != "" {
 		rawResponsePtr = &rawResponse
 	}
-	return ValidateOutput{
+	return StatusResponse{
 		Success:          false,
 		ErrorType:        &t,
 		ErrorMessage:     messagePtr,
