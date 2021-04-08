@@ -91,10 +91,10 @@ Learn more about tenant isolation in our [key concepts references](./references/
 ```bash
 cat <<EOF > opstrace-config.yaml
 tenants:
+  - dev
   - staging
   - prod
 env_label: quickstart
-node_count: 3
 cert_issuer: letsencrypt-prod
 EOF
 ```
