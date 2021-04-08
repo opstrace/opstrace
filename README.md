@@ -18,19 +18,23 @@ Opstrace deploys secure, horizontally-scalable open source observability in your
 Install Opstrace in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
 
 ```bash
-cat <<EOF > config.yaml
+opstrace create aws <choose_a_name> <<EOF
 tenants:
   - dev
   - staging
   - prod
-env_label: tryme
+env_label: try_me
 cert_issuer: letsencrypt-prod
 EOF
-
-opstrace create aws <choose_a_name> -c config.yaml
 ```
 
 (Note: `gcp` is also supported.)
+
+Don't forget to clean up when you're done:
+
+```bash
+opstrace destroy aws <choose_a_name>
+```
 
 ## Community
 
