@@ -22,6 +22,7 @@ import Layout from "client/layout/MainContent";
 
 import TenantDetail from "client/views/tenant/TenantDetail";
 import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";
+import { CloudMetrics } from "client/viewsBasic/cloudMetrics";
 
 import NotFound from "client/views/404/404";
 
@@ -31,9 +32,15 @@ const TenantRouter = () => {
       <Switch>
         <Route
           exact
-          key="/cluster/tenants/:tenantId/alertmanager-config"
-          path="/cluster/tenants/:tenantId/alertmanager-config"
+          key="/cluster/tenants/:tenantId/alertmanager"
+          path="/cluster/tenants/:tenantId/alertmanager"
           component={AlertmanagerConfigEditor}
+        />
+        <Route
+          exact
+          key="/cluster/tenants/:tenantId/cloud-metrics"
+          path="/cluster/tenants/:tenantId/cloud-metrics"
+          component={CloudMetrics}
         />
         <Route
           exact
