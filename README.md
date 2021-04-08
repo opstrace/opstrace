@@ -20,14 +20,14 @@ Install Opstrace in your own cloud account with our [quick start](https://go.ops
 ```bash
 cat <<EOF > config.yaml
 tenants:
+  - dev
   - staging
   - prod
-env_label: quickstart
-node_count: 3
+env_label: tryme
 cert_issuer: letsencrypt-prod
 EOF
 
-opstrace create aws me -c config.yaml
+opstrace create aws <choose_a_name> -c config.yaml
 ```
 
 ## Community
