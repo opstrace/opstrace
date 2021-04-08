@@ -23,6 +23,7 @@ COPY packages/controller /build/packages/controller/
 COPY packages/config /build/packages/config/
 COPY packages/tenants /build/packages/tenants/
 COPY packages/controller-config /build/packages/controller-config/
+COPY packages/buildinfo /build/packages/buildinfo/
 
 WORKDIR /build/packages/controller
 
@@ -33,6 +34,8 @@ RUN yarn --frozen-lockfile
 # unknown reason, doing this manually in this precise order is required for `yarn tsc -b` to work when
 # building the Controller
 
+WORKDIR /build/packages/buildinfo
+RUN yarn build
 WORKDIR /build/lib/utils
 RUN yarn build
 WORKDIR /build/lib/kubernetes

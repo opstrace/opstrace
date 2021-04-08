@@ -20,6 +20,7 @@
   "dependencies": {
     "@kubernetes/client-node": "0.14.0",
     "@opstrace/utils": "^0.0.0",
+    "@opstrace/buildinfo": "^0.0.0",
     "glob": "^7.1.6",
     "js-yaml": "^3.13.1",
     "json-schema-to-typescript": "^8.2.0",

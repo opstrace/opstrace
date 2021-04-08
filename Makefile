@@ -114,7 +114,7 @@ lint-docs:
 
 
 .PHONY: tsc
-tsc: cli-set-build-info-constants
+tsc: set-build-info-constants
 	@# tsc-compile the opstrace cli and controller cli
 	yarn --frozen-lockfile
 	yarn build:controller
@@ -188,7 +188,7 @@ controller-local:
 
 
 .PHONY: build-and-push-controller-image
-build-and-push-controller-image:
+build-and-push-controller-image: set-build-info-constants
 	docker build . -f containers/controller/Dockerfile -t $(DOCKER_REPO)/controller:$(CHECKOUT_VERSION_STRING)
 	echo "Size of docker image:"
 	docker images --format "{{.Size}}" $(DOCKER_REPO)/controller:$(CHECKOUT_VERSION_STRING)
@@ -235,7 +235,7 @@ lint-codebase.go:
 	(cd go/ && golangci-lint run --allow-parallel-runners)
 
 .PHONY: cli-tsc
-cli-tsc: cli-set-build-info-constants
+cli-tsc: set-build-info-constants
 	@# tsc-compile the opstrace cli (not the controller cli)
 	yarn --frozen-lockfile
 	yarn build:cli
@@ -330,8 +330,8 @@ check-license-headers:
 	git --no-pager diff --exit-code
 
 
-.PHONY: cli-set-build-info-constants
-cli-set-build-info-constants:
+.PHONY: set-build-info-constants
+set-build-info-constants:
 	# Set build info constants for the next tsc-based CLI build. This also
 	# affects the default value for `controller_config` (in CI, this is being
 	# created and pushed by this CI run).
