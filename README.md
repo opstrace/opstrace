@@ -30,6 +30,8 @@ EOF
 opstrace create aws <choose_a_name> -c config.yaml
 ```
 
+(Note: `gcp` is also supported.)
+
 ## Community
 
 Authentic collaboration in a community setting is important to us.
