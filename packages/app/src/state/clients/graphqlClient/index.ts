@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isArray } from "ramda-adjunct";
 import { GraphQLClient } from "graphql-request";
 import { getSdk } from "state/graphql-api-types";
 export * from "state/graphql-api-types";
@@ -39,8 +38,8 @@ const client = adminSecret
       headers: {}
     });
 
-export const fetcher = (rawQuery: string | [string, {}]) =>
-  isArray(rawQuery) ? client.request(...rawQuery) : client.request(rawQuery);
+export const fetcher = (query: string, variables?: {}) =>
+  client.request(query, variables);
 
 export type PromiseReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type ClientResponse<T extends (args?: any) => {}> = PromiseReturnType<
