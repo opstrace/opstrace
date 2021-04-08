@@ -16,38 +16,16 @@
 
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
 
 import useFetcher from "client/hooks/useFetcher";
 
-import { CondRender } from "client/utils/rendering";
 import { CredentialsTable } from "./Table";
+import { CredentialsForm } from "./Form";
 
-import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "client/components/Box";
-import Grid from "@material-ui/core/Grid";
-import {
-  Input,
-  Select,
-  MenuItem,
-  FormControl,
-  FormLabel,
-  FormHelperText
-} from "@material-ui/core";
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    "& > *": {
-      margin: theme.spacing(1),
-      width: "25ch"
-    }
-  }
-}));
 
 function Credentials() {
   const { tenantId } = useParams<{ tenantId: string }>();
-  const { control, watch } = useForm({ defaultValues: { cloudProvider: "" } });
-  const cloudProvider = watch("cloudProvider");
 
   const { data } = useFetcher(
     `query credentials($tenant_id: String) {
@@ -60,163 +38,11 @@ function Credentials() {
     { tenant_id: tenantId }
   );
 
-  console.log(data?.credential);
-
   return (
     <Box display="flex" height="500px" width="700px">
       <CredentialsTable rows={data?.credential} />
-      <Grid
-        container
-        alignItems="flex-start"
-        justify="flex-start"
-        direction="column"
-      >
-        <Grid item>
-          <FormControl>
-            <FormLabel>Cloud Provider</FormLabel>
-            <Controller
-              render={({ field }) => (
-                <Select {...field}>
-                  <MenuItem value={"aws"}>Amazon Web Services</MenuItem>
-                  <MenuItem value={"gcp"}>Google Cloud Platform</MenuItem>
-                </Select>
-              )}
-              control={control}
-              name="cloudProvider"
-              defaultValue={10}
-            />
-          </FormControl>
-        </Grid>
-
-        <CondRender when={cloudProvider === "aws"}>
-          <AwsForm />
-        </CondRender>
-        <CondRender when={cloudProvider === "gcp"}>
-          <GcpForm />
-        </CondRender>
-      </Grid>
+      <CredentialsForm tenantId={tenantId} />
     </Box>
-  );
-}
-
-type ControlledInputProps = {
-  name: `${string}` | `${string}.${string}` | `${string}.${number}`;
-  label: string;
-  helperText?: string;
-  inputProps?: {};
-  control: any;
-};
-
-const ControlledInput = ({
-  name,
-  label,
-  inputProps = {},
-  helperText,
-  control
-}: ControlledInputProps) => (
-  <Grid item>
-    <Controller
-      render={({ field }) => (
-        <FormControl>
-          <FormLabel>{label}</FormLabel>
-          <Input {...field} {...inputProps} />
-          <CondRender when={helperText !== undefined}>
-            <FormHelperText>{helperText}</FormHelperText>
-          </CondRender>
-        </FormControl>
-      )}
-      control={control}
-      name={name}
-    />
-  </Grid>
-);
-
-const awsDefaultValues = {
-  name: "",
-  accessKeyId: "",
-  secretAccessKey: ""
-};
-
-function AwsForm() {
-  const classes = useStyles();
-  const { handleSubmit, reset, control } = useForm({
-    defaultValues: awsDefaultValues
-  });
-  const onSubmit = (data: {}) => console.log(data);
-
-  return (
-    <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
-      <ControlledInput name="name" label="Name" control={control} />
-      <ControlledInput
-        name="accessKeyId"
-        label="Access Key ID"
-        control={control}
-      />
-      <ControlledInput
-        name="secretAccessKey"
-        label="Secret Access Key"
-        helperText="Important: this is stored as plain text."
-        control={control}
-      />
-
-      <Grid
-        container
-        direction="row"
-        justify="space-evenly"
-        alignItems="flex-start"
-      >
-        <Grid item>
-          <button type="button" onClick={() => reset(awsDefaultValues)}>
-            Reset
-          </button>
-        </Grid>
-        <Grid item>
-          <input type="submit" />
-        </Grid>
-      </Grid>
-    </form>
-  );
-}
-
-const gcpDefaultValues = {
-  name: "",
-  accessYaml: ""
-};
-
-function GcpForm() {
-  const classes = useStyles();
-  const { handleSubmit, reset, control } = useForm({
-    defaultValues: gcpDefaultValues
-  });
-  const onSubmit = (data: {}) => console.log(data);
-
-  return (
-    <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
-      <ControlledInput name="name" label="Name" control={control} />
-      <ControlledInput
-        name="accessYaml"
-        label="Access YAML"
-        inputProps={{ multiline: true }}
-        helperText="Important: this is stored as plain text."
-        control={control}
-      />
-
-      <Grid
-        container
-        direction="row"
-        justify="space-evenly"
-        alignItems="flex-start"
-      >
-        <Grid item>
-          <button type="button" onClick={() => reset(gcpDefaultValues)}>
-            Reset
-          </button>
-        </Grid>
-        <Grid item>
-          <input type="submit" />
-        </Grid>
-      </Grid>
-    </form>
   );
 }
 
