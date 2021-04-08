@@ -58,7 +58,7 @@ export const TenantPanel = (props: TenantPanelProps) => {
     ) => {
       setSelectedIndex(index);
       if (subItem && subItem.id !== "detail")
-        history.push(`/cluster/tenants/${item.data.name}/${subItem.id}`);
+        history.push(`/cluster/tenants/${item.data.name}/${subItem.data.path}`);
       else history.push(`/cluster/tenants/${item.data.name}`);
     },
     [history]
@@ -66,8 +66,17 @@ export const TenantPanel = (props: TenantPanelProps) => {
 
   const makeSubItems = (item: PanelItem, index: number) => {
     return [
-      { id: "detail", text: "Detail", data: {} },
-      { id: "alertmanager-config", text: "Alertmanager", data: {} }
+      { id: "detail", text: "Detail", data: { path: "" } },
+      {
+        id: "alertmanager",
+        text: "Alertmanager",
+        data: { path: "alertmanager" }
+      },
+      {
+        id: "cloud-metrics",
+        text: "Cloud Metrics",
+        data: { path: "cloud-metrics" }
+      }
     ];
   };
 
