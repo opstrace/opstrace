@@ -8,5 +8,8 @@
     "src/**/*.ts",
     "src/crds/**/*.json"
   ],
-  "references": [{ "path": "../utils" }]
+  "references": [
+    { "path": "../utils" },
+    { "path": "../../packages/buildinfo" }
+  ]
 }
