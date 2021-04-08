@@ -2,6 +2,7 @@ tenants:
   - default
 env_label: opstrace-ci
 node_count: 3
+cert_issuer: letsencrypt-staging
 aws:
   eks_admin_roles:
     - AWSReservedSSO_AdministratorAccess_8488c3da2f880f06

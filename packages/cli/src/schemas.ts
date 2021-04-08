@@ -56,7 +56,7 @@ export const infraConfigSchemaGCP = yup
 export const clusterConfigFileSchema = yup
   .object({
     // infra-related things, provider-independent
-    node_count: yup.number().positive().integer().required(),
+    node_count: yup.number().positive().integer().default(3),
 
     // Note(JP): CONTROLLER_IMAGE_DEFAULT is supposed to be inserted by
     // CI / the build system (for any build, there is supposed to be a sane
@@ -78,7 +78,7 @@ export const clusterConfigFileSchema = yup
     cert_issuer: yup
       .string()
       .oneOf(["letsencrypt-prod", "letsencrypt-staging"])
-      .default("letsencrypt-staging"),
+      .default("letsencrypt-prod"),
 
     log_retention_days: yup.number().positive().integer().default(7),
     metric_retention_days: yup.number().positive().integer().default(7),
