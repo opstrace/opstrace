@@ -15,7 +15,10 @@
  */
 
 import React from "react";
+import { useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
+
+import useFetcher from "client/hooks/useFetcher";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "client/components/Box";
@@ -40,13 +43,23 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const defaultValues = {
-  cloudProvider: ""
-};
-
 function Credentials() {
-  const { control, watch } = useForm({ defaultValues });
+  const { tenantId } = useParams<{ tenantId: string }>();
+  const { control, watch } = useForm({ defaultValues: { cloudProvider: "" } });
   const cloudProvider = watch("cloudProvider");
+
+  const { data: credentials } = useFetcher(
+    `query credentials($tenant_id: String) {
+       credential(where: { tenant: { _eq: $tenant_id } }) {
+         created_at
+         name
+         type
+       }
+     }`,
+    { tenant_id: tenantId }
+  );
+
+  console.log(credentials);
 
   return (
     <Box display="flex" height="500px" width="700px">
