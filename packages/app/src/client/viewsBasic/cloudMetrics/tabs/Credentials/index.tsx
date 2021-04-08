@@ -20,6 +20,9 @@ import { useForm, Controller } from "react-hook-form";
 
 import useFetcher from "client/hooks/useFetcher";
 
+import { CondRender } from "client/utils/rendering";
+import { CredentialsTable } from "./Table";
+
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "client/components/Box";
 import Grid from "@material-ui/core/Grid";
@@ -31,8 +34,6 @@ import {
   FormLabel,
   FormHelperText
 } from "@material-ui/core";
-
-import { CondRender } from "client/utils/rendering";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -48,21 +49,22 @@ function Credentials() {
   const { control, watch } = useForm({ defaultValues: { cloudProvider: "" } });
   const cloudProvider = watch("cloudProvider");
 
-  const { data: credentials } = useFetcher(
+  const { data } = useFetcher(
     `query credentials($tenant_id: String) {
        credential(where: { tenant: { _eq: $tenant_id } }) {
-         created_at
-         name
          type
+         name
+         created_at
        }
      }`,
     { tenant_id: tenantId }
   );
 
-  console.log(credentials);
+  console.log(data?.credential);
 
   return (
     <Box display="flex" height="500px" width="700px">
+      <CredentialsTable rows={data?.credential} />
       <Grid
         container
         alignItems="flex-start"
