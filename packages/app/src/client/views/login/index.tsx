@@ -30,7 +30,6 @@ import { ErrorView } from "client/components/Error";
 import useQueryParams from "client/hooks/useQueryParams";
 import TracyImg from "../common/Tracy";
 
-
 interface LoginConfigInterface {
   auth0_client_id: string;
   auth0_domain: string;
@@ -39,7 +38,6 @@ interface LoginConfigInterface {
 interface State extends AppState {
   redirectUri: string;
 }
-
 
 // https://github.com/JustinBeckwith/retry-axios
 // Attach rax "interceptor" to axios globally.
@@ -67,7 +65,7 @@ const raxcfg = {
     [500, 599]
   ],
 
-  onRetryAttempt: function(err: AxiosError) {
+  onRetryAttempt: function (err: AxiosError) {
     const cfg = rax.getConfig(err);
     //@ts-ignore cfg possibly undefined
     console.log(`Retry attempt #${cfg.currentRetryAttempt} -- error: ${err}`);
@@ -135,12 +133,18 @@ const Login = (props: { state?: State }) => {
     });
   }, [loginWithRedirect, rd]);
 
+  // Extract cluster name from URL
+  const opstraceClusterName = window.location.host.endsWith("opstrace.io")
+    ? window.location.host.replace(".opstrace.io", "")
+    : "localhost";
+
   // Log in to Auth0 (SSO flow) -> obtain an access token.
   useEffect(() => {
     (async function getAccessToken() {
       try {
         const token = await getAccessTokenSilently({
-          audience: "https://user-cluster.opstrace.io/api"
+          audience: "https://user-cluster.opstrace.io/api",
+          opstraceClusterName
         });
         setAccessToken(token);
       } catch (e) {}
@@ -228,7 +232,8 @@ const Login = (props: { state?: State }) => {
         <br />
         <br />
         <Typography>
-          Contact your administrator or log out and try again with a different account.
+          Contact your administrator or log out and try again with a different
+          account.
         </Typography>
         <Box mt={3} pb={0}>
           <Button
@@ -249,10 +254,10 @@ const Login = (props: { state?: State }) => {
   // do not display an interactive page in that case: no button, etc.
   const querystring = window.location.search.substring(1);
   const queryparms = new URLSearchParams(querystring);
-  const authzcode: null | string = queryparms.get("code")
+  const authzcode: null | string = queryparms.get("code");
   if (authzcode !== null && authzcode.length > 1) {
     // To render nothing, return null.
-    return null
+    return null;
   }
 
   return (
@@ -277,13 +282,15 @@ const Login = (props: { state?: State }) => {
 
 function LoginPageParent() {
   // Uninitialized state will cause Child to error out
-  const [loginConfig, setLoginConfig] = useState<LoginConfigInterface | undefined>();
+  const [loginConfig, setLoginConfig] = useState<
+    LoginConfigInterface | undefined
+  >();
   useEffect(() => {
     (async () => {
       // Without this early exit criterion, `fetchLoginConfig()` is going to
       // be called with every render cycle.
       if (loginConfig !== undefined) {
-        return
+        return;
       }
 
       const lcfg = await fetchLoginConfig();
@@ -295,13 +302,10 @@ function LoginPageParent() {
   // https://stackoverflow.com/a/57312722/145400 for the `{...loginConfig}` to
   // work around `not assignable to type 'IntrinsicAttributes..` kind of errors
   // when doing `loginconfig={loginconfig}`.
-  return (
-    <div>{loginConfig && <LoginPageChild {...loginConfig} />}</div>
-  );
+  return <div>{loginConfig && <LoginPageChild {...loginConfig} />}</div>;
 }
 
 function LoginPageChild(lcfg: LoginConfigInterface) {
-
   const [state, setState] = useState<State | undefined>();
 
   const onRedirectCallback = useCallback((state: AppState) => {
