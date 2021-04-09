@@ -73,7 +73,7 @@ node_count: 3
   ] = await uccGetAndValidate(filename, "aws");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-staging",
+    "cert_issuer": "letsencrypt-prod",
     "controller_image": CONTROLLER_IMAGE_DEFAULT,
     "data_api_authentication_disabled": false,
     "data_api_authorized_ip_ranges": [
@@ -116,7 +116,7 @@ node_count: 3
   ] = await uccGetAndValidate(filename, "gcp");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-staging",
+    "cert_issuer": "letsencrypt-prod",
     "controller_image": CONTROLLER_IMAGE_DEFAULT,
     "data_api_authentication_disabled": false,
     "data_api_authorized_ip_ranges": [
