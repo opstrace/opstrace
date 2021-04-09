@@ -28,7 +28,7 @@ if (!endpoint) {
 }
 const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
 
-const client = adminSecret
+export const client = adminSecret
   ? new GraphQLClient(endpoint, {
       headers: {
         "x-hasura-admin-secret": adminSecret!
@@ -37,9 +37,6 @@ const client = adminSecret
   : new GraphQLClient(endpoint, {
       headers: {}
     });
-
-export const fetcher = (query: string, variables?: {}) =>
-  client.request(query, variables);
 
 export type PromiseReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type ClientResponse<T extends (args?: any) => {}> = PromiseReturnType<

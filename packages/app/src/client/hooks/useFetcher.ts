@@ -16,7 +16,7 @@
 
 import useSWR from "swr";
 
-import { fetcher } from "state/clients/graphqlClient";
+import { client } from "state/clients/graphqlClient";
 
 import useDeepMemo from "client/hooks/useDeepMemo";
 
@@ -30,5 +30,8 @@ const useFetcher = (query: string, variables?: {}) => {
 
   return useSWR(token, fetcher);
 };
+
+const fetcher = (query: string, variables?: {}) =>
+  client.request(query, variables);
 
 export default useFetcher;
