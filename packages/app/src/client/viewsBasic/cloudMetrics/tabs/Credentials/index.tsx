@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useCallback } from "react";
 import { useParams } from "react-router-dom";
 
 import useFetcher from "client/hooks/useFetcher";
@@ -23,25 +23,39 @@ import { CredentialsTable } from "./Table";
 import { CredentialsForm } from "./Form";
 
 import { Box } from "client/components/Box";
+import Grid from "@material-ui/core/Grid";
 
 function Credentials() {
   const { tenantId } = useParams<{ tenantId: string }>();
 
-  const { data } = useFetcher(
+  const { data, mutate } = useFetcher(
     `query credentials($tenant_id: String) {
        credential(where: { tenant: { _eq: $tenant_id } }) {
-         type
          name
+         type
          created_at
        }
      }`,
     { tenant_id: tenantId }
   );
 
+  const reload = useCallback(() => mutate(), [mutate]);
+
   return (
     <Box display="flex" height="500px" width="700px">
-      <CredentialsTable rows={data?.credential} />
-      <CredentialsForm tenantId={tenantId} />
+      <Grid
+        container
+        alignItems="flex-start"
+        justify="flex-start"
+        direction="column"
+      >
+        <Grid item>
+          <CredentialsTable rows={data?.credential} />
+        </Grid>
+        <Grid item>
+          <CredentialsForm tenantId={tenantId} onCreate={reload} />
+        </Grid>
+      </Grid>
     </Box>
   );
 }

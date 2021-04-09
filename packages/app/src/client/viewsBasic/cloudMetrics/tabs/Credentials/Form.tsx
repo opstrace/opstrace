@@ -17,6 +17,7 @@
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 
+import graphqlClient from "state/clients/graphqlClient";
 import { CondRender } from "client/utils/rendering";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -39,8 +40,11 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export function CredentialsForm(props: { tenantId: string }) {
-  const { tenantId } = props;
+export function CredentialsForm(props: {
+  tenantId: string;
+  onCreate: Function;
+}) {
+  const { tenantId, onCreate } = props;
   const { control, watch } = useForm({ defaultValues: { cloudProvider: "" } });
   const cloudProvider = watch("cloudProvider");
 
@@ -71,10 +75,10 @@ export function CredentialsForm(props: { tenantId: string }) {
       </Grid>
 
       <CondRender when={cloudProvider === "aws"}>
-        <AwsForm />
+        <AwsForm tenantId={tenantId} onCreate={onCreate} />
       </CondRender>
       <CondRender when={cloudProvider === "gcp"}>
-        <GcpForm />
+        <GcpForm tenantId={tenantId} onCreate={onCreate} />
       </CondRender>
     </Grid>
   );
@@ -118,12 +122,34 @@ const awsDefaultValues = {
   secretAccessKey: ""
 };
 
-function AwsForm() {
+function AwsForm(props: { tenantId: string; onCreate: Function }) {
+  const { tenantId, onCreate } = props;
   const classes = useStyles();
   const { handleSubmit, reset, control } = useForm({
     defaultValues: awsDefaultValues
   });
-  const onSubmit = (data: {}) => console.log(data);
+  const onSubmit = (data: {
+    name: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+  }) => {
+    graphqlClient
+      .CreateCredentials({
+        credentials: {
+          tenant: tenantId,
+          name: data.name,
+          type: "aws",
+          value: {
+            AWS_ACCESS_KEY_ID: data.accessKeyId,
+            AWS_SECRET_ACCESS_KEY: data.secretAccessKey
+          }
+        }
+      })
+      .then(response => {
+        onCreate();
+        reset(awsDefaultValues);
+      });
+  };
 
   return (
     <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
@@ -161,22 +187,38 @@ function AwsForm() {
 
 const gcpDefaultValues = {
   name: "",
-  accessYaml: ""
+  accessDoc: ""
 };
 
-function GcpForm() {
+function GcpForm(props: { tenantId: string; onCreate: Function }) {
+  const { tenantId, onCreate } = props;
   const classes = useStyles();
   const { handleSubmit, reset, control } = useForm({
     defaultValues: gcpDefaultValues
   });
-  const onSubmit = (data: {}) => console.log(data);
+
+  const onSubmit = (data: { name: string; accessDoc: string }) => {
+    graphqlClient
+      .CreateCredentials({
+        credentials: {
+          tenant: tenantId,
+          name: data.name,
+          type: "gcp",
+          value: data.accessDoc
+        }
+      })
+      .then(response => {
+        onCreate();
+        reset(awsDefaultValues);
+      });
+  };
 
   return (
     <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
       <ControlledInput name="name" label="Name" control={control} />
       <ControlledInput
-        name="accessYaml"
-        label="Access YAML"
+        name="accessDoc"
+        label="Access Doc"
         inputProps={{ multiline: true }}
         helperText="Important: this is stored as plain text."
         control={control}
