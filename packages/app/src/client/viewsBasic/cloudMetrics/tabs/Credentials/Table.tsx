@@ -51,7 +51,7 @@ export const CredentialsTable = (props: CredentialsTableProps) => {
   const { tenantId, rows, onChange } = props;
   const classes = useStyles();
 
-  if (!rows)
+  if (!rows || rows.length === 0)
     return (
       <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
     );
