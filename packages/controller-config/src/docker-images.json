@@ -6,6 +6,7 @@
   "cortex": "cortexproject/cortex:v1.8.0-rc.0",
   "cortexApiProxy": "opstrace/cortex-api:b3c0c6cb64ad8d38e65e2a576a4f84c3e2d8981b",
   "ddApi": "opstrace/ddapi:b3c0c6cb64ad8d38e65e2a576a4f84c3e2d8981b",
+  "exporterBlackbox": "prom/blackbox-exporter:v0.18.0",
   "exporterCloudwatch": "prom/cloudwatch-exporter:cloudwatch_exporter-0.10.0",
   "exporterStackdriver": "prometheuscommunity/stackdriver-exporter:v0.11.0",
   "externalDNS": "k8s.gcr.io/external-dns/external-dns:v0.7.4",

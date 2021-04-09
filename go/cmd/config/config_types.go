@@ -28,6 +28,7 @@ var (
 	}
 	// All supported exporter types, and the credential types that they may be paired with.
 	validExporterCredentials = map[string][]string{
+		"blackbox": {},
 		"cloudwatch":  {"aws-key"},
 		"stackdriver": {"gcp-service-account"},
 	}
@@ -166,7 +167,7 @@ func convertYAMLExporterConfig(exporterName string, exporterConfig interface{}) 
 
 // Validates that a GraphQL JSON exporter type and credential type are valid and compatible.
 func validateExporterTypes(exporterType string, credType *string) error {
-	// Validate exporter type is supported
+	// Validate exporter type is known/supported
 	validCredTypes, ok := validExporterCredentials[exporterType]
 	if !ok {
 		keys := make([]string, len(validExporterCredentials))
@@ -178,6 +179,7 @@ func validateExporterTypes(exporterType string, credType *string) error {
 		return fmt.Errorf("unsupported exporter type %s, expected one of: %s", exporterType, keys)
 	}
 	if credType == nil {
+		// No credential provided with exporter, skip credential lookup
 		return nil
 	}
 

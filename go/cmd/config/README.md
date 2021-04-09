@@ -245,22 +245,22 @@ type: gcp-service-account
 # gcp-service-account must contain valid json:
 value: |-
   {"json": "goes-here"}
-' | curl -v -H "X-Scope-OrgID: tenant-foo" -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/credentials/
+' | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- https://MYCLUSTER.opstrace.io/api/v1/credentials/
 ```
 
 Get all
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/
+curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://MYCLUSTER.opstrace.io/api/v1/credentials/
 ```
 
 Get foo
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/credentials/foo
+curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://MYCLUSTER.opstrace.io/api/v1/credentials/foo
 ```
 
 Delete foo
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" -XDELETE http://127.0.0.1:8989/api/v1/credentials/foo
+curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" -XDELETE https://MYCLUSTER.opstrace.io/api/v1/credentials/foo
 ```
 
 #### Exporter HTTP examples
@@ -300,20 +300,48 @@ config:
   - proj2
   monitoring.metrics-interval: '5m' # optional
   monitoring.metrics-offset: '0s' # optional
-' | curl -v -H "X-Scope-OrgID: tenant-foo" -XPOST --data-binary @- http://127.0.0.1:8989/api/v1/exporters/
+---
+name: baz
+type: blackbox
+config:
+  probes: # required, list of probes to collect. args match HTTP params
+  - target: prometheus.io
+    module: http_2xx
+  - target: example.com
+    module: http_2xx
+  - target: 1.1.1.1
+    module: dns_opstrace_mx
+  - target: 8.8.8.8
+    module: dns_opstrace_mx
+  modules: # optional, blackbox module configuration to overwrite exporter defaults
+    http_2xx:
+      prober: http
+      timeout: 5s
+      http:
+        preferred_ip_protocol: "ip4"
+    dns_opstrace_mx:
+      prober: dns
+      timeout: 5s
+      dns:
+        preferred_ip_protocol: "ip4"
+        transport_protocol: tcp
+        dns_over_tls: true
+        query_name: opstrace.com
+        query_type: MX
+' | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- https://MYCLUSTER.opstrace.io/api/v1/exporters/
 ```
 
 Get all
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/
+curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://MYCLUSTER.opstrace.io/api/v1/exporters/
 ```
 
 Get foo
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" http://127.0.0.1:8989/api/v1/exporters/foo
+curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" https://MYCLUSTER.opstrace.io/api/v1/exporters/foo
 ```
 
 Delete foo
 ```
-curl -v -H "X-Scope-OrgID: tenant-foo" -XDELETE http://127.0.0.1:8989/api/v1/exporters/foo
+curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" -XDELETE https://MYCLUSTER.opstrace.io/api/v1/exporters/foo
 ```
