@@ -17,6 +17,8 @@
 import React from "react";
 import { format, parseISO } from "date-fns";
 
+import graphqlClient from "state/clients/graphqlClient";
+
 import { makeStyles } from "@material-ui/core/styles";
 import Skeleton from "@material-ui/lab/Skeleton";
 import Table from "@material-ui/core/Table";
@@ -39,14 +41,31 @@ type Row = {
   created_at: string;
 };
 
-export const CredentialsTable = (props: { rows?: Row[] }) => {
-  const { rows } = props;
+type CredentialsTableProps = {
+  tenantId: string;
+  rows?: Row[];
+  onChange: Function;
+};
+
+export const CredentialsTable = (props: CredentialsTableProps) => {
+  const { tenantId, rows, onChange } = props;
   const classes = useStyles();
 
   if (!rows)
     return (
       <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
     );
+
+  const deleteCredential = (name: string) => {
+    graphqlClient
+      .DeleteCredential({
+        tenant: tenantId,
+        name: name
+      })
+      .then(response => {
+        onChange();
+      });
+  };
 
   return (
     <TableContainer component={Paper}>
@@ -56,6 +75,7 @@ export const CredentialsTable = (props: { rows?: Row[] }) => {
             <TableCell>Name</TableCell>
             <TableCell>Type</TableCell>
             <TableCell>Created At</TableCell>
+            <TableCell></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -66,6 +86,14 @@ export const CredentialsTable = (props: { rows?: Row[] }) => {
               </TableCell>
               <TableCell>{row.type}</TableCell>
               <TableCell>{format(parseISO(row.created_at), "Pppp")}</TableCell>
+              <TableCell>
+                <button
+                  type="button"
+                  onClick={() => deleteCredential(row.name)}
+                >
+                  Delete
+                </button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

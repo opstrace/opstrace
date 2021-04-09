@@ -39,7 +39,7 @@ function Credentials() {
     { tenant_id: tenantId }
   );
 
-  const reload = useCallback(() => mutate(), [mutate]);
+  const changeCallback = useCallback(() => mutate(), [mutate]);
 
   return (
     <Box display="flex" height="500px" width="700px">
@@ -50,10 +50,14 @@ function Credentials() {
         direction="column"
       >
         <Grid item>
-          <CredentialsTable rows={data?.credential} />
+          <CredentialsTable
+            tenantId={tenantId}
+            onChange={changeCallback}
+            rows={data?.credential}
+          />
         </Grid>
         <Grid item>
-          <CredentialsForm tenantId={tenantId} onCreate={reload} />
+          <CredentialsForm tenantId={tenantId} onCreate={changeCallback} />
         </Grid>
       </Grid>
     </Box>
