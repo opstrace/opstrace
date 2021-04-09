@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { format, parseISO } from "date-fns";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Skeleton from "@material-ui/lab/Skeleton";
@@ -49,12 +50,12 @@ export const CredentialsTable = (props: { rows?: Row[] }) => {
 
   return (
     <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="simple table">
+      <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
-            <TableCell align="right">name</TableCell>
-            <TableCell align="right">Type</TableCell>
-            <TableCell align="right">Created At</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell>Created At</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -63,8 +64,8 @@ export const CredentialsTable = (props: { rows?: Row[] }) => {
               <TableCell component="th" scope="row">
                 {row.name}
               </TableCell>
-              <TableCell align="right">{row.type}</TableCell>
-              <TableCell align="right">{row.created_at}</TableCell>
+              <TableCell>{row.type}</TableCell>
+              <TableCell>{format(parseISO(row.created_at), "Pppp")}</TableCell>
             </TableRow>
           ))}
         </TableBody>
