@@ -11,7 +11,6 @@ A minimal variant might look like this:
 tenants:
     - prod
     - ci
-node_count: 3
 ```
 
 The following sections list individual configuration parameters and aim to provide detailed specification for their purpose and meaning.
@@ -40,9 +39,11 @@ tenants:
     - ci
 ```
 
+## Optional parameters
+
 ### `node_count`
 
-The number of machines this Opstrace cluster is supposed to be comprised of.
+The number of underlying instances to use.
 
 *Value type:* number \(integer\)
 
@@ -52,12 +53,8 @@ The number of machines this Opstrace cluster is supposed to be comprised of.
 node_count: 3
 ```
 
-You should explicitly choose the number of machines your Opstrace cluster is comprised of, which is why this is a required parameter for now.
-
 **Warning 😈:**
 Here be dragons: we develop with three nodes, and—for now—we rarely test with less or more.
-
-## Optional parameters
 
 ### `aws`
 
