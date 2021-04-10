@@ -4,7 +4,7 @@ description: Parameter reference
 
 # Cluster configuration
 
-For setting up an Opstrace cluster, one has to provide a corresponding configuration document in YAML format.
+When installing Opstrace, one has to provide a corresponding configuration document in YAML format.
 A minimal variant might look like this:
 
 ```yaml
@@ -13,11 +13,11 @@ tenants:
     - ci
 ```
 
-The following sections list individual configuration parameters and aim to provide detailed specification for their purpose and meaning.
+The following sections list individual configuration parameters and aim to provide a detailed specification for their purpose and meaning.
 
 At a high level, there are two different types of parameters:
 
-* required ones (you have to set those for creating an Opstrace cluster)
+* required ones
 * optional ones (but please do not assume sane defaults yet :-))
 
 **Note:**  as of today, the cluster configuration cannot be updated at runtime.
@@ -73,8 +73,7 @@ aws:
         - AWSReservedSSO_AdministratorAccess_133333abc3333337
 ```
 
-Use the `eks_admin_roles` parameter (expected to be an enumeration of strings) to define individual AWS IAM roles that should have administrator access to the underlying EKS cluster, via e.g. the [EKS console](https://aws.amazon.com/blogs/containers/introducing-the-new-amazon-eks-console/).
-
+Use the `eks_admin_roles` parameter (an enumeration of strings) to define individual AWS IAM roles that should have administrator access to the underlying EKS cluster, via e.g. the [EKS console](https://aws.amazon.com/blogs/containers/introducing-the-new-amazon-eks-console/).
 
 **Note:**
 we develop and test mainly with `region` set to `us-west-2`.
@@ -95,12 +94,7 @@ gcp:
     zone_suffix: a
 ```
 
-
 Note: the example above shows the defaults.
-
-**Warning 😈:**
-we develop and test with region `us-west2` and have not validated other regions yet.
-
 
 ### `env_label`
 
@@ -124,18 +118,18 @@ The label name will be `env`, and the value will be what you provide here.
 
 *Value type:* boolean
 
-By default, authentication proof is required when accessing the HTTP API for pushing or querying logs/metrics data.
-This flag can be used to disable said authentication mechanism, allowing for unauthenticated clients to write or read data.
+By default, authentication proof is required when accessing the HTTP API for pushing or querying data.
+This flag disables said authentication mechanism, allowing for unauthenticated clients to write or read data.
 
 When required, any HTTP request arriving at the tenant HTTP API is expected to show an API token in an `Authorization` header \(using the `Bearer` scheme\).
 
 Notes:
 
-* When set to `false` \(default\), the Opstrace cluster management CLI creates one long-lived API token per tenant upon cluster creation.
+* When set to `false` \(default\), the Opstrace CLI creates one long-lived API token per tenant upon cluster creation.
 
 Naming:
 
-* might be renamed in the future \(data_api_..?\)
+* might be renamed in the future
 
 ### `data_api_authorized_ip_ranges`
 
@@ -154,12 +148,11 @@ data_api_authorized_ip_ranges:
 
 Locking this down makes sense when setting `data_api_authentication_disabled` to `true`.
 
-
 ### `cert_issuer`
 
 Defines the issuer to use for all TLS-terminating certificates in the cluster, such as for the externally available data API endpoints.
 
-*Default:* `letsencrypt-staging`
+*Default:* `letsencrypt-prod`
 
 *Value type:* string, one of `letsencrypt-prod` and `letsencrypt-staging`
 
@@ -173,8 +166,7 @@ Note:
 
 * `letsencrypt-staging` should be used for test cluster setups and playgrounds.
   This results in certificates that are not automatically trusted by browsers, i.e. users are likely to see security warnings.
-* `letsencrypt-prod` results in browser-trusted certificates, but is subject to quota/limits so use it only when needed: [https://letsencrypt.org/docs/rate-limits/](https://letsencrypt.org/docs/rate-limits/).
-
+* `letsencrypt-prod` results in browser-trusted certificates, but is subject to quota/limits: [https://letsencrypt.org/docs/rate-limits/](https://letsencrypt.org/docs/rate-limits/).
 
 ### `controller_image`
 
