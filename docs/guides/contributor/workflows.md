@@ -87,7 +87,6 @@ $ cat cluster-config.yaml
 controller_image: opstrace/controller:latest-main
 tenants:
   - dev
-node_count: 3
 ```
 
 When you use this `cluster-config.yaml` for your testing/iteration effort, you can stop worrying about the "controller image does not exist" error.
