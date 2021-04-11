@@ -21,7 +21,7 @@ type CondRenderProps = {
   unless?: boolean;
   render?: Function;
   content?: string | number;
-  children?: React.ReactNode;
+  children?: React.ReactElement | React.ReactElement[];
 };
 
 export const CondRender = (props: CondRenderProps) => {
