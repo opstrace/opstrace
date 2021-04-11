@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 
 import useFetcher from "client/hooks/useFetcher";
@@ -28,8 +28,8 @@ import Grid from "@material-ui/core/Grid";
 function Credentials() {
   const { tenantId } = useParams<{ tenantId: string }>();
 
-  const { data, mutate } = useFetcher(
-    `query credentials($tenant_id: String) {
+  const { data, mutate: changeCallback } = useFetcher(
+    `query credentials($tenant_id: String!) {
        credential(where: { tenant: { _eq: $tenant_id } }) {
          name
          type
@@ -38,8 +38,6 @@ function Credentials() {
      }`,
     { tenant_id: tenantId }
   );
-
-  const changeCallback = useCallback(() => mutate(), [mutate]);
 
   return (
     <Box display="flex" height="500px" width="700px">
