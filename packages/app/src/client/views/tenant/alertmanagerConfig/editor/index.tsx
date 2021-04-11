@@ -162,19 +162,15 @@ type ErrorPanelProps = {
   response?: StatusResponse;
 };
 
-const ErrorPanel = ({ response }: ErrorPanelProps) => {
-  if (response)
-    return (
-      <CondRender unless={response.success}>
-        <CardHeader
-          titleTypographyProps={{ variant: "h6" }}
-          title="Error: Service side validation failed"
-        />
+const ErrorPanel = ({ response }: ErrorPanelProps) => (
+  <CondRender when={response && !response.success}>
+    <CardHeader
+      titleTypographyProps={{ variant: "h6" }}
+      title="Error: Service side validation failed"
+    />
 
-        <CardContent>{response.error_raw_response}</CardContent>
-      </CondRender>
-    );
-  else return null;
-};
+    <CardContent>{response?.error_raw_response}</CardContent>
+  </CondRender>
+);
 
 export default AlertmanagerConfigEditorLoader;
