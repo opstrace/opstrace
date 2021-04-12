@@ -48,10 +48,11 @@ type BlackboxConfig = {
   // Probes, each entry in the array is a set of key value pairs to be set as params in the HTTP url.
   // Passed to the prometheus operator as endpoints to monitor.
   // For example {target: "example.com", module: "http_2xx"} -> "/probe?target=example.com&module=http_2xx"
-  probes: object[] | undefined,
+  probes: Record<string, string>[] | undefined,
   // Modules that may be referenced by probes.
   // Passed to the blackbox exporter configuration, or the default configuration is used if this is undefined.
   // For example this may configure an "http_2xx" module to be referenced by the probes.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   modules: any | undefined
 };
 
@@ -71,7 +72,7 @@ const toKubeResources = (
 
   const resources: Array<K8sResource> = [];
   let podSpec: V1PodSpec;
-  const monitorEndpoints: Array<object> = [];
+  const monitorEndpoints: Array<Record<string, unknown>> = [];
   if (exporter.type == "cloudwatch") {
     resources.push(
       new ConfigMap(

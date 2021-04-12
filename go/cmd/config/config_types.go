@@ -28,7 +28,7 @@ var (
 	}
 	// All supported exporter types, and the credential types that they may be paired with.
 	validExporterCredentials = map[string][]string{
-		"blackbox": {},
+		"blackbox":    {},
 		"cloudwatch":  {"aws-key"},
 		"stackdriver": {"gcp-service-account"},
 	}
