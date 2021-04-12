@@ -16,6 +16,7 @@
 
 import React from "react";
 import { useParams } from "react-router-dom";
+import { map } from "ramda";
 
 import useFetcher from "client/hooks/useFetcher";
 
@@ -29,13 +30,20 @@ function Credentials() {
   const { tenantId } = useParams<{ tenantId: string }>();
 
   const { data, mutate: changeCallback } = useFetcher(
-    `query credentials($tenant_id: String!) {
-       credential(where: { tenant: { _eq: $tenant_id } }) {
-         name
-         type
-         created_at
-       }
-     }`,
+    `
+      query credentials($tenant_id: String!) {
+        credential(where: {tenant: {_eq: $tenant_id}}) {
+          name
+          type
+          created_at
+          exporters_aggregate {
+            aggregate {
+              count
+            }
+          }
+        }
+      }
+     `,
     { tenant_id: tenantId }
   );
 
@@ -51,7 +59,7 @@ function Credentials() {
           <CredentialsTable
             tenantId={tenantId}
             onChange={changeCallback}
-            rows={data?.credential}
+            rows={formatRows(data?.credential)}
           />
         </Grid>
         <Grid item>
@@ -61,6 +69,17 @@ function Credentials() {
     </Box>
   );
 }
+
+const formatRows = (data: any[] | undefined) => {
+  if (data)
+    return map((d: any) => ({
+      name: d.name,
+      type: d.type,
+      exporter_count: d.exporters_aggregate.aggregate.count,
+      created_at: d.created_at
+    }))(data);
+  else return [];
+};
 
 const CredentialsTab = {
   key: "credentials",

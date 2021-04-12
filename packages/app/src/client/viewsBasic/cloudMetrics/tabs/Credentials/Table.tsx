@@ -39,6 +39,7 @@ type Row = {
   name: string;
   type: string;
   created_at: string;
+  exporter_count: number;
 };
 
 type CredentialsTableProps = {
@@ -75,6 +76,7 @@ export const CredentialsTable = (props: CredentialsTableProps) => {
             <TableCell>Name</TableCell>
             <TableCell>Type</TableCell>
             <TableCell>Created At</TableCell>
+            <TableCell>Active</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableHead>
@@ -86,9 +88,11 @@ export const CredentialsTable = (props: CredentialsTableProps) => {
               </TableCell>
               <TableCell>{row.type}</TableCell>
               <TableCell>{format(parseISO(row.created_at), "Pppp")}</TableCell>
+              <TableCell>{row.exporter_count > 0 ? "Yes" : ""}</TableCell>
               <TableCell>
                 <button
                   type="button"
+                  disabled={row.exporter_count > 0}
                   onClick={() => deleteCredential(row.name)}
                 >
                   Delete
