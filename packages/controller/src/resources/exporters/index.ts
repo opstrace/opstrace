@@ -44,6 +44,18 @@ export function ExporterResources(
   return collection;
 }
 
+type BlackboxConfig = {
+  // Probes, each entry in the array is a set of key value pairs to be set as params in the HTTP url.
+  // Passed to the prometheus operator as endpoints to monitor.
+  // For example {target: "example.com", module: "http_2xx"} -> "/probe?target=example.com&module=http_2xx"
+  probes: Record<string, string>[] | undefined,
+  // Modules that may be referenced by probes.
+  // Passed to the blackbox exporter configuration, or the default configuration is used if this is undefined.
+  // For example this may configure an "http_2xx" module to be referenced by the probes.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  modules: any | undefined
+};
+
 const toKubeResources = (
   exporter: Exporter,
   kubeConfig: KubeConfig,
@@ -60,6 +72,7 @@ const toKubeResources = (
 
   const resources: Array<K8sResource> = [];
   let podSpec: V1PodSpec;
+  const monitorEndpoints: Array<Record<string, unknown>> = [];
   if (exporter.type == "cloudwatch") {
     resources.push(
       new ConfigMap(
@@ -85,6 +98,7 @@ const toKubeResources = (
       containers: [{
         name: "exporter",
         image: DockerImages.exporterCloudwatch,
+        // Enable credential env if credential is specified
         env: (exporter.credential)
           ? [{
             name: "AWS_SECRET_ACCESS_KEY",
@@ -100,6 +114,20 @@ const toKubeResources = (
           : [],
         ports: [{ name: "metrics", containerPort: 9106 }],
         volumeMounts: [{ name: "config", mountPath: "/config" }],
+        // Use the 'healthy' endpoint
+        // See https://github.com/prometheus/cloudwatch_exporter/blob/f0e84d6/src/main/java/io/prometheus/cloudwatch/WebServer.java#L43
+        startupProbe: {
+          httpGet: {
+            path: "/-/healthy",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            port: "metrics" as any
+          },
+          failureThreshold: 3,
+          initialDelaySeconds: 10,
+          periodSeconds: 30,
+          successThreshold: 1,
+          timeoutSeconds: 5
+        }
       }],
       volumes: [{
         name: "config",
@@ -108,6 +136,12 @@ const toKubeResources = (
         }
       }]
     };
+
+    monitorEndpoints.push({
+      interval: "30s",
+      port: "metrics",
+      path: "/metrics"
+    });
   } else if (exporter.type == "stackdriver") {
     // We do not support changing the following envvars, because they are part of the integration:
     // - GOOGLE_APPLICATION_CREDENTIALS must be "/credential/secret.json"
@@ -157,8 +191,26 @@ const toKubeResources = (
         image: DockerImages.exporterStackdriver,
         env,
         ports: [{ name: "metrics", containerPort: 9255 }],
-        volumeMounts: [{ name: "credential", mountPath: "/credential" }]
+        // Enable credential mount if credential is specified
+        volumeMounts: (exporter.credential)
+          ? [{ name: "credential", mountPath: "/credential" }]
+          : [],
+        // Use the root path, which just returns a stub HTML page
+        // see https://github.com/prometheus-community/stackdriver_exporter/blob/42badeb/stackdriver_exporter.go#L178
+        startupProbe: {
+          httpGet: {
+            path: "/",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            port: "metrics" as any
+          },
+          failureThreshold: 3,
+          initialDelaySeconds: 10,
+          periodSeconds: 30,
+          successThreshold: 1,
+          timeoutSeconds: 5
+        }
       }],
+      // Enable credential volume if credential is specified
       volumes: (exporter.credential)
         ? [{
           name: "credential",
@@ -168,6 +220,97 @@ const toKubeResources = (
         }]
         : []
     };
+
+    monitorEndpoints.push({
+      interval: "30s",
+      port: "metrics",
+      path: "/metrics"
+    });
+  } else if (exporter.type == "blackbox") {
+    const exporterConfig = JSON.parse(exporter.config) as BlackboxConfig;
+
+    // modules: Override the default exporter module configuration yaml file (optional)
+    if (exporterConfig.modules) {
+      resources.push(
+        new ConfigMap(
+          {
+            apiVersion: "v1",
+            kind: "ConfigMap",
+            // Use name/labels that match the Deployment
+            metadata: {
+              name,
+              namespace,
+              labels
+            },
+            data: {
+              // Convert JSON string to YAML string.
+              // Blackbox exporter expects a root-level 'modules' section.
+              "config.yml": yaml.dump({modules: exporterConfig.modules})
+            }
+          },
+          kubeConfig
+        )
+      );
+    }
+
+    // If modules is defined, configure configmap volume.
+    // Line things up so that the config ends up at the default path of /etc/blackbox_exporter/config.yml
+    podSpec = {
+      containers: [{
+        name: "exporter",
+        image: DockerImages.exporterBlackbox,
+        ports: [{ name: "metrics", containerPort: 9115 }],
+        // Enable configmap mount if modules override is provided
+        volumeMounts: (exporterConfig.modules)
+          ? [{ name: "config", mountPath: "/etc/blackbox_exporter" }]
+          : [],
+        // Use the 'healthy' endpoint
+        // See https://github.com/prometheus/blackbox_exporter/blob/70bce1a/main.go#L312
+        startupProbe: {
+          httpGet: {
+            path: "/-/healthy",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            port: "metrics" as any
+          },
+          failureThreshold: 3,
+          initialDelaySeconds: 10,
+          periodSeconds: 30,
+          successThreshold: 1,
+          timeoutSeconds: 5
+        }
+      }],
+      // Enable configmap mount if modules override is provided
+      volumes: (exporterConfig.modules)
+        ? [{ name: "config", configMap: { name }}]
+        : [],
+    };
+
+    // probes: List of probes to run against exporter modules (required)
+    // We need to configure Prometheus to hit each of the specified probes.
+    // Add the probes to the ServiceMonitor object as HTTP /probe queries
+    if (!exporterConfig.probes) {
+      log.warning(
+        "Skipping deployment of blackbox exporter %s/%s: missing required 'probes' in config",
+        exporter.tenant,
+        exporter.name
+      );
+      return [];
+    }
+    for (const probeIdx in exporterConfig.probes) {
+      // Convert the object values to be arrays to match ServiceMonitor schema:
+      //   {module: "http_2xx", target: "example.com"} => {module: ["http_2xx"], target: ["example.com"]}
+      const params = Object.fromEntries(
+        Object.entries(exporterConfig.probes[probeIdx])
+          .map(([k,v]) => [k, [v]])
+      );
+      monitorEndpoints.push({
+        interval: "30s",
+        port: "metrics",
+        path: "/probe",
+        // HTTP GET params must be provided as separate object field, not as part of path:
+        params
+      });
+    }
   } else {
     log.warning("Exporter %s/%s has unsupported type: %s", exporter.tenant, exporter.name, exporter.type);
     return [];
@@ -244,14 +387,7 @@ const toKubeResources = (
         spec: {
           // Shows up as "job" label in metrics
           jobLabel: exporter.name,
-          endpoints: [
-            {
-              interval: "30s",
-              port: "metrics",
-              // Common default path for both the cloudwatch and stackdriver exporters
-              path: "/metrics"
-            }
-          ],
+          endpoints: monitorEndpoints,
           selector: {
             matchLabels: {
               app: name

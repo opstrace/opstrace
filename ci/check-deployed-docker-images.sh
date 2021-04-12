@@ -17,9 +17,10 @@ echo
 # - postgresql-client: Only in initContainers which we aren't checking
 # - cloudwatch-exporter: Not deployed in initial cluster, only added after user adds a cloudwatch exporter
 # - stackdriver-exporter: Not deployed in initial cluster, only added after user adds a stackdriver exporter
+# - blackbox-exporter: Not deployed in initial cluster, only added after user adds a blackbox exporter
 # - local-volume-provisioner: Not deployed on AWS
 #
-UNEXPECTED_IMAGES=("tmaier/postgresql-client" "prom/cloudwatch-exporter" "prometheuscommunity/stackdriver-exporter")
+UNEXPECTED_IMAGES=("tmaier/postgresql-client" "prom/cloudwatch-exporter" "prometheuscommunity/stackdriver-exporter" "prom/blackbox-exporter")
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
     UNEXPECTED_IMAGES+=("quay.io/external_storage/local-volume-provisioner")
 fi
