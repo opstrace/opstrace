@@ -38,6 +38,7 @@ const useStyles = makeStyles({
 type Row = {
   name: string;
   type: string;
+  credential: string;
   created_at: string;
 };
 
@@ -74,6 +75,7 @@ export const ExportersTable = (props: ExportersTableProps) => {
           <TableRow>
             <TableCell>Name</TableCell>
             <TableCell>Type</TableCell>
+            <TableCell>Credential</TableCell>
             <TableCell>Created At</TableCell>
             <TableCell></TableCell>
           </TableRow>
@@ -85,6 +87,7 @@ export const ExportersTable = (props: ExportersTableProps) => {
                 {row.name}
               </TableCell>
               <TableCell>{row.type}</TableCell>
+              <TableCell>{row.credential}</TableCell>
               <TableCell>{format(parseISO(row.created_at), "Pppp")}</TableCell>
               <TableCell>
                 <button type="button" onClick={() => deleteExporter(row.name)}>
