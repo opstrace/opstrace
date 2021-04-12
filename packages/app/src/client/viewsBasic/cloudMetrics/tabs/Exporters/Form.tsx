@@ -15,21 +15,18 @@
  */
 
 import React from "react";
+import { map } from "ramda";
 import { useForm, Controller } from "react-hook-form";
 
 import graphqlClient from "state/clients/graphqlClient";
+import useFetcher from "client/hooks/useFetcher";
+
+import { ControlledInput } from "client/viewsBasic/common/formUtils";
 import { CondRender } from "client/utils/rendering";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import {
-  Input,
-  Select,
-  MenuItem,
-  FormControl,
-  FormLabel,
-  FormHelperText
-} from "@material-ui/core";
+import { Select, MenuItem, FormControl, FormLabel } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,12 +37,53 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+type Values = {
+  cloudProvider: string;
+  name: string;
+  credential: string;
+  config: string;
+};
+
+const defaultValues: Values = {
+  cloudProvider: "",
+  name: "",
+  credential: "",
+  config: ""
+};
+
 export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
   const { tenantId, onCreate } = props;
-  const { control, watch } = useForm({ defaultValues: { cloudProvider: "" } });
+  const classes = useStyles();
+  const { handleSubmit, reset, control, watch } = useForm({
+    defaultValues: defaultValues
+  });
   const cloudProvider = watch("cloudProvider");
 
-  console.log(tenantId);
+  const { data: credentials } = useFetcher(
+    `query credentials($tenant_id: String!, $type: String!) {
+       credential(where: { tenant: { _eq: $tenant_id }, type: {_eq: $type} }) {
+         name
+       }
+     }`,
+    { tenant_id: tenantId, type: cloudProvider }
+  );
+
+  const onSubmit = (data: Values) => {
+    graphqlClient
+      .CreateExporters({
+        exporters: {
+          tenant: tenantId,
+          type: data.cloudProvider,
+          name: data.name,
+          credential: data.credential,
+          config: data.config
+        }
+      })
+      .then(response => {
+        onCreate();
+        reset(defaultValues);
+      });
+  };
 
   return (
     <Grid
@@ -54,7 +92,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
       justify="flex-start"
       direction="column"
     >
-      <Grid item>
+      <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
         <FormControl>
           <FormLabel>Add Exporter</FormLabel>
           <Controller
@@ -66,167 +104,80 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
             )}
             control={control}
             name="cloudProvider"
-            defaultValue={10}
           />
         </FormControl>
-      </Grid>
+        <CondRender when={credentials?.credential.length > 0}>
+          <FormControl>
+            <FormLabel>{`${
+              cloudProvider === "aws" ? "AWS" : "GCP"
+            } Credential`}</FormLabel>
+            <Controller
+              render={({ field }) => (
+                <Select {...field}>
+                  {map(({ name }) => {
+                    return <MenuItem value={name}>{name}</MenuItem>;
+                  })(credentials?.credential)}
+                </Select>
+              )}
+              control={control}
+              name="credential"
+            />
+          </FormControl>
+          <ControlledInput name="name" label="Name" control={control} />
+          <ControlledInput
+            name="config"
+            label={`${
+              cloudProvider === "aws" ? "CloudWatch" : "Stackdriver"
+            } Config`}
+            inputProps={{ multiline: true }}
+            helperText={
+              <>
+                <CondRender when={cloudProvider === "aws"}>
+                  <p>
+                    CloudWatch{" "}
+                    <a
+                      href="https://github.com/prometheus/cloudwatch_exporter#user-content-configuration"
+                      target="_blank"
+                    >
+                      configuration format
+                    </a>
+                    .
+                  </p>
+                </CondRender>
+                <CondRender when={cloudProvider === "gcp"}>
+                  <p>
+                    Stackdriver{" "}
+                    <a
+                      href="https://github.com/prometheus-community/stackdriver_exporter#user-content-flags"
+                      target="_blank"
+                    >
+                      configuration format
+                    </a>
+                    .
+                  </p>
+                </CondRender>
+              </>
+            }
+            control={control}
+          />
 
-      <CondRender when={cloudProvider === "aws"}>
-        <AwsForm tenantId={tenantId} onCreate={onCreate} />
-      </CondRender>
-      <CondRender when={cloudProvider === "gcp"}>
-        <GcpForm tenantId={tenantId} onCreate={onCreate} />
-      </CondRender>
+          <Grid
+            container
+            direction="row"
+            justify="space-evenly"
+            alignItems="flex-start"
+          >
+            <Grid item>
+              <button type="button" onClick={() => reset(defaultValues)}>
+                Reset
+              </button>
+            </Grid>
+            <Grid item>
+              <input type="submit" />
+            </Grid>
+          </Grid>
+        </CondRender>
+      </form>
     </Grid>
-  );
-}
-
-type ControlledInputProps = {
-  name: `${string}` | `${string}.${string}` | `${string}.${number}`;
-  label: string;
-  helperText?: string;
-  inputProps?: {};
-  control: any;
-};
-
-const ControlledInput = ({
-  name,
-  label,
-  inputProps = {},
-  helperText,
-  control
-}: ControlledInputProps) => (
-  <Grid item>
-    <Controller
-      render={({ field }) => (
-        <FormControl>
-          <FormLabel>{label}</FormLabel>
-          <Input {...field} {...inputProps} />
-          <CondRender when={helperText !== undefined}>
-            <FormHelperText>{helperText}</FormHelperText>
-          </CondRender>
-        </FormControl>
-      )}
-      control={control}
-      name={name}
-    />
-  </Grid>
-);
-
-const awsDefaultValues = {
-  name: "",
-  accessKeyId: "",
-  secretAccessKey: ""
-};
-
-function AwsForm(props: { tenantId: string; onCreate: Function }) {
-  const { tenantId, onCreate } = props;
-  const classes = useStyles();
-  const { handleSubmit, reset, control } = useForm({
-    defaultValues: awsDefaultValues
-  });
-  const onSubmit = (data: { name: string }) => {
-    graphqlClient
-      .CreateExporters({
-        exporters: {
-          tenant: tenantId,
-          name: data.name,
-          type: "aws"
-        }
-      })
-      .then(response => {
-        onCreate();
-        reset(awsDefaultValues);
-      });
-  };
-
-  return (
-    <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
-      <ControlledInput name="name" label="Name" control={control} />
-      <ControlledInput
-        name="accessKeyId"
-        label="Access Key ID"
-        control={control}
-      />
-      <ControlledInput
-        name="secretAccessKey"
-        label="Secret Access Key"
-        helperText="Important: this is stored as plain text."
-        control={control}
-      />
-
-      <Grid
-        container
-        direction="row"
-        justify="space-evenly"
-        alignItems="flex-start"
-      >
-        <Grid item>
-          <button type="button" onClick={() => reset(awsDefaultValues)}>
-            Reset
-          </button>
-        </Grid>
-        <Grid item>
-          <input type="submit" />
-        </Grid>
-      </Grid>
-    </form>
-  );
-}
-
-const gcpDefaultValues = {
-  name: "",
-  accessDoc: ""
-};
-
-function GcpForm(props: { tenantId: string; onCreate: Function }) {
-  const { tenantId, onCreate } = props;
-  const classes = useStyles();
-  const { handleSubmit, reset, control } = useForm({
-    defaultValues: gcpDefaultValues
-  });
-
-  const onSubmit = (data: { name: string }) => {
-    graphqlClient
-      .CreateExporters({
-        exporters: {
-          tenant: tenantId,
-          name: data.name,
-          type: "gcp"
-        }
-      })
-      .then(response => {
-        onCreate();
-        reset(awsDefaultValues);
-      });
-  };
-
-  return (
-    <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
-      <ControlledInput name="name" label="Name" control={control} />
-      <ControlledInput
-        name="accessDoc"
-        label="Access Doc"
-        inputProps={{ multiline: true }}
-        helperText="Important: this is stored as plain text."
-        control={control}
-      />
-
-      <Grid
-        container
-        direction="row"
-        justify="space-evenly"
-        alignItems="flex-start"
-      >
-        <Grid item>
-          <button type="button" onClick={() => reset(gcpDefaultValues)}>
-            Reset
-          </button>
-        </Grid>
-        <Grid item>
-          <input type="submit" />
-        </Grid>
-      </Grid>
-    </form>
   );
 }
