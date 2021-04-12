@@ -124,6 +124,7 @@
       - type
       - updated_at
       filter: {}
+      allow_aggregations: true
   update_permissions:
   - role: user_admin
     permission:
@@ -181,6 +182,7 @@
       - created_at
       - updated_at
       filter: {}
+      allow_aggregations: true
   update_permissions:
   - role: user_admin
     permission:
