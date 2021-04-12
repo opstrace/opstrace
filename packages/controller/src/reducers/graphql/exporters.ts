@@ -128,7 +128,7 @@ export function startInformer(
       })
       .subscribe({
         next: res => {
-          if (res.data?.exporter && res.data.exporter.length > 0) {
+          if (res.data?.exporter) {
             channel(actions.fetch.success({
               resources: res.data.exporter
             }));
