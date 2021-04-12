@@ -60,13 +60,13 @@ func (h *HasuraHandler) handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	reqbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		writeGraphQLError(w, "invalid payload")
 		return
 	}
 
-	actionName, err := actions.GetActionName(body)
+	actionName, err := actions.GetActionName(reqbody)
 	if err != nil {
 		// This implies invalid request from hasura itself, so use plain HTTP error
 		writeGraphQLError(w, fmt.Sprintf("invalid/missing action name: %s", err.Error()))
@@ -74,168 +74,289 @@ func (h *HasuraHandler) handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// use action name to decide how to unmarshal the input
-	var data []byte
+	var response interface{}
 	switch actionName {
 	case "getAlertmanager":
 		var request actions.GetAlertmanagerPayload
-		err = json.Unmarshal(body, &request)
+		err = json.Unmarshal(reqbody, &request)
 		if err != nil {
 			writeGraphQLError(w, "invalid request payload")
 			return
 		}
 
 		// see https://cortexmetrics.io/docs/api/#get-alertmanager-configuration
-		var response actions.Alertmanager
-		resp, err := h.alertmanagerQuery(request.Input.TenantID, "GET", "/api/v1/alerts", "")
+		httpresp, err := h.cortexQuery(request.Input.TenantID, "GET", "/api/v1/alerts", "")
+		response, err = toGetAlertmanagerResponse(request.Input.TenantID, httpresp, err)
 		if err != nil {
-			switch {
-			case resp == nil:
-				// Network failure
-				log.Warnf("Failed to retrieve alertmanager config for tenant %s: %s", request.Input.TenantID, err.Error())
-				response = actions.Alertmanager{
-					TenantID: request.Input.TenantID,
-					Config:   nil,
-					Online:   false,
-				}
-			case resp.StatusCode == 404:
-				// Query succeeded, config not assigned yet
-				emptyConfig := ""
-				response = actions.Alertmanager{
-					TenantID: request.Input.TenantID,
-					Config:   &emptyConfig,
-					Online:   true,
-				}
-			default:
-				// Other HTTP error (e.g. serialization/storage error)
-				log.Warnf("Error when retrieving alertmanager config for tenant %s: %s", request.Input.TenantID, err.Error())
-				response = actions.Alertmanager{
-					TenantID: request.Input.TenantID,
-					Config:   nil,
-					Online:   true,
-				}
-			}
-		} else {
-			// NOTE: Returning the full cortex content (with template_files and/or alertmanager_config fields)
-			respBody, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				writeGraphQLError(w, fmt.Sprintf("cortex response body failed: %s", err))
-				return
-			}
-			respBodyStr := string(respBody)
-			response = actions.Alertmanager{
-				TenantID: request.Input.TenantID,
-				Config:   &respBodyStr,
-				Online:   true,
-			}
-		}
-
-		data, err = json.Marshal(response)
-		if err != nil {
-			writeGraphQLError(w, fmt.Sprintf("serializing response body failed: %s", err))
+			writeGraphQLError(w, err.Error())
 			return
 		}
 
 	case "updateAlertmanager":
 		var request actions.UpdateAlertmanagerPayload
-		err = json.Unmarshal(body, &request)
+		err = json.Unmarshal(reqbody, &request)
 		if err != nil {
 			writeGraphQLError(w, "invalid request payload")
 			return
 		}
 
-		// NOTE: Expecting the full cortex content (with template_files and/or alertmanager_config fields)
-		var response actions.AlertmanagerUpdateResponse
-		resp, err := h.alertmanagerQuery(request.Input.TenantID, "POST", "/api/v1/alerts", request.Input.Input.Config)
-		if err != nil {
-			var errType actions.ErrorType
-			var errMsg string
-			var errRaw string
-			switch {
-			case resp == nil:
-				// Network failure
-				errType = actions.ServiceOfflineType
-				errMsg = "Alertmanager query failed"
-				errRaw = err.Error()
-			case resp.StatusCode == http.StatusBadRequest:
-				// Query succeeded, config parsing/validation failed
-				errType = actions.ValidationFailedType
-				errMsg = "Alertmanager config validation failed"
-				// Try to include original content returned by cortex
-				errRawBytes, err := ioutil.ReadAll(resp.Body)
-				if err != nil || len(errRawBytes) == 0 {
-					// Give up and just give generic "cortex returned <code> response"
-					errRaw = err.Error()
-				} else {
-					errRaw = string(errRawBytes)
-				}
-			default:
-				// Other HTTP error (e.g. storage error)
-				errType = actions.ServiceErrorType
-				errMsg = "Error when updating Alertmanager config"
-				// Try to include original content returned by cortex
-				errRawBytes, err := ioutil.ReadAll(resp.Body)
-				if err != nil || len(errRawBytes) == 0 {
-					// Give up and just give generic "cortex returned <code> response"
-					errRaw = err.Error()
-				} else {
-					errRaw = string(errRawBytes)
-				}
-			}
-			response = actions.AlertmanagerUpdateResponse{
-				Success:          false,
-				ErrorType:        &errType,
-				ErrorMessage:     &errMsg,
-				ErrorRawResponse: &errRaw,
-			}
+		if request.Input.Input == nil {
+			httpresp, err := h.cortexQuery(request.Input.TenantID, "DELETE", "/api/v1/alerts", "")
+			response = actions.ToDeleteResponse("Alertmanager config", httpresp, err)
 		} else {
-			response = actions.AlertmanagerUpdateResponse{
-				Success: true,
-			}
+			httpresp, err := h.cortexQuery(request.Input.TenantID, "POST", "/api/v1/alerts", request.Input.Input.Config)
+			response = actions.ToUpdateResponse("Alertmanager config", httpresp, err)
 		}
 
-		data, err = json.Marshal(response)
+	case "listRules":
+		var request actions.ListRulesPayload
+		err = json.Unmarshal(reqbody, &request)
 		if err != nil {
-			writeGraphQLError(w, fmt.Sprintf("serializing response body failed: %s", err))
+			writeGraphQLError(w, "invalid request payload")
 			return
 		}
+
+		httpresp, err := h.cortexQuery(request.Input.TenantID, "GET", "/api/v1/rules", "")
+		response, err = toListRulesResponse(request.Input.TenantID, httpresp, err)
+		if err != nil {
+			writeGraphQLError(w, err.Error())
+			return
+		}
+
+	case "getRuleGroup":
+		var request actions.GetRuleGroupPayload
+		err = json.Unmarshal(reqbody, &request)
+		if err != nil {
+			writeGraphQLError(w, "invalid request payload")
+			return
+		}
+
+		path := fmt.Sprintf("/api/v1/rules/%s/%s", request.Input.Namespace, request.Input.RuleGroupName)
+		httpresp, err := h.cortexQuery(request.Input.TenantID, "GET", path, "")
+		response, err = toGetRuleGroupResponse(
+			request.Input.TenantID,
+			request.Input.Namespace,
+			request.Input.RuleGroupName,
+			httpresp,
+			err,
+		)
+		if err != nil {
+			writeGraphQLError(w, err.Error())
+			return
+		}
+
+	case "updateRuleGroup":
+		var request actions.UpdateRuleGroupPayload
+		err = json.Unmarshal(reqbody, &request)
+		if err != nil {
+			writeGraphQLError(w, "invalid request payload")
+			return
+		}
+
+		path := fmt.Sprintf("/api/v1/rules/%s", request.Input.Namespace)
+		httpresp, err := h.cortexQuery(request.Input.TenantID, "POST", path, request.Input.RuleGroup.RuleGroup)
+		response = actions.ToUpdateResponse("Rule group", httpresp, err)
+
+	case "deleteRuleGroup":
+		var request actions.DeleteRuleGroupPayload
+		err = json.Unmarshal(reqbody, &request)
+		if err != nil {
+			writeGraphQLError(w, "invalid request payload")
+			return
+		}
+
+		path := fmt.Sprintf("/api/v1/rules/%s/%s", request.Input.Namespace, request.Input.RuleGroupName)
+		httpresp, err := h.cortexQuery(request.Input.TenantID, "DELETE", path, "")
+		response = actions.ToDeleteResponse("Rule group", httpresp, err)
 
 	case "validateCredential":
 		var request actions.ValidateCredentialPayload
-		err = json.Unmarshal(body, &request)
+		err = json.Unmarshal(reqbody, &request)
 		if err != nil {
 			writeGraphQLError(w, "invalid request payload")
 			return
 		}
 
-		data, err = json.Marshal(h.validateCredential(request))
-		if err != nil {
-			writeGraphQLError(w, fmt.Sprintf("serializing response body failed: %s", err))
-			return
-		}
+		response = h.validateCredential(request)
 
 	case "validateExporter":
 		var request actions.ValidateExporterPayload
-		err = json.Unmarshal(body, &request)
+		err = json.Unmarshal(reqbody, &request)
 		if err != nil {
 			writeGraphQLError(w, "invalid request payload")
 			return
 		}
 
-		data, err = json.Marshal(h.validateExporter(request))
-		if err != nil {
-			writeGraphQLError(w, fmt.Sprintf("serializing response body failed: %s", err))
-			return
-		}
+		response = h.validateExporter(request)
+	}
+
+	data, err := json.Marshal(response)
+	if err != nil {
+		writeGraphQLError(w, fmt.Sprintf("serializing response body failed: %s", err))
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
 
-func (h *HasuraHandler) validateCredential(request actions.ValidateCredentialPayload) actions.ValidateOutput {
+func toGetAlertmanagerResponse(tenantID string, httpresp *http.Response, err error) (*actions.Alertmanager, error) {
+	if err != nil {
+		switch {
+		case httpresp == nil:
+			// Network failure
+			log.Warnf("Failed to retrieve alertmanager config for tenant %s: %s", tenantID, err.Error())
+			return &actions.Alertmanager{
+				TenantID: tenantID,
+				Config:   nil,
+				Online:   false,
+			}, nil
+		case httpresp.StatusCode == http.StatusNotFound:
+			// Query succeeded, config not assigned yet
+			emptyConfig := ""
+			return &actions.Alertmanager{
+				TenantID: tenantID,
+				Config:   &emptyConfig,
+				Online:   true,
+			}, nil
+		default:
+			// Other HTTP error (e.g. serialization/storage error)
+			log.Warnf("Error when retrieving alertmanager config for tenant %s: %s", tenantID, err.Error())
+			return &actions.Alertmanager{
+				TenantID: tenantID,
+				Config:   nil,
+				Online:   true,
+			}, nil
+		}
+	} else {
+		// NOTE: Returning the full cortex content (with template_files and/or alertmanager_config fields)
+		respBody, err := ioutil.ReadAll(httpresp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("cortex response body failed: %s", err)
+		}
+		respBodyStr := string(respBody)
+		return &actions.Alertmanager{
+			TenantID: tenantID,
+			Config:   &respBodyStr,
+			Online:   true,
+		}, nil
+	}
+}
+
+func toListRulesResponse(tenantID string, httpresp *http.Response, err error) (*actions.Rules, error) {
+	if err != nil {
+		switch {
+		case httpresp == nil:
+			// Network failure
+			log.Warnf("Failed to retrieve rules for tenant %s: %s", tenantID, err.Error())
+			return &actions.Rules{
+				TenantID: tenantID,
+				Rules:    nil,
+				Online:   false,
+			}, nil
+		case httpresp.StatusCode == http.StatusNotFound:
+			// Query succeeded, rules not assigned yet (TODO recheck if this is how no-rules response behaves?)
+			emptyConfig := ""
+			return &actions.Rules{
+				TenantID: tenantID,
+				Rules:    &emptyConfig,
+				Online:   true,
+			}, nil
+		default:
+			// Other HTTP error (e.g. serialization/storage error)
+			log.Warnf("Error when retrieving rules for tenant %s: %s", tenantID, err.Error())
+			return &actions.Rules{
+				TenantID: tenantID,
+				Rules:    nil,
+				Online:   true,
+			}, nil
+		}
+	} else {
+		respBody, err := ioutil.ReadAll(httpresp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("cortex response body failed: %s", err)
+		}
+		respBodyStr := string(respBody)
+		return &actions.Rules{
+			TenantID: tenantID,
+			Rules:    &respBodyStr,
+			Online:   true,
+		}, nil
+	}
+}
+
+func toGetRuleGroupResponse(
+	tenantID string,
+	namespace string,
+	ruleGroupName string,
+	httpresp *http.Response,
+	err error,
+) (*actions.RuleGroup, error) {
+	if err != nil {
+		switch {
+		case httpresp == nil:
+			// Network failure
+			log.Warnf(
+				"Failed to retrieve rule group %s/%s for tenant %s: %s",
+				namespace,
+				ruleGroupName,
+				tenantID,
+				err.Error(),
+			)
+			return &actions.RuleGroup{
+				TenantID:      tenantID,
+				Namespace:     namespace,
+				RuleGroupName: ruleGroupName,
+				RuleGroup:     nil,
+				Online:        false,
+			}, nil
+		case httpresp.StatusCode == http.StatusNotFound:
+			// Query succeeded, rule group not assigned yet
+			emptyConfig := ""
+			return &actions.RuleGroup{
+				TenantID:      tenantID,
+				Namespace:     namespace,
+				RuleGroupName: ruleGroupName,
+				RuleGroup:     &emptyConfig,
+				Online:        true,
+			}, nil
+		default:
+			// Other HTTP error (e.g. serialization/storage error)
+			log.Warnf(
+				"Error when retrieving rule group %s/%s for tenant %s: %s",
+				namespace,
+				ruleGroupName,
+				tenantID,
+				err.Error(),
+			)
+			return &actions.RuleGroup{
+				TenantID:      tenantID,
+				Namespace:     namespace,
+				RuleGroupName: ruleGroupName,
+				RuleGroup:     nil,
+				Online:        true,
+			}, nil
+		}
+	} else {
+		respBody, err := ioutil.ReadAll(httpresp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("cortex response body failed: %s", err)
+		}
+		respBodyStr := string(respBody)
+		return &actions.RuleGroup{
+			TenantID:      tenantID,
+			Namespace:     namespace,
+			RuleGroupName: ruleGroupName,
+			RuleGroup:     &respBodyStr,
+			Online:        true,
+		}, nil
+	}
+}
+
+func (h *HasuraHandler) validateCredential(request actions.ValidateCredentialPayload) actions.StatusResponse {
 	existingTypes, err := h.credentialAPI.listCredentialTypes(request.Input.TenantID)
 	if err != nil {
-		return actions.ValidateError(actions.ServiceErrorType, "listing credentials failed", err.Error())
+		return actions.ToValidateError(actions.ServiceErrorType, "listing credentials failed", err.Error())
 	}
 
 	// Combine the graphql fields into a Credential object for validation
@@ -247,18 +368,18 @@ func (h *HasuraHandler) validateCredential(request actions.ValidateCredentialPay
 
 	_, err = h.credentialAPI.validateCredential(existingTypes, credential)
 	if err != nil {
-		return actions.ValidateError(actions.ValidationFailedType, "credential validation failed", err.Error())
+		return actions.ToValidateError(actions.ValidationFailedType, "credential validation failed", err.Error())
 	}
 
-	return actions.ValidateOutput{
+	return actions.StatusResponse{
 		Success: true,
 	}
 }
 
-func (h *HasuraHandler) validateExporter(request actions.ValidateExporterPayload) actions.ValidateOutput {
+func (h *HasuraHandler) validateExporter(request actions.ValidateExporterPayload) actions.StatusResponse {
 	existingTypes, err := h.exporterAPI.listExporterTypes(request.Input.TenantID)
 	if err != nil {
-		return actions.ValidateError(actions.ServiceErrorType, "listing exporters failed", err.Error())
+		return actions.ToValidateError(actions.ServiceErrorType, "listing exporters failed", err.Error())
 	}
 
 	// Combine the graphql fields into an Exporter object for validation
@@ -277,15 +398,15 @@ func (h *HasuraHandler) validateExporter(request actions.ValidateExporterPayload
 
 	_, err = h.exporterAPI.validateExporter(request.Input.TenantID, existingTypes, exporter)
 	if err != nil {
-		return actions.ValidateError(actions.ValidationFailedType, "config validation failed", err.Error())
+		return actions.ToValidateError(actions.ValidationFailedType, "config validation failed", err.Error())
 	}
 
-	return actions.ValidateOutput{
+	return actions.StatusResponse{
 		Success: true,
 	}
 }
 
-func (h *HasuraHandler) alertmanagerQuery(tenant, method, path, body string) (*http.Response, error) {
+func (h *HasuraHandler) cortexQuery(tenant, method, path, body string) (*http.Response, error) {
 	url := *h.alertmanagerURL
 	url.Path = path
 	req := http.Request{

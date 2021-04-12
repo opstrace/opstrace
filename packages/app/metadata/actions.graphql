@@ -9,32 +9,10 @@ enum ErrorType {
   VALIDATION_FAILED,
 }
 
-# getAlertmanager
-
-type Query {
-  getAlertmanager(tenant_id: String!): Alertmanager
-}
-
-type Alertmanager {
-  tenant_id: String!
-  config: String
-  online: Boolean!
-}
-
-# updateAlertmanager
-
-type Mutation {
-  updateAlertmanager(tenant_id: String!, input: AlertmanagerInput): AlertmanagerUpdateResponse
-}
-
-input AlertmanagerInput {
-  config: String!
-}
-
 # NOTE: Unable to use nested response types in Hasura Actions, so using a flat response for now.
 #       See also https://github.com/hasura/graphql-engine/issues/4796
 # TODO: Is this fixed by switching to Remote Schemas instead?
-type AlertmanagerUpdateResponse {
+type StatusResponse {
   # False if the update failed for any reason, see error_* fields for details
   success: Boolean!
 
@@ -46,24 +24,131 @@ type AlertmanagerUpdateResponse {
   error_raw_response: String
 }
 
+# getAlertmanager/updateAlertmanager
+
+type Query {
+  getAlertmanager(tenant_id: String!): Alertmanager
+}
+type Mutation {
+  updateAlertmanager(tenant_id: String!, input: AlertmanagerInput): StatusResponse
+}
+
+type Alertmanager {
+  tenant_id: String!
+  config: String
+  online: Boolean!
+}
+
+input AlertmanagerInput {
+  config: String!
+}
+
+# Rules access
+# Within each tenant, rules are under this hierarchy: namespace -> rulegroup -> rules
+
+# Returns all rules across all namespaces/rulegroups. Example:
+type Query {
+  listRules(tenant_id: String!): Rules
+}
+
+type Rules {
+  tenant_id: String!
+
+  # List of all rules across all namespaces/rulegroups. Example:
+  #   namespace-1:
+  #    - name: group-1
+  #      interval: duration
+  #      rules:
+  #      - alert: alert-A
+  #        expr: vector(1)
+  #        labels:
+  #          severity: warning
+  #        annotations:
+  #          description: alertA
+  #          summary: alertA
+  #      - alert: alert-B
+  #        expr: vector(1)
+  #        labels:
+  #          severity: warning
+  #        annotations:
+  #          description: alertB
+  #          summary: alertB
+  #    - name: group-2
+  #      rules:
+  #      - alert: alert-C
+  #        expr: vector(1)
+  #        labels:
+  #          severity: warning
+  #        annotations:
+  #          description: alertC
+  #          summary: alertC
+  #
+  # If nothing was found but the query succeeded, this value is an empty string.
+  # If the query failed or the service was offline, this value is unset.
+  rules: String
+
+  # If rules is unset, this may be checked to determine if the data is miss
+  online: Boolean!
+}
+
+type Query {
+  getRuleGroup(tenant_id: String!, namespace: String!, rule_group_name: String!): RuleGroup
+}
+
+type RuleGroup {
+  tenant_id: String!
+  namespace: String!
+  # The name that was requested. This is also provided via a 'name' field in the rule_group payload.
+  rule_group_name: String!
+
+  # Same format as RuleGroupInput.rule_group
+  # If nothing was found but the query succeeded, this value is an empty string.
+  # If the query failed or the service was offline, this value is unset.
+  rule_group: String
+
+  online: Boolean!
+}
+
+type Mutation {
+  updateRuleGroup(tenant_id: String!, namespace: String!, rule_group: RuleGroupInput!): StatusResponse
+}
+
+input RuleGroupInput {
+  # YAML payload containing the name of the rule group and the rules it should have assigned to it. Example:
+  #   name: group-1
+  #   interval: duration
+  #   rules:
+  #   - alert: alert-A
+  #     expr: vector(1)
+  #     labels:
+  #       severity: warning
+  #     annotations:
+  #       description: alertA
+  #       summary: alertA
+  #   - alert: alert-B
+  #     expr: vector(1)
+  #     labels:
+  #       severity: warning
+  #     annotations:
+  #       description: alertB
+  #       summary: alertB
+  #
+  # If the list of rules is unset or empty (Cortex treats as invalid), the rule group is deleted. Example:
+  #   name: group-1
+  # If the deleted rule group was the only one left in the namespace, then the namespace is also deleted automatically.
+  rule_group: String!
+}
+
+type Mutation {
+  deleteRuleGroup(tenant_id: String!, namespace: String!, rule_group_name: String!): StatusResponse
+}
+
 # validateCredential/validateExporter
 
 type Query {
-  validateCredential(tenant_id: String!, name: String!, type: String!, value: json!): ValidateOutput
+  validateCredential(tenant_id: String!, name: String!, type: String!, value: json!): StatusResponse
 }
 
 type Query {
-  validateExporter(tenant_id: String!, name: String!, type: String!, config: json!, credential: String!): ValidateOutput
-}
-
-type ValidateOutput {
-  # False if the validation failed for any reason, see error_* fields for details
-  success: Boolean!
-
-  # Must be set if success=false
-  error_type: ErrorType
-  # Must be set if success=false
-  error_message: String
-  # Optional if success=false, message returned by underlying service
-  error_raw_response: String
+  validateExporter(tenant_id: String!, name: String!, type: String!, config: json!, credential: String): StatusResponse
 }

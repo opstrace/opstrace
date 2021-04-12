@@ -3053,6 +3053,10 @@ type BooleanComparisonExp struct {
 	Nin    *[]Boolean `json:"_nin,omitempty"`
 }
 
+type RuleGroupInput struct {
+	RuleGroup String `json:"rule_group"`
+}
+
 type StringComparisonExp struct {
 	Eq       *String   `json:"_eq,omitempty"`
 	Gt       *String   `json:"_gt,omitempty"`
@@ -3970,14 +3974,21 @@ type Alertmanager struct {
 	TenantId String  `json:"tenant_id"`
 }
 
-type AlertmanagerUpdateResponse struct {
-	ErrorMessage     *String    `json:"error_message,omitempty"`
-	ErrorRawResponse *String    `json:"error_raw_response,omitempty"`
-	ErrorType        *ErrorType `json:"error_type,omitempty"`
-	Success          Boolean    `json:"success"`
+type RuleGroup struct {
+	Namespace     String  `json:"namespace"`
+	Online        Boolean `json:"online"`
+	RuleGroup     *String `json:"rule_group,omitempty"`
+	RuleGroupName String  `json:"rule_group_name"`
+	TenantId      String  `json:"tenant_id"`
 }
 
-type ValidateOutput struct {
+type Rules struct {
+	Online   Boolean `json:"online"`
+	Rules    *String `json:"rules,omitempty"`
+	TenantId String  `json:"tenant_id"`
+}
+
+type StatusResponse struct {
 	ErrorMessage     *String    `json:"error_message,omitempty"`
 	ErrorRawResponse *String    `json:"error_raw_response,omitempty"`
 	ErrorType        *ErrorType `json:"error_type,omitempty"`
@@ -4269,6 +4280,7 @@ type ModuleVersionMutationResponse struct {
 }
 
 type MutationRoot struct {
+	DeleteRuleGroup          *StatusResponse                 `json:"deleteRuleGroup,omitempty"`
 	DeleteBranch             *BranchMutationResponse         `json:"delete_branch,omitempty"`
 	DeleteBranchByPk         *Branch                         `json:"delete_branch_by_pk,omitempty"`
 	DeleteCredential         *CredentialMutationResponse     `json:"delete_credential,omitempty"`
@@ -4305,7 +4317,8 @@ type MutationRoot struct {
 	InsertUserOne            *User                           `json:"insert_user_one,omitempty"`
 	InsertUserPreference     *UserPreferenceMutationResponse `json:"insert_user_preference,omitempty"`
 	InsertUserPreferenceOne  *UserPreference                 `json:"insert_user_preference_one,omitempty"`
-	UpdateAlertmanager       *AlertmanagerUpdateResponse     `json:"updateAlertmanager,omitempty"`
+	UpdateAlertmanager       *StatusResponse                 `json:"updateAlertmanager,omitempty"`
+	UpdateRuleGroup          *StatusResponse                 `json:"updateRuleGroup,omitempty"`
 	UpdateBranch             *BranchMutationResponse         `json:"update_branch,omitempty"`
 	UpdateBranchByPk         *Branch                         `json:"update_branch_by_pk,omitempty"`
 	UpdateCredential         *CredentialMutationResponse     `json:"update_credential,omitempty"`
@@ -4340,6 +4353,8 @@ type QueryRoot struct {
 	FileAggregate           FileAggregate           `json:"file_aggregate"`
 	FileByPk                *File                   `json:"file_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
+	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
+	ListRules               *Rules                  `json:"listRules,omitempty"`
 	Module                  *[]Module               `json:"module,omitempty"`
 	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
 	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
@@ -4355,8 +4370,8 @@ type QueryRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
-	ValidateCredential      *ValidateOutput         `json:"validateCredential,omitempty"`
-	ValidateExporter        *ValidateOutput         `json:"validateExporter,omitempty"`
+	ValidateCredential      *StatusResponse         `json:"validateCredential,omitempty"`
+	ValidateExporter        *StatusResponse         `json:"validateExporter,omitempty"`
 }
 
 type SubscriptionRoot struct {
@@ -4373,6 +4388,8 @@ type SubscriptionRoot struct {
 	FileAggregate           FileAggregate           `json:"file_aggregate"`
 	FileByPk                *File                   `json:"file_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
+	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
+	ListRules               *Rules                  `json:"listRules,omitempty"`
 	Module                  *[]Module               `json:"module,omitempty"`
 	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
 	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
@@ -4388,8 +4405,8 @@ type SubscriptionRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
-	ValidateCredential      *ValidateOutput         `json:"validateCredential,omitempty"`
-	ValidateExporter        *ValidateOutput         `json:"validateExporter,omitempty"`
+	ValidateCredential      *StatusResponse         `json:"validateCredential,omitempty"`
+	ValidateExporter        *StatusResponse         `json:"validateExporter,omitempty"`
 }
 
 type Tenant struct {

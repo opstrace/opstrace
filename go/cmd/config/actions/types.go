@@ -18,6 +18,8 @@ type GraphQLError struct {
 	Message string `json:"message"`
 }
 
+// Common types.
+
 type ErrorType string
 
 const (
@@ -26,38 +28,107 @@ const (
 	ValidationFailedType ErrorType = "VALIDATION_FAILED"
 )
 
-type Alertmanager struct {
-	TenantID string  `json:"tenant_id"`
-	Config   *string `json:"config"`
-	Online   bool    `json:"online"`
-}
-
-type AlertmanagerUpdateResponse struct {
+type StatusResponse struct {
 	Success          bool       `json:"success"`
 	ErrorType        *ErrorType `json:"error_type"`
 	ErrorMessage     *string    `json:"error_message"`
 	ErrorRawResponse *string    `json:"error_raw_response"`
 }
 
-type ValidateOutput struct {
-	Success          bool       `json:"success"`
-	ErrorType        *ErrorType `json:"error_type"`
-	ErrorMessage     *string    `json:"error_message"`
-	ErrorRawResponse *string    `json:"error_raw_response"`
-}
-
-type AlertmanagerInput struct {
-	Config string `json:"config"`
-}
+// Alertmanager types.
 
 type GetAlertmanagerArgs struct {
 	TenantID string `json:"tenant_id"`
+}
+
+type GetAlertmanagerPayload struct {
+	SessionVariables map[string]interface{} `json:"session_variables"`
+	Input            GetAlertmanagerArgs    `json:"input"`
 }
 
 type UpdateAlertmanagerArgs struct {
 	TenantID string             `json:"tenant_id"`
 	Input    *AlertmanagerInput `json:"input"`
 }
+
+type UpdateAlertmanagerPayload struct {
+	SessionVariables map[string]interface{} `json:"session_variables"`
+	Input            UpdateAlertmanagerArgs `json:"input"`
+}
+
+type Alertmanager struct {
+	TenantID string  `json:"tenant_id"`
+	Config   *string `json:"config"`
+	Online   bool    `json:"online"`
+}
+
+type AlertmanagerInput struct {
+	Config string `json:"config"`
+}
+
+// Rules types.
+
+type ListRulesArgs struct {
+	TenantID string `json:"tenant_id"`
+}
+
+type GetRuleGroupArgs struct {
+	TenantID      string `json:"tenant_id"`
+	Namespace     string `json:"namespace"`
+	RuleGroupName string `json:"rule_group_name"`
+}
+
+type UpdateRuleGroupArgs struct {
+	TenantID  string         `json:"tenant_id"`
+	Namespace string         `json:"namespace"`
+	RuleGroup RuleGroupInput `json:"rule_group"`
+}
+
+type DeleteRuleGroupArgs struct {
+	TenantID      string `json:"tenant_id"`
+	Namespace     string `json:"namespace"`
+	RuleGroupName string `json:"rule_group_name"`
+}
+
+type ListRulesPayload struct {
+	SessionVariables map[string]interface{} `json:"session_variables"`
+	Input            ListRulesArgs          `json:"input"`
+}
+
+type GetRuleGroupPayload struct {
+	SessionVariables map[string]interface{} `json:"session_variables"`
+	Input            GetRuleGroupArgs       `json:"input"`
+}
+
+type UpdateRuleGroupPayload struct {
+	SessionVariables map[string]interface{} `json:"session_variables"`
+	Input            UpdateRuleGroupArgs    `json:"input"`
+}
+
+type DeleteRuleGroupPayload struct {
+	SessionVariables map[string]interface{} `json:"session_variables"`
+	Input            DeleteRuleGroupArgs    `json:"input"`
+}
+
+type Rules struct {
+	TenantID string  `json:"tenant_id"`
+	Rules    *string `json:"rules"`
+	Online   bool    `json:"online"`
+}
+
+type RuleGroup struct {
+	TenantID      string  `json:"tenant_id"`
+	Namespace     string  `json:"namespace"`
+	RuleGroupName string  `json:"rule_group_name"`
+	RuleGroup     *string `json:"rule_group"`
+	Online        bool    `json:"online"`
+}
+
+type RuleGroupInput struct {
+	RuleGroup string `json:"rule_group"`
+}
+
+// Credential/Exporter types.
 
 type ValidateCredentialArgs struct {
 	TenantID string `json:"tenant_id"`
@@ -72,16 +143,6 @@ type ValidateExporterArgs struct {
 	Type       string  `json:"type"`
 	Config     string  `json:"config"`
 	Credential *string `json:"credential,omitempty"`
-}
-
-type GetAlertmanagerPayload struct {
-	SessionVariables map[string]interface{} `json:"session_variables"`
-	Input            GetAlertmanagerArgs    `json:"input"`
-}
-
-type UpdateAlertmanagerPayload struct {
-	SessionVariables map[string]interface{} `json:"session_variables"`
-	Input            UpdateAlertmanagerArgs `json:"input"`
 }
 
 type ValidateCredentialPayload struct {

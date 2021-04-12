@@ -51,13 +51,6 @@ export type AlertmanagerInput = {
   config: Scalars["String"];
 };
 
-export type AlertmanagerUpdateResponse = {
-  error_message?: Maybe<Scalars["String"]>;
-  error_raw_response?: Maybe<Scalars["String"]>;
-  error_type?: Maybe<ErrorType>;
-  success: Scalars["Boolean"];
-};
-
 /** expression to compare columns of type Boolean. All fields are combined with logical 'AND'. */
 export type Boolean_Comparison_Exp = {
   _eq?: Maybe<Scalars["Boolean"]>;
@@ -77,6 +70,31 @@ export enum ErrorType {
   ValidationFailed = "VALIDATION_FAILED"
 }
 
+export type RuleGroup = {
+  namespace: Scalars["String"];
+  online: Scalars["Boolean"];
+  rule_group?: Maybe<Scalars["String"]>;
+  rule_group_name: Scalars["String"];
+  tenant_id: Scalars["String"];
+};
+
+export type RuleGroupInput = {
+  rule_group: Scalars["String"];
+};
+
+export type Rules = {
+  online: Scalars["Boolean"];
+  rules?: Maybe<Scalars["String"]>;
+  tenant_id: Scalars["String"];
+};
+
+export type StatusResponse = {
+  error_message?: Maybe<Scalars["String"]>;
+  error_raw_response?: Maybe<Scalars["String"]>;
+  error_type?: Maybe<ErrorType>;
+  success: Scalars["Boolean"];
+};
+
 /** expression to compare columns of type String. All fields are combined with logical 'AND'. */
 export type String_Comparison_Exp = {
   _eq?: Maybe<Scalars["String"]>;
@@ -94,13 +112,6 @@ export type String_Comparison_Exp = {
   _nlike?: Maybe<Scalars["String"]>;
   _nsimilar?: Maybe<Scalars["String"]>;
   _similar?: Maybe<Scalars["String"]>;
-};
-
-export type ValidateOutput = {
-  error_message?: Maybe<Scalars["String"]>;
-  error_raw_response?: Maybe<Scalars["String"]>;
-  error_type?: Maybe<ErrorType>;
-  success: Scalars["Boolean"];
 };
 
 /** columns and relationships of "branch" */
@@ -1587,6 +1598,8 @@ export enum Module_Version_Update_Column {
 
 /** mutation root */
 export type Mutation_Root = {
+  /** perform the action: "deleteRuleGroup" */
+  deleteRuleGroup?: Maybe<StatusResponse>;
   /** delete data from the table: "branch" */
   delete_branch?: Maybe<Branch_Mutation_Response>;
   /** delete single row from the table: "branch" */
@@ -1660,7 +1673,9 @@ export type Mutation_Root = {
   /** insert a single row into the table: "user_preference" */
   insert_user_preference_one?: Maybe<User_Preference>;
   /** perform the action: "updateAlertmanager" */
-  updateAlertmanager?: Maybe<AlertmanagerUpdateResponse>;
+  updateAlertmanager?: Maybe<StatusResponse>;
+  /** perform the action: "updateRuleGroup" */
+  updateRuleGroup?: Maybe<StatusResponse>;
   /** update data of the table: "branch" */
   update_branch?: Maybe<Branch_Mutation_Response>;
   /** update single row of the table: "branch" */
@@ -1697,6 +1712,13 @@ export type Mutation_Root = {
   update_user_preference?: Maybe<User_Preference_Mutation_Response>;
   /** update single row of the table: "user_preference" */
   update_user_preference_by_pk?: Maybe<User_Preference>;
+};
+
+/** mutation root */
+export type Mutation_RootDeleteRuleGroupArgs = {
+  namespace: Scalars["String"];
+  rule_group_name: Scalars["String"];
+  tenant_id: Scalars["String"];
 };
 
 /** mutation root */
@@ -1911,6 +1933,13 @@ export type Mutation_RootUpdateAlertmanagerArgs = {
 };
 
 /** mutation root */
+export type Mutation_RootUpdateRuleGroupArgs = {
+  namespace: Scalars["String"];
+  rule_group: RuleGroupInput;
+  tenant_id: Scalars["String"];
+};
+
+/** mutation root */
 export type Mutation_RootUpdate_BranchArgs = {
   _set?: Maybe<Branch_Set_Input>;
   where: Branch_Bool_Exp;
@@ -2072,6 +2101,10 @@ export type Query_Root = {
   file_by_pk?: Maybe<File>;
   /** perform the action: "getAlertmanager" */
   getAlertmanager?: Maybe<Alertmanager>;
+  /** perform the action: "getRuleGroup" */
+  getRuleGroup?: Maybe<RuleGroup>;
+  /** perform the action: "listRules" */
+  listRules?: Maybe<Rules>;
   /** fetch data from the table: "module" */
   module: Array<Module>;
   /** fetch aggregated fields from the table: "module" */
@@ -2103,9 +2136,9 @@ export type Query_Root = {
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
   /** perform the action: "validateCredential" */
-  validateCredential?: Maybe<ValidateOutput>;
+  validateCredential?: Maybe<StatusResponse>;
   /** perform the action: "validateExporter" */
-  validateExporter?: Maybe<ValidateOutput>;
+  validateExporter?: Maybe<StatusResponse>;
 };
 
 /** query root */
@@ -2204,6 +2237,18 @@ export type Query_RootFile_By_PkArgs = {
 
 /** query root */
 export type Query_RootGetAlertmanagerArgs = {
+  tenant_id: Scalars["String"];
+};
+
+/** query root */
+export type Query_RootGetRuleGroupArgs = {
+  namespace: Scalars["String"];
+  rule_group_name: Scalars["String"];
+  tenant_id: Scalars["String"];
+};
+
+/** query root */
+export type Query_RootListRulesArgs = {
   tenant_id: Scalars["String"];
 };
 
@@ -2338,7 +2383,7 @@ export type Query_RootValidateCredentialArgs = {
 /** query root */
 export type Query_RootValidateExporterArgs = {
   config: Scalars["json"];
-  credential: Scalars["String"];
+  credential?: Maybe<Scalars["String"]>;
   name: Scalars["String"];
   tenant_id: Scalars["String"];
   type: Scalars["String"];
@@ -2372,6 +2417,10 @@ export type Subscription_Root = {
   file_by_pk?: Maybe<File>;
   /** perform the action: "getAlertmanager" */
   getAlertmanager?: Maybe<Alertmanager>;
+  /** perform the action: "getRuleGroup" */
+  getRuleGroup?: Maybe<RuleGroup>;
+  /** perform the action: "listRules" */
+  listRules?: Maybe<Rules>;
   /** fetch data from the table: "module" */
   module: Array<Module>;
   /** fetch aggregated fields from the table: "module" */
@@ -2403,9 +2452,9 @@ export type Subscription_Root = {
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
   /** perform the action: "validateCredential" */
-  validateCredential?: Maybe<ValidateOutput>;
+  validateCredential?: Maybe<StatusResponse>;
   /** perform the action: "validateExporter" */
-  validateExporter?: Maybe<ValidateOutput>;
+  validateExporter?: Maybe<StatusResponse>;
 };
 
 /** subscription root */
@@ -2504,6 +2553,18 @@ export type Subscription_RootFile_By_PkArgs = {
 
 /** subscription root */
 export type Subscription_RootGetAlertmanagerArgs = {
+  tenant_id: Scalars["String"];
+};
+
+/** subscription root */
+export type Subscription_RootGetRuleGroupArgs = {
+  namespace: Scalars["String"];
+  rule_group_name: Scalars["String"];
+  tenant_id: Scalars["String"];
+};
+
+/** subscription root */
+export type Subscription_RootListRulesArgs = {
   tenant_id: Scalars["String"];
 };
 
@@ -2638,7 +2699,7 @@ export type Subscription_RootValidateCredentialArgs = {
 /** subscription root */
 export type Subscription_RootValidateExporterArgs = {
   config: Scalars["json"];
-  credential: Scalars["String"];
+  credential?: Maybe<Scalars["String"]>;
   name: Scalars["String"];
   tenant_id: Scalars["String"];
   type: Scalars["String"];
@@ -3665,7 +3726,7 @@ export type UpdateAlertmanagerMutationVariables = Exact<{
 export type UpdateAlertmanagerMutation = {
   updateAlertmanager?: Maybe<
     Pick<
-      AlertmanagerUpdateResponse,
+      StatusResponse,
       "success" | "error_type" | "error_message" | "error_raw_response"
     >
   >;
