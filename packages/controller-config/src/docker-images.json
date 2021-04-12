@@ -3,7 +3,7 @@
   "certManagerCAInjector": "quay.io/jetstack/cert-manager-cainjector:v1.2.0",
   "certManagerController": "quay.io/jetstack/cert-manager-controller:v1.2.0",
   "configApi": "opstrace/config-api:28212f4f86ec129393405600702c64c3e0208d07",
-  "cortex": "cortexproject/cortex:v1.8.0-rc.0",
+  "cortex": "cortexproject/cortex:master-d302dc4",
   "cortexApiProxy": "opstrace/cortex-api:b3c0c6cb64ad8d38e65e2a576a4f84c3e2d8981b",
   "ddApi": "opstrace/ddapi:b3c0c6cb64ad8d38e65e2a576a4f84c3e2d8981b",
   "exporterCloudwatch": "prom/cloudwatch-exporter:cloudwatch_exporter-0.10.0",
