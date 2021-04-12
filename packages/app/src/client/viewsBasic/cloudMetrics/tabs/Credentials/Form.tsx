@@ -18,18 +18,13 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 
 import graphqlClient from "state/clients/graphqlClient";
+
+import { ControlledInput } from "client/viewsBasic/common/formUtils";
 import { CondRender } from "client/utils/rendering";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import {
-  Input,
-  Select,
-  MenuItem,
-  FormControl,
-  FormLabel,
-  FormHelperText
-} from "@material-ui/core";
+import { Select, MenuItem, FormControl, FormLabel } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,8 +42,6 @@ export function CredentialsForm(props: {
   const { tenantId, onCreate } = props;
   const { control, watch } = useForm({ defaultValues: { cloudProvider: "" } });
   const cloudProvider = watch("cloudProvider");
-
-  console.log(tenantId);
 
   return (
     <Grid
@@ -69,7 +62,6 @@ export function CredentialsForm(props: {
             )}
             control={control}
             name="cloudProvider"
-            defaultValue={10}
           />
         </FormControl>
       </Grid>
@@ -84,39 +76,13 @@ export function CredentialsForm(props: {
   );
 }
 
-type ControlledInputProps = {
-  name: `${string}` | `${string}.${string}` | `${string}.${number}`;
-  label: string;
-  helperText?: string;
-  inputProps?: {};
-  control: any;
+type AwsValues = {
+  name: string;
+  accessKeyId: string;
+  secretAccessKey: string;
 };
 
-const ControlledInput = ({
-  name,
-  label,
-  inputProps = {},
-  helperText,
-  control
-}: ControlledInputProps) => (
-  <Grid item>
-    <Controller
-      render={({ field }) => (
-        <FormControl>
-          <FormLabel>{label}</FormLabel>
-          <Input {...field} {...inputProps} />
-          <CondRender when={helperText !== undefined}>
-            <FormHelperText>{helperText}</FormHelperText>
-          </CondRender>
-        </FormControl>
-      )}
-      control={control}
-      name={name}
-    />
-  </Grid>
-);
-
-const awsDefaultValues = {
+const awsDefaultValues: AwsValues = {
   name: "",
   accessKeyId: "",
   secretAccessKey: ""
@@ -128,11 +94,7 @@ function AwsForm(props: { tenantId: string; onCreate: Function }) {
   const { handleSubmit, reset, control } = useForm({
     defaultValues: awsDefaultValues
   });
-  const onSubmit = (data: {
-    name: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-  }) => {
+  const onSubmit = (data: AwsValues) => {
     graphqlClient
       .CreateCredentials({
         credentials: {
@@ -185,7 +147,9 @@ function AwsForm(props: { tenantId: string; onCreate: Function }) {
   );
 }
 
-const gcpDefaultValues = {
+type GcpValues = { name: string; accessDoc: string };
+
+const gcpDefaultValues: GcpValues = {
   name: "",
   accessDoc: ""
 };
@@ -197,7 +161,7 @@ function GcpForm(props: { tenantId: string; onCreate: Function }) {
     defaultValues: gcpDefaultValues
   });
 
-  const onSubmit = (data: { name: string; accessDoc: string }) => {
+  const onSubmit = (data: GcpValues) => {
     graphqlClient
       .CreateCredentials({
         credentials: {
@@ -209,7 +173,7 @@ function GcpForm(props: { tenantId: string; onCreate: Function }) {
       })
       .then(response => {
         onCreate();
-        reset(awsDefaultValues);
+        reset(gcpDefaultValues);
       });
   };
 
