@@ -16,6 +16,7 @@
 
 import React from "react";
 import { useParams } from "react-router-dom";
+import { map } from "ramda";
 
 import useFetcher from "client/hooks/useFetcher";
 
@@ -55,7 +56,7 @@ const Exporters = () => {
           <ExportersTable
             tenantId={tenantId}
             onChange={changeCallback}
-            rows={data?.exporter}
+            rows={formatRows(data?.exporter)}
           />
         </Grid>
         <Grid item>
@@ -64,6 +65,18 @@ const Exporters = () => {
       </Grid>
     </Box>
   );
+};
+
+const formatRows = (data: any[] | undefined) => {
+  if (data)
+    return map((d: any) => ({
+      name: d.name,
+      type: d.type,
+      config: d.config,
+      credential: d.credentialByCredentialTenant.name,
+      created_at: d.created_at
+    }))(data);
+  else return [];
 };
 
 const ExportersTab = {

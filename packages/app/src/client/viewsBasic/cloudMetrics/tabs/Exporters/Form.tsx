@@ -141,7 +141,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
                     >
                       configuration format
                     </a>
-                    .
+                    documentation.
                   </p>
                 </CondRender>
                 <CondRender when={cloudProvider === "gcp"}>
@@ -153,7 +153,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
                     >
                       configuration format
                     </a>
-                    .
+                    documentation.
                   </p>
                 </CondRender>
               </>
