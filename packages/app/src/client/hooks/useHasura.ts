@@ -25,7 +25,7 @@ import useDeepMemo from "client/hooks/useDeepMemo";
 // wrapped the useSWR call with useDeepMemo to ensure that the same array is passed in
 // for the same variables
 
-const useFetcher = (query: string, variables?: {}) => {
+const useHasura = (query: string, variables?: {}) => {
   const token = useDeepMemo(() => [query, variables], [query, variables]);
 
   return useSWR(token, fetcher);
@@ -34,4 +34,4 @@ const useFetcher = (query: string, variables?: {}) => {
 const fetcher = (query: string, variables?: {}) =>
   client.request(query, variables);
 
-export default useFetcher;
+export default useHasura;

@@ -18,7 +18,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { map } from "ramda";
 
-import useFetcher from "client/hooks/useFetcher";
+import useHasura from "client/hooks/useHasura";
 
 import { CredentialsTable } from "./Table";
 import { CredentialsForm } from "./Form";
@@ -29,7 +29,7 @@ import Grid from "@material-ui/core/Grid";
 function Credentials() {
   const { tenantId } = useParams<{ tenantId: string }>();
 
-  const { data, mutate: changeCallback } = useFetcher(
+  const { data, mutate: changeCallback } = useHasura(
     `
       query credentials($tenant_id: String!) {
         credential(where: {tenant: {_eq: $tenant_id}}) {

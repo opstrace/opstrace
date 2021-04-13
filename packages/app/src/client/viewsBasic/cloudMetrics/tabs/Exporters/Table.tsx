@@ -92,7 +92,12 @@ export const ExportersTable = (props: ExportersTableProps) => {
         </TableHead>
         <TableBody>
           {rows.map(row => (
-            <ExportersRow key={row.name} row={row} onDelete={deleteExporter} />
+            <ExportersRow
+              key={row.name}
+              tenantId={tenantId}
+              row={row}
+              onDelete={deleteExporter}
+            />
           ))}
         </TableBody>
       </Table>
@@ -101,6 +106,7 @@ export const ExportersTable = (props: ExportersTableProps) => {
 };
 
 const ExportersRow = (props: {
+  tenantId: string;
   row: Row;
   onDelete: (name: string) => void;
 }) => {
@@ -147,7 +153,8 @@ const ExportersRow = (props: {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
               <Typography variant="subtitle1" gutterBottom component="div">
-                {row.type === "aws" ? "CloudWatch" : "Stackdriver"} Config
+                {row.type === "cloudwatch" ? "CloudWatch" : "Stackdriver"}{" "}
+                Config
               </Typography>
               <pre>{config}</pre>
             </Box>
