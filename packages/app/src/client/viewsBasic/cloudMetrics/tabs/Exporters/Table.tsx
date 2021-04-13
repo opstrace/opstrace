@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { format, parseISO } from "date-fns";
+import * as yamlParser from "js-yaml";
 
 import graphqlClient from "state/clients/graphqlClient";
 
@@ -81,6 +82,7 @@ export const ExportersTable = (props: ExportersTableProps) => {
       <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
+            <TableCell></TableCell>
             <TableCell>Name</TableCell>
             <TableCell>Type</TableCell>
             <TableCell>Credential</TableCell>
@@ -104,6 +106,17 @@ const ExportersRow = (props: {
 }) => {
   const { row, onDelete } = props;
   const [open, setOpen] = React.useState(false);
+
+  const config = useMemo(() => {
+    if (open)
+      return yamlParser.dump(JSON.parse(row.config), {
+        schema: yamlParser.JSON_SCHEMA,
+        lineWidth: -1
+      });
+    else return "";
+  }, [row.config, open]);
+
+  console.log(config);
 
   return (
     <React.Fragment>
@@ -136,7 +149,7 @@ const ExportersRow = (props: {
               <Typography variant="subtitle1" gutterBottom component="div">
                 {row.type === "aws" ? "CloudWatch" : "Stackdriver"} Config
               </Typography>
-              <pre>{row.config}</pre>
+              <pre>{config}</pre>
             </Box>
           </Collapse>
         </TableCell>
