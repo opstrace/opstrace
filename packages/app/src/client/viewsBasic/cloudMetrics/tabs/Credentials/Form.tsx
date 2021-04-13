@@ -100,11 +100,11 @@ function AwsForm(props: { tenantId: string; onCreate: Function }) {
         credentials: {
           tenant: tenantId,
           name: data.name,
-          type: "aws",
-          value: {
+          type: "aws-key",
+          value: JSON.stringify({
             AWS_ACCESS_KEY_ID: data.accessKeyId,
             AWS_SECRET_ACCESS_KEY: data.secretAccessKey
-          }
+          })
         }
       })
       .then(response => {
@@ -167,7 +167,7 @@ function GcpForm(props: { tenantId: string; onCreate: Function }) {
         credentials: {
           tenant: tenantId,
           name: data.name,
-          type: "gcp",
+          type: "gcp-service-account",
           value: data.accessDoc
         }
       })
@@ -183,7 +183,7 @@ function GcpForm(props: { tenantId: string; onCreate: Function }) {
       <ControlledInput
         name="accessDoc"
         label="Access Doc"
-        inputProps={{ multiline: true }}
+        inputProps={{ multiline: true, rows: 5 }}
         helperText="Important: this is stored as plain text."
         control={control}
       />

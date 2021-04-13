@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { map } from "ramda";
 import { useForm, Controller } from "react-hook-form";
+import * as yamlParser from "js-yaml";
 
 import graphqlClient from "state/clients/graphqlClient";
 import useFetcher from "client/hooks/useFetcher";
@@ -38,14 +39,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 type Values = {
-  cloudProvider: string;
+  type: "cloudwatch" | "stackdriver" | "";
   name: string;
   credential: string;
   config: string;
 };
 
 const defaultValues: Values = {
-  cloudProvider: "",
+  type: "",
   name: "",
   credential: "",
   config: ""
@@ -57,7 +58,12 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
   const { handleSubmit, reset, control, watch } = useForm({
     defaultValues: defaultValues
   });
-  const cloudProvider = watch("cloudProvider");
+  const type = watch("type");
+  const cloudProvider = useMemo(() => {
+    return { cloudwatch: "aws", stackdriver: "gcp", [""]: "" }[type];
+  }, [type]);
+
+  console.log(type, cloudProvider);
 
   const { data: credentials } = useFetcher(
     `query credentials($tenant_id: String!, $type: String!) {
@@ -65,18 +71,29 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
          name
        }
      }`,
-    { tenant_id: tenantId, type: cloudProvider }
+    {
+      tenant_id: tenantId,
+      type: cloudProvider
+    }
   );
 
   const onSubmit = (data: Values) => {
+    const config = JSON.stringify(
+      yamlParser.load(data.config, {
+        schema: yamlParser.JSON_SCHEMA
+      })
+    );
+
+    console.log(data.config, config);
+
     graphqlClient
       .CreateExporters({
         exporters: {
           tenant: tenantId,
-          type: data.cloudProvider,
+          type: data.type,
           name: data.name,
           credential: data.credential,
-          config: data.config
+          config: config
         }
       })
       .then(response => {
@@ -98,18 +115,18 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
           <Controller
             render={({ field }) => (
               <Select {...field}>
-                <MenuItem value={"aws"}>Amazon Web Services</MenuItem>
-                <MenuItem value={"gcp"}>Google Cloud Platform</MenuItem>
+                <MenuItem value={"cloudwatch"}>CloudWatch</MenuItem>
+                <MenuItem value={"stackdriver"}>Stackdriver</MenuItem>
               </Select>
             )}
             control={control}
-            name="cloudProvider"
+            name="type"
           />
         </FormControl>
         <CondRender when={credentials?.credential.length > 0}>
           <FormControl>
             <FormLabel>{`${
-              cloudProvider === "aws" ? "AWS" : "GCP"
+              type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
             } Credential`}</FormLabel>
             <Controller
               render={({ field }) => (
@@ -127,12 +144,12 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
           <ControlledInput
             name="config"
             label={`${
-              cloudProvider === "aws" ? "CloudWatch" : "Stackdriver"
+              type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
             } Config`}
-            inputProps={{ multiline: true }}
+            inputProps={{ multiline: true, rows: 5 }}
             helperText={
               <>
-                <CondRender when={cloudProvider === "aws"}>
+                <CondRender when={type === "cloudwatch"}>
                   <p>
                     CloudWatch{" "}
                     <a
@@ -144,7 +161,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
                     documentation.
                   </p>
                 </CondRender>
-                <CondRender when={cloudProvider === "gcp"}>
+                <CondRender when={type === "stackdriver"}>
                   <p>
                     Stackdriver{" "}
                     <a
