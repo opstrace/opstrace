@@ -18,7 +18,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { map } from "ramda";
 
-import useFetcher from "client/hooks/useFetcher";
+import useHasura from "client/hooks/useHasura";
 
 import { ExportersTable } from "./Table";
 import { ExporterForm } from "./Form";
@@ -29,9 +29,10 @@ import Grid from "@material-ui/core/Grid";
 const Exporters = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
 
-  const { data, mutate: changeCallback } = useFetcher(
+  const { data, mutate: changeCallback } = useHasura(
     `query exporters($tenant_id: String!) {
        exporter(where: {tenant: {_eq: $tenant_id}}) {
+         tenant
          name
          type
          config

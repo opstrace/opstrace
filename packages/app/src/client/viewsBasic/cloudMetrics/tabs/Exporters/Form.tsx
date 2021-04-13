@@ -20,7 +20,7 @@ import { useForm, Controller } from "react-hook-form";
 import * as yamlParser from "js-yaml";
 
 import graphqlClient from "state/clients/graphqlClient";
-import useFetcher from "client/hooks/useFetcher";
+import useHasura from "client/hooks/useHasura";
 
 import { ControlledInput } from "client/viewsBasic/common/formUtils";
 import { CondRender } from "client/utils/rendering";
@@ -60,12 +60,16 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
   });
   const type = watch("type");
   const cloudProvider = useMemo(() => {
-    return { cloudwatch: "aws", stackdriver: "gcp", [""]: "" }[type];
+    return {
+      cloudwatch: "aws-key",
+      stackdriver: "gcp-service-account",
+      [""]: "unknown"
+    }[type];
   }, [type]);
 
   console.log(type, cloudProvider);
 
-  const { data: credentials } = useFetcher(
+  const { data: credentials } = useHasura(
     `query credentials($tenant_id: String!, $type: String!) {
        credential(where: { tenant: { _eq: $tenant_id }, type: {_eq: $type} }) {
          name
@@ -117,12 +121,16 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
               <Select {...field}>
                 <MenuItem value={"cloudwatch"}>CloudWatch</MenuItem>
                 <MenuItem value={"stackdriver"}>Stackdriver</MenuItem>
+                <MenuItem value={"blackbox"}>Blackbox</MenuItem>
               </Select>
             )}
             control={control}
             name="type"
           />
         </FormControl>
+        <CondRender when={type !== "" && !(credentials?.credential.length > 0)}>
+          <p>There are no defined credentials for this exporter.</p>
+        </CondRender>
         <CondRender when={credentials?.credential.length > 0}>
           <FormControl>
             <FormLabel>{`${
