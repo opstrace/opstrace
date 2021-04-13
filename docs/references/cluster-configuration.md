@@ -43,7 +43,7 @@ tenants:
 
 ### `node_count`
 
-The number of underlying instances to use.
+The number of underlying nodes for Opstrace to use.
 
 *Value type:* number \(integer\)
 
@@ -53,8 +53,8 @@ The number of underlying instances to use.
 node_count: 3
 ```
 
-**Warning 😈:**
-Here be dragons: we develop with three nodes, and—for now—we rarely test with less or more.
+**Note:**
+we develop with three nodes, and—for now—we rarely test with less or more.
 
 ### `aws`
 
@@ -96,6 +96,10 @@ gcp:
 
 Note: the example above shows the defaults.
 
+**Note:**
+we develop and test mainly with `region` set to `us-west2`.
+To date, we test other regions only manually and rarely.
+
 ### `env_label`
 
 Specifies a label that is subsequently attached to most cloud resources associated with the Opstrace cluster.
@@ -119,7 +123,7 @@ The label name will be `env`, and the value will be what you provide here.
 *Value type:* boolean
 
 By default, authentication proof is required when accessing the HTTP API for pushing or querying data.
-This flag disables said authentication mechanism, allowing for unauthenticated clients to write or read data.
+This flag enables or disables said authentication mechanism, allowing for unauthenticated clients to write or read data.
 
 When required, any HTTP request arriving at the tenant HTTP API is expected to show an API token in an `Authorization` header \(using the `Bearer` scheme\).
 
