@@ -284,6 +284,11 @@ func (e *exporterAPI) validateExporter(
 	existingTypes map[string]string,
 	exporter Exporter,
 ) (bool, error) {
+	// Check that the exporter name is suitable for use in K8s object names
+	if err := config.ValidateName(exporter.Name); err != nil {
+		return false, err
+	}
+
 	if exporter.Credential == "" {
 		if err := validateExporterTypes(exporter.Type, nil); err != nil {
 			msg := fmt.Sprintf("Invalid exporter input %s: %s", exporter.Name, err)
