@@ -45,7 +45,8 @@ cert_issuer: letsencrypt-prod
 EOF
 ```
 
-We also support `gcp`.
+Besides AWS we also support GCP.
+
 See our configuration reference for details: [docs/references/cluster-configuration.md](docs/references/cluster-configuration.md).
 
 Don't forget to clean up when you're done:
