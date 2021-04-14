@@ -12,13 +12,15 @@
 Features that are not guarded behind a paywall.
 Opstrace installs secure, horizontally-scalable, open source observability in your cloud account combining open APIs with reduced toil.
 Opstrace is:
+Highlights:
 
 * Horizontally scalable for ingestion and queries.
 * Durable with inexpensive long-term retention.
-* Rigoriously tested end-to-end, freqently, for confident upgrades.
+* Rigoriously tested end-to-end.
+* Large efforts towards confident upgrades.
 * Secure by default with TLS and authenticated endpoints.
-* Easy to configure with new web interfaces and APIs.
-* All the open source projects you know and love in one place.
+* Easy to configure with GUIs and APIs.
+
 
 ## Quick Start
 
