@@ -56,11 +56,10 @@ ENV NO_UPDATE_NOTIFIER true
 ENV PATH=${PATH}:/build/node_modules/.bin
 
 # Sanity check that all dependencies/libraries are actually present before running tests
-# Takes a few minutes so disabled by default
-#RUN playwright -h && \
-#    cd /build/test/test-remote && \
-#    yarn tsc && \
-#    yarn clean
+# If we don't run 'yarn tsc' then we get errors about not being able to find '@opstrace/kubernetes' when running tests.
+RUN playwright -h && \
+    cd /build/test/test-remote && \
+    yarn tsc
 
 # To use this image mount a volume with tests you want to run in a directory
 # under /build, example /build/test-remote, and run `yarn run mocha` in that
