@@ -7,14 +7,15 @@
 
 <img src="https://user-images.githubusercontent.com/19239758/97793010-00161b00-1ba3-11eb-949b-e62eae6fdb9c.png" width="350">
 
-# Secure observability, deployed in your own network
+# The Open Source Observability Distribution
 
-Opstrace deploys secure, horizontally-scalable open source observability in your cloud account, combining open APIs with a simple user experience.
+Features that are not guarded behind a paywall.
+Opstrace installs secure, horizontally-scalable, open source observability in your cloud account combining open APIs with reduced toil.
 Opstrace is:
 
 * Horizontally scalable for ingestion and queries.
 * Durable with inexpensive long-term retention.
-* Tested end-to-end, freqently.  
+* Rigoriously tested end-to-end, freqently, for confident upgrades.
 * Secure by default with TLS and authenticated endpoints.
 * Easy to configure with new web interfaces and APIs.
 * All the open source projects you know and love in one place.
@@ -22,6 +23,7 @@ Opstrace is:
 ## Quick Start
 
 Install Opstrace in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
+For example:
 
 ```bash
 opstrace create aws <choose_a_name> <<EOF
@@ -49,7 +51,7 @@ Authentic collaboration in a community setting is important to us.
 Please join us to learn more, get support, or contribute to the project.
 
 * Join our [Slack Community](https://go.opstrace.com/community)
-* Chat with us in our [GitHub Discussions](https://github.com/opstrace/opstrace/discussions)
+* Ask a question in our [GitHub Discussions](https://github.com/opstrace/opstrace/discussions)
 * Contribute a [proposal](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=thinktank:%20proposal&template=2-proposal.md&title=) or a [bug report](https://github.com/opstrace/opstrace/issues/new?assignees=&labels=type:%20bug&template=1-bug_report.md&title=)
 * Or just send us an email at [hello@opstrace.com](mailto:hello@opstrace.com)
 
