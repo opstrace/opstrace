@@ -38,7 +38,7 @@ export function handleFailedCertificate(
   log.debug("checking if certificate is in failed state");
 
   const cert = certificates.find(cert => {
-    cert.spec.status?.conditions?.find(cond => {
+    return cert.spec.status?.conditions?.find(cond => {
       log.debug(`certificate condition: ${cond.message}`);
       return cond.message!.includes("Failed to wait for order resource");
     });
