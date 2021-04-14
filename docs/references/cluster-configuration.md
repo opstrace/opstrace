@@ -123,7 +123,7 @@ The label name will be `env`, and the value will be what you provide here.
 *Value type:* boolean
 
 By default, authentication proof is required when accessing the HTTP API for pushing or querying data.
-This flag enables or disables said authentication mechanism, allowing for unauthenticated clients to write or read data.
+This flag enables or disables said authentication mechanism.
 
 When required, any HTTP request arriving at the tenant HTTP API is expected to show an API token in an `Authorization` header \(using the `Bearer` scheme\).
 
