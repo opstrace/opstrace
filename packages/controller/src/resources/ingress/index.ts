@@ -79,8 +79,11 @@ export function IngressResources(
               // Include an X-Scope-OrgID header containing the tenant name in all requests.
               // This is (only) used by cortex-* services to identify the tenant.
               // WARNING: Don't forget the trailing semicolon or else routes will silently fail.
-              "nginx.ingress.kubernetes.io/configuration-snippet":
-                `more_set_input_headers "X-Scope-OrgID: ${tenant.name}";`
+              "nginx.ingress.kubernetes.io/configuration-snippet": ` more_set_input_headers "X-Scope-OrgID: ${tenant.name}";`,
+              "nginx.ingress.kubernetes.io/cors-allow-credentials": "true",
+              "nginx.ingress.kubernetes.io/cors-allow-methods": "GET, OPTIONS",
+              "nginx.ingress.kubernetes.io/cors-allow-origin": `https://${domain}`,
+              "nginx.ingress.kubernetes.io/enable-cors": "true"
             }
           },
           spec: {
