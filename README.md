@@ -9,9 +9,9 @@
 
 # The Open Source Observability Distribution
 
-Features that are not guarded behind a paywall.
-Opstrace installs secure, horizontally-scalable, open source observability in your cloud account combining open APIs with reduced toil.
-Opstrace is:
+Opstrace is a secure, horizontally-scalable, open source observability platform installed in your cloud account.
+It combines open APIs with reduced toil.
+
 Highlights:
 
 * Horizontally scalable for ingestion and queries.
