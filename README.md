@@ -21,6 +21,13 @@ Highlights:
 * Secure by default with TLS and authenticated endpoints.
 * Easy to configure with GUIs and APIs.
 
+We walk on the shoulders of giants; Opstrace contains all the open source projects you know and love in one place:
+* [Cortex](https://github.com/cortexproject/cortex)
+* [Loki](https://github.com/grafana/loki)
+* [Prometheus](https://github.com/prometheus/prometheus)
+* [Kubernetes](https://github.com/kubernetes/kubernetes)
+* and many more!
+
 
 ## Quick Start
 
