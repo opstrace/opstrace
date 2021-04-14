@@ -1,17 +1,23 @@
-
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD033 -->
 
 [![Build status](https://badge.buildkite.com/df9e995b3a5e4b0bebce8b432b0bf48b092fd261b7017b65c1.svg)](https://buildkite.com/opstrace/scheduled-main-builds)
 [![License](https://img.shields.io/github/license/opstrace/opstrace)](https://github.com/opstrace/opstrace/blob/main/LICENSE)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopstrace%2Fopstrace.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopstrace%2Fopstrace?ref=badge_shield&style=social)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 <img src="https://user-images.githubusercontent.com/19239758/97793010-00161b00-1ba3-11eb-949b-e62eae6fdb9c.png" width="350">
 
 # Secure observability, deployed in your own network
 
-Opstrace deploys secure, horizontally-scalable open source observability in your own cloud account, combining open APIs with the simple user experience of a large service provider.
+Opstrace deploys secure, horizontally-scalable open source observability in your cloud account, combining open APIs with a simple user experience.
+Opstrace is:
+
+* Horizontally scalable for ingestion and queries.
+* Durable with inexpensive long-term retention.
+* Tested end-to-end, freqently.  
+* Secure by default with TLS and authenticated endpoints.
+* Easy to configure with new web interfaces and APIs.
+* All the open source projects you know and love in one place.
 
 ## Quick Start
 
@@ -28,7 +34,8 @@ cert_issuer: letsencrypt-prod
 EOF
 ```
 
-(Note: `gcp` is also supported.)
+We also support `gcp`.
+See our configuration reference for details: [docs/references/cluster-configuration.md](docs/references/cluster-configuration.md).
 
 Don't forget to clean up when you're done:
 
@@ -51,7 +58,7 @@ You can find out more on [our community page](https://opstrace.com/community), i
 ## Documentation
 
 You can find the Opstrace documentation in [/docs](/docs).
-We would also like to invite you to improve these docs together with us and have a [corresponding guide](./docs/guides/contributor/writing-docs.md) for that.
+We invite you to improve these docs together with us, and have a [corresponding guide](./docs/guides/contributor/writing-docs.md) for that.
 
 ## Contributing
 
@@ -67,6 +74,14 @@ Take a look at our [high-level roadmap](./docs/references/roadmap.md) to see whe
 IMPORTANT NOTE: We welcome contributions from developers of all backgrounds.
 We encode that in a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project, you agree to abide by its terms.
+
+# Privacy
+
+At Opstrace, we host a service that automatically provisions subdomains like `<my_name>.opstrace.io`.
+This makes it easy and clean to use the URLs for both humans and machines.
+To accomplish this safely, we require login via oauth subject to our [privacy poicy](https://go.opstrace.com/privacy-policy).
+
+Get in touch with us to discuss support for custom domains!
 
 ## Security Reports
 
