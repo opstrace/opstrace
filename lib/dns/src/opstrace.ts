@@ -359,6 +359,11 @@ export class DNSClient {
             die("DNS setup failed with a permanent error (403 HTTP response).");
           }
 
+          // exit if we're trying to use a cluster name that is already taken
+          if (e.response?.statusCode === 409 && method === "POST") {
+            die("DNS setup failed with a permanent error, please choose a different cluster name");
+          }
+
           if (e.response?.statusCode === 401) {
             log.info("perform another login to refresh authentication state");
             this.clearAuthnState();
