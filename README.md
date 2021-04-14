@@ -90,7 +90,7 @@ By participating in this project, you agree to abide by its terms.
 
 At Opstrace, we host a service that automatically provisions subdomains like `<my_name>.opstrace.io`.
 This makes it easy and clean to use the URLs for both humans and machines.
-To accomplish this safely, we require login via oauth subject to our [privacy poicy](https://go.opstrace.com/privacy-policy).
+To accomplish this safely, we require login via Auth0 subject to our [privacy poicy](https://go.opstrace.com/privacy-policy).
 
 Get in touch with us to discuss support for custom domains!
 
