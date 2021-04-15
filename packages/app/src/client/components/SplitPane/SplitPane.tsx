@@ -27,6 +27,8 @@ export type SplitPaneProps = {
   split: "vertical" | "horizontal";
   size: number;
   minSize?: number;
+  leftStyle?: {};
+  rightStyle?: {};
 };
 
 function SplitPane({
@@ -35,7 +37,9 @@ function SplitPane({
   split,
   size,
   onChangeSize,
-  minSize = 0
+  minSize = 0,
+  leftStyle,
+  rightStyle
 }: SplitPaneProps) {
   if (children.length !== 2) {
     throw Error("SplitPane only supports two immediate children");
@@ -58,10 +62,10 @@ function SplitPane({
       size={size}
       onChange={onChangeSize}
     >
-      <Box height="100%" width="100%">
+      <Box height="100%" width="100%" style={leftStyle}>
         {children[0]}
       </Box>
-      <Box height="100%" width="100%">
+      <Box height="100%" width="100%" style={rightStyle}>
         {children[1]}
       </Box>
     </StyledSplitPane>
