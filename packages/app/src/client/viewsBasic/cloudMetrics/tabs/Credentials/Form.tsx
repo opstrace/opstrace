@@ -28,7 +28,7 @@ import { Select, MenuItem, FormLabel } from "@material-ui/core";
 const useStyles = makeStyles(theme => ({
   grid: {
     display: "grid",
-    gridTemplateColumns: "[label] 200px [control] 1fr",
+    gridTemplateColumns: "[label] 240px [control] 1fr",
     gridAutoFlow: "row",
     gridGap: ".8em",
     padding: "1.2em"

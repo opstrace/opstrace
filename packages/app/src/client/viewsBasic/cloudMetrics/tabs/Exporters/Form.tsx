@@ -31,7 +31,7 @@ import { Select, MenuItem, FormLabel } from "@material-ui/core";
 const useStyles = makeStyles(theme => ({
   grid: {
     display: "grid",
-    gridTemplateColumns: "[label] 200px [control] 1fr",
+    gridTemplateColumns: "[label] 240px [control] 1fr",
     gridAutoFlow: "row",
     gridGap: ".8em",
     padding: "1.2em"
@@ -93,16 +93,12 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
     }
   );
 
-  console.log(type, cloudProvider);
-
   const onSubmit = (data: Values) => {
     const config = JSON.stringify(
       yamlParser.load(data.config, {
         schema: yamlParser.JSON_SCHEMA
       })
     );
-
-    console.log(data.config, config);
 
     graphqlClient
       .CreateExporters({
@@ -139,8 +135,13 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
           name="type"
         />
       </div>
+      <CondRender when={credentials === undefined}>
+        <div className={classes.control}>
+          <p>Loading credentials...</p>
+        </div>
+      </CondRender>
       <CondRender
-        when={type !== "blackbox" && !(credentials?.credential.length > 0)}
+        when={credentials !== undefined && credentials?.credential.length === 0}
       >
         <div className={classes.control}>
           <p>There are no defined credentials for this exporter.</p>
@@ -190,7 +191,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
                     target="_blank"
                   >
                     configuration format
-                  </a>
+                  </a>{" "}
                   documentation.
                 </p>
               </CondRender>
@@ -202,7 +203,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
                     target="_blank"
                   >
                     configuration format
-                  </a>
+                  </a>{" "}
                   documentation.
                 </p>
               </CondRender>
