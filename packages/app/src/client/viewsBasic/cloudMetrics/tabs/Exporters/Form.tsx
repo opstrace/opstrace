@@ -16,7 +16,9 @@
 
 import React, { useMemo } from "react";
 import { map } from "ramda";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFormState } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import * as yamlParser from "js-yaml";
 
 import graphqlClient from "state/clients/graphqlClient";
@@ -58,6 +60,13 @@ type Values = {
   config: string;
 };
 
+const Schema = yup.object().shape({
+  type: yup.string().required(),
+  name: yup.string().required(),
+  credential: yup.string().required(),
+  config: yup.string().required()
+});
+
 const defaultValues: Values = {
   type: "cloudwatch",
   name: "",
@@ -70,7 +79,13 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
   const classes = useStyles();
 
   const { handleSubmit, reset, control, watch } = useForm({
-    defaultValues: defaultValues
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: defaultValues,
+    resolver: yupResolver(Schema)
+  });
+  const { isValid } = useFormState({
+    control
   });
   const type = watch("type");
   const cloudProvider = useMemo(() => {
@@ -213,7 +228,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
         />
 
         <div className={classes.control}>
-          <input type="submit" />
+          <input type="submit" disabled={!isValid} />
         </div>
       </CondRender>
     </form>
