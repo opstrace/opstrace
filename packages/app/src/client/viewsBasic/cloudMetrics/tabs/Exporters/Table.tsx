@@ -127,8 +127,6 @@ const ExportersRow = (props: {
     else return "";
   }, [row.config, open]);
 
-  console.log(config);
-
   return (
     <React.Fragment>
       <TableRow>

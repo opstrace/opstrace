@@ -39,26 +39,23 @@ export const ControlledInput = ({
   control,
   labelClass,
   controlClass
-}: ControlledInputProps) => {
-  console.log(name, helperText);
-  return (
-    <Controller
-      render={({ field }) => (
-        <>
-          <div className={labelClass}>
-            <FormLabel>{label}</FormLabel>
-          </div>
-          <div className={controlClass}>
-            <Input {...field} {...inputProps} />
-            <CondRender
-              unless={helperText === undefined}
-              render={() => <FormHelperText>{helperText}</FormHelperText>}
-            />
-          </div>
-        </>
-      )}
-      control={control}
-      name={name}
-    />
-  );
-};
+}: ControlledInputProps) => (
+  <Controller
+    render={({ field }) => (
+      <>
+        <div className={labelClass}>
+          <FormLabel>{label}</FormLabel>
+        </div>
+        <div className={controlClass}>
+          <Input {...field} {...inputProps} />
+          <CondRender
+            unless={helperText === undefined}
+            render={() => <FormHelperText>{helperText}</FormHelperText>}
+          />
+        </div>
+      </>
+    )}
+    control={control}
+    name={name}
+  />
+);
