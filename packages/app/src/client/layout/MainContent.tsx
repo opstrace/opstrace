@@ -60,6 +60,7 @@ const Layout = (props: {
         }
         minSize={100}
         onChangeSize={display.setSidebarWidth}
+        rightStyle={{ overflow: "auto" }}
       >
         {props.sidebar}
         {props.children}
