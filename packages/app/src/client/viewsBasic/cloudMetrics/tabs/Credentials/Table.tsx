@@ -27,7 +27,6 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
 
 const useStyles = makeStyles({
   table: {
@@ -69,14 +68,14 @@ export const CredentialsTable = (props: CredentialsTableProps) => {
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
             <TableCell>Type</TableCell>
             <TableCell>Created At</TableCell>
-            <TableCell>Active</TableCell>
+            <TableCell>Used</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableHead>

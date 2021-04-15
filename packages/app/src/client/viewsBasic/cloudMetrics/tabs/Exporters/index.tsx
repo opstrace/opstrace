@@ -23,11 +23,20 @@ import useHasura from "client/hooks/useHasura";
 import { ExportersTable } from "./Table";
 import { ExporterForm } from "./Form";
 
-import { Box } from "client/components/Box";
-import Grid from "@material-ui/core/Grid";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles(theme => ({
+  gridContainer: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: "16px 0px",
+    gridTemplateAreas: `"." "."`
+  }
+}));
 
 const Exporters = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
+  const classes = useStyles();
 
   const { data, mutate: changeCallback } = useHasura(
     `query exporters($tenant_id: String!) {
@@ -46,25 +55,15 @@ const Exporters = () => {
   );
 
   return (
-    <Box display="flex" height="500px" width="700px">
-      <Grid
-        container
-        alignItems="flex-start"
-        justify="flex-start"
-        direction="column"
-      >
-        <Grid item>
-          <ExportersTable
-            tenantId={tenantId}
-            onChange={changeCallback}
-            rows={formatRows(data?.exporter)}
-          />
-        </Grid>
-        <Grid item>
-          <ExporterForm tenantId={tenantId} onCreate={changeCallback} />
-        </Grid>
-      </Grid>
-    </Box>
+    <div className={classes.gridContainer}>
+      <ExportersTable
+        tenantId={tenantId}
+        onChange={changeCallback}
+        rows={formatRows(data?.exporter)}
+      />
+
+      <ExporterForm tenantId={tenantId} onCreate={changeCallback} />
+    </div>
   );
 };
 
