@@ -63,15 +63,15 @@ import {
   mtimeDeadlineInSeconds,
   rndstring,
   sleep,
+  waitForCortexMetricResult,
+  waitForPrometheusTarget,
   CLUSTER_BASE_URL,
   CORTEX_API_TLS_VERIFY,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
   TENANT_DEFAULT_CORTEX_API_BASE_URL,
   TENANT_SYSTEM_API_TOKEN_FILEPATH,
-  TENANT_SYSTEM_CORTEX_API_BASE_URL
+  TENANT_SYSTEM_CORTEX_API_BASE_URL,
 } from "./testutils";
-
-import { waitForCortexQueryResult } from "./test_prom_remote_write";
 
 function getE2EAlertingResources(tenant: string, job: string): Array<K8sResource> {
   // The test environment should already have kubectl working, so we can use that.
@@ -295,11 +295,11 @@ async function getE2EAlertCountMetric(baseUrl: string, uniqueScrapeJobName: stri
   const queryParams = {
     query: `e2ealerting_webhook_receiver_evaluations_total{job="${uniqueScrapeJobName}"}`,
   };
-  const resultArray = await waitForCortexQueryResult(
+  const resultArray = await waitForCortexMetricResult(
     baseUrl,
     queryParams,
     "query",
-    30,
+    30, // timeout
     true // logQueryResponse
   );
 
@@ -326,7 +326,8 @@ async function testE2EAlertsForTenant(cortexBaseUrl: string, authTokenFilepath: 
 
   // Give a random token to include for the 'job' label in metrics.
   // This is just in case e.g. tests are re-run against the same cluster.
-  const uniqueScrapeJobName = "testalerts-" + rndstring().slice(0, 5);
+  // Include '-job' at the end just to avoid punctuation at the end of the label which K8s disallows
+  const uniqueScrapeJobName = `testalerts-${rndstring().slice(0, 5)}-job`;
 
   log.info(`Deploying E2E alerting resources into ${tenant}-tenant namespace`);
   const resources = getE2EAlertingResources(tenant, uniqueScrapeJobName);
@@ -352,6 +353,10 @@ async function testE2EAlertsForTenant(cortexBaseUrl: string, authTokenFilepath: 
       }
     }
   }
+
+  // Wait for the E2E pod to appear in prometheus scrape targets
+  log.info(`Waiting for E2E scrape target to appear in tenant prometheus for tenant=${tenant} job=${uniqueScrapeJobName}`);
+  await waitForPrometheusTarget(tenant, uniqueScrapeJobName);
 
   // Wait for the metric to appear in cortex with the matching random 'job' tag
   log.info(`Waiting for cortex E2E alerting metric for tenant=${tenant} job=${uniqueScrapeJobName} with zero value`);

@@ -164,24 +164,20 @@ export class PortForward {
     behind (resource cleanup guarantee).
     */
 
-    log.info("%s: initialize", this);
+    log.info(`${this}: initialize`);
 
     await this.startProcess();
 
     const maxWaitSeconds = 30;
     const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-    log.info(
-      "%s: waiting for port-forward to become ready, deadline in %s s",
-      this,
-      maxWaitSeconds
-    );
+    log.info(`${this}: waiting for port-forward to become ready, deadline in ${maxWaitSeconds}s`);
 
     while (true) {
       // `break`ing out the loop enters the error path, returning `true`
       // indicates success.
 
       if (mtime() > deadline) {
-        log.error("%s: port-forward deadline hit", this);
+        log.error(`${this}: port-forward deadline hit`);
         break;
       }
 
@@ -192,15 +188,12 @@ export class PortForward {
       // up in the next loop iteration _after_ the corresponding event handlers
       // fired.
       if (this.processStartupError) {
-        log.error("%s: kubectl process startup error, stop waiting", this);
+        log.error(`${this}: kubectl process startup error, stop waiting`);
         break;
       }
 
       if (this.processExitCode) {
-        log.error(
-          "%s: kubectl process exited unexpectedly, stop waiting",
-          this
-        );
+        log.error(`${this}: kubectl process exited unexpectedly, stop waiting`);
         break;
       }
 
@@ -211,7 +204,7 @@ export class PortForward {
         // handler with one that informs about the child having gone away
         // unexpectedly after successful port-forward establishment, should
         // then also log stdout.err as well and exit code.
-        log.info("%s: ready", this);
+        log.info(`${this}: ready\n${fileHeadBytes}`);
         return true;
       }
       await sleep(0.1);
