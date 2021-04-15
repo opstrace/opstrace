@@ -15,7 +15,9 @@
  */
 
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFormState } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 import graphqlClient from "state/clients/graphqlClient";
 
@@ -97,6 +99,12 @@ type AwsValues = {
   secretAccessKey: string;
 };
 
+const AwsSchema = yup.object().shape({
+  name: yup.string().required(),
+  accessKeyId: yup.string().required(),
+  secretAccessKey: yup.string().required()
+});
+
 const awsDefaultValues: AwsValues = {
   name: "",
   accessKeyId: "",
@@ -107,7 +115,13 @@ function AwsForm(props: { tenantId: string; onCreate: Function }) {
   const classes = useStyles();
   const { tenantId, onCreate } = props;
   const { handleSubmit, reset, control } = useForm({
-    defaultValues: awsDefaultValues
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: awsDefaultValues,
+    resolver: yupResolver(AwsSchema)
+  });
+  const { isValid } = useFormState({
+    control
   });
   const onSubmit = (data: AwsValues) => {
     graphqlClient
@@ -154,13 +168,18 @@ function AwsForm(props: { tenantId: string; onCreate: Function }) {
       />
 
       <div className={classes.control}>
-        <input type="submit" />
+        <input type="submit" disabled={!isValid} />
       </div>
     </form>
   );
 }
 
 type GcpValues = { name: string; accessDoc: string };
+
+const GcpSchema = yup.object().shape({
+  name: yup.string().required(),
+  accessDoc: yup.string().required()
+});
 
 const gcpDefaultValues: GcpValues = {
   name: "",
@@ -171,7 +190,13 @@ function GcpForm(props: { tenantId: string; onCreate: Function }) {
   const classes = useStyles();
   const { tenantId, onCreate } = props;
   const { handleSubmit, reset, control } = useForm({
-    defaultValues: gcpDefaultValues
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: gcpDefaultValues,
+    resolver: yupResolver(GcpSchema)
+  });
+  const { isValid } = useFormState({
+    control
   });
 
   const onSubmit = (data: GcpValues) => {
@@ -210,7 +235,7 @@ function GcpForm(props: { tenantId: string; onCreate: Function }) {
       />
 
       <div className={classes.control}>
-        <input type="submit" />
+        <input type="submit" disabled={!isValid} />
       </div>
     </form>
   );
