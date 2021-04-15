@@ -61,10 +61,11 @@ import {
   logHTTPResponse,
   mtime,
   mtimeDeadlineInSeconds,
+  queryJSONAPI,
   rndstring,
   sleep,
   waitForCortexMetricResult,
-  waitForPrometheusTarget,
+  waitForQueryResult,
   CLUSTER_BASE_URL,
   CORTEX_API_TLS_VERIFY,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
@@ -72,6 +73,8 @@ import {
   TENANT_SYSTEM_API_TOKEN_FILEPATH,
   TENANT_SYSTEM_CORTEX_API_BASE_URL,
 } from "./testutils";
+
+import { PortForward } from "./testutils/portforward";
 
 function getE2EAlertingResources(tenant: string, job: string): Array<K8sResource> {
   // The test environment should already have kubectl working, so we can use that.
@@ -315,6 +318,60 @@ async function getE2EAlertCountMetric(baseUrl: string, uniqueScrapeJobName: stri
   return value;
 }
 
+// Queries Prometheus scrape targets and waits for one or more targets with a matching job label to appear
+export async function waitForPrometheusTarget(
+  tenant: string,
+  jobLabel: string,
+  maxWaitSeconds: number,
+) {
+  const portForwardProm = new PortForward(
+    `tenant-prometheus-${tenant}`, // name (arbitrary/logging)
+    `statefulsets/prometheus-${tenant}-prometheus`, // k8sobj
+    9091, // port_local
+    9090, // port_remote
+    `${tenant}-tenant`, // namespace
+  );
+  await portForwardProm.setup();
+
+  try {
+    const url = `http://127.0.0.1:9091/prometheus/api/v1/targets`;
+    const qparms = new URLSearchParams({state: "active"});
+
+    log.info(`Querying prometheus via port-forward: ${url}`)
+    await waitForQueryResult(
+      () => queryJSONAPI(url, qparms),
+      (data) => {
+        // Example data: https://prometheus.io/docs/prometheus/latest/querying/api/#targets
+        // Search for target(s) with matching job label
+        const targets: Array<any> = data["data"]["activeTargets"];
+        const filtered = targets.filter(target => target["labels"]["job"] === jobLabel);
+        if (filtered.length == 0) {
+          log.info(
+            "No targets with job=%s, instead got: %s",
+            jobLabel,
+            targets
+              .map(t => `${t["labels"]["job"]}:${t["labels"]["namespace"]}/${t["labels"]["pod"]}`)
+              .sort()
+          );
+          return null;
+        }
+        log.info(
+          "Found tenant prometheus scrape targets for job=%s: %s",
+          jobLabel,
+          filtered
+            .map(t => `${t["labels"]["job"]}:${t["labels"]["namespace"]}/${t["labels"]["pod"]}`)
+            .sort()
+        );
+        return filtered;
+      },
+      maxWaitSeconds,
+      false, // This is VERY long for system tenant, so don't log
+    );
+  } finally {
+    await portForwardProm.terminate();
+  }
+}
+
 async function testE2EAlertsForTenant(cortexBaseUrl: string, authTokenFilepath: string | undefined, tenant: string) {
   const ruleNamespace = "testremote";
 
@@ -356,7 +413,9 @@ async function testE2EAlertsForTenant(cortexBaseUrl: string, authTokenFilepath: 
 
   // Wait for the E2E pod to appear in prometheus scrape targets
   log.info(`Waiting for E2E scrape target to appear in tenant prometheus for tenant=${tenant} job=${uniqueScrapeJobName}`);
-  await waitForPrometheusTarget(tenant, uniqueScrapeJobName);
+  // Use a long timeout when waiting for prometheus scraper to see the pod.
+  // Normally takes 5-15s, but can take longer than 30s
+  await waitForPrometheusTarget(tenant, uniqueScrapeJobName, 300);
 
   // Wait for the metric to appear in cortex with the matching random 'job' tag
   log.info(`Waiting for cortex E2E alerting metric for tenant=${tenant} job=${uniqueScrapeJobName} with zero value`);
