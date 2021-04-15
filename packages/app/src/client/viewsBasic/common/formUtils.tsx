@@ -19,13 +19,7 @@ import { Controller } from "react-hook-form";
 
 import { CondRender } from "client/utils/rendering";
 
-import Grid from "@material-ui/core/Grid";
-import {
-  Input,
-  FormControl,
-  FormLabel,
-  FormHelperText
-} from "@material-ui/core";
+import { Input, FormLabel, FormHelperText } from "@material-ui/core";
 
 type ControlledInputProps = {
   name: `${string}` | `${string}.${string}` | `${string}.${number}`;
@@ -33,6 +27,8 @@ type ControlledInputProps = {
   helperText?: string | React.ReactNode | (() => React.ReactNode);
   inputProps?: {};
   control: any;
+  labelClass?: string;
+  controlClass?: string;
 };
 
 export const ControlledInput = ({
@@ -40,25 +36,29 @@ export const ControlledInput = ({
   label,
   inputProps = {},
   helperText,
-  control
+  control,
+  labelClass,
+  controlClass
 }: ControlledInputProps) => {
   console.log(name, helperText);
   return (
-    <Grid item>
-      <Controller
-        render={({ field }) => (
-          <FormControl>
+    <Controller
+      render={({ field }) => (
+        <>
+          <div className={labelClass}>
             <FormLabel>{label}</FormLabel>
+          </div>
+          <div className={controlClass}>
             <Input {...field} {...inputProps} />
             <CondRender
               unless={helperText === undefined}
               render={() => <FormHelperText>{helperText}</FormHelperText>}
             />
-          </FormControl>
-        )}
-        control={control}
-        name={name}
-      />
-    </Grid>
+          </div>
+        </>
+      )}
+      control={control}
+      name={name}
+    />
   );
 };

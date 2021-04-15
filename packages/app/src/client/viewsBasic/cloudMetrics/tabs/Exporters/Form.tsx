@@ -26,27 +26,40 @@ import { ControlledInput } from "client/viewsBasic/common/formUtils";
 import { CondRender } from "client/utils/rendering";
 
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import { Select, MenuItem, FormControl, FormLabel } from "@material-ui/core";
+import { Select, MenuItem, FormLabel } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    "& > *": {
-      margin: theme.spacing(1),
-      width: "25ch"
-    }
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "[label] 200px [control] 1fr",
+    gridAutoFlow: "row",
+    gridGap: ".8em",
+    padding: "1.2em"
+  },
+  label: {
+    gridColumn: "label",
+    gridRow: "auto",
+    alignSelf: "center",
+    justifySelf: "end"
+  },
+  control: {
+    gridColumn: "control",
+    gridRow: "auto",
+    border: "none",
+    padding: "1em",
+    alignSelf: "center"
   }
 }));
 
 type Values = {
-  type: "cloudwatch" | "stackdriver" | "";
+  type: "cloudwatch" | "stackdriver" | "blackbox";
   name: string;
   credential: string;
   config: string;
 };
 
 const defaultValues: Values = {
-  type: "",
+  type: "cloudwatch",
   name: "",
   credential: "",
   config: ""
@@ -55,6 +68,7 @@ const defaultValues: Values = {
 export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
   const { tenantId, onCreate } = props;
   const classes = useStyles();
+
   const { handleSubmit, reset, control, watch } = useForm({
     defaultValues: defaultValues
   });
@@ -63,11 +77,9 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
     return {
       cloudwatch: "aws-key",
       stackdriver: "gcp-service-account",
-      [""]: "unknown"
+      blackbox: "blackbox"
     }[type];
   }, [type]);
-
-  console.log(type, cloudProvider);
 
   const { data: credentials } = useHasura(
     `query credentials($tenant_id: String!, $type: String!) {
@@ -80,6 +92,8 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
       type: cloudProvider
     }
   );
+
+  console.log(type, cloudProvider);
 
   const onSubmit = (data: Values) => {
     const config = JSON.stringify(
@@ -107,102 +121,100 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
   };
 
   return (
-    <Grid
-      container
-      alignItems="flex-start"
-      justify="flex-start"
-      direction="column"
-    >
-      <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
-        <FormControl>
-          <FormLabel>Add Exporter</FormLabel>
+    <form className={classes.grid} onSubmit={handleSubmit(onSubmit)}>
+      <div className={classes.label}>
+        <FormLabel>Add Exporter</FormLabel>
+        <FormLabel>Add Cloud Provider</FormLabel>
+      </div>
+      <div className={classes.control}>
+        <Controller
+          render={({ field }) => (
+            <Select {...field}>
+              <MenuItem value={"cloudwatch"}>CloudWatch</MenuItem>
+              <MenuItem value={"stackdriver"}>Stackdriver</MenuItem>
+              <MenuItem value={"blackbox"}>Blackbox</MenuItem>
+            </Select>
+          )}
+          control={control}
+          name="type"
+        />
+      </div>
+      <CondRender
+        when={type !== "blackbox" && !(credentials?.credential.length > 0)}
+      >
+        <div className={classes.control}>
+          <p>There are no defined credentials for this exporter.</p>
+        </div>
+      </CondRender>
+      <CondRender when={credentials?.credential.length > 0}>
+        <div className={classes.label}>
+          <FormLabel>{`${
+            type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
+          } Credential`}</FormLabel>
+        </div>
+        <div className={classes.control}>
           <Controller
             render={({ field }) => (
               <Select {...field}>
-                <MenuItem value={"cloudwatch"}>CloudWatch</MenuItem>
-                <MenuItem value={"stackdriver"}>Stackdriver</MenuItem>
-                <MenuItem value={"blackbox"}>Blackbox</MenuItem>
+                {map(({ name }) => <MenuItem value={name}>{name}</MenuItem>)(
+                  credentials?.credential
+                )}
               </Select>
             )}
             control={control}
-            name="type"
+            name="credential"
           />
-        </FormControl>
-        <CondRender when={type !== "" && !(credentials?.credential.length > 0)}>
-          <p>There are no defined credentials for this exporter.</p>
-        </CondRender>
-        <CondRender when={credentials?.credential.length > 0}>
-          <FormControl>
-            <FormLabel>{`${
-              type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
-            } Credential`}</FormLabel>
-            <Controller
-              render={({ field }) => (
-                <Select {...field}>
-                  {map(({ name }) => {
-                    return <MenuItem value={name}>{name}</MenuItem>;
-                  })(credentials?.credential)}
-                </Select>
-              )}
-              control={control}
-              name="credential"
-            />
-          </FormControl>
-          <ControlledInput name="name" label="Name" control={control} />
-          <ControlledInput
-            name="config"
-            label={`${
-              type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
-            } Config`}
-            inputProps={{ multiline: true, rows: 5 }}
-            helperText={
-              <>
-                <CondRender when={type === "cloudwatch"}>
-                  <p>
-                    CloudWatch{" "}
-                    <a
-                      href="https://github.com/prometheus/cloudwatch_exporter#user-content-configuration"
-                      target="_blank"
-                    >
-                      configuration format
-                    </a>
-                    documentation.
-                  </p>
-                </CondRender>
-                <CondRender when={type === "stackdriver"}>
-                  <p>
-                    Stackdriver{" "}
-                    <a
-                      href="https://github.com/prometheus-community/stackdriver_exporter#user-content-flags"
-                      target="_blank"
-                    >
-                      configuration format
-                    </a>
-                    documentation.
-                  </p>
-                </CondRender>
-              </>
-            }
-            control={control}
-          />
+        </div>
+        <ControlledInput
+          name="name"
+          label="Name"
+          control={control}
+          labelClass={classes.label}
+          controlClass={classes.control}
+        />
+        <ControlledInput
+          name="config"
+          label={`${
+            type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
+          } Config`}
+          inputProps={{ multiline: true, rows: 10, fullWidth: true }}
+          labelClass={classes.label}
+          controlClass={classes.control}
+          helperText={
+            <>
+              <CondRender when={type === "cloudwatch"}>
+                <p>
+                  CloudWatch{" "}
+                  <a
+                    href="https://github.com/prometheus/cloudwatch_exporter#user-content-configuration"
+                    target="_blank"
+                  >
+                    configuration format
+                  </a>
+                  documentation.
+                </p>
+              </CondRender>
+              <CondRender when={type === "stackdriver"}>
+                <p>
+                  Stackdriver{" "}
+                  <a
+                    href="https://github.com/prometheus-community/stackdriver_exporter#user-content-flags"
+                    target="_blank"
+                  >
+                    configuration format
+                  </a>
+                  documentation.
+                </p>
+              </CondRender>
+            </>
+          }
+          control={control}
+        />
 
-          <Grid
-            container
-            direction="row"
-            justify="space-evenly"
-            alignItems="flex-start"
-          >
-            <Grid item>
-              <button type="button" onClick={() => reset(defaultValues)}>
-                Reset
-              </button>
-            </Grid>
-            <Grid item>
-              <input type="submit" />
-            </Grid>
-          </Grid>
-        </CondRender>
-      </form>
-    </Grid>
+        <div className={classes.control}>
+          <input type="submit" />
+        </div>
+      </CondRender>
+    </form>
   );
 }

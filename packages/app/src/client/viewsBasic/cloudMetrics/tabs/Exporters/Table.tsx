@@ -18,6 +18,7 @@ import React, { useMemo } from "react";
 import { format, parseISO } from "date-fns";
 import * as yamlParser from "js-yaml";
 
+// import useGraphana from "client/hooks/useGraphana";
 import graphqlClient from "state/clients/graphqlClient";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -28,7 +29,6 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
 
 import Collapse from "@material-ui/core/Collapse";
 import IconButton from "@material-ui/core/IconButton";
@@ -78,7 +78,7 @@ export const ExportersTable = (props: ExportersTableProps) => {
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
@@ -112,6 +112,11 @@ const ExportersRow = (props: {
 }) => {
   const { row, onDelete } = props;
   const [open, setOpen] = React.useState(false);
+
+  // const url = `/loki/ap/ipacgkzv1/series?match=%7Bk8s_container_name%3D%22exporter%22%2Ck8s_namespace_name%3D%22${tenantId}-tenant%22%2Ck8s_pod_name%3D~%22%5Eexporter-${row.name}-%5Ba-z0-9-%5D*%22%7D&start=1618278146119000000&end=1618281746120000000`;
+
+  // const { data: exporterStatus } = useGraphana("terrcin", url);
+  // console.log(exporterStatus);
 
   const config = useMemo(() => {
     if (open)

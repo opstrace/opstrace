@@ -19,31 +19,16 @@ import React from "react";
 import tabs from "./tabs";
 import { TabbedDetail } from "client/components/TabbedDetail";
 
-import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 
-export const CloudMetrics = () => {
-  return (
-    <Box
-      width="100%"
-      height="100%"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      flexWrap="wrap"
-      p={1}
-    >
-      <Box maxWidth={900}>
-        <Card p={3}>
-          <CardHeader
-            titleTypographyProps={{ variant: "h5" }}
-            title="Cloud Metrics"
-          />
-          <CardContent>
-            <TabbedDetail tabs={tabs} />
-          </CardContent>
-        </Card>
-      </Box>
-    </Box>
-  );
-};
+export const CloudMetrics = () => (
+  <Card p={3}>
+    <CardHeader
+      titleTypographyProps={{ variant: "h5" }}
+      title="Cloud Metrics"
+    />
+    <CardContent>
+      <TabbedDetail tabs={tabs} />
+    </CardContent>
+  </Card>
+);

@@ -23,11 +23,20 @@ import useHasura from "client/hooks/useHasura";
 import { CredentialsTable } from "./Table";
 import { CredentialsForm } from "./Form";
 
-import { Box } from "client/components/Box";
-import Grid from "@material-ui/core/Grid";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles(theme => ({
+  gridContainer: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: "16px 0px",
+    gridTemplateAreas: `"." "."`
+  }
+}));
 
 function Credentials() {
   const { tenantId } = useParams<{ tenantId: string }>();
+  const classes = useStyles();
 
   const { data, mutate: changeCallback } = useHasura(
     `
@@ -48,25 +57,14 @@ function Credentials() {
   );
 
   return (
-    <Box display="flex" height="500px" width="700px">
-      <Grid
-        container
-        alignItems="flex-start"
-        justify="flex-start"
-        direction="column"
-      >
-        <Grid item>
-          <CredentialsTable
-            tenantId={tenantId}
-            onChange={changeCallback}
-            rows={formatRows(data?.credential)}
-          />
-        </Grid>
-        <Grid item>
-          <CredentialsForm tenantId={tenantId} onCreate={changeCallback} />
-        </Grid>
-      </Grid>
-    </Box>
+    <div className={classes.gridContainer}>
+      <CredentialsTable
+        tenantId={tenantId}
+        onChange={changeCallback}
+        rows={formatRows(data?.credential)}
+      />
+      <CredentialsForm tenantId={tenantId} onCreate={changeCallback} />
+    </div>
   );
 }
 

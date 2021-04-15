@@ -23,15 +23,28 @@ import { ControlledInput } from "client/viewsBasic/common/formUtils";
 import { CondRender } from "client/utils/rendering";
 
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import { Select, MenuItem, FormControl, FormLabel } from "@material-ui/core";
+import { Select, MenuItem, FormLabel } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    "& > *": {
-      margin: theme.spacing(1),
-      width: "25ch"
-    }
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "[label] 200px [control] 1fr",
+    gridAutoFlow: "row",
+    gridGap: ".8em",
+    padding: "1.2em"
+  },
+  label: {
+    gridColumn: "label",
+    gridRow: "auto",
+    alignSelf: "center",
+    justifySelf: "end"
+  },
+  control: {
+    gridColumn: "control",
+    gridRow: "auto",
+    border: "none",
+    padding: "1em",
+    alignSelf: "center"
   }
 }));
 
@@ -39,40 +52,42 @@ export function CredentialsForm(props: {
   tenantId: string;
   onCreate: Function;
 }) {
+  const classes = useStyles();
   const { tenantId, onCreate } = props;
-  const { control, watch } = useForm({ defaultValues: { cloudProvider: "" } });
+  const { control, watch } = useForm({
+    defaultValues: { cloudProvider: "aws-key" }
+  });
   const cloudProvider = watch("cloudProvider");
 
   return (
-    <Grid
-      container
-      alignItems="flex-start"
-      justify="flex-start"
-      direction="column"
-    >
-      <Grid item>
-        <FormControl>
+    <>
+      <div className={classes.grid}>
+        <div className={classes.label}>
           <FormLabel>Add Cloud Provider</FormLabel>
+        </div>
+        <div className={classes.control}>
           <Controller
             render={({ field }) => (
               <Select {...field}>
-                <MenuItem value={"aws"}>Amazon Web Services</MenuItem>
-                <MenuItem value={"gcp"}>Google Cloud Platform</MenuItem>
+                <MenuItem value="aws-key">Amazon Web Services</MenuItem>
+                <MenuItem value="gcp-service-account">
+                  Google Cloud Platform
+                </MenuItem>
               </Select>
             )}
             control={control}
             name="cloudProvider"
           />
-        </FormControl>
-      </Grid>
+        </div>
+      </div>
 
-      <CondRender when={cloudProvider === "aws"}>
+      <CondRender when={cloudProvider === "aws-key"}>
         <AwsForm tenantId={tenantId} onCreate={onCreate} />
       </CondRender>
-      <CondRender when={cloudProvider === "gcp"}>
+      <CondRender when={cloudProvider === "gcp-service-account"}>
         <GcpForm tenantId={tenantId} onCreate={onCreate} />
       </CondRender>
-    </Grid>
+    </>
   );
 }
 
@@ -89,8 +104,8 @@ const awsDefaultValues: AwsValues = {
 };
 
 function AwsForm(props: { tenantId: string; onCreate: Function }) {
-  const { tenantId, onCreate } = props;
   const classes = useStyles();
+  const { tenantId, onCreate } = props;
   const { handleSubmit, reset, control } = useForm({
     defaultValues: awsDefaultValues
   });
@@ -114,35 +129,33 @@ function AwsForm(props: { tenantId: string; onCreate: Function }) {
   };
 
   return (
-    <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
-      <ControlledInput name="name" label="Name" control={control} />
+    <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
+      <ControlledInput
+        name="name"
+        label="Name"
+        control={control}
+        labelClass={classes.label}
+        controlClass={classes.control}
+      />
       <ControlledInput
         name="accessKeyId"
         label="Access Key ID"
         control={control}
+        labelClass={classes.label}
+        controlClass={classes.control}
       />
       <ControlledInput
         name="secretAccessKey"
         label="Secret Access Key"
         helperText="Important: this is stored as plain text."
         control={control}
+        labelClass={classes.label}
+        controlClass={classes.control}
       />
 
-      <Grid
-        container
-        direction="row"
-        justify="space-evenly"
-        alignItems="flex-start"
-      >
-        <Grid item>
-          <button type="button" onClick={() => reset(awsDefaultValues)}>
-            Reset
-          </button>
-        </Grid>
-        <Grid item>
-          <input type="submit" />
-        </Grid>
-      </Grid>
+      <div className={classes.control}>
+        <input type="submit" />
+      </div>
     </form>
   );
 }
@@ -155,8 +168,8 @@ const gcpDefaultValues: GcpValues = {
 };
 
 function GcpForm(props: { tenantId: string; onCreate: Function }) {
-  const { tenantId, onCreate } = props;
   const classes = useStyles();
+  const { tenantId, onCreate } = props;
   const { handleSubmit, reset, control } = useForm({
     defaultValues: gcpDefaultValues
   });
@@ -178,31 +191,27 @@ function GcpForm(props: { tenantId: string; onCreate: Function }) {
   };
 
   return (
-    <form className={classes.root} onSubmit={handleSubmit(onSubmit)}>
-      <ControlledInput name="name" label="Name" control={control} />
+    <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
+      <ControlledInput
+        name="name"
+        label="Name"
+        control={control}
+        labelClass={classes.label}
+        controlClass={classes.control}
+      />
       <ControlledInput
         name="accessDoc"
         label="Access Doc"
-        inputProps={{ multiline: true, rows: 5 }}
+        inputProps={{ multiline: true, rows: 10, fullWidth: true }}
         helperText="Important: this is stored as plain text."
         control={control}
+        labelClass={classes.label}
+        controlClass={classes.control}
       />
 
-      <Grid
-        container
-        direction="row"
-        justify="space-evenly"
-        alignItems="flex-start"
-      >
-        <Grid item>
-          <button type="button" onClick={() => reset(gcpDefaultValues)}>
-            Reset
-          </button>
-        </Grid>
-        <Grid item>
-          <input type="submit" />
-        </Grid>
-      </Grid>
+      <div className={classes.control}>
+        <input type="submit" />
+      </div>
     </form>
   );
 }
