@@ -32,8 +32,6 @@ import { ZonedDateTime, DateTimeFormatter } from "@js-joda/core";
 
 import getPort from "get-port";
 
-import { PortForward } from "./portforward";
-
 export const CORTEX_API_TLS_VERIFY = false;
 export const LOKI_API_TLS_VERIFY = false;
 
@@ -83,14 +81,16 @@ export declare interface Dict<T = any> {
  */
 export let CLUSTER_BASE_URL: string;
 export let TEST_REMOTE_ARTIFACT_DIRECTORY: string;
-export let TENANT_DEFAULT_LOKI_API_BASE_URL: string;
+
 export let TENANT_DEFAULT_CORTEX_API_BASE_URL: string;
 export let TENANT_DEFAULT_DD_API_BASE_URL: string;
+export let TENANT_DEFAULT_LOKI_API_BASE_URL: string;
 export let TENANT_DEFAULT_API_TOKEN_FILEPATH: string | undefined;
 
-export let TENANT_SYSTEM_LOKI_API_BASE_URL: string;
 export let TENANT_SYSTEM_CORTEX_API_BASE_URL: string;
+export let TENANT_SYSTEM_LOKI_API_BASE_URL: string;
 export let TENANT_SYSTEM_API_TOKEN_FILEPATH: string | undefined;
+
 let globalTestSuiteSetupPerformed = false;
 export function globalTestSuiteSetupOnce() {
   log.info("globalTestSuiteSetupOnce()");
@@ -374,6 +374,29 @@ export async function readFirstNBytes(
   //log.debug("read head of file: %s", fileHead);
 }
 
+// Manually applies the specified token file to the headers.
+export function enrichHeadersWithAuthTokenFile(
+  authTokenFilepath: string | undefined,
+  headers: Record<string, string>
+): Record<string, string> {
+  if (!authTokenFilepath) {
+    // shortcut: skip addition if file is not configured
+    return headers;
+  }
+  log.info("read token from %s", authTokenFilepath);
+  const tenantAuthToken = fs
+    .readFileSync(authTokenFilepath, {
+      encoding: "utf8"
+    })
+    .trim();
+  if (!tenantAuthToken) {
+    throw new Error("auth token file defined, but file is empty: ${tokenFilepath}");
+  }
+  headers["Authorization"] = `Bearer ${tenantAuthToken}`;
+  return headers;
+}
+
+// Autodetects the auth token to use based on the URL and applies it to the headers.
 export function enrichHeadersWithAuthToken(
   url: string,
   headers: Record<string, string>
@@ -381,38 +404,27 @@ export function enrichHeadersWithAuthToken(
   // automatically add authentication proof
 
   const mapping: Record<string, string> = {};
+
   mapping[TENANT_DEFAULT_CORTEX_API_BASE_URL] =
     TENANT_DEFAULT_API_TOKEN_FILEPATH || "";
   mapping[TENANT_DEFAULT_LOKI_API_BASE_URL] =
     TENANT_DEFAULT_API_TOKEN_FILEPATH || "";
+
   mapping[TENANT_SYSTEM_CORTEX_API_BASE_URL] =
     TENANT_SYSTEM_API_TOKEN_FILEPATH || "";
   mapping[TENANT_SYSTEM_LOKI_API_BASE_URL] =
     TENANT_SYSTEM_API_TOKEN_FILEPATH || "";
 
-  let tenantAuthToken = "";
-
   for (const [baseurl, tokenFilepath] of Object.entries(mapping)) {
     if (url.startsWith(baseurl)) {
       if (tokenFilepath !== "") {
-        log.info("read token from %s for url %s", tokenFilepath, url);
-        tenantAuthToken = fs
-          .readFileSync(tokenFilepath, {
-            encoding: "utf8"
-          })
-          .trim();
-        if (!tenantAuthToken) {
-          throw new Error("auth token file defined, but file is empty");
-        }
-        break;
+        // Found match, add to headers and exit
+        return enrichHeadersWithAuthTokenFile(tokenFilepath, headers)
       }
     }
   }
 
-  if (tenantAuthToken !== "") {
-    headers["Authorization"] = `Bearer ${tenantAuthToken}`;
-  }
-
+  // Give up and return existing headers
   return headers;
 }
 
@@ -841,40 +853,120 @@ export const httpTimeoutSettings = {
   request: 60000
 };
 
-export async function sendAlertToAlertmanager(
-  portForwardAlertmanager: PortForward,
-  alertDefinition: string
+export async function queryJSONAPI(url: string, queryParams: URLSearchParams) {
+  /* Notes, in no particular order:
+
+  - test deprecated /api/prom/query endpoint
+    https://github.com/grafana/loki/blob/master/docs/api.md#get-apipromquery
+    this resembles a query parameter set as constructed by the Grafana Explore
+    UI.
+
+  - Ideal would be: do not perform any kind of response body decoding within
+    got's HTTP client implementation, do this explicitly after retrieving the
+    response data as a byte sequence (into a Buffer), and then decode it
+    explicitly first to text using e.g. response.body.toString("utf-8") and
+    then as JSON doc. In the future use got 10 (currently 10.0.0-beta2, so a
+    little early) because of the buffer goodness:
+    https://github.com/sindresorhus/got/issues/949
+
+  - Do not magically throw an error upon receiving a non-2xx response. Leave
+    this to the test business logic.
+
+  - Note that Loki seems to set `'Content-Type': 'text/plain; charset=utf-8'`
+    even when it sends a JSON document in the response body. Submit a bug
+    report, and at some point test that this is not the case anymore here.
+  */
+
+  // Automagically enrich with Authorization header, if applicable.
+  const headers = enrichHeadersWithAuthToken(url, {});
+
+  const options = {
+    throwHttpErrors: false,
+    searchParams: queryParams,
+    timeout: httpTimeoutSettings,
+    headers: headers,
+    https: { rejectUnauthorized: CORTEX_API_TLS_VERIFY } // disable TLS server cert verification for now
+  };
+
+  const response = await got(url, options);
+  if (response.statusCode != 200) {
+    logHTTPResponse(response);
+  }
+
+  try {
+    return JSON.parse(response.body);
+  } catch (e) {
+    log.error("Failed to parse response as JSON:");
+    logHTTPResponse(response);
+    throw e;
+  }
+}
+
+// Generic function for polling a JSON endpoint and returning a result after it passes a check.
+export async function waitForQueryResult<T>(
+  // Callback for executing the query itself
+  queryFunc: { (): Promise<T> },
+  // Callback for checking the result for an expected value, returning null if the query should retry
+  testFunc: { (queryResponse: T): any | null},
+  maxWaitSeconds = 30,
+  logQueryResponse = false
 ) {
-  const maxWaitSeconds = 15;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-  log.info("Sending alert to Alertmanager; deadline in %s s.", maxWaitSeconds);
-
-  const t0 = mtime();
-  const url = `http://localhost:${portForwardAlertmanager.port_local}/alertmanager/api/v1/alerts`;
-
-  log.info(`Alert definition: ${alertDefinition}`);
-  log.info(`Alertmanager URL: ${url}`);
+  log.info("Waiting for query to return a match, deadline in %ss", maxWaitSeconds);
 
   while (true) {
     if (mtime() > deadline) {
-      log.info("Deadline hit");
-      throw new Error("Prometheus container setup failed: deadline hit");
+      log.error("Reached %ss deadline, giving up", maxWaitSeconds);
+      break;
     }
-    await sleep(0.1);
 
-    try {
-      const response = await got.post(url, { body: alertDefinition });
-      if (response.statusCode == 200 && response.body) {
-        log.info("Alertmanager response: " + response.body);
-        log.info("This took %s s", mtimeDiffSeconds(t0).toFixed(2));
-        break;
-      } else {
-        log.error("Got unexpected HTTP response from Prom /metrics");
-        logHTTPResponse(response);
-      }
-    } catch (error) {
-      log.error("Got unexpected error from HTTP call to Alertmanager");
-      logHTTPResponse(error);
+    const data = await queryFunc();
+    if (logQueryResponse) {
+      log.info("Query response data:\n%s", JSON.stringify(data, null, 2));
     }
+
+    const testResult = testFunc(data)
+    if (testResult != null) {
+      return testResult;
+    }
+
+    await sleep(1.0);
   }
+  throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+}
+
+// Queries Cortex metrics data and waits for a non-empty result.
+export async function waitForCortexMetricResult(
+  cortexBaseUrl: string,
+  queryParams: Record<string, string>,
+  // Query endpoint under /api/v1 to hit, e.g. "query" for latest value or "query_range" for time range
+  queryUrlSuffix: string,
+  // What's our latency goal here? Upper pipeline latency limit? As of writing
+  // this code I have seen this latency to vary between about 2 seconds and 12
+  // seconds.
+  maxWaitSeconds = 30,
+  logQueryResponse = false
+) {
+  const url = `${cortexBaseUrl}/api/v1/${queryUrlSuffix}`;
+
+  log.info(
+    "Cortex query parameter (object):\n%s",
+    JSON.stringify(queryParams, Object.keys(queryParams).sort(), 2)
+  );
+  const qparms = new URLSearchParams(queryParams);
+  log.info("Cortex query parameters (query string):\n%s", qparms);
+
+  return waitForQueryResult(
+    () => queryJSONAPI(url, qparms),
+    (data) => {
+      // Example data:
+      // - query: https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
+      // - query_range: https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
+      // Metrics data has results nested here, wait for non-empty result:
+      const resultArray = data["data"]["result"];
+      return (resultArray.length > 0) ? resultArray : null;
+    },
+    maxWaitSeconds,
+    logQueryResponse,
+  );
 }

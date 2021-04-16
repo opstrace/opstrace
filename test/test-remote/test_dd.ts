@@ -22,23 +22,22 @@ import { ZonedDateTime } from "@js-joda/core";
 import got from "got";
 
 import {
-  log,
-  rndstring,
-  logHTTPResponse,
-  httpTimeoutSettings,
-  TENANT_DEFAULT_DD_API_BASE_URL,
-  TENANT_DEFAULT_CORTEX_API_BASE_URL,
-  TENANT_DEFAULT_API_TOKEN_FILEPATH,
-  globalTestSuiteSetupOnce,
-  readDockerDNSSettings,
   createTempfile,
-  mtimeDeadlineInSeconds,
+  globalTestSuiteSetupOnce,
+  httpTimeoutSettings,
+  log,
+  logHTTPResponse,
   mtime,
+  mtimeDeadlineInSeconds,
+  readDockerDNSSettings,
+  readFirstNBytes,
+  rndstring,
   sleep,
-  readFirstNBytes
+  waitForCortexMetricResult,
+  TENANT_DEFAULT_API_TOKEN_FILEPATH,
+  TENANT_DEFAULT_CORTEX_API_BASE_URL,
+  TENANT_DEFAULT_DD_API_BASE_URL,
 } from "./testutils";
-
-import { waitForCortexQueryResult } from "./test_prom_remote_write";
 
 function ddApiSeriesUrl() {
   let url = `${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;
@@ -294,9 +293,10 @@ suite("DD API test suite", function () {
       step: "60s"
     };
 
-    const resultArray = await waitForCortexQueryResult(
+    const resultArray = await waitForCortexMetricResult(
       TENANT_DEFAULT_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
 
     log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));
@@ -346,9 +346,10 @@ suite("DD API test suite", function () {
       step: "60s"
     };
 
-    const resultArray = await waitForCortexQueryResult(
+    const resultArray = await waitForCortexMetricResult(
       TENANT_DEFAULT_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
 
     log.info("resultArray: %s", JSON.stringify(resultArray, null, 2));

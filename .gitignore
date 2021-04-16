@@ -25,6 +25,7 @@ opstrace
 ./go.mod
 
 tsconfig.tsbuildinfo
+_tscbuild/
 
 **/secrets/**
 **/out

@@ -9,7 +9,9 @@ This README is relevant for developing tests.
 Concept:
 
 * `test-remote` is the name of this test runner.
-* `test-remote` requires `kubectl` to be configured against a specific remote opstrace cluster (it uses `kubectl port-forward ...` to connect to individual [Kubernetes network services](https://kubernetes.io/docs/concepts/services-networking/service/) in the remote cluster to communicate with them).
+* `test-remote` requires `kubectl` to be configured against a specific remote opstrace cluster:
+  - it uses `kubectl port-forward ...` to connect to individual [Kubernetes network services](https://kubernetes.io/docs/concepts/services-networking/service/) in the remote cluster to communicate with them.
+  - it deploys [test harnesses](https://github.com/grafana/cortex-tools/blob/main/docs/e2ealerting.md) into the cluster to interact with cluster alerts
 * `test-remote` is executed by the NodeJS runtime and -- for separation of concerns -- is set up as an isolated NPM package; defined by the directory that this README resides in.
 
 ## Architecture overview

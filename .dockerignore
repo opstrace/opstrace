@@ -1,6 +1,5 @@
 **/build
 secrets
-test
 ci
 npm-debug.log
 .git

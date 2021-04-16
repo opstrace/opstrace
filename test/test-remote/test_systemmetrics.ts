@@ -19,10 +19,9 @@ import { ZonedDateTime } from "@js-joda/core";
 import {
   log,
   globalTestSuiteSetupOnce,
-  TENANT_SYSTEM_CORTEX_API_BASE_URL
+  waitForCortexMetricResult,
+  TENANT_SYSTEM_CORTEX_API_BASE_URL,
 } from "./testutils";
-
-import { waitForCortexQueryResult } from "./test_prom_remote_write";
 
 suite("system metrics test suite", function () {
   suiteSetup(async function () {
@@ -48,9 +47,10 @@ suite("system metrics test suite", function () {
       step: "1"
     };
 
-    const resultArray = await waitForCortexQueryResult(
+    const resultArray = await waitForCortexMetricResult(
       TENANT_SYSTEM_CORTEX_API_BASE_URL,
-      queryParams
+      queryParams,
+      "query_range"
     );
 
     // pragmatic criterion for starters: expect a number of values. with

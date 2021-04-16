@@ -28,10 +28,5 @@
     "loki-node-client-tools/*.ts",
     "prom-node-client-tools/resources/*.json",
     "prom-node-client-tools/*.ts"
-  ],
-  "references": [
-    { "path": "../../lib/utils" },
-    { "path": "../../lib/kubernetes" },
-    { "path": "../../packages/buildinfo" }
   ]
 }
