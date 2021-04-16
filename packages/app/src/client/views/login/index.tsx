@@ -149,7 +149,7 @@ const Login = (props: { state?: State }) => {
         setAccessToken(token);
       } catch (e) {}
     })();
-  }, [isAuthenticated, getAccessTokenSilently]);
+  }, [isAuthenticated, getAccessTokenSilently, opstraceClusterName]);
 
   // Use the access token to log in to (create a session with) the cluster.
   useEffect(() => {
