@@ -19,14 +19,13 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
-import * as serviceWorker from "./serviceWorker";
+// import * as serviceWorker from "./serviceWorker";
 import { RoutesWithSSRAssetRemoval } from "./routes";
 
 Sentry.init({
-  dsn: "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
-  integrations: [
-    new Integrations.BrowserTracing(),
-  ]
+  dsn:
+    "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
+  integrations: [new Integrations.BrowserTracing()]
 });
 
 const root = document.getElementById("root");
@@ -47,4 +46,8 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-serviceWorker.register();
+// 2021.04.16 NTW: this service worker does additional caching for progressive asset loading. After each cluster
+// upgrade users can't login and much clear their caches to get the login working again. Current theory is that
+// this serviceWorker might be creating a bad cache situation, so disabling it to test that.
+// Also not really providing any benefit at the moment.
+// serviceWorker.register();
