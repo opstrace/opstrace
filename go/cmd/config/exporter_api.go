@@ -77,8 +77,10 @@ func (e *exporterAPI) listExporters(tenant string, w http.ResponseWriter, r *htt
 
 	log.Debugf("Listing %d exporters", len(resp.Exporter))
 
-	encoder := yaml.NewEncoder(w)
-	for _, exporter := range resp.Exporter {
+	// Create list payload to respond with.
+	// Avoid passing entries individually to encoder since that won't consistently produce a list.
+	entries := make([]ExporterInfo, len(resp.Exporter))
+	for i, exporter := range resp.Exporter {
 		configJSON := make(map[string]interface{})
 		err := json.Unmarshal([]byte(exporter.Config), &configJSON)
 		if err != nil {
@@ -86,15 +88,18 @@ func (e *exporterAPI) listExporters(tenant string, w http.ResponseWriter, r *htt
 			log.Warnf("Failed to decode JSON config for exporter %s (err: %s): %s", exporter.Name, err, exporter.Config)
 			configJSON["json"] = exporter.Config
 		}
-		encoder.Encode(ExporterInfo{
+		entries[i] = ExporterInfo{
 			Name:       exporter.Name,
 			Type:       exporter.Type,
 			Credential: exporter.Credential,
 			Config:     configJSON,
 			CreatedAt:  exporter.CreatedAt,
 			UpdatedAt:  exporter.UpdatedAt,
-		})
+		}
 	}
+
+	encoder := yaml.NewEncoder(w)
+	encoder.Encode(entries)
 }
 
 func (e *exporterAPI) writeExporters(tenant string, w http.ResponseWriter, r *http.Request) {

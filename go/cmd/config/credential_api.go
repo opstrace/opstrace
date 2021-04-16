@@ -71,15 +71,20 @@ func (c *credentialAPI) listCredentials(tenant string, w http.ResponseWriter, r 
 
 	log.Debugf("Listing %d credentials", len(resp.Credential))
 
-	encoder := yaml.NewEncoder(w)
-	for _, credential := range resp.Credential {
-		encoder.Encode(CredentialInfo{
+	// Create list payload to respond with.
+	// Avoid passing entries individually to encoder since that won't consistently produce a list.
+	entries := make([]CredentialInfo, len(resp.Credential))
+	for i, credential := range resp.Credential {
+		entries[i] = CredentialInfo{
 			Name:      credential.Name,
 			Type:      credential.Type,
 			CreatedAt: credential.CreatedAt,
 			UpdatedAt: credential.UpdatedAt,
-		})
+		}
 	}
+
+	encoder := yaml.NewEncoder(w)
+	encoder.Encode(entries)
 }
 
 func (c *credentialAPI) writeCredentials(tenant string, w http.ResponseWriter, r *http.Request) {

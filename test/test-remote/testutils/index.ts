@@ -22,15 +22,16 @@ import path from "path";
 import crypto from "crypto";
 
 import Docker from "dockerode";
-import mustache from "mustache";
-import winston from "winston";
-import tmp from "tmp";
+import getPort from "get-port";
 import jwt from "jsonwebtoken";
+import mustache from "mustache";
+import tmp from "tmp";
+import winston from "winston";
 
 import got, { Response as GotResponse } from "got";
 import { ZonedDateTime, DateTimeFormatter } from "@js-joda/core";
 
-import getPort from "get-port";
+import { PortForward } from "./portforward";
 
 export const CORTEX_API_TLS_VERIFY = false;
 export const LOKI_API_TLS_VERIFY = false;
@@ -969,4 +970,60 @@ export async function waitForCortexMetricResult(
     maxWaitSeconds,
     logQueryResponse,
   );
+}
+
+// Queries Prometheus scrape targets and waits for one or more targets with a matching job label to appear
+export async function waitForPrometheusTarget(
+  tenant: string,
+  jobLabel: string,
+  // Use a long timeout when waiting for prometheus scraper to see the pod.
+  // Normally takes 5-15s, but can take longer than 30s
+  maxWaitSeconds = 300,
+) {
+  const portForwardProm = new PortForward(
+    `tenant-prometheus-${tenant}`, // name (arbitrary/logging)
+    `statefulsets/prometheus-${tenant}-prometheus`, // k8sobj
+    9091, // port_local
+    9090, // port_remote
+    `${tenant}-tenant`, // namespace
+  );
+  await portForwardProm.setup();
+
+  try {
+    const url = `http://127.0.0.1:9091/prometheus/api/v1/targets`;
+    const qparms = new URLSearchParams({state: "active"});
+
+    log.info(`Querying prometheus via port-forward: ${url}`)
+    await waitForQueryResult(
+      () => queryJSONAPI(url, qparms),
+      (data) => {
+        // Example data: https://prometheus.io/docs/prometheus/latest/querying/api/#targets
+        // Search for target(s) with matching job label
+        const targets: Array<any> = data["data"]["activeTargets"];
+        const filtered = targets.filter(target => target["labels"]["job"] === jobLabel);
+        if (filtered.length == 0) {
+          log.info(
+            "No targets with job=%s, instead got: %s",
+            jobLabel,
+            targets
+              .map(t => `${t["labels"]["job"]}:${t["labels"]["namespace"]}/${t["labels"]["pod"]}`)
+              .sort()
+          );
+          return null;
+        }
+        log.info(
+          "Found tenant prometheus scrape targets for job=%s: %s",
+          jobLabel,
+          filtered
+            .map(t => `${t["labels"]["job"]}:${t["labels"]["namespace"]}/${t["labels"]["pod"]}`)
+            .sort()
+        );
+        return filtered;
+      },
+      maxWaitSeconds,
+      false, // This is VERY long for system tenant, so don't log
+    );
+  } finally {
+    await portForwardProm.terminate();
+  }
 }
