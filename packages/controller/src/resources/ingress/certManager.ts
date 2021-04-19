@@ -1174,7 +1174,10 @@ export function CertManagerResources(
             spec: {
               containers: [
                 {
-                  args: ["--v=2", "--leader-election-namespace=kube-system"],
+                  args: [
+                    "--v=2",
+                    "--leader-elect=false"
+                  ],
                   env: [
                     {
                       name: "POD_NAMESPACE",
