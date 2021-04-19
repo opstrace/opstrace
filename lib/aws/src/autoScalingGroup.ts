@@ -124,6 +124,12 @@ class ASGRes extends AWSResource<
     );
 
     const scalingacts: AutoScaling.Activities = await this.getScalingActivities();
+
+    if ((scalingacts.length === 0) && (instanceCount === this.expectedInstanceCount)) {
+      log.info("%s setup: nothing to do, no scaling activities seen recently and already at desired capacity", this.rname);
+      return asg;
+    }
+
     if (scalingacts.length === 0) {
       log.info("%s setup: no scaling activities seen yet", this.rname);
       return false;
