@@ -15,10 +15,11 @@
  */
 
 import React, { useMemo } from "react";
-import { format, parseISO } from "date-fns";
+import { pathOr } from "ramda";
+import { format, parseISO, getUnixTime, subHours } from "date-fns";
 import * as yamlParser from "js-yaml";
 
-// import useGraphana from "client/hooks/useGraphana";
+import useGrafana from "client/hooks/useGrafana";
 import graphqlClient from "state/clients/graphqlClient";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -87,6 +88,7 @@ export const ExportersTable = (props: ExportersTableProps) => {
             <TableCell>Type</TableCell>
             <TableCell>Credential</TableCell>
             <TableCell>Created At</TableCell>
+            <TableCell>Status</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableHead>
@@ -105,6 +107,8 @@ export const ExportersTable = (props: ExportersTableProps) => {
   );
 };
 
+const getUnixNanoSecTime = (date: Date) => getUnixTime(date) * 1000000000;
+
 const ExportersRow = (props: {
   tenantId: string;
   row: Row;
@@ -113,10 +117,24 @@ const ExportersRow = (props: {
   const { row, onDelete } = props;
   const [open, setOpen] = React.useState(false);
 
-  // const url = `/loki/ap/ipacgkzv1/series?match=%7Bk8s_container_name%3D%22exporter%22%2Ck8s_namespace_name%3D%22${tenantId}-tenant%22%2Ck8s_pod_name%3D~%22%5Eexporter-${row.name}-%5Ba-z0-9-%5D*%22%7D&start=1618278146119000000&end=1618281746120000000`;
+  const exporterLogUri = useMemo(() => {
+    const logQl = `{k8s_namespace_name="system-tenant",k8s_container_name="exporter",k8s_pod_name=~"^exporter-${row.name}-[a-z0-9-]*"} |= "stderr" |= "software.amazon.awssdk.services.cloudwatch.model.CloudWatchException"`;
+    const end = new Date();
+    const start = subHours(end, 1);
 
-  // const { data: exporterStatus } = useGraphana("terrcin", url);
-  // console.log(exporterStatus);
+    return encodeURI(
+      `/loki/api/v1/query_range?direction=BACKWARD&limit=1000&query=${logQl}&start=${getUnixNanoSecTime(
+        start
+      )}&end=${getUnixNanoSecTime(end)}`
+    );
+  }, [row.name]);
+
+  const grafanaDashboardUrl = useMemo(() => {
+    const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22logs%22,%7B%22expr%22:%22%7Bk8s_namespace_name%3D%5C%22system-tenant%5C%22,k8s_container_name%3D%5C%22exporter%5C%22,k8s_pod_name%3D~%5C%22%5Eexporter-${row.name}-%5Ba-z0-9-%5D*%5C%22%7D%20%7C%3D%20%5C%22stderr%5C%22%20%7C%3D%20%5C%22software.amazon.awssdk.services.cloudwatch.model.CloudWatchException%5C%22%22%7D%5D`;
+    return `${window.location.protocol}//system.${window.location.host}/grafana/explore?${path}`;
+  }, [row.name]);
+
+  const { data: exporterLogs } = useGrafana(exporterLogUri);
 
   const config = useMemo(() => {
     if (open)
@@ -145,7 +163,14 @@ const ExportersRow = (props: {
         <TableCell>{row.type}</TableCell>
         <TableCell>{row.credential}</TableCell>
         <TableCell>{format(parseISO(row.created_at), "Pppp")}</TableCell>
+        <TableCell>{LogStatusAsString(exporterLogs)}</TableCell>
         <TableCell>
+          <button
+            type="button"
+            onClick={() => window.open(grafanaDashboardUrl)}
+          >
+            View Logs
+          </button>
           <button type="button" onClick={() => onDelete(row.name)}>
             Delete
           </button>
@@ -166,4 +191,18 @@ const ExportersRow = (props: {
       </TableRow>
     </React.Fragment>
   );
+};
+
+const LogStatusAsString = (logs: {}) => {
+  const errors = pathOr([], ["data", "result", 0, "values"])(logs);
+  const errorCount = errors.length;
+  const text = "in the last hour";
+
+  console.log("logs", logs);
+  console.log("errorCount", errorCount);
+
+  if (logs === undefined) return "";
+  else if (errorCount === 1) return "1 error ${text}";
+  else if (errorCount > 1) return `${errorCount} errors ${text}`;
+  else return `no errors ${text}`;
 };
