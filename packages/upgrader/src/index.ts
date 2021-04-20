@@ -50,7 +50,11 @@ import { getClusterConfig, LatestClusterConfigType } from "@opstrace/config";
 const UPGRADE_ATTEMPTS = 5;
 
 // timeout per cluster upgrade attempt
-const UPGRADE_ATTEMPT_TIMEOUT_SECONDS = 60 * 20;
+const UPGRADE_INFRA_ATTEMPT_TIMEOUT_SECONDS = 60 * 20; // 20 min
+
+// A controller deployment upgrade can take longer, for example, if it needs to
+// rollout an update to the cortex ingesters.
+const UPGRADE_K8S_RESOURCES_ATTEMPT_TIMEOUT_SECONDS = 45 * 60; // 45 min
 
 interface UpgradeConfigInterface {
   cloudProvider: "gcp" | "aws";
@@ -95,33 +99,23 @@ async function getKubecfgIfk8sClusterExists(
   }
 }
 
-function* upgradeClusterCore() {
+// Uprade infrastructure. Infrastructure are all the components required to
+// create a Kubernetes cluster and any other components, ex. cloud storage
+// buckets, required to run Opstrace. Checks if Kubernetes cluster is available
+// before starting the upgrade.
+function* triggerInfraUpgrade() {
   if (upgradeConfig === undefined) {
     throw new Error("call setUpgradeConfig() first");
   }
 
-  const kubeconfig: KubeConfig | undefined = yield call(
+  const kubeConfig: KubeConfig | undefined = yield call(
     getKubecfgIfk8sClusterExists,
     upgradeConfig
   );
 
-  if (kubeconfig === undefined) {
+  if (kubeConfig === undefined) {
     throw new Error("could not fetch cluster kubeconfig");
   }
-
-  yield call(triggerUpgrade, kubeconfig);
-
-  log.info(
-    "Opstrace cluster upgrade done for %s (%s)",
-    upgradeConfig.clusterName,
-    upgradeConfig.cloudProvider
-  );
-}
-
-/**
- * Trigger soft-upgrade by bumping the controller deployment version.
- */
-function* triggerUpgrade(kubeConfig: KubeConfig) {
 
   const ucc: LatestClusterConfigType = getClusterConfig();
 
@@ -131,16 +125,42 @@ function* triggerUpgrade(kubeConfig: KubeConfig) {
   // fails.
   yield call(k8sListNamespacesOrError, kubeConfig);
 
-  log.info("k8s cluster seems to exist, trigger upgrade");
+  log.info("k8s cluster seems to exist, trigger infrastructure upgrade");
+
+  yield call(upgradeInfra, upgradeConfig.cloudProvider);
+}
+
+// Upgrade controller deployment and wait for it to finish updating Kubernetes
+// resources.
+function* triggerControllerDeploymentUpgrade() {
+  if (upgradeConfig === undefined) {
+    throw new Error("call setUpgradeConfig() first");
+  }
+
+  const kubeConfig: KubeConfig | undefined = yield call(
+    getKubecfgIfk8sClusterExists,
+    upgradeConfig
+  );
+
+  if (kubeConfig === undefined) {
+    throw new Error("could not fetch cluster kubeconfig");
+  }
+
+  const ucc: LatestClusterConfigType = getClusterConfig();
+
+  yield call(checkIfDockerImageExistsOrErrorOut, ucc.controller_image);
+
+  // Explicitly test the availability of the k8s api and exit if interaction
+  // fails.
+  yield call(k8sListNamespacesOrError, kubeConfig);
+
+  log.info("k8s cluster seems to exist, trigger controller deployment upgrade");
 
   log.info("starting kubernetes informers");
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);
 
-  yield call(upgradeInfra, upgradeConfig.cloudProvider);
-
-  // TODO: fetch and save system-tenant api token locally
   yield call(upgradeControllerConfigMap, kubeConfig);
 
   yield call(upgradeControllerDeployment, {
@@ -158,13 +178,13 @@ function* triggerUpgrade(kubeConfig: KubeConfig) {
 }
 
 /**
- * Timeout control around a single cluster upgrade attempt.
+ * Timeout control around a single cluster infrastructure upgrade attempt.
  */
-function* upgradeClusterAttemptWithTimeout() {
-  log.debug("upgradeClusterAttemptWithTimeout");
+function* upgradeClusterCoreAttemptWithTimeout() {
+  log.debug("upgradeClusterInfraAttemptWithTimeout");
   const { timeout } = yield race({
-    upgrade: call(upgradeClusterCore),
-    timeout: delay(UPGRADE_ATTEMPT_TIMEOUT_SECONDS * SECOND)
+    upgrade: call(triggerInfraUpgrade),
+    timeout: delay(UPGRADE_INFRA_ATTEMPT_TIMEOUT_SECONDS * SECOND)
   });
 
   if (timeout) {
@@ -176,7 +196,32 @@ function* upgradeClusterAttemptWithTimeout() {
     // also see opstrace-prelaunch/issues/1457
     log.warning(
       "cluster upgrade attempt timed out after %s seconds",
-      UPGRADE_ATTEMPT_TIMEOUT_SECONDS
+      UPGRADE_INFRA_ATTEMPT_TIMEOUT_SECONDS
+    );
+    throw new ClusterUpgradeTimeoutError();
+  }
+}
+
+/**
+ * Timeout control around a single cluster Kubernetes resources upgrade attempt.
+ */
+function* upgradeControllerDeploymentWithTimeout() {
+  log.debug("upgradeControllerDeploymentWithTimeout");
+  const { timeout } = yield race({
+    upgrade: call(triggerControllerDeploymentUpgrade),
+    timeout: delay(UPGRADE_K8S_RESOURCES_ATTEMPT_TIMEOUT_SECONDS * SECOND)
+  });
+
+  if (timeout) {
+    // Note that in this case redux-saga guarantees to have cancelled the
+    // task(s) that lost the race, i.e. the `upgrade` task above.
+    // see https://redux-saga.js.org/docs/advanced/TaskCancellation.html
+    // however, this does not seem to reliable cancel all tasks spawned along
+    // the hierarchy, maybe as of usage of promises as part of the stack?
+    // also see opstrace-prelaunch/issues/1457
+    log.warning(
+      "cluster upgrade attempt timed out after %s seconds",
+      UPGRADE_K8S_RESOURCES_ATTEMPT_TIMEOUT_SECONDS
     );
     throw new ClusterUpgradeTimeoutError();
   }
@@ -189,12 +234,21 @@ function* rootTaskUpgrade() {
   // synchronously, but after all still takes a while to be properly reflected
   // across all views).
   yield call(retryUponAnyError, {
-    task: upgradeClusterAttemptWithTimeout,
+    task: upgradeClusterCoreAttemptWithTimeout,
     maxAttempts: UPGRADE_ATTEMPTS,
     doNotLogDetailForTheseErrors: [ClusterUpgradeTimeoutError],
-    actionName: "cluster upgrade",
+    actionName: "cluster infrastructure upgrade",
     delaySeconds: 30
   });
+
+  // Wait for controller to rollout the upgrade.
+  yield call(upgradeControllerDeploymentWithTimeout);
+
+  log.info(
+    "Opstrace cluster upgrade done for %s (%s)",
+    upgradeConfig.clusterName,
+    upgradeConfig.cloudProvider
+  );
 }
 
 /**
