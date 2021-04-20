@@ -299,8 +299,7 @@ async function getE2EAlertCountMetric(cortexBaseUrl: string, uniqueScrapeJobName
     cortexBaseUrl,
     queryParams,
     "query",
-    30, // timeout
-    true // logQueryResponse
+    30 // timeout
   );
 
   // Sanity check: label should match

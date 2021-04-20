@@ -101,8 +101,7 @@ async function getExporterMetric(cortexBaseUrl: string, metricQuery: string): Pr
     cortexBaseUrl,
     queryParams,
     "query",
-    300, // timeout, use longer since stackdriver can take a while to try its first scrape
-    true // logQueryResponse
+    300 // normally <10s, but needs to be longer because stackdriver exporter can be slow to perform first scrape
   );
 
   return resultArray[0]["value"][1];
@@ -219,8 +218,7 @@ config:
   - compute.googleapis.com/instance/cpu
   - compute.googleapis.com/instance/disk
   google.project-id:
-  - vast-pad-240918
-  - proj2
+  - phony-project-12345
   monitoring.metrics-interval: '5m'
   monitoring.metrics-offset: '0s'
 `;

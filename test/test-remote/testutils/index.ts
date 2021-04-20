@@ -992,7 +992,7 @@ export async function waitForPrometheusTarget(
     const url = `http://127.0.0.1:${localPort}/prometheus/api/v1/targets`;
     const qparms = new URLSearchParams({state: "active"});
 
-    log.info(`Querying prometheus via port-forward: ${url}`)
+    log.info(`Waiting for target with tenant=${tenant} job=${jobLabel} via port-forward: ${url}`)
     await waitForQueryResult(
       () => queryJSONAPI(url, qparms),
       (data) => {
@@ -1001,13 +1001,7 @@ export async function waitForPrometheusTarget(
         const targets: Array<any> = data["data"]["activeTargets"];
         const filtered = targets.filter(target => target["labels"]["job"] === jobLabel);
         if (filtered.length == 0) {
-          log.info(
-            "No targets with job=%s, instead got: %s",
-            jobLabel,
-            targets
-              .map(t => `${t["labels"]["job"]}:${t["labels"]["namespace"]}/${t["labels"]["pod"]}`)
-              .sort()
-          );
+          // Not found yet
           return null;
         }
         log.info(
