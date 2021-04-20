@@ -103,19 +103,15 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
       })
     );
 
-    let exporter: Values & { tenant: string } = {
-      tenant: tenantId,
-      type: data.type,
-      name: data.name,
-      credential: null,
-      config: config
-    };
-
-    if (data.type !== "blackbox") exporter.credential = data.credential;
-
     graphqlClient
       .CreateExporters({
-        exporters: exporter
+        exporters: {
+          tenant: tenantId,
+          type: data.type,
+          name: data.name,
+          credential: data.type !== "blackbox" ? data.credential : null,
+          config: config
+        }
       })
       .then(response => {
         onCreate();
