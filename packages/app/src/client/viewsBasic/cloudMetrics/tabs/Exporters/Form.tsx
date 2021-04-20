@@ -66,8 +66,11 @@ const Schema = yup.object().shape({
   name: yup
     .string()
     .required()
-    .matches(subdomainValidator, "Name can only contain a-z"),
-  credential: yup.string(),
+    .matches(subdomainValidator, "Name can only contain 'a-z' and '-'"),
+  credential: yup.string().when("type", {
+    is: (name: string) => name !== "blackbox",
+    then: yup.string().required()
+  }),
   config: yup.string().required()
 });
 
