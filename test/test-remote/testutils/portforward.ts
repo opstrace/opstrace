@@ -27,6 +27,8 @@ import {
   readFirstNBytes
 } from "./index";
 
+const PORT_FORWARD_LISTEN_PATTERN = /^Forwarding from 127\.0\.0\.1:(\d+) -> \d+/g;
+
 export class PortForward {
   /*
   Represents a local port-forward to a service running a in K8S cluster,
@@ -54,24 +56,17 @@ export class PortForward {
   private processStartupError: Error | null;
   // To be populated by the "exit" event emitter of the child process.
   private processExitCode: number | null;
-  public port_local: number;
 
   constructor(
     name: string,
     k8sobj: string,
-    port_local: number,
     port_remote: number,
     namespace: string
   ) {
     /*
     name: arbitrary name for this port-foward, used in log and output filename.
-
     k8sobj: the TYPE/NAME in the cmdline signature for kubectl
-
-    port_local: local port
-
     port_remote: remote port
-
     namespace: passed as --namespace <namespace> to kubectl
     */
 
@@ -82,14 +77,16 @@ export class PortForward {
       "--namespace",
       namespace,
       k8sobj,
-      port_local + ":" + port_remote
+      // local port 0: Select a random ephemeral port on each invocation.
+      // This avoids collisions with other parallel test runs or other services on the same machine.
+      // kubectl will print the local ephemeral port that it has selected and we will return it to the caller.
+      `0:${port_remote}`
     ];
 
     this.outfilePath = createTempfile("kubectl-port-forward-", ".outerr");
 
     this.kubectlCmd = "kubectl " + this.kubectlArgs.join(" ");
 
-    this.port_local = port_local;
     this.processStartupError = null;
     this.processExitCode = null;
     this.process = null;
@@ -143,11 +140,9 @@ export class PortForward {
     this.process = process;
   }
 
-  public baseUrl() {
-    return `http://127.0.0.1:${this.port_local}`;
-  }
-
-  public async setup() {
+  // Starts the port forward and returns the local port number to connect to.
+  // If the port forward fails, an error is thrown.
+  public async setup(): Promise<number> {
     /*
     Wait for the port-forward setup to become ready.
 
@@ -197,15 +192,12 @@ export class PortForward {
         break;
       }
 
-      // Success criterion: stdout haystack contains needle.
-      const fileHeadBytes = await readFirstNBytes(this.outfilePath, 100);
-      if (fileHeadBytes.includes(Buffer.from("Forwarding from", "utf-8"))) {
-        // here we might want to replace the current process "exit" event
-        // handler with one that informs about the child having gone away
-        // unexpectedly after successful port-forward establishment, should
-        // then also log stdout.err as well and exit code.
-        log.info(`${this}: ready\n${fileHeadBytes}`);
-        return true;
+      // Wait for kubectl to print the ephemeral ipv4 port
+      const kubectlOut = new TextDecoder("utf-8").decode(await readFirstNBytes(this.outfilePath, 100));
+      const regexResult = PORT_FORWARD_LISTEN_PATTERN.exec(kubectlOut)
+      if (regexResult != null && regexResult.length > 1) {
+        log.info(`${this}: port-forward listening on port ${regexResult[1]}`);
+        return parseInt(regexResult[1], 10);
       }
       await sleep(0.1);
     }
@@ -238,8 +230,9 @@ export class PortForward {
       await this.terminate();
     }
 
-    if (this.processExitCode)
+    if (this.processExitCode) {
       log.info("%s: child process exit code: %s", this, this.processExitCode);
+    }
 
     // Not documented, but this performs a surrogate escape if necessary, see
     // https://github.com/nodejs/node/pull/30706

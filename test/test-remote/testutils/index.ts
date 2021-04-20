@@ -983,14 +983,13 @@ export async function waitForPrometheusTarget(
   const portForwardProm = new PortForward(
     `tenant-prometheus-${tenant}`, // name (arbitrary/logging)
     `statefulsets/prometheus-${tenant}-prometheus`, // k8sobj
-    9091, // port_local
     9090, // port_remote
     `${tenant}-tenant`, // namespace
   );
-  await portForwardProm.setup();
+  const localPort = await portForwardProm.setup();
 
   try {
-    const url = `http://127.0.0.1:9091/prometheus/api/v1/targets`;
+    const url = `http://127.0.0.1:${localPort}/prometheus/api/v1/targets`;
     const qparms = new URLSearchParams({state: "active"});
 
     log.info(`Querying prometheus via port-forward: ${url}`)
