@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { map } from "ramda";
 import { useForm, Controller, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -26,6 +26,7 @@ import useHasura from "client/hooks/useHasura";
 
 import { ControlledInput } from "client/viewsBasic/common/formUtils";
 import { CondRender } from "client/utils/rendering";
+import { subdomainValidator } from "client/utils/regex";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { Select, MenuItem, FormLabel } from "@material-ui/core";
@@ -56,14 +57,17 @@ const useStyles = makeStyles(theme => ({
 type Values = {
   type: "cloudwatch" | "stackdriver" | "blackbox";
   name: string;
-  credential: string;
+  credential: string | null;
   config: string;
 };
 
 const Schema = yup.object().shape({
   type: yup.string().required(),
-  name: yup.string().required(),
-  credential: yup.string().required(),
+  name: yup
+    .string()
+    .required()
+    .matches(subdomainValidator, "Name can only contain a-z"),
+  credential: yup.string(),
   config: yup.string().required()
 });
 
@@ -88,25 +92,6 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
     control
   });
   const type = watch("type");
-  const cloudProvider = useMemo(() => {
-    return {
-      cloudwatch: "aws-key",
-      stackdriver: "gcp-service-account",
-      blackbox: "blackbox"
-    }[type];
-  }, [type]);
-
-  const { data: credentials } = useHasura(
-    `query credentials($tenant_id: String!, $type: String!) {
-       credential(where: { tenant: { _eq: $tenant_id }, type: {_eq: $type} }) {
-         name
-       }
-     }`,
-    {
-      tenant_id: tenantId,
-      type: cloudProvider
-    }
-  );
 
   const onSubmit = (data: Values) => {
     const config = JSON.stringify(
@@ -115,15 +100,19 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
       })
     );
 
+    let exporter: Values & { tenant: string } = {
+      tenant: tenantId,
+      type: data.type,
+      name: data.name,
+      credential: null,
+      config: config
+    };
+
+    if (data.type !== "blackbox") exporter.credential = data.credential;
+
     graphqlClient
       .CreateExporters({
-        exporters: {
-          tenant: tenantId,
-          type: data.type,
-          name: data.name,
-          credential: data.credential,
-          config: config
-        }
+        exporters: exporter
       })
       .then(response => {
         onCreate();
@@ -150,6 +139,41 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
           name="type"
         />
       </div>
+      <CondRender when={type === "cloudwatch"}>
+        <CloudWatchForm tenantId={tenantId} control={control} />
+      </CondRender>
+      <CondRender when={type === "stackdriver"}>
+        <StackdriverForm tenantId={tenantId} control={control} />
+      </CondRender>
+      <CondRender when={type === "blackbox"}>
+        <BlackboxForm control={control} />
+      </CondRender>
+
+      <div className={classes.control}>
+        <input type="submit" disabled={!isValid} />
+      </div>
+    </form>
+  );
+}
+
+const CloudWatchForm = (props: { tenantId: string; control: any }) => {
+  const { tenantId, control } = props;
+  const classes = useStyles();
+
+  const { data: credentials } = useHasura(
+    `query credentials($tenant_id: String!, $type: String!) {
+       credential(where: { tenant: { _eq: $tenant_id }, type: {_eq: $type} }) {
+         name
+       }
+     }`,
+    {
+      tenant_id: tenantId,
+      type: "aws-key"
+    }
+  );
+
+  return (
+    <React.Fragment>
       <CondRender when={credentials === undefined}>
         <div className={classes.control}>
           <p>Loading credentials...</p>
@@ -164,9 +188,7 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
       </CondRender>
       <CondRender when={credentials?.credential.length > 0}>
         <div className={classes.label}>
-          <FormLabel>{`${
-            type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
-          } Credential`}</FormLabel>
+          <FormLabel>CloudWatch</FormLabel>
         </div>
         <div className={classes.control}>
           <Controller
@@ -190,47 +212,144 @@ export function ExporterForm(props: { tenantId: string; onCreate: Function }) {
         />
         <ControlledInput
           name="config"
-          label={`${
-            type === "cloudwatch" ? "CloudWatch" : "Stackdriver"
-          } Config`}
+          label="CloudWatch Config"
           inputProps={{ multiline: true, rows: 10, fullWidth: true }}
           labelClass={classes.label}
           controlClass={classes.control}
           helperText={
-            <>
-              <CondRender when={type === "cloudwatch"}>
-                <p>
-                  CloudWatch{" "}
-                  <a
-                    href="https://github.com/prometheus/cloudwatch_exporter#user-content-configuration"
-                    target="_blank"
-                  >
-                    configuration format
-                  </a>{" "}
-                  documentation.
-                </p>
-              </CondRender>
-              <CondRender when={type === "stackdriver"}>
-                <p>
-                  Stackdriver{" "}
-                  <a
-                    href="https://github.com/prometheus-community/stackdriver_exporter#user-content-flags"
-                    target="_blank"
-                  >
-                    configuration format
-                  </a>{" "}
-                  documentation.
-                </p>
-              </CondRender>
-            </>
+            <p>
+              CloudWatch{" "}
+              <a
+                href="https://github.com/prometheus/cloudwatch_exporter#user-content-configuration"
+                target="_blank"
+                rel="noreferrer"
+              >
+                configuration format
+              </a>{" "}
+              documentation.
+            </p>
           }
           control={control}
         />
+      </CondRender>
+    </React.Fragment>
+  );
+};
 
+const StackdriverForm = (props: { tenantId: string; control: any }) => {
+  const { tenantId, control } = props;
+  const classes = useStyles();
+
+  const { data: credentials } = useHasura(
+    `query credentials($tenant_id: String!, $type: String!) {
+       credential(where: { tenant: { _eq: $tenant_id }, type: {_eq: $type} }) {
+         name
+       }
+     }`,
+    {
+      tenant_id: tenantId,
+      type: "gcp-service-account"
+    }
+  );
+
+  return (
+    <React.Fragment>
+      <CondRender when={credentials === undefined}>
         <div className={classes.control}>
-          <input type="submit" disabled={!isValid} />
+          <p>Loading credentials...</p>
         </div>
       </CondRender>
-    </form>
+      <CondRender
+        when={credentials !== undefined && credentials?.credential.length === 0}
+      >
+        <div className={classes.control}>
+          <p>There are no defined credentials for this exporter.</p>
+        </div>
+      </CondRender>
+      <CondRender when={credentials?.credential.length > 0}>
+        <div className={classes.label}>
+          <FormLabel>Stackdriver</FormLabel>
+        </div>
+        <div className={classes.control}>
+          <Controller
+            render={({ field }) => (
+              <Select {...field}>
+                {map(({ name }) => <MenuItem value={name}>{name}</MenuItem>)(
+                  credentials?.credential
+                )}
+              </Select>
+            )}
+            control={control}
+            name="credential"
+          />
+        </div>
+        <ControlledInput
+          name="name"
+          label="Name"
+          control={control}
+          labelClass={classes.label}
+          controlClass={classes.control}
+        />
+        <ControlledInput
+          name="config"
+          label="Stackdriver Config"
+          inputProps={{ multiline: true, rows: 10, fullWidth: true }}
+          labelClass={classes.label}
+          controlClass={classes.control}
+          helperText={
+            <p>
+              Stackdriver{" "}
+              <a
+                href="https://github.com/prometheus-community/stackdriver_exporter#user-content-flags"
+                target="_blank"
+                rel="noreferrer"
+              >
+                configuration format
+              </a>{" "}
+              documentation.
+            </p>
+          }
+          control={control}
+        />
+      </CondRender>
+    </React.Fragment>
   );
-}
+};
+
+const BlackboxForm = (props: { control: any }) => {
+  const { control } = props;
+  const classes = useStyles();
+
+  return (
+    <React.Fragment>
+      <ControlledInput
+        name="name"
+        label="Name"
+        control={control}
+        labelClass={classes.label}
+        controlClass={classes.control}
+      />
+      <ControlledInput
+        name="config"
+        label="Blackbox Config"
+        inputProps={{ multiline: true, rows: 10, fullWidth: true }}
+        labelClass={classes.label}
+        controlClass={classes.control}
+        helperText={
+          <p>
+            Blackbox{" "}
+            <a
+              href="https://github.com/prometheus/blackbox_exporter/blob/master/CONFIGURATION.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              configuration format
+            </a>{" "}
+            documentation.
+          </p>
+        }
+        control={control}
+      />
+    </React.Fragment>
+  );
+};
