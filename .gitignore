@@ -59,5 +59,4 @@ packages/buildinfo/src/buildinfo.ts
 
 packages/app/.env
 packages/app/.env.client.development
-packages/app/.env.server.development
 
