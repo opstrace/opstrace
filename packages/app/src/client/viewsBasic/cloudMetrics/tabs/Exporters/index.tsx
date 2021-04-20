@@ -73,7 +73,7 @@ const formatRows = (data: any[] | undefined) => {
       name: d.name,
       type: d.type,
       config: d.config,
-      credential: d.credentialByCredentialTenant.name,
+      credential: d.credentialByCredentialTenant?.name,
       created_at: d.created_at
     }))(data);
   else return [];
