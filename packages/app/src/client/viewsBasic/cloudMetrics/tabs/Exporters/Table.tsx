@@ -117,8 +117,15 @@ const ExportersRow = (props: {
   const { row, onDelete } = props;
   const [open, setOpen] = React.useState(false);
 
+  const exporterErrorStr = useMemo(() => {
+    if (row.type === "cloudwatch")
+      return `software.amazon.awssdk.services.cloudwatch.model.CloudWatchException`;
+    else if (row.type === "stackdriver") return `level=error`;
+    else return "blackbox";
+  }, [row.type]);
+
   const exporterLogUri = useMemo(() => {
-    const logQl = `{k8s_namespace_name="system-tenant",k8s_container_name="exporter",k8s_pod_name=~"^exporter-${row.name}-[a-z0-9-]*"} |= "stderr" |= "software.amazon.awssdk.services.cloudwatch.model.CloudWatchException"`;
+    const logQl = `{k8s_namespace_name="system-tenant",k8s_container_name="exporter",k8s_pod_name=~"^exporter-${row.name}-[a-z0-9-]*"} |= "stderr" |= "${exporterErrorStr}"`;
     const end = new Date();
     const start = subHours(end, 1);
 
@@ -127,12 +134,12 @@ const ExportersRow = (props: {
         start
       )}&end=${getUnixNanoSecTime(end)}`
     );
-  }, [row.name]);
+  }, [row.name, exporterErrorStr]);
 
   const grafanaDashboardUrl = useMemo(() => {
-    const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22logs%22,%7B%22expr%22:%22%7Bk8s_namespace_name%3D%5C%22system-tenant%5C%22,k8s_container_name%3D%5C%22exporter%5C%22,k8s_pod_name%3D~%5C%22%5Eexporter-${row.name}-%5Ba-z0-9-%5D*%5C%22%7D%20%7C%3D%20%5C%22stderr%5C%22%20%7C%3D%20%5C%22software.amazon.awssdk.services.cloudwatch.model.CloudWatchException%5C%22%22%7D%5D`;
+    const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22logs%22,%7B%22expr%22:%22%7Bk8s_namespace_name%3D%5C%22system-tenant%5C%22,k8s_container_name%3D%5C%22exporter%5C%22,k8s_pod_name%3D~%5C%22%5Eexporter-${row.name}-%5Ba-z0-9-%5D*%5C%22%7D%20%7C%3D%20%5C%22stderr%5C%22%20%7C%3D%20%5C%22${exporterErrorStr}%5C%22%22%7D%5D`;
     return `${window.location.protocol}//system.${window.location.host}/grafana/explore?${path}`;
-  }, [row.name]);
+  }, [row.name, exporterErrorStr]);
 
   const { data: exporterLogs } = useGrafana(exporterLogUri);
 
@@ -197,9 +204,6 @@ const LogStatusAsString = (logs: {}) => {
   const errors = pathOr([], ["data", "result", 0, "values"])(logs);
   const errorCount = errors.length;
   const text = "in the last hour";
-
-  console.log("logs", logs);
-  console.log("errorCount", errorCount);
 
   if (logs === undefined) return "";
   else if (errorCount === 1) return "1 error ${text}";
