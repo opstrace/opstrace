@@ -303,12 +303,22 @@ const toKubeResources = (
         Object.entries(exporterConfig.probes[probeIdx])
           .map(([k,v]) => [k, [v]])
       );
+      // Ensure that the per-probe metrics are each labeled with the probe info: module and target normally
+      const relabelings = Object.entries(exporterConfig.probes[probeIdx])
+        .map(([k, v]) => ({
+          // Prometheus label hack: Pick an arbitrary label that should exist in the metric.
+          // This value is ignored and results in inserting a new label.
+          sourceLabels: ["job"],
+          targetLabel: k,
+          replacement: v,
+        }));
       monitorEndpoints.push({
         interval: "30s",
         port: "metrics",
         path: "/probe",
         // HTTP GET params must be provided as separate object field, not as part of path:
-        params
+        params,
+        relabelings,
       });
     }
   } else {
