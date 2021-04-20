@@ -101,7 +101,7 @@ async function getExporterMetric(cortexBaseUrl: string, metricQuery: string): Pr
     cortexBaseUrl,
     queryParams,
     "query",
-    30, // timeout
+    300, // timeout, use longer since stackdriver can take a while to try its first scrape
     true // logQueryResponse
   );
 
@@ -238,6 +238,7 @@ value: |-
 `;
 
     const jobName = `exporter-${exporterName}`;
+    // this metric can take >30s to appear:
     const metricQuery = `stackdriver_monitoring_scrape_errors_total{job="${jobName}"}`;
 
     await testExporter(
