@@ -152,6 +152,13 @@ const ExportersRow = (props: {
     else return "";
   }, [row.config, open]);
 
+  // @ts-ignore
+  const cloudProvider = {
+    cloudwatch: "CloudWatch",
+    stackdriver: "Stackdriver",
+    blackbox: "Blackbox"
+  }[row.type];
+
   return (
     <React.Fragment>
       <TableRow>
@@ -188,8 +195,7 @@ const ExportersRow = (props: {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
               <Typography variant="subtitle1" gutterBottom component="div">
-                {row.type === "cloudwatch" ? "CloudWatch" : "Stackdriver"}{" "}
-                Config
+                {`${cloudProvider} Config`}
               </Typography>
               <pre>{config}</pre>
             </Box>
@@ -205,8 +211,8 @@ const LogStatusAsString = (logs: {}) => {
   const errorCount = errors.length;
   const text = "in the last hour";
 
-  if (logs === undefined) return "";
+  if (logs === undefined) return "unknown";
   else if (errorCount === 1) return "1 error ${text}";
   else if (errorCount > 1) return `${errorCount} errors ${text}`;
-  else return `no errors ${text}`;
+  else return `online`;
 };
