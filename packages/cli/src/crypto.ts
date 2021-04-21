@@ -20,7 +20,7 @@ import jwt from "jsonwebtoken";
 
 import { log, keyIDfromPEM } from "@opstrace/utils";
 
-interface RSAKeypair {
+export interface RSAKeypair {
   privkeyObj: crypto.KeyObject;
   pubkeyPem: string;
 }
@@ -45,15 +45,27 @@ export function generateJWTforTenantAPI(
     initialize();
   }
 
+  return generateJWTforTenantAPIfromKeyPair(
+    tenantName,
+    opstraceClusterName,
+    keypairForSession
+  );
+}
+
+export function generateJWTforTenantAPIfromKeyPair(
+  tenantName: string,
+  opstraceClusterName: string,
+  keypair: RSAKeypair
+): string {
   // auth0/node-jsonwebtoken does not seem to support the native nodejs
   // private key object (crypto.KeyObject) for signing, also see
   // https://github.com/auth0/node-jsonwebtoken/issues/750
-  const privkeyPem = keypairForSession.privkeyObj.export({
+  const privkeyPem = keypair.privkeyObj.export({
     type: "pkcs1",
     format: "pem"
   }) as string;
 
-  const pubkeyId = keyIDfromPEM(keypairForSession.pubkeyPem);
+  const pubkeyId = keyIDfromPEM(keypair.pubkeyPem);
 
   // Opstrace-specific spec:
   //  audience: required, special string
@@ -71,7 +83,8 @@ export function generateJWTforTenantAPI(
 
   const token: string = jwt.sign({}, privkeyPem, options);
   log.info(
-    "generated tenant API authentication token for tenant `%s`, to be verified with key %s",
+    "generated tenant API authentication token for cluster `%s` for tenant `%s`, to be verified with key %s",
+    opstraceClusterName,
     tenantName,
     pubkeyId
   );
