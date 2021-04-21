@@ -226,6 +226,85 @@ const toKubeResources = (
       port: "metrics",
       path: "/metrics"
     });
+  } else if (exporter.type == "azure") {
+    resources.push(
+      new ConfigMap(
+        {
+          apiVersion: "v1",
+          kind: "ConfigMap",
+          // Use name/labels that match the Deployment
+          metadata: {
+            name,
+            namespace,
+            labels
+          },
+          data: {
+            // Convert JSON string to YAML string
+            "azure.yml": yaml.dump(JSON.parse(exporter.config))
+          }
+        },
+        kubeConfig
+      )
+    );
+
+    podSpec = {
+      containers: [{
+        name: "exporter",
+        image: DockerImages.exporterAzure,
+        command: ["/bin/azure_metrics_exporter", "--config.file=/config/azure.yml"],
+        env: (exporter.credential)
+          ? [{
+            name: "AZURE_SUBSCRIPTION_ID",
+            valueFrom: {
+              secretKeyRef: { name: `credential-${exporter.credential}`, key: "AZURE_SUBSCRIPTION_ID" }
+            }
+          }, {
+            name: "AZURE_TENANT_ID",
+            valueFrom: {
+              secretKeyRef: { name: `credential-${exporter.credential}`, key: "AZURE_TENANT_ID" }
+            }
+          }, {
+            name: "AZURE_CLIENT_ID",
+            valueFrom: {
+              secretKeyRef: { name: `credential-${exporter.credential}`, key: "AZURE_CLIENT_ID" }
+            }
+          }, {
+            name: "AZURE_CLIENT_SECRET",
+            valueFrom: {
+              secretKeyRef: { name: `credential-${exporter.credential}`, key: "AZURE_CLIENT_SECRET" }
+            }
+          }]
+          : [],
+        ports: [{ name: "metrics", containerPort: 9276 }],
+        volumeMounts: [{ name: "config", mountPath: "/config" }],
+        // Use the root path, which just returns a stub HTML page
+        // see https://github.com/RobustPerception/azure_metrics_exporter/blob/f5baabe/main.go#L363
+        startupProbe: {
+          httpGet: {
+            path: "/",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            port: "metrics" as any
+          },
+          failureThreshold: 3,
+          initialDelaySeconds: 10,
+          periodSeconds: 30,
+          successThreshold: 1,
+          timeoutSeconds: 5
+        }
+      }],
+      volumes: [{
+        name: "config",
+        configMap: {
+          name
+        }
+      }]
+    };
+
+    monitorEndpoints.push({
+      interval: "30s",
+      port: "metrics",
+      path: "/metrics"
+    });
   } else if (exporter.type == "blackbox") {
     const exporterConfig = JSON.parse(exporter.config) as BlackboxConfig;
 

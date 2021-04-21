@@ -47,6 +47,10 @@ const toKubeSecret = (
     // Pass through the key_id and access_key as distinct string values, which can then be used as envvars
     // {"AWS_ACCESS_KEY_ID": "id", "AWS_SECRET_ACCESS_KEY": "secret"}
     data = JSON.parse(credential.value);
+  } else if (credential.type == "azure-service-principal") {
+    // Pass through the params as distinct string values, which can then be used as envvars
+    // {"AZURE_SUBSCRIPTION_ID": "uuid1", "AZURE_TENANT_ID": "uuid2", "AZURE_CLIENT_ID": "uuid3", "AZURE_CLIENT_SECRET": "secret"}
+    data = JSON.parse(credential.value);
   } else if (credential.type == "gcp-service-account") {
     // Pass through the json payload as a string/single file
     data = {"secret.json": credential.value};
