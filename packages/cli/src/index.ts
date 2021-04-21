@@ -45,6 +45,7 @@ import * as list from "./list";
 import * as status from "./status";
 import * as upgrade from "./upgrade";
 import * as util from "./util";
+import * as ctoken from "./createTenantAuthToken";
 import { BUILD_INFO } from "@opstrace/buildinfo";
 
 const DEFAULT_LOG_LEVEL_STDERR = "info";
@@ -62,6 +63,8 @@ interface CliOptsInterface {
   region: string;
   assumeYes: boolean;
   kubeconfigFilePath: string; // emtpy means: not set
+  tenantApiAuthenticatorPrivkeyFilepath: string; // emtpy means: not set
+  tenantName: string; // empty means: not set
 }
 
 // Note(JP): think of this as a singleton object (set once, immutable, allow
@@ -99,6 +102,11 @@ async function main() {
 
   if (CLIARGS.command == "upgrade") {
     await upgrade.upgrade();
+    throw new ExitSuccess();
+  }
+
+  if (CLIARGS.command == "create-tenant-token") {
+    await ctoken.create();
     throw new ExitSuccess();
   }
 
@@ -161,9 +169,10 @@ function parseCmdlineArgs() {
     help: "Upgrade an existing Opstrace cluster."
   });
 
-  const parserCreateTAAuthtoken = subparsers.add_parser("sign-tenant-token", {
+  const parserCreateTAAuthtoken = subparsers.add_parser("create-tenant-token", {
     help:
-      "Create and sign a tenant API authentication token using a custom private key (wip, experimental)."
+      "Create a signed tenant API authentication token using a custom private " +
+      "key. Write token to stdout. (wip, experimental)."
   });
 
   // The --log-level switch must work when not using a sub command, but also
@@ -348,6 +357,14 @@ function configureParserCreateTAAuthtoken(parser: argparse.ArgumentParser) {
     metavar: "CLUSTER_NAME"
   });
 
+  parser.add_argument("tenantName", {
+    help:
+      "The name of the tenant to generate the token for. " +
+      "Be sure to set it correctly, otherwise the token will not be accepted.",
+    type: "str",
+    metavar: "TENANT_NAME"
+  });
+
   parser.add_argument("tenantApiAuthenticatorPrivkeyFilepath", {
     help:
       "Use this private key to sign tenant API authentication token. " +
@@ -355,7 +372,6 @@ function configureParserCreateTAAuthtoken(parser: argparse.ArgumentParser) {
       "PKCS#8 (RFC 3447) serialization format.",
     type: "str",
     metavar: "PRIV_KEY_FILE_PATH",
-    //dest: "tenantApiAuthenticatorPrivkeyFilepath",
     default: ""
   });
 }
