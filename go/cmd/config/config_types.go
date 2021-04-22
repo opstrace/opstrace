@@ -28,6 +28,7 @@ var (
 	}
 	// All supported exporter types, and the credential types that they may be paired with.
 	validExporterCredentials = map[string][]string{
+		"azure":       {"azure-service-principal"},
 		"blackbox":    {},
 		"cloudwatch":  {"aws-key"},
 		"stackdriver": {"gcp-service-account"},
@@ -39,39 +40,49 @@ type AWSCredentialValue struct {
 	AwsSecretAccessKey string `json:"AWS_SECRET_ACCESS_KEY"`
 }
 
+type AzureCredentialValue struct {
+	SubscriptionID string `json:"AZURE_SUBSCRIPTION_ID"`
+	TenantID       string `json:"AZURE_TENANT_ID"`
+	ClientID       string `json:"AZURE_CLIENT_ID"`
+	ClientSecret   string `json:"AZURE_CLIENT_SECRET"`
+}
+
 // Converts an HTTP/YAML credential value for writing to GraphQL as JSON.
 func convertYAMLCredValue(credName string, credType string, credValue interface{}) (*string, error) {
 	switch credType {
 	case "aws-key":
 		// Expect regular object fields (not as a nested string)
-		errfmt := "expected %s credential '%s' value to contain string fields: " +
-			"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (%s)"
 		switch v := credValue.(type) {
 		case map[interface{}]interface{}:
-			if len(v) != 2 {
-				return nil, fmt.Errorf(errfmt, credType, credName, "wrong size")
-			}
-			keyid, keyidok := v["AWS_ACCESS_KEY_ID"]
-			accesskey, accesskeyok := v["AWS_SECRET_ACCESS_KEY"]
-			if !keyidok || !accesskeyok {
-				return nil, fmt.Errorf(errfmt, credType, credName, "missing fields")
-			}
-			keyidstr, keyidok := keyid.(string)
-			accesskeystr, accesskeyok := accesskey.(string)
-			if !keyidok || !accesskeyok {
-				return nil, fmt.Errorf(errfmt, credType, credName, "non-string fields")
-			}
-			json, err := json.Marshal(AWSCredentialValue{
-				AwsAccessKeyID:     keyidstr,
-				AwsSecretAccessKey: accesskeystr,
-			})
+			vstrkeys, err := toStringKeys(v)
 			if err != nil {
-				return nil, fmt.Errorf(errfmt, credType, credName, "failed to reserialize as JSON")
+				return nil, err
+			}
+			json, err := convertAwsCredential(credName, credType, vstrkeys)
+			if err != nil {
+				return nil, err
 			}
 			jsonstr := string(json)
 			return &jsonstr, nil
 		default:
-			return nil, fmt.Errorf(errfmt, credType, credName, fmt.Sprintf("expected a map, got %s", v))
+			return nil, errors.New("expected a map")
+		}
+	case "azure-service-principal":
+		// Expect regular object fields (not as a nested string)
+		switch v := credValue.(type) {
+		case map[interface{}]interface{}:
+			vstrkeys, err := toStringKeys(v)
+			if err != nil {
+				return nil, err
+			}
+			json, err := convertAzureCredential(credName, credType, vstrkeys)
+			if err != nil {
+				return nil, err
+			}
+			jsonstr := string(json)
+			return &jsonstr, nil
+		default:
+			return nil, errors.New("expected a map")
 		}
 	case "gcp-service-account":
 		// Expect string containing a valid JSON payload
@@ -99,29 +110,23 @@ func convertYAMLCredValue(credName string, credType string, credValue interface{
 func validateCredentialValue(credName string, credType string, credValueJSON string) error {
 	switch credType {
 	case "aws-key":
-		// Expect JSON payload containing expected key pair
-		errfmt := "expected %s credential '%s' value to contain string fields: " +
-			"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (%s)"
-
-		// Manually decode into map so that we can e.g. check for unknown values
+		// Expect JSON object payload with AWS_X keys
 		var v map[string]interface{}
 		err := json.Unmarshal([]byte(credValueJSON), &v)
 		if err != nil {
 			return fmt.Errorf("decoding %s credential '%s' JSON value failed: %s", credType, credName, err.Error())
 		}
-		if len(v) != 2 {
-			return fmt.Errorf(errfmt, credType, credName, "wrong size")
+		_, err = convertAwsCredential(credName, credType, v)
+		return err
+	case "azure-service-principal":
+		// Expect JSON object payload with AZURE_X keys
+		var v map[string]interface{}
+		err := json.Unmarshal([]byte(credValueJSON), &v)
+		if err != nil {
+			return fmt.Errorf("decoding %s credential '%s' JSON value failed: %s", credType, credName, err.Error())
 		}
-		keyid, keyidok := v["AWS_ACCESS_KEY_ID"]
-		accesskey, accesskeyok := v["AWS_SECRET_ACCESS_KEY"]
-		if !keyidok || !accesskeyok {
-			return fmt.Errorf(errfmt, credType, credName, "missing fields")
-		}
-		_, keyidok = keyid.(string)
-		_, accesskeyok = accesskey.(string)
-		if !keyidok || !accesskeyok {
-			return fmt.Errorf(errfmt, credType, credName, "non-string fields")
-		}
+		_, err = convertAzureCredential(credName, credType, v)
+		return err
 	case "gcp-service-account":
 		// Expect valid JSON payload, but don't enforce content
 		if !json.Valid([]byte(credValueJSON)) {
@@ -137,6 +142,64 @@ func validateCredentialValue(credName string, credType string, credValueJSON str
 		return fmt.Errorf("unsupported credential type: %s (expected one of %s)", credType, keys)
 	}
 	return nil
+}
+
+func convertAwsCredential(credName string, credType string, v map[string]interface{}) ([]byte, error) {
+	errfmt := "expected %s credential '%s' value to contain string fields: " +
+		"AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (%s)"
+	if len(v) != 2 {
+		return nil, fmt.Errorf(errfmt, credType, credName, "wrong size")
+	}
+	keyid, keyidok := v["AWS_ACCESS_KEY_ID"]
+	accesskey, accesskeyok := v["AWS_SECRET_ACCESS_KEY"]
+	if !keyidok || !accesskeyok {
+		return nil, fmt.Errorf(errfmt, credType, credName, "missing fields")
+	}
+	keyidstr, keyidok := keyid.(string)
+	accesskeystr, accesskeyok := accesskey.(string)
+	if !keyidok || !accesskeyok {
+		return nil, fmt.Errorf(errfmt, credType, credName, "non-string fields")
+	}
+	json, err := json.Marshal(AWSCredentialValue{
+		AwsAccessKeyID:     keyidstr,
+		AwsSecretAccessKey: accesskeystr,
+	})
+	if err != nil {
+		return nil, fmt.Errorf(errfmt, credType, credName, "failed to reserialize as JSON")
+	}
+	return json, nil
+}
+
+func convertAzureCredential(credName string, credType string, v map[string]interface{}) ([]byte, error) {
+	errfmt := "expected %s credential '%s' value to contain string fields: " +
+		"AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, AZURE_CLIENT_ID, and AZURE_CLIENT_SECRET (%s)"
+	if len(v) != 4 {
+		return nil, fmt.Errorf(errfmt, credType, credName, "wrong size")
+	}
+	subid, subidok := v["AZURE_SUBSCRIPTION_ID"]
+	tenantid, tenantidok := v["AZURE_TENANT_ID"]
+	clientid, clientidok := v["AZURE_CLIENT_ID"]
+	clientsecret, clientsecretok := v["AZURE_CLIENT_SECRET"]
+	if !subidok || !tenantidok || !clientidok || !clientsecretok {
+		return nil, fmt.Errorf(errfmt, credType, credName, "missing fields")
+	}
+	subidstr, subidok := subid.(string)
+	tenantidstr, tenantidok := tenantid.(string)
+	clientidstr, clientidok := clientid.(string)
+	clientsecretstr, clientsecretok := clientsecret.(string)
+	if !subidok || !tenantidok || !clientidok || !clientsecretok {
+		return nil, fmt.Errorf(errfmt, credType, credName, "non-string fields")
+	}
+	json, err := json.Marshal(AzureCredentialValue{
+		SubscriptionID: subidstr,
+		TenantID:       tenantidstr,
+		ClientID:       clientidstr,
+		ClientSecret:   clientsecretstr,
+	})
+	if err != nil {
+		return nil, fmt.Errorf(errfmt, credType, credName, "failed to reserialize as JSON")
+	}
+	return json, nil
 }
 
 // Converts an HTTP/YAML exporter config for writing to GraphQL as JSON.
@@ -193,6 +256,20 @@ func validateExporterTypes(exporterType string, credType *string) error {
 		"incompatible exporter type %s with credential type %s (expected one of credential types: %s)",
 		exporterType, *credType, validCredTypes,
 	)
+}
+
+// Converts the map to have string keys instead of interface keys.
+func toStringKeys(in map[interface{}]interface{}) (map[string]interface{}, error) {
+	strMap := make(map[string]interface{})
+	for k, v := range in {
+		switch kType := k.(type) {
+		case string:
+			strMap[kType] = v
+		default:
+			return nil, errors.New("map is invalid (keys must be strings)")
+		}
+	}
+	return strMap, nil
 }
 
 // Searches through the provided object tree for any maps with interface keys (from YAML),
