@@ -39,6 +39,7 @@ import {
   ExitSuccess
 } from "@opstrace/utils";
 
+import * as aks from "./aks";
 import * as create from "./create";
 import * as destroy from "./destroy";
 import * as list from "./list";
@@ -110,6 +111,11 @@ async function main() {
     throw new ExitSuccess();
   }
 
+  if (CLIARGS.command == "authenticator-add-key") {
+    await aks.add();
+    throw new ExitSuccess();
+  }
+
   throw Error("should never be here");
 }
 
@@ -174,6 +180,13 @@ function parseCmdlineArgs() {
       "Create a signed tenant API authentication token using a custom private " +
       "key. Write token to stdout. (wip, experimental)."
   });
+
+  const parserAuthenticatorAddKey = subparsers.add_parser(
+    "authenticator-add-key",
+    {
+      help: "Add public key to authenticator (TODO help text"
+    }
+  );
 
   // The --log-level switch must work when not using a sub command, but also
   // for each sub command.
@@ -266,6 +279,7 @@ function parseCmdlineArgs() {
   });
 
   configureParserCreateTAAuthtoken(parserCreateTAAuthtoken);
+  configureParserAuthenticatorAddKey(parserAuthenticatorAddKey);
 
   // About those next two args: that's just brainstorm, maybe do not build
   // that... Maybe _always_ drop that private key. maybe only provide one
@@ -373,6 +387,23 @@ function configureParserCreateTAAuthtoken(parser: argparse.ArgumentParser) {
     type: "str",
     metavar: "PRIV_KEY_FILE_PATH",
     default: ""
+  });
+}
+
+// Mutate parser in place.
+function configureParserAuthenticatorAddKey(parser: argparse.ArgumentParser) {
+  parser.add_argument("cloudProvider", {
+    help: "The cloud provider to act on (aws, gcp).", // potentially make this a little more specific depending on `create`, `list`, ...
+    type: "str",
+    choices: ["aws", "gcp"],
+    metavar: "PROVIDER"
+  });
+
+  parser.add_argument("clusterName", {
+    help:
+      "The name of the cluster to change the authenticator(s) in. Must exist, on given cloud provider ",
+    type: "str",
+    metavar: "CLUSTER_NAME"
   });
 }
 
