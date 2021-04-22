@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import { EKS } from "aws-sdk";
 
 import { log, die } from "@opstrace/utils";
@@ -33,8 +35,7 @@ export async function list(): Promise<void> {
   }
 
   if (cli.CLIARGS.cloudProvider == "aws") {
-    //const opstraceClusterNames = await listOpstraceClustersOnEKS();
-    const clusters = await listOpstraceClustersOnEKS();
+    const clusters = await EKSgetOpstraceClusters();
     if (clusters.length > 0) {
       for (const c of clusters)
         process.stdout.write(`${c.opstraceClusterName}\n`);
@@ -55,19 +56,20 @@ class ListEksInRegionError extends Error {
   }
 }
 
-interface ClusterRegionRelation {
+export interface EKSOpstraceClusterRegionRelation {
   awsRegion: string;
   opstraceClusterName: string;
+  eksCluster: EKS.Cluster;
 }
 
 /**
- * List Opstrace clusters in EKS (AWS), those that the currently configured
+ * List Opstrace clusters in AWS EKS; those that the currently configured
  * credentials can see.
  * Goal: list for all possible regions/locations, also see
  * opstrace-prelaunch/issues/1033
  */
-export async function listOpstraceClustersOnEKS(): Promise<
-  ClusterRegionRelation[]
+export async function EKSgetOpstraceClusters(): Promise<
+  EKSOpstraceClusterRegionRelation[]
 > {
   // Make it so that the AWS / EKS region is not a required input parameter for
   // the `opstrace list` operation. Parallelize/batch http requests. Is a bit
@@ -101,13 +103,13 @@ export async function listOpstraceClustersOnEKS(): Promise<
   // Fetch, for all regions concurrently.
   const actors = [];
   for (const region of regions) {
-    actors.push(listOpstraceClustersInRegion(region));
+    actors.push(EKSgetOpstraceClustersInRegion(region));
   }
 
   // Promise.all resolves once all promises in the array resolve, or rejects as
   // soon as one of them rejects. It either resolves with an array of all
   // resolved values, or rejects with a single error.
-  let ocnLists: ClusterRegionRelation[][];
+  let ocnLists: EKSOpstraceClusterRegionRelation[][];
   try {
     ocnLists = await Promise.all(actors);
   } catch (e) {
@@ -133,9 +135,9 @@ export async function listOpstraceClustersOnEKS(): Promise<
  * This function is expected to throw a `ListEksInRegionError` for AWS
  * API call failures.
  */
-async function listOpstraceClustersInRegion(
+async function EKSgetOpstraceClustersInRegion(
   region: string
-): Promise<ClusterRegionRelation[]> {
+): Promise<EKSOpstraceClusterRegionRelation[]> {
   const ekscl = eksClient(region);
 
   // TODO: don't worry about pagination yet, this may miss opstrace clusters
@@ -173,6 +175,12 @@ async function listOpstraceClustersInRegion(
     result.clusters?.length
   );
 
+  interface NameCluster {
+    name: string;
+    cluster: EKS.Cluster;
+  }
+
+  const opstraceClusters: NameCluster[] = [];
   const opstraceClusterNames: string[] = [];
   for (const EKSclusterName of result.clusters as string[]) {
     let dcresp;
@@ -191,12 +199,15 @@ async function listOpstraceClustersInRegion(
       throw e;
     }
     const ocn = dcresp.cluster?.tags?.opstrace_cluster_name;
+    assert(ocn);
+    assert(dcresp.cluster);
     if (ocn !== undefined) {
+      opstraceClusters.push({ name: ocn, cluster: dcresp.cluster });
       opstraceClusterNames.push(ocn);
     }
   }
 
-  if (opstraceClusterNames.length > 0) {
+  if (opstraceClusters.length > 0) {
     log.info(
       `Found Opstrace clusters in AWS ${region}: ${opstraceClusterNames.join(
         ", "
@@ -204,10 +215,11 @@ async function listOpstraceClustersInRegion(
     );
   }
 
-  const rv: ClusterRegionRelation[] = opstraceClusterNames.map(ocn => {
+  const rv: EKSOpstraceClusterRegionRelation[] = opstraceClusters.map(c => {
     return {
       awsRegion: region,
-      opstraceClusterName: ocn
+      eksCluster: c.cluster,
+      opstraceClusterName: c.name
     };
   });
 
