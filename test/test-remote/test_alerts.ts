@@ -63,8 +63,6 @@ import {
   mtimeDeadlineInSeconds,
   rndstring,
   sleep,
-  waitForCortexMetricResult,
-  waitForPrometheusTarget,
   CLUSTER_BASE_URL,
   CORTEX_API_TLS_VERIFY,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
@@ -72,6 +70,11 @@ import {
   TENANT_SYSTEM_API_TOKEN_FILEPATH,
   TENANT_SYSTEM_CORTEX_API_BASE_URL,
 } from "./testutils";
+
+import {
+  waitForCortexMetricResult,
+  waitForPrometheusTarget,
+} from "./testutils/metrics";
 
 function getE2EAlertingResources(tenant: string, job: string): Array<K8sResource> {
   // The test environment should already have kubectl working, so we can use that.
