@@ -137,6 +137,9 @@ async function getCluster(
  * Check if EKS cluster exists for specific Opstrace cluster, matched via name
  * as well as opstrace_cluster_name resource tag. Return EKS.Cluster type if
  * yes or false if no.
+ *
+ * Note that this searches only in the AWS region that the EKS library client
+ * has been initialized for
  */
 export async function doesEKSClusterExist({
   opstraceClusterName
