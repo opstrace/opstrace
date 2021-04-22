@@ -2,18 +2,27 @@
 
 set -eou pipefail
 
-echo "--- finding last two available cli versions"
+if [ -z ${OPSTRACE_CLI_VERSION_FROM+x} ];
+then
+    echo "OPSTRACE_CLI_VERSION_FROM env var is not set"
+    exit 1
+fi
+
+if [ -z ${OPSTRACE_CLI_VERSION_TO+x} ];
+then
+    echo "OPSTRACE_CLI_VERSION_TO env var is not set"
+    exit 1
+fi
+
 #
-# Read the last two available cli versions into a bash array
+# Initial cluster install version.
 #
-LAST_AVAILABLE_CLI_ARTIFACTS=($(
-    aws s3 ls --recursive  opstrace-ci-main-artifacts/cli/main/ | \
-    grep opstrace-cli-linux-amd64 | \
-    grep -v latest | \
-    sort -n | \
-    tail -2 | \
-    awk '{print $4}'
-))
+FROM=cli/main/${OPSTRACE_CLI_VERSION_FROM}/opstrace-cli-linux-amd64-${OPSTRACE_CLI_VERSION_FROM}.tar.bz2
+
+#
+# Upgrade the cluster to this version.
+#
+TO=cli/main/${OPSTRACE_CLI_VERSION_TO}/opstrace-cli-linux-amd64-${OPSTRACE_CLI_VERSION_TO}.tar.bz2
 
 #
 # Funtion that downloads cli artifact from s3 bucket and extracts it to a target
@@ -31,6 +40,6 @@ fetch_cli_artifact() {
     tar xjf $(basename ${artifact}) -C ${dir}
 }
 
-echo "--- fetching last two available cli artifacts"
-fetch_cli_artifact ${LAST_AVAILABLE_CLI_ARTIFACTS[0]} from
-fetch_cli_artifact ${LAST_AVAILABLE_CLI_ARTIFACTS[1]} to
+echo "--- fetching cli artifacts"
+fetch_cli_artifact ${FROM} from
+fetch_cli_artifact ${TO} to
