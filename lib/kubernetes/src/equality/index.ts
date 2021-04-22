@@ -39,7 +39,6 @@ import {
 } from "..";
 
 import { logDifference } from "./general";
-import { NetworkingV1beta1IngressTLS } from "@kubernetes/client-node";
 import { V1CertificateResource } from "../custom-resources";
 import { isCertificateEqual } from "./Certificate";
 import { log } from "@opstrace/utils";
