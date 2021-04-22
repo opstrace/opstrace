@@ -209,19 +209,22 @@ export async function awsGetClusterRegion(): Promise<string> {
   }
 
   log.info("starting look up of EKS cluster accross AWS regions");
-  const ocnRegionMap: Record<string, string> = {};
-  for (const c of await list.listOpstraceClustersOnEKS()) {
-    ocnRegionMap[c.opstraceClusterName] = c.awsRegion;
+  const ocnRegionMap: Record<
+    string,
+    list.EKSOpstraceClusterRegionRelation
+  > = {};
+  for (const c of await list.EKSgetOpstraceClusters()) {
+    ocnRegionMap[c.opstraceClusterName] = c;
   }
 
   if (cli.CLIARGS.clusterName in ocnRegionMap) {
-    const r = ocnRegionMap[cli.CLIARGS.clusterName];
+    const c = ocnRegionMap[cli.CLIARGS.clusterName];
     log.info(
       "identified AWS region (found EKS cluster %s): %s",
       cli.CLIARGS.clusterName,
-      r
+      c.awsRegion
     );
-    return r;
+    return c.awsRegion;
   }
 
   // Empty string: convention for not set via cmdline.
