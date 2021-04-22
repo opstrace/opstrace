@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import equal = require("fast-deep-equal");
 import { isDeepStrictEqual } from "util";
 import * as Service from "./Service";
 import * as ServiceMonitor from "./ServiceMonitor";
@@ -46,30 +47,13 @@ import { log } from "@opstrace/utils";
 export * from "./general";
 export * from "./Pod";
 
-function isNetworkingV1beta1IngressTLSEqual(
-  desired: NetworkingV1beta1IngressTLS,
-  existing: NetworkingV1beta1IngressTLS
-): boolean {
-  return (
-    isDeepStrictEqual(desired?.hosts, existing?.hosts) &&
-    desired?.secretName == existing?.secretName
-  );
-}
-
 export const hasIngressChanged = (
   desired: IngressType,
   existing: IngressType
 ): boolean => {
   if (
-    Array.isArray(desired.spec.spec?.tls) &&
-    Array.isArray(existing.spec.spec?.tls) &&
-    (desired.spec.spec?.tls.length !== existing.spec.spec?.tls.length ||
-      desired.spec.spec?.tls.find(
-        (t, i) =>
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          !isNetworkingV1beta1IngressTLSEqual(t, existing.spec.spec!.tls![i])
-      )) &&
-    !isDeepStrictEqual(
+    !equal(desired.spec.spec, existing.spec.spec) ||
+    !equal(
       desired.spec.metadata?.annotations,
       existing.spec.metadata?.annotations
     )
@@ -101,7 +85,8 @@ export const hasDeploymentChanged = (
     return true;
   }
 
-  if (desired.spec.spec?.strategy !== undefined &&
+  if (
+    desired.spec.spec?.strategy !== undefined &&
     !isDeepStrictEqual(
       desired.spec.spec?.strategy,
       existing.spec.spec?.strategy
@@ -115,7 +100,8 @@ export const hasDeploymentChanged = (
     return true;
   }
 
-  if (desired.spec.spec?.selector !== undefined &&
+  if (
+    desired.spec.spec?.selector !== undefined &&
     !isDeepStrictEqual(
       desired.spec.spec?.selector,
       existing.spec.spec?.selector
@@ -352,13 +338,25 @@ export const hasClusterRoleChanged = (
   // Those defaults make this check fail. Check if any of the fiels we are
   // interested in have changed.
   if (
-    !isDeepStrictEqual(desired.spec.aggregationRule, existing.spec.aggregationRule) ||
+    !isDeepStrictEqual(
+      desired.spec.aggregationRule,
+      existing.spec.aggregationRule
+    ) ||
     !isDeepStrictEqual(desired.spec.apiVersion, existing.spec.apiVersion) ||
     !isDeepStrictEqual(desired.spec.kind, existing.spec.kind) ||
     !isDeepStrictEqual(desired.spec.rules, existing.spec.rules) ||
-    !isDeepStrictEqual(desired.spec.metadata?.annotations, existing.spec.metadata?.annotations) ||
-    !isDeepStrictEqual(desired.spec.metadata?.labels, existing.spec.metadata?.labels) ||
-    !isDeepStrictEqual(desired.spec.metadata?.name, existing.spec.metadata?.name)
+    !isDeepStrictEqual(
+      desired.spec.metadata?.annotations,
+      existing.spec.metadata?.annotations
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.metadata?.labels,
+      existing.spec.metadata?.labels
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.metadata?.name,
+      existing.spec.metadata?.name
+    )
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -378,7 +376,12 @@ export const hasCustomResourceDefinitionChanged = (
   desired: CustomResourceDefinitionType,
   existing: CustomResourceDefinitionType
 ): boolean => {
-  if (!isDeepStrictEqual(desired.spec.metadata?.annotations, existing.spec.metadata?.annotations)) {
+  if (
+    !isDeepStrictEqual(
+      desired.spec.metadata?.annotations,
+      existing.spec.metadata?.annotations
+    )
+  ) {
     // don't use logDifference because it doesn't handle very large json objects
     // like the CRD schema and it'll stall for a few seconds for each CRD it
     // compares
