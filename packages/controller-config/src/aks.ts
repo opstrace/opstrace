@@ -27,7 +27,7 @@ export function authenticatorKeySetAddKey(
   }
   const newKeySet = {
     ...previousKeySet,
-    newKeyID: newPubkeyPem
+    [newKeyID]: newPubkeyPem
   };
   return JSON.stringify(newKeySet);
 }
