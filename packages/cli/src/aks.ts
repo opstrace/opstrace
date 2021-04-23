@@ -21,7 +21,7 @@ import { EKS } from "aws-sdk";
 
 import { KubeConfig } from "@kubernetes/client-node";
 
-import { log, die } from "@opstrace/utils";
+import { log, die, keyIDfromPEM } from "@opstrace/utils";
 
 // import {
 //   KubeConfiguration,
@@ -56,6 +56,7 @@ import { generateKubeconfigStringForEksCluster } from "@opstrace/aws";
 import * as cli from "./index";
 import * as list from "./list";
 import * as cryp from "./crypto";
+import { assert } from "node:console";
 
 export async function add(): Promise<void> {
   const pubkeypem = cryp.readRSAPubKeyfromPEMfileAsPEMstring(
@@ -114,26 +115,55 @@ async function addAuthenticatorKey(
   kubeconfig: KubeConfig,
   newPubkeyPem: string
 ) {
-  log.info("addAuthenticatorKey() dummy: kubeconfig: %s", kubeconfig);
-
   log.info("fetch controller config (k8s config map) from Opstrace cluster");
   //@ts-ignore: this is a wtf moment
-  const prevControllerConfigObj: controllerconfig.LatestControllerConfigType = await controllerconfig.fetch(
+  const controllerConfigObj: controllerconfig.LatestControllerConfigType = await controllerconfig.fetch(
     kubeconfig
   );
 
-  if (prevControllerConfigObj === undefined) {
+  if (controllerConfigObj === undefined) {
     die("could not read current controller config");
   }
 
   log.info(
-    "previous tenant_api_authenticator_pubkey_set_json: %s",
-    JSON.stringify(prevControllerConfigObj)
+    "current controller config: %s",
+    JSON.stringify(controllerConfigObj, null, 2)
   );
 
-  log.info("add new public key to ");
-  //   controllerconfig.authenticatorKeySetAddKey(
-  //     prevControllerConfigObj.tenant_api_authenticator_pubkey_set_json,
-  //     newPubkeyPem
-  //   );
+  if (
+    controllerConfigObj.tenant_api_authenticator_pubkey_set_json === undefined
+  ) {
+    log.info("controller config: %s", controllerConfigObj);
+    die(
+      "parameter tenant_api_authenticator_pubkey_set_json is undefined in controller config"
+    );
+  }
+
+  log.info(
+    "current tenant_api_authenticator_pubkey_set_json, deserialized: %s",
+    JSON.parse(controllerConfigObj.tenant_api_authenticator_pubkey_set_json)
+  );
+
+  const keyIDnewPubkey = keyIDfromPEM(newPubkeyPem);
+
+  log.info("add new public key with id %s key to config", keyIDnewPubkey);
+  const newKeySetJSON: string = controllerconfig.authenticatorKeySetAddKey(
+    controllerConfigObj.tenant_api_authenticator_pubkey_set_json,
+    newPubkeyPem
+  );
+
+  log.info(
+    "new tenant_api_authenticator_pubkey_set_json, deserialized: %s",
+    JSON.parse(newKeySetJSON)
+  );
+
+  // This is just to double-check that the new AKS contains the expected key
+  // ID. Saw a bug during dev in `authenticatorKeySetAddKey()` that was
+  // caught by this assertion.
+  assert(keyIDnewPubkey in JSON.parse(newKeySetJSON));
+
+  controllerConfigObj.tenant_api_authenticator_pubkey_set_json = newKeySetJSON;
+
+  log.info("set new controller config (k8s config map)");
+  controllerconfig.set(controllerConfigObj, kubeconfig);
 }
