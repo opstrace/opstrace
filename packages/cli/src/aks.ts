@@ -24,6 +24,27 @@ import { KubeConfig } from "@kubernetes/client-node";
 import { log, die } from "@opstrace/utils";
 
 // import {
+//   KubeConfiguration,
+//   ConfigMap,
+//   createOrUpdateCM
+// } from "@opstrace/kubernetes";
+
+// import { serialize, configmap, deserialize } from "@opstrace/controller-config";
+
+// import { LatestControllerConfigType } from "@opstrace/controller-config";
+
+// import {
+//   fetch as getCurrentControllerConfig,
+//   ControllerResourcesDeploymentStrategy,
+//   deployControllerResources,
+//   LatestControllerConfigType,
+//   LatestControllerConfigSchema,
+//   authenticatorKeySetAddKey
+// } from
+
+import * as controllerconfig from "@opstrace/controller-config";
+
+// import {
 //   getAllGKEClusters,
 //   getGcpProjectId,
 //   generateKubeconfigStringForGkeCluster,
@@ -34,8 +55,13 @@ import { generateKubeconfigStringForEksCluster } from "@opstrace/aws";
 
 import * as cli from "./index";
 import * as list from "./list";
+import * as cryp from "./crypto";
 
 export async function add(): Promise<void> {
+  const pubkeypem = cryp.readRSAPubKeyfromPEMfileAsPEMstring(
+    cli.CLIARGS.tenantApiAuthenticatorKeyFilePath
+  );
+
   // if (cli.CLIARGS.cloudProvider == "gcp") {
   //   util.gcpValidateCredFileAndGetDetailOrError();
   //   await listGKEClusters();
@@ -54,9 +80,12 @@ export async function add(): Promise<void> {
             c.opstraceClusterName,
             c.awsRegion
           );
-          const kubeconfig = EKSgenKubConfigObject(c.awsRegion, c.eksCluster);
+          const kubeconfig = genKubConfigObjForEKScluster(
+            c.awsRegion,
+            c.eksCluster
+          );
 
-          addAuthenticatorKey(kubeconfig);
+          await addAuthenticatorKey(kubeconfig, pubkeypem);
 
           // great, success, stop iteration and break out of function
           return;
@@ -69,7 +98,10 @@ export async function add(): Promise<void> {
   }
 }
 
-function EKSgenKubConfigObject(awsregion: string, eksCluster: EKS.Cluster) {
+function genKubConfigObjForEKScluster(
+  awsregion: string,
+  eksCluster: EKS.Cluster
+) {
   log.info("generate kubeconfig string for EKS cluster");
   const kstring = generateKubeconfigStringForEksCluster(awsregion, eksCluster);
   const kubeConfig = new KubeConfig();
@@ -78,6 +110,30 @@ function EKSgenKubConfigObject(awsregion: string, eksCluster: EKS.Cluster) {
   return kubeConfig;
 }
 
-function addAuthenticatorKey(kubeconfig: KubeConfig) {
+async function addAuthenticatorKey(
+  kubeconfig: KubeConfig,
+  newPubkeyPem: string
+) {
   log.info("addAuthenticatorKey() dummy: kubeconfig: %s", kubeconfig);
+
+  log.info("fetch controller config (k8s config map) from Opstrace cluster");
+  //@ts-ignore: this is a wtf moment
+  const prevControllerConfigObj: controllerconfig.LatestControllerConfigType = await controllerconfig.fetch(
+    kubeconfig
+  );
+
+  if (prevControllerConfigObj === undefined) {
+    die("could not read current controller config");
+  }
+
+  log.info(
+    "previous tenant_api_authenticator_pubkey_set_json: %s",
+    JSON.stringify(prevControllerConfigObj)
+  );
+
+  log.info("add new public key to ");
+  //   controllerconfig.authenticatorKeySetAddKey(
+  //     prevControllerConfigObj.tenant_api_authenticator_pubkey_set_json,
+  //     newPubkeyPem
+  //   );
 }
