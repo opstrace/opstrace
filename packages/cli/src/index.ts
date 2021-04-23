@@ -64,7 +64,7 @@ interface CliOptsInterface {
   region: string;
   assumeYes: boolean;
   kubeconfigFilePath: string; // emtpy means: not set
-  tenantApiAuthenticatorPrivkeyFilepath: string; // emtpy means: not set
+  tenantApiAuthenticatorKeyFilePath: string; // emtpy means: not set
   tenantName: string; // empty means: not set
 }
 
@@ -379,13 +379,13 @@ function configureParserCreateTAAuthtoken(parser: argparse.ArgumentParser) {
     metavar: "TENANT_NAME"
   });
 
-  parser.add_argument("tenantApiAuthenticatorPrivkeyFilepath", {
+  parser.add_argument("tenantApiAuthenticatorKeyFilePath", {
     help:
-      "Use this private key to sign tenant API authentication token. " +
+      "Use the private key encoded in this file to sign tenant API authentication token. " +
       "The path must point to a PEM RSA private key file using the " +
       "PKCS#8 (RFC 3447) serialization format.",
     type: "str",
-    metavar: "PRIV_KEY_FILE_PATH",
+    metavar: "KEY_PAIR_FILE_PATH",
     default: ""
   });
 }
@@ -404,6 +404,15 @@ function configureParserAuthenticatorAddKey(parser: argparse.ArgumentParser) {
       "The name of the cluster to change the authenticator(s) in. Must exist, on given cloud provider ",
     type: "str",
     metavar: "CLUSTER_NAME"
+  });
+
+  parser.add_argument("tenantApiAuthenticatorKeyFilePath", {
+    help:
+      "Use the public key encoded in this file. The path must point to a PEM RSA private key " +
+      "file or a public key file",
+    type: "str",
+    metavar: "KEY_FILE_PATH",
+    default: ""
   });
 }
 
