@@ -15,10 +15,11 @@
  */
 
 import crypto from "crypto";
+import fs from "fs";
 
 import jwt from "jsonwebtoken";
 
-import { log, keyIDfromPEM } from "@opstrace/utils";
+import { log, keyIDfromPEM, die } from "@opstrace/utils";
 
 export interface RSAKeypair {
   privkeyObj: crypto.KeyObject;
@@ -36,6 +37,10 @@ export interface RSAKeypair {
 //   handed over to the Opstrace cluster as non-sensitive configuration
 //   parameter.
 let keypairForSession: RSAKeypair;
+
+function initialize() {
+  keypairForSession = generateRSAkeypair();
+}
 
 export function generateJWTforTenantAPI(
   tenantName: string,
@@ -146,14 +151,94 @@ function generateRSAkeypair(): RSAKeypair {
   };
 }
 
-function initialize() {
-  keypairForSession = generateRSAkeypair();
-}
-
 export function getPubkeyAsPem(): string {
   if (keypairForSession === undefined) {
     initialize();
   }
 
   return keypairForSession.pubkeyPem;
+}
+
+export function readRSAKeyPairfromPEMfile(fpath: string): RSAKeypair {
+  let pemstring: string;
+
+  try {
+    pemstring = fs.readFileSync(fpath, "utf8");
+  } catch (err) {
+    // This is an over-generalized error handler. Would have loved to
+    // handle only SystemError (around file interaction) and decoding
+    // errors, and re-raise every other error. How to do that cleanly?
+    // Also see https://github.com/nodejs/node/issues/8342.
+    // expected errors: ENOENT, EACCES, and related, also decoding errors.
+    return die(`could not read file '${fpath}': ${err.message}`);
+  }
+
+  // Expect PEM file structure:
+  // -----BEGIN RSA PRIVATE KEY-----
+  // MIIEpAIBAAKCAQEAwHtWIYduVZI2JK2wmDCisgSCIwAWCor1WZx/U3iXWwI9HaoG
+  // ...
+  // r7FksGLN0LhHuKM1EC4oSZGSBjIdm6GJ0oGNglprgZ/rY7VTcNU3HicMXTUuNaIu
+  // 9f1rA3YxtkddPgZVebl/AFMnV5RK+1Yujy2VKlOPd2bcBtOFg4i8ww==
+  // -----END RSA PRIVATE KEY-----
+
+  let privkey: crypto.KeyObject;
+  let pubkey: crypto.KeyObject;
+
+  try {
+    privkey = crypto.createPrivateKey({ key: pemstring, format: "pem" });
+  } catch (err) {
+    return die(`could not deserialize RSA private key: ${err.message}`);
+  }
+
+  try {
+    pubkey = crypto.createPublicKey({ key: pemstring, format: "pem" });
+  } catch (err) {
+    return die(`could not deserialize RSA public key: ${err.message}`);
+  }
+
+  log.info("deserialized private key of type: %s", privkey.asymmetricKeyType);
+
+  const pubkeyPem = pubkey.export({
+    type: "spki",
+    format: "pem"
+  }) as string;
+
+  return {
+    privkeyObj: privkey,
+    pubkeyPem: pubkeyPem
+  };
+}
+
+export function readRSAPubKeyfromPEMfileAsPEMstring(fpath: string): string {
+  // Expect a PEM file encoding just the public key, or a key pair file which
+  // at the surface seems to encode only the private key, but the public key
+  // can always be derived from that, which is what the code
+  // `createPublicKey()` below does.
+  let pemstring: string;
+
+  try {
+    pemstring = fs.readFileSync(fpath, "utf8");
+  } catch (err) {
+    // This is an over-generalized error handler. Would have loved to
+    // handle only SystemError (around file interaction) and decoding
+    // errors, and re-raise every other error. How to do that cleanly?
+    // Also see https://github.com/nodejs/node/issues/8342.
+    // expected errors: ENOENT, EACCES, and related, also decoding errors.
+    return die(`could not read file '${fpath}': ${err.message}`);
+  }
+
+  let pubkey: crypto.KeyObject;
+
+  try {
+    pubkey = crypto.createPublicKey({ key: pemstring, format: "pem" });
+  } catch (err) {
+    return die(`could not deserialize RSA public key: ${err.message}`);
+  }
+
+  const pubkeyPem = pubkey.export({
+    type: "spki",
+    format: "pem"
+  }) as string;
+
+  return pubkeyPem;
 }
