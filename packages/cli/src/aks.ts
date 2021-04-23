@@ -17,6 +17,8 @@
 // module for managing the authenticator key set (AKS) in an existing
 // Opstrace cluster.
 
+import { strict as assert } from "assert";
+
 import { EKS } from "aws-sdk";
 
 import { KubeConfig } from "@kubernetes/client-node";
@@ -56,7 +58,6 @@ import { generateKubeconfigStringForEksCluster } from "@opstrace/aws";
 import * as cli from "./index";
 import * as list from "./list";
 import * as cryp from "./crypto";
-import { assert } from "node:console";
 
 export async function add(): Promise<void> {
   const pubkeypem = cryp.readRSAPubKeyfromPEMfileAsPEMstring(
