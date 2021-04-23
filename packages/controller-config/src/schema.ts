@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { log, keyIDfromPEM } from "@opstrace/utils";
+import { log } from "@opstrace/utils";
 
 import { ControllerConfigSchemaV1, ControllerConfigTypeV1 } from "./schemav1";
 import {
@@ -24,31 +24,10 @@ import {
 
 import { ControllerConfigSchemaV2, ControllerConfigTypeV2 } from "./schemav2";
 
+import * as aks from "./aks";
+
 export type LatestControllerConfigType = ControllerConfigTypeV2;
 export const LatestControllerConfigSchema = ControllerConfigSchemaV2;
-
-function generateAuthenticatorPubkeySetJSON(data_api_authn_pubkey_pem: string) {
-  // The key set is required to be a mapping between keyID (string) and
-  // PEM-encoded pubkey (string).
-  // Note: upon _continutation_, this key should be added to the existing
-  // key set.
-  const keyId = keyIDfromPEM(data_api_authn_pubkey_pem);
-  const keyset = {
-    [keyId]: data_api_authn_pubkey_pem
-  };
-
-  log.debug("built authenticator key ID: %s", keyId);
-
-  // The corresponding configuration parameter value is expected to be a
-  // string, namely the above `keyset` mapping in JSON-encoded form *without
-  // literal newline chars*.
-  const tenant_api_authenticator_pubkey_set_json = JSON.stringify(keyset);
-  log.debug(
-    "generated AuthenticatorPubkeySetJSON: %s",
-    tenant_api_authenticator_pubkey_set_json
-  );
-  return tenant_api_authenticator_pubkey_set_json;
-}
 
 // upgrade function
 function V1toV2(cfg: ControllerConfigTypeV1): ControllerConfigTypeV2 {
@@ -58,7 +37,10 @@ function V1toV2(cfg: ControllerConfigTypeV1): ControllerConfigTypeV2 {
     data_api_authn_pubkey_pem,
     ...restConfig
   } = cfg;
-  const tenant_api_authenticator_pubkey_set_json = generateAuthenticatorPubkeySetJSON(
+
+  // Generate the tenant/data API authenticator keyset from the single, initial
+  // known public key.
+  const tenant_api_authenticator_pubkey_set_json = aks.authenticatorKeySetgenerateJSONSingleKey(
     data_api_authn_pubkey_pem
   );
 
