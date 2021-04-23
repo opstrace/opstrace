@@ -166,5 +166,7 @@ async function addAuthenticatorKey(
   controllerConfigObj.tenant_api_authenticator_pubkey_set_json = newKeySetJSON;
 
   log.info("set new controller config (k8s config map)");
-  controllerconfig.set(controllerConfigObj, kubeconfig);
+  await controllerconfig.set(controllerConfigObj, kubeconfig);
+
+  log.info("controller config map updated");
 }
