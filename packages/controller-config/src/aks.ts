@@ -22,7 +22,7 @@ export function authenticatorKeySetAddKey(
 ): string {
   const previousKeySet = JSON.parse(previousKeySetJSONString);
   const newKeyID = keyIDfromPEM(newPubkeyPem);
-  if (previousKeySet.includes(newKeyID)) {
+  if (newKeyID in previousKeySet) {
     die("key already in key set");
   }
   const newKeySet = {
