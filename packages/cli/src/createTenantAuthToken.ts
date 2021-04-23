@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import crypto from "crypto";
-import fs from "fs";
-
-import { log, die } from "@opstrace/utils";
+import { log } from "@opstrace/utils";
 
 import * as cli from "./index";
 // import * as util from "./util";
 import * as cryp from "./crypto";
 
 export async function create(): Promise<void> {
-  const keypair: cryp.RSAKeypair = readKeyPairRSAfromPEM();
+  const keypair: cryp.RSAKeypair = cryp.readRSAKeyPairfromPEMfile(
+    // Expect a PEM file encoding private key within `BEGIN RSA PRIVATE KEY ...
+    // END RSA PRIVATE KEY` Note that this actually encodes the complete key
+    // pair.
+    // TODO: check file permissions, that this is 600-protected
+    cli.CLIARGS.tenantApiAuthenticatorKeyFilePath
+  );
 
   const token = cryp.generateJWTforTenantAPIfromKeyPair(
     cli.CLIARGS.tenantName,
@@ -39,59 +42,4 @@ export async function create(): Promise<void> {
   process.stderr.write("\n");
   process.stdout.write(`${token}`);
   process.stderr.write("\n");
-}
-
-function readKeyPairRSAfromPEM(): cryp.RSAKeypair {
-  let pemstring: string;
-
-  try {
-    pemstring = fs.readFileSync(
-      cli.CLIARGS.tenantApiAuthenticatorPrivkeyFilepath,
-      "utf8"
-    );
-  } catch (err) {
-    // This is an over-generalized error handler. Would have loved to
-    // handle only SystemError (around file interaction) and decoding
-    // errors, and re-raise every other error. How to do that cleanly?
-    // Also see https://github.com/nodejs/node/issues/8342.
-    // expected errors: ENOENT, EACCES, and related, also decoding errors.
-    return die(
-      `could not read private key file '${cli.CLIARGS.tenantApiAuthenticatorPrivkeyFilepath}': ${err.message}`
-    );
-  }
-
-  // Expect PEM file structure:
-  // -----BEGIN RSA PRIVATE KEY-----
-  // MIIEpAIBAAKCAQEAwHtWIYduVZI2JK2wmDCisgSCIwAWCor1WZx/U3iXWwI9HaoG
-  // ...
-  // r7FksGLN0LhHuKM1EC4oSZGSBjIdm6GJ0oGNglprgZ/rY7VTcNU3HicMXTUuNaIu
-  // 9f1rA3YxtkddPgZVebl/AFMnV5RK+1Yujy2VKlOPd2bcBtOFg4i8ww==
-  // -----END RSA PRIVATE KEY-----
-
-  let privkey: crypto.KeyObject;
-  let pubkey: crypto.KeyObject;
-
-  try {
-    privkey = crypto.createPrivateKey({ key: pemstring, format: "pem" });
-  } catch (err) {
-    return die(`could not deserialize RSA private key: ${err.message}`);
-  }
-
-  try {
-    pubkey = crypto.createPublicKey({ key: pemstring, format: "pem" });
-  } catch (err) {
-    return die(`could not deserialize RSA public key: ${err.message}`);
-  }
-
-  log.info("deserialized private key of type: %s", privkey.asymmetricKeyType);
-
-  const pubkeyPem = pubkey.export({
-    type: "spki",
-    format: "pem"
-  }) as string;
-
-  return {
-    privkeyObj: privkey,
-    pubkeyPem: pubkeyPem
-  };
 }
