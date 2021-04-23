@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { call, CallEffect } from "redux-saga/effects";
-
 import { serialize, configmap, deserialize } from "../utils";
 
 import { LatestControllerConfigType } from "../schema";
@@ -58,10 +56,10 @@ export async function fetch(
   }
 }
 
-export function* set(
+export async function set(
   controllerconfig: LatestControllerConfigType,
   kubeConfig: KubeConfiguration
-): Generator<CallEffect, void, unknown> {
+): Promise<void> {
   const cm = serialize(controllerconfig, kubeConfig);
 
   // Expect this error structure:
@@ -82,5 +80,5 @@ export function* set(
   //   },
   //...
 
-  yield call(createOrUpdateCM, cm);
+  await createOrUpdateCM(cm);
 }
