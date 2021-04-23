@@ -34,10 +34,7 @@ export const ControllerConfigSchemaV1 = yup
       .required("must specify metric retention in number of days"),
     dnsName: yup.string().required(),
     terminate: yup.bool().default(false),
-    // https://stackoverflow.com/a/63944333/145400 `data_api_authn_pubkey_pem`
-    // is optional, is a legacy controller config option, a noop right now
-    // (future: set fallback key for authenticator).
-    data_api_authn_pubkey_pem: yup.string().required(),
+    data_api_authn_pubkey_pem: yup.string().required(), // assume: non-empty string
     disable_data_api_authentication: yup.bool().required(),
     uiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
     apiSourceIpFirewallRules: yup.array(yup.string()).ensure(),
@@ -61,4 +58,6 @@ export const ControllerConfigSchemaV1 = yup
   .noUnknown()
   .defined();
 
-export type ControllerConfigTypeV1 = yup.InferType<typeof ControllerConfigSchemaV1>;
+export type ControllerConfigTypeV1 = yup.InferType<
+  typeof ControllerConfigSchemaV1
+>;
