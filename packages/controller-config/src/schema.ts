@@ -16,14 +16,13 @@
 
 import { log, keyIDfromPEM } from "@opstrace/utils";
 
+import { ControllerConfigSchemaV1, ControllerConfigTypeV1 } from "./schemav1";
 import {
-    ControllerConfigSchemaV1,
-    ControllerConfigTypeV1
-} from "./schemav1";
-import {
-    ControllerConfigSchemaV2,
-    ControllerConfigTypeV2
- } from "./schemav2";
+  ControllerConfigSchemaV1a,
+  ControllerConfigTypeV1a
+} from "./schemav1a";
+
+import { ControllerConfigSchemaV2, ControllerConfigTypeV2 } from "./schemav2";
 
 export type LatestControllerConfigType = ControllerConfigTypeV2;
 export const LatestControllerConfigSchema = ControllerConfigSchemaV2;
@@ -53,8 +52,15 @@ function generateAuthenticatorPubkeySetJSON(data_api_authn_pubkey_pem: string) {
 
 // upgrade function
 function V1toV2(cfg: ControllerConfigTypeV1): ControllerConfigTypeV2 {
-  const { logRetention, metricRetention, data_api_authn_pubkey_pem, ...restConfig } = cfg;
-  const tenant_api_authenticator_pubkey_set_json = generateAuthenticatorPubkeySetJSON(data_api_authn_pubkey_pem);
+  const {
+    logRetention,
+    metricRetention,
+    data_api_authn_pubkey_pem,
+    ...restConfig
+  } = cfg;
+  const tenant_api_authenticator_pubkey_set_json = generateAuthenticatorPubkeySetJSON(
+    data_api_authn_pubkey_pem
+  );
 
   return {
     ...restConfig,
@@ -64,10 +70,22 @@ function V1toV2(cfg: ControllerConfigTypeV1): ControllerConfigTypeV2 {
     // continue to support older tokens.
     data_api_authn_pubkey_pem: data_api_authn_pubkey_pem,
     tenant_api_authenticator_pubkey_set_json: tenant_api_authenticator_pubkey_set_json
-  }
+  };
 }
 
-export function upgradeControllerConfigMapToLatest(json: object): LatestControllerConfigType {
+function V1atoV2(cfg: ControllerConfigTypeV1a): ControllerConfigTypeV2 {
+  const { logRetention, metricRetention, ...restConfig } = cfg;
+
+  return {
+    ...restConfig,
+    logRetentionDays: logRetention,
+    metricRetentionDays: metricRetention
+  };
+}
+
+export function upgradeControllerConfigMapToLatest(
+  json: object
+): LatestControllerConfigType {
   if (LatestControllerConfigSchema.isValidSync(json, { strict: true })) {
     // validate again, this time "only" to interpolate with defaults, see
     // https://github.com/jquense/yup/pull/961
@@ -75,12 +93,17 @@ export function upgradeControllerConfigMapToLatest(json: object): LatestControll
     return LatestControllerConfigSchema.validateSync(json);
   }
 
-  if (ControllerConfigSchemaV1.isValidSync(json, {strict: true})) {
+  if (ControllerConfigSchemaV1.isValidSync(json, { strict: true })) {
     log.debug("got v1 controller config, upgrading...");
     return V1toV2(ControllerConfigSchemaV1.validateSync(json));
   }
 
+  if (ControllerConfigSchemaV1a.isValidSync(json, { strict: true })) {
+    log.debug("got v1a controller config, upgrading...");
+    return V1atoV2(ControllerConfigSchemaV1a.validateSync(json));
+  }
+
   // Possible user error. Parse again and it'll throw a meaningful error
   // message.
-  return LatestControllerConfigSchema.validateSync(json, {strict: true});
+  return LatestControllerConfigSchema.validateSync(json, { strict: true });
 }
