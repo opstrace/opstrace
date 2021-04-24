@@ -22,7 +22,8 @@ FROM=cli/main/${OPSTRACE_CLI_VERSION_FROM}/opstrace-cli-linux-amd64-${OPSTRACE_C
 #
 # Upgrade the cluster to this version.
 #
-TO=cli/main/${OPSTRACE_CLI_VERSION_TO}/opstrace-cli-linux-amd64-${OPSTRACE_CLI_VERSION_TO}.tar.bz2
+# TO=cli/main/${OPSTRACE_CLI_VERSION_TO}/opstrace-cli-linux-amd64-${OPSTRACE_CLI_VERSION_TO}.tar.bz2
+TO=cli/prs/594/2d8a1900-ci/opstrace-cli-linux-amd64-2d8a1900-ci.tar.bz2
 
 #
 # Funtion that downloads cli artifact from s3 bucket and extracts it to a target
