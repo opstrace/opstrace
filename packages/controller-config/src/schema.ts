@@ -18,9 +18,9 @@ import { log, keyIDfromPEM } from "@opstrace/utils";
 
 import { ControllerConfigSchemaV1, ControllerConfigTypeV1 } from "./schemav1";
 import {
-  ControllerConfigSchemaV1a,
-  ControllerConfigTypeV1a
-} from "./schemav1a";
+  ControllerConfigSchemaV1alpha,
+  ControllerConfigTypeV1alpha
+} from "./schemav1alpha";
 
 import { ControllerConfigSchemaV2, ControllerConfigTypeV2 } from "./schemav2";
 
@@ -73,7 +73,7 @@ function V1toV2(cfg: ControllerConfigTypeV1): ControllerConfigTypeV2 {
   };
 }
 
-function V1atoV2(cfg: ControllerConfigTypeV1a): ControllerConfigTypeV2 {
+function V1alphatoV2(cfg: ControllerConfigTypeV1alpha): ControllerConfigTypeV2 {
   const { logRetention, metricRetention, ...restConfig } = cfg;
 
   return {
@@ -98,9 +98,9 @@ export function upgradeControllerConfigMapToLatest(
     return V1toV2(ControllerConfigSchemaV1.validateSync(json));
   }
 
-  if (ControllerConfigSchemaV1a.isValidSync(json, { strict: true })) {
-    log.debug("got v1a controller config, upgrading...");
-    return V1atoV2(ControllerConfigSchemaV1a.validateSync(json));
+  if (ControllerConfigSchemaV1alpha.isValidSync(json, { strict: true })) {
+    log.debug("got v1alpha controller config, upgrading...");
+    return V1alphatoV2(ControllerConfigSchemaV1alpha.validateSync(json));
   }
 
   // Possible user error. Parse again and it'll throw a meaningful error
