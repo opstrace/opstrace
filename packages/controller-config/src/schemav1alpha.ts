@@ -21,7 +21,7 @@ import { AWSConfig } from "@opstrace/aws";
 // Between V1 and V2 there was a cluster launched that had the
 // tenant_api_authenticator_pubkey_set_json field but before logRetention and
 // metricRetention were renamed.
-export const ControllerConfigSchemaV1a = yup
+export const ControllerConfigSchemaV1alpha = yup
   .object({
     name: yup.string(),
     target: yup
@@ -64,6 +64,6 @@ export const ControllerConfigSchemaV1a = yup
   .noUnknown()
   .defined();
 
-export type ControllerConfigTypeV1a = yup.InferType<
-  typeof ControllerConfigSchemaV1a
+export type ControllerConfigTypeV1alpha = yup.InferType<
+  typeof ControllerConfigSchemaV1alpha
 >;
