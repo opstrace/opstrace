@@ -48,17 +48,12 @@ import { log, die, keyIDfromPEM } from "@opstrace/utils";
 
 import * as controllerconfig from "@opstrace/controller-config";
 
-// import {
-//   getAllGKEClusters,
-//   getGcpProjectId,
-//   generateKubeconfigStringForGkeCluster,
-//   getGKEKubeconfig
-// } from "@opstrace/gcp";
+import { getGcpProjectId, getGKEKubeconfig } from "@opstrace/gcp";
 
 import { generateKubeconfigStringForEksCluster } from "@opstrace/aws";
 
 import * as cli from "./index";
-import * as list from "./list";
+import * as util from "./util";
 import * as cryp from "./crypto";
 
 export async function createKeypair(): Promise<void> {
@@ -102,40 +97,40 @@ export async function add(): Promise<void> {
     cli.CLIARGS.tenantApiAuthenticatorKeyFilePath
   );
 
-  // if (cli.CLIARGS.cloudProvider == "gcp") {
-  //   util.gcpValidateCredFileAndGetDetailOrError();
-  //   await listGKEClusters();
-  //   return;
-  // }
+  let kubeconfig: KubeConfig;
 
-  if (cli.CLIARGS.cloudProvider == "aws") {
-    // TODO: use util.awsGetClusterRegion() instead
-    log.info("do a lookup across all regions to see if cluster exists");
-    const clusters = await list.EKSgetOpstraceClusters();
-    if (clusters.length > 0) {
-      for (const c of clusters)
-        if (c.opstraceClusterName === cli.CLIARGS.clusterName) {
-          log.info(
-            "cluster `%s` found in AWS region %s",
-            c.opstraceClusterName,
-            c.awsRegion
-          );
-          const kubeconfig = genKubConfigObjForEKScluster(
-            c.awsRegion,
-            c.eksCluster
-          );
+  if (cli.CLIARGS.cloudProvider == "gcp") {
+    util.gcpValidateCredFileAndGetDetailOrError();
+    const pid: string = await getGcpProjectId();
+    log.debug("GCP project ID: %s", pid);
 
-          await addAuthenticatorKey(kubeconfig, pubkeypem);
+    const kc = await getGKEKubeconfig(cli.CLIARGS.clusterName);
+    if (kc === undefined) {
+      die(
+        `error while trying to generate the kubeconfig for cluster ${cli.CLIARGS.clusterName}`
+      );
+    }
+    kubeconfig = kc;
+  } else {
+    // case: cloudProvider == "aws"
+    const c = await util.awsGetClusterRegionDynamic(cli.CLIARGS.clusterName);
 
-          // great, success, stop iteration and break out of function
-          return;
-        }
+    if (c === undefined) {
+      die(
+        `Opstrace cluster not found across all inspected AWS regions: ${cli.CLIARGS.clusterName}`
+      );
     }
 
-    die(
-      `Opstrace cluster not found across all inspected AWS regions: ${cli.CLIARGS.clusterName}`
+    log.info(
+      "cluster `%s` found in AWS region %s",
+      c.opstraceClusterName,
+      c.awsRegion
     );
+
+    kubeconfig = genKubConfigObjForEKScluster(c.awsRegion, c.eksCluster);
   }
+
+  await addAuthenticatorKey(kubeconfig, pubkeypem);
 }
 
 function genKubConfigObjForEKScluster(
