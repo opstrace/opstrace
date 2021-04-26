@@ -32,7 +32,7 @@ export async function destroy(): Promise<void> {
 
   let awsRegion: string | undefined;
   if (cli.CLIARGS.cloudProvider == "aws") {
-    awsRegion = await util.awsGetClusterRegion();
+    awsRegion = await util.awsGetClusterRegionWithCmdlineFallback();
   }
 
   // The "destroy config" concept is deliberately chaotic for now. user-given

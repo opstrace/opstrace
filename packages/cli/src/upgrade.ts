@@ -71,7 +71,7 @@ export async function upgrade(): Promise<void> {
 
   let awsRegion: string | undefined;
   if (cli.CLIARGS.cloudProvider == "aws") {
-    awsRegion = await util.awsGetClusterRegion();
+    awsRegion = await util.awsGetClusterRegionWithCmdlineFallback();
   }
 
   setUpgradeConfig({
