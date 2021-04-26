@@ -289,6 +289,8 @@ As you can see, the data we sent to Opstrace in step 3 is indeed ingested as exp
 
 You can also see that the `prod` tenant is empty, completely separated from `staging`:
 
+<https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
+
 ```text
 https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
 ```
