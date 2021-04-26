@@ -193,7 +193,7 @@ export function timestampForFilenames(ts: ZonedDateTime): string {
  * - use what was provided via --region on cmdline
  * - error out if --region was not provided
  */
-export async function awsGetClusterRegion(): Promise<string> {
+export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> {
   if (cli.CLIARGS.region !== "") {
     log.debug("region to destroy in from cli args: %s", cli.CLIARGS.region);
 
@@ -208,27 +208,12 @@ export async function awsGetClusterRegion(): Promise<string> {
     return cli.CLIARGS.region;
   }
 
-  log.info("starting look up of EKS cluster accross AWS regions");
-  const ocnRegionMap: Record<
-    string,
-    list.EKSOpstraceClusterRegionRelation
-  > = {};
-  for (const c of await list.EKSgetOpstraceClusters()) {
-    ocnRegionMap[c.opstraceClusterName] = c;
-  }
+  const c = await awsGetClusterRegionDynamic(cli.CLIARGS.clusterName);
 
-  if (cli.CLIARGS.clusterName in ocnRegionMap) {
-    const c = ocnRegionMap[cli.CLIARGS.clusterName];
-    log.info(
-      "identified AWS region (found EKS cluster %s): %s",
-      cli.CLIARGS.clusterName,
-      c.awsRegion
-    );
+  if (c !== undefined) {
     return c.awsRegion;
   }
 
-  // Empty string: convention for not set via cmdline.
-  //
   // Note(JP): or instead of erroring out here fall back to some 'default'
   // region? Might feel nicer in some cases. But: I'd rather make this
   // explicit. For example, when the goal is to tear down the remainders of
@@ -247,6 +232,31 @@ export async function awsGetClusterRegion(): Promise<string> {
       "Cannot determine cluster region. " +
       "Please specify the region with the --region command line argument."
   );
+}
+
+export async function awsGetClusterRegionDynamic(
+  lookForOpstraceClusterName: string
+): Promise<list.EKSOpstraceClusterRegionRelation | undefined> {
+  log.info("starting lookup of EKS cluster accross AWS regions");
+  const ocnRegionMap: Record<
+    string,
+    list.EKSOpstraceClusterRegionRelation
+  > = {};
+  for (const c of await list.EKSgetOpstraceClusters()) {
+    ocnRegionMap[c.opstraceClusterName] = c;
+  }
+
+  if (lookForOpstraceClusterName in ocnRegionMap) {
+    const c = ocnRegionMap[lookForOpstraceClusterName];
+    log.info(
+      "identified AWS region (found EKS cluster %s): %s",
+      lookForOpstraceClusterName,
+      c.awsRegion
+    );
+    return c;
+  }
+
+  return undefined;
 }
 
 export function gcpGetClusterRegion() {
