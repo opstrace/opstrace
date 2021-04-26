@@ -96,13 +96,10 @@ export async function waitForLokiQueryResult(
   expectedEntryCount: number | undefined,
   logDetails = true,
   expectedStreamCount = 1,
-  buildhash = true
+  buildhash = true,
+  // Latency should normally vary from 2 to 12 seconds
+  maxWaitSeconds = 30
 ): Promise<LokiQueryResult> {
-  // What's our latency goal here? Upper pipeline latency limit? As of writing
-  // this code I have seen this latency to vary between about 2 seconds and 12
-  // seconds.
-  const maxWaitSeconds = 30;
-
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   if (logDetails) {
     log.info(
@@ -128,9 +125,6 @@ Query parameters: ${JSON.stringify(
     }
 
     queryCount += 1;
-    if (queryCount % 15 === 0) {
-      log.info("send query %s to loki", queryCount);
-    }
     const result = await queryLoki(lokiQuerierBaseUrl, qparms);
 
     if (result.status === undefined) {
@@ -240,7 +234,6 @@ Query parameters: ${JSON.stringify(
       }
 
       const result: LokiQueryResult = {
-        //entries: data["streams"][0]["entries"],
         entries: streams[0]["values"],
         labels: labels,
         textmd5: textmd5

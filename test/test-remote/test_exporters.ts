@@ -155,11 +155,15 @@ async function getExporterLog(exporterNamespace: string, exporterName: string, l
   const entries = await waitForLokiQueryResult(
     TENANT_SYSTEM_LOKI_API_BASE_URL,
     queryParams,
-    undefined,
-    false,
-    0
+    undefined, // expectedEntryCount
+    false, // logDetails
+    1, // expectedStreamCount
+    true, // buildhash
+    // Default is 30s, which is plenty for default-tenant.
+    // Meanwhile system-tenant seems to take as long as 62s for an entry to appear.
+    120 // maxWaitSeconds
   );
-  log.info(`Got exporter log for query=${query}: ${entries}`);
+  log.info(`Got exporter log for query=${query}: ${entries.entries}`);
   return entries;
 }
 
@@ -385,7 +389,7 @@ type: azure
 credential: ${exporterName}
 config:
   resource_groups:
-  - resource_group: group
+  - resource_group: mygroup
     resource_types:
     - "Microsoft.Storage/storageAccounts"
     metrics:
@@ -407,8 +411,8 @@ value:
   AZURE_CLIENT_ID: bar
   AZURE_CLIENT_SECRET: baz
 `;
-
     const expectedLogMessage = "Tenant 'testtenantshouldfail' not found";
+
     await testExporterLog(
       TENANT_DEFAULT_API_TOKEN_FILEPATH,
       exporterConfig,
