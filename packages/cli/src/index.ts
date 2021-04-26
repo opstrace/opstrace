@@ -116,6 +116,11 @@ async function main() {
     throw new ExitSuccess();
   }
 
+  if (CLIARGS.command == "ta-create-keypair") {
+    await aks.createKeypair();
+    throw new ExitSuccess();
+  }
+
   throw Error("should never be here");
 }
 
@@ -184,9 +189,14 @@ function parseCmdlineArgs() {
   const parserAuthenticatorAddKey = subparsers.add_parser(
     "authenticator-add-key",
     {
-      help: "Add public key to authenticator (TODO help text"
+      help: "Add public key to authenticator (TODO: help text)"
     }
   );
+
+  const parserCreateKeypair = subparsers.add_parser("ta-create-keypair", {
+    help:
+      "Create an RSA keypair, to be used for the tenant authenticator (TODO: help text)"
+  });
 
   // The --log-level switch must work when not using a sub command, but also
   // for each sub command.
@@ -280,6 +290,7 @@ function parseCmdlineArgs() {
 
   configureParserCreateTAAuthtoken(parserCreateTAAuthtoken);
   configureParserAuthenticatorAddKey(parserAuthenticatorAddKey);
+  configureParserParserCreateKeypair(parserCreateKeypair);
 
   // About those next two args: that's just brainstorm, maybe do not build
   // that... Maybe _always_ drop that private key. maybe only provide one
@@ -382,10 +393,10 @@ function configureParserCreateTAAuthtoken(parser: argparse.ArgumentParser) {
   parser.add_argument("tenantApiAuthenticatorKeyFilePath", {
     help:
       "Use the private key encoded in this file to sign tenant API authentication token. " +
-      "The path must point to a PEM RSA private key file using the " +
+      "The path must point to a PEM RSA private key file using the PKCS#1 or" +
       "PKCS#8 (RFC 3447) serialization format.",
     type: "str",
-    metavar: "KEY_PAIR_FILE_PATH",
+    metavar: "KEYPAIR_FILE_PATH",
     default: ""
   });
 }
@@ -412,6 +423,18 @@ function configureParserAuthenticatorAddKey(parser: argparse.ArgumentParser) {
       "file or a public key file",
     type: "str",
     metavar: "KEY_FILE_PATH",
+    default: ""
+  });
+}
+
+// Mutate parser in place.
+function configureParserParserCreateKeypair(parser: argparse.ArgumentParser) {
+  parser.add_argument("tenantApiAuthenticatorKeyFilePath", {
+    help:
+      "Write the RSA private key (containing the public key) in PKCS#8 format " +
+      "to this file (TODO: help text).",
+    type: "str",
+    metavar: "KEYPAIR_FILE_PATH",
     default: ""
   });
 }

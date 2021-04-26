@@ -173,13 +173,19 @@ export function readRSAKeyPairfromPEMfile(fpath: string): RSAKeypair {
     return die(`could not read file '${fpath}': ${err.message}`);
   }
 
-  // Expect PEM file structure:
+  // Expect PEM file structure to be of kind PKCS1:
+  //
   // -----BEGIN RSA PRIVATE KEY-----
   // MIIEpAIBAAKCAQEAwHtWIYduVZI2JK2wmDCisgSCIwAWCor1WZx/U3iXWwI9HaoG
   // ...
   // r7FksGLN0LhHuKM1EC4oSZGSBjIdm6GJ0oGNglprgZ/rY7VTcNU3HicMXTUuNaIu
   // 9f1rA3YxtkddPgZVebl/AFMnV5RK+1Yujy2VKlOPd2bcBtOFg4i8ww==
   // -----END RSA PRIVATE KEY-----
+  //
+  // ... or of type PKCS8:
+  // -----BEGIN PRIVATE KEY-----
+  // ...
+  // -----END PRIVATE KEY-----
 
   let privkey: crypto.KeyObject;
   let pubkey: crypto.KeyObject;
