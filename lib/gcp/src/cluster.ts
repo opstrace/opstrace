@@ -281,6 +281,7 @@ export function* ensureGKEDoesNotExist(
 export async function getGKEKubeconfig(
   clusterName: string
 ): Promise<KubeConfig | undefined> {
+  log.info("looking up GKE cluster across GCP regions");
   const gkeCluster = await doesGKEClusterExist({
     opstraceClusterName: clusterName
   });
@@ -305,10 +306,7 @@ export async function getGKEKubeconfig(
       kubeconfig: kstring
     });
   } catch (e) {
-    log.warning(
-      "Failed to fetch kubeconfig for GKE cluster: %s. Proceeding with infraestructure cleanup.",
-      e.message
-    );
+    log.warning("Failed to fetch kubeconfig for GKE cluster: %s", e.message);
     return undefined;
   }
 }
