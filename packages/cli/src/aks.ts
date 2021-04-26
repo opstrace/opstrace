@@ -18,6 +18,8 @@
 // Opstrace cluster.
 
 import { strict as assert } from "assert";
+import fs from "fs";
+import crypto from "crypto";
 
 import { EKS } from "aws-sdk";
 
@@ -58,6 +60,42 @@ import { generateKubeconfigStringForEksCluster } from "@opstrace/aws";
 import * as cli from "./index";
 import * as list from "./list";
 import * as cryp from "./crypto";
+
+export async function createKeypair(): Promise<void> {
+  const modulusLengthBits = 2048;
+
+  log.info(
+    "generate new RSA keypair. Modulus length (bits): %s",
+    modulusLengthBits
+  );
+
+  const { privateKey } = crypto.generateKeyPairSync("rsa", {
+    modulusLength: modulusLengthBits
+  });
+
+  // About PKCS1 vs PKCS8:
+  // PKCS8 is a little more modern and supports not only RSA.
+  // https://superuser.com/a/606266/178217
+  // https://stackoverflow.com/a/48960291/145400
+  // https://crypto.stackexchange.com/a/47433/43746
+  const privkeyPem = privateKey.export({
+    type: "pkcs8",
+    format: "pem"
+  }) as string;
+
+  const fpath = cli.CLIARGS.tenantApiAuthenticatorKeyFilePath;
+
+  log.info("write key pair to file: %s", fpath);
+
+  try {
+    fs.writeFileSync(fpath, privkeyPem, {
+      mode: 0o600,
+      encoding: "utf8"
+    });
+  } catch (err) {
+    return die(`could not write file '${fpath}': ${err.message}`);
+  }
+}
 
 export async function add(): Promise<void> {
   const pubkeypem = cryp.readRSAPubKeyfromPEMfileAsPEMstring(
