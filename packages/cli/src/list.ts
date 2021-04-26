@@ -63,10 +63,9 @@ export interface EKSOpstraceClusterRegionRelation {
 }
 
 /**
- * List Opstrace clusters in AWS EKS; those that the currently configured
- * credentials can see.
- * Goal: list for all possible regions/locations, also see
- * opstrace-prelaunch/issues/1033
+ * List Opstrace clusters in AWS EKS across many AWS regions.
+ * Note: this can only discover those clusters that the currently configured
+ * AWS credentials can see.
  */
 export async function EKSgetOpstraceClusters(): Promise<
   EKSOpstraceClusterRegionRelation[]
@@ -175,12 +174,12 @@ async function EKSgetOpstraceClustersInRegion(
     result.clusters?.length
   );
 
-  interface NameCluster {
-    name: string;
-    cluster: EKS.Cluster;
-  }
+  // interface NameCluster {
+  //   name: string;
+  //   cluster: EKS.Cluster;
+  // }
 
-  const opstraceClusters: NameCluster[] = [];
+  const opstraceClusters: EKSOpstraceClusterRegionRelation[] = [];
   const opstraceClusterNames: string[] = [];
   for (const EKSclusterName of result.clusters as string[]) {
     let dcresp;
@@ -202,7 +201,11 @@ async function EKSgetOpstraceClustersInRegion(
     assert(ocn);
     assert(dcresp.cluster);
     if (ocn !== undefined) {
-      opstraceClusters.push({ name: ocn, cluster: dcresp.cluster });
+      opstraceClusters.push({
+        awsRegion: region,
+        opstraceClusterName: ocn,
+        eksCluster: dcresp.cluster
+      });
       opstraceClusterNames.push(ocn);
     }
   }
@@ -215,15 +218,7 @@ async function EKSgetOpstraceClustersInRegion(
     );
   }
 
-  const rv: EKSOpstraceClusterRegionRelation[] = opstraceClusters.map(c => {
-    return {
-      awsRegion: region,
-      eksCluster: c.cluster,
-      opstraceClusterName: c.name
-    };
-  });
-
-  return rv;
+  return opstraceClusters;
 }
 
 /**
