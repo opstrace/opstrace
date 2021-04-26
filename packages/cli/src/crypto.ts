@@ -204,6 +204,10 @@ export function readRSAKeyPairfromPEMfile(fpath: string): RSAKeypair {
 
   log.info("deserialized private key of type: %s", privkey.asymmetricKeyType);
 
+  if (pubkey.asymmetricKeyType !== "rsa") {
+    die("unexpected key type");
+  }
+
   const pubkeyPem = pubkey.export({
     type: "spki",
     format: "pem"
@@ -239,6 +243,12 @@ export function readRSAPubKeyfromPEMfileAsPEMstring(fpath: string): string {
     pubkey = crypto.createPublicKey({ key: pemstring, format: "pem" });
   } catch (err) {
     return die(`could not deserialize RSA public key: ${err.message}`);
+  }
+
+  log.info("deserialized public key of type: %s", pubkey.asymmetricKeyType);
+
+  if (pubkey.asymmetricKeyType !== "rsa") {
+    die("unexpected key type");
   }
 
   const pubkeyPem = pubkey.export({
