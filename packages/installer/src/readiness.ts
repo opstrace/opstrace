@@ -148,6 +148,7 @@ export function* waitForControllerDeployment() {
     yield delay(15000);
   }
 }
+
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* installationProgressReporter() {
   while (true) {
