@@ -419,7 +419,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (route, status_code) (rate(loki_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.loki-api\", method=\"GET\", route=~\"loki_api_v1_query.*\"}[$timewindow]))",
+          "expr": "sum by (route, status_code) (rate(loki_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.loki-api\", method=\"GET\", route=~\"loki_api_v1_query.*|loki_api_v1_tail\"}[$timewindow]))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1780,12 +1780,8 @@
         "current": {
           "selected": true,
           "tags": [],
-          "text": [
-            "loadtest"
-          ],
-          "value": [
-            "loadtest"
-          ]
+          "text": ["loadtest"],
+          "value": ["loadtest"]
         },
         "datasource": "metrics",
         "definition": "label_values(kube_pod_container_info{image=~\".*cortex.*\"}, namespace)",
