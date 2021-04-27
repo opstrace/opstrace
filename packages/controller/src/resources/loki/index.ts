@@ -32,8 +32,14 @@ import {
 } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
 import { roundDownToOdd, select, getBucketName } from "@opstrace/utils";
-import { getControllerConfig, getNodeCount } from "../../helpers";
+import {
+  deepMerge,
+  getControllerConfig,
+  getControllerLokiConfigOverrides,
+  getNodeCount
+} from "../../helpers";
 import { DockerImages } from "@opstrace/controller-config";
+import { log } from "@opstrace/utils";
 
 export function LokiResources(
   state: State,
@@ -148,7 +154,7 @@ export function LokiResources(
     env: []
   };
 
-  const lokiConfig = {
+  const lokiDefaultConfig = {
     server: {
       http_listen_port: 1080,
       grpc_server_max_recv_msg_size: 41943040, // default (4 MB) * 10
@@ -270,6 +276,14 @@ export function LokiResources(
       }
     }
   };
+
+  const lokiConfigOverrides = getControllerLokiConfigOverrides(state);
+
+  log.debug(
+    `loki config overrides: ${JSON.stringify(lokiConfigOverrides, null, 2)}`
+  );
+
+  const lokiConfig = deepMerge(lokiDefaultConfig, lokiConfigOverrides);
 
   collection.add(
     new Namespace(
