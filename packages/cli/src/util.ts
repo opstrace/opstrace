@@ -249,7 +249,7 @@ export async function awsGetClusterRegionDynamic(
     string,
     list.EKSOpstraceClusterRegionRelation
   > = {};
-  for (const c of await list.EKSgetOpstraceClusters()) {
+  for (const c of await list.EKSgetOpstraceClustersAcrossManyRegions()) {
     ocnRegionMap[c.opstraceClusterName] = c;
   }
 
