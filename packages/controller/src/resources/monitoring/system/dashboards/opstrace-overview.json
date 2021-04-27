@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "id": 20,
+  "id": 23,
   "links": [],
   "panels": [
     {
@@ -1029,6 +1029,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "description": "ACTIVE state uses `min` whereas non-ACTIVE states use `max`; see queries for details.",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -1044,7 +1045,7 @@
         "y": 41
       },
       "hiddenSeries": false,
-      "id": 64,
+      "id": 78,
       "legend": {
         "avg": false,
         "current": false,
@@ -1071,18 +1072,23 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(thanos_objstore_bucket_operations_total) by (operation)",
+          "expr": "max by (service, state) (cortex_ring_members{namespace=\"cortex\", state!=\"ACTIVE\", name=\"ingester\"}) ",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{state}} -- {{service}}",
           "queryType": "randomWalk",
           "refId": "A"
+        },
+        {
+          "expr": "min by (service, state) (cortex_ring_members{namespace=\"cortex\", state=\"ACTIVE\", name=\"ingester\"}) ",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{state}} -- {{service}}",
+          "refId": "B"
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
-      "title": "[METRICS] Total number of Operations",
+      "title": "[METRICS] Ring state seen by service",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1098,14 +1104,16 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:199",
           "format": "short",
-          "label": null,
+          "label": "number of members in state",
           "logBase": 1,
           "max": null,
           "min": null,
           "show": true
         },
         {
+          "$$hashKey": "object:200",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1125,6 +1133,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "description": "ACTIVE state uses `min` whereas non-ACTIVE states use `max`; see queries for details.",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -1140,7 +1149,7 @@
         "y": 41
       },
       "hiddenSeries": false,
-      "id": 62,
+      "id": 79,
       "legend": {
         "avg": false,
         "current": false,
@@ -1167,18 +1176,25 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(cortex_s3_request_duration_seconds_count{namespace=\"loki\"}) by (operation)",
+          "expr": "max by (service, state) (cortex_ring_members{namespace=\"loki\", state!=\"ACTIVE\", name=\"ingester\"}) ",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{state}} -- {{service}}",
           "queryType": "randomWalk",
           "refId": "A"
+        },
+        {
+          "expr": "min by (service, state) (cortex_ring_members{namespace=\"loki\", state=\"ACTIVE\", name=\"ingester\"}) ",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{state}} -- {{service}}",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS] Total number of S3 operations",
+      "title": "[LOGS] Ring state seen by service",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1194,14 +1210,16 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:265",
           "format": "short",
-          "label": null,
+          "label": "number of members in state",
           "logBase": 1,
           "max": null,
           "min": null,
           "show": true
         },
         {
+          "$$hashKey": "object:266",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1801,11 +1819,12 @@
       ],
       "thresholds": [
         {
+          "$$hashKey": "object:789",
           "colorMode": "critical",
           "fill": true,
           "line": true,
           "op": "gt",
-          "value": 0.8,
+          "value": 0.7,
           "yaxis": "left"
         }
       ],
@@ -2270,6 +2289,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -2321,18 +2341,19 @@
       ],
       "thresholds": [
         {
+          "$$hashKey": "object:578",
           "colorMode": "critical",
           "fill": true,
           "line": true,
           "op": "gt",
-          "value": 1,
+          "value": 0.85,
           "yaxis": "left"
         }
       ],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "CPU Throttling (seconds) [5m]",
+      "title": "CPU Throttling by pod (seconds) [5m]",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -2348,6 +2369,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:547",
           "format": "s",
           "label": null,
           "logBase": 1,
@@ -2356,6 +2378,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:548",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -2741,14 +2764,24 @@
           "refId": "A"
         }
       ],
-      "thresholds": [],
+      "thresholds": [
+        {
+          "$$hashKey": "object:909",
+          "colorMode": "critical",
+          "fill": true,
+          "line": true,
+          "op": "gt",
+          "value": 0.4,
+          "yaxis": "left"
+        }
+      ],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
       "title": "[METRICS] PVC Storage Used Percentage",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -2830,21 +2863,31 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n",
+          "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})",
           "interval": "",
           "legendFormat": "",
           "queryType": "randomWalk",
           "refId": "A"
         }
       ],
-      "thresholds": [],
+      "thresholds": [
+        {
+          "$$hashKey": "object:829",
+          "colorMode": "critical",
+          "fill": true,
+          "line": true,
+          "op": "gt",
+          "value": 0.4,
+          "yaxis": "left"
+        }
+      ],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
       "title": "[LOGS] PVC Storage Used Percentage",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -2923,10 +2966,12 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
+          "$$hashKey": "object:660",
           "alias": "/ Receive/",
           "stack": "A"
         },
         {
+          "$$hashKey": "object:661",
           "alias": "/ Transmit/",
           "stack": "B",
           "transform": "negative-Y"
@@ -2951,6 +2996,7 @@
       ],
       "thresholds": [
         {
+          "$$hashKey": "object:676",
           "colorMode": "critical",
           "fill": true,
           "line": true,
@@ -2959,6 +3005,7 @@
           "yaxis": "left"
         },
         {
+          "$$hashKey": "object:677",
           "colorMode": "critical",
           "fill": true,
           "line": true,
@@ -2973,7 +3020,7 @@
       "title": "Instance Network Tx/Rx [1m] (stacked)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -3131,5 +3178,5 @@
   "timezone": "",
   "title": "Opstrace Overview Dashboard",
   "uid": "GqFJrOxGk",
-  "version": 2
+  "version": 3
 }
