@@ -252,9 +252,9 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
   //    discovered and cleaned up after.
   die(
     `No EKS cluster found for Opstrace cluster name '${cli.CLIARGS.clusterName}. ` +
-      "Cannot determine cluster region. Abort operation. " +
-      "You can force running the requested operation in a specific AWS region" +
-      " by setting the --region <region> command line parameter."
+      "Assume that the Opstrace cluster does not exist (anymore). " +
+      "You can force running the requested operation in a specific AWS region " +
+      "by setting the --region <region> command line parameter."
   );
 }
 
