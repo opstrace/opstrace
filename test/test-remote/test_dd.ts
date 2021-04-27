@@ -33,11 +33,12 @@ import {
   readFirstNBytes,
   rndstring,
   sleep,
-  waitForCortexMetricResult,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
   TENANT_DEFAULT_CORTEX_API_BASE_URL,
   TENANT_DEFAULT_DD_API_BASE_URL,
 } from "./testutils";
+
+import { waitForCortexMetricResult } from "./testutils/metrics";
 
 function ddApiSeriesUrl() {
   let url = `${TENANT_DEFAULT_DD_API_BASE_URL}/api/v1/series`;

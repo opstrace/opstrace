@@ -23,10 +23,11 @@ import {
   log,
   rndstring,
   sendMetricsWithPromContainer,
-  waitForCortexMetricResult,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
   TENANT_DEFAULT_CORTEX_API_BASE_URL,
 } from "./testutils";
+
+import { waitForCortexMetricResult } from "./testutils/metrics";
 
 import { DummyTimeseries } from "./prom-node-client-tools";
 
