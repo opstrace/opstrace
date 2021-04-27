@@ -200,7 +200,11 @@ async function testExporterLog(
 }
 
 function getExporterName(type: string) {
-  return `testexporters-${rndstring().slice(0, 5).toLowerCase().replace('_', '0')}-${type}`;
+  // The exporter name is used in the K8s deployment name.
+  // As such, the exporter name can only contain letters, numbers, and '-'.
+  // rndstring() can return '_', so replace all '_'s with '0' just so that they fit.
+  // (use regex with /g to ensure ALL instances are replaced)
+  return `testexporters-${rndstring().slice(0, 5).toLowerCase().replace(/_/g, '0')}-${type}`;
 }
 
 suite("Metric exporter tests", function () {
