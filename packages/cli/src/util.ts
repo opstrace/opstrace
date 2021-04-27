@@ -235,9 +235,10 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
   //    `... destroy foo --region=eu-central-1` -> remainders are
   //    discovered and cleaned up after.
   die(
-    `No EKS cluster found for cluster name '${cli.CLIARGS.clusterName}. ` +
-      "Cannot determine cluster region. " +
-      "Please specify the region with the --region command line argument."
+    `No EKS cluster found for Opstrace cluster name '${cli.CLIARGS.clusterName}. ` +
+      "Cannot determine cluster region. Abort operation. " +
+      "You can force running the requested operation in a specific AWS region" +
+      " by setting the --region <region> command line parameter."
   );
 }
 
