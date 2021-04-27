@@ -241,6 +241,11 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
   );
 }
 
+/**
+ * This is expected to throw `ListEksInRegionError` when the lookup in a
+ * specific region fails.
+ *
+ */
 export async function awsGetClusterRegionDynamic(
   lookForOpstraceClusterName: string
 ): Promise<list.EKSOpstraceClusterRegionRelation | undefined> {

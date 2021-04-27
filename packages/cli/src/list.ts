@@ -63,9 +63,12 @@ export interface EKSOpstraceClusterRegionRelation {
 }
 
 /**
- * List Opstrace clusters in AWS EKS across many AWS regions.
- * Note: this can only discover those clusters that the currently configured
- * AWS credentials can see.
+ * List Opstrace clusters in AWS EKS across many AWS regions. Note: this can
+ * only discover those clusters that the currently configured AWS credentials
+ * can see.
+ *
+ * This is expected to throw `ListEksInRegionError` when the lookup in a
+ * specific region fails.
  */
 export async function EKSgetOpstraceClustersAcrossManyRegions(): Promise<
   EKSOpstraceClusterRegionRelation[]
@@ -173,11 +176,6 @@ async function EKSgetOpstraceClustersInRegion(
     region,
     result.clusters?.length
   );
-
-  // interface NameCluster {
-  //   name: string;
-  //   cluster: EKS.Cluster;
-  // }
 
   const opstraceClusters: EKSOpstraceClusterRegionRelation[] = [];
   const opstraceClusterNames: string[] = [];
