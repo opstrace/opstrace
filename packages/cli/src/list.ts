@@ -111,15 +111,10 @@ export async function EKSgetOpstraceClustersAcrossManyRegions(): Promise<
   // Promise.all resolves once all promises in the array resolve, or rejects as
   // soon as one of them rejects. It either resolves with an array of all
   // resolved values, or rejects with a single error.
-  let ocnLists: EKSOpstraceClusterRegionRelation[][];
-  try {
-    ocnLists = await Promise.all(actors);
-  } catch (e) {
-    if (e instanceof ListEksInRegionError) {
-      die(`AWS API call error: ${e.message} ${JSON.stringify(e, null, 2)}`);
-    }
-    throw e;
-  }
+  // This may throw ListEksInRegionError, hhandle in caller.
+  const ocnLists: EKSOpstraceClusterRegionRelation[][] = await Promise.all(
+    actors
+  );
 
   log.debug("listOpstraceClustersOnEKS(): done");
 

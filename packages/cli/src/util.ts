@@ -215,7 +215,23 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
     return cli.CLIARGS.region;
   }
 
-  const c = await awsGetClusterRegionDynamic(cli.CLIARGS.clusterName);
+  let c: list.EKSOpstraceClusterRegionRelation | undefined;
+
+  try {
+    c = await awsGetClusterRegionDynamic(cli.CLIARGS.clusterName);
+  } catch (e) {
+    if (e instanceof list.ListEksInRegionError) {
+      // Assume (rely on) that error details were already logged, in a useful
+      // way for the admin/user to understand what went wrong.
+      die(
+        "Could not reliably look up the AWS region corresponding to the " +
+          "specified Opstrace cluster. Abort operation. " +
+          "If you know what you are doing, you can retry " +
+          "with skipping this region lookup by setting the --region <region> " +
+          "command line parameter."
+      );
+    }
+  }
 
   if (c !== undefined) {
     return c.awsRegion;
