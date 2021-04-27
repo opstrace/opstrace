@@ -18,7 +18,7 @@ import { strict as assert } from "assert";
 
 import { EKS } from "aws-sdk";
 
-import { log, die } from "@opstrace/utils";
+import { log } from "@opstrace/utils";
 
 import { getAllGKEClusters, getGcpProjectId } from "@opstrace/gcp";
 
