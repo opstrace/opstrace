@@ -43,14 +43,14 @@ export async function list(): Promise<void> {
   }
 }
 
-class ListEksInRegionError extends Error {
+export class ListEksInRegionError extends Error {
   public region: string;
   public message: string;
-  public awserror: AWSApiError;
-  constructor(message: string, region: string, awserror: AWSApiError) {
+  public error: Error;
+  constructor(message: string, region: string, error: Error) {
     super(message);
     this.region = region;
-    this.awserror = awserror;
+    this.error = error;
     this.message = message;
     Error.captureStackTrace(this, ListEksInRegionError);
   }
