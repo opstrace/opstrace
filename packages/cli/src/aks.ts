@@ -14,47 +14,21 @@
  * limitations under the License.
  */
 
-// module for managing the authenticator key set (AKS) in an existing
+// Module for managing the authenticator key set (AKS) in an existing
 // Opstrace cluster.
 
 import { strict as assert } from "assert";
 import fs from "fs";
 import crypto from "crypto";
 
-import { EKS } from "aws-sdk";
-
 import { KubeConfig } from "@kubernetes/client-node";
-
 import { log, die, keyIDfromPEM } from "@opstrace/utils";
-
-// import {
-//   KubeConfiguration,
-//   ConfigMap,
-//   createOrUpdateCM
-// } from "@opstrace/kubernetes";
-
-// import { serialize, configmap, deserialize } from "@opstrace/controller-config";
-
-// import { LatestControllerConfigType } from "@opstrace/controller-config";
-
-// import {
-//   fetch as getCurrentControllerConfig,
-//   ControllerResourcesDeploymentStrategy,
-//   deployControllerResources,
-//   LatestControllerConfigType,
-//   LatestControllerConfigSchema,
-//   authenticatorKeySetAddKey
-// } from
 
 import * as controllerconfig from "@opstrace/controller-config";
 
-import { getGcpProjectId, getGKEKubeconfig } from "@opstrace/gcp";
-
-import { generateKubeconfigStringForEksCluster } from "@opstrace/aws";
-
 import * as cli from "./index";
-import * as util from "./util";
 import * as cryp from "./crypto";
+import * as util from "./util";
 
 export async function createKeypair(): Promise<void> {
   const modulusLengthBits = 2048;
@@ -80,7 +54,7 @@ export async function createKeypair(): Promise<void> {
 
   const fpath = cli.CLIARGS.tenantApiAuthenticatorKeyFilePath;
 
-  log.info("write key pair to file: %s", fpath);
+  log.info("write key pair to file (mode: 600): %s", fpath);
 
   try {
     fs.writeFileSync(fpath, privkeyPem, {
@@ -92,64 +66,32 @@ export async function createKeypair(): Promise<void> {
   }
 }
 
-export async function add(): Promise<void> {
+/* Modify cluster state: add public key to authenticator config
+ *
+ * Specifically, mutate the corresponding Opstrace controller config paramters
+ * in the Opstrace controller's k8s config map. Upon mutating the config map,
+ * rely on the controller to observe the mutation and restart the corresponding
+ * k8s deployments.
+ */
+export async function addToAuthenticatorConfig(): Promise<void> {
   const pubkeypem = cryp.readRSAPubKeyfromPEMfileAsPEMstring(
     cli.CLIARGS.tenantApiAuthenticatorKeyFilePath
   );
 
-  let kubeconfig: KubeConfig;
+  const kubeconfig = await util.getKubeConfigForOpstraceClusterOrDie(
+    cli.CLIARGS.cloudProvider,
+    cli.CLIARGS.clusterName
+  );
 
-  if (cli.CLIARGS.cloudProvider == "gcp") {
-    util.gcpValidateCredFileAndGetDetailOrError();
-    const pid: string = await getGcpProjectId();
-    log.debug("GCP project ID: %s", pid);
-
-    const kc = await getGKEKubeconfig(cli.CLIARGS.clusterName);
-    if (kc === undefined) {
-      die(
-        `error while trying to generate the kubeconfig for cluster ${cli.CLIARGS.clusterName}`
-      );
-    }
-    kubeconfig = kc;
-  } else {
-    // case: cloudProvider == "aws"
-    const c = await util.awsGetClusterRegionDynamic(cli.CLIARGS.clusterName);
-
-    if (c === undefined) {
-      die(
-        `Opstrace cluster not found across all inspected AWS regions: ${cli.CLIARGS.clusterName}`
-      );
-    }
-
-    log.info(
-      "cluster `%s` found in AWS region %s",
-      c.opstraceClusterName,
-      c.awsRegion
-    );
-
-    kubeconfig = genKubConfigObjForEKScluster(c.awsRegion, c.eksCluster);
-  }
-
-  await addAuthenticatorKey(kubeconfig, pubkeypem);
+  await mutateClusterStateAddAuthenticatorKey(kubeconfig, pubkeypem);
 }
 
-function genKubConfigObjForEKScluster(
-  awsregion: string,
-  eksCluster: EKS.Cluster
-) {
-  log.info("generate kubeconfig string for EKS cluster");
-  const kstring = generateKubeconfigStringForEksCluster(awsregion, eksCluster);
-  const kubeConfig = new KubeConfig();
-  log.info("parse kubeconfig string for EKS cluster");
-  kubeConfig.loadFromString(kstring);
-  return kubeConfig;
-}
-
-async function addAuthenticatorKey(
+async function mutateClusterStateAddAuthenticatorKey(
   kubeconfig: KubeConfig,
   newPubkeyPem: string
 ) {
-  log.info("fetch controller config (k8s config map) from Opstrace cluster");
+  log.info("fetch Opstrace controller config map from k8s cluster");
+
   //@ts-ignore: this is a wtf moment
   const controllerConfigObj: controllerconfig.LatestControllerConfigType = await controllerconfig.fetch(
     kubeconfig
@@ -167,7 +109,6 @@ async function addAuthenticatorKey(
   if (
     controllerConfigObj.tenant_api_authenticator_pubkey_set_json === undefined
   ) {
-    log.info("controller config: %s", controllerConfigObj);
     die(
       "parameter tenant_api_authenticator_pubkey_set_json is undefined in controller config"
     );
