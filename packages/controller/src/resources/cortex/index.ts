@@ -19,7 +19,12 @@ import * as yaml from "js-yaml";
 import { strict as assert } from "assert";
 import { getBucketName, roundDownToOdd } from "@opstrace/utils";
 import { State } from "../../reducer";
-import { getNodeCount, getControllerConfig } from "../../helpers";
+import {
+  getNodeCount,
+  getControllerConfig,
+  getControllerCortexConfigOverrides,
+  deepMerge
+} from "../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
 import { min, roundDown, select } from "@opstrace/utils";
 import {
@@ -35,6 +40,7 @@ import {
   withPodAntiAffinityRequired
 } from "@opstrace/kubernetes";
 import { DockerImages } from "@opstrace/controller-config";
+import { log } from "@opstrace/utils";
 
 export function CortexResources(
   state: State,
@@ -245,7 +251,7 @@ export function CortexResources(
   const storageBackend = target === "gcp" ? "gcs" : "s3";
 
   // Cortex config schema: https://cortexmetrics.io/docs/configuration/configuration-file/
-  const cortexConfig = {
+  const cortexDefaultConfig = {
     // HTTP path prefix for Cortex API: default is /api/prom which we do not like
     // in front of e.g. /api/v1/query. Note that the "Prometheus API" is served
     // at api.prometheus_http_prefix.
@@ -479,6 +485,14 @@ export function CortexResources(
       }
     }
   };
+
+  const cortexConfigOverrides = getControllerCortexConfigOverrides(state);
+
+  log.debug(
+    `cortex config overrides: ${JSON.stringify(cortexConfigOverrides, null, 2)}`
+  );
+
+  const cortexConfig = deepMerge(cortexDefaultConfig, cortexConfigOverrides);
 
   collection.add(
     new Namespace(
