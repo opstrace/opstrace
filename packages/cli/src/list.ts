@@ -35,7 +35,7 @@ export async function list(): Promise<void> {
   }
 
   if (cli.CLIARGS.cloudProvider == "aws") {
-    const clusters = await EKSgetOpstraceClusters();
+    const clusters = await EKSgetOpstraceClustersAcrossManyRegions();
     if (clusters.length > 0) {
       for (const c of clusters)
         process.stdout.write(`${c.opstraceClusterName}\n`);
@@ -67,7 +67,7 @@ export interface EKSOpstraceClusterRegionRelation {
  * Note: this can only discover those clusters that the currently configured
  * AWS credentials can see.
  */
-export async function EKSgetOpstraceClusters(): Promise<
+export async function EKSgetOpstraceClustersAcrossManyRegions(): Promise<
   EKSOpstraceClusterRegionRelation[]
 > {
   // Make it so that the AWS / EKS region is not a required input parameter for
