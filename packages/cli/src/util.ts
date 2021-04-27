@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import { EKS } from "aws-sdk";
+
 import { ZonedDateTime, DateTimeFormatter } from "@js-joda/core";
 import yesno from "yesno";
 
+import { KubeConfig } from "@kubernetes/client-node";
+
+import { generateKubeconfigStringForEksCluster } from "@opstrace/aws";
+import { getGcpProjectId, getGKEKubeconfig } from "@opstrace/gcp";
 import { log, hasUpperCase, die, sleep, ExitError } from "@opstrace/utils";
+
 import {
   getValidatedGCPAuthOptionsFromFile,
   GCPAuthOptions
@@ -257,6 +264,58 @@ export async function awsGetClusterRegionDynamic(
   }
 
   return undefined;
+}
+
+export async function getKubeConfigForOpstraceClusterOrDie(
+  cloudProvider: "aws" | "gcp",
+  opstraceClusterName: string
+): Promise<KubeConfig> {
+  let kubeconfig: KubeConfig;
+
+  if (cloudProvider == "gcp") {
+    gcpValidateCredFileAndGetDetailOrError();
+    const pid: string = await getGcpProjectId();
+    log.debug("GCP project ID: %s", pid);
+
+    const kc = await getGKEKubeconfig(opstraceClusterName);
+    if (kc === undefined) {
+      die(
+        `error while trying to generate the kubeconfig for cluster ${opstraceClusterName}`
+      );
+    }
+    kubeconfig = kc;
+  } else {
+    // case: cloudProvider == "aws"
+    const c = await awsGetClusterRegionDynamic(opstraceClusterName);
+
+    if (c === undefined) {
+      die(
+        `Opstrace cluster not found across all inspected AWS regions: ${opstraceClusterName}`
+      );
+    }
+
+    log.info(
+      "cluster `%s` found in AWS region %s",
+      c.opstraceClusterName,
+      c.awsRegion
+    );
+
+    kubeconfig = genKubConfigObjForEKScluster(c.awsRegion, c.eksCluster);
+  }
+
+  return kubeconfig;
+}
+
+function genKubConfigObjForEKScluster(
+  awsregion: string,
+  eksCluster: EKS.Cluster
+) {
+  log.info("generate kubeconfig string for EKS cluster");
+  const kstring = generateKubeconfigStringForEksCluster(awsregion, eksCluster);
+  const kubeConfig = new KubeConfig();
+  log.info("parse kubeconfig string for EKS cluster");
+  kubeConfig.loadFromString(kstring);
+  return kubeConfig;
 }
 
 export function gcpGetClusterRegion() {
