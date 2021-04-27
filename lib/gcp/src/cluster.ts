@@ -278,17 +278,22 @@ export function* ensureGKEDoesNotExist(
   }
 }
 
+/**
+ * Look up the GKE cluster across GCP regions that corresponds to the provided
+ * Opstrace cluster name. Generate and return the KubeConfig object
+ * corresponding to that GKE cluster. Return `undefined` otherwise.
+ */
 export async function getGKEKubeconfig(
-  clusterName: string
+  opstraceClusterName: string
 ): Promise<KubeConfig | undefined> {
   log.info("looking up GKE cluster across GCP regions");
   const gkeCluster = await doesGKEClusterExist({
-    opstraceClusterName: clusterName
+    opstraceClusterName: opstraceClusterName
   });
   if (gkeCluster === false) {
     log.info(
       "GKE cluster corresponding to Opstrace cluster '%s' does not seem to exist.",
-      clusterName
+      opstraceClusterName
     );
     return undefined;
   }
