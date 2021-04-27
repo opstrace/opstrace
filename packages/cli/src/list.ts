@@ -156,19 +156,28 @@ async function EKSgetOpstraceClustersInRegion(
       if (e.statusCode === 403) {
         // UnrecognizedClientException: The security token included in the
         // request is invalid. (HTTP status code: 403)
-        log.debug(
-          "eks.listClusters() for region %s failed with a 403 error (not authorized)",
+        log.info(
+          "listing EKS clusters for region %s failed with a 403 error (not authorized), skip region",
           region
         );
         return [];
       }
-      throw new ListEksInRegionError(
-        `AWS API error during listClusters() for region ${region}: ${e.message}`,
-        region,
-        e
-      );
     }
-    throw e;
+
+    // After N retries, this is expected to be hit for example for
+    // TimeoutError: Socket timed out without establishing a connection
+
+    log.error(
+      "eks.listClusters() for region %s failed unexpectedly with error: %s",
+      region,
+      e
+    );
+
+    throw new ListEksInRegionError(
+      `error during listClusters() for region ${region}: ${e.code}: ${e.message}`,
+      region,
+      e
+    );
   }
 
   log.debug(
