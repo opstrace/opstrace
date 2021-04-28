@@ -1,23 +1,27 @@
 # Cloud Metrics
 
 Prometheus supports a wide range of exporters for getting metrics out of other systems and into Prometheus.
-This guide describes how to configure managed exporters for AWS CloudWatch and GCP Stackdriver metrics within Opstrace.
+This guide describes how to configure managed exporters for AWS CloudWatch, GCP Stackdriver, and Azure Monitor metrics within Opstrace.
 
-This functionality allows you to collect metrics from your AWS and/or GCP accounts into a single location.
+This functionality allows you to collect metrics from your Cloud accounts into a single location.
 For example you can keep track of S3 disk usage, GKS node size, and ELB throughput.
 Some third party services like Buildkite also emit custom metrics that you can then collect.
 
-In this guide we will show you how to set up working exporters for both AWS and GCP.
+In this guide we will show you how to set up working exporters for all three major cloud providers, AWS, GCP, and Azure.
 In both cases, the process is identical: You provide Opstrace with credentials to access the cloud account, and then with a configuration listing the metrics you would like to collect.
 The difference between the services is in the format of the credentials and metrics configuration.
 
 To keep things easier to follow, we will provide separate sections for each service, but you can mix and match them as needed, running potentially several exporters of each type simultaneously in each tenant.
 
+![screenshot showing Grafana with AWS and GCP metrics in a common dashboard](../../assets/cloud-exporter_grafana.png)
+
 ## How It Works
 
-To set up a new AWS or GCP exporter, we need two things:
+![diagram of cloud exporter architecture showing AWS and GCP exporters](../../assets/cloud-exporter-arch.png)
 
-* AWS or GCP credentials for accessing the metrics. As best practice, these must be configured to only allow access to the metrics and nothing else. The scopes/roles to assign are described below.
+To set up a new Cloud exporter, we need two things:
+
+* Cloud credentials for accessing the metrics. As best practice, these must be configured to only allow access to the metrics and nothing else. The scopes/roles to assign are described below.
 * Configuration listing metrics to be retrieved. This can be as narrow or as broad as you like, but keep in mind that both AWS CloudWatch and GCP Stackdriver charge per metric retrieved, so this could get expensive.
 
 As you provide Opstrace with the credentials and configuration, the following will occur:
@@ -29,7 +33,7 @@ As you provide Opstrace with the credentials and configuration, the following wi
 
 ## AWS CloudWatch
 
-These instructions show how you can extract metrics from AWS CloudWatch and bring them into Opstrace.
+These instructions show how you can extract metrics from [AWS CloudWatch](https://aws.amazon.com/cloudwatch/) and bring them into Opstrace.
 
 ### Credentials
 
@@ -51,7 +55,7 @@ value:
 ' | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- https://me.opstrace.io/api/v1/credentials/
 ```
 
-`example-aws-credential` can now be referenced in your CloudWatch exporter configurations under the same tenant.
+`example-aws-credential` can now be referenced in your CloudWatch exporter configurations under the same Opstrace tenant.
 Behind the scenes, the credentials will be stored to an internal Postgres database in plaintext form, and then passed to the deployed `cloudwatch_exporter` as a Kubernetes Secret.
 
 ### Exporter
@@ -101,11 +105,9 @@ The deployed exporter will collect the requested metrics using the configured cr
 Each exporter configuration maps to its own separate deployment.
 You can configure several exporters in the same Opstrace tenant, for example to collect from separate AWS accounts.
 
-TODO show screenshot accessing AWS metrics (from blog post)
-
 ## GCP Stackdriver
 
-These instructions show how you can extract metrics from Stackdriver and bring them into Opstrace.
+These instructions show how you can extract metrics from [Stackdriver](https://cloud.google.com/monitoring/docs) and bring them into Opstrace.
 Note that "Stackdriver" is currently being rebranded as "Operations Suite", but we use "Stackdriver" here since as of this writing everyone still calls it that anyway.
 
 ### Credentials
@@ -128,7 +130,7 @@ $(cat my-gcp-credentials.json | sed 's/^/  /')
 " | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- https://me.opstrace.io/api/v1/credentials/
 ```
 
-`example-gcp-credential` can now be referenced in your Stackdriver exporter configurations under the same tenant.
+`example-gcp-credential` can now be referenced in your Stackdriver exporter configurations under the same Opstrace tenant.
 Behind the scenes, the credentials will be stored to an internal Postgres database in plaintext form, and then passed to the deployed `stackdriver_exporter` as a Kubernetes Secret.
 
 ### Exporter
@@ -169,17 +171,85 @@ The deployed exporter will collect the requested metrics using the configured cr
 Each exporter configuration maps to its own separate deployment.
 You can configure several exporters in the same Opstrace tenant, for example to collect from separate GCP projects or accounts.
 
-TODO show screenshot accessing GCP metrics (from blog post)
+## Azure Monitor
+
+These instructions show how you can extract metrics from [Azure Monitor](https://docs.microsoft.com/en-us/azure/azure-monitor/) and bring them into Opstrace.
+
+### Credentials
+
+First we will need to set up an Azure AD Application registration, configure it with a role for accessing Azure Monitor, then generate a Client Secret, as described in [this guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal).
+The exact process may vary depending on your local procedures around account credentials.
+The underlying [`azure_metrics_exporter` documentation](https://github.com/RobustPerception/azure_metrics_exporter#azure-account-requirements) recommends assigning the `Monitoring Reader` Role to the AD Application.
+Note that in the dialog for adding the role assignment, you MUST start typing the AD Application's name before anything will appear.
+
+The Azure Subscription UUID, Azure Tenant UUID, AD Application UUID, and generated Client Secret are submitted to Opstrace as follows.
+In this example, we are creating a credential named `example-azure-credential` under a tenant named `dev`, using the corresponding `tenant-api-token-dev` for authentication:
+
+```bash
+$ echo "
+name: example-azure-credential
+type: azure-service-principal
+value:
+  AZURE_SUBSCRIPTION_ID: azure_subscription_uuid
+  AZURE_TENANT_ID: azure_tenant_uuid
+  AZURE_CLIENT_ID: azure_application_uuid
+  AZURE_CLIENT_SECRET: application_client_secret
+" | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- https://me.opstrace.io/api/v1/credentials/
+```
+
+`example-azure-credential` can now be referenced in your Azure exporter configurations under the same Opstrace tenant.
+Behind the scenes, the credentials will be stored to an internal Postgres database in plaintext form, and then passed to the deployed `azure_metrics_exporter` as a Kubernetes Secret.
+
+### Exporter
+
+In Prometheus terminology, an "exporter" is a process that fetches metrics from somewhere and makes them available in a form that Prometheus supports.
+Opstrace uses a modified build of the [RobustPerception `azure_metrics_exporter`](https://github.com/RobustPerception/azure_metrics_exporter) package to support exporting Azure metrics into Opstrace.
+The only modification is to support providing Azure credentials via environment variables rather than the metrics yaml configuration itself, as seen in [this PR](https://github.com/RobustPerception/azure_metrics_exporter/pull/101) to the project.
+
+The Azure exporter configuration is effectively a pass-through of the underlying settings exposed by the [`azure_metrics_exporter` configuration](https://github.com/RobustPerception/azure_metrics_exporter#example-azure-metrics-exporter-config), and should work the same way as documented there.
+In other words, anything you can do with a stock `azure_metrics_exporter` can also be done via the Opstrace exporter configuration.
+
+The main thing to determine is what metrics should be collected.
+These are configured via sections named `targets`, `resource_groups`, and/or `resource_tags`.
+In the below example we are collecting Storage Account metrics against a `resource_group` named `my_group`.
+For a current list of available metrics divided by resource type, see the [metrics list documentation](https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported).
+Keep in mind that fetching Azure Monitor metrics is billed by Azure on a [per-MiB and/or per-query basis](https://azure.microsoft.com/en-us/pricing/details/monitor/) so overly broad metric filters will come with a cost.
+
+```bash
+$ echo '
+name: example-azure-exporter
+type: azure
+credential: example-azure-credential
+config:
+  resource_groups:
+  - resource_group: my_group
+    resource_types:
+    - "Microsoft.Storage/storageAccounts"
+    metrics:
+    - name: Availability
+    - name: Egress
+    - name: Ingress
+    - name: SuccessE2ELatency
+    - name: SuccessServerLatency
+    - name: Transactions
+    - name: UsedCapacity
+' | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- https://me.opstrace.io/api/v1/exporters/
+```
+
+After the configuration has been submitted, a new `azure_metrics_exporter` container will be deployed against the Opstrace tenant.
+The deployed exporter will collect the requested metrics using the configured credentials.
+Each exporter configuration maps to its own separate deployment.
+You can configure several exporters in the same Opstrace tenant, for example to collect from separate Azure projects or accounts.
 
 ## HTTP API Reference
 
 The above examples show usage of the `POST` endpoints for submitting new configurations, but you can also list, view, update, and delete configurations.
-All requests must include an Authentication header with a tenant token and are scoped to that tenant.
+All requests are scoped to an Opstrace tenant and must include an Authentication header containing a bearer token for that tenant.
 
 ### Credentials
 
 Credentials are written to the internal Opstrace Kubernetes cluster against the tenant namespace.
-Credentials may be referenced by one or more exporters under the same tenant.
+Credentials may be referenced by one or more exporters under the same Opstrace tenant.
 Updating a credential will automatically restart exporters using that credential.
 Each credential within a tenant has a unique name.
 
@@ -221,6 +291,14 @@ name: bar
 type: gcp-service-account
 value: |-
   {"service-account-json": "goes-here"}
+---
+name: baz
+type: azure-service-principal
+value:
+  AZURE_SUBSCRIPTION_ID: azure_subscription_uuid
+  AZURE_TENANT_ID: azure_tenant_uuid
+  AZURE_CLIENT_ID: azure_application_uuid
+  AZURE_CLIENT_SECRET: application_client_secret
 ' | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- http://me.opstrace.io/api/v1/credentials/
 ```
 
@@ -236,7 +314,7 @@ curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" -XDELETE https://
 ### Exporters
 
 Exporters are deployed in the internal Opstrace Kubernetes cluster against the tenant namespace.
-Exporters may optionally reference one Credential under the same tenant.
+Exporters may optionally reference one Credential under the same Opstrace tenant.
 Updating an exporter’s configuration or a referenced credential will automatically restart the exporter.
 Each exporter within a tenant has a unique name.
 
@@ -282,6 +360,19 @@ credential: bar
 config:
   monitoring.metrics-type-prefixes:
   - compute.googleapis.com/instance/cpu
+---
+name: baz
+type: azure
+credential: baz
+config:
+  resource_groups:
+  - resource_group: my_group
+    resource_types:
+    - "Microsoft.Storage/storageAccounts"
+    metrics:
+    - name: Availability
+    - name: Egress
+    - name: Ingress
 ' | curl -v -H "Authorization: Bearer $(cat tenant-api-token-dev)" --data-binary @- http://me.opstrace.io/api/v1/exporters/
 ```
 
