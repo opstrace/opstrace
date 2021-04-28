@@ -40,7 +40,7 @@ export interface LogRecord {
   labels: LogRecordLabels;
 }
 
-export async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
+async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
   /* Notes, in no particular order:
 
   - test deprecated /api/prom/query endpoint
@@ -66,10 +66,16 @@ export async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
   const headers = enrichHeadersWithAuthToken(url, {});
 
   const options = {
-    retry: 0,
+    // Allow up to two retries in the event of spurious timeouts or similar errors.
+    retry: 2,
     throwHttpErrors: false,
     searchParams: queryParams,
-    timeout: httpTimeoutSettings,
+    // Use a 5s request timeout rather than the configured 60s default.
+    // We want the poll loop to retry quickly if there is a timeout.
+    timeout: {
+      connect: httpTimeoutSettings.connect, // inherit default
+      request: 5000,
+    },
     headers: headers,
     https: { rejectUnauthorized: LOKI_API_TLS_VERIFY } // https://github.com/sindresorhus/got/issues/1191
   };
