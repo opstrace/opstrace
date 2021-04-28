@@ -429,7 +429,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "API proxy /loki/api/v1/query[_range], GETs, rate by status code ($timewindow mean)",
+      "title": "API proxy /loki/api/v1/query[_range]|loki_api_v1_tail, GETs, rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
         "sort": 2,
