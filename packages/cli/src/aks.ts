@@ -73,7 +73,7 @@ export async function createKeypair(): Promise<void> {
  * rely on the controller to observe the mutation and restart the corresponding
  * k8s deployments.
  */
-export async function addToAuthenticatorConfig(): Promise<void> {
+export async function addKeyToAuthenticatorConfig(): Promise<void> {
   const pubkeypem = cryp.readRSAPubKeyfromPEMfileAsPEMstring(
     cli.CLIARGS.tenantApiAuthenticatorKeyFilePath
   );
@@ -86,40 +86,39 @@ export async function addToAuthenticatorConfig(): Promise<void> {
   await mutateClusterStateAddAuthenticatorKey(kubeconfig, pubkeypem);
 }
 
+export async function listKeys(): Promise<void> {
+  const kubeconfig = await util.getKubeConfigForOpstraceClusterOrDie(
+    cli.CLIARGS.cloudProvider,
+    cli.CLIARGS.clusterName
+  );
+
+  await listAuthenticatorKeys(kubeconfig);
+}
+
+async function listAuthenticatorKeys(kubeconfig: KubeConfig) {
+  const controllerConfigObj = await fetchControllerConfigWithCurrentKeySet(
+    kubeconfig
+  );
+
+  const keySet = JSON.parse(
+    controllerConfigObj.tenant_api_authenticator_pubkey_set_json
+  );
+
+  log.info("number of public keys configured: %s", Object.keys(keySet).length);
+
+  for (const keyId in keySet) {
+    process.stdout.write(`${keyId}\n`);
+  }
+}
+
 async function mutateClusterStateAddAuthenticatorKey(
   kubeconfig: KubeConfig,
   newPubkeyPem: string
 ) {
-  log.info("fetch Opstrace controller config map from k8s cluster");
-
-  //@ts-ignore: this is a wtf moment
-  const controllerConfigObj: controllerconfig.LatestControllerConfigType = await controllerconfig.fetch(
+  const keyIDnewPubkey = keyIDfromPEM(newPubkeyPem);
+  const controllerConfigObj = await fetchControllerConfigWithCurrentKeySet(
     kubeconfig
   );
-
-  if (controllerConfigObj === undefined) {
-    die("could not read current controller config");
-  }
-
-  log.info(
-    "current controller config: %s",
-    JSON.stringify(controllerConfigObj, null, 2)
-  );
-
-  if (
-    controllerConfigObj.tenant_api_authenticator_pubkey_set_json === undefined
-  ) {
-    die(
-      "parameter tenant_api_authenticator_pubkey_set_json is undefined in controller config"
-    );
-  }
-
-  log.info(
-    "current tenant_api_authenticator_pubkey_set_json, deserialized: %s",
-    JSON.parse(controllerConfigObj.tenant_api_authenticator_pubkey_set_json)
-  );
-
-  const keyIDnewPubkey = keyIDfromPEM(newPubkeyPem);
 
   log.info("add new public key with id %s key to config", keyIDnewPubkey);
   const newKeySetJSON: string = controllerconfig.authenticatorKeySetAddKey(
@@ -143,4 +142,37 @@ async function mutateClusterStateAddAuthenticatorKey(
   await controllerconfig.set(controllerConfigObj, kubeconfig);
 
   log.info("controller config map updated");
+}
+
+async function fetchControllerConfigWithCurrentKeySet(
+  kubeconfig: KubeConfig
+): Promise<controllerconfig.LatestControllerConfigType> {
+  //@ts-ignore: this is a wtf moment
+  const controllerConfigObj: controllerconfig.LatestControllerConfigType = await controllerconfig.fetch(
+    kubeconfig
+  );
+
+  if (controllerConfigObj === undefined) {
+    die("error: could not read current Opstrace controller config");
+  }
+
+  log.debug(
+    "current controller config: %s",
+    JSON.stringify(controllerConfigObj, null, 2)
+  );
+
+  if (
+    controllerConfigObj.tenant_api_authenticator_pubkey_set_json === undefined
+  ) {
+    die(
+      "error: parameter tenant_api_authenticator_pubkey_set_json is undefined in controller config"
+    );
+  }
+
+  log.debug(
+    "current tenant_api_authenticator_pubkey_set_json, deserialized: %s",
+    JSON.parse(controllerConfigObj.tenant_api_authenticator_pubkey_set_json)
+  );
+
+  return controllerConfigObj;
 }
