@@ -266,7 +266,8 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
 export async function awsGetClusterRegionDynamic(
   lookForOpstraceClusterName: string
 ): Promise<list.EKSOpstraceClusterRegionRelation | undefined> {
-  log.info("starting lookup of EKS cluster accross AWS regions");
+  log.info("starting lookup of matching EKS cluster accross AWS regions");
+
   const ocnRegionMap: Record<
     string,
     list.EKSOpstraceClusterRegionRelation
@@ -336,7 +337,12 @@ function genKubConfigObjForEKScluster(
   const kstring = generateKubeconfigStringForEksCluster(awsregion, eksCluster);
   const kubeConfig = new KubeConfig();
   log.info("parse kubeconfig string for EKS cluster");
-  kubeConfig.loadFromString(kstring);
+  try {
+    kubeConfig.loadFromString(kstring);
+  } catch (err) {
+    log.error("bad kconfig string:\n%s", kstring);
+    die(`error loading kubeconfig from text: ${err.code}: ${err.message}`);
+  }
   return kubeConfig;
 }
 
