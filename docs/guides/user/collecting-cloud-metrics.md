@@ -6,6 +6,9 @@ This guide describes how to configure managed exporters for AWS CloudWatch, GCP 
 This functionality allows you to collect metrics from your Cloud accounts into a single location.
 For example you can keep track of S3 disk usage, GKS node size, and ELB throughput.
 Some third party services like Buildkite also emit custom metrics that you can then collect.
+As Cloud metrics are collected into Opstrace, they can then be used in e.g. [alerts](configuring-alerts.md) and Grafana dashboards:
+
+![screenshot showing Grafana with AWS and GCP metrics in a common dashboard](../../assets/cloud-exporter_grafana.png)
 
 In this guide we will show you how to set up working exporters for all three major cloud providers, AWS, GCP, and Azure.
 In both cases, the process is identical: You provide Opstrace with credentials to access the cloud account, and then with a configuration listing the metrics you would like to collect.
@@ -13,11 +16,7 @@ The difference between the services is in the format of the credentials and metr
 
 To keep things easier to follow, we will provide separate sections for each service, but you can mix and match them as needed, running potentially several exporters of each type simultaneously in each tenant.
 
-![screenshot showing Grafana with AWS and GCP metrics in a common dashboard](../../assets/cloud-exporter_grafana.png)
-
 ## How It Works
-
-![diagram of cloud exporter architecture showing AWS and GCP exporters](../../assets/cloud-exporter-arch.png)
 
 To set up a new Cloud exporter, we need two things:
 
@@ -30,6 +29,10 @@ As you provide Opstrace with the credentials and configuration, the following wi
 2. In the Opstrace Kubernetes cluster, the credentials are created as Secrets and the exporters as Deployments.
 3. The deployed exporters use the credentials to fetch the configured list of metrics from the cloud services.
 4. The exporters serve the metrics to Prometheus to be scraped and imported into the internal metrics database, available for dashboards and alerts.
+
+This diagram shows an example deployment, where the `CI tenant` is running an AWS CloudWatch exporter while the `prod tenant` is running an AWS CloudWatch and GCP Stackdriver exporters. The metrics from these exporters are then written to the Opstrace Cortex instance against each tenant:
+
+![diagram of cloud exporter architecture showing AWS and GCP exporters](../../assets/cloud-exporter-arch.png)
 
 ## AWS CloudWatch
 
