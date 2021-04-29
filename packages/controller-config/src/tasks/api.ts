@@ -34,7 +34,8 @@ import { log } from "@opstrace/utils";
 export async function fetch(
   kubeConfig: KubeConfiguration
 ): Promise<LatestControllerConfigType | undefined> {
-  log.info("fetch controller config map");
+  log.info("fetch Opstrace controller config map from Kubernetes cluster");
+
   const cm = configmap(kubeConfig);
   try {
     const v1ConfigMap = await cm.read();
