@@ -111,13 +111,18 @@ async function main() {
     throw new ExitSuccess();
   }
 
-  if (CLIARGS.command == "ta-add-pubkey") {
-    await aks.addToAuthenticatorConfig();
+  if (CLIARGS.command == "ta-create-keypair") {
+    await aks.createKeypair();
     throw new ExitSuccess();
   }
 
-  if (CLIARGS.command == "ta-create-keypair") {
-    await aks.createKeypair();
+  if (CLIARGS.command == "ta-pubkeys-add") {
+    await aks.addKeyToAuthenticatorConfig();
+    throw new ExitSuccess();
+  }
+
+  if (CLIARGS.command == "ta-pubkeys-list") {
+    await aks.listKeys();
     throw new ExitSuccess();
   }
 
@@ -187,13 +192,27 @@ function parseCmdlineArgs() {
   const parserTACreateToken = subparsers.add_parser("ta-create-token", {
     help:
       "Tenant authentication: create a tenant API authentication token " +
-      "signed with a custom private key. Write token to stdout."
+      "signed with a custom private key. Write token to stdout.",
+    description: "Write token to stdout"
   });
 
-  const parserTAAddPubKey = subparsers.add_parser("ta-add-pubkey", {
+  const parserTAPubKeysAdd = subparsers.add_parser("ta-pubkeys-add", {
     help:
       "Tenant authentication: add public key to a running Opstrace cluster " +
       "so that it accepts tokens signed with the corresponding private key."
+  });
+
+  // Note: the `help` pops up when listing sub commands, the `description`
+  // pops up when showing --help for this specific sub command. The high-level
+  // help should be part of the more fine-grained description.
+  const parserTAPubKeysListHelp =
+    "Tenant authentication: list public keys for a running Opstrace cluster, " +
+    "i.e. the set of trust anchors for signed authentication tokens.";
+  const parserTAPubKeysList = subparsers.add_parser("ta-pubkeys-list", {
+    help: parserTAPubKeysListHelp,
+    description:
+      `${parserTAPubKeysListHelp} The configured public keys are ` +
+      `listed via their key ID on stdout, with one key ID per line.`
   });
 
   // The --log-level switch must work when not using a sub command, but also
@@ -202,7 +221,8 @@ function parseCmdlineArgs() {
     parserCreate,
     parserTACreateKeypair,
     parserTACreateToken,
-    parserTAAddPubKey,
+    parserTAPubKeysAdd,
+    parserTAPubKeysList,
     parserDestroy,
     parserList,
     parserStatus,
@@ -288,7 +308,8 @@ function parseCmdlineArgs() {
   });
 
   configureParserTACreateToken(parserTACreateToken);
-  configureParserTAAddPubKey(parserTAAddPubKey);
+  configureParserTAPubKeysAdd(parserTAPubKeysAdd);
+  configureParserTAPubKeysList(parserTAPubKeysList);
   configureParserTACreateKeypair(parserTACreateKeypair);
 
   // About those next two args: that's just brainstorm, maybe do not build
@@ -401,9 +422,9 @@ function configureParserTACreateToken(parser: argparse.ArgumentParser) {
 }
 
 // Mutate parser in place.
-function configureParserTAAddPubKey(parser: argparse.ArgumentParser) {
+function configureParserTAPubKeysAdd(parser: argparse.ArgumentParser) {
   parser.add_argument("cloudProvider", {
-    help: "The cloud provider to act on (aws, gcp).", // potentially make this a little more specific depending on `create`, `list`, ...
+    help: "The cloud provider to look up the Opstrace cluster in (aws, gcp).",
     type: "str",
     choices: ["aws", "gcp"],
     metavar: "PROVIDER"
@@ -411,7 +432,7 @@ function configureParserTAAddPubKey(parser: argparse.ArgumentParser) {
 
   parser.add_argument("clusterName", {
     help:
-      "The name of the cluster to change the authenticator configuration in.",
+      "The name of the cluster to change the authenticator configuration for.",
     type: "str",
     metavar: "CLUSTER_NAME"
   });
@@ -425,6 +446,23 @@ function configureParserTAAddPubKey(parser: argparse.ArgumentParser) {
     type: "str",
     metavar: "KEY_FILE_PATH",
     default: ""
+  });
+}
+
+// Mutate parser in place.
+function configureParserTAPubKeysList(parser: argparse.ArgumentParser) {
+  parser.add_argument("cloudProvider", {
+    help: "The cloud provider to look up the Opstrace cluster in (aws, gcp).",
+    type: "str",
+    choices: ["aws", "gcp"],
+    metavar: "PROVIDER"
+  });
+
+  parser.add_argument("clusterName", {
+    help:
+      "The name of the cluster to look up the authenticator configuration for.",
+    type: "str",
+    metavar: "CLUSTER_NAME"
   });
 }
 
