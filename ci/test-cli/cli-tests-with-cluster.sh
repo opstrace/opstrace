@@ -45,7 +45,8 @@ test_tenant_authenticator_custom_keypair_flow() {
   ./build/bin/opstrace ta-create-keypair ta-custom-keypair.pem
   ./build/bin/opstrace ta-create-token ${OPSTRACE_CLUSTER_NAME} \
     default ta-custom-keypair.pem > tenant-default-auth-token-from-custom-keypair
-  ./build/bin/opstrace ta-add-pubkey \
+  ./build/bin/opstrace ta-pubkeys-list ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME}
+  ./build/bin/opstrace ta-pubkeys-add \
     ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} ta-custom-keypair.pem
 
   # pragmatic, non-robust wait
