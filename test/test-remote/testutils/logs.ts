@@ -40,6 +40,9 @@ export interface LogRecord {
   labels: LogRecordLabels;
 }
 
+/**
+ * Expected to throw got.RequestError, handle in caller if desired.
+ */
 async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
   /* Notes, in no particular order:
 
@@ -74,7 +77,7 @@ async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
     // We want the poll loop to retry quickly if there is a timeout.
     timeout: {
       connect: httpTimeoutSettings.connect, // inherit default
-      request: 5000,
+      request: 5000
     },
     headers: headers,
     https: { rejectUnauthorized: LOKI_API_TLS_VERIFY } // https://github.com/sindresorhus/got/issues/1191
@@ -85,6 +88,7 @@ async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
   // in the `options` object above and then use
   // `response.body.toString("utf-8")` below but
   // https://github.com/sindresorhus/got/issues/1079
+  // Note: this may throw got.RequestError for request timeout errors.
   const response = await got(url, options);
   if (response.statusCode !== 200) logHTTPResponse(response);
   return JSON.parse(response.body);
@@ -131,7 +135,22 @@ Query parameters: ${JSON.stringify(
     }
 
     queryCount += 1;
-    const result = await queryLoki(lokiQuerierBaseUrl, qparms);
+
+    let result: any;
+    try {
+      result = await queryLoki(lokiQuerierBaseUrl, qparms);
+    } catch (e) {
+      // handle any error that happened during http request processing
+      if (e instanceof got.RequestError) {
+        log.info(
+          `waitForLokiQueryResult() loop: http request failed: ${e.message} -- ignore, proceed with next iteration`
+        );
+        continue;
+      } else {
+        // Throw any other error, mainly programming error.
+        throw e;
+      }
+    }
 
     if (result.status === undefined) {
       log.warning(
