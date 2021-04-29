@@ -388,7 +388,9 @@ export function enrichHeadersWithAuthTokenFile(
     })
     .trim();
   if (!tenantAuthToken) {
-    throw new Error("auth token file defined, but file is empty: ${tokenFilepath}");
+    throw new Error(
+      "auth token file defined, but file is empty: ${tokenFilepath}"
+    );
   }
   headers["Authorization"] = `Bearer ${tenantAuthToken}`;
   return headers;
@@ -417,7 +419,7 @@ export function enrichHeadersWithAuthToken(
     if (url.startsWith(baseurl)) {
       if (tokenFilepath !== "") {
         // Found match, add to headers and exit
-        return enrichHeadersWithAuthTokenFile(tokenFilepath, headers)
+        return enrichHeadersWithAuthTokenFile(tokenFilepath, headers);
       }
     }
   }
@@ -905,12 +907,15 @@ export async function waitForQueryResult<T>(
   // Callback for executing the query itself
   queryFunc: { (): Promise<T> },
   // Callback for checking the result for an expected value, returning null if the query should retry
-  testFunc: { (queryResponse: T): any | null},
+  testFunc: { (queryResponse: T): any | null },
   maxWaitSeconds = 30,
   logQueryResponse = false
 ) {
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-  log.info("Waiting for query to return a match, deadline in %ss", maxWaitSeconds);
+  log.info(
+    "Waiting for query to return a match, deadline in %ss",
+    maxWaitSeconds
+  );
 
   while (true) {
     if (mtime() > deadline) {
@@ -918,12 +923,27 @@ export async function waitForQueryResult<T>(
       break;
     }
 
-    const data = await queryFunc();
+    let data: any;
+    try {
+      data = await queryFunc();
+    } catch (e) {
+      // handle any error that happened during http request processing
+      if (e instanceof got.RequestError) {
+        log.info(
+          `waitForQueryResult() loop: http request failed: ${e.message} -- ignore, proceed with next iteration`
+        );
+        continue;
+      } else {
+        // Throw any other error, mainly programming error.
+        throw e;
+      }
+    }
+
     if (logQueryResponse) {
       log.info("Query response data:\n%s", JSON.stringify(data, null, 2));
     }
 
-    const testResult = testFunc(data)
+    const testResult = testFunc(data);
     if (testResult != null) {
       return testResult;
     }
