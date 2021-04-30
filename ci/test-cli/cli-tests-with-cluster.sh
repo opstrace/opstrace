@@ -42,12 +42,20 @@ test_list() {
 
 test_tenant_authenticator_custom_keypair_flow() {
   set -o xtrace
+
+  ./build/bin/opstrace ta-pubkeys-list ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
+    > keyid_initial
+
+  cat keyid_initial
+
   ./build/bin/opstrace ta-create-keypair ta-custom-keypair.pem
   ./build/bin/opstrace ta-create-token ${OPSTRACE_CLUSTER_NAME} \
     default ta-custom-keypair.pem > tenant-default-auth-token-from-custom-keypair
-  ./build/bin/opstrace ta-pubkeys-list ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME}
   ./build/bin/opstrace ta-pubkeys-add \
     ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} ta-custom-keypair.pem
+
+  ./build/bin/opstrace ta-pubkeys-list ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
+    > keyids_modified
 
   # pragmatic, non-robust wait
   sleep 80
@@ -55,6 +63,13 @@ test_tenant_authenticator_custom_keypair_flow() {
   curl -vk --fail -H "Authorization: Bearer $(cat tenant-default-auth-token-from-custom-keypair)" \
     https://cortex.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io/api/v1/labels
   set +o xtrace
+
+  NEWKEYID=$(cat keyids_modified | grep -v $(cat keyid_initial))
+  ./build/bin/opstrace ta-pubkeys-remove \
+    ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} "${NEWKEYID}"
+
+  # here we might wait for another bit, and test that the above's request would
+  # fail with a 401 response.
 }
 
 test_list
