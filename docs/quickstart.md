@@ -268,9 +268,7 @@ You now have dummy (random) metrics and associated logs (simulating a real app y
 
 Let's view the data in our `staging` tenant using the Grafana "explore" view:
 
-```text
-https://staging.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
-```
+<https://staging.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
 
 1. To query these metrics, first select the "metrics" data source in the upper left-hand corner.
 2. Enter this simple query in the query dialog:
@@ -289,9 +287,7 @@ As you can see, the data we sent to Opstrace in step 3 is indeed ingested as exp
 
 You can also see that the `prod` tenant is empty, completely separated from `staging`:
 
-```text
-https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D
-```
+<https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
 
 ## Step 4: Add users and tenants
 
@@ -299,9 +295,7 @@ Congratulations!
 You've walked through the majority of our foundational release, but we're [working on much more](./references/roadmap.md).
 Before you uninstall Opstrace, why not check out our UI which allows you to add users and tenants to the system:
 
-```text
-https://$OPSTRACE_NAME.opstrace.io/login
-```
+<https://$OPSTRACE_NAME.opstrace.io/login>
 
 ## Step 5: Clean up
 
