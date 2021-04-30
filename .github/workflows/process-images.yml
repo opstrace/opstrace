@@ -13,7 +13,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: Tinify Image Action
-        uses: namoscato/action-tinify@v1.2.6
+        uses: namoscato/action-tinify@v1.3.1
         with:
           api_key: ${{ secrets.TINIFY_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
