@@ -13,7 +13,7 @@ It consists of an installer that runs as a CLI to use your cloud credentials to 
 ## How does it work?
 
 Opstrace clusters expose a horizontally scalable [Prometheus](https://prometheus.io) API, backed by [Cortex](https://github.com/cortexproject/cortex), and a [Loki](https://github.com/grafana/loki) API for logs collection.
-You can point your existing Prometheus or [Fluentd](https://www.fluentd.org)/[Promtail](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/_index.md) instances to it.
+You can point your existing Prometheus or [Fluentd](https://www.fluentd.org)/[Promtail](https://github.com/grafana/loki/blob/main/docs/sources/clients/promtail/_index.md) instances to it.
 We also plan to support a wide variety of other APIs, such as the Datadog agent.
 
 Creating an Opstrace Cluster requires our [command-line interface](./references/cli.md), which talks directly to your cloud provider.
