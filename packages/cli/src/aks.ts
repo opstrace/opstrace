@@ -17,7 +17,6 @@
 // Module for managing the authenticator key set (AKS) in an existing
 // Opstrace cluster.
 
-import { strict as assert } from "assert";
 import fs from "fs";
 import crypto from "crypto";
 
@@ -95,6 +94,48 @@ export async function listKeys(): Promise<void> {
   await listAuthenticatorKeys(kubeconfig);
 }
 
+export async function removeKey(): Promise<void> {
+  if (cli.CLIARGS.keyId.length !== 40) {
+    die("unexpected key ID: expecting a string with 40 characters");
+  }
+
+  const kubeconfig = await util.getKubeConfigForOpstraceClusterOrDie(
+    cli.CLIARGS.cloudProvider,
+    cli.CLIARGS.clusterName
+  );
+
+  await removeAuthenticatorKey(kubeconfig, cli.CLIARGS.keyId);
+}
+
+async function removeAuthenticatorKey(
+  kubeconfig: KubeConfig,
+  keyIdToRemove: string
+) {
+  const controllerConfigObj = await fetchControllerConfigWithCurrentKeySet(
+    kubeconfig
+  );
+
+  const keySet = JSON.parse(
+    controllerConfigObj.tenant_api_authenticator_pubkey_set_json
+  );
+
+  log.info(
+    "number of public keys currently configured: %s",
+    Object.keys(keySet).length
+  );
+
+  const newKeySetJSON: string = controllerconfig.authenticatorKeySetRemoveKey(
+    controllerConfigObj.tenant_api_authenticator_pubkey_set_json,
+    keyIdToRemove
+  );
+
+  await setControllerConfigWithNewKeySet(
+    kubeconfig,
+    newKeySetJSON,
+    controllerConfigObj
+  );
+}
+
 async function listAuthenticatorKeys(kubeconfig: KubeConfig) {
   const controllerConfigObj = await fetchControllerConfigWithCurrentKeySet(
     kubeconfig
@@ -126,15 +167,22 @@ async function mutateClusterStateAddAuthenticatorKey(
     newPubkeyPem
   );
 
+  await setControllerConfigWithNewKeySet(
+    kubeconfig,
+    newKeySetJSON,
+    controllerConfigObj
+  );
+}
+
+async function setControllerConfigWithNewKeySet(
+  kubeconfig: KubeConfig,
+  newKeySetJSON: string,
+  controllerConfigObj: any
+) {
   log.info(
     "new tenant_api_authenticator_pubkey_set_json, deserialized: %s",
     JSON.parse(newKeySetJSON)
   );
-
-  // This is just to double-check that the new AKS contains the expected key
-  // ID. Saw a bug during dev in `authenticatorKeySetAddKey()` that was
-  // caught by this assertion.
-  assert(keyIDnewPubkey in JSON.parse(newKeySetJSON));
 
   controllerConfigObj.tenant_api_authenticator_pubkey_set_json = newKeySetJSON;
 

@@ -22,14 +22,30 @@ export function authenticatorKeySetAddKey(
 ): string {
   const previousKeySet = JSON.parse(previousKeySetJSONString);
   const newKeyID = keyIDfromPEM(newPubkeyPem);
+
   if (newKeyID in previousKeySet) {
     die("key already in key set");
   }
+
   const newKeySet = {
     ...previousKeySet,
     [newKeyID]: newPubkeyPem
   };
   return JSON.stringify(newKeySet);
+}
+
+export function authenticatorKeySetRemoveKey(
+  previousKeySetJSONString: string,
+  keyIdToRemove: string
+): string {
+  const ks = JSON.parse(previousKeySetJSONString);
+
+  if (!(keyIdToRemove in ks)) {
+    die("key not present in key set");
+  }
+
+  delete ks[keyIdToRemove];
+  return JSON.stringify(ks);
 }
 
 export function authenticatorKeySetgenerateJSONSingleKey(

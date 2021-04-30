@@ -63,8 +63,9 @@ interface CliOptsInterface {
   showVersion: boolean;
   region: string;
   assumeYes: boolean;
-  kubeconfigFilePath: string; // emtpy means: not set
-  tenantApiAuthenticatorKeyFilePath: string; // emtpy means: not set
+  kubeconfigFilePath: string; // empty means: not set
+  tenantApiAuthenticatorKeyFilePath: string; // empty means: not set
+  keyId: string; // empty means: not set
   tenantName: string; // empty means: not set
 }
 
@@ -123,6 +124,11 @@ async function main() {
 
   if (CLIARGS.command == "ta-pubkeys-list") {
     await aks.listKeys();
+    throw new ExitSuccess();
+  }
+
+  if (CLIARGS.command == "ta-pubkeys-remove") {
+    await aks.removeKey();
     throw new ExitSuccess();
   }
 
@@ -215,6 +221,17 @@ function parseCmdlineArgs() {
       `listed via their key ID on stdout, with one key ID per line.`
   });
 
+  const parserTAPubKeysRemoveHelp =
+    "Tenant authentication: remove a specific public key from the set of trust anchors, " +
+    "i.e. do not accept corresponding authentication tokens anymore.";
+  const parserTAPubKeysRemove = subparsers.add_parser("ta-pubkeys-remove", {
+    help: parserTAPubKeysRemoveHelp,
+    description:
+      `${parserTAPubKeysRemoveHelp} The relevant public key needs to be ` +
+      `specified via its key ID. You can list currently configured keys with ` +
+      `the 'ta-pubkeys-list' command.`
+  });
+
   // The --log-level switch must work when not using a sub command, but also
   // for each sub command.
   for (const p of [
@@ -223,6 +240,7 @@ function parseCmdlineArgs() {
     parserTACreateToken,
     parserTAPubKeysAdd,
     parserTAPubKeysList,
+    parserTAPubKeysRemove,
     parserDestroy,
     parserList,
     parserStatus,
@@ -310,6 +328,7 @@ function parseCmdlineArgs() {
   configureParserTACreateToken(parserTACreateToken);
   configureParserTAPubKeysAdd(parserTAPubKeysAdd);
   configureParserTAPubKeysList(parserTAPubKeysList);
+  configureParserTAPubKeysRemove(parserTAPubKeysRemove);
   configureParserTACreateKeypair(parserTACreateKeypair);
 
   // About those next two args: that's just brainstorm, maybe do not build
@@ -463,6 +482,30 @@ function configureParserTAPubKeysList(parser: argparse.ArgumentParser) {
       "The name of the cluster to look up the authenticator configuration for.",
     type: "str",
     metavar: "CLUSTER_NAME"
+  });
+}
+
+// Mutate parser in place.
+function configureParserTAPubKeysRemove(parser: argparse.ArgumentParser) {
+  parser.add_argument("cloudProvider", {
+    help: "The cloud provider to look up the Opstrace cluster in (aws, gcp).",
+    type: "str",
+    choices: ["aws", "gcp"],
+    metavar: "PROVIDER"
+  });
+
+  parser.add_argument("clusterName", {
+    help:
+      "The name of the cluster to change the authenticator configuration in.",
+    type: "str",
+    metavar: "CLUSTER_NAME"
+  });
+
+  parser.add_argument("keyId", {
+    help: "Use ID of the public key to remove.",
+    type: "str",
+    metavar: "KEY_ID",
+    default: ""
   });
 }
 
