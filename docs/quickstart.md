@@ -315,14 +315,6 @@ You can then uninstall Opstrace:
 ./opstrace destroy aws $OPSTRACE_NAME
 ```
 
-If something went wrong or was unpleasant, please send us your log files via email:
-
-```bash
-tar czf opstrace-logs.tgz opstrace_cli_*.log
-```
-
-Share the resulting file with us at [hello@opstrace.com](mailto:hello@opstrace.com).
-
 ## Step 6: Learn more
 
 That's it! 👏
