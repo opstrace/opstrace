@@ -268,7 +268,9 @@ You now have dummy (random) metrics and associated logs (simulating a real app y
 
 Let's view the data in our `staging` tenant using the Grafana "explore" view:
 
+<!-- markdown-link-check-disable -->
 <https://staging.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
+<!-- markdown-link-check-enable -->
 
 1. To query these metrics, first select the "metrics" data source in the upper left-hand corner.
 2. Enter this simple query in the query dialog:
@@ -287,7 +289,9 @@ As you can see, the data we sent to Opstrace in step 3 is indeed ingested as exp
 
 You can also see that the `prod` tenant is empty, completely separated from `staging`:
 
+<!-- markdown-link-check-disable -->
 <https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
+<!-- markdown-link-check-enable -->
 
 ## Step 4: Add users and tenants
 
@@ -295,7 +299,9 @@ Congratulations!
 You've walked through the majority of our foundational release, but we're [working on much more](./references/roadmap.md).
 Before you uninstall Opstrace, why not check out our UI which allows you to add users and tenants to the system:
 
+<!-- markdown-link-check-disable -->
 <https://$OPSTRACE_NAME.opstrace.io/login>
+<!-- markdown-link-check-enable -->
 
 ## Step 5: Clean up
 
@@ -321,10 +327,10 @@ That's it! 👏
 
 <!-- markdownlint-disable MD044 -->
 Join our [community Slack](https://go.opstrace.com/community) and follow us on [Twitter @opstrace](https://twitter.com/opstrace).
-Let us know what you thought of the quick start—we like any and all feedback.
+Let us know what you thought of the quick start—feedback is a gift 🎁.
 <!-- markdownlint-enable MD044 -->
 
 To learn more about how to use Opstrace, check out our Administrator and User Guides.
-If you'd like to hack on Opstrace, feel free to [fork our repository](https://github.com/opstrace/opstrace/network/members) and set up your [dev environment](https://opstrace.com/docs/guides/contributor/setting-up-your-dev-env).
+If you'd like to hack on Opstrace, feel free to [fork our repository](https://github.com/opstrace/opstrace/network/members) and set up your [dev environment](https://opstrace.com/docs/guides/contributor/setting-up-your-dev-env/).
 
 Thank you. 🙏
