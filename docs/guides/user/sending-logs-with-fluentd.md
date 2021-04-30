@@ -14,7 +14,7 @@ It is worth mentioning that FluentD has decent debuggability, with insightful lo
 
 ## FluentD output configuration block: the basics
 
-A FluentD instance can be instructed to send logs to an Opstrace cluster by using the `@type loki` output plugin ([on GitHub](https://github.com/grafana/loki/tree/master/cmd/fluentd), [on rubygems.org](https://rubygems.org/gems/fluent-plugin-grafana-loki)).
+A FluentD instance can be instructed to send logs to an Opstrace cluster by using the `@type loki` output plugin ([on GitHub](https://github.com/grafana/loki/tree/main/clients/cmd/fluentd), [on rubygems.org](https://rubygems.org/gems/fluent-plugin-grafana-loki)).
 
 What follows is an example for a block matching all log entries, and for sending them to your Opstrace cluster:
 
@@ -90,6 +90,6 @@ Note that FluentD can also back up log entries that it failed to flush.
 
 ## Further references
 
-* [Loki output plugin on GitHub](https://github.com/grafana/loki/tree/master/cmd/fluentd)
+* [Loki output plugin on GitHub](https://github.com/grafana/loki/tree/main/clients/cmd/fluentd)
 * [FluentD Buffer configuration](https://docs.fluentd.org/configuration/buffer-section) (buffering parameters, flushing parameters, retrying parameters)
 

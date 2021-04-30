@@ -182,7 +182,7 @@ These instructions show how you can extract metrics from [Azure Monitor](https:/
 
 First we will need to set up an Azure AD Application registration, configure it with a role for accessing Azure Monitor, then generate a Client Secret, as described in [this guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal).
 The exact process may vary depending on your local procedures around account credentials.
-The underlying [`azure_metrics_exporter` documentation](https://github.com/RobustPerception/azure_metrics_exporter#azure-account-requirements) recommends assigning the `Monitoring Reader` Role to the AD Application.
+The underlying [`azure_metrics_exporter` documentation](https://github.com/RobustPerception/azure_metrics_exporter#user-content-azure-account-requirements) recommends assigning the `Monitoring Reader` Role to the AD Application.
 Note that in the dialog for adding the role assignment, you MUST start typing the AD Application's name before anything will appear.
 
 The Azure Subscription UUID, Azure Tenant UUID, AD Application UUID, and generated Client Secret are submitted to Opstrace as follows.
@@ -209,7 +209,7 @@ In Prometheus terminology, an "exporter" is a process that fetches metrics from 
 Opstrace uses a modified build of the [RobustPerception `azure_metrics_exporter`](https://github.com/RobustPerception/azure_metrics_exporter) package to support exporting Azure metrics into Opstrace.
 The only modification is to support providing Azure credentials via environment variables rather than the metrics yaml configuration itself, as seen in [this PR](https://github.com/RobustPerception/azure_metrics_exporter/pull/101) to the project.
 
-The Azure exporter configuration is effectively a pass-through of the underlying settings exposed by the [`azure_metrics_exporter` configuration](https://github.com/RobustPerception/azure_metrics_exporter#example-azure-metrics-exporter-config), and should work the same way as documented there.
+The Azure exporter configuration is effectively a pass-through of the underlying settings exposed by the [`azure_metrics_exporter` configuration](https://github.com/RobustPerception/azure_metrics_exporter#user-content-example-azure-metrics-exporter-config), and should work the same way as documented there.
 In other words, anything you can do with a stock `azure_metrics_exporter` can also be done via the Opstrace exporter configuration.
 
 The main thing to determine is what metrics should be collected.

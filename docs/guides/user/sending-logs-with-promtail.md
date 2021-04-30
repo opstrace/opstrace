@@ -1,6 +1,6 @@
 # Sending logs with Promtail
 
-In this guide we show how to configure a [Promtail](https://github.com/grafana/loki/tree/master/cmd/promtail) instance to securely send logs to your Opstrace cluster.
+In this guide we show how to configure a [Promtail](https://github.com/grafana/loki/tree/main/clients/cmd/promtail) instance to securely send logs to your Opstrace cluster.
 
 ## Prerequisites
 
@@ -65,5 +65,5 @@ This is required for example when using `letsencrypt-staging` as `cert_issuer`.
 
 ## Further references
 
-* [Configuring Promtail: reference](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/configuration.md)
-* [Troubleshooting Promtail](https://github.com/grafana/loki/blob/master/docs/sources/clients/promtail/troubleshooting.md)
+* [Configuring Promtail: reference](https://github.com/grafana/loki/blob/main/docs/sources/clients/promtail/configuration.md)
+* [Troubleshooting Promtail](https://github.com/grafana/loki/blob/main/docs/sources/clients/promtail/troubleshooting.md)
