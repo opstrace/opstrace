@@ -254,13 +254,14 @@ export function CortexResources(
   const cortexDefaultConfig = {
     // HTTP path prefix for Cortex API: default is /api/prom which we do not like
     // in front of e.g. /api/v1/query. Note that the "Prometheus API" is served
-    // at api.prometheus_http_prefix.
+    // at api.prometheus_http_prefix which by default is /prometheus
     http_prefix: "",
     api: {
       // Serve Alertmanager UI at this location, matching the path served by the tenant Ingresses.
       // This is the default but we call it out explicitly here.
       // SEE ALSO: resources/ingress/index.ts, and alertmanager.external_url and ruler.alertmanager_url below
-      alertmanager_http_prefix: "/alertmanager"
+      alertmanager_http_prefix: "/alertmanager",
+      response_compression_enabled: true
     },
     auth_enabled: true,
     distributor: {
@@ -314,9 +315,6 @@ export function CortexResources(
           }
         }
       }
-    },
-    frontend: {
-      compress_responses: true
     },
     frontend_worker: {
       frontend_address: `query-frontend.${namespace}.svc.cluster.local:9095`
@@ -381,8 +379,7 @@ export function CortexResources(
           backend: "memcached",
           memcached: {
             addresses: `dnssrv+memcached-index-queries.${namespace}.svc.cluster.local:11211`
-          },
-          postings_compression_enabled: true
+          }
         },
         chunks_cache: {
           backend: "memcached",
@@ -489,10 +486,15 @@ export function CortexResources(
   const cortexConfigOverrides = getControllerCortexConfigOverrides(state);
 
   log.debug(
-    `cortex config overrides: ${JSON.stringify(cortexConfigOverrides, null, 2)}`
+    `cortex config overrides:\n${JSON.stringify(
+      cortexConfigOverrides,
+      null,
+      2
+    )}`
   );
 
   const cortexConfig = deepMerge(cortexDefaultConfig, cortexConfigOverrides);
+  // Note(JP) log the merged object?
 
   collection.add(
     new Namespace(
