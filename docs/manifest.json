@@ -39,6 +39,10 @@
             {
               "title": "Collecting Cloud Vendor Metrics",
               "path": "/docs/guides/user/collecting-cloud-metrics.md"
+            },
+            {
+              "title": "Collecting Uptime Metrics",
+              "path": "/docs/guides/user/collecting-uptime-metrics.md"
             }
           ]
         },
