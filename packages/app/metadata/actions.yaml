@@ -1,5 +1,5 @@
 actions:
-- name: getAlertmanager
+- name: deleteRuleGroup
   definition:
     kind: synchronous
     handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
@@ -8,9 +8,18 @@ actions:
       value_from_env: ACTION_CONFIG_API_SECRET
   permissions:
   - role: user_admin
-- name: updateAlertmanager
+- name: getAlertmanager
   definition:
-    kind: synchronous
+    kind: ""
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
+- name: getRuleGroup
+  definition:
+    kind: ""
     handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
     headers:
     - name: X-Action-Secret
@@ -19,14 +28,14 @@ actions:
   - role: user_admin
 - name: listRules
   definition:
-    kind: synchronous
+    kind: ""
     handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
     headers:
     - name: X-Action-Secret
       value_from_env: ACTION_CONFIG_API_SECRET
   permissions:
   - role: user_admin
-- name: getRuleGroup
+- name: updateAlertmanager
   definition:
     kind: synchronous
     handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
@@ -44,18 +53,9 @@ actions:
       value_from_env: ACTION_CONFIG_API_SECRET
   permissions:
   - role: user_admin
-- name: deleteRuleGroup
-  definition:
-    kind: synchronous
-    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
-    headers:
-    - name: X-Action-Secret
-      value_from_env: ACTION_CONFIG_API_SECRET
-  permissions:
-  - role: user_admin
 - name: validateCredential
   definition:
-    kind: synchronous
+    kind: ""
     handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
     headers:
     - name: X-Action-Secret
@@ -64,7 +64,7 @@ actions:
   - role: user_admin
 - name: validateExporter
   definition:
-    kind: synchronous
+    kind: ""
     handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
     headers:
     - name: X-Action-Secret
@@ -74,6 +74,16 @@ actions:
 custom_types:
   enums:
   - name: ErrorType
+    values:
+    - description: null
+      is_deprecated: null
+      value: SERVICE_OFFLINE
+    - description: null
+      is_deprecated: null
+      value: SERVICE_ERROR
+    - description: null
+      is_deprecated: null
+      value: VALIDATION_FAILED
   input_objects:
   - name: AlertmanagerInput
   - name: RuleGroupInput
