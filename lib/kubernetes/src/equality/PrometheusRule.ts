@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 import { V1Prometheusrule } from "..";
 
 export const isPrometheusRuleEqual = (
@@ -100,7 +100,7 @@ const isRuleEqual = (desired: Rule, existing: Rule): boolean => {
     desired.expr === existing.expr &&
     desired.for === existing.for &&
     desired.record === existing.record &&
-    isDeepStrictEqual(desired.labels, existing.labels) &&
-    isDeepStrictEqual(desired.annotations, existing.annotations)
+    equal(desired.labels, existing.labels) &&
+    equal(desired.annotations, existing.annotations)
   );
 };

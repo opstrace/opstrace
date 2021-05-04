@@ -15,8 +15,8 @@
  */
 
 import { log } from "@opstrace/utils";
-import { isDeepStrictEqual } from "util";
 import { V1Certificate } from "../custom-resources";
+import equal from "fast-deep-equal";
 
 export const isCertificateEqual = (
   desired: V1Certificate,
@@ -26,12 +26,7 @@ export const isCertificateEqual = (
     return false;
   }
 
-  if (
-    !isDeepStrictEqual(
-      desired.metadata?.annotations,
-      existing.metadata?.annotations
-    )
-  ) {
+  if (!equal(desired.metadata?.annotations, existing.metadata?.annotations)) {
     log.debug(
       `annotations mismatch: ${JSON.stringify(
         desired.metadata?.annotations
@@ -47,7 +42,7 @@ export const isCertificateEqual = (
     return false;
   }
 
-  if (!isDeepStrictEqual(desired.spec.dnsNames, existing.spec.dnsNames)) {
+  if (!equal(desired.spec.dnsNames, existing.spec.dnsNames)) {
     log.debug(
       `dnsNames mismatch:  ${desired.spec.dnsNames} vs ${existing.spec.dnsNames}`
     );
@@ -59,7 +54,7 @@ export const isCertificateEqual = (
     return false;
   }
 
-  if (!isDeepStrictEqual(desired.spec.issuerRef, existing.spec.issuerRef)) {
+  if (!equal(desired.spec.issuerRef, existing.spec.issuerRef)) {
     log.debug(
       `issuerRef mismatch:  ${desired.spec.issuerRef} vs ${existing.spec.issuerRef}`
     );

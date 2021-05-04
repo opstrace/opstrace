@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import equal = require("fast-deep-equal");
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 import * as Service from "./Service";
 import * as ServiceMonitor from "./ServiceMonitor";
 import * as Pod from "./Pod";
@@ -86,10 +85,7 @@ export const hasDeploymentChanged = (
 
   if (
     desired.spec.spec?.strategy !== undefined &&
-    !isDeepStrictEqual(
-      desired.spec.spec?.strategy,
-      existing.spec.spec?.strategy
-    )
+    !equal(desired.spec.spec?.strategy, existing.spec.spec?.strategy)
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -101,10 +97,7 @@ export const hasDeploymentChanged = (
 
   if (
     desired.spec.spec?.selector !== undefined &&
-    !isDeepStrictEqual(
-      desired.spec.spec?.selector,
-      existing.spec.spec?.selector
-    )
+    !equal(desired.spec.spec?.selector, existing.spec.spec?.selector)
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -215,8 +208,8 @@ export const hasSecretChanged = (
     return false;
   }
   if (
-    !isDeepStrictEqual(desired.spec.data, existing.spec.data) ||
-    !isDeepStrictEqual(desired.spec.stringData, existing.spec.stringData)
+    !equal(desired.spec.data, existing.spec.data) ||
+    !equal(desired.spec.stringData, existing.spec.stringData)
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -250,8 +243,8 @@ export const hasConfigMapChanged = (
   existing: ConfigMapType
 ): boolean => {
   if (
-    !isDeepStrictEqual(desired.spec.data, existing.spec.data) ||
-    !isDeepStrictEqual(desired.spec.binaryData, existing.spec.binaryData)
+    !equal(desired.spec.data, existing.spec.data) ||
+    !equal(desired.spec.binaryData, existing.spec.binaryData)
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -337,25 +330,16 @@ export const hasClusterRoleChanged = (
   // Those defaults make this check fail. Check if any of the fiels we are
   // interested in have changed.
   if (
-    !isDeepStrictEqual(
-      desired.spec.aggregationRule,
-      existing.spec.aggregationRule
-    ) ||
-    !isDeepStrictEqual(desired.spec.apiVersion, existing.spec.apiVersion) ||
-    !isDeepStrictEqual(desired.spec.kind, existing.spec.kind) ||
-    !isDeepStrictEqual(desired.spec.rules, existing.spec.rules) ||
-    !isDeepStrictEqual(
+    !equal(desired.spec.aggregationRule, existing.spec.aggregationRule) ||
+    !equal(desired.spec.apiVersion, existing.spec.apiVersion) ||
+    !equal(desired.spec.kind, existing.spec.kind) ||
+    !equal(desired.spec.rules, existing.spec.rules) ||
+    !equal(
       desired.spec.metadata?.annotations,
       existing.spec.metadata?.annotations
     ) ||
-    !isDeepStrictEqual(
-      desired.spec.metadata?.labels,
-      existing.spec.metadata?.labels
-    ) ||
-    !isDeepStrictEqual(
-      desired.spec.metadata?.name,
-      existing.spec.metadata?.name
-    )
+    !equal(desired.spec.metadata?.labels, existing.spec.metadata?.labels) ||
+    !equal(desired.spec.metadata?.name, existing.spec.metadata?.name)
   ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
@@ -368,7 +352,7 @@ export const hasClusterRoleChanged = (
   return false;
 };
 
-// isDeepStrictEquals doesn't handle the CRD schema very well and always reports
+// equals doesn't handle the CRD schema very well and always reports
 // a mismatch. The workaround is to check if the annotations match. This works
 // since we add an annotation with the controller version to the CRDs.
 export const hasCustomResourceDefinitionChanged = (
@@ -376,7 +360,7 @@ export const hasCustomResourceDefinitionChanged = (
   existing: CustomResourceDefinitionType
 ): boolean => {
   if (
-    !isDeepStrictEqual(
+    !equal(
       desired.spec.metadata?.annotations,
       existing.spec.metadata?.annotations
     )

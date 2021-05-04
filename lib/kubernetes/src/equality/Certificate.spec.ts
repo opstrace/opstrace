@@ -124,6 +124,16 @@ test("should not be equal when certificate commonName does not match", () => {
   expect(isCertificateEqual(desired, existing)).toBe(false);
 });
 
+test("should return true if certificate dnsNames order changed", () => {
+  const desired = genCert();
+  const existing = genCert();
+
+  desired.spec.dnsNames = ["foo", "bar"];
+  existing.spec.dnsNames = ["bar", "foo"];
+
+  expect(isCertificateEqual(desired, existing)).toBe(true);
+});
+
 test("should not be equal when certificate dnsNames does not match", () => {
   const desired = genCert();
   const existing = genCert();

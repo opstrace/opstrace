@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 import { V1Prometheus } from "..";
 
 export const isPrometheusEqual = (
   desired: V1Prometheus,
   existing: V1Prometheus
 ): boolean => {
-  if (!isDeepStrictEqual(desired.spec, existing.spec)) {
+  if (!equal(desired.spec, existing.spec)) {
     return false;
   }
 

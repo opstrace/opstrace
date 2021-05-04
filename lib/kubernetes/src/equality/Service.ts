@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 import { V1ServiceSpec, V1ServicePort } from "@kubernetes/client-node";
 
 export const isServiceSpecEqual = (
@@ -24,7 +24,7 @@ export const isServiceSpecEqual = (
   if (!desired || !existing) {
     return !desired && !existing;
   }
-  if (!isDeepStrictEqual(desired.selector, existing.selector)) {
+  if (!equal(desired.selector, existing.selector)) {
     return false;
   }
   if (!areServicePortsEqual(desired, existing)) {
