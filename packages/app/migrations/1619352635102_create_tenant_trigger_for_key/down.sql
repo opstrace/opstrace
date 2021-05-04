@@ -1,0 +1,1 @@
+DROP TRIGGER t_tenant_insert ON tenant;

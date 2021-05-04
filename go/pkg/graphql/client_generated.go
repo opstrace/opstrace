@@ -1936,6 +1936,7 @@ type GetTenantsResponse struct {
 		Name      string `json:"name"`
 		CreatedAt string `json:"created_at"`
 		Type      string `json:"type"`
+		Key       string `json:"key"`
 	} `json:"tenant"`
 }
 
@@ -1950,6 +1951,7 @@ func NewGetTenantsRequest(url string) (*GetTenantsRequest, error) {
     name
     created_at
     type
+    key
   }
 }`,
 	})
@@ -2956,13 +2958,15 @@ const (
 type TenantConstraint string
 
 const (
-	TenantConstraintTenantPkey TenantConstraint = "tenant_pkey"
+	TenantConstraintTenantKeyKey TenantConstraint = "tenant_key_key"
+	TenantConstraintTenantPkey   TenantConstraint = "tenant_pkey"
 )
 
 type TenantSelectColumn string
 
 const (
 	TenantSelectColumnCreatedAt TenantSelectColumn = "created_at"
+	TenantSelectColumnKey       TenantSelectColumn = "key"
 	TenantSelectColumnName      TenantSelectColumn = "name"
 	TenantSelectColumnType      TenantSelectColumn = "type"
 )
@@ -2971,6 +2975,7 @@ type TenantUpdateColumn string
 
 const (
 	TenantUpdateColumnCreatedAt TenantUpdateColumn = "created_at"
+	TenantUpdateColumnKey       TenantUpdateColumn = "key"
 	TenantUpdateColumnName      TenantUpdateColumn = "name"
 	TenantUpdateColumnType      TenantUpdateColumn = "type"
 )
@@ -3713,6 +3718,7 @@ type TenantBoolExp struct {
 	CreatedAt   *TimestampComparisonExp `json:"created_at,omitempty"`
 	Credentials *CredentialBoolExp      `json:"credentials,omitempty"`
 	Exporters   *ExporterBoolExp        `json:"exporters,omitempty"`
+	Key         *StringComparisonExp    `json:"key,omitempty"`
 	Name        *StringComparisonExp    `json:"name,omitempty"`
 	Type        *StringComparisonExp    `json:"type,omitempty"`
 }
@@ -3721,18 +3727,21 @@ type TenantInsertInput struct {
 	CreatedAt   *Timestamp                   `json:"created_at,omitempty"`
 	Credentials *CredentialArrRelInsertInput `json:"credentials,omitempty"`
 	Exporters   *ExporterArrRelInsertInput   `json:"exporters,omitempty"`
+	Key         *String                      `json:"key,omitempty"`
 	Name        *String                      `json:"name,omitempty"`
 	Type        *String                      `json:"type,omitempty"`
 }
 
 type TenantMaxOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
+	Key       *OrderBy `json:"key,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
 	Type      *OrderBy `json:"type,omitempty"`
 }
 
 type TenantMinOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
+	Key       *OrderBy `json:"key,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
 	Type      *OrderBy `json:"type,omitempty"`
 }
@@ -3752,6 +3761,7 @@ type TenantOrderBy struct {
 	CreatedAt            *OrderBy                    `json:"created_at,omitempty"`
 	CredentialsAggregate *CredentialAggregateOrderBy `json:"credentials_aggregate,omitempty"`
 	ExportersAggregate   *ExporterAggregateOrderBy   `json:"exporters_aggregate,omitempty"`
+	Key                  *OrderBy                    `json:"key,omitempty"`
 	Name                 *OrderBy                    `json:"name,omitempty"`
 	Type                 *OrderBy                    `json:"type,omitempty"`
 }
@@ -3762,6 +3772,7 @@ type TenantPkColumnsInput struct {
 
 type TenantSetInput struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	Type      *String    `json:"type,omitempty"`
 }
@@ -4415,6 +4426,7 @@ type Tenant struct {
 	CredentialsAggregate CredentialAggregate `json:"credentials_aggregate"`
 	Exporters            *[]Exporter         `json:"exporters,omitempty"`
 	ExportersAggregate   ExporterAggregate   `json:"exporters_aggregate"`
+	Key                  String              `json:"key"`
 	Name                 String              `json:"name"`
 	Type                 String              `json:"type"`
 }
@@ -4432,12 +4444,14 @@ type TenantAggregateFields struct {
 
 type TenantMaxFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	Type      *String    `json:"type,omitempty"`
 }
 
 type TenantMinFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	Type      *String    `json:"type,omitempty"`
 }

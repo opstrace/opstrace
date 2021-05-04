@@ -2716,6 +2716,7 @@ export type Tenant = {
   exporters: Array<Exporter>;
   /** An aggregated array relationship */
   exporters_aggregate: Exporter_Aggregate;
+  key: Scalars["String"];
   name: Scalars["String"];
   type: Scalars["String"];
 };
@@ -2796,12 +2797,15 @@ export type Tenant_Bool_Exp = {
   created_at?: Maybe<Timestamp_Comparison_Exp>;
   credentials?: Maybe<Credential_Bool_Exp>;
   exporters?: Maybe<Exporter_Bool_Exp>;
+  key?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
   type?: Maybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "tenant" */
 export enum Tenant_Constraint {
+  /** unique or primary key constraint */
+  TenantKeyKey = "tenant_key_key",
   /** unique or primary key constraint */
   TenantPkey = "tenant_pkey"
 }
@@ -2811,6 +2815,7 @@ export type Tenant_Insert_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   credentials?: Maybe<Credential_Arr_Rel_Insert_Input>;
   exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
 };
@@ -2818,6 +2823,7 @@ export type Tenant_Insert_Input = {
 /** aggregate max on columns */
 export type Tenant_Max_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
 };
@@ -2825,6 +2831,7 @@ export type Tenant_Max_Fields = {
 /** order by max() on columns of table "tenant" */
 export type Tenant_Max_Order_By = {
   created_at?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
 };
@@ -2832,6 +2839,7 @@ export type Tenant_Max_Order_By = {
 /** aggregate min on columns */
 export type Tenant_Min_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
 };
@@ -2839,6 +2847,7 @@ export type Tenant_Min_Fields = {
 /** order by min() on columns of table "tenant" */
 export type Tenant_Min_Order_By = {
   created_at?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
 };
@@ -2869,6 +2878,7 @@ export type Tenant_Order_By = {
   created_at?: Maybe<Order_By>;
   credentials_aggregate?: Maybe<Credential_Aggregate_Order_By>;
   exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
+  key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
 };
@@ -2883,6 +2893,8 @@ export enum Tenant_Select_Column {
   /** column name */
   CreatedAt = "created_at",
   /** column name */
+  Key = "key",
+  /** column name */
   Name = "name",
   /** column name */
   Type = "type"
@@ -2891,6 +2903,7 @@ export enum Tenant_Select_Column {
 /** input type for updating data in table "tenant" */
 export type Tenant_Set_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
 };
@@ -2899,6 +2912,8 @@ export type Tenant_Set_Input = {
 export enum Tenant_Update_Column {
   /** column name */
   CreatedAt = "created_at",
+  /** column name */
+  Key = "key",
   /** column name */
   Name = "name",
   /** column name */
@@ -3707,7 +3722,7 @@ export type GetAlertmanagerQuery = {
 export type GetTenantsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetTenantsQuery = {
-  tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
+  tenant: Array<Pick<Tenant, "name" | "created_at" | "type" | "key">>;
 };
 
 export type SubscribeToTenantListSubscriptionVariables = Exact<{
@@ -3715,7 +3730,7 @@ export type SubscribeToTenantListSubscriptionVariables = Exact<{
 }>;
 
 export type SubscribeToTenantListSubscription = {
-  tenant: Array<Pick<Tenant, "name" | "created_at" | "type">>;
+  tenant: Array<Pick<Tenant, "name" | "created_at" | "type" | "key">>;
 };
 
 export type UpdateAlertmanagerMutationVariables = Exact<{
@@ -4322,6 +4337,7 @@ export const GetTenantsDocument = gql`
       name
       created_at
       type
+      key
     }
   }
 `;
@@ -4331,6 +4347,7 @@ export const SubscribeToTenantListDocument = gql`
       name
       created_at
       type
+      key
     }
   }
 `;
