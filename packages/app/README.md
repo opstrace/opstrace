@@ -39,6 +39,10 @@ Starts Storybook for our application development kit and serves the storybook UI
 
 Opens the Hasura console in a new browser window ([localhost:9009](http://localhost:9009)). We use [Hasura](https://hasura.io) for our GraphQL/Postgress backend.
 
+### `yarn seeds:dev:tenants`
+
+Prepopulates the tenant table with the required "system" tenant and another tenant named "default".
+
 ### `yarn types:watch`
 
 Watches for changes to the graphql schema and regenerates typescript code using [https://graphql-code-generator.com/docs/plugins/typescript](https://graphql-code-generator.com/docs/plugins/typescript)
