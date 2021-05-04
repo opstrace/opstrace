@@ -110,7 +110,7 @@ List existing Opstrace clusters (visible with the configured cloud credentials).
 Example:
 
 ```text
-
+./opstrace list aws
 ```
 
 Help text:
