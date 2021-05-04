@@ -26,8 +26,8 @@ import { tenantsToItems } from "client/views/tenant/utils";
 import { Panel, PanelItem } from "client/components/Panel";
 
 import TenantPicker from "client/views/tenant/TenantPicker";
-// import AddTenantDialog from "client/views/tenant/AddTenantDialog";
-// import DeleteTenantDialog from "client/views/tenant/DeleteTenantDialog";
+import AddTenantDialog from "client/views/tenant/AddTenantDialog";
+import DeleteTenantDialog from "client/views/tenant/DeleteTenantDialog";
 
 type TenantPanelProps = {
   defaultId?: string;
@@ -83,8 +83,8 @@ export const TenantPanel = (props: TenantPanelProps) => {
   return (
     <>
       <TenantPicker />
-      {/* <AddTenantDialog /> */}
-      {/* <DeleteTenantDialog /> */}
+      <AddTenantDialog />
+      <DeleteTenantDialog />
       <Panel
         forceSelected={selectedIndex}
         items={tenantsToItems(tenants)}
