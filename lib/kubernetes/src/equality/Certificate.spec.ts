@@ -46,6 +46,24 @@ test("should return true when certificates are empty", () => {
   expect(isCertificateEqual(desired, existing)).toBe(true);
 });
 
+test("should return true when certificates match", () => {
+  const desired = genCert();
+  const existing = genCert();
+
+  desired.metadata = {
+    annotations: {
+      foo: "foo"
+    }
+  };
+  existing.metadata = {
+    annotations: {
+      foo: "foo"
+    }
+  };
+
+  expect(isCertificateEqual(desired, existing)).toBe(true);
+});
+
 test("should not be equal when certificate annotations do not match", () => {
   const desired = genCert();
   const existing = genCert();

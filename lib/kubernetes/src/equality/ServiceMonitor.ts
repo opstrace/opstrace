@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 import { V1Servicemonitor } from "..";
 
 export const isServiceMonitorEqual = (
   desired: V1Servicemonitor,
   existing: V1Servicemonitor
 ): boolean => {
-  if (!isDeepStrictEqual(desired.spec.selector, existing.spec.selector)) {
+  if (!equal(desired.spec.selector, existing.spec.selector)) {
     return false;
   }
   if (desired.spec.jobLabel !== existing.spec.jobLabel) {

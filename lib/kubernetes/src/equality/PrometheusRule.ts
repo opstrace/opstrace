@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 import { V1Prometheusrule } from "..";
 
 export const isPrometheusRuleEqual = (
@@ -28,25 +28,8 @@ export const isPrometheusRuleEqual = (
   return true;
 };
 
-type Group = {
-  interval?: string;
-  name: string;
-  rules: Rule[];
-};
-
-type Rule = {
-  alert?: string;
-  annotations?: {
-    [k: string]: unknown;
-  };
-  expr: string | number;
-  for?: string;
-  labels?: {
-    [k: string]: unknown;
-  };
-  record?: string;
-  [k: string]: unknown;
-};
+type Group = NonNullable<V1Prometheusrule["spec"]["groups"]>[number];
+type Rule = Group["rules"][number];
 
 const areGroupsEqual = (
   desired: V1Prometheusrule,
@@ -100,7 +83,7 @@ const isRuleEqual = (desired: Rule, existing: Rule): boolean => {
     desired.expr === existing.expr &&
     desired.for === existing.for &&
     desired.record === existing.record &&
-    isDeepStrictEqual(desired.labels, existing.labels) &&
-    isDeepStrictEqual(desired.annotations, existing.annotations)
+    equal(desired.labels, existing.labels) &&
+    equal(desired.annotations, existing.annotations)
   );
 };

@@ -25,8 +25,7 @@ import {
   V1EnvVar,
   V1Probe
 } from "@kubernetes/client-node";
-
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 
 export const ENV_HASH_NAME = "OPSTRACE_CONTROLLER_VERSION";
 
@@ -138,13 +137,13 @@ const isContainerProbeEqual = (
   existing: V1Probe | undefined
 ): boolean => {
   return (
-    isDeepStrictEqual(desired?.exec, existing?.exec) &&
+    equal(desired?.exec, existing?.exec) &&
     desired?.failureThreshold === existing?.failureThreshold &&
-    isDeepStrictEqual(desired?.httpGet, existing?.httpGet) &&
+    equal(desired?.httpGet, existing?.httpGet) &&
     desired?.initialDelaySeconds === existing?.initialDelaySeconds &&
     desired?.periodSeconds === existing?.periodSeconds &&
     desired?.successThreshold === existing?.successThreshold &&
-    isDeepStrictEqual(desired?.tcpSocket, existing?.tcpSocket) &&
+    equal(desired?.tcpSocket, existing?.tcpSocket) &&
     desired?.timeoutSeconds === existing?.timeoutSeconds
   );
 };
