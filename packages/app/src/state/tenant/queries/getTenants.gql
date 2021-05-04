@@ -3,5 +3,6 @@ query GetTenants {
     name
     created_at
     type
+    key
   }
 }

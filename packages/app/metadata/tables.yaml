@@ -409,6 +409,7 @@
     permission:
       check: {}
       columns:
+      - key
       - name
       - type
       backend_only: false
@@ -417,6 +418,7 @@
     permission:
       columns:
       - created_at
+      - key
       - name
       - type
       filter: {}
