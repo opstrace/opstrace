@@ -30,7 +30,7 @@ nvm use 14
 
 ## Building locally
 
-To build locally, visit our Developer Workflows](workflows#local-checkout-build-artifacts-and-create-a-cluster) page.
+To build locally, visit our [Developer Workflows](./workflows.md#local-checkout-build-artifacts-and-create-a-cluster) page.
 
 ## Golang and dependencies
 
