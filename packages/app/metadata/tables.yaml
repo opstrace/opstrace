@@ -289,6 +289,7 @@
       - id
       - tenant_id
       filter: {}
+      allow_aggregations: true
   update_permissions:
   - role: user_admin
     permission:
@@ -466,6 +467,7 @@
       - type
       - updated_at
       filter: {}
+      allow_aggregations: true
   delete_permissions:
   - role: user_admin
     permission:
