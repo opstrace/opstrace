@@ -23,7 +23,6 @@ import AddIcon from "@material-ui/icons/Add";
 import { usePickerService } from "client/services/Picker";
 import { SideBar, SideBarContainer } from "client/components/SideBar";
 import { User } from "state/user/types";
-// import { Tenant } from "state/tenant/types";
 
 import { TenantPanel } from "./TenantPanel";
 import { UserPanel } from "./UserPanel";
@@ -51,15 +50,15 @@ const ClusterSidebar = () => {
     </IconButton>
   );
 
-  // const addTenant = useCallback(() => {
-  //   activatePickerWithText("add tenant: ");
-  // }, [activatePickerWithText]);
+  const addTenant = useCallback(() => {
+    activatePickerWithText("add tenant: ");
+  }, [activatePickerWithText]);
 
-  // const tenantActions = (
-  //   <IconButton size="small" onClick={addTenant}>
-  //     <AddIcon />
-  //   </IconButton>
-  // );
+  const tenantActions = (
+    <IconButton size="small" onClick={addTenant}>
+      <AddIcon />
+    </IconButton>
+  );
 
   return (
     <>
@@ -68,7 +67,7 @@ const ClusterSidebar = () => {
           title="Tenants"
           minHeight={100}
           flexGrow={1}
-          // actions={tenantActions}
+          actions={tenantActions}
         >
           <TenantPanel
             defaultId={activePanel === "tenant" ? params.tenantId : undefined}
