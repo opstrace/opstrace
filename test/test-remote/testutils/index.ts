@@ -948,7 +948,7 @@ export async function waitForQueryResult<T>(
       return testResult;
     }
 
-    await sleep(1.0);
+    await sleep(5.0);
   }
   throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
 }
