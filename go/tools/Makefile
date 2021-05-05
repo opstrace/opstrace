@@ -1,10 +1,10 @@
 all: cortex alertmanager loki
 
 cortex:
-	cd cortex-jsonschema-exporter && go mod download && go run cortex-config.go
+	cd cortex-jsonschema-exporter && go mod download && (go run main.go > schema.json)
 
 alertmanager:
-	cd cortex-jsonschema-exporter && go mod download && go run alertmanager-config.go
+	cd alertmanager-jsonschema-exporter && go mod download && (go run main.go > schema.json)
 
 loki:
-	cd loki-jsonschema-exporter && go mod download && go run main.go
+	cd loki-jsonschema-exporter && go mod download && (go run main.go > schema.json)
