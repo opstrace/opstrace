@@ -1938,6 +1938,7 @@ type GetTenantsResponse struct {
 		CreatedAt string `json:"created_at"`
 		UpdatedAt string `json:"updated_at"`
 		Type      string `json:"type"`
+		Key       string `json:"key"`
 	} `json:"tenant"`
 }
 
@@ -1954,6 +1955,7 @@ func NewGetTenantsRequest(url string) (*GetTenantsRequest, error) {
     created_at
     updated_at
     type
+    key
   }
 }`,
 	})
@@ -2991,8 +2993,9 @@ const (
 type TenantConstraint string
 
 const (
-	TenantConstraintTenantIdKey TenantConstraint = "tenant_id_key"
-	TenantConstraintTenantPkey  TenantConstraint = "tenant_pkey"
+	TenantConstraintTenantIdKey  TenantConstraint = "tenant_id_key"
+	TenantConstraintTenantKeyKey TenantConstraint = "tenant_key_key"
+	TenantConstraintTenantPkey   TenantConstraint = "tenant_pkey"
 )
 
 type TenantSelectColumn string
@@ -3000,6 +3003,7 @@ type TenantSelectColumn string
 const (
 	TenantSelectColumnCreatedAt TenantSelectColumn = "created_at"
 	TenantSelectColumnID        TenantSelectColumn = "id"
+	TenantSelectColumnKey       TenantSelectColumn = "key"
 	TenantSelectColumnName      TenantSelectColumn = "name"
 	TenantSelectColumnType      TenantSelectColumn = "type"
 	TenantSelectColumnUpdatedAt TenantSelectColumn = "updated_at"
@@ -3010,6 +3014,7 @@ type TenantUpdateColumn string
 const (
 	TenantUpdateColumnCreatedAt TenantUpdateColumn = "created_at"
 	TenantUpdateColumnID        TenantUpdateColumn = "id"
+	TenantUpdateColumnKey       TenantUpdateColumn = "key"
 	TenantUpdateColumnName      TenantUpdateColumn = "name"
 	TenantUpdateColumnType      TenantUpdateColumn = "type"
 	TenantUpdateColumnUpdatedAt TenantUpdateColumn = "updated_at"
@@ -3847,6 +3852,7 @@ type TenantBoolExp struct {
 	Exporters    *ExporterBoolExp        `json:"exporters,omitempty"`
 	ID           *UuidComparisonExp      `json:"id,omitempty"`
 	Integrations *IntegrationsBoolExp    `json:"integrations,omitempty"`
+	Key          *StringComparisonExp    `json:"key,omitempty"`
 	Name         *StringComparisonExp    `json:"name,omitempty"`
 	Type         *StringComparisonExp    `json:"type,omitempty"`
 	UpdatedAt    *TimestampComparisonExp `json:"updated_at,omitempty"`
@@ -3858,6 +3864,7 @@ type TenantInsertInput struct {
 	Exporters    *ExporterArrRelInsertInput     `json:"exporters,omitempty"`
 	ID           *UUID                          `json:"id,omitempty"`
 	Integrations *IntegrationsArrRelInsertInput `json:"integrations,omitempty"`
+	Key          *String                        `json:"key,omitempty"`
 	Name         *String                        `json:"name,omitempty"`
 	Type         *String                        `json:"type,omitempty"`
 	UpdatedAt    *Timestamp                     `json:"updated_at,omitempty"`
@@ -3866,6 +3873,7 @@ type TenantInsertInput struct {
 type TenantMaxOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
 	ID        *OrderBy `json:"id,omitempty"`
+	Key       *OrderBy `json:"key,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
 	Type      *OrderBy `json:"type,omitempty"`
 	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
@@ -3874,6 +3882,7 @@ type TenantMaxOrderBy struct {
 type TenantMinOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
 	ID        *OrderBy `json:"id,omitempty"`
+	Key       *OrderBy `json:"key,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
 	Type      *OrderBy `json:"type,omitempty"`
 	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
@@ -3896,6 +3905,7 @@ type TenantOrderBy struct {
 	ExportersAggregate    *ExporterAggregateOrderBy     `json:"exporters_aggregate,omitempty"`
 	ID                    *OrderBy                      `json:"id,omitempty"`
 	IntegrationsAggregate *IntegrationsAggregateOrderBy `json:"integrations_aggregate,omitempty"`
+	Key                   *OrderBy                      `json:"key,omitempty"`
 	Name                  *OrderBy                      `json:"name,omitempty"`
 	Type                  *OrderBy                      `json:"type,omitempty"`
 	UpdatedAt             *OrderBy                      `json:"updated_at,omitempty"`
@@ -3908,6 +3918,7 @@ type TenantPkColumnsInput struct {
 type TenantSetInput struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	Type      *String    `json:"type,omitempty"`
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
@@ -4624,6 +4635,7 @@ type Tenant struct {
 	ID                    UUID                  `json:"id"`
 	Integrations          *[]Integrations       `json:"integrations,omitempty"`
 	IntegrationsAggregate IntegrationsAggregate `json:"integrations_aggregate"`
+	Key                   String                `json:"key"`
 	Name                  String                `json:"name"`
 	Type                  String                `json:"type"`
 	UpdatedAt             Timestamp             `json:"updated_at"`
@@ -4643,6 +4655,7 @@ type TenantAggregateFields struct {
 type TenantMaxFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	Type      *String    `json:"type,omitempty"`
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
@@ -4651,6 +4664,7 @@ type TenantMaxFields struct {
 type TenantMinFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	Type      *String    `json:"type,omitempty"`
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`

@@ -5,5 +5,6 @@ subscription SubscribeToTenantList {
     created_at
     updated_at
     type
+    key
   }
 }

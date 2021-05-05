@@ -3034,6 +3034,7 @@ export type Tenant = {
   integrations: Array<Integrations>;
   /** An aggregated array relationship */
   integrations_aggregate: Integrations_Aggregate;
+  key: Scalars["String"];
   name: Scalars["String"];
   type: Scalars["String"];
   updated_at: Scalars["timestamp"];
@@ -3135,6 +3136,7 @@ export type Tenant_Bool_Exp = {
   exporters?: Maybe<Exporter_Bool_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
   integrations?: Maybe<Integrations_Bool_Exp>;
+  key?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
   type?: Maybe<String_Comparison_Exp>;
   updated_at?: Maybe<Timestamp_Comparison_Exp>;
@@ -3144,6 +3146,8 @@ export type Tenant_Bool_Exp = {
 export enum Tenant_Constraint {
   /** unique or primary key constraint */
   TenantIdKey = "tenant_id_key",
+  /** unique or primary key constraint */
+  TenantKeyKey = "tenant_key_key",
   /** unique or primary key constraint */
   TenantPkey = "tenant_pkey"
 }
@@ -3155,6 +3159,7 @@ export type Tenant_Insert_Input = {
   exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
   id?: Maybe<Scalars["uuid"]>;
   integrations?: Maybe<Integrations_Arr_Rel_Insert_Input>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
@@ -3164,6 +3169,7 @@ export type Tenant_Insert_Input = {
 export type Tenant_Max_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
   id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
@@ -3173,6 +3179,7 @@ export type Tenant_Max_Fields = {
 export type Tenant_Max_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
@@ -3182,6 +3189,7 @@ export type Tenant_Max_Order_By = {
 export type Tenant_Min_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
   id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
@@ -3191,6 +3199,7 @@ export type Tenant_Min_Fields = {
 export type Tenant_Min_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
@@ -3224,6 +3233,7 @@ export type Tenant_Order_By = {
   exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
   id?: Maybe<Order_By>;
   integrations_aggregate?: Maybe<Integrations_Aggregate_Order_By>;
+  key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
@@ -3241,6 +3251,8 @@ export enum Tenant_Select_Column {
   /** column name */
   Id = "id",
   /** column name */
+  Key = "key",
+  /** column name */
   Name = "name",
   /** column name */
   Type = "type",
@@ -3252,6 +3264,7 @@ export enum Tenant_Select_Column {
 export type Tenant_Set_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
@@ -3263,6 +3276,8 @@ export enum Tenant_Update_Column {
   CreatedAt = "created_at",
   /** column name */
   Id = "id",
+  /** column name */
+  Key = "key",
   /** column name */
   Name = "name",
   /** column name */
@@ -4074,7 +4089,7 @@ export type GetTenantsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetTenantsQuery = {
   tenant: Array<
-    Pick<Tenant, "id" | "name" | "created_at" | "updated_at" | "type">
+    Pick<Tenant, "id" | "name" | "created_at" | "updated_at" | "type" | "key">
   >;
 };
 
@@ -4084,7 +4099,7 @@ export type SubscribeToTenantListSubscriptionVariables = Exact<{
 
 export type SubscribeToTenantListSubscription = {
   tenant: Array<
-    Pick<Tenant, "id" | "name" | "created_at" | "updated_at" | "type">
+    Pick<Tenant, "id" | "name" | "created_at" | "updated_at" | "type" | "key">
   >;
 };
 
@@ -4694,6 +4709,7 @@ export const GetTenantsDocument = gql`
       created_at
       updated_at
       type
+      key
     }
   }
 `;
@@ -4705,6 +4721,7 @@ export const SubscribeToTenantListDocument = gql`
       created_at
       updated_at
       type
+      key
     }
   }
 `;

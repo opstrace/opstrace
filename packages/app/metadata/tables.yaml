@@ -454,6 +454,7 @@
     permission:
       check: {}
       columns:
+      - key
       - name
       - type
       backend_only: false
@@ -463,6 +464,7 @@
       columns:
       - created_at
       - id
+      - key
       - name
       - type
       - updated_at

@@ -43,7 +43,7 @@
     "mustache": "^4.0.0",
     "prom-client": "^12.0.0",
     "protobufjs": "^6.10.1",
-    "playwright": "1.9.2",
+    "playwright": "1.10.0",
     "snappy": "^6.3.5",
     "tmp": "^0.2.1",
     "winston": "^3.3.3",
