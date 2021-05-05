@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import useTenantList from "state/tenant/hooks/useTenantList";
+import { Tenant } from "state/tenant/types";
+import { withTenant } from "client/views/tenant/utils";
 import { usePickerService } from "client/services/Picker";
 
 import { deleteTenant } from "state/tenant/actions";
 
-import Skeleton from "@material-ui/lab/Skeleton";
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -31,19 +31,22 @@ import { Button } from "client/components/Button";
 import Typography from "client/components/Typography/Typography";
 import { ExternalLink } from "client/components/Link";
 
-const TenantDetail = () => {
-  const params = useParams<{ tenantId: string }>();
-  const tenants = useTenantList();
-  const dispatch = useDispatch();
+const TenantDetailParamLoader = (props: {}) => {
+  const { tenantId } = useParams<{ tenantId: string }>();
+  const Component = withTenant(TenantDetail, tenantId);
+  return <Component {...props} />;
+};
 
-  const tenant = useMemo(() => tenants.find(t => t.name === params.tenantId), [
-    params.tenantId,
-    tenants
-  ]);
+type TenantDetailProps = {
+  tenant: Tenant;
+};
+
+const TenantDetail = ({ tenant }: TenantDetailProps) => {
+  const dispatch = useDispatch();
 
   const { activatePickerWithText } = usePickerService(
     {
-      title: `Delete ${tenant?.name}?`,
+      title: `Delete ${tenant.name}?`,
       activationPrefix: "delete tenant directly?:",
       disableFilter: true,
       disableInput: true,
@@ -58,76 +61,71 @@ const TenantDetail = () => {
         }
       ],
       onSelected: option => {
-        if (option.id === "yes" && tenant?.name) {
-          dispatch(deleteTenant(tenant?.name));
+        if (option.id === "yes" && tenant.name) {
+          dispatch(deleteTenant(tenant.name));
         }
       }
     },
-    [tenant?.name]
+    [tenant.name]
   );
 
-  if (!tenant)
-    return (
-      <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
-    );
-  else
-    return (
-      <Box
-        width="100%"
-        height="100%"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-        p={1}
-      >
-        <Box maxWidth={700}>
-          <Card p={3}>
-            <CardHeader
-              titleTypographyProps={{ variant: "h5" }}
-              action={
-                <Box ml={3} display="flex" flexWrap="wrap">
-                  <Box p={1}>
-                    <Button
-                      variant="outlined"
-                      size="medium"
-                      disabled={tenant.type === "SYSTEM"}
-                      onClick={() =>
-                        activatePickerWithText("delete tenant directly?: ")
-                      }
-                    >
-                      Delete
-                    </Button>
-                  </Box>
-                </Box>
-              }
-              title={tenant.name}
-            />
-            <CardContent>
-              <Box display="flex">
-                <Box display="flex" flexDirection="column">
-                  <Attribute.Key>Grafana:</Attribute.Key>
-                  <Attribute.Key>Created:</Attribute.Key>
-                </Box>
-                <Box display="flex" flexDirection="column" flexGrow={1}>
-                  <Attribute.Value>
-                    <ExternalLink
-                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
-                    >
-                      {`${tenant.name}.${window.location.host}`}
-                    </ExternalLink>
-                  </Attribute.Value>
-                  <Attribute.Value>{tenant.created_at}</Attribute.Value>
+  return (
+    <Box
+      width="100%"
+      height="100%"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      flexWrap="wrap"
+      p={1}
+    >
+      <Box maxWidth={700}>
+        <Card p={3}>
+          <CardHeader
+            titleTypographyProps={{ variant: "h5" }}
+            action={
+              <Box ml={3} display="flex" flexWrap="wrap">
+                <Box p={1}>
+                  <Button
+                    variant="outlined"
+                    size="medium"
+                    disabled={tenant.type === "SYSTEM"}
+                    onClick={() =>
+                      activatePickerWithText("delete tenant directly?: ")
+                    }
+                  >
+                    Delete
+                  </Button>
                 </Box>
               </Box>
-            </CardContent>
-          </Card>
-          <Typography color="textSecondary">
-            New tenants can take 5 minutes to provision with dns propagation
-          </Typography>
-        </Box>
+            }
+            title={tenant.name}
+          />
+          <CardContent>
+            <Box display="flex">
+              <Box display="flex" flexDirection="column">
+                <Attribute.Key>Grafana:</Attribute.Key>
+                <Attribute.Key>Created:</Attribute.Key>
+              </Box>
+              <Box display="flex" flexDirection="column" flexGrow={1}>
+                <Attribute.Value>
+                  <ExternalLink
+                    href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
+                  >
+                    {`${tenant.name}.${window.location.host}`}
+                  </ExternalLink>
+                </Attribute.Value>
+                <Attribute.Value>{tenant.created_at}</Attribute.Value>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+        <Typography color="textSecondary">
+          New tenants can take 5 minutes to provision with dns propagation
+        </Typography>
       </Box>
-    );
+    </Box>
+  );
 };
 
-export default TenantDetail;
+export default TenantDetailParamLoader;
