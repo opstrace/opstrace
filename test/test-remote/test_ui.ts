@@ -142,5 +142,52 @@ suite("test_ui_with_headless_browser", function () {
     log.info("suite teardown done");
   });
 
-  test("create_tenant_api", async function () {});
+  test("create_tenant_api", async function () {
+    // Note(JP): pragmatic first step: synthetically emit HTTP request with
+    // `got`, do not actually let the browser emit it. That was easier to
+    // implement than navigating the browser (complications: the PLUS icon for
+    // tenants does not have a distinct css class or property set, etc).
+    // Use the suiteSetup() here to obtain valid authentication state, and then
+    // use
+    assert(COOKIES_AFTER_LOGIN);
+
+    const cookie_header_value = COOKIES_AFTER_LOGIN.map(
+      c => `${c.name}=${c.value}`
+    ).join("; ");
+
+    log.info("cookie header value: %s", cookie_header_value);
+
+    const url = `${CLUSTER_BASE_URL}/_/graphql`;
+    const headers = {
+      "Content-Type": "application/json",
+      Cookie: cookie_header_value
+    };
+
+    const bodyObj = {
+      query:
+        "mutation CreateTenants($tenants: [tenant_insert_input!]!) {\n  insert_tenant(objects: $tenants) {\n    returning {\n      name\n    }\n  }\n}\n",
+      variables: {
+        tenants: [
+          {
+            name: "asdasd"
+          }
+        ]
+      }
+    };
+
+    const response = await got.post(url, {
+      body: JSON.stringify(bodyObj, null, 2),
+      throwHttpErrors: false,
+      headers: headers,
+      timeout: httpTimeoutSettings,
+      https: { rejectUnauthorized: false } // skip tls cert verification
+    });
+
+    logHTTPResponse(response);
+    assert.strictEqual(response.statusCode, 200);
+
+    // GraphQL: 200 OK response does not mean that no error happened.
+    const rdata = JSON.parse(response.body);
+    assert(rdata.errors === undefined);
+  });
 });
