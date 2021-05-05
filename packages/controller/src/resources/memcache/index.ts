@@ -44,12 +44,7 @@ export function MemcacheResources(
           "<=": Infinity,
           choose: min(4, roundDown(getNodeCount(state) / 3))
         }
-      ]),
-      resources: {
-        requests: {
-          memory: "3200Mi"
-        }
-      }
+      ])
     },
     memcachedIndexWrites: {
       replicas: select(getNodeCount(state), [
@@ -59,12 +54,7 @@ export function MemcacheResources(
           "<=": Infinity,
           choose: min(4, roundDown(getNodeCount(state) / 3))
         }
-      ]),
-      resources: {
-        requests: {
-          memory: "1050Mi"
-        }
-      }
+      ])
     },
     memcachedIndexQueries: {
       replicas: select(getNodeCount(state), [
@@ -74,12 +64,7 @@ export function MemcacheResources(
           "<=": Infinity,
           choose: min(4, roundDown(getNodeCount(state) / 3))
         }
-      ]),
-      resources: {
-        requests: {
-          memory: "1050Mi"
-        }
-      }
+      ])
     }
   };
 
@@ -282,7 +267,13 @@ export function MemcacheResources(
                       name: "client"
                     }
                   ],
-                  resources: config.memcachedIndexQueries.resources
+                  resources: {
+                    requests: {
+                      // Add some headroom here compared to the `-m 1024`
+                      // above, saw mem alloc failures.
+                      memory: "1400Mi"
+                    }
+                  }
                 },
                 {
                   args: [
@@ -352,7 +343,12 @@ export function MemcacheResources(
                       name: "client"
                     }
                   ],
-                  resources: config.memcachedIndexWrites.resources
+                  resources: {
+                    requests: {
+                      // Tune this to the `-m XX` above, add headroom
+                      memory: "1400Mi"
+                    }
+                  }
                 },
                 {
                   args: [
@@ -422,7 +418,12 @@ export function MemcacheResources(
                       name: "client"
                     }
                   ],
-                  resources: config.memcached.resources
+                  resources: {
+                    requests: {
+                      // Tune this to the `-m XX` above, add headroom
+                      memory: "3200Mi"
+                    }
+                  }
                 },
                 {
                   args: [
