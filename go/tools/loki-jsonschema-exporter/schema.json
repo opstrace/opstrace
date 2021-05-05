@@ -1,0 +1,605 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Config",
+  "definitions": {
+    "AutoScalingConfig": {
+      "required": [
+        "enabled",
+        "role_arn",
+        "min_capacity",
+        "max_capacity",
+        "out_cooldown",
+        "in_cooldown",
+        "target"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "role_arn": {
+          "type": "string"
+        },
+        "min_capacity": {
+          "type": "integer"
+        },
+        "max_capacity": {
+          "type": "integer"
+        },
+        "out_cooldown": {
+          "type": "integer"
+        },
+        "in_cooldown": {
+          "type": "integer"
+        },
+        "target": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ChunkStoreConfig": {
+      "required": [
+        "chunk_cache_config",
+        "write_dedupe_cache_config",
+        "cache_lookups_older_than",
+        "max_look_back_period"
+      ],
+      "properties": {
+        "chunk_cache_config": {
+          "$ref": "#/definitions/Config"
+        },
+        "write_dedupe_cache_config": {
+          "$ref": "#/definitions/Config"
+        },
+        "cache_lookups_older_than": {
+          "type": "integer"
+        },
+        "max_look_back_period": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Config": {
+      "required": ["http_prefix", "memberlist", "tracing"],
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "auth_enabled": {
+          "type": "boolean"
+        },
+        "http_prefix": {
+          "type": "string"
+        },
+        "server": {
+          "$ref": "#/definitions/Config"
+        },
+        "distributor": {
+          "$ref": "#/definitions/Config"
+        },
+        "querier": {
+          "$ref": "#/definitions/Config"
+        },
+        "ingester_client": {
+          "$ref": "#/definitions/Config"
+        },
+        "ingester": {
+          "$ref": "#/definitions/Config"
+        },
+        "storage_config": {
+          "$ref": "#/definitions/Config"
+        },
+        "chunk_store_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ChunkStoreConfig"
+        },
+        "schema_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/SchemaConfig"
+        },
+        "limits_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Limits"
+        },
+        "table_manager": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/TableManagerConfig"
+        },
+        "frontend_worker": {
+          "$ref": "#/definitions/Config"
+        },
+        "frontend": {
+          "$ref": "#/definitions/Config"
+        },
+        "ruler": {
+          "$ref": "#/definitions/Config"
+        },
+        "query_range": {
+          "$ref": "#/definitions/Config"
+        },
+        "runtime_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ManagerConfig"
+        },
+        "memberlist": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/KVConfig"
+        },
+        "tracing": {
+          "$ref": "#/definitions/Config"
+        },
+        "compactor": {
+          "$ref": "#/definitions/Config"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DayTime": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "KVConfig": {
+      "required": [
+        "node_name",
+        "randomize_node_name",
+        "stream_timeout",
+        "retransmit_factor",
+        "pull_push_interval",
+        "gossip_interval",
+        "gossip_nodes",
+        "gossip_to_dead_nodes_time",
+        "dead_node_reclaim_time",
+        "join_members",
+        "min_join_backoff",
+        "max_join_backoff",
+        "max_join_retries",
+        "abort_if_cluster_join_fails",
+        "rejoin_interval",
+        "left_ingesters_timeout",
+        "leave_timeout",
+        "message_history_buffer_bytes",
+        "bind_addr",
+        "bind_port",
+        "packet_dial_timeout",
+        "packet_write_timeout",
+        "tls_enabled",
+        "tls_cert_path",
+        "tls_key_path",
+        "tls_ca_path",
+        "tls_server_name",
+        "tls_insecure_skip_verify"
+      ],
+      "properties": {
+        "node_name": {
+          "type": "string"
+        },
+        "randomize_node_name": {
+          "type": "boolean"
+        },
+        "stream_timeout": {
+          "type": "integer"
+        },
+        "retransmit_factor": {
+          "type": "integer"
+        },
+        "pull_push_interval": {
+          "type": "integer"
+        },
+        "gossip_interval": {
+          "type": "integer"
+        },
+        "gossip_nodes": {
+          "type": "integer"
+        },
+        "gossip_to_dead_nodes_time": {
+          "type": "integer"
+        },
+        "dead_node_reclaim_time": {
+          "type": "integer"
+        },
+        "join_members": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "min_join_backoff": {
+          "type": "integer"
+        },
+        "max_join_backoff": {
+          "type": "integer"
+        },
+        "max_join_retries": {
+          "type": "integer"
+        },
+        "abort_if_cluster_join_fails": {
+          "type": "boolean"
+        },
+        "rejoin_interval": {
+          "type": "integer"
+        },
+        "left_ingesters_timeout": {
+          "type": "integer"
+        },
+        "leave_timeout": {
+          "type": "integer"
+        },
+        "message_history_buffer_bytes": {
+          "type": "integer"
+        },
+        "bind_addr": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "bind_port": {
+          "type": "integer"
+        },
+        "packet_dial_timeout": {
+          "type": "integer"
+        },
+        "packet_write_timeout": {
+          "type": "integer"
+        },
+        "tls_enabled": {
+          "type": "boolean"
+        },
+        "tls_cert_path": {
+          "type": "string"
+        },
+        "tls_key_path": {
+          "type": "string"
+        },
+        "tls_ca_path": {
+          "type": "string"
+        },
+        "tls_server_name": {
+          "type": "string"
+        },
+        "tls_insecure_skip_verify": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Limits": {
+      "required": [
+        "ingestion_rate_strategy",
+        "ingestion_rate_mb",
+        "ingestion_burst_size_mb",
+        "max_label_name_length",
+        "max_label_value_length",
+        "max_label_names_per_series",
+        "reject_old_samples",
+        "reject_old_samples_max_age",
+        "creation_grace_period",
+        "enforce_metric_name",
+        "max_line_size",
+        "max_streams_per_user",
+        "max_global_streams_per_user",
+        "max_chunks_per_query",
+        "max_query_series",
+        "max_query_lookback",
+        "max_query_length",
+        "max_query_parallelism",
+        "cardinality_limit",
+        "max_streams_matchers_per_query",
+        "max_concurrent_tail_requests",
+        "max_entries_limit_per_query",
+        "max_cache_freshness_per_query",
+        "split_queries_by_interval",
+        "ruler_evaluation_delay_duration",
+        "ruler_max_rules_per_rule_group",
+        "ruler_max_rule_groups_per_tenant",
+        "retention_period",
+        "retention_stream",
+        "per_tenant_override_config",
+        "per_tenant_override_period"
+      ],
+      "properties": {
+        "ingestion_rate_strategy": {
+          "type": "string"
+        },
+        "ingestion_rate_mb": {
+          "type": "number"
+        },
+        "ingestion_burst_size_mb": {
+          "type": "number"
+        },
+        "max_label_name_length": {
+          "type": "integer"
+        },
+        "max_label_value_length": {
+          "type": "integer"
+        },
+        "max_label_names_per_series": {
+          "type": "integer"
+        },
+        "reject_old_samples": {
+          "type": "boolean"
+        },
+        "reject_old_samples_max_age": {
+          "type": "integer"
+        },
+        "creation_grace_period": {
+          "type": "integer"
+        },
+        "enforce_metric_name": {
+          "type": "boolean"
+        },
+        "max_line_size": {
+          "type": "integer"
+        },
+        "max_streams_per_user": {
+          "type": "integer"
+        },
+        "max_global_streams_per_user": {
+          "type": "integer"
+        },
+        "max_chunks_per_query": {
+          "type": "integer"
+        },
+        "max_query_series": {
+          "type": "integer"
+        },
+        "max_query_lookback": {
+          "type": "integer"
+        },
+        "max_query_length": {
+          "type": "integer"
+        },
+        "max_query_parallelism": {
+          "type": "integer"
+        },
+        "cardinality_limit": {
+          "type": "integer"
+        },
+        "max_streams_matchers_per_query": {
+          "type": "integer"
+        },
+        "max_concurrent_tail_requests": {
+          "type": "integer"
+        },
+        "max_entries_limit_per_query": {
+          "type": "integer"
+        },
+        "max_cache_freshness_per_query": {
+          "type": "integer"
+        },
+        "split_queries_by_interval": {
+          "type": "integer"
+        },
+        "ruler_evaluation_delay_duration": {
+          "type": "integer"
+        },
+        "ruler_max_rules_per_rule_group": {
+          "type": "integer"
+        },
+        "ruler_max_rule_groups_per_tenant": {
+          "type": "integer"
+        },
+        "retention_period": {
+          "type": "integer"
+        },
+        "retention_stream": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/StreamRetention"
+          },
+          "type": "array"
+        },
+        "per_tenant_override_config": {
+          "type": "string"
+        },
+        "per_tenant_override_period": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ManagerConfig": {
+      "required": ["period", "file"],
+      "properties": {
+        "period": {
+          "type": "integer"
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PeriodConfig": {
+      "required": [
+        "from",
+        "store",
+        "object_store",
+        "schema",
+        "index",
+        "chunks",
+        "row_shards"
+      ],
+      "properties": {
+        "from": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/DayTime"
+        },
+        "store": {
+          "type": "string"
+        },
+        "object_store": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "index": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/PeriodicTableConfig"
+        },
+        "chunks": {
+          "$ref": "#/definitions/PeriodicTableConfig"
+        },
+        "row_shards": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PeriodicTableConfig": {
+      "required": ["Prefix", "Period", "Tags"],
+      "properties": {
+        "Prefix": {
+          "type": "string"
+        },
+        "Period": {
+          "type": "integer"
+        },
+        "Tags": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ProvisionConfig": {
+      "required": [
+        "enable_ondemand_throughput_mode",
+        "provisioned_write_throughput",
+        "provisioned_read_throughput",
+        "write_scale",
+        "read_scale",
+        "enable_inactive_throughput_on_demand_mode",
+        "inactive_write_throughput",
+        "inactive_read_throughput",
+        "inactive_write_scale",
+        "inactive_read_scale",
+        "inactive_write_scale_lastn",
+        "inactive_read_scale_lastn"
+      ],
+      "properties": {
+        "enable_ondemand_throughput_mode": {
+          "type": "boolean"
+        },
+        "provisioned_write_throughput": {
+          "type": "integer"
+        },
+        "provisioned_read_throughput": {
+          "type": "integer"
+        },
+        "write_scale": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "read_scale": {
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "enable_inactive_throughput_on_demand_mode": {
+          "type": "boolean"
+        },
+        "inactive_write_throughput": {
+          "type": "integer"
+        },
+        "inactive_read_throughput": {
+          "type": "integer"
+        },
+        "inactive_write_scale": {
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "inactive_read_scale": {
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "inactive_write_scale_lastn": {
+          "type": "integer"
+        },
+        "inactive_read_scale_lastn": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SchemaConfig": {
+      "required": ["configs"],
+      "properties": {
+        "configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/PeriodConfig"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "StreamRetention": {
+      "required": ["period", "priority", "selector"],
+      "properties": {
+        "period": {
+          "type": "integer"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "selector": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TableManagerConfig": {
+      "required": [
+        "throughput_updates_disabled",
+        "retention_deletes_enabled",
+        "retention_period",
+        "poll_interval",
+        "creation_grace_period",
+        "index_tables_provisioning",
+        "chunk_tables_provisioning"
+      ],
+      "properties": {
+        "throughput_updates_disabled": {
+          "type": "boolean"
+        },
+        "retention_deletes_enabled": {
+          "type": "boolean"
+        },
+        "retention_period": {
+          "type": "integer"
+        },
+        "poll_interval": {
+          "type": "integer"
+        },
+        "creation_grace_period": {
+          "type": "integer"
+        },
+        "index_tables_provisioning": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ProvisionConfig"
+        },
+        "chunk_tables_provisioning": {
+          "$ref": "#/definitions/ProvisionConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,1029 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Config",
+  "definitions": {
+    "Authorization": {
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "credentials": {
+          "type": "string"
+        },
+        "credentials_file": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "BasicAuth": {
+      "required": ["username"],
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "password_file": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Config": {
+      "required": ["templates"],
+      "properties": {
+        "global": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/GlobalConfig"
+        },
+        "route": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Route"
+        },
+        "inhibit_rules": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/InhibitRule"
+          },
+          "type": "array"
+        },
+        "receivers": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/Receiver"
+          },
+          "type": "array"
+        },
+        "templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmailConfig": {
+      "required": ["send_resolved"],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "to": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "hello": {
+          "type": "string"
+        },
+        "smarthost": {
+          "$ref": "#/definitions/HostPort"
+        },
+        "auth_username": {
+          "type": "string"
+        },
+        "auth_password": {
+          "type": "string"
+        },
+        "auth_secret": {
+          "type": "string"
+        },
+        "auth_identity": {
+          "type": "string"
+        },
+        "headers": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "html": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "require_tls": {
+          "type": "boolean"
+        },
+        "tls_config": {
+          "$ref": "#/definitions/TLSConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "GlobalConfig": {
+      "required": ["resolve_timeout"],
+      "properties": {
+        "resolve_timeout": {
+          "type": "integer"
+        },
+        "http_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "smtp_from": {
+          "type": "string"
+        },
+        "smtp_hello": {
+          "type": "string"
+        },
+        "smtp_smarthost": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/HostPort"
+        },
+        "smtp_auth_username": {
+          "type": "string"
+        },
+        "smtp_auth_password": {
+          "type": "string"
+        },
+        "smtp_auth_secret": {
+          "type": "string"
+        },
+        "smtp_auth_identity": {
+          "type": "string"
+        },
+        "smtp_require_tls": {
+          "type": "boolean"
+        },
+        "slack_api_url": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/SecretURL"
+        },
+        "pagerduty_url": {
+          "$ref": "#/definitions/URL"
+        },
+        "opsgenie_api_url": {
+          "$ref": "#/definitions/URL"
+        },
+        "opsgenie_api_key": {
+          "type": "string"
+        },
+        "wechat_api_url": {
+          "$ref": "#/definitions/URL"
+        },
+        "wechat_api_secret": {
+          "type": "string"
+        },
+        "wechat_api_corp_id": {
+          "type": "string"
+        },
+        "victorops_api_url": {
+          "$ref": "#/definitions/URL"
+        },
+        "victorops_api_key": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "HTTPClientConfig": {
+      "required": ["follow_redirects"],
+      "properties": {
+        "basic_auth": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/BasicAuth"
+        },
+        "authorization": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Authorization"
+        },
+        "oauth2": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/OAuth2"
+        },
+        "bearer_token": {
+          "type": "string"
+        },
+        "bearer_token_file": {
+          "type": "string"
+        },
+        "proxy_url": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/URL"
+        },
+        "tls_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/TLSConfig"
+        },
+        "follow_redirects": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "HostPort": {
+      "required": ["Host", "Port"],
+      "properties": {
+        "Host": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "InhibitRule": {
+      "properties": {
+        "source_match": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "source_match_re": {
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/Regexp"
+            }
+          },
+          "type": "object"
+        },
+        "target_match": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "target_match_re": {
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/Regexp"
+            }
+          },
+          "type": "object"
+        },
+        "equal": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "OAuth2": {
+      "required": [
+        "client_id",
+        "client_secret",
+        "client_secret_file",
+        "token_url"
+      ],
+      "properties": {
+        "client_id": {
+          "type": "string"
+        },
+        "client_secret": {
+          "type": "string"
+        },
+        "client_secret_file": {
+          "type": "string"
+        },
+        "scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "token_url": {
+          "type": "string"
+        },
+        "endpoint_params": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "OpsGenieConfig": {
+      "required": ["send_resolved"],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "api_key": {
+          "type": "string"
+        },
+        "api_url": {
+          "$ref": "#/definitions/URL"
+        },
+        "message": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "details": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "responders": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/OpsGenieConfigResponder"
+          },
+          "type": "array"
+        },
+        "tags": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "OpsGenieConfigResponder": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PagerdutyConfig": {
+      "required": ["send_resolved"],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "service_key": {
+          "type": "string"
+        },
+        "routing_key": {
+          "type": "string"
+        },
+        "url": {
+          "$ref": "#/definitions/URL"
+        },
+        "client": {
+          "type": "string"
+        },
+        "client_url": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "details": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "images": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/PagerdutyImage"
+          },
+          "type": "array"
+        },
+        "links": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/PagerdutyLink"
+          },
+          "type": "array"
+        },
+        "severity": {
+          "type": "string"
+        },
+        "class": {
+          "type": "string"
+        },
+        "component": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PagerdutyImage": {
+      "properties": {
+        "src": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "string"
+        },
+        "href": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PagerdutyLink": {
+      "properties": {
+        "href": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PushoverConfig": {
+      "required": ["send_resolved"],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "user_key": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "url_title": {
+          "type": "string"
+        },
+        "sound": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string"
+        },
+        "retry": {
+          "type": "integer"
+        },
+        "expire": {
+          "type": "integer"
+        },
+        "html": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Receiver": {
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/EmailConfig"
+          },
+          "type": "array"
+        },
+        "pagerduty_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/PagerdutyConfig"
+          },
+          "type": "array"
+        },
+        "slack_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/SlackConfig"
+          },
+          "type": "array"
+        },
+        "webhook_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/WebhookConfig"
+          },
+          "type": "array"
+        },
+        "opsgenie_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/OpsGenieConfig"
+          },
+          "type": "array"
+        },
+        "wechat_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/WechatConfig"
+          },
+          "type": "array"
+        },
+        "pushover_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/PushoverConfig"
+          },
+          "type": "array"
+        },
+        "victorops_configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/VictorOpsConfig"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Regexp": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Route": {
+      "properties": {
+        "receiver": {
+          "type": "string"
+        },
+        "group_by": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "match": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "match_re": {
+          "patternProperties": {
+            ".*": {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$ref": "#/definitions/Regexp"
+            }
+          },
+          "type": "object"
+        },
+        "continue": {
+          "type": "boolean"
+        },
+        "routes": {
+          "items": {
+            "$ref": "#/definitions/Route"
+          },
+          "type": "array"
+        },
+        "group_wait": {
+          "type": "integer"
+        },
+        "group_interval": {
+          "type": "integer"
+        },
+        "repeat_interval": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SecretURL": {
+      "required": [
+        "Scheme",
+        "Opaque",
+        "User",
+        "Host",
+        "Path",
+        "RawPath",
+        "ForceQuery",
+        "RawQuery",
+        "Fragment",
+        "RawFragment"
+      ],
+      "properties": {
+        "Scheme": {
+          "type": "string"
+        },
+        "Opaque": {
+          "type": "string"
+        },
+        "User": {
+          "$ref": "#/definitions/Userinfo"
+        },
+        "Host": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "RawPath": {
+          "type": "string"
+        },
+        "ForceQuery": {
+          "type": "boolean"
+        },
+        "RawQuery": {
+          "type": "string"
+        },
+        "Fragment": {
+          "type": "string"
+        },
+        "RawFragment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SlackAction": {
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "confirm": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/SlackConfirmationField"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SlackConfig": {
+      "required": ["send_resolved"],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "api_url": {
+          "$ref": "#/definitions/SecretURL"
+        },
+        "channel": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "title_link": {
+          "type": "string"
+        },
+        "pretext": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/SlackField"
+          },
+          "type": "array"
+        },
+        "short_fields": {
+          "type": "boolean"
+        },
+        "footer": {
+          "type": "string"
+        },
+        "fallback": {
+          "type": "string"
+        },
+        "callback_id": {
+          "type": "string"
+        },
+        "icon_emoji": {
+          "type": "string"
+        },
+        "icon_url": {
+          "type": "string"
+        },
+        "image_url": {
+          "type": "string"
+        },
+        "thumb_url": {
+          "type": "string"
+        },
+        "link_names": {
+          "type": "boolean"
+        },
+        "mrkdwn_in": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/SlackAction"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SlackConfirmationField": {
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "ok_text": {
+          "type": "string"
+        },
+        "dismiss_text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SlackField": {
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "short": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TLSConfig": {
+      "required": ["insecure_skip_verify"],
+      "properties": {
+        "ca_file": {
+          "type": "string"
+        },
+        "cert_file": {
+          "type": "string"
+        },
+        "key_file": {
+          "type": "string"
+        },
+        "server_name": {
+          "type": "string"
+        },
+        "insecure_skip_verify": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "URL": {
+      "required": [
+        "Scheme",
+        "Opaque",
+        "User",
+        "Host",
+        "Path",
+        "RawPath",
+        "ForceQuery",
+        "RawQuery",
+        "Fragment",
+        "RawFragment"
+      ],
+      "properties": {
+        "Scheme": {
+          "type": "string"
+        },
+        "Opaque": {
+          "type": "string"
+        },
+        "User": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Userinfo"
+        },
+        "Host": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "RawPath": {
+          "type": "string"
+        },
+        "ForceQuery": {
+          "type": "boolean"
+        },
+        "RawQuery": {
+          "type": "string"
+        },
+        "Fragment": {
+          "type": "string"
+        },
+        "RawFragment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Userinfo": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "VictorOpsConfig": {
+      "required": [
+        "send_resolved",
+        "api_key",
+        "api_url",
+        "routing_key",
+        "message_type",
+        "state_message",
+        "entity_display_name",
+        "monitoring_tool"
+      ],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "api_key": {
+          "type": "string"
+        },
+        "api_url": {
+          "$ref": "#/definitions/URL"
+        },
+        "routing_key": {
+          "type": "string"
+        },
+        "message_type": {
+          "type": "string"
+        },
+        "state_message": {
+          "type": "string"
+        },
+        "entity_display_name": {
+          "type": "string"
+        },
+        "monitoring_tool": {
+          "type": "string"
+        },
+        "custom_fields": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WebhookConfig": {
+      "required": ["send_resolved", "url", "max_alerts"],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "url": {
+          "$ref": "#/definitions/URL"
+        },
+        "max_alerts": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WechatConfig": {
+      "required": ["send_resolved"],
+      "properties": {
+        "send_resolved": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$ref": "#/definitions/HTTPClientConfig"
+        },
+        "api_secret": {
+          "type": "string"
+        },
+        "corp_id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "api_url": {
+          "$ref": "#/definitions/URL"
+        },
+        "to_user": {
+          "type": "string"
+        },
+        "to_party": {
+          "type": "string"
+        },
+        "to_tag": {
+          "type": "string"
+        },
+        "agent_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}

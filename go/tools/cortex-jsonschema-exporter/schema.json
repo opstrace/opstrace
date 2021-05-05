@@ -1,0 +1,1671 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Config",
+  "definitions": {
+    "AutoScalingConfig": {
+      "required": [
+        "enabled",
+        "role_arn",
+        "min_capacity",
+        "max_capacity",
+        "out_cooldown",
+        "in_cooldown",
+        "target"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "role_arn": {
+          "type": "string"
+        },
+        "min_capacity": {
+          "type": "integer"
+        },
+        "max_capacity": {
+          "type": "integer"
+        },
+        "out_cooldown": {
+          "type": "integer"
+        },
+        "in_cooldown": {
+          "type": "integer"
+        },
+        "target": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "BlobStorageConfig": {
+      "required": [
+        "environment",
+        "container_name",
+        "account_name",
+        "account_key",
+        "download_buffer_size",
+        "upload_buffer_size",
+        "upload_buffer_count",
+        "request_timeout",
+        "max_retries",
+        "min_retry_delay",
+        "max_retry_delay"
+      ],
+      "properties": {
+        "environment": {
+          "type": "string"
+        },
+        "container_name": {
+          "type": "string"
+        },
+        "account_name": {
+          "type": "string"
+        },
+        "account_key": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Secret"
+        },
+        "download_buffer_size": {
+          "type": "integer"
+        },
+        "upload_buffer_size": {
+          "type": "integer"
+        },
+        "upload_buffer_count": {
+          "type": "integer"
+        },
+        "request_timeout": {
+          "type": "integer"
+        },
+        "max_retries": {
+          "type": "integer"
+        },
+        "min_retry_delay": {
+          "type": "integer"
+        },
+        "max_retry_delay": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "BlocksStorageConfig": {
+      "required": [
+        "backend",
+        "s3",
+        "gcs",
+        "azure",
+        "swift",
+        "filesystem",
+        "bucket_store",
+        "tsdb"
+      ],
+      "properties": {
+        "backend": {
+          "type": "string"
+        },
+        "s3": {
+          "$ref": "#/definitions/Config"
+        },
+        "gcs": {
+          "$ref": "#/definitions/Config"
+        },
+        "azure": {
+          "$ref": "#/definitions/Config"
+        },
+        "swift": {
+          "$ref": "#/definitions/Config"
+        },
+        "filesystem": {
+          "$ref": "#/definitions/Config"
+        },
+        "bucket_store": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/BucketStoreConfig"
+        },
+        "tsdb": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/TSDBConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "BucketIndexConfig": {
+      "required": [
+        "enabled",
+        "update_on_error_interval",
+        "idle_timeout",
+        "max_stale_period"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "update_on_error_interval": {
+          "type": "integer"
+        },
+        "idle_timeout": {
+          "type": "integer"
+        },
+        "max_stale_period": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "BucketStoreConfig": {
+      "required": [
+        "sync_dir",
+        "sync_interval",
+        "max_concurrent",
+        "tenant_sync_concurrency",
+        "block_sync_concurrency",
+        "meta_sync_concurrency",
+        "consistency_delay",
+        "index_cache",
+        "chunks_cache",
+        "metadata_cache",
+        "ignore_deletion_mark_delay",
+        "bucket_index",
+        "max_chunk_pool_bytes",
+        "chunk_pool_min_bucket_size_bytes",
+        "chunk_pool_max_bucket_size_bytes",
+        "index_header_lazy_loading_enabled",
+        "index_header_lazy_loading_idle_timeout",
+        "partitioner_max_gap_bytes",
+        "postings_offsets_in_mem_sampling"
+      ],
+      "properties": {
+        "sync_dir": {
+          "type": "string"
+        },
+        "sync_interval": {
+          "type": "integer"
+        },
+        "max_concurrent": {
+          "type": "integer"
+        },
+        "tenant_sync_concurrency": {
+          "type": "integer"
+        },
+        "block_sync_concurrency": {
+          "type": "integer"
+        },
+        "meta_sync_concurrency": {
+          "type": "integer"
+        },
+        "consistency_delay": {
+          "type": "integer"
+        },
+        "index_cache": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/IndexCacheConfig"
+        },
+        "chunks_cache": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ChunksCacheConfig"
+        },
+        "metadata_cache": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/MetadataCacheConfig"
+        },
+        "ignore_deletion_mark_delay": {
+          "type": "integer"
+        },
+        "bucket_index": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/BucketIndexConfig"
+        },
+        "max_chunk_pool_bytes": {
+          "type": "integer"
+        },
+        "chunk_pool_min_bucket_size_bytes": {
+          "type": "integer"
+        },
+        "chunk_pool_max_bucket_size_bytes": {
+          "type": "integer"
+        },
+        "index_header_lazy_loading_enabled": {
+          "type": "boolean"
+        },
+        "index_header_lazy_loading_idle_timeout": {
+          "type": "integer"
+        },
+        "partitioner_max_gap_bytes": {
+          "type": "integer"
+        },
+        "postings_offsets_in_mem_sampling": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CIDR": {
+      "required": ["Value"],
+      "properties": {
+        "Value": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/IPNet"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ChunksCacheConfig": {
+      "required": [
+        "backend",
+        "memcached",
+        "subrange_size",
+        "max_get_range_requests",
+        "attributes_ttl",
+        "subrange_ttl"
+      ],
+      "properties": {
+        "backend": {
+          "type": "string"
+        },
+        "memcached": {
+          "$ref": "#/definitions/MemcachedClientConfig"
+        },
+        "subrange_size": {
+          "type": "integer"
+        },
+        "max_get_range_requests": {
+          "type": "integer"
+        },
+        "attributes_ttl": {
+          "type": "integer"
+        },
+        "subrange_ttl": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ClientConfig": {
+      "required": [
+        "remote_timeout",
+        "tls_enabled",
+        "tls_cert_path",
+        "tls_key_path",
+        "tls_ca_path",
+        "tls_server_name",
+        "tls_insecure_skip_verify"
+      ],
+      "properties": {
+        "remote_timeout": {
+          "type": "integer"
+        },
+        "tls_enabled": {
+          "type": "boolean"
+        },
+        "tls_cert_path": {
+          "type": "string"
+        },
+        "tls_key_path": {
+          "type": "string"
+        },
+        "tls_ca_path": {
+          "type": "string"
+        },
+        "tls_server_name": {
+          "type": "string"
+        },
+        "tls_insecure_skip_verify": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ClusterConfig": {
+      "required": [
+        "listen_address",
+        "advertise_address",
+        "peers",
+        "peer_timeout",
+        "gossip_interval",
+        "push_pull_interval"
+      ],
+      "properties": {
+        "listen_address": {
+          "type": "string"
+        },
+        "advertise_address": {
+          "type": "string"
+        },
+        "peers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "peer_timeout": {
+          "type": "integer"
+        },
+        "gossip_interval": {
+          "type": "integer"
+        },
+        "push_pull_interval": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CombinedFrontendConfig": {
+      "required": [
+        "log_queries_longer_than",
+        "max_body_size",
+        "query_stats_enabled",
+        "max_outstanding_per_tenant",
+        "querier_forget_delay",
+        "scheduler_address",
+        "scheduler_dns_lookup_period",
+        "scheduler_worker_concurrency",
+        "grpc_client_config",
+        "instance_interface_names",
+        "address",
+        "Port",
+        "downstream_url"
+      ],
+      "properties": {
+        "log_queries_longer_than": {
+          "type": "integer"
+        },
+        "max_body_size": {
+          "type": "integer"
+        },
+        "query_stats_enabled": {
+          "type": "boolean"
+        },
+        "max_outstanding_per_tenant": {
+          "type": "integer"
+        },
+        "querier_forget_delay": {
+          "type": "integer"
+        },
+        "scheduler_address": {
+          "type": "string"
+        },
+        "scheduler_dns_lookup_period": {
+          "type": "integer"
+        },
+        "scheduler_worker_concurrency": {
+          "type": "integer"
+        },
+        "grpc_client_config": {
+          "$ref": "#/definitions/Config"
+        },
+        "instance_interface_names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "address": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "integer"
+        },
+        "downstream_url": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Config": {
+      "required": [
+        "target",
+        "auth_enabled",
+        "http_prefix",
+        "api",
+        "server",
+        "distributor",
+        "querier",
+        "ingester_client",
+        "ingester",
+        "flusher",
+        "storage",
+        "chunk_store",
+        "schema",
+        "limits",
+        "prealloc",
+        "frontend_worker",
+        "frontend",
+        "query_range",
+        "table_manager",
+        "blocks_storage",
+        "compactor",
+        "store_gateway",
+        "purger",
+        "tenant_federation",
+        "ruler",
+        "ruler_storage",
+        "configs",
+        "alertmanager",
+        "alertmanager_storage",
+        "runtime_config",
+        "memberlist",
+        "query_scheduler"
+      ],
+      "properties": {
+        "target": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "auth_enabled": {
+          "type": "boolean"
+        },
+        "http_prefix": {
+          "type": "string"
+        },
+        "api": {
+          "$ref": "#/definitions/Config"
+        },
+        "server": {
+          "$ref": "#/definitions/Config"
+        },
+        "distributor": {
+          "$ref": "#/definitions/Config"
+        },
+        "querier": {
+          "$ref": "#/definitions/Config"
+        },
+        "ingester_client": {
+          "$ref": "#/definitions/Config"
+        },
+        "ingester": {
+          "$ref": "#/definitions/Config"
+        },
+        "flusher": {
+          "$ref": "#/definitions/Config"
+        },
+        "storage": {
+          "$ref": "#/definitions/Config"
+        },
+        "chunk_store": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/StoreConfig"
+        },
+        "schema": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/SchemaConfig"
+        },
+        "limits": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Limits"
+        },
+        "prealloc": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/PreallocConfig"
+        },
+        "frontend_worker": {
+          "$ref": "#/definitions/Config"
+        },
+        "frontend": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/CombinedFrontendConfig"
+        },
+        "query_range": {
+          "$ref": "#/definitions/Config"
+        },
+        "table_manager": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/TableManagerConfig"
+        },
+        "blocks_storage": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/BlocksStorageConfig"
+        },
+        "compactor": {
+          "$ref": "#/definitions/Config"
+        },
+        "store_gateway": {
+          "$ref": "#/definitions/Config"
+        },
+        "purger": {
+          "$ref": "#/definitions/Config"
+        },
+        "tenant_federation": {
+          "$ref": "#/definitions/Config"
+        },
+        "ruler": {
+          "$ref": "#/definitions/Config"
+        },
+        "ruler_storage": {
+          "$ref": "#/definitions/Config"
+        },
+        "configs": {
+          "$ref": "#/definitions/Config"
+        },
+        "alertmanager": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/MultitenantAlertmanagerConfig"
+        },
+        "alertmanager_storage": {
+          "$ref": "#/definitions/Config"
+        },
+        "runtime_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ManagerConfig"
+        },
+        "memberlist": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/KVConfig"
+        },
+        "query_scheduler": {
+          "$ref": "#/definitions/Config"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DayTime": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "FirewallConfig": {
+      "required": ["block"],
+      "properties": {
+        "block": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/FirewallHostsSpec"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "FirewallHostsSpec": {
+      "required": ["cidr_networks", "private_addresses"],
+      "properties": {
+        "cidr_networks": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/CIDR"
+          },
+          "type": "array"
+        },
+        "private_addresses": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "GCSConfig": {
+      "required": ["bucket_name", "chunk_buffer_size", "request_timeout"],
+      "properties": {
+        "bucket_name": {
+          "type": "string"
+        },
+        "chunk_buffer_size": {
+          "type": "integer"
+        },
+        "request_timeout": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "HTTPConfig": {
+      "required": [
+        "idle_conn_timeout",
+        "response_header_timeout",
+        "insecure_skip_verify"
+      ],
+      "properties": {
+        "idle_conn_timeout": {
+          "type": "integer"
+        },
+        "response_header_timeout": {
+          "type": "integer"
+        },
+        "insecure_skip_verify": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "IPNet": {
+      "required": ["IP", "Mask"],
+      "properties": {
+        "IP": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "Mask": {
+          "type": "string",
+          "media": {
+            "binaryEncoding": "base64"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "InMemoryIndexCacheConfig": {
+      "required": ["max_size_bytes"],
+      "properties": {
+        "max_size_bytes": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "IndexCacheConfig": {
+      "required": ["backend", "inmemory", "memcached"],
+      "properties": {
+        "backend": {
+          "type": "string"
+        },
+        "inmemory": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/InMemoryIndexCacheConfig"
+        },
+        "memcached": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/MemcachedClientConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "KVConfig": {
+      "required": [
+        "node_name",
+        "randomize_node_name",
+        "stream_timeout",
+        "retransmit_factor",
+        "pull_push_interval",
+        "gossip_interval",
+        "gossip_nodes",
+        "gossip_to_dead_nodes_time",
+        "dead_node_reclaim_time",
+        "join_members",
+        "min_join_backoff",
+        "max_join_backoff",
+        "max_join_retries",
+        "abort_if_cluster_join_fails",
+        "rejoin_interval",
+        "left_ingesters_timeout",
+        "leave_timeout",
+        "message_history_buffer_bytes",
+        "bind_addr",
+        "bind_port",
+        "packet_dial_timeout",
+        "packet_write_timeout",
+        "tls_enabled",
+        "tls_cert_path",
+        "tls_key_path",
+        "tls_ca_path",
+        "tls_server_name",
+        "tls_insecure_skip_verify"
+      ],
+      "properties": {
+        "node_name": {
+          "type": "string"
+        },
+        "randomize_node_name": {
+          "type": "boolean"
+        },
+        "stream_timeout": {
+          "type": "integer"
+        },
+        "retransmit_factor": {
+          "type": "integer"
+        },
+        "pull_push_interval": {
+          "type": "integer"
+        },
+        "gossip_interval": {
+          "type": "integer"
+        },
+        "gossip_nodes": {
+          "type": "integer"
+        },
+        "gossip_to_dead_nodes_time": {
+          "type": "integer"
+        },
+        "dead_node_reclaim_time": {
+          "type": "integer"
+        },
+        "join_members": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "min_join_backoff": {
+          "type": "integer"
+        },
+        "max_join_backoff": {
+          "type": "integer"
+        },
+        "max_join_retries": {
+          "type": "integer"
+        },
+        "abort_if_cluster_join_fails": {
+          "type": "boolean"
+        },
+        "rejoin_interval": {
+          "type": "integer"
+        },
+        "left_ingesters_timeout": {
+          "type": "integer"
+        },
+        "leave_timeout": {
+          "type": "integer"
+        },
+        "message_history_buffer_bytes": {
+          "type": "integer"
+        },
+        "bind_addr": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "bind_port": {
+          "type": "integer"
+        },
+        "packet_dial_timeout": {
+          "type": "integer"
+        },
+        "packet_write_timeout": {
+          "type": "integer"
+        },
+        "tls_enabled": {
+          "type": "boolean"
+        },
+        "tls_cert_path": {
+          "type": "string"
+        },
+        "tls_key_path": {
+          "type": "string"
+        },
+        "tls_ca_path": {
+          "type": "string"
+        },
+        "tls_server_name": {
+          "type": "string"
+        },
+        "tls_insecure_skip_verify": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "LegacyConfig": {
+      "required": ["type", "configdb", "azure", "gcs", "s3", "local"],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "configdb": {
+          "$ref": "#/definitions/Config"
+        },
+        "azure": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/BlobStorageConfig"
+        },
+        "gcs": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/GCSConfig"
+        },
+        "s3": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/S3Config"
+        },
+        "local": {
+          "$ref": "#/definitions/StoreConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Limits": {
+      "required": [
+        "ingestion_rate",
+        "ingestion_rate_strategy",
+        "ingestion_burst_size",
+        "accept_ha_samples",
+        "ha_cluster_label",
+        "ha_replica_label",
+        "ha_max_clusters",
+        "drop_labels",
+        "max_label_name_length",
+        "max_label_value_length",
+        "max_label_names_per_series",
+        "max_metadata_length",
+        "reject_old_samples",
+        "reject_old_samples_max_age",
+        "creation_grace_period",
+        "enforce_metadata_metric_name",
+        "enforce_metric_name",
+        "ingestion_tenant_shard_size",
+        "max_series_per_query",
+        "max_samples_per_query",
+        "max_series_per_user",
+        "max_series_per_metric",
+        "max_global_series_per_user",
+        "max_global_series_per_metric",
+        "min_chunk_length",
+        "max_metadata_per_user",
+        "max_metadata_per_metric",
+        "max_global_metadata_per_user",
+        "max_global_metadata_per_metric",
+        "max_chunks_per_query",
+        "max_query_lookback",
+        "max_query_length",
+        "max_query_parallelism",
+        "cardinality_limit",
+        "max_cache_freshness",
+        "max_queriers_per_tenant",
+        "ruler_evaluation_delay_duration",
+        "ruler_tenant_shard_size",
+        "ruler_max_rules_per_rule_group",
+        "ruler_max_rule_groups_per_tenant",
+        "store_gateway_tenant_shard_size",
+        "compactor_blocks_retention_period",
+        "s3_sse_type",
+        "s3_sse_kms_key_id",
+        "s3_sse_kms_encryption_context"
+      ],
+      "properties": {
+        "ingestion_rate": {
+          "type": "number"
+        },
+        "ingestion_rate_strategy": {
+          "type": "string"
+        },
+        "ingestion_burst_size": {
+          "type": "integer"
+        },
+        "accept_ha_samples": {
+          "type": "boolean"
+        },
+        "ha_cluster_label": {
+          "type": "string"
+        },
+        "ha_replica_label": {
+          "type": "string"
+        },
+        "ha_max_clusters": {
+          "type": "integer"
+        },
+        "drop_labels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_label_name_length": {
+          "type": "integer"
+        },
+        "max_label_value_length": {
+          "type": "integer"
+        },
+        "max_label_names_per_series": {
+          "type": "integer"
+        },
+        "max_metadata_length": {
+          "type": "integer"
+        },
+        "reject_old_samples": {
+          "type": "boolean"
+        },
+        "reject_old_samples_max_age": {
+          "type": "integer"
+        },
+        "creation_grace_period": {
+          "type": "integer"
+        },
+        "enforce_metadata_metric_name": {
+          "type": "boolean"
+        },
+        "enforce_metric_name": {
+          "type": "boolean"
+        },
+        "ingestion_tenant_shard_size": {
+          "type": "integer"
+        },
+        "metric_relabel_configs": {
+          "items": {
+            "$ref": "#/definitions/Config"
+          },
+          "type": "array"
+        },
+        "max_series_per_query": {
+          "type": "integer"
+        },
+        "max_samples_per_query": {
+          "type": "integer"
+        },
+        "max_series_per_user": {
+          "type": "integer"
+        },
+        "max_series_per_metric": {
+          "type": "integer"
+        },
+        "max_global_series_per_user": {
+          "type": "integer"
+        },
+        "max_global_series_per_metric": {
+          "type": "integer"
+        },
+        "min_chunk_length": {
+          "type": "integer"
+        },
+        "max_metadata_per_user": {
+          "type": "integer"
+        },
+        "max_metadata_per_metric": {
+          "type": "integer"
+        },
+        "max_global_metadata_per_user": {
+          "type": "integer"
+        },
+        "max_global_metadata_per_metric": {
+          "type": "integer"
+        },
+        "max_chunks_per_query": {
+          "type": "integer"
+        },
+        "max_query_lookback": {
+          "type": "integer"
+        },
+        "max_query_length": {
+          "type": "integer"
+        },
+        "max_query_parallelism": {
+          "type": "integer"
+        },
+        "cardinality_limit": {
+          "type": "integer"
+        },
+        "max_cache_freshness": {
+          "type": "integer"
+        },
+        "max_queriers_per_tenant": {
+          "type": "integer"
+        },
+        "ruler_evaluation_delay_duration": {
+          "type": "integer"
+        },
+        "ruler_tenant_shard_size": {
+          "type": "integer"
+        },
+        "ruler_max_rules_per_rule_group": {
+          "type": "integer"
+        },
+        "ruler_max_rule_groups_per_tenant": {
+          "type": "integer"
+        },
+        "store_gateway_tenant_shard_size": {
+          "type": "integer"
+        },
+        "compactor_blocks_retention_period": {
+          "type": "integer"
+        },
+        "s3_sse_type": {
+          "type": "string"
+        },
+        "s3_sse_kms_key_id": {
+          "type": "string"
+        },
+        "s3_sse_kms_encryption_context": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ManagerConfig": {
+      "required": ["period", "file"],
+      "properties": {
+        "period": {
+          "type": "integer"
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "MemcachedClientConfig": {
+      "required": [
+        "addresses",
+        "timeout",
+        "max_idle_connections",
+        "max_async_concurrency",
+        "max_async_buffer_size",
+        "max_get_multi_concurrency",
+        "max_get_multi_batch_size",
+        "max_item_size"
+      ],
+      "properties": {
+        "addresses": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        },
+        "max_idle_connections": {
+          "type": "integer"
+        },
+        "max_async_concurrency": {
+          "type": "integer"
+        },
+        "max_async_buffer_size": {
+          "type": "integer"
+        },
+        "max_get_multi_concurrency": {
+          "type": "integer"
+        },
+        "max_get_multi_batch_size": {
+          "type": "integer"
+        },
+        "max_item_size": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "MetadataCacheConfig": {
+      "required": [
+        "backend",
+        "memcached",
+        "tenants_list_ttl",
+        "tenant_blocks_list_ttl",
+        "chunks_list_ttl",
+        "metafile_exists_ttl",
+        "metafile_doesnt_exist_ttl",
+        "metafile_content_ttl",
+        "metafile_max_size_bytes",
+        "metafile_attributes_ttl",
+        "block_index_attributes_ttl",
+        "bucket_index_content_ttl",
+        "bucket_index_max_size_bytes"
+      ],
+      "properties": {
+        "backend": {
+          "type": "string"
+        },
+        "memcached": {
+          "$ref": "#/definitions/MemcachedClientConfig"
+        },
+        "tenants_list_ttl": {
+          "type": "integer"
+        },
+        "tenant_blocks_list_ttl": {
+          "type": "integer"
+        },
+        "chunks_list_ttl": {
+          "type": "integer"
+        },
+        "metafile_exists_ttl": {
+          "type": "integer"
+        },
+        "metafile_doesnt_exist_ttl": {
+          "type": "integer"
+        },
+        "metafile_content_ttl": {
+          "type": "integer"
+        },
+        "metafile_max_size_bytes": {
+          "type": "integer"
+        },
+        "metafile_attributes_ttl": {
+          "type": "integer"
+        },
+        "block_index_attributes_ttl": {
+          "type": "integer"
+        },
+        "bucket_index_content_ttl": {
+          "type": "integer"
+        },
+        "bucket_index_max_size_bytes": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "MultitenantAlertmanagerConfig": {
+      "required": [
+        "data_dir",
+        "retention",
+        "external_url",
+        "poll_interval",
+        "max_recv_msg_size",
+        "receivers_firewall",
+        "sharding_enabled",
+        "sharding_ring",
+        "fallback_config_file",
+        "auto_webhook_root",
+        "storage",
+        "cluster",
+        "enable_api",
+        "alertmanager_client",
+        "persist_interval"
+      ],
+      "properties": {
+        "data_dir": {
+          "type": "string"
+        },
+        "retention": {
+          "type": "integer"
+        },
+        "external_url": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/URLValue"
+        },
+        "poll_interval": {
+          "type": "integer"
+        },
+        "max_recv_msg_size": {
+          "type": "integer"
+        },
+        "receivers_firewall": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/FirewallConfig"
+        },
+        "sharding_enabled": {
+          "type": "boolean"
+        },
+        "sharding_ring": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/RingConfig"
+        },
+        "fallback_config_file": {
+          "type": "string"
+        },
+        "auto_webhook_root": {
+          "type": "string"
+        },
+        "storage": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/LegacyConfig"
+        },
+        "cluster": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ClusterConfig"
+        },
+        "enable_api": {
+          "type": "boolean"
+        },
+        "alertmanager_client": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ClientConfig"
+        },
+        "persist_interval": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PeriodConfig": {
+      "required": [
+        "from",
+        "store",
+        "object_store",
+        "schema",
+        "index",
+        "chunks",
+        "row_shards"
+      ],
+      "properties": {
+        "from": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/DayTime"
+        },
+        "store": {
+          "type": "string"
+        },
+        "object_store": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "index": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/PeriodicTableConfig"
+        },
+        "chunks": {
+          "$ref": "#/definitions/PeriodicTableConfig"
+        },
+        "row_shards": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PeriodicTableConfig": {
+      "required": ["Prefix", "Period", "Tags"],
+      "properties": {
+        "Prefix": {
+          "type": "string"
+        },
+        "Period": {
+          "type": "integer"
+        },
+        "Tags": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PreallocConfig": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ProvisionConfig": {
+      "required": [
+        "enable_ondemand_throughput_mode",
+        "provisioned_write_throughput",
+        "provisioned_read_throughput",
+        "write_scale",
+        "read_scale",
+        "enable_inactive_throughput_on_demand_mode",
+        "inactive_write_throughput",
+        "inactive_read_throughput",
+        "inactive_write_scale",
+        "inactive_read_scale",
+        "inactive_write_scale_lastn",
+        "inactive_read_scale_lastn"
+      ],
+      "properties": {
+        "enable_ondemand_throughput_mode": {
+          "type": "boolean"
+        },
+        "provisioned_write_throughput": {
+          "type": "integer"
+        },
+        "provisioned_read_throughput": {
+          "type": "integer"
+        },
+        "write_scale": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "read_scale": {
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "enable_inactive_throughput_on_demand_mode": {
+          "type": "boolean"
+        },
+        "inactive_write_throughput": {
+          "type": "integer"
+        },
+        "inactive_read_throughput": {
+          "type": "integer"
+        },
+        "inactive_write_scale": {
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "inactive_read_scale": {
+          "$ref": "#/definitions/AutoScalingConfig"
+        },
+        "inactive_write_scale_lastn": {
+          "type": "integer"
+        },
+        "inactive_read_scale_lastn": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RingConfig": {
+      "required": [
+        "kvstore",
+        "heartbeat_period",
+        "heartbeat_timeout",
+        "replication_factor",
+        "instance_id",
+        "instance_interface_names",
+        "instance_port",
+        "instance_addr"
+      ],
+      "properties": {
+        "kvstore": {
+          "$ref": "#/definitions/Config"
+        },
+        "heartbeat_period": {
+          "type": "integer"
+        },
+        "heartbeat_timeout": {
+          "type": "integer"
+        },
+        "replication_factor": {
+          "type": "integer"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "instance_interface_names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "instance_port": {
+          "type": "integer"
+        },
+        "instance_addr": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "S3Config": {
+      "required": [
+        "S3",
+        "S3ForcePathStyle",
+        "BucketNames",
+        "endpoint",
+        "region",
+        "access_key_id",
+        "secret_access_key",
+        "insecure",
+        "sse_encryption",
+        "http_config",
+        "signature_version",
+        "sse"
+      ],
+      "properties": {
+        "S3": {
+          "$ref": "#/definitions/URLValue"
+        },
+        "S3ForcePathStyle": {
+          "type": "boolean"
+        },
+        "BucketNames": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "access_key_id": {
+          "type": "string"
+        },
+        "secret_access_key": {
+          "type": "string"
+        },
+        "insecure": {
+          "type": "boolean"
+        },
+        "sse_encryption": {
+          "type": "boolean"
+        },
+        "http_config": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/HTTPConfig"
+        },
+        "signature_version": {
+          "type": "string"
+        },
+        "sse": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/SSEConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SSEConfig": {
+      "required": ["type", "kms_key_id", "kms_encryption_context"],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "kms_key_id": {
+          "type": "string"
+        },
+        "kms_encryption_context": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SchemaConfig": {
+      "required": ["configs"],
+      "properties": {
+        "configs": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/PeriodConfig"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Secret": {
+      "required": ["Value"],
+      "properties": {
+        "Value": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "StoreConfig": {
+      "required": [
+        "chunk_cache_config",
+        "write_dedupe_cache_config",
+        "cache_lookups_older_than"
+      ],
+      "properties": {
+        "chunk_cache_config": {
+          "$ref": "#/definitions/Config"
+        },
+        "write_dedupe_cache_config": {
+          "$ref": "#/definitions/Config"
+        },
+        "cache_lookups_older_than": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TSDBConfig": {
+      "required": [
+        "dir",
+        "block_ranges_period",
+        "retention_period",
+        "ship_interval",
+        "ship_concurrency",
+        "head_compaction_interval",
+        "head_compaction_concurrency",
+        "head_compaction_idle_timeout",
+        "head_chunks_write_buffer_size_bytes",
+        "stripe_size",
+        "wal_compression_enabled",
+        "wal_segment_size_bytes",
+        "flush_blocks_on_shutdown",
+        "close_idle_tsdb_timeout",
+        "max_tsdb_opening_concurrency_on_startup"
+      ],
+      "properties": {
+        "dir": {
+          "type": "string"
+        },
+        "block_ranges_period": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "retention_period": {
+          "type": "integer"
+        },
+        "ship_interval": {
+          "type": "integer"
+        },
+        "ship_concurrency": {
+          "type": "integer"
+        },
+        "head_compaction_interval": {
+          "type": "integer"
+        },
+        "head_compaction_concurrency": {
+          "type": "integer"
+        },
+        "head_compaction_idle_timeout": {
+          "type": "integer"
+        },
+        "head_chunks_write_buffer_size_bytes": {
+          "type": "integer"
+        },
+        "stripe_size": {
+          "type": "integer"
+        },
+        "wal_compression_enabled": {
+          "type": "boolean"
+        },
+        "wal_segment_size_bytes": {
+          "type": "integer"
+        },
+        "flush_blocks_on_shutdown": {
+          "type": "boolean"
+        },
+        "close_idle_tsdb_timeout": {
+          "type": "integer"
+        },
+        "max_tsdb_opening_concurrency_on_startup": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TableManagerConfig": {
+      "required": [
+        "throughput_updates_disabled",
+        "retention_deletes_enabled",
+        "retention_period",
+        "poll_interval",
+        "creation_grace_period",
+        "index_tables_provisioning",
+        "chunk_tables_provisioning"
+      ],
+      "properties": {
+        "throughput_updates_disabled": {
+          "type": "boolean"
+        },
+        "retention_deletes_enabled": {
+          "type": "boolean"
+        },
+        "retention_period": {
+          "type": "integer"
+        },
+        "poll_interval": {
+          "type": "integer"
+        },
+        "creation_grace_period": {
+          "type": "integer"
+        },
+        "index_tables_provisioning": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/ProvisionConfig"
+        },
+        "chunk_tables_provisioning": {
+          "$ref": "#/definitions/ProvisionConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "URLValue": {
+      "required": [
+        "Scheme",
+        "Opaque",
+        "User",
+        "Host",
+        "Path",
+        "RawPath",
+        "ForceQuery",
+        "RawQuery",
+        "Fragment",
+        "RawFragment"
+      ],
+      "properties": {
+        "Scheme": {
+          "type": "string"
+        },
+        "Opaque": {
+          "type": "string"
+        },
+        "User": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Userinfo"
+        },
+        "Host": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "RawPath": {
+          "type": "string"
+        },
+        "ForceQuery": {
+          "type": "boolean"
+        },
+        "RawQuery": {
+          "type": "string"
+        },
+        "Fragment": {
+          "type": "string"
+        },
+        "RawFragment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Userinfo": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
