@@ -19,14 +19,15 @@ import (
 	"fmt"
 
 	"github.com/alecthomas/jsonschema"
-	"github.com/cortexproject/cortex/pkg/alertmanager"
+	"github.com/prometheus/alertmanager/config"
 )
 
 //
-// Prints the json schema definition of the Cortex configuration to stdout.
+// Prints the json schema definition of the Alertmanager configuration to
+// stdout.
 //
 func main() {
-	schema := jsonschema.Reflect(&alertmanager.Config{})
+	schema := jsonschema.Reflect(&config.Config{})
 
 	bytes, _ := json.MarshalIndent(schema, "", "  ")
 	fmt.Println(string(bytes))
