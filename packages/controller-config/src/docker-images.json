@@ -19,7 +19,7 @@
   "localVolumeProvisioner": "quay.io/external_storage/local-volume-provisioner:v2.2.0",
   "loki": "grafana/loki:2.2.0",
   "lokiApiProxy": "opstrace/loki-api:50089147b3fbf267a7c7d74990aa2c494c06498e",
-  "memcached": "memcached:1.6.6-alpine",
+  "memcached": "memcached:1.6.9-alpine",
   "memcachedExporter": "prom/memcached-exporter:v0.6.0",
   "nginxController": "k8s.gcr.io/ingress-nginx/controller:v0.41.2",
   "nodeExporter": "quay.io/prometheus/node-exporter:v0.18.1",
