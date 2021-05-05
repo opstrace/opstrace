@@ -118,7 +118,7 @@ suite("test_ui_with_headless_browser", function () {
 
     log.info("chromium.launch()");
     BROWSER = await chromium.launch({
-      headless: false, // set to false to see browser on your desktop
+      // headless: false, // set to false to see browser on your desktop
       args: [
         // https://github.com/microsoft/playwright/blob/761bd78879c83ed810ae38ef39513b2d874badb1/docs/ci.md#docker
         "--disable-dev-shm-usage",
