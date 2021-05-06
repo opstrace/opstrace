@@ -26,9 +26,9 @@ import got, {
 import { test, suite, suiteSetup } from "mocha";
 
 import {
-  httpcl,
+  httpcl
   //debugLogHTTPResponse,
-  debugLogHTTPResponseLight
+  //debugLogHTTPResponseLight
 } from "@opstrace/utils";
 
 import {
@@ -241,7 +241,7 @@ suite("test_ui_with_headless_browser", function () {
       );
 
       if (resp) {
-        debugLogHTTPResponseLight(resp);
+        logHTTPResponse(resp);
         if (resp.statusCode === 200) {
           return;
         }
