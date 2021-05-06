@@ -18,7 +18,18 @@ import { strict as assert } from "assert";
 
 import path from "path";
 
-import got from "got";
+import got, {
+  Response as GotResponse,
+  OptionsOfTextResponseBody as GotOptions
+} from "got";
+
+import { test, suite, suiteSetup } from "mocha";
+
+import {
+  httpcl,
+  //debugLogHTTPResponse,
+  debugLogHTTPResponseLight
+} from "@opstrace/utils";
 
 import {
   log,
@@ -26,6 +37,7 @@ import {
   httpTimeoutSettings,
   logHTTPResponse,
   CLUSTER_BASE_URL,
+  CLUSTER_NAME,
   TEST_REMOTE_ARTIFACT_DIRECTORY
 } from "./testutils";
 
@@ -35,6 +47,7 @@ import {
 
 import type { ChromiumBrowser, Browser, Cookie } from "playwright";
 import { chromium } from "playwright";
+import { sleep } from "@opstrace/utils";
 
 let BROWSER: ChromiumBrowser;
 
@@ -142,14 +155,34 @@ suite("test_ui_with_headless_browser", function () {
     log.info("suite teardown done");
   });
 
-  test("create_tenant_api", async function () {
+  test("create_tenant_and_use_custom_authn_token", async function () {
     // Note(JP): pragmatic first step: synthetically emit HTTP request with
     // `got`, do not actually let the browser emit it. That was easier to
     // implement than navigating the browser (complications: the PLUS icon for
-    // tenants does not have a distinct css class or property set, etc).
-    // Use the suiteSetup() here to obtain valid authentication state, and then
-    // use
+    // tenants does not have a distinct css class or property set, etc). Use
+    // the suiteSetup() here to obtain valid authentication state, and then
+    // reuse that state by sending all relevant cookies. Note that technically
+    // the test_ui.ts was/is meant to do only _actual_ browser interaction.
+    // This test here isn't doing that. It's in here for now for dependency
+    // management: using the state created by setupSuite(). It's also in here
+    // so that it can be replaced by the UI-based flow for creating the tenant!
     assert(COOKIES_AFTER_LOGIN);
+
+    if (process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT === undefined) {
+      log.info(
+        "skip, process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT not defined"
+      );
+      return this.skip();
+    }
+
+    if (process.env.TENANT_RND_AUTHTOKEN === undefined) {
+      log.info("skip, process.env.TENANT_RND_AUTHTOKEN not defined");
+      return this.skip();
+    }
+
+    const tenantName = process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT;
+    const tenantAuthToken = process.env.TENANT_RND_AUTHTOKEN;
+    log.info("create tenant with name %s", tenantName);
 
     const cookie_header_value = COOKIES_AFTER_LOGIN.map(
       c => `${c.name}=${c.value}`
@@ -169,7 +202,7 @@ suite("test_ui_with_headless_browser", function () {
       variables: {
         tenants: [
           {
-            name: "asdasd"
+            name: tenantName
           }
         ]
       }
@@ -189,5 +222,34 @@ suite("test_ui_with_headless_browser", function () {
     // GraphQL: 200 OK response does not mean that no error happened.
     const rdata = JSON.parse(response.body);
     assert(rdata.errors === undefined);
+
+    log.info("using tenant auth token: %s", tenantAuthToken);
+
+    const httpopts: GotOptions = {
+      method: "GET",
+      // Some HTTP error responses are expected. Do this handling work manually.
+      throwHttpErrors: false,
+      headers: { Authorization: `Bearer: ${tenantAuthToken}` },
+      timeout: httpTimeoutSettings,
+      https: { rejectUnauthorized: false } // skip tls cert verification
+    };
+
+    while (true) {
+      const resp: GotResponse<string> | undefined = await httpcl(
+        `https://cortex.${tenantName}.${CLUSTER_NAME}.opstrace.io/api/v1/labels`,
+        httpopts
+      );
+
+      if (resp) {
+        debugLogHTTPResponseLight(resp);
+        if (resp.statusCode === 200) {
+          return;
+        }
+      }
+
+      log.warning("outer retry: try again in 5 s");
+
+      await sleep(5);
+    }
   });
 });
