@@ -67,7 +67,7 @@ data:
         target_label: __scheme__
         replacement: https
       # Rename jobs to be <namespace>/<name, from pod name label>
-      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_name]
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
         action: replace
         separator: /
         target_label: job
@@ -90,7 +90,7 @@ data:
       - role: node
 
       tls_config:
-        insecure_skip_verify: true # TODO(nick) ca_file like above?
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
@@ -110,7 +110,7 @@ data:
       - role: endpoints
 
       tls_config:
-        insecure_skip_verify: true # TODO(nick) ca_file like above?
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
@@ -187,7 +187,7 @@ spec:
       serviceAccountName: opstrace-prometheus
       containers:
       - name: prometheus
-        image: prom/prometheus:v2.21.0 # TODO(nick) use latest
+        image: prom/prometheus:v2.26.0
         imagePullPolicy: IfNotPresent
         args:
         - --config.file=/etc/prometheus/prometheus.yml
@@ -401,7 +401,7 @@ spec:
         operator: Exists
       containers:
       - name: promtail
-        image: grafana/promtail:1.6.1 # TODO(nick) use latest
+        image: grafana/promtail:2.2.1 # TODO(nick) was 1.6.1
         imagePullPolicy: IfNotPresent
         args:
         - -config.file=/etc/promtail/promtail.yml
