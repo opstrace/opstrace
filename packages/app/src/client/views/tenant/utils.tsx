@@ -36,8 +36,11 @@ export const tenantsToItems: (tenants: Tenants) => PanelItem[] = map(
   tenantToItem
 );
 
-export const withTenant = (Component: React.ReactType, tenantName: string) => {
-  return (props: {}) => {
+export const withTenant = <T extends {}>(
+  Component: React.ReactType,
+  tenantName: string
+) => {
+  return (props: T) => {
     const tenant = useTenant(tenantName);
 
     return tenant ? (
@@ -48,10 +51,12 @@ export const withTenant = (Component: React.ReactType, tenantName: string) => {
   };
 };
 
-export const withTenantFromParams = (Component: React.ReactType) => {
-  return (props: {}) => {
+export const withTenantFromParams = <T extends {}>(
+  Component: React.ReactType
+) => {
+  return (props: T) => {
     const { tenantId } = useParams<{ tenantId: string }>();
-    const ComponentWithTenant = withTenant(Component, tenantId);
+    const ComponentWithTenant = withTenant<T>(Component, tenantId);
     return <ComponentWithTenant {...props} />;
   };
 };
@@ -60,16 +65,11 @@ export type TenantProps = {
   tenant: Tenant;
 };
 
-export const withAlertmanager = (
+export const withAlertmanager = <T extends {}>(
   Component: React.ReactType,
   tenantId: string
 ) => {
-  const ComponentWithAlertmanager = ({
-    tenant,
-    ...rest
-  }: {
-    tenant: Tenant;
-  }) => {
+  const ComponentWithAlertmanager = ({ tenant, ...rest }: T & TenantProps) => {
     const alertmanager = useAlertmanager(tenant.name);
 
     return alertmanager ? (
@@ -79,13 +79,18 @@ export const withAlertmanager = (
     );
   };
 
-  return withTenant(ComponentWithAlertmanager, tenantId);
+  return withTenant<T & TenantProps>(ComponentWithAlertmanager, tenantId);
 };
 
-export const withAlertmanagerFromParams = (Component: React.ReactType) => {
-  return (props: {}) => {
+export const withAlertmanagerFromParams = <T extends {}>(
+  Component: React.ReactType
+) => {
+  return (props: T & TenantProps) => {
     const { tenantId } = useParams<{ tenantId: string }>();
-    const ComponentWithTenant = withAlertmanager(Component, tenantId);
+    const ComponentWithTenant = withAlertmanager<T & TenantProps>(
+      Component,
+      tenantId
+    );
     return <ComponentWithTenant {...props} />;
   };
 };
