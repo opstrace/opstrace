@@ -80,6 +80,9 @@ async function storeConfig(authTokenFilepath: string | undefined, urlSuffix: str
   );
   logHTTPResponse(postResponse);
   assert(postResponse.statusCode == 200);
+
+  // After a successful store, list the configs for logs
+  await listConfigNames(authTokenFilepath, urlSuffix);
 }
 
 async function deleteAllConfigs(authTokenFilepath: string | undefined, urlSuffix: string) {
