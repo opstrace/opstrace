@@ -18,6 +18,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { findIndex, propEq } from "ramda";
 
+import { EARLY_PREVIEW } from "client/flags";
+
 import useTenantList from "state/tenant/hooks/useTenantList";
 
 import { Tenant, Tenants } from "state/tenant/types";
@@ -65,7 +67,7 @@ export const TenantPanel = (props: TenantPanelProps) => {
   );
 
   const makeSubItems = (item: PanelItem, index: number) => {
-    return [
+    let items = [
       { id: "detail", text: "Detail", data: { path: "" } },
       {
         id: "alertmanager",
@@ -76,13 +78,20 @@ export const TenantPanel = (props: TenantPanelProps) => {
         id: "cloud-metrics",
         text: "Cloud Metrics",
         data: { path: "cloud-metrics" }
-      },
-      {
-        id: "integrations",
-        text: "Integrations",
-        data: { path: "integrations" }
       }
     ];
+
+    if (EARLY_PREVIEW)
+      items = [
+        ...items,
+        {
+          id: "integrations",
+          text: "Integrations",
+          data: { path: "integrations" }
+        }
+      ];
+
+    return items;
   };
 
   return (

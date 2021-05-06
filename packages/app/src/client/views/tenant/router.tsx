@@ -17,6 +17,8 @@
 import React from "react";
 import { Switch, Route } from "react-router";
 
+import { EARLY_PREVIEW } from "client/flags";
+
 import SideBar from "client/views/sidebar";
 import Layout from "client/layout/MainContent";
 
@@ -43,12 +45,14 @@ const TenantRouter = () => {
           path="/cluster/tenants/:tenantId/cloud-metrics"
           component={CloudMetrics}
         />
-        <Route
-          exact
-          key="/cluster/tenants/:tenantId/integrations"
-          path="/cluster/tenants/:tenantId/integrations"
-          component={TenantIntegrations}
-        />
+        {EARLY_PREVIEW && (
+          <Route
+            exact
+            key="/cluster/tenants/:tenantId/integrations"
+            path="/cluster/tenants/:tenantId/integrations"
+            component={TenantIntegrations}
+          />
+        )}
         <Route
           exact
           key="/cluster/tenants/:tenantId"
