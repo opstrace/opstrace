@@ -1,11 +1,11 @@
 # Copyright 2019-2021 Opstrace, Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -246,6 +246,29 @@ ${DIR}/build-docker-images-update-controller-config.sh
 
 source ci/check-deployed-docker-images.sh
 
+# Run the CLI tests before invoking test-remote. This excercises the basic
+# tenant API authenticator keypair management capability.
+echo "--- run opstrace CLI tests (cli-tests-with-cluster.sh)"
+source ci/test-cli/cli-tests-with-cluster.sh
+
+# The tenant API authenticator keypair management capability is confirmed to
+# work -- now create a keypair, push the public key into the cluster and
+# generate a tenant API authentication token for a tenant that does not
+# exist yet in the cluster -- use a random name. Then inject into test-remote:
+# - the name of that tenant
+# - the path to the authentication token file
+RNDSTRING=$( tr -dc A-Za-z0-9 < /dev/urandom | head -c 5 )
+TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant${RNDSTRING}"
+./build/bin/opstrace ta-create-keypair ./ta-custom-keypair.pem
+./build/bin/opstrace ta-create-token "${OPSTRACE_CLUSTER_NAME}" \
+    "${TENANT_RND_NAME_FOR_TESTING_ADD_TENANT}" ta-custom-keypair.pem > tenant-rnd-auth-token-from-custom-keypair
+TENANT_RND_AUTHTOKEN="$(cat tenant-rnd-auth-token-from-custom-keypair)"
+./build/bin/opstrace ta-pubkeys-add \
+    "${OPSTRACE_CLOUD_PROVIDER}" "${OPSTRACE_CLUSTER_NAME}" ta-custom-keypair.pem
+
+export TENANT_RND_AUTHTOKEN
+export TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
+
 echo "+++ run test-remote"
 
 set +e
@@ -266,8 +289,7 @@ cp uishot-*.png /build/bk-artifacts || true
 echo "--- run looker tests"
 source ci/invoke-looker.sh
 
-echo "--- run opstrace CLI tests (cli-tests-with-cluster.sh)"
-source ci/test-cli/cli-tests-with-cluster.sh
+
 
 # Delayed exit if `make test-remote` failed
 if [ "${EXITCODE_MAKE_TESTREMOTE}" -ne 0 ]; then
