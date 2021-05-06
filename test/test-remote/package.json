@@ -42,7 +42,7 @@
     "mathjs": "^8.0.1",
     "mocha": "^8.2.1",
     "mustache": "^4.0.0",
-    "playwright": "^1.10.0",
+    "playwright": "1.10.0",
     "prom-client": "^12.0.0",
     "protobufjs": "^6.10.1",
     "snappy": "^6.3.5",
