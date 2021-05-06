@@ -15,16 +15,15 @@
  */
 
 import React, { useState, useCallback, useRef } from "react";
-import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { values, none } from "ramda";
 import { isFalse } from "ramda-adjunct";
 
 import { useForm, useFormState } from "state/form/hooks";
 import {
-  withAlertmanager,
-  Tenant,
-  Alertmanager
+  withAlertmanagerFromParams,
+  TenantProps,
+  AlertmanagerProps
 } from "client/views/tenant/utils";
 import { updateAlertmanager } from "state/tenant/actions";
 
@@ -50,106 +49,97 @@ const defaultData: FormData = {
   }
 };
 
-const AlertmanagerConfigEditorLoader = (props: {}) => {
-  const { tenantId } = useParams<{ tenantId: string }>();
-  const Component = withAlertmanager(AlertmanagerConfigEditor, tenantId);
-  return <Component {...props} />;
-};
+const AlertmanagerConfigEditor = withAlertmanagerFromParams(
+  (props: TenantProps & AlertmanagerProps) => {
+    const { tenant, alertmanager } = props;
+    const formId = useForm({
+      type: "alertmanagerConfig",
+      code: tenant.name,
+      data: defaultData
+    });
+    const formState = useFormState<FormData>(formId, defaultData);
 
-type AlertmanagerConfigEditorProps = {
-  tenant: Tenant;
-  alertmanager: Alertmanager;
-};
+    const initialDataRef = useRef({
+      config: alertmanager?.config || "",
+      templates: alertmanager?.templates || ""
+    });
 
-const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
-  const { tenant, alertmanager } = props;
-  const formId = useForm({
-    type: "alertmanagerConfig",
-    code: tenant.name,
-    data: defaultData
-  });
-  const formState = useFormState<FormData>(formId, defaultData);
+    const dataRef = useRef(initialDataRef.current);
 
-  const initialDataRef = useRef({
-    config: alertmanager?.config || "",
-    templates: alertmanager?.templates || ""
-  });
+    const [validation, setValidation] = useState<Record<string, boolean>>({});
+    const dispatch = useDispatch();
 
-  const dataRef = useRef(initialDataRef.current);
+    const validationChanged = useCallback(
+      (tabKey: string, valid: boolean) => {
+        setValidation({ ...validation, [tabKey]: valid });
+      },
+      [validation, setValidation]
+    );
 
-  const [validation, setValidation] = useState<Record<string, boolean>>({});
-  const dispatch = useDispatch();
+    const dataUpdated = useCallback((newData: {}) => {
+      dataRef.current = { ...dataRef.current, ...newData };
+    }, []);
 
-  const validationChanged = useCallback(
-    (tabKey: string, valid: boolean) => {
-      setValidation({ ...validation, [tabKey]: valid });
-    },
-    [validation, setValidation]
-  );
+    const isValid = useCallback(() => none(isFalse)(values(validation)), [
+      validation
+    ]);
 
-  const dataUpdated = useCallback((newData: {}) => {
-    dataRef.current = { ...dataRef.current, ...newData };
-  }, []);
+    const handleSave = useCallback(() => {
+      if (tenant.name && isValid()) {
+        dispatch(
+          updateAlertmanager({
+            tenantId: tenant.name,
+            templates: dataRef.current.templates,
+            config: dataRef.current.config,
+            formId: formId
+          })
+        );
+      }
+    }, [tenant.name, formId, isValid, dispatch]);
 
-  const isValid = useCallback(() => none(isFalse)(values(validation)), [
-    validation
-  ]);
-
-  const handleSave = useCallback(() => {
-    if (tenant.name && isValid()) {
-      dispatch(
-        updateAlertmanager({
-          tenantId: tenant.name,
-          templates: dataRef.current.templates,
-          config: dataRef.current.config,
-          formId: formId
-        })
-      );
-    }
-  }, [tenant.name, formId, isValid, dispatch]);
-
-  return (
-    <Box
-      width="100%"
-      height="100%"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      flexWrap="wrap"
-      p={1}
-    >
-      <Box maxWidth={900}>
-        <Card p={3}>
-          <CardHeader
-            titleTypographyProps={{ variant: "h5" }}
-            title="Alertmanager"
-          />
-          <CardContent>
-            <TabbedDetail<State>
-              tabs={tabs}
-              onTabChange={() => (initialDataRef.current = dataRef.current)}
-              opts={{
-                data: initialDataRef.current,
-                setData: dataUpdated,
-                setValidation: validationChanged
-              }}
+    return (
+      <Box
+        width="100%"
+        height="100%"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexWrap="wrap"
+        p={1}
+      >
+        <Box maxWidth={900}>
+          <Card p={3}>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title="Alertmanager"
             />
-          </CardContent>
+            <CardContent>
+              <TabbedDetail<State>
+                tabs={tabs}
+                onTabChange={() => (initialDataRef.current = dataRef.current)}
+                opts={{
+                  data: initialDataRef.current,
+                  setData: dataUpdated,
+                  setValidation: validationChanged
+                }}
+              />
+            </CardContent>
 
-          <Button
-            variant="contained"
-            state="primary"
-            disabled={!isValid() || formState?.status !== "active"}
-            onClick={handleSave}
-          >
-            publish
-          </Button>
-          <ErrorPanel response={formState?.data.remoteValidation} />
-        </Card>
+            <Button
+              variant="contained"
+              state="primary"
+              disabled={!isValid() || formState?.status !== "active"}
+              onClick={handleSave}
+            >
+              publish
+            </Button>
+            <ErrorPanel response={formState?.data.remoteValidation} />
+          </Card>
+        </Box>
       </Box>
-    </Box>
-  );
-};
+    );
+  }
+);
 
 type ErrorPanelProps = {
   response?: StatusResponse;
@@ -166,4 +156,4 @@ const ErrorPanel = ({ response }: ErrorPanelProps) => (
   </CondRender>
 );
 
-export default AlertmanagerConfigEditorLoader;
+export default AlertmanagerConfigEditor;

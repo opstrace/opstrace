@@ -16,6 +16,7 @@
 
 import React from "react";
 import { map } from "ramda";
+import { useParams } from "react-router-dom";
 
 import useTenant from "state/tenant/hooks/useTenant";
 import useAlertmanager from "state/tenant/hooks/useAlertmanager";
@@ -47,6 +48,18 @@ export const withTenant = (Component: React.ReactType, tenantName: string) => {
   };
 };
 
+export const withTenantFromParams = (Component: React.ReactType) => {
+  return (props: {}) => {
+    const { tenantId } = useParams<{ tenantId: string }>();
+    const ComponentWithTenant = withTenant(Component, tenantId);
+    return <ComponentWithTenant {...props} />;
+  };
+};
+
+export type TenantProps = {
+  tenant: Tenant;
+};
+
 export const withAlertmanager = (
   Component: React.ReactType,
   tenantId: string
@@ -67,4 +80,16 @@ export const withAlertmanager = (
   };
 
   return withTenant(ComponentWithAlertmanager, tenantId);
+};
+
+export const withAlertmanagerFromParams = (Component: React.ReactType) => {
+  return (props: {}) => {
+    const { tenantId } = useParams<{ tenantId: string }>();
+    const ComponentWithTenant = withAlertmanager(Component, tenantId);
+    return <ComponentWithTenant {...props} />;
+  };
+};
+
+export type AlertmanagerProps = {
+  alertmanager: Alertmanager;
 };
