@@ -23,6 +23,7 @@ import Layout from "client/layout/MainContent";
 import TenantDetail from "client/views/tenant/TenantDetail";
 import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";
 import { CloudMetrics } from "client/viewsBasic/cloudMetrics";
+import { TenantIntegrations } from "client/viewsBasic/tenantIntegrations";
 
 import NotFound from "client/views/404/404";
 
@@ -41,6 +42,12 @@ const TenantRouter = () => {
           key="/cluster/tenants/:tenantId/cloud-metrics"
           path="/cluster/tenants/:tenantId/cloud-metrics"
           component={CloudMetrics}
+        />
+        <Route
+          exact
+          key="/cluster/tenants/:tenantId/integrations"
+          path="/cluster/tenants/:tenantId/integrations"
+          component={TenantIntegrations}
         />
         <Route
           exact

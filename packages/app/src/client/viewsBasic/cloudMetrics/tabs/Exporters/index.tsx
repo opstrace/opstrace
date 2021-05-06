@@ -15,10 +15,10 @@
  */
 
 import React from "react";
-import { useParams } from "react-router-dom";
 import { map } from "ramda";
 
 import useHasura from "client/hooks/useHasura";
+import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { ExportersTable } from "./Table";
 import { ExporterForm } from "./Form";
@@ -34,8 +34,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Exporters = () => {
-  const { tenantId } = useParams<{ tenantId: string }>();
+const Exporters = withTenantFromParams(({ tenant }: TenantProps) => {
   const classes = useStyles();
 
   const { data, mutate: changeCallback } = useHasura(
@@ -51,21 +50,21 @@ const Exporters = () => {
          created_at
        }
      }`,
-    { tenant_id: tenantId }
+    { tenant_id: tenant.name }
   );
 
   return (
     <div className={classes.gridContainer}>
       <ExportersTable
-        tenantId={tenantId}
+        tenantId={tenant.name}
         onChange={changeCallback}
         rows={formatRows(data?.exporter)}
       />
 
-      <ExporterForm tenantId={tenantId} onCreate={changeCallback} />
+      <ExporterForm tenantId={tenant.name} onCreate={changeCallback} />
     </div>
   );
-};
+});
 
 const formatRows = (data: any[] | undefined) => {
   if (data)

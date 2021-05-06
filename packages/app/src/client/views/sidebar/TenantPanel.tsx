@@ -76,6 +76,11 @@ export const TenantPanel = (props: TenantPanelProps) => {
         id: "cloud-metrics",
         text: "Cloud Metrics",
         data: { path: "cloud-metrics" }
+      },
+      {
+        id: "integrations",
+        text: "Integrations",
+        data: { path: "integrations" }
       }
     ];
   };
