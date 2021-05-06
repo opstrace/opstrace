@@ -20,10 +20,12 @@ import { map } from "ramda";
 import useTenant from "state/tenant/hooks/useTenant";
 import useAlertmanager from "state/tenant/hooks/useAlertmanager";
 
-import { Tenant, Tenants } from "state/tenant/types";
+import { Tenant, Tenants, Alertmanager } from "state/tenant/types";
 import { PanelItem } from "client/components/Panel";
 
 import Skeleton from "@material-ui/lab/Skeleton";
+
+export { Tenant, Alertmanager };
 
 export const tenantToItem = (tenant: Tenant): PanelItem => {
   return { id: tenant.name, text: tenant.name, data: tenant };

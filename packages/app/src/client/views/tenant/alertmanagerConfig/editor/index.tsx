@@ -21,10 +21,13 @@ import { values, none } from "ramda";
 import { isFalse } from "ramda-adjunct";
 
 import { useForm, useFormState } from "state/form/hooks";
-import { withAlertmanager } from "client/views/tenant/utils";
+import {
+  withAlertmanager,
+  Tenant,
+  Alertmanager
+} from "client/views/tenant/utils";
 import { updateAlertmanager } from "state/tenant/actions";
 
-import { Tenant, Alertmanager } from "state/tenant/types";
 import { StatusResponse } from "state/graphql-api-types";
 
 import { State } from "./types";

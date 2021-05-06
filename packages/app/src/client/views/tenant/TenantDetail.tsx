@@ -18,8 +18,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { Tenant } from "state/tenant/types";
-import { withTenant } from "client/views/tenant/utils";
+import { withTenant, Tenant } from "client/views/tenant/utils";
 import { usePickerService } from "client/services/Picker";
 
 import { deleteTenant } from "state/tenant/actions";
