@@ -78,6 +78,7 @@ export declare interface Dict<T = any> {
  * effect of import became intolerable.
  */
 export let CLUSTER_BASE_URL: string;
+export let CLUSTER_NAME: string;
 export let TEST_REMOTE_ARTIFACT_DIRECTORY: string;
 
 export let TENANT_DEFAULT_CORTEX_API_BASE_URL: string;
@@ -180,6 +181,7 @@ export function globalTestSuiteSetupOnce() {
   }
 
   CLUSTER_BASE_URL = `https://${clusterName}.opstrace.io`;
+  CLUSTER_NAME = clusterName;
   TENANT_DEFAULT_LOKI_API_BASE_URL = `https://loki.default.${clusterName}.opstrace.io`;
   TENANT_DEFAULT_DD_API_BASE_URL = `https://dd.default.${clusterName}.opstrace.io`;
   TENANT_DEFAULT_CORTEX_API_BASE_URL = `https://cortex.default.${clusterName}.opstrace.io`;
