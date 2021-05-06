@@ -1126,6 +1126,215 @@ export enum File_Update_Column {
   Path = "path"
 }
 
+/** columns and relationships of "integrations" */
+export type Integrations = {
+  created_at: Scalars["timestamp"];
+  id: Scalars["uuid"];
+  kind: Scalars["String"];
+  name: Scalars["String"];
+  status: Scalars["String"];
+  /** An object relationship */
+  tenant: Tenant;
+  tenant_id: Scalars["uuid"];
+  updated_at: Scalars["timestamp"];
+};
+
+/** aggregated selection of "integrations" */
+export type Integrations_Aggregate = {
+  aggregate?: Maybe<Integrations_Aggregate_Fields>;
+  nodes: Array<Integrations>;
+};
+
+/** aggregate fields of "integrations" */
+export type Integrations_Aggregate_Fields = {
+  count?: Maybe<Scalars["Int"]>;
+  max?: Maybe<Integrations_Max_Fields>;
+  min?: Maybe<Integrations_Min_Fields>;
+};
+
+/** aggregate fields of "integrations" */
+export type Integrations_Aggregate_FieldsCountArgs = {
+  columns?: Maybe<Array<Integrations_Select_Column>>;
+  distinct?: Maybe<Scalars["Boolean"]>;
+};
+
+/** order by aggregate values of table "integrations" */
+export type Integrations_Aggregate_Order_By = {
+  count?: Maybe<Order_By>;
+  max?: Maybe<Integrations_Max_Order_By>;
+  min?: Maybe<Integrations_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "integrations" */
+export type Integrations_Arr_Rel_Insert_Input = {
+  data: Array<Integrations_Insert_Input>;
+  on_conflict?: Maybe<Integrations_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "integrations". All fields are combined with a logical 'AND'. */
+export type Integrations_Bool_Exp = {
+  _and?: Maybe<Array<Maybe<Integrations_Bool_Exp>>>;
+  _not?: Maybe<Integrations_Bool_Exp>;
+  _or?: Maybe<Array<Maybe<Integrations_Bool_Exp>>>;
+  created_at?: Maybe<Timestamp_Comparison_Exp>;
+  id?: Maybe<Uuid_Comparison_Exp>;
+  kind?: Maybe<String_Comparison_Exp>;
+  name?: Maybe<String_Comparison_Exp>;
+  status?: Maybe<String_Comparison_Exp>;
+  tenant?: Maybe<Tenant_Bool_Exp>;
+  tenant_id?: Maybe<Uuid_Comparison_Exp>;
+  updated_at?: Maybe<Timestamp_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "integrations" */
+export enum Integrations_Constraint {
+  /** unique or primary key constraint */
+  IntegrationsNameKey = "integrations_name_key",
+  /** unique or primary key constraint */
+  IntegrationsPkey = "integrations_pkey"
+}
+
+/** input type for inserting data into table "integrations" */
+export type Integrations_Insert_Input = {
+  created_at?: Maybe<Scalars["timestamp"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  kind?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  status?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Tenant_Obj_Rel_Insert_Input>;
+  tenant_id?: Maybe<Scalars["uuid"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
+};
+
+/** aggregate max on columns */
+export type Integrations_Max_Fields = {
+  created_at?: Maybe<Scalars["timestamp"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  kind?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  status?: Maybe<Scalars["String"]>;
+  tenant_id?: Maybe<Scalars["uuid"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
+};
+
+/** order by max() on columns of table "integrations" */
+export type Integrations_Max_Order_By = {
+  created_at?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  kind?: Maybe<Order_By>;
+  name?: Maybe<Order_By>;
+  status?: Maybe<Order_By>;
+  tenant_id?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Integrations_Min_Fields = {
+  created_at?: Maybe<Scalars["timestamp"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  kind?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  status?: Maybe<Scalars["String"]>;
+  tenant_id?: Maybe<Scalars["uuid"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
+};
+
+/** order by min() on columns of table "integrations" */
+export type Integrations_Min_Order_By = {
+  created_at?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  kind?: Maybe<Order_By>;
+  name?: Maybe<Order_By>;
+  status?: Maybe<Order_By>;
+  tenant_id?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** response of any mutation on the table "integrations" */
+export type Integrations_Mutation_Response = {
+  /** number of affected rows by the mutation */
+  affected_rows: Scalars["Int"];
+  /** data of the affected rows by the mutation */
+  returning: Array<Integrations>;
+};
+
+/** input type for inserting object relation for remote table "integrations" */
+export type Integrations_Obj_Rel_Insert_Input = {
+  data: Integrations_Insert_Input;
+  on_conflict?: Maybe<Integrations_On_Conflict>;
+};
+
+/** on conflict condition type for table "integrations" */
+export type Integrations_On_Conflict = {
+  constraint: Integrations_Constraint;
+  update_columns: Array<Integrations_Update_Column>;
+  where?: Maybe<Integrations_Bool_Exp>;
+};
+
+/** ordering options when selecting data from "integrations" */
+export type Integrations_Order_By = {
+  created_at?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
+  kind?: Maybe<Order_By>;
+  name?: Maybe<Order_By>;
+  status?: Maybe<Order_By>;
+  tenant?: Maybe<Tenant_Order_By>;
+  tenant_id?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** primary key columns input for table: "integrations" */
+export type Integrations_Pk_Columns_Input = {
+  id: Scalars["uuid"];
+};
+
+/** select columns of table "integrations" */
+export enum Integrations_Select_Column {
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Id = "id",
+  /** column name */
+  Kind = "kind",
+  /** column name */
+  Name = "name",
+  /** column name */
+  Status = "status",
+  /** column name */
+  TenantId = "tenant_id",
+  /** column name */
+  UpdatedAt = "updated_at"
+}
+
+/** input type for updating data in table "integrations" */
+export type Integrations_Set_Input = {
+  created_at?: Maybe<Scalars["timestamp"]>;
+  id?: Maybe<Scalars["uuid"]>;
+  kind?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  status?: Maybe<Scalars["String"]>;
+  tenant_id?: Maybe<Scalars["uuid"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
+};
+
+/** update columns of table "integrations" */
+export enum Integrations_Update_Column {
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Id = "id",
+  /** column name */
+  Kind = "kind",
+  /** column name */
+  Name = "name",
+  /** column name */
+  Status = "status",
+  /** column name */
+  TenantId = "tenant_id",
+  /** column name */
+  UpdatedAt = "updated_at"
+}
+
 /** expression to compare columns of type json. All fields are combined with logical 'AND'. */
 export type Json_Comparison_Exp = {
   _eq?: Maybe<Scalars["json"]>;
@@ -1616,6 +1825,10 @@ export type Mutation_Root = {
   delete_file?: Maybe<File_Mutation_Response>;
   /** delete single row from the table: "file" */
   delete_file_by_pk?: Maybe<File>;
+  /** delete data from the table: "integrations" */
+  delete_integrations?: Maybe<Integrations_Mutation_Response>;
+  /** delete single row from the table: "integrations" */
+  delete_integrations_by_pk?: Maybe<Integrations>;
   /** delete data from the table: "module" */
   delete_module?: Maybe<Module_Mutation_Response>;
   /** delete single row from the table: "module" */
@@ -1652,6 +1865,10 @@ export type Mutation_Root = {
   insert_file?: Maybe<File_Mutation_Response>;
   /** insert a single row into the table: "file" */
   insert_file_one?: Maybe<File>;
+  /** insert data into the table: "integrations" */
+  insert_integrations?: Maybe<Integrations_Mutation_Response>;
+  /** insert a single row into the table: "integrations" */
+  insert_integrations_one?: Maybe<Integrations>;
   /** insert data into the table: "module" */
   insert_module?: Maybe<Module_Mutation_Response>;
   /** insert a single row into the table: "module" */
@@ -1692,6 +1909,10 @@ export type Mutation_Root = {
   update_file?: Maybe<File_Mutation_Response>;
   /** update single row of the table: "file" */
   update_file_by_pk?: Maybe<File>;
+  /** update data of the table: "integrations" */
+  update_integrations?: Maybe<Integrations_Mutation_Response>;
+  /** update single row of the table: "integrations" */
+  update_integrations_by_pk?: Maybe<Integrations>;
   /** update data of the table: "module" */
   update_module?: Maybe<Module_Mutation_Response>;
   /** update single row of the table: "module" */
@@ -1760,6 +1981,16 @@ export type Mutation_RootDelete_FileArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_File_By_PkArgs = {
+  id: Scalars["uuid"];
+};
+
+/** mutation root */
+export type Mutation_RootDelete_IntegrationsArgs = {
+  where: Integrations_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootDelete_Integrations_By_PkArgs = {
   id: Scalars["uuid"];
 };
 
@@ -1864,6 +2095,18 @@ export type Mutation_RootInsert_FileArgs = {
 export type Mutation_RootInsert_File_OneArgs = {
   object: File_Insert_Input;
   on_conflict?: Maybe<File_On_Conflict>;
+};
+
+/** mutation root */
+export type Mutation_RootInsert_IntegrationsArgs = {
+  objects: Array<Integrations_Insert_Input>;
+  on_conflict?: Maybe<Integrations_On_Conflict>;
+};
+
+/** mutation root */
+export type Mutation_RootInsert_Integrations_OneArgs = {
+  object: Integrations_Insert_Input;
+  on_conflict?: Maybe<Integrations_On_Conflict>;
 };
 
 /** mutation root */
@@ -1998,6 +2241,18 @@ export type Mutation_RootUpdate_File_By_PkArgs = {
 };
 
 /** mutation root */
+export type Mutation_RootUpdate_IntegrationsArgs = {
+  _set?: Maybe<Integrations_Set_Input>;
+  where: Integrations_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootUpdate_Integrations_By_PkArgs = {
+  _set?: Maybe<Integrations_Set_Input>;
+  pk_columns: Integrations_Pk_Columns_Input;
+};
+
+/** mutation root */
 export type Mutation_RootUpdate_ModuleArgs = {
   _set?: Maybe<Module_Set_Input>;
   where: Module_Bool_Exp;
@@ -2103,6 +2358,12 @@ export type Query_Root = {
   getAlertmanager?: Maybe<Alertmanager>;
   /** perform the action: "getRuleGroup" */
   getRuleGroup?: Maybe<RuleGroup>;
+  /** fetch data from the table: "integrations" */
+  integrations: Array<Integrations>;
+  /** fetch aggregated fields from the table: "integrations" */
+  integrations_aggregate: Integrations_Aggregate;
+  /** fetch data from the table: "integrations" using primary key columns */
+  integrations_by_pk?: Maybe<Integrations>;
   /** perform the action: "listRules" */
   listRules?: Maybe<Rules>;
   /** fetch data from the table: "module" */
@@ -2245,6 +2506,29 @@ export type Query_RootGetRuleGroupArgs = {
   namespace: Scalars["String"];
   rule_group_name: Scalars["String"];
   tenant_id: Scalars["String"];
+};
+
+/** query root */
+export type Query_RootIntegrationsArgs = {
+  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Integrations_Order_By>>;
+  where?: Maybe<Integrations_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootIntegrations_AggregateArgs = {
+  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Integrations_Order_By>>;
+  where?: Maybe<Integrations_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootIntegrations_By_PkArgs = {
+  id: Scalars["uuid"];
 };
 
 /** query root */
@@ -2419,6 +2703,12 @@ export type Subscription_Root = {
   getAlertmanager?: Maybe<Alertmanager>;
   /** perform the action: "getRuleGroup" */
   getRuleGroup?: Maybe<RuleGroup>;
+  /** fetch data from the table: "integrations" */
+  integrations: Array<Integrations>;
+  /** fetch aggregated fields from the table: "integrations" */
+  integrations_aggregate: Integrations_Aggregate;
+  /** fetch data from the table: "integrations" using primary key columns */
+  integrations_by_pk?: Maybe<Integrations>;
   /** perform the action: "listRules" */
   listRules?: Maybe<Rules>;
   /** fetch data from the table: "module" */
@@ -2561,6 +2851,29 @@ export type Subscription_RootGetRuleGroupArgs = {
   namespace: Scalars["String"];
   rule_group_name: Scalars["String"];
   tenant_id: Scalars["String"];
+};
+
+/** subscription root */
+export type Subscription_RootIntegrationsArgs = {
+  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Integrations_Order_By>>;
+  where?: Maybe<Integrations_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootIntegrations_AggregateArgs = {
+  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Integrations_Order_By>>;
+  where?: Maybe<Integrations_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootIntegrations_By_PkArgs = {
+  id: Scalars["uuid"];
 };
 
 /** subscription root */
@@ -2716,9 +3029,15 @@ export type Tenant = {
   exporters: Array<Exporter>;
   /** An aggregated array relationship */
   exporters_aggregate: Exporter_Aggregate;
+  id: Scalars["uuid"];
+  /** An array relationship */
+  integrations: Array<Integrations>;
+  /** An aggregated array relationship */
+  integrations_aggregate: Integrations_Aggregate;
   key: Scalars["String"];
   name: Scalars["String"];
   type: Scalars["String"];
+  updated_at: Scalars["timestamp"];
 };
 
 /** columns and relationships of "tenant" */
@@ -2755,6 +3074,24 @@ export type TenantExporters_AggregateArgs = {
   offset?: Maybe<Scalars["Int"]>;
   order_by?: Maybe<Array<Exporter_Order_By>>;
   where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** columns and relationships of "tenant" */
+export type TenantIntegrationsArgs = {
+  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Integrations_Order_By>>;
+  where?: Maybe<Integrations_Bool_Exp>;
+};
+
+/** columns and relationships of "tenant" */
+export type TenantIntegrations_AggregateArgs = {
+  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Integrations_Order_By>>;
+  where?: Maybe<Integrations_Bool_Exp>;
 };
 
 /** aggregated selection of "tenant" */
@@ -2797,13 +3134,18 @@ export type Tenant_Bool_Exp = {
   created_at?: Maybe<Timestamp_Comparison_Exp>;
   credentials?: Maybe<Credential_Bool_Exp>;
   exporters?: Maybe<Exporter_Bool_Exp>;
+  id?: Maybe<Uuid_Comparison_Exp>;
+  integrations?: Maybe<Integrations_Bool_Exp>;
   key?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
   type?: Maybe<String_Comparison_Exp>;
+  updated_at?: Maybe<Timestamp_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "tenant" */
 export enum Tenant_Constraint {
+  /** unique or primary key constraint */
+  TenantIdKey = "tenant_id_key",
   /** unique or primary key constraint */
   TenantKeyKey = "tenant_key_key",
   /** unique or primary key constraint */
@@ -2815,41 +3157,52 @@ export type Tenant_Insert_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   credentials?: Maybe<Credential_Arr_Rel_Insert_Input>;
   exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
+  id?: Maybe<Scalars["uuid"]>;
+  integrations?: Maybe<Integrations_Arr_Rel_Insert_Input>;
   key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
 /** aggregate max on columns */
 export type Tenant_Max_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
 /** order by max() on columns of table "tenant" */
 export type Tenant_Max_Order_By = {
   created_at?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
   key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
 };
 
 /** aggregate min on columns */
 export type Tenant_Min_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
 /** order by min() on columns of table "tenant" */
 export type Tenant_Min_Order_By = {
   created_at?: Maybe<Order_By>;
+  id?: Maybe<Order_By>;
   key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
 };
 
 /** response of any mutation on the table "tenant" */
@@ -2878,9 +3231,12 @@ export type Tenant_Order_By = {
   created_at?: Maybe<Order_By>;
   credentials_aggregate?: Maybe<Credential_Aggregate_Order_By>;
   exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
+  id?: Maybe<Order_By>;
+  integrations_aggregate?: Maybe<Integrations_Aggregate_Order_By>;
   key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
 };
 
 /** primary key columns input for table: "tenant" */
@@ -2893,19 +3249,25 @@ export enum Tenant_Select_Column {
   /** column name */
   CreatedAt = "created_at",
   /** column name */
+  Id = "id",
+  /** column name */
   Key = "key",
   /** column name */
   Name = "name",
   /** column name */
-  Type = "type"
+  Type = "type",
+  /** column name */
+  UpdatedAt = "updated_at"
 }
 
 /** input type for updating data in table "tenant" */
 export type Tenant_Set_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
 /** update columns of table "tenant" */
@@ -2913,11 +3275,15 @@ export enum Tenant_Update_Column {
   /** column name */
   CreatedAt = "created_at",
   /** column name */
+  Id = "id",
+  /** column name */
   Key = "key",
   /** column name */
   Name = "name",
   /** column name */
-  Type = "type"
+  Type = "type",
+  /** column name */
+  UpdatedAt = "updated_at"
 }
 
 /** expression to compare columns of type timestamp. All fields are combined with logical 'AND'. */
@@ -3722,7 +4088,9 @@ export type GetAlertmanagerQuery = {
 export type GetTenantsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetTenantsQuery = {
-  tenant: Array<Pick<Tenant, "name" | "created_at" | "type" | "key">>;
+  tenant: Array<
+    Pick<Tenant, "id" | "name" | "created_at" | "updated_at" | "type" | "key">
+  >;
 };
 
 export type SubscribeToTenantListSubscriptionVariables = Exact<{
@@ -3730,7 +4098,9 @@ export type SubscribeToTenantListSubscriptionVariables = Exact<{
 }>;
 
 export type SubscribeToTenantListSubscription = {
-  tenant: Array<Pick<Tenant, "name" | "created_at" | "type" | "key">>;
+  tenant: Array<
+    Pick<Tenant, "id" | "name" | "created_at" | "updated_at" | "type" | "key">
+  >;
 };
 
 export type UpdateAlertmanagerMutationVariables = Exact<{
@@ -4334,8 +4704,10 @@ export const GetAlertmanagerDocument = gql`
 export const GetTenantsDocument = gql`
   query GetTenants {
     tenant {
+      id
       name
       created_at
+      updated_at
       type
       key
     }
@@ -4344,8 +4716,10 @@ export const GetTenantsDocument = gql`
 export const SubscribeToTenantListDocument = gql`
   subscription SubscribeToTenantList {
     tenant {
+      id
       name
       created_at
+      updated_at
       type
       key
     }

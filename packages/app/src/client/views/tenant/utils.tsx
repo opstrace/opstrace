@@ -16,14 +16,17 @@
 
 import React from "react";
 import { map } from "ramda";
+import { useParams } from "react-router-dom";
 
 import useTenant from "state/tenant/hooks/useTenant";
 import useAlertmanager from "state/tenant/hooks/useAlertmanager";
 
-import { Tenant, Tenants } from "state/tenant/types";
+import { Tenant, Tenants, Alertmanager } from "state/tenant/types";
 import { PanelItem } from "client/components/Panel";
 
 import Skeleton from "@material-ui/lab/Skeleton";
+
+export { Tenant, Alertmanager };
 
 export const tenantToItem = (tenant: Tenant): PanelItem => {
   return { id: tenant.name, text: tenant.name, data: tenant };
@@ -33,8 +36,11 @@ export const tenantsToItems: (tenants: Tenants) => PanelItem[] = map(
   tenantToItem
 );
 
-export const withTenant = (Component: React.ReactType, tenantName: string) => {
-  return (props: {}) => {
+export const withTenant = <T extends {}>(
+  Component: React.ReactType,
+  tenantName: string
+) => {
+  return (props: T) => {
     const tenant = useTenant(tenantName);
 
     return tenant ? (
@@ -45,16 +51,25 @@ export const withTenant = (Component: React.ReactType, tenantName: string) => {
   };
 };
 
-export const withAlertmanager = (
+export const withTenantFromParams = <T extends {}>(
+  Component: React.ReactType
+) => {
+  return (props: T) => {
+    const { tenantId } = useParams<{ tenantId: string }>();
+    const ComponentWithTenant = withTenant<T>(Component, tenantId);
+    return <ComponentWithTenant {...props} />;
+  };
+};
+
+export type TenantProps = {
+  tenant: Tenant;
+};
+
+export const withAlertmanager = <T extends {}>(
   Component: React.ReactType,
   tenantId: string
 ) => {
-  const ComponentWithAlertmanager = ({
-    tenant,
-    ...rest
-  }: {
-    tenant: Tenant;
-  }) => {
+  const ComponentWithAlertmanager = ({ tenant, ...rest }: T & TenantProps) => {
     const alertmanager = useAlertmanager(tenant.name);
 
     return alertmanager ? (
@@ -64,5 +79,22 @@ export const withAlertmanager = (
     );
   };
 
-  return withTenant(ComponentWithAlertmanager, tenantId);
+  return withTenant<T & TenantProps>(ComponentWithAlertmanager, tenantId);
+};
+
+export const withAlertmanagerFromParams = <T extends {}>(
+  Component: React.ReactType
+) => {
+  return (props: T & TenantProps) => {
+    const { tenantId } = useParams<{ tenantId: string }>();
+    const ComponentWithTenant = withAlertmanager<T & TenantProps>(
+      Component,
+      tenantId
+    );
+    return <ComponentWithTenant {...props} />;
+  };
+};
+
+export type AlertmanagerProps = {
+  alertmanager: Alertmanager;
 };

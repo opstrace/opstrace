@@ -262,6 +262,44 @@
       filter: {}
 - table:
     schema: public
+    name: integrations
+  object_relationships:
+  - name: tenant
+    using:
+      foreign_key_constraint_on: tenant_id
+  insert_permissions:
+  - role: user_admin
+    permission:
+      check: {}
+      columns:
+      - kind
+      - name
+      - status
+      - tenant_id
+      backend_only: false
+  select_permissions:
+  - role: user_admin
+    permission:
+      columns:
+      - kind
+      - name
+      - status
+      - created_at
+      - updated_at
+      - id
+      - tenant_id
+      filter: {}
+      allow_aggregations: true
+  update_permissions:
+  - role: user_admin
+    permission:
+      columns:
+      - name
+      - status
+      filter: {}
+      check: {}
+- table:
+    schema: public
     name: module
   object_relationships:
   - name: branch
@@ -404,6 +442,13 @@
         table:
           schema: public
           name: exporter
+  - name: integrations
+    using:
+      foreign_key_constraint_on:
+        column: tenant_id
+        table:
+          schema: public
+          name: integrations
   insert_permissions:
   - role: user_admin
     permission:
@@ -418,10 +463,13 @@
     permission:
       columns:
       - created_at
+      - id
       - key
       - name
       - type
+      - updated_at
       filter: {}
+      allow_aggregations: true
   delete_permissions:
   - role: user_admin
     permission:

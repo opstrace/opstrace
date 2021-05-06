@@ -15,10 +15,10 @@
  */
 
 import React from "react";
-import { useParams } from "react-router-dom";
 import { map } from "ramda";
 
 import useHasura from "client/hooks/useHasura";
+import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { CredentialsTable } from "./Table";
 import { CredentialsForm } from "./Form";
@@ -34,8 +34,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-function Credentials() {
-  const { tenantId } = useParams<{ tenantId: string }>();
+const Credentials = withTenantFromParams(({ tenant }: TenantProps) => {
   const classes = useStyles();
 
   const { data, mutate: changeCallback } = useHasura(
@@ -53,20 +52,20 @@ function Credentials() {
         }
       }
      `,
-    { tenant_id: tenantId }
+    { tenant_id: tenant.name }
   );
 
   return (
     <div className={classes.gridContainer}>
       <CredentialsTable
-        tenantId={tenantId}
+        tenantId={tenant.name}
         onChange={changeCallback}
         rows={formatRows(data?.credential)}
       />
-      <CredentialsForm tenantId={tenantId} onCreate={changeCallback} />
+      <CredentialsForm tenantId={tenant.name} onCreate={changeCallback} />
     </div>
   );
-}
+});
 
 const formatRows = (data: any[] | undefined) => {
   if (data)

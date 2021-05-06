@@ -15,11 +15,9 @@
  */
 
 import React from "react";
-import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { Tenant } from "state/tenant/types";
-import { withTenant } from "client/views/tenant/utils";
+import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 import { usePickerService } from "client/services/Picker";
 
 import { deleteTenant } from "state/tenant/actions";
@@ -31,17 +29,7 @@ import { Button } from "client/components/Button";
 import Typography from "client/components/Typography/Typography";
 import { ExternalLink } from "client/components/Link";
 
-const TenantDetailParamLoader = (props: {}) => {
-  const { tenantId } = useParams<{ tenantId: string }>();
-  const Component = withTenant(TenantDetail, tenantId);
-  return <Component {...props} />;
-};
-
-type TenantDetailProps = {
-  tenant: Tenant;
-};
-
-const TenantDetail = ({ tenant }: TenantDetailProps) => {
+const TenantDetail = withTenantFromParams(({ tenant }: TenantProps) => {
   const dispatch = useDispatch();
 
   const { activatePickerWithText } = usePickerService(
@@ -126,6 +114,6 @@ const TenantDetail = ({ tenant }: TenantDetailProps) => {
       </Box>
     </Box>
   );
-};
+});
 
-export default TenantDetailParamLoader;
+export default TenantDetail;
