@@ -257,8 +257,8 @@ source ci/test-cli/cli-tests-with-cluster.sh
 # exist yet in the cluster -- use a random name. Then inject into test-remote:
 # - the name of that tenant
 # - the path to the authentication token file
-tr -dc A-Za-z0-9 < /dev/urandom | head -c 5
-RNDSTRING=$( tr -dc A-Za-z0-9 < /dev/urandom | head -c 5 )
+set -x
+set +e; RNDSTRING=$( tr -dc A-Za-z0-9 < /dev/urandom | head -c 5 ); set -e
 TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant${RNDSTRING}"
 ./build/bin/opstrace ta-create-keypair ./ta-custom-keypair.pem
 ./build/bin/opstrace ta-create-token "${OPSTRACE_CLUSTER_NAME}" \
@@ -266,7 +266,7 @@ TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant${RNDSTRING}"
 TENANT_RND_AUTHTOKEN="$(cat tenant-rnd-auth-token-from-custom-keypair)"
 ./build/bin/opstrace ta-pubkeys-add \
     "${OPSTRACE_CLOUD_PROVIDER}" "${OPSTRACE_CLUSTER_NAME}" ta-custom-keypair.pem
-
+set -x
 export TENANT_RND_AUTHTOKEN
 export TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
 
