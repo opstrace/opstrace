@@ -1,0 +1,7 @@
+mutation CreateIntegration($integration: integration_insert_input!) {
+  insert_integration(object: $integration) {
+    returning {
+      id
+    }
+  }
+}

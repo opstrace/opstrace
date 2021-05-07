@@ -1,0 +1,10 @@
+query GetIntegrations {
+  integrations {
+    id
+    kind
+    name
+    status
+    created_at
+    updated_at
+  }
+}

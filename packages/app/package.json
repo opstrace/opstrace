@@ -256,6 +256,7 @@
     "prebuild": "yarn clean",
     "storybook": "STORYBOOK_GRAPHQL_ENDPOINT=http://localhost:8080/v1/graphql STORYBOOK_GRAPHQL_SUBSCRIPTION_ENDPOINT=ws://localhost:8080/v1/graphql start-storybook -p 9009 -s public --quiet",
     "metadata:export": "yarn hasura metadata export --admin-secret myadminsecret",
+    "types": "HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret graphql-codegen --config codegen.js",
     "types:watch": "HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret graphql-codegen --config codegen.js --watch",
     "console": "hasura console --admin-secret myadminsecret --no-browser",
     "services:start": "docker-compose up",
