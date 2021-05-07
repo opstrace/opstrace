@@ -36,6 +36,9 @@ bash ci/check-if-docs-pr.sh && exit 0
 echo "--- detect missing license headers"
 make check-license-headers
 
+echo "--- install yarn workspace dependencies"
+yarn --frozen-lockfile --ignore-optional
+
 echo "--- lint codebase: quick feedback"
 make lint-codebase
 
