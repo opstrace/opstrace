@@ -105,7 +105,7 @@ echo "--- build looker in non-isolated environment (for local dev)"
 # to install the 'optional dependency' playwright. Playwright is a dep for
 # test-remote, though, and not for looker. To split out the looker project /
 # build makes a lot of sense, with its own tsconfig and package.json
-( cd test/test-remote; yarn add playwright@1.10.0 --optional && yarn run tsc -v ./tsconfig.json )
+( cd test/test-remote; yarn add playwright --frozen-lockfile && yarn run tsc -v ./tsconfig.json )
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
