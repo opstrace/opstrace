@@ -98,11 +98,14 @@ echo "--- build looker image"
 ( cd test/test-remote/containers/looker ; make image ; make publish )
 
 echo "--- build looker in non-isolated environment (for local dev)"
-# Note(JP): the looker build via Dockerfile is special. During local looker dev,
-# I am used to using a different build method. Which might break when it's not
-# covered by CI. Cover that here. Also see
-# https://github.com/opstrace/opstrace/issues/493
-( cd test/test-remote; yarn run tsc -v ./tsconfig.json )
+# Note(JP): the looker build via Dockerfile is special. During local looker
+# dev, I am used to using a different build method. Which might break when it's
+# not covered by CI. Cover that here. Also see
+# https://github.com/opstrace/opstrace/issues/493 Run `yarn --frozen-lockfile`
+# to install the 'optional dependency' playwright. Playwright is a dep for
+# test-remote, though, and not for looker. To split out the looker project /
+# build makes a lot of sense, with its own tsconfig and package.json
+( cd test/test-remote; yarn --frozen-lockfile && yarn run tsc -v ./tsconfig.json )
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
