@@ -116,7 +116,8 @@ lint-docs:
 .PHONY: tsc
 tsc: set-build-info-constants
 	@# tsc-compile the opstrace cli and controller cli
-	yarn --frozen-lockfile
+	# --ignore-optional to skip playwright
+	yarn --frozen-lockfile --ignore-optional
 	yarn build:controller
 	yarn build:cli
 
@@ -227,7 +228,7 @@ cli-crashtest:
 
 
 lint-codebase.js:
-	yarn --frozen-lockfile
+	# yarn --frozen-lockfile
 	yarn run lint
 
 lint-codebase.go:
@@ -237,7 +238,7 @@ lint-codebase.go:
 .PHONY: cli-tsc
 cli-tsc: set-build-info-constants
 	@# tsc-compile the opstrace cli (not the controller cli)
-	yarn --frozen-lockfile
+	yarn --frozen-lockfile --ignore-optional
 	yarn build:cli
 
 
