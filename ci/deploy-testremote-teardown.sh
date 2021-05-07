@@ -234,7 +234,7 @@ retry_check_certificate loki.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate cortex.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 
-echo "--- check if deployed docker images match docker-images.json"
+echo "+++ check if deployed docker images match docker-images.json"
 #
 # The Buildkite pipeline before starting a step runs a git checkout. The
 # preamble step that sets up docker-images.json runs before the step that call
@@ -248,7 +248,7 @@ source ci/check-deployed-docker-images.sh
 
 # Run the CLI tests before invoking test-remote. This excercises the basic
 # tenant API authenticator keypair management capability.
-echo "--- run opstrace CLI tests (cli-tests-with-cluster.sh)"
+echo "+++ run opstrace CLI tests (cli-tests-with-cluster.sh)"
 source ci/test-cli/cli-tests-with-cluster.sh
 
 # The tenant API authenticator keypair management capability is confirmed to
@@ -257,6 +257,7 @@ source ci/test-cli/cli-tests-with-cluster.sh
 # exist yet in the cluster -- use a random name. Then inject into test-remote:
 # - the name of that tenant
 # - the path to the authentication token file
+tr -dc A-Za-z0-9 < /dev/urandom | head -c 5
 RNDSTRING=$( tr -dc A-Za-z0-9 < /dev/urandom | head -c 5 )
 TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant${RNDSTRING}"
 ./build/bin/opstrace ta-create-keypair ./ta-custom-keypair.pem
@@ -275,7 +276,7 @@ set +e
 make test-remote
 EXITCODE_MAKE_TESTREMOTE=$?
 set -e
-echo "--- Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
+echo "+++ Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
 
 set +e
 make test-remote-ui
