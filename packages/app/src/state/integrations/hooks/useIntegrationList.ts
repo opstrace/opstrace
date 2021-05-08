@@ -14,44 +14,33 @@
  * limitations under the License.
  */
 import { useEffect } from "react";
+import { values } from "ramda";
+import { createSelector } from "reselect";
 import { useDispatch, useSelector, State } from "state/provider";
+
 import {
   subscribeToIntegrationList,
   unsubscribeFromIntegrationList
 } from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
-import { Users } from "state/user/types";
-import { values } from "ramda";
 
-type GetUserListOptions = {
-  includeInactive: boolean;
-};
+const selectIntegrationList = createSelector(
+  (state: State) => state.integrations.loading,
+  (state: State) => state.integrations.integrations,
+  (loading, integrations) => (loading ? [] : values(integrations))
+);
 
-export const getUserList = (
-  state: State,
-  options: GetUserListOptions | null = null
-) => {
-  return values(
-    options?.includeInactive ? state.users.allUsers : state.users.users
-  ) as Users;
-};
-
-/**
- * Subscribes to users and will update on any changes.
- * Automatically unsubscribeFromIntegrationLists on unmount.
- */
-export default function useUserList() {
-  const users = useSelector(getUserList);
+export const useIntegrationList = () => {
+  const integrations = useSelector(selectIntegrationList);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const subId = getSubscriptionID();
     dispatch(subscribeToIntegrationList(subId));
-
     return () => {
       dispatch(unsubscribeFromIntegrationList(subId));
     };
   }, [dispatch]);
 
-  return users;
-}
+  return integrations;
+};

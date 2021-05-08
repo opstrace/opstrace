@@ -17,9 +17,11 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { useIntegration } from "state/integrations/hooks";
-import { Integration } from "state/interations/types";
-export { Integration };
+import { useIntegration, useIntegrationList } from "state/integrations/hooks";
+import { Integration, Integrations } from "state/integrations/types";
+export { Integration, Integrations };
+
+import Skeleton from "@material-ui/lab/Skeleton";
 
 export const withIntegration = <T extends {}>(
   Component: React.ReactType,
@@ -51,4 +53,22 @@ export const withIntegrationFromParams = <T extends {}>(
 
 export type IntegrationProps = {
   integration: Integration;
+};
+
+export const withIntegrationList = <T extends {}>(
+  Component: React.ReactType
+) => {
+  return (props: T) => {
+    const integrationList = useIntegrationList();
+
+    return integrationList ? (
+      <Component {...props} integrationList={integrationList} />
+    ) : (
+      <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
+    );
+  };
+};
+
+export type IntegrationListProps = {
+  integration: Integrations;
 };

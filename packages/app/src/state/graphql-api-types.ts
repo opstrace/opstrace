@@ -3971,6 +3971,55 @@ export type UpdateContentsMutation = {
   update_file_by_pk?: Maybe<Pick<File, "id">>;
 };
 
+export type CreateIntegrationsMutationVariables = Exact<{
+  integrations: Array<Integrations_Insert_Input> | Integrations_Insert_Input;
+}>;
+
+export type CreateIntegrationsMutation = {
+  insert_integrations?: Maybe<{
+    returning: Array<
+      Pick<
+        Integrations,
+        "id" | "kind" | "name" | "status" | "created_at" | "updated_at"
+      >
+    >;
+  }>;
+};
+
+export type DeleteIntegrationMutationVariables = Exact<{
+  id: Scalars["uuid"];
+}>;
+
+export type DeleteIntegrationMutation = {
+  delete_integrations_by_pk?: Maybe<Pick<Integrations, "id">>;
+};
+
+export type GetIntegrationsQueryVariables = Exact<{
+  tenant_id: Scalars["uuid"];
+}>;
+
+export type GetIntegrationsQuery = {
+  integrations: Array<
+    Pick<
+      Integrations,
+      "id" | "kind" | "name" | "status" | "created_at" | "updated_at"
+    >
+  >;
+};
+
+export type SubscribeToIntegrationListSubscriptionVariables = Exact<{
+  tenant_id: Scalars["uuid"];
+}>;
+
+export type SubscribeToIntegrationListSubscription = {
+  integrations: Array<
+    Pick<
+      Integrations,
+      "id" | "kind" | "name" | "status" | "created_at" | "updated_at"
+    >
+  >;
+};
+
 export type CreateModuleMutationVariables = Exact<{
   name: Scalars["String"];
   scope: Scalars["String"];
@@ -4530,6 +4579,51 @@ export const UpdateContentsDocument = gql`
       }
     ) {
       id
+    }
+  }
+`;
+export const CreateIntegrationsDocument = gql`
+  mutation CreateIntegrations($integrations: [integrations_insert_input!]!) {
+    insert_integrations(objects: $integrations) {
+      returning {
+        id
+        kind
+        name
+        status
+        created_at
+        updated_at
+      }
+    }
+  }
+`;
+export const DeleteIntegrationDocument = gql`
+  mutation DeleteIntegration($id: uuid!) {
+    delete_integrations_by_pk(id: $id) {
+      id
+    }
+  }
+`;
+export const GetIntegrationsDocument = gql`
+  query GetIntegrations($tenant_id: uuid!) {
+    integrations(where: { tenant_id: { _eq: $tenant_id } }) {
+      id
+      kind
+      name
+      status
+      created_at
+      updated_at
+    }
+  }
+`;
+export const SubscribeToIntegrationListDocument = gql`
+  subscription SubscribeToIntegrationList($tenant_id: uuid!) {
+    integrations(where: { tenant_id: { _eq: $tenant_id } }) {
+      id
+      kind
+      name
+      status
+      created_at
+      updated_at
     }
   }
 `;
@@ -5237,6 +5331,70 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<UpdateContentsMutation>(
           print(UpdateContentsDocument),
+          variables
+        )
+      );
+    },
+    CreateIntegrations(
+      variables: CreateIntegrationsMutationVariables
+    ): Promise<{
+      data?: CreateIntegrationsMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<CreateIntegrationsMutation>(
+          print(CreateIntegrationsDocument),
+          variables
+        )
+      );
+    },
+    DeleteIntegration(
+      variables: DeleteIntegrationMutationVariables
+    ): Promise<{
+      data?: DeleteIntegrationMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<DeleteIntegrationMutation>(
+          print(DeleteIntegrationDocument),
+          variables
+        )
+      );
+    },
+    GetIntegrations(
+      variables: GetIntegrationsQueryVariables
+    ): Promise<{
+      data?: GetIntegrationsQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetIntegrationsQuery>(
+          print(GetIntegrationsDocument),
+          variables
+        )
+      );
+    },
+    SubscribeToIntegrationList(
+      variables: SubscribeToIntegrationListSubscriptionVariables
+    ): Promise<{
+      data?: SubscribeToIntegrationListSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<SubscribeToIntegrationListSubscription>(
+          print(SubscribeToIntegrationListDocument),
           variables
         )
       );

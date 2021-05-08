@@ -1,5 +1,5 @@
-query GetIntegrations {
-  integrations {
+query GetIntegrations($tenant_id: uuid!) {
+  integrations(where: { tenant_id: { _eq: $tenant_id } }) {
     id
     kind
     name

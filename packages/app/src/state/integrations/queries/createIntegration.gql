@@ -1,7 +1,12 @@
-mutation CreateIntegration($integration: integration_insert_input!) {
-  insert_integration(object: $integration) {
+mutation CreateIntegrations($integrations: [integrations_insert_input!]!) {
+  insert_integrations(objects: $integrations) {
     returning {
       id
+      kind
+      name
+      status
+      created_at
+      updated_at
     }
   }
 }

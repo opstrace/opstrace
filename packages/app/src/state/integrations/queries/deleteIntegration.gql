@@ -1,5 +1,5 @@
-mutation DeleteIntegration($id: String!) {
-  delete_integration_by_pk(id: $id) {
+mutation DeleteIntegration($id: uuid!) {
+  delete_integrations_by_pk(id: $id) {
     id
   }
 }
