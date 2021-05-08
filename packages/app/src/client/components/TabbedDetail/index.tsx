@@ -73,11 +73,18 @@ export function TabbedDetail<T = {}>(props: TabbedDetailProps<T>) {
     <div className={classes.root}>
       <AppBar position="static">
         <Tabs value={value} onChange={handleChange}>
-          {map((tab: tabTypes.Tab) => <Tab label={tab.label} />)(props.tabs)}
+          {map((tab: tabTypes.Tab) => (
+            <Tab key={tab.label} label={tab.label} />
+          ))(props.tabs)}
         </Tabs>
       </AppBar>
       {mapIndexed((tab: tabTypes.Tab, index: number) => (
-        <Panel<T> active={value === index} tab={tab} opts={props.opts} />
+        <Panel<T>
+          key={tab.label}
+          active={value === index}
+          tab={tab}
+          opts={props.opts}
+        />
       ))(props.tabs)}
     </div>
   );
