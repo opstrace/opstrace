@@ -14,16 +14,37 @@
  * limitations under the License.
  */
 
-import { createSelector } from "reselect";
-import { useSelector, State } from "state/provider";
+import { isObj } from "ramda-adjunct";
 
-export const selectIntegration = createSelector(
-  (state: State) => state.integrations.loading,
-  (state: State, _) => state.integrations.integrations,
-  (_: State, integrationId: string) => integrationId,
-  (loading, integrations, integrationId: string) =>
-    loading ? null : integrations[integrationId]
-);
+import useHasura from "client/hooks/useHasura";
 
-export const useIntegration = (integrationId: string) =>
-  useSelector((state: State) => selectIntegration(state, integrationId));
+import { Tenant } from "state/tenant/types";
+import { Integration } from "state/integrations/types";
+
+export const useIntegration = (
+  tenant: Tenant | string,
+  id: string
+): Integration => {
+  const tenant_id = isObj(tenant) ? (tenant as Tenant).id : tenant;
+
+  const { data } = useHasura(
+    `
+      query integration($tenant_id: uuid!, $id: uuid!) {
+        tenant(where: {id: {_eq: $tenant_id}}) {
+          integrations(where: {id: {_eq: $id}}) {
+            created_at
+            id
+            kind
+            name
+            status
+            tenant_id
+            updated_at
+          }
+        }
+      }
+     `,
+    { tenant_id: tenant_id, id: id }
+  );
+
+  return data?.integration || null;
+};

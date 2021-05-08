@@ -1,7 +1,8 @@
-mutation CreateIntegrations($integrations: [integrations_insert_input!]!) {
+mutation InsertIntegrations($integrations: [integrations_insert_input!]!) {
   insert_integrations(objects: $integrations) {
     returning {
       id
+      tenant_id
       kind
       name
       status

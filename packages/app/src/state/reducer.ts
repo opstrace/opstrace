@@ -21,7 +21,6 @@ import { reducer as moduleVersionReducer } from "./moduleVersion/reducer";
 import { reducer as fileReducer } from "./file/reducer";
 import { reducer as userReducer } from "./user/reducer";
 import { reducer as tenantReducer } from "./tenant/reducer";
-import { reducer as integrationsReducer } from "./integrations/reducer";
 import { reducer as sandboxReducer } from "./sandbox/reducer";
 import { reducer as formReducer } from "./form/reducer";
 
@@ -29,7 +28,6 @@ export const mainReducers = {
   users: userReducer,
   files: fileReducer,
   tenants: tenantReducer,
-  integrations: integrationsReducer,
   branches: branchReducer,
   modules: moduleReducer,
   moduleVersions: moduleVersionReducer,

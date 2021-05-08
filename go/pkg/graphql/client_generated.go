@@ -1381,97 +1381,20 @@ func (client *Client) UpdateContents(vars *UpdateContentsVariables) (*UpdateCont
 }
 
 //
-// mutation CreateIntegrations($integrations: [integrations_insert_input!]!)
-//
-
-type CreateIntegrationsVariables struct {
-	Integrations *[]IntegrationsInsertInput `json:"integrations,omitempty"`
-}
-
-type CreateIntegrationsResponse struct {
-	InsertIntegrations struct {
-		Returning []struct {
-			ID        string `json:"id"`
-			Kind      string `json:"kind"`
-			Name      string `json:"name"`
-			Status    string `json:"status"`
-			CreatedAt string `json:"created_at"`
-			UpdatedAt string `json:"updated_at"`
-		} `json:"returning"`
-	} `json:"insert_integrations"`
-}
-
-type CreateIntegrationsRequest struct {
-	*http.Request
-}
-
-func NewCreateIntegrationsRequest(url string, vars *CreateIntegrationsVariables) (*CreateIntegrationsRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation CreateIntegrations($integrations: [integrations_insert_input!]!) {
-  insert_integrations(objects: $integrations) {
-    returning {
-      id
-      kind
-      name
-      status
-      created_at
-      updated_at
-    }
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &CreateIntegrationsRequest{req}, nil
-}
-
-func (req *CreateIntegrationsRequest) Execute(client *http.Client) (*CreateIntegrationsResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result CreateIntegrationsResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func CreateIntegrations(url string, client *http.Client, vars *CreateIntegrationsVariables) (*CreateIntegrationsResponse, error) {
-	req, err := NewCreateIntegrationsRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) CreateIntegrations(vars *CreateIntegrationsVariables) (*CreateIntegrationsResponse, error) {
-	return CreateIntegrations(client.Url, client.Client, vars)
-}
-
-//
-// mutation DeleteIntegration($id: uuid!)
+// mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!)
 //
 
 type DeleteIntegrationVariables struct {
-	ID UUID `json:"id"`
+	TenantId UUID `json:"tenant_id"`
+	ID       UUID `json:"id"`
 }
 
 type DeleteIntegrationResponse struct {
-	DeleteIntegrationsByPk struct {
-		ID string `json:"id"`
-	} `json:"delete_integrations_by_pk"`
+	DeleteIntegrations struct {
+		Returning []struct {
+			ID string `json:"id"`
+		} `json:"returning"`
+	} `json:"delete_integrations"`
 }
 
 type DeleteIntegrationRequest struct {
@@ -1485,9 +1408,11 @@ func NewDeleteIntegrationRequest(url string, vars *DeleteIntegrationVariables) (
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation DeleteIntegration($id: uuid!) {
-  delete_integrations_by_pk(id: $id) {
-    id
+		Query: `mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!) {
+  delete_integrations(where: {id: {_eq: $id}, tenant_id: {_eq: $tenant_id}}) {
+    returning {
+      id
+    }
   }
 }`,
 	})
@@ -1527,43 +1452,49 @@ func (client *Client) DeleteIntegration(vars *DeleteIntegrationVariables) (*Dele
 }
 
 //
-// query GetIntegrations($tenant_id: uuid!)
+// mutation InsertIntegrations($integrations: [integrations_insert_input!]!)
 //
 
-type GetIntegrationsVariables struct {
-	TenantId UUID `json:"tenant_id"`
+type InsertIntegrationsVariables struct {
+	Integrations *[]IntegrationsInsertInput `json:"integrations,omitempty"`
 }
 
-type GetIntegrationsResponse struct {
-	Integrations []struct {
-		ID        string `json:"id"`
-		Kind      string `json:"kind"`
-		Name      string `json:"name"`
-		Status    string `json:"status"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
-	} `json:"integrations"`
+type InsertIntegrationsResponse struct {
+	InsertIntegrations struct {
+		Returning []struct {
+			ID        string `json:"id"`
+			TenantId  string `json:"tenant_id"`
+			Kind      string `json:"kind"`
+			Name      string `json:"name"`
+			Status    string `json:"status"`
+			CreatedAt string `json:"created_at"`
+			UpdatedAt string `json:"updated_at"`
+		} `json:"returning"`
+	} `json:"insert_integrations"`
 }
 
-type GetIntegrationsRequest struct {
+type InsertIntegrationsRequest struct {
 	*http.Request
 }
 
-func NewGetIntegrationsRequest(url string, vars *GetIntegrationsVariables) (*GetIntegrationsRequest, error) {
+func NewInsertIntegrationsRequest(url string, vars *InsertIntegrationsVariables) (*InsertIntegrationsRequest, error) {
 	variables, err := json.Marshal(vars)
 	if err != nil {
 		return nil, err
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `query GetIntegrations($tenant_id: uuid!) {
-  integrations(where: {tenant_id: {_eq: $tenant_id}}) {
-    id
-    kind
-    name
-    status
-    created_at
-    updated_at
+		Query: `mutation InsertIntegrations($integrations: [integrations_insert_input!]!) {
+  insert_integrations(objects: $integrations) {
+    returning {
+      id
+      tenant_id
+      kind
+      name
+      status
+      created_at
+      updated_at
+    }
   }
 }`,
 	})
@@ -1575,31 +1506,31 @@ func NewGetIntegrationsRequest(url string, vars *GetIntegrationsVariables) (*Get
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return &GetIntegrationsRequest{req}, nil
+	return &InsertIntegrationsRequest{req}, nil
 }
 
-func (req *GetIntegrationsRequest) Execute(client *http.Client) (*GetIntegrationsResponse, error) {
+func (req *InsertIntegrationsRequest) Execute(client *http.Client) (*InsertIntegrationsResponse, error) {
 	resp, err := execute(client, req.Request)
 	if err != nil {
 		return nil, err
 	}
-	var result GetIntegrationsResponse
+	var result InsertIntegrationsResponse
 	if err := json.Unmarshal(resp.Data, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func GetIntegrations(url string, client *http.Client, vars *GetIntegrationsVariables) (*GetIntegrationsResponse, error) {
-	req, err := NewGetIntegrationsRequest(url, vars)
+func InsertIntegrations(url string, client *http.Client, vars *InsertIntegrationsVariables) (*InsertIntegrationsResponse, error) {
+	req, err := NewInsertIntegrationsRequest(url, vars)
 	if err != nil {
 		return nil, err
 	}
 	return req.Execute(client)
 }
 
-func (client *Client) GetIntegrations(vars *GetIntegrationsVariables) (*GetIntegrationsResponse, error) {
-	return GetIntegrations(client.Url, client.Client, vars)
+func (client *Client) InsertIntegrations(vars *InsertIntegrationsVariables) (*InsertIntegrationsResponse, error) {
+	return InsertIntegrations(client.Url, client.Client, vars)
 }
 
 //

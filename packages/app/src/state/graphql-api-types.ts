@@ -3971,53 +3971,34 @@ export type UpdateContentsMutation = {
   update_file_by_pk?: Maybe<Pick<File, "id">>;
 };
 
-export type CreateIntegrationsMutationVariables = Exact<{
-  integrations: Array<Integrations_Insert_Input> | Integrations_Insert_Input;
-}>;
-
-export type CreateIntegrationsMutation = {
-  insert_integrations?: Maybe<{
-    returning: Array<
-      Pick<
-        Integrations,
-        "id" | "kind" | "name" | "status" | "created_at" | "updated_at"
-      >
-    >;
-  }>;
-};
-
 export type DeleteIntegrationMutationVariables = Exact<{
+  tenant_id: Scalars["uuid"];
   id: Scalars["uuid"];
 }>;
 
 export type DeleteIntegrationMutation = {
-  delete_integrations_by_pk?: Maybe<Pick<Integrations, "id">>;
+  delete_integrations?: Maybe<{ returning: Array<Pick<Integrations, "id">> }>;
 };
 
-export type GetIntegrationsQueryVariables = Exact<{
-  tenant_id: Scalars["uuid"];
+export type InsertIntegrationsMutationVariables = Exact<{
+  integrations: Array<Integrations_Insert_Input> | Integrations_Insert_Input;
 }>;
 
-export type GetIntegrationsQuery = {
-  integrations: Array<
-    Pick<
-      Integrations,
-      "id" | "kind" | "name" | "status" | "created_at" | "updated_at"
-    >
-  >;
-};
-
-export type SubscribeToIntegrationListSubscriptionVariables = Exact<{
-  tenant_id: Scalars["uuid"];
-}>;
-
-export type SubscribeToIntegrationListSubscription = {
-  integrations: Array<
-    Pick<
-      Integrations,
-      "id" | "kind" | "name" | "status" | "created_at" | "updated_at"
-    >
-  >;
+export type InsertIntegrationsMutation = {
+  insert_integrations?: Maybe<{
+    returning: Array<
+      Pick<
+        Integrations,
+        | "id"
+        | "tenant_id"
+        | "kind"
+        | "name"
+        | "status"
+        | "created_at"
+        | "updated_at"
+      >
+    >;
+  }>;
 };
 
 export type CreateModuleMutationVariables = Exact<{
@@ -4582,48 +4563,29 @@ export const UpdateContentsDocument = gql`
     }
   }
 `;
-export const CreateIntegrationsDocument = gql`
-  mutation CreateIntegrations($integrations: [integrations_insert_input!]!) {
+export const DeleteIntegrationDocument = gql`
+  mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!) {
+    delete_integrations(
+      where: { id: { _eq: $id }, tenant_id: { _eq: $tenant_id } }
+    ) {
+      returning {
+        id
+      }
+    }
+  }
+`;
+export const InsertIntegrationsDocument = gql`
+  mutation InsertIntegrations($integrations: [integrations_insert_input!]!) {
     insert_integrations(objects: $integrations) {
       returning {
         id
+        tenant_id
         kind
         name
         status
         created_at
         updated_at
       }
-    }
-  }
-`;
-export const DeleteIntegrationDocument = gql`
-  mutation DeleteIntegration($id: uuid!) {
-    delete_integrations_by_pk(id: $id) {
-      id
-    }
-  }
-`;
-export const GetIntegrationsDocument = gql`
-  query GetIntegrations($tenant_id: uuid!) {
-    integrations(where: { tenant_id: { _eq: $tenant_id } }) {
-      id
-      kind
-      name
-      status
-      created_at
-      updated_at
-    }
-  }
-`;
-export const SubscribeToIntegrationListDocument = gql`
-  subscription SubscribeToIntegrationList($tenant_id: uuid!) {
-    integrations(where: { tenant_id: { _eq: $tenant_id } }) {
-      id
-      kind
-      name
-      status
-      created_at
-      updated_at
     }
   }
 `;
@@ -5335,22 +5297,6 @@ export function getSdk(
         )
       );
     },
-    CreateIntegrations(
-      variables: CreateIntegrationsMutationVariables
-    ): Promise<{
-      data?: CreateIntegrationsMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<CreateIntegrationsMutation>(
-          print(CreateIntegrationsDocument),
-          variables
-        )
-      );
-    },
     DeleteIntegration(
       variables: DeleteIntegrationMutationVariables
     ): Promise<{
@@ -5367,34 +5313,18 @@ export function getSdk(
         )
       );
     },
-    GetIntegrations(
-      variables: GetIntegrationsQueryVariables
+    InsertIntegrations(
+      variables: InsertIntegrationsMutationVariables
     ): Promise<{
-      data?: GetIntegrationsQuery | undefined;
+      data?: InsertIntegrationsMutation | undefined;
       extensions?: any;
       headers: Headers;
       status: number;
       errors?: GraphQLError[] | undefined;
     }> {
       return withWrapper(() =>
-        client.rawRequest<GetIntegrationsQuery>(
-          print(GetIntegrationsDocument),
-          variables
-        )
-      );
-    },
-    SubscribeToIntegrationList(
-      variables: SubscribeToIntegrationListSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToIntegrationListSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToIntegrationListSubscription>(
-          print(SubscribeToIntegrationListDocument),
+        client.rawRequest<InsertIntegrationsMutation>(
+          print(InsertIntegrationsDocument),
           variables
         )
       );

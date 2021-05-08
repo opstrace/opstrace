@@ -15,19 +15,13 @@
  */
 
 import { createAction } from "typesafe-actions";
-import { Integrations, SubscriptionId } from "./types";
 
-export const subscribeToIntegrationList = createAction(
-  "SUBSCRIBE_INTEGRATION_LIST"
-)<SubscriptionId>();
-export const unsubscribeFromIntegrationList = createAction(
-  "UNSUBSCRIBE_INTEGRATION_LIST"
-)<SubscriptionId>();
-
-export const setIntegrationList = createAction(
-  "SET_INTEGRATION_LIST"
-)<Integrations>();
-
-export const deleteIntegration = createAction("DELETE_INTEGRATION")<string>();
-export const addIntegration = createAction("ADD_INTEGRATION")<string>();
-export const updateIntegration = createAction("UPDATE_INTEGRATION")<string>();
+export const insertIntegration = createAction("INSERT_INTEGRATION")<{
+  tenantId: string;
+  kind: string;
+  name: string;
+}>();
+export const deleteIntegration = createAction("DELETE_INTEGRATION")<{
+  tenantId: string;
+  id: string;
+}>();

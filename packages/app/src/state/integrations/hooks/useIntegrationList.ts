@@ -13,34 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useEffect } from "react";
-import { values } from "ramda";
-import { createSelector } from "reselect";
-import { useDispatch, useSelector, State } from "state/provider";
 
-import {
-  subscribeToIntegrationList,
-  unsubscribeFromIntegrationList
-} from "../actions";
-import getSubscriptionID from "state/utils/getSubscriptionID";
+import { isObj } from "ramda-adjunct";
 
-const selectIntegrationList = createSelector(
-  (state: State) => state.integrations.loading,
-  (state: State) => state.integrations.integrations,
-  (loading, integrations) => (loading ? [] : values(integrations))
-);
+import useHasura from "client/hooks/useHasura";
 
-export const useIntegrationList = () => {
-  const integrations = useSelector(selectIntegrationList);
-  const dispatch = useDispatch();
+import { Tenant } from "state/tenant/types";
+import { Integrations } from "state/integrations/types";
 
-  useEffect(() => {
-    const subId = getSubscriptionID();
-    dispatch(subscribeToIntegrationList(subId));
-    return () => {
-      dispatch(unsubscribeFromIntegrationList(subId));
-    };
-  }, [dispatch]);
+export const useIntegrationList = (tenant: Tenant | string): Integrations => {
+  const tenant_id = isObj(tenant) ? (tenant as Tenant).id : tenant;
 
-  return integrations;
+  const { data } = useHasura(
+    `
+      query integrations($tenant_id: uuid!) {
+        integrations(where: {tenant_id: {_eq: $tenant_id}}) {
+          id
+          name
+          kind
+          status
+          created_at
+          updated_at
+        }
+      }
+     `,
+    { tenant_id: tenant_id }
+  );
+
+  return data?.integrations || [];
 };

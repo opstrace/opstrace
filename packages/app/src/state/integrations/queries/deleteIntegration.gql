@@ -1,5 +1,9 @@
-mutation DeleteIntegration($id: uuid!) {
-  delete_integrations_by_pk(id: $id) {
-    id
+mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!) {
+  delete_integrations(
+    where: { id: { _eq: $id }, tenant_id: { _eq: $tenant_id } }
+  ) {
+    returning {
+      id
+    }
   }
 }
