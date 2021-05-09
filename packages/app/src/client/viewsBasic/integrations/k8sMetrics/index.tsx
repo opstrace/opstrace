@@ -15,9 +15,19 @@
  */
 
 import { K8sMetricsForm } from "./Form";
+import { K8sMetricsRow } from "./Row";
+import { K8sMetricsCard } from "./Card";
+import { K8sMetricsDetail } from "./Detail";
 
-export const K8sMetricsIntegration = {
+import { IntegrationDef } from "client/viewsBasic/integrations/types";
+
+export const K8sMetricsIntegration: IntegrationDef = {
   kind: "k8s-metrics",
+  category: "infrastructure",
   label: "Kubernetes Metrics",
-  form: K8sMetricsForm
+  Form: K8sMetricsForm,
+  Row: K8sMetricsRow,
+  Card: K8sMetricsCard,
+  Detail: K8sMetricsDetail,
+  enabled: true
 };

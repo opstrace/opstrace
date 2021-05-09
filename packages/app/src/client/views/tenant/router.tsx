@@ -17,15 +17,14 @@
 import React from "react";
 import { Switch, Route } from "react-router";
 
-import { EARLY_PREVIEW } from "client/flags";
-
 import SideBar from "client/views/sidebar";
 import Layout from "client/layout/MainContent";
+
+import { IntegrationRoutes } from "client/viewsBasic/integrations/routes";
 
 import TenantDetail from "client/views/tenant/TenantDetail";
 import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";
 import { CloudMetrics } from "client/viewsBasic/cloudMetrics";
-import { TenantIntegrations } from "client/viewsBasic/tenantIntegrations";
 
 import NotFound from "client/views/404/404";
 
@@ -45,14 +44,7 @@ const TenantRouter = () => {
           path="/cluster/tenants/:tenantId/cloud-metrics"
           component={CloudMetrics}
         />
-        {EARLY_PREVIEW && (
-          <Route
-            exact
-            key="/cluster/tenants/:tenantId/integrations"
-            path="/cluster/tenants/:tenantId/integrations"
-            component={TenantIntegrations}
-          />
-        )}
+        <IntegrationRoutes />
         <Route
           exact
           key="/cluster/tenants/:tenantId"

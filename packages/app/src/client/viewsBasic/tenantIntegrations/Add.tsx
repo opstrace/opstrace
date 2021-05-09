@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-import { K8sMetricsIntegration } from "./k8sMetrics";
-import { CloudwatchIntegration } from "./cloudwatch";
-import { StackDriverIntegration } from "./stackDriver";
-import { BlackBoxIntegration } from "./blackBox";
+import React from "react";
+import { useParams } from "react-router-dom";
 
-import { IntegrationDefs } from "./types";
-
-export * from "./types";
-
-export const integrations: IntegrationDefs = [
-  K8sMetricsIntegration,
-  CloudwatchIntegration,
-  StackDriverIntegration,
-  BlackBoxIntegration
-];
-
-export default integrations;
+export const AddIntegration = () => {
+  const { integrationKind: kind } = useParams<{
+    integrationKind: string;
+  }>();
+  return <div>Adding Integration - {kind}</div>;
+};

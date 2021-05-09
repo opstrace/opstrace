@@ -25,5 +25,3 @@ export type Integration = {
 
 export type Integrations = Integration[];
 export type IntegrationRecords = Record<string, Integration>;
-
-export type SubscriptionId = number;

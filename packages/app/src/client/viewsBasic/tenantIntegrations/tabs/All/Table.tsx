@@ -15,7 +15,16 @@
  */
 
 import React from "react";
+import { filter, propEq } from "ramda";
+import { useHistory } from "react-router-dom";
 
+import {
+  IntegrationDefs,
+  IntegrationDef
+} from "client/viewsBasic/integrations/types";
+import { addIntegrationPath } from "client/viewsBasic/integrations/paths";
+
+import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 import { withSkeleton } from "client/viewsBasic/utils";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -32,33 +41,55 @@ const useStyles = makeStyles({
   }
 });
 
-type Row = {
-  kind: string;
-};
+type Props = { data: IntegrationDefs };
 
-type Props = { rows: Row[] };
+export const AllIntegrationsTable = withTenantFromParams<Props>(
+  withSkeleton<Props>(({ data, tenant }: Props & TenantProps) => {
+    const history = useHistory();
+    const classes = useStyles();
+    const available = filter(propEq("enabled", true))(data);
 
-export const AllIntegrationsTable = withSkeleton<Props>(({ rows }: Props) => {
-  const classes = useStyles();
+    const onAdd = (i9n: IntegrationDef) => {
+      console.log(i9n);
+      history.push(
+        addIntegrationPath({
+          tenant: tenant,
+          integration: i9n
+        })
+      );
+    };
 
-  return (
-    <TableContainer>
-      <Table stickyHeader className={classes.table}>
-        <TableHead>
-          <TableRow>
-            <TableCell>Kind</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map(row => (
-            <TableRow key={row.kind}>
-              <TableCell component="th" scope="row">
-                {row.kind}
+    return (
+      <TableContainer>
+        <Table stickyHeader className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <h3>Kind</h3>
+              </TableCell>
+              <TableCell>
+                <h3>Category</h3>
+              </TableCell>
+              <TableCell>
+                <h3>Status</h3>
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-});
+          </TableHead>
+          <TableBody>
+            {available.map(i9n => (
+              <TableRow key={i9n.kind}>
+                <TableCell component="th" scope="row">
+                  {i9n.kind}
+                </TableCell>
+                <TableCell>{i9n.category}</TableCell>
+                <TableCell>
+                  <button onClick={() => onAdd(i9n)}>Add Btn</button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  })
+);

@@ -17,6 +17,7 @@
 import React from "react";
 
 import { AllIntegrationsTable } from "./Table";
+import { integrations } from "client/viewsBasic/integrations";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -34,7 +35,7 @@ const AllIntegrations = () => {
 
   return (
     <div className={classes.gridContainer}>
-      <AllIntegrationsTable rows={[{ kind: "Kubernetes Metrics" }]} />
+      <AllIntegrationsTable data={integrations} />
     </div>
   );
 };

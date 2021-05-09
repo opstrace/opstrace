@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import { K8sMetricsIntegration } from "./k8sMetrics";
-import { CloudwatchIntegration } from "./cloudwatch";
-import { StackDriverIntegration } from "./stackDriver";
-import { BlackBoxIntegration } from "./blackBox";
+export type IntegrationDef = {
+  kind: string;
+  category: string;
+  label: string;
+  Form: React.ReactType;
+  Row: React.ReactType;
+  Card: React.ReactType;
+  Detail: React.ReactType;
+  enabled: boolean;
+};
 
-import { IntegrationDefs } from "./types";
-
-export * from "./types";
-
-export const integrations: IntegrationDefs = [
-  K8sMetricsIntegration,
-  CloudwatchIntegration,
-  StackDriverIntegration,
-  BlackBoxIntegration
-];
-
-export default integrations;
+export type IntegrationDefs = IntegrationDef[];
+export type IntegrationDefRecords = Record<string, IntegrationDef>;
