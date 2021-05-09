@@ -18,11 +18,13 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import { useIntegration, useIntegrationList } from "state/integrations/hooks";
+import { useTenant } from "state/tenant/hooks";
 import { Integration, Integrations } from "state/integrations/types";
 import { Tenant } from "state/tenant/types";
-export { Integration, Integrations };
 
 import Skeleton from "@material-ui/lab/Skeleton";
+
+export { Integration, Integrations };
 
 export const withIntegration = <T extends {}>(
   Component: React.ReactType,
@@ -44,16 +46,25 @@ export const withIntegrationFromParams = <T extends {}>(
   Component: React.ReactType
 ) => {
   return (props: T) => {
-    const { tenantId: tenant, integrationId } = useParams<{
+    const { tenantId, integrationId } = useParams<{
       tenantId: string;
       integrationId: string;
     }>();
-    const ComponentWithIntegration = withIntegration<T>(
-      Component,
-      tenant,
-      integrationId
-    );
-    return <ComponentWithIntegration {...props} />;
+
+    const tenant = useTenant(tenantId);
+
+    if (tenant) {
+      const ComponentWithIntegration = withIntegration<T>(
+        Component,
+        tenant,
+        integrationId
+      );
+      return <ComponentWithIntegration {...props} />;
+    } else {
+      return (
+        <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
+      );
+    }
   };
 };
 
@@ -76,6 +87,30 @@ export const withIntegrationList = <T extends {}>(
   };
 };
 
+export const withIntegrationListFromParams = <T extends {}>(
+  Component: React.ReactType
+) => {
+  return (props: T) => {
+    const { tenantId } = useParams<{
+      tenantId: string;
+    }>();
+
+    const tenant = useTenant(tenantId);
+
+    if (tenant) {
+      const ComponentWithIntegrationList = withIntegrationList<T>(
+        Component,
+        tenant
+      );
+      return <ComponentWithIntegrationList {...props} />;
+    } else {
+      return (
+        <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
+      );
+    }
+  };
+};
+
 export type IntegrationListProps = {
-  integration: Integrations;
+  integrations: Integrations;
 };

@@ -16,8 +16,10 @@
 
 import React from "react";
 
-import useHasura from "client/hooks/useHasura";
-import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
+import {
+  withIntegrationListFromParams,
+  IntegrationListProps
+} from "client/viewsBasic/integrations/utils";
 
 import { InstalledIntegrationsTable } from "./Table";
 
@@ -32,29 +34,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const InstalledIntegrations = withTenantFromParams(
-  ({ tenant }: TenantProps) => {
+const InstalledIntegrations = withIntegrationListFromParams(
+  ({ integrations }: IntegrationListProps) => {
     const classes = useStyles();
-
-    const { data } = useHasura(
-      `
-      query integrations($tenant_id: uuid = "") {
-        integrations(where: {tenant_id: {_eq: $tenant_id}}) {
-          id
-          name
-          kind
-          status
-          created_at
-          updated_at
-        }
-      }
-     `,
-      { tenant_id: tenant.id }
-    );
 
     return (
       <div className={classes.gridContainer}>
-        <InstalledIntegrationsTable rows={data?.integrations || []} />
+        <InstalledIntegrationsTable rows={integrations} />
       </div>
     );
   }

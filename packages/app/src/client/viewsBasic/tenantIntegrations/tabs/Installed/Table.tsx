@@ -15,7 +15,9 @@
  */
 
 import React from "react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
+
+import { Integrations } from "state/integrations/types";
 
 import { withSkeleton } from "client/viewsBasic/utils";
 
@@ -33,15 +35,7 @@ const useStyles = makeStyles({
   }
 });
 
-type Row = {
-  id: string;
-  name: string;
-  kind: string;
-  status: number;
-  created_at: string;
-};
-
-type Props = { rows: Row[] };
+type Props = { rows: Integrations };
 
 export const InstalledIntegrationsTable = withSkeleton<Props>(
   ({ rows }: Props) => {
@@ -66,9 +60,7 @@ export const InstalledIntegrationsTable = withSkeleton<Props>(
                 </TableCell>
                 <TableCell>{row.kind}</TableCell>
                 <TableCell>{row.status}</TableCell>
-                <TableCell>
-                  {format(parseISO(row.created_at), "Pppp")}
-                </TableCell>
+                <TableCell>{format(row.created_at, "Pppp")}</TableCell>
               </TableRow>
             ))}
           </TableBody>
