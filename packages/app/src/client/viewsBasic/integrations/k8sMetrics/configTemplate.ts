@@ -151,6 +151,7 @@ rules:
   - ""
   resources:
   - nodes
+  - nodes/metrics
   - nodes/proxy
   - services
   - endpoints
