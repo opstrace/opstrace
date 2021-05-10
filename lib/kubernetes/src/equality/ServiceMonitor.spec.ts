@@ -125,7 +125,7 @@ test("should return false when jobLabel does not match", () => {
   expect(isServiceMonitorEqual(desired, existing)).toBe(false);
 });
 
-describe.only("should return false when endpoint does not match", () => {
+describe("should return false when endpoint does not match", () => {
   it("changing amount of endpoints", () => {
     const existing = generateServiceMonitor();
     const desired = generateServiceMonitor();
@@ -141,7 +141,7 @@ describe.only("should return false when endpoint does not match", () => {
 
     expect(isServiceMonitorEqual(desired, existing)).toBe(false);
   });
-  it.only("different interval", () => {
+  it("different interval", () => {
     const existing = generateServiceMonitor();
     const desired = generateServiceMonitor();
 
