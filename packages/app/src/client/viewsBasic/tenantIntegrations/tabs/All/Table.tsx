@@ -84,9 +84,9 @@ export const AllIntegrationsTable = withTenantFromParams<Props>(
                 <TableCell>{i9n.category}</TableCell>
                 <TableCell>
                   {i9n.enabled && (
-                    <button onClick={() => onAdd(i9n)}>Add Btn</button>
+                    <button onClick={() => onAdd(i9n)}>Add</button>
                   )}
-                  {!i9n.enabled && "Comming soon"}
+                  {!i9n.enabled && <i>Comming soon</i>}
                 </TableCell>
               </TableRow>
             ))}

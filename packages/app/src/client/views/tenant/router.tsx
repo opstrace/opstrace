@@ -44,13 +44,13 @@ const TenantRouter = () => {
           path="/cluster/tenants/:tenantId/cloud-metrics"
           component={CloudMetrics}
         />
-        <IntegrationRoutes />
         <Route
           exact
           key="/cluster/tenants/:tenantId"
           path="/cluster/tenants/:tenantId"
           component={TenantDetail}
         />
+        <IntegrationRoutes />
         <Route key="*" path="*" component={NotFound} />
       </Switch>
     </Layout>
