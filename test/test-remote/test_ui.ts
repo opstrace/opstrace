@@ -98,7 +98,7 @@ async function performLoginFlow(br: Browser) {
 
   // The first view after successful login is expected to be the details page
   // for the `system` tenant, showing a link to Grafana.
-  await page.waitForSelector("text=Grafana:");
+  await page.waitForSelector("text=Getting Started");
 
   await page.screenshot({
     path: artipath("uishot-after-auth0-login.png")
