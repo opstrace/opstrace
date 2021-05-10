@@ -73,8 +73,7 @@ export OPSTRACE_NAME=<name_choosen_at_install_time>
 Let's get things going:
 
 ```bash
-./opstrace upgrade aws $OPSTRACE_NAME \
-  -c opstrace-config.yaml
+./opstrace upgrade aws $OPSTRACE_NAME -c opstrace-config.yaml
 ```
 
 **Be patient:** Upgrade takes on average 10 minutes on AWS (but it can go as long as 30 minutes if upgrading Cortex and Loki).
