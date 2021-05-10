@@ -19,8 +19,8 @@ import { Switch, Route } from "react-router";
 
 import { EARLY_PREVIEW } from "client/flags";
 
-import SideBar from "client/views/sidebar";
-import Layout from "client/layout/MainContent";
+import SideBar from "client/views/module/sidebar/index";
+import Layout from "client/views/module/layout/MainContent";
 
 import TenantDetail from "client/views/tenant/TenantDetail";
 import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";

@@ -61,7 +61,7 @@ const AlertmanagerConfigEditor = withAlertmanagerFromParams(
 
     const initialDataRef = useRef({
       config: alertmanager?.config || "",
-      templates: alertmanager?.templates || ""
+      templates: ""
     });
 
     const dataRef = useRef(initialDataRef.current);
@@ -88,8 +88,7 @@ const AlertmanagerConfigEditor = withAlertmanagerFromParams(
       if (tenant.name && isValid()) {
         dispatch(
           updateAlertmanager({
-            tenantId: tenant.name,
-            templates: dataRef.current.templates,
+            tenantName: tenant.name,
             config: dataRef.current.config,
             formId: formId
           })
@@ -108,7 +107,7 @@ const AlertmanagerConfigEditor = withAlertmanagerFromParams(
         p={1}
       >
         <Box maxWidth={900}>
-          <Card p={3}>
+          <Card>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
               title="Alertmanager"
