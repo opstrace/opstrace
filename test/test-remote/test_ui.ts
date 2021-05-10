@@ -236,7 +236,7 @@ suite("test_ui_with_headless_browser", function () {
       https: { rejectUnauthorized: false } // skip tls cert verification
     };
 
-    const maxWaitSeconds = 600;
+    const maxWaitSeconds = 2100;
     const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
     log.info(
       "Waiting for API for new tenant to become available, deadline in %ss",
