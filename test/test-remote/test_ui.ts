@@ -26,7 +26,9 @@ import got, {
 import { test, suite, suiteSetup } from "mocha";
 
 import {
-  httpcl
+  httpcl,
+  mtimeDeadlineInSeconds,
+  mtime
   //debugLogHTTPResponse,
   //debugLogHTTPResponseLight
 } from "@opstrace/utils";
@@ -234,7 +236,18 @@ suite("test_ui_with_headless_browser", function () {
       https: { rejectUnauthorized: false } // skip tls cert verification
     };
 
+    const maxWaitSeconds = 600;
+    const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
+    log.info(
+      "Waiting for API for new tenant to become available, deadline in %ss",
+      maxWaitSeconds
+    );
+
     while (true) {
+      if (mtime() > deadline) {
+        throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+      }
+
       let resp: GotResponse<string> | undefined;
       try {
         resp = await httpcl(
