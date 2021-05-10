@@ -235,21 +235,25 @@ suite("test_ui_with_headless_browser", function () {
     };
 
     while (true) {
-      const resp: GotResponse<string> | undefined = await httpcl(
-        `https://cortex.${tenantName}.${CLUSTER_NAME}.opstrace.io/api/v1/labels`,
-        httpopts
-      );
+      let resp: GotResponse<string> | undefined;
+      try {
+        resp = await httpcl(
+          `https://cortex.${tenantName}.${CLUSTER_NAME}.opstrace.io/api/v1/labels`,
+          httpopts
+        );
+      } catch (err) {
+        log.info(`request failed: ${err}`);
+      }
 
-      if (resp) {
+      if (resp !== undefined) {
         logHTTPResponse(resp);
         if (resp.statusCode === 200) {
           return;
         }
       }
 
-      log.warning("outer retry: try again in 5 s");
-
-      await sleep(5);
+      log.info("outer retry: try again in 10 s");
+      await sleep(10);
     }
   });
 });
