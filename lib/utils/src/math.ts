@@ -81,3 +81,8 @@ export const select = (value: number, ranges: Range[]): number => {
   }
   return val.choose;
 };
+
+export function rndFloatFromInterval(min: number, max: number) {
+  // half-closed: [min, max)
+  return Math.random() * (max - min) + min;
+}

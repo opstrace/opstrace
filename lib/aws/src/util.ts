@@ -18,8 +18,7 @@ import { strict as assert } from "assert";
 
 import AWS from "aws-sdk";
 
-import { log } from "@opstrace/utils";
-
+import { log, rndFloatFromInterval } from "@opstrace/utils";
 import { AWSApiError } from "./types";
 import { PromiseResult } from "aws-sdk/lib/request";
 
@@ -45,11 +44,6 @@ function getAWSRegion() {
 // Adjust global (singleton) AWS client config
 // `AWS.config` *is* "the global configuration object singleton instance", see
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS.html#config-property
-
-function rndFloatFromInterval(min: number, max: number) {
-  // half-closed: [min, max)
-  return Math.random() * (max - min) + min;
-}
 
 AWS.config.update({
   httpOptions: {
