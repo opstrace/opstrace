@@ -32,7 +32,6 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import DeleteTenantButton from "./deleteTenant";
-import TenantPicker from "./TenantPicker";
 import AddTenantDialog from "./AddTenantDialog";
 import DeleteTenantDialog from "./DeleteTenantDialog";
 import { Button } from "client/components/Button";
@@ -54,7 +53,6 @@ const Tenants = () => {
 
   return (
     <>
-      <TenantPicker />
       <AddTenantDialog />
       <DeleteTenantDialog />
       <Box pt={1} pb={4} display="flex" justifyContent="space-between">
