@@ -28,9 +28,9 @@ const logFormat = format.printf(
 export let log: Logger;
 
 export function setLogger(logger: Logger): void {
-  if (log !== undefined) {
-    throw Error("logger already set");
-  }
+  // if (log !== undefined) {
+  //   throw Error("logger already set");
+  // }
   log = logger;
 }
 
