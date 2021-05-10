@@ -114,10 +114,8 @@ const Login = (props: { state?: State }) => {
     loginWithRedirect
   } = useAuth0();
 
-  const [
-    accessDeniedError,
-    setAccessDeniedError
-  ] = useState<GeneralServerError | null>(null);
+  const [accessDeniedError, setAccessDeniedError] =
+    useState<GeneralServerError | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   // This will look for a param like so: /login?rd=%2Fgrafana
@@ -228,7 +226,9 @@ const Login = (props: { state?: State }) => {
         emoji="💩"
         maxWidth={400}
       >
-        <Typography>Access denied for {user.email}.</Typography>
+        <Typography>
+          Access denied{user ? " for ${user.email}." : ""}.
+        </Typography>
         <br />
         <br />
         <Typography>
@@ -282,9 +282,8 @@ const Login = (props: { state?: State }) => {
 
 function LoginPageParent() {
   // Uninitialized state will cause Child to error out
-  const [loginConfig, setLoginConfig] = useState<
-    LoginConfigInterface | undefined
-  >();
+  const [loginConfig, setLoginConfig] =
+    useState<LoginConfigInterface | undefined>();
   useEffect(() => {
     (async () => {
       // Without this early exit criterion, `fetchLoginConfig()` is going to
