@@ -25,17 +25,29 @@ jest.mock("@opstrace/utils", () => ({
 }));
 
 // return an empty certificate for testing
-function genCert(): V1Certificate {
+function genCert(template: Partial<V1Certificate> = {}): V1Certificate {
   return {
     metadata: {
-      annotations: {}
+      /* start default metadata */
+      generation: 1,
+      resourceVersion: "1234",
+      selfLink: "/random/string",
+      uid: "randomstring",
+      /* end default metadata */
+      annotations: {
+        some: "annotation"
+      },
+      labels: {
+        some: "label"
+      }
     },
     spec: {
       issuerRef: {
         name: "test"
       },
       secretName: "test"
-    }
+    },
+    ...template
   };
 }
 
@@ -43,6 +55,44 @@ test("should return true when certificates are empty", () => {
   const desired = genCert();
   const existing = genCert();
 
+  expect(isCertificateEqual(desired, existing)).toBe(true);
+});
+
+test("should return true when certificates match", () => {
+  const desired = genCert();
+  const existing = genCert();
+
+  desired.metadata = {
+    annotations: {
+      foo: "foo"
+    }
+  };
+  existing.metadata = {
+    annotations: {
+      foo: "foo"
+    }
+  };
+
+  expect(isCertificateEqual(desired, existing)).toBe(true);
+});
+
+test("should return true when spec matches and default metatada is set", () => {
+  const desired = genCert({
+    metadata: {
+      generation: 1,
+      resourceVersion: "1234",
+      selfLink: "/random/string",
+      uid: "randomstring"
+    }
+  });
+  const existing = genCert({
+    metadata: {
+      generation: 2,
+      resourceVersion: "5678",
+      selfLink: "/even/more/random/string",
+      uid: "evenmorerandomstring"
+    }
+  });
   expect(isCertificateEqual(desired, existing)).toBe(true);
 });
 
