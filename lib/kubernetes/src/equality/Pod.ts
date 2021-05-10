@@ -27,6 +27,7 @@ import {
 } from "@kubernetes/client-node";
 
 import { isDeepStrictEqual } from "util";
+import { isResourceListEqual } from "./utils";
 
 export const ENV_HASH_NAME = "OPSTRACE_CONTROLLER_VERSION";
 
@@ -62,27 +63,21 @@ const isPodSpecEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
   }
 
   if (
-    Array.isArray(desired.containers) &&
-    Array.isArray(existing.containers) &&
-    !(
-      desired.containers.length === existing.containers.length &&
-      !desired.containers.find(
-        (c, i) => !isContainerEqual(c, existing.containers[i])
-      )
+    !isResourceListEqual(
+      desired.containers,
+      existing.containers,
+      (desiredContainer, existingContainer) =>
+        isContainerEqual(desiredContainer, existingContainer)
     )
   ) {
     return false;
   }
 
   if (
-    Array.isArray(desired.initContainers) &&
-    Array.isArray(existing.initContainers) &&
-    !(
-      desired.initContainers.length === existing.initContainers.length &&
-      !desired.initContainers.find(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (c, i) => !isContainerEqual(c, existing.initContainers![i])
-      )
+    !isResourceListEqual(
+      desired.initContainers,
+      existing.initContainers,
+      (desiredIC, existingIC) => isContainerEqual(desiredIC, existingIC)
     )
   ) {
     return false;
@@ -106,6 +101,10 @@ const isContainerEqual = (
     !areContainerReadinessProbesEqual(desired, existing) ||
     !areContainerLivenessProbesEqual(desired, existing)
   ) {
+    return false;
+  }
+
+  if (desired.name !== existing.name) {
     return false;
   }
 
@@ -154,14 +153,11 @@ const areContainerPortsEqual = (
   existing: V1Container
 ): boolean => {
   if (
-    Array.isArray(desired.ports) &&
-    Array.isArray(existing.ports) &&
-    !(
-      desired.ports.length === existing.ports.length &&
-      !desired.ports.find(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (p, i) => !isContainerPortEqual(p, existing.ports![i])
-      )
+    !isResourceListEqual(
+      desired.ports,
+      existing.ports,
+      (desiredPort, existingPort) =>
+        isContainerPortEqual(desiredPort, existingPort)
     )
   ) {
     return false;
@@ -262,14 +258,10 @@ const areVolumeMountsEqual = (
   existing: V1Container
 ): boolean => {
   if (
-    Array.isArray(desired.volumeMounts) &&
-    Array.isArray(existing.volumeMounts) &&
-    !(
-      desired.volumeMounts.length === existing.volumeMounts.length &&
-      !desired.volumeMounts.find(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (p, i) => !isVolumeMountEqual(p, existing.volumeMounts![i])
-      )
+    !isResourceListEqual(
+      desired.volumeMounts,
+      existing.volumeMounts,
+      (desiredVM, existingVM) => isVolumeMountEqual(desiredVM, existingVM)
     )
   ) {
     return false;
@@ -294,12 +286,11 @@ const isVolumeMountEqual = (
 
 const areVolumesEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
   if (
-    Array.isArray(desired.volumes) &&
-    Array.isArray(existing.volumes) &&
-    !(
-      desired.volumes.length === existing.volumes.length &&
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      !desired.volumes.find((v, i) => !isVolumeEqual(v, existing.volumes![i]))
+    !isResourceListEqual(
+      desired.volumes,
+      existing.volumes,
+      (desiredVolume, existingVolume) =>
+        isVolumeEqual(desiredVolume, existingVolume)
     )
   ) {
     return false;
@@ -394,11 +385,8 @@ const areVolumeItemsEqual = (
   existing: Array<V1KeyToPath> | undefined
 ): boolean => {
   if (
-    Array.isArray(desired) &&
-    Array.isArray(existing) &&
-    !(
-      desired.length === existing.length &&
-      !desired.find((s, i) => !isVolumeItemEqual(s, existing[i]))
+    !isResourceListEqual(desired, existing, (desiredVolItem, existingVolItem) =>
+      isVolumeItemEqual(desiredVolItem, existingVolItem)
     )
   ) {
     return false;

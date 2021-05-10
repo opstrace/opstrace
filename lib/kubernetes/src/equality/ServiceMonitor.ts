@@ -16,6 +16,7 @@
 
 import { isDeepStrictEqual } from "util";
 import { V1Servicemonitor } from "..";
+import { isResourceListEqual } from "./utils";
 
 export const isServiceMonitorEqual = (
   desired: V1Servicemonitor,
@@ -49,16 +50,14 @@ const areEndpointsEqual = (
   }
 
   if (
-    Array.isArray(desired.spec.endpoints) &&
-    !(
-      desired.spec.endpoints.length === existing.spec.endpoints.length &&
-      !desired.spec.endpoints.find(
-        (p, i) =>
-          !isEndpointEqual(
-            p as Endpoint,
-            existing.spec.endpoints[i] as Endpoint
-          )
-      )
+    !isResourceListEqual(
+      desired.spec.endpoints,
+      existing.spec.endpoints,
+      (desiredEndpoint, existingEndpoint) =>
+        isEndpointEqual(
+          desiredEndpoint as Endpoint,
+          existingEndpoint as Endpoint
+        )
     )
   ) {
     return false;

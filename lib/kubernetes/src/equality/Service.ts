@@ -16,6 +16,7 @@
 
 import { isDeepStrictEqual } from "util";
 import { V1ServiceSpec, V1ServicePort } from "@kubernetes/client-node";
+import { isResourceListEqual } from "./utils";
 
 export const isServiceSpecEqual = (
   desired?: V1ServiceSpec,
@@ -65,11 +66,11 @@ const areServicePortsEqual = (
   }
 
   if (
-    Array.isArray(desired.ports) &&
-    !(
-      desired.ports.length === existing.ports?.length &&
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      !desired.ports.find((p, i) => !isServicePortEqual(p, existing.ports![i]))
+    !isResourceListEqual(
+      desired.ports,
+      existing.ports,
+      (desiredPort, existingPort) =>
+        isServicePortEqual(desiredPort, existingPort)
     )
   ) {
     return false;

@@ -16,6 +16,7 @@
 
 import { isDeepStrictEqual } from "util";
 import { V1Prometheusrule } from "..";
+import { isResourceListEqual } from "./utils";
 
 export const isPrometheusRuleEqual = (
   desired: V1Prometheusrule,
@@ -57,14 +58,10 @@ const areGroupsEqual = (
   }
 
   if (
-    Array.isArray(desired.spec.groups) &&
-    Array.isArray(existing.spec.groups) &&
-    !(
-      desired.spec.groups.length === existing.spec.groups.length &&
-      !desired.spec.groups.find(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (g, i) => !isGroupEqual(g, existing.spec.groups![i])
-      )
+    !isResourceListEqual(
+      desired.spec.groups,
+      existing.spec.groups,
+      (desired, existing) => isGroupEqual(desired, existing)
     )
   ) {
     return false;
