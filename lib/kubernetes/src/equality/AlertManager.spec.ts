@@ -70,6 +70,42 @@ test("should return true when spec matches and default metatada is set", () => {
   expect(isAlertManagerEqual(desired, existing)).toBe(true);
 });
 
+test("should return false when metatada.annotations changed", () => {
+  const desired = generateAlertManager({
+    metadata: {
+      annotations: {
+        my: "old-annotation"
+      }
+    }
+  });
+  const existing = generateAlertManager({
+    metadata: {
+      annotations: {
+        my: "new-annotation"
+      }
+    }
+  });
+  expect(isAlertManagerEqual(desired, existing)).toBe(false);
+});
+
+test("should return false when metatada.labels changed", () => {
+  const desired = generateAlertManager({
+    metadata: {
+      labels: {
+        my: "old-label"
+      }
+    }
+  });
+  const existing = generateAlertManager({
+    metadata: {
+      labels: {
+        my: "new-label"
+      }
+    }
+  });
+  expect(isAlertManagerEqual(desired, existing)).toBe(false);
+});
+
 test("should return false when spec does not match", () => {
   const desired = generateAlertManager({
     spec: {

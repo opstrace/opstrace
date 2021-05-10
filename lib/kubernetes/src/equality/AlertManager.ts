@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-import { isDeepStrictEqual } from "util";
+import equal from "fast-deep-equal";
 import { V1Alertmanager } from "..";
 
 export const isAlertManagerEqual = (
   desired: V1Alertmanager,
   existing: V1Alertmanager
 ): boolean => {
-  if (!isDeepStrictEqual(desired.spec, existing.spec)) {
+  if (!equal(desired.metadata?.annotations, existing.metadata?.annotations)) {
+    return false;
+  }
+  if (!equal(desired.metadata?.labels, existing.metadata?.labels)) {
+    return false;
+  }
+
+  if (!equal(desired.spec, existing.spec)) {
     return false;
   }
 
