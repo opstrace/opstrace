@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Integration } from "state/integrations/types";
 import { IntegrationDef } from "client/viewsBasic/integrations/types";
 import { Tenant } from "state/tenant/types";
 
@@ -25,4 +26,24 @@ export const addIntegrationPath = ({
   integration: IntegrationDef;
 }) => {
   return `/cluster/tenants/${tenant.name}/integrations/add/${integration.kind}`;
+};
+
+export const showIntegrationPath = ({
+  tenant,
+  integration
+}: {
+  tenant: Tenant;
+  integration: Integration;
+}) => {
+  return `/cluster/tenants/${tenant.name}/integrations/${integration.id}`;
+};
+
+export const editIntegrationPath = ({
+  tenant,
+  integration
+}: {
+  tenant: Tenant;
+  integration: Integration;
+}) => {
+  return `/cluster/tenants/${tenant.name}/integrations/${integration.id}/edit`;
 };

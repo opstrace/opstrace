@@ -21,7 +21,9 @@ import { EARLY_PREVIEW } from "client/flags";
 
 import {
   TenantIntegrations,
-  AddIntegration
+  AddIntegration,
+  ShowIntegration,
+  EditIntegration
 } from "client/viewsBasic/tenantIntegrations";
 
 export const IntegrationRoutes = () => {
@@ -35,12 +37,23 @@ export const IntegrationRoutes = () => {
         path="/cluster/tenants/:tenantId/integrations"
         component={TenantIntegrations}
       />
-
       <Route
         exact
         key="/cluster/tenants/:tenantId/integrations/add/:integrationKind"
         path="/cluster/tenants/:tenantId/integrations/add/:integrationKind"
         component={AddIntegration}
+      />
+      <Route
+        exact
+        key="/cluster/tenants/:tenantId/integrations/:integrationId"
+        path="/cluster/tenants/:tenantId/integrations/:integrationId"
+        component={ShowIntegration}
+      />
+      <Route
+        exact
+        key="/cluster/tenants/:tenantId/integrations/:integrationId/edit"
+        path="/cluster/tenants/:tenantId/integrations/:integrationId/edit"
+        component={EditIntegration}
       />
     </Switch>
   );

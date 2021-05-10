@@ -46,5 +46,5 @@ export const useIntegration = (
     { tenant_id: tenant_id, id: id }
   );
 
-  return data?.integration || null;
+  return data?.tenant[0]?.integrations[0] || null;
 };

@@ -16,20 +16,4 @@
 
 import React from "react";
 
-import tabs from "./tabs";
-import { TabbedDetail } from "client/components/TabbedDetail";
-
-import { Card, CardContent, CardHeader } from "client/components/Card";
-
-export { AddIntegration } from "./Add";
-export { ShowIntegration } from "./Show";
-export { EditIntegration } from "./Edit";
-
-export const TenantIntegrations = () => (
-  <Card p={3}>
-    <CardHeader titleTypographyProps={{ variant: "h5" }} title="Integrations" />
-    <CardContent>
-      <TabbedDetail tabs={tabs} />
-    </CardContent>
-  </Card>
-);
+export const EditIntegration = () => <div>Edit Integration</div>;

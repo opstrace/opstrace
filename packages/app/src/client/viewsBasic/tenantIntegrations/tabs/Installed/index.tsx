@@ -35,12 +35,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const InstalledIntegrations = withIntegrationListFromParams(
-  ({ integrations }: IntegrationListProps) => {
+  ({ integrationList }: IntegrationListProps) => {
     const classes = useStyles();
+
+    console.log("integrationList", integrationList);
 
     return (
       <div className={classes.gridContainer}>
-        <InstalledIntegrationsTable rows={integrations} />
+        <InstalledIntegrationsTable data={integrationList} />
       </div>
     );
   }

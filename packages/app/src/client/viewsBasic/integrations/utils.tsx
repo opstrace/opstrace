@@ -112,5 +112,5 @@ export const withIntegrationListFromParams = <T extends {}>(
 };
 
 export type IntegrationListProps = {
-  integrations: Integrations;
+  integrationList: Integrations;
 };

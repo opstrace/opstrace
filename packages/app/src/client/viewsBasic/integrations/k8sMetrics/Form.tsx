@@ -15,17 +15,14 @@
  */
 
 import React from "react";
-import { useForm, Controller, useFormState } from "react-hook-form";
+import { useForm, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import graphqlClient from "state/clients/graphqlClient";
-
 import { ControlledInput } from "client/viewsBasic/common/formUtils";
-import { CondRender } from "client/utils/rendering";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { Select, MenuItem, FormLabel } from "@material-ui/core";
+import { FormLabel } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -50,193 +47,74 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export function K8sMetricsForm(props: {
-  tenantId: string;
-  onCreate: Function;
-}) {
+type Values = {
+  name: string;
+  namespace: string;
+};
+
+const Schema = yup.object().shape({
+  name: yup.string().required(),
+  namespace: yup.string().required()
+});
+
+const defaultValues: Values = {
+  name: "My Dev Cluster",
+  namespace: "opstrace-k8s-monitoring"
+};
+
+type Props = {
+  handleCreate: Function;
+};
+
+export const K8sMetricsForm = ({ handleCreate }: Props) => {
   const classes = useStyles();
-  const { tenantId, onCreate } = props;
-  const { control, watch } = useForm({
-    defaultValues: { cloudProvider: "aws-key" }
+
+  const { handleSubmit, control } = useForm({
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: defaultValues,
+    resolver: yupResolver(Schema)
   });
-  const cloudProvider = watch("cloudProvider");
+
+  const { isValid } = useFormState({
+    control
+  });
+
+  const onSubmit = (data: Values) => {
+    handleCreate({
+      name: data.name,
+      metadata: { namespace: data.namespace }
+    });
+  };
 
   return (
     <>
       <div className={classes.grid}>
         <div className={classes.label}>
-          <FormLabel>Add Cloud Provider</FormLabel>
-        </div>
-        <div className={classes.control}>
-          <Controller
-            render={({ field }) => (
-              <Select {...field}>
-                <MenuItem value="aws-key">Amazon Web Services</MenuItem>
-                <MenuItem value="gcp-service-account">
-                  Google Cloud Platform
-                </MenuItem>
-              </Select>
-            )}
-            control={control}
-            name="cloudProvider"
-          />
+          <FormLabel>Add Kubernetes Metrics Integration</FormLabel>
         </div>
       </div>
 
-      <CondRender when={cloudProvider === "aws-key"}>
-        <AwsForm tenantId={tenantId} onCreate={onCreate} />
-      </CondRender>
-      <CondRender when={cloudProvider === "gcp-service-account"}>
-        <GcpForm tenantId={tenantId} onCreate={onCreate} />
-      </CondRender>
+      <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
+        <ControlledInput
+          name="name"
+          label="Name"
+          control={control}
+          labelClass={classes.label}
+          controlClass={classes.control}
+        />
+        <ControlledInput
+          name="namespace"
+          label="Kubernetes namespace to install in"
+          control={control}
+          labelClass={classes.label}
+          controlClass={classes.control}
+        />
+
+        <div className={classes.control}>
+          <input type="submit" disabled={!isValid} />
+        </div>
+      </form>
     </>
   );
-}
-
-type AwsValues = {
-  name: string;
-  accessKeyId: string;
-  secretAccessKey: string;
 };
-
-const AwsSchema = yup.object().shape({
-  name: yup.string().required(),
-  accessKeyId: yup.string().required(),
-  secretAccessKey: yup.string().required()
-});
-
-const awsDefaultValues: AwsValues = {
-  name: "",
-  accessKeyId: "",
-  secretAccessKey: ""
-};
-
-function AwsForm(props: { tenantId: string; onCreate: Function }) {
-  const classes = useStyles();
-  const { tenantId, onCreate } = props;
-  const { handleSubmit, reset, control } = useForm({
-    mode: "onChange",
-    reValidateMode: "onChange",
-    defaultValues: awsDefaultValues,
-    resolver: yupResolver(AwsSchema)
-  });
-  const { isValid } = useFormState({
-    control
-  });
-  const onSubmit = (data: AwsValues) => {
-    graphqlClient
-      .CreateCredentials({
-        credentials: {
-          tenant: tenantId,
-          name: data.name,
-          type: "aws-key",
-          value: JSON.stringify({
-            AWS_ACCESS_KEY_ID: data.accessKeyId,
-            AWS_SECRET_ACCESS_KEY: data.secretAccessKey
-          })
-        }
-      })
-      .then(response => {
-        onCreate();
-        reset(awsDefaultValues);
-      });
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
-      <ControlledInput
-        name="name"
-        label="Name"
-        control={control}
-        labelClass={classes.label}
-        controlClass={classes.control}
-      />
-      <ControlledInput
-        name="accessKeyId"
-        label="Access Key ID"
-        control={control}
-        labelClass={classes.label}
-        controlClass={classes.control}
-      />
-      <ControlledInput
-        name="secretAccessKey"
-        label="Secret Access Key"
-        helperText="Important: this is stored as plain text."
-        control={control}
-        labelClass={classes.label}
-        controlClass={classes.control}
-      />
-
-      <div className={classes.control}>
-        <input type="submit" disabled={!isValid} />
-      </div>
-    </form>
-  );
-}
-
-type GcpValues = { name: string; accessDoc: string };
-
-const GcpSchema = yup.object().shape({
-  name: yup.string().required(),
-  accessDoc: yup.string().required()
-});
-
-const gcpDefaultValues: GcpValues = {
-  name: "",
-  accessDoc: ""
-};
-
-function GcpForm(props: { tenantId: string; onCreate: Function }) {
-  const classes = useStyles();
-  const { tenantId, onCreate } = props;
-  const { handleSubmit, reset, control } = useForm({
-    mode: "onChange",
-    reValidateMode: "onChange",
-    defaultValues: gcpDefaultValues,
-    resolver: yupResolver(GcpSchema)
-  });
-  const { isValid } = useFormState({
-    control
-  });
-
-  const onSubmit = (data: GcpValues) => {
-    graphqlClient
-      .CreateCredentials({
-        credentials: {
-          tenant: tenantId,
-          name: data.name,
-          type: "gcp-service-account",
-          value: data.accessDoc
-        }
-      })
-      .then(response => {
-        onCreate();
-        reset(gcpDefaultValues);
-      });
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
-      <ControlledInput
-        name="name"
-        label="Name"
-        control={control}
-        labelClass={classes.label}
-        controlClass={classes.control}
-      />
-      <ControlledInput
-        name="accessDoc"
-        label="Access Doc"
-        inputProps={{ multiline: true, rows: 10, fullWidth: true }}
-        helperText="Important: this is stored as plain text."
-        control={control}
-        labelClass={classes.label}
-        controlClass={classes.control}
-      />
-
-      <div className={classes.control}>
-        <input type="submit" disabled={!isValid} />
-      </div>
-    </form>
-  );
-}

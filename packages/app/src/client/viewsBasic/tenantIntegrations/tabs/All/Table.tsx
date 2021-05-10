@@ -15,7 +15,7 @@
  */
 
 import React from "react";
-import { filter, propEq } from "ramda";
+// import { filter, propEq } from "ramda";
 import { useHistory } from "react-router-dom";
 
 import {
@@ -47,7 +47,7 @@ export const AllIntegrationsTable = withTenantFromParams<Props>(
   withSkeleton<Props>(({ data, tenant }: Props & TenantProps) => {
     const history = useHistory();
     const classes = useStyles();
-    const available = filter(propEq("enabled", true))(data);
+    // const available = filter(propEq("enabled", true))(data);
 
     const onAdd = (i9n: IntegrationDef) => {
       console.log(i9n);
@@ -76,14 +76,17 @@ export const AllIntegrationsTable = withTenantFromParams<Props>(
             </TableRow>
           </TableHead>
           <TableBody>
-            {available.map(i9n => (
+            {data.map(i9n => (
               <TableRow key={i9n.kind}>
                 <TableCell component="th" scope="row">
                   {i9n.kind}
                 </TableCell>
                 <TableCell>{i9n.category}</TableCell>
                 <TableCell>
-                  <button onClick={() => onAdd(i9n)}>Add Btn</button>
+                  {i9n.enabled && (
+                    <button onClick={() => onAdd(i9n)}>Add Btn</button>
+                  )}
+                  {!i9n.enabled && "Comming soon"}
                 </TableCell>
               </TableRow>
             ))}

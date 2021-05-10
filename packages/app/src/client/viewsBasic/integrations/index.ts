@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { pluck, zipObj } from "ramda";
+
 import { K8sMetricsIntegration } from "./k8sMetrics";
 import { CloudwatchIntegration } from "./cloudwatch";
 import { StackDriverIntegration } from "./stackDriver";
 import { BlackBoxIntegration } from "./blackBox";
 
-import { IntegrationDefs } from "./types";
+import { IntegrationDefs, IntegrationDefRecords } from "./types";
 
 export * from "./types";
 
@@ -29,5 +31,10 @@ export const integrations: IntegrationDefs = [
   StackDriverIntegration,
   BlackBoxIntegration
 ];
+
+export const integrationRecords: IntegrationDefRecords = zipObj(
+  pluck("kind", integrations),
+  integrations
+);
 
 export default integrations;

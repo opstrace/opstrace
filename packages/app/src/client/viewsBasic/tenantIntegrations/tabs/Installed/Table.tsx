@@ -15,10 +15,12 @@
  */
 
 import React from "react";
-import { format } from "date-fns";
+import { useHistory } from "react-router-dom";
 
 import { Integrations } from "state/integrations/types";
+import { showIntegrationPath } from "client/viewsBasic/integrations/paths";
 
+import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 import { withSkeleton } from "client/viewsBasic/utils";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -35,11 +37,12 @@ const useStyles = makeStyles({
   }
 });
 
-type Props = { rows: Integrations };
+type Props = { data: Integrations };
 
-export const InstalledIntegrationsTable = withSkeleton<Props>(
-  ({ rows }: Props) => {
+export const InstalledIntegrationsTable = withTenantFromParams<Props>(
+  withSkeleton<Props>(({ data, tenant }: Props & TenantProps) => {
     const classes = useStyles();
+    const history = useHistory();
 
     return (
       <TableContainer>
@@ -50,22 +53,34 @@ export const InstalledIntegrationsTable = withSkeleton<Props>(
               <TableCell>Kind</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Used</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map(row => (
-              <TableRow key={row.id}>
+            {data.map(i9n => (
+              <TableRow key={i9n.id}>
                 <TableCell component="th" scope="row">
-                  {row.name}
+                  {i9n.name}
                 </TableCell>
-                <TableCell>{row.kind}</TableCell>
-                <TableCell>{row.status}</TableCell>
-                <TableCell>{format(row.created_at, "Pppp")}</TableCell>
+                <TableCell>{i9n.kind}</TableCell>
+                <TableCell>{i9n.status}</TableCell>
+                <TableCell>{i9n.created_at}</TableCell>
+                <TableCell>
+                  <button
+                    onClick={() =>
+                      history.push(
+                        showIntegrationPath({ tenant, integration: i9n })
+                      )
+                    }
+                  >
+                    Detail
+                  </button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
     );
-  }
+  })
 );
