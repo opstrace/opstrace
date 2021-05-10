@@ -20,7 +20,9 @@ import {
   V1Probe,
   V1Volume,
   V1PodSpec,
-  V1KeyToPath
+  V1KeyToPath,
+  V1ContainerPort,
+  V1VolumeMount
 } from "@kubernetes/client-node";
 import { isPodSpecTemplateEqual } from "./Pod";
 
@@ -53,23 +55,41 @@ function generateProbe(template: Partial<V1Probe> = {}): Required<V1Probe> {
   };
 }
 
+function generateContainerPort(
+  template: Partial<V1ContainerPort> = {}
+): V1ContainerPort {
+  return {
+    name: "my-port",
+    containerPort: 1001,
+    hostPort: 2001,
+    ...template
+  };
+}
+
+function generateVolumeMount(
+  template: Partial<V1VolumeMount> = {}
+): V1VolumeMount {
+  return {
+    name: "my-volume",
+    mountPath: "/mountPath",
+    subPath: "/subpath",
+    ...template
+  };
+}
+
 function generateContainer(template: Partial<V1Container> = {}): V1Container {
   return {
     name: "busybox",
     image: "busybox:1.25",
     ports: [
-      {
-        name: "my-port",
-        containerPort: 8080,
-        hostPort: 3000
-      }
+      generateContainerPort({ name: "port-one" }),
+      generateContainerPort({ name: "port-two" }),
+      generateContainerPort({ name: "port-three" })
     ],
     volumeMounts: [
-      {
-        name: "my-volume",
-        mountPath: "/mountPath",
-        subPath: "/subpath"
-      }
+      generateVolumeMount({ name: "volume-mount-one" }),
+      generateVolumeMount({ name: "volume-mount-two" }),
+      generateVolumeMount({ name: "volume-mount-three" })
     ],
     env: [
       {
@@ -180,18 +200,6 @@ test("should return true when spec matches and default metatada is set", () => {
   expect(isPodSpecTemplateEqual(desired, existing)).toBe(true);
 });
 
-describe("containers", () => {
-  it("should return true when containers have not changed", () => {
-    const existing = generatePodTemplateSpec();
-    const desired = generatePodTemplateSpec();
-
-    existing.spec.containers = [generateContainer(), generateContainer()];
-    desired.spec.containers = [generateContainer(), generateContainer()];
-
-    expect(isPodSpecTemplateEqual(desired, existing)).toBe(true);
-  });
-});
-
 describe("volumes", () => {
   it("should return true when volumes have not changed", () => {
     const existing = generatePodTemplateSpec();
@@ -264,57 +272,213 @@ describe("volumes", () => {
   });
 });
 
-describe("should return false when container liveness probe doesnt match", () => {
-  it("different exec", () => {
-    const existingProbe = generateProbe();
-    const desiredProbe = generateProbe({
-      exec: {
-        command: ["different", "command"]
-      }
-    });
-
+describe("initContainers", () => {
+  it("should return true when initContainers have not changed", () => {
     const existing = generatePodTemplateSpec();
     const desired = generatePodTemplateSpec();
 
-    existing.spec.containers[0].livenessProbe = existingProbe;
-    desired.spec.containers[0].livenessProbe = desiredProbe;
+    existing.spec.initContainers = [generateContainer(), generateContainer()];
+    desired.spec.initContainers = [generateContainer(), generateContainer()];
+
+    expect(isPodSpecTemplateEqual(desired, existing)).toBe(true);
+  });
+
+  it("should return false when initContainers amount has changed", () => {
+    const existing = generatePodTemplateSpec();
+    const desired = generatePodTemplateSpec();
+
+    existing.spec.initContainers = [generateContainer(), generateContainer()];
+    desired.spec.initContainers = [generateContainer()];
+
+    expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+  });
+});
+
+describe("containers", () => {
+  it("should return true when containers have not changed", () => {
+    const existing = generatePodTemplateSpec();
+    const desired = generatePodTemplateSpec();
+
+    existing.spec.containers = [generateContainer(), generateContainer()];
+    desired.spec.containers = [generateContainer(), generateContainer()];
+
+    expect(isPodSpecTemplateEqual(desired, existing)).toBe(true);
+  });
+
+  it("should return false when container amount has changed", () => {
+    const existing = generatePodTemplateSpec();
+    const desired = generatePodTemplateSpec();
+
+    existing.spec.containers = [generateContainer(), generateContainer()];
+    desired.spec.containers = [generateContainer()];
 
     expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
   });
 
-  it("different httpGet", () => {
-    const existingProbe = generateProbe();
-    const desiredProbe = generateProbe({
-      httpGet: {
-        // @ts-ignore should be number, not object as TS insists
-        port: 3001
-      }
+  describe("ports", () => {
+    it("should return false when quantity changes", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].ports = [
+        generateContainerPort(),
+        generateContainerPort()
+      ];
+      desired.spec.containers[0].ports = [generateContainerPort()];
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
+    it("should return false when name doesnt match", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].ports = [
+        generateContainerPort({ name: "old" })
+      ];
+      desired.spec.containers[0].ports = [
+        generateContainerPort({ name: "new" })
+      ];
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
     });
 
-    const existing = generatePodTemplateSpec();
-    const desired = generatePodTemplateSpec();
+    it("should return false when containerPort doesnt match", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
 
-    existing.spec.containers[0].livenessProbe = existingProbe;
-    desired.spec.containers[0].livenessProbe = desiredProbe;
+      existing.spec.containers[0].ports = [
+        generateContainerPort({ containerPort: 1 })
+      ];
+      desired.spec.containers[0].ports = [
+        generateContainerPort({ containerPort: 2 })
+      ];
 
-    expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
+
+    it("should return false when hostPort doesnt match", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].ports = [
+        generateContainerPort({ hostPort: 1 })
+      ];
+      desired.spec.containers[0].ports = [
+        generateContainerPort({ hostPort: 2 })
+      ];
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
   });
 
-  it("different tcpSocket", () => {
-    const existingProbe = generateProbe();
-    const desiredProbe = generateProbe({
-      tcpSocket: {
-        // @ts-ignore should be number, not object as TS insists
-        port: 3001
-      }
+  describe("volume mounts", () => {
+    it("should return false when quantity changes", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].volumeMounts = [
+        generateVolumeMount(),
+        generateVolumeMount()
+      ];
+      desired.spec.containers[0].volumeMounts = [generateVolumeMount()];
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
+    it("should return false when name doesnt match", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].volumeMounts = [
+        generateVolumeMount({ name: "old" })
+      ];
+      desired.spec.containers[0].volumeMounts = [
+        generateVolumeMount({ name: "new" })
+      ];
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
     });
 
-    const existing = generatePodTemplateSpec();
-    const desired = generatePodTemplateSpec();
+    it("should return false when mountPath doesnt match", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
 
-    existing.spec.containers[0].livenessProbe = existingProbe;
-    desired.spec.containers[0].livenessProbe = desiredProbe;
+      existing.spec.containers[0].volumeMounts = [
+        generateVolumeMount({ mountPath: "mount-path-old" })
+      ];
+      desired.spec.containers[0].volumeMounts = [
+        generateVolumeMount({ mountPath: "mount-path-new" })
+      ];
 
-    expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
+
+    it("should return false when subPath doesnt match", () => {
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].volumeMounts = [
+        generateVolumeMount({ subPath: "sub-path-old" })
+      ];
+      desired.spec.containers[0].volumeMounts = [
+        generateVolumeMount({ subPath: "sub-path-new" })
+      ];
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
+  });
+
+  describe("liveness probe", () => {
+    it("should return false when exec doesnt match", () => {
+      const existingProbe = generateProbe();
+      const desiredProbe = generateProbe({
+        exec: {
+          command: ["different", "command"]
+        }
+      });
+
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].livenessProbe = existingProbe;
+      desired.spec.containers[0].livenessProbe = desiredProbe;
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
+
+    it("should return false when httpGet doesnt match", () => {
+      const existingProbe = generateProbe();
+      const desiredProbe = generateProbe({
+        httpGet: {
+          // @ts-ignore should be number, not object as TS insists
+          port: 3001
+        }
+      });
+
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].livenessProbe = existingProbe;
+      desired.spec.containers[0].livenessProbe = desiredProbe;
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
+
+    it("should return false when tcpSocket doesnt match", () => {
+      const existingProbe = generateProbe();
+      const desiredProbe = generateProbe({
+        tcpSocket: {
+          // @ts-ignore should be number, not object as TS insists
+          port: 3001
+        }
+      });
+
+      const existing = generatePodTemplateSpec();
+      const desired = generatePodTemplateSpec();
+
+      existing.spec.containers[0].livenessProbe = existingProbe;
+      desired.spec.containers[0].livenessProbe = desiredProbe;
+
+      expect(isPodSpecTemplateEqual(desired, existing)).toBe(false);
+    });
   });
 });
