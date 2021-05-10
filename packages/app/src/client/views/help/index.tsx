@@ -94,7 +94,7 @@ const Help = () => {
           <Box>
             <Box p={2} width="100%" textAlign="center">
               <Typography variant="h6" color="textSecondary">
-                {isMacLike ? "⌘ + p" : "⌃ + p"}
+                {isMacLike ? "⌘ + k" : "⌃ + k"}
               </Typography>
             </Box>
             <Box p={2}>

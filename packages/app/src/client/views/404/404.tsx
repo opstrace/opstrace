@@ -30,7 +30,7 @@ const StyledPage = styled(Page)`
 
 const NotFound = (props: NotFoundProps) => {
   return (
-    <StyledPage position="absolute">
+    <StyledPage centered>
       <NotFoundComponent {...props} />
     </StyledPage>
   );

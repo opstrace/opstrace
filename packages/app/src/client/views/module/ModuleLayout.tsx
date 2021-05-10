@@ -28,7 +28,7 @@ import { useCommandService } from "client/services/Command";
 import { isEditMode, setEditingMode } from "state/file/utils/navigation";
 import { SplitPane } from "client/components/SplitPane";
 import { ModuleEditorGroup } from "client/components/Editor";
-import Layout from "client/layout/MainContent";
+import Layout from "./layout/MainContent";
 
 import Sandbox from "./Sandbox";
 

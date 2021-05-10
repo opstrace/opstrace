@@ -16,6 +16,7 @@
 
 import deepmerge from "deepmerge";
 import { createMuiTheme } from "@material-ui/core/styles";
+import * as colors from "@material-ui/core/colors";
 
 import { PaletteType } from "./types";
 import common from "./common";
@@ -23,7 +24,16 @@ import common from "./common";
 export const theme = {
   name: "light",
   palette: {
-    type: "light" as PaletteType
+    type: "light" as PaletteType,
+    background: {
+      default: "white",
+      paper: "white"
+    },
+    divider: colors.grey[400],
+    primary: {
+      main: "#5664D2",
+      contrastText: colors.common.white
+    }
   }
 };
 

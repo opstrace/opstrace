@@ -43,9 +43,8 @@ interface Props {
 
 const GlobalStyle = createGlobalStyle`
   body {
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
+    height: 100%;
+    width: 100%;
     padding: 0px !important;
     background-color: ${props => props.theme.palette.background.default};
     
@@ -85,8 +84,8 @@ class ThemeProvider extends React.PureComponent<Props> {
  */
 export function ThemeSwitcher({ children }: { children: React.ReactNode }) {
   const currentUser = useCurrentUser();
-  // Set darkMode by default unless explicitly false
-  const darkMode = currentUser?.preference?.dark_mode === false ? false : true;
+  // Set darkMode to false by default
+  const darkMode = currentUser?.preference?.dark_mode === true ? true : false;
   return (
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       {children}

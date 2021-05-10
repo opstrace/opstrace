@@ -4739,7 +4739,7 @@ export const CreateUserDocument = gql`
   mutation CreateUser($email: String!, $username: String!, $avatar: String!) {
     insert_user_preference_one(
       object: {
-        dark_mode: true
+        dark_mode: false
         user: {
           data: {
             email: $email

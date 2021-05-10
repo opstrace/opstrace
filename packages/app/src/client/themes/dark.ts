@@ -26,18 +26,18 @@ export const theme = {
   palette: {
     type: "dark" as PaletteType,
     background: {
-      default: colors.common.black, //"#18181a",
-      paper: colors.common.black
+      default: "#181C24",
+      paper: "#181C24"
     },
-    divider: colors.grey[800]
-  },
-  overrides: {
-    MuiBackdrop: {
-      root: {
-        backgroundColor: "rgba(255, 255, 255, 0.1)"
-      }
-    }
+    divider: colors.grey[700]
   }
+  // overrides: {
+  //   MuiBackdrop: {
+  //     root: {
+  //       backgroundColor: "rgba(255, 255, 255, 0.1)"
+  //     }
+  //   }
+  // }
 };
 
 export default createMuiTheme(deepmerge(common, theme));

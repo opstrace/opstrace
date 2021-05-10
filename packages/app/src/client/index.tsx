@@ -20,7 +20,7 @@ import { BrowserRouter } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 // import * as serviceWorker from "./serviceWorker";
-import { RoutesWithSSRAssetRemoval } from "./routes";
+import App from "./app";
 
 Sentry.init({
   dsn:
@@ -33,14 +33,14 @@ const root = document.getElementById("root");
 if (process.env.NODE_ENV !== "production") {
   ReactDOM.render(
     <BrowserRouter>
-      <RoutesWithSSRAssetRemoval />
+      <App />
     </BrowserRouter>,
     root
   );
 } else {
   ReactDOM.hydrate(
     <BrowserRouter>
-      <RoutesWithSSRAssetRemoval />
+      <App />
     </BrowserRouter>,
     root
   );

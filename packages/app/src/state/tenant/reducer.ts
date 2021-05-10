@@ -49,10 +49,8 @@ export const reducer = createReducer<TenantState, TenantActions>(
     (state, action): TenantState => {
       return mergeDeepRight(state, {
         tenants: {
-          [action.payload.tenantId]: {
-            alertmanager: pick(["templates", "config", "online"])(
-              action.payload
-            )
+          [action.payload.tenantName]: {
+            alertmanager: pick(["config", "online"])(action.payload)
           }
         }
       });
@@ -63,8 +61,8 @@ export const reducer = createReducer<TenantState, TenantActions>(
     (state, action): TenantState => {
       return mergeDeepRight(state, {
         tenants: {
-          [action.payload.tenantId]: {
-            alertmanager: pick(["templates", "config"])(action.payload)
+          [action.payload.tenantName]: {
+            alertmanager: pick(["config"])(action.payload)
           }
         }
       });

@@ -15,33 +15,19 @@
  */
 
 import React from "react";
-import styled, { css } from "styled-components";
 
 import MuiCard, { CardProps as MuiCardProps } from "@material-ui/core/Card";
+import { makeStyles } from "@material-ui/core/styles";
 
-import { ITheme } from "client/themes/types";
+const useStyles = makeStyles(theme => ({
+  root: {
+    padding: theme.spacing(4)
+  }
+}));
 
-type CardProps = MuiCardProps & {
-  // optional padding
-  p?: number;
+const BaseCard = (props: MuiCardProps) => {
+  const classes = useStyles();
+  return <MuiCard variant="outlined" className={classes.root} {...props} />;
 };
 
-const BaseCard = (props: CardProps) => <MuiCard {...props} />;
-
-function spacing(theme: ITheme, value: number) {
-  if (theme && typeof theme.spacing === "function") {
-    return theme.spacing(value);
-  }
-  return 0;
-}
-
-const Card = styled(BaseCard)`
-  ${props =>
-    props.p
-      ? css`
-          padding: ${spacing(props.theme, props.p)}px;
-        `
-      : ""}
-`;
-
-export default Card;
+export default BaseCard;

@@ -85,10 +85,7 @@ function VirtualList({
 }
 
 const List = React.memo(VirtualList);
-/**
- * blah blah
- * @param props
- */
+
 function MemoList(props: VirtualListProps) {
   return <List {...props} />;
 }

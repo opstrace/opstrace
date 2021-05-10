@@ -37,7 +37,6 @@ const NotFound = ({ title, subheader, content }: NotFoundProps) => {
       title={title ? title : "That's a 404"}
       subheader={subheader ? subheader : ""}
       emoji="😬"
-      maxWidth={400}
       actions={
         <CardActions>
           <Box display="flex" justifyContent="center" width="100%">

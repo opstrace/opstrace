@@ -69,7 +69,7 @@ function PickerList(props: PickerListProps) {
 
   return (
     <Box width={PICKER_WIDTH} height={PICKER_HEIGHT}>
-      <List renderItem={renderItem} items={props.options} itemSize={() => 30} />
+      <List renderItem={renderItem} items={props.options} itemSize={() => 37} />
     </Box>
   );
 }

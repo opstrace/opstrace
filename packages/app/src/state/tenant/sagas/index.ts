@@ -19,8 +19,19 @@ import * as yamlParser from "js-yaml";
 
 import * as actions from "../actions";
 import graphqlClient from "state/clients/graphqlClient";
+import { updateFormStatus, updateForm } from "state/form/actions";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
+
+// create a generic type
+type AsyncReturnType<T extends (...args: any) => any> =
+  // if T matches this signature and returns a Promise, extract
+  // U (the type of the resolved promise) and use that, or...
+  T extends (...args: any) => Promise<infer U>
+    ? U // if T matches this signature and returns anything else, // extract the return value U and use that, or...
+    : T extends (...args: any) => infer U
+    ? U // if everything goes to hell, return an `any`
+    : any;
 
 export default function* tenantTaskManager() {
   const sagas = [
@@ -87,9 +98,11 @@ function* getAlertmanagerListener() {
 
 function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
   try {
-    const response = yield graphqlClient.GetAlertmanager({
-      tenant_id: action.payload
-    });
+    const response: AsyncReturnType<typeof graphqlClient.GetAlertmanager> = yield graphqlClient.GetAlertmanager(
+      {
+        tenant_id: action.payload
+      }
+    );
 
     if (response.data?.getAlertmanager?.config) {
       const cortexConfig = yamlParser.load(
@@ -99,32 +112,21 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
         }
       );
 
-      const templates = yamlParser.dump(cortexConfig.template_files, {
-        schema: yamlParser.JSON_SCHEMA,
-        lineWidth: -1
-      });
-
-      yield put({
-        type: "ALERTMANAGER_LOADED",
-        payload: {
-          tenantId: action.payload,
-          templates: templates,
+      yield put(
+        actions.alertmanagerLoaded({
+          tenantName: action.payload,
           config: cortexConfig.alertmanager_config,
           online: true
-        }
-      });
+        })
+      );
     } else {
-      const defaultTemplate = `default_template: |\n  '{{ define "__alertmanager" }}AlertManager{{ end }}\n  {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}'`;
-
-      yield put({
-        type: "ALERTMANAGER_LOADED",
-        payload: {
-          tenantId: action.payload,
-          templates: defaultTemplate,
+      yield put(
+        actions.alertmanagerLoaded({
+          tenantName: action.payload,
           config: "",
           online: true
-        }
-      });
+        })
+      );
     }
   } catch (err) {
     console.error(err);
@@ -140,41 +142,37 @@ function* updateAlertmanager(
 ) {
   try {
     if (action.payload.formId) {
-      yield put({
-        type: "UPDATE_FORM_STATUS",
-        payload: {
+      yield put(
+        updateFormStatus({
           id: action.payload.formId,
           status: "validating"
-        }
-      });
+        })
+      );
     }
 
-    const templates = yamlParser.load(action.payload.templates, {
-      schema: yamlParser.JSON_SCHEMA
-    });
-
     const config = yamlParser.dump(
-      { template_files: templates, alertmanager_config: action.payload.config },
+      { template_files: "", alertmanager_config: action.payload.config },
       {
         schema: yamlParser.JSON_SCHEMA,
         lineWidth: -1
       }
     );
 
-    const response = yield graphqlClient.UpdateAlertmanager({
-      tenant_id: action.payload.tenantId,
-      input: { config }
-    });
+    const response: AsyncReturnType<typeof graphqlClient.UpdateAlertmanager> = yield graphqlClient.UpdateAlertmanager(
+      {
+        tenant_id: action.payload.tenantName,
+        input: { config }
+      }
+    );
 
     if (action.payload.formId) {
-      yield put({
-        type: "UPDATE_FORM",
-        payload: {
+      yield put(
+        updateForm({
           id: action.payload.formId,
           status: "active",
-          data: { remoteValidation: response.data.updateAlertmanager }
-        }
-      });
+          data: { remoteValidation: response?.data?.updateAlertmanager }
+        })
+      );
     }
   } catch (err) {
     console.error(err);

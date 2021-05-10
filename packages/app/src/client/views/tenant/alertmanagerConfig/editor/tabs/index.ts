@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import ConfigTab from "./Config";
 import TemplatesTab from "./Templates";
 
 import { Tabs } from "client/components/TabbedDetail/types";
 
-export { ConfigTab, TemplatesTab };
-export default [ConfigTab, TemplatesTab] as Tabs;
+export { TemplatesTab };
+export default [TemplatesTab] as Tabs;

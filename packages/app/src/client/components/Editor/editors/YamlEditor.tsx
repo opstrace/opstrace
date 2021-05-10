@@ -29,7 +29,13 @@ const YamlEditor = ({
   data,
   onChange
 }: YamlEditorProps) => {
-  const modelRef = useRef<monaco.editor.IModel | null>(null);
+  const fileUri = monaco.Uri.parse(filename);
+
+  const modelRef = useRef<monaco.editor.IModel | null>(
+    monaco.editor.getModel(fileUri) ||
+      monaco.editor.createModel(data, "yaml", fileUri)
+  );
+
   const subscriptionRef = useRef<monaco.IDisposable | null>(null);
 
   useEffect(() => {
@@ -50,17 +56,6 @@ const YamlEditor = ({
   }, [jsonSchema]);
 
   useEffect(() => {
-    const fileUri = monaco.Uri.parse(filename);
-    modelRef.current =
-      monaco.editor.getModel(fileUri) ||
-      monaco.editor.createModel("", "yaml", fileUri);
-    // return () => {
-    //   modelRef.current?.dispose();
-    //   modelRef.current = null;
-    // };
-  }, [filename]);
-
-  useEffect(() => {
     if (modelRef?.current && onChange) {
       subscriptionRef.current = modelRef.current?.onDidChangeContent(() => {
         if (modelRef?.current) onChange(modelRef.current.getValue(), filename);
@@ -73,7 +68,11 @@ const YamlEditor = ({
   }, [onChange, filename]);
 
   useEffect(() => {
-    modelRef.current?.setValue(data);
+    // Only update the model if we're not updating with the default empty string.
+    // This ensures we keep any changes in the model after navigating away and back again
+    if (data.length) {
+      modelRef.current?.setValue(data);
+    }
   }, [data]);
 
   if (modelRef?.current) return <AutoSizingEditor model={modelRef.current} />;

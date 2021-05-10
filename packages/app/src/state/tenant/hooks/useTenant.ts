@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import { useEffect } from "react";
+import { useRouteMatch } from "react-router";
 import { createSelector } from "reselect";
-import { useSelector, State } from "state/provider";
+import { useSelector, State, useDispatch } from "state/provider";
+import getSubscriptionID from "state/utils/getSubscriptionID";
+import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
+import { Tenant } from "../types";
 
 export const selectTenant = createSelector(
   (state: State) => state.tenants.loading,
@@ -25,6 +30,26 @@ export const selectTenant = createSelector(
     loading ? null : tenants[tenantName]
 );
 
-export default function useTenant(tenantName: string) {
+export function useSelectedTenant() {
+  // Assumes we use the structure in our URL /tenant/<tenantId>/*
+  const tenantRouteMatch = useRouteMatch<{ tenantId: string }>(
+    "/tenant/:tenantId"
+  );
+  return useTenant(tenantRouteMatch?.params.tenantId || "");
+}
+
+export default function useTenant(
+  tenantName: string
+): Tenant | null | undefined {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const subId = getSubscriptionID();
+    dispatch(subscribeToTenantList(subId));
+    return () => {
+      dispatch(unsubscribeFromTenantList(subId));
+    };
+  }, [dispatch]);
+  // can return undefined if the tenantName does not exist
   return useSelector((state: State) => selectTenant(state, tenantName));
 }

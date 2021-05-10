@@ -18,31 +18,33 @@ import { ThemeOptions } from "@material-ui/core/styles";
 import * as colors from "@material-ui/core/colors";
 
 const common: ThemeOptions = {
-  overrides: {
-    MuiTab: {
-      root: {
-        minWidth: "48px",
-        "@media (min-width: 0px)": {
-          minWidth: "48px"
-        }
-      }
-    }
-  },
   props: {
     MuiBackdrop: {
       transitionDuration: 0
     },
     MuiDialog: {
       transitionDuration: 0
+    },
+    MuiListItemText: {
+      primaryTypographyProps: {
+        style: {
+          fontWeight: 700
+        }
+      },
+      secondaryTypographyProps: {
+        style: {
+          fontWeight: 700
+        }
+      }
     }
   },
   palette: {
     primary: {
-      main: "#F54773",
+      main: "#688EFF",
       contrastText: colors.common.white
     },
     secondary: {
-      main: colors.blue.A400,
+      main: "#F54773",
       contrastText: colors.common.white
     },
     success: {
@@ -65,28 +67,50 @@ const common: ThemeOptions = {
   },
   typography: {
     fontFamily: [
+      "fakt-web",
       "-apple-system",
       "BlinkMacSystemFont",
-      '"Segoe UI"',
+      "Segoe UI",
       "Roboto",
-      '"Helvetica Neue"',
+      "Helvetica",
       "Arial",
       "sans-serif",
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"'
+      "Apple Color Emoji",
+      "Segoe UI Emoji",
+      "Segoe UI Symbol"
     ].join(","),
     button: {
       textTransform: "none"
     },
     body2: {
-      fontSize: 13,
-      fontWeight: 500,
-      lineHeight: 1
+      fontSize: "0.875rem",
+      fontWeight: 400,
+      lineHeight: 1.5,
+      letterSpacing: "0.00938em"
+    },
+    body1: {
+      fontSize: "1rem",
+      fontWeight: 400,
+      lineHeight: 1.5,
+      letterSpacing: "0.00938em"
+    },
+    subtitle2: {
+      fontWeight: 600,
+      fontSize: "0.875rem"
+    },
+    h1: {
+      fontWeight: 400,
+      lineHeight: 1.26667,
+      letterSpacing: "-0.00833em",
+      fontSize: "1.875rem"
+    },
+    h6: {
+      fontWeight: 800,
+      fontSize: "0.8rem"
     }
   },
   shape: {
-    borderRadius: 2
+    borderRadius: 6
   }
 };
 

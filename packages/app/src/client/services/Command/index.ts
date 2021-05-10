@@ -15,4 +15,6 @@
  */
 
 export { default as CommandService } from "./CommandService";
+export { cmdID } from "./CommandPicker";
+
 export * from "./CommandService";

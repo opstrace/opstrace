@@ -21,7 +21,7 @@ import { Command } from "./types";
 import { getKeysFromKeybinding } from "client/services/Command/util";
 import Box from "client/components/Box/Box";
 
-const cmdID = "open-command-picker";
+export const cmdID = "open-command-picker";
 
 type CommandPickerProps = {
   commands: Command[];
@@ -54,12 +54,7 @@ function renderKeybindings(data?: Command) {
       {keybindings.map((keys, idx) => (
         <Box display="flex" ml={1} key={`keybinding-${idx}`}>
           {keys.map((keyCode, partIdx) => (
-            <Box
-              bgcolor="grey.500"
-              p={0.3}
-              ml={0.3}
-              key={`keybinding-key-${partIdx}`}
-            >
+            <Box p={0.3} ml={0.3} key={`keybinding-key-${partIdx}`}>
               {keyCode}
             </Box>
           ))}
@@ -77,7 +72,7 @@ function CommandPicker({ commands }: CommandPickerProps) {
       e.keyboardEvent?.preventDefault();
       activatePickerWithText("");
     },
-    keybindings: ["mod+p"]
+    keybindings: ["mod+k"]
   });
 
   const getCommand = useCallback(
