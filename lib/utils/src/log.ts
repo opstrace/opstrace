@@ -130,3 +130,9 @@ export function debugLogErrorDetail(err: Error): void {
     log.debug("could not json-serialize error: %s", e);
   }
 }
+
+// Set default logger So that `log` in this module can actually be used via
+// e.g. `log.info()`, otherwise importing and using `log` from this module w/o
+// calling setLogger() results in difficult-to-debug errors like `Cannot read
+// property 'info' of undefined`.
+setLogger(buildLogger({ stderrLevel: "debug" }));
