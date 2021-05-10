@@ -19,7 +19,7 @@ import { K8sMetricsRow } from "./Row";
 import { K8sMetricsCard } from "./Card";
 import { K8sMetricsShow } from "./Show";
 
-import { IntegrationDef } from "client/viewsBasic/integrations/types";
+import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
 export const K8sMetricsIntegration: IntegrationDef = {
   kind: "k8s-metrics",

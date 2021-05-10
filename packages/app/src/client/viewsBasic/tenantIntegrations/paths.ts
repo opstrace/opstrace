@@ -15,7 +15,7 @@
  */
 
 import { Integration } from "state/integrations/types";
-import { IntegrationDef } from "client/viewsBasic/integrations/types";
+import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 import { Tenant } from "state/tenant/types";
 
 export const addIntegrationPath = ({

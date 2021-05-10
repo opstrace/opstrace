@@ -19,16 +19,14 @@ import React from "react";
 import {
   withIntegrationFromParams,
   IntegrationProps
-} from "client/viewsBasic/integrations/utils";
-import { integrationRecords } from "client/viewsBasic/integrations";
+} from "client/viewsBasic/tenantIntegrations/utils";
+import { integrationDefRecords } from "client/viewsBasic/integrationDefs";
 
 import NotFound from "client/views/404/404";
 
 export const ShowIntegration = withIntegrationFromParams(
   ({ integration }: IntegrationProps) => {
-    const integrationDef = integrationRecords[integration.kind];
-
-    console.log(integrationRecords, integration, integration.kind);
+    const integrationDef = integrationDefRecords[integration.kind];
 
     if (!integrationDef) return <NotFound />;
 

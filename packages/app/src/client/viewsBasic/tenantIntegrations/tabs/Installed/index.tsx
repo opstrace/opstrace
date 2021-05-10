@@ -19,7 +19,7 @@ import React from "react";
 import {
   withIntegrationListFromParams,
   IntegrationListProps
-} from "client/viewsBasic/integrations/utils";
+} from "client/viewsBasic/tenantIntegrations/utils";
 
 import { InstalledIntegrationsTable } from "./Table";
 
@@ -37,8 +37,6 @@ const useStyles = makeStyles(theme => ({
 const InstalledIntegrations = withIntegrationListFromParams(
   ({ integrationList }: IntegrationListProps) => {
     const classes = useStyles();
-
-    console.log("integrationList", integrationList);
 
     return (
       <div className={classes.gridContainer}>

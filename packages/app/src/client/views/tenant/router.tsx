@@ -20,7 +20,7 @@ import { Switch, Route } from "react-router";
 import SideBar from "client/views/sidebar";
 import Layout from "client/layout/MainContent";
 
-import { IntegrationRoutes } from "client/viewsBasic/integrations/routes";
+import { IntegrationRoutes } from "client/viewsBasic/tenantIntegrations/routes";
 
 import TenantDetail from "client/views/tenant/TenantDetail";
 import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";

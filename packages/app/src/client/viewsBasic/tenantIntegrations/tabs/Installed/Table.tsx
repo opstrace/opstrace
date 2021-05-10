@@ -18,10 +18,10 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 
 import { Integrations } from "state/integrations/types";
-import { showIntegrationPath } from "client/viewsBasic/integrations/paths";
+import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
-import { withSkeleton } from "client/viewsBasic/utils";
+import { withSkeleton } from "client/viewsBasic/common/utils";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";

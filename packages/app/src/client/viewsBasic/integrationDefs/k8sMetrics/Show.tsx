@@ -16,15 +16,12 @@
 
 import React from "react";
 
-import { IntegrationDef } from "client/viewsBasic/integrations/types";
+import { IntegrationProps } from "client/viewsBasic/tenantIntegrations/utils";
 
-export const BlackBoxIntegration: IntegrationDef = {
-  kind: "blackbox",
-  category: "exporter",
-  label: "Black Box",
-  Form: () => <div />,
-  Row: () => <div />,
-  Card: () => <div />,
-  Show: () => <div />,
-  enabled: false
+export const K8sMetricsShow = ({ integration }: IntegrationProps) => {
+  return (
+    <div>
+      Show Integration - {integration.name} - {integration.kind}
+    </div>
+  );
 };

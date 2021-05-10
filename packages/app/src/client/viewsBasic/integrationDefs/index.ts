@@ -25,16 +25,16 @@ import { IntegrationDefs, IntegrationDefRecords } from "./types";
 
 export * from "./types";
 
-export const integrations: IntegrationDefs = [
+export const integrationsDefs: IntegrationDefs = [
   K8sMetricsIntegration,
   CloudwatchIntegration,
   StackDriverIntegration,
   BlackBoxIntegration
 ];
 
-export const integrationRecords: IntegrationDefRecords = zipObj(
-  pluck("kind", integrations),
-  integrations
+export const integrationDefRecords: IntegrationDefRecords = zipObj(
+  pluck("kind", integrationsDefs),
+  integrationsDefs
 );
 
-export default integrations;
+export default integrationsDefs;

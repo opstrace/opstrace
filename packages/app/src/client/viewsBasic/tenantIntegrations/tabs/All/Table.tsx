@@ -21,11 +21,11 @@ import { useHistory } from "react-router-dom";
 import {
   IntegrationDefs,
   IntegrationDef
-} from "client/viewsBasic/integrations/types";
-import { addIntegrationPath } from "client/viewsBasic/integrations/paths";
+} from "client/viewsBasic/integrationDefs/types";
+import { addIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
-import { withSkeleton } from "client/viewsBasic/utils";
+import { withSkeleton } from "client/viewsBasic/common/utils";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -50,7 +50,6 @@ export const AllIntegrationsTable = withTenantFromParams<Props>(
     // const available = filter(propEq("enabled", true))(data);
 
     const onAdd = (i9n: IntegrationDef) => {
-      console.log(i9n);
       history.push(
         addIntegrationPath({
           tenant: tenant,

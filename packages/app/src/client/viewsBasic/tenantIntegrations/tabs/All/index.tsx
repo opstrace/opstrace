@@ -17,7 +17,7 @@
 import React from "react";
 
 import { AllIntegrationsTable } from "./Table";
-import { integrations } from "client/viewsBasic/integrations";
+import { integrationsDefs } from "client/viewsBasic/integrationDefs";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -35,7 +35,7 @@ const AllIntegrations = () => {
 
   return (
     <div className={classes.gridContainer}>
-      <AllIntegrationsTable data={integrations} />
+      <AllIntegrationsTable data={integrationsDefs} />
     </div>
   );
 };

@@ -21,8 +21,8 @@ import { useHistory } from "react-router-dom";
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { Integration } from "state/integrations/types";
-import { integrationRecords } from "client/viewsBasic/integrations";
-import { showIntegrationPath } from "client/viewsBasic/integrations/paths";
+import { integrationDefRecords } from "client/viewsBasic/integrationDefs";
+import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
 import graphqlClient from "state/clients/graphqlClient";
 
@@ -40,7 +40,7 @@ export const AddIntegration = withTenantFromParams(
     }>();
     const history = useHistory();
 
-    const integration = integrationRecords[kind];
+    const integration = integrationDefRecords[kind];
     if (!integration) return <NotFound />;
 
     const onCreate = (data: NewIntegration) => {
@@ -58,7 +58,6 @@ export const AddIntegration = withTenantFromParams(
             ?.returning[0] as Integration | undefined;
           if (integration)
             history.push(showIntegrationPath({ tenant, integration }));
-          console.log("integration created", response);
         });
     };
 

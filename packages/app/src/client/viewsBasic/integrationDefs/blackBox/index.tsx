@@ -16,12 +16,12 @@
 
 import React from "react";
 
-import { IntegrationDef } from "client/viewsBasic/integrations/types";
+import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
-export const CloudwatchIntegration: IntegrationDef = {
-  kind: "cloudwatch",
+export const BlackBoxIntegration: IntegrationDef = {
+  kind: "blackbox",
   category: "exporter",
-  label: "Cloudwatch",
+  label: "Black Box",
   Form: () => <div />,
   Row: () => <div />,
   Card: () => <div />,

@@ -16,12 +16,15 @@
 
 import React from "react";
 
-import { IntegrationProps } from "client/viewsBasic/integrations/utils";
+import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
-export const K8sMetricsShow = ({ integration }: IntegrationProps) => {
-  return (
-    <div>
-      Show Integration - {integration.name} - {integration.kind}
-    </div>
-  );
+export const StackDriverIntegration: IntegrationDef = {
+  kind: "stack-driver",
+  category: "exporter",
+  label: "Stack Driver",
+  Form: () => <div />,
+  Row: () => <div />,
+  Card: () => <div />,
+  Show: () => <div />,
+  enabled: false
 };
