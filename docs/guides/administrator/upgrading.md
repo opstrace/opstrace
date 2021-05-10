@@ -50,6 +50,8 @@ curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
 curl -L https://go.opstrace.com/cli-latest-linux | tar xjf -
 ```
 
+<!-- /tabs -->
+
 Make note of this new version:
 
 ```bash
@@ -63,6 +65,7 @@ Define `OPSTRACE_NAME` with your Opstrace installation name:
 ```bash
 export OPSTRACE_NAME=<name_choosen_at_install_time>
 ```
+<!--/export-to-input-->
 
 **Your input needed:** After you initiate the command below, a browser page may pop up asking you to sign in with your Google account.
 (The URL will also be printed in the CLI output.)
