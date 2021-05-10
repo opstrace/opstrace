@@ -6,6 +6,10 @@ description: Upgrade Opstrace to latest available release.
 
 This guide will show you how to upgrade Opstrace to the latest available version on AWS.
 
+The upgrade command updates the cloud resources and deploys an updated version of the Opstrace operator, which in turn updates the components of the system:
+
+![upgrade overview diagram](../../assets/opstrace-upgrades-flow.png)
+
 **NOTES:**
 
 There are many issues associated with doing upgrades well.
