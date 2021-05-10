@@ -25,6 +25,9 @@ const BaseCardActions = (props: CardActionsProps) => (
   <MuiCardActions {...props} />
 );
 
-const CardActions = styled(BaseCardActions)``;
+const CardActions = styled(BaseCardActions)`
+  padding-left: 0px;
+  padding-right: 0px;
+`;
 
 export default CardActions;

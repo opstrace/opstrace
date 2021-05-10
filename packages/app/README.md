@@ -67,7 +67,7 @@ When making graphql querys that utilise Hasura Actions the full stack needs to b
 
 Make sure you are correctly setup to access the cluster, for example using
 
-- `source secrets/aws-dev-svc-acc-env.sh`
+- `source ../../secrets/aws-dev-svc-acc-env.sh`
 - `aws eks update-kubeconfig --name <your cluster name here> --region us-west-2`
 
 Then run all of the following commands:

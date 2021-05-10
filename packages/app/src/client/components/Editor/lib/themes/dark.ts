@@ -25,7 +25,7 @@ const entries = Object.entries as <T>(
 ) => [Extract<keyof T, string>, T[keyof T]][];
 
 const white = "#ffffff";
-const black = "#18181a";
+const black = "#181C24";
 const variableColor = "#f2b472";
 
 const syntaxClasses = {

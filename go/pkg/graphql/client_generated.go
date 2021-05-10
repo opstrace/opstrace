@@ -2104,7 +2104,7 @@ func NewCreateUserRequest(url string, vars *CreateUserVariables) (*CreateUserReq
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
 		Query: `mutation CreateUser($email: String!, $username: String!, $avatar: String!) {
-  insert_user_preference_one(object: {dark_mode: true, user: {data: {email: $email, username: $username, active: true, avatar: $avatar}}}) {
+  insert_user_preference_one(object: {dark_mode: false, user: {data: {email: $email, username: $username, active: true, avatar: $avatar}}}) {
     user {
       id
       email

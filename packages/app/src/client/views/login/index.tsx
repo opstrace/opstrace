@@ -313,7 +313,7 @@ function LoginPageChild(lcfg: LoginConfigInterface) {
   }, []);
 
   return (
-    <Page>
+    <Page centered height="100vh" width="100vw">
       <Auth0Provider
         domain={lcfg.auth0_domain}
         clientId={lcfg.auth0_client_id}

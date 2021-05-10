@@ -22,7 +22,7 @@ import { TabbedDetail } from "client/components/TabbedDetail";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 
 export const CloudMetrics = () => (
-  <Card p={3}>
+  <Card>
     <CardHeader
       titleTypographyProps={{ variant: "h5" }}
       title="Cloud Metrics"

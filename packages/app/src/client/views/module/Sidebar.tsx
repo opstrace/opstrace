@@ -21,9 +21,9 @@ import AddIcon from "@material-ui/icons/Add";
 import { SideBar, SideBarContainer } from "client/components/SideBar";
 import { ModuleTreeViewContainer } from "client/components/TreeView";
 
-import BranchSelector from "client/views/common/BranchSelector";
+import BranchSelector from "./BranchSelector";
 import { usePickerService } from "client/services/Picker";
-import CreateModuleDialog from "client/views/common/CreateModuleDialog";
+import CreateModuleDialog from "./CreateModuleDialog";
 
 function ModuleSidebar() {
   const { activatePickerWithText } = usePickerService();

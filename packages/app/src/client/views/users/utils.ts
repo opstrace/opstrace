@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-import React from "react";
-import { Meta } from "@storybook/react";
+import { map } from "ramda";
 
-import ActivityBar from "./ActivityBar";
-import Box from "client/components/Box/Box";
+import { User, Users } from "state/user/types";
+import { PanelItem } from "client/components/Panel";
 
-export default {
-  title: "Views/Common/ActivityBar"
-} as Meta;
-
-export const Default = (): JSX.Element => {
-  return (
-    <Box ml={1}>
-      <ActivityBar />
-    </Box>
-  );
+export const userToItem = (user: User): PanelItem => {
+  return { id: user.username, text: user.username, data: user };
 };
+
+export const usersToItems: (users: Users) => PanelItem[] = map(userToItem);

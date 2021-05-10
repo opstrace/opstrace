@@ -92,10 +92,10 @@ const ErrorView = (props: ErrorViewProps) => {
 
   return (
     <Box maxWidth={maxWidth}>
-      <Card variant="outlined" p={2}>
+      <Card variant="outlined">
         <CardHeader avatar={emoji} title={title} subheader={subheader} />
         <CardContent>{content}</CardContent>
-        <Box p={1}>
+        <Box pb={1} pt={1}>
           {props.actions !== undefined ? props.actions : defaultActions}
         </Box>
       </Card>

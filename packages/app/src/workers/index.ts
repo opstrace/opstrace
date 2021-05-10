@@ -17,6 +17,7 @@
 import "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/esm/vs/editor/edcore.main";
 import "monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution";
+import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution";
 import "monaco-yaml/lib/esm/monaco.contribution";
 /* eslint-disable import/no-webpack-loader-syntax */
 /*
@@ -43,7 +44,7 @@ import {
 import { languages } from "monaco-editor/esm/vs/editor/editor.api";
 
 import type { OpScriptWorker } from "./opscript/opscriptWorker";
-import buildTime from "client/buildInfo";
+// import buildTime from "client/buildInfo";
 
 export const getOpScriptWorker = async (): Promise<OpScriptWorker> => {
   const worker = await getTypeScriptWorker();
@@ -54,18 +55,20 @@ export const opScriptDefaults = typescriptDefaults;
 // @ts-ignore
 export const { yaml } = languages || {};
 
-(async function fetchSDKTypings() {
-  if (process.env.RUNTIME === "sandbox") {
-    return;
-  }
-  try {
-    const res = await fetch(`/_/modules/opstrace.lib.d.ts?mtime=${buildTime}`);
-    const content = await res.text();
-    opScriptDefaults.addExtraLib(content, "opstrace.lib.d.ts");
-  } catch (err) {
-    console.error(err);
-  }
-})();
+// Disabled temporarily
+
+// (async function fetchSDKTypings() {
+//   if (process.env.RUNTIME === "sandbox") {
+//     return;
+//   }
+//   try {
+//     const res = await fetch(`/_/modules/opstrace.lib.d.ts?mtime=${buildTime}`);
+//     const content = await res.text();
+//     opScriptDefaults.addExtraLib(content, "opstrace.lib.d.ts");
+//   } catch (err) {
+//     console.error(err);
+//   }
+// })();
 
 opScriptDefaults.setEagerModelSync(true);
 opScriptDefaults.setCompilerOptions({

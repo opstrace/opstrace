@@ -21,6 +21,8 @@ import MuiCardHeader, { CardHeaderProps } from "@material-ui/core/CardHeader";
 
 const BaseCardHeader = (props: CardHeaderProps) => <MuiCardHeader {...props} />;
 
-const CardHeader = styled(BaseCardHeader)``;
+const CardHeader = styled(BaseCardHeader)`
+  padding: 0px;
+`;
 
 export default CardHeader;

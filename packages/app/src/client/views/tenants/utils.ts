@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import React from "react";
+import { map } from "ramda";
 
-import { Page } from "client/components/Page";
+import { Tenant, Tenants } from "state/tenant/types";
+import { PanelItem } from "client/components/Panel";
 
-const FullPage = (props: { children: React.ReactNode }) => {
-  return (
-    <Page p={0} justifyContent="left" alignItems="normal">
-      {props.children}
-    </Page>
-  );
+export const tenantToItem = (tenant: Tenant): PanelItem => {
+  return { id: tenant.name, text: tenant.name, data: tenant };
 };
 
-export default FullPage;
+export const tenantsToItems: (tenants: Tenants) => PanelItem[] = map(
+  tenantToItem
+);

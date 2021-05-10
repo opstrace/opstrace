@@ -21,7 +21,6 @@ import { mapIndexed } from "ramda-adjunct";
 import * as tabTypes from "./types";
 
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Box from "@material-ui/core/Box";
@@ -39,7 +38,7 @@ function Panel<T>({ active, tab, opts }: TabPanelProps<T>) {
   return (
     <div role="tabpanel" hidden={!active} id={key}>
       {active && (
-        <Box p={3}>
+        <Box mt={3} mb={3}>
           <Content {...opts} />
         </Box>
       )}
@@ -50,7 +49,7 @@ function Panel<T>({ active, tab, opts }: TabPanelProps<T>) {
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
-    backgroundColor: theme.palette.background.paper
+    borderBottom: `1px solid ${theme.palette.divider}`
   }
 }));
 

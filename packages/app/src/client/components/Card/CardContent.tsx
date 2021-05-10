@@ -25,6 +25,13 @@ const BaseCardContent = (props: CardContentProps) => (
   <MuiCardContent {...props} />
 );
 
-const CardContent = styled(BaseCardContent)``;
+const CardContent = styled(BaseCardContent)`
+  padding-left: 0px;
+  padding-right: 0px;
+
+  &.MuiCardContent-root:last-child {
+    padding-bottom: 0px;
+  }
+`;
 
 export default CardContent;

@@ -17,19 +17,35 @@
 import React from "react";
 import MuiBox, { BoxProps as MuiBoxProps } from "@material-ui/core/Box";
 
-export type PageProps = MuiBoxProps;
+export type PageProps = MuiBoxProps & {
+  centered?: boolean;
+};
 
-const Page = (props: PageProps) => (
-  <MuiBox
-    width="100vw"
-    height="100vh"
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-    flexWrap="wrap"
-    p={1}
-    {...props}
-  />
-);
+const Page = ({ centered, ...props }: PageProps) => {
+  if (centered) {
+    return (
+      <MuiBox
+        width="100%"
+        height="100%"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexWrap="wrap"
+        p={1}
+        {...props}
+      />
+    );
+  }
+  return (
+    <MuiBox
+      width="100%"
+      height="100%"
+      display="flex"
+      flexWrap="wrap"
+      p={1}
+      {...props}
+    />
+  );
+};
 
 export default Page;

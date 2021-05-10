@@ -60,13 +60,8 @@ const getColorForState = (theme: ITheme, state?: ButtonState) => {
 };
 
 const Button = styled(BaseButton)`
-  box-shadow: none;
   text-decoration: none;
-  &:hover {
-    box-shadow: none;
-  }
   color: ${props => getColorForState(props.theme, props.state).contrastText};
-
   ${props =>
     props.variant === "contained" &&
     css`
