@@ -25,6 +25,6 @@ export const CloudwatchIntegration: IntegrationDef = {
   Form: () => <div />,
   Row: () => <div />,
   Card: () => <div />,
-  Detail: () => <div />,
+  Show: () => <div />,
   enabled: false
 };

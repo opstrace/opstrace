@@ -17,7 +17,7 @@
 import { K8sMetricsForm } from "./Form";
 import { K8sMetricsRow } from "./Row";
 import { K8sMetricsCard } from "./Card";
-import { K8sMetricsDetail } from "./Detail";
+import { K8sMetricsShow } from "./Show";
 
 import { IntegrationDef } from "client/viewsBasic/integrations/types";
 
@@ -28,6 +28,6 @@ export const K8sMetricsIntegration: IntegrationDef = {
   Form: K8sMetricsForm,
   Row: K8sMetricsRow,
   Card: K8sMetricsCard,
-  Detail: K8sMetricsDetail,
+  Show: K8sMetricsShow,
   enabled: true
 };

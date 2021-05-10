@@ -42,14 +42,13 @@ export const AddIntegration = withTenantFromParams(
 
     const integration = integrationRecords[kind];
     if (!integration) return <NotFound />;
-    // const Form = integration.Form;
 
     const onCreate = (data: NewIntegration) => {
       graphqlClient
         .InsertIntegrations({
           integrations: {
             tenant_id: tenant.id,
-            kind: "k8sMetrics",
+            kind: "k8s-metrics",
             name: data.name,
             status: "pending"
           }
@@ -66,16 +65,3 @@ export const AddIntegration = withTenantFromParams(
     return <integration.Form handleCreate={onCreate} />;
   }
 );
-
-// {data: {…}, headers: Headers, status: 200}
-// data:
-// insert_integrations:
-// returning: Array(1)
-// 0:
-// created_at: "2021-05-10T02:10:48.907139"
-// id: "16fe15cb-9b87-4765-9ba2-99e6d6a89d74"
-// kind: "k8sMetrics"
-// name: "My Dev Cluster"
-// status: "pending"
-// tenant_id: "8c97adfa-b4a9-4ce7-a65f-128f57f781ed"
-// updated_at: "2021-05

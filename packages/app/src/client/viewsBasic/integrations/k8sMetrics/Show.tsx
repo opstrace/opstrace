@@ -16,6 +16,12 @@
 
 import React from "react";
 
-export const K8sMetricsDetail = () => {
-  return <div>k8sMetrics</div>;
+import { IntegrationProps } from "client/viewsBasic/integrations/utils";
+
+export const K8sMetricsShow = ({ integration }: IntegrationProps) => {
+  return (
+    <div>
+      Show Integration - {integration.name} - {integration.kind}
+    </div>
+  );
 };

@@ -21,7 +21,7 @@ export type IntegrationDef = {
   Form: React.ReactType;
   Row: React.ReactType;
   Card: React.ReactType;
-  Detail: React.ReactType;
+  Show: React.ReactType;
   enabled: boolean;
 };
 

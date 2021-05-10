@@ -20,11 +20,23 @@ import {
   withIntegrationFromParams,
   IntegrationProps
 } from "client/viewsBasic/integrations/utils";
+import { integrationRecords } from "client/viewsBasic/integrations";
+
+import NotFound from "client/views/404/404";
 
 export const ShowIntegration = withIntegrationFromParams(
-  ({ integration }: IntegrationProps) => (
-    <div>
-      Show Integration - {integration.name} - {integration.kind}
-    </div>
-  )
+  ({ integration }: IntegrationProps) => {
+    const integrationDef = integrationRecords[integration.kind];
+
+    console.log(integrationRecords, integration, integration.kind);
+
+    if (!integrationDef) return <NotFound />;
+
+    return (
+      <integrationDef.Show
+        integration={integration}
+        integrationDef={integrationDef}
+      />
+    );
+  }
 );
