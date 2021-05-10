@@ -130,7 +130,7 @@ optional arguments:
 
 ### `upgrade`
 
-Upgrades an Opstrace cluster.
+Upgrades an Opstrace cluster to the CLI version running the command.
 
 NOTE: GCP platform is not yet supported.
 
@@ -169,11 +169,14 @@ optional arguments:
 
 Notes:
 
+* The CLI version that executes the upgrade command defines the Opstrace target version.
+* The original config file used to create the cluster is a requirement to upgrade the cloud provider infrastructure. This requirement might change in the future.
+* The original config file should not contain any changes. Opstrace does not yet fully support changing some options after the initial install.
 * The `upgrade` operation has internal timeout and retry logic.
   Unless you know better, it makes sense to keep this procedure running.
 * When the `upgrade` operation detects a problem that needs to be resolved through human intervention then it does not necessarily error out immediately.
   Instead, it presents the problem through its logs, retries periodically, and waits for you to take action behind the scenes.
-  For example, when a cloud resource can't be upgrade as of a quota error then you can infer that from the CLI's log output and can take action while the CLI keeps retrying.
+  For example, when a cloud resource can't be upgraded as of a quota error then you can infer that from the CLI's log output and can take action while the CLI keeps retrying.
   If you do not take action, the `upgrade` operation will time out eventually.
 * For some permanent, non-retryable errors the `upgrade` operation will exit immediately, providing a clear error message.
 * When the `upgrade` operation errors out expectedly or unexpectedly or when you interrupt it manually (for instance, by sending `SIGINT` via `Ctrl+C`) then you can safely re-run it.
