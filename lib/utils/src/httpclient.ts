@@ -23,6 +23,7 @@ import got, {
 } from "got";
 
 import { log } from "./log";
+//import { rndFloatFromInterval } from "./math";
 
 // Generic/default HTTP timeout settings object for HTTP requests made with
 // `got`. Note that every time an HTTP request is made we should review timeout
@@ -127,23 +128,32 @@ function retryfunc(ro: GotRetryObject): number {
   // with error class code, like ECONNREFUSED. All the errors below inherit
   // this one."
 
+  // Implement upper bond.
+  let waitSec = 1.6 ** ro.attemptCount;
+  if (waitSec > 15) {
+    waitSec = 15;
+  }
+  const waitMilliSec = waitSec * 1000;
+
   let msg = "";
   msg += `${req.options.method} HTTP request to ${req.requestUrl} failed. `;
   msg += `Attempt: ${ro.attemptCount}. `;
   msg += `Error: ${ro.error.code}, ${ro.error.message}. `;
+  msg += `Retry in ${waitSec.toFixed(1)} s. `;
 
   const resp = ro.error.response;
   if (resp === undefined) {
-    // No response information: transient / transport issue.
+    // No response information: transient / transport issue, e.g. DNS
+    // resolution problem or RECV timeout..
     log.info(msg);
-    return 2000;
+    return waitMilliSec;
   }
 
   msg += `Response code: ${resp.statusCode}. `;
   msg += `Response body[:500]: ${getBodyPrefix(resp)}.`;
 
   log.info(msg);
-  return 2000;
+  return waitMilliSec;
 }
 
 function getBodyPrefix(resp: GotResponse<unknown>): string {
@@ -173,7 +183,7 @@ export const httpcl: Got = got.extend({
   retry: {
     limit: 10,
     calculateDelay: retryfunc,
-    // remove 429 for now, forhttps://github.com/opstrace/opstrace/issues/30
+    // remove 429 for now, for https://github.com/opstrace/opstrace/issues/30
     statusCodes: [408, 413, 500, 502, 503, 504, 521, 522, 524],
     // do not retry for longer than 5 minutes
     maxRetryAfter: 5 * 60 * 1000
