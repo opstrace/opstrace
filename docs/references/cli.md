@@ -130,7 +130,7 @@ optional arguments:
 
 ### `upgrade`
 
-Upgrades an Opstrace cluster to the CLI version running the command.
+Upgrade Opstrace from the version running in your account to the version defined by the current CLI you are using.
 
 NOTE: GCP platform is not yet supported.
 
@@ -170,8 +170,7 @@ optional arguments:
 Notes:
 
 * The CLI version that executes the upgrade command defines the Opstrace target version.
-* The original config file used to create the cluster is a requirement to upgrade the cloud provider infrastructure. This requirement might change in the future.
-* The original config file should not contain any changes. Opstrace does not yet fully support changing some options after the initial install.
+* The original config file used to create the cluster is required. However, changes to it are not yet supported. This requirement might change in the future.
 * The `upgrade` operation has internal timeout and retry logic.
   Unless you know better, it makes sense to keep this procedure running.
 * When the `upgrade` operation detects a problem that needs to be resolved through human intervention then it does not necessarily error out immediately.
