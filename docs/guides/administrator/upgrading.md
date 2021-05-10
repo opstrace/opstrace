@@ -81,6 +81,8 @@ For additional information understanding and troubleshooting the `upgrade` comma
 
 When everything is done, you'll see the following log line:
 
-`info: Opstrace cluster upgrade done for $OPSTRACE_NAME (aws)`
+```text
+info: Opstrace cluster upgrade done for $OPSTRACE_NAME (aws)
+```
 
 In case of any **upgrade errors** check the [known issues section](troubleshooting.md#known-issues) or search our [GitHub issues](https://github.com/opstrace/opstrace/issues).
