@@ -128,6 +128,57 @@ optional arguments:
                      warning, error. Default: info
 ```
 
+### `upgrade`
+
+Upgrades an Opstrace cluster.
+
+NOTE: GCP platform it not yet supported.
+
+Example (to upgrade a cluster named `testcluster` in AWS):
+
+```text
+./opstrace upgrade aws testcluster -c config.yaml
+```
+
+Help text:
+
+```text
+$ ./opstrace upgrade --help
+usage: opstrace upgrade [-h] [--log-level LEVEL] [-c CONFIG_FILE_PATH] [--yes] [--region REGION]
+                        PROVIDER CLUSTER_NAME
+
+positional arguments:
+  PROVIDER              The cloud provider to act on (aws, gcp).
+  CLUSTER_NAME          The Opstrace cluster name ([a-z0-9-_], no more than 23 characters).
+
+optional arguments:
+optional arguments:
+  -h, --help         show this help message and exit
+  --log-level LEVEL  Set log level for output on stderr. One of: debug, info,
+                     warning, error. Default: info
+  -c CONFIG_FILE_PATH, --cluster-config CONFIG_FILE_PATH
+                        File path to cluster config document (YAML). Read
+                        from stdin otherwise.
+  --yes              Automatic yes to prompts; assume 'yes' as answer to all
+                     prompts andrun non-interactively
+  --region REGION    Set the AWS region to destroy in. Only needed when the
+                     automatic region detection fails (when the corresponding
+                     EKS cluster cannot be found or inspected). Not yet
+                     supported for GCP.
+```
+
+Notes:
+
+* The `upgrade` operation has internal timeout and retry logic.
+  Unless you know better, it makes sense to keep this procedure running.
+* When the `upgrade` operation detects a problem that needs to be resolved through human intervention then it does not necessarily error out immediately.
+  Instead, it presents the problem through its logs, retries periodically, and waits for you to take action behind the scenes.
+  For example, when a cloud resource can't be upgrade as of a quota error then you can infer that from the CLI's log output and can take action while the CLI keeps retrying.
+  If you do not take action, the `upgrade` operation will time out eventually.
+* For some permanent, non-retryable errors the `upgrade` operation will exit immediately, providing a clear error message.
+* When the `upgrade` operation errors out expectedly or unexpectedly or when you interrupt it manually (for instance, by sending `SIGINT` via `Ctrl+C`) then you can safely re-run it.
+  It is designed to pick up the work where it was left.
+
 ## Cloud credential discovery
 
 <!--tabs-->
