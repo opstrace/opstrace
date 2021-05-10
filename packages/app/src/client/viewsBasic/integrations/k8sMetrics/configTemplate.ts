@@ -47,7 +47,8 @@ data:
   prometheus.yml: |-
     remote_write:
     - url: https://cortex.${tenantName}.${clusterName}.opstrace.io/api/v1/push
-      bearer_token_file: /var/run/tenant-auth/token
+      authorization:
+        credentials_file: /var/run/tenant-auth/token
 
     scrape_configs:
     # Collection of per-pod metrics
@@ -55,9 +56,11 @@ data:
       kubernetes_sd_configs:
       - role: pod
 
+      # TLS config for getting pod info, not querying pods themselves
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
       # Always use HTTPS for the api server
@@ -89,9 +92,12 @@ data:
       kubernetes_sd_configs:
       - role: node
 
+      scheme: https
+      # TLS config for getting list of nodes to scrape, not querying nodes themselves
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
       - target_label: __scheme__
@@ -109,9 +115,11 @@ data:
       kubernetes_sd_configs:
       - role: endpoints
 
+      # TLS config for getting endpoint info, not querying nodes themselves
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
       - source_labels: [__meta_kubernetes_service_label_component]
@@ -143,6 +151,7 @@ rules:
   - ""
   resources:
   - nodes
+  - nodes/metrics
   - nodes/proxy
   - services
   - endpoints
