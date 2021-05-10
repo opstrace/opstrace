@@ -68,7 +68,7 @@ const TenantDetail = withTenantFromParams(({ tenant }: TenantProps) => {
       p={1}
     >
       <Box maxWidth={700}>
-        <Card p={3}>
+        <Card>
           <CardHeader
             titleTypographyProps={{ variant: "h5" }}
             action={

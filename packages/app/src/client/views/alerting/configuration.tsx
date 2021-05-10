@@ -96,7 +96,6 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
   const formState = useFormState<FormData>(formId, defaultData);
   const dataRef = useRef(alertmanager?.config || "");
   const classes = useStyles();
-  let hasMadeEdits = false;
 
   useEffect(() => {
     dataRef.current = alertmanager?.config;
@@ -110,7 +109,6 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
 
   const handleSave = useCallback(() => {
     if (tenant?.name && validationError) {
-      hasMadeEdits = false;
       dispatch(
         updateAlertmanager({
           tenantName: tenant.name,
@@ -163,8 +161,6 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
       maxWait: 5000
     });
 
-    hasMadeEdits = true;
-
     validationCheckOnChangeStart(filename);
     checkValidationOnChangePause(filename);
   }, []);
@@ -184,8 +180,7 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
           Save
         </Button>
       </Box>
-      {!hasMadeEdits &&
-        validationResponse &&
+      {validationResponse &&
         !validationResponse.success &&
         validationResponse.error_raw_response && (
           <ErrorPanel message={validationResponse.error_raw_response} />
