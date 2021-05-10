@@ -132,7 +132,7 @@ optional arguments:
 
 Upgrades an Opstrace cluster.
 
-NOTE: GCP platform it not yet supported.
+NOTE: GCP platform is not yet supported.
 
 Example (to upgrade a cluster named `testcluster` in AWS):
 
@@ -161,7 +161,7 @@ optional arguments:
                         from stdin otherwise.
   --yes              Automatic yes to prompts; assume 'yes' as answer to all
                      prompts andrun non-interactively
-  --region REGION    Set the AWS region to destroy in. Only needed when the
+  --region REGION    Set the AWS region. Only needed when the
                      automatic region detection fails (when the corresponding
                      EKS cluster cannot be found or inspected). Not yet
                      supported for GCP.
