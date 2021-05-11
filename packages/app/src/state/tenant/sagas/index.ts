@@ -98,11 +98,11 @@ function* getAlertmanagerListener() {
 
 function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
   try {
-    const response: AsyncReturnType<typeof graphqlClient.GetAlertmanager> = yield graphqlClient.GetAlertmanager(
-      {
-        tenant_id: action.payload
-      }
-    );
+    const response: AsyncReturnType<
+      typeof graphqlClient.GetAlertmanager
+    > = yield graphqlClient.GetAlertmanager({
+      tenant_id: action.payload
+    });
 
     if (response.data?.getAlertmanager?.config) {
       const cortexConfig = yamlParser.load(
@@ -137,6 +137,12 @@ function* updateAlertmanagerListener() {
   yield takeEvery(actions.updateAlertmanager, updateAlertmanager);
 }
 
+// Note: until we add back in user editing of template files for the alertmanager configuration we are using the default as something valid needs to be specified
+const DEFAULT_TEMPLATE_FILES = `default_template: |\n  '{{ define "__alertmanager" }}AlertManager{{ end }}\n  {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}'`;
+const template_files = yamlParser.load(DEFAULT_TEMPLATE_FILES, {
+  schema: yamlParser.JSON_SCHEMA
+});
+
 function* updateAlertmanager(
   action: ReturnType<typeof actions.updateAlertmanager>
 ) {
@@ -151,19 +157,22 @@ function* updateAlertmanager(
     }
 
     const config = yamlParser.dump(
-      { template_files: "", alertmanager_config: action.payload.config },
+      {
+        template_files: template_files,
+        alertmanager_config: action.payload.config
+      },
       {
         schema: yamlParser.JSON_SCHEMA,
         lineWidth: -1
       }
     );
 
-    const response: AsyncReturnType<typeof graphqlClient.UpdateAlertmanager> = yield graphqlClient.UpdateAlertmanager(
-      {
-        tenant_id: action.payload.tenantName,
-        input: { config }
-      }
-    );
+    const response: AsyncReturnType<
+      typeof graphqlClient.UpdateAlertmanager
+    > = yield graphqlClient.UpdateAlertmanager({
+      tenant_id: action.payload.tenantName,
+      input: { config }
+    });
 
     if (action.payload.formId) {
       yield put(
