@@ -24,7 +24,10 @@ jest.mock("@opstrace/utils", () => ({
   }
 }));
 
-type Group = NonNullable<V1Prometheusrule["spec"]["groups"]>[number];
+// Extracting the type of prometheusRule.spec.groups
+type GroupList = NonNullable<V1Prometheusrule["spec"]["groups"]>;
+// Extracting type of element in GroupList
+type Group = GroupList[number];
 type Rule = Group["rules"][number];
 
 function generateRule(template: Partial<Rule> = {}): Rule {
