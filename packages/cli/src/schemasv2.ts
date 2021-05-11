@@ -15,7 +15,11 @@
  */
 import * as yup from "yup";
 
-import { CLUSTER_NAME_REGEX, KNOWN_AWS_REGIONS } from "@opstrace/config";
+import {
+  CLUSTER_NAME_REGEX,
+  TENANT_NAME_REGEX,
+  KNOWN_AWS_REGIONS
+} from "@opstrace/config";
 
 import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
@@ -65,7 +69,7 @@ export const ClusterConfigFileSchemaV2 = yup
     // see opstrace-prelaunch/issues/1676
     tenants: yup
       .array()
-      .of(yup.string())
+      .of(yup.string().matches(TENANT_NAME_REGEX))
       .min(1, "`tenants` needs to contain at least one tenant name")
       .defined(),
 
