@@ -231,7 +231,7 @@ suite("test_ui_with_headless_browser", function () {
       method: "GET",
       // Some HTTP error responses are expected. Do this handling work manually.
       throwHttpErrors: false,
-      headers: { Authorization: `Bearer: ${tenantAuthToken}` },
+      headers: { Authorization: `Bearer ${tenantAuthToken}` },
       timeout: httpTimeoutSettings,
       https: { rejectUnauthorized: false } // skip tls cert verification
     };
