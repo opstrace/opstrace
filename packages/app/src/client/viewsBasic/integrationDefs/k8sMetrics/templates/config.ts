@@ -113,12 +113,16 @@ data:
       # Include node hostname
       - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
         target_label: instance
+      # Include job label for the nodes
+      - source_labels: []
+        target_label: job
+        replacement: kubelet
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
         replacement: ${integrationId}
 
-    # Collection of the default/kubernetes service
+    # Collection of the kubernetes apiserver
     - job_name: 'kubernetes-service'
       kubernetes_sd_configs:
       - role: endpoints
@@ -138,7 +142,7 @@ data:
       # Include job label for the service
       - source_labels: []
         target_label: job
-        replacement: default/kubernetes
+        replacement: apiserver
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
