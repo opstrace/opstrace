@@ -30,7 +30,7 @@ export const CLUSTER_NAME_REGEX = /^[a-z0-9-_]+$/;
 
 // This is the same regex the k8s ecosystem uses for dns-related label values
 // see https://github.com/opstrace/opstrace/issues/710
-export const TENANT_NAME_REGEX = /[a-z0-9]([-a-z0-9]*[a-z0-9])?/;
+export const TENANT_NAME_REGEX = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
 
 export function setClusterConfig(c: LatestClusterConfigType): void {
   if (clusterConfig !== undefined) {
