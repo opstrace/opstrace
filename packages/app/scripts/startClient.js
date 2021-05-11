@@ -48,6 +48,7 @@ const createDevServerConfig = require("../config/webpackDevServer.config");
 
 const useYarn = fs.existsSync(paths.yarnLockFile);
 const isInteractive = process.stdout.isTTY;
+const buildForRemoteDev = process.env.REMOTE_DEV;
 
 // Warn and crash if required files are missing
 if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
@@ -151,9 +152,10 @@ checkBrowsers(paths.appPath, isInteractive)
         );
         console.log();
       }
-
-      console.log(chalk.cyan("Starting the development server...\n"));
-      openBrowser(urls.localUrlForBrowser);
+      if (!buildForRemoteDev) {
+        console.log(chalk.cyan("Starting the development server...\n"));
+        openBrowser(urls.localUrlForBrowser);
+      }
     });
 
     ["SIGINT", "SIGTERM"].forEach(function (sig) {

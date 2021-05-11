@@ -151,9 +151,7 @@ module.exports = function (webpackEnv) {
     mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     // Stop compilation early in production
     bail: isEnvProduction,
-    devtool: isEnvProduction
-        ? "source-map"
-        : "cheap-module-source-map",
+    devtool: isEnvProduction ? "source-map" : "cheap-module-source-map",
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
     entry: {
@@ -179,7 +177,7 @@ module.exports = function (webpackEnv) {
     },
     output: {
       // The build folder.
-      path: isEnvProduction ? paths.appBuild : undefined,
+      path: paths.appBuild,
       // Add /* filename */ comments to generated require()s in the output.
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
@@ -386,27 +384,27 @@ module.exports = function (webpackEnv) {
                   "@babel/plugin-proposal-class-properties",
                   "@babel/plugin-syntax-dynamic-import",
                   [
-                    require.resolve('babel-plugin-transform-imports'),
+                    require.resolve("babel-plugin-transform-imports"),
                     {
-                      '@material-ui/core': {
+                      "@material-ui/core": {
                         // Use "transform: '@material-ui/core/${member}'," if your bundler does not support ES modules
-                        'transform': '@material-ui/core/esm/${member}',
-                        'preventFullImport': true
+                        transform: "@material-ui/core/esm/${member}",
+                        preventFullImport: true
                       },
-                      '@material-ui/icons': {
+                      "@material-ui/icons": {
                         // Use "transform: '@material-ui/icons/${member}'," if your bundler does not support ES modules
-                        'transform': '@material-ui/icons/esm/${member}',
-                        'preventFullImport': true
+                        transform: "@material-ui/icons/esm/${member}",
+                        preventFullImport: true
                       },
-                      '@material-ui/styles': {
+                      "@material-ui/styles": {
                         // Use "transform: '@material-ui/icons/${member}'," if your bundler does not support ES modules
-                        'transform': '@material-ui/styles/esm/${member}',
-                        'preventFullImport': true
+                        transform: "@material-ui/styles/esm/${member}",
+                        preventFullImport: true
                       },
-                      '@material-ui/lab': {
+                      "@material-ui/lab": {
                         // Use "transform: '@material-ui/icons/${member}'," if your bundler does not support ES modules
-                        'transform': '@material-ui/lab/esm/${member}',
-                        'preventFullImport': true
+                        transform: "@material-ui/lab/esm/${member}",
+                        preventFullImport: true
                       }
                     }
                   ],
