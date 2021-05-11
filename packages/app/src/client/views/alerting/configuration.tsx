@@ -161,6 +161,7 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
       maxWait: 5000
     });
 
+    dataRef.current = newConfig;
     validationCheckOnChangeStart(filename);
     checkValidationOnChangePause(filename);
   }, []);
@@ -195,7 +196,7 @@ const AlertmanagerConfigEditor = (props: AlertmanagerConfigEditorProps) => {
         <YamlEditor
           filename={`${tenant.name}-alertmanager-config.yaml`}
           jsonSchema={jsonSchema}
-          data={dataRef.current}
+          data={alertmanager?.config || ""} // using this to initially seed the editor as don't want it to re-render each time we update dataRef based on user typing - it sends their cursor back to the start of the file
           onChange={handleChange}
         />
       </Box>
