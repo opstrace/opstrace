@@ -64,7 +64,7 @@ export default function setupWebsocketHandling(server: http.Server) {
         }
       });
     } else {
-      log.info("denying socket upgrade request to unknown endpoint");
+      log.info(`socket upgrade request to unknown endpoint ${pathname}`);
       socket.destroy();
     }
   });

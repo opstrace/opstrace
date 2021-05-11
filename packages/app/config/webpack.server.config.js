@@ -144,7 +144,12 @@ module.exports = {
     extensions: [".ts", ".tsx", ".mjs", ".js", ".jsx"],
     alias: paths.aliases
   },
-  plugins: [new NodemonPlugin()],
+  plugins: [
+    new NodemonPlugin({
+      delay: "400",
+      watch: path.join(__dirname, "..")
+    })
+  ],
   module: {
     strictExportPresence: true,
     rules: [

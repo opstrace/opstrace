@@ -46,3 +46,8 @@ publish-app:
 publish-graphql: DOCKER_IMAGE_NAME = graphql
 publish-graphql:
 	$(call publish_docker_image)
+
+.PHONY: remote-dev
+remote-dev:
+	docker build -t app-dev -f Dockerfile.app-dev ../../
+	telepresence --swap-deployment opstrace-application --namespace application --docker-run --rm -it -v $(shell cd ../../ && pwd):/usr/src/opstrace app-dev
