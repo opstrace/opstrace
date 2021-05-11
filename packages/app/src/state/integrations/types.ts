@@ -18,9 +18,10 @@ export type Integration = {
   id: string;
   kind: string;
   name: string;
-  status: ["pending", "active", "error", "unknown"];
+  status: "pending" | "active" | "error" | "unknown";
   created_at: Date;
   updated_at: Date;
+  data: any;
 };
 
 export type Integrations = Integration[];

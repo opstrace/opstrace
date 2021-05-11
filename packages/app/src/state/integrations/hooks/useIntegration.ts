@@ -32,12 +32,13 @@ export const useIntegration = (
       query integration($tenant_id: uuid!, $id: uuid!) {
         tenant(where: {id: {_eq: $tenant_id}}) {
           integrations(where: {id: {_eq: $id}}) {
-            created_at
             id
             kind
             name
             status
+            data
             tenant_id
+            created_at
             updated_at
           }
         }

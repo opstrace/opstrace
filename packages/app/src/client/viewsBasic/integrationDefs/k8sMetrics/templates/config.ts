@@ -24,12 +24,20 @@
 // - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
 //
 // The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
-export function prometheusYaml(
-  clusterName: String,
-  tenantName: String,
-  integrationId: String,
-  deployNamespace: String,
-): String {
+
+type Props = {
+  clusterName: String;
+  tenantName: String;
+  integrationId: String;
+  deployNamespace: String;
+};
+
+export function prometheusYaml({
+  clusterName,
+  tenantName,
+  integrationId,
+  deployNamespace
+}: Props): BlobPart {
   return `apiVersion: v1
 kind: Secret
 metadata:
@@ -229,12 +237,12 @@ spec:
 // - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
 //
 // The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
-export function promtailYaml(
-  tenantName: String,
-  clusterName: String,
-  integrationId: String,
-  deployNamespace: String,
-): String {
+export function promtailYaml({
+  clusterName,
+  tenantName,
+  integrationId,
+  deployNamespace
+}: Props): BlobPart {
   return `apiVersion: v1
 kind: Secret
 metadata:

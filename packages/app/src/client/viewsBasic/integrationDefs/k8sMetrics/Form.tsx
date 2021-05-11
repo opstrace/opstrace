@@ -49,17 +49,17 @@ const useStyles = makeStyles(theme => ({
 
 type Values = {
   name: string;
-  namespace: string;
+  deployNamespace: string;
 };
 
 const Schema = yup.object().shape({
   name: yup.string().required(),
-  namespace: yup.string().required()
+  deployNamespace: yup.string().required()
 });
 
 const defaultValues: Values = {
   name: "My Dev Cluster",
-  namespace: "opstrace-k8s-monitoring"
+  deployNamespace: "opstrace-k8s-monitoring"
 };
 
 type Props = {
@@ -83,7 +83,7 @@ export const K8sMetricsForm = ({ handleCreate }: Props) => {
   const onSubmit = (data: Values) => {
     handleCreate({
       name: data.name,
-      metadata: { namespace: data.namespace }
+      data: { deployNamespace: data.deployNamespace }
     });
   };
 
@@ -104,7 +104,7 @@ export const K8sMetricsForm = ({ handleCreate }: Props) => {
           controlClass={classes.control}
         />
         <ControlledInput
-          name="namespace"
+          name="deployNamespace"
           label="Kubernetes namespace to install in"
           control={control}
           labelClass={classes.label}

@@ -1,13 +1,41 @@
-mutation InsertIntegrations($integrations: [integrations_insert_input!]!) {
-  insert_integrations(objects: $integrations) {
-    returning {
-      id
-      tenant_id
-      kind
-      name
-      status
-      created_at
-      updated_at
+# mutation InsertIntegrations($integrations: [integrations_insert_input!]!) {
+#   insert_integrations(objects: $integrations) {
+#     returning {
+#       id
+#       kind
+#       name
+#       status
+#       data
+#       tenant_id
+#       created_at
+#       updated_at
+#     }
+#   }
+# }
+
+mutation InsertIntegration(
+  $name: String!
+  $kind: String!
+  $status: String!
+  $data: jsonb!
+  $tenant_id: uuid!
+) {
+  insert_integrations_one(
+    object: {
+      name: $name
+      kind: $kind
+      status: $status
+      data: $data
+      tenant_id: $tenant_id
     }
+  ) {
+    id
+    kind
+    name
+    status
+    data
+    tenant_id
+    created_at
+    updated_at
   }
 }

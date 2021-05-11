@@ -48,15 +48,15 @@ function* insertIntegration(
   action: ReturnType<typeof actions.insertIntegration>
 ) {
   try {
-    yield graphqlClient.InsertIntegrations({
-      integrations: [
-        {
-          tenant_id: action.payload.tenantId,
-          kind: action.payload.kind,
-          name: action.payload.name
-        }
-      ]
-    });
+    // yield graphqlClient.InsertIntegrations({
+    //   integrations: [
+    //     {
+    //       tenant_id: action.payload.tenantId,
+    //       kind: action.payload.kind,
+    //       name: action.payload.name
+    //     }
+    //   ]
+    // });
   } catch (err) {
     console.error(err);
   }

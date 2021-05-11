@@ -30,7 +30,7 @@ import NotFound from "client/views/404/404";
 
 export type NewIntegration = {
   name: string;
-  metadata: {};
+  data: {};
 };
 
 export const AddIntegration = withTenantFromParams(
@@ -45,19 +45,23 @@ export const AddIntegration = withTenantFromParams(
 
     const onCreate = (data: NewIntegration) => {
       graphqlClient
-        .InsertIntegrations({
-          integrations: {
-            tenant_id: tenant.id,
-            kind: "k8s-metrics",
-            name: data.name,
-            status: "pending"
-          }
+        .InsertIntegration({
+          name: data.name,
+          kind: "k8s-metrics",
+          status: "pending",
+          data: data.data || {},
+          tenant_id: tenant.id
         })
         .then(response => {
-          const integration = response?.data?.insert_integrations
-            ?.returning[0] as Integration | undefined;
+          const integration = response?.data
+            ?.insert_integrations_one as Integration;
           if (integration)
-            history.push(showIntegrationPath({ tenant, integration }));
+            history.push(
+              showIntegrationPath({
+                tenant,
+                integration: integration
+              })
+            );
         });
     };
 

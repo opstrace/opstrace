@@ -1452,49 +1452,51 @@ func (client *Client) DeleteIntegration(vars *DeleteIntegrationVariables) (*Dele
 }
 
 //
-// mutation InsertIntegrations($integrations: [integrations_insert_input!]!)
+// mutation InsertIntegration($name: String!, $kind: String!, $status: String!, $data: jsonb!, $tenant_id: uuid!)
 //
 
-type InsertIntegrationsVariables struct {
-	Integrations *[]IntegrationsInsertInput `json:"integrations,omitempty"`
+type InsertIntegrationVariables struct {
+	Name     String `json:"name"`
+	Kind     String `json:"kind"`
+	Status   String `json:"status"`
+	Data     Jsonb  `json:"data"`
+	TenantId UUID   `json:"tenant_id"`
 }
 
-type InsertIntegrationsResponse struct {
-	InsertIntegrations struct {
-		Returning []struct {
-			ID        string `json:"id"`
-			TenantId  string `json:"tenant_id"`
-			Kind      string `json:"kind"`
-			Name      string `json:"name"`
-			Status    string `json:"status"`
-			CreatedAt string `json:"created_at"`
-			UpdatedAt string `json:"updated_at"`
-		} `json:"returning"`
-	} `json:"insert_integrations"`
+type InsertIntegrationResponse struct {
+	InsertIntegrationsOne struct {
+		ID        string `json:"id"`
+		Kind      string `json:"kind"`
+		Name      string `json:"name"`
+		Status    string `json:"status"`
+		Data      string `json:"data"`
+		TenantId  string `json:"tenant_id"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	} `json:"insert_integrations_one"`
 }
 
-type InsertIntegrationsRequest struct {
+type InsertIntegrationRequest struct {
 	*http.Request
 }
 
-func NewInsertIntegrationsRequest(url string, vars *InsertIntegrationsVariables) (*InsertIntegrationsRequest, error) {
+func NewInsertIntegrationRequest(url string, vars *InsertIntegrationVariables) (*InsertIntegrationRequest, error) {
 	variables, err := json.Marshal(vars)
 	if err != nil {
 		return nil, err
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation InsertIntegrations($integrations: [integrations_insert_input!]!) {
-  insert_integrations(objects: $integrations) {
-    returning {
-      id
-      tenant_id
-      kind
-      name
-      status
-      created_at
-      updated_at
-    }
+		Query: `mutation InsertIntegration($name: String!, $kind: String!, $status: String!, $data: jsonb!, $tenant_id: uuid!) {
+  insert_integrations_one(object: {name: $name, kind: $kind, status: $status, data: $data, tenant_id: $tenant_id}) {
+    id
+    kind
+    name
+    status
+    data
+    tenant_id
+    created_at
+    updated_at
   }
 }`,
 	})
@@ -1506,31 +1508,31 @@ func NewInsertIntegrationsRequest(url string, vars *InsertIntegrationsVariables)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return &InsertIntegrationsRequest{req}, nil
+	return &InsertIntegrationRequest{req}, nil
 }
 
-func (req *InsertIntegrationsRequest) Execute(client *http.Client) (*InsertIntegrationsResponse, error) {
+func (req *InsertIntegrationRequest) Execute(client *http.Client) (*InsertIntegrationResponse, error) {
 	resp, err := execute(client, req.Request)
 	if err != nil {
 		return nil, err
 	}
-	var result InsertIntegrationsResponse
+	var result InsertIntegrationResponse
 	if err := json.Unmarshal(resp.Data, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func InsertIntegrations(url string, client *http.Client, vars *InsertIntegrationsVariables) (*InsertIntegrationsResponse, error) {
-	req, err := NewInsertIntegrationsRequest(url, vars)
+func InsertIntegration(url string, client *http.Client, vars *InsertIntegrationVariables) (*InsertIntegrationResponse, error) {
+	req, err := NewInsertIntegrationRequest(url, vars)
 	if err != nil {
 		return nil, err
 	}
 	return req.Execute(client)
 }
 
-func (client *Client) InsertIntegrations(vars *InsertIntegrationsVariables) (*InsertIntegrationsResponse, error) {
-	return InsertIntegrations(client.Url, client.Client, vars)
+func (client *Client) InsertIntegration(vars *InsertIntegrationVariables) (*InsertIntegrationResponse, error) {
+	return InsertIntegration(client.Url, client.Client, vars)
 }
 
 //
@@ -3062,6 +3064,7 @@ type IntegrationsSelectColumn string
 
 const (
 	IntegrationsSelectColumnCreatedAt IntegrationsSelectColumn = "created_at"
+	IntegrationsSelectColumnData      IntegrationsSelectColumn = "data"
 	IntegrationsSelectColumnID        IntegrationsSelectColumn = "id"
 	IntegrationsSelectColumnKind      IntegrationsSelectColumn = "kind"
 	IntegrationsSelectColumnName      IntegrationsSelectColumn = "name"
@@ -3074,6 +3077,7 @@ type IntegrationsUpdateColumn string
 
 const (
 	IntegrationsUpdateColumnCreatedAt IntegrationsUpdateColumn = "created_at"
+	IntegrationsUpdateColumnData      IntegrationsUpdateColumn = "data"
 	IntegrationsUpdateColumnID        IntegrationsUpdateColumn = "id"
 	IntegrationsUpdateColumnKind      IntegrationsUpdateColumn = "kind"
 	IntegrationsUpdateColumnName      IntegrationsUpdateColumn = "name"
@@ -3699,6 +3703,10 @@ type IntegrationsAggregateOrderBy struct {
 	Min   *IntegrationsMinOrderBy `json:"min,omitempty"`
 }
 
+type IntegrationsAppendInput struct {
+	Data *Jsonb `json:"data,omitempty"`
+}
+
 type IntegrationsArrRelInsertInput struct {
 	Data       *[]IntegrationsInsertInput `json:"data,omitempty"`
 	OnConflict *IntegrationsOnConflict    `json:"on_conflict,omitempty"`
@@ -3709,6 +3717,7 @@ type IntegrationsBoolExp struct {
 	Not       *IntegrationsBoolExp    `json:"_not,omitempty"`
 	Or        *[]IntegrationsBoolExp  `json:"_or,omitempty"`
 	CreatedAt *TimestampComparisonExp `json:"created_at,omitempty"`
+	Data      *JsonbComparisonExp     `json:"data,omitempty"`
 	ID        *UuidComparisonExp      `json:"id,omitempty"`
 	Kind      *StringComparisonExp    `json:"kind,omitempty"`
 	Name      *StringComparisonExp    `json:"name,omitempty"`
@@ -3718,8 +3727,21 @@ type IntegrationsBoolExp struct {
 	UpdatedAt *TimestampComparisonExp `json:"updated_at,omitempty"`
 }
 
+type IntegrationsDeleteAtPathInput struct {
+	Data *[]String `json:"data,omitempty"`
+}
+
+type IntegrationsDeleteElemInput struct {
+	Data *Int `json:"data,omitempty"`
+}
+
+type IntegrationsDeleteKeyInput struct {
+	Data *String `json:"data,omitempty"`
+}
+
 type IntegrationsInsertInput struct {
 	CreatedAt *Timestamp               `json:"created_at,omitempty"`
+	Data      *Jsonb                   `json:"data,omitempty"`
 	ID        *UUID                    `json:"id,omitempty"`
 	Kind      *String                  `json:"kind,omitempty"`
 	Name      *String                  `json:"name,omitempty"`
@@ -3762,6 +3784,7 @@ type IntegrationsOnConflict struct {
 
 type IntegrationsOrderBy struct {
 	CreatedAt *OrderBy       `json:"created_at,omitempty"`
+	Data      *OrderBy       `json:"data,omitempty"`
 	ID        *OrderBy       `json:"id,omitempty"`
 	Kind      *OrderBy       `json:"kind,omitempty"`
 	Name      *OrderBy       `json:"name,omitempty"`
@@ -3775,8 +3798,13 @@ type IntegrationsPkColumnsInput struct {
 	ID UUID `json:"id"`
 }
 
+type IntegrationsPrependInput struct {
+	Data *Jsonb `json:"data,omitempty"`
+}
+
 type IntegrationsSetInput struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Data      *Jsonb     `json:"data,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
 	Kind      *String    `json:"kind,omitempty"`
 	Name      *String    `json:"name,omitempty"`
@@ -4506,6 +4534,7 @@ type FileMutationResponse struct {
 
 type Integrations struct {
 	CreatedAt Timestamp `json:"created_at"`
+	Data      Jsonb     `json:"data"`
 	ID        UUID      `json:"id"`
 	Kind      String    `json:"kind"`
 	Name      String    `json:"name"`

@@ -29,9 +29,11 @@ export const useIntegrationList = (tenant: Tenant | string): Integrations => {
       query integrations($tenant_id: uuid!) {
         integrations(where: {tenant_id: {_eq: $tenant_id}}) {
           id
-          name
           kind
+          name
           status
+          data
+          tenant_id
           created_at
           updated_at
         }
