@@ -9,33 +9,33 @@
 
 # The Open Source Observability Distribution
 
-Opstrace is a secure, horizontally-scalable, open source observability platform installed in your cloud account.
-It combines open APIs with reduced toil.
+Opstrace is secure, horizontally-scalable, open source observability installed in your cloud account.
+It combines open APIs to reduce toil.
 
 Highlights:
 
-* Horizontally scalable for ingestion and queries.
-* Durable with inexpensive long-term retention.
-* Rigoriously tested end-to-end.
-* Large efforts towards confident upgrades.
-* Secure by default with TLS and authenticated endpoints.
-* Easy to configure with GUIs and APIs.
+* Horizontally **scalable** for ingestion and queries.
+* Durable with inexpensive **long-term** retention.
+* Rigoriously **tested** end-to-end.
+* Large efforts towards confident **upgrades**.
+* **Secure** by default with TLS and authenticated endpoints.
+* **Easy to configure** with GUIs and APIs.
 
-We walk on the shoulders of giants; Opstrace contains all the open source projects you know and love in one place:
+We walk on the shoulders of giants; Opstrace contains the open source projects you know and love in one place:
 
 * [Cortex](https://github.com/cortexproject/cortex)
 * [Loki](https://github.com/grafana/loki)
+* [Grafana](https://github.com/grafana/grafana)
 * [Prometheus](https://github.com/prometheus/prometheus)
 * [Kubernetes](https://github.com/kubernetes/kubernetes)
-* and many more!
-
+* and many more
 
 ## Key Features
 
 ### Installation and Upgrades
 
-Both installation and upgrades are initiated by a single CLI command, and orchestrated behind the scenes.
-The installer users your local credentials to setup the necessary cloud resources (e.g., a EKS or GKE cluster) and then deploys the Opstrace controller which orchestrates all of the app-level deployments.
+Both installation and upgrades are initiated by a single CLI command.
+In this example, you can see an abbreviated installation and upgrade cycle:
 
 ```bash
 $ cat << EOF > config.yaml
@@ -44,7 +44,7 @@ $ cat << EOF > config.yaml
   - prod
 EOF
 
-$ ./opstrace create aws tracy --yes -c config.yaml
+$ ./opstrace create aws tracy -c config.yaml
 ...
 info: cluster creation finished: tracy (aws)
 info: Log in here: https://tracy.opstrace.io
@@ -52,7 +52,7 @@ info: Log in here: https://tracy.opstrace.io
 # a week later...
 
 $ curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
-$ ./opstrace upgrade aws tracy --yes -c config.yaml
+$ ./opstrace upgrade aws tracy -c config.yaml
 ...
 info: Opstrace cluster upgrade done for tracy (aws)
 ```
@@ -60,13 +60,14 @@ info: Opstrace cluster upgrade done for tracy (aws)
 ### Alert Management
 
 Alertmanager can be difficult to configure, especially [for Cortex](https://cortexmetrics.io/docs/architecture/#alertmanager) where they correspond with tenants you have created.
-Our goal is to improve this with editors that provide realtime feedback:
+Our goal is to improve this with editors that provide realtime validation feedback:
 
 ![alertmanager configuration ui](https://p-aa3d33.f1.n0.cdn.getcloudapp.com/items/RBuYDxD8/a7f04563-71f0-4d18-a5e5-d8ca86663a36.jpg?v=699f44b3f89f096a6bde61e3310169f4)
 
 ### Tenant Management
 
-Tenants provide isolation for and rate limiting of your data, both on the write and read paths.
+Tenants provide isolation for logically separate entities.
+For example, they enable authn/authz for groups of users (e.g., different teams) and provide rate limiting of your data on both the write and read paths.
 Managing tenants with a central UI can be helpful for visualizing and managing multiple tenants:
 
 ![tenants can be managed holistically](https://p-aa3d33.f1.n0.cdn.getcloudapp.com/items/7KuPrGD8/60fae09c-1b20-4db5-9513-a5d9d56ff47c.jpg?v=4d3ff54b6ee8d5b0623bf9ea470b5e64)
@@ -74,6 +75,7 @@ Managing tenants with a central UI can be helpful for visualizing and managing m
 ## Quick Start
 
 Install Opstrace in your own cloud account with our [quick start](https://go.opstrace.com/quickstart).
+The Opstrace CLI uses your local credentials to setup the necessary cloud resources (e.g., a EKS or GKE cluster) and then deploys the Opstrace controller which orchestrates all of the app-level deployments.
 For example:
 
 ```bash
@@ -82,16 +84,16 @@ tenants:
   - dev
   - staging
   - prod
-env_label: try_me
+env_label: try_opstrace
 cert_issuer: letsencrypt-prod
 EOF
 ```
 
-Besides AWS we also support GCP.
+In addition to AWS we also support GCP.
 
 See our configuration reference for details: [docs/references/cluster-configuration.md](docs/references/cluster-configuration.md).
 
-Don't forget to clean up when you're done:
+Don't forget to clean up if you're done kicking the tires:
 
 ```bash
 opstrace destroy aws <choose_a_name>
