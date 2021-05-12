@@ -61,7 +61,7 @@ const IntegrationDefCards = withTenantFromParams<Props>(
             <Card>
               <CardHeader
                 titleTypographyProps={{ variant: "h6" }}
-                title={`Integration ${i9n.kind}`}
+                title={i9n.label}
               />
               <CardContent>
                 <Typography color="textSecondary">{i9n.desc}</Typography>
