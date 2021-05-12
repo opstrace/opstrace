@@ -76,8 +76,8 @@ const TenantOverview = () => {
               width="100%"
               height={1000}
               style={{ border: "none" }}
-              title="Opstrace Module Sandbox"
-              src={`${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/d/GqFJrOxGk/opstrace-overview-dashboard?orgId=1&refresh=30s&kiosk`}
+              title="Tenant Overview"
+              src={`${window.location.protocol}//system.${window.location.host}/grafana/d/GqFJrOxGk/opstrace-overview-dashboard?orgId=1&refresh=30s&kiosk`}
             />
           </Box>
         </Grid>
