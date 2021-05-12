@@ -62,21 +62,24 @@ const IntegrationDefCards = withTenantFromParams<Props>(
               <CardHeader
                 titleTypographyProps={{ variant: "h6" }}
                 title={i9n.label}
+                action={
+                  <Box ml={3} display="flex" flexWrap="wrap">
+                    <Box p={1}>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={!i9n.enabled}
+                        onClick={() => onAdd(i9n)}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </Box>
+                }
               />
               <CardContent>
                 <Typography color="textSecondary">{i9n.desc}</Typography>
-                {i9n.enabled ? (
-                  <Button
-                    variant="outlined"
-                    state="primary"
-                    size="small"
-                    onClick={() => onAdd(i9n)}
-                  >
-                    Add
-                  </Button>
-                ) : (
-                  "Coming soon"
-                )}
+                {i9n.enabled ? null : <i>Coming soon</i>}
               </CardContent>
             </Card>
           </Grid>
