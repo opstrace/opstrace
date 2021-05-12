@@ -19,7 +19,15 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Switch, Route, Redirect, useRouteMatch } from "react-router";
 
-import { Zap, Grid, BarChart2, Bell, Users, Layers } from "react-feather";
+import {
+  Zap,
+  Grid,
+  BarChart2,
+  Bell,
+  Users,
+  Layers,
+  Activity
+} from "react-feather";
 
 import WithAuthentication from "client/components/withAuthentication";
 import ErrorBoundary from "client/components/Error/Boundary";
@@ -42,6 +50,7 @@ import TenantAlerting from "client/views/alerting";
 import LoginView from "client/views/login";
 import HelpDialog from "client/views/help";
 import NotFound from "client/views/404/404";
+import ClusterOverview from "./views/cluster-overview";
 import UsersTable from "client/views/users/list";
 import TenantsTable from "client/views/tenants/list";
 
@@ -130,6 +139,11 @@ const AuthProtectedApplication = () => {
         ]}
         clusterNavItems={[
           {
+            title: "Health",
+            icon: <Activity />,
+            path: `/cluster/health`
+          },
+          {
             title: "Users",
             icon: <Users />,
             path: `/cluster/users`
@@ -204,6 +218,12 @@ const AuthProtectedApplication = () => {
               key="tenant-cloud-metrics"
               path="/tenant/:tenantId/cloud-metrics"
               component={CloudMetrics}
+            />
+            <Route
+              exact
+              key="cluster-health"
+              path="/cluster/health"
+              component={ClusterOverview}
             />
             <Route
               exact
