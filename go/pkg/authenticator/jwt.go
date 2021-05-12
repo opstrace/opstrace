@@ -58,19 +58,18 @@ func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) 
 
 	// Custom convention: encode Opstrace tenant name in subject, expect
 	// a specific prefix.
-	ssplits := strings.Split(claims.Subject, "tenant-")
-	if len(ssplits) != 2 {
-		log.Infof("invalid subject (tenant- prefix missing)")
+	if !strings.HasPrefix(claims.Subject, "tenant-") {
+		log.Infof("invalid subject (tenant- prefix missing): %s", claims.Subject)
 		return "", fmt.Errorf("bad authentication token")
 	}
 
-	// Note: we could also inspect the `aud` claim: should be an Opstrace
-	// cluster name, and match the cluster name of the Opstrace cluster that
-	// this authenticator runs in. However, technically, the cryptographic
-	// verification already confirms that (if key pairs are not shared between
-	// Opstrace clusters).
+	// Another part of custom spec/convection: we should also inspect the `aud`
+	// claim: should be an Opstrace cluster name, and match the cluster name of
+	// the Opstrace cluster that this authenticator runs in. Let's do this in
+	// the future. For now, technically, the cryptographic verification already
+	// confirms that (if key pairs are not shared between Opstrace clusters).
 
-	tenantNameFromToken := ssplits[1]
+	tenantNameFromToken := strings.TrimPrefix(claims.Subject, "tenant-")
 	// log.Debugf("authenticated for tenant: %s", tenantNameFromToken)
 
 	return tenantNameFromToken, nil
