@@ -231,6 +231,14 @@ export function GrafanaResources(
                   resources: {},
                   env: [
                     {
+                      name: "GF_USERS_DEFAULT_THEME",
+                      value: "light"
+                    },
+                    {
+                      name: "GF_SECURITY_ALLOW_EMBEDDING",
+                      value: "true"
+                    },
+                    {
                       name: "GF_LOG_LEVEL",
                       value: "debug"
                     },
