@@ -16,46 +16,21 @@
 
 import React from "react";
 
-import useHasura from "client/hooks/useHasura";
-import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
+import {
+  withIntegrationListFromParams,
+  IntegrationListProps
+} from "client/viewsBasic/tenantIntegrations/utils";
 
 import { InstalledIntegrationsTable } from "./Table";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { Box } from "client/components/Box";
 
-const useStyles = makeStyles(theme => ({
-  gridContainer: {
-    display: "grid",
-    gridTemplateColumns: "1fr",
-    gap: "16px 0px",
-    gridTemplateAreas: `"." "."`
-  }
-}));
-
-const InstalledIntegrations = withTenantFromParams(
-  ({ tenant }: TenantProps) => {
-    const classes = useStyles();
-
-    const { data } = useHasura(
-      `
-      query integrations($tenant_id: uuid = "") {
-        integrations(where: {tenant_id: {_eq: $tenant_id}}) {
-          id
-          name
-          kind
-          status
-          created_at
-          updated_at
-        }
-      }
-     `,
-      { tenant_id: tenant.id }
-    );
-
+const InstalledIntegrations = withIntegrationListFromParams(
+  ({ integrationList }: IntegrationListProps) => {
     return (
-      <div className={classes.gridContainer}>
-        <InstalledIntegrationsTable rows={data?.integrations || []} />
-      </div>
+      <Box mt={3}>
+        <InstalledIntegrationsTable data={integrationList} />
+      </Box>
     );
   }
 );

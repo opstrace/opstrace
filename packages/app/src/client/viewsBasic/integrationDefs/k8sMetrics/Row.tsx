@@ -16,21 +16,6 @@
 
 import React from "react";
 
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
-
-import { Box } from "client/components/Box";
-
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
+export const K8sMetricsRow = () => {
+  return <div>k8sMetrics</div>;
 };
-
-export { AllIntegrations, AllIntegrationsTab };

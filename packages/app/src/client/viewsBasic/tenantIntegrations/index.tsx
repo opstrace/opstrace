@@ -16,16 +16,49 @@
 
 import React from "react";
 
-import tabs from "./tabs";
-import { TabbedDetail } from "client/components/TabbedDetail";
+import { AllIntegrations } from "./tabs/All";
+import { InstalledIntegrations } from "./tabs/Installed";
 
-import { Card, CardContent, CardHeader } from "client/components/Card";
+import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
+import {
+  withIntegrationListFromParams,
+  IntegrationListProps
+} from "client/viewsBasic/tenantIntegrations/utils";
 
-export const TenantIntegrations = () => (
-  <Card>
-    <CardHeader titleTypographyProps={{ variant: "h5" }} title="Integrations" />
-    <CardContent>
-      <TabbedDetail tabs={tabs} />
-    </CardContent>
-  </Card>
+import { Box } from "client/components/Box";
+import Typography from "client/components/Typography/Typography";
+import { Tabs } from "client/components/Tabs";
+
+export { AddIntegration } from "./Add";
+export { ShowIntegration } from "./Show";
+export { EditIntegration } from "./Edit";
+
+export const TenantIntegrations = withTenantFromParams(
+  withIntegrationListFromParams(
+    ({ tenant, integrationList }: TenantProps & IntegrationListProps) => {
+      return (
+        <>
+          <Box pt={1} pb={4}>
+            <Typography variant="h1">Integrations</Typography>
+          </Box>
+          <Tabs
+            tabs={[
+              {
+                path: `/tenant/:tenantId/integrations/all`,
+                to: `/tenant/${tenant.name}/integrations/all`,
+                title: "All Integrations",
+                component: AllIntegrations
+              },
+              {
+                path: `/tenant/:tenantId/integrations/installed`,
+                to: `/tenant/${tenant.name}/integrations/installed`,
+                title: `Installed Integrations (${integrationList.length})`,
+                component: InstalledIntegrations
+              }
+            ]}
+          />
+        </>
+      );
+    }
+  )
 );

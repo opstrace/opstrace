@@ -15,22 +15,20 @@
  */
 
 import React from "react";
+import { all, values } from "ramda";
+import { isNotNilOrEmpty } from "ramda-adjunct";
 
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
+import Skeleton from "@material-ui/lab/Skeleton";
 
-import { Box } from "client/components/Box";
+function withSkeleton<T extends {}>(Component: React.ReactType) {
+  return (props: T) => {
+    if (isNotNilOrEmpty(props) && all(isNotNilOrEmpty)(values(props)))
+      return <Component {...props} />;
+    else
+      return (
+        <Skeleton variant="rect" width="100%" height="100%" animation="wave" />
+      );
+  };
+}
 
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
-};
-
-export { AllIntegrations, AllIntegrationsTab };
+export { withSkeleton };

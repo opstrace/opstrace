@@ -16,21 +16,25 @@
 
 import React from "react";
 
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
+import {
+  withIntegrationFromParams,
+  IntegrationProps
+} from "client/viewsBasic/tenantIntegrations/utils";
+import { integrationDefRecords } from "client/viewsBasic/integrationDefs";
 
-import { Box } from "client/components/Box";
+import NotFound from "client/views/404/404";
 
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
+export const ShowIntegration = withIntegrationFromParams(
+  ({ integration }: IntegrationProps) => {
+    const integrationDef = integrationDefRecords[integration.kind];
+
+    if (!integrationDef) return <NotFound />;
+
+    return (
+      <integrationDef.Show
+        integration={integration}
+        integrationDef={integrationDef}
+      />
+    );
+  }
 );
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
-};
-
-export { AllIntegrations, AllIntegrationsTab };

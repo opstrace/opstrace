@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import React from "react";
+import { K8sMetricsForm } from "./Form";
+import { K8sMetricsRow } from "./Row";
+import { K8sMetricsCard } from "./Card";
+import { K8sMetricsShow } from "./Show";
 
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
+import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
-import { Box } from "client/components/Box";
-
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
+export const K8sMetricsIntegration: IntegrationDef = {
+  kind: "k8s-metrics",
+  category: "infrastructure",
+  label: "Kubernetes Metrics",
+  desc: "Kubernetes Metrics desc",
+  Form: K8sMetricsForm,
+  Row: K8sMetricsRow,
+  Card: K8sMetricsCard,
+  Show: K8sMetricsShow,
+  enabled: true
 };
-
-export { AllIntegrations, AllIntegrationsTab };

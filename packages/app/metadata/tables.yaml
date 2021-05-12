@@ -272,6 +272,7 @@
     permission:
       check: {}
       columns:
+      - data
       - kind
       - name
       - status
@@ -281,19 +282,21 @@
   - role: user_admin
     permission:
       columns:
+      - created_at
+      - data
+      - id
       - kind
       - name
       - status
-      - created_at
-      - updated_at
-      - id
       - tenant_id
+      - updated_at
       filter: {}
       allow_aggregations: true
   update_permissions:
   - role: user_admin
     permission:
       columns:
+      - data
       - name
       - status
       filter: {}

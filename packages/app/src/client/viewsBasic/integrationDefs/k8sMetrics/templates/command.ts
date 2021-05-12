@@ -15,17 +15,25 @@
  */
 
 // Returns the (optional) command for a user to create a namespace, if it doesn't already exist.
+// This would be executed by the user before deploying prometheusYaml() or promtailYaml().
 export function createNamespaceCommand(deployNamespace: String): String {
   return `kubectl create namespace ${deployNamespace}`;
 }
 
 // Returns the command for a user to locally access the prometheus instance over a port forward.
 export function portforwardPrometheusCommand(tenantName: String, deployNamespace: String): String {
-  return `kubectl port-forward -n ${deployNamespace} deployments/opstrace-prometheus`;
+  return `kubectl port-forward -n ${deployNamespace} deployments/opstrace-prometheus ui`;
 }
 
 // Returns the command for a user to locally deploy either prometheusYaml() or promtailYaml() content.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
-export function deployCommand(yamlFilename: String, tenantName: String): String {
+export function deployYamlCommand(yamlFilename: String, tenantName: String): String {
   return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | kubectl apply -f -`;
+}
+
+// Returns the command for a user to locally delete either prometheusYaml() or promtailYaml() content.
+// This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
+// This does not include deletion of the namespace, in case the user also has other things there.
+export function deleteYamlCommand(yamlFilename: String): String {
+  return `kubectl delete -f ${yamlFilename}`;
 }

@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 export type TabItem = {
   title: string;
   path: string;
+  to?: string;
   component: React.ComponentType;
 };
 
@@ -56,9 +57,9 @@ export function Tabs({ tabs }: TabsProps) {
           <Tab
             key={tab.title}
             label={tab.title}
-            value={tab.path}
+            value={tab.to || tab.path}
             component={Link}
-            to={tab.path}
+            to={tab.to || tab.path}
           />
         ))}
       </MuiTabs>

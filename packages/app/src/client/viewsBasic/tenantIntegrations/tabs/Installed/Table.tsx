@@ -15,11 +15,15 @@
  */
 
 import React from "react";
-import { format, parseISO } from "date-fns";
+import { useHistory } from "react-router-dom";
 
-import { withSkeleton } from "client/viewsBasic/utils";
+import { Integrations } from "state/integrations/types";
+import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
+import { withSkeleton } from "client/viewsBasic/common/utils";
+
+import { Card } from "client/components/Card";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -27,47 +31,43 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 
-const useStyles = makeStyles({
-  table: {
-    minWidth: 650
-  }
-});
+type Props = { data: Integrations };
 
-type Row = {
-  id: string;
-  name: string;
-  kind: string;
-  status: number;
-  created_at: string;
-};
-
-type Props = { rows: Row[] };
-
-export const InstalledIntegrationsTable = withSkeleton<Props>(
-  ({ rows }: Props) => {
-    const classes = useStyles();
+export const InstalledIntegrationsTable = withTenantFromParams<Props>(
+  withSkeleton<Props>(({ data, tenant }: Props & TenantProps) => {
+    const history = useHistory();
 
     return (
-      <TableContainer>
-        <Table stickyHeader className={classes.table}>
+      <TableContainer component={Card}>
+        <Table aria-label="installed integrations">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Kind</TableCell>
+              <TableCell>Type</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Used</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map(row => (
-              <TableRow key={row.id}>
+            {data.map(i9n => (
+              <TableRow key={i9n.id}>
                 <TableCell component="th" scope="row">
-                  {row.name}
+                  {i9n.name}
                 </TableCell>
-                <TableCell>{row.kind}</TableCell>
-                <TableCell>{row.status}</TableCell>
+                <TableCell>{i9n.kind}</TableCell>
+                <TableCell>{i9n.status}</TableCell>
+                <TableCell>{i9n.created_at}</TableCell>
                 <TableCell>
-                  {format(parseISO(row.created_at), "Pppp")}
+                  <button
+                    onClick={() =>
+                      history.push(
+                        showIntegrationPath({ tenant, integration: i9n })
+                      )
+                    }
+                  >
+                    Detail
+                  </button>
                 </TableCell>
               </TableRow>
             ))}
@@ -75,5 +75,5 @@ export const InstalledIntegrationsTable = withSkeleton<Props>(
         </Table>
       </TableContainer>
     );
-  }
+  })
 );

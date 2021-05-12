@@ -1129,6 +1129,7 @@ export enum File_Update_Column {
 /** columns and relationships of "integrations" */
 export type Integrations = {
   created_at: Scalars["timestamp"];
+  data: Scalars["jsonb"];
   id: Scalars["uuid"];
   kind: Scalars["String"];
   name: Scalars["String"];
@@ -1137,6 +1138,11 @@ export type Integrations = {
   tenant: Tenant;
   tenant_id: Scalars["uuid"];
   updated_at: Scalars["timestamp"];
+};
+
+/** columns and relationships of "integrations" */
+export type IntegrationsDataArgs = {
+  path?: Maybe<Scalars["String"]>;
 };
 
 /** aggregated selection of "integrations" */
@@ -1165,6 +1171,11 @@ export type Integrations_Aggregate_Order_By = {
   min?: Maybe<Integrations_Min_Order_By>;
 };
 
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Integrations_Append_Input = {
+  data?: Maybe<Scalars["jsonb"]>;
+};
+
 /** input type for inserting array relation for remote table "integrations" */
 export type Integrations_Arr_Rel_Insert_Input = {
   data: Array<Integrations_Insert_Input>;
@@ -1177,6 +1188,7 @@ export type Integrations_Bool_Exp = {
   _not?: Maybe<Integrations_Bool_Exp>;
   _or?: Maybe<Array<Maybe<Integrations_Bool_Exp>>>;
   created_at?: Maybe<Timestamp_Comparison_Exp>;
+  data?: Maybe<Jsonb_Comparison_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
   kind?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
@@ -1194,9 +1206,25 @@ export enum Integrations_Constraint {
   IntegrationsPkey = "integrations_pkey"
 }
 
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Integrations_Delete_At_Path_Input = {
+  data?: Maybe<Array<Maybe<Scalars["String"]>>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Integrations_Delete_Elem_Input = {
+  data?: Maybe<Scalars["Int"]>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Integrations_Delete_Key_Input = {
+  data?: Maybe<Scalars["String"]>;
+};
+
 /** input type for inserting data into table "integrations" */
 export type Integrations_Insert_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  data?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
@@ -1274,6 +1302,7 @@ export type Integrations_On_Conflict = {
 /** ordering options when selecting data from "integrations" */
 export type Integrations_Order_By = {
   created_at?: Maybe<Order_By>;
+  data?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
@@ -1288,10 +1317,17 @@ export type Integrations_Pk_Columns_Input = {
   id: Scalars["uuid"];
 };
 
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Integrations_Prepend_Input = {
+  data?: Maybe<Scalars["jsonb"]>;
+};
+
 /** select columns of table "integrations" */
 export enum Integrations_Select_Column {
   /** column name */
   CreatedAt = "created_at",
+  /** column name */
+  Data = "data",
   /** column name */
   Id = "id",
   /** column name */
@@ -1309,6 +1345,7 @@ export enum Integrations_Select_Column {
 /** input type for updating data in table "integrations" */
 export type Integrations_Set_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  data?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
@@ -1321,6 +1358,8 @@ export type Integrations_Set_Input = {
 export enum Integrations_Update_Column {
   /** column name */
   CreatedAt = "created_at",
+  /** column name */
+  Data = "data",
   /** column name */
   Id = "id",
   /** column name */
@@ -2242,12 +2281,22 @@ export type Mutation_RootUpdate_File_By_PkArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_IntegrationsArgs = {
+  _append?: Maybe<Integrations_Append_Input>;
+  _delete_at_path?: Maybe<Integrations_Delete_At_Path_Input>;
+  _delete_elem?: Maybe<Integrations_Delete_Elem_Input>;
+  _delete_key?: Maybe<Integrations_Delete_Key_Input>;
+  _prepend?: Maybe<Integrations_Prepend_Input>;
   _set?: Maybe<Integrations_Set_Input>;
   where: Integrations_Bool_Exp;
 };
 
 /** mutation root */
 export type Mutation_RootUpdate_Integrations_By_PkArgs = {
+  _append?: Maybe<Integrations_Append_Input>;
+  _delete_at_path?: Maybe<Integrations_Delete_At_Path_Input>;
+  _delete_elem?: Maybe<Integrations_Delete_Elem_Input>;
+  _delete_key?: Maybe<Integrations_Delete_Key_Input>;
+  _prepend?: Maybe<Integrations_Prepend_Input>;
   _set?: Maybe<Integrations_Set_Input>;
   pk_columns: Integrations_Pk_Columns_Input;
 };
@@ -3971,6 +4020,39 @@ export type UpdateContentsMutation = {
   update_file_by_pk?: Maybe<Pick<File, "id">>;
 };
 
+export type DeleteIntegrationMutationVariables = Exact<{
+  tenant_id: Scalars["uuid"];
+  id: Scalars["uuid"];
+}>;
+
+export type DeleteIntegrationMutation = {
+  delete_integrations?: Maybe<{ returning: Array<Pick<Integrations, "id">> }>;
+};
+
+export type InsertIntegrationMutationVariables = Exact<{
+  name: Scalars["String"];
+  kind: Scalars["String"];
+  status: Scalars["String"];
+  data: Scalars["jsonb"];
+  tenant_id: Scalars["uuid"];
+}>;
+
+export type InsertIntegrationMutation = {
+  insert_integrations_one?: Maybe<
+    Pick<
+      Integrations,
+      | "id"
+      | "kind"
+      | "name"
+      | "status"
+      | "data"
+      | "tenant_id"
+      | "created_at"
+      | "updated_at"
+    >
+  >;
+};
+
 export type CreateModuleMutationVariables = Exact<{
   name: Scalars["String"];
   scope: Scalars["String"];
@@ -4530,6 +4612,45 @@ export const UpdateContentsDocument = gql`
       }
     ) {
       id
+    }
+  }
+`;
+export const DeleteIntegrationDocument = gql`
+  mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!) {
+    delete_integrations(
+      where: { id: { _eq: $id }, tenant_id: { _eq: $tenant_id } }
+    ) {
+      returning {
+        id
+      }
+    }
+  }
+`;
+export const InsertIntegrationDocument = gql`
+  mutation InsertIntegration(
+    $name: String!
+    $kind: String!
+    $status: String!
+    $data: jsonb!
+    $tenant_id: uuid!
+  ) {
+    insert_integrations_one(
+      object: {
+        name: $name
+        kind: $kind
+        status: $status
+        data: $data
+        tenant_id: $tenant_id
+      }
+    ) {
+      id
+      kind
+      name
+      status
+      data
+      tenant_id
+      created_at
+      updated_at
     }
   }
 `;
@@ -5237,6 +5358,38 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<UpdateContentsMutation>(
           print(UpdateContentsDocument),
+          variables
+        )
+      );
+    },
+    DeleteIntegration(
+      variables: DeleteIntegrationMutationVariables
+    ): Promise<{
+      data?: DeleteIntegrationMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<DeleteIntegrationMutation>(
+          print(DeleteIntegrationDocument),
+          variables
+        )
+      );
+    },
+    InsertIntegration(
+      variables: InsertIntegrationMutationVariables
+    ): Promise<{
+      data?: InsertIntegrationMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<InsertIntegrationMutation>(
+          print(InsertIntegrationDocument),
           variables
         )
       );

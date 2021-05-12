@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-import React from "react";
+import { IntegrationDef } from "./types";
 
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
-
-import { Box } from "client/components/Box";
-
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
+export type IntegrationDefProps = {
+  integrationDef: IntegrationDef;
 };
-
-export { AllIntegrations, AllIntegrationsTab };
