@@ -24,7 +24,7 @@ import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { prometheusYaml } from "./templates/config";
-import { makePrometheusDashboardRequests } from "./templates/dashboards";
+import { makePrometheusFolderRequest, makePrometheusDashboardRequests } from "./templates/dashboards";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
@@ -39,15 +39,12 @@ type folderInfo = {
   urlPath: String
 }
 
-async function createDashboardFolder({integration, tenant}: IntegrationProps & TenantProps): Promise<folderInfo> {
+async function createFolder(tenantName: String, folder: object): Promise<folderInfo> {
   // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
   const responseData = await axios({
     method: "post",
-    url: `${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/api/folders`,
-    data: {
-      "uid": `integration-${integration.id}`,
-      "title": `Integration: ${integration.name}`,
-    },
+    url: `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/folders`,
+    data: folder,
     withCredentials: true
   }).then(res => res.data);
   return {
@@ -96,7 +93,13 @@ export const K8sMetricsShow = withTenantFromParams(
     };
 
     const dashboardHandler = async () => {
-      const folder = await createDashboardFolder({integration: integration, tenant: tenant});
+      const folder = await createFolder(
+        tenant.name,
+        makePrometheusFolderRequest({
+          integrationId: integration.id,
+          integrationName: integration.name
+        })
+      );
       console.log(`Folder created: id=${folder.id} path=${folder.urlPath}`);
 
       for (const d of makePrometheusDashboardRequests({
