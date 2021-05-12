@@ -25,6 +25,7 @@ import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { prometheusYaml } from "./templates/config";
+import * as commands from "./templates/commands";
 import {
   makePrometheusFolderRequest,
   makePrometheusDashboardRequests
@@ -125,74 +126,127 @@ export const K8sMetricsShow = withTenantFromParams(
     };
 
     return (
-      <Box
-        width="100%"
-        height="100%"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-        p={1}
-      >
-        <Card>
-          <CardHeader
-            titleTypographyProps={{ variant: "h5" }}
-            title={integration.name}
-            action={
-              <Box ml={3} display="flex" flexWrap="wrap">
-                <Box p={1}>
-                  <Button
-                    size="small"
-                    onClick={() =>
-                      history.push(
-                        `/tenant/${tenant.name}/integrations/installed`
-                      )
-                    }
-                  >
-                    {"< Back"}
-                  </Button>
+      <>
+        <Box
+          width="100%"
+          height="100%"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
+          p={1}
+        >
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title={integration.name}
+              action={
+                <Box ml={3} display="flex" flexWrap="wrap">
+                  <Box p={1}>
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        history.push(
+                          `/tenant/${tenant.name}/integrations/installed`
+                        )
+                      }
+                    >
+                      {"< Back"}
+                    </Button>
+                  </Box>
+                </Box>
+              }
+            />
+            <CardContent>
+              <Box display="flex">
+                <Box display="flex" flexDirection="column">
+                  <Attribute.Key>Integration:</Attribute.Key>
+                  <Attribute.Key>Category:</Attribute.Key>
+                  <Attribute.Key>Status:</Attribute.Key>
+                  <Attribute.Key>Created:</Attribute.Key>
+                </Box>
+                <Box display="flex" flexDirection="column" flexGrow={1}>
+                  <Attribute.Value>{integrationDef.label}</Attribute.Value>
+                  <Attribute.Value>{integrationDef.category}</Attribute.Value>
+                  <Attribute.Value>{integration.status}</Attribute.Value>
+                  <Attribute.Value>{integration.created_at}</Attribute.Value>
                 </Box>
               </Box>
-            }
-          />
-          <CardContent>
-            <Box display="flex">
-              <Box display="flex" flexDirection="column">
-                <Attribute.Key>Integration:</Attribute.Key>
-                <Attribute.Key>Category:</Attribute.Key>
-                <Attribute.Key>Status:</Attribute.Key>
-                <Attribute.Key>Created:</Attribute.Key>
-                <Attribute.Key>Config:</Attribute.Key>
+            </CardContent>
+          </Card>
+        </Box>
+        <Box
+          width="100%"
+          height="100%"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
+          p={1}
+        >
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title="Install Instructions"
+            />
+            <CardContent>
+              <Box display="flex">
+                <Box display="flex" flexDirection="column" flexGrow={1}>
+                  <Attribute.Value>
+                    {`Step 1. Download the generated config YAML and save to the same
+                    location as your Opstrace "${tenant.name}" Tenant API Token.`}
+                    <br />
+                    <br />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={downloadHandler}
+                    >
+                      Download YAML
+                    </Button>
+                  </Attribute.Value>
+                  <Attribute.Value>
+                    {`Step 2. Run these commands to install`}
+                    <br />
+                    <pre>
+                      {commands.createNamespace(
+                        integration.data.deployNamespace
+                      )}
+                    </pre>
+                    <pre>
+                      {commands.portforwardPrometheus(
+                        tenant.name,
+                        integration.data.deployNamespace
+                      )}
+                    </pre>
+                    <pre>
+                      {commands.deployYaml(
+                        "opstrace-monitoring-prometheus.yaml",
+                        tenant.name
+                      )}
+                    </pre>
+                  </Attribute.Value>
+                  <Attribute.Value>
+                    Step 3. Once the integration is installed in your namepsace
+                    we can installed a default set of Grafana Dashboards for
+                    you.
+                    <br />
+                    <br />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={integration.grafana_folder_id !== null}
+                      onClick={dashboardHandler}
+                    >
+                      Install Dashboards
+                    </Button>
+                  </Attribute.Value>
+                </Box>
               </Box>
-              <Box display="flex" flexDirection="column" flexGrow={1}>
-                <Attribute.Value>{integrationDef.label}</Attribute.Value>
-                <Attribute.Value>{integrationDef.category}</Attribute.Value>
-                <Attribute.Value>{integration.status}</Attribute.Value>
-                <Attribute.Value>{integration.created_at}</Attribute.Value>
-                <Attribute.Value>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={downloadHandler}
-                  >
-                    Download YAML
-                  </Button>
-                </Attribute.Value>
-                <Attribute.Value>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    disabled={integration.grafana_folder_id !== null}
-                    onClick={dashboardHandler}
-                  >
-                    Create dashboards
-                  </Button>
-                </Attribute.Value>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </>
     );
   }
 );
