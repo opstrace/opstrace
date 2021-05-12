@@ -1,0 +1,11 @@
+mutation UpdateIntegrationGrafanaFolderId(
+  $id: uuid!
+  $grafana_folder_id: Int!
+) {
+  update_integrations_by_pk(
+    pk_columns: { id: $id }
+    _set: { grafana_folder_id: $grafana_folder_id }
+  ) {
+    id
+  }
+}
