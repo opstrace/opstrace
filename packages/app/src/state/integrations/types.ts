@@ -19,6 +19,7 @@ export type Integration = {
   kind: string;
   name: string;
   status: "pending" | "active" | "error" | "unknown";
+  grafana_folder_id?: number;
   created_at: Date;
   updated_at: Date;
   data: any;

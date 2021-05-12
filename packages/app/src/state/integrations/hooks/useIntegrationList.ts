@@ -34,6 +34,7 @@ export const useIntegrationList = (tenant: Tenant | string): Integrations => {
           status
           data
           tenant_id
+          grafana_folder_id
           created_at
           updated_at
         }
