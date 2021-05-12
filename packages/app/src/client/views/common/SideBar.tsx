@@ -16,6 +16,11 @@
 
 import React, { useState } from "react";
 import { NavLink, useRouteMatch } from "react-router-dom";
+import { ChevronDown, ChevronRight } from "react-feather";
+import className from "classnames";
+
+import { appBarHeight } from "./AppBar";
+
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import Hidden from "@material-ui/core/Hidden";
@@ -25,12 +30,9 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
-import { ChevronDown, ChevronRight } from "react-feather";
-import className from "classnames";
-
+import { ExternalLink } from "client/components/Link";
 import { Box } from "client/components/Box";
 import { Typography } from "client/components/Typography";
-import { appBarHeight } from "./AppBar";
 
 export const sidebarWidth = 250;
 export const minimizedSidebarWidth = 70;
@@ -212,10 +214,17 @@ const Sidebar = ({ tenantNavItems, clusterNavItems }: SidebarProps) => {
       <Box flexGrow={1} />
       <Box m={2} p={2}>
         <Typography align="center" gutterBottom variant="body2">
-          View docs
+          <ExternalLink target="_blank" href="https://opstrace.com/docs">
+            View docs
+          </ExternalLink>
         </Typography>
         <Typography align="center" variant="body2">
-          Submit an issue
+          <ExternalLink
+            target="_blank"
+            href="https://github.com/opstrace/opstrace/issues/new/choose"
+          >
+            Submit an issue
+          </ExternalLink>
         </Typography>
       </Box>
     </Box>
