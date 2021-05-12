@@ -26,7 +26,8 @@ import {
   Bell,
   Users,
   Layers,
-  Activity
+  Activity,
+  Compass
 } from "react-feather";
 
 import WithAuthentication from "client/components/withAuthentication";
@@ -63,6 +64,7 @@ import UserDetail from "client/views/users/detail";
 // import TenantDetail from "client/views/tenant/TenantDetail";
 // import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";
 import { CloudMetrics } from "client/viewsBasic/cloudMetrics";
+import TenantExplore from "./views/explore";
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -105,6 +107,11 @@ const AuthProtectedApplication = () => {
             title: "Overview",
             icon: <BarChart2 />,
             path: `/tenant/${tenantName}/overview`
+          },
+          {
+            title: "Explore",
+            icon: <Compass />,
+            path: `/tenant/${tenantName}/explore`
           },
           {
             title: "Alerting",
@@ -181,6 +188,12 @@ const AuthProtectedApplication = () => {
               key="tenant-overview"
               path="/tenant/:tenantId/overview"
               component={TenantOverview}
+            />
+            <Route
+              exact
+              key="tenant-explore"
+              path="/tenant/:tenantId/explore"
+              component={TenantExplore}
             />
             <Route
               exact
