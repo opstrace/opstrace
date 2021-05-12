@@ -33,7 +33,7 @@ import lightTheme from "./light";
 import { ITheme } from "./types";
 import { useCommandService } from "../services/Command";
 import { useDispatch } from "state/provider";
-import { setDarkMode } from "state/user/actions";
+import { requestSetDarkMode } from "state/user/actions";
 import useCurrentUser from "state/user/hooks/useCurrentUser";
 
 interface Props {
@@ -100,7 +100,7 @@ export function ThemeCommands({ children }: { children: React.ReactNode }) {
 
   const setDarkModePreference = useCallback(
     (darkMode: boolean) => {
-      dispatch(setDarkMode(darkMode));
+      dispatch(requestSetDarkMode(darkMode));
     },
     [dispatch]
   );
