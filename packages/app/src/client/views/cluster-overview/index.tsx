@@ -19,11 +19,9 @@ import Grid from "@material-ui/core/Grid";
 
 import { Box } from "client/components/Box";
 import Typography from "client/components/Typography/Typography";
-import { useTheme } from "@material-ui/core/styles";
+import GrafanaIframe from "client/components/Grafana/Iframe";
 
 const ClusterOverview = () => {
-  const theme = useTheme();
-
   return (
     <>
       <Box pt={1} pb={4}>
@@ -32,19 +30,12 @@ const ClusterOverview = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Box
-            border={`1px solid ${theme.palette.divider}`}
-            borderRadius={theme.shape.borderRadius}
-            overflow="hidden"
-          >
-            <iframe
-              width="100%"
-              height={1550}
-              style={{ border: "none" }}
-              title="Cluster Health"
-              src={`${window.location.protocol}//system.${window.location.host}/grafana/d/3e97d1d02672cdd0861f4c97c64f89b2/use-method-cluster?orgId=1&refresh=10s&kiosk`}
-            />
-          </Box>
+          <GrafanaIframe
+            initialHeight={1550}
+            tenant="system"
+            title="Cluster Health"
+            path="/d/3e97d1d02672cdd0861f4c97c64f89b2/use-method-cluster"
+          />
         </Grid>
       </Grid>
     </>

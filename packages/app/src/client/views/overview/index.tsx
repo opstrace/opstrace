@@ -22,11 +22,10 @@ import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
 import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 import { ExternalLink } from "client/components/Link";
-import { useTheme } from "@material-ui/core/styles";
+import GrafanaIframe from "client/components/Grafana/Iframe";
 
 const TenantOverview = () => {
   const tenant = useSelectedTenant();
-  const theme = useTheme();
 
   if (!tenant) {
     return null;
@@ -67,19 +66,15 @@ const TenantOverview = () => {
           </Card>
         </Grid>
         <Grid item xs={12}>
-          <Box
-            border={`1px solid ${theme.palette.divider}`}
-            borderRadius={theme.shape.borderRadius}
-            overflow="hidden"
-          >
-            <iframe
-              width="100%"
-              height={1000}
-              style={{ border: "none" }}
-              title="Tenant Overview"
-              src={`${window.location.protocol}//system.${window.location.host}/grafana/d/GqFJrOxGk/opstrace-overview-dashboard?orgId=1&refresh=30s&kiosk`}
-            />
-          </Box>
+          <GrafanaIframe
+            initialHeight={1550}
+            tenant="system"
+            title="Tenant Overview"
+            path="/d/c72shqQZz/cortex-overview"
+            params={{
+              "var-tenant": tenant.name
+            }}
+          />
         </Grid>
       </Grid>
     </>
