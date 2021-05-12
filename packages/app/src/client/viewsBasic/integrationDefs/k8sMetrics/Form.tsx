@@ -65,7 +65,7 @@ const Schema = yup.object().shape({
 
 const defaultValues: Values = {
   name: "My Dev Cluster",
-  deployNamespace: "opstrace-k8s-monitoring"
+  deployNamespace: "opstrace-prometheus"
 };
 
 type Props = {

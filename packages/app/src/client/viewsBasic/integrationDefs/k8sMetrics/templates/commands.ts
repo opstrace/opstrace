@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-// Returns the (optional) command for a user to create a namespace, if it doesn't already exist.
-// This would be executed by the user before deploying prometheusYaml() or promtailYaml().
-export function createNamespace(deployNamespace: String): String {
-  return `kubectl create namespace ${deployNamespace}`;
+// Returns the command for a user to locally deploy either prometheusYaml() or promtailYaml() content.
+// This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
+export function deployYaml(yamlFilename: String, tenantName: String): String {
+  return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | kubectl apply -f -`;
 }
 
 // Returns the command for a user to locally access the prometheus instance over a port forward.
@@ -26,12 +26,6 @@ export function portforwardPrometheus(
   deployNamespace: String
 ): String {
   return `kubectl port-forward -n ${deployNamespace} deployments/opstrace-prometheus ui`;
-}
-
-// Returns the command for a user to locally deploy either prometheusYaml() or promtailYaml() content.
-// This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
-export function deployYaml(yamlFilename: String, tenantName: String): String {
-  return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | kubectl apply -f -`;
 }
 
 // Returns the command for a user to locally delete either prometheusYaml() or promtailYaml() content.
