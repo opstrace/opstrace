@@ -25,7 +25,7 @@ export const k8sMetricsIntegration: IntegrationDef = {
   kind: "k8s-metrics",
   category: "infrastructure",
   label: "Kubernetes Metrics",
-  desc: "Kubernetes Metrics desc",
+  desc: "Monitor a Kubernetes Cluster with Opstrace",
   Form: K8sMetricsForm,
   Row: K8sMetricsRow,
   Card: K8sMetricsCard,

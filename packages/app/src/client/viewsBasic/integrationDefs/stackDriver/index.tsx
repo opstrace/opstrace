@@ -22,7 +22,7 @@ export const stackDriverIntegration: IntegrationDef = {
   kind: "stack-driver",
   category: "exporter",
   label: "Stack Driver",
-  desc: "Stack Driver desc",
+  desc: () => <i>Coming soon</i>,
   Form: () => <div />,
   Row: () => <div />,
   Card: () => <div />,
