@@ -20,6 +20,10 @@ import { useHistory } from "react-router-dom";
 import { Integrations } from "state/integrations/types";
 import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
+import {
+  withIntegrationListFromParams,
+  IntegrationListProps
+} from "client/viewsBasic/tenantIntegrations/utils";
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 import { withSkeleton } from "client/viewsBasic/common/utils";
 
@@ -31,9 +35,21 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 
+import { Box } from "client/components/Box";
+
+export const InstalledIntegrations = withIntegrationListFromParams(
+  ({ integrationList }: IntegrationListProps) => {
+    return (
+      <Box mt={3}>
+        <InstalledIntegrationsTable data={integrationList} />
+      </Box>
+    );
+  }
+);
+
 type Props = { data: Integrations };
 
-export const InstalledIntegrationsTable = withTenantFromParams<Props>(
+const InstalledIntegrationsTable = withTenantFromParams<Props>(
   withSkeleton<Props>(({ data, tenant }: Props & TenantProps) => {
     const history = useHistory();
 
