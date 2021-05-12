@@ -18,7 +18,7 @@ import React from "react";
 
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
-export const CloudwatchIntegration: IntegrationDef = {
+export const cloudwatchIntegration: IntegrationDef = {
   kind: "cloudwatch",
   category: "exporter",
   label: "Cloudwatch",
