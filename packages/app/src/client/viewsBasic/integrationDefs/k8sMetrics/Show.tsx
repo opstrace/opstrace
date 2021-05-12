@@ -42,8 +42,10 @@ export const K8sMetricsShow = withTenantFromParams(
         deployNamespace: integration.data.deployNamespace
       });
 
-      var configBlog = new Blob([config], { type: "text/plain;charset=utf-8" });
-      saveAs(configBlog, "opstrace-monitoring-prometheus");
+      var configBlog = new Blob([config], {
+        type: "application/x-yaml;charset=utf-8"
+      });
+      saveAs(configBlog, "opstrace-monitoring-prometheus.yaml");
     };
 
     return (
