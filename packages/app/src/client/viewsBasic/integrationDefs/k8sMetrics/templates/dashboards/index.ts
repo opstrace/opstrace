@@ -14,29 +14,45 @@
  * limitations under the License.
  */
 
-// For each dashboard we want, we import it here
+// For each dashboard we want, we import it here and list it below
 import makeDashboardApiserver from "./apiserver.js";
 import makeDashboardKubelet from "./kubelet.js";
 
-type Props = {
+type FolderProps = {
+  integrationId: String;
+  integrationName: String;
+}
+
+type DashboardProps = {
   integrationId: String;
   folderId: number;
 };
 
-// Returns an array of dashboard payloads for submitting to Grafana.
+// Returns a folder creation request payload for submitting to Grafana.
+export function makePrometheusFolderRequest({
+  integrationId,
+  integrationName
+}: FolderProps): object {
+  return {
+    "uid": `integration-${integrationId}`,
+    "title": `Integration: ${integrationName}`,
+  }
+}
+
+// Returns an array of dashboard creation request payloads for submitting to Grafana.
 export function makePrometheusDashboardRequests({
   integrationId,
   folderId
-}: Props): object[] {
+}: DashboardProps): object[] {
   return [
     {
-      "uid": `${integrationId}-apiserver`,
+      "uid": `integration-${integrationId}-apiserver`,
       "dashboard": makeDashboardApiserver(integrationId),
       "folderId": folderId,
       "overwrite": true
     },
     {
-      "uid": `${integrationId}-kubelet`,
+      "uid": `integration-${integrationId}-kubelet`,
       "dashboard": makeDashboardKubelet(integrationId),
       "folderId": folderId,
       "overwrite": true
