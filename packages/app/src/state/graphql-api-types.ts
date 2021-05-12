@@ -1242,7 +1242,7 @@ export type Integrations_Bool_Exp = {
 /** unique or primary key constraints on table "integrations" */
 export enum Integrations_Constraint {
   /** unique or primary key constraint */
-  IntegrationsNameKey = "integrations_name_key",
+  IntegrationsNameTenantIdKey = "integrations_name_tenant_id_key",
   /** unique or primary key constraint */
   IntegrationsPkey = "integrations_pkey"
 }
@@ -4183,6 +4183,15 @@ export type InsertIntegrationMutation = {
   >;
 };
 
+export type UpdateIntegrationGrafanaFolderIdMutationVariables = Exact<{
+  id: Scalars["uuid"];
+  grafana_folder_id: Scalars["Int"];
+}>;
+
+export type UpdateIntegrationGrafanaFolderIdMutation = {
+  update_integrations_by_pk?: Maybe<Pick<Integrations, "id">>;
+};
+
 export type CreateModuleMutationVariables = Exact<{
   name: Scalars["String"];
   scope: Scalars["String"];
@@ -4782,6 +4791,19 @@ export const InsertIntegrationDocument = gql`
       grafana_folder_id
       created_at
       updated_at
+    }
+  }
+`;
+export const UpdateIntegrationGrafanaFolderIdDocument = gql`
+  mutation UpdateIntegrationGrafanaFolderId(
+    $id: uuid!
+    $grafana_folder_id: Int!
+  ) {
+    update_integrations_by_pk(
+      pk_columns: { id: $id }
+      _set: { grafana_folder_id: $grafana_folder_id }
+    ) {
+      id
     }
   }
 `;
@@ -5521,6 +5543,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<InsertIntegrationMutation>(
           print(InsertIntegrationDocument),
+          variables
+        )
+      );
+    },
+    UpdateIntegrationGrafanaFolderId(
+      variables: UpdateIntegrationGrafanaFolderIdMutationVariables
+    ): Promise<{
+      data?: UpdateIntegrationGrafanaFolderIdMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<UpdateIntegrationGrafanaFolderIdMutation>(
+          print(UpdateIntegrationGrafanaFolderIdDocument),
           variables
         )
       );

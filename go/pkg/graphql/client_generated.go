@@ -1538,6 +1538,73 @@ func (client *Client) InsertIntegration(vars *InsertIntegrationVariables) (*Inse
 }
 
 //
+// mutation UpdateIntegrationGrafanaFolderId($id: uuid!, $grafana_folder_id: Int!)
+//
+
+type UpdateIntegrationGrafanaFolderIdVariables struct {
+	ID              UUID `json:"id"`
+	GrafanaFolderId Int  `json:"grafana_folder_id"`
+}
+
+type UpdateIntegrationGrafanaFolderIdResponse struct {
+	UpdateIntegrationsByPk struct {
+		ID string `json:"id"`
+	} `json:"update_integrations_by_pk"`
+}
+
+type UpdateIntegrationGrafanaFolderIdRequest struct {
+	*http.Request
+}
+
+func NewUpdateIntegrationGrafanaFolderIdRequest(url string, vars *UpdateIntegrationGrafanaFolderIdVariables) (*UpdateIntegrationGrafanaFolderIdRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpdateIntegrationGrafanaFolderId($id: uuid!, $grafana_folder_id: Int!) {
+  update_integrations_by_pk(pk_columns: {id: $id}, _set: {grafana_folder_id: $grafana_folder_id}) {
+    id
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpdateIntegrationGrafanaFolderIdRequest{req}, nil
+}
+
+func (req *UpdateIntegrationGrafanaFolderIdRequest) Execute(client *http.Client) (*UpdateIntegrationGrafanaFolderIdResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpdateIntegrationGrafanaFolderIdResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateIntegrationGrafanaFolderId(url string, client *http.Client, vars *UpdateIntegrationGrafanaFolderIdVariables) (*UpdateIntegrationGrafanaFolderIdResponse, error) {
+	req, err := NewUpdateIntegrationGrafanaFolderIdRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpdateIntegrationGrafanaFolderId(vars *UpdateIntegrationGrafanaFolderIdVariables) (*UpdateIntegrationGrafanaFolderIdResponse, error) {
+	return UpdateIntegrationGrafanaFolderId(client.Url, client.Client, vars)
+}
+
+//
 // mutation CreateModule($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!)
 //
 
@@ -3058,8 +3125,8 @@ const (
 type IntegrationsConstraint string
 
 const (
-	IntegrationsConstraintIntegrationsNameKey IntegrationsConstraint = "integrations_name_key"
-	IntegrationsConstraintIntegrationsPkey    IntegrationsConstraint = "integrations_pkey"
+	IntegrationsConstraintIntegrationsNameTenantIdKey IntegrationsConstraint = "integrations_name_tenant_id_key"
+	IntegrationsConstraintIntegrationsPkey            IntegrationsConstraint = "integrations_pkey"
 )
 
 type IntegrationsSelectColumn string
