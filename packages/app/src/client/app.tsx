@@ -37,7 +37,12 @@ import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 
 import GettingStarted from "client/views/getting-started";
 import TenantOverview from "client/views/overview";
-import TenantIntegrations from "client/views/integrations";
+import {
+  TenantIntegrations,
+  AddIntegration,
+  ShowIntegration,
+  EditIntegration
+} from "client/viewsBasic/tenantIntegrations";
 import TenantAlerting from "client/views/alerting";
 import LoginView from "client/views/login";
 import HelpDialog from "client/views/help";
@@ -198,6 +203,24 @@ const AuthProtectedApplication = () => {
               key="tenant-integrations-installed"
               path="/tenant/:tenantId/integrations/installed"
               component={TenantIntegrations}
+            />
+            <Route
+              exact
+              key="/cluster/tenants/:tenantId/integrations/add/:integrationKind"
+              path="/cluster/tenants/:tenantId/integrations/add/:integrationKind"
+              component={AddIntegration}
+            />
+            <Route
+              exact
+              key="/cluster/tenants/:tenantId/integrations/:integrationId"
+              path="/cluster/tenants/:tenantId/integrations/:integrationId"
+              component={ShowIntegration}
+            />
+            <Route
+              exact
+              key="/cluster/tenants/:tenantId/integrations/:integrationId/edit"
+              path="/cluster/tenants/:tenantId/integrations/:integrationId/edit"
+              component={EditIntegration}
             />
             <Route
               exact

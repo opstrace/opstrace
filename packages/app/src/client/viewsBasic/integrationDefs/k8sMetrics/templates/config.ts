@@ -24,12 +24,20 @@
 // - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
 //
 // The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
-export function prometheusYaml(
-  clusterName: String,
-  tenantName: String,
-  integrationId: String,
-  deployNamespace: String,
-): String {
+
+type Props = {
+  clusterName: String;
+  tenantName: String;
+  integrationId: String;
+  deployNamespace: String;
+};
+
+export function prometheusYaml({
+  clusterName,
+  tenantName,
+  integrationId,
+  deployNamespace
+}: Props): BlobPart {
   return `apiVersion: v1
 kind: Secret
 metadata:
@@ -47,7 +55,8 @@ data:
   prometheus.yml: |-
     remote_write:
     - url: https://cortex.${tenantName}.${clusterName}.opstrace.io/api/v1/push
-      bearer_token_file: /var/run/tenant-auth/token
+      authorization:
+        credentials_file: /var/run/tenant-auth/token
 
     scrape_configs:
     # Collection of per-pod metrics
@@ -55,9 +64,11 @@ data:
       kubernetes_sd_configs:
       - role: pod
 
+      # TLS config for getting pod info, not querying pods themselves
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
       # Always use HTTPS for the api server
@@ -89,9 +100,12 @@ data:
       kubernetes_sd_configs:
       - role: node
 
+      scheme: https
+      # TLS config for getting list of nodes to scrape, not querying nodes themselves
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
       - target_label: __scheme__
@@ -99,19 +113,25 @@ data:
       # Include node hostname
       - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
         target_label: instance
+      # Include job label for the nodes
+      - source_labels: []
+        target_label: job
+        replacement: kubelet
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
         replacement: ${integrationId}
 
-    # Collection of the default/kubernetes service
+    # Collection of the kubernetes apiserver
     - job_name: 'kubernetes-service'
       kubernetes_sd_configs:
       - role: endpoints
 
+      # TLS config for getting endpoint info, not querying nodes themselves
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
       - source_labels: [__meta_kubernetes_service_label_component]
@@ -122,7 +142,7 @@ data:
       # Include job label for the service
       - source_labels: []
         target_label: job
-        replacement: default/kubernetes
+        replacement: apiserver
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
@@ -143,6 +163,7 @@ rules:
   - ""
   resources:
   - nodes
+  - nodes/metrics
   - nodes/proxy
   - services
   - endpoints
@@ -220,12 +241,12 @@ spec:
 // - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
 //
 // The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
-export function promtailYaml(
-  tenantName: String,
-  clusterName: String,
-  integrationId: String,
-  deployNamespace: String,
-): String {
+export function promtailYaml({
+  clusterName,
+  tenantName,
+  integrationId,
+  deployNamespace
+}: Props): BlobPart {
   return `apiVersion: v1
 kind: Secret
 metadata:

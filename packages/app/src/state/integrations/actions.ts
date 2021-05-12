@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-import React from "react";
+import { createAction } from "typesafe-actions";
 
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
-
-import { Box } from "client/components/Box";
-
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
-};
-
-export { AllIntegrations, AllIntegrationsTab };
+export const insertIntegration = createAction("INSERT_INTEGRATION")<{
+  tenantId: string;
+  kind: string;
+  name: string;
+}>();
+export const deleteIntegration = createAction("DELETE_INTEGRATION")<{
+  tenantId: string;
+  id: string;
+}>();

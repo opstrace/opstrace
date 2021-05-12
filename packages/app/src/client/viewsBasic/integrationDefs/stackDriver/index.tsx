@@ -16,21 +16,16 @@
 
 import React from "react";
 
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
+import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
-import { Box } from "client/components/Box";
-
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
+export const StackDriverIntegration: IntegrationDef = {
+  kind: "stack-driver",
+  category: "exporter",
+  label: "Stack Driver",
+  desc: "Stack Driver desc",
+  Form: () => <div />,
+  Row: () => <div />,
+  Card: () => <div />,
+  Show: () => <div />,
+  enabled: false
 };
-
-export { AllIntegrations, AllIntegrationsTab };

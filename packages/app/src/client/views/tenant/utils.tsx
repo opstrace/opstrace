@@ -38,10 +38,10 @@ export const tenantsToItems: (tenants: Tenants) => PanelItem[] = map(
 
 export const withTenant = <T extends {}>(
   Component: React.ReactType,
-  tenantName: string
+  tenantId: string
 ) => {
   return (props: T) => {
-    const tenant = useTenant(tenantName);
+    const tenant = useTenant(tenantId);
 
     return tenant ? (
       <Component {...props} tenant={tenant} />

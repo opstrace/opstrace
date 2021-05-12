@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-import React from "react";
-
-import { IntegrationDefCards } from "./Cards";
-import { integrationsDefs } from "client/viewsBasic/integrationDefs";
-
-import { Box } from "client/components/Box";
-
-const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-const AllIntegrationsTab = {
-  key: "all",
-  label: "All Integrations",
-  content: AllIntegrations
+export type IntegrationDef = {
+  kind: string;
+  category: string;
+  label: string;
+  desc: string;
+  Form: React.ReactType;
+  Row: React.ReactType;
+  Card: React.ReactType;
+  Show: React.ReactType;
+  enabled: boolean;
 };
 
-export { AllIntegrations, AllIntegrationsTab };
+export type IntegrationDefs = IntegrationDef[];
+export type IntegrationDefRecords = Record<string, IntegrationDef>;
