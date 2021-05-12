@@ -19,10 +19,16 @@ import { useForm, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
+import { k8sMetricsIntegration as integrationDef } from "./index";
+
 import { ControlledInput } from "client/viewsBasic/common/formUtils";
 
+import { Card, CardContent, CardHeader } from "client/components/Card";
+import { Box } from "client/components/Box";
+import Attribute from "client/components/Attribute";
+import { Button } from "client/components/Button";
+
 import { makeStyles } from "@material-ui/core/styles";
-import { FormLabel } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -88,33 +94,50 @@ export const K8sMetricsForm = ({ handleCreate }: Props) => {
   };
 
   return (
-    <>
-      <div className={classes.grid}>
-        <div className={classes.label}>
-          <FormLabel>Add Kubernetes Metrics Integration</FormLabel>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
-        <ControlledInput
-          name="name"
-          label="Name"
-          control={control}
-          labelClass={classes.label}
-          controlClass={classes.control}
+    <Box
+      width="100%"
+      height="100%"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      flexWrap="wrap"
+      p={1}
+    >
+      <Card>
+        <CardHeader
+          titleTypographyProps={{ variant: "h5" }}
+          title={`Add ${integrationDef.label} Integration`}
         />
-        <ControlledInput
-          name="deployNamespace"
-          label="Kubernetes namespace to install in"
-          control={control}
-          labelClass={classes.label}
-          controlClass={classes.control}
-        />
-
-        <div className={classes.control}>
-          <input type="submit" disabled={!isValid} />
-        </div>
-      </form>
-    </>
+        <CardContent>
+          <Box display="flex">
+            <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
+              <Box display="flex" flexDirection="column">
+                <Attribute.Key>Name:</Attribute.Key>
+                <Attribute.Key>Deployment Namespace:</Attribute.Key>
+                <Attribute.Key>{""}</Attribute.Key>
+              </Box>
+              <Box display="flex" flexDirection="column" flexGrow={1}>
+                <Attribute.Value>
+                  <ControlledInput name="name" control={control} />
+                </Attribute.Value>
+                <Attribute.Value>
+                  <ControlledInput name="deployNamespace" control={control} />
+                </Attribute.Value>
+                <Attribute.Value>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="medium"
+                    disabled={!isValid}
+                  >
+                    Add
+                  </Button>
+                </Attribute.Value>
+              </Box>
+            </form>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };

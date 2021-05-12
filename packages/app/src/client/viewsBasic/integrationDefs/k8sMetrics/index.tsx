@@ -21,7 +21,7 @@ import { K8sMetricsShow } from "./Show";
 
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
-export const K8sMetricsIntegration: IntegrationDef = {
+export const k8sMetricsIntegration: IntegrationDef = {
   kind: "k8s-metrics",
   category: "infrastructure",
   label: "Kubernetes Metrics",

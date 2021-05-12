@@ -23,7 +23,7 @@ import { Input, FormLabel, FormHelperText } from "@material-ui/core";
 
 type ControlledInputProps = {
   name: `${string}` | `${string}.${string}` | `${string}.${number}`;
-  label: string;
+  label?: string;
   helperText?: string | React.ReactNode | (() => React.ReactNode);
   inputProps?: {};
   control: any;
@@ -43,9 +43,11 @@ export const ControlledInput = ({
   <Controller
     render={({ field }) => (
       <>
-        <div className={labelClass}>
-          <FormLabel>{label}</FormLabel>
-        </div>
+        <CondRender unless={label === undefined}>
+          <div className={labelClass}>
+            <FormLabel>{label}</FormLabel>
+          </div>
+        </CondRender>
         <div className={controlClass}>
           <Input {...field} {...inputProps} />
           <CondRender

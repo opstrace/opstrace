@@ -18,7 +18,7 @@ import React from "react";
 
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
-export const BlackBoxIntegration: IntegrationDef = {
+export const blackBoxIntegration: IntegrationDef = {
   kind: "blackbox",
   category: "exporter",
   label: "Black Box",
