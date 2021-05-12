@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { saveAs } from "file-saver";
 import axios from "axios";
 
@@ -88,6 +89,8 @@ export const K8sMetricsShow = withTenantFromParams(
     integrationDef,
     tenant
   }: IntegrationProps & IntegrationDefProps & TenantProps) => {
+    const history = useHistory();
+
     const downloadHandler = () => {
       const config = prometheusYaml({
         clusterName: window.location.host,
@@ -131,50 +134,64 @@ export const K8sMetricsShow = withTenantFromParams(
         flexWrap="wrap"
         p={1}
       >
-        <Box maxWidth={700}>
-          <Card>
-            <CardHeader
-              titleTypographyProps={{ variant: "h5" }}
-              title={integration.name}
-            />
-            <CardContent>
-              <Box display="flex">
-                <Box display="flex" flexDirection="column">
-                  <Attribute.Key>Integration:</Attribute.Key>
-                  <Attribute.Key>Category:</Attribute.Key>
-                  <Attribute.Key>Status:</Attribute.Key>
-                  <Attribute.Key>Created:</Attribute.Key>
-                  <Attribute.Key>Config:</Attribute.Key>
-                </Box>
-                <Box display="flex" flexDirection="column" flexGrow={1}>
-                  <Attribute.Value>{integrationDef.label}</Attribute.Value>
-                  <Attribute.Value>{integrationDef.category}</Attribute.Value>
-                  <Attribute.Value>{integration.status}</Attribute.Value>
-                  <Attribute.Value>{integration.created_at}</Attribute.Value>
-                  <Attribute.Value>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={downloadHandler}
-                    >
-                      Download YAML
-                    </Button>
-                  </Attribute.Value>
-                  <Attribute.Value>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={integration.grafana_folder_id !== null}
-                      onClick={dashboardHandler}
-                    >
-                      Create dashboards
-                    </Button>
-                  </Attribute.Value>
+        <Card>
+          <CardHeader
+            titleTypographyProps={{ variant: "h5" }}
+            title={integration.name}
+            action={
+              <Box ml={3} display="flex" flexWrap="wrap">
+                <Box p={1}>
+                  <Button
+                    size="small"
+                    onClick={() =>
+                      history.push(
+                        `/tenant/${tenant.name}/integrations/installed`
+                      )
+                    }
+                  >
+                    {"< Back"}
+                  </Button>
                 </Box>
               </Box>
-            </CardContent>
-          </Card>
-        </Box>
+            }
+          />
+          <CardContent>
+            <Box display="flex">
+              <Box display="flex" flexDirection="column">
+                <Attribute.Key>Integration:</Attribute.Key>
+                <Attribute.Key>Category:</Attribute.Key>
+                <Attribute.Key>Status:</Attribute.Key>
+                <Attribute.Key>Created:</Attribute.Key>
+                <Attribute.Key>Config:</Attribute.Key>
+              </Box>
+              <Box display="flex" flexDirection="column" flexGrow={1}>
+                <Attribute.Value>{integrationDef.label}</Attribute.Value>
+                <Attribute.Value>{integrationDef.category}</Attribute.Value>
+                <Attribute.Value>{integration.status}</Attribute.Value>
+                <Attribute.Value>{integration.created_at}</Attribute.Value>
+                <Attribute.Value>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={downloadHandler}
+                  >
+                    Download YAML
+                  </Button>
+                </Attribute.Value>
+                <Attribute.Value>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    disabled={integration.grafana_folder_id !== null}
+                    onClick={dashboardHandler}
+                  >
+                    Create dashboards
+                  </Button>
+                </Attribute.Value>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
       </Box>
     );
   }
