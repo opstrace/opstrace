@@ -18,20 +18,28 @@ import React from "react";
 // import { filter, propEq } from "ramda";
 import { useHistory } from "react-router-dom";
 
+import { integrationsDefs } from "client/viewsBasic/integrationDefs";
 import { IntegrationDefs } from "client/viewsBasic/integrationDefs/types";
 import { addIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 import { withSkeleton } from "client/viewsBasic/common/utils";
 
+import { Box } from "client/components/Box";
 import Grid from "@material-ui/core/Grid";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
 import { Button } from "client/components/Button";
 
+export const AllIntegrations = () => (
+  <Box mt={3}>
+    <IntegrationDefCards integrationDefs={integrationsDefs} />
+  </Box>
+);
+
 type Props = { integrationDefs: IntegrationDefs };
 
-export const IntegrationDefCards = withTenantFromParams<Props>(
+const IntegrationDefCards = withTenantFromParams<Props>(
   withSkeleton<Props>(({ integrationDefs, tenant }: Props & TenantProps) => {
     const history = useHistory();
     // const available = filter(propEq("enabled", true))(data);
