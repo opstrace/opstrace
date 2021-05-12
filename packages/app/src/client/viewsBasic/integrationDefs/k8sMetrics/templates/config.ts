@@ -37,8 +37,14 @@ export function prometheusYaml({
   tenantName,
   integrationId,
   deployNamespace
-}: Props): BlobPart {
+}: Props): string {
   return `apiVersion: v1
+kind: Namespace
+apiVersion: v1
+metadata:
+name: ${deployNamespace}
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: opstrace-tenant-auth
@@ -246,8 +252,14 @@ export function promtailYaml({
   tenantName,
   integrationId,
   deployNamespace
-}: Props): BlobPart {
+}: Props): string {
   return `apiVersion: v1
+kind: Namespace
+apiVersion: v1
+metadata:
+name: ${deployNamespace}
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: opstrace-tenant-auth

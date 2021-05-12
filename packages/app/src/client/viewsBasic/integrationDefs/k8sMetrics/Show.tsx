@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useHistory } from "react-router-dom";
 import { saveAs } from "file-saver";
 import axios from "axios";
@@ -35,6 +35,9 @@ import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
+
+import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import Modal from "@material-ui/core/Modal";
 
 type folderInfo = {
   // The numeric ID for the folder that was created (or updated).
@@ -84,6 +87,8 @@ async function createDashboard(
   };
 }
 
+const configFilename = "opstrace-prometheus.yaml";
+
 export const K8sMetricsShow = withTenantFromParams(
   ({
     integration,
@@ -92,18 +97,20 @@ export const K8sMetricsShow = withTenantFromParams(
   }: IntegrationProps & IntegrationDefProps & TenantProps) => {
     const history = useHistory();
 
-    const downloadHandler = () => {
-      const config = prometheusYaml({
+    const config = useMemo(() => {
+      return prometheusYaml({
         clusterName: window.location.host,
         tenantName: tenant.name,
         integrationId: integration.id,
         deployNamespace: integration.data.deployNamespace
       });
+    }, []);
 
+    const downloadHandler = () => {
       var configBlob = new Blob([config], {
         type: "application/x-yaml;charset=utf-8"
       });
-      saveAs(configBlob, "opstrace-monitoring-prometheus.yaml");
+      saveAs(configBlob, configFilename);
     };
 
     const dashboardHandler = async () => {
@@ -194,7 +201,7 @@ export const K8sMetricsShow = withTenantFromParams(
                 <Box display="flex" flexDirection="column" flexGrow={1}>
                   <Attribute.Value>
                     {`Step 1. Download the generated config YAML and save to the same
-                    location as your Opstrace "${tenant.name}" Tenant API Token.`}
+                    location as the api key for Tenant "${tenant.name}", it should be called "tenant-api-token-${tenant.name}".`}
                     <br />
                     <br />
                     <Button
@@ -204,31 +211,21 @@ export const K8sMetricsShow = withTenantFromParams(
                     >
                       Download YAML
                     </Button>
+                    <ViewConfigButtonModal
+                      filename={configFilename}
+                      config={config}
+                    />
                   </Attribute.Value>
                   <Attribute.Value>
-                    {`Step 2. Run these commands to install`}
+                    {`Step 2. Run this command to install Prometheus`}
                     <br />
                     <pre>
-                      {commands.createNamespace(
-                        integration.data.deployNamespace
-                      )}
-                    </pre>
-                    <pre>
-                      {commands.portforwardPrometheus(
-                        tenant.name,
-                        integration.data.deployNamespace
-                      )}
-                    </pre>
-                    <pre>
-                      {commands.deployYaml(
-                        "opstrace-monitoring-prometheus.yaml",
-                        tenant.name
-                      )}
+                      {commands.deployYaml(configFilename, tenant.name)}
                     </pre>
                   </Attribute.Value>
                   <Attribute.Value>
                     Step 3. Once the integration is installed in your namepsace
-                    we can installed a default set of Grafana Dashboards for
+                    we can install our default set of Grafana Dashboards for
                     you.
                     <br />
                     <br />
@@ -250,3 +247,55 @@ export const K8sMetricsShow = withTenantFromParams(
     );
   }
 );
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    modal: {
+      display: "flex",
+      justifyItems: "center",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "500px",
+      overflow: "scroll"
+    },
+    paper: {
+      backgroundColor: theme.palette.background.paper,
+      border: "2px solid #000",
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3)
+    }
+  })
+);
+
+const ViewConfigButtonModal = ({
+  filename,
+  config
+}: {
+  filename: string;
+  config: string;
+}) => {
+  const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <Button variant="contained" size="small" onClick={handleOpen}>
+        View YAML
+      </Button>
+      <Modal open={open} onClose={handleClose} className={classes.modal}>
+        <div className={classes.paper}>
+          <h2>{configFilename}</h2>
+          <pre>{config}</pre>
+        </div>
+      </Modal>
+    </>
+  );
+};
