@@ -81,7 +81,8 @@ export function IngressResources(
               // WARNING: Don't forget the trailing semicolon or else routes will silently fail.
               "nginx.ingress.kubernetes.io/configuration-snippet": ` more_set_input_headers "X-Scope-OrgID: ${tenant.name}";`,
               "nginx.ingress.kubernetes.io/cors-allow-credentials": "true",
-              "nginx.ingress.kubernetes.io/cors-allow-methods": "GET, OPTIONS",
+              "nginx.ingress.kubernetes.io/cors-allow-methods":
+                "GET, OPTIONS, PUT, POST, DELETE",
               "nginx.ingress.kubernetes.io/cors-allow-origin": `https://${domain}`,
               "nginx.ingress.kubernetes.io/enable-cors": "true"
             }
