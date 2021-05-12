@@ -24,7 +24,7 @@ import {
 } from "state/tenant/actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-const selectTenantList = createSelector(
+export const selectTenantList = createSelector(
   (state: State) => state.tenants.loading,
   (state: State) => state.tenants.tenants,
   (loading, tenants) => (loading ? [] : values(tenants))

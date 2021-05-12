@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all, select, take, call, spawn, takeEvery } from "redux-saga/effects";
+import {
+  all,
+  select,
+  take,
+  call,
+  spawn,
+  takeEvery,
+  put
+} from "redux-saga/effects";
 import * as actions from "../actions";
 import graphqlClient, { User } from "state/clients/graphqlClient";
 
@@ -21,6 +29,9 @@ import userListSubscriptionManager from "./userListSubscription";
 import { getCurrentUser } from "../hooks/useCurrentUser";
 import { State } from "state/reducer";
 import { getUserList } from "../hooks/useUserList";
+import { Tenants } from "state/tenant/types";
+import { selectTenantList } from "state/tenant/hooks/useTenantList";
+import axios from "axios";
 
 export default function* userTaskManager() {
   const sagas = [
@@ -98,14 +109,31 @@ function* deleteUser(action: ReturnType<typeof actions.deleteUser>) {
 
 function* persistDarkModePreference() {
   while (true) {
-    const action: ReturnType<typeof actions.setDarkMode> = yield take(
-      actions.setDarkMode
+    const action: ReturnType<typeof actions.requestSetDarkMode> = yield take(
+      actions.requestSetDarkMode
     );
     const user: User | undefined = yield select(getCurrentUser);
     if (!user?.id) {
       return;
     }
+    const tenants: Tenants = yield select(selectTenantList);
     try {
+      // First update Grafana instances
+      yield Promise.all(
+        tenants.map(tenant =>
+          axios({
+            method: "put",
+            url: `${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/api/user/preferences`,
+            withCredentials: true,
+            data: {
+              homeDashboardId: 0,
+              theme: action.payload ? "dark" : "light",
+              timezone: ""
+            }
+          })
+        )
+      );
+      yield put(actions.setDarkMode(action.payload));
       yield graphqlClient.SetDarkMode({
         user_id: user.id,
         dark_mode: action.payload
