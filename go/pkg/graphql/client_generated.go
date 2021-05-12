@@ -1465,14 +1465,15 @@ type InsertIntegrationVariables struct {
 
 type InsertIntegrationResponse struct {
 	InsertIntegrationsOne struct {
-		ID        string `json:"id"`
-		Kind      string `json:"kind"`
-		Name      string `json:"name"`
-		Status    string `json:"status"`
-		Data      string `json:"data"`
-		TenantId  string `json:"tenant_id"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
+		ID              string `json:"id"`
+		Kind            string `json:"kind"`
+		Name            string `json:"name"`
+		Status          string `json:"status"`
+		Data            string `json:"data"`
+		TenantId        string `json:"tenant_id"`
+		GrafanaFolderId string `json:"grafana_folder_id"`
+		CreatedAt       string `json:"created_at"`
+		UpdatedAt       string `json:"updated_at"`
 	} `json:"insert_integrations_one"`
 }
 
@@ -1495,6 +1496,7 @@ func NewInsertIntegrationRequest(url string, vars *InsertIntegrationVariables) (
     status
     data
     tenant_id
+    grafana_folder_id
     created_at
     updated_at
   }
@@ -3063,27 +3065,29 @@ const (
 type IntegrationsSelectColumn string
 
 const (
-	IntegrationsSelectColumnCreatedAt IntegrationsSelectColumn = "created_at"
-	IntegrationsSelectColumnData      IntegrationsSelectColumn = "data"
-	IntegrationsSelectColumnID        IntegrationsSelectColumn = "id"
-	IntegrationsSelectColumnKind      IntegrationsSelectColumn = "kind"
-	IntegrationsSelectColumnName      IntegrationsSelectColumn = "name"
-	IntegrationsSelectColumnStatus    IntegrationsSelectColumn = "status"
-	IntegrationsSelectColumnTenantId  IntegrationsSelectColumn = "tenant_id"
-	IntegrationsSelectColumnUpdatedAt IntegrationsSelectColumn = "updated_at"
+	IntegrationsSelectColumnCreatedAt       IntegrationsSelectColumn = "created_at"
+	IntegrationsSelectColumnData            IntegrationsSelectColumn = "data"
+	IntegrationsSelectColumnGrafanaFolderId IntegrationsSelectColumn = "grafana_folder_id"
+	IntegrationsSelectColumnID              IntegrationsSelectColumn = "id"
+	IntegrationsSelectColumnKind            IntegrationsSelectColumn = "kind"
+	IntegrationsSelectColumnName            IntegrationsSelectColumn = "name"
+	IntegrationsSelectColumnStatus          IntegrationsSelectColumn = "status"
+	IntegrationsSelectColumnTenantId        IntegrationsSelectColumn = "tenant_id"
+	IntegrationsSelectColumnUpdatedAt       IntegrationsSelectColumn = "updated_at"
 )
 
 type IntegrationsUpdateColumn string
 
 const (
-	IntegrationsUpdateColumnCreatedAt IntegrationsUpdateColumn = "created_at"
-	IntegrationsUpdateColumnData      IntegrationsUpdateColumn = "data"
-	IntegrationsUpdateColumnID        IntegrationsUpdateColumn = "id"
-	IntegrationsUpdateColumnKind      IntegrationsUpdateColumn = "kind"
-	IntegrationsUpdateColumnName      IntegrationsUpdateColumn = "name"
-	IntegrationsUpdateColumnStatus    IntegrationsUpdateColumn = "status"
-	IntegrationsUpdateColumnTenantId  IntegrationsUpdateColumn = "tenant_id"
-	IntegrationsUpdateColumnUpdatedAt IntegrationsUpdateColumn = "updated_at"
+	IntegrationsUpdateColumnCreatedAt       IntegrationsUpdateColumn = "created_at"
+	IntegrationsUpdateColumnData            IntegrationsUpdateColumn = "data"
+	IntegrationsUpdateColumnGrafanaFolderId IntegrationsUpdateColumn = "grafana_folder_id"
+	IntegrationsUpdateColumnID              IntegrationsUpdateColumn = "id"
+	IntegrationsUpdateColumnKind            IntegrationsUpdateColumn = "kind"
+	IntegrationsUpdateColumnName            IntegrationsUpdateColumn = "name"
+	IntegrationsUpdateColumnStatus          IntegrationsUpdateColumn = "status"
+	IntegrationsUpdateColumnTenantId        IntegrationsUpdateColumn = "tenant_id"
+	IntegrationsUpdateColumnUpdatedAt       IntegrationsUpdateColumn = "updated_at"
 )
 
 type ModuleConstraint string
@@ -3253,6 +3257,18 @@ type BooleanComparisonExp struct {
 	Lte    *Boolean   `json:"_lte,omitempty"`
 	Neq    *Boolean   `json:"_neq,omitempty"`
 	Nin    *[]Boolean `json:"_nin,omitempty"`
+}
+
+type IntComparisonExp struct {
+	Eq     *Int     `json:"_eq,omitempty"`
+	Gt     *Int     `json:"_gt,omitempty"`
+	Gte    *Int     `json:"_gte,omitempty"`
+	In     *[]Int   `json:"_in,omitempty"`
+	IsNull *Boolean `json:"_is_null,omitempty"`
+	Lt     *Int     `json:"_lt,omitempty"`
+	Lte    *Int     `json:"_lte,omitempty"`
+	Neq    *Int     `json:"_neq,omitempty"`
+	Nin    *[]Int   `json:"_nin,omitempty"`
 }
 
 type RuleGroupInput struct {
@@ -3698,9 +3714,17 @@ type FileSetInput struct {
 }
 
 type IntegrationsAggregateOrderBy struct {
-	Count *OrderBy                `json:"count,omitempty"`
-	Max   *IntegrationsMaxOrderBy `json:"max,omitempty"`
-	Min   *IntegrationsMinOrderBy `json:"min,omitempty"`
+	Avg        *IntegrationsAvgOrderBy        `json:"avg,omitempty"`
+	Count      *OrderBy                       `json:"count,omitempty"`
+	Max        *IntegrationsMaxOrderBy        `json:"max,omitempty"`
+	Min        *IntegrationsMinOrderBy        `json:"min,omitempty"`
+	Stddev     *IntegrationsStddevOrderBy     `json:"stddev,omitempty"`
+	StddevPop  *IntegrationsStddevPopOrderBy  `json:"stddev_pop,omitempty"`
+	StddevSamp *IntegrationsStddevSampOrderBy `json:"stddev_samp,omitempty"`
+	Sum        *IntegrationsSumOrderBy        `json:"sum,omitempty"`
+	VarPop     *IntegrationsVarPopOrderBy     `json:"var_pop,omitempty"`
+	VarSamp    *IntegrationsVarSampOrderBy    `json:"var_samp,omitempty"`
+	Variance   *IntegrationsVarianceOrderBy   `json:"variance,omitempty"`
 }
 
 type IntegrationsAppendInput struct {
@@ -3712,19 +3736,24 @@ type IntegrationsArrRelInsertInput struct {
 	OnConflict *IntegrationsOnConflict    `json:"on_conflict,omitempty"`
 }
 
+type IntegrationsAvgOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+}
+
 type IntegrationsBoolExp struct {
-	And       *[]IntegrationsBoolExp  `json:"_and,omitempty"`
-	Not       *IntegrationsBoolExp    `json:"_not,omitempty"`
-	Or        *[]IntegrationsBoolExp  `json:"_or,omitempty"`
-	CreatedAt *TimestampComparisonExp `json:"created_at,omitempty"`
-	Data      *JsonbComparisonExp     `json:"data,omitempty"`
-	ID        *UuidComparisonExp      `json:"id,omitempty"`
-	Kind      *StringComparisonExp    `json:"kind,omitempty"`
-	Name      *StringComparisonExp    `json:"name,omitempty"`
-	Status    *StringComparisonExp    `json:"status,omitempty"`
-	Tenant    *TenantBoolExp          `json:"tenant,omitempty"`
-	TenantId  *UuidComparisonExp      `json:"tenant_id,omitempty"`
-	UpdatedAt *TimestampComparisonExp `json:"updated_at,omitempty"`
+	And             *[]IntegrationsBoolExp  `json:"_and,omitempty"`
+	Not             *IntegrationsBoolExp    `json:"_not,omitempty"`
+	Or              *[]IntegrationsBoolExp  `json:"_or,omitempty"`
+	CreatedAt       *TimestampComparisonExp `json:"created_at,omitempty"`
+	Data            *JsonbComparisonExp     `json:"data,omitempty"`
+	GrafanaFolderId *IntComparisonExp       `json:"grafana_folder_id,omitempty"`
+	ID              *UuidComparisonExp      `json:"id,omitempty"`
+	Kind            *StringComparisonExp    `json:"kind,omitempty"`
+	Name            *StringComparisonExp    `json:"name,omitempty"`
+	Status          *StringComparisonExp    `json:"status,omitempty"`
+	Tenant          *TenantBoolExp          `json:"tenant,omitempty"`
+	TenantId        *UuidComparisonExp      `json:"tenant_id,omitempty"`
+	UpdatedAt       *TimestampComparisonExp `json:"updated_at,omitempty"`
 }
 
 type IntegrationsDeleteAtPathInput struct {
@@ -3739,36 +3768,43 @@ type IntegrationsDeleteKeyInput struct {
 	Data *String `json:"data,omitempty"`
 }
 
+type IntegrationsIncInput struct {
+	GrafanaFolderId *Int `json:"grafana_folder_id,omitempty"`
+}
+
 type IntegrationsInsertInput struct {
-	CreatedAt *Timestamp               `json:"created_at,omitempty"`
-	Data      *Jsonb                   `json:"data,omitempty"`
-	ID        *UUID                    `json:"id,omitempty"`
-	Kind      *String                  `json:"kind,omitempty"`
-	Name      *String                  `json:"name,omitempty"`
-	Status    *String                  `json:"status,omitempty"`
-	Tenant    *TenantObjRelInsertInput `json:"tenant,omitempty"`
-	TenantId  *UUID                    `json:"tenant_id,omitempty"`
-	UpdatedAt *Timestamp               `json:"updated_at,omitempty"`
+	CreatedAt       *Timestamp               `json:"created_at,omitempty"`
+	Data            *Jsonb                   `json:"data,omitempty"`
+	GrafanaFolderId *Int                     `json:"grafana_folder_id,omitempty"`
+	ID              *UUID                    `json:"id,omitempty"`
+	Kind            *String                  `json:"kind,omitempty"`
+	Name            *String                  `json:"name,omitempty"`
+	Status          *String                  `json:"status,omitempty"`
+	Tenant          *TenantObjRelInsertInput `json:"tenant,omitempty"`
+	TenantId        *UUID                    `json:"tenant_id,omitempty"`
+	UpdatedAt       *Timestamp               `json:"updated_at,omitempty"`
 }
 
 type IntegrationsMaxOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	ID        *OrderBy `json:"id,omitempty"`
-	Kind      *OrderBy `json:"kind,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Status    *OrderBy `json:"status,omitempty"`
-	TenantId  *OrderBy `json:"tenant_id,omitempty"`
-	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
+	CreatedAt       *OrderBy `json:"created_at,omitempty"`
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+	ID              *OrderBy `json:"id,omitempty"`
+	Kind            *OrderBy `json:"kind,omitempty"`
+	Name            *OrderBy `json:"name,omitempty"`
+	Status          *OrderBy `json:"status,omitempty"`
+	TenantId        *OrderBy `json:"tenant_id,omitempty"`
+	UpdatedAt       *OrderBy `json:"updated_at,omitempty"`
 }
 
 type IntegrationsMinOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	ID        *OrderBy `json:"id,omitempty"`
-	Kind      *OrderBy `json:"kind,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Status    *OrderBy `json:"status,omitempty"`
-	TenantId  *OrderBy `json:"tenant_id,omitempty"`
-	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
+	CreatedAt       *OrderBy `json:"created_at,omitempty"`
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+	ID              *OrderBy `json:"id,omitempty"`
+	Kind            *OrderBy `json:"kind,omitempty"`
+	Name            *OrderBy `json:"name,omitempty"`
+	Status          *OrderBy `json:"status,omitempty"`
+	TenantId        *OrderBy `json:"tenant_id,omitempty"`
+	UpdatedAt       *OrderBy `json:"updated_at,omitempty"`
 }
 
 type IntegrationsObjRelInsertInput struct {
@@ -3783,15 +3819,16 @@ type IntegrationsOnConflict struct {
 }
 
 type IntegrationsOrderBy struct {
-	CreatedAt *OrderBy       `json:"created_at,omitempty"`
-	Data      *OrderBy       `json:"data,omitempty"`
-	ID        *OrderBy       `json:"id,omitempty"`
-	Kind      *OrderBy       `json:"kind,omitempty"`
-	Name      *OrderBy       `json:"name,omitempty"`
-	Status    *OrderBy       `json:"status,omitempty"`
-	Tenant    *TenantOrderBy `json:"tenant,omitempty"`
-	TenantId  *OrderBy       `json:"tenant_id,omitempty"`
-	UpdatedAt *OrderBy       `json:"updated_at,omitempty"`
+	CreatedAt       *OrderBy       `json:"created_at,omitempty"`
+	Data            *OrderBy       `json:"data,omitempty"`
+	GrafanaFolderId *OrderBy       `json:"grafana_folder_id,omitempty"`
+	ID              *OrderBy       `json:"id,omitempty"`
+	Kind            *OrderBy       `json:"kind,omitempty"`
+	Name            *OrderBy       `json:"name,omitempty"`
+	Status          *OrderBy       `json:"status,omitempty"`
+	Tenant          *TenantOrderBy `json:"tenant,omitempty"`
+	TenantId        *OrderBy       `json:"tenant_id,omitempty"`
+	UpdatedAt       *OrderBy       `json:"updated_at,omitempty"`
 }
 
 type IntegrationsPkColumnsInput struct {
@@ -3803,14 +3840,43 @@ type IntegrationsPrependInput struct {
 }
 
 type IntegrationsSetInput struct {
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	Data      *Jsonb     `json:"data,omitempty"`
-	ID        *UUID      `json:"id,omitempty"`
-	Kind      *String    `json:"kind,omitempty"`
-	Name      *String    `json:"name,omitempty"`
-	Status    *String    `json:"status,omitempty"`
-	TenantId  *UUID      `json:"tenant_id,omitempty"`
-	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
+	CreatedAt       *Timestamp `json:"created_at,omitempty"`
+	Data            *Jsonb     `json:"data,omitempty"`
+	GrafanaFolderId *Int       `json:"grafana_folder_id,omitempty"`
+	ID              *UUID      `json:"id,omitempty"`
+	Kind            *String    `json:"kind,omitempty"`
+	Name            *String    `json:"name,omitempty"`
+	Status          *String    `json:"status,omitempty"`
+	TenantId        *UUID      `json:"tenant_id,omitempty"`
+	UpdatedAt       *Timestamp `json:"updated_at,omitempty"`
+}
+
+type IntegrationsStddevOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsStddevPopOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsStddevSampOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsSumOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsVarPopOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsVarSampOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsVarianceOrderBy struct {
+	GrafanaFolderId *OrderBy `json:"grafana_folder_id,omitempty"`
 }
 
 type JsonComparisonExp struct {
@@ -4533,15 +4599,16 @@ type FileMutationResponse struct {
 }
 
 type Integrations struct {
-	CreatedAt Timestamp `json:"created_at"`
-	Data      Jsonb     `json:"data"`
-	ID        UUID      `json:"id"`
-	Kind      String    `json:"kind"`
-	Name      String    `json:"name"`
-	Status    String    `json:"status"`
-	Tenant    Tenant    `json:"tenant"`
-	TenantId  UUID      `json:"tenant_id"`
-	UpdatedAt Timestamp `json:"updated_at"`
+	CreatedAt       Timestamp `json:"created_at"`
+	Data            Jsonb     `json:"data"`
+	GrafanaFolderId *Int      `json:"grafana_folder_id,omitempty"`
+	ID              UUID      `json:"id"`
+	Kind            String    `json:"kind"`
+	Name            String    `json:"name"`
+	Status          String    `json:"status"`
+	Tenant          Tenant    `json:"tenant"`
+	TenantId        UUID      `json:"tenant_id"`
+	UpdatedAt       Timestamp `json:"updated_at"`
 }
 
 type IntegrationsAggregate struct {
@@ -4550,34 +4617,76 @@ type IntegrationsAggregate struct {
 }
 
 type IntegrationsAggregateFields struct {
-	Count *Int                   `json:"count,omitempty"`
-	Max   *IntegrationsMaxFields `json:"max,omitempty"`
-	Min   *IntegrationsMinFields `json:"min,omitempty"`
+	Avg        *IntegrationsAvgFields        `json:"avg,omitempty"`
+	Count      *Int                          `json:"count,omitempty"`
+	Max        *IntegrationsMaxFields        `json:"max,omitempty"`
+	Min        *IntegrationsMinFields        `json:"min,omitempty"`
+	Stddev     *IntegrationsStddevFields     `json:"stddev,omitempty"`
+	StddevPop  *IntegrationsStddevPopFields  `json:"stddev_pop,omitempty"`
+	StddevSamp *IntegrationsStddevSampFields `json:"stddev_samp,omitempty"`
+	Sum        *IntegrationsSumFields        `json:"sum,omitempty"`
+	VarPop     *IntegrationsVarPopFields     `json:"var_pop,omitempty"`
+	VarSamp    *IntegrationsVarSampFields    `json:"var_samp,omitempty"`
+	Variance   *IntegrationsVarianceFields   `json:"variance,omitempty"`
+}
+
+type IntegrationsAvgFields struct {
+	GrafanaFolderId *Float `json:"grafana_folder_id,omitempty"`
 }
 
 type IntegrationsMaxFields struct {
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	ID        *UUID      `json:"id,omitempty"`
-	Kind      *String    `json:"kind,omitempty"`
-	Name      *String    `json:"name,omitempty"`
-	Status    *String    `json:"status,omitempty"`
-	TenantId  *UUID      `json:"tenant_id,omitempty"`
-	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
+	CreatedAt       *Timestamp `json:"created_at,omitempty"`
+	GrafanaFolderId *Int       `json:"grafana_folder_id,omitempty"`
+	ID              *UUID      `json:"id,omitempty"`
+	Kind            *String    `json:"kind,omitempty"`
+	Name            *String    `json:"name,omitempty"`
+	Status          *String    `json:"status,omitempty"`
+	TenantId        *UUID      `json:"tenant_id,omitempty"`
+	UpdatedAt       *Timestamp `json:"updated_at,omitempty"`
 }
 
 type IntegrationsMinFields struct {
-	CreatedAt *Timestamp `json:"created_at,omitempty"`
-	ID        *UUID      `json:"id,omitempty"`
-	Kind      *String    `json:"kind,omitempty"`
-	Name      *String    `json:"name,omitempty"`
-	Status    *String    `json:"status,omitempty"`
-	TenantId  *UUID      `json:"tenant_id,omitempty"`
-	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
+	CreatedAt       *Timestamp `json:"created_at,omitempty"`
+	GrafanaFolderId *Int       `json:"grafana_folder_id,omitempty"`
+	ID              *UUID      `json:"id,omitempty"`
+	Kind            *String    `json:"kind,omitempty"`
+	Name            *String    `json:"name,omitempty"`
+	Status          *String    `json:"status,omitempty"`
+	TenantId        *UUID      `json:"tenant_id,omitempty"`
+	UpdatedAt       *Timestamp `json:"updated_at,omitempty"`
 }
 
 type IntegrationsMutationResponse struct {
 	AffectedRows Int             `json:"affected_rows"`
 	Returning    *[]Integrations `json:"returning,omitempty"`
+}
+
+type IntegrationsStddevFields struct {
+	GrafanaFolderId *Float `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsStddevPopFields struct {
+	GrafanaFolderId *Float `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsStddevSampFields struct {
+	GrafanaFolderId *Float `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsSumFields struct {
+	GrafanaFolderId *Int `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsVarPopFields struct {
+	GrafanaFolderId *Float `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsVarSampFields struct {
+	GrafanaFolderId *Float `json:"grafana_folder_id,omitempty"`
+}
+
+type IntegrationsVarianceFields struct {
+	GrafanaFolderId *Float `json:"grafana_folder_id,omitempty"`
 }
 
 type Module struct {

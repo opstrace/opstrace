@@ -1,18 +1,3 @@
-# mutation InsertIntegrations($integrations: [integrations_insert_input!]!) {
-#   insert_integrations(objects: $integrations) {
-#     returning {
-#       id
-#       kind
-#       name
-#       status
-#       data
-#       tenant_id
-#       created_at
-#       updated_at
-#     }
-#   }
-# }
-
 mutation InsertIntegration(
   $name: String!
   $kind: String!
@@ -35,6 +20,7 @@ mutation InsertIntegration(
     status
     data
     tenant_id
+    grafana_folder_id
     created_at
     updated_at
   }

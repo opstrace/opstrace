@@ -273,6 +273,7 @@
       check: {}
       columns:
       - data
+      - grafana_folder_id
       - kind
       - name
       - status
@@ -284,6 +285,7 @@
       columns:
       - created_at
       - data
+      - grafana_folder_id
       - id
       - kind
       - name
@@ -297,6 +299,7 @@
     permission:
       columns:
       - data
+      - grafana_folder_id
       - name
       - status
       filter: {}
