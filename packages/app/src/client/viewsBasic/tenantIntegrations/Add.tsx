@@ -48,7 +48,7 @@ export const AddIntegration = withTenantFromParams(
         .InsertIntegration({
           name: data.name,
           kind: "k8s-metrics",
-          status: "pending",
+          status: "active",
           data: data.data || {},
           tenant_id: tenant.id
         })
