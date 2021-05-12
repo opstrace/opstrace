@@ -22,7 +22,7 @@ export const blackBoxIntegration: IntegrationDef = {
   kind: "blackbox",
   category: "exporter",
   label: "Black Box",
-  desc: "Black Box desc",
+  desc: () => <i>Coming soon</i>,
   Form: () => <div />,
   Row: () => <div />,
   Card: () => <div />,

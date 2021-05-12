@@ -24,22 +24,29 @@ import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { prometheusYaml } from "./templates/config";
-import { makePrometheusFolderRequest, makePrometheusDashboardRequests } from "./templates/dashboards";
+import {
+  makePrometheusFolderRequest,
+  makePrometheusDashboardRequests
+} from "./templates/dashboards";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
+import { Button } from "client/components/Button";
 
 type folderInfo = {
   // The numeric ID for the folder that was created (or updated).
   // This ID must be included when creating dashboards within the folder.
-  id: number,
+  id: number;
   // The '/grafana/...' path linking to the folder in Grafana.
   // Doesn't include the hostname.
-  urlPath: String
-}
+  urlPath: String;
+};
 
-async function createFolder(tenantName: String, folder: object): Promise<folderInfo> {
+async function createFolder(
+  tenantName: String,
+  folder: object
+): Promise<folderInfo> {
   // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
   const responseData = await axios({
     method: "post",
@@ -51,15 +58,18 @@ async function createFolder(tenantName: String, folder: object): Promise<folderI
     id: responseData.id,
     urlPath: responseData.url
   };
-};
+}
 
 type dashboardInfo = {
   // The '/grafana/...' path linking to the dashboard in Grafana.
   // Doesn't include the hostname.
-  urlPath: String
-}
+  urlPath: String;
+};
 
-async function createDashboard(tenantName: String, dashboard: object): Promise<dashboardInfo> {
+async function createDashboard(
+  tenantName: String,
+  dashboard: object
+): Promise<dashboardInfo> {
   // see also: https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard
   const responseData = await axios({
     method: "post",
@@ -108,7 +118,7 @@ export const K8sMetricsShow = withTenantFromParams(
       })) {
         const result = await createDashboard(tenant.name, d);
         console.log(`Dashboard created: path=${result.urlPath}`);
-      };
+      }
     };
 
     return (
@@ -130,22 +140,35 @@ export const K8sMetricsShow = withTenantFromParams(
             <CardContent>
               <Box display="flex">
                 <Box display="flex" flexDirection="column">
-                  <Attribute.Key>Kind:</Attribute.Key>
+                  <Attribute.Key>Integration:</Attribute.Key>
                   <Attribute.Key>Category:</Attribute.Key>
                   <Attribute.Key>Status:</Attribute.Key>
                   <Attribute.Key>Created:</Attribute.Key>
                   <Attribute.Key>Config:</Attribute.Key>
                 </Box>
                 <Box display="flex" flexDirection="column" flexGrow={1}>
-                  <Attribute.Value>{integrationDef.kind}</Attribute.Value>
+                  <Attribute.Value>{integrationDef.label}</Attribute.Value>
                   <Attribute.Value>{integrationDef.category}</Attribute.Value>
                   <Attribute.Value>{integration.status}</Attribute.Value>
                   <Attribute.Value>{integration.created_at}</Attribute.Value>
                   <Attribute.Value>
-                    <button onClick={downloadHandler}>Download</button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={downloadHandler}
+                    >
+                      Download YAML
+                    </Button>
                   </Attribute.Value>
                   <Attribute.Value>
-                    <button onClick={dashboardHandler}>Create dashboards</button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={integration.grafana_folder_id !== null}
+                      onClick={dashboardHandler}
+                    >
+                      Create dashboards
+                    </Button>
                   </Attribute.Value>
                 </Box>
               </Box>

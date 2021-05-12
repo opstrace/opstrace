@@ -18,7 +18,7 @@ export type IntegrationDef = {
   kind: string;
   category: string;
   label: string;
-  desc: string;
+  desc: string | React.ReactType;
   Form: React.ReactType;
   Row: React.ReactType;
   Card: React.ReactType;

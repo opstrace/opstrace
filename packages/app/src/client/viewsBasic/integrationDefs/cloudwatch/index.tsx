@@ -22,7 +22,7 @@ export const cloudwatchIntegration: IntegrationDef = {
   kind: "cloudwatch",
   category: "exporter",
   label: "Cloudwatch",
-  desc: "Cloudwatch desc",
+  desc: () => <i>Coming soon</i>,
   Form: () => <div />,
   Row: () => <div />,
   Card: () => <div />,

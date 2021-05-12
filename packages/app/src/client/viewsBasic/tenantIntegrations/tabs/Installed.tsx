@@ -27,6 +27,7 @@ import {
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 import { withSkeleton } from "client/viewsBasic/common/utils";
 
+import { Box } from "client/components/Box";
 import { Card } from "client/components/Card";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -34,8 +35,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-
-import { Box } from "client/components/Box";
+import { Button } from "client/components/Button";
 
 export const InstalledIntegrations = withIntegrationListFromParams(
   ({ integrationList }: IntegrationListProps) => {
@@ -75,15 +75,17 @@ const InstalledIntegrationsTable = withTenantFromParams<Props>(
                 <TableCell>{i9n.status}</TableCell>
                 <TableCell>{i9n.created_at}</TableCell>
                 <TableCell>
-                  <button
+                  <Button
+                    variant="contained"
+                    size="small"
                     onClick={() =>
                       history.push(
                         showIntegrationPath({ tenant, integration: i9n })
                       )
                     }
                   >
-                    Detail
-                  </button>
+                    Show
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
