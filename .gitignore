@@ -13,6 +13,7 @@ out
 .cache
 .build
 .log
+telepresence.log
 yarn-error.log
 id.jwt
 access.jwt

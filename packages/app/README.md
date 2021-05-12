@@ -63,23 +63,25 @@ The build is minified and the filenames include the hashes.
 
 ## Remote cluster development
 
-When making graphql querys that utilise Hasura Actions the full stack needs to be running, the best way to achieve this is to spin up a cluster in AWS and use the Hasura server running there rather than one locally. Instead of the usual workflow running `services:start`, `server:start` and `client:start` the needed steps are slightly different.
+Some features rely on other Opstrace services running in an Opstrace cluster. To develop against an Opstrace cluster, we use Telepresence to connect your remote Opstrace application pod to your local machine, enabling you to make changes locally and the container in the remote cluster will automatically reload with compiled changes. Instead of the usual workflow running `services:start`, `server:start` and `client:start` the needed steps are slightly different.
 
 Make sure you are correctly setup to access the cluster, for example using
 
-- `source ../../secrets/aws-dev-svc-acc-env.sh`
-- `aws eks update-kubeconfig --name <your cluster name here> --region us-west-2`
+* Install [Telepresence](https://www.telepresence.io/reference/install.html) on your local machine
+* On macos you'll be prompted with instructions to grant some permissions for filesystem access
+* `source ../../secrets/aws-dev-svc-acc-env.sh`
+* `aws eks update-kubeconfig --name <your cluster name here> --region us-west-2`
 
 Then run all of the following commands:
 
-- `yarn services:start`
-- `yarn services:start:graphql:remote`
-- `yarn server:start:remote`
-- `yarn client:start`
+* `yarn client:remote`
+* `make remote-dev`
+
+These two commands will compile client and server code changes and you'll then be able to *access the UI in the remote cluster* (i.e. {clustername}.Opstrace.io **NOTE: select "disable cache" under your browsers network tab) to see the updated changes. Hot reloading is disabled so you'll have to hit a browser refresh. Note, localhost ui dev will not work in this mode.
 
 For accessing the remote Hasura console run the this script:
 
-- `console:remote`
+* `console:remote`
 
 ### What this does
 
@@ -95,13 +97,14 @@ The `services:start:graphql:remote` starts a port forward into your cluster maki
 For changing the Postgres schema e.g. adding new tables or existing new tables, we will launch Hasura+Postgres in a docker-compose environment, and then locally run the Hasura console for interacting with that environment. See also [Hasura migrations docs](https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html).
 
 Changes via the Hasura console will take effect immediately:
-- The Postgres schema in the docker-compose environment will be updated to reflect schema changes.
-- The Hasura `metadata/` and `migrations/` directories will be updated automatically (via mounts in the docker-compose environment).
-- The Typescript and Go GraphQL client code will be automatically regenerated (via `yarn types:watch`).
+
+* The Postgres schema in the docker-compose environment will be updated to reflect schema changes.
+* The Hasura `metadata/` and `migrations/` directories will be updated automatically (via mounts in the docker-compose environment).
+* The Typescript and Go GraphQL client code will be automatically regenerated (via `yarn types:watch`).
 
 `.gql` files must be explicitly created for any query/mutate calls to be included in the generated Typescript/Go client code. See existing `.gql` files under `src/state/` for examples.
 
-```
+```bash
 # Ensure dependencies are installed and linked
 yarn
 docker-compose --version

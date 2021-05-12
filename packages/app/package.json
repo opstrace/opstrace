@@ -248,10 +248,12 @@
   },
   "scripts": {
     "client:start": "node scripts/startClient.js",
+    "client:remote": "REMOTE_DEV=true node scripts/startClient.js",
     "client:build": "node scripts/buildClient.js",
     "client:build-debug-workbox": "node scripts/buildClient.js --workbox-debug",
     "client:test": "node scripts/test.js",
     "server:start": "NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
+    "server:remote": "NODE_ENV=production webpack --watch --config config/webpack.server.config.js",
     "server:build": "NODE_ENV=production webpack --config config/webpack.server.config.js",
     "clean": "rimraf build dist .cache tsconfig.tsbuildinfo",
     "build": "yarn client:build && yarn server:build",
@@ -285,11 +287,11 @@
   ],
   "proxy": {
     "/_": {
-      "target": "http://localhost:3001",
+      "target": "http://localhost:3000",
       "ws": true
     },
     "/modules": {
-      "target": "http://localhost:3001"
+      "target": "http://localhost:3000"
     }
   },
   "browserslist": {

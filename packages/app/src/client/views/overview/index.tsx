@@ -22,9 +22,11 @@ import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
 import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 import { ExternalLink } from "client/components/Link";
+import { useTheme } from "@material-ui/core/styles";
 
 const TenantOverview = () => {
   const tenant = useSelectedTenant();
+  const theme = useTheme();
 
   if (!tenant) {
     return null;
@@ -35,6 +37,7 @@ const TenantOverview = () => {
       <Box pt={1} pb={4}>
         <Typography variant="h1">Overview</Typography>
       </Box>
+
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Card>
@@ -62,6 +65,21 @@ const TenantOverview = () => {
               </Grid>
             </CardContent>
           </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Box
+            border={`1px solid ${theme.palette.divider}`}
+            borderRadius={theme.shape.borderRadius}
+            overflow="hidden"
+          >
+            <iframe
+              width="100%"
+              height={1000}
+              style={{ border: "none" }}
+              title="Tenant Overview"
+              src={`${window.location.protocol}//system.${window.location.host}/grafana/d/GqFJrOxGk/opstrace-overview-dashboard?orgId=1&refresh=30s&kiosk`}
+            />
+          </Box>
         </Grid>
       </Grid>
     </>
