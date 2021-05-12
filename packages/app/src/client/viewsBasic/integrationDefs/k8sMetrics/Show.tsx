@@ -16,6 +16,7 @@
 
 import React from "react";
 import { saveAs } from "file-saver";
+import axios from "axios";
 
 import { IntegrationProps } from "client/viewsBasic/tenantIntegrations/utils";
 import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
@@ -23,10 +24,56 @@ import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { prometheusYaml } from "./templates/config";
+import { makePrometheusDashboardRequests } from "./templates/dashboards";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
+
+type folderInfo = {
+  // The numeric ID for the folder that was created (or updated).
+  // This ID must be included when creating dashboards within the folder.
+  id: number,
+  // The '/grafana/...' path linking to the folder in Grafana.
+  // Doesn't include the hostname.
+  urlPath: String
+}
+
+async function createDashboardFolder({integration, tenant}: IntegrationProps & TenantProps): Promise<folderInfo> {
+  // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
+  const responseData = await axios({
+    method: "post",
+    url: `${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/api/folders`,
+    data: {
+      "uid": `integration-${integration.id}`,
+      "title": `Integration: ${integration.name}`,
+    },
+    withCredentials: true
+  }).then(res => res.data);
+  return {
+    id: responseData.id,
+    urlPath: responseData.url
+  };
+};
+
+type dashboardInfo = {
+  // The '/grafana/...' path linking to the dashboard in Grafana.
+  // Doesn't include the hostname.
+  urlPath: String
+}
+
+async function createDashboard(tenantName: String, dashboard: object): Promise<dashboardInfo> {
+  // see also: https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard
+  const responseData = await axios({
+    method: "post",
+    url: `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/dashboards/db`,
+    data: dashboard,
+    withCredentials: true
+  }).then(res => res.data);
+  return {
+    urlPath: responseData.url
+  };
+}
 
 export const K8sMetricsShow = withTenantFromParams(
   ({
@@ -42,10 +89,23 @@ export const K8sMetricsShow = withTenantFromParams(
         deployNamespace: integration.data.deployNamespace
       });
 
-      var configBlog = new Blob([config], {
+      var configBlob = new Blob([config], {
         type: "application/x-yaml;charset=utf-8"
       });
-      saveAs(configBlog, "opstrace-monitoring-prometheus.yaml");
+      saveAs(configBlob, "opstrace-monitoring-prometheus.yaml");
+    };
+
+    const dashboardHandler = async () => {
+      const folder = await createDashboardFolder({integration: integration, tenant: tenant});
+      console.log(`Folder created: id=${folder.id} path=${folder.urlPath}`);
+
+      for (const d of makePrometheusDashboardRequests({
+        integrationId: integration.id,
+        folderId: folder.id
+      })) {
+        const result = await createDashboard(tenant.name, d);
+        console.log(`Dashboard created: path=${result.urlPath}`);
+      };
     };
 
     return (
@@ -80,6 +140,9 @@ export const K8sMetricsShow = withTenantFromParams(
                   <Attribute.Value>{integration.created_at}</Attribute.Value>
                   <Attribute.Value>
                     <button onClick={downloadHandler}>Download</button>
+                  </Attribute.Value>
+                  <Attribute.Value>
+                    <button onClick={dashboardHandler}>Create dashboards</button>
                   </Attribute.Value>
                 </Box>
               </Box>
