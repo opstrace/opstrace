@@ -23,7 +23,7 @@ import K8sMetricsLogo from "./Logo.png";
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
 export const k8sMetricsIntegration: IntegrationDef = {
-  kind: "k8s-logs",
+  kind: "k8s-metrics",
   category: "infrastructure",
   label: "Kubernetes Metrics",
   desc:
