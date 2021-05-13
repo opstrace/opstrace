@@ -31,6 +31,8 @@ import {
   makePrometheusDashboardRequests
 } from "./templates/dashboards";
 
+import { CheckStatusBtn } from "./CheckStatusBtn";
+
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -175,7 +177,10 @@ export const K8sMetricsShow = withTenantFromParams(
                 <Box display="flex" flexDirection="column" flexGrow={1}>
                   <Attribute.Value>{integrationDef.label}</Attribute.Value>
                   <Attribute.Value>{integrationDef.category}</Attribute.Value>
-                  <Attribute.Value>{integration.status}</Attribute.Value>
+                  <Attribute.Value>
+                    {integration.status}{" "}
+                    <CheckStatusBtn integration={integration} tenant={tenant} />
+                  </Attribute.Value>
                   <Attribute.Value>{integration.created_at}</Attribute.Value>
                 </Box>
               </Box>
