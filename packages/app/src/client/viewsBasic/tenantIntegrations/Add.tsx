@@ -47,7 +47,7 @@ export const AddIntegration = withTenantFromParams(
       graphqlClient
         .InsertIntegration({
           name: data.name,
-          kind: "k8s-metrics",
+          kind: kind,
           status: "active",
           data: data.data || {},
           tenant_id: tenant.id

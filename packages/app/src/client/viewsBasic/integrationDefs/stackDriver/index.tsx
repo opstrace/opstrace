@@ -24,8 +24,6 @@ export const stackDriverIntegration: IntegrationDef = {
   label: "Stack Driver",
   desc: () => <i>Coming soon</i>,
   Form: () => <div />,
-  Row: () => <div />,
-  Card: () => <div />,
   Show: () => <div />,
   enabled: false
 };

@@ -24,8 +24,6 @@ export const blackBoxIntegration: IntegrationDef = {
   label: "Black Box",
   desc: () => <i>Coming soon</i>,
   Form: () => <div />,
-  Row: () => <div />,
-  Card: () => <div />,
   Show: () => <div />,
   enabled: false
 };
