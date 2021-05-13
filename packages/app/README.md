@@ -79,13 +79,14 @@ Then run all of the following commands:
 
 These two commands will compile client and server code changes and you'll then be able to *access the UI in the remote cluster* (i.e. {clustername}.Opstrace.io **NOTE: select "disable cache" under your browsers network tab) to see the updated changes. Hot reloading is disabled so you'll have to hit a browser refresh. Note, localhost ui dev will not work in this mode.
 
-For accessing the remote Hasura console run the this script:
+For accessing the remote Hasura console run the these scripts:
 
-* `console:remote`
+* `remote:services:start:graphql`
+* `remote:console`
 
 ### What this does
 
-The `services:start:graphql:remote` starts a port forward into your cluster making the Hasura server available locally on port `8090`. For the `server` and `console` scripts to then connect to this the Hasure admin secret is extracted from the appropriate k8s secret and set as an envar.
+The `remote:services:start:graphql` starts a port forward into your cluster making the Hasura server available locally on port `8090`. The `remote:console` script then connects to this using the Hasura admin secret it extracts from the appropriate k8s secret that are set as ENV VARs.
 
 ### Todo
 
