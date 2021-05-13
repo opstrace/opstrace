@@ -24,6 +24,7 @@ export type IntegrationDef = {
   Card: React.ReactType;
   Show: React.ReactType;
   enabled: boolean;
+  Logo?: string;
 };
 
 export type IntegrationDefs = IntegrationDef[];
