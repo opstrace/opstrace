@@ -28,33 +28,40 @@ const Dashboards = () => {
   const tenantName = tenant ? tenant.name : "system";
 
   return (
-    <Box mt={3}>
-      <Card>
-        <CardHeader
-          titleTypographyProps={{ variant: "h6" }}
-          title="View Dashboards"
-        />
-        <CardContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Typography color="textSecondary" variant="body2">
-                View Dashboards for the <strong>{tenantName}</strong> tenant in
-                Grafana.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box display="flex" justifyContent="flex-end">
-                <ExternalLink
-                  href={`${window.location.protocol}//${tenantName}.${window.location.host}/grafana/dashboards`}
-                >
-                  View Dashboards →
-                </ExternalLink>
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-    </Box>
+    <>
+      <Box pt={1} pb={4}>
+        <Typography variant="h1">Dashboards</Typography>
+      </Box>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h6" }}
+              title="View Dashboards"
+            />
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography color="textSecondary" variant="body2">
+                    View Dashboards for the <strong>{tenantName}</strong> tenant
+                    in Grafana.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" justifyContent="flex-end">
+                    <ExternalLink
+                      href={`${window.location.protocol}//${tenantName}.${window.location.host}/grafana/dashboards`}
+                    >
+                      View Dashboards →
+                    </ExternalLink>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </>
   );
 };
 

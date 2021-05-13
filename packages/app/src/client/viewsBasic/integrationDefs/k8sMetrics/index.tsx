@@ -18,17 +18,20 @@ import { K8sMetricsForm } from "./Form";
 import { K8sMetricsRow } from "./Row";
 import { K8sMetricsCard } from "./Card";
 import { K8sMetricsShow } from "./Show";
+import K8sMetricsLogo from "./Logo.png";
 
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 
 export const k8sMetricsIntegration: IntegrationDef = {
-  kind: "k8s-metrics",
+  kind: "k8s-logs",
   category: "infrastructure",
   label: "Kubernetes Metrics",
-  desc: "Monitor a Kubernetes Cluster with Opstrace",
+  desc:
+    "Generate all the yaml required to send metrics from your kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
   Form: K8sMetricsForm,
   Row: K8sMetricsRow,
   Card: K8sMetricsCard,
   Show: K8sMetricsShow,
-  enabled: true
+  enabled: true,
+  Logo: K8sMetricsLogo
 };
