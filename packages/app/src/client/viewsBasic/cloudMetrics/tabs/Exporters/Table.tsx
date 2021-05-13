@@ -16,11 +16,12 @@
 
 import React, { useMemo } from "react";
 import { pathOr } from "ramda";
-import { format, parseISO, getUnixTime, subHours } from "date-fns";
+import { format, parseISO, subHours } from "date-fns";
 import * as yamlParser from "js-yaml";
 
-import useGrafana from "client/hooks/useGrafana";
+import { useLoki } from "client/hooks/useGrafana";
 import graphqlClient from "state/clients/graphqlClient";
+import { getUnixNanoSecTime } from "client/viewsBasic/common/dateTime";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Skeleton from "@material-ui/lab/Skeleton";
@@ -107,8 +108,6 @@ export const ExportersTable = (props: ExportersTableProps) => {
   );
 };
 
-const getUnixNanoSecTime = (date: Date) => getUnixTime(date) * 1000000000;
-
 const ExportersRow = (props: {
   tenantId: string;
   row: Row;
@@ -130,7 +129,7 @@ const ExportersRow = (props: {
     const start = subHours(end, 1);
 
     return encodeURI(
-      `/loki/api/v1/query_range?direction=BACKWARD&limit=1000&query=${logQl}&start=${getUnixNanoSecTime(
+      `query_range?direction=BACKWARD&limit=1000&query=${logQl}&start=${getUnixNanoSecTime(
         start
       )}&end=${getUnixNanoSecTime(end)}`
     );
@@ -146,7 +145,7 @@ const ExportersRow = (props: {
     return `${window.location.protocol}//system.${window.location.host}/grafana/explore?${path}`;
   }, [tenantId, row.name]);
 
-  const { data: exporterLogs } = useGrafana(exporterLogUri);
+  const { data: exporterLogs } = useLoki(exporterLogUri);
 
   const config = useMemo(() => {
     if (open)
