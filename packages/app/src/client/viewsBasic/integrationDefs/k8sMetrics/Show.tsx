@@ -29,7 +29,7 @@ import * as commands from "./templates/commands";
 import {
   makePrometheusFolderRequest,
   makePrometheusDashboardRequests
-} from "./templates/dashboards";
+} from "./dashboards";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
@@ -104,7 +104,7 @@ export const K8sMetricsShow = withTenantFromParams(
         integrationId: integration.id,
         deployNamespace: integration.data.deployNamespace
       });
-    }, []);
+    }, [integration.data.deployNamespace, integration.id, tenant.name]);
 
     const downloadHandler = () => {
       var configBlob = new Blob([config], {
