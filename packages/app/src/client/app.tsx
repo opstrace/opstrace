@@ -246,20 +246,20 @@ const AuthProtectedApplication = () => {
             />
             <Route
               exact
-              key="/cluster/tenants/:tenantId/integrations/add/:integrationKind"
-              path="/cluster/tenants/:tenantId/integrations/add/:integrationKind"
+              key="/tenant/:tenantId/integrations/add/:integrationKind"
+              path="/tenant/:tenantId/integrations/add/:integrationKind"
               component={AddIntegration}
             />
             <Route
               exact
-              key="/cluster/tenants/:tenantId/integrations/:integrationId"
-              path="/cluster/tenants/:tenantId/integrations/:integrationId"
+              key="/tenant/:tenantId/integrations/:integrationId"
+              path="/tenant/:tenantId/integrations/:integrationId"
               component={ShowIntegration}
             />
             <Route
               exact
-              key="/cluster/tenants/:tenantId/integrations/:integrationId/edit"
-              path="/cluster/tenants/:tenantId/integrations/:integrationId/edit"
+              key="/tenant/:tenantId/integrations/:integrationId/edit"
+              path="/tenant/:tenantId/integrations/:integrationId/edit"
               component={EditIntegration}
             />
             <Route
