@@ -42,7 +42,7 @@ export function prometheusYaml({
 kind: Namespace
 apiVersion: v1
 metadata:
-name: ${deployNamespace}
+  name: ${deployNamespace}
 ---
 apiVersion: v1
 kind: Secret
@@ -237,14 +237,14 @@ spec:
 `;
 }
 
-// Returns a rendered prometheus deployment YAML for displaying to a user.
-// The user can pass this to kubectl for collecting metrics from their cluster.
+// Returns a rendered promtail deployment YAML for displaying to a user.
+// The user can pass this to kubectl for collecting logs from their cluster.
 //
 // Args:
-// - clusterName: The Opstrace cluster where metrics data should be sent
-// - tenantName: The Opstrace tenant where metrics data should be sent
-// - integrationId: The unique id that sent metrics should have as a label
-// - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
+// - clusterName: The Opstrace cluster where log data should be sent
+// - tenantName: The Opstrace tenant where log data should be sent
+// - integrationId: The unique id that sent log should have as a label
+// - deployNamespace: Where the user would like Promtail to be deployed in their cluster
 //
 // The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
 export function promtailYaml({
@@ -257,7 +257,7 @@ export function promtailYaml({
 kind: Namespace
 apiVersion: v1
 metadata:
-name: ${deployNamespace}
+  name: ${deployNamespace}
 ---
 apiVersion: v1
 kind: Secret
@@ -434,7 +434,7 @@ spec:
         operator: Exists
       containers:
       - name: promtail
-        image: grafana/promtail:2.2.1 # TODO(nick) was 1.6.1
+        image: grafana/promtail:2.2.1
         imagePullPolicy: IfNotPresent
         args:
         - -config.file=/etc/promtail/promtail.yml
