@@ -1548,7 +1548,9 @@ type UpdateIntegrationGrafanaFolderIdVariables struct {
 
 type UpdateIntegrationGrafanaFolderIdResponse struct {
 	UpdateIntegrationsByPk struct {
-		ID string `json:"id"`
+		ID              string `json:"id"`
+		GrafanaFolderId string `json:"grafana_folder_id"`
+		UpdatedAt       string `json:"updated_at"`
 	} `json:"update_integrations_by_pk"`
 }
 
@@ -1566,6 +1568,8 @@ func NewUpdateIntegrationGrafanaFolderIdRequest(url string, vars *UpdateIntegrat
 		Query: `mutation UpdateIntegrationGrafanaFolderId($id: uuid!, $grafana_folder_id: Int!) {
   update_integrations_by_pk(pk_columns: {id: $id}, _set: {grafana_folder_id: $grafana_folder_id}) {
     id
+    grafana_folder_id
+    updated_at
   }
 }`,
 	})
@@ -1602,6 +1606,77 @@ func UpdateIntegrationGrafanaFolderId(url string, client *http.Client, vars *Upd
 
 func (client *Client) UpdateIntegrationGrafanaFolderId(vars *UpdateIntegrationGrafanaFolderIdVariables) (*UpdateIntegrationGrafanaFolderIdResponse, error) {
 	return UpdateIntegrationGrafanaFolderId(client.Url, client.Client, vars)
+}
+
+//
+// mutation UpdateIntegrationStatus($id: uuid!, $status: String!)
+//
+
+type UpdateIntegrationStatusVariables struct {
+	ID     UUID   `json:"id"`
+	Status String `json:"status"`
+}
+
+type UpdateIntegrationStatusResponse struct {
+	UpdateIntegrationsByPk struct {
+		ID        string `json:"id"`
+		Status    string `json:"status"`
+		UpdatedAt string `json:"updated_at"`
+	} `json:"update_integrations_by_pk"`
+}
+
+type UpdateIntegrationStatusRequest struct {
+	*http.Request
+}
+
+func NewUpdateIntegrationStatusRequest(url string, vars *UpdateIntegrationStatusVariables) (*UpdateIntegrationStatusRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpdateIntegrationStatus($id: uuid!, $status: String!) {
+  update_integrations_by_pk(pk_columns: {id: $id}, _set: {status: $status}) {
+    id
+    status
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpdateIntegrationStatusRequest{req}, nil
+}
+
+func (req *UpdateIntegrationStatusRequest) Execute(client *http.Client) (*UpdateIntegrationStatusResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpdateIntegrationStatusResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateIntegrationStatus(url string, client *http.Client, vars *UpdateIntegrationStatusVariables) (*UpdateIntegrationStatusResponse, error) {
+	req, err := NewUpdateIntegrationStatusRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpdateIntegrationStatus(vars *UpdateIntegrationStatusVariables) (*UpdateIntegrationStatusResponse, error) {
+	return UpdateIntegrationStatus(client.Url, client.Client, vars)
 }
 
 //
