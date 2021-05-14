@@ -90,7 +90,7 @@ async function createDashboard(
   };
 }
 
-const configFilename = "opstrace-prometheus.yaml";
+const configFilename = "opstrace-k8s-metrics.yaml";
 
 const INTEGRATION_STATUS_SUBSCRIPTION = `
   subscription IntegrationStatus($id: uuid!) {
