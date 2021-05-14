@@ -32,7 +32,7 @@ import {
 } from "./templates/dashboards";
 
 import { CheckStatusBtn } from "./CheckStatusBtn";
-import { CopyToClipboardBtn } from "client/viewsBasic/common/CopyToClipboard";
+import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
 
@@ -253,7 +253,7 @@ export const K8sMetricsShow = withTenantFromParams(
                     {`Step 2. Run this command to install Prometheus`}
                     <br />
                     <pre>{deployYamlCommand}</pre>
-                    <CopyToClipboardBtn text={deployYamlCommand} />
+                    <CopyToClipboardIcon text={deployYamlCommand} />
                   </Attribute.Value>
                   <Attribute.Value>
                     Step 3. Once the integration is installed in your namepsace
