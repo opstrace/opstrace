@@ -82,9 +82,6 @@ const isPodSpecEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
   ) {
     return false;
   }
-  if (desired.initContainers && existing.initContainers === undefined) {
-    return false;
-  }
 
   return true;
 };
@@ -160,9 +157,6 @@ const areContainerPortsEqual = (
         isContainerPortEqual(desiredPort, existingPort)
     )
   ) {
-    return false;
-  }
-  if (desired.ports && existing.ports === undefined) {
     return false;
   }
 
@@ -266,9 +260,6 @@ const areVolumeMountsEqual = (
   ) {
     return false;
   }
-  if (desired.volumeMounts && existing.volumeMounts === undefined) {
-    return false;
-  }
 
   return true;
 };
@@ -293,9 +284,6 @@ const areVolumesEqual = (desired: V1PodSpec, existing: V1PodSpec): boolean => {
         isVolumeEqual(desiredVolume, existingVolume)
     )
   ) {
-    return false;
-  }
-  if (desired.volumes && existing.volumes === undefined) {
     return false;
   }
 

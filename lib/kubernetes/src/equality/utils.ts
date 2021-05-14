@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
+// empty lists can either be `undefined` or have length of 0
+const isResourceListEmpty = <Resource>(list: Array<Resource> | void) =>
+  !list || list.length === 0;
+
 export const isResourceListEqual = <Resource>(
   desiredList: Array<Resource> | void,
   existingList: Array<Resource> | void,
   isResourceEqual: (desired: Resource, existing: Resource) => boolean
 ): boolean => {
   if (!Array.isArray(desiredList) || !Array.isArray(existingList)) {
-    // TODO: why though?
-    return true;
+    return (
+      isResourceListEmpty(desiredList) && isResourceListEmpty(existingList)
+    );
   }
 
   if (desiredList.length !== existingList.length) {
