@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { pathOr } from "ramda";
 import { subHours } from "date-fns";
 
@@ -32,7 +32,7 @@ type Props = {
 };
 
 export const CheckStatusBtn = ({ integration, tenant }: Props) => {
-  const [checkingStatus, setCheckingStatus] = React.useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
   const statusCheckUri = useMemo(() => {
     const logQl = `process_cpu_seconds_total{integration_id="${integration.id}"}`;
     const end = new Date();
