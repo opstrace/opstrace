@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const CopyToClipboardBtn = ({ text }: { text: string }) => {
+export const CopyToClipboardIcon = ({ text }: { text: string }) => {
   const [copied, setCopied] = useState(false);
   const classes = useStyles();
 
