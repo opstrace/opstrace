@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { strict as assert } from "assert";
-
 import { EKS } from "aws-sdk";
 
 import { log } from "@opstrace/utils";
