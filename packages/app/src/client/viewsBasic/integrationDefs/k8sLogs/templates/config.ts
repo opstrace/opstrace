@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-enum PromtailLogFormat {
+export enum PromtailLogFormat {
   // JSON-style logs used by dockerd
   // Example: {"log":"linux/amd64, go1.13.15, f59c03d0\n","stream":"stdout","time":"2021-05-07T04:46:42.866604098Z"}
   Docker = "docker",

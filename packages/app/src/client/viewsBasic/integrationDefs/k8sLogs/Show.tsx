@@ -24,11 +24,14 @@ import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
-import { promtailYaml } from "./templates/config";
+import {
+  promtailYaml,
+  PromtailLogFormat
+} from "./templates/config";
 import * as commands from "./templates/commands";
 import {
-  makePrometheusFolderRequest,
-  makePrometheusDashboardRequests
+  makeFolderRequest,
+  makePromtailDashboardRequests
 } from "./templates/dashboards";
 
 import { Box } from "client/components/Box";
@@ -87,7 +90,7 @@ async function createDashboard(
   };
 }
 
-const configFilename = "opstrace-prometheus.yaml";
+const configFilename = "opstrace-promtail.yaml";
 
 export const K8sLogsShow = withTenantFromParams(
   ({
@@ -98,11 +101,13 @@ export const K8sLogsShow = withTenantFromParams(
     const history = useHistory();
 
     const config = useMemo(() => {
-      return prometheusYaml({
+      return promtailYaml({
         clusterName: window.location.host,
         tenantName: tenant.name,
         integrationId: integration.id,
-        deployNamespace: integration.data.deployNamespace
+        deployNamespace: integration.data.deployNamespace,
+        // TODO: allow user to select dockerd or cri/containerd (different log formats)
+        logFormat: PromtailLogFormat.CRI
       });
     }, []);
 
@@ -116,14 +121,14 @@ export const K8sLogsShow = withTenantFromParams(
     const dashboardHandler = async () => {
       const folder = await createFolder(
         tenant.name,
-        makePrometheusFolderRequest({
+        makeFolderRequest({
           integrationId: integration.id,
           integrationName: integration.name
         })
       );
       console.log(`Folder created: id=${folder.id} path=${folder.urlPath}`);
 
-      for (const d of makePrometheusDashboardRequests({
+      for (const d of makePromtailDashboardRequests({
         integrationId: integration.id,
         folderId: folder.id
       })) {
@@ -217,7 +222,7 @@ export const K8sLogsShow = withTenantFromParams(
                     />
                   </Attribute.Value>
                   <Attribute.Value>
-                    {`Step 2. Run this command to install Prometheus`}
+                    {`Step 2. Run this command to install Promtail`}
                     <br />
                     <pre>
                       {commands.deployYaml(configFilename, tenant.name)}

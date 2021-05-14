@@ -1064,7 +1064,7 @@ export default function makeDashboard(integrationId) {
   ],
   "schemaVersion": 14,
   "style": "dark",
-  "tags": ["kubernetes-mixin"],
+  "tags": ["kubernetes-integration"],
   "templating": {
     "list": [
       {
@@ -1123,7 +1123,7 @@ export default function makeDashboard(integrationId) {
     "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
   },
   "timezone": "",
-  "title": "Kubernetes / API server",
+  "title": "Kubernetes / API server metrics",
   "uid": "09ec8aa1e996d6ffcd6817bbaff4db1b",
   "version": 0
 };
