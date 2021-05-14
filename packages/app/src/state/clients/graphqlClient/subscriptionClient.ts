@@ -17,6 +17,7 @@
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { onError } from "@apollo/client/link/error";
 import { ApolloClient, InMemoryCache, from } from "@apollo/client";
+
 export * from "state/graphql-api-types";
 
 // we use webpack to set these "false" during client build
@@ -25,6 +26,10 @@ const headers = process.env.HASURA_GRAPHQL_ADMIN_SECRET
       "x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET
     }
   : {};
+
+const endpoint = `${window.location.protocol === "https:" ? "wss" : "ws"}://${
+  window.location.host
+}/_/graphql`;
 
 export type PromiseReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type ClientResponse<T extends (args?: any) => {}> = PromiseReturnType<
@@ -46,9 +51,6 @@ const subscriptionErrorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 const subscriptionClient = () => {
-  const endpoint = `${window.location.protocol === "https:" ? "wss" : "ws"}://${
-    window.location.host
-  }/_/graphql`;
   const wsLink = new WebSocketLink({
     uri: endpoint,
     options: {
@@ -69,3 +71,4 @@ const subscriptionClient = () => {
 };
 
 export default subscriptionClient();
+export { endpoint, headers };

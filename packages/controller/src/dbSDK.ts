@@ -4189,7 +4189,20 @@ export type UpdateIntegrationGrafanaFolderIdMutationVariables = Exact<{
 }>;
 
 export type UpdateIntegrationGrafanaFolderIdMutation = {
-  update_integrations_by_pk?: Maybe<Pick<Integrations, "id">>;
+  update_integrations_by_pk?: Maybe<
+    Pick<Integrations, "id" | "grafana_folder_id" | "updated_at">
+  >;
+};
+
+export type UpdateIntegrationStatusMutationVariables = Exact<{
+  id: Scalars["uuid"];
+  status: Scalars["String"];
+}>;
+
+export type UpdateIntegrationStatusMutation = {
+  update_integrations_by_pk?: Maybe<
+    Pick<Integrations, "id" | "status" | "updated_at">
+  >;
 };
 
 export type CreateModuleMutationVariables = Exact<{
@@ -4804,6 +4817,20 @@ export const UpdateIntegrationGrafanaFolderIdDocument = gql`
       _set: { grafana_folder_id: $grafana_folder_id }
     ) {
       id
+      grafana_folder_id
+      updated_at
+    }
+  }
+`;
+export const UpdateIntegrationStatusDocument = gql`
+  mutation UpdateIntegrationStatus($id: uuid!, $status: String!) {
+    update_integrations_by_pk(
+      pk_columns: { id: $id }
+      _set: { status: $status }
+    ) {
+      id
+      status
+      updated_at
     }
   }
 `;
@@ -5559,6 +5586,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<UpdateIntegrationGrafanaFolderIdMutation>(
           print(UpdateIntegrationGrafanaFolderIdDocument),
+          variables
+        )
+      );
+    },
+    UpdateIntegrationStatus(
+      variables: UpdateIntegrationStatusMutationVariables
+    ): Promise<{
+      data?: UpdateIntegrationStatusMutation | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<UpdateIntegrationStatusMutation>(
+          print(UpdateIntegrationStatusDocument),
           variables
         )
       );

@@ -18,9 +18,10 @@ import React, { useMemo, useEffect } from "react";
 import { pathOr } from "ramda";
 import { subHours } from "date-fns";
 
+import graphqlClient from "state/clients/graphqlClient";
 import { usePrometheus } from "client/hooks/useGrafana";
 
-import { Integration } from "state/integrations/types";
+import { Integration, integrationStatus } from "state/integrations/utils";
 import { Tenant } from "state/tenant/types";
 
 import { Button } from "client/components/Button";
@@ -43,8 +44,16 @@ export const CheckStatusBtn = ({ integration, tenant }: Props) => {
   }, [integration.id]);
 
   const statusUpdateHandler = (metricsFound: boolean) => {
-    console.log(metricsFound ? "active" : "pending");
-    setCheckingStatus(false);
+    graphqlClient
+      .UpdateIntegrationStatus({
+        id: integration.id,
+        status: metricsFound
+          ? integrationStatus.active
+          : integrationStatus.pending
+      })
+      .then(response => {
+        setCheckingStatus(false);
+      });
   };
 
   if (checkingStatus)
