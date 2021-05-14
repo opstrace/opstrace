@@ -32,6 +32,8 @@ import {
 } from "./templates/dashboards";
 
 import { CheckStatusBtn } from "./CheckStatusBtn";
+import { CopyToClipboardBtn } from "client/viewsBasic/common/CopyToClipboard";
+
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
 
 import { Box } from "client/components/Box";
@@ -128,6 +130,11 @@ export const K8sMetricsShow = withTenantFromParams(
         deployNamespace: integration.data.deployNamespace
       });
     }, []);
+
+    const deployYamlCommand = useMemo(
+      () => commands.deployYaml(configFilename, tenant.name),
+      [configFilename, tenant.name]
+    );
 
     const downloadHandler = () => {
       var configBlob = new Blob([config], {
@@ -245,9 +252,8 @@ export const K8sMetricsShow = withTenantFromParams(
                   <Attribute.Value>
                     {`Step 2. Run this command to install Prometheus`}
                     <br />
-                    <pre>
-                      {commands.deployYaml(configFilename, tenant.name)}
-                    </pre>
+                    <pre>{deployYamlCommand}</pre>
+                    <CopyToClipboardBtn text={deployYamlCommand} />
                   </Attribute.Value>
                   <Attribute.Value>
                     Step 3. Once the integration is installed in your namepsace

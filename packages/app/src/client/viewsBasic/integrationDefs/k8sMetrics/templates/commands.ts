@@ -16,21 +16,21 @@
 
 // Returns the command for a user to locally deploy either prometheusYaml() or promtailYaml() content.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
-export function deployYaml(yamlFilename: String, tenantName: String): String {
+export function deployYaml(yamlFilename: string, tenantName: string): string {
   return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | kubectl apply -f -`;
 }
 
 // Returns the command for a user to locally access the prometheus instance over a port forward.
 export function portforwardPrometheus(
-  tenantName: String,
-  deployNamespace: String
-): String {
+  tenantName: string,
+  deployNamespace: string
+): string {
   return `kubectl port-forward -n ${deployNamespace} deployments/opstrace-prometheus ui`;
 }
 
 // Returns the command for a user to locally delete either prometheusYaml() or promtailYaml() content.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
 // This does not include deletion of the namespace, in case the user also has other things there.
-export function deleteYaml(yamlFilename: String): String {
+export function deleteYaml(yamlFilename: string): string {
   return `kubectl delete -f ${yamlFilename}`;
 }
