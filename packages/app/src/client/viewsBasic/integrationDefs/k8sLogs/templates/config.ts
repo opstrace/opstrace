@@ -98,29 +98,34 @@ data:
       - ${logFormat}:
 
       relabel_configs:
-      # Assign job tag with <namespace>/<pod name>
-      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
-        action: replace
+      # Include <namespace>/<pod name>
+      - action: replace
+        source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
         separator: /
         replacement: $1
         target_label: job
-      # Assign instance to <pod name>
+      # Include namespace
+      - action: replace
+        source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      # Include pod name without namespace
       - action: replace
         source_labels: [__meta_kubernetes_pod_name]
         target_label: instance
-      # Assign controller to <replicaset/statefulset/daemonset name>
-      - source_labels: [__meta_kubernetes_pod_controller_name]
-        action: replace
+      # Include parent replicaset/statefulset/daemonset name
+      - action: replace
+        source_labels: [__meta_kubernetes_pod_controller_name]
         target_label: controller
-      # Assign container to <container name>
+      # Include container name within pod
       - action: replace
         source_labels: [__meta_kubernetes_pod_container_name]
         target_label: container
       # Include node name
-      - source_labels: [__meta_kubernetes_pod_node_name]
+      - action: replace
+        source_labels: [__meta_kubernetes_pod_node_name]
         target_label: node
 
-      # Include integration ID for autodetection in opstrace
+      # Include integration ID for separation in opstrace
       - source_labels: []
         target_label: integration_id
         replacement: ${integrationId}
