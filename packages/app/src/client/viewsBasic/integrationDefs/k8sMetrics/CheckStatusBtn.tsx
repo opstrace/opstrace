@@ -96,7 +96,7 @@ const CheckingStatusBtn = ({
       const metrics = pathOr([], ["data", "result"])(data);
       statusUpdateHandler(status === "success" && metrics.length > 0);
     }
-  }, [data]);
+  }, [data, statusUpdateHandler]);
 
   return (
     <Button variant="outlined" state="info" size="small" disabled>

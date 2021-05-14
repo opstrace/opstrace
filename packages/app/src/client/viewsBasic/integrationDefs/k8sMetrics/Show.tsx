@@ -129,11 +129,11 @@ export const K8sMetricsShow = withTenantFromParams(
         integrationId: integration.id,
         deployNamespace: integration.data.deployNamespace
       });
-    }, []);
+    }, [tenant.name, integration.id, integration.data.deployNamespace]);
 
     const deployYamlCommand = useMemo(
       () => commands.deployYaml(configFilename, tenant.name),
-      [configFilename, tenant.name]
+      [tenant.name]
     );
 
     const downloadHandler = () => {
