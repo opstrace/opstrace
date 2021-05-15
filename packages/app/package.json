@@ -253,7 +253,7 @@
     "client:build-debug-workbox": "node scripts/buildClient.js --workbox-debug",
     "client:test": "node scripts/test.js",
     "server:start": "NODE_ENV=development webpack --watch --config config/webpack.server.config.js",
-    "server:remote": "NODE_ENV=production webpack --watch --config config/webpack.server.config.js",
+    "server:remote": "NODE_ENV=production REMOTE_DEV=true webpack --watch --config config/webpack.server.config.js",
     "server:build": "NODE_ENV=production webpack --config config/webpack.server.config.js",
     "clean": "rimraf build dist .cache tsconfig.tsbuildinfo",
     "build": "yarn client:build && yarn server:build",

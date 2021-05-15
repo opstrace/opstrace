@@ -47,7 +47,14 @@ publish-graphql: DOCKER_IMAGE_NAME = graphql
 publish-graphql:
 	$(call publish_docker_image)
 
-.PHONY: remote-dev
-remote-dev:
-	docker build -t app-dev -f Dockerfile.app-dev ../../
-	telepresence --swap-deployment opstrace-application --namespace application --docker-run --rm -it -v $(shell cd ../../ && pwd):/usr/src/opstrace app-dev
+.PHONY: start-remote-dev
+start-remote-dev:
+	telepresence connect
+	telepresence intercept opstrace-application --port 3001:http --namespace application --env-file .env.server.remote --workload opstrace-application
+	@echo ""
+	@echo "Congrats, ready to start developing locally! Remember to run make stop-remote-dev when you're done, to close telepresence down."
+
+.PHONY: stop-remote-dev
+stop-remote-dev:
+	telepresence leave opstrace-application
+	telepresence quit
