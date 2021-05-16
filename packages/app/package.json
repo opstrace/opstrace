@@ -279,7 +279,13 @@
     "remote:console": "yarn remote yarn hasura console --no-browser",
     "remote:migrate": "yarn remote yarn migrate",
     "remote:migrate:down": "yarn remote yarn migrate:down",
-    "remote:migrate:up": "yarn remote yarn migrate:up"
+    "remote:migrate:up": "yarn remote yarn migrate:up",
+    "telepresence": "GRAPHQL_ENDPOINT=http://graphql.application.svc.cluster.local:8080/v1/graphql GRAPHQL_ENDPOINT_PORT=8080 HASURA_GRAPHQL_ENDPOINT=http://graphql.application.svc.cluster.local:8080 HASURA_GRAPHQL_ADMIN_SECRET=$(kubectl get secrets -n kube-system -o json hasura-admin-secret | jq -r .data.HASURA_ADMIN_SECRET | base64 -d)",
+    "telepresence:console": "yarn telepresence yarn hasura console --no-browser",
+    "telepresence:migrate": "yarn telepresence yarn migrate",
+    "telepresence:migrate:down": "yarn telepresence yarn migrate:down",
+    "telepresence:migrate:up": "yarn telepresence yarn migrate:up",
+    "telepresence:seeds:dev:tenants": "yarn telepresence yarn seeds:dev:tenants"
   },
   "eslintIgnore": [
     "src/workers/monaco-typescript-4.1.1/**/*",
