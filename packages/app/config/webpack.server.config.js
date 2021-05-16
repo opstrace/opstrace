@@ -28,7 +28,9 @@ const NodemonPlugin = require("nodemon-webpack-plugin");
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
 
-const isEnvDevelopment = process.env.NODE_ENV === "development";
+const isRemoteDevelopment = !!process.env.REMOTE_DEV;
+const isEnvDevelopment =
+  process.env.NODE_ENV === "development" || isRemoteDevelopment;
 const isEnvProduction = process.env.NODE_ENV === "production";
 
 const imageInlineSizeLimit = Infinity;
@@ -41,7 +43,10 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 
 // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 const dotenvFiles = [
-  path.join(process.cwd(), `.env.server.${process.env.NODE_ENV}`)
+  path.join(
+    process.cwd(),
+    `.env.server.${isRemoteDevelopment ? "remote" : process.env.NODE_ENV}`
+  )
 ];
 // Load environment variables from .env* files. Suppress warnings using silent
 // if this file is missing. dotenv will never modify any environment variables

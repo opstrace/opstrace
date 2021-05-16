@@ -22,9 +22,8 @@ import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
 import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 import { ExternalLink } from "client/components/Link";
-import GrafanaIframe from "client/components/Grafana/Iframe";
 
-const TenantOverview = () => {
+const TenantExplore = () => {
   const tenant = useSelectedTenant();
 
   if (!tenant) {
@@ -42,22 +41,21 @@ const TenantOverview = () => {
           <Card>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
-              title={`Grafana for ${tenant.name} tenant`}
+              title={`Explore Logs for ${tenant.name} tenant`}
             />
             <CardContent>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <Typography color="textSecondary" variant="body2">
-                    View your dashboards and explore logs and metrics for the{" "}
-                    <strong>{tenant.name}</strong> tenant.
+                    Explore Logs in the <strong>{tenant.name}</strong> tenant.
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Box display="flex" justifyContent="flex-end">
                     <ExternalLink
-                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
+                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/explore?orgId=1&left=%5B"now-1h","now","logs",%7B%7D%5D`}
                     >
-                      View Grafana →
+                      Explore Logs →
                     </ExternalLink>
                   </Box>
                 </Grid>
@@ -66,19 +64,35 @@ const TenantOverview = () => {
           </Card>
         </Grid>
         <Grid item xs={12}>
-          <GrafanaIframe
-            initialHeight={1550}
-            tenant="system"
-            title="Tenant Overview"
-            path="/d/c72shqQZz/cortex-overview"
-            params={{
-              "var-tenant": tenant.name
-            }}
-          />
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title={`Explore Metrics for ${tenant.name} tenant`}
+            />
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography color="textSecondary" variant="body2">
+                    Explore Metrics in the <strong>{tenant.name}</strong>{" "}
+                    tenant.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" justifyContent="flex-end">
+                    <ExternalLink
+                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/explore?orgId=1&left=%5B"now-1h","now","metrics",%7B%7D%5D`}
+                    >
+                      Explore Metrics →
+                    </ExternalLink>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </>
   );
 };
 
-export default TenantOverview;
+export default TenantExplore;

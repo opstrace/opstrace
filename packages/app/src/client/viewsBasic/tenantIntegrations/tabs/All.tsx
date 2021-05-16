@@ -56,34 +56,41 @@ const IntegrationDefCards = withTenantFromParams<Props>(
 
     return (
       <Grid container spacing={3}>
-        {integrationDefs.map(i9n => (
-          <Grid key={i9n.kind} item xs={12} sm={6} md={4} lg={3}>
-            <Card>
-              <CardHeader
-                titleTypographyProps={{ variant: "h6" }}
-                title={i9n.label}
-                action={
-                  <Box ml={3} display="flex" flexWrap="wrap">
-                    <Box p={1}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        disabled={!i9n.enabled}
-                        onClick={() => onAdd(i9n)}
-                      >
-                        Add
-                      </Button>
+        {integrationDefs.map(i9n => {
+          if (!i9n.enabled) {
+            return null;
+          }
+
+          return (
+            <Grid key={i9n.kind} item xs={12} sm={6}>
+              <Card>
+                <CardHeader
+                  avatar={<img src={i9n.Logo} width={30} height={30} />}
+                  titleTypographyProps={{ variant: "h6" }}
+                  title={i9n.label}
+                  action={
+                    <Box ml={3} display="flex" flexWrap="wrap">
+                      <Box p={1}>
+                        <Button
+                          variant="contained"
+                          state="primary"
+                          size="small"
+                          disabled={!i9n.enabled}
+                          onClick={() => onAdd(i9n)}
+                        >
+                          Add
+                        </Button>
+                      </Box>
                     </Box>
-                  </Box>
-                }
-              />
-              <CardContent>
-                <Typography color="textSecondary">{i9n.desc}</Typography>
-                {i9n.enabled ? null : <i>Coming soon</i>}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                  }
+                />
+                <CardContent>
+                  <Typography color="textSecondary">{i9n.desc}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
     );
   })

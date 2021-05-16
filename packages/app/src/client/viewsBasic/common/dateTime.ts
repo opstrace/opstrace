@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-export type IntegrationDef = {
-  kind: string;
-  category: string;
-  label: string;
-  desc: string | React.ReactType;
-  Form: React.ReactType;
-  Row: React.ReactType;
-  Card: React.ReactType;
-  Show: React.ReactType;
-  enabled: boolean;
-  Logo?: string;
-};
+import { getUnixTime } from "date-fns";
 
-export type IntegrationDefs = IntegrationDef[];
-export type IntegrationDefRecords = Record<string, IntegrationDef>;
+export const getUnixNanoSecTime = (date: Date) =>
+  getUnixTime(date) * 1000000000;

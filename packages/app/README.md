@@ -67,25 +67,31 @@ Some features rely on other Opstrace services running in an Opstrace cluster. To
 
 Make sure you are correctly setup to access the cluster, for example using
 
-* Install [Telepresence](https://www.telepresence.io/reference/install.html) on your local machine
+* Install [Telepresence](https://www.getambassador.io/docs/telepresence/latest/howtos/intercepts/#1-install-the-telepresence-cli) on your local machine
 * On macos you'll be prompted with instructions to grant some permissions for filesystem access
 * `source ../../secrets/aws-dev-svc-acc-env.sh`
 * `aws eks update-kubeconfig --name <your cluster name here> --region us-west-2`
 
 Then run all of the following commands:
 
-* `yarn client:remote`
-* `make remote-dev`
+* `make start-remote-dev`
+* `yarn server:remote`
+* `yarn client:start`
 
-These two commands will compile client and server code changes and you'll then be able to *access the UI in the remote cluster* (i.e. {clustername}.Opstrace.io **NOTE: select "disable cache" under your browsers network tab) to see the updated changes. Hot reloading is disabled so you'll have to hit a browser refresh. Note, localhost ui dev will not work in this mode.
+When finished with remote dev:
 
-For accessing the remote Hasura console run the this script:
+* `make stop-remote-dev`
 
-* `console:remote`
+The remote development workflow will compile client and server code changes locally and you'll then be able to *access the UI in the remote cluster* (i.e. {clustername}.Opstrace.io **NOTE: select "disable cache" under your browsers network tab) to see the updated changes. Hot reloading is disabled so you'll have to hit a browser refresh.
+
+For accessing the remote Hasura console run the these scripts:
+
+* `remote:services:start:graphql`
+* `remote:console`
 
 ### What this does
 
-The `services:start:graphql:remote` starts a port forward into your cluster making the Hasura server available locally on port `8090`. For the `server` and `console` scripts to then connect to this the Hasure admin secret is extracted from the appropriate k8s secret and set as an envar.
+The `remote:services:start:graphql` starts a port forward into your cluster making the Hasura server available locally on port `8090`. The `remote:console` script then connects to this using the Hasura admin secret it extracts from the appropriate k8s secret that are set as ENV VARs.
 
 ### Todo
 

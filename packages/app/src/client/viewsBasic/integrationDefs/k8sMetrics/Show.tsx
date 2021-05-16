@@ -31,6 +31,9 @@ import {
   makePrometheusDashboardRequests
 } from "./dashboards";
 
+import { CheckStatusBtn } from "./CheckStatusBtn";
+import useHasuraSubscription from "client/hooks/useHasuraSubscription";
+
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -89,6 +92,15 @@ async function createDashboard(
 
 const configFilename = "opstrace-prometheus.yaml";
 
+const INTEGRATION_STATUS_SUBSCRIPTION = `
+  subscription IntegrationStatus($id: uuid!) {
+    integrations_by_pk(id: $id) {
+      status
+      updated_at
+    }
+  }
+`;
+
 export const K8sMetricsShow = withTenantFromParams(
   ({
     integration,
@@ -96,6 +108,17 @@ export const K8sMetricsShow = withTenantFromParams(
     tenant
   }: IntegrationProps & IntegrationDefProps & TenantProps) => {
     const history = useHistory();
+
+    const { data: statusData } = useHasuraSubscription(
+      INTEGRATION_STATUS_SUBSCRIPTION,
+      {
+        id: integration.id
+      }
+    );
+
+    const status = useMemo(() => {
+      return statusData?.integrations_by_pk?.status || integration.status;
+    }, [statusData?.integrations_by_pk?.status, integration.status]);
 
     const config = useMemo(() => {
       return prometheusYaml({
@@ -175,7 +198,10 @@ export const K8sMetricsShow = withTenantFromParams(
                 <Box display="flex" flexDirection="column" flexGrow={1}>
                   <Attribute.Value>{integrationDef.label}</Attribute.Value>
                   <Attribute.Value>{integrationDef.category}</Attribute.Value>
-                  <Attribute.Value>{integration.status}</Attribute.Value>
+                  <Attribute.Value>
+                    {status}{" "}
+                    <CheckStatusBtn integration={integration} tenant={tenant} />
+                  </Attribute.Value>
                   <Attribute.Value>{integration.created_at}</Attribute.Value>
                 </Box>
               </Box>

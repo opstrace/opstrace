@@ -7,5 +7,7 @@ mutation UpdateIntegrationGrafanaFolderId(
     _set: { grafana_folder_id: $grafana_folder_id }
   ) {
     id
+    grafana_folder_id
+    updated_at
   }
 }

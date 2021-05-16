@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { strict as assert } from "assert";
-
 import { EKS } from "aws-sdk";
 
 import { log } from "@opstrace/utils";
@@ -200,13 +198,17 @@ async function EKSgetOpstraceClustersInRegion(
       throw e;
     }
     const ocn = dcresp.cluster?.tags?.opstrace_cluster_name;
-    assert(ocn);
-    assert(dcresp.cluster);
+
     if (ocn !== undefined) {
+      // Only proceed processing those clusters that have the
+      // opstrace_cluster_name label set; the definite signal that this
+      // EKS cluster is part of an Opstrace cluster.
       opstraceClusters.push({
         awsRegion: region,
         opstraceClusterName: ocn,
-        eksCluster: dcresp.cluster
+        // `dcresp.cluster` is known to not be undefined, because `ocn` is not
+        // undefined. That is why this non-null assertion is OK here.
+        eksCluster: dcresp.cluster!
       });
       opstraceClusterNames.push(ocn);
     }

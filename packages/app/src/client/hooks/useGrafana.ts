@@ -17,8 +17,14 @@
 import useSWR from "swr";
 import axios from "axios";
 
-const useGrafana = (path: string) => {
-  const url = `${window.location.protocol}//system.${window.location.host}/grafana/api/datasources/proxy/2${path}`;
+export const useLoki = (path: string, tenantName: string = "system") => {
+  const url = `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/datasources/proxy/2/loki/api/v1/${path}`;
+
+  return useSWR(url, fetcher);
+};
+
+export const usePrometheus = (path: string, tenantName: string = "system") => {
+  const url = `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/datasources/proxy/1/api/v1/${path}`;
 
   return useSWR(url, fetcher);
 };
@@ -29,5 +35,3 @@ const fetcher = (url: string) =>
     url: url,
     withCredentials: true
   }).then(res => res.data);
-
-export default useGrafana;

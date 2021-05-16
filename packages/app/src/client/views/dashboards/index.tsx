@@ -19,45 +19,40 @@ import Grid from "@material-ui/core/Grid";
 
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
-import Typography from "client/components/Typography/Typography";
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
-import GrafanaIframe from "client/components/Grafana/Iframe";
+import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 
-const TenantOverview = () => {
+const Dashboards = () => {
   const tenant = useSelectedTenant();
-
-  if (!tenant) {
-    return null;
-  }
+  const tenantName = tenant ? tenant.name : "system";
 
   return (
     <>
       <Box pt={1} pb={4}>
-        <Typography variant="h1">Overview</Typography>
+        <Typography variant="h1">Dashboards</Typography>
       </Box>
-
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Card>
             <CardHeader
-              titleTypographyProps={{ variant: "h5" }}
-              title={`Grafana for ${tenant.name} tenant`}
+              titleTypographyProps={{ variant: "h6" }}
+              title="View Dashboards"
             />
             <CardContent>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <Typography color="textSecondary" variant="body2">
-                    View your dashboards and explore logs and metrics for the{" "}
-                    <strong>{tenant.name}</strong> tenant.
+                    View Dashboards for the <strong>{tenantName}</strong> tenant
+                    in Grafana.
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Box display="flex" justifyContent="flex-end">
                     <ExternalLink
-                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
+                      href={`${window.location.protocol}//${tenantName}.${window.location.host}/grafana/dashboards`}
                     >
-                      View Grafana →
+                      View Dashboards →
                     </ExternalLink>
                   </Box>
                 </Grid>
@@ -65,20 +60,9 @@ const TenantOverview = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12}>
-          <GrafanaIframe
-            initialHeight={1550}
-            tenant="system"
-            title="Tenant Overview"
-            path="/d/c72shqQZz/cortex-overview"
-            params={{
-              "var-tenant": tenant.name
-            }}
-          />
-        </Grid>
       </Grid>
     </>
   );
 };
 
-export default TenantOverview;
+export default Dashboards;

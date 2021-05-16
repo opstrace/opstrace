@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-export type IntegrationDef = {
-  kind: string;
-  category: string;
-  label: string;
-  desc: string | React.ReactType;
-  Form: React.ReactType;
-  Row: React.ReactType;
-  Card: React.ReactType;
-  Show: React.ReactType;
-  enabled: boolean;
-  Logo?: string;
-};
+export * from "./types";
 
-export type IntegrationDefs = IntegrationDef[];
-export type IntegrationDefRecords = Record<string, IntegrationDef>;
+export const integrationStatus = {
+  pending: "pending",
+  active: "active",
+  error: "error",
+  unknown: "unknown"
+};

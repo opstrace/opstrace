@@ -1,0 +1,10 @@
+mutation UpdateIntegrationStatus($id: uuid!, $status: String!) {
+  update_integrations_by_pk(
+    pk_columns: { id: $id }
+    _set: { status: $status }
+  ) {
+    id
+    status
+    updated_at
+  }
+}

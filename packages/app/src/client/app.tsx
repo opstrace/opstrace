@@ -26,7 +26,9 @@ import {
   Bell,
   Users,
   Layers,
-  Activity
+  Activity,
+  Compass,
+  Layout
 } from "react-feather";
 
 import WithAuthentication from "client/components/withAuthentication";
@@ -58,11 +60,13 @@ import NotFound from "client/views/404/404";
 import ClusterOverview from "./views/cluster-overview";
 import UsersTable from "client/views/users/list";
 import TenantsTable from "client/views/tenants/list";
+import TenantDashboards from "client/views/dashboards";
 
 import UserDetail from "client/views/users/detail";
 // import TenantDetail from "client/views/tenant/TenantDetail";
 // import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";
 import { CloudMetrics } from "client/viewsBasic/cloudMetrics";
+import TenantExplore from "./views/explore";
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -105,6 +109,16 @@ const AuthProtectedApplication = () => {
             title: "Overview",
             icon: <BarChart2 />,
             path: `/tenant/${tenantName}/overview`
+          },
+          {
+            title: "Dashboards",
+            icon: <Layout />,
+            path: `/tenant/${tenantName}/dashboards`
+          },
+          {
+            title: "Explore",
+            icon: <Compass />,
+            path: `/tenant/${tenantName}/explore`
           },
           {
             title: "Alerting",
@@ -181,6 +195,18 @@ const AuthProtectedApplication = () => {
               key="tenant-overview"
               path="/tenant/:tenantId/overview"
               component={TenantOverview}
+            />
+            <Route
+              exact
+              key="tenant-dashboards"
+              path="/tenant/:tenantId/dashboards"
+              component={TenantDashboards}
+            />
+            <Route
+              exact
+              key="tenant-explore"
+              path="/tenant/:tenantId/explore"
+              component={TenantExplore}
             />
             <Route
               exact
