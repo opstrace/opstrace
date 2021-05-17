@@ -15,10 +15,13 @@
  */
 
 import React from "react";
+import { keys } from "ramda";
+import { isTruthy, isArray, isObj } from "ramda-adjunct";
 
 type CondRenderProps = {
   when?: boolean;
   unless?: boolean;
+  present?: any;
   render?: Function;
   content?: string | number;
   children?: React.ReactElement | React.ReactElement[];
@@ -28,6 +31,12 @@ export const CondRender = (props: CondRenderProps) => {
   let shouldRender: boolean = false;
 
   if (props.when === true || props.unless === false) shouldRender = true;
+  else if (props.present !== undefined && isTruthy(props.present)) {
+    if (isArray(props.present) && props.present.length > 0) shouldRender = true;
+    else if (isObj(props.present) && keys(props.present).length > 0)
+      shouldRender = true;
+    else shouldRender = true;
+  }
 
   if (shouldRender) {
     if (props.content) return props.content;
