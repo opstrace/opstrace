@@ -32,6 +32,8 @@ import {
 } from "./dashboards";
 
 import { CheckStatusBtn } from "./CheckStatusBtn";
+import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
+
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
 
 import graphqlClient from "state/clients/graphqlClient";
@@ -94,7 +96,7 @@ async function createDashboard(
   };
 }
 
-const configFilename = "opstrace-prometheus.yaml";
+const configFilename = "opstrace-k8s-metrics.yaml";
 
 const INTEGRATION_STATUS_SUBSCRIPTION = `
   subscription IntegrationStatus($id: uuid!) {
@@ -131,7 +133,12 @@ export const K8sMetricsShow = withTenantFromParams(
         integrationId: integration.id,
         deployNamespace: integration.data.deployNamespace
       });
-    }, [integration.data.deployNamespace, integration.id, tenant.name]);
+    }, [tenant.name, integration.id, integration.data.deployNamespace]);
+
+    const deployYamlCommand = useMemo(
+      () => commands.deployYaml(configFilename, tenant.name),
+      [tenant.name]
+    );
 
     const downloadHandler = () => {
       var configBlob = new Blob([config], {
@@ -261,9 +268,8 @@ export const K8sMetricsShow = withTenantFromParams(
                   <Attribute.Value>
                     {`Step 2. Run this command to install Prometheus`}
                     <br />
-                    <pre>
-                      {commands.deployYaml(configFilename, tenant.name)}
-                    </pre>
+                    <pre>{deployYamlCommand}</pre>
+                    <CopyToClipboardIcon text={deployYamlCommand} />
                   </Attribute.Value>
                   <Attribute.Value>
                     Step 3. Once the integration is installed in your namepsace
