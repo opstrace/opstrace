@@ -142,7 +142,7 @@ export const K8sMetricsShow = withTenantFromParams(
 
     const config = useMemo(() => {
       return prometheusYaml({
-        clusterName: window.location.host,
+        clusterHost: window.location.host,
         tenantName: tenant.name,
         integrationId: integration.id,
         deployNamespace: integration.data.deployNamespace
