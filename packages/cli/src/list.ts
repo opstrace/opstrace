@@ -16,7 +16,7 @@
 
 import { EKS } from "aws-sdk";
 
-import { log } from "@opstrace/utils";
+import { log, die } from "@opstrace/utils";
 
 import { getAllGKEClusters, getGcpProjectId } from "@opstrace/gcp";
 
@@ -33,7 +33,17 @@ export async function list(): Promise<void> {
   }
 
   if (cli.CLIARGS.cloudProvider == "aws") {
-    const clusters = await EKSgetOpstraceClustersAcrossManyRegions();
+    let clusters: EKSOpstraceClusterRegionRelation[] = [];
+    try {
+      clusters = await EKSgetOpstraceClustersAcrossManyRegions();
+    } catch (e) {
+      if (e instanceof ListEksInRegionError) {
+        // Assume (rely on) that error details were already logged, in a useful
+        // way for the admin/user to understand what went wrong.
+        die(`Could not look up clusters in region ${e.region}.`);
+      }
+    }
+
     if (clusters.length > 0) {
       for (const c of clusters)
         process.stdout.write(`${c.opstraceClusterName}\n`);
@@ -163,7 +173,7 @@ async function EKSgetOpstraceClustersInRegion(
     log.error(
       "eks.listClusters() for region %s failed unexpectedly with error: %s",
       region,
-      e
+      e.message
     );
 
     throw new ListEksInRegionError(
