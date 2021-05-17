@@ -342,7 +342,9 @@ export class DNSClient {
             if (e.response?.body !== undefined) {
               const bodytext = e.response?.body as string;
               if (bodytext.includes("ERR_ENTITY_NOT_FOUND_FOR_USER")) {
-                log.info("%s: cluster already deleted for user");
+                log.info(
+                  "Opstrace DNS service: cluster already deleted for user"
+                );
 
                 // Good response, caller not interested in response body.
                 return undefined;
@@ -361,7 +363,9 @@ export class DNSClient {
 
           // exit if we're trying to use a cluster name that is already taken
           if (e.response?.statusCode === 409 && method === "POST") {
-            die("DNS setup failed with a permanent error, please choose a different cluster name");
+            die(
+              "DNS setup failed with a permanent error, please choose a different cluster name"
+            );
           }
 
           if (e.response?.statusCode === 401) {
