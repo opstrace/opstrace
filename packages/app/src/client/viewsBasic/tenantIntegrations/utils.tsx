@@ -17,7 +17,11 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { useIntegration, useIntegrationList } from "state/integrations/hooks";
+import {
+  useIntegration,
+  useIntegrationSub,
+  useIntegrationList
+} from "state/integrations/hooks";
 import { useTenant } from "state/tenant/hooks";
 import { Integration, Integrations } from "state/integrations/types";
 import { Tenant } from "state/tenant/types";
@@ -26,13 +30,22 @@ import Skeleton from "@material-ui/lab/Skeleton";
 
 export { Integration, Integrations };
 
+type Options = {
+  subscription?: boolean;
+};
+
 export const withIntegration = <T extends {}>(
   Component: React.ReactType,
   tenant: Tenant | string,
-  id: string
+  id: string,
+  options?: Options
 ) => {
+  const intergrationHook = options?.subscription
+    ? useIntegrationSub
+    : useIntegration;
+
   return (props: T) => {
-    const integration = useIntegration(tenant, id);
+    const integration = intergrationHook(tenant, id);
 
     return integration ? (
       <Component {...props} integration={integration} />
@@ -43,7 +56,8 @@ export const withIntegration = <T extends {}>(
 };
 
 export const withIntegrationFromParams = <T extends {}>(
-  Component: React.ReactType
+  Component: React.ReactType,
+  options?: Options
 ) => {
   return (props: T) => {
     const { tenantId, integrationId } = useParams<{
@@ -57,7 +71,8 @@ export const withIntegrationFromParams = <T extends {}>(
       const ComponentWithIntegration = withIntegration<T>(
         Component,
         tenant,
-        integrationId
+        integrationId,
+        options
       );
       return <ComponentWithIntegration {...props} />;
     } else {
