@@ -140,8 +140,6 @@ export const K8sMetricsShow = withTenantFromParams(
       integration.grafana_metadata
     ]);
 
-    console.log("grafanaMetadata", grafanaMetadata);
-
     const config = useMemo(() => {
       return prometheusYaml({
         clusterName: window.location.host,
