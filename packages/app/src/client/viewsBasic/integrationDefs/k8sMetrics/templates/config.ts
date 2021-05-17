@@ -18,22 +18,21 @@
 // The user can pass this to kubectl for collecting metrics from their cluster.
 //
 // Args:
-// - clusterName: The Opstrace cluster where metrics data should be sent
+// - clusterHost: The Opstrace cluster hostname (foo.opstrace.io) where metrics data should be sent
 // - tenantName: The Opstrace tenant where metrics data should be sent
 // - integrationId: The unique id that sent metrics should have as a label
 // - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
 //
 // The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
-
 type Props = {
-  clusterName: String;
+  clusterHost: String;
   tenantName: String;
   integrationId: String;
   deployNamespace: String;
 };
 
 export function prometheusYaml({
-  clusterName,
+  clusterHost,
   tenantName,
   integrationId,
   deployNamespace
@@ -42,7 +41,7 @@ export function prometheusYaml({
 kind: Namespace
 apiVersion: v1
 metadata:
-name: ${deployNamespace}
+  name: ${deployNamespace}
 ---
 apiVersion: v1
 kind: Secret
@@ -60,7 +59,7 @@ metadata:
 data:
   prometheus.yml: |-
     remote_write:
-    - url: https://cortex.${tenantName}.${clusterName}.opstrace.io/api/v1/push
+    - url: https://cortex.${tenantName}.${clusterHost}/api/v1/push
       authorization:
         credentials_file: /var/run/tenant-auth/token
 
@@ -241,14 +240,14 @@ spec:
 // The user can pass this to kubectl for collecting metrics from their cluster.
 //
 // Args:
-// - clusterName: The Opstrace cluster where metrics data should be sent
+// - clusterHost: The Opstrace cluster where metrics data should be sent
 // - tenantName: The Opstrace tenant where metrics data should be sent
 // - integrationId: The unique id that sent metrics should have as a label
 // - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
 //
 // The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
 export function promtailYaml({
-  clusterName,
+  clusterHost,
   tenantName,
   integrationId,
   deployNamespace
@@ -275,7 +274,7 @@ metadata:
 data:
   promtail.yml: |
     client:
-      url: https://loki.${tenantName}.${clusterName}.opstrace.io/loki/api/v1/push
+      url: https://loki.${tenantName}.${clusterHost}/loki/api/v1/push
       bearer_token_file: /var/run/tenant-auth/token
 
     scrape_configs:
