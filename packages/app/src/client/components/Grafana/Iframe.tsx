@@ -39,7 +39,7 @@ const GrafanaIframe = (props: GrafanaIframeProps) => {
     if (theme.palette.type && frame.current) {
       setReloadTrigger(reloadTrigger + 1);
     }
-  }, [theme.palette.type]);
+  }, [theme.palette.type, reloadTrigger]);
 
   let queryParams = {
     orgId: 1,

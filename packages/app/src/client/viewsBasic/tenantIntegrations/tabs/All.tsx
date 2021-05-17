@@ -65,7 +65,7 @@ const IntegrationDefCards = withTenantFromParams<Props>(
             <Grid key={i9n.kind} item xs={12} sm={6}>
               <Card>
                 <CardHeader
-                  avatar={<img src={i9n.Logo} width={30} height={30} />}
+                  avatar={<img src={i9n.Logo} width={30} height={30} alt="" />}
                   titleTypographyProps={{ variant: "h6" }}
                   title={i9n.label}
                   action={

@@ -20,7 +20,7 @@ import { useHistory } from "react-router-dom";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
-import { Integration } from "state/integrations/types";
+import { Integration, integrationStatus } from "state/integrations/utils";
 import { integrationDefRecords } from "client/viewsBasic/integrationDefs";
 import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
@@ -48,7 +48,7 @@ export const AddIntegration = withTenantFromParams(
         .InsertIntegration({
           name: data.name,
           kind: kind,
-          status: "active",
+          status: integrationStatus.pending,
           data: data.data || {},
           tenant_id: tenant.id
         })
