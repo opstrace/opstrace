@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const endpoint = process.env.HASURA_GRAPHQL_ENDPOINT || "http://localhost:8080";
+const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
+
 module.exports = {
   documents: "./src/**/*.gql",
   schema: [
     {
-      "http://localhost:8080/v1/graphql": {
+      [endpoint + "/v1/graphql"]: {
         headers: {
-          "X-Hasura-Admin-Secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET
+          "X-Hasura-Admin-Secret": adminSecret
         }
       }
     }
@@ -61,16 +65,12 @@ module.exports = {
       }
     },
     "../../go/pkg/graphql/client_generated.go": {
-      plugins: [
-        "graphql-codegen-golang"
-      ],
+      plugins: ["graphql-codegen-golang"],
       config: {
-        packageName: "graphql",
+        packageName: "graphql"
       },
       hooks: {
-        afterOneFileWrite: [
-          "go fmt"
-        ]
+        afterOneFileWrite: ["go fmt"]
       }
     }
   }

@@ -38,7 +38,7 @@ export const useIntegration = (
             status
             data
             tenant_id
-            grafana_folder_id
+            grafana_metadata
             created_at
             updated_at
           }
