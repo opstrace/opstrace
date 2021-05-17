@@ -34,6 +34,8 @@ import {
 import { CheckStatusBtn } from "./CheckStatusBtn";
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
 
+import graphqlClient from "state/clients/graphqlClient";
+
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -62,6 +64,7 @@ async function createFolder(
     data: folder,
     withCredentials: true
   }).then(res => res.data);
+
   return {
     id: responseData.id,
     urlPath: responseData.url
@@ -85,6 +88,7 @@ async function createDashboard(
     data: dashboard,
     withCredentials: true
   }).then(res => res.data);
+
   return {
     urlPath: responseData.url
   };
@@ -146,6 +150,16 @@ export const K8sMetricsShow = withTenantFromParams(
       );
       console.log(`Folder created: id=${folder.id} path=${folder.urlPath}`);
 
+      integration.grafana_metadata = {
+        folder_id: folder.id,
+        folder_path: folder.urlPath as string
+      };
+      const response = await graphqlClient.UpdateIntegrationGrafanaMetadata({
+        id: integration.id,
+        grafana_metadata: integration.grafana_metadata
+      });
+      console.log("create folder update integration response", response);
+
       for (const d of makePrometheusDashboardRequests({
         integrationId: integration.id,
         folderId: folder.id
@@ -154,6 +168,8 @@ export const K8sMetricsShow = withTenantFromParams(
         console.log(`Dashboard created: path=${result.urlPath}`);
       }
     };
+
+    console.log("integration", integration);
 
     return (
       <>
@@ -258,7 +274,9 @@ export const K8sMetricsShow = withTenantFromParams(
                     <Button
                       variant="contained"
                       size="small"
-                      disabled={integration.grafana_folder_id !== null}
+                      disabled={
+                        integration.grafana_metadata.folder_path !== undefined
+                      }
                       onClick={dashboardHandler}
                     >
                       Install Dashboards

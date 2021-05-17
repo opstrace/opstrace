@@ -21,7 +21,7 @@ import makeDashboardKubelet from "./kubelet.js";
 type FolderProps = {
   integrationId: String;
   integrationName: String;
-}
+};
 
 type DashboardProps = {
   integrationId: String;
@@ -34,9 +34,9 @@ export function makePrometheusFolderRequest({
   integrationName
 }: FolderProps): object {
   return {
-    "uid": `integration-${integrationId}`,
-    "title": `Integration: ${integrationName}`,
-  }
+    uid: `i9n-${integrationId}`,
+    title: `Integration: ${integrationName}`
+  };
 }
 
 // Returns an array of dashboard creation request payloads for submitting to Grafana.
@@ -46,16 +46,16 @@ export function makePrometheusDashboardRequests({
 }: DashboardProps): object[] {
   return [
     {
-      "uid": `integration-${integrationId}-apiserver`,
-      "dashboard": makeDashboardApiserver(integrationId),
-      "folderId": folderId,
-      "overwrite": true
+      uid: `as-${integrationId}`,
+      dashboard: makeDashboardApiserver(integrationId),
+      folderId: folderId,
+      overwrite: true
     },
     {
-      "uid": `integration-${integrationId}-kubelet`,
-      "dashboard": makeDashboardKubelet(integrationId),
-      "folderId": folderId,
-      "overwrite": true
+      uid: `kub-${integrationId}`,
+      dashboard: makeDashboardKubelet(integrationId),
+      folderId: folderId,
+      overwrite: true
     }
   ];
 }

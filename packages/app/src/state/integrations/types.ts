@@ -19,7 +19,7 @@ export type Integration = {
   kind: string;
   name: string;
   status: "pending" | "active" | "error" | "unknown";
-  grafana_metadata: IntegrationGrafanaMetadata extends {};
+  grafana_metadata: IntegrationGrafanaMetadata;
   created_at: Date;
   updated_at: Date;
   data: any;
@@ -28,7 +28,7 @@ export type Integration = {
 export type IntegrationGrafanaMetadata = {
   folder_id?: number;
   folder_path?: string;
-}
+} & {};
 
 export type Integrations = Integration[];
 export type IntegrationRecords = Record<string, Integration>;
