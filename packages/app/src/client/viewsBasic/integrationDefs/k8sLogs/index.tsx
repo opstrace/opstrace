@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-import React from "react";
+import { K8sLogsForm } from "./Form";
+import { K8sLogsShow } from "./Show";
+import K8sLogsLogo from "./Logo.png";
 
-export const K8sMetricsCard = () => {
-  return <div>k8sMetrics</div>;
+import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
+
+export const k8sLogsIntegration: IntegrationDef = {
+  kind: "k8s-logs",
+  category: "infrastructure",
+  label: "Kubernetes Logs",
+  desc:
+    "Generate all the yaml required to send logs from your Kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
+  Form: K8sLogsForm,
+  Show: K8sLogsShow,
+  enabled: true,
+  Logo: K8sLogsLogo
 };

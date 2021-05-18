@@ -20,8 +20,6 @@ export type IntegrationDef = {
   label: string;
   desc: string | React.ReactType;
   Form: React.ReactType;
-  Row: React.ReactType;
-  Card: React.ReactType;
   Show: React.ReactType;
   enabled: boolean;
   Logo?: string;
