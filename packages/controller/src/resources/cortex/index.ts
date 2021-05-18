@@ -222,7 +222,10 @@ export function CortexResources(
     // Define a 'runtime config file' to set dynamic per-tenant config such as
     // rate limits.
     // https://cortexmetrics.io/docs/configuration/arguments/#runtime-configuration-file
-    runtime_config: { period: "10s", file: "/etc/cortex-runtime-cfg/runtime-config.yaml" },
+    runtime_config: {
+      period: "10s",
+      file: "/etc/cortex-runtime-cfg/runtime-config.yaml"
+    },
     api: {
       // Serve Alertmanager UI at this location, matching the path served by the tenant Ingresses.
       // This is the default but we call it out explicitly here.
@@ -990,7 +993,7 @@ export function CortexResources(
         },
         kind: "ConfigMap",
         metadata: {
-          name: "cortexRuntimeConfig",
+          name: "cortex-runtime-config",
           namespace
         }
       },
@@ -1054,7 +1057,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -1068,9 +1071,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 }
               ]
             }
@@ -1269,7 +1272,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -1286,9 +1289,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 },
                 {
                   name: "datadir",
@@ -1454,7 +1457,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -1469,9 +1472,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 },
                 {
                   name: "datadir",
@@ -1637,7 +1640,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -1652,9 +1655,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 },
                 {
                   name: "datadir",
@@ -1779,7 +1782,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -1794,9 +1797,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 }
               ]
             }
@@ -1933,7 +1936,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -1947,9 +1950,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 }
               ]
             }
@@ -2104,7 +2107,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -2118,9 +2121,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 }
               ]
             }
@@ -2246,7 +2249,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -2262,9 +2265,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 }
               ]
             }
@@ -2397,7 +2400,7 @@ export function CortexResources(
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
-                      name: "cortexRuntimeConfig"
+                      name: "cortex-runtime-config"
                     }
                   ]
                 }
@@ -2413,9 +2416,9 @@ export function CortexResources(
                 },
                 {
                   configMap: {
-                    name: "cortexRuntimeConfig"
+                    name: "cortex-runtime-config"
                   },
-                  name: "cortexRuntimeConfig"
+                  name: "cortex-runtime-config"
                 }
               ]
             }
