@@ -19,7 +19,8 @@
     "watch": "tsc -b -w",
     "clean": "rimraf build .cache tsconfig.tsbuildinfo",
     "prebuild": "yarn clean",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "test": "node scripts/test.js --coverage"
   },
   "dependencies": {
     "@apollo/client": "^3.2.5",
@@ -40,6 +41,9 @@
     "url-join-ts": "^1.0.5"
   },
   "devDependencies": {
-    "@types/argparse": "^1.0.38"
+    "@types/argparse": "^1.0.38",
+    "@types/jest": "^26.0.16",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.4.4"
   }
 }
