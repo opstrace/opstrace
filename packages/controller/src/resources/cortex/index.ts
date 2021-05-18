@@ -994,7 +994,16 @@ export function CortexResources(
         kind: "ConfigMap",
         metadata: {
           name: "cortex-runtime-config",
-          namespace
+          namespace,
+          annotations: {
+            // Custom convention, so that the Opstrace controller will not
+            // delete/overwrite this config map when it has been mutated by a
+            // different entity (that's the goal: this config map is supposed
+            // to be mutated by the Opstrace UI's API implementation); the
+            // `protected` annotation certainly survives these mutations.
+            // Also see https://github.com/opstrace/opstrace/blob/85a4f97e5705fff23df152454a845c4f443f17e9/lib/kubernetes/src/common.ts#L204
+            opstrace: "protected"
+          }
         }
       },
       kubeConfig
@@ -1740,6 +1749,7 @@ export function CortexResources(
           selector: {
             matchLabels: {
               name: "querier",
+              // why 'loki' here?
               memberlist: "loki-gossip-ring"
             }
           },
@@ -1747,6 +1757,7 @@ export function CortexResources(
             metadata: {
               labels: {
                 name: "querier",
+                // why 'loki' here?
                 memberlist: "loki-gossip-ring"
               }
             },
