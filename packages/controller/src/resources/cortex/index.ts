@@ -85,16 +85,7 @@ export function CortexResources(
       resources: {}
     },
     storegateway: {
-      resources: {
-        // limits: {
-        //   cpu: "3",
-        //   memory: "1Gi"
-        // },
-        // requests: {
-        //   cpu: "50m",
-        //   memory: "100Mi"
-        // }
-      },
+      resources: {},
       replicas: select(getNodeCount(state), [
         {
           "<=": 6,
@@ -107,16 +98,7 @@ export function CortexResources(
       ])
     },
     compactor: {
-      resources: {
-        // limits: {
-        //   cpu: "3",
-        //   memory: "1Gi"
-        // },
-        // requests: {
-        //   cpu: "50m",
-        //   memory: "100Mi"
-        // }
-      },
+      resources: {},
       replicas: select(getNodeCount(state), [
         {
           "<=": 6,
@@ -133,16 +115,7 @@ export function CortexResources(
       ])
     },
     querier: {
-      resources: {
-        // limits: {
-        //   cpu: "3",
-        //   memory: "1Gi"
-        // },
-        // requests: {
-        //   cpu: "50m",
-        // //   memory: "100Mi"
-        // }
-      },
+      resources: {},
       replicas: select(getNodeCount(state), [
         {
           "<=": 6,
@@ -171,16 +144,7 @@ export function CortexResources(
       replicas: 3
     },
     distributor: {
-      resources: {
-        // limits: {
-        //   cpu: "12",
-        //   memory: "1Gi"
-        // },
-        // requests: {
-        //   cpu: "50m",
-        //   memory: "100Mi"
-        // }
-      },
+      resources: {},
       replicas: select(getNodeCount(state), [
         {
           "<=": 4,
@@ -212,16 +176,7 @@ export function CortexResources(
       ])
     },
     ingester: {
-      resources: {
-        // limits: {
-        //   cpu: "26",
-        //   memory: "64Gi"
-        // },
-        // requests: {
-        //   cpu: "100m",
-        //   memory: "50Mi"
-        // }
-      },
+      resources: {},
       replicas: select(getNodeCount(state), [
         {
           "<=": 4,
