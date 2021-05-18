@@ -22,6 +22,7 @@ import createGraphqlHandler from "./graphql";
 import pubUiCfgHandler from "./uicfg";
 import authRequired from "server/middleware/auth";
 import setCortexRuntimeConfigHandler from "./cortexRuntimeConfig";
+import createCortexHandler from "./cortex";
 
 function createAPIRoutes(): express.Router {
   const api = express.Router();
@@ -38,6 +39,7 @@ function createAPIRoutes(): express.Router {
     authRequired,
     setCortexRuntimeConfigHandler
   );
+  api.use("/cortex", createCortexHandler());
 
   api.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
