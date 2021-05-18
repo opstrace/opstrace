@@ -982,6 +982,23 @@ export function CortexResources(
   );
 
   collection.add(
+    new ConfigMap(
+      {
+        apiVersion: "v1",
+        data: {
+          "runtime-config.yaml": yaml.safeDump(runtimeConfigDefault)
+        },
+        kind: "ConfigMap",
+        metadata: {
+          name: "cortexRuntimeConfig",
+          namespace
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
     new Deployment(
       {
         apiVersion: "apps/v1",
@@ -1044,6 +1061,12 @@ export function CortexResources(
                     name: "cortexConfig"
                   },
                   name: "cortexConfig"
+                },
+                {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
                 }
               ]
             }
@@ -1249,9 +1272,15 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortex"
+                    name: "cortexConfig"
                   },
-                  name: "cortex"
+                  name: "cortexConfig"
+                },
+                {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
                 },
                 {
                   name: "datadir",
@@ -1427,6 +1456,12 @@ export function CortexResources(
                   name: "cortex"
                 },
                 {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
+                },
+                {
                   name: "datadir",
                   persistentVolumeClaim: {
                     claimName: "datadir"
@@ -1600,6 +1635,12 @@ export function CortexResources(
                   name: "cortex"
                 },
                 {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
+                },
+                {
                   name: "datadir",
                   persistentVolumeClaim: {
                     claimName: "datadir"
@@ -1730,6 +1771,12 @@ export function CortexResources(
                     name: "cortexConfig"
                   },
                   name: "cortexConfig"
+                },
+                {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
                 }
               ]
             }
@@ -1873,6 +1920,12 @@ export function CortexResources(
                     name: "cortexConfig"
                   },
                   name: "cortexConfig"
+                },
+                {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
                 }
               ]
             }
@@ -2034,6 +2087,12 @@ export function CortexResources(
                     name: "cortexConfig"
                   },
                   name: "cortexConfig"
+                },
+                {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
                 }
               ]
             }
@@ -2168,6 +2227,12 @@ export function CortexResources(
                     name: "cortexConfig"
                   },
                   name: "cortexConfig"
+                },
+                {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
                 }
               ]
             }
@@ -2309,6 +2374,12 @@ export function CortexResources(
                     name: "cortexConfig"
                   },
                   name: "cortexConfig"
+                },
+                {
+                  configMap: {
+                    name: "cortexRuntimeConfig"
+                  },
+                  name: "cortexRuntimeConfig"
                 }
               ]
             }
