@@ -273,7 +273,7 @@
       check: {}
       columns:
       - data
-      - grafana_folder_id
+      - grafana_metadata
       - kind
       - name
       - status
@@ -283,27 +283,31 @@
   - role: user_admin
     permission:
       columns:
-      - created_at
       - data
-      - grafana_folder_id
-      - id
+      - grafana_metadata
       - kind
       - name
       - status
-      - tenant_id
+      - created_at
       - updated_at
+      - id
+      - tenant_id
       filter: {}
-      allow_aggregations: true
   update_permissions:
   - role: user_admin
     permission:
       columns:
       - data
-      - grafana_folder_id
+      - grafana_metadata
+      - kind
       - name
       - status
       filter: {}
-      check: {}
+      check: null
+  delete_permissions:
+  - role: user_admin
+    permission:
+      filter: {}
 - table:
     schema: public
     name: module

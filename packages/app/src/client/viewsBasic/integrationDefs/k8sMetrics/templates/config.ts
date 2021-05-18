@@ -14,29 +14,47 @@
  * limitations under the License.
  */
 
-// Returns a rendered prometheus deployment YAML for displaying to a user.
-// The user can pass this to kubectl for collecting metrics from their cluster.
-//
-// Args:
-// - clusterHost: The Opstrace cluster hostname (foo.opstrace.io) where metrics data should be sent
-// - tenantName: The Opstrace tenant where metrics data should be sent
-// - integrationId: The unique id that sent metrics should have as a label
-// - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
-//
-// The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
-type Props = {
+type PrometheusProps = {
+  // The Opstrace cluster hostname (foo.opstrace.io) where metrics data should be sent
   clusterHost: String;
+  // The Opstrace tenant where metrics data should be sent
   tenantName: String;
+  // The unique id that sent metrics should have as a label
   integrationId: String;
+  // Where the user would like Prometheus to be deployed in their cluster
   deployNamespace: String;
 };
 
+enum PromtailLogFormat {
+  // JSON-style logs used by dockerd
+  // Example: {"log":"linux/amd64, go1.13.15, f59c03d0\n","stream":"stdout","time":"2021-05-07T04:46:42.866604098Z"}
+  Docker = "docker",
+  // TSV-style logs used by containerd/CRI
+  // Example: 2021-05-03T18:30:48.888677423+12:00 stdout F 2021-05-03 06:30:48.888 [INFO][9] startup/startup.go 112: Datastore is ready
+  CRI = "cri",
+}
+
+type PromtailProps = {
+  // The Opstrace cluster hostname (foo.opstrace.io) where logs should be sent
+  clusterHost: String;
+  // The Opstrace tenant where logs should be sent
+  tenantName: String;
+  // The unique id that sent logs should have as a label
+  integrationId: String;
+  // Where the user would like Promtail to be deployed in their cluster
+  deployNamespace: String;
+  // Whether the user is running dockerd (docker) or containerd (cri) in their cluster
+  logFormat: PromtailLogFormat;
+};
+
+// Returns a rendered prometheus deployment YAML for displaying to a user.
+// After replacing __AUTH_TOKEN__ with the tenant auth token, the user can pass this to 'kubectl apply -f'.
 export function prometheusYaml({
   clusterHost,
   tenantName,
   integrationId,
   deployNamespace
-}: Props): string {
+}: PrometheusProps): string {
   return `apiVersion: v1
 kind: Namespace
 apiVersion: v1
@@ -76,29 +94,40 @@ data:
         credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
       relabel_configs:
-      # Always use HTTPS for the api server
+      # Assign job tag with <namespace>/<pod name>
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+        action: replace
+        separator: /
+        replacement: $1
+        target_label: job
+      # Assign instance to <pod name>
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: instance
+      # Assign controller to <replicaset/statefulset/daemonset name>
+      - source_labels: [__meta_kubernetes_pod_controller_name]
+        action: replace
+        target_label: controller
+      # Assign container to <container name>
+      - action: replace
+        source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      # Include node name
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
+
+      # Include integration ID for autodetection in opstrace
+      - source_labels: []
+        target_label: integration_id
+        replacement: ${integrationId}
+
+      # Internal labels used by prometheus itself
+      # Always use HTTPS for scraping the api server
       - source_labels: [__meta_kubernetes_service_label_component]
         regex: apiserver
         action: replace
         target_label: __scheme__
         replacement: https
-      # Rename jobs to be <namespace>/<name, from pod name label>
-      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
-        action: replace
-        separator: /
-        target_label: job
-        replacement: $1
-      # Rename instances to be the pod name
-      - source_labels: [__meta_kubernetes_pod_name]
-        action: replace
-        target_label: instance
-      # Include node name as a extra field
-      - source_labels: [__meta_kubernetes_pod_node_name]
-        target_label: node
-      # Include integration ID for autodetection in opstrace
-      - source_labels: []
-        target_label: integration_id
-        replacement: ${integrationId}
 
     # Collection of per-node metrics
     - job_name: 'kubernetes-nodes'
@@ -221,8 +250,10 @@ spec:
         - name: ui
           containerPort: 9090
         volumeMounts:
+        # Prometheus configmap
         - name: config
           mountPath: /etc/prometheus
+        # Opstrace tenant auth secret
         - name: tenant-auth
           mountPath: /var/run/tenant-auth
           readOnly: true
@@ -236,27 +267,33 @@ spec:
 `;
 }
 
-// Returns a rendered prometheus deployment YAML for displaying to a user.
-// The user can pass this to kubectl for collecting metrics from their cluster.
-//
-// Args:
-// - clusterHost: The Opstrace cluster where metrics data should be sent
-// - tenantName: The Opstrace tenant where metrics data should be sent
-// - integrationId: The unique id that sent metrics should have as a label
-// - deployNamespace: Where the user would like Prometheus to be deployed in their cluster
-//
-// The returned multiline string will contain '__AUTH_TOKEN__' for the user to replace locally.
+// Returns a rendered promtail deployment YAML for displaying to a user.
+// After replacing __AUTH_TOKEN__ with the tenant auth token, the user can pass this to 'kubectl apply -f'.
 export function promtailYaml({
   clusterHost,
   tenantName,
   integrationId,
-  deployNamespace
-}: Props): string {
+  deployNamespace,
+  logFormat
+}: PromtailProps): string {
+  var dockerVolumeMount = "";
+  var dockerVolume = "";
+  if (logFormat === PromtailLogFormat.Docker) {
+    dockerVolumeMount = `
+        # Read-only access to /var/lib/docker/containers/, symlinked from /var/log/pods/
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true`;
+    dockerVolume = `
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers`;
+  }
   return `apiVersion: v1
 kind: Namespace
 apiVersion: v1
 metadata:
-name: ${deployNamespace}
+  name: ${deployNamespace}
 ---
 apiVersion: v1
 kind: Secret
@@ -273,105 +310,61 @@ metadata:
   namespace: ${deployNamespace}
 data:
   promtail.yml: |
-    client:
-      url: https://loki.${tenantName}.${clusterHost}/loki/api/v1/push
+    clients:
+    - url: https://loki.${tenantName}.${clusterHost}/loki/api/v1/push
       bearer_token_file: /var/run/tenant-auth/token
 
+    positions:
+      # Must be writable by promtail, and should persist across restarts
+      filename: /positions/positions.yaml
+
     scrape_configs:
-    - pipeline_stages:
-      - docker:
-      job_name: kubernetes-pods-name
+    # Collection of per-pod logs
+    - job_name: kubernetes-pods
       kubernetes_sd_configs:
       - role: pod
+
+      # Whether the data is cri (tsv) or dockerd (json) format
+      pipeline_stages:
+      - ${logFormat}:
+
       relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_label_name]
-        target_label: __service__
-      - source_labels: [__meta_kubernetes_pod_node_name]
-        target_label: __host__
-      - action: drop
-        regex: ^$
-        source_labels: [__service__]
-      - action: replace
-        replacement: $1
+      # Assign job tag with <namespace>/<pod name>
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+        action: replace
         separator: /
-        source_labels: [__meta_kubernetes_namespace, __service__]
-        target_label: k8s_app
-
-      - action: replace
-        source_labels: [__meta_kubernetes_namespace]
-        target_label: k8s_namespace_name
-
+        replacement: $1
+        target_label: job
+      # Assign instance to <pod name>
       - action: replace
         source_labels: [__meta_kubernetes_pod_name]
-        target_label: k8s_pod_name
-
+        target_label: instance
+      # Assign controller to <replicaset/statefulset/daemonset name>
+      - source_labels: [__meta_kubernetes_pod_controller_name]
+        action: replace
+        target_label: controller
+      # Assign container to <container name>
       - action: replace
         source_labels: [__meta_kubernetes_pod_container_name]
-        target_label: k8s_container_name
-
-      - replacement: /var/log/pods/*$1/*.log
-        separator: /
-        source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
-        target_label: __path__
-
-      - replacement: /var/log/pods/*$1/*.log
-        separator: /
-        source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
-        target_label: __path__
+        target_label: container
+      # Include node name
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
 
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
         replacement: ${integrationId}
 
-    - pipeline_stages:
-      - docker:
-      job_name: kubernetes-pods-static
-      kubernetes_sd_configs:
-      - role: pod
-      relabel_configs:
-      - action: drop
-        regex: ^$
-        source_labels: [__meta_kubernetes_pod_annotation_kubernetes_io_config_mirror]
-
-      - action: replace
-        source_labels: [__meta_kubernetes_pod_label_component]
-        target_label: __service__
-
+      # Internal labels used by promtail itself
+      # Map node hostname to __host__, used by promtail to decide which instance should scrape the pod
       - source_labels: [__meta_kubernetes_pod_node_name]
         target_label: __host__
-
-      - action: drop
-        regex: ^$
-        source_labels: [__service__]
-
-      - action: replace
-        replacement: $1
-        separator: /
-        source_labels: [__meta_kubernetes_namespace, __service__]
-        target_label: k8s_app
-
-      - action: replace
-        source_labels: [__meta_kubernetes_namespace]
-        target_label: k8s_namespace_name
-
-      - action: replace
-        source_labels: [__meta_kubernetes_pod_name]
-        target_label: k8s_pod_name
-
-      - action: replace
-        source_labels: [__meta_kubernetes_pod_container_name]
-        target_label: k8s_container_name
-
+      # Map container to expected path: /var/log/pods/<namespace>_<podname>_<uuid>/<containername>/*.log
       - replacement: /var/log/pods/*$1/*.log
         separator: /
-        source_labels: [__meta_kubernetes_pod_annotation_kubernetes_io_config_mirror, __meta_kubernetes_pod_container_name]
+        source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
         target_label: __path__
-
-      # Include integration ID for autodetection in opstrace
-      - source_labels: []
-        target_label: integration_id
-        replacement: ${integrationId}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -387,10 +380,6 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - nodes
-  - nodes/proxy
-  - services
-  - endpoints
   - pods
   verbs:
   - get
@@ -421,11 +410,11 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      name: promtail
+      name: opstrace-promtail
   template:
     metadata:
       labels:
-        name: promtail
+        name: opstrace-promtail
     spec:
       serviceAccount: opstrace-promtail
       tolerations:
@@ -433,51 +422,56 @@ spec:
         operator: Exists
       containers:
       - name: promtail
-        image: grafana/promtail:2.2.1 # TODO(nick) was 1.6.1
+        image: grafana/promtail:2.2.1
         imagePullPolicy: IfNotPresent
         args:
         - -config.file=/etc/promtail/promtail.yml
         env:
+        # Used by promtail to detect which pods are on the same node
         - name: HOSTNAME
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
         ports:
-        - name: http-metrics
+        - name: ui
           containerPort: 80
         readinessProbe:
           httpGet:
             path: /ready
-            port: http-metrics
+            port: ui
             scheme: HTTP
           initialDelaySeconds: 10
         securityContext:
-          privileged: true
+          # Pod logs are only accessible to uid=root
           runAsUser: 0
-        volumeMounts:
+        volumeMounts:${dockerVolumeMount}
+        # Promtail configmap
         - name: config
           mountPath: /etc/promtail
+        # Opstrace tenant auth secret
         - name: tenant-auth
           mountPath: /var/run/tenant-auth
           readOnly: true
-        - name: varlog
-          mountPath: /var/log
+        # Read-only access to /var/log/pods/*
+        - name: varlogpods
+          mountPath: /var/log/pods
           readOnly: true
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-      volumes:
+        # Read-write access to /var/log/opstrace-promtail for positions file
+        - name: varlogopstracepromtail
+          mountPath: /positions
+          readOnly: false
+      volumes:${dockerVolume}
       - name: config
         configMap:
           name: opstrace-promtail
       - name: tenant-auth
         secret:
           secretName: opstrace-tenant-auth
-      - name: varlog
+      - name: varlogpods
         hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
+          path: /var/log/pods
+      - name: varlogopstracepromtail
         hostPath:
-          path: /var/lib/docker/containers
+          path: /var/log/opstrace-promtail
 `;
 }

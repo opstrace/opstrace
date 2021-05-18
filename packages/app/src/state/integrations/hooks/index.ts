@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { useIntegration } from "./useIntegration";
+export { useIntegration, useIntegrationSub } from "./useIntegration";
 export { useIntegrationList } from "./useIntegrationList";

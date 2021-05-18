@@ -25,7 +25,6 @@ import {
 
 const headers = { "Content-Type": "application/json", ...authHeader };
 
-// const useHasura: (query: string, variables?: {} | undefined) => SWRResponse<any, any>
 const useHasuraSubscription = (
   query: string,
   variables: {} = {}

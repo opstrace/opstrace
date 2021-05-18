@@ -70,19 +70,6 @@ export enum ErrorType {
   ValidationFailed = "VALIDATION_FAILED"
 }
 
-/** expression to compare columns of type Int. All fields are combined with logical 'AND'. */
-export type Int_Comparison_Exp = {
-  _eq?: Maybe<Scalars["Int"]>;
-  _gt?: Maybe<Scalars["Int"]>;
-  _gte?: Maybe<Scalars["Int"]>;
-  _in?: Maybe<Array<Scalars["Int"]>>;
-  _is_null?: Maybe<Scalars["Boolean"]>;
-  _lt?: Maybe<Scalars["Int"]>;
-  _lte?: Maybe<Scalars["Int"]>;
-  _neq?: Maybe<Scalars["Int"]>;
-  _nin?: Maybe<Array<Scalars["Int"]>>;
-};
-
 export type RuleGroup = {
   namespace: Scalars["String"];
   online: Scalars["Boolean"];
@@ -1143,7 +1130,7 @@ export enum File_Update_Column {
 export type Integrations = {
   created_at: Scalars["timestamp"];
   data: Scalars["jsonb"];
-  grafana_folder_id?: Maybe<Scalars["Int"]>;
+  grafana_metadata: Scalars["jsonb"];
   id: Scalars["uuid"];
   kind: Scalars["String"];
   name: Scalars["String"];
@@ -1159,6 +1146,11 @@ export type IntegrationsDataArgs = {
   path?: Maybe<Scalars["String"]>;
 };
 
+/** columns and relationships of "integrations" */
+export type IntegrationsGrafana_MetadataArgs = {
+  path?: Maybe<Scalars["String"]>;
+};
+
 /** aggregated selection of "integrations" */
 export type Integrations_Aggregate = {
   aggregate?: Maybe<Integrations_Aggregate_Fields>;
@@ -1167,17 +1159,9 @@ export type Integrations_Aggregate = {
 
 /** aggregate fields of "integrations" */
 export type Integrations_Aggregate_Fields = {
-  avg?: Maybe<Integrations_Avg_Fields>;
   count?: Maybe<Scalars["Int"]>;
   max?: Maybe<Integrations_Max_Fields>;
   min?: Maybe<Integrations_Min_Fields>;
-  stddev?: Maybe<Integrations_Stddev_Fields>;
-  stddev_pop?: Maybe<Integrations_Stddev_Pop_Fields>;
-  stddev_samp?: Maybe<Integrations_Stddev_Samp_Fields>;
-  sum?: Maybe<Integrations_Sum_Fields>;
-  var_pop?: Maybe<Integrations_Var_Pop_Fields>;
-  var_samp?: Maybe<Integrations_Var_Samp_Fields>;
-  variance?: Maybe<Integrations_Variance_Fields>;
 };
 
 /** aggregate fields of "integrations" */
@@ -1188,38 +1172,21 @@ export type Integrations_Aggregate_FieldsCountArgs = {
 
 /** order by aggregate values of table "integrations" */
 export type Integrations_Aggregate_Order_By = {
-  avg?: Maybe<Integrations_Avg_Order_By>;
   count?: Maybe<Order_By>;
   max?: Maybe<Integrations_Max_Order_By>;
   min?: Maybe<Integrations_Min_Order_By>;
-  stddev?: Maybe<Integrations_Stddev_Order_By>;
-  stddev_pop?: Maybe<Integrations_Stddev_Pop_Order_By>;
-  stddev_samp?: Maybe<Integrations_Stddev_Samp_Order_By>;
-  sum?: Maybe<Integrations_Sum_Order_By>;
-  var_pop?: Maybe<Integrations_Var_Pop_Order_By>;
-  var_samp?: Maybe<Integrations_Var_Samp_Order_By>;
-  variance?: Maybe<Integrations_Variance_Order_By>;
 };
 
 /** append existing jsonb value of filtered columns with new jsonb value */
 export type Integrations_Append_Input = {
   data?: Maybe<Scalars["jsonb"]>;
+  grafana_metadata?: Maybe<Scalars["jsonb"]>;
 };
 
 /** input type for inserting array relation for remote table "integrations" */
 export type Integrations_Arr_Rel_Insert_Input = {
   data: Array<Integrations_Insert_Input>;
   on_conflict?: Maybe<Integrations_On_Conflict>;
-};
-
-/** aggregate avg on columns */
-export type Integrations_Avg_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Float"]>;
-};
-
-/** order by avg() on columns of table "integrations" */
-export type Integrations_Avg_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "integrations". All fields are combined with a logical 'AND'. */
@@ -1229,7 +1196,7 @@ export type Integrations_Bool_Exp = {
   _or?: Maybe<Array<Maybe<Integrations_Bool_Exp>>>;
   created_at?: Maybe<Timestamp_Comparison_Exp>;
   data?: Maybe<Jsonb_Comparison_Exp>;
-  grafana_folder_id?: Maybe<Int_Comparison_Exp>;
+  grafana_metadata?: Maybe<Jsonb_Comparison_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
   kind?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
@@ -1250,28 +1217,26 @@ export enum Integrations_Constraint {
 /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
 export type Integrations_Delete_At_Path_Input = {
   data?: Maybe<Array<Maybe<Scalars["String"]>>>;
+  grafana_metadata?: Maybe<Array<Maybe<Scalars["String"]>>>;
 };
 
 /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
 export type Integrations_Delete_Elem_Input = {
   data?: Maybe<Scalars["Int"]>;
+  grafana_metadata?: Maybe<Scalars["Int"]>;
 };
 
 /** delete key/value pair or string element. key/value pairs are matched based on their key value */
 export type Integrations_Delete_Key_Input = {
   data?: Maybe<Scalars["String"]>;
-};
-
-/** input type for incrementing integer column in table "integrations" */
-export type Integrations_Inc_Input = {
-  grafana_folder_id?: Maybe<Scalars["Int"]>;
+  grafana_metadata?: Maybe<Scalars["String"]>;
 };
 
 /** input type for inserting data into table "integrations" */
 export type Integrations_Insert_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   data?: Maybe<Scalars["jsonb"]>;
-  grafana_folder_id?: Maybe<Scalars["Int"]>;
+  grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
@@ -1284,7 +1249,6 @@ export type Integrations_Insert_Input = {
 /** aggregate max on columns */
 export type Integrations_Max_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
-  grafana_folder_id?: Maybe<Scalars["Int"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
@@ -1296,7 +1260,6 @@ export type Integrations_Max_Fields = {
 /** order by max() on columns of table "integrations" */
 export type Integrations_Max_Order_By = {
   created_at?: Maybe<Order_By>;
-  grafana_folder_id?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
@@ -1308,7 +1271,6 @@ export type Integrations_Max_Order_By = {
 /** aggregate min on columns */
 export type Integrations_Min_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
-  grafana_folder_id?: Maybe<Scalars["Int"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
@@ -1320,7 +1282,6 @@ export type Integrations_Min_Fields = {
 /** order by min() on columns of table "integrations" */
 export type Integrations_Min_Order_By = {
   created_at?: Maybe<Order_By>;
-  grafana_folder_id?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
@@ -1354,7 +1315,7 @@ export type Integrations_On_Conflict = {
 export type Integrations_Order_By = {
   created_at?: Maybe<Order_By>;
   data?: Maybe<Order_By>;
-  grafana_folder_id?: Maybe<Order_By>;
+  grafana_metadata?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
@@ -1372,6 +1333,7 @@ export type Integrations_Pk_Columns_Input = {
 /** prepend existing jsonb value of filtered columns with new jsonb value */
 export type Integrations_Prepend_Input = {
   data?: Maybe<Scalars["jsonb"]>;
+  grafana_metadata?: Maybe<Scalars["jsonb"]>;
 };
 
 /** select columns of table "integrations" */
@@ -1381,7 +1343,7 @@ export enum Integrations_Select_Column {
   /** column name */
   Data = "data",
   /** column name */
-  GrafanaFolderId = "grafana_folder_id",
+  GrafanaMetadata = "grafana_metadata",
   /** column name */
   Id = "id",
   /** column name */
@@ -1400,53 +1362,13 @@ export enum Integrations_Select_Column {
 export type Integrations_Set_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   data?: Maybe<Scalars["jsonb"]>;
-  grafana_folder_id?: Maybe<Scalars["Int"]>;
+  grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   status?: Maybe<Scalars["String"]>;
   tenant_id?: Maybe<Scalars["uuid"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
-};
-
-/** aggregate stddev on columns */
-export type Integrations_Stddev_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Float"]>;
-};
-
-/** order by stddev() on columns of table "integrations" */
-export type Integrations_Stddev_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
-};
-
-/** aggregate stddev_pop on columns */
-export type Integrations_Stddev_Pop_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Float"]>;
-};
-
-/** order by stddev_pop() on columns of table "integrations" */
-export type Integrations_Stddev_Pop_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
-};
-
-/** aggregate stddev_samp on columns */
-export type Integrations_Stddev_Samp_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Float"]>;
-};
-
-/** order by stddev_samp() on columns of table "integrations" */
-export type Integrations_Stddev_Samp_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
-};
-
-/** aggregate sum on columns */
-export type Integrations_Sum_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Int"]>;
-};
-
-/** order by sum() on columns of table "integrations" */
-export type Integrations_Sum_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
 };
 
 /** update columns of table "integrations" */
@@ -1456,7 +1378,7 @@ export enum Integrations_Update_Column {
   /** column name */
   Data = "data",
   /** column name */
-  GrafanaFolderId = "grafana_folder_id",
+  GrafanaMetadata = "grafana_metadata",
   /** column name */
   Id = "id",
   /** column name */
@@ -1470,36 +1392,6 @@ export enum Integrations_Update_Column {
   /** column name */
   UpdatedAt = "updated_at"
 }
-
-/** aggregate var_pop on columns */
-export type Integrations_Var_Pop_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Float"]>;
-};
-
-/** order by var_pop() on columns of table "integrations" */
-export type Integrations_Var_Pop_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
-};
-
-/** aggregate var_samp on columns */
-export type Integrations_Var_Samp_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Float"]>;
-};
-
-/** order by var_samp() on columns of table "integrations" */
-export type Integrations_Var_Samp_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
-};
-
-/** aggregate variance on columns */
-export type Integrations_Variance_Fields = {
-  grafana_folder_id?: Maybe<Scalars["Float"]>;
-};
-
-/** order by variance() on columns of table "integrations" */
-export type Integrations_Variance_Order_By = {
-  grafana_folder_id?: Maybe<Order_By>;
-};
 
 /** expression to compare columns of type json. All fields are combined with logical 'AND'. */
 export type Json_Comparison_Exp = {
@@ -2412,7 +2304,6 @@ export type Mutation_RootUpdate_IntegrationsArgs = {
   _delete_at_path?: Maybe<Integrations_Delete_At_Path_Input>;
   _delete_elem?: Maybe<Integrations_Delete_Elem_Input>;
   _delete_key?: Maybe<Integrations_Delete_Key_Input>;
-  _inc?: Maybe<Integrations_Inc_Input>;
   _prepend?: Maybe<Integrations_Prepend_Input>;
   _set?: Maybe<Integrations_Set_Input>;
   where: Integrations_Bool_Exp;
@@ -2424,7 +2315,6 @@ export type Mutation_RootUpdate_Integrations_By_PkArgs = {
   _delete_at_path?: Maybe<Integrations_Delete_At_Path_Input>;
   _delete_elem?: Maybe<Integrations_Delete_Elem_Input>;
   _delete_key?: Maybe<Integrations_Delete_Key_Input>;
-  _inc?: Maybe<Integrations_Inc_Input>;
   _prepend?: Maybe<Integrations_Prepend_Input>;
   _set?: Maybe<Integrations_Set_Input>;
   pk_columns: Integrations_Pk_Columns_Input;
@@ -4176,21 +4066,21 @@ export type InsertIntegrationMutation = {
       | "status"
       | "data"
       | "tenant_id"
-      | "grafana_folder_id"
+      | "grafana_metadata"
       | "created_at"
       | "updated_at"
     >
   >;
 };
 
-export type UpdateIntegrationGrafanaFolderIdMutationVariables = Exact<{
+export type UpdateIntegrationGrafanaMetadataMutationVariables = Exact<{
   id: Scalars["uuid"];
-  grafana_folder_id: Scalars["Int"];
+  grafana_metadata: Scalars["jsonb"];
 }>;
 
-export type UpdateIntegrationGrafanaFolderIdMutation = {
+export type UpdateIntegrationGrafanaMetadataMutation = {
   update_integrations_by_pk?: Maybe<
-    Pick<Integrations, "id" | "grafana_folder_id" | "updated_at">
+    Pick<Integrations, "id" | "grafana_metadata" | "updated_at">
   >;
 };
 
@@ -4801,23 +4691,23 @@ export const InsertIntegrationDocument = gql`
       status
       data
       tenant_id
-      grafana_folder_id
+      grafana_metadata
       created_at
       updated_at
     }
   }
 `;
-export const UpdateIntegrationGrafanaFolderIdDocument = gql`
-  mutation UpdateIntegrationGrafanaFolderId(
+export const UpdateIntegrationGrafanaMetadataDocument = gql`
+  mutation UpdateIntegrationGrafanaMetadata(
     $id: uuid!
-    $grafana_folder_id: Int!
+    $grafana_metadata: jsonb!
   ) {
     update_integrations_by_pk(
       pk_columns: { id: $id }
-      _set: { grafana_folder_id: $grafana_folder_id }
+      _set: { grafana_metadata: $grafana_metadata }
     ) {
       id
-      grafana_folder_id
+      grafana_metadata
       updated_at
     }
   }
@@ -5574,18 +5464,18 @@ export function getSdk(
         )
       );
     },
-    UpdateIntegrationGrafanaFolderId(
-      variables: UpdateIntegrationGrafanaFolderIdMutationVariables
+    UpdateIntegrationGrafanaMetadata(
+      variables: UpdateIntegrationGrafanaMetadataMutationVariables
     ): Promise<{
-      data?: UpdateIntegrationGrafanaFolderIdMutation | undefined;
+      data?: UpdateIntegrationGrafanaMetadataMutation | undefined;
       extensions?: any;
       headers: Headers;
       status: number;
       errors?: GraphQLError[] | undefined;
     }> {
       return withWrapper(() =>
-        client.rawRequest<UpdateIntegrationGrafanaFolderIdMutation>(
-          print(UpdateIntegrationGrafanaFolderIdDocument),
+        client.rawRequest<UpdateIntegrationGrafanaMetadataMutation>(
+          print(UpdateIntegrationGrafanaMetadataDocument),
           variables
         )
       );

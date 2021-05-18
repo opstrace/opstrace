@@ -36,5 +36,6 @@ export const ShowIntegration = withIntegrationFromParams(
         integrationDef={integrationDef}
       />
     );
-  }
+  },
+  { subscription: false }
 );
