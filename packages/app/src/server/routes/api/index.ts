@@ -23,6 +23,7 @@ import createGraphqlHandler from "./graphql";
 import pubUiCfgHandler from "./uicfg";
 import createModuleHandler from "./modules";
 import authRequired from "server/middleware/auth";
+import setCortexRuntimeConfigHandler from "./cortexRuntimeConfig";
 
 function createAPIRoutes(): express.Router {
   const api = express.Router();
@@ -33,6 +34,14 @@ function createAPIRoutes(): express.Router {
   api.use("/modules", authRequired, createModuleHandler());
   api.use("/graphql", authRequired, createGraphqlHandler());
   api.use("/datasource/:target", authRequired, datasourceHandler);
+
+  // being able to access this implies having access to cortex config for
+  // all tenants, i.e. this is a privileged / superuser action.
+  api.post(
+    "/config/cortex/runtime",
+    authRequired,
+    setCortexRuntimeConfigHandler
+  );
 
   api.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
