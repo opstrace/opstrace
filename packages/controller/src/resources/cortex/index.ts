@@ -205,6 +205,14 @@ export function CortexResources(
 
   const storageBackend = target === "gcp" ? "gcs" : "s3";
 
+  // can use `state.tenants.list.tenants` if we'd like to.
+  // Note(JP): Is this just the initial state? This is used in a configmap
+  // data value below. Will the controller overwrite this configmap again
+  // when mutated by a different entity?
+  const runtimeConfigDefault = {
+    overrides: {}
+  };
+
   // Cortex config schema: https://cortexmetrics.io/docs/configuration/configuration-file/
   const cortexDefaultConfig = {
     // HTTP path prefix for Cortex API: default is /api/prom which we do not like
