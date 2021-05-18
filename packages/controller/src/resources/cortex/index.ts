@@ -976,7 +976,7 @@ export function CortexResources(
         },
         kind: "ConfigMap",
         metadata: {
-          name: "cortexConfig",
+          name: "cortex-config",
           namespace
         }
       },
@@ -1053,7 +1053,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
@@ -1065,9 +1065,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortexConfig"
+                    name: "cortex-config"
                   },
-                  name: "cortexConfig"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
@@ -1264,7 +1264,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       name: "datadir",
@@ -1283,9 +1283,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortexConfig"
+                    name: "cortex-config"
                   },
-                  name: "cortexConfig"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
@@ -1449,7 +1449,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       name: "datadir",
@@ -1632,7 +1632,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       name: "datadir",
@@ -1778,7 +1778,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
@@ -1791,9 +1791,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortexConfig"
+                    name: "cortex-config"
                   },
-                  name: "cortexConfig"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
@@ -1932,7 +1932,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
@@ -1944,9 +1944,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortexConfig"
+                    name: "cortex-config"
                   },
-                  name: "cortexConfig"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
@@ -2103,7 +2103,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
@@ -2115,9 +2115,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortexConfig"
+                    name: "cortex-config"
                   },
-                  name: "cortexConfig"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
@@ -2245,7 +2245,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
@@ -2259,9 +2259,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortexConfig"
+                    name: "cortex-config"
                   },
-                  name: "cortexConfig"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
@@ -2396,7 +2396,7 @@ export function CortexResources(
                   volumeMounts: [
                     {
                       mountPath: "/etc/cortex",
-                      name: "cortexConfig"
+                      name: "cortex-config"
                     },
                     {
                       mountPath: "/etc/cortex-runtime-cfg",
@@ -2410,9 +2410,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortexConfig"
+                    name: "cortex-config"
                   },
-                  name: "cortexConfig"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
