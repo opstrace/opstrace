@@ -15,8 +15,8 @@
  */
 
 type PrometheusProps = {
-  // The Opstrace cluster where metrics data should be sent
-  clusterName: String;
+  // The Opstrace cluster hostname (foo.opstrace.io) where metrics data should be sent
+  clusterHost: String;
   // The Opstrace tenant where metrics data should be sent
   tenantName: String;
   // The unique id that sent metrics should have as a label
@@ -28,7 +28,7 @@ type PrometheusProps = {
 // Returns a rendered prometheus deployment YAML for displaying to a user.
 // After replacing __AUTH_TOKEN__ with the tenant auth token, the user can pass this to 'kubectl apply -f'.
 export function prometheusYaml({
-  clusterName,
+  clusterHost,
   tenantName,
   integrationId,
   deployNamespace
@@ -55,7 +55,7 @@ metadata:
 data:
   prometheus.yml: |-
     remote_write:
-    - url: https://cortex.${tenantName}.${clusterName}.opstrace.io/api/v1/push
+    - url: https://cortex.${tenantName}.${clusterHost}/api/v1/push
       authorization:
         credentials_file: /var/run/tenant-auth/token
 

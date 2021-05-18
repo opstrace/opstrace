@@ -24,8 +24,8 @@ export enum PromtailLogFormat {
 }
 
 type PromtailProps = {
-  // The Opstrace cluster where logs should be sent
-  clusterName: String;
+  // The Opstrace cluster hostname (foo.opstrace.io) where logs should be sent
+  clusterHost: String;
   // The Opstrace tenant where logs should be sent
   tenantName: String;
   // The unique id that sent logs should have as a label
@@ -39,7 +39,7 @@ type PromtailProps = {
 // Returns a rendered promtail deployment YAML for displaying to a user.
 // After replacing __AUTH_TOKEN__ with the tenant auth token, the user can pass this to 'kubectl apply -f'.
 export function promtailYaml({
-  clusterName,
+  clusterHost,
   tenantName,
   integrationId,
   deployNamespace,
@@ -80,7 +80,7 @@ metadata:
 data:
   promtail.yml: |
     clients:
-    - url: https://loki.${tenantName}.${clusterName}.opstrace.io/loki/api/v1/push
+    - url: https://loki.${tenantName}.${clusterHost}/loki/api/v1/push
       bearer_token_file: /var/run/tenant-auth/token
 
     positions:

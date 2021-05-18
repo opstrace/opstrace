@@ -32,7 +32,16 @@ import * as commands from "./templates/commands";
 import {
   makeFolderRequest,
   makePromtailDashboardRequests
-} from "./templates/dashboards";
+} from "./dashboards";
+
+import { CheckStatusBtn } from "client/viewsBasic/common/CheckStatusBtn";
+import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
+
+import useHasuraSubscription from "client/hooks/useHasuraSubscription";
+
+import graphqlClient from "state/clients/graphqlClient";
+
+import { CondRender } from "client/utils/rendering";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
@@ -41,6 +50,7 @@ import { Button } from "client/components/Button";
 
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
+import { ExternalLink } from "client/components/Link";
 
 type folderInfo = {
   // The numeric ID for the folder that was created (or updated).
@@ -92,6 +102,16 @@ async function createDashboard(
 
 const configFilename = "opstrace-promtail.yaml";
 
+const INTEGRATION_STATUS_SUBSCRIPTION = `
+  subscription IntegrationUpdates($id: uuid!) {
+    integrations_by_pk(id: $id) {
+      status
+      grafana_metadata
+      updated_at
+    }
+  }
+`;
+
 export const K8sLogsShow = withTenantFromParams(
   ({
     integration,
@@ -100,9 +120,30 @@ export const K8sLogsShow = withTenantFromParams(
   }: IntegrationProps & IntegrationDefProps & TenantProps) => {
     const history = useHistory();
 
+    const { data: subData } = useHasuraSubscription(
+      INTEGRATION_STATUS_SUBSCRIPTION,
+      {
+        id: integration.id
+      }
+    );
+
+    const status = useMemo(() => {
+      return subData?.integrations_by_pk?.status || integration.status;
+    }, [subData?.integrations_by_pk?.status, integration.status]);
+
+    const grafanaMetadata = useMemo(() => {
+      return (
+        subData?.integrations_by_pk?.grafana_metadata ||
+        integration.grafana_metadata
+      );
+    }, [
+      subData?.integrations_by_pk?.grafana_metadata,
+      integration.grafana_metadata
+    ]);
+
     const config = useMemo(() => {
       return promtailYaml({
-        clusterName: window.location.host,
+        clusterHost: window.location.host,
         tenantName: tenant.name,
         integrationId: integration.id,
         deployNamespace: integration.data.deployNamespace,
@@ -110,6 +151,11 @@ export const K8sLogsShow = withTenantFromParams(
         logFormat: PromtailLogFormat.CRI
       });
     }, []);
+
+    const deployYamlCommand = useMemo(
+      () => commands.deployYaml(configFilename, tenant.name),
+      [tenant.name]
+    );
 
     const downloadHandler = () => {
       var configBlob = new Blob([config], {
@@ -126,15 +172,21 @@ export const K8sLogsShow = withTenantFromParams(
           integrationName: integration.name
         })
       );
-      console.log(`Folder created: id=${folder.id} path=${folder.urlPath}`);
 
       for (const d of makePromtailDashboardRequests({
         integrationId: integration.id,
         folderId: folder.id
       })) {
-        const result = await createDashboard(tenant.name, d);
-        console.log(`Dashboard created: path=${result.urlPath}`);
+        await createDashboard(tenant.name, d);
       }
+
+      await graphqlClient.UpdateIntegrationGrafanaMetadata({
+        id: integration.id,
+        grafana_metadata: {
+          folder_id: folder.id,
+          folder_path: folder.urlPath as string
+        }
+      });
     };
 
     return (
@@ -176,13 +228,29 @@ export const K8sLogsShow = withTenantFromParams(
                   <Attribute.Key>Category:</Attribute.Key>
                   <Attribute.Key>Status:</Attribute.Key>
                   <Attribute.Key>Created:</Attribute.Key>
+                  <CondRender present={grafanaMetadata?.folder_path}>
+                    <Attribute.Key> </Attribute.Key>
+                  </CondRender>
                 </Box>
                 <Box display="flex" flexDirection="column" flexGrow={1}>
                   <Attribute.Value>{integrationDef.label}</Attribute.Value>
                   <Attribute.Value>{integrationDef.category}</Attribute.Value>
-                  <Attribute.Value>{integration.status}</Attribute.Value>
+                  <Attribute.Value>
+                    {status}{" "}
+                    <CheckStatusBtn integration={integration} tenant={tenant} />
+                  </Attribute.Value>
                   <Attribute.Value>{integration.created_at}</Attribute.Value>
                 </Box>
+                <CondRender present={grafanaMetadata?.folder_path}>
+                  <Attribute.Key>
+                    <ExternalLink
+                      target="_blank"
+                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}${grafanaMetadata?.folder_path}`}
+                    >
+                      View Grafana Dashboards
+                    </ExternalLink>
+                  </Attribute.Key>
+                </CondRender>
               </Box>
             </CardContent>
           </Card>
@@ -224,9 +292,8 @@ export const K8sLogsShow = withTenantFromParams(
                   <Attribute.Value>
                     {`Step 2. Run this command to install Promtail`}
                     <br />
-                    <pre>
-                      {commands.deployYaml(configFilename, tenant.name)}
-                    </pre>
+                    <pre>{deployYamlCommand}</pre>
+                    <CopyToClipboardIcon text={deployYamlCommand} />
                   </Attribute.Value>
                   <Attribute.Value>
                     Step 3. Once the integration is installed in your namepsace
@@ -237,7 +304,7 @@ export const K8sLogsShow = withTenantFromParams(
                     <Button
                       variant="contained"
                       size="small"
-                      disabled={integration.grafana_folder_id !== null}
+                      disabled={grafanaMetadata.folder_path !== undefined}
                       onClick={dashboardHandler}
                     >
                       Install Dashboards

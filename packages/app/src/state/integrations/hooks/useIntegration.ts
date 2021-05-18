@@ -17,36 +17,65 @@
 import { isObj } from "ramda-adjunct";
 
 import useHasura from "client/hooks/useHasura";
+import useHasuraSubscription from "client/hooks/useHasuraSubscription";
 
 import { Tenant } from "state/tenant/types";
 import { Integration } from "state/integrations/types";
 
-export const useIntegration = (
-  tenant: Tenant | string,
-  id: string
-): Integration => {
-  const tenant_id = isObj(tenant) ? (tenant as Tenant).id : tenant;
+type TenantOrId = Tenant | string;
 
-  const { data } = useHasura(
-    `
-      query integration($tenant_id: uuid!, $id: uuid!) {
-        tenant(where: {id: {_eq: $tenant_id}}) {
-          integrations(where: {id: {_eq: $id}}) {
-            id
-            kind
-            name
-            status
-            data
-            tenant_id
-            grafana_folder_id
-            created_at
-            updated_at
-          }
-        }
-      }
-     `,
-    { tenant_id: tenant_id, id: id }
-  );
+const getTenantId = (tenant: TenantOrId): string =>
+  isObj(tenant) ? (tenant as Tenant).id : tenant;
 
+const makeVariables = (tenant: TenantOrId, id: string) => ({
+  tenant_id: getTenantId(tenant),
+  id: id
+});
+
+export const useIntegration = (tenant: TenantOrId, id: string): Integration => {
+  const { data } = useHasura(QUERY, makeVariables(tenant, id));
   return data?.tenant[0]?.integrations[0] || null;
 };
+
+export const useIntegrationSub = (
+  tenant: TenantOrId,
+  id: string
+): Integration => {
+  const { data } = useHasuraSubscription(
+    SUBSCRIPTION,
+    makeVariables(tenant, id)
+  );
+  return data?.tenant[0]?.integrations[0] || null;
+};
+
+const FIELDS = `
+        id
+        kind
+        name
+        status
+        data
+        tenant_id
+        grafana_metadata
+        created_at
+        updated_at
+`;
+
+const QUERY = `
+  query integration($tenant_id: uuid!, $id: uuid!) {
+    tenant(where: {id: {_eq: $tenant_id}}) {
+      integrations(where: {id: {_eq: $id}}) {
+        ${FIELDS}
+      }
+    }
+  }
+`;
+
+const SUBSCRIPTION = `
+  subscription IntegrationStatus($tenant_id: uuid!, $id: uuid!) {
+    tenant(where: {id: {_eq: $tenant_id}}) {
+      integrations(where: {id: {_eq: $id}}) {
+        ${FIELDS}
+      }
+    }
+  }
+`;
