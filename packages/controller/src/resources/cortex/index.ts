@@ -211,6 +211,10 @@ export function CortexResources(
     // in front of e.g. /api/v1/query. Note that the "Prometheus API" is served
     // at api.prometheus_http_prefix which by default is /prometheus
     http_prefix: "",
+    // Define a 'runtime config file' to set dynamic per-tenant config such as
+    // rate limits.
+    // https://cortexmetrics.io/docs/configuration/arguments/#runtime-configuration-file
+    runtime_config: { period: "10s", file: "/etc/cortex/runtime-config.yaml" },
     api: {
       // Serve Alertmanager UI at this location, matching the path served by the tenant Ingresses.
       // This is the default but we call it out explicitly here.
