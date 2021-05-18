@@ -21,10 +21,7 @@ export function deployYaml(yamlFilename: string, tenantName: string): string {
 }
 
 // Returns the command for a user to locally access the prometheus instance over a port forward.
-export function portforwardPrometheus(
-  tenantName: string,
-  deployNamespace: string
-): string {
+export function portforwardPrometheus(deployNamespace: string): string {
   return `kubectl port-forward -n ${deployNamespace} deployments/opstrace-prometheus ui`;
 }
 
