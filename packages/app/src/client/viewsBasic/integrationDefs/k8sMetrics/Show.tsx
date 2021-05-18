@@ -27,7 +27,7 @@ import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 import { prometheusYaml } from "./templates/config";
 import * as commands from "./templates/commands";
 import {
-  makePrometheusFolderRequest,
+  makeFolderRequest,
   makePrometheusDashboardRequests
 } from "./dashboards";
 
@@ -164,7 +164,7 @@ export const K8sMetricsShow = withTenantFromParams(
     const dashboardHandler = async () => {
       const folder = await createFolder(
         tenant.name,
-        makePrometheusFolderRequest({
+        makeFolderRequest({
           integrationId: integration.id,
           integrationName: integration.name
         })

@@ -2108,7 +2108,7 @@ export default function makeDashboard(integrationId) {
   ],
   "schemaVersion": 14,
   "style": "dark",
-  "tags": ["kubernetes-mixin"],
+  "tags": ["kubernetes-integration"],
   "templating": {
     "list": [
       {
@@ -2167,7 +2167,7 @@ export default function makeDashboard(integrationId) {
     "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
   },
   "timezone": "",
-  "title": "Kubernetes / Kubelet",
+  "title": "Kubernetes / Kubelet metrics",
   "uid": "3138fa155d5915769fbded898ac09fd9",
   "version": 0
 };

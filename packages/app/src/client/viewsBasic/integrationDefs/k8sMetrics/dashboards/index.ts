@@ -15,8 +15,8 @@
  */
 
 // For each dashboard we want, we import it here and list it below
-import makeDashboardApiserver from "./apiserver.js";
-import makeDashboardKubelet from "./kubelet.js";
+import makeApiserverDashboard from "./apiserver.js";
+import makeKubeletDashboard from "./kubelet.js";
 
 type FolderProps = {
   integrationId: String;
@@ -29,7 +29,7 @@ type DashboardProps = {
 };
 
 // Returns a folder creation request payload for submitting to Grafana.
-export function makePrometheusFolderRequest({
+export function makeFolderRequest({
   integrationId,
   integrationName
 }: FolderProps): object {
@@ -39,7 +39,7 @@ export function makePrometheusFolderRequest({
   };
 }
 
-// Returns an array of dashboard creation request payloads for submitting to Grafana.
+// Returns an array of Prometheus/metrics dashboard creation request payloads for submitting to Grafana.
 export function makePrometheusDashboardRequests({
   integrationId,
   folderId
@@ -47,13 +47,13 @@ export function makePrometheusDashboardRequests({
   return [
     {
       uid: `as-${integrationId}`,
-      dashboard: makeDashboardApiserver(integrationId),
+      dashboard: makeApiserverDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
       uid: `kub-${integrationId}`,
-      dashboard: makeDashboardKubelet(integrationId),
+      dashboard: makeKubeletDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     }
