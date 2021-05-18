@@ -200,7 +200,9 @@ export function timestampForFilenames(ts: ZonedDateTime): string {
  * - use what was provided via --region on cmdline
  * - error out if --region was not provided
  */
-export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> {
+export async function awsGetClusterRegionWithCmdlineFallback(): Promise<
+  string
+> {
   if (cli.CLIARGS.region !== "") {
     log.debug("region to destroy in from cli args: %s", cli.CLIARGS.region);
 
@@ -231,6 +233,9 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
           "command line parameter."
       );
     }
+
+    // Re-throw all other errors, mainly programming errors.
+    throw e;
   }
 
   if (c !== undefined) {

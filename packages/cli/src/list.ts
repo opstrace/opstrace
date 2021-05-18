@@ -42,6 +42,8 @@ export async function list(): Promise<void> {
         // way for the admin/user to understand what went wrong.
         die(`Could not look up clusters in region ${e.region}.`);
       }
+
+      throw e;
     }
 
     if (clusters.length > 0) {
@@ -165,6 +167,8 @@ async function EKSgetOpstraceClustersInRegion(
         );
         return [];
       }
+
+      throw e;
     }
 
     // After N retries, this is expected to be hit for example for
