@@ -16,10 +16,10 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { pathOr } from "ramda";
-import { subHours } from "date-fns";
+import { addHours, subHours } from "date-fns";
 
 import graphqlClient from "state/clients/graphqlClient";
-import { usePrometheus } from "client/hooks/useGrafana";
+import { useLoki } from "client/hooks/useGrafana";
 
 import { Integration, integrationStatus } from "state/integrations/utils";
 import { Tenant } from "state/tenant/types";
@@ -34,12 +34,16 @@ type Props = {
 export const CheckStatusBtn = ({ integration, tenant }: Props) => {
   const [checkingStatus, setCheckingStatus] = useState(false);
   const statusCheckUri = useMemo(() => {
-    const logQl = `process_cpu_seconds_total{integration_id="${integration.id}"}`;
-    const end = new Date();
-    const start = subHours(end, 1);
+    const logQl = `{integration_id="${integration.id}"}`;
+    // TODO don't cache this URI on page load
+    // Ideally we'd recalculate start=now-1h, end=now each time the button is pressed.
+    const pageLoad = new Date();
+    const startMillis = subHours(pageLoad, 1).getTime();
+    const endMillis = addHours(pageLoad, 1).getTime();
 
+    // Loki expects epoch nanoseconds for the start/end time
     return encodeURI(
-      `query_range?query=${logQl}&start=${start.toISOString()}&end=${end.toISOString()}&step=300`
+      `query_range?query=${logQl}&start=${1000 * 1000 * startMillis}&end=${1000 * 1000 * endMillis}&limit=1&step=300`
     );
   }, [integration.id]);
 
@@ -88,7 +92,7 @@ const CheckingStatusBtn = ({
   tenantName: string;
   statusUpdateHandler: Function;
 }) => {
-  const { data } = usePrometheus(statusCheckUri, tenantName);
+  const { data } = useLoki(statusCheckUri, tenantName);
 
   useEffect(() => {
     if (data !== undefined) {

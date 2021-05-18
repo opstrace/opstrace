@@ -25,7 +25,7 @@ export const k8sMetricsIntegration: IntegrationDef = {
   category: "infrastructure",
   label: "Kubernetes Metrics",
   desc:
-    "Generate all the yaml required to send metrics from your kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
+    "Generate all the yaml required to send metrics from your Kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
   Form: K8sMetricsForm,
   Show: K8sMetricsShow,
   enabled: true,

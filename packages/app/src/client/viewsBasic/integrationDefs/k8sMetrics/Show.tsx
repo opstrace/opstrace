@@ -31,7 +31,7 @@ import {
   makePrometheusDashboardRequests
 } from "./dashboards";
 
-import { CheckStatusBtn } from "client/viewsBasic/common/CheckStatusBtn";
+import { CheckStatusBtn } from "./CheckStatusBtn";
 import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";

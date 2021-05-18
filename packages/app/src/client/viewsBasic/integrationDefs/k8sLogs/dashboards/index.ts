@@ -33,9 +33,9 @@ export function makeFolderRequest({
   integrationName
 }: FolderProps): object {
   return {
-    "uid": `integration-${integrationId}`,
-    "title": `Integration: ${integrationName}`,
-  }
+    uid: `i9n-${integrationId}`,
+    title: `Integration: ${integrationName}`
+  };
 }
 
 // Returns an array of Promtail/logs dashboard creation request payloads for submitting to Grafana.
@@ -45,10 +45,10 @@ export function makePromtailDashboardRequests({
 }: DashboardProps): object[] {
   return [
     {
-      "uid": `integration-${integrationId}-summary`,
-      "dashboard": makeSummaryDashboard(integrationId),
-      "folderId": folderId,
-      "overwrite": true
+      uid: `sum-${integrationId}`,
+      dashboard: makeSummaryDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
     }
   ];
 }

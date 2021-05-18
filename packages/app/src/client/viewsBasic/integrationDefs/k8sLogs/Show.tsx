@@ -34,7 +34,7 @@ import {
   makePromtailDashboardRequests
 } from "./dashboards";
 
-import { CheckStatusBtn } from "client/viewsBasic/common/CheckStatusBtn";
+import { CheckStatusBtn } from "./CheckStatusBtn";
 import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
@@ -72,6 +72,7 @@ async function createFolder(
     data: folder,
     withCredentials: true
   }).then(res => res.data);
+
   return {
     id: responseData.id,
     urlPath: responseData.url
@@ -95,6 +96,7 @@ async function createDashboard(
     data: dashboard,
     withCredentials: true
   }).then(res => res.data);
+
   return {
     urlPath: responseData.url
   };
@@ -150,7 +152,7 @@ export const K8sLogsShow = withTenantFromParams(
         // TODO: allow user to select dockerd or cri/containerd (different log formats)
         logFormat: PromtailLogFormat.CRI
       });
-    }, []);
+    }, [tenant.name, integration.id, integration.data.deployNamespace]);
 
     const deployYamlCommand = useMemo(
       () => commands.deployYaml(configFilename, tenant.name),
