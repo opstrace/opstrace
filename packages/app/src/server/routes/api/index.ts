@@ -23,6 +23,7 @@ import createGraphqlHandler from "./graphql";
 import pubUiCfgHandler from "./uicfg";
 import createModuleHandler from "./modules";
 import authRequired from "server/middleware/auth";
+import createCortexHandler from "./cortex";
 
 function createAPIRoutes(): express.Router {
   const api = express.Router();
@@ -32,8 +33,9 @@ function createAPIRoutes(): express.Router {
   // Authentication required
   api.use("/modules", authRequired, createModuleHandler());
   api.use("/graphql", authRequired, createGraphqlHandler());
-  api.use("/datasource/:target", authRequired, datasourceHandler);
+  api.use("/cortex", createCortexHandler());
 
+  api.use("/datasource/:target", authRequired, datasourceHandler);
   api.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
   });
