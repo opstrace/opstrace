@@ -84,6 +84,7 @@
     "identity-obj-proxy": "3.0.0",
     "js-yaml": "^4.0.0",
     "jwks-rsa": "^1.12.3",
+    "@kubernetes/client-node": "0.14.0",
     "lightship": "^6.1.0",
     "lodash": "^4.17.21",
     "match-sorter": "^4.2.1",
