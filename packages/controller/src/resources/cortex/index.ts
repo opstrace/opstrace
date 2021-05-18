@@ -1475,9 +1475,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortex"
+                    name: "cortex-config"
                   },
-                  name: "cortex"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
@@ -1658,9 +1658,9 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortex"
+                    name: "cortex-config"
                   },
-                  name: "cortex"
+                  name: "cortex-config"
                 },
                 {
                   configMap: {
