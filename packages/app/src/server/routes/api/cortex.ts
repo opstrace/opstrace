@@ -70,12 +70,6 @@ export default function createCortexHandler(): express.Router {
     )(req, res);
   });
 
-  // only available if -runtime-config.file specified when running cortex components https://cortexmetrics.io/docs/api/#runtime-configuration
-  cortex.use(
-    "/runtime_config",
-    proxyTo(`http://ruler.cortex.svc.cluster.local/runtime_config`)
-  );
-
   // ring health
   cortex.use(
     `/ingester/ring`,
@@ -94,6 +88,16 @@ export default function createCortexHandler(): express.Router {
     proxyTo(`http://store-gateway.cortex.svc.cluster.local/store-gateway/ring`)
   );
   // cortex.use(`/alertmanager/ring`, proxyTo(`http://alertmanager.cortex.svc.cluster.local/multitenant_alertmanager/ring`)) // sharding currenctly disabled
+  //     `http://ruler.cortex.svc.cluster.local/api/v1/rules/${req.params.namespace}/${req.params.group}`,
+  //     req,
+  //     res
+  //   );
+  // });
+
+  // only available if -runtime-config.file specified when running cortex components https://cortexmetrics.io/docs/api/#runtime-configuration
+  cortex.use("/runtime_config", (req, res) => {
+    proxyTo(`http://ruler.cortex.svc.cluster.local/runtime_config`, req, res);
+  });
 
   return cortex;
 }

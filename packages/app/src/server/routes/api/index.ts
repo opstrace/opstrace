@@ -41,6 +41,7 @@ function createAPIRoutes(): express.Router {
   );
   api.use("/cortex", createCortexHandler());
 
+  api.use("/datasource/:target", authRequired, datasourceHandler);
   api.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
   });
