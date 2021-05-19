@@ -25,7 +25,7 @@ export const addIntegrationPath = ({
   tenant: Tenant;
   integrationDef: IntegrationDef;
 }) => {
-  return `/tenant/${tenant.name}/integrations/add/${integrationDef.kind}`;
+  return `/tenant/${tenant.name}/integrations/all/add/${integrationDef.kind}`;
 };
 
 export const showIntegrationPath = ({
@@ -35,7 +35,7 @@ export const showIntegrationPath = ({
   tenant: Tenant;
   integration: Integration;
 }) => {
-  return `/tenant/${tenant.name}/integrations/${integration.id}`;
+  return `/tenant/${tenant.name}/integrations/installed/${integration.id}`;
 };
 
 export const editIntegrationPath = ({
@@ -45,5 +45,5 @@ export const editIntegrationPath = ({
   tenant: Tenant;
   integration: Integration;
 }) => {
-  return `/tenant/${tenant.name}/integrations/${integration.id}/edit`;
+  return `/tenant/${tenant.name}/integrations/installed/${integration.id}/edit`;
 };
