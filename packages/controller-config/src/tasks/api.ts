@@ -21,7 +21,7 @@ import { LatestControllerConfigType } from "../schema";
 import {
   KubeConfiguration,
   ConfigMap,
-  createOrUpdateCM
+  createOrUpdateConfigMapWithRetry
 } from "@opstrace/kubernetes";
 import { log } from "@opstrace/utils";
 
@@ -81,5 +81,5 @@ export async function set(
   //   },
   //...
 
-  await createOrUpdateCM(cm);
+  await createOrUpdateConfigMapWithRetry(cm);
 }
