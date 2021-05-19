@@ -21,6 +21,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import { Integrations } from "state/integrations/types";
 import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
+import { integrationDefRecords } from "client/viewsBasic/integrationDefs";
 
 import {
   withIntegrationListFromParams,
@@ -77,29 +78,32 @@ const InstalledIntegrationsTable = withTenantFromParams<Props>(
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map(i9n => (
-              <TableRow
-                hover={true}
-                className={classes.integrationRow}
-                key={i9n.id}
-                onClick={() =>
-                  history.push(
-                    showIntegrationPath({ tenant, integration: i9n })
-                  )
-                }
-              >
-                <TableCell component="th" scope="row">
-                  {i9n.name}
-                </TableCell>
-                <TableCell>{i9n.kind}</TableCell>
-                <TableCell>
-                  <IntegrationStatus integration={i9n} tenant={tenant} />
-                </TableCell>
-                <TableCell>
-                  {format(parseISO(i9n.created_at), "Pppp")}
-                </TableCell>
-              </TableRow>
-            ))}
+            {data.map(i9n => {
+              const def = integrationDefRecords[i9n.kind];
+              return (
+                <TableRow
+                  hover={true}
+                  className={classes.integrationRow}
+                  key={i9n.id}
+                  onClick={() =>
+                    history.push(
+                      showIntegrationPath({ tenant, integration: i9n })
+                    )
+                  }
+                >
+                  <TableCell component="th" scope="row">
+                    {i9n.name}
+                  </TableCell>
+                  <TableCell>{i9n.kind}</TableCell>
+                  <TableCell>
+                    <def.Status integration={i9n} tenant={tenant} />
+                  </TableCell>
+                  <TableCell>
+                    {format(parseISO(i9n.created_at), "Pppp")}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
