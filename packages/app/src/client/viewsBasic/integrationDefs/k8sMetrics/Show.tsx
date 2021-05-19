@@ -38,11 +38,11 @@ import {
   makePrometheusDashboardRequests
 } from "./dashboards";
 
-import { IntegrationStatus } from "./IntegrationStatus";
 import {
   createFolder,
   createDashboard
 } from "client/viewsBasic/integrationDefs/common/grafana";
+import { IntegrationStatus } from "./Status";
 import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
