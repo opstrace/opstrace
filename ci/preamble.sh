@@ -42,6 +42,9 @@ yarn --frozen-lockfile --ignore-optional
 echo "--- lint codebase: quick feedback"
 make lint-codebase
 
+# This is needed also by the app Docker image build
+make set-build-info-constants
+
 # If there are any changes to go directory then build and publish the images to
 # docker hub. Update packages/controller-config/docker-images.json to use the
 # newly built image tags in this test run.
