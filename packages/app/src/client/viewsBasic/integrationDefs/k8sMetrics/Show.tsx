@@ -18,7 +18,7 @@ import React, { useMemo } from "react";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { saveAs } from "file-saver";
-import axios from "axios";
+
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
 import TimelineSeparator from "@material-ui/lab/TimelineSeparator";
@@ -39,6 +39,10 @@ import {
 } from "./dashboards";
 
 import { IntegrationStatus } from "./IntegrationStatus";
+import {
+  createFolder,
+  createDashboard
+} from "client/viewsBasic/integrationDefs/common/grafana";
 import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
@@ -47,14 +51,14 @@ import graphqlClient from "state/clients/graphqlClient";
 
 import { CondRender } from "client/utils/rendering";
 
+import { ViewConfigButtonModal } from "client/viewsBasic/integrationDefs/common/ViewConfigButtonModal";
+
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 
-import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import styled from "styled-components";
-import Modal from "@material-ui/core/Modal";
 import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 
@@ -63,58 +67,6 @@ const TimelineWrapper = styled(Timeline)`
     flex: 0;
   }
 `;
-
-type folderInfo = {
-  // The numeric ID for the folder that was created (or updated).
-  // This ID must be included when creating dashboards within the folder.
-  id: number;
-  // The '/grafana/...' path linking to the folder in Grafana.
-  // Doesn't include the hostname.
-  urlPath: String;
-};
-
-async function createFolder(
-  tenantName: String,
-  folder: object
-): Promise<folderInfo> {
-  // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
-  const responseData = await axios({
-    method: "post",
-    url: `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/folders`,
-    data: folder,
-    withCredentials: true
-  }).then(res => res.data);
-
-  return {
-    id: responseData.id,
-    urlPath: responseData.url
-  };
-}
-
-type dashboardInfo = {
-  // The '/grafana/...' path linking to the dashboard in Grafana.
-  // Doesn't include the hostname.
-  urlPath: String;
-};
-
-async function createDashboard(
-  tenantName: String,
-  dashboard: object
-): Promise<dashboardInfo> {
-  // see also: https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard
-  const responseData = await axios({
-    method: "post",
-    url: `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/dashboards/db`,
-    data: dashboard,
-    withCredentials: true
-  }).then(res => res.data);
-
-  return {
-    urlPath: responseData.url
-  };
-}
-
-const configFilename = "opstrace-k8s-metrics.yaml";
 
 const INTEGRATION_STATUS_SUBSCRIPTION = `
   subscription IntegrationUpdates($id: uuid!) {
@@ -151,6 +103,11 @@ export const K8sMetricsShow = withTenantFromParams(
       integration.grafana_metadata
     ]);
 
+    const configFilename = useMemo(
+      () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
+      [tenant.name, integration.kind]
+    );
+
     const config = useMemo(() => {
       return prometheusYaml({
         clusterHost: window.location.host,
@@ -162,7 +119,7 @@ export const K8sMetricsShow = withTenantFromParams(
 
     const deployYamlCommand = useMemo(
       () => commands.deployYaml(configFilename, tenant.name),
-      [tenant.name]
+      [tenant.name, configFilename]
     );
 
     const downloadHandler = () => {
@@ -344,60 +301,3 @@ export const K8sMetricsShow = withTenantFromParams(
     );
   }
 );
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    modal: {
-      display: "flex",
-      justifyItems: "center",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "500px",
-      overflow: "scroll"
-    },
-    paper: {
-      backgroundColor: theme.palette.background.paper,
-      border: "2px solid #000",
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3)
-    }
-  })
-);
-
-const ViewConfigButtonModal = ({
-  filename,
-  config
-}: {
-  filename: string;
-  config: string;
-}) => {
-  const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  return (
-    <>
-      <Button
-        variant="contained"
-        size="small"
-        state="primary"
-        onClick={handleOpen}
-      >
-        View YAML
-      </Button>
-      <Modal open={open} onClose={handleClose} className={classes.modal}>
-        <div className={classes.paper}>
-          <h2>{configFilename}</h2>
-          <pre>{config}</pre>
-        </div>
-      </Modal>
-    </>
-  );
-};
