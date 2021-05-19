@@ -24,6 +24,7 @@ import got, {
 } from "got";
 
 import { test, suite, suiteSetup } from "mocha";
+import yaml from "js-yaml";
 
 import {
   httpcl,
@@ -36,10 +37,12 @@ import {
 import {
   log,
   globalTestSuiteSetupOnce,
+  enrichHeadersWithAuthToken,
   httpTimeoutSettings,
   logHTTPResponse,
   CLUSTER_BASE_URL,
   CLUSTER_NAME,
+  TENANT_SYSTEM_CORTEX_API_BASE_URL,
   TEST_REMOTE_ARTIFACT_DIRECTORY
 } from "./testutils";
 
@@ -263,6 +266,87 @@ suite("test_ui_with_headless_browser", function () {
         if (resp.statusCode === 200) {
           return;
         }
+      }
+
+      log.info("outer retry: try again in 10 s");
+      await sleep(10);
+    }
+  });
+
+  test("test_submit_cortex_runtime_config", async function () {
+    // Same consideration as above: this test is here in this module for now
+    // just because it's easy to use the authentication state after actual
+    // UI-based login.
+    assert(COOKIES_AFTER_LOGIN);
+
+    const cookie_header_value = COOKIES_AFTER_LOGIN.map(
+      c => `${c.name}=${c.value}`
+    ).join("; ");
+
+    log.info("cookie header value: %s", cookie_header_value);
+
+    const url = `${CLUSTER_BASE_URL}/_/config/cortex/runtime`;
+    const headers = {
+      "Content-Type": "application/yaml",
+      Cookie: cookie_header_value
+    };
+
+    const bodyObj = {
+      overrides: {
+        tenantnamefoo: {
+          ingestion_rate: 10000
+        },
+        tenantnamebar: {
+          ingestion_rate: 10000
+        }
+      }
+    };
+
+    const response = await got.post(url, {
+      body: yaml.safeDump(bodyObj),
+      throwHttpErrors: false,
+      headers: headers,
+      timeout: httpTimeoutSettings,
+      https: { rejectUnauthorized: false } // skip tls cert verification
+    });
+
+    logHTTPResponse(response);
+
+    const maxWaitSeconds = 240;
+    const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
+    log.info(
+      "Waiting for Cortex runtime config to reflect change, deadline in %ss",
+      maxWaitSeconds
+    );
+
+    const systemTenantCortexRuntimeCfgUrl = `${TENANT_SYSTEM_CORTEX_API_BASE_URL}/runtime_config`; //?mode=diff`;
+    const httpopts: GotOptions = {
+      method: "GET",
+      // Some HTTP error responses are expected. Do this handling work manually.
+      throwHttpErrors: false,
+      headers: enrichHeadersWithAuthToken(systemTenantCortexRuntimeCfgUrl, {}),
+      timeout: httpTimeoutSettings,
+      https: { rejectUnauthorized: false } // skip tls cert verification
+    };
+
+    while (true) {
+      if (mtime() > deadline) {
+        throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+      }
+
+      let resp: GotResponse<string> | undefined;
+      try {
+        resp = await httpcl(systemTenantCortexRuntimeCfgUrl, httpopts);
+      } catch (err) {
+        log.info(`request failed: ${err}`);
+      }
+
+      if (resp !== undefined) {
+        logHTTPResponse(resp);
+        // TODO: build criterion to exit
+        // if (resp.statusCode === 200) {
+        //   return;
+        // }
       }
 
       log.info("outer retry: try again in 10 s");
