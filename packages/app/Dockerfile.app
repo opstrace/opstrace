@@ -39,10 +39,11 @@ COPY packages/buildinfo /build/packages/buildinfo/
 # package do the rest, since it forks the typechecking for better parallelization
 WORKDIR /build/lib/utils
 RUN yarn run tsc -b
-WORKDIR /build/lib/kubernetes
-RUN yarn run tsc -b
 WORKDIR /build/packages/buildinfo
 RUN yarn run tsc -b
+WORKDIR /build/lib/kubernetes
+RUN yarn run tsc -b
+
 
 WORKDIR /build/packages/app
 # temporarily move node_modules
