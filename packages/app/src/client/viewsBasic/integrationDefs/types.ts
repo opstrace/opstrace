@@ -21,6 +21,7 @@ export type IntegrationDef = {
   desc: string | React.ReactType;
   Form: React.ReactType;
   Show: React.ReactType;
+  Status: React.ReactType;
   enabled: boolean;
   Logo?: string;
 };

@@ -16,6 +16,7 @@
 
 import { K8sMetricsForm } from "./Form";
 import { K8sMetricsShow } from "./Show";
+import K8sMetricsStatus from "./Status";
 import K8sMetricsLogo from "./Logo.png";
 
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
@@ -28,6 +29,7 @@ export const k8sMetricsIntegration: IntegrationDef = {
     "Generate all the yaml required to send metrics from your Kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
   Form: K8sMetricsForm,
   Show: K8sMetricsShow,
+  Status: K8sMetricsStatus,
   enabled: true,
   Logo: K8sMetricsLogo
 };

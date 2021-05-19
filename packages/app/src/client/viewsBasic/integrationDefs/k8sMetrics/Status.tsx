@@ -52,7 +52,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const IntegrationStatus = ({ integration, tenant }: Props) => {
+export default function IntegrationStatus({ integration, tenant }: Props) {
   const [status, setStatus] = useState("pending");
   const [queryTime, setQueryTime] = useState(new Date());
   const classes = useStyles();
@@ -110,4 +110,4 @@ export const IntegrationStatus = ({ integration, tenant }: Props) => {
       )}
     </div>
   );
-};
+}
