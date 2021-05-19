@@ -72,7 +72,7 @@ export default async function setCortexRuntimeConfigHandler(
   log.info("setCortexRuntimeConfigHandler: got request body: %s", req.body);
 
   try {
-    yaml.safeLoad(req.body);
+    yaml.load(req.body);
   } catch (err) {
     res
       .status(400)
