@@ -16,8 +16,15 @@
 
 import React, { useMemo } from "react";
 import { useHistory } from "react-router-dom";
+import { format, parseISO } from "date-fns";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import Timeline from "@material-ui/lab/Timeline";
+import TimelineItem from "@material-ui/lab/TimelineItem";
+import TimelineSeparator from "@material-ui/lab/TimelineSeparator";
+import TimelineConnector from "@material-ui/lab/TimelineConnector";
+import TimelineContent from "@material-ui/lab/TimelineContent";
+import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import { IntegrationProps } from "client/viewsBasic/tenantIntegrations/utils";
 import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
@@ -31,7 +38,7 @@ import {
   makePrometheusDashboardRequests
 } from "./dashboards";
 
-import { CheckStatusBtn } from "./CheckStatusBtn";
+import { IntegrationStatus } from "./IntegrationStatus";
 import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
@@ -46,8 +53,16 @@ import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import styled from "styled-components";
 import Modal from "@material-ui/core/Modal";
 import { ExternalLink } from "client/components/Link";
+import { ArrowLeft } from "react-feather";
+
+const TimelineWrapper = styled(Timeline)`
+  .MuiTimelineItem-missingOppositeContent:before {
+    flex: 0;
+  }
+`;
 
 type folderInfo = {
   // The numeric ID for the folder that was created (or updated).
@@ -126,10 +141,6 @@ export const K8sMetricsShow = withTenantFromParams(
       }
     );
 
-    const status = useMemo(() => {
-      return subData?.integrations_by_pk?.status || integration.status;
-    }, [subData?.integrations_by_pk?.status, integration.status]);
-
     const grafanaMetadata = useMemo(() => {
       return (
         subData?.integrations_by_pk?.grafana_metadata ||
@@ -188,32 +199,31 @@ export const K8sMetricsShow = withTenantFromParams(
 
     return (
       <>
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
+        <Box width="100%" height="100%" p={1}>
+          <Box mb={2}>
+            <Button
+              size="small"
+              onClick={() =>
+                history.push(`/tenant/${tenant.name}/integrations/installed`)
+              }
+            >
+              <ArrowLeft width={20} height={20} /> Installed Integrations
+            </Button>
+          </Box>
           <Card>
             <CardHeader
-              titleTypographyProps={{ variant: "h5" }}
+              avatar={
+                <img src={integrationDef.Logo} width={80} height={80} alt="" />
+              }
+              titleTypographyProps={{ variant: "h1" }}
               title={integration.name}
               action={
                 <Box ml={3} display="flex" flexWrap="wrap">
                   <Box p={1}>
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        history.push(
-                          `/tenant/${tenant.name}/integrations/installed`
-                        )
-                      }
-                    >
-                      {"< Back"}
-                    </Button>
+                    <IntegrationStatus
+                      integration={integration}
+                      tenant={tenant}
+                    />
                   </Box>
                 </Box>
               }
@@ -222,8 +232,6 @@ export const K8sMetricsShow = withTenantFromParams(
               <Box display="flex">
                 <Box display="flex" flexDirection="column">
                   <Attribute.Key>Integration:</Attribute.Key>
-                  <Attribute.Key>Category:</Attribute.Key>
-                  <Attribute.Key>Status:</Attribute.Key>
                   <Attribute.Key>Created:</Attribute.Key>
                   <CondRender present={grafanaMetadata?.folder_path}>
                     <Attribute.Key> </Attribute.Key>
@@ -231,12 +239,9 @@ export const K8sMetricsShow = withTenantFromParams(
                 </Box>
                 <Box display="flex" flexDirection="column" flexGrow={1}>
                   <Attribute.Value>{integrationDef.label}</Attribute.Value>
-                  <Attribute.Value>{integrationDef.category}</Attribute.Value>
                   <Attribute.Value>
-                    {status}{" "}
-                    <CheckStatusBtn integration={integration} tenant={tenant} />
+                    {format(parseISO(integration.created_at), "Pppp")}
                   </Attribute.Value>
-                  <Attribute.Value>{integration.created_at}</Attribute.Value>
                 </Box>
                 <CondRender present={grafanaMetadata?.folder_path}>
                   <Attribute.Key>
@@ -267,48 +272,71 @@ export const K8sMetricsShow = withTenantFromParams(
               title="Install Instructions"
             />
             <CardContent>
-              <Box display="flex">
-                <Box display="flex" flexDirection="column" flexGrow={1}>
-                  <Attribute.Value>
-                    {`Step 1. Download the generated config YAML and save to the same
+              <TimelineWrapper>
+                <TimelineItem>
+                  <TimelineSeparator>
+                    <TimelineDot />
+                    <TimelineConnector />
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Box flexGrow={1} pb={2}>
+                      {`Download the generated config YAML and save to the same
                     location as the api key for Tenant "${tenant.name}", it should be called "tenant-api-token-${tenant.name}".`}
-                    <br />
-                    <br />
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={downloadHandler}
-                    >
-                      Download YAML
-                    </Button>
-                    <ViewConfigButtonModal
-                      filename={configFilename}
-                      config={config}
-                    />
-                  </Attribute.Value>
-                  <Attribute.Value>
-                    {`Step 2. Run this command to install Prometheus`}
-                    <br />
-                    <pre>{deployYamlCommand}</pre>
-                    <CopyToClipboardIcon text={deployYamlCommand} />
-                  </Attribute.Value>
-                  <Attribute.Value>
-                    Step 3. Once the integration is installed in your namepsace
-                    we can install our default set of Grafana Dashboards for
-                    you.
-                    <br />
-                    <br />
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={grafanaMetadata.folder_path !== undefined}
-                      onClick={dashboardHandler}
-                    >
-                      Install Dashboards
-                    </Button>
-                  </Attribute.Value>
-                </Box>
-              </Box>
+                      <Box pt={1}>
+                        <Button
+                          style={{ marginRight: 20 }}
+                          variant="contained"
+                          size="small"
+                          state="primary"
+                          onClick={downloadHandler}
+                        >
+                          Download YAML
+                        </Button>
+                        <ViewConfigButtonModal
+                          filename={configFilename}
+                          config={config}
+                        />
+                      </Box>
+                    </Box>
+                  </TimelineContent>
+                </TimelineItem>
+                <TimelineItem>
+                  <TimelineSeparator>
+                    <TimelineDot />
+                    <TimelineConnector />
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Box flexGrow={1} pb={2}>
+                      {`Run this command to install Prometheus`}
+                      <br />
+                      <code>{deployYamlCommand}</code>
+                      <CopyToClipboardIcon text={deployYamlCommand} />
+                    </Box>
+                  </TimelineContent>
+                </TimelineItem>
+                <TimelineItem>
+                  <TimelineSeparator>
+                    <TimelineDot />
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Box flexGrow={1} pb={2}>
+                      Once the integration is installed in your namepsace we can
+                      install our default set of Grafana Dashboards for you.
+                      <br />
+                      <br />
+                      <Button
+                        variant="contained"
+                        size="small"
+                        state="primary"
+                        disabled={grafanaMetadata.folder_path !== undefined}
+                        onClick={dashboardHandler}
+                      >
+                        Install Dashboards
+                      </Button>
+                    </Box>
+                  </TimelineContent>
+                </TimelineItem>
+              </TimelineWrapper>
             </CardContent>
           </Card>
         </Box>
@@ -356,7 +384,12 @@ const ViewConfigButtonModal = ({
 
   return (
     <>
-      <Button variant="contained" size="small" onClick={handleOpen}>
+      <Button
+        variant="contained"
+        size="small"
+        state="primary"
+        onClick={handleOpen}
+      >
         View YAML
       </Button>
       <Modal open={open} onClose={handleClose} className={classes.modal}>

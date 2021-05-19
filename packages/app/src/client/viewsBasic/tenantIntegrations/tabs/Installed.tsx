@@ -18,8 +18,6 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { makeStyles } from "@material-ui/core/styles";
-import CheckCircle from "@material-ui/icons/CheckCircle";
-import green from "@material-ui/core/colors/green";
 
 import { Integrations } from "state/integrations/types";
 import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
@@ -39,19 +37,11 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import { IntegrationStatus } from "client/viewsBasic/integrationDefs/k8sMetrics/IntegrationStatus";
 
 const useStyles = makeStyles(theme => ({
   integrationRow: {
     cursor: "pointer"
-  },
-  statusCell: {
-    display: "flex",
-    alignItems: "center",
-    flexWrap: "wrap"
-  },
-  statusIcon: { color: green["500"] },
-  statusText: {
-    marginRight: 10
   }
 }));
 
@@ -100,14 +90,7 @@ const InstalledIntegrationsTable = withTenantFromParams<Props>(
                 </TableCell>
                 <TableCell>{i9n.kind}</TableCell>
                 <TableCell>
-                  {i9n.status === "active" ? (
-                    <div className={classes.statusCell}>
-                      <span className={classes.statusText}>active </span>
-                      <CheckCircle className={classes.statusIcon} />
-                    </div>
-                  ) : (
-                    <span>{i9n.status}</span>
-                  )}
+                  <IntegrationStatus integration={i9n} tenant={tenant} />
                 </TableCell>
                 <TableCell>
                   {format(parseISO(i9n.created_at), "Pppp")}
