@@ -3843,19 +3843,6 @@ export type GetCredentialsDumpQuery = {
   >;
 };
 
-export type SubscribeToCredentialListSubscriptionVariables = Exact<{
-  [key: string]: never;
-}>;
-
-export type SubscribeToCredentialListSubscription = {
-  credential: Array<
-    Pick<
-      Credential,
-      "name" | "tenant" | "type" | "value" | "created_at" | "updated_at"
-    >
-  >;
-};
-
 export type UpdateCredentialMutationVariables = Exact<{
   tenant: Scalars["String"];
   name: Scalars["String"];
@@ -3939,16 +3926,6 @@ export type GetExportersDumpQuery = {
       | "created_at"
       | "updated_at"
     >
-  >;
-};
-
-export type SubscribeToExporterListSubscriptionVariables = Exact<{
-  [key: string]: never;
-}>;
-
-export type SubscribeToExporterListSubscription = {
-  exporter: Array<
-    Pick<Exporter, "name" | "tenant" | "type" | "credential" | "config">
   >;
 };
 
@@ -4442,18 +4419,6 @@ export const GetCredentialsDumpDocument = gql`
     }
   }
 `;
-export const SubscribeToCredentialListDocument = gql`
-  subscription SubscribeToCredentialList {
-    credential {
-      name
-      tenant
-      type
-      value
-      created_at
-      updated_at
-    }
-  }
-`;
 export const UpdateCredentialDocument = gql`
   mutation UpdateCredential(
     $tenant: String!
@@ -4524,17 +4489,6 @@ export const GetExportersDumpDocument = gql`
       config
       created_at
       updated_at
-    }
-  }
-`;
-export const SubscribeToExporterListDocument = gql`
-  subscription SubscribeToExporterList {
-    exporter {
-      name
-      tenant
-      type
-      credential
-      config
     }
   }
 `;
@@ -5214,22 +5168,6 @@ export function getSdk(
         )
       );
     },
-    SubscribeToCredentialList(
-      variables?: SubscribeToCredentialListSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToCredentialListSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToCredentialListSubscription>(
-          print(SubscribeToCredentialListDocument),
-          variables
-        )
-      );
-    },
     UpdateCredential(
       variables: UpdateCredentialMutationVariables
     ): Promise<{
@@ -5322,22 +5260,6 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<GetExportersDumpQuery>(
           print(GetExportersDumpDocument),
-          variables
-        )
-      );
-    },
-    SubscribeToExporterList(
-      variables?: SubscribeToExporterListSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToExporterListSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToExporterListSubscription>(
-          print(SubscribeToExporterListDocument),
           variables
         )
       );
