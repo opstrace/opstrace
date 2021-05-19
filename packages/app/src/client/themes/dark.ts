@@ -29,7 +29,11 @@ export const theme = {
       default: "#181C24",
       paper: "#181C24"
     },
-    divider: colors.grey[700]
+    divider: colors.grey[700],
+    info: {
+      main: colors.blueGrey[200],
+      contrastText: colors.common.white
+    }
   }
   // overrides: {
   //   MuiBackdrop: {
