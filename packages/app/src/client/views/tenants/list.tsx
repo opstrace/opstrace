@@ -79,6 +79,7 @@ const Tenants = () => {
             <TableBody>
               {tenants.map(tenant => (
                 <TableRow
+                  hover={true}
                   className={classes.tenantRow}
                   key={tenant.name}
                   onClick={() => history.push(`/tenant/${tenant.name}`)}

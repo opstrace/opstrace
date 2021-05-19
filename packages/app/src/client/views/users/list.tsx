@@ -90,6 +90,7 @@ const Users = () => {
                 <TableRow
                   className={classes.userRow}
                   key={user.email}
+                  hover={true}
                   onClick={() =>
                     history.push(
                       clusterUserList

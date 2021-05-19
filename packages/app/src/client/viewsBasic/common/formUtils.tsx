@@ -16,20 +16,40 @@
 
 import React from "react";
 import { Controller } from "react-hook-form";
+import { HelpCircle } from "react-feather";
 
+import {
+  FormLabel,
+  FormHelperText,
+  TextField,
+  TextFieldProps
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+
+import { Typography } from "client/components/Typography";
 import { CondRender } from "client/utils/rendering";
-
-import { Input, FormLabel, FormHelperText } from "@material-ui/core";
+import { Box } from "client/components/Box";
 
 type ControlledInputProps = {
   name: `${string}` | `${string}.${string}` | `${string}.${number}`;
   label?: string;
   helperText?: string | React.ReactNode | (() => React.ReactNode);
-  inputProps?: {};
+  inputProps?: TextFieldProps;
   control: any;
   labelClass?: string;
   controlClass?: string;
 };
+
+const useStyles = makeStyles(theme => ({
+  helperText: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap"
+  },
+  helperIcon: {
+    marginRight: 5
+  }
+}));
 
 export const ControlledInput = ({
   name,
@@ -39,25 +59,44 @@ export const ControlledInput = ({
   control,
   labelClass,
   controlClass
-}: ControlledInputProps) => (
-  <Controller
-    render={({ field }) => (
-      <>
-        <CondRender unless={label === undefined}>
-          <div className={labelClass}>
-            <FormLabel>{label}</FormLabel>
+}: ControlledInputProps) => {
+  const classes = useStyles();
+
+  return (
+    <Controller
+      render={({ field }) => (
+        <Box>
+          <CondRender unless={label === undefined}>
+            <div className={labelClass}>
+              <FormLabel>
+                <Typography variant="h6" color="textSecondary">
+                  {label}
+                </Typography>
+              </FormLabel>
+            </div>
+          </CondRender>
+          <div className={controlClass}>
+            <TextField {...field} {...inputProps} variant="outlined" />
+            <CondRender
+              unless={helperText === undefined}
+              render={() => (
+                <FormHelperText>
+                  <Typography variant="caption" className={classes.helperText}>
+                    <HelpCircle
+                      width={12}
+                      height={12}
+                      className={classes.helperIcon}
+                    />
+                    <span>{helperText}</span>
+                  </Typography>
+                </FormHelperText>
+              )}
+            />
           </div>
-        </CondRender>
-        <div className={controlClass}>
-          <Input {...field} {...inputProps} />
-          <CondRender
-            unless={helperText === undefined}
-            render={() => <FormHelperText>{helperText}</FormHelperText>}
-          />
-        </div>
-      </>
-    )}
-    control={control}
-    name={name}
-  />
-);
+        </Box>
+      )}
+      control={control}
+      name={name}
+    />
+  );
+};
