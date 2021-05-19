@@ -59,7 +59,7 @@ export const ViewConfigButtonModal = ({
 
   return (
     <>
-      <Button variant="contained" size="small" onClick={handleOpen}>
+      <Button variant="outlined" size="small" onClick={handleOpen}>
         View YAML
       </Button>
       <Modal open={open} onClose={handleClose} className={classes.modal}>
