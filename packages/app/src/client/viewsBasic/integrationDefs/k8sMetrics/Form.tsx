@@ -25,33 +25,7 @@ import { ControlledInput } from "client/viewsBasic/common/formUtils";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
-import Attribute from "client/components/Attribute";
 import { Button } from "client/components/Button";
-
-import { makeStyles } from "@material-ui/core/styles";
-
-const useStyles = makeStyles(theme => ({
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "[label] 240px [control] 1fr",
-    gridAutoFlow: "row",
-    gridGap: ".8em",
-    padding: "1.2em"
-  },
-  label: {
-    gridColumn: "label",
-    gridRow: "auto",
-    alignSelf: "center",
-    justifySelf: "end"
-  },
-  control: {
-    gridColumn: "control",
-    gridRow: "auto",
-    border: "none",
-    padding: "1em",
-    alignSelf: "center"
-  }
-}));
 
 type Values = {
   name: string;
@@ -64,8 +38,8 @@ const Schema = yup.object().shape({
 });
 
 const defaultValues: Values = {
-  name: "My Dev Cluster",
-  deployNamespace: "opstrace-k8s-metrics"
+  name: "",
+  deployNamespace: "opstrace"
 };
 
 type Props = {
@@ -73,8 +47,6 @@ type Props = {
 };
 
 export const K8sMetricsForm = ({ handleCreate }: Props) => {
-  const classes = useStyles();
-
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -103,41 +75,45 @@ export const K8sMetricsForm = ({ handleCreate }: Props) => {
       flexWrap="wrap"
       p={1}
     >
-      <Card>
-        <CardHeader
-          titleTypographyProps={{ variant: "h5" }}
-          title={`Add ${integrationDef.label} Integration`}
-        />
-        <CardContent>
-          <Box display="flex">
-            <form onSubmit={handleSubmit(onSubmit)} className={classes.grid}>
-              <Box display="flex" flexDirection="column">
-                <Attribute.Key>Name:</Attribute.Key>
-                <Attribute.Key>Deployment Namespace:</Attribute.Key>
-                <Attribute.Key>{""}</Attribute.Key>
+      <Box>
+        <Card>
+          <CardHeader
+            titleTypographyProps={{ variant: "h5" }}
+            title={`Add ${integrationDef.label} Integration`}
+          />
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Box mb={3} mt={2}>
+                <ControlledInput
+                  name="name"
+                  control={control}
+                  inputProps={{ fullWidth: true, autoFocus: true }}
+                  label="Integration Name"
+                  helperText="An identifier for this integration"
+                />
               </Box>
-              <Box display="flex" flexDirection="column" flexGrow={1}>
-                <Attribute.Value>
-                  <ControlledInput name="name" control={control} />
-                </Attribute.Value>
-                <Attribute.Value>
-                  <ControlledInput name="deployNamespace" control={control} />
-                </Attribute.Value>
-                <Attribute.Value>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="medium"
-                    disabled={!isValid}
-                  >
-                    Add
-                  </Button>
-                </Attribute.Value>
+              <Box mb={3}>
+                <ControlledInput
+                  name="deployNamespace"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="Deployment Namespace"
+                  helperText="Namespace to deploy to in your Kubernetes cluster"
+                />
               </Box>
+              <Button
+                type="submit"
+                variant="contained"
+                state="primary"
+                size="large"
+                disabled={!isValid}
+              >
+                Create
+              </Button>
             </form>
-          </Box>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 };

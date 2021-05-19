@@ -17,6 +17,9 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
+import { makeStyles } from "@material-ui/core/styles";
+import CheckCircle from "@material-ui/icons/CheckCircle";
+import green from "@material-ui/core/colors/green";
 
 import { Integrations } from "state/integrations/types";
 import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
@@ -37,6 +40,21 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 
+const useStyles = makeStyles(theme => ({
+  integrationRow: {
+    cursor: "pointer"
+  },
+  statusCell: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap"
+  },
+  statusIcon: { color: green["500"] },
+  statusText: {
+    marginRight: 10
+  }
+}));
+
 export const InstalledIntegrations = withIntegrationListFromParams(
   ({ integrationList }: IntegrationListProps) => {
     return (
@@ -52,6 +70,7 @@ type Props = { data: Integrations };
 const InstalledIntegrationsTable = withTenantFromParams<Props>(
   withSkeleton<Props>(({ data, tenant }: Props & TenantProps) => {
     const history = useHistory();
+    const classes = useStyles();
 
     return (
       <TableContainer component={Card}>
@@ -68,6 +87,7 @@ const InstalledIntegrationsTable = withTenantFromParams<Props>(
             {data.map(i9n => (
               <TableRow
                 hover={true}
+                className={classes.integrationRow}
                 key={i9n.id}
                 onClick={() =>
                   history.push(
@@ -79,7 +99,16 @@ const InstalledIntegrationsTable = withTenantFromParams<Props>(
                   {i9n.name}
                 </TableCell>
                 <TableCell>{i9n.kind}</TableCell>
-                <TableCell>{i9n.status}</TableCell>
+                <TableCell>
+                  {i9n.status === "active" ? (
+                    <div className={classes.statusCell}>
+                      <span className={classes.statusText}>active </span>
+                      <CheckCircle className={classes.statusIcon} />
+                    </div>
+                  ) : (
+                    <span>{i9n.status}</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   {format(parseISO(i9n.created_at), "Pppp")}
                 </TableCell>

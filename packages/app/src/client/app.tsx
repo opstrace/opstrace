@@ -75,7 +75,9 @@ const useStyles = makeStyles(theme => ({
     marginLeft: sidebarWidth,
     [theme.breakpoints.down("md")]: {
       marginLeft: minimizedSidebarWidth
-    }
+    },
+    minHeight: `calc(100vh - ${appBarHeight}px)`,
+    position: "relative"
   }
 }));
 
