@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-export type Integration = {
-  id: string;
-  kind: string;
-  name: string;
-  status: "pending" | "active" | "error" | "unknown";
-  grafana_metadata: IntegrationGrafanaMetadata;
-  created_at: Date;
-  updated_at: Date;
-  data: any;
-};
+import { Integrations as DBIntegration } from "state/clients/graphqlClient";
+
+export type Integration = DBIntegration;
 
 export type IntegrationGrafanaMetadata = {
   folder_id?: number;
