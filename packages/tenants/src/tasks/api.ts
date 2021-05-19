@@ -21,7 +21,7 @@ import { serialize, deserialize } from "../utils";
 import {
   KubeConfiguration,
   ConfigMap,
-  createOrUpdateCM
+  createOrUpdateConfigMapWithRetry
 } from "@opstrace/kubernetes";
 import { V1ConfigMap } from "@kubernetes/client-node";
 
@@ -42,5 +42,5 @@ export function* set(
   kubeConfig: KubeConfiguration
 ): Generator<CallEffect, void, unknown> {
   const cm = serialize(tenants, kubeConfig);
-  yield call(createOrUpdateCM, cm);
+  yield call(createOrUpdateConfigMapWithRetry, cm);
 }
