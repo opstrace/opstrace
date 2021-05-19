@@ -66,7 +66,7 @@ import {
 import {
   ConfigMap,
   getKubeConfig,
-  createOrUpdateCM
+  createOrUpdateConfigMapWithRetry
 } from "@opstrace/kubernetes";
 
 import { log, getBucketName, sleep, entries } from "@opstrace/utils";
@@ -823,7 +823,7 @@ export function* ensureAWSInfraExists(): Generator<
     kubeConfig
   );
 
-  yield call(createOrUpdateCM, awsAuthConfigMap);
+  yield call(createOrUpdateConfigMapWithRetry, awsAuthConfigMap);
 
   const instanceProfileName = yield call(
     createInstanceProfile,
