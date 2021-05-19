@@ -33,15 +33,9 @@ import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
 import { prometheusYaml } from "./templates/config";
 import * as commands from "./templates/commands";
-import {
-  makeFolderRequest,
-  makePrometheusDashboardRequests
-} from "./dashboards";
+import { makePrometheusDashboardRequests } from "./dashboards";
 
-import {
-  createFolder,
-  createDashboard
-} from "client/viewsBasic/integrationDefs/common/grafana";
+import * as grafana from "client/viewsBasic/integrationDefs/common/grafana";
 import IntegrationStatus from "./Status";
 import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
@@ -114,14 +108,13 @@ export const K8sMetricsShow = withTenantFromParams(
       [tenant.name, integration.kind]
     );
 
-    const config = useMemo(() => {
-      return prometheusYaml({
+    const makeConfig = () =>
+      prometheusYaml({
         clusterHost: window.location.host,
         tenantName: tenant.name,
         integrationId: integration.id,
         deployNamespace: integration.data.deployNamespace
       });
-    }, [tenant.name, integration.id, integration.data.deployNamespace]);
 
     const deployYamlCommand = useMemo(
       () => commands.deployYaml(configFilename, tenant.name),
@@ -129,26 +122,20 @@ export const K8sMetricsShow = withTenantFromParams(
     );
 
     const downloadHandler = () => {
-      var configBlob = new Blob([config], {
+      var configBlob = new Blob([makeConfig()], {
         type: "application/x-yaml;charset=utf-8"
       });
       saveAs(configBlob, configFilename);
     };
 
     const dashboardHandler = async () => {
-      const folder = await createFolder(
-        tenant.name,
-        makeFolderRequest({
-          integrationId: integration.id,
-          integrationName: integration.name
-        })
-      );
+      const folder = await grafana.createFolder(integration, tenant);
 
       for (const d of makePrometheusDashboardRequests({
         integrationId: integration.id,
         folderId: folder.id
       })) {
-        await createDashboard(tenant.name, d);
+        await grafana.createDashboard(tenant, d);
       }
 
       await graphqlClient.UpdateIntegrationGrafanaMetadata({
@@ -254,7 +241,7 @@ export const K8sMetricsShow = withTenantFromParams(
                         </Button>
                         <ViewConfigButtonModal
                           filename={configFilename}
-                          config={config}
+                          config={makeConfig}
                         />
                       </Box>
                     </Box>
