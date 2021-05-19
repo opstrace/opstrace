@@ -19,7 +19,10 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 
 import { integrationsDefs } from "client/viewsBasic/integrationDefs";
-import { IntegrationDefs } from "client/viewsBasic/integrationDefs/types";
+import {
+  IntegrationDefs,
+  IntegrationDef
+} from "client/viewsBasic/integrationDefs/types";
 import { addIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
@@ -44,7 +47,6 @@ const IntegrationDefCards = withTenantFromParams<Props>(
     const history = useHistory();
     // const available = filter(propEq("enabled", true))(data);
 
-    // @ts-ignore
     const onAdd = (i9n: IntegrationDef) => {
       history.push(
         addIntegrationPath({
@@ -65,7 +67,7 @@ const IntegrationDefCards = withTenantFromParams<Props>(
             <Grid key={i9n.kind} item xs={12} sm={6}>
               <Card>
                 <CardHeader
-                  avatar={<img src={i9n.Logo} width={30} height={30} alt="" />}
+                  avatar={<img src={i9n.Logo} width={50} height={50} alt="" />}
                   titleTypographyProps={{ variant: "h6" }}
                   title={i9n.label}
                   action={

@@ -16,6 +16,7 @@
 
 import React from "react";
 import { useHistory } from "react-router-dom";
+import { format, parseISO } from "date-fns";
 
 import { Integrations } from "state/integrations/types";
 import { showIntegrationPath } from "client/viewsBasic/tenantIntegrations/paths";
@@ -35,7 +36,6 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { Button } from "client/components/Button";
 
 export const InstalledIntegrations = withIntegrationListFromParams(
   ({ integrationList }: IntegrationListProps) => {
@@ -61,31 +61,27 @@ const InstalledIntegrationsTable = withTenantFromParams<Props>(
               <TableCell>Name</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Used</TableCell>
-              <TableCell></TableCell>
+              <TableCell>Created At</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data.map(i9n => (
-              <TableRow key={i9n.id}>
+              <TableRow
+                hover={true}
+                key={i9n.id}
+                onClick={() =>
+                  history.push(
+                    showIntegrationPath({ tenant, integration: i9n })
+                  )
+                }
+              >
                 <TableCell component="th" scope="row">
                   {i9n.name}
                 </TableCell>
                 <TableCell>{i9n.kind}</TableCell>
                 <TableCell>{i9n.status}</TableCell>
-                <TableCell>{i9n.created_at}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() =>
-                      history.push(
-                        showIntegrationPath({ tenant, integration: i9n })
-                      )
-                    }
-                  >
-                    Show
-                  </Button>
+                  {format(parseISO(i9n.created_at), "Pppp")}
                 </TableCell>
               </TableRow>
             ))}
