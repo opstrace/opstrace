@@ -62,9 +62,15 @@ import styled from "styled-components";
 import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 
+const TimelineDotWrapper = styled(TimelineDot)`
+  padding-left: 10px;
+  padding-right: 10px;
+`;
+
 const TimelineWrapper = styled(Timeline)`
   .MuiTimelineItem-missingOppositeContent:before {
     flex: 0;
+    padding: 0;
   }
 `;
 
@@ -207,7 +213,9 @@ export const K8sMetricsShow = withTenantFromParams(
                       target="_blank"
                       href={`${window.location.protocol}//${tenant.name}.${window.location.host}${grafanaMetadata?.folder_path}`}
                     >
-                      View Grafana Dashboards
+                      <Button state="primary" variant="outlined" size="medium">
+                        View Grafana Dashboards
+                      </Button>
                     </ExternalLink>
                   </Attribute.Key>
                 </CondRender>
@@ -215,15 +223,7 @@ export const K8sMetricsShow = withTenantFromParams(
             </CardContent>
           </Card>
         </Box>
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
+        <Box width="100%" height="100%" p={1}>
           <Card>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
@@ -233,7 +233,9 @@ export const K8sMetricsShow = withTenantFromParams(
               <TimelineWrapper>
                 <TimelineItem>
                   <TimelineSeparator>
-                    <TimelineDot />
+                    <TimelineDotWrapper variant="outlined" color="primary">
+                      1
+                    </TimelineDotWrapper>
                     <TimelineConnector />
                   </TimelineSeparator>
                   <TimelineContent>
@@ -260,7 +262,9 @@ export const K8sMetricsShow = withTenantFromParams(
                 </TimelineItem>
                 <TimelineItem>
                   <TimelineSeparator>
-                    <TimelineDot />
+                    <TimelineDotWrapper variant="outlined" color="primary">
+                      2
+                    </TimelineDotWrapper>
                     <TimelineConnector />
                   </TimelineSeparator>
                   <TimelineContent>
@@ -274,12 +278,13 @@ export const K8sMetricsShow = withTenantFromParams(
                 </TimelineItem>
                 <TimelineItem>
                   <TimelineSeparator>
-                    <TimelineDot />
+                    <TimelineDotWrapper variant="outlined" color="primary">
+                      3
+                    </TimelineDotWrapper>
                   </TimelineSeparator>
                   <TimelineContent>
                     <Box flexGrow={1} pb={2}>
-                      Once the integration is installed in your namepsace we can
-                      install our default set of Grafana Dashboards for you.
+                      Install Dashboards for this Integration.
                       <br />
                       <br />
                       <Button
