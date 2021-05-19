@@ -997,12 +997,9 @@ export function CortexResources(
           namespace,
           annotations: {
             // Custom convention, so that the Opstrace controller will not
-            // delete/overwrite this config map when it has been mutated by a
-            // different entity (that's the goal: this config map is supposed
-            // to be mutated by the Opstrace UI's API implementation); the
-            // `protected` annotation certainly survives these mutations.
-            // Also see https://github.com/opstrace/opstrace/blob/85a4f97e5705fff23df152454a845c4f443f17e9/lib/kubernetes/src/common.ts#L204
-            opstrace: "protected"
+            // delete/overwrite this config map when it detects change. Note that
+            // the UI API implementation is expected to mutate this config map.
+            opstrace: "no-update"
           }
         }
       },
