@@ -160,11 +160,12 @@ export const K8sMetricsShow = withTenantFromParams(
           <Box mb={2}>
             <Button
               size="small"
+              startIcon={<ArrowLeft />}
               onClick={() =>
                 history.push(`/tenant/${tenant.name}/integrations/installed`)
               }
             >
-              <ArrowLeft width={20} height={20} /> Installed Integrations
+              Installed Integrations
             </Button>
           </Box>
           <Card>
