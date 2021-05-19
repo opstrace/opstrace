@@ -37,12 +37,12 @@ import {
 import {
   log,
   globalTestSuiteSetupOnce,
-  enrichHeadersWithAuthToken,
+  //enrichHeadersWithAuthToken,
   httpTimeoutSettings,
   logHTTPResponse,
   CLUSTER_BASE_URL,
   CLUSTER_NAME,
-  TENANT_SYSTEM_CORTEX_API_BASE_URL,
+  //TENANT_SYSTEM_CORTEX_API_BASE_URL,
   TEST_REMOTE_ARTIFACT_DIRECTORY
 } from "./testutils";
 
