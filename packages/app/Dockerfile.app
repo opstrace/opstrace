@@ -19,6 +19,7 @@ RUN mkdir /build/lib && mkdir /build/packages
 # and only run them again if package.json or yarn.lock changed
 COPY lib/utils/package.json /build/lib/utils/package.json
 COPY lib/kubernetes/package.json /build/lib/kubernetes/package.json
+COPY lib/buildinfo/package.json /build/lib/buildinfo/package.json
 COPY packages/app/package.json /build/packages/app/package.json
 # increase node's default mem limit to something much bigger than needed
 ENV NODE_OPTIONS=--max_old_space_size=8192
@@ -32,6 +33,7 @@ RUN yarn --frozen-lockfile --network-timeout 1000000
 # Copy over all files
 COPY lib/utils /build/lib/utils/
 COPY lib/kubernetes /build/lib/kubernetes/
+COPY lib/buildinfo /build/lib/buildinfo/
 # Build the utils library. Don't run tsc -b in the app directory because it'll perform a single CPU bound
 # build and typecheck for everything. Instead, just build and typecheck the utils, and let our yarn build step in the app
 # package do the rest, since it forks the typechecking for better parallelization
@@ -39,7 +41,8 @@ WORKDIR /build/lib/utils
 RUN yarn run tsc -b
 WORKDIR /build/lib/kubernetes
 RUN yarn run tsc -b
-
+WORKDIR /build/lib/buildinfo
+RUN yarn run tsc -b
 
 WORKDIR /build/packages/app
 # temporarily move node_modules
