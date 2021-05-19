@@ -18,27 +18,10 @@
 import makeApiserverDashboard from "./apiserver.js";
 import makeKubeletDashboard from "./kubelet.js";
 
-type FolderProps = {
-  integrationId: String;
-  integrationName: String;
-};
-
 type DashboardProps = {
   integrationId: String;
   folderId: number;
 };
-
-// Returns a folder creation request payload for submitting to Grafana.
-export function makeFolderRequest({
-  integrationId,
-  integrationName
-}: FolderProps): object {
-  return {
-    uid: `i9n-${integrationId}`,
-    title: `Integration: ${integrationName}`
-  };
-}
-
 // Returns an array of Prometheus/metrics dashboard creation request payloads for submitting to Grafana.
 export function makePrometheusDashboardRequests({
   integrationId,
