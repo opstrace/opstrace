@@ -16,7 +16,15 @@
 
 import React, { useMemo } from "react";
 import { useHistory } from "react-router-dom";
+import { format, parseISO } from "date-fns";
 import { saveAs } from "file-saver";
+
+import Timeline from "@material-ui/lab/Timeline";
+import TimelineItem from "@material-ui/lab/TimelineItem";
+import TimelineSeparator from "@material-ui/lab/TimelineSeparator";
+import TimelineConnector from "@material-ui/lab/TimelineConnector";
+import TimelineContent from "@material-ui/lab/TimelineContent";
+import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import { IntegrationProps } from "client/viewsBasic/tenantIntegrations/utils";
 import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
@@ -31,8 +39,7 @@ import {
   createFolder,
   createDashboard
 } from "client/viewsBasic/integrationDefs/common/grafana";
-
-import { CheckStatusBtn } from "./CheckStatusBtn";
+import IntegrationStatus from "./Status";
 import { CopyToClipboardIcon } from "client/viewsBasic/common/CopyToClipboard";
 
 import useHasuraSubscription from "client/hooks/useHasuraSubscription";
@@ -48,7 +55,21 @@ import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 
+import styled from "styled-components";
 import { ExternalLink } from "client/components/Link";
+import { ArrowLeft } from "react-feather";
+
+const TimelineDotWrapper = styled(TimelineDot)`
+  padding-left: 10px;
+  padding-right: 10px;
+`;
+
+const TimelineWrapper = styled(Timeline)`
+  .MuiTimelineItem-missingOppositeContent:before {
+    flex: 0;
+    padding: 0;
+  }
+`;
 
 const INTEGRATION_STATUS_SUBSCRIPTION = `
   subscription IntegrationUpdates($id: uuid!) {
@@ -74,10 +95,6 @@ export const K8sLogsShow = withTenantFromParams(
         id: integration.id
       }
     );
-
-    const status = useMemo(() => {
-      return subData?.integrations_by_pk?.status || integration.status;
-    }, [subData?.integrations_by_pk?.status, integration.status]);
 
     const grafanaMetadata = useMemo(() => {
       return (
@@ -144,32 +161,32 @@ export const K8sLogsShow = withTenantFromParams(
 
     return (
       <>
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
+        <Box width="100%" height="100%" p={1}>
+          <Box mb={2}>
+            <Button
+              size="small"
+              startIcon={<ArrowLeft />}
+              onClick={() =>
+                history.push(`/tenant/${tenant.name}/integrations/installed`)
+              }
+            >
+              Installed Integrations
+            </Button>
+          </Box>
           <Card>
             <CardHeader
-              titleTypographyProps={{ variant: "h5" }}
+              avatar={
+                <img src={integrationDef.Logo} width={80} height={80} alt="" />
+              }
+              titleTypographyProps={{ variant: "h1" }}
               title={integration.name}
               action={
                 <Box ml={3} display="flex" flexWrap="wrap">
                   <Box p={1}>
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        history.push(
-                          `/tenant/${tenant.name}/integrations/installed`
-                        )
-                      }
-                    >
-                      {"< Back"}
-                    </Button>
+                    <IntegrationStatus
+                      integration={integration}
+                      tenant={tenant}
+                    />
                   </Box>
                 </Box>
               }
@@ -178,8 +195,6 @@ export const K8sLogsShow = withTenantFromParams(
               <Box display="flex">
                 <Box display="flex" flexDirection="column">
                   <Attribute.Key>Integration:</Attribute.Key>
-                  <Attribute.Key>Category:</Attribute.Key>
-                  <Attribute.Key>Status:</Attribute.Key>
                   <Attribute.Key>Created:</Attribute.Key>
                   <CondRender present={grafanaMetadata?.folder_path}>
                     <Attribute.Key> </Attribute.Key>
@@ -187,12 +202,9 @@ export const K8sLogsShow = withTenantFromParams(
                 </Box>
                 <Box display="flex" flexDirection="column" flexGrow={1}>
                   <Attribute.Value>{integrationDef.label}</Attribute.Value>
-                  <Attribute.Value>{integrationDef.category}</Attribute.Value>
                   <Attribute.Value>
-                    {status}{" "}
-                    <CheckStatusBtn integration={integration} tenant={tenant} />
+                    {format(parseISO(integration.created_at), "Pppp")}
                   </Attribute.Value>
-                  <Attribute.Value>{integration.created_at}</Attribute.Value>
                 </Box>
                 <CondRender present={grafanaMetadata?.folder_path}>
                   <Attribute.Key>
@@ -200,7 +212,9 @@ export const K8sLogsShow = withTenantFromParams(
                       target="_blank"
                       href={`${window.location.protocol}//${tenant.name}.${window.location.host}${grafanaMetadata?.folder_path}`}
                     >
-                      View Grafana Dashboards
+                      <Button state="primary" variant="outlined" size="medium">
+                        View Grafana Dashboards
+                      </Button>
                     </ExternalLink>
                   </Attribute.Key>
                 </CondRender>
@@ -208,63 +222,83 @@ export const K8sLogsShow = withTenantFromParams(
             </CardContent>
           </Card>
         </Box>
-        <Box
-          width="100%"
-          height="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          p={1}
-        >
+        <Box width="100%" height="100%" p={1}>
           <Card>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
               title="Install Instructions"
             />
             <CardContent>
-              <Box display="flex">
-                <Box display="flex" flexDirection="column" flexGrow={1}>
-                  <Attribute.Value>
-                    {`Step 1. Download the generated config YAML and save to the same
+              <TimelineWrapper>
+                <TimelineItem>
+                  <TimelineSeparator>
+                    <TimelineDotWrapper variant="outlined" color="primary">
+                      1
+                    </TimelineDotWrapper>
+                    <TimelineConnector />
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Box flexGrow={1} pb={2}>
+                      {`Download the generated config YAML and save to the same
                     location as the api key for Tenant "${tenant.name}", it should be called "tenant-api-token-${tenant.name}".`}
-                    <br />
-                    <br />
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={downloadHandler}
-                    >
-                      Download YAML
-                    </Button>
-                    <ViewConfigButtonModal
-                      filename={configFilename}
-                      config={config}
-                    />
-                  </Attribute.Value>
-                  <Attribute.Value>
-                    {`Step 2. Run this command to install Promtail`}
-                    <br />
-                    <pre>{deployYamlCommand}</pre>
-                    <CopyToClipboardIcon text={deployYamlCommand} />
-                  </Attribute.Value>
-                  <Attribute.Value>
-                    Step 3. Once the integration is installed in your namepsace
-                    we can install our default set of Grafana Dashboards for
-                    you.
-                    <br />
-                    <br />
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={grafanaMetadata.folder_path !== undefined}
-                      onClick={dashboardHandler}
-                    >
-                      Install Dashboards
-                    </Button>
-                  </Attribute.Value>
-                </Box>
-              </Box>
+                      <Box pt={1}>
+                        <Button
+                          style={{ marginRight: 20 }}
+                          variant="contained"
+                          size="small"
+                          state="primary"
+                          onClick={downloadHandler}
+                        >
+                          Download YAML
+                        </Button>
+                        <ViewConfigButtonModal
+                          filename={configFilename}
+                          config={config}
+                        />
+                      </Box>
+                    </Box>
+                  </TimelineContent>
+                </TimelineItem>
+                <TimelineItem>
+                  <TimelineSeparator>
+                    <TimelineDotWrapper variant="outlined" color="primary">
+                      2
+                    </TimelineDotWrapper>
+                    <TimelineConnector />
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Box flexGrow={1} pb={2}>
+                      {`Run this command to install Promtail`}
+                      <br />
+                      <code>{deployYamlCommand}</code>
+                      <CopyToClipboardIcon text={deployYamlCommand} />
+                    </Box>
+                  </TimelineContent>
+                </TimelineItem>
+                <TimelineItem>
+                  <TimelineSeparator>
+                    <TimelineDotWrapper variant="outlined" color="primary">
+                      3
+                    </TimelineDotWrapper>
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Box flexGrow={1} pb={2}>
+                      Install Dashboards for this Integration.
+                      <br />
+                      <br />
+                      <Button
+                        variant="contained"
+                        size="small"
+                        state="primary"
+                        disabled={grafanaMetadata.folder_path !== undefined}
+                        onClick={dashboardHandler}
+                      >
+                        Install Dashboards
+                      </Button>
+                    </Box>
+                  </TimelineContent>
+                </TimelineItem>
+              </TimelineWrapper>
             </CardContent>
           </Card>
         </Box>
