@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from "react";
+
 import { K8sLogsForm } from "./Form";
 import { K8sLogsShow } from "./Show";
+import K8sLogsStatus from "./Status";
 import K8sLogsLogo from "./Logo.png";
 
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
@@ -28,7 +29,7 @@ export const k8sLogsIntegration: IntegrationDef = {
     "Generate all the yaml required to send logs from your Kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
   Form: K8sLogsForm,
   Show: K8sLogsShow,
-  Status: () => <div />,
+  Status: K8sLogsStatus,
   enabled: true,
   Logo: K8sLogsLogo
 };
