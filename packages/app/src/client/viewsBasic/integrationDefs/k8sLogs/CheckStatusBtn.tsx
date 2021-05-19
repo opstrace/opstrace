@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { pathOr } from "ramda";
-import { addHours, subHours } from "date-fns";
+import { subHours } from "date-fns";
 
 import graphqlClient from "state/clients/graphqlClient";
 import { useLoki } from "client/hooks/useGrafana";
@@ -33,19 +33,6 @@ type Props = {
 
 export const CheckStatusBtn = ({ integration, tenant }: Props) => {
   const [checkingStatus, setCheckingStatus] = useState(false);
-  const statusCheckUri = useMemo(() => {
-    const logQl = `{integration_id="${integration.id}"}`;
-    // TODO don't cache this URI on page load
-    // Ideally we'd recalculate start=now-1h, end=now each time the button is pressed.
-    const pageLoad = new Date();
-    const startMillis = subHours(pageLoad, 1).getTime();
-    const endMillis = addHours(pageLoad, 1).getTime();
-
-    // Loki expects epoch nanoseconds for the start/end time
-    return encodeURI(
-      `query_range?query=${logQl}&start=${1000 * 1000 * startMillis}&end=${1000 * 1000 * endMillis}&limit=1&step=300`
-    );
-  }, [integration.id]);
 
   const statusUpdateHandler = (metricsFound: boolean) => {
     graphqlClient
@@ -63,7 +50,7 @@ export const CheckStatusBtn = ({ integration, tenant }: Props) => {
   if (checkingStatus)
     return (
       <CheckingStatusBtn
-        statusCheckUri={statusCheckUri}
+        statusCheckUri={makeStatusCheckUri(integration)}
         tenantName={tenant.name}
         statusUpdateHandler={statusUpdateHandler}
       />
@@ -106,5 +93,19 @@ const CheckingStatusBtn = ({
     <Button variant="outlined" state="info" size="small" disabled>
       Checking...
     </Button>
+  );
+};
+
+const makeStatusCheckUri = (integration: Integration) => {
+  const logQl = `{integration_id="${integration.id}"}`;
+
+  const end = new Date();
+  const startMillis = subHours(end, 1).getTime();
+  const endMillis = end.getTime();
+
+  return encodeURI(
+    `query_range?query=${logQl}&start=${1000 * 1000 * startMillis}&end=${
+      1000 * 1000 * endMillis
+    }&limit=1&step=300`
   );
 };

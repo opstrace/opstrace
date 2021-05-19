@@ -16,7 +16,7 @@
 
 import React, { useState, useEffect } from "react";
 import { pathOr } from "ramda";
-import { addHours, subHours } from "date-fns";
+import { subHours } from "date-fns";
 
 import graphqlClient from "state/clients/graphqlClient";
 import { usePrometheus } from "client/hooks/useGrafana";
