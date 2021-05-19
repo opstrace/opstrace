@@ -61,7 +61,7 @@ export async function deleteFolder(
   // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#delete-folder
   const responseData = await axios({
     method: "delete",
-    url: makeUrl(tenant, `folders/${integration}`),
+    url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
     withCredentials: true
   }).then(res => res.data);
 
