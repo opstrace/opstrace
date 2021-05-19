@@ -23,12 +23,6 @@ import { log } from "@opstrace/utils";
 import { ResourceCache } from "./util";
 
 import dbClient from "../../dbClient";
-import {
-  SubscribeToCredentialListSubscription,
-  SubscribeToCredentialListDocument
-} from "../../dbSDK";
-
-import subscriptionClient, { Subscription } from "../../dbSubscriptionClient";
 
 export interface Credential {
   name: string;
@@ -88,8 +82,9 @@ export function startInformer(
   channel: (input: unknown) => void
 ): () => void {
   let cancelled = false;
-  let subscription: Subscription;
-  const watch = async () => {
+  // We use a polling loop rather than a subscription.
+  // Subscriptions were occasionally failing to get any data in CI tests.
+  const poll = async () => {
     if (cancelled) {
       return;
     }
@@ -99,47 +94,26 @@ export function startInformer(
       );
       return;
     }
-    // Do initial load up-front
     try {
       const res = await dbClient.GetCredentialsDump();
-      if (res.data?.credential && res.data.credential.length > 0) {
+      if (res.data?.credential) {
         channel(
           actions.fetch.success({
             resources: res.data?.credential
           })
         );
       }
+      return setTimeout(poll, 3000);
     } catch (error) {
       channel(actions.fetch.failure({ error }));
-      log.warning("starting credentials informer failed (will retry): %s", error);
-      return setTimeout(watch, 3000);
+      log.warning("polling credentials failed (retrying in 15s): %s", error);
+      // seems like a good idea to wait a bit longer in the event of failure
+      return setTimeout(poll, 15000);
     }
-    if (!subscriptionClient) {
-      log.warning(
-        "skipping credential subscription due to missing env vars GRAPHQL_ENDPOINT & HASURA_GRAPHQL_ADMIN_SECRET"
-      );
-      return;
-    }
-    // Start subscription to future updates
-    subscription = subscriptionClient
-      .subscribe<SubscribeToCredentialListSubscription>({
-        query: SubscribeToCredentialListDocument
-      })
-      .subscribe({
-        next: res => {
-          if (res.data?.credential) {
-            channel(actions.fetch.success({
-              resources: res.data.credential
-            }));
-          }
-        }
-      });
-    return () => subscription.unsubscribe();
   };
-  watch();
-  // Return a function to disable the informer and close the request
+  poll();
+  // Return a function to stop the polling loop
   return () => {
     cancelled = true;
-    subscription && subscription.unsubscribe();
   };
 }
