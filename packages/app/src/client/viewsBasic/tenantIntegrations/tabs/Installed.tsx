@@ -37,7 +37,8 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { IntegrationStatus } from "client/viewsBasic/integrationDefs/k8sMetrics/Status";
+// Temporary direct import
+import IntegrationStatus from "client/viewsBasic/integrationDefs/k8sMetrics/Status";
 
 const useStyles = makeStyles(theme => ({
   integrationRow: {
@@ -47,6 +48,7 @@ const useStyles = makeStyles(theme => ({
 
 export const InstalledIntegrations = withIntegrationListFromParams(
   ({ integrationList }: IntegrationListProps) => {
+    // This integrationList needs to be mapped to integrationDefs (at least to access the Status component, and possibly Edit button)
     return (
       <Box mt={3}>
         <InstalledIntegrationsTable data={integrationList} />

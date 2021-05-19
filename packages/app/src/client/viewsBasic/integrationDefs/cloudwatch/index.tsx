@@ -25,5 +25,6 @@ export const cloudwatchIntegration: IntegrationDef = {
   desc: () => <i>Coming soon</i>,
   Form: () => <div />,
   Show: () => <div />,
+  Status: () => <div />,
   enabled: false
 };
