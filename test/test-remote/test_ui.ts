@@ -287,7 +287,7 @@ suite("test_ui_with_headless_browser", function () {
 
     const url = `${CLUSTER_BASE_URL}/_/config/cortex/runtime`;
     const headers = {
-      "Content-Type": "application/yaml",
+      "Content-Type": "text/plain", // for bodyParser.text() express middleware
       Cookie: cookie_header_value
     };
 
@@ -303,7 +303,7 @@ suite("test_ui_with_headless_browser", function () {
     };
 
     const response = await got.post(url, {
-      body: yaml.safeDump(bodyObj),
+      body: yaml.dump(bodyObj),
       throwHttpErrors: false,
       headers: headers,
       timeout: httpTimeoutSettings,
