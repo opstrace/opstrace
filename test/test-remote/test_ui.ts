@@ -37,12 +37,12 @@ import {
 import {
   log,
   globalTestSuiteSetupOnce,
-  //enrichHeadersWithAuthToken,
+  enrichHeadersWithAuthToken,
   httpTimeoutSettings,
   logHTTPResponse,
   CLUSTER_BASE_URL,
   CLUSTER_NAME,
-  //TENANT_SYSTEM_CORTEX_API_BASE_URL,
+  TENANT_SYSTEM_CORTEX_API_BASE_URL,
   TEST_REMOTE_ARTIFACT_DIRECTORY
 } from "./testutils";
 
@@ -319,15 +319,15 @@ suite("test_ui_with_headless_browser", function () {
       maxWaitSeconds
     );
 
-    //const cortexRuntimeCfgUrl = `${TENANT_SYSTEM_CORTEX_API_BASE_URL}/runtime_config`; //?mode=diff`;
+    const cortexRuntimeCfgUrl = `${TENANT_SYSTEM_CORTEX_API_BASE_URL}/runtime_config`; //?mode=diff`;
     // This is exposed through a proxy to
-    const cortexRuntimeCfgUrl = `${CLUSTER_BASE_URL}/_/cortex/runtime_config`;
+    //const cortexRuntimeCfgUrl = `${CLUSTER_BASE_URL}/_/cortex/runtime_config`;
     const httpopts: GotOptions = {
       method: "GET",
       // Some HTTP error responses are expected. Do this handling work manually.
       throwHttpErrors: false,
-      //headers: enrichHeadersWithAuthToken(cortexRuntimeCfgUrl, {}),
-      headers: { Cookie: cookie_header_value },
+      headers: enrichHeadersWithAuthToken(cortexRuntimeCfgUrl, {}),
+      //headers: { Cookie: cookie_header_value },
       timeout: httpTimeoutSettings,
       https: { rejectUnauthorized: false } // skip tls cert verification
     };
