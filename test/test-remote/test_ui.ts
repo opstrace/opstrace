@@ -346,10 +346,17 @@ suite("test_ui_with_headless_browser", function () {
 
       if (resp !== undefined) {
         logHTTPResponse(resp);
-        // TODO: build criterion to exit
-        // if (resp.statusCode === 200) {
-        //   return;
-        // }
+
+        if (resp.body.includes("tenantnamebar")) {
+          log.info('found "tenantnamebar" in response body:\n%s', resp.body);
+          log.info("success criterion, leave waiting loop");
+          return;
+        } else {
+          log.info(
+            'response does not yet contain "tenantnamebar:\n%s',
+            resp.body
+          );
+        }
       }
 
       log.info("outer retry: try again in 10 s");
