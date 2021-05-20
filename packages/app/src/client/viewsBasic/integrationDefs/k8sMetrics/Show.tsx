@@ -107,6 +107,17 @@ export const K8sMetricsShow = withTenantFromParams(
       integration.grafana_metadata
     ]);
 
+    const config = useMemo(
+      () =>
+        prometheusYaml({
+          clusterHost: window.location.host,
+          tenantName: tenant.name,
+          integrationId: integration.id,
+          deployNamespace: integration.data.deployNamespace
+        }),
+      [tenant.name, integration.id, integration.data.deployNamespace]
+    );
+
     return (
       <>
         <Box width="100%" height="100%" p={1}>
@@ -174,6 +185,7 @@ export const K8sMetricsShow = withTenantFromParams(
           integration={integration}
           tenant={tenant}
           isDashboardInstalled={isDashboardInstalled}
+          config={config}
         />
       </>
     );
@@ -183,20 +195,14 @@ export const K8sMetricsShow = withTenantFromParams(
 const InstallInstructions = ({
   integration,
   tenant,
-  isDashboardInstalled
-}: IntegrationProps & TenantProps & { isDashboardInstalled: boolean }) => {
+  isDashboardInstalled,
+  config
+}: IntegrationProps &
+  TenantProps & { isDashboardInstalled: boolean; config: string }) => {
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
   );
-
-  const makeConfig = () =>
-    prometheusYaml({
-      clusterHost: window.location.host,
-      tenantName: tenant.name,
-      integrationId: integration.id,
-      deployNamespace: integration.data.deployNamespace
-    });
 
   const deployYamlCommand = useMemo(
     () => commands.deployYaml(configFilename, tenant.name),
@@ -204,7 +210,7 @@ const InstallInstructions = ({
   );
 
   const downloadHandler = () => {
-    var configBlob = new Blob([makeConfig()], {
+    var configBlob = new Blob([config], {
       type: "application/x-yaml;charset=utf-8"
     });
     saveAs(configBlob, configFilename);
@@ -261,7 +267,7 @@ const InstallInstructions = ({
                     </Button>
                     <ViewConfigButtonModal
                       filename={configFilename}
-                      config={makeConfig()}
+                      config={config}
                     />
                   </Box>
                 </Box>
