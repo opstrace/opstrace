@@ -187,6 +187,11 @@ export class K8sResource implements Resource {
     this.resource.metadata.annotations[OPSTRACE_MANAGED_VERSION_KEY] =
       BUILD_INFO.VERSION_STRING;
   }
+  /**
+   * Annotate the object (via k8s metadata annotations) with a custom key/value
+   * pair, instructing the Opstrace controller to not delete/overwrite this
+   * config map when it detects change.
+   */
   setImmutable(): void {
     if (!this.resource.metadata.annotations) {
       this.resource.metadata.annotations = {};
