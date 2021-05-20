@@ -18,15 +18,22 @@ import { Integration } from "state/integrations/types";
 import { IntegrationDef } from "client/viewsBasic/integrationDefs/types";
 import { Tenant } from "state/tenant/types";
 
+const baseIntegrationsPath = (tenant: Tenant) =>
+  `/tenant/${tenant.name}/integrations`;
+
+export const allIntegrationsPath = ({ tenant }: { tenant: Tenant }) =>
+  `${baseIntegrationsPath(tenant)}/all`;
+
+export const installedIntegrationsPath = ({ tenant }: { tenant: Tenant }) =>
+  `${baseIntegrationsPath(tenant)}/installed`;
+
 export const addIntegrationPath = ({
   tenant,
   integrationDef
 }: {
   tenant: Tenant;
   integrationDef: IntegrationDef;
-}) => {
-  return `/tenant/${tenant.name}/integrations/all/add/${integrationDef.kind}`;
-};
+}) => `${baseIntegrationsPath(tenant)}/all/add/${integrationDef.kind}`;
 
 export const showIntegrationPath = ({
   tenant,
@@ -34,9 +41,7 @@ export const showIntegrationPath = ({
 }: {
   tenant: Tenant;
   integration: Integration;
-}) => {
-  return `/tenant/${tenant.name}/integrations/installed/${integration.id}`;
-};
+}) => `${baseIntegrationsPath(tenant)}/installed/${integration.id}`;
 
 export const editIntegrationPath = ({
   tenant,
@@ -44,6 +49,4 @@ export const editIntegrationPath = ({
 }: {
   tenant: Tenant;
   integration: Integration;
-}) => {
-  return `/tenant/${tenant.name}/integrations/installed/${integration.id}/edit`;
-};
+}) => `${baseIntegrationsPath(tenant)}/installed/${integration.id}/edit`;
