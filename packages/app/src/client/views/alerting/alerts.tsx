@@ -15,13 +15,15 @@
  */
 
 import React from "react";
-import Grid from "@material-ui/core/Grid";
 
+import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { grafanaUrl } from "client/viewsBasic/paths";
+
+import Grid from "@material-ui/core/Grid";
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 
 const Alerts = () => {
   const tenant = useSelectedTenant();
@@ -46,7 +48,9 @@ const Alerts = () => {
             <Grid item xs={12} md={6}>
               <Box display="flex" justifyContent="flex-end">
                 <ExternalLink
-                  href={`${window.location.protocol}//${tenantName}.${window.location.host}/prometheus/alerts`}
+                  href={`${grafanaUrl({
+                    tenant: tenantName
+                  })}/prometheus/alerts`}
                 >
                   View Alerts →
                 </ExternalLink>

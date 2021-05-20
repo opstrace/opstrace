@@ -15,16 +15,19 @@
  */
 
 import React from "react";
-import Grid from "@material-ui/core/Grid";
 
-import { Box } from "client/components/Box";
-import { Card, CardContent, CardHeader } from "client/components/Card";
-import Typography from "client/components/Typography/Typography";
 import { useSelectedTenant } from "state/tenant/hooks/useTenant";
-import { Button } from "client/components/Button";
+import { grafanaUrl } from "client/viewsBasic/paths";
+
 import { cmdID, useCommandService } from "client/services/Command";
 import { openTenantPickerCommandId } from "../tenant/TenantPicker";
 import { getKeysFromKeybinding } from "client/services/Command/util";
+
+import Grid from "@material-ui/core/Grid";
+import { Box } from "client/components/Box";
+import { Card, CardContent, CardHeader } from "client/components/Card";
+import Typography from "client/components/Typography/Typography";
+import { Button } from "client/components/Button";
 import { ExternalLink, Link } from "client/components/Link";
 
 const GettingStarted = () => {
@@ -101,7 +104,9 @@ const GettingStarted = () => {
               <Grid item xs={12} md={6}>
                 <Box display="flex" justifyContent="flex-end">
                   <ExternalLink
-                    href={`${window.location.protocol}//${tenantName}.${window.location.host}`}
+                    href={grafanaUrl({
+                      tenant: tenantName
+                    })}
                   >
                     View Grafana →
                   </ExternalLink>

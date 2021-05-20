@@ -17,11 +17,13 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
 
+import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { grafanaUrl } from "client/viewsBasic/paths";
+
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 
 const Dashboards = () => {
   const tenant = useSelectedTenant();
@@ -50,7 +52,9 @@ const Dashboards = () => {
                 <Grid item xs={12} md={6}>
                   <Box display="flex" justifyContent="flex-end">
                     <ExternalLink
-                      href={`${window.location.protocol}//${tenantName}.${window.location.host}/grafana/dashboards`}
+                      href={`${grafanaUrl({
+                        tenant: tenantName
+                      })}/grafana/dashboards`}
                     >
                       View Dashboards →
                     </ExternalLink>

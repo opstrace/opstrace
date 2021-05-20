@@ -17,6 +17,8 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
 
+import { grafanaUrl } from "client/viewsBasic/paths";
+
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
@@ -53,7 +55,9 @@ const TenantExplore = () => {
                 <Grid item xs={12} md={6}>
                   <Box display="flex" justifyContent="flex-end">
                     <ExternalLink
-                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/explore?orgId=1&left=%5B"now-1h","now","logs",%7B%7D%5D`}
+                      href={`${grafanaUrl({
+                        tenant
+                      })}/grafana/explore?orgId=1&left=%5B"now-1h","now","logs",%7B%7D%5D`}
                     >
                       Explore Logs →
                     </ExternalLink>
@@ -80,7 +84,9 @@ const TenantExplore = () => {
                 <Grid item xs={12} md={6}>
                   <Box display="flex" justifyContent="flex-end">
                     <ExternalLink
-                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/explore?orgId=1&left=%5B"now-1h","now","metrics",%7B%7D%5D`}
+                      href={`${grafanaUrl({
+                        tenant
+                      })}/grafana/explore?orgId=1&left=%5B"now-1h","now","metrics",%7B%7D%5D`}
                     >
                       Explore Metrics →
                     </ExternalLink>

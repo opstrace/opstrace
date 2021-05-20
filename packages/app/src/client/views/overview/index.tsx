@@ -17,6 +17,8 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
 
+import { grafanaUrl } from "client/viewsBasic/paths";
+
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
@@ -54,9 +56,7 @@ const TenantOverview = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Box display="flex" justifyContent="flex-end">
-                    <ExternalLink
-                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
-                    >
+                    <ExternalLink href={grafanaUrl({ tenant })}>
                       View Grafana →
                     </ExternalLink>
                   </Box>

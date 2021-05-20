@@ -22,6 +22,8 @@ import {
   takeEvery,
   put
 } from "redux-saga/effects";
+import axios from "axios";
+
 import * as actions from "../actions";
 import graphqlClient, { User } from "state/clients/graphqlClient";
 
@@ -31,7 +33,7 @@ import { State } from "state/reducer";
 import { getUserList } from "../hooks/useUserList";
 import { Tenants } from "state/tenant/types";
 import { selectTenantList } from "state/tenant/hooks/useTenantList";
-import axios from "axios";
+import { grafanaUrl } from "client/viewsBasic/paths";
 
 export default function* userTaskManager() {
   const sagas = [
@@ -123,7 +125,7 @@ function* persistDarkModePreference() {
         tenants.map(tenant =>
           axios({
             method: "put",
-            url: `${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/api/user/preferences`,
+            url: `${grafanaUrl({ tenant })}/grafana/api/user/preferences`,
             withCredentials: true,
             data: {
               homeDashboardId: 0,

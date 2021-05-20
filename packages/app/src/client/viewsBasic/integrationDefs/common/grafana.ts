@@ -19,9 +19,11 @@ import axios from "axios";
 import { Tenant } from "state/tenant/types";
 import { Integration } from "state/integrations/types";
 
+import { grafanaUrl } from "client/viewsBasic/paths";
+
 const makeUuid = (integration: Integration) => `i9n-${integration.id}`;
 const makeUrl = (tenant: Tenant, path: string) =>
-  `${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/api/${path}`;
+  `${grafanaUrl({ tenant })}/grafana/api/${path}`;
 
 type createFolderInfo = {
   // The numeric ID for the folder that was created (or updated).
