@@ -31,7 +31,8 @@ import { KUBECONFIG } from "../../server";
 function genCortexRuntimeConfigCM(kubeconfig: KubeConfig, yamldoc: string) {
   // name and namespace and data key: are all convention-based, must be in sync
   // with controller / installer.
-  return new ConfigMap(
+
+  const c = new ConfigMap(
     {
       apiVersion: "v1",
       data: {
@@ -40,16 +41,16 @@ function genCortexRuntimeConfigCM(kubeconfig: KubeConfig, yamldoc: string) {
       kind: "ConfigMap",
       metadata: {
         name: "cortex-runtime-config",
-        namespace: "cortex",
-        annotations: {
-          // Custom convention, so that the Opstrace controller will not
-          // delete/overwrite this config map when it detects change.
-          opstrace: "no-update"
-        }
+        namespace: "cortex"
       }
     },
     kubeconfig
   );
+
+  // Custom convention (using k8s annotations), so that the Opstrace controller
+  // will not delete/overwrite this config map when it detects change.
+  c.setImmutable();
+  return c;
 
   // Note that we could use the @kubernetes/client-node primitives more directly":
   // const k8sapi = KUBECONFIG.makeApiClient(CoreV1Api);
