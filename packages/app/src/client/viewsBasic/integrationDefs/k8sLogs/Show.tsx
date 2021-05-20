@@ -28,6 +28,7 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import { IntegrationProps } from "client/viewsBasic/tenantIntegrations/utils";
 import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
+import { installedIntegrationsPath } from "client/viewsBasic/tenantIntegrations/paths";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
@@ -128,7 +129,7 @@ export const K8sLogsShow = withTenantFromParams(
               size="small"
               startIcon={<ArrowLeft />}
               onClick={() =>
-                history.push(`/tenant/${tenant.name}/integrations/installed`)
+                history.push(installedIntegrationsPath({ tenant }))
               }
             >
               Installed Integrations
@@ -334,6 +335,7 @@ const UninstallInstructions = ({
   config
 }: IntegrationProps &
   TenantProps & { isDashboardInstalled: boolean; config: string }) => {
+  const history = useHistory();
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
@@ -351,22 +353,14 @@ const UninstallInstructions = ({
   };
 
   const deleteDashboardHandler = async () => {
-    const folder = await grafana.createFolder(integration, tenant);
+    await grafana.deleteFolder(integration, tenant);
 
-    for (const d of makePromtailDashboardRequests({
-      integrationId: integration.id,
-      folderId: folder.id
-    })) {
-      await grafana.createDashboard(tenant, d);
-    }
-
-    await graphqlClient.UpdateIntegrationGrafanaMetadata({
-      id: integration.id,
-      grafana_metadata: {
-        folder_id: folder.id,
-        folder_path: folder.urlPath as string
-      }
+    await graphqlClient.DeleteIntegration({
+      tenant_id: tenant.id,
+      id: integration.id
     });
+
+    history.push(installedIntegrationsPath({ tenant }));
   };
 
   return (
@@ -430,17 +424,17 @@ const UninstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  Delete Dashboards for this Integration.
+                  Delete this Integration including Dashboards.
                   <br />
                   <br />
                   <Button
                     variant="contained"
                     size="small"
-                    state="primary"
+                    state="error"
                     disabled={!isDashboardInstalled}
                     onClick={deleteDashboardHandler}
                   >
-                    Delete Dashboards
+                    Delete Integration
                   </Button>
                 </Box>
               </TimelineContent>
