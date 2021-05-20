@@ -19,13 +19,6 @@ import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { saveAs } from "file-saver";
 
-import Timeline from "@material-ui/lab/Timeline";
-import TimelineItem from "@material-ui/lab/TimelineItem";
-import TimelineSeparator from "@material-ui/lab/TimelineSeparator";
-import TimelineConnector from "@material-ui/lab/TimelineConnector";
-import TimelineContent from "@material-ui/lab/TimelineContent";
-import TimelineDot from "@material-ui/lab/TimelineDot";
-
 import { IntegrationProps } from "client/viewsBasic/tenantIntegrations/utils";
 import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
 import { installedIntegrationsPath } from "client/viewsBasic/tenantIntegrations/paths";
@@ -48,6 +41,14 @@ import graphqlClient from "state/clients/graphqlClient";
 import { CondRender } from "client/utils/rendering";
 
 import { ViewConfigButtonModal } from "client/viewsBasic/integrationDefs/common/ViewConfigButtonModal";
+import { DeleteBtn } from "client/viewsBasic/integrationDefs/common/DeleteBtn";
+
+import Timeline from "@material-ui/lab/Timeline";
+import TimelineItem from "@material-ui/lab/TimelineItem";
+import TimelineSeparator from "@material-ui/lab/TimelineSeparator";
+import TimelineConnector from "@material-ui/lab/TimelineConnector";
+import TimelineContent from "@material-ui/lab/TimelineContent";
+import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
@@ -336,7 +337,6 @@ const UninstallInstructions = ({
   config
 }: IntegrationProps &
   TenantProps & { isDashboardInstalled: boolean; config: string }) => {
-  const history = useHistory();
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
@@ -355,13 +355,6 @@ const UninstallInstructions = ({
 
   const deleteDashboardHandler = async () => {
     await grafana.deleteFolder(integration, tenant);
-
-    await graphqlClient.DeleteIntegration({
-      tenant_id: tenant.id,
-      id: integration.id
-    });
-
-    history.push(installedIntegrationsPath({ tenant }));
   };
 
   return (
@@ -428,15 +421,12 @@ const UninstallInstructions = ({
                   Delete this Integration including Dashboards.
                   <br />
                   <br />
-                  <Button
-                    variant="contained"
-                    size="small"
-                    state="error"
+                  <DeleteBtn
+                    integration={integration}
+                    tenant={tenant}
                     disabled={!isDashboardInstalled}
-                    onClick={deleteDashboardHandler}
-                  >
-                    Delete Integration
-                  </Button>
+                    deleteCallback={deleteDashboardHandler}
+                  />
                 </Box>
               </TimelineContent>
             </TimelineItem>
