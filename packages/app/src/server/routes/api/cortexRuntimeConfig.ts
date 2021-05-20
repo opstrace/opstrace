@@ -94,6 +94,37 @@ export default async function setCortexRuntimeConfigHandler(
   try {
     await createOrUpdateConfigMapWithRetry(newcm, true);
   } catch (err) {
+    // Expected error for invalid documents: response status
+    // 422 Unprocessable Entity
+    if (err.response !== undefined) {
+      // Reflecting the HTTP response returned by the k8s API. Example:
+      // 2021-05-19 18:33:24
+      // 2021-05-19T16:33:24.678Z warning: e.response: {
+      // 2021-05-19 18:33:24
+      //   "statusCode": 422,
+      // 2021-05-19 18:33:24
+      //   "body": {
+      // 2021-05-19 18:33:24
+      //     "kind": "Status",
+      // 2021-05-19 18:33:24
+      //     "apiVersion": "v1",
+      // 2021-05-19 18:33:24
+      //     "metadata": {},
+      // 2021-05-19 18:33:24
+      //     "status": "Failure",
+      const kr = err.response;
+      // forward status code.
+      res
+        .status(kr.statusCode)
+        .send(
+          `Error during config map update. ` +
+            `Kubernetes API returned status code ${kr.statusCode}. ` +
+            `Message: ${kr.body.message}`
+        );
+      return;
+    }
+
+    // When no HTTP response was received, i.e. upon transient errors.
     log.warning("error during config map update: %s", err); // log with stack trace
     res.status(500).send(`error during config map update: ${err.message}`);
     return;
