@@ -107,6 +107,19 @@ export const K8sLogsShow = withTenantFromParams(
       integration.grafana_metadata
     ]);
 
+    const config = useMemo(
+      () =>
+        promtailYaml({
+          clusterHost: window.location.host,
+          tenantName: tenant.name,
+          integrationId: integration.id,
+          deployNamespace: integration.data.deployNamespace,
+          // TODO: allow user to select dockerd or cri/containerd (different log formats)
+          logFormat: PromtailLogFormat.CRI
+        }),
+      [tenant.name, integration.id, integration.data.deployNamespace]
+    );
+
     return (
       <>
         <Box width="100%" height="100%" p={1}>
@@ -174,6 +187,13 @@ export const K8sLogsShow = withTenantFromParams(
           integration={integration}
           tenant={tenant}
           isDashboardInstalled={isDashboardInstalled}
+          config={config}
+        />
+        <UninstallInstructions
+          integration={integration}
+          tenant={tenant}
+          isDashboardInstalled={isDashboardInstalled}
+          config={config}
         />
       </>
     );
@@ -183,22 +203,14 @@ export const K8sLogsShow = withTenantFromParams(
 const InstallInstructions = ({
   integration,
   tenant,
-  isDashboardInstalled
-}: IntegrationProps & TenantProps & { isDashboardInstalled: boolean }) => {
+  isDashboardInstalled,
+  config
+}: IntegrationProps &
+  TenantProps & { isDashboardInstalled: boolean; config: string }) => {
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
   );
-
-  const makeConfig = () =>
-    promtailYaml({
-      clusterHost: window.location.host,
-      tenantName: tenant.name,
-      integrationId: integration.id,
-      deployNamespace: integration.data.deployNamespace,
-      // TODO: allow user to select dockerd or cri/containerd (different log formats)
-      logFormat: PromtailLogFormat.CRI
-    });
 
   const deployYamlCommand = useMemo(
     () => commands.deployYaml(configFilename, tenant.name),
@@ -206,7 +218,7 @@ const InstallInstructions = ({
   );
 
   const downloadHandler = () => {
-    var configBlob = new Blob([makeConfig()], {
+    var configBlob = new Blob([config], {
       type: "application/x-yaml;charset=utf-8"
     });
     saveAs(configBlob, configFilename);
@@ -263,7 +275,7 @@ const InstallInstructions = ({
                     </Button>
                     <ViewConfigButtonModal
                       filename={configFilename}
-                      config={makeConfig()}
+                      config={config}
                     />
                   </Box>
                 </Box>
@@ -304,6 +316,131 @@ const InstallInstructions = ({
                     onClick={dashboardHandler}
                   >
                     Install Dashboards
+                  </Button>
+                </Box>
+              </TimelineContent>
+            </TimelineItem>
+          </TimelineWrapper>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+};
+
+const UninstallInstructions = ({
+  integration,
+  tenant,
+  isDashboardInstalled,
+  config
+}: IntegrationProps &
+  TenantProps & { isDashboardInstalled: boolean; config: string }) => {
+  const configFilename = useMemo(
+    () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
+    [tenant.name, integration.kind]
+  );
+
+  const deleteYamlCommand = useMemo(() => commands.deleteYaml(configFilename), [
+    configFilename
+  ]);
+
+  const downloadHandler = () => {
+    var configBlob = new Blob([config], {
+      type: "application/x-yaml;charset=utf-8"
+    });
+    saveAs(configBlob, configFilename);
+  };
+
+  const deleteDashboardHandler = async () => {
+    const folder = await grafana.createFolder(integration, tenant);
+
+    for (const d of makePromtailDashboardRequests({
+      integrationId: integration.id,
+      folderId: folder.id
+    })) {
+      await grafana.createDashboard(tenant, d);
+    }
+
+    await graphqlClient.UpdateIntegrationGrafanaMetadata({
+      id: integration.id,
+      grafana_metadata: {
+        folder_id: folder.id,
+        folder_path: folder.urlPath as string
+      }
+    });
+  };
+
+  return (
+    <Box width="100%" height="100%" p={1}>
+      <Card>
+        <CardHeader
+          titleTypographyProps={{ variant: "h5" }}
+          title="Uninstall Instructions"
+        />
+        <CardContent>
+          <TimelineWrapper>
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDotWrapper variant="outlined" color="primary">
+                  1
+                </TimelineDotWrapper>
+                <TimelineConnector />
+              </TimelineSeparator>
+              <TimelineContent>
+                <Box flexGrow={1} pb={2}>
+                  {`Use the previously download config YAML or Download a fresh one here, it should be called "tenant-api-token-${tenant.name}".`}
+                  <Box pt={1}>
+                    <Button
+                      style={{ marginRight: 20 }}
+                      variant="contained"
+                      size="small"
+                      state="primary"
+                      onClick={downloadHandler}
+                    >
+                      Download YAML
+                    </Button>
+                    <ViewConfigButtonModal
+                      filename={configFilename}
+                      config={config}
+                    />
+                  </Box>
+                </Box>
+              </TimelineContent>
+            </TimelineItem>
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDotWrapper variant="outlined" color="primary">
+                  2
+                </TimelineDotWrapper>
+                <TimelineConnector />
+              </TimelineSeparator>
+              <TimelineContent>
+                <Box flexGrow={1} pb={2}>
+                  {`Run this command to remove Promtail`}
+                  <br />
+                  <code>{deleteYamlCommand}</code>
+                  <CopyToClipboardIcon text={deleteYamlCommand} />
+                </Box>
+              </TimelineContent>
+            </TimelineItem>
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDotWrapper variant="outlined" color="primary">
+                  3
+                </TimelineDotWrapper>
+              </TimelineSeparator>
+              <TimelineContent>
+                <Box flexGrow={1} pb={2}>
+                  Delete Dashboards for this Integration.
+                  <br />
+                  <br />
+                  <Button
+                    variant="contained"
+                    size="small"
+                    state="primary"
+                    disabled={!isDashboardInstalled}
+                    onClick={deleteDashboardHandler}
+                  >
+                    Delete Dashboards
                   </Button>
                 </Box>
               </TimelineContent>
