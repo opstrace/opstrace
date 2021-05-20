@@ -94,7 +94,6 @@ func main() {
 
 	// mux matches based on registration order, not prefix length.
 	router := mux.NewRouter()
-	// router.PathPrefix("/api/prom/push").HandlerFunc(reverseProxy.HandleWithDistributorProxy)
 
 	// Require non-deprecated push path (instead of also allowing /api/prom/push)
 	router.PathPrefix("/api/v1/push").HandlerFunc(distributorProxy.HandleWithProxy)
@@ -103,6 +102,22 @@ func main() {
 	// /api/v1/push to the querier for now.
 	router.PathPrefix("/api/v1").HandlerFunc(querierProxy.HandleWithProxy)
 
+	// All Cortex components expose various endpoints with configuration /
+	// debug details. https://cortexmetrics.io/docs/api/#all-services Expose
+	// some of them here. Maybe remove / restrict some of these later for
+	// security / isolation reasons. Note that /runtime_config and /config and
+	// /services are expected to look the same regardless of which Cortex
+	// component serves them (use the distributor, here).
+	router.PathPrefix("/runtime_config").HandlerFunc(distributorProxy.HandleWithProxy)
+	router.PathPrefix("/config").HandlerFunc(distributorProxy.HandleWithProxy)
+	router.PathPrefix("/services").HandlerFunc(distributorProxy.HandleWithProxy)
+	// This is distributor-specific (must be served by the Cortex distributor).
+	// "Displays a web page with the distributor hash ring status, including
+	// the state, healthy and last heartbeat time of each distributor.""
+	router.PathPrefix("/distributor/ring").HandlerFunc(distributorProxy.HandleWithProxy)
+
+	// Expose a special endpoint /metrics exposing metrics for _this API
+	// proxy_.
 	router.Handle("/metrics", promhttp.Handler())
 	router.Use(middleware.PrometheusMetrics("cortex_api_proxy"))
 
