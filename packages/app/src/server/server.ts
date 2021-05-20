@@ -89,6 +89,11 @@ function createServer() {
     })
   );
   app.use(bodyParser.json());
+
+  // Without this, the app would only allow for JSON request bodies. Allow for
+  // passing 'text', too (for example for YAML docs).
+  app.use(bodyParser.text({ type: "text/plain", defaultCharset: "utf-8" }));
+
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(
     expressWinston.logger({
