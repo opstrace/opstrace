@@ -22,6 +22,8 @@ import { usePickerService } from "client/services/Picker";
 
 import { deleteTenant } from "state/tenant/actions";
 
+import { grafanaUrl } from "client/viewsBasic/paths";
+
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -97,9 +99,7 @@ const TenantDetail = withTenantFromParams(({ tenant }: TenantProps) => {
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
                 <Attribute.Value>
-                  <ExternalLink
-                    href={`${window.location.protocol}//${tenant.name}.${window.location.host}`}
-                  >
+                  <ExternalLink href={grafanaUrl({ tenant })}>
                     {`${tenant.name}.${window.location.host}`}
                   </ExternalLink>
                 </Attribute.Value>

@@ -17,14 +17,20 @@
 import useSWR from "swr";
 import axios from "axios";
 
+import { grafanaUrl } from "client/viewsBasic/paths";
+
 export const useLoki = (path: string, tenantName: string = "system") => {
-  const url = `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/datasources/proxy/2/loki/api/v1/${path}`;
+  const url = `${grafanaUrl({
+    tenant: tenantName
+  })}/grafana/api/datasources/proxy/2/loki/api/v1/${path}`;
 
   return useSWR(url, fetcher);
 };
 
 export const usePrometheus = (path: string, tenantName: string = "system") => {
-  const url = `${window.location.protocol}//${tenantName}.${window.location.host}/grafana/api/datasources/proxy/1/api/v1/${path}`;
+  const url = `${grafanaUrl({
+    tenant: tenantName
+  })}/grafana/api/datasources/proxy/1/api/v1/${path}`;
 
   return useSWR(url, fetcher);
 };

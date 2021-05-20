@@ -29,6 +29,7 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 import { IntegrationProps } from "client/viewsBasic/tenantIntegrations/utils";
 import { IntegrationDefProps } from "client/viewsBasic/integrationDefs/utils";
 import { installedIntegrationsPath } from "client/viewsBasic/tenantIntegrations/paths";
+import { grafanaUrl } from "client/viewsBasic/paths";
 
 import { withTenantFromParams, TenantProps } from "client/views/tenant/utils";
 
@@ -172,7 +173,7 @@ export const K8sLogsShow = withTenantFromParams(
                   <Attribute.Key>
                     <ExternalLink
                       target="_blank"
-                      href={`${window.location.protocol}//${tenant.name}.${window.location.host}${grafanaFolderPath}`}
+                      href={`${grafanaUrl({ tenant })}${grafanaFolderPath}`}
                     >
                       <Button state="primary" variant="outlined" size="medium">
                         View Grafana Dashboards
