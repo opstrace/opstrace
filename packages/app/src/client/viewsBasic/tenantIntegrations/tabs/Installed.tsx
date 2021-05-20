@@ -39,9 +39,6 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 
-// Temporary direct import
-import IntegrationStatus from "client/viewsBasic/integrationDefs/k8sMetrics/Status";
-
 const useStyles = makeStyles(theme => ({
   integrationRow: {
     cursor: "pointer"
