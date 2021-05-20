@@ -984,28 +984,27 @@ export function CortexResources(
     )
   );
 
-  collection.add(
-    new ConfigMap(
-      {
-        apiVersion: "v1",
-        data: {
-          "runtime-config.yaml": yaml.safeDump(runtimeConfigDefault)
-        },
-        kind: "ConfigMap",
-        metadata: {
-          name: "cortex-runtime-config",
-          namespace,
-          annotations: {
-            // Custom convention, so that the Opstrace controller will not
-            // delete/overwrite this config map when it detects change. Note that
-            // the UI API implementation is expected to mutate this config map.
-            opstrace: "no-update"
-          }
-        }
+  const rtccm = new ConfigMap(
+    {
+      apiVersion: "v1",
+      data: {
+        "runtime-config.yaml": yaml.safeDump(runtimeConfigDefault)
       },
-      kubeConfig
-    )
+      kind: "ConfigMap",
+      metadata: {
+        name: "cortex-runtime-config",
+        namespace
+      }
+    },
+    kubeConfig
   );
+
+  // Set immutable: annotation-based custom convention, so that the Opstrace
+  // controller will not delete/overwrite this config map when it detects
+  // change. Note that the UI API implementation is expected to mutate this
+  // config map.
+  rtccm.setImmutable();
+  collection.add(rtccm);
 
   collection.add(
     new Deployment(
