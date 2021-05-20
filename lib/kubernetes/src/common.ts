@@ -184,7 +184,8 @@ export class K8sResource implements Resource {
     if (!this.resource.metadata.annotations) {
       this.resource.metadata.annotations = {};
     }
-    this.resource.metadata.annotations[OPSTRACE_MANAGED_VERSION_KEY] = BUILD_INFO.VERSION_STRING;
+    this.resource.metadata.annotations[OPSTRACE_MANAGED_VERSION_KEY] =
+      BUILD_INFO.VERSION_STRING;
   }
   setImmutable(): void {
     if (!this.resource.metadata.annotations) {
