@@ -1,0 +1,12 @@
+# Returns the integrations for a single tenant.
+query GetIntegrations($tenant_id: uuid!) {
+  integration(where: {tenant_id: {_eq: $tenant_id}}) {
+    id
+    tenant_id
+    name
+    kind
+    data
+    created_at
+    updated_at
+  }
+}

@@ -48,22 +48,11 @@ type Mutation {
 
 
 type Query {
-  validateCredential (
+  validateIntegration (
     tenant_id: String!
     name: String!
     type: String!
     value: json!
-  ): StatusResponse
-}
-
-
-type Query {
-  validateExporter (
-    tenant_id: String!
-    name: String!
-    type: String!
-    config: json!
-    credential: String
   ): StatusResponse
 }
 

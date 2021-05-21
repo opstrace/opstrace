@@ -1,0 +1,10 @@
+mutation UpdateIntegrationData($id: uuid!, $data: jsonb!) {
+  update_integration_by_pk(
+    pk_columns: { id: $id },
+    _set: { data: $data }
+  ) {
+    id
+    data
+    updated_at
+  }
+}

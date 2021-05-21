@@ -211,13 +211,11 @@ rules:
 
 Cloud credentials and exporter configs are stored directly in Hasura/Postgres. The `config-api` service provides HTTP endpoints for users to configure their credentials and exporters, while also providing Hasura endpoints for validating them.
 
-### Credential and Exporter Hasura Actions: validateCredential/validateExporter
+### Integration Hasura Actions: validateIntegration
 
-These actions allow the UI to execute the validation code implemented in the Go service. This is effectively "honor system" and just avoids the UI needing to reimplement validation in the UI directly. Once validation has passed, the UI can then update the validated Credential or Exporter in question via Hasura directly.
+These actions allow the UI to execute the validation code implemented in the Go service. This is effectively "honor system" and just avoids the UI needing to reimplement validation in the UI directly. Once validation has passed, the UI can then update the validated Integration in question via Hasura directly.
 
 The HTTP endpoints described in the next section perform the same validation internally, and will reject `POST` submissions that do not pass validation.
-
-NOTE: As of this writing (March 2021) these endpoints are not yet fully functional and are still subject to change pending the UI starting to need them. As such we do not document any examples here since they are likely to change anyway.
 
 ### Credential and Exporter HTTP endpoints
 

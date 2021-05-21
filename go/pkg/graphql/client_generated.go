@@ -81,873 +81,6 @@ func unmarshalGraphQLReponse(b []byte) (*GraphQLResponse, error) {
 }
 
 //
-// mutation CreateCredentials($credentials: [credential_insert_input!]!)
-//
-
-type CreateCredentialsVariables struct {
-	Credentials *[]CredentialInsertInput `json:"credentials,omitempty"`
-}
-
-type CreateCredentialsResponse struct {
-	InsertCredential struct {
-		Returning []struct {
-			Tenant string `json:"tenant"`
-			Name   string `json:"name"`
-		} `json:"returning"`
-	} `json:"insert_credential"`
-}
-
-type CreateCredentialsRequest struct {
-	*http.Request
-}
-
-func NewCreateCredentialsRequest(url string, vars *CreateCredentialsVariables) (*CreateCredentialsRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation CreateCredentials($credentials: [credential_insert_input!]!) {
-  insert_credential(objects: $credentials) {
-    returning {
-      tenant
-      name
-    }
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &CreateCredentialsRequest{req}, nil
-}
-
-func (req *CreateCredentialsRequest) Execute(client *http.Client) (*CreateCredentialsResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result CreateCredentialsResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func CreateCredentials(url string, client *http.Client, vars *CreateCredentialsVariables) (*CreateCredentialsResponse, error) {
-	req, err := NewCreateCredentialsRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) CreateCredentials(vars *CreateCredentialsVariables) (*CreateCredentialsResponse, error) {
-	return CreateCredentials(client.Url, client.Client, vars)
-}
-
-//
-// mutation DeleteCredential($tenant: String!, $name: String!)
-//
-
-type DeleteCredentialVariables struct {
-	Tenant String `json:"tenant"`
-	Name   String `json:"name"`
-}
-
-type DeleteCredentialResponse struct {
-	DeleteCredentialByPk struct {
-		Tenant string `json:"tenant"`
-		Name   string `json:"name"`
-	} `json:"delete_credential_by_pk"`
-}
-
-type DeleteCredentialRequest struct {
-	*http.Request
-}
-
-func NewDeleteCredentialRequest(url string, vars *DeleteCredentialVariables) (*DeleteCredentialRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation DeleteCredential($tenant: String!, $name: String!) {
-  delete_credential_by_pk(tenant: $tenant, name: $name) {
-    tenant
-    name
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &DeleteCredentialRequest{req}, nil
-}
-
-func (req *DeleteCredentialRequest) Execute(client *http.Client) (*DeleteCredentialResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result DeleteCredentialResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func DeleteCredential(url string, client *http.Client, vars *DeleteCredentialVariables) (*DeleteCredentialResponse, error) {
-	req, err := NewDeleteCredentialRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) DeleteCredential(vars *DeleteCredentialVariables) (*DeleteCredentialResponse, error) {
-	return DeleteCredential(client.Url, client.Client, vars)
-}
-
-//
-// query GetCredential($tenant: String!, $name: String!)
-//
-
-type GetCredentialVariables struct {
-	Tenant String `json:"tenant"`
-	Name   String `json:"name"`
-}
-
-type GetCredentialResponse struct {
-	CredentialByPk struct {
-		Tenant    string `json:"tenant"`
-		Name      string `json:"name"`
-		Type      string `json:"type"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
-	} `json:"credential_by_pk"`
-}
-
-type GetCredentialRequest struct {
-	*http.Request
-}
-
-func NewGetCredentialRequest(url string, vars *GetCredentialVariables) (*GetCredentialRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetCredential($tenant: String!, $name: String!) {
-  credential_by_pk(tenant: $tenant, name: $name) {
-    tenant
-    name
-    type
-    created_at
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetCredentialRequest{req}, nil
-}
-
-func (req *GetCredentialRequest) Execute(client *http.Client) (*GetCredentialResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetCredentialResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetCredential(url string, client *http.Client, vars *GetCredentialVariables) (*GetCredentialResponse, error) {
-	req, err := NewGetCredentialRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetCredential(vars *GetCredentialVariables) (*GetCredentialResponse, error) {
-	return GetCredential(client.Url, client.Client, vars)
-}
-
-//
-// query GetCredentials($tenant: String!)
-//
-
-type GetCredentialsVariables struct {
-	Tenant String `json:"tenant"`
-}
-
-type GetCredentialsResponse struct {
-	Credential []struct {
-		Tenant    string `json:"tenant"`
-		Name      string `json:"name"`
-		Type      string `json:"type"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
-	} `json:"credential"`
-}
-
-type GetCredentialsRequest struct {
-	*http.Request
-}
-
-func NewGetCredentialsRequest(url string, vars *GetCredentialsVariables) (*GetCredentialsRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetCredentials($tenant: String!) {
-  credential(where: {tenant: {_eq: $tenant}}) {
-    tenant
-    name
-    type
-    created_at
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetCredentialsRequest{req}, nil
-}
-
-func (req *GetCredentialsRequest) Execute(client *http.Client) (*GetCredentialsResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetCredentialsResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetCredentials(url string, client *http.Client, vars *GetCredentialsVariables) (*GetCredentialsResponse, error) {
-	req, err := NewGetCredentialsRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetCredentials(vars *GetCredentialsVariables) (*GetCredentialsResponse, error) {
-	return GetCredentials(client.Url, client.Client, vars)
-}
-
-//
-// query GetCredentialsDump
-//
-
-type GetCredentialsDumpResponse struct {
-	Credential []struct {
-		Tenant    string `json:"tenant"`
-		Name      string `json:"name"`
-		Type      string `json:"type"`
-		Value     string `json:"value"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
-	} `json:"credential"`
-}
-
-type GetCredentialsDumpRequest struct {
-	*http.Request
-}
-
-func NewGetCredentialsDumpRequest(url string) (*GetCredentialsDumpRequest, error) {
-	b, err := json.Marshal(&GraphQLOperation{
-		Query: `query GetCredentialsDump {
-  credential {
-    tenant
-    name
-    type
-    value
-    created_at
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetCredentialsDumpRequest{req}, nil
-}
-
-func (req *GetCredentialsDumpRequest) Execute(client *http.Client) (*GetCredentialsDumpResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetCredentialsDumpResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetCredentialsDump(url string, client *http.Client) (*GetCredentialsDumpResponse, error) {
-	req, err := NewGetCredentialsDumpRequest(url)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetCredentialsDump() (*GetCredentialsDumpResponse, error) {
-	return GetCredentialsDump(client.Url, client.Client)
-}
-
-//
-// mutation UpdateCredential($tenant: String!, $name: String!, $value: json!, $updated_at: timestamptz!)
-//
-
-type UpdateCredentialVariables struct {
-	Tenant    String      `json:"tenant"`
-	Name      String      `json:"name"`
-	Value     Json        `json:"value"`
-	UpdatedAt Timestamptz `json:"updated_at"`
-}
-
-type UpdateCredentialResponse struct {
-	UpdateCredentialByPk struct {
-		Tenant string `json:"tenant"`
-		Name   string `json:"name"`
-	} `json:"update_credential_by_pk"`
-}
-
-type UpdateCredentialRequest struct {
-	*http.Request
-}
-
-func NewUpdateCredentialRequest(url string, vars *UpdateCredentialVariables) (*UpdateCredentialRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation UpdateCredential($tenant: String!, $name: String!, $value: json!, $updated_at: timestamptz!) {
-  update_credential_by_pk(_set: {value: $value, updated_at: $updated_at}, pk_columns: {tenant: $tenant, name: $name}) {
-    tenant
-    name
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &UpdateCredentialRequest{req}, nil
-}
-
-func (req *UpdateCredentialRequest) Execute(client *http.Client) (*UpdateCredentialResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result UpdateCredentialResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func UpdateCredential(url string, client *http.Client, vars *UpdateCredentialVariables) (*UpdateCredentialResponse, error) {
-	req, err := NewUpdateCredentialRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) UpdateCredential(vars *UpdateCredentialVariables) (*UpdateCredentialResponse, error) {
-	return UpdateCredential(client.Url, client.Client, vars)
-}
-
-//
-// mutation CreateExporters($exporters: [exporter_insert_input!]!)
-//
-
-type CreateExportersVariables struct {
-	Exporters *[]ExporterInsertInput `json:"exporters,omitempty"`
-}
-
-type CreateExportersResponse struct {
-	InsertExporter struct {
-		Returning []struct {
-			Tenant string `json:"tenant"`
-			Name   string `json:"name"`
-		} `json:"returning"`
-	} `json:"insert_exporter"`
-}
-
-type CreateExportersRequest struct {
-	*http.Request
-}
-
-func NewCreateExportersRequest(url string, vars *CreateExportersVariables) (*CreateExportersRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation CreateExporters($exporters: [exporter_insert_input!]!) {
-  insert_exporter(objects: $exporters) {
-    returning {
-      tenant
-      name
-    }
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &CreateExportersRequest{req}, nil
-}
-
-func (req *CreateExportersRequest) Execute(client *http.Client) (*CreateExportersResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result CreateExportersResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func CreateExporters(url string, client *http.Client, vars *CreateExportersVariables) (*CreateExportersResponse, error) {
-	req, err := NewCreateExportersRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) CreateExporters(vars *CreateExportersVariables) (*CreateExportersResponse, error) {
-	return CreateExporters(client.Url, client.Client, vars)
-}
-
-//
-// mutation DeleteExporter($tenant: String!, $name: String!)
-//
-
-type DeleteExporterVariables struct {
-	Tenant String `json:"tenant"`
-	Name   String `json:"name"`
-}
-
-type DeleteExporterResponse struct {
-	DeleteExporterByPk struct {
-		Tenant string `json:"tenant"`
-		Name   string `json:"name"`
-	} `json:"delete_exporter_by_pk"`
-}
-
-type DeleteExporterRequest struct {
-	*http.Request
-}
-
-func NewDeleteExporterRequest(url string, vars *DeleteExporterVariables) (*DeleteExporterRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation DeleteExporter($tenant: String!, $name: String!) {
-  delete_exporter_by_pk(tenant: $tenant, name: $name) {
-    tenant
-    name
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &DeleteExporterRequest{req}, nil
-}
-
-func (req *DeleteExporterRequest) Execute(client *http.Client) (*DeleteExporterResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result DeleteExporterResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func DeleteExporter(url string, client *http.Client, vars *DeleteExporterVariables) (*DeleteExporterResponse, error) {
-	req, err := NewDeleteExporterRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) DeleteExporter(vars *DeleteExporterVariables) (*DeleteExporterResponse, error) {
-	return DeleteExporter(client.Url, client.Client, vars)
-}
-
-//
-// query GetExporter($tenant: String!, $name: String!)
-//
-
-type GetExporterVariables struct {
-	Tenant String `json:"tenant"`
-	Name   String `json:"name"`
-}
-
-type GetExporterResponse struct {
-	ExporterByPk struct {
-		Tenant     string `json:"tenant"`
-		Name       string `json:"name"`
-		Type       string `json:"type"`
-		Credential string `json:"credential"`
-		Config     string `json:"config"`
-		CreatedAt  string `json:"created_at"`
-		UpdatedAt  string `json:"updated_at"`
-	} `json:"exporter_by_pk"`
-}
-
-type GetExporterRequest struct {
-	*http.Request
-}
-
-func NewGetExporterRequest(url string, vars *GetExporterVariables) (*GetExporterRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetExporter($tenant: String!, $name: String!) {
-  exporter_by_pk(tenant: $tenant, name: $name) {
-    tenant
-    name
-    type
-    credential
-    config
-    created_at
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetExporterRequest{req}, nil
-}
-
-func (req *GetExporterRequest) Execute(client *http.Client) (*GetExporterResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetExporterResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetExporter(url string, client *http.Client, vars *GetExporterVariables) (*GetExporterResponse, error) {
-	req, err := NewGetExporterRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetExporter(vars *GetExporterVariables) (*GetExporterResponse, error) {
-	return GetExporter(client.Url, client.Client, vars)
-}
-
-//
-// query GetExporters($tenant: String!)
-//
-
-type GetExportersVariables struct {
-	Tenant String `json:"tenant"`
-}
-
-type GetExportersResponse struct {
-	Exporter []struct {
-		Tenant     string `json:"tenant"`
-		Name       string `json:"name"`
-		Type       string `json:"type"`
-		Credential string `json:"credential"`
-		Config     string `json:"config"`
-		CreatedAt  string `json:"created_at"`
-		UpdatedAt  string `json:"updated_at"`
-	} `json:"exporter"`
-}
-
-type GetExportersRequest struct {
-	*http.Request
-}
-
-func NewGetExportersRequest(url string, vars *GetExportersVariables) (*GetExportersRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetExporters($tenant: String!) {
-  exporter(where: {tenant: {_eq: $tenant}}) {
-    tenant
-    name
-    type
-    credential
-    config
-    created_at
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetExportersRequest{req}, nil
-}
-
-func (req *GetExportersRequest) Execute(client *http.Client) (*GetExportersResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetExportersResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetExporters(url string, client *http.Client, vars *GetExportersVariables) (*GetExportersResponse, error) {
-	req, err := NewGetExportersRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetExporters(vars *GetExportersVariables) (*GetExportersResponse, error) {
-	return GetExporters(client.Url, client.Client, vars)
-}
-
-//
-// query GetExportersDump
-//
-
-type GetExportersDumpResponse struct {
-	Exporter []struct {
-		Tenant     string `json:"tenant"`
-		Name       string `json:"name"`
-		Type       string `json:"type"`
-		Credential string `json:"credential"`
-		Config     string `json:"config"`
-		CreatedAt  string `json:"created_at"`
-		UpdatedAt  string `json:"updated_at"`
-	} `json:"exporter"`
-}
-
-type GetExportersDumpRequest struct {
-	*http.Request
-}
-
-func NewGetExportersDumpRequest(url string) (*GetExportersDumpRequest, error) {
-	b, err := json.Marshal(&GraphQLOperation{
-		Query: `query GetExportersDump {
-  exporter {
-    tenant
-    name
-    type
-    credential
-    config
-    created_at
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetExportersDumpRequest{req}, nil
-}
-
-func (req *GetExportersDumpRequest) Execute(client *http.Client) (*GetExportersDumpResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetExportersDumpResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetExportersDump(url string, client *http.Client) (*GetExportersDumpResponse, error) {
-	req, err := NewGetExportersDumpRequest(url)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetExportersDump() (*GetExportersDumpResponse, error) {
-	return GetExportersDump(client.Url, client.Client)
-}
-
-//
-// mutation UpdateExporter($tenant: String!, $name: String!, $config: json!, $credential: String, $updated_at: timestamptz!)
-//
-
-type UpdateExporterVariables struct {
-	Tenant     String      `json:"tenant"`
-	Name       String      `json:"name"`
-	Config     Json        `json:"config"`
-	Credential *String     `json:"credential,omitempty"`
-	UpdatedAt  Timestamptz `json:"updated_at"`
-}
-
-type UpdateExporterResponse struct {
-	UpdateExporterByPk struct {
-		Tenant string `json:"tenant"`
-		Name   string `json:"name"`
-	} `json:"update_exporter_by_pk"`
-}
-
-type UpdateExporterRequest struct {
-	*http.Request
-}
-
-func NewUpdateExporterRequest(url string, vars *UpdateExporterVariables) (*UpdateExporterRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation UpdateExporter($tenant: String!, $name: String!, $config: json!, $credential: String, $updated_at: timestamptz!) {
-  update_exporter_by_pk(_set: {config: $config, credential: $credential, updated_at: $updated_at}, pk_columns: {tenant: $tenant, name: $name}) {
-    tenant
-    name
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &UpdateExporterRequest{req}, nil
-}
-
-func (req *UpdateExporterRequest) Execute(client *http.Client) (*UpdateExporterResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result UpdateExporterResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func UpdateExporter(url string, client *http.Client, vars *UpdateExporterVariables) (*UpdateExporterResponse, error) {
-	req, err := NewUpdateExporterRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) UpdateExporter(vars *UpdateExporterVariables) (*UpdateExporterResponse, error) {
-	return UpdateExporter(client.Url, client.Client, vars)
-}
-
-//
 // mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!)
 //
 
@@ -1016,6 +149,163 @@ func DeleteIntegration(url string, client *http.Client, vars *DeleteIntegrationV
 
 func (client *Client) DeleteIntegration(vars *DeleteIntegrationVariables) (*DeleteIntegrationResponse, error) {
 	return DeleteIntegration(client.Url, client.Client, vars)
+}
+
+//
+// query GetIntegration($tenant_id: uuid!, $name: String!)
+//
+
+type GetIntegrationVariables struct {
+	TenantId UUID   `json:"tenant_id"`
+	Name     String `json:"name"`
+}
+
+type GetIntegrationResponse struct {
+	Integration []struct {
+		ID        string `json:"id"`
+		TenantId  string `json:"tenant_id"`
+		Name      string `json:"name"`
+		Kind      string `json:"kind"`
+		Data      string `json:"data"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	} `json:"integration"`
+}
+
+type GetIntegrationRequest struct {
+	*http.Request
+}
+
+func NewGetIntegrationRequest(url string, vars *GetIntegrationVariables) (*GetIntegrationRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetIntegration($tenant_id: uuid!, $name: String!) {
+  integration(where: {tenant_id: {_eq: $tenant_id}, name: {_eq: $name}}) {
+    id
+    tenant_id
+    name
+    kind
+    data
+    created_at
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetIntegrationRequest{req}, nil
+}
+
+func (req *GetIntegrationRequest) Execute(client *http.Client) (*GetIntegrationResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetIntegrationResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetIntegration(url string, client *http.Client, vars *GetIntegrationVariables) (*GetIntegrationResponse, error) {
+	req, err := NewGetIntegrationRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetIntegration(vars *GetIntegrationVariables) (*GetIntegrationResponse, error) {
+	return GetIntegration(client.Url, client.Client, vars)
+}
+
+//
+// query GetIntegrations($tenant_id: uuid!)
+//
+
+type GetIntegrationsVariables struct {
+	TenantId UUID `json:"tenant_id"`
+}
+
+type GetIntegrationsResponse struct {
+	Integration []struct {
+		ID        string `json:"id"`
+		TenantId  string `json:"tenant_id"`
+		Name      string `json:"name"`
+		Kind      string `json:"kind"`
+		Data      string `json:"data"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+	} `json:"integration"`
+}
+
+type GetIntegrationsRequest struct {
+	*http.Request
+}
+
+func NewGetIntegrationsRequest(url string, vars *GetIntegrationsVariables) (*GetIntegrationsRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `query GetIntegrations($tenant_id: uuid!) {
+  integration(where: {tenant_id: {_eq: $tenant_id}}) {
+    id
+    tenant_id
+    name
+    kind
+    data
+    created_at
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetIntegrationsRequest{req}, nil
+}
+
+func (req *GetIntegrationsRequest) Execute(client *http.Client) (*GetIntegrationsResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetIntegrationsResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetIntegrations(url string, client *http.Client, vars *GetIntegrationsVariables) (*GetIntegrationsResponse, error) {
+	req, err := NewGetIntegrationsRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetIntegrations(vars *GetIntegrationsVariables) (*GetIntegrationsResponse, error) {
+	return GetIntegrations(client.Url, client.Client, vars)
 }
 
 //
@@ -1102,6 +392,151 @@ func (client *Client) InsertIntegration(vars *InsertIntegrationVariables) (*Inse
 }
 
 //
+// mutation InsertIntegrations($integrations: [integration_insert_input!]!)
+//
+
+type InsertIntegrationsVariables struct {
+	Integrations *[]IntegrationInsertInput `json:"integrations,omitempty"`
+}
+
+type InsertIntegrationsResponse struct {
+	InsertIntegration struct {
+		Returning []struct {
+			TenantId string `json:"tenant_id"`
+			ID       string `json:"id"`
+			Name     string `json:"name"`
+		} `json:"returning"`
+	} `json:"insert_integration"`
+}
+
+type InsertIntegrationsRequest struct {
+	*http.Request
+}
+
+func NewInsertIntegrationsRequest(url string, vars *InsertIntegrationsVariables) (*InsertIntegrationsRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation InsertIntegrations($integrations: [integration_insert_input!]!) {
+  insert_integration(objects: $integrations) {
+    returning {
+      tenant_id
+      id
+      name
+    }
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &InsertIntegrationsRequest{req}, nil
+}
+
+func (req *InsertIntegrationsRequest) Execute(client *http.Client) (*InsertIntegrationsResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result InsertIntegrationsResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func InsertIntegrations(url string, client *http.Client, vars *InsertIntegrationsVariables) (*InsertIntegrationsResponse, error) {
+	req, err := NewInsertIntegrationsRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) InsertIntegrations(vars *InsertIntegrationsVariables) (*InsertIntegrationsResponse, error) {
+	return InsertIntegrations(client.Url, client.Client, vars)
+}
+
+//
+// mutation UpdateIntegrationData($id: uuid!, $data: jsonb!)
+//
+
+type UpdateIntegrationDataVariables struct {
+	ID   UUID  `json:"id"`
+	Data Jsonb `json:"data"`
+}
+
+type UpdateIntegrationDataResponse struct {
+	UpdateIntegrationByPk struct {
+		ID        string `json:"id"`
+		Data      string `json:"data"`
+		UpdatedAt string `json:"updated_at"`
+	} `json:"update_integration_by_pk"`
+}
+
+type UpdateIntegrationDataRequest struct {
+	*http.Request
+}
+
+func NewUpdateIntegrationDataRequest(url string, vars *UpdateIntegrationDataVariables) (*UpdateIntegrationDataRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpdateIntegrationData($id: uuid!, $data: jsonb!) {
+  update_integration_by_pk(pk_columns: {id: $id}, _set: {data: $data}) {
+    id
+    data
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpdateIntegrationDataRequest{req}, nil
+}
+
+func (req *UpdateIntegrationDataRequest) Execute(client *http.Client) (*UpdateIntegrationDataResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpdateIntegrationDataResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateIntegrationData(url string, client *http.Client, vars *UpdateIntegrationDataVariables) (*UpdateIntegrationDataResponse, error) {
+	req, err := NewUpdateIntegrationDataRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpdateIntegrationData(vars *UpdateIntegrationDataVariables) (*UpdateIntegrationDataResponse, error) {
+	return UpdateIntegrationData(client.Url, client.Client, vars)
+}
+
+//
 // mutation UpdateIntegrationGrafanaMetadata($id: uuid!, $grafana_metadata: jsonb!)
 //
 
@@ -1170,6 +605,77 @@ func UpdateIntegrationGrafanaMetadata(url string, client *http.Client, vars *Upd
 
 func (client *Client) UpdateIntegrationGrafanaMetadata(vars *UpdateIntegrationGrafanaMetadataVariables) (*UpdateIntegrationGrafanaMetadataResponse, error) {
 	return UpdateIntegrationGrafanaMetadata(client.Url, client.Client, vars)
+}
+
+//
+// mutation UpdateIntegrationName($id: uuid!, $name: String!)
+//
+
+type UpdateIntegrationNameVariables struct {
+	ID   UUID   `json:"id"`
+	Name String `json:"name"`
+}
+
+type UpdateIntegrationNameResponse struct {
+	UpdateIntegrationByPk struct {
+		ID        string `json:"id"`
+		Name      string `json:"name"`
+		UpdatedAt string `json:"updated_at"`
+	} `json:"update_integration_by_pk"`
+}
+
+type UpdateIntegrationNameRequest struct {
+	*http.Request
+}
+
+func NewUpdateIntegrationNameRequest(url string, vars *UpdateIntegrationNameVariables) (*UpdateIntegrationNameRequest, error) {
+	variables, err := json.Marshal(vars)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(&GraphQLOperation{
+		Variables: variables,
+		Query: `mutation UpdateIntegrationName($id: uuid!, $name: String!) {
+  update_integration_by_pk(pk_columns: {id: $id}, _set: {name: $name}) {
+    id
+    name
+    updated_at
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &UpdateIntegrationNameRequest{req}, nil
+}
+
+func (req *UpdateIntegrationNameRequest) Execute(client *http.Client) (*UpdateIntegrationNameResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result UpdateIntegrationNameResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateIntegrationName(url string, client *http.Client, vars *UpdateIntegrationNameVariables) (*UpdateIntegrationNameResponse, error) {
+	req, err := NewUpdateIntegrationNameRequest(url, vars)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) UpdateIntegrationName(vars *UpdateIntegrationNameVariables) (*UpdateIntegrationNameResponse, error) {
+	return UpdateIntegrationName(client.Url, client.Client, vars)
 }
 
 //
@@ -2217,64 +1723,6 @@ const (
 	ErrorTypeVALIDATIONFAILED ErrorType = "VALIDATION_FAILED"
 )
 
-type CredentialConstraint string
-
-const (
-	CredentialConstraintCredentialPkey CredentialConstraint = "credential_pkey"
-)
-
-type CredentialSelectColumn string
-
-const (
-	CredentialSelectColumnCreatedAt CredentialSelectColumn = "created_at"
-	CredentialSelectColumnName      CredentialSelectColumn = "name"
-	CredentialSelectColumnTenant    CredentialSelectColumn = "tenant"
-	CredentialSelectColumnType      CredentialSelectColumn = "type"
-	CredentialSelectColumnUpdatedAt CredentialSelectColumn = "updated_at"
-	CredentialSelectColumnValue     CredentialSelectColumn = "value"
-)
-
-type CredentialUpdateColumn string
-
-const (
-	CredentialUpdateColumnCreatedAt CredentialUpdateColumn = "created_at"
-	CredentialUpdateColumnName      CredentialUpdateColumn = "name"
-	CredentialUpdateColumnTenant    CredentialUpdateColumn = "tenant"
-	CredentialUpdateColumnType      CredentialUpdateColumn = "type"
-	CredentialUpdateColumnUpdatedAt CredentialUpdateColumn = "updated_at"
-	CredentialUpdateColumnValue     CredentialUpdateColumn = "value"
-)
-
-type ExporterConstraint string
-
-const (
-	ExporterConstraintExporterPkey ExporterConstraint = "exporter_pkey"
-)
-
-type ExporterSelectColumn string
-
-const (
-	ExporterSelectColumnConfig     ExporterSelectColumn = "config"
-	ExporterSelectColumnCreatedAt  ExporterSelectColumn = "created_at"
-	ExporterSelectColumnCredential ExporterSelectColumn = "credential"
-	ExporterSelectColumnName       ExporterSelectColumn = "name"
-	ExporterSelectColumnTenant     ExporterSelectColumn = "tenant"
-	ExporterSelectColumnType       ExporterSelectColumn = "type"
-	ExporterSelectColumnUpdatedAt  ExporterSelectColumn = "updated_at"
-)
-
-type ExporterUpdateColumn string
-
-const (
-	ExporterUpdateColumnConfig     ExporterUpdateColumn = "config"
-	ExporterUpdateColumnCreatedAt  ExporterUpdateColumn = "created_at"
-	ExporterUpdateColumnCredential ExporterUpdateColumn = "credential"
-	ExporterUpdateColumnName       ExporterUpdateColumn = "name"
-	ExporterUpdateColumnTenant     ExporterUpdateColumn = "tenant"
-	ExporterUpdateColumnType       ExporterUpdateColumn = "type"
-	ExporterUpdateColumnUpdatedAt  ExporterUpdateColumn = "updated_at"
-)
-
 type IntegrationConstraint string
 
 const (
@@ -2449,188 +1897,6 @@ type StringComparisonExp struct {
 	Similar  *String   `json:"_similar,omitempty"`
 }
 
-type CredentialAggregateOrderBy struct {
-	Count *OrderBy              `json:"count,omitempty"`
-	Max   *CredentialMaxOrderBy `json:"max,omitempty"`
-	Min   *CredentialMinOrderBy `json:"min,omitempty"`
-}
-
-type CredentialArrRelInsertInput struct {
-	Data       *[]CredentialInsertInput `json:"data,omitempty"`
-	OnConflict *CredentialOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type CredentialBoolExp struct {
-	And            *[]CredentialBoolExp      `json:"_and,omitempty"`
-	Not            *CredentialBoolExp        `json:"_not,omitempty"`
-	Or             *[]CredentialBoolExp      `json:"_or,omitempty"`
-	CreatedAt      *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Exporters      *ExporterBoolExp          `json:"exporters,omitempty"`
-	Name           *StringComparisonExp      `json:"name,omitempty"`
-	Tenant         *StringComparisonExp      `json:"tenant,omitempty"`
-	TenantByTenant *TenantBoolExp            `json:"tenantByTenant,omitempty"`
-	Type           *StringComparisonExp      `json:"type,omitempty"`
-	UpdatedAt      *TimestamptzComparisonExp `json:"updated_at,omitempty"`
-	Value          *JsonComparisonExp        `json:"value,omitempty"`
-}
-
-type CredentialInsertInput struct {
-	CreatedAt      *Timestamptz               `json:"created_at,omitempty"`
-	Exporters      *ExporterArrRelInsertInput `json:"exporters,omitempty"`
-	Name           *String                    `json:"name,omitempty"`
-	Tenant         *String                    `json:"tenant,omitempty"`
-	TenantByTenant *TenantObjRelInsertInput   `json:"tenantByTenant,omitempty"`
-	Type           *String                    `json:"type,omitempty"`
-	UpdatedAt      *Timestamptz               `json:"updated_at,omitempty"`
-	Value          *Json                      `json:"value,omitempty"`
-}
-
-type CredentialMaxOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Tenant    *OrderBy `json:"tenant,omitempty"`
-	Type      *OrderBy `json:"type,omitempty"`
-	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
-}
-
-type CredentialMinOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Tenant    *OrderBy `json:"tenant,omitempty"`
-	Type      *OrderBy `json:"type,omitempty"`
-	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
-}
-
-type CredentialObjRelInsertInput struct {
-	Data       CredentialInsertInput `json:"data"`
-	OnConflict *CredentialOnConflict `json:"on_conflict,omitempty"`
-}
-
-type CredentialOnConflict struct {
-	Constraint    CredentialConstraint      `json:"constraint"`
-	UpdateColumns *[]CredentialUpdateColumn `json:"update_columns,omitempty"`
-	Where         *CredentialBoolExp        `json:"where,omitempty"`
-}
-
-type CredentialOrderBy struct {
-	CreatedAt          *OrderBy                  `json:"created_at,omitempty"`
-	ExportersAggregate *ExporterAggregateOrderBy `json:"exporters_aggregate,omitempty"`
-	Name               *OrderBy                  `json:"name,omitempty"`
-	Tenant             *OrderBy                  `json:"tenant,omitempty"`
-	TenantByTenant     *TenantOrderBy            `json:"tenantByTenant,omitempty"`
-	Type               *OrderBy                  `json:"type,omitempty"`
-	UpdatedAt          *OrderBy                  `json:"updated_at,omitempty"`
-	Value              *OrderBy                  `json:"value,omitempty"`
-}
-
-type CredentialPkColumnsInput struct {
-	Name   String `json:"name"`
-	Tenant String `json:"tenant"`
-}
-
-type CredentialSetInput struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-	Tenant    *String      `json:"tenant,omitempty"`
-	Type      *String      `json:"type,omitempty"`
-	UpdatedAt *Timestamptz `json:"updated_at,omitempty"`
-	Value     *Json        `json:"value,omitempty"`
-}
-
-type ExporterAggregateOrderBy struct {
-	Count *OrderBy            `json:"count,omitempty"`
-	Max   *ExporterMaxOrderBy `json:"max,omitempty"`
-	Min   *ExporterMinOrderBy `json:"min,omitempty"`
-}
-
-type ExporterArrRelInsertInput struct {
-	Data       *[]ExporterInsertInput `json:"data,omitempty"`
-	OnConflict *ExporterOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type ExporterBoolExp struct {
-	And                          *[]ExporterBoolExp        `json:"_and,omitempty"`
-	Not                          *ExporterBoolExp          `json:"_not,omitempty"`
-	Or                           *[]ExporterBoolExp        `json:"_or,omitempty"`
-	Config                       *JsonComparisonExp        `json:"config,omitempty"`
-	CreatedAt                    *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Credential                   *StringComparisonExp      `json:"credential,omitempty"`
-	CredentialByCredentialTenant *CredentialBoolExp        `json:"credentialByCredentialTenant,omitempty"`
-	Name                         *StringComparisonExp      `json:"name,omitempty"`
-	Tenant                       *StringComparisonExp      `json:"tenant,omitempty"`
-	TenantByTenant               *TenantBoolExp            `json:"tenantByTenant,omitempty"`
-	Type                         *StringComparisonExp      `json:"type,omitempty"`
-	UpdatedAt                    *TimestamptzComparisonExp `json:"updated_at,omitempty"`
-}
-
-type ExporterInsertInput struct {
-	Config                       *Json                        `json:"config,omitempty"`
-	CreatedAt                    *Timestamptz                 `json:"created_at,omitempty"`
-	Credential                   *String                      `json:"credential,omitempty"`
-	CredentialByCredentialTenant *CredentialObjRelInsertInput `json:"credentialByCredentialTenant,omitempty"`
-	Name                         *String                      `json:"name,omitempty"`
-	Tenant                       *String                      `json:"tenant,omitempty"`
-	TenantByTenant               *TenantObjRelInsertInput     `json:"tenantByTenant,omitempty"`
-	Type                         *String                      `json:"type,omitempty"`
-	UpdatedAt                    *Timestamptz                 `json:"updated_at,omitempty"`
-}
-
-type ExporterMaxOrderBy struct {
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	Credential *OrderBy `json:"credential,omitempty"`
-	Name       *OrderBy `json:"name,omitempty"`
-	Tenant     *OrderBy `json:"tenant,omitempty"`
-	Type       *OrderBy `json:"type,omitempty"`
-	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
-}
-
-type ExporterMinOrderBy struct {
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	Credential *OrderBy `json:"credential,omitempty"`
-	Name       *OrderBy `json:"name,omitempty"`
-	Tenant     *OrderBy `json:"tenant,omitempty"`
-	Type       *OrderBy `json:"type,omitempty"`
-	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
-}
-
-type ExporterObjRelInsertInput struct {
-	Data       ExporterInsertInput `json:"data"`
-	OnConflict *ExporterOnConflict `json:"on_conflict,omitempty"`
-}
-
-type ExporterOnConflict struct {
-	Constraint    ExporterConstraint      `json:"constraint"`
-	UpdateColumns *[]ExporterUpdateColumn `json:"update_columns,omitempty"`
-	Where         *ExporterBoolExp        `json:"where,omitempty"`
-}
-
-type ExporterOrderBy struct {
-	Config                       *OrderBy           `json:"config,omitempty"`
-	CreatedAt                    *OrderBy           `json:"created_at,omitempty"`
-	Credential                   *OrderBy           `json:"credential,omitempty"`
-	CredentialByCredentialTenant *CredentialOrderBy `json:"credentialByCredentialTenant,omitempty"`
-	Name                         *OrderBy           `json:"name,omitempty"`
-	Tenant                       *OrderBy           `json:"tenant,omitempty"`
-	TenantByTenant               *TenantOrderBy     `json:"tenantByTenant,omitempty"`
-	Type                         *OrderBy           `json:"type,omitempty"`
-	UpdatedAt                    *OrderBy           `json:"updated_at,omitempty"`
-}
-
-type ExporterPkColumnsInput struct {
-	Name   String `json:"name"`
-	Tenant String `json:"tenant"`
-}
-
-type ExporterSetInput struct {
-	Config     *Json        `json:"config,omitempty"`
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Credential *String      `json:"credential,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Tenant     *String      `json:"tenant,omitempty"`
-	Type       *String      `json:"type,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
-}
-
 type IntegrationAggregateOrderBy struct {
 	Count *OrderBy               `json:"count,omitempty"`
 	Max   *IntegrationMaxOrderBy `json:"max,omitempty"`
@@ -2795,8 +2061,6 @@ type TenantBoolExp struct {
 	Not          *TenantBoolExp          `json:"_not,omitempty"`
 	Or           *[]TenantBoolExp        `json:"_or,omitempty"`
 	CreatedAt    *TimestampComparisonExp `json:"created_at,omitempty"`
-	Credentials  *CredentialBoolExp      `json:"credentials,omitempty"`
-	Exporters    *ExporterBoolExp        `json:"exporters,omitempty"`
 	ID           *UuidComparisonExp      `json:"id,omitempty"`
 	Integrations *IntegrationBoolExp     `json:"integrations,omitempty"`
 	Key          *StringComparisonExp    `json:"key,omitempty"`
@@ -2807,8 +2071,6 @@ type TenantBoolExp struct {
 
 type TenantInsertInput struct {
 	CreatedAt    *Timestamp                    `json:"created_at,omitempty"`
-	Credentials  *CredentialArrRelInsertInput  `json:"credentials,omitempty"`
-	Exporters    *ExporterArrRelInsertInput    `json:"exporters,omitempty"`
 	ID           *UUID                         `json:"id,omitempty"`
 	Integrations *IntegrationArrRelInsertInput `json:"integrations,omitempty"`
 	Key          *String                       `json:"key,omitempty"`
@@ -2848,8 +2110,6 @@ type TenantOnConflict struct {
 
 type TenantOrderBy struct {
 	CreatedAt             *OrderBy                     `json:"created_at,omitempty"`
-	CredentialsAggregate  *CredentialAggregateOrderBy  `json:"credentials_aggregate,omitempty"`
-	ExportersAggregate    *ExporterAggregateOrderBy    `json:"exporters_aggregate,omitempty"`
 	ID                    *OrderBy                     `json:"id,omitempty"`
 	IntegrationsAggregate *IntegrationAggregateOrderBy `json:"integrations_aggregate,omitempty"`
 	Key                   *OrderBy                     `json:"key,omitempty"`
@@ -3100,96 +2360,6 @@ type StatusResponse struct {
 	Success          Boolean    `json:"success"`
 }
 
-type Credential struct {
-	CreatedAt          Timestamptz       `json:"created_at"`
-	Exporters          *[]Exporter       `json:"exporters,omitempty"`
-	ExportersAggregate ExporterAggregate `json:"exporters_aggregate"`
-	Name               String            `json:"name"`
-	Tenant             String            `json:"tenant"`
-	TenantByTenant     Tenant            `json:"tenantByTenant"`
-	Type               String            `json:"type"`
-	UpdatedAt          Timestamptz       `json:"updated_at"`
-	Value              Json              `json:"value"`
-}
-
-type CredentialAggregate struct {
-	Aggregate *CredentialAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]Credential              `json:"nodes,omitempty"`
-}
-
-type CredentialAggregateFields struct {
-	Count *Int                 `json:"count,omitempty"`
-	Max   *CredentialMaxFields `json:"max,omitempty"`
-	Min   *CredentialMinFields `json:"min,omitempty"`
-}
-
-type CredentialMaxFields struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-	Tenant    *String      `json:"tenant,omitempty"`
-	Type      *String      `json:"type,omitempty"`
-	UpdatedAt *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type CredentialMinFields struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-	Tenant    *String      `json:"tenant,omitempty"`
-	Type      *String      `json:"type,omitempty"`
-	UpdatedAt *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type CredentialMutationResponse struct {
-	AffectedRows Int           `json:"affected_rows"`
-	Returning    *[]Credential `json:"returning,omitempty"`
-}
-
-type Exporter struct {
-	Config                       Json        `json:"config"`
-	CreatedAt                    Timestamptz `json:"created_at"`
-	Credential                   *String     `json:"credential,omitempty"`
-	CredentialByCredentialTenant *Credential `json:"credentialByCredentialTenant,omitempty"`
-	Name                         String      `json:"name"`
-	Tenant                       String      `json:"tenant"`
-	TenantByTenant               Tenant      `json:"tenantByTenant"`
-	Type                         String      `json:"type"`
-	UpdatedAt                    Timestamptz `json:"updated_at"`
-}
-
-type ExporterAggregate struct {
-	Aggregate *ExporterAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]Exporter              `json:"nodes,omitempty"`
-}
-
-type ExporterAggregateFields struct {
-	Count *Int               `json:"count,omitempty"`
-	Max   *ExporterMaxFields `json:"max,omitempty"`
-	Min   *ExporterMinFields `json:"min,omitempty"`
-}
-
-type ExporterMaxFields struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Credential *String      `json:"credential,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Tenant     *String      `json:"tenant,omitempty"`
-	Type       *String      `json:"type,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type ExporterMinFields struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Credential *String      `json:"credential,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Tenant     *String      `json:"tenant,omitempty"`
-	Type       *String      `json:"type,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type ExporterMutationResponse struct {
-	AffectedRows Int         `json:"affected_rows"`
-	Returning    *[]Exporter `json:"returning,omitempty"`
-}
-
 type Integration struct {
 	CreatedAt       Timestamp `json:"created_at"`
 	Data            Jsonb     `json:"data"`
@@ -3238,10 +2408,6 @@ type IntegrationMutationResponse struct {
 
 type MutationRoot struct {
 	DeleteRuleGroup          *StatusResponse                 `json:"deleteRuleGroup,omitempty"`
-	DeleteCredential         *CredentialMutationResponse     `json:"delete_credential,omitempty"`
-	DeleteCredentialByPk     *Credential                     `json:"delete_credential_by_pk,omitempty"`
-	DeleteExporter           *ExporterMutationResponse       `json:"delete_exporter,omitempty"`
-	DeleteExporterByPk       *Exporter                       `json:"delete_exporter_by_pk,omitempty"`
 	DeleteIntegration        *IntegrationMutationResponse    `json:"delete_integration,omitempty"`
 	DeleteIntegrationByPk    *Integration                    `json:"delete_integration_by_pk,omitempty"`
 	DeleteTenant             *TenantMutationResponse         `json:"delete_tenant,omitempty"`
@@ -3250,10 +2416,6 @@ type MutationRoot struct {
 	DeleteUserByPk           *User                           `json:"delete_user_by_pk,omitempty"`
 	DeleteUserPreference     *UserPreferenceMutationResponse `json:"delete_user_preference,omitempty"`
 	DeleteUserPreferenceByPk *UserPreference                 `json:"delete_user_preference_by_pk,omitempty"`
-	InsertCredential         *CredentialMutationResponse     `json:"insert_credential,omitempty"`
-	InsertCredentialOne      *Credential                     `json:"insert_credential_one,omitempty"`
-	InsertExporter           *ExporterMutationResponse       `json:"insert_exporter,omitempty"`
-	InsertExporterOne        *Exporter                       `json:"insert_exporter_one,omitempty"`
 	InsertIntegration        *IntegrationMutationResponse    `json:"insert_integration,omitempty"`
 	InsertIntegrationOne     *Integration                    `json:"insert_integration_one,omitempty"`
 	InsertTenant             *TenantMutationResponse         `json:"insert_tenant,omitempty"`
@@ -3264,10 +2426,6 @@ type MutationRoot struct {
 	InsertUserPreferenceOne  *UserPreference                 `json:"insert_user_preference_one,omitempty"`
 	UpdateAlertmanager       *StatusResponse                 `json:"updateAlertmanager,omitempty"`
 	UpdateRuleGroup          *StatusResponse                 `json:"updateRuleGroup,omitempty"`
-	UpdateCredential         *CredentialMutationResponse     `json:"update_credential,omitempty"`
-	UpdateCredentialByPk     *Credential                     `json:"update_credential_by_pk,omitempty"`
-	UpdateExporter           *ExporterMutationResponse       `json:"update_exporter,omitempty"`
-	UpdateExporterByPk       *Exporter                       `json:"update_exporter_by_pk,omitempty"`
 	UpdateIntegration        *IntegrationMutationResponse    `json:"update_integration,omitempty"`
 	UpdateIntegrationByPk    *Integration                    `json:"update_integration_by_pk,omitempty"`
 	UpdateTenant             *TenantMutationResponse         `json:"update_tenant,omitempty"`
@@ -3279,12 +2437,6 @@ type MutationRoot struct {
 }
 
 type QueryRoot struct {
-	Credential              *[]Credential           `json:"credential,omitempty"`
-	CredentialAggregate     CredentialAggregate     `json:"credential_aggregate"`
-	CredentialByPk          *Credential             `json:"credential_by_pk,omitempty"`
-	Exporter                *[]Exporter             `json:"exporter,omitempty"`
-	ExporterAggregate       ExporterAggregate       `json:"exporter_aggregate"`
-	ExporterByPk            *Exporter               `json:"exporter_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
 	Integration             *[]Integration          `json:"integration,omitempty"`
@@ -3300,17 +2452,10 @@ type QueryRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
-	ValidateCredential      *StatusResponse         `json:"validateCredential,omitempty"`
-	ValidateExporter        *StatusResponse         `json:"validateExporter,omitempty"`
+	ValidateIntegration     *StatusResponse         `json:"validateIntegration,omitempty"`
 }
 
 type SubscriptionRoot struct {
-	Credential              *[]Credential           `json:"credential,omitempty"`
-	CredentialAggregate     CredentialAggregate     `json:"credential_aggregate"`
-	CredentialByPk          *Credential             `json:"credential_by_pk,omitempty"`
-	Exporter                *[]Exporter             `json:"exporter,omitempty"`
-	ExporterAggregate       ExporterAggregate       `json:"exporter_aggregate"`
-	ExporterByPk            *Exporter               `json:"exporter_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
 	Integration             *[]Integration          `json:"integration,omitempty"`
@@ -3326,16 +2471,11 @@ type SubscriptionRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
-	ValidateCredential      *StatusResponse         `json:"validateCredential,omitempty"`
-	ValidateExporter        *StatusResponse         `json:"validateExporter,omitempty"`
+	ValidateIntegration     *StatusResponse         `json:"validateIntegration,omitempty"`
 }
 
 type Tenant struct {
 	CreatedAt             Timestamp            `json:"created_at"`
-	Credentials           *[]Credential        `json:"credentials,omitempty"`
-	CredentialsAggregate  CredentialAggregate  `json:"credentials_aggregate"`
-	Exporters             *[]Exporter          `json:"exporters,omitempty"`
-	ExportersAggregate    ExporterAggregate    `json:"exporters_aggregate"`
 	ID                    UUID                 `json:"id"`
 	Integrations          *[]Integration       `json:"integrations,omitempty"`
 	IntegrationsAggregate IntegrationAggregate `json:"integrations_aggregate"`
