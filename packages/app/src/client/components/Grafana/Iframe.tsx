@@ -39,7 +39,8 @@ const GrafanaIframe = (props: GrafanaIframeProps) => {
     if (theme.palette.type && frame.current) {
       setReloadTrigger(reloadTrigger + 1);
     }
-  }, [theme.palette.type, reloadTrigger]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [theme.palette.type]); // do not add reloadTrigger as a dependency (will cause infinite loop if it is)
 
   let queryParams = {
     orgId: 1,
