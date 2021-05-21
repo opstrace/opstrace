@@ -63,10 +63,21 @@ const TenantOverview = () => {
         </Grid>
         <Grid item xs={12}>
           <GrafanaIframe
-            initialHeight={1550}
+            initialHeight={1000}
             tenant="system"
-            title="Tenant Overview"
-            path="/d/c72shqQZz/cortex-overview"
+            title="Tenant Overview: Metrics (Cortex)"
+            path="/d/c82shqQZz/tenant-overview-cortex"
+            params={{
+              "var-tenant": tenant.name
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <GrafanaIframe
+            initialHeight={1000}
+            tenant="system"
+            title="Tenant Overview: Logs (Loki)"
+            path="/d/TODO/tenant-overview-loki"
             params={{
               "var-tenant": tenant.name
             }}
