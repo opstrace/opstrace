@@ -125,6 +125,18 @@ teardown() {
     if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         ./build/bin/opstrace destroy aws ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
         EXITCODE_DESTROY=$?
+
+        # The destroy command searches for the cluster in all the available AWS
+        # regions and sometimes it can timeout and fail to cleanup resources
+        # properly.
+        if [[ "${EXITCODE_DESTROY}" -ne 0 ]]; then
+            echo "--- initial destroy failed, retrying..."
+            ./build/bin/opstrace destroy aws ${OPSTRACE_CLUSTER_NAME} \
+                --region=${AWS_CLI_REGION} \
+                --log-level=debug \
+                --yes
+        fi
+
     else
         ./build/bin/opstrace destroy gcp ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
         EXITCODE_DESTROY=$?
