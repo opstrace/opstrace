@@ -55,7 +55,7 @@ export function getGKEClusterConfig(
     subnetwork: ccfg.cluster_name,
     initialClusterVersion: "1.18", // "1.X": picks the highest valid patch+gke.N patch in the 1.X version
     releaseChannel: {
-      channel: "REGULAR"
+      channel: "STABLE"
     },
     loggingService: "none",
     monitoringService: "none",
