@@ -1,0 +1,9 @@
+mutation InsertIntegrations($integrations: [integration_insert_input!]!) {
+  insert_integration(objects: $integrations) {
+    returning {
+      tenant_id
+      id
+      name
+    }
+  }
+}

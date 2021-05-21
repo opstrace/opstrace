@@ -128,29 +128,16 @@ type RuleGroupInput struct {
 	RuleGroup string `json:"rule_group"`
 }
 
-// Credential/Exporter types.
+// Integration types.
 
-type ValidateCredentialArgs struct {
+type ValidateIntegrationArgs struct {
 	TenantID string `json:"tenant_id"`
 	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Value    string `json:"value"`
+	Kind     string `json:"kind"`
+	Data     string `json:"data"`
 }
 
-type ValidateExporterArgs struct {
-	TenantID   string  `json:"tenant_id"`
-	Name       string  `json:"name"`
-	Type       string  `json:"type"`
-	Config     string  `json:"config"`
-	Credential *string `json:"credential,omitempty"`
-}
-
-type ValidateCredentialPayload struct {
-	SessionVariables map[string]interface{} `json:"session_variables"`
-	Input            ValidateCredentialArgs `json:"input"`
-}
-
-type ValidateExporterPayload struct {
-	SessionVariables map[string]interface{} `json:"session_variables"`
-	Input            ValidateExporterArgs   `json:"input"`
+type ValidateIntegrationPayload struct {
+	SessionVariables map[string]interface{}  `json:"session_variables"`
+	Input            ValidateIntegrationArgs `json:"input"`
 }

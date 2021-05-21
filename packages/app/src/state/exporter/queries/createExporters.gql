@@ -1,8 +1,0 @@
-mutation CreateExporters($exporters: [exporter_insert_input!]!) {
-  insert_exporter(objects: $exporters) {
-    returning {
-      tenant
-      name
-    }
-  }
-}

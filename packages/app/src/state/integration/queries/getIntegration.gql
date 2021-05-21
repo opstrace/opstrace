@@ -1,0 +1,12 @@
+# Returns the integration for a single named entry.
+query GetIntegration($tenant_id: uuid!, $name: String!) {
+  integration(where: {tenant_id: {_eq: $tenant_id}, name: {_eq: $name}}) {
+    id
+    tenant_id
+    name
+    kind
+    data
+    created_at
+    updated_at
+  }
+}

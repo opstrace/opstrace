@@ -31,21 +31,18 @@ import (
 type HasuraHandler struct {
 	alertmanagerURL *url.URL
 	expectedSecret  string
-	exporterAPI     *exporterAPI
-	credentialAPI   *credentialAPI
+	api             *integrationAPI
 }
 
 func NewHasuraHandler(
 	alertmanagerURL *url.URL,
 	expectedSecret string,
-	credentialAPI *credentialAPI,
-	exporterAPI *exporterAPI,
+	api *integrationAPI,
 ) *HasuraHandler {
 	return &HasuraHandler{
 		alertmanagerURL,
 		expectedSecret,
-		exporterAPI,
-		credentialAPI,
+		api,
 	}
 }
 
@@ -169,25 +166,15 @@ func (h *HasuraHandler) handler(w http.ResponseWriter, r *http.Request) {
 		httpresp, err := h.cortexQuery(request.Input.TenantID, "DELETE", path, "")
 		response = actions.ToDeleteResponse("Rule group", httpresp, err)
 
-	case "validateCredential":
-		var request actions.ValidateCredentialPayload
+	case "validateIntegration":
+		var request actions.ValidateIntegrationPayload
 		err = json.Unmarshal(reqbody, &request)
 		if err != nil {
 			writeGraphQLError(w, "invalid request payload")
 			return
 		}
 
-		response = h.validateCredential(request)
-
-	case "validateExporter":
-		var request actions.ValidateExporterPayload
-		err = json.Unmarshal(reqbody, &request)
-		if err != nil {
-			writeGraphQLError(w, "invalid request payload")
-			return
-		}
-
-		response = h.validateExporter(request)
+		response = h.validateIntegration(request)
 	}
 
 	data, err := json.Marshal(response)
@@ -353,52 +340,22 @@ func toGetRuleGroupResponse(
 	}
 }
 
-func (h *HasuraHandler) validateCredential(request actions.ValidateCredentialPayload) actions.StatusResponse {
-	existingTypes, err := h.credentialAPI.listCredentialTypes(request.Input.TenantID)
+func (h *HasuraHandler) validateIntegration(request actions.ValidateIntegrationPayload) actions.StatusResponse {
+	existingKinds, err := h.api.listIntegrationKinds(request.Input.TenantID)
 	if err != nil {
-		return actions.ToValidateError(actions.ServiceErrorType, "listing credentials failed", err.Error())
+		return actions.ToValidateError(actions.ServiceErrorType, "listing integrations failed", err.Error())
 	}
 
 	// Combine the graphql fields into a Credential object for validation
-	credential := Credential{
-		Name:      request.Input.Name,
-		Type:      request.Input.Type,
-		ValueJSON: request.Input.Value,
+	credential := Integration{
+		Name:     request.Input.Name,
+		Kind:     request.Input.Kind,
+		DataJSON: request.Input.Data,
 	}
 
-	_, err = h.credentialAPI.validateCredential(existingTypes, credential)
+	_, err = h.api.validateIntegration(existingKinds, credential)
 	if err != nil {
-		return actions.ToValidateError(actions.ValidationFailedType, "credential validation failed", err.Error())
-	}
-
-	return actions.StatusResponse{
-		Success: true,
-	}
-}
-
-func (h *HasuraHandler) validateExporter(request actions.ValidateExporterPayload) actions.StatusResponse {
-	existingTypes, err := h.exporterAPI.listExporterTypes(request.Input.TenantID)
-	if err != nil {
-		return actions.ToValidateError(actions.ServiceErrorType, "listing exporters failed", err.Error())
-	}
-
-	// Combine the graphql fields into an Exporter object for validation
-	var credential string
-	if request.Input.Credential == nil {
-		credential = ""
-	} else {
-		credential = *request.Input.Credential
-	}
-	exporter := Exporter{
-		Name:       request.Input.Name,
-		Type:       request.Input.Type,
-		Credential: credential,
-		ConfigJSON: request.Input.Config,
-	}
-
-	_, err = h.exporterAPI.validateExporter(request.Input.TenantID, existingTypes, exporter)
-	if err != nil {
-		return actions.ToValidateError(actions.ValidationFailedType, "config validation failed", err.Error())
+		return actions.ToValidateError(actions.ValidationFailedType, "integration validation failed", err.Error())
 	}
 
 	return actions.StatusResponse{

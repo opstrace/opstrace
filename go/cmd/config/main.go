@@ -89,11 +89,9 @@ func main() {
 		}
 
 		// Create separate access objects to avoid potential threading issues with config handler below
-		credentialAccess := config.NewCredentialAccess(graphqlURL, graphqlSecret)
-		credentialAPI := newCredentialAPI(&credentialAccess)
-		exporterAccess := config.NewExporterAccess(graphqlURL, graphqlSecret)
-		exporterAPI := newExporterAPI(&credentialAccess, &exporterAccess)
-		handler := NewHasuraHandler(alertmanagerURL, actionSecret, credentialAPI, exporterAPI)
+		integrationAccess := config.NewIntegrationAccess(graphqlURL, graphqlSecret)
+		integrationAPI := newIntegrationAPI(&integrationAccess)
+		handler := NewHasuraHandler(alertmanagerURL, actionSecret, integrationAPI)
 		// Not blocking on this one, but it will panic internally if there's a problem
 		go runActionHandler(handler, actionAddress)
 	}
@@ -164,30 +162,45 @@ func buildConfigHandler(
 	router.PathPrefix("/api/v1/alerts").HandlerFunc(alertmanagerProxy.HandleWithProxy)
 	router.PathPrefix("/api/v1/multitenant_alertmanager").HandlerFunc(alertmanagerProxy.HandleWithProxy)
 
-	credentialAccess := config.NewCredentialAccess(graphqlURL, graphqlSecret)
-	exporterAccess := config.NewExporterAccess(graphqlURL, graphqlSecret)
+	integrationAccess := config.NewIntegrationAccess(graphqlURL, graphqlSecret)
 
 	// Credentials/exporters: Specify exact paths, but manually allow with and without a trailing '/'
-	credentialRouter := router.PathPrefix("/api/v1/credentials").Subrouter()
-	credentialAPI := newCredentialAPI(&credentialAccess)
-	setupConfigAPI(
-		credentialRouter,
-		credentialAPI.listCredentials,
-		credentialAPI.writeCredentials,
-		credentialAPI.getCredential,
-		credentialAPI.deleteCredential,
-		disableAPIAuthentication,
-	)
-	exporterRouter := router.PathPrefix("/api/v1/exporters").Subrouter()
-	exporterAPI := newExporterAPI(&credentialAccess, &exporterAccess)
-	setupConfigAPI(
-		exporterRouter,
-		exporterAPI.listExporters,
-		exporterAPI.writeExporters,
-		exporterAPI.getExporter,
-		exporterAPI.deleteExporter,
-		disableAPIAuthentication,
-	)
+	integrationRouter := router.PathPrefix("/api/v1/integrations").Subrouter()
+	integrationAPI := newIntegrationAPI(&integrationAccess)
+
+	// Ensure that each call is authenticated before proceeding
+	integrationRouter.HandleFunc(
+		"",
+		getTenantThenCall(integrationAPI.listIntegrations, disableAPIAuthentication),
+	).Methods("GET")
+	integrationRouter.HandleFunc(
+		"/",
+		getTenantThenCall(integrationAPI.listIntegrations, disableAPIAuthentication),
+	).Methods("GET")
+	integrationRouter.HandleFunc(
+		"",
+		getTenantThenCall(integrationAPI.writeIntegrations, disableAPIAuthentication),
+	).Methods("POST")
+	integrationRouter.HandleFunc(
+		"/",
+		getTenantThenCall(integrationAPI.writeIntegrations, disableAPIAuthentication),
+	).Methods("POST")
+	integrationRouter.HandleFunc(
+		"/{name}",
+		getTenantThenCall(integrationAPI.getIntegration, disableAPIAuthentication),
+	).Methods("GET")
+	integrationRouter.HandleFunc(
+		"/{name}/",
+		getTenantThenCall(integrationAPI.getIntegration, disableAPIAuthentication),
+	).Methods("GET")
+	integrationRouter.HandleFunc(
+		"/{name}",
+		getTenantThenCall(integrationAPI.deleteIntegration, disableAPIAuthentication),
+	).Methods("DELETE")
+	integrationRouter.HandleFunc(
+		"/{name}/",
+		getTenantThenCall(integrationAPI.deleteIntegration, disableAPIAuthentication),
+	).Methods("DELETE")
 
 	return router
 }
@@ -219,27 +232,6 @@ func envEndpointURL(envName string, defaultEndpoint *string) *url.URL {
 	return endpointURL
 }
 
-// setupAPI configures GET/POST/DELETE endpoints for the provided handler callbacks.
-// The paths are configured to be exact, with optional trailing slashes.
-func setupConfigAPI(
-	router *mux.Router,
-	listFunc func(string, http.ResponseWriter, *http.Request),
-	writeFunc func(string, http.ResponseWriter, *http.Request),
-	getFunc func(string, http.ResponseWriter, *http.Request),
-	deleteFunc func(string, http.ResponseWriter, *http.Request),
-	disableAPIAuthentication bool,
-) {
-	// Ensure that each call is authenticated before proceeding
-	router.HandleFunc("", getTenantThenCall(listFunc, disableAPIAuthentication)).Methods("GET")
-	router.HandleFunc("/", getTenantThenCall(listFunc, disableAPIAuthentication)).Methods("GET")
-	router.HandleFunc("", getTenantThenCall(writeFunc, disableAPIAuthentication)).Methods("POST")
-	router.HandleFunc("/", getTenantThenCall(writeFunc, disableAPIAuthentication)).Methods("POST")
-	router.HandleFunc("/{name}", getTenantThenCall(getFunc, disableAPIAuthentication)).Methods("GET")
-	router.HandleFunc("/{name}/", getTenantThenCall(getFunc, disableAPIAuthentication)).Methods("GET")
-	router.HandleFunc("/{name}", getTenantThenCall(deleteFunc, disableAPIAuthentication)).Methods("DELETE")
-	router.HandleFunc("/{name}/", getTenantThenCall(deleteFunc, disableAPIAuthentication)).Methods("DELETE")
-}
-
 // Wraps `f` in a preceding check that authenticates the request headers for the expected tenant name.
 // The check is skipped if `disableAPIAuthentication` is true.
 func getTenantThenCall(
@@ -257,6 +249,6 @@ func getTenantThenCall(
 
 // Returns a string representation of the current time in UTC, suitable for passing to Hasura as a timestamptz
 // See also https://hasura.io/blog/postgres-date-time-data-types-on-graphql-fd926e86ee87/
-func nowTimestamp() graphql.Timestamptz {
-	return graphql.Timestamptz(time.Now().Format(time.RFC3339))
+func nowTimestamp() graphql.Timestamp {
+	return graphql.Timestamp(time.Now().Format(time.RFC3339))
 }
