@@ -27,7 +27,7 @@ import * as grafana from "client/utils/grafana";
 import graphqlClient from "state/clients/graphqlClient";
 
 import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
-import { ViewConfigButtonModal } from "client/integrations/common/ViewConfigButtonModal";
+import { ViewConfigDialogBtn } from "client/utils/ViewConfigDialogBtn";
 
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -134,7 +134,7 @@ export const InstallInstructions = ({
                     >
                       Download YAML
                     </Button>
-                    <ViewConfigButtonModal
+                    <ViewConfigDialogBtn
                       filename={configFilename}
                       config={config}
                     />

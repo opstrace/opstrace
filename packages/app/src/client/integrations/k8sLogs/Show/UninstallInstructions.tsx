@@ -24,7 +24,7 @@ import * as commands from "./templates/commands";
 import * as grafana from "client/utils/grafana";
 
 import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
-import { ViewConfigButtonModal } from "client/integrations/common/ViewConfigButtonModal";
+import { ViewConfigDialogBtn } from "client/utils/ViewConfigDialogBtn";
 import { DeleteBtn } from "client/integrations/common/DeleteIntegrationButton";
 
 import { Box } from "client/components/Box";
@@ -135,7 +135,7 @@ export const UninstallInstructions = ({
                     >
                       Download YAML
                     </Button>
-                    <ViewConfigButtonModal
+                    <ViewConfigDialogBtn
                       filename={configFilename}
                       config={config}
                     />
