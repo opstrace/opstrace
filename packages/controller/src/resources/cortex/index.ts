@@ -322,6 +322,13 @@ export function CortexResources(
       ruler_tenant_shard_size: 3
     },
     ingester: {
+      // Enable tracking of active series and export them as metrics.
+      // Enables the metric `cortex_ingester_active_series`, resolving per
+      // tenant ("user").
+      active_series_metrics_enabled: true,
+      active_series_metrics_update_period: "1m",
+      // After what time a series is considered to be inactive.
+      active_series_metrics_idle_timeout: "10m",
       lifecycler: {
         join_after: "30s",
         observe_period: "30s",
