@@ -23,4 +23,5 @@ export type YamlEditorProps = {
   jsonSchema?: object;
   data: string;
   onChange?: Function;
+  configViewer?: boolean;
 };
