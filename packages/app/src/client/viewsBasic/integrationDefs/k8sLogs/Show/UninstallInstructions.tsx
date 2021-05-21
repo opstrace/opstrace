@@ -98,7 +98,7 @@ export const UninstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {`Use the previously download config YAML or Download a fresh one here, it should be called "tenant-api-token-${tenant.name}".`}
+                  {`Use the previously downloaded config YAML or download it again.`}
                   <Box pt={1}>
                     <Button
                       style={{ marginRight: 20 }}
