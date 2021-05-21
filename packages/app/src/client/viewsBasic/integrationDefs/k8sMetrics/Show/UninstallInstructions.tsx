@@ -40,6 +40,9 @@ import TimelineContent from "@material-ui/lab/TimelineContent";
 import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import styled from "styled-components";
+import graphqlClient from "state/clients/graphqlClient";
+import { useHistory } from "react-router";
+import { installedIntegrationsPath } from "client/viewsBasic/tenantIntegrations/paths";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -60,6 +63,7 @@ export const UninstallInstructions = ({
   config
 }: IntegrationProps &
   TenantProps & { isDashboardInstalled: boolean; config: string }) => {
+  const history = useHistory();
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
@@ -76,8 +80,25 @@ export const UninstallInstructions = ({
     saveAs(configBlob, configFilename);
   };
 
-  const deleteDashboardHandler = async () => {
-    await grafana.deleteFolder(integration, tenant);
+  const deleteIntegrationHandler = async () => {
+    try {
+      // Dashboard folder might not exist
+      await grafana.deleteFolder(integration, tenant);
+    } catch (err) {
+      console.log(err);
+    }
+    try {
+      await graphqlClient
+        .DeleteIntegration({
+          tenant_id: integration.tenant_id,
+          id: integration.id
+        })
+        .then(() => {
+          history.push(installedIntegrationsPath({ tenant }));
+        });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -147,8 +168,8 @@ export const UninstallInstructions = ({
                   <DeleteBtn
                     integration={integration}
                     tenant={tenant}
-                    disabled={!isDashboardInstalled}
-                    deleteCallback={deleteDashboardHandler}
+                    disabled={false}
+                    deleteCallback={deleteIntegrationHandler}
                   />
                 </Box>
               </TimelineContent>
