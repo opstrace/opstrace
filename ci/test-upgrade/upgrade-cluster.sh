@@ -9,7 +9,8 @@ source ci/utils.sh
 # into the cluster and wait until deployments are 'ready'.
 echo "--- upgrading cluster"
 ./to/opstrace upgrade ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
-    --cluster-config ci/cluster-config.yaml \
+    --region=${AWS_CLI_REGION} \
+    --cluster-config=ci/cluster-config.yaml \
     --log-level=debug \
     --yes
 
