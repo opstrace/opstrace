@@ -35,7 +35,6 @@ export function prometheusYaml({
 }: PrometheusProps): string {
   return `apiVersion: v1
 kind: Namespace
-apiVersion: v1
 metadata:
   name: ${deployNamespace}
 ---

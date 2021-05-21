@@ -60,7 +60,6 @@ export function promtailYaml({
   }
   return `apiVersion: v1
 kind: Namespace
-apiVersion: v1
 metadata:
   name: ${deployNamespace}
 ---
