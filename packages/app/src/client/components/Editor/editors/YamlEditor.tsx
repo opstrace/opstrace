@@ -129,7 +129,6 @@ function BaseEditor({
   // Update editor layout when width/height changes
   useEffect(() => {
     if (width !== undefined && height !== undefined && editorRef.current) {
-      console.log(width, height);
       editorRef.current.layout({ width, height });
     }
   }, [width, height]);
