@@ -15,7 +15,11 @@
  */
 
 import React, { useCallback, useEffect, useRef } from "react";
-import { editor } from "monaco-editor/esm/vs/editor/editor.api";
+import {
+  editor,
+  Uri,
+  IDisposable
+} from "monaco-editor/esm/vs/editor/editor.api";
 import { yaml } from "workers";
 
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
@@ -27,18 +31,19 @@ const YamlEditor = ({
   filename,
   jsonSchema,
   data,
-  onChange
+  onChange,
+  configViewer
 }: YamlEditorProps) => {
-  const fileUri = monaco.Uri.parse(filename);
+  const fileUri = Uri.parse(filename);
 
-  const modelRef = useRef<monaco.editor.IModel | null>(
-    monaco.editor.getModel(fileUri) ||
-      monaco.editor.createModel(data, "yaml", fileUri)
+  const modelRef = useRef<editor.IModel | null>(
+    editor.getModel(fileUri) || editor.createModel(data, "yaml", fileUri)
   );
 
-  const subscriptionRef = useRef<monaco.IDisposable | null>(null);
+  const subscriptionRef = useRef<IDisposable | null>(null);
 
   useEffect(() => {
+    if (configViewer) return;
     yaml &&
       yaml.yamlDefaults.setDiagnosticsOptions({
         validate: true,
@@ -53,7 +58,7 @@ const YamlEditor = ({
           }
         ]
       });
-  }, [jsonSchema]);
+  }, [jsonSchema, configViewer]);
 
   useEffect(() => {
     if (modelRef?.current && onChange) {
@@ -75,25 +80,34 @@ const YamlEditor = ({
     }
   }, [data]);
 
-  if (modelRef?.current) return <AutoSizingEditor model={modelRef.current} />;
+  if (modelRef?.current)
+    return (
+      <AutoSizingEditor model={modelRef.current} configViewer={configViewer} />
+    );
   else return null; // TODO: show loading component here?
 };
 
-function AutoSizingEditor({ model }: { model: editor.ITextModel }) {
+function AutoSizingEditor(props: { model: editor.ITextModel }) {
   return (
     <AutoSizer>
       {({ height, width }: Size) => {
-        return <BaseEditor height={height} width={width} model={model} />;
+        return <BaseEditor height={height} width={width} {...props} />;
       }}
     </AutoSizer>
   );
 }
 
 type BaseEditorProps = {
-  model: monaco.editor.ITextModel;
+  model: editor.ITextModel;
+  configViewer?: boolean;
 };
 
-function BaseEditor({ height, width, model }: BaseEditorProps & Size) {
+function BaseEditor({
+  height,
+  width,
+  model,
+  configViewer
+}: BaseEditorProps & Size) {
   const editorRef = useRef<null | editor.ICodeEditor>(null);
   const currentModelRef = useRef<editor.IModel>(model);
 
@@ -102,7 +116,7 @@ function BaseEditor({ height, width, model }: BaseEditorProps & Size) {
       editorRef.current = editor.create(
         node,
         getTextEditorOptions({
-          readOnly: false,
+          readOnly: configViewer === true ? true : false,
           model: currentModelRef.current
         })
       );
@@ -115,6 +129,7 @@ function BaseEditor({ height, width, model }: BaseEditorProps & Size) {
   // Update editor layout when width/height changes
   useEffect(() => {
     if (width !== undefined && height !== undefined && editorRef.current) {
+      console.log(width, height);
       editorRef.current.layout({ width, height });
     }
   }, [width, height]);

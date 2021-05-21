@@ -16,12 +16,15 @@
 
 import React from "react";
 
+import { YamlEditor } from "client/components/Editor";
+
 import { Button } from "client/components/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { Box } from "client/components/Box";
 
 export const ViewConfigDialogBtn = ({
   filename,
@@ -36,6 +39,7 @@ export const ViewConfigDialogBtn = ({
   const handleClose = () => setOpen(false);
 
   const descriptionElementRef = React.useRef<HTMLElement>(null);
+
   React.useEffect(() => {
     if (open) {
       const { current: descriptionElement } = descriptionElementRef;
@@ -51,14 +55,16 @@ export const ViewConfigDialogBtn = ({
         View YAML
       </Button>
       <Dialog open={open} onClose={handleClose} scroll="paper" maxWidth="lg">
-        <DialogTitle id="scroll-dialog-title">{filename}</DialogTitle>
+        <DialogTitle>{filename}</DialogTitle>
         <DialogContent dividers={true}>
-          <DialogContentText
-            id="i9n-config"
-            ref={descriptionElementRef}
-            tabIndex={-1}
-          >
-            <pre>{config}</pre>
+          <DialogContentText ref={descriptionElementRef} tabIndex={-1}>
+            <Box width="600px" height="600px">
+              <YamlEditor
+                filename={filename}
+                data={config}
+                configViewer={true}
+              />
+            </Box>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
