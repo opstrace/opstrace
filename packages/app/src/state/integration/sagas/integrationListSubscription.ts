@@ -102,6 +102,8 @@ export default function* integrationListSubscriptionManager() {
       // Cancel active subscription if there are no subscribers
       if (activeSubscription && subscribers.size === 0) {
         yield cancel(activeSubscription);
+        // Reset list
+        yield put(actions.setIntegrationList([]));
         activeSubscription = undefined;
       }
     }
@@ -123,10 +125,7 @@ export function integrationListSubscriptionEventChannel(tenantName: string) {
         })
         .subscribe({
           next: res => {
-            if (
-              res.data?.tenant_by_pk?.integrations &&
-              res.data.tenant_by_pk.integrations.length > 0
-            ) {
+            if (res.data?.tenant_by_pk?.integrations) {
               emitter(
                 actions.setIntegrationList(res.data.tenant_by_pk.integrations)
               );
