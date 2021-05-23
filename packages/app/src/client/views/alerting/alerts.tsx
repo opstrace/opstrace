@@ -16,8 +16,8 @@
 
 import React from "react";
 
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
-import { grafanaUrl } from "client/viewsBasic/paths";
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
+import { grafanaUrl } from "client/utils/grafana";
 
 import Grid from "@material-ui/core/Grid";
 import { Box } from "client/components/Box";
@@ -26,8 +26,7 @@ import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
 
 const Alerts = () => {
-  const tenant = useSelectedTenant();
-  const tenantName = tenant ? tenant.name : "system";
+  const tenant = useSelectedTenantWithFallback();
 
   return (
     <Box mt={3}>
@@ -40,7 +39,7 @@ const Alerts = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <Typography color="textSecondary" variant="body2">
-                View alerts for the <strong>{tenantName}</strong> tenant in the
+                View alerts for the <strong>{tenant.name}</strong> tenant in the
                 Prometheus UI. Full support for viewing, editing and creating
                 alerts in this UI is under construction.{" "}
               </Typography>
@@ -49,7 +48,7 @@ const Alerts = () => {
               <Box display="flex" justifyContent="flex-end">
                 <ExternalLink
                   href={`${grafanaUrl({
-                    tenant: tenantName
+                    tenant: tenant.name
                   })}/prometheus/alerts`}
                 >
                   View Alerts →

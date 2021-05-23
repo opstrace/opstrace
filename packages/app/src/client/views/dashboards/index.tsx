@@ -17,8 +17,8 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
 
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
-import { grafanaUrl } from "client/viewsBasic/paths";
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
+import { grafanaUrl } from "client/utils/grafana";
 
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -26,8 +26,7 @@ import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
 
 const Dashboards = () => {
-  const tenant = useSelectedTenant();
-  const tenantName = tenant ? tenant.name : "system";
+  const tenant = useSelectedTenantWithFallback();
 
   return (
     <>
@@ -45,15 +44,15 @@ const Dashboards = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <Typography color="textSecondary" variant="body2">
-                    View Dashboards for the <strong>{tenantName}</strong> tenant
-                    in Grafana.
+                    View Dashboards for the <strong>{tenant.name}</strong>{" "}
+                    tenant in Grafana.
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Box display="flex" justifyContent="flex-end">
                     <ExternalLink
                       href={`${grafanaUrl({
-                        tenant: tenantName
+                        tenant: tenant.name
                       })}/grafana/dashboards`}
                     >
                       View Dashboards →

@@ -18,15 +18,14 @@ import React from "react";
 
 import { Box } from "client/components/Box";
 import Typography from "client/components/Typography/Typography";
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { Tabs } from "client/components/Tabs";
 
 import Alerts from "./alerts";
 import Configuration from "./configuration";
 
 const Alerting = () => {
-  const tenant = useSelectedTenant();
-  const tenantName = tenant ? tenant.name : "system";
+  const tenant = useSelectedTenantWithFallback();
 
   return (
     <>
@@ -36,12 +35,12 @@ const Alerting = () => {
       <Tabs
         tabs={[
           {
-            path: `/tenant/${tenantName}/alerting/alerts`,
+            path: `/tenant/${tenant.name}/alerting/alerts`,
             title: "Alerts",
             component: Alerts
           },
           {
-            path: `/tenant/${tenantName}/alerting/configuration`,
+            path: `/tenant/${tenant.name}/alerting/configuration`,
             title: "Configuration",
             component: Configuration
           }

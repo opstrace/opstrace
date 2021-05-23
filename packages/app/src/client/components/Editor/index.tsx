@@ -15,26 +15,10 @@
  */
 import React from "react";
 import { AsyncComponent } from "../Loadable";
-import type { ModuleEditorProps, YamlEditorProps } from "./lib/types";
+import type { YamlEditorProps } from "./lib/types";
 import EditorSkeleton from "./lib/components/EditorSkeleton";
 
 export { default as EditorSkeleton } from "./lib/components/EditorSkeleton";
-
-export const ModuleEditor = AsyncComponent<ModuleEditorProps>(
-  /* #__LOADABLE__ */ () =>
-    import(/* webpackChunkName: "module-editor" */ "./editors/ModuleEditor"),
-  false,
-  <EditorSkeleton />
-);
-
-export const ModuleEditorGroup = AsyncComponent<{}>(
-  /* #__LOADABLE__ */ () =>
-    import(
-      /* webpackChunkName: "module-editor-group" */ "./editors/EditorGroup"
-    ),
-  false,
-  <EditorSkeleton />
-);
 
 export const YamlEditor = AsyncComponent<YamlEditorProps>(
   /* #__LOADABLE__ */ () =>

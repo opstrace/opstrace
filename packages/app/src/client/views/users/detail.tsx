@@ -29,7 +29,7 @@ import { Button } from "client/components/Button";
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import DeleteUserButton from "./deleteUser";
-import DeleteUserDialog from "../user/DeleteUserDialog";
+import DeleteUserDialog from "./DeleteUserDialog";
 
 const UserDetail = () => {
   const params = useParams<{ userId: string }>();

@@ -15,6 +15,7 @@
  */
 
 import express, { Request } from "express";
+import { IncomingMessage, ServerResponse, ClientRequest } from "http";
 import { ServerError } from "./errors";
 
 export const getHeader = (
@@ -51,3 +52,30 @@ export const handleError = (err: ServerError, res: express.Response): void => {
     .status(err.statusCode || 500)
     .json({ ...err, message: err.message, stack: err.stack });
 };
+
+export function onProxyReq(
+  proxyReq: ClientRequest,
+  req: IncomingMessage,
+  res: ServerResponse
+) {
+  // @ts-ignore
+  if (!req.body || !Object.keys(req.body).length) {
+    return;
+  }
+
+  const contentType = proxyReq.getHeader("Content-Type");
+  const writeBody = (bodyData: string) => {
+    proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+    proxyReq.write(bodyData);
+  };
+
+  if (contentType === "application/json") {
+    // @ts-ignore
+    writeBody(JSON.stringify(req.body));
+  }
+
+  if (contentType === "application/x-www-form-urlencoded") {
+    // @ts-ignore
+    writeBody(querystring.stringify(req.body));
+  }
+}

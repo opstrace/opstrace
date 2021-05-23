@@ -38,7 +38,7 @@ import { StatusResponse } from "state/graphql-api-types";
 
 import { CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { debounce } from "lodash";
 
 type FormData = {
@@ -64,9 +64,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const AlertmanagerConfigEditorLoader = () => {
-  const tenant = useSelectedTenant();
-  const tenantName = tenant ? tenant.name : "system";
-  const alertmanager = useAlertmanager(tenantName);
+  const tenant = useSelectedTenantWithFallback();
+  const alertmanager = useAlertmanager(tenant.name);
 
   if (!tenant || !alertmanager)
     return (

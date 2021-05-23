@@ -16,6 +16,7 @@
 
 import formatFn from "date-fns/format";
 import formatISO from "date-fns/formatISO";
+import { getUnixTime } from "date-fns";
 
 const getLocale = (locale: string): Promise<Locale> =>
   import(`date-fns/locale/${locale}/index.js`);
@@ -40,3 +41,6 @@ export const format = async (
 export function isoNow() {
   return formatISO(new Date());
 }
+
+export const getUnixNanoSecTime = (date: Date) =>
+  getUnixTime(date) * 1000000000;

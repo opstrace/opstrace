@@ -1,0 +1,19 @@
+mutation InsertIntegration(
+  $name: String!
+  $kind: String!
+  $data: jsonb!
+  $tenant_id: uuid!
+) {
+  insert_integration_one(
+    object: { name: $name, kind: $kind, data: $data, tenant_id: $tenant_id }
+  ) {
+    id
+    kind
+    name
+    data
+    tenant_id
+    grafana_metadata
+    created_at
+    updated_at
+  }
+}

@@ -27,15 +27,13 @@ import expressWinston from "express-winston";
 import winston from "winston";
 import helmet from "helmet";
 import compression from "compression";
-
 import { createLightship } from "lightship";
-import { KubeConfig } from "@kubernetes/client-node";
+
 import { log, setLogger, buildLogger } from "@opstrace/utils";
 
 import env, { isDevEnvironment } from "./env";
 
 import api from "./routes/api";
-import modules from "./routes/modules";
 import setupWebsocketHandling from "./routes/websockets";
 
 import sessionParser from "./middleware/session";
@@ -63,20 +61,7 @@ const lightship = createLightship({
 
 const shutdownDelay: number = isDevEnvironment ? 0 : 30000;
 
-export let KUBECONFIG: KubeConfig | undefined;
-
 function createServer() {
-  KUBECONFIG = new KubeConfig();
-  log.info(
-    "Try to load kubeconfig. Assume to run in k8s cluster, rely on privileged access"
-  );
-  try {
-    KUBECONFIG.loadFromCluster();
-  } catch (err) {
-    log.info("could not load kubeconfig: %s", err);
-    KUBECONFIG = undefined;
-  }
-
   const app = express();
 
   app.use(helmet());
@@ -116,8 +101,6 @@ function createServer() {
   // all api routes will be prefixed with _/ which gets us around the service worker cache
   // we don't want these responses cached long term by the service worker
   app.use("/_", api());
-  // mount the module routes (responses are immutable so we can cache these long term)
-  app.use("/modules", modules({ maxAge }));
   // apply post api middleware
   app.use(catchErrorsMiddleware);
   // return the app-shell for PWA

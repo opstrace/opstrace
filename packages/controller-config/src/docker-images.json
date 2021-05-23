@@ -27,7 +27,7 @@
   "prometheusAdapter": "quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1",
   "prometheusConfigReloader": "quay.io/prometheus-operator/prometheus-config-reloader:v0.46.0",
   "prometheusOperator": "quay.io/prometheus-operator/prometheus-operator:v0.46.0",
-  "graphqlEngine": "opstrace/graphql:44fe4bf2066d152e367dbeba8111f9d6",
+  "graphqlEngine": "opstrace/graphql:0109ba355e119398af787d63713ca974",
   "app": "opstrace/app:44fe4bf2066d152e367dbeba8111f9d6",
   "redis": "bitnami/redis:6.0.9",
   "postgresClient": "tmaier/postgresql-client@sha256:3702d3bff09b18e1d173cdf5887d6e4fea5feac0a521becf4a27559992e44ff3"

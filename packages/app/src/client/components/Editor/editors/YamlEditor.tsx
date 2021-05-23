@@ -21,7 +21,7 @@ import { yaml } from "workers";
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import { YamlEditorProps } from "../lib/types";
 import { GlobalEditorCSS } from "../lib/themes";
-import { getTextEditorOptions } from "state/file/utils/monaco";
+import { getTextEditorOptions } from "./utils";
 
 const YamlEditor = ({
   filename,

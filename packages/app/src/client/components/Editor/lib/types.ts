@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import TextFileModel from "state/file/TextFileModel";
 
-export type ModuleEditorProps = {
-  textFileModel?: TextFileModel | null;
-  visible: boolean;
-  height: number;
-  width: number;
-};
+export type EditorOptions = NonNullable<
+  Parameters<typeof monaco.editor.create>[1]
+>;
 
 export type YamlEditorProps = {
   filename: string;

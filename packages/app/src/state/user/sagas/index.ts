@@ -33,7 +33,7 @@ import { State } from "state/reducer";
 import { getUserList } from "../hooks/useUserList";
 import { Tenants } from "state/tenant/types";
 import { selectTenantList } from "state/tenant/hooks/useTenantList";
-import { grafanaUrl } from "client/viewsBasic/paths";
+import { grafanaUrl } from "client/utils/grafana";
 
 export default function* userTaskManager() {
   const sagas = [
@@ -135,6 +135,10 @@ function* persistDarkModePreference() {
           })
         )
       );
+    } catch (err) {
+      console.error(err);
+    }
+    try {
       yield put(actions.setDarkMode(action.payload));
       yield graphqlClient.SetDarkMode({
         user_id: user.id,
