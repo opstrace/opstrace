@@ -114,238 +114,6 @@ export type String_Comparison_Exp = {
   _similar?: Maybe<Scalars["String"]>;
 };
 
-/** columns and relationships of "branch" */
-export type Branch = {
-  created_at: Scalars["timestamptz"];
-  /** An array relationship */
-  files: Array<File>;
-  /** An aggregated array relationship */
-  files_aggregate: File_Aggregate;
-  has_merged: Scalars["Boolean"];
-  /** An array relationship */
-  modules: Array<Module>;
-  /** An aggregated array relationship */
-  modules_aggregate: Module_Aggregate;
-  name: Scalars["String"];
-  protected: Scalars["Boolean"];
-  /** An array relationship */
-  versions: Array<Module_Version>;
-  /** An aggregated array relationship */
-  versions_aggregate: Module_Version_Aggregate;
-};
-
-/** columns and relationships of "branch" */
-export type BranchFilesArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** columns and relationships of "branch" */
-export type BranchFiles_AggregateArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** columns and relationships of "branch" */
-export type BranchModulesArgs = {
-  distinct_on?: Maybe<Array<Module_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Order_By>>;
-  where?: Maybe<Module_Bool_Exp>;
-};
-
-/** columns and relationships of "branch" */
-export type BranchModules_AggregateArgs = {
-  distinct_on?: Maybe<Array<Module_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Order_By>>;
-  where?: Maybe<Module_Bool_Exp>;
-};
-
-/** columns and relationships of "branch" */
-export type BranchVersionsArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** columns and relationships of "branch" */
-export type BranchVersions_AggregateArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** aggregated selection of "branch" */
-export type Branch_Aggregate = {
-  aggregate?: Maybe<Branch_Aggregate_Fields>;
-  nodes: Array<Branch>;
-};
-
-/** aggregate fields of "branch" */
-export type Branch_Aggregate_Fields = {
-  count?: Maybe<Scalars["Int"]>;
-  max?: Maybe<Branch_Max_Fields>;
-  min?: Maybe<Branch_Min_Fields>;
-};
-
-/** aggregate fields of "branch" */
-export type Branch_Aggregate_FieldsCountArgs = {
-  columns?: Maybe<Array<Branch_Select_Column>>;
-  distinct?: Maybe<Scalars["Boolean"]>;
-};
-
-/** order by aggregate values of table "branch" */
-export type Branch_Aggregate_Order_By = {
-  count?: Maybe<Order_By>;
-  max?: Maybe<Branch_Max_Order_By>;
-  min?: Maybe<Branch_Min_Order_By>;
-};
-
-/** input type for inserting array relation for remote table "branch" */
-export type Branch_Arr_Rel_Insert_Input = {
-  data: Array<Branch_Insert_Input>;
-  on_conflict?: Maybe<Branch_On_Conflict>;
-};
-
-/** Boolean expression to filter rows from the table "branch". All fields are combined with a logical 'AND'. */
-export type Branch_Bool_Exp = {
-  _and?: Maybe<Array<Maybe<Branch_Bool_Exp>>>;
-  _not?: Maybe<Branch_Bool_Exp>;
-  _or?: Maybe<Array<Maybe<Branch_Bool_Exp>>>;
-  created_at?: Maybe<Timestamptz_Comparison_Exp>;
-  files?: Maybe<File_Bool_Exp>;
-  has_merged?: Maybe<Boolean_Comparison_Exp>;
-  modules?: Maybe<Module_Bool_Exp>;
-  name?: Maybe<String_Comparison_Exp>;
-  protected?: Maybe<Boolean_Comparison_Exp>;
-  versions?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** unique or primary key constraints on table "branch" */
-export enum Branch_Constraint {
-  /** unique or primary key constraint */
-  BranchNameKey = "Branch_name_key",
-  /** unique or primary key constraint */
-  BranchPkey = "branch_pkey"
-}
-
-/** input type for inserting data into table "branch" */
-export type Branch_Insert_Input = {
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  files?: Maybe<File_Arr_Rel_Insert_Input>;
-  has_merged?: Maybe<Scalars["Boolean"]>;
-  modules?: Maybe<Module_Arr_Rel_Insert_Input>;
-  name?: Maybe<Scalars["String"]>;
-  protected?: Maybe<Scalars["Boolean"]>;
-  versions?: Maybe<Module_Version_Arr_Rel_Insert_Input>;
-};
-
-/** aggregate max on columns */
-export type Branch_Max_Fields = {
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  name?: Maybe<Scalars["String"]>;
-};
-
-/** order by max() on columns of table "branch" */
-export type Branch_Max_Order_By = {
-  created_at?: Maybe<Order_By>;
-  name?: Maybe<Order_By>;
-};
-
-/** aggregate min on columns */
-export type Branch_Min_Fields = {
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  name?: Maybe<Scalars["String"]>;
-};
-
-/** order by min() on columns of table "branch" */
-export type Branch_Min_Order_By = {
-  created_at?: Maybe<Order_By>;
-  name?: Maybe<Order_By>;
-};
-
-/** response of any mutation on the table "branch" */
-export type Branch_Mutation_Response = {
-  /** number of affected rows by the mutation */
-  affected_rows: Scalars["Int"];
-  /** data of the affected rows by the mutation */
-  returning: Array<Branch>;
-};
-
-/** input type for inserting object relation for remote table "branch" */
-export type Branch_Obj_Rel_Insert_Input = {
-  data: Branch_Insert_Input;
-  on_conflict?: Maybe<Branch_On_Conflict>;
-};
-
-/** on conflict condition type for table "branch" */
-export type Branch_On_Conflict = {
-  constraint: Branch_Constraint;
-  update_columns: Array<Branch_Update_Column>;
-  where?: Maybe<Branch_Bool_Exp>;
-};
-
-/** ordering options when selecting data from "branch" */
-export type Branch_Order_By = {
-  created_at?: Maybe<Order_By>;
-  files_aggregate?: Maybe<File_Aggregate_Order_By>;
-  has_merged?: Maybe<Order_By>;
-  modules_aggregate?: Maybe<Module_Aggregate_Order_By>;
-  name?: Maybe<Order_By>;
-  protected?: Maybe<Order_By>;
-  versions_aggregate?: Maybe<Module_Version_Aggregate_Order_By>;
-};
-
-/** primary key columns input for table: "branch" */
-export type Branch_Pk_Columns_Input = {
-  name: Scalars["String"];
-};
-
-/** select columns of table "branch" */
-export enum Branch_Select_Column {
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  HasMerged = "has_merged",
-  /** column name */
-  Name = "name",
-  /** column name */
-  Protected = "protected"
-}
-
-/** input type for updating data in table "branch" */
-export type Branch_Set_Input = {
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  has_merged?: Maybe<Scalars["Boolean"]>;
-  name?: Maybe<Scalars["String"]>;
-  protected?: Maybe<Scalars["Boolean"]>;
-};
-
-/** update columns of table "branch" */
-export enum Branch_Update_Column {
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  HasMerged = "has_merged",
-  /** column name */
-  Name = "name",
-  /** column name */
-  Protected = "protected"
-}
-
 /** columns and relationships of "credential" */
 export type Credential = {
   created_at: Scalars["timestamptz"];
@@ -781,433 +549,86 @@ export enum Exporter_Update_Column {
   UpdatedAt = "updated_at"
 }
 
-/** columns and relationships of "file" */
-export type File = {
-  base_file_id?: Maybe<Scalars["uuid"]>;
-  /** An object relationship */
-  branch: Branch;
-  branch_name: Scalars["String"];
-  compile_errors?: Maybe<Scalars["jsonb"]>;
-  contents: Scalars["String"];
-  created_at: Scalars["timestamp"];
-  dts?: Maybe<Scalars["String"]>;
-  ext: Scalars["String"];
-  id: Scalars["uuid"];
-  js?: Maybe<Scalars["String"]>;
-  map?: Maybe<Scalars["String"]>;
-  mark_deleted: Scalars["Boolean"];
-  /** An object relationship */
-  module?: Maybe<Module>;
-  module_name: Scalars["String"];
-  module_scope: Scalars["String"];
-  module_version: Scalars["String"];
-  path: Scalars["String"];
-  /** An object relationship */
-  version?: Maybe<Module_Version>;
-};
-
-/** columns and relationships of "file" */
-export type FileCompile_ErrorsArgs = {
-  path?: Maybe<Scalars["String"]>;
-};
-
-/** aggregated selection of "file" */
-export type File_Aggregate = {
-  aggregate?: Maybe<File_Aggregate_Fields>;
-  nodes: Array<File>;
-};
-
-/** aggregate fields of "file" */
-export type File_Aggregate_Fields = {
-  count?: Maybe<Scalars["Int"]>;
-  max?: Maybe<File_Max_Fields>;
-  min?: Maybe<File_Min_Fields>;
-};
-
-/** aggregate fields of "file" */
-export type File_Aggregate_FieldsCountArgs = {
-  columns?: Maybe<Array<File_Select_Column>>;
-  distinct?: Maybe<Scalars["Boolean"]>;
-};
-
-/** order by aggregate values of table "file" */
-export type File_Aggregate_Order_By = {
-  count?: Maybe<Order_By>;
-  max?: Maybe<File_Max_Order_By>;
-  min?: Maybe<File_Min_Order_By>;
-};
-
-/** append existing jsonb value of filtered columns with new jsonb value */
-export type File_Append_Input = {
-  compile_errors?: Maybe<Scalars["jsonb"]>;
-};
-
-/** input type for inserting array relation for remote table "file" */
-export type File_Arr_Rel_Insert_Input = {
-  data: Array<File_Insert_Input>;
-  on_conflict?: Maybe<File_On_Conflict>;
-};
-
-/** Boolean expression to filter rows from the table "file". All fields are combined with a logical 'AND'. */
-export type File_Bool_Exp = {
-  _and?: Maybe<Array<Maybe<File_Bool_Exp>>>;
-  _not?: Maybe<File_Bool_Exp>;
-  _or?: Maybe<Array<Maybe<File_Bool_Exp>>>;
-  base_file_id?: Maybe<Uuid_Comparison_Exp>;
-  branch?: Maybe<Branch_Bool_Exp>;
-  branch_name?: Maybe<String_Comparison_Exp>;
-  compile_errors?: Maybe<Jsonb_Comparison_Exp>;
-  contents?: Maybe<String_Comparison_Exp>;
-  created_at?: Maybe<Timestamp_Comparison_Exp>;
-  dts?: Maybe<String_Comparison_Exp>;
-  ext?: Maybe<String_Comparison_Exp>;
-  id?: Maybe<Uuid_Comparison_Exp>;
-  js?: Maybe<String_Comparison_Exp>;
-  map?: Maybe<String_Comparison_Exp>;
-  mark_deleted?: Maybe<Boolean_Comparison_Exp>;
-  module?: Maybe<Module_Bool_Exp>;
-  module_name?: Maybe<String_Comparison_Exp>;
-  module_scope?: Maybe<String_Comparison_Exp>;
-  module_version?: Maybe<String_Comparison_Exp>;
-  path?: Maybe<String_Comparison_Exp>;
-  version?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** unique or primary key constraints on table "file" */
-export enum File_Constraint {
-  /** unique or primary key constraint */
-  FilePathModuleVersionModuleNameModuleScopeBranchNameE = "file_path_module_version_module_name_module_scope_branch_name_e",
-  /** unique or primary key constraint */
-  FilePkey = "file_pkey"
-}
-
-/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
-export type File_Delete_At_Path_Input = {
-  compile_errors?: Maybe<Array<Maybe<Scalars["String"]>>>;
-};
-
-/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
-export type File_Delete_Elem_Input = {
-  compile_errors?: Maybe<Scalars["Int"]>;
-};
-
-/** delete key/value pair or string element. key/value pairs are matched based on their key value */
-export type File_Delete_Key_Input = {
-  compile_errors?: Maybe<Scalars["String"]>;
-};
-
-/** input type for inserting data into table "file" */
-export type File_Insert_Input = {
-  base_file_id?: Maybe<Scalars["uuid"]>;
-  branch?: Maybe<Branch_Obj_Rel_Insert_Input>;
-  branch_name?: Maybe<Scalars["String"]>;
-  compile_errors?: Maybe<Scalars["jsonb"]>;
-  contents?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamp"]>;
-  dts?: Maybe<Scalars["String"]>;
-  ext?: Maybe<Scalars["String"]>;
-  id?: Maybe<Scalars["uuid"]>;
-  js?: Maybe<Scalars["String"]>;
-  map?: Maybe<Scalars["String"]>;
-  mark_deleted?: Maybe<Scalars["Boolean"]>;
-  module?: Maybe<Module_Obj_Rel_Insert_Input>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  module_version?: Maybe<Scalars["String"]>;
-  path?: Maybe<Scalars["String"]>;
-  version?: Maybe<Module_Version_Obj_Rel_Insert_Input>;
-};
-
-/** aggregate max on columns */
-export type File_Max_Fields = {
-  base_file_id?: Maybe<Scalars["uuid"]>;
-  branch_name?: Maybe<Scalars["String"]>;
-  contents?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamp"]>;
-  dts?: Maybe<Scalars["String"]>;
-  ext?: Maybe<Scalars["String"]>;
-  id?: Maybe<Scalars["uuid"]>;
-  js?: Maybe<Scalars["String"]>;
-  map?: Maybe<Scalars["String"]>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  module_version?: Maybe<Scalars["String"]>;
-  path?: Maybe<Scalars["String"]>;
-};
-
-/** order by max() on columns of table "file" */
-export type File_Max_Order_By = {
-  base_file_id?: Maybe<Order_By>;
-  branch_name?: Maybe<Order_By>;
-  contents?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  dts?: Maybe<Order_By>;
-  ext?: Maybe<Order_By>;
-  id?: Maybe<Order_By>;
-  js?: Maybe<Order_By>;
-  map?: Maybe<Order_By>;
-  module_name?: Maybe<Order_By>;
-  module_scope?: Maybe<Order_By>;
-  module_version?: Maybe<Order_By>;
-  path?: Maybe<Order_By>;
-};
-
-/** aggregate min on columns */
-export type File_Min_Fields = {
-  base_file_id?: Maybe<Scalars["uuid"]>;
-  branch_name?: Maybe<Scalars["String"]>;
-  contents?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamp"]>;
-  dts?: Maybe<Scalars["String"]>;
-  ext?: Maybe<Scalars["String"]>;
-  id?: Maybe<Scalars["uuid"]>;
-  js?: Maybe<Scalars["String"]>;
-  map?: Maybe<Scalars["String"]>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  module_version?: Maybe<Scalars["String"]>;
-  path?: Maybe<Scalars["String"]>;
-};
-
-/** order by min() on columns of table "file" */
-export type File_Min_Order_By = {
-  base_file_id?: Maybe<Order_By>;
-  branch_name?: Maybe<Order_By>;
-  contents?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  dts?: Maybe<Order_By>;
-  ext?: Maybe<Order_By>;
-  id?: Maybe<Order_By>;
-  js?: Maybe<Order_By>;
-  map?: Maybe<Order_By>;
-  module_name?: Maybe<Order_By>;
-  module_scope?: Maybe<Order_By>;
-  module_version?: Maybe<Order_By>;
-  path?: Maybe<Order_By>;
-};
-
-/** response of any mutation on the table "file" */
-export type File_Mutation_Response = {
-  /** number of affected rows by the mutation */
-  affected_rows: Scalars["Int"];
-  /** data of the affected rows by the mutation */
-  returning: Array<File>;
-};
-
-/** input type for inserting object relation for remote table "file" */
-export type File_Obj_Rel_Insert_Input = {
-  data: File_Insert_Input;
-  on_conflict?: Maybe<File_On_Conflict>;
-};
-
-/** on conflict condition type for table "file" */
-export type File_On_Conflict = {
-  constraint: File_Constraint;
-  update_columns: Array<File_Update_Column>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** ordering options when selecting data from "file" */
-export type File_Order_By = {
-  base_file_id?: Maybe<Order_By>;
-  branch?: Maybe<Branch_Order_By>;
-  branch_name?: Maybe<Order_By>;
-  compile_errors?: Maybe<Order_By>;
-  contents?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  dts?: Maybe<Order_By>;
-  ext?: Maybe<Order_By>;
-  id?: Maybe<Order_By>;
-  js?: Maybe<Order_By>;
-  map?: Maybe<Order_By>;
-  mark_deleted?: Maybe<Order_By>;
-  module?: Maybe<Module_Order_By>;
-  module_name?: Maybe<Order_By>;
-  module_scope?: Maybe<Order_By>;
-  module_version?: Maybe<Order_By>;
-  path?: Maybe<Order_By>;
-  version?: Maybe<Module_Version_Order_By>;
-};
-
-/** primary key columns input for table: "file" */
-export type File_Pk_Columns_Input = {
-  id: Scalars["uuid"];
-};
-
-/** prepend existing jsonb value of filtered columns with new jsonb value */
-export type File_Prepend_Input = {
-  compile_errors?: Maybe<Scalars["jsonb"]>;
-};
-
-/** select columns of table "file" */
-export enum File_Select_Column {
-  /** column name */
-  BaseFileId = "base_file_id",
-  /** column name */
-  BranchName = "branch_name",
-  /** column name */
-  CompileErrors = "compile_errors",
-  /** column name */
-  Contents = "contents",
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  Dts = "dts",
-  /** column name */
-  Ext = "ext",
-  /** column name */
-  Id = "id",
-  /** column name */
-  Js = "js",
-  /** column name */
-  Map = "map",
-  /** column name */
-  MarkDeleted = "mark_deleted",
-  /** column name */
-  ModuleName = "module_name",
-  /** column name */
-  ModuleScope = "module_scope",
-  /** column name */
-  ModuleVersion = "module_version",
-  /** column name */
-  Path = "path"
-}
-
-/** input type for updating data in table "file" */
-export type File_Set_Input = {
-  base_file_id?: Maybe<Scalars["uuid"]>;
-  branch_name?: Maybe<Scalars["String"]>;
-  compile_errors?: Maybe<Scalars["jsonb"]>;
-  contents?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamp"]>;
-  dts?: Maybe<Scalars["String"]>;
-  ext?: Maybe<Scalars["String"]>;
-  id?: Maybe<Scalars["uuid"]>;
-  js?: Maybe<Scalars["String"]>;
-  map?: Maybe<Scalars["String"]>;
-  mark_deleted?: Maybe<Scalars["Boolean"]>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  module_version?: Maybe<Scalars["String"]>;
-  path?: Maybe<Scalars["String"]>;
-};
-
-/** update columns of table "file" */
-export enum File_Update_Column {
-  /** column name */
-  BaseFileId = "base_file_id",
-  /** column name */
-  BranchName = "branch_name",
-  /** column name */
-  CompileErrors = "compile_errors",
-  /** column name */
-  Contents = "contents",
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  Dts = "dts",
-  /** column name */
-  Ext = "ext",
-  /** column name */
-  Id = "id",
-  /** column name */
-  Js = "js",
-  /** column name */
-  Map = "map",
-  /** column name */
-  MarkDeleted = "mark_deleted",
-  /** column name */
-  ModuleName = "module_name",
-  /** column name */
-  ModuleScope = "module_scope",
-  /** column name */
-  ModuleVersion = "module_version",
-  /** column name */
-  Path = "path"
-}
-
-/** columns and relationships of "integrations" */
-export type Integrations = {
+/** columns and relationships of "integration" */
+export type Integration = {
   created_at: Scalars["timestamp"];
   data: Scalars["jsonb"];
   grafana_metadata: Scalars["jsonb"];
   id: Scalars["uuid"];
   kind: Scalars["String"];
   name: Scalars["String"];
-  status: Scalars["String"];
   /** An object relationship */
   tenant: Tenant;
   tenant_id: Scalars["uuid"];
   updated_at: Scalars["timestamp"];
 };
 
-/** columns and relationships of "integrations" */
-export type IntegrationsDataArgs = {
+/** columns and relationships of "integration" */
+export type IntegrationDataArgs = {
   path?: Maybe<Scalars["String"]>;
 };
 
-/** columns and relationships of "integrations" */
-export type IntegrationsGrafana_MetadataArgs = {
+/** columns and relationships of "integration" */
+export type IntegrationGrafana_MetadataArgs = {
   path?: Maybe<Scalars["String"]>;
 };
 
-/** aggregated selection of "integrations" */
-export type Integrations_Aggregate = {
-  aggregate?: Maybe<Integrations_Aggregate_Fields>;
-  nodes: Array<Integrations>;
+/** aggregated selection of "integration" */
+export type Integration_Aggregate = {
+  aggregate?: Maybe<Integration_Aggregate_Fields>;
+  nodes: Array<Integration>;
 };
 
-/** aggregate fields of "integrations" */
-export type Integrations_Aggregate_Fields = {
+/** aggregate fields of "integration" */
+export type Integration_Aggregate_Fields = {
   count?: Maybe<Scalars["Int"]>;
-  max?: Maybe<Integrations_Max_Fields>;
-  min?: Maybe<Integrations_Min_Fields>;
+  max?: Maybe<Integration_Max_Fields>;
+  min?: Maybe<Integration_Min_Fields>;
 };
 
-/** aggregate fields of "integrations" */
-export type Integrations_Aggregate_FieldsCountArgs = {
-  columns?: Maybe<Array<Integrations_Select_Column>>;
+/** aggregate fields of "integration" */
+export type Integration_Aggregate_FieldsCountArgs = {
+  columns?: Maybe<Array<Integration_Select_Column>>;
   distinct?: Maybe<Scalars["Boolean"]>;
 };
 
-/** order by aggregate values of table "integrations" */
-export type Integrations_Aggregate_Order_By = {
+/** order by aggregate values of table "integration" */
+export type Integration_Aggregate_Order_By = {
   count?: Maybe<Order_By>;
-  max?: Maybe<Integrations_Max_Order_By>;
-  min?: Maybe<Integrations_Min_Order_By>;
+  max?: Maybe<Integration_Max_Order_By>;
+  min?: Maybe<Integration_Min_Order_By>;
 };
 
 /** append existing jsonb value of filtered columns with new jsonb value */
-export type Integrations_Append_Input = {
+export type Integration_Append_Input = {
   data?: Maybe<Scalars["jsonb"]>;
   grafana_metadata?: Maybe<Scalars["jsonb"]>;
 };
 
-/** input type for inserting array relation for remote table "integrations" */
-export type Integrations_Arr_Rel_Insert_Input = {
-  data: Array<Integrations_Insert_Input>;
-  on_conflict?: Maybe<Integrations_On_Conflict>;
+/** input type for inserting array relation for remote table "integration" */
+export type Integration_Arr_Rel_Insert_Input = {
+  data: Array<Integration_Insert_Input>;
+  on_conflict?: Maybe<Integration_On_Conflict>;
 };
 
-/** Boolean expression to filter rows from the table "integrations". All fields are combined with a logical 'AND'. */
-export type Integrations_Bool_Exp = {
-  _and?: Maybe<Array<Maybe<Integrations_Bool_Exp>>>;
-  _not?: Maybe<Integrations_Bool_Exp>;
-  _or?: Maybe<Array<Maybe<Integrations_Bool_Exp>>>;
+/** Boolean expression to filter rows from the table "integration". All fields are combined with a logical 'AND'. */
+export type Integration_Bool_Exp = {
+  _and?: Maybe<Array<Maybe<Integration_Bool_Exp>>>;
+  _not?: Maybe<Integration_Bool_Exp>;
+  _or?: Maybe<Array<Maybe<Integration_Bool_Exp>>>;
   created_at?: Maybe<Timestamp_Comparison_Exp>;
   data?: Maybe<Jsonb_Comparison_Exp>;
   grafana_metadata?: Maybe<Jsonb_Comparison_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
   kind?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
-  status?: Maybe<String_Comparison_Exp>;
   tenant?: Maybe<Tenant_Bool_Exp>;
   tenant_id?: Maybe<Uuid_Comparison_Exp>;
   updated_at?: Maybe<Timestamp_Comparison_Exp>;
 };
 
-/** unique or primary key constraints on table "integrations" */
-export enum Integrations_Constraint {
+/** unique or primary key constraints on table "integration" */
+export enum Integration_Constraint {
   /** unique or primary key constraint */
   IntegrationsNameTenantIdKey = "integrations_name_tenant_id_key",
   /** unique or primary key constraint */
@@ -1215,129 +636,123 @@ export enum Integrations_Constraint {
 }
 
 /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
-export type Integrations_Delete_At_Path_Input = {
+export type Integration_Delete_At_Path_Input = {
   data?: Maybe<Array<Maybe<Scalars["String"]>>>;
   grafana_metadata?: Maybe<Array<Maybe<Scalars["String"]>>>;
 };
 
 /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
-export type Integrations_Delete_Elem_Input = {
+export type Integration_Delete_Elem_Input = {
   data?: Maybe<Scalars["Int"]>;
   grafana_metadata?: Maybe<Scalars["Int"]>;
 };
 
 /** delete key/value pair or string element. key/value pairs are matched based on their key value */
-export type Integrations_Delete_Key_Input = {
+export type Integration_Delete_Key_Input = {
   data?: Maybe<Scalars["String"]>;
   grafana_metadata?: Maybe<Scalars["String"]>;
 };
 
-/** input type for inserting data into table "integrations" */
-export type Integrations_Insert_Input = {
+/** input type for inserting data into table "integration" */
+export type Integration_Insert_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   data?: Maybe<Scalars["jsonb"]>;
   grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
-  status?: Maybe<Scalars["String"]>;
   tenant?: Maybe<Tenant_Obj_Rel_Insert_Input>;
   tenant_id?: Maybe<Scalars["uuid"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
 /** aggregate max on columns */
-export type Integrations_Max_Fields = {
+export type Integration_Max_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
-  status?: Maybe<Scalars["String"]>;
   tenant_id?: Maybe<Scalars["uuid"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
-/** order by max() on columns of table "integrations" */
-export type Integrations_Max_Order_By = {
+/** order by max() on columns of table "integration" */
+export type Integration_Max_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
-  status?: Maybe<Order_By>;
   tenant_id?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
 };
 
 /** aggregate min on columns */
-export type Integrations_Min_Fields = {
+export type Integration_Min_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
-  status?: Maybe<Scalars["String"]>;
   tenant_id?: Maybe<Scalars["uuid"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
-/** order by min() on columns of table "integrations" */
-export type Integrations_Min_Order_By = {
+/** order by min() on columns of table "integration" */
+export type Integration_Min_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
-  status?: Maybe<Order_By>;
   tenant_id?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
 };
 
-/** response of any mutation on the table "integrations" */
-export type Integrations_Mutation_Response = {
+/** response of any mutation on the table "integration" */
+export type Integration_Mutation_Response = {
   /** number of affected rows by the mutation */
   affected_rows: Scalars["Int"];
   /** data of the affected rows by the mutation */
-  returning: Array<Integrations>;
+  returning: Array<Integration>;
 };
 
-/** input type for inserting object relation for remote table "integrations" */
-export type Integrations_Obj_Rel_Insert_Input = {
-  data: Integrations_Insert_Input;
-  on_conflict?: Maybe<Integrations_On_Conflict>;
+/** input type for inserting object relation for remote table "integration" */
+export type Integration_Obj_Rel_Insert_Input = {
+  data: Integration_Insert_Input;
+  on_conflict?: Maybe<Integration_On_Conflict>;
 };
 
-/** on conflict condition type for table "integrations" */
-export type Integrations_On_Conflict = {
-  constraint: Integrations_Constraint;
-  update_columns: Array<Integrations_Update_Column>;
-  where?: Maybe<Integrations_Bool_Exp>;
+/** on conflict condition type for table "integration" */
+export type Integration_On_Conflict = {
+  constraint: Integration_Constraint;
+  update_columns: Array<Integration_Update_Column>;
+  where?: Maybe<Integration_Bool_Exp>;
 };
 
-/** ordering options when selecting data from "integrations" */
-export type Integrations_Order_By = {
+/** ordering options when selecting data from "integration" */
+export type Integration_Order_By = {
   created_at?: Maybe<Order_By>;
   data?: Maybe<Order_By>;
   grafana_metadata?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
-  status?: Maybe<Order_By>;
   tenant?: Maybe<Tenant_Order_By>;
   tenant_id?: Maybe<Order_By>;
   updated_at?: Maybe<Order_By>;
 };
 
-/** primary key columns input for table: "integrations" */
-export type Integrations_Pk_Columns_Input = {
+/** primary key columns input for table: "integration" */
+export type Integration_Pk_Columns_Input = {
   id: Scalars["uuid"];
 };
 
 /** prepend existing jsonb value of filtered columns with new jsonb value */
-export type Integrations_Prepend_Input = {
+export type Integration_Prepend_Input = {
   data?: Maybe<Scalars["jsonb"]>;
   grafana_metadata?: Maybe<Scalars["jsonb"]>;
 };
 
-/** select columns of table "integrations" */
-export enum Integrations_Select_Column {
+/** select columns of table "integration" */
+export enum Integration_Select_Column {
   /** column name */
   CreatedAt = "created_at",
   /** column name */
@@ -1350,29 +765,26 @@ export enum Integrations_Select_Column {
   Kind = "kind",
   /** column name */
   Name = "name",
-  /** column name */
-  Status = "status",
   /** column name */
   TenantId = "tenant_id",
   /** column name */
   UpdatedAt = "updated_at"
 }
 
-/** input type for updating data in table "integrations" */
-export type Integrations_Set_Input = {
+/** input type for updating data in table "integration" */
+export type Integration_Set_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   data?: Maybe<Scalars["jsonb"]>;
   grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
-  status?: Maybe<Scalars["String"]>;
   tenant_id?: Maybe<Scalars["uuid"]>;
   updated_at?: Maybe<Scalars["timestamp"]>;
 };
 
-/** update columns of table "integrations" */
-export enum Integrations_Update_Column {
+/** update columns of table "integration" */
+export enum Integration_Update_Column {
   /** column name */
   CreatedAt = "created_at",
   /** column name */
@@ -1385,8 +797,6 @@ export enum Integrations_Update_Column {
   Kind = "kind",
   /** column name */
   Name = "name",
-  /** column name */
-  Status = "status",
   /** column name */
   TenantId = "tenant_id",
   /** column name */
@@ -1429,448 +839,10 @@ export type Jsonb_Comparison_Exp = {
   _nin?: Maybe<Array<Scalars["jsonb"]>>;
 };
 
-/** columns and relationships of "module" */
-export type Module = {
-  /** An object relationship */
-  branch: Branch;
-  branch_name: Scalars["String"];
-  created_at: Scalars["timestamptz"];
-  /** An array relationship */
-  files: Array<File>;
-  /** An aggregated array relationship */
-  files_aggregate: File_Aggregate;
-  name: Scalars["String"];
-  scope: Scalars["String"];
-  /** An array relationship */
-  versions: Array<Module_Version>;
-  /** An aggregated array relationship */
-  versions_aggregate: Module_Version_Aggregate;
-};
-
-/** columns and relationships of "module" */
-export type ModuleFilesArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** columns and relationships of "module" */
-export type ModuleFiles_AggregateArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** columns and relationships of "module" */
-export type ModuleVersionsArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** columns and relationships of "module" */
-export type ModuleVersions_AggregateArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** aggregated selection of "module" */
-export type Module_Aggregate = {
-  aggregate?: Maybe<Module_Aggregate_Fields>;
-  nodes: Array<Module>;
-};
-
-/** aggregate fields of "module" */
-export type Module_Aggregate_Fields = {
-  count?: Maybe<Scalars["Int"]>;
-  max?: Maybe<Module_Max_Fields>;
-  min?: Maybe<Module_Min_Fields>;
-};
-
-/** aggregate fields of "module" */
-export type Module_Aggregate_FieldsCountArgs = {
-  columns?: Maybe<Array<Module_Select_Column>>;
-  distinct?: Maybe<Scalars["Boolean"]>;
-};
-
-/** order by aggregate values of table "module" */
-export type Module_Aggregate_Order_By = {
-  count?: Maybe<Order_By>;
-  max?: Maybe<Module_Max_Order_By>;
-  min?: Maybe<Module_Min_Order_By>;
-};
-
-/** input type for inserting array relation for remote table "module" */
-export type Module_Arr_Rel_Insert_Input = {
-  data: Array<Module_Insert_Input>;
-  on_conflict?: Maybe<Module_On_Conflict>;
-};
-
-/** Boolean expression to filter rows from the table "module". All fields are combined with a logical 'AND'. */
-export type Module_Bool_Exp = {
-  _and?: Maybe<Array<Maybe<Module_Bool_Exp>>>;
-  _not?: Maybe<Module_Bool_Exp>;
-  _or?: Maybe<Array<Maybe<Module_Bool_Exp>>>;
-  branch?: Maybe<Branch_Bool_Exp>;
-  branch_name?: Maybe<String_Comparison_Exp>;
-  created_at?: Maybe<Timestamptz_Comparison_Exp>;
-  files?: Maybe<File_Bool_Exp>;
-  name?: Maybe<String_Comparison_Exp>;
-  scope?: Maybe<String_Comparison_Exp>;
-  versions?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** unique or primary key constraints on table "module" */
-export enum Module_Constraint {
-  /** unique or primary key constraint */
-  ModulePkey = "module_pkey"
-}
-
-/** input type for inserting data into table "module" */
-export type Module_Insert_Input = {
-  branch?: Maybe<Branch_Obj_Rel_Insert_Input>;
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  files?: Maybe<File_Arr_Rel_Insert_Input>;
-  name?: Maybe<Scalars["String"]>;
-  scope?: Maybe<Scalars["String"]>;
-  versions?: Maybe<Module_Version_Arr_Rel_Insert_Input>;
-};
-
-/** aggregate max on columns */
-export type Module_Max_Fields = {
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  name?: Maybe<Scalars["String"]>;
-  scope?: Maybe<Scalars["String"]>;
-};
-
-/** order by max() on columns of table "module" */
-export type Module_Max_Order_By = {
-  branch_name?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  name?: Maybe<Order_By>;
-  scope?: Maybe<Order_By>;
-};
-
-/** aggregate min on columns */
-export type Module_Min_Fields = {
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  name?: Maybe<Scalars["String"]>;
-  scope?: Maybe<Scalars["String"]>;
-};
-
-/** order by min() on columns of table "module" */
-export type Module_Min_Order_By = {
-  branch_name?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  name?: Maybe<Order_By>;
-  scope?: Maybe<Order_By>;
-};
-
-/** response of any mutation on the table "module" */
-export type Module_Mutation_Response = {
-  /** number of affected rows by the mutation */
-  affected_rows: Scalars["Int"];
-  /** data of the affected rows by the mutation */
-  returning: Array<Module>;
-};
-
-/** input type for inserting object relation for remote table "module" */
-export type Module_Obj_Rel_Insert_Input = {
-  data: Module_Insert_Input;
-  on_conflict?: Maybe<Module_On_Conflict>;
-};
-
-/** on conflict condition type for table "module" */
-export type Module_On_Conflict = {
-  constraint: Module_Constraint;
-  update_columns: Array<Module_Update_Column>;
-  where?: Maybe<Module_Bool_Exp>;
-};
-
-/** ordering options when selecting data from "module" */
-export type Module_Order_By = {
-  branch?: Maybe<Branch_Order_By>;
-  branch_name?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  files_aggregate?: Maybe<File_Aggregate_Order_By>;
-  name?: Maybe<Order_By>;
-  scope?: Maybe<Order_By>;
-  versions_aggregate?: Maybe<Module_Version_Aggregate_Order_By>;
-};
-
-/** primary key columns input for table: "module" */
-export type Module_Pk_Columns_Input = {
-  branch_name: Scalars["String"];
-  name: Scalars["String"];
-  scope: Scalars["String"];
-};
-
-/** select columns of table "module" */
-export enum Module_Select_Column {
-  /** column name */
-  BranchName = "branch_name",
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  Name = "name",
-  /** column name */
-  Scope = "scope"
-}
-
-/** input type for updating data in table "module" */
-export type Module_Set_Input = {
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  name?: Maybe<Scalars["String"]>;
-  scope?: Maybe<Scalars["String"]>;
-};
-
-/** update columns of table "module" */
-export enum Module_Update_Column {
-  /** column name */
-  BranchName = "branch_name",
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  Name = "name",
-  /** column name */
-  Scope = "scope"
-}
-
-/** columns and relationships of "module_version" */
-export type Module_Version = {
-  /** An object relationship */
-  branch: Branch;
-  branch_name: Scalars["String"];
-  created_at: Scalars["timestamptz"];
-  /** An array relationship */
-  files: Array<File>;
-  /** An aggregated array relationship */
-  files_aggregate: File_Aggregate;
-  /** An object relationship */
-  module?: Maybe<Module>;
-  module_name: Scalars["String"];
-  module_scope: Scalars["String"];
-  version: Scalars["String"];
-};
-
-/** columns and relationships of "module_version" */
-export type Module_VersionFilesArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** columns and relationships of "module_version" */
-export type Module_VersionFiles_AggregateArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** aggregated selection of "module_version" */
-export type Module_Version_Aggregate = {
-  aggregate?: Maybe<Module_Version_Aggregate_Fields>;
-  nodes: Array<Module_Version>;
-};
-
-/** aggregate fields of "module_version" */
-export type Module_Version_Aggregate_Fields = {
-  count?: Maybe<Scalars["Int"]>;
-  max?: Maybe<Module_Version_Max_Fields>;
-  min?: Maybe<Module_Version_Min_Fields>;
-};
-
-/** aggregate fields of "module_version" */
-export type Module_Version_Aggregate_FieldsCountArgs = {
-  columns?: Maybe<Array<Module_Version_Select_Column>>;
-  distinct?: Maybe<Scalars["Boolean"]>;
-};
-
-/** order by aggregate values of table "module_version" */
-export type Module_Version_Aggregate_Order_By = {
-  count?: Maybe<Order_By>;
-  max?: Maybe<Module_Version_Max_Order_By>;
-  min?: Maybe<Module_Version_Min_Order_By>;
-};
-
-/** input type for inserting array relation for remote table "module_version" */
-export type Module_Version_Arr_Rel_Insert_Input = {
-  data: Array<Module_Version_Insert_Input>;
-  on_conflict?: Maybe<Module_Version_On_Conflict>;
-};
-
-/** Boolean expression to filter rows from the table "module_version". All fields are combined with a logical 'AND'. */
-export type Module_Version_Bool_Exp = {
-  _and?: Maybe<Array<Maybe<Module_Version_Bool_Exp>>>;
-  _not?: Maybe<Module_Version_Bool_Exp>;
-  _or?: Maybe<Array<Maybe<Module_Version_Bool_Exp>>>;
-  branch?: Maybe<Branch_Bool_Exp>;
-  branch_name?: Maybe<String_Comparison_Exp>;
-  created_at?: Maybe<Timestamptz_Comparison_Exp>;
-  files?: Maybe<File_Bool_Exp>;
-  module?: Maybe<Module_Bool_Exp>;
-  module_name?: Maybe<String_Comparison_Exp>;
-  module_scope?: Maybe<String_Comparison_Exp>;
-  version?: Maybe<String_Comparison_Exp>;
-};
-
-/** unique or primary key constraints on table "module_version" */
-export enum Module_Version_Constraint {
-  /** unique or primary key constraint */
-  ModuleVersionPkey = "module_version_pkey"
-}
-
-/** input type for inserting data into table "module_version" */
-export type Module_Version_Insert_Input = {
-  branch?: Maybe<Branch_Obj_Rel_Insert_Input>;
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  files?: Maybe<File_Arr_Rel_Insert_Input>;
-  module?: Maybe<Module_Obj_Rel_Insert_Input>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  version?: Maybe<Scalars["String"]>;
-};
-
-/** aggregate max on columns */
-export type Module_Version_Max_Fields = {
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  version?: Maybe<Scalars["String"]>;
-};
-
-/** order by max() on columns of table "module_version" */
-export type Module_Version_Max_Order_By = {
-  branch_name?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  module_name?: Maybe<Order_By>;
-  module_scope?: Maybe<Order_By>;
-  version?: Maybe<Order_By>;
-};
-
-/** aggregate min on columns */
-export type Module_Version_Min_Fields = {
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  version?: Maybe<Scalars["String"]>;
-};
-
-/** order by min() on columns of table "module_version" */
-export type Module_Version_Min_Order_By = {
-  branch_name?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  module_name?: Maybe<Order_By>;
-  module_scope?: Maybe<Order_By>;
-  version?: Maybe<Order_By>;
-};
-
-/** response of any mutation on the table "module_version" */
-export type Module_Version_Mutation_Response = {
-  /** number of affected rows by the mutation */
-  affected_rows: Scalars["Int"];
-  /** data of the affected rows by the mutation */
-  returning: Array<Module_Version>;
-};
-
-/** input type for inserting object relation for remote table "module_version" */
-export type Module_Version_Obj_Rel_Insert_Input = {
-  data: Module_Version_Insert_Input;
-  on_conflict?: Maybe<Module_Version_On_Conflict>;
-};
-
-/** on conflict condition type for table "module_version" */
-export type Module_Version_On_Conflict = {
-  constraint: Module_Version_Constraint;
-  update_columns: Array<Module_Version_Update_Column>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** ordering options when selecting data from "module_version" */
-export type Module_Version_Order_By = {
-  branch?: Maybe<Branch_Order_By>;
-  branch_name?: Maybe<Order_By>;
-  created_at?: Maybe<Order_By>;
-  files_aggregate?: Maybe<File_Aggregate_Order_By>;
-  module?: Maybe<Module_Order_By>;
-  module_name?: Maybe<Order_By>;
-  module_scope?: Maybe<Order_By>;
-  version?: Maybe<Order_By>;
-};
-
-/** primary key columns input for table: "module_version" */
-export type Module_Version_Pk_Columns_Input = {
-  branch_name: Scalars["String"];
-  module_name: Scalars["String"];
-  module_scope: Scalars["String"];
-  version: Scalars["String"];
-};
-
-/** select columns of table "module_version" */
-export enum Module_Version_Select_Column {
-  /** column name */
-  BranchName = "branch_name",
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  ModuleName = "module_name",
-  /** column name */
-  ModuleScope = "module_scope",
-  /** column name */
-  Version = "version"
-}
-
-/** input type for updating data in table "module_version" */
-export type Module_Version_Set_Input = {
-  branch_name?: Maybe<Scalars["String"]>;
-  created_at?: Maybe<Scalars["timestamptz"]>;
-  module_name?: Maybe<Scalars["String"]>;
-  module_scope?: Maybe<Scalars["String"]>;
-  version?: Maybe<Scalars["String"]>;
-};
-
-/** update columns of table "module_version" */
-export enum Module_Version_Update_Column {
-  /** column name */
-  BranchName = "branch_name",
-  /** column name */
-  CreatedAt = "created_at",
-  /** column name */
-  ModuleName = "module_name",
-  /** column name */
-  ModuleScope = "module_scope",
-  /** column name */
-  Version = "version"
-}
-
 /** mutation root */
 export type Mutation_Root = {
   /** perform the action: "deleteRuleGroup" */
   deleteRuleGroup?: Maybe<StatusResponse>;
-  /** delete data from the table: "branch" */
-  delete_branch?: Maybe<Branch_Mutation_Response>;
-  /** delete single row from the table: "branch" */
-  delete_branch_by_pk?: Maybe<Branch>;
   /** delete data from the table: "credential" */
   delete_credential?: Maybe<Credential_Mutation_Response>;
   /** delete single row from the table: "credential" */
@@ -1879,22 +851,10 @@ export type Mutation_Root = {
   delete_exporter?: Maybe<Exporter_Mutation_Response>;
   /** delete single row from the table: "exporter" */
   delete_exporter_by_pk?: Maybe<Exporter>;
-  /** delete data from the table: "file" */
-  delete_file?: Maybe<File_Mutation_Response>;
-  /** delete single row from the table: "file" */
-  delete_file_by_pk?: Maybe<File>;
-  /** delete data from the table: "integrations" */
-  delete_integrations?: Maybe<Integrations_Mutation_Response>;
-  /** delete single row from the table: "integrations" */
-  delete_integrations_by_pk?: Maybe<Integrations>;
-  /** delete data from the table: "module" */
-  delete_module?: Maybe<Module_Mutation_Response>;
-  /** delete single row from the table: "module" */
-  delete_module_by_pk?: Maybe<Module>;
-  /** delete data from the table: "module_version" */
-  delete_module_version?: Maybe<Module_Version_Mutation_Response>;
-  /** delete single row from the table: "module_version" */
-  delete_module_version_by_pk?: Maybe<Module_Version>;
+  /** delete data from the table: "integration" */
+  delete_integration?: Maybe<Integration_Mutation_Response>;
+  /** delete single row from the table: "integration" */
+  delete_integration_by_pk?: Maybe<Integration>;
   /** delete data from the table: "tenant" */
   delete_tenant?: Maybe<Tenant_Mutation_Response>;
   /** delete single row from the table: "tenant" */
@@ -1907,10 +867,6 @@ export type Mutation_Root = {
   delete_user_preference?: Maybe<User_Preference_Mutation_Response>;
   /** delete single row from the table: "user_preference" */
   delete_user_preference_by_pk?: Maybe<User_Preference>;
-  /** insert data into the table: "branch" */
-  insert_branch?: Maybe<Branch_Mutation_Response>;
-  /** insert a single row into the table: "branch" */
-  insert_branch_one?: Maybe<Branch>;
   /** insert data into the table: "credential" */
   insert_credential?: Maybe<Credential_Mutation_Response>;
   /** insert a single row into the table: "credential" */
@@ -1919,22 +875,10 @@ export type Mutation_Root = {
   insert_exporter?: Maybe<Exporter_Mutation_Response>;
   /** insert a single row into the table: "exporter" */
   insert_exporter_one?: Maybe<Exporter>;
-  /** insert data into the table: "file" */
-  insert_file?: Maybe<File_Mutation_Response>;
-  /** insert a single row into the table: "file" */
-  insert_file_one?: Maybe<File>;
-  /** insert data into the table: "integrations" */
-  insert_integrations?: Maybe<Integrations_Mutation_Response>;
-  /** insert a single row into the table: "integrations" */
-  insert_integrations_one?: Maybe<Integrations>;
-  /** insert data into the table: "module" */
-  insert_module?: Maybe<Module_Mutation_Response>;
-  /** insert a single row into the table: "module" */
-  insert_module_one?: Maybe<Module>;
-  /** insert data into the table: "module_version" */
-  insert_module_version?: Maybe<Module_Version_Mutation_Response>;
-  /** insert a single row into the table: "module_version" */
-  insert_module_version_one?: Maybe<Module_Version>;
+  /** insert data into the table: "integration" */
+  insert_integration?: Maybe<Integration_Mutation_Response>;
+  /** insert a single row into the table: "integration" */
+  insert_integration_one?: Maybe<Integration>;
   /** insert data into the table: "tenant" */
   insert_tenant?: Maybe<Tenant_Mutation_Response>;
   /** insert a single row into the table: "tenant" */
@@ -1951,10 +895,6 @@ export type Mutation_Root = {
   updateAlertmanager?: Maybe<StatusResponse>;
   /** perform the action: "updateRuleGroup" */
   updateRuleGroup?: Maybe<StatusResponse>;
-  /** update data of the table: "branch" */
-  update_branch?: Maybe<Branch_Mutation_Response>;
-  /** update single row of the table: "branch" */
-  update_branch_by_pk?: Maybe<Branch>;
   /** update data of the table: "credential" */
   update_credential?: Maybe<Credential_Mutation_Response>;
   /** update single row of the table: "credential" */
@@ -1963,22 +903,10 @@ export type Mutation_Root = {
   update_exporter?: Maybe<Exporter_Mutation_Response>;
   /** update single row of the table: "exporter" */
   update_exporter_by_pk?: Maybe<Exporter>;
-  /** update data of the table: "file" */
-  update_file?: Maybe<File_Mutation_Response>;
-  /** update single row of the table: "file" */
-  update_file_by_pk?: Maybe<File>;
-  /** update data of the table: "integrations" */
-  update_integrations?: Maybe<Integrations_Mutation_Response>;
-  /** update single row of the table: "integrations" */
-  update_integrations_by_pk?: Maybe<Integrations>;
-  /** update data of the table: "module" */
-  update_module?: Maybe<Module_Mutation_Response>;
-  /** update single row of the table: "module" */
-  update_module_by_pk?: Maybe<Module>;
-  /** update data of the table: "module_version" */
-  update_module_version?: Maybe<Module_Version_Mutation_Response>;
-  /** update single row of the table: "module_version" */
-  update_module_version_by_pk?: Maybe<Module_Version>;
+  /** update data of the table: "integration" */
+  update_integration?: Maybe<Integration_Mutation_Response>;
+  /** update single row of the table: "integration" */
+  update_integration_by_pk?: Maybe<Integration>;
   /** update data of the table: "tenant" */
   update_tenant?: Maybe<Tenant_Mutation_Response>;
   /** update single row of the table: "tenant" */
@@ -1998,16 +926,6 @@ export type Mutation_RootDeleteRuleGroupArgs = {
   namespace: Scalars["String"];
   rule_group_name: Scalars["String"];
   tenant_id: Scalars["String"];
-};
-
-/** mutation root */
-export type Mutation_RootDelete_BranchArgs = {
-  where: Branch_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootDelete_Branch_By_PkArgs = {
-  name: Scalars["String"];
 };
 
 /** mutation root */
@@ -2033,48 +951,13 @@ export type Mutation_RootDelete_Exporter_By_PkArgs = {
 };
 
 /** mutation root */
-export type Mutation_RootDelete_FileArgs = {
-  where: File_Bool_Exp;
+export type Mutation_RootDelete_IntegrationArgs = {
+  where: Integration_Bool_Exp;
 };
 
 /** mutation root */
-export type Mutation_RootDelete_File_By_PkArgs = {
+export type Mutation_RootDelete_Integration_By_PkArgs = {
   id: Scalars["uuid"];
-};
-
-/** mutation root */
-export type Mutation_RootDelete_IntegrationsArgs = {
-  where: Integrations_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootDelete_Integrations_By_PkArgs = {
-  id: Scalars["uuid"];
-};
-
-/** mutation root */
-export type Mutation_RootDelete_ModuleArgs = {
-  where: Module_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootDelete_Module_By_PkArgs = {
-  branch_name: Scalars["String"];
-  name: Scalars["String"];
-  scope: Scalars["String"];
-};
-
-/** mutation root */
-export type Mutation_RootDelete_Module_VersionArgs = {
-  where: Module_Version_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootDelete_Module_Version_By_PkArgs = {
-  branch_name: Scalars["String"];
-  module_name: Scalars["String"];
-  module_scope: Scalars["String"];
-  version: Scalars["String"];
 };
 
 /** mutation root */
@@ -2108,18 +991,6 @@ export type Mutation_RootDelete_User_Preference_By_PkArgs = {
 };
 
 /** mutation root */
-export type Mutation_RootInsert_BranchArgs = {
-  objects: Array<Branch_Insert_Input>;
-  on_conflict?: Maybe<Branch_On_Conflict>;
-};
-
-/** mutation root */
-export type Mutation_RootInsert_Branch_OneArgs = {
-  object: Branch_Insert_Input;
-  on_conflict?: Maybe<Branch_On_Conflict>;
-};
-
-/** mutation root */
 export type Mutation_RootInsert_CredentialArgs = {
   objects: Array<Credential_Insert_Input>;
   on_conflict?: Maybe<Credential_On_Conflict>;
@@ -2144,51 +1015,15 @@ export type Mutation_RootInsert_Exporter_OneArgs = {
 };
 
 /** mutation root */
-export type Mutation_RootInsert_FileArgs = {
-  objects: Array<File_Insert_Input>;
-  on_conflict?: Maybe<File_On_Conflict>;
+export type Mutation_RootInsert_IntegrationArgs = {
+  objects: Array<Integration_Insert_Input>;
+  on_conflict?: Maybe<Integration_On_Conflict>;
 };
 
 /** mutation root */
-export type Mutation_RootInsert_File_OneArgs = {
-  object: File_Insert_Input;
-  on_conflict?: Maybe<File_On_Conflict>;
-};
-
-/** mutation root */
-export type Mutation_RootInsert_IntegrationsArgs = {
-  objects: Array<Integrations_Insert_Input>;
-  on_conflict?: Maybe<Integrations_On_Conflict>;
-};
-
-/** mutation root */
-export type Mutation_RootInsert_Integrations_OneArgs = {
-  object: Integrations_Insert_Input;
-  on_conflict?: Maybe<Integrations_On_Conflict>;
-};
-
-/** mutation root */
-export type Mutation_RootInsert_ModuleArgs = {
-  objects: Array<Module_Insert_Input>;
-  on_conflict?: Maybe<Module_On_Conflict>;
-};
-
-/** mutation root */
-export type Mutation_RootInsert_Module_OneArgs = {
-  object: Module_Insert_Input;
-  on_conflict?: Maybe<Module_On_Conflict>;
-};
-
-/** mutation root */
-export type Mutation_RootInsert_Module_VersionArgs = {
-  objects: Array<Module_Version_Insert_Input>;
-  on_conflict?: Maybe<Module_Version_On_Conflict>;
-};
-
-/** mutation root */
-export type Mutation_RootInsert_Module_Version_OneArgs = {
-  object: Module_Version_Insert_Input;
-  on_conflict?: Maybe<Module_Version_On_Conflict>;
+export type Mutation_RootInsert_Integration_OneArgs = {
+  object: Integration_Insert_Input;
+  on_conflict?: Maybe<Integration_On_Conflict>;
 };
 
 /** mutation root */
@@ -2241,18 +1076,6 @@ export type Mutation_RootUpdateRuleGroupArgs = {
 };
 
 /** mutation root */
-export type Mutation_RootUpdate_BranchArgs = {
-  _set?: Maybe<Branch_Set_Input>;
-  where: Branch_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootUpdate_Branch_By_PkArgs = {
-  _set?: Maybe<Branch_Set_Input>;
-  pk_columns: Branch_Pk_Columns_Input;
-};
-
-/** mutation root */
 export type Mutation_RootUpdate_CredentialArgs = {
   _set?: Maybe<Credential_Set_Input>;
   where: Credential_Bool_Exp;
@@ -2277,71 +1100,25 @@ export type Mutation_RootUpdate_Exporter_By_PkArgs = {
 };
 
 /** mutation root */
-export type Mutation_RootUpdate_FileArgs = {
-  _append?: Maybe<File_Append_Input>;
-  _delete_at_path?: Maybe<File_Delete_At_Path_Input>;
-  _delete_elem?: Maybe<File_Delete_Elem_Input>;
-  _delete_key?: Maybe<File_Delete_Key_Input>;
-  _prepend?: Maybe<File_Prepend_Input>;
-  _set?: Maybe<File_Set_Input>;
-  where: File_Bool_Exp;
+export type Mutation_RootUpdate_IntegrationArgs = {
+  _append?: Maybe<Integration_Append_Input>;
+  _delete_at_path?: Maybe<Integration_Delete_At_Path_Input>;
+  _delete_elem?: Maybe<Integration_Delete_Elem_Input>;
+  _delete_key?: Maybe<Integration_Delete_Key_Input>;
+  _prepend?: Maybe<Integration_Prepend_Input>;
+  _set?: Maybe<Integration_Set_Input>;
+  where: Integration_Bool_Exp;
 };
 
 /** mutation root */
-export type Mutation_RootUpdate_File_By_PkArgs = {
-  _append?: Maybe<File_Append_Input>;
-  _delete_at_path?: Maybe<File_Delete_At_Path_Input>;
-  _delete_elem?: Maybe<File_Delete_Elem_Input>;
-  _delete_key?: Maybe<File_Delete_Key_Input>;
-  _prepend?: Maybe<File_Prepend_Input>;
-  _set?: Maybe<File_Set_Input>;
-  pk_columns: File_Pk_Columns_Input;
-};
-
-/** mutation root */
-export type Mutation_RootUpdate_IntegrationsArgs = {
-  _append?: Maybe<Integrations_Append_Input>;
-  _delete_at_path?: Maybe<Integrations_Delete_At_Path_Input>;
-  _delete_elem?: Maybe<Integrations_Delete_Elem_Input>;
-  _delete_key?: Maybe<Integrations_Delete_Key_Input>;
-  _prepend?: Maybe<Integrations_Prepend_Input>;
-  _set?: Maybe<Integrations_Set_Input>;
-  where: Integrations_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootUpdate_Integrations_By_PkArgs = {
-  _append?: Maybe<Integrations_Append_Input>;
-  _delete_at_path?: Maybe<Integrations_Delete_At_Path_Input>;
-  _delete_elem?: Maybe<Integrations_Delete_Elem_Input>;
-  _delete_key?: Maybe<Integrations_Delete_Key_Input>;
-  _prepend?: Maybe<Integrations_Prepend_Input>;
-  _set?: Maybe<Integrations_Set_Input>;
-  pk_columns: Integrations_Pk_Columns_Input;
-};
-
-/** mutation root */
-export type Mutation_RootUpdate_ModuleArgs = {
-  _set?: Maybe<Module_Set_Input>;
-  where: Module_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootUpdate_Module_By_PkArgs = {
-  _set?: Maybe<Module_Set_Input>;
-  pk_columns: Module_Pk_Columns_Input;
-};
-
-/** mutation root */
-export type Mutation_RootUpdate_Module_VersionArgs = {
-  _set?: Maybe<Module_Version_Set_Input>;
-  where: Module_Version_Bool_Exp;
-};
-
-/** mutation root */
-export type Mutation_RootUpdate_Module_Version_By_PkArgs = {
-  _set?: Maybe<Module_Version_Set_Input>;
-  pk_columns: Module_Version_Pk_Columns_Input;
+export type Mutation_RootUpdate_Integration_By_PkArgs = {
+  _append?: Maybe<Integration_Append_Input>;
+  _delete_at_path?: Maybe<Integration_Delete_At_Path_Input>;
+  _delete_elem?: Maybe<Integration_Delete_Elem_Input>;
+  _delete_key?: Maybe<Integration_Delete_Key_Input>;
+  _prepend?: Maybe<Integration_Prepend_Input>;
+  _set?: Maybe<Integration_Set_Input>;
+  pk_columns: Integration_Pk_Columns_Input;
 };
 
 /** mutation root */
@@ -2398,12 +1175,6 @@ export enum Order_By {
 
 /** query root */
 export type Query_Root = {
-  /** fetch data from the table: "branch" */
-  branch: Array<Branch>;
-  /** fetch aggregated fields from the table: "branch" */
-  branch_aggregate: Branch_Aggregate;
-  /** fetch data from the table: "branch" using primary key columns */
-  branch_by_pk?: Maybe<Branch>;
   /** fetch data from the table: "credential" */
   credential: Array<Credential>;
   /** fetch aggregated fields from the table: "credential" */
@@ -2416,36 +1187,18 @@ export type Query_Root = {
   exporter_aggregate: Exporter_Aggregate;
   /** fetch data from the table: "exporter" using primary key columns */
   exporter_by_pk?: Maybe<Exporter>;
-  /** fetch data from the table: "file" */
-  file: Array<File>;
-  /** fetch aggregated fields from the table: "file" */
-  file_aggregate: File_Aggregate;
-  /** fetch data from the table: "file" using primary key columns */
-  file_by_pk?: Maybe<File>;
   /** perform the action: "getAlertmanager" */
   getAlertmanager?: Maybe<Alertmanager>;
   /** perform the action: "getRuleGroup" */
   getRuleGroup?: Maybe<RuleGroup>;
-  /** fetch data from the table: "integrations" */
-  integrations: Array<Integrations>;
-  /** fetch aggregated fields from the table: "integrations" */
-  integrations_aggregate: Integrations_Aggregate;
-  /** fetch data from the table: "integrations" using primary key columns */
-  integrations_by_pk?: Maybe<Integrations>;
+  /** fetch data from the table: "integration" */
+  integration: Array<Integration>;
+  /** fetch aggregated fields from the table: "integration" */
+  integration_aggregate: Integration_Aggregate;
+  /** fetch data from the table: "integration" using primary key columns */
+  integration_by_pk?: Maybe<Integration>;
   /** perform the action: "listRules" */
   listRules?: Maybe<Rules>;
-  /** fetch data from the table: "module" */
-  module: Array<Module>;
-  /** fetch aggregated fields from the table: "module" */
-  module_aggregate: Module_Aggregate;
-  /** fetch data from the table: "module" using primary key columns */
-  module_by_pk?: Maybe<Module>;
-  /** fetch data from the table: "module_version" */
-  module_version: Array<Module_Version>;
-  /** fetch aggregated fields from the table: "module_version" */
-  module_version_aggregate: Module_Version_Aggregate;
-  /** fetch data from the table: "module_version" using primary key columns */
-  module_version_by_pk?: Maybe<Module_Version>;
   /** fetch data from the table: "tenant" */
   tenant: Array<Tenant>;
   /** fetch aggregated fields from the table: "tenant" */
@@ -2468,29 +1221,6 @@ export type Query_Root = {
   validateCredential?: Maybe<StatusResponse>;
   /** perform the action: "validateExporter" */
   validateExporter?: Maybe<StatusResponse>;
-};
-
-/** query root */
-export type Query_RootBranchArgs = {
-  distinct_on?: Maybe<Array<Branch_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Branch_Order_By>>;
-  where?: Maybe<Branch_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootBranch_AggregateArgs = {
-  distinct_on?: Maybe<Array<Branch_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Branch_Order_By>>;
-  where?: Maybe<Branch_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootBranch_By_PkArgs = {
-  name: Scalars["String"];
 };
 
 /** query root */
@@ -2542,29 +1272,6 @@ export type Query_RootExporter_By_PkArgs = {
 };
 
 /** query root */
-export type Query_RootFileArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootFile_AggregateArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootFile_By_PkArgs = {
-  id: Scalars["uuid"];
-};
-
-/** query root */
 export type Query_RootGetAlertmanagerArgs = {
   tenant_id: Scalars["String"];
 };
@@ -2577,82 +1284,31 @@ export type Query_RootGetRuleGroupArgs = {
 };
 
 /** query root */
-export type Query_RootIntegrationsArgs = {
-  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+export type Query_RootIntegrationArgs = {
+  distinct_on?: Maybe<Array<Integration_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
   offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Integrations_Order_By>>;
-  where?: Maybe<Integrations_Bool_Exp>;
+  order_by?: Maybe<Array<Integration_Order_By>>;
+  where?: Maybe<Integration_Bool_Exp>;
 };
 
 /** query root */
-export type Query_RootIntegrations_AggregateArgs = {
-  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+export type Query_RootIntegration_AggregateArgs = {
+  distinct_on?: Maybe<Array<Integration_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
   offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Integrations_Order_By>>;
-  where?: Maybe<Integrations_Bool_Exp>;
+  order_by?: Maybe<Array<Integration_Order_By>>;
+  where?: Maybe<Integration_Bool_Exp>;
 };
 
 /** query root */
-export type Query_RootIntegrations_By_PkArgs = {
+export type Query_RootIntegration_By_PkArgs = {
   id: Scalars["uuid"];
 };
 
 /** query root */
 export type Query_RootListRulesArgs = {
   tenant_id: Scalars["String"];
-};
-
-/** query root */
-export type Query_RootModuleArgs = {
-  distinct_on?: Maybe<Array<Module_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Order_By>>;
-  where?: Maybe<Module_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootModule_AggregateArgs = {
-  distinct_on?: Maybe<Array<Module_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Order_By>>;
-  where?: Maybe<Module_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootModule_By_PkArgs = {
-  branch_name: Scalars["String"];
-  name: Scalars["String"];
-  scope: Scalars["String"];
-};
-
-/** query root */
-export type Query_RootModule_VersionArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootModule_Version_AggregateArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** query root */
-export type Query_RootModule_Version_By_PkArgs = {
-  branch_name: Scalars["String"];
-  module_name: Scalars["String"];
-  module_scope: Scalars["String"];
-  version: Scalars["String"];
 };
 
 /** query root */
@@ -2743,12 +1399,6 @@ export type Query_RootValidateExporterArgs = {
 
 /** subscription root */
 export type Subscription_Root = {
-  /** fetch data from the table: "branch" */
-  branch: Array<Branch>;
-  /** fetch aggregated fields from the table: "branch" */
-  branch_aggregate: Branch_Aggregate;
-  /** fetch data from the table: "branch" using primary key columns */
-  branch_by_pk?: Maybe<Branch>;
   /** fetch data from the table: "credential" */
   credential: Array<Credential>;
   /** fetch aggregated fields from the table: "credential" */
@@ -2761,36 +1411,18 @@ export type Subscription_Root = {
   exporter_aggregate: Exporter_Aggregate;
   /** fetch data from the table: "exporter" using primary key columns */
   exporter_by_pk?: Maybe<Exporter>;
-  /** fetch data from the table: "file" */
-  file: Array<File>;
-  /** fetch aggregated fields from the table: "file" */
-  file_aggregate: File_Aggregate;
-  /** fetch data from the table: "file" using primary key columns */
-  file_by_pk?: Maybe<File>;
   /** perform the action: "getAlertmanager" */
   getAlertmanager?: Maybe<Alertmanager>;
   /** perform the action: "getRuleGroup" */
   getRuleGroup?: Maybe<RuleGroup>;
-  /** fetch data from the table: "integrations" */
-  integrations: Array<Integrations>;
-  /** fetch aggregated fields from the table: "integrations" */
-  integrations_aggregate: Integrations_Aggregate;
-  /** fetch data from the table: "integrations" using primary key columns */
-  integrations_by_pk?: Maybe<Integrations>;
+  /** fetch data from the table: "integration" */
+  integration: Array<Integration>;
+  /** fetch aggregated fields from the table: "integration" */
+  integration_aggregate: Integration_Aggregate;
+  /** fetch data from the table: "integration" using primary key columns */
+  integration_by_pk?: Maybe<Integration>;
   /** perform the action: "listRules" */
   listRules?: Maybe<Rules>;
-  /** fetch data from the table: "module" */
-  module: Array<Module>;
-  /** fetch aggregated fields from the table: "module" */
-  module_aggregate: Module_Aggregate;
-  /** fetch data from the table: "module" using primary key columns */
-  module_by_pk?: Maybe<Module>;
-  /** fetch data from the table: "module_version" */
-  module_version: Array<Module_Version>;
-  /** fetch aggregated fields from the table: "module_version" */
-  module_version_aggregate: Module_Version_Aggregate;
-  /** fetch data from the table: "module_version" using primary key columns */
-  module_version_by_pk?: Maybe<Module_Version>;
   /** fetch data from the table: "tenant" */
   tenant: Array<Tenant>;
   /** fetch aggregated fields from the table: "tenant" */
@@ -2813,29 +1445,6 @@ export type Subscription_Root = {
   validateCredential?: Maybe<StatusResponse>;
   /** perform the action: "validateExporter" */
   validateExporter?: Maybe<StatusResponse>;
-};
-
-/** subscription root */
-export type Subscription_RootBranchArgs = {
-  distinct_on?: Maybe<Array<Branch_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Branch_Order_By>>;
-  where?: Maybe<Branch_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootBranch_AggregateArgs = {
-  distinct_on?: Maybe<Array<Branch_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Branch_Order_By>>;
-  where?: Maybe<Branch_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootBranch_By_PkArgs = {
-  name: Scalars["String"];
 };
 
 /** subscription root */
@@ -2887,29 +1496,6 @@ export type Subscription_RootExporter_By_PkArgs = {
 };
 
 /** subscription root */
-export type Subscription_RootFileArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootFile_AggregateArgs = {
-  distinct_on?: Maybe<Array<File_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<File_Order_By>>;
-  where?: Maybe<File_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootFile_By_PkArgs = {
-  id: Scalars["uuid"];
-};
-
-/** subscription root */
 export type Subscription_RootGetAlertmanagerArgs = {
   tenant_id: Scalars["String"];
 };
@@ -2922,82 +1508,31 @@ export type Subscription_RootGetRuleGroupArgs = {
 };
 
 /** subscription root */
-export type Subscription_RootIntegrationsArgs = {
-  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+export type Subscription_RootIntegrationArgs = {
+  distinct_on?: Maybe<Array<Integration_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
   offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Integrations_Order_By>>;
-  where?: Maybe<Integrations_Bool_Exp>;
+  order_by?: Maybe<Array<Integration_Order_By>>;
+  where?: Maybe<Integration_Bool_Exp>;
 };
 
 /** subscription root */
-export type Subscription_RootIntegrations_AggregateArgs = {
-  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+export type Subscription_RootIntegration_AggregateArgs = {
+  distinct_on?: Maybe<Array<Integration_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
   offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Integrations_Order_By>>;
-  where?: Maybe<Integrations_Bool_Exp>;
+  order_by?: Maybe<Array<Integration_Order_By>>;
+  where?: Maybe<Integration_Bool_Exp>;
 };
 
 /** subscription root */
-export type Subscription_RootIntegrations_By_PkArgs = {
+export type Subscription_RootIntegration_By_PkArgs = {
   id: Scalars["uuid"];
 };
 
 /** subscription root */
 export type Subscription_RootListRulesArgs = {
   tenant_id: Scalars["String"];
-};
-
-/** subscription root */
-export type Subscription_RootModuleArgs = {
-  distinct_on?: Maybe<Array<Module_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Order_By>>;
-  where?: Maybe<Module_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootModule_AggregateArgs = {
-  distinct_on?: Maybe<Array<Module_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Order_By>>;
-  where?: Maybe<Module_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootModule_By_PkArgs = {
-  branch_name: Scalars["String"];
-  name: Scalars["String"];
-  scope: Scalars["String"];
-};
-
-/** subscription root */
-export type Subscription_RootModule_VersionArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootModule_Version_AggregateArgs = {
-  distinct_on?: Maybe<Array<Module_Version_Select_Column>>;
-  limit?: Maybe<Scalars["Int"]>;
-  offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Module_Version_Order_By>>;
-  where?: Maybe<Module_Version_Bool_Exp>;
-};
-
-/** subscription root */
-export type Subscription_RootModule_Version_By_PkArgs = {
-  branch_name: Scalars["String"];
-  module_name: Scalars["String"];
-  module_scope: Scalars["String"];
-  version: Scalars["String"];
 };
 
 /** subscription root */
@@ -3099,9 +1634,9 @@ export type Tenant = {
   exporters_aggregate: Exporter_Aggregate;
   id: Scalars["uuid"];
   /** An array relationship */
-  integrations: Array<Integrations>;
+  integrations: Array<Integration>;
   /** An aggregated array relationship */
-  integrations_aggregate: Integrations_Aggregate;
+  integrations_aggregate: Integration_Aggregate;
   key: Scalars["String"];
   name: Scalars["String"];
   type: Scalars["String"];
@@ -3146,20 +1681,20 @@ export type TenantExporters_AggregateArgs = {
 
 /** columns and relationships of "tenant" */
 export type TenantIntegrationsArgs = {
-  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  distinct_on?: Maybe<Array<Integration_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
   offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Integrations_Order_By>>;
-  where?: Maybe<Integrations_Bool_Exp>;
+  order_by?: Maybe<Array<Integration_Order_By>>;
+  where?: Maybe<Integration_Bool_Exp>;
 };
 
 /** columns and relationships of "tenant" */
 export type TenantIntegrations_AggregateArgs = {
-  distinct_on?: Maybe<Array<Integrations_Select_Column>>;
+  distinct_on?: Maybe<Array<Integration_Select_Column>>;
   limit?: Maybe<Scalars["Int"]>;
   offset?: Maybe<Scalars["Int"]>;
-  order_by?: Maybe<Array<Integrations_Order_By>>;
-  where?: Maybe<Integrations_Bool_Exp>;
+  order_by?: Maybe<Array<Integration_Order_By>>;
+  where?: Maybe<Integration_Bool_Exp>;
 };
 
 /** aggregated selection of "tenant" */
@@ -3203,7 +1738,7 @@ export type Tenant_Bool_Exp = {
   credentials?: Maybe<Credential_Bool_Exp>;
   exporters?: Maybe<Exporter_Bool_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
-  integrations?: Maybe<Integrations_Bool_Exp>;
+  integrations?: Maybe<Integration_Bool_Exp>;
   key?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
   type?: Maybe<String_Comparison_Exp>;
@@ -3226,7 +1761,7 @@ export type Tenant_Insert_Input = {
   credentials?: Maybe<Credential_Arr_Rel_Insert_Input>;
   exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
   id?: Maybe<Scalars["uuid"]>;
-  integrations?: Maybe<Integrations_Arr_Rel_Insert_Input>;
+  integrations?: Maybe<Integration_Arr_Rel_Insert_Input>;
   key?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   type?: Maybe<Scalars["String"]>;
@@ -3300,7 +1835,7 @@ export type Tenant_Order_By = {
   credentials_aggregate?: Maybe<Credential_Aggregate_Order_By>;
   exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
   id?: Maybe<Order_By>;
-  integrations_aggregate?: Maybe<Integrations_Aggregate_Order_By>;
+  integrations_aggregate?: Maybe<Integration_Aggregate_Order_By>;
   key?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   type?: Maybe<Order_By>;
@@ -3768,30 +2303,6 @@ export type Uuid_Comparison_Exp = {
   _nin?: Maybe<Array<Scalars["uuid"]>>;
 };
 
-export type CreateBranchMutationVariables = Exact<{
-  name: Scalars["String"];
-}>;
-
-export type CreateBranchMutation = {
-  insert_branch_one?: Maybe<Pick<Branch, "name">>;
-};
-
-export type DeleteBranchMutationVariables = Exact<{
-  name: Scalars["String"];
-}>;
-
-export type DeleteBranchMutation = {
-  delete_branch_by_pk?: Maybe<Pick<Branch, "name">>;
-};
-
-export type SubscribeToBranchesSubscriptionVariables = Exact<{
-  [key: string]: never;
-}>;
-
-export type SubscribeToBranchesSubscription = {
-  branch: Array<Pick<Branch, "name" | "created_at" | "protected">>;
-};
-
 export type CreateCredentialsMutationVariables = Exact<{
   credentials: Array<Credential_Insert_Input> | Credential_Insert_Input;
 }>;
@@ -3941,106 +2452,29 @@ export type UpdateExporterMutation = {
   update_exporter_by_pk?: Maybe<Pick<Exporter, "tenant" | "name">>;
 };
 
-export type GetCompiledOutputQueryVariables = Exact<{
-  id: Scalars["uuid"];
-}>;
-
-export type GetCompiledOutputQuery = {
-  file_by_pk?: Maybe<Pick<File, "js" | "dts" | "map" | "compile_errors">>;
-};
-
-export type GetFileQueryVariables = Exact<{
-  id: Scalars["uuid"];
-}>;
-
-export type GetFileQuery = {
-  file_by_pk?: Maybe<
-    Pick<
-      File,
-      | "id"
-      | "ext"
-      | "path"
-      | "module_name"
-      | "module_scope"
-      | "module_version"
-      | "created_at"
-      | "branch_name"
-      | "base_file_id"
-      | "mark_deleted"
-      | "contents"
-    >
-  >;
-};
-
-export type GetFileIdQueryVariables = Exact<{
-  branch?: Maybe<Scalars["String"]>;
-  module?: Maybe<Scalars["String"]>;
-  scope?: Maybe<Scalars["String"]>;
-  version?: Maybe<Scalars["String"]>;
-  path?: Maybe<Scalars["String"]>;
-}>;
-
-export type GetFileIdQuery = { file: Array<Pick<File, "id" | "branch_name">> };
-
-export type SubscribeToBranchFilesSubscriptionVariables = Exact<{
-  branch: Scalars["String"];
-}>;
-
-export type SubscribeToBranchFilesSubscription = {
-  branch_by_pk?: Maybe<{
-    files: Array<
-      Pick<
-        File,
-        | "id"
-        | "path"
-        | "module_name"
-        | "module_scope"
-        | "module_version"
-        | "mark_deleted"
-        | "contents"
-      >
-    >;
-  }>;
-};
-
-export type UpdateContentsMutationVariables = Exact<{
-  id: Scalars["uuid"];
-  contents: Scalars["String"];
-  js: Scalars["String"];
-  dts: Scalars["String"];
-  map: Scalars["String"];
-  errors: Scalars["jsonb"];
-}>;
-
-export type UpdateContentsMutation = {
-  update_file_by_pk?: Maybe<Pick<File, "id">>;
-};
-
 export type DeleteIntegrationMutationVariables = Exact<{
   tenant_id: Scalars["uuid"];
   id: Scalars["uuid"];
 }>;
 
 export type DeleteIntegrationMutation = {
-  delete_integrations?: Maybe<{ returning: Array<Pick<Integrations, "id">> }>;
+  delete_integration?: Maybe<{ returning: Array<Pick<Integration, "id">> }>;
 };
 
 export type InsertIntegrationMutationVariables = Exact<{
   name: Scalars["String"];
   kind: Scalars["String"];
-  status: Scalars["String"];
   data: Scalars["jsonb"];
   tenant_id: Scalars["uuid"];
 }>;
 
 export type InsertIntegrationMutation = {
-  insert_integrations_one?: Maybe<
+  insert_integration_one?: Maybe<
     Pick<
-      Integrations,
+      Integration,
       | "id"
       | "kind"
       | "name"
-      | "status"
       | "data"
       | "tenant_id"
       | "grafana_metadata"
@@ -4050,115 +2484,36 @@ export type InsertIntegrationMutation = {
   >;
 };
 
+export type SubscribeToIntegrationListSubscriptionVariables = Exact<{
+  tenant_name: Scalars["String"];
+}>;
+
+export type SubscribeToIntegrationListSubscription = {
+  tenant_by_pk?: Maybe<{
+    integrations: Array<
+      Pick<
+        Integration,
+        | "id"
+        | "kind"
+        | "name"
+        | "data"
+        | "tenant_id"
+        | "grafana_metadata"
+        | "created_at"
+        | "updated_at"
+      >
+    >;
+  }>;
+};
+
 export type UpdateIntegrationGrafanaMetadataMutationVariables = Exact<{
   id: Scalars["uuid"];
   grafana_metadata: Scalars["jsonb"];
 }>;
 
 export type UpdateIntegrationGrafanaMetadataMutation = {
-  update_integrations_by_pk?: Maybe<
-    Pick<Integrations, "id" | "grafana_metadata" | "updated_at">
-  >;
-};
-
-export type UpdateIntegrationStatusMutationVariables = Exact<{
-  id: Scalars["uuid"];
-  status: Scalars["String"];
-}>;
-
-export type UpdateIntegrationStatusMutation = {
-  update_integrations_by_pk?: Maybe<
-    Pick<Integrations, "id" | "status" | "updated_at">
-  >;
-};
-
-export type CreateModuleMutationVariables = Exact<{
-  name: Scalars["String"];
-  scope: Scalars["String"];
-  branch: Scalars["String"];
-  version: Scalars["String"];
-  files: Array<File_Insert_Input> | File_Insert_Input;
-}>;
-
-export type CreateModuleMutation = {
-  insert_module_one?: Maybe<Pick<Module, "created_at">>;
-  insert_module_version?: Maybe<{
-    returning: Array<Pick<Module_Version, "created_at">>;
-  }>;
-  insert_file?: Maybe<{ returning: Array<Pick<File, "id">> }>;
-};
-
-export type GetModuleQueryVariables = Exact<{
-  name: Scalars["String"];
-  scope: Scalars["String"];
-  branch: Scalars["String"];
-}>;
-
-export type GetModuleQuery = {
-  module_by_pk?: Maybe<Pick<Module, "created_at">>;
-  branch_by_pk?: Maybe<Pick<Branch, "protected">>;
-};
-
-export type SubscribeToModulesSubscriptionVariables = Exact<{
-  [key: string]: never;
-}>;
-
-export type SubscribeToModulesSubscription = {
-  module: Array<Pick<Module, "name" | "scope" | "created_at" | "branch_name">>;
-};
-
-export type CreateVersionedFilesMutationVariables = Exact<{
-  name: Scalars["String"];
-  scope: Scalars["String"];
-  branch: Scalars["String"];
-  version: Scalars["String"];
-  files: Array<File_Insert_Input> | File_Insert_Input;
-}>;
-
-export type CreateVersionedFilesMutation = {
-  insert_module_version?: Maybe<{
-    returning: Array<Pick<Module_Version, "created_at">>;
-  }>;
-  insert_file?: Maybe<{ returning: Array<Pick<File, "id">> }>;
-};
-
-export type GetModuleVersionFilesQueryVariables = Exact<{
-  branch?: Maybe<Scalars["String"]>;
-  name?: Maybe<Scalars["String"]>;
-  scope?: Maybe<Scalars["String"]>;
-  version?: Maybe<Scalars["String"]>;
-}>;
-
-export type GetModuleVersionFilesQuery = {
-  file: Array<
-    Pick<
-      File,
-      | "id"
-      | "ext"
-      | "path"
-      | "module_name"
-      | "module_scope"
-      | "module_version"
-      | "created_at"
-      | "branch_name"
-      | "base_file_id"
-      | "mark_deleted"
-      | "contents"
-    >
-  >;
-  module_version: Array<Pick<Module_Version, "version">>;
-};
-
-export type SubscribeToModuleVersionsSubscriptionVariables = Exact<{
-  [key: string]: never;
-}>;
-
-export type SubscribeToModuleVersionsSubscription = {
-  module_version: Array<
-    Pick<
-      Module_Version,
-      "version" | "module_name" | "module_scope" | "created_at" | "branch_name"
-    >
+  update_integration_by_pk?: Maybe<
+    Pick<Integration, "id" | "grafana_metadata" | "updated_at">
   >;
 };
 
@@ -4344,29 +2699,6 @@ export type UpdateUserSessionMutation = {
   update_user_by_pk?: Maybe<Pick<User, "id" | "session_last_updated">>;
 };
 
-export const CreateBranchDocument = gql`
-  mutation CreateBranch($name: String!) {
-    insert_branch_one(object: { name: $name }) {
-      name
-    }
-  }
-`;
-export const DeleteBranchDocument = gql`
-  mutation DeleteBranch($name: String!) {
-    delete_branch_by_pk(name: $name) {
-      name
-    }
-  }
-`;
-export const SubscribeToBranchesDocument = gql`
-  subscription SubscribeToBranches {
-    branch {
-      name
-      created_at
-      protected
-    }
-  }
-`;
 export const CreateCredentialsDocument = gql`
   mutation CreateCredentials($credentials: [credential_insert_input!]!) {
     insert_credential(objects: $credentials) {
@@ -4513,107 +2845,9 @@ export const UpdateExporterDocument = gql`
     }
   }
 `;
-export const GetCompiledOutputDocument = gql`
-  query GetCompiledOutput($id: uuid!) {
-    file_by_pk(id: $id) {
-      js
-      dts
-      map
-      compile_errors
-    }
-  }
-`;
-export const GetFileDocument = gql`
-  query GetFile($id: uuid!) {
-    file_by_pk(id: $id) {
-      id
-      ext
-      path
-      module_name
-      module_scope
-      module_version
-      created_at
-      branch_name
-      base_file_id
-      mark_deleted
-      contents
-    }
-  }
-`;
-export const GetFileIdDocument = gql`
-  query GetFileId(
-    $branch: String
-    $module: String
-    $scope: String
-    $version: String
-    $path: String
-  ) {
-    file(
-      where: {
-        _or: [
-          {
-            branch_name: { _eq: $branch }
-            module_name: { _eq: $module }
-            module_scope: { _eq: $scope }
-            module_version: { _eq: $version }
-            path: { _eq: $path }
-          }
-          {
-            branch_name: { _eq: "main" }
-            module_name: { _eq: $module }
-            module_scope: { _eq: $scope }
-            module_version: { _eq: $version }
-            path: { _eq: $path }
-          }
-        ]
-      }
-    ) {
-      id
-      branch_name
-    }
-  }
-`;
-export const SubscribeToBranchFilesDocument = gql`
-  subscription SubscribeToBranchFiles($branch: String!) {
-    branch_by_pk(name: $branch) {
-      files {
-        id
-        path
-        module_name
-        module_scope
-        module_version
-        mark_deleted
-        contents
-      }
-    }
-  }
-`;
-export const UpdateContentsDocument = gql`
-  mutation UpdateContents(
-    $id: uuid!
-    $contents: String!
-    $js: String!
-    $dts: String!
-    $map: String!
-    $errors: jsonb!
-  ) {
-    update_file_by_pk(
-      pk_columns: { id: $id }
-      _set: {
-        contents: $contents
-        js: $js
-        dts: $dts
-        map: $map
-        compile_errors: $errors
-      }
-    ) {
-      id
-    }
-  }
-`;
 export const DeleteIntegrationDocument = gql`
   mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!) {
-    delete_integrations(
+    delete_integration(
       where: { id: { _eq: $id }, tenant_id: { _eq: $tenant_id } }
     ) {
       returning {
@@ -4626,23 +2860,15 @@ export const InsertIntegrationDocument = gql`
   mutation InsertIntegration(
     $name: String!
     $kind: String!
-    $status: String!
     $data: jsonb!
     $tenant_id: uuid!
   ) {
-    insert_integrations_one(
-      object: {
-        name: $name
-        kind: $kind
-        status: $status
-        data: $data
-        tenant_id: $tenant_id
-      }
+    insert_integration_one(
+      object: { name: $name, kind: $kind, data: $data, tenant_id: $tenant_id }
     ) {
       id
       kind
       name
-      status
       data
       tenant_id
       grafana_metadata
@@ -4651,174 +2877,34 @@ export const InsertIntegrationDocument = gql`
     }
   }
 `;
+export const SubscribeToIntegrationListDocument = gql`
+  subscription SubscribeToIntegrationList($tenant_name: String!) {
+    tenant_by_pk(name: $tenant_name) {
+      integrations {
+        id
+        kind
+        name
+        data
+        tenant_id
+        grafana_metadata
+        created_at
+        updated_at
+      }
+    }
+  }
+`;
 export const UpdateIntegrationGrafanaMetadataDocument = gql`
   mutation UpdateIntegrationGrafanaMetadata(
     $id: uuid!
     $grafana_metadata: jsonb!
   ) {
-    update_integrations_by_pk(
+    update_integration_by_pk(
       pk_columns: { id: $id }
       _set: { grafana_metadata: $grafana_metadata }
     ) {
       id
       grafana_metadata
       updated_at
-    }
-  }
-`;
-export const UpdateIntegrationStatusDocument = gql`
-  mutation UpdateIntegrationStatus($id: uuid!, $status: String!) {
-    update_integrations_by_pk(
-      pk_columns: { id: $id }
-      _set: { status: $status }
-    ) {
-      id
-      status
-      updated_at
-    }
-  }
-`;
-export const CreateModuleDocument = gql`
-  mutation CreateModule(
-    $name: String!
-    $scope: String!
-    $branch: String!
-    $version: String!
-    $files: [file_insert_input!]!
-  ) {
-    insert_module_one(
-      object: { name: $name, scope: $scope, branch_name: $branch }
-    ) {
-      created_at
-    }
-    insert_module_version(
-      objects: [
-        {
-          module_name: $name
-          module_scope: $scope
-          branch_name: $branch
-          version: $version
-        }
-        {
-          module_name: $name
-          module_scope: $scope
-          branch_name: $branch
-          version: "latest"
-        }
-      ]
-    ) {
-      returning {
-        created_at
-      }
-    }
-    insert_file(objects: $files) {
-      returning {
-        id
-      }
-    }
-  }
-`;
-export const GetModuleDocument = gql`
-  query GetModule($name: String!, $scope: String!, $branch: String!) {
-    module_by_pk(branch_name: $branch, name: $name, scope: $scope) {
-      created_at
-    }
-    branch_by_pk(name: $branch) {
-      protected
-    }
-  }
-`;
-export const SubscribeToModulesDocument = gql`
-  subscription SubscribeToModules {
-    module {
-      name
-      scope
-      created_at
-      branch_name
-    }
-  }
-`;
-export const CreateVersionedFilesDocument = gql`
-  mutation CreateVersionedFiles(
-    $name: String!
-    $scope: String!
-    $branch: String!
-    $version: String!
-    $files: [file_insert_input!]!
-  ) {
-    insert_module_version(
-      objects: [
-        {
-          module_name: $name
-          module_scope: $scope
-          branch_name: $branch
-          version: $version
-        }
-      ]
-    ) {
-      returning {
-        created_at
-      }
-    }
-    insert_file(objects: $files) {
-      returning {
-        id
-      }
-    }
-  }
-`;
-export const GetModuleVersionFilesDocument = gql`
-  query GetModuleVersionFiles(
-    $branch: String
-    $name: String
-    $scope: String
-    $version: String
-  ) {
-    file(
-      where: {
-        _and: {
-          branch_name: { _eq: $branch }
-          module_version: { _eq: $version }
-          module_scope: { _eq: $scope }
-          module_name: { _eq: $name }
-        }
-      }
-    ) {
-      id
-      ext
-      path
-      module_name
-      module_scope
-      module_version
-      created_at
-      branch_name
-      base_file_id
-      mark_deleted
-      contents
-    }
-    module_version(
-      limit: 1
-      order_by: { created_at: desc }
-      where: {
-        _and: {
-          branch_name: { _eq: $branch }
-          module_scope: { _eq: $scope }
-          module_name: { _eq: $name }
-        }
-      }
-    ) {
-      version
-    }
-  }
-`;
-export const SubscribeToModuleVersionsDocument = gql`
-  subscription SubscribeToModuleVersions {
-    module_version {
-      version
-      module_name
-      module_scope
-      created_at
-      branch_name
     }
   }
 `;
@@ -5040,54 +3126,6 @@ export function getSdk(
   withWrapper: SdkFunctionWrapper = defaultWrapper
 ) {
   return {
-    CreateBranch(
-      variables: CreateBranchMutationVariables
-    ): Promise<{
-      data?: CreateBranchMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<CreateBranchMutation>(
-          print(CreateBranchDocument),
-          variables
-        )
-      );
-    },
-    DeleteBranch(
-      variables: DeleteBranchMutationVariables
-    ): Promise<{
-      data?: DeleteBranchMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<DeleteBranchMutation>(
-          print(DeleteBranchDocument),
-          variables
-        )
-      );
-    },
-    SubscribeToBranches(
-      variables?: SubscribeToBranchesSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToBranchesSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToBranchesSubscription>(
-          print(SubscribeToBranchesDocument),
-          variables
-        )
-      );
-    },
     CreateCredentials(
       variables: CreateCredentialsMutationVariables
     ): Promise<{
@@ -5280,80 +3318,6 @@ export function getSdk(
         )
       );
     },
-    GetCompiledOutput(
-      variables: GetCompiledOutputQueryVariables
-    ): Promise<{
-      data?: GetCompiledOutputQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<GetCompiledOutputQuery>(
-          print(GetCompiledOutputDocument),
-          variables
-        )
-      );
-    },
-    GetFile(
-      variables: GetFileQueryVariables
-    ): Promise<{
-      data?: GetFileQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<GetFileQuery>(print(GetFileDocument), variables)
-      );
-    },
-    GetFileId(
-      variables?: GetFileIdQueryVariables
-    ): Promise<{
-      data?: GetFileIdQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<GetFileIdQuery>(print(GetFileIdDocument), variables)
-      );
-    },
-    SubscribeToBranchFiles(
-      variables: SubscribeToBranchFilesSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToBranchFilesSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToBranchFilesSubscription>(
-          print(SubscribeToBranchFilesDocument),
-          variables
-        )
-      );
-    },
-    UpdateContents(
-      variables: UpdateContentsMutationVariables
-    ): Promise<{
-      data?: UpdateContentsMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<UpdateContentsMutation>(
-          print(UpdateContentsDocument),
-          variables
-        )
-      );
-    },
     DeleteIntegration(
       variables: DeleteIntegrationMutationVariables
     ): Promise<{
@@ -5386,6 +3350,22 @@ export function getSdk(
         )
       );
     },
+    SubscribeToIntegrationList(
+      variables: SubscribeToIntegrationListSubscriptionVariables
+    ): Promise<{
+      data?: SubscribeToIntegrationListSubscription | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<SubscribeToIntegrationListSubscription>(
+          print(SubscribeToIntegrationListDocument),
+          variables
+        )
+      );
+    },
     UpdateIntegrationGrafanaMetadata(
       variables: UpdateIntegrationGrafanaMetadataMutationVariables
     ): Promise<{
@@ -5398,115 +3378,6 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<UpdateIntegrationGrafanaMetadataMutation>(
           print(UpdateIntegrationGrafanaMetadataDocument),
-          variables
-        )
-      );
-    },
-    UpdateIntegrationStatus(
-      variables: UpdateIntegrationStatusMutationVariables
-    ): Promise<{
-      data?: UpdateIntegrationStatusMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<UpdateIntegrationStatusMutation>(
-          print(UpdateIntegrationStatusDocument),
-          variables
-        )
-      );
-    },
-    CreateModule(
-      variables: CreateModuleMutationVariables
-    ): Promise<{
-      data?: CreateModuleMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<CreateModuleMutation>(
-          print(CreateModuleDocument),
-          variables
-        )
-      );
-    },
-    GetModule(
-      variables: GetModuleQueryVariables
-    ): Promise<{
-      data?: GetModuleQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<GetModuleQuery>(print(GetModuleDocument), variables)
-      );
-    },
-    SubscribeToModules(
-      variables?: SubscribeToModulesSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToModulesSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToModulesSubscription>(
-          print(SubscribeToModulesDocument),
-          variables
-        )
-      );
-    },
-    CreateVersionedFiles(
-      variables: CreateVersionedFilesMutationVariables
-    ): Promise<{
-      data?: CreateVersionedFilesMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<CreateVersionedFilesMutation>(
-          print(CreateVersionedFilesDocument),
-          variables
-        )
-      );
-    },
-    GetModuleVersionFiles(
-      variables?: GetModuleVersionFilesQueryVariables
-    ): Promise<{
-      data?: GetModuleVersionFilesQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<GetModuleVersionFilesQuery>(
-          print(GetModuleVersionFilesDocument),
-          variables
-        )
-      );
-    },
-    SubscribeToModuleVersions(
-      variables?: SubscribeToModuleVersionsSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToModuleVersionsSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<SubscribeToModuleVersionsSubscription>(
-          print(SubscribeToModuleVersionsDocument),
           variables
         )
       );

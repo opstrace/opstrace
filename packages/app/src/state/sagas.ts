@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 import { spawn, all, call } from "@redux-saga/core/effects";
-import branchManager from "./branch/sagas";
-import moduleManager from "./module/sagas";
-import moduleVersionManager from "./moduleVersion/sagas";
-import fileManager from "./file/sagas";
+
 import userManager from "./user/sagas";
 import tenantManager from "./tenant/sagas";
-import sandboxManager from "./sandbox/sagas";
+import integrationManager from "./integration/sagas";
 
 export default function* main() {
-  const sagas = [
-    branchManager,
-    moduleManager,
-    moduleVersionManager,
-    fileManager,
-    userManager,
-    tenantManager,
-    sandboxManager
-  ];
+  const sagas = [userManager, tenantManager, integrationManager];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
   // https://redux-saga.js.org/docs/advanced/RootSaga.html

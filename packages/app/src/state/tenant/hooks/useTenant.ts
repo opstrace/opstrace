@@ -30,6 +30,21 @@ export const selectTenant = createSelector(
     loading ? null : tenants[tenantName]
 );
 
+export function useSelectedTenantWithFallback(): Tenant {
+  const tenant = useSelectedTenant();
+  // We may choose to change this default to pick one from the users tenant list
+  return tenant
+    ? tenant
+    : {
+        name: "system",
+        type: "SYSTEM",
+        created_at: "",
+        updated_at: "",
+        id: "",
+        key: ""
+      };
+}
+
 export function useSelectedTenant() {
   // Assumes we use the structure in our URL /tenant/<tenantId>/*
   const tenantRouteMatch = useRouteMatch<{ tenantId: string }>(

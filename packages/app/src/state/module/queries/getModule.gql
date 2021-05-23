@@ -1,8 +1,0 @@
-query GetModule($name: String!, $scope: String!, $branch: String!) {
-  module_by_pk(branch_name: $branch, name: $name, scope: $scope) {
-    created_at
-  }
-  branch_by_pk(name: $branch) {
-    protected
-  }
-}

@@ -34,9 +34,9 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import useUserList from "state/user/hooks/useUserList";
 import DeleteUserButton from "./deleteUser";
-import UserPicker from "../user/UserPicker";
-import AddUserDialog from "../user/AddUserDialog";
-import DeleteUserDialog from "../user/DeleteUserDialog";
+import UserPicker from "./UserPicker";
+import AddUserDialog from "./AddUserDialog";
+import DeleteUserDialog from "./DeleteUserDialog";
 import { Button } from "client/components/Button";
 import { useCommandService } from "client/services/Command";
 import { addUserCommandId } from "./AddUserDialog";

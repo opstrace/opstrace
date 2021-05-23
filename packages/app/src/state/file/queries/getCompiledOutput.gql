@@ -1,8 +1,0 @@
-query GetCompiledOutput($id: uuid!) {
-  file_by_pk(id: $id) {
-    js
-    dts
-    map
-    compile_errors
-  }
-}

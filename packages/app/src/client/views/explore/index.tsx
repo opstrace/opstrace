@@ -17,20 +17,16 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
 
-import { grafanaUrl } from "client/viewsBasic/paths";
+import { grafanaUrl } from "client/utils/grafana";
 
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { ExternalLink } from "client/components/Link";
 
 const TenantExplore = () => {
-  const tenant = useSelectedTenant();
-
-  if (!tenant) {
-    return null;
-  }
+  const tenant = useSelectedTenantWithFallback();
 
   return (
     <>

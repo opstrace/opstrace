@@ -1,5 +1,0 @@
-mutation DeleteBranch($name: String!) {
-  delete_branch_by_pk(name: $name) {
-    name
-  }
-}

@@ -293,8 +293,6 @@
     "telepresence:types": "yarn telepresenceEnv yarn graphql-codegen --config codegen.js"
   },
   "eslintIgnore": [
-    "src/workers/monaco-typescript-4.1.1/**/*",
-    "src/workers/opscript/**/*"
   ],
   "proxy": {
     "/_": {

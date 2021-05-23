@@ -81,138 +81,6 @@ func unmarshalGraphQLReponse(b []byte) (*GraphQLResponse, error) {
 }
 
 //
-// mutation CreateBranch($name: String!)
-//
-
-type CreateBranchVariables struct {
-	Name String `json:"name"`
-}
-
-type CreateBranchResponse struct {
-	InsertBranchOne struct {
-		Name string `json:"name"`
-	} `json:"insert_branch_one"`
-}
-
-type CreateBranchRequest struct {
-	*http.Request
-}
-
-func NewCreateBranchRequest(url string, vars *CreateBranchVariables) (*CreateBranchRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation CreateBranch($name: String!) {
-  insert_branch_one(object: {name: $name}) {
-    name
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &CreateBranchRequest{req}, nil
-}
-
-func (req *CreateBranchRequest) Execute(client *http.Client) (*CreateBranchResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result CreateBranchResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func CreateBranch(url string, client *http.Client, vars *CreateBranchVariables) (*CreateBranchResponse, error) {
-	req, err := NewCreateBranchRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) CreateBranch(vars *CreateBranchVariables) (*CreateBranchResponse, error) {
-	return CreateBranch(client.Url, client.Client, vars)
-}
-
-//
-// mutation DeleteBranch($name: String!)
-//
-
-type DeleteBranchVariables struct {
-	Name String `json:"name"`
-}
-
-type DeleteBranchResponse struct {
-	DeleteBranchByPk struct {
-		Name string `json:"name"`
-	} `json:"delete_branch_by_pk"`
-}
-
-type DeleteBranchRequest struct {
-	*http.Request
-}
-
-func NewDeleteBranchRequest(url string, vars *DeleteBranchVariables) (*DeleteBranchRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation DeleteBranch($name: String!) {
-  delete_branch_by_pk(name: $name) {
-    name
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &DeleteBranchRequest{req}, nil
-}
-
-func (req *DeleteBranchRequest) Execute(client *http.Client) (*DeleteBranchResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result DeleteBranchResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func DeleteBranch(url string, client *http.Client, vars *DeleteBranchVariables) (*DeleteBranchResponse, error) {
-	req, err := NewDeleteBranchRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) DeleteBranch(vars *DeleteBranchVariables) (*DeleteBranchResponse, error) {
-	return DeleteBranch(client.Url, client.Client, vars)
-}
-
-//
 // mutation CreateCredentials($credentials: [credential_insert_input!]!)
 //
 
@@ -1080,307 +948,6 @@ func (client *Client) UpdateExporter(vars *UpdateExporterVariables) (*UpdateExpo
 }
 
 //
-// query GetCompiledOutput($id: uuid!)
-//
-
-type GetCompiledOutputVariables struct {
-	ID UUID `json:"id"`
-}
-
-type GetCompiledOutputResponse struct {
-	FileByPk struct {
-		Js            string `json:"js"`
-		Dts           string `json:"dts"`
-		Map           string `json:"map"`
-		CompileErrors string `json:"compile_errors"`
-	} `json:"file_by_pk"`
-}
-
-type GetCompiledOutputRequest struct {
-	*http.Request
-}
-
-func NewGetCompiledOutputRequest(url string, vars *GetCompiledOutputVariables) (*GetCompiledOutputRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetCompiledOutput($id: uuid!) {
-  file_by_pk(id: $id) {
-    js
-    dts
-    map
-    compile_errors
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetCompiledOutputRequest{req}, nil
-}
-
-func (req *GetCompiledOutputRequest) Execute(client *http.Client) (*GetCompiledOutputResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetCompiledOutputResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetCompiledOutput(url string, client *http.Client, vars *GetCompiledOutputVariables) (*GetCompiledOutputResponse, error) {
-	req, err := NewGetCompiledOutputRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetCompiledOutput(vars *GetCompiledOutputVariables) (*GetCompiledOutputResponse, error) {
-	return GetCompiledOutput(client.Url, client.Client, vars)
-}
-
-//
-// query GetFile($id: uuid!)
-//
-
-type GetFileVariables struct {
-	ID UUID `json:"id"`
-}
-
-type GetFileResponse struct {
-	FileByPk struct {
-		ID            string `json:"id"`
-		Ext           string `json:"ext"`
-		Path          string `json:"path"`
-		ModuleName    string `json:"module_name"`
-		ModuleScope   string `json:"module_scope"`
-		ModuleVersion string `json:"module_version"`
-		CreatedAt     string `json:"created_at"`
-		BranchName    string `json:"branch_name"`
-		BaseFileId    string `json:"base_file_id"`
-		MarkDeleted   string `json:"mark_deleted"`
-		Contents      string `json:"contents"`
-	} `json:"file_by_pk"`
-}
-
-type GetFileRequest struct {
-	*http.Request
-}
-
-func NewGetFileRequest(url string, vars *GetFileVariables) (*GetFileRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetFile($id: uuid!) {
-  file_by_pk(id: $id) {
-    id
-    ext
-    path
-    module_name
-    module_scope
-    module_version
-    created_at
-    branch_name
-    base_file_id
-    mark_deleted
-    contents
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetFileRequest{req}, nil
-}
-
-func (req *GetFileRequest) Execute(client *http.Client) (*GetFileResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetFileResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetFile(url string, client *http.Client, vars *GetFileVariables) (*GetFileResponse, error) {
-	req, err := NewGetFileRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetFile(vars *GetFileVariables) (*GetFileResponse, error) {
-	return GetFile(client.Url, client.Client, vars)
-}
-
-//
-// query GetFileId($branch: String, $module: String, $scope: String, $version: String, $path: String)
-//
-
-type GetFileIdVariables struct {
-	Branch  *String `json:"branch,omitempty"`
-	Module  *String `json:"module,omitempty"`
-	Scope   *String `json:"scope,omitempty"`
-	Version *String `json:"version,omitempty"`
-	Path    *String `json:"path,omitempty"`
-}
-
-type GetFileIdResponse struct {
-	File []struct {
-		ID         string `json:"id"`
-		BranchName string `json:"branch_name"`
-	} `json:"file"`
-}
-
-type GetFileIdRequest struct {
-	*http.Request
-}
-
-func NewGetFileIdRequest(url string, vars *GetFileIdVariables) (*GetFileIdRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetFileId($branch: String, $module: String, $scope: String, $version: String, $path: String) {
-  file(where: {_or: [{branch_name: {_eq: $branch}, module_name: {_eq: $module}, module_scope: {_eq: $scope}, module_version: {_eq: $version}, path: {_eq: $path}}, {branch_name: {_eq: "main"}, module_name: {_eq: $module}, module_scope: {_eq: $scope}, module_version: {_eq: $version}, path: {_eq: $path}}]}) {
-    id
-    branch_name
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetFileIdRequest{req}, nil
-}
-
-func (req *GetFileIdRequest) Execute(client *http.Client) (*GetFileIdResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetFileIdResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetFileId(url string, client *http.Client, vars *GetFileIdVariables) (*GetFileIdResponse, error) {
-	req, err := NewGetFileIdRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetFileId(vars *GetFileIdVariables) (*GetFileIdResponse, error) {
-	return GetFileId(client.Url, client.Client, vars)
-}
-
-//
-// mutation UpdateContents($id: uuid!, $contents: String!, $js: String!, $dts: String!, $map: String!, $errors: jsonb!)
-//
-
-type UpdateContentsVariables struct {
-	ID       UUID   `json:"id"`
-	Contents String `json:"contents"`
-	Js       String `json:"js"`
-	Dts      String `json:"dts"`
-	Map      String `json:"map"`
-	Errors   Jsonb  `json:"errors"`
-}
-
-type UpdateContentsResponse struct {
-	UpdateFileByPk struct {
-		ID string `json:"id"`
-	} `json:"update_file_by_pk"`
-}
-
-type UpdateContentsRequest struct {
-	*http.Request
-}
-
-func NewUpdateContentsRequest(url string, vars *UpdateContentsVariables) (*UpdateContentsRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation UpdateContents($id: uuid!, $contents: String!, $js: String!, $dts: String!, $map: String!, $errors: jsonb!) {
-  update_file_by_pk(pk_columns: {id: $id}, _set: {contents: $contents, js: $js, dts: $dts, map: $map, compile_errors: $errors}) {
-    id
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &UpdateContentsRequest{req}, nil
-}
-
-func (req *UpdateContentsRequest) Execute(client *http.Client) (*UpdateContentsResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result UpdateContentsResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func UpdateContents(url string, client *http.Client, vars *UpdateContentsVariables) (*UpdateContentsResponse, error) {
-	req, err := NewUpdateContentsRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) UpdateContents(vars *UpdateContentsVariables) (*UpdateContentsResponse, error) {
-	return UpdateContents(client.Url, client.Client, vars)
-}
-
-//
 // mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!)
 //
 
@@ -1390,11 +957,11 @@ type DeleteIntegrationVariables struct {
 }
 
 type DeleteIntegrationResponse struct {
-	DeleteIntegrations struct {
+	DeleteIntegration struct {
 		Returning []struct {
 			ID string `json:"id"`
 		} `json:"returning"`
-	} `json:"delete_integrations"`
+	} `json:"delete_integration"`
 }
 
 type DeleteIntegrationRequest struct {
@@ -1409,7 +976,7 @@ func NewDeleteIntegrationRequest(url string, vars *DeleteIntegrationVariables) (
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
 		Query: `mutation DeleteIntegration($tenant_id: uuid!, $id: uuid!) {
-  delete_integrations(where: {id: {_eq: $id}, tenant_id: {_eq: $tenant_id}}) {
+  delete_integration(where: {id: {_eq: $id}, tenant_id: {_eq: $tenant_id}}) {
     returning {
       id
     }
@@ -1452,29 +1019,27 @@ func (client *Client) DeleteIntegration(vars *DeleteIntegrationVariables) (*Dele
 }
 
 //
-// mutation InsertIntegration($name: String!, $kind: String!, $status: String!, $data: jsonb!, $tenant_id: uuid!)
+// mutation InsertIntegration($name: String!, $kind: String!, $data: jsonb!, $tenant_id: uuid!)
 //
 
 type InsertIntegrationVariables struct {
 	Name     String `json:"name"`
 	Kind     String `json:"kind"`
-	Status   String `json:"status"`
 	Data     Jsonb  `json:"data"`
 	TenantId UUID   `json:"tenant_id"`
 }
 
 type InsertIntegrationResponse struct {
-	InsertIntegrationsOne struct {
+	InsertIntegrationOne struct {
 		ID              string `json:"id"`
 		Kind            string `json:"kind"`
 		Name            string `json:"name"`
-		Status          string `json:"status"`
 		Data            string `json:"data"`
 		TenantId        string `json:"tenant_id"`
 		GrafanaMetadata string `json:"grafana_metadata"`
 		CreatedAt       string `json:"created_at"`
 		UpdatedAt       string `json:"updated_at"`
-	} `json:"insert_integrations_one"`
+	} `json:"insert_integration_one"`
 }
 
 type InsertIntegrationRequest struct {
@@ -1488,12 +1053,11 @@ func NewInsertIntegrationRequest(url string, vars *InsertIntegrationVariables) (
 	}
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
-		Query: `mutation InsertIntegration($name: String!, $kind: String!, $status: String!, $data: jsonb!, $tenant_id: uuid!) {
-  insert_integrations_one(object: {name: $name, kind: $kind, status: $status, data: $data, tenant_id: $tenant_id}) {
+		Query: `mutation InsertIntegration($name: String!, $kind: String!, $data: jsonb!, $tenant_id: uuid!) {
+  insert_integration_one(object: {name: $name, kind: $kind, data: $data, tenant_id: $tenant_id}) {
     id
     kind
     name
-    status
     data
     tenant_id
     grafana_metadata
@@ -1547,11 +1111,11 @@ type UpdateIntegrationGrafanaMetadataVariables struct {
 }
 
 type UpdateIntegrationGrafanaMetadataResponse struct {
-	UpdateIntegrationsByPk struct {
+	UpdateIntegrationByPk struct {
 		ID              string `json:"id"`
 		GrafanaMetadata string `json:"grafana_metadata"`
 		UpdatedAt       string `json:"updated_at"`
-	} `json:"update_integrations_by_pk"`
+	} `json:"update_integration_by_pk"`
 }
 
 type UpdateIntegrationGrafanaMetadataRequest struct {
@@ -1566,7 +1130,7 @@ func NewUpdateIntegrationGrafanaMetadataRequest(url string, vars *UpdateIntegrat
 	b, err := json.Marshal(&GraphQLOperation{
 		Variables: variables,
 		Query: `mutation UpdateIntegrationGrafanaMetadata($id: uuid!, $grafana_metadata: jsonb!) {
-  update_integrations_by_pk(pk_columns: {id: $id}, _set: {grafana_metadata: $grafana_metadata}) {
+  update_integration_by_pk(pk_columns: {id: $id}, _set: {grafana_metadata: $grafana_metadata}) {
     id
     grafana_metadata
     updated_at
@@ -1606,420 +1170,6 @@ func UpdateIntegrationGrafanaMetadata(url string, client *http.Client, vars *Upd
 
 func (client *Client) UpdateIntegrationGrafanaMetadata(vars *UpdateIntegrationGrafanaMetadataVariables) (*UpdateIntegrationGrafanaMetadataResponse, error) {
 	return UpdateIntegrationGrafanaMetadata(client.Url, client.Client, vars)
-}
-
-//
-// mutation UpdateIntegrationStatus($id: uuid!, $status: String!)
-//
-
-type UpdateIntegrationStatusVariables struct {
-	ID     UUID   `json:"id"`
-	Status String `json:"status"`
-}
-
-type UpdateIntegrationStatusResponse struct {
-	UpdateIntegrationsByPk struct {
-		ID        string `json:"id"`
-		Status    string `json:"status"`
-		UpdatedAt string `json:"updated_at"`
-	} `json:"update_integrations_by_pk"`
-}
-
-type UpdateIntegrationStatusRequest struct {
-	*http.Request
-}
-
-func NewUpdateIntegrationStatusRequest(url string, vars *UpdateIntegrationStatusVariables) (*UpdateIntegrationStatusRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation UpdateIntegrationStatus($id: uuid!, $status: String!) {
-  update_integrations_by_pk(pk_columns: {id: $id}, _set: {status: $status}) {
-    id
-    status
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &UpdateIntegrationStatusRequest{req}, nil
-}
-
-func (req *UpdateIntegrationStatusRequest) Execute(client *http.Client) (*UpdateIntegrationStatusResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result UpdateIntegrationStatusResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func UpdateIntegrationStatus(url string, client *http.Client, vars *UpdateIntegrationStatusVariables) (*UpdateIntegrationStatusResponse, error) {
-	req, err := NewUpdateIntegrationStatusRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) UpdateIntegrationStatus(vars *UpdateIntegrationStatusVariables) (*UpdateIntegrationStatusResponse, error) {
-	return UpdateIntegrationStatus(client.Url, client.Client, vars)
-}
-
-//
-// mutation CreateModule($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!)
-//
-
-type CreateModuleVariables struct {
-	Name    String             `json:"name"`
-	Scope   String             `json:"scope"`
-	Branch  String             `json:"branch"`
-	Version String             `json:"version"`
-	Files   *[]FileInsertInput `json:"files,omitempty"`
-}
-
-type CreateModuleResponse struct {
-	InsertModuleOne struct {
-		CreatedAt string `json:"created_at"`
-	} `json:"insert_module_one"`
-	InsertModuleVersion struct {
-		Returning []struct {
-			CreatedAt string `json:"created_at"`
-		} `json:"returning"`
-	} `json:"insert_module_version"`
-	InsertFile struct {
-		Returning []struct {
-			ID string `json:"id"`
-		} `json:"returning"`
-	} `json:"insert_file"`
-}
-
-type CreateModuleRequest struct {
-	*http.Request
-}
-
-func NewCreateModuleRequest(url string, vars *CreateModuleVariables) (*CreateModuleRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation CreateModule($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!) {
-  insert_module_one(object: {name: $name, scope: $scope, branch_name: $branch}) {
-    created_at
-  }
-  insert_module_version(objects: [{module_name: $name, module_scope: $scope, branch_name: $branch, version: $version}, {module_name: $name, module_scope: $scope, branch_name: $branch, version: "latest"}]) {
-    returning {
-      created_at
-    }
-  }
-  insert_file(objects: $files) {
-    returning {
-      id
-    }
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &CreateModuleRequest{req}, nil
-}
-
-func (req *CreateModuleRequest) Execute(client *http.Client) (*CreateModuleResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result CreateModuleResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func CreateModule(url string, client *http.Client, vars *CreateModuleVariables) (*CreateModuleResponse, error) {
-	req, err := NewCreateModuleRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) CreateModule(vars *CreateModuleVariables) (*CreateModuleResponse, error) {
-	return CreateModule(client.Url, client.Client, vars)
-}
-
-//
-// query GetModule($name: String!, $scope: String!, $branch: String!)
-//
-
-type GetModuleVariables struct {
-	Name   String `json:"name"`
-	Scope  String `json:"scope"`
-	Branch String `json:"branch"`
-}
-
-type GetModuleResponse struct {
-	ModuleByPk struct {
-		CreatedAt string `json:"created_at"`
-	} `json:"module_by_pk"`
-	BranchByPk struct {
-		Protected string `json:"protected"`
-	} `json:"branch_by_pk"`
-}
-
-type GetModuleRequest struct {
-	*http.Request
-}
-
-func NewGetModuleRequest(url string, vars *GetModuleVariables) (*GetModuleRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetModule($name: String!, $scope: String!, $branch: String!) {
-  module_by_pk(branch_name: $branch, name: $name, scope: $scope) {
-    created_at
-  }
-  branch_by_pk(name: $branch) {
-    protected
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetModuleRequest{req}, nil
-}
-
-func (req *GetModuleRequest) Execute(client *http.Client) (*GetModuleResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetModuleResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetModule(url string, client *http.Client, vars *GetModuleVariables) (*GetModuleResponse, error) {
-	req, err := NewGetModuleRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetModule(vars *GetModuleVariables) (*GetModuleResponse, error) {
-	return GetModule(client.Url, client.Client, vars)
-}
-
-//
-// mutation CreateVersionedFiles($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!)
-//
-
-type CreateVersionedFilesVariables struct {
-	Name    String             `json:"name"`
-	Scope   String             `json:"scope"`
-	Branch  String             `json:"branch"`
-	Version String             `json:"version"`
-	Files   *[]FileInsertInput `json:"files,omitempty"`
-}
-
-type CreateVersionedFilesResponse struct {
-	InsertModuleVersion struct {
-		Returning []struct {
-			CreatedAt string `json:"created_at"`
-		} `json:"returning"`
-	} `json:"insert_module_version"`
-	InsertFile struct {
-		Returning []struct {
-			ID string `json:"id"`
-		} `json:"returning"`
-	} `json:"insert_file"`
-}
-
-type CreateVersionedFilesRequest struct {
-	*http.Request
-}
-
-func NewCreateVersionedFilesRequest(url string, vars *CreateVersionedFilesVariables) (*CreateVersionedFilesRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation CreateVersionedFiles($name: String!, $scope: String!, $branch: String!, $version: String!, $files: [file_insert_input!]!) {
-  insert_module_version(objects: [{module_name: $name, module_scope: $scope, branch_name: $branch, version: $version}]) {
-    returning {
-      created_at
-    }
-  }
-  insert_file(objects: $files) {
-    returning {
-      id
-    }
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &CreateVersionedFilesRequest{req}, nil
-}
-
-func (req *CreateVersionedFilesRequest) Execute(client *http.Client) (*CreateVersionedFilesResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result CreateVersionedFilesResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func CreateVersionedFiles(url string, client *http.Client, vars *CreateVersionedFilesVariables) (*CreateVersionedFilesResponse, error) {
-	req, err := NewCreateVersionedFilesRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) CreateVersionedFiles(vars *CreateVersionedFilesVariables) (*CreateVersionedFilesResponse, error) {
-	return CreateVersionedFiles(client.Url, client.Client, vars)
-}
-
-//
-// query GetModuleVersionFiles($branch: String, $name: String, $scope: String, $version: String)
-//
-
-type GetModuleVersionFilesVariables struct {
-	Branch  *String `json:"branch,omitempty"`
-	Name    *String `json:"name,omitempty"`
-	Scope   *String `json:"scope,omitempty"`
-	Version *String `json:"version,omitempty"`
-}
-
-type GetModuleVersionFilesResponse struct {
-	File []struct {
-		ID            string `json:"id"`
-		Ext           string `json:"ext"`
-		Path          string `json:"path"`
-		ModuleName    string `json:"module_name"`
-		ModuleScope   string `json:"module_scope"`
-		ModuleVersion string `json:"module_version"`
-		CreatedAt     string `json:"created_at"`
-		BranchName    string `json:"branch_name"`
-		BaseFileId    string `json:"base_file_id"`
-		MarkDeleted   string `json:"mark_deleted"`
-		Contents      string `json:"contents"`
-	} `json:"file"`
-	ModuleVersion []struct {
-		Version string `json:"version"`
-	} `json:"module_version"`
-}
-
-type GetModuleVersionFilesRequest struct {
-	*http.Request
-}
-
-func NewGetModuleVersionFilesRequest(url string, vars *GetModuleVersionFilesVariables) (*GetModuleVersionFilesRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `query GetModuleVersionFiles($branch: String, $name: String, $scope: String, $version: String) {
-  file(where: {_and: {branch_name: {_eq: $branch}, module_version: {_eq: $version}, module_scope: {_eq: $scope}, module_name: {_eq: $name}}}) {
-    id
-    ext
-    path
-    module_name
-    module_scope
-    module_version
-    created_at
-    branch_name
-    base_file_id
-    mark_deleted
-    contents
-  }
-  module_version(limit: 1, order_by: {created_at: desc}, where: {_and: {branch_name: {_eq: $branch}, module_scope: {_eq: $scope}, module_name: {_eq: $name}}}) {
-    version
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &GetModuleVersionFilesRequest{req}, nil
-}
-
-func (req *GetModuleVersionFilesRequest) Execute(client *http.Client) (*GetModuleVersionFilesResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result GetModuleVersionFilesResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func GetModuleVersionFiles(url string, client *http.Client, vars *GetModuleVersionFilesVariables) (*GetModuleVersionFilesResponse, error) {
-	req, err := NewGetModuleVersionFilesRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) GetModuleVersionFiles(vars *GetModuleVersionFilesVariables) (*GetModuleVersionFilesResponse, error) {
-	return GetModuleVersionFiles(client.Url, client.Client, vars)
 }
 
 //
@@ -3067,31 +2217,6 @@ const (
 	ErrorTypeVALIDATIONFAILED ErrorType = "VALIDATION_FAILED"
 )
 
-type BranchConstraint string
-
-const (
-	BranchConstraintBranchNameKey BranchConstraint = "Branch_name_key"
-	BranchConstraintBranchPkey    BranchConstraint = "branch_pkey"
-)
-
-type BranchSelectColumn string
-
-const (
-	BranchSelectColumnCreatedAt BranchSelectColumn = "created_at"
-	BranchSelectColumnHasMerged BranchSelectColumn = "has_merged"
-	BranchSelectColumnName      BranchSelectColumn = "name"
-	BranchSelectColumnProtected BranchSelectColumn = "protected"
-)
-
-type BranchUpdateColumn string
-
-const (
-	BranchUpdateColumnCreatedAt BranchUpdateColumn = "created_at"
-	BranchUpdateColumnHasMerged BranchUpdateColumn = "has_merged"
-	BranchUpdateColumnName      BranchUpdateColumn = "name"
-	BranchUpdateColumnProtected BranchUpdateColumn = "protected"
-)
-
 type CredentialConstraint string
 
 const (
@@ -3150,136 +2275,37 @@ const (
 	ExporterUpdateColumnUpdatedAt  ExporterUpdateColumn = "updated_at"
 )
 
-type FileConstraint string
+type IntegrationConstraint string
 
 const (
-	FileConstraintFilePathModuleVersionModuleNameModuleScopeBranchNameE FileConstraint = "file_path_module_version_module_name_module_scope_branch_name_e"
-	FileConstraintFilePkey                                              FileConstraint = "file_pkey"
+	IntegrationConstraintIntegrationsNameTenantIdKey IntegrationConstraint = "integrations_name_tenant_id_key"
+	IntegrationConstraintIntegrationsPkey            IntegrationConstraint = "integrations_pkey"
 )
 
-type FileSelectColumn string
+type IntegrationSelectColumn string
 
 const (
-	FileSelectColumnBaseFileId    FileSelectColumn = "base_file_id"
-	FileSelectColumnBranchName    FileSelectColumn = "branch_name"
-	FileSelectColumnCompileErrors FileSelectColumn = "compile_errors"
-	FileSelectColumnContents      FileSelectColumn = "contents"
-	FileSelectColumnCreatedAt     FileSelectColumn = "created_at"
-	FileSelectColumnDts           FileSelectColumn = "dts"
-	FileSelectColumnExt           FileSelectColumn = "ext"
-	FileSelectColumnID            FileSelectColumn = "id"
-	FileSelectColumnJs            FileSelectColumn = "js"
-	FileSelectColumnMap           FileSelectColumn = "map"
-	FileSelectColumnMarkDeleted   FileSelectColumn = "mark_deleted"
-	FileSelectColumnModuleName    FileSelectColumn = "module_name"
-	FileSelectColumnModuleScope   FileSelectColumn = "module_scope"
-	FileSelectColumnModuleVersion FileSelectColumn = "module_version"
-	FileSelectColumnPath          FileSelectColumn = "path"
+	IntegrationSelectColumnCreatedAt       IntegrationSelectColumn = "created_at"
+	IntegrationSelectColumnData            IntegrationSelectColumn = "data"
+	IntegrationSelectColumnGrafanaMetadata IntegrationSelectColumn = "grafana_metadata"
+	IntegrationSelectColumnID              IntegrationSelectColumn = "id"
+	IntegrationSelectColumnKind            IntegrationSelectColumn = "kind"
+	IntegrationSelectColumnName            IntegrationSelectColumn = "name"
+	IntegrationSelectColumnTenantId        IntegrationSelectColumn = "tenant_id"
+	IntegrationSelectColumnUpdatedAt       IntegrationSelectColumn = "updated_at"
 )
 
-type FileUpdateColumn string
+type IntegrationUpdateColumn string
 
 const (
-	FileUpdateColumnBaseFileId    FileUpdateColumn = "base_file_id"
-	FileUpdateColumnBranchName    FileUpdateColumn = "branch_name"
-	FileUpdateColumnCompileErrors FileUpdateColumn = "compile_errors"
-	FileUpdateColumnContents      FileUpdateColumn = "contents"
-	FileUpdateColumnCreatedAt     FileUpdateColumn = "created_at"
-	FileUpdateColumnDts           FileUpdateColumn = "dts"
-	FileUpdateColumnExt           FileUpdateColumn = "ext"
-	FileUpdateColumnID            FileUpdateColumn = "id"
-	FileUpdateColumnJs            FileUpdateColumn = "js"
-	FileUpdateColumnMap           FileUpdateColumn = "map"
-	FileUpdateColumnMarkDeleted   FileUpdateColumn = "mark_deleted"
-	FileUpdateColumnModuleName    FileUpdateColumn = "module_name"
-	FileUpdateColumnModuleScope   FileUpdateColumn = "module_scope"
-	FileUpdateColumnModuleVersion FileUpdateColumn = "module_version"
-	FileUpdateColumnPath          FileUpdateColumn = "path"
-)
-
-type IntegrationsConstraint string
-
-const (
-	IntegrationsConstraintIntegrationsNameTenantIdKey IntegrationsConstraint = "integrations_name_tenant_id_key"
-	IntegrationsConstraintIntegrationsPkey            IntegrationsConstraint = "integrations_pkey"
-)
-
-type IntegrationsSelectColumn string
-
-const (
-	IntegrationsSelectColumnCreatedAt       IntegrationsSelectColumn = "created_at"
-	IntegrationsSelectColumnData            IntegrationsSelectColumn = "data"
-	IntegrationsSelectColumnGrafanaMetadata IntegrationsSelectColumn = "grafana_metadata"
-	IntegrationsSelectColumnID              IntegrationsSelectColumn = "id"
-	IntegrationsSelectColumnKind            IntegrationsSelectColumn = "kind"
-	IntegrationsSelectColumnName            IntegrationsSelectColumn = "name"
-	IntegrationsSelectColumnStatus          IntegrationsSelectColumn = "status"
-	IntegrationsSelectColumnTenantId        IntegrationsSelectColumn = "tenant_id"
-	IntegrationsSelectColumnUpdatedAt       IntegrationsSelectColumn = "updated_at"
-)
-
-type IntegrationsUpdateColumn string
-
-const (
-	IntegrationsUpdateColumnCreatedAt       IntegrationsUpdateColumn = "created_at"
-	IntegrationsUpdateColumnData            IntegrationsUpdateColumn = "data"
-	IntegrationsUpdateColumnGrafanaMetadata IntegrationsUpdateColumn = "grafana_metadata"
-	IntegrationsUpdateColumnID              IntegrationsUpdateColumn = "id"
-	IntegrationsUpdateColumnKind            IntegrationsUpdateColumn = "kind"
-	IntegrationsUpdateColumnName            IntegrationsUpdateColumn = "name"
-	IntegrationsUpdateColumnStatus          IntegrationsUpdateColumn = "status"
-	IntegrationsUpdateColumnTenantId        IntegrationsUpdateColumn = "tenant_id"
-	IntegrationsUpdateColumnUpdatedAt       IntegrationsUpdateColumn = "updated_at"
-)
-
-type ModuleConstraint string
-
-const (
-	ModuleConstraintModulePkey ModuleConstraint = "module_pkey"
-)
-
-type ModuleSelectColumn string
-
-const (
-	ModuleSelectColumnBranchName ModuleSelectColumn = "branch_name"
-	ModuleSelectColumnCreatedAt  ModuleSelectColumn = "created_at"
-	ModuleSelectColumnName       ModuleSelectColumn = "name"
-	ModuleSelectColumnScope      ModuleSelectColumn = "scope"
-)
-
-type ModuleUpdateColumn string
-
-const (
-	ModuleUpdateColumnBranchName ModuleUpdateColumn = "branch_name"
-	ModuleUpdateColumnCreatedAt  ModuleUpdateColumn = "created_at"
-	ModuleUpdateColumnName       ModuleUpdateColumn = "name"
-	ModuleUpdateColumnScope      ModuleUpdateColumn = "scope"
-)
-
-type ModuleVersionConstraint string
-
-const (
-	ModuleVersionConstraintModuleVersionPkey ModuleVersionConstraint = "module_version_pkey"
-)
-
-type ModuleVersionSelectColumn string
-
-const (
-	ModuleVersionSelectColumnBranchName  ModuleVersionSelectColumn = "branch_name"
-	ModuleVersionSelectColumnCreatedAt   ModuleVersionSelectColumn = "created_at"
-	ModuleVersionSelectColumnModuleName  ModuleVersionSelectColumn = "module_name"
-	ModuleVersionSelectColumnModuleScope ModuleVersionSelectColumn = "module_scope"
-	ModuleVersionSelectColumnVersion     ModuleVersionSelectColumn = "version"
-)
-
-type ModuleVersionUpdateColumn string
-
-const (
-	ModuleVersionUpdateColumnBranchName  ModuleVersionUpdateColumn = "branch_name"
-	ModuleVersionUpdateColumnCreatedAt   ModuleVersionUpdateColumn = "created_at"
-	ModuleVersionUpdateColumnModuleName  ModuleVersionUpdateColumn = "module_name"
-	ModuleVersionUpdateColumnModuleScope ModuleVersionUpdateColumn = "module_scope"
-	ModuleVersionUpdateColumnVersion     ModuleVersionUpdateColumn = "version"
+	IntegrationUpdateColumnCreatedAt       IntegrationUpdateColumn = "created_at"
+	IntegrationUpdateColumnData            IntegrationUpdateColumn = "data"
+	IntegrationUpdateColumnGrafanaMetadata IntegrationUpdateColumn = "grafana_metadata"
+	IntegrationUpdateColumnID              IntegrationUpdateColumn = "id"
+	IntegrationUpdateColumnKind            IntegrationUpdateColumn = "kind"
+	IntegrationUpdateColumnName            IntegrationUpdateColumn = "name"
+	IntegrationUpdateColumnTenantId        IntegrationUpdateColumn = "tenant_id"
+	IntegrationUpdateColumnUpdatedAt       IntegrationUpdateColumn = "updated_at"
 )
 
 type OrderBy string
@@ -3421,82 +2447,6 @@ type StringComparisonExp struct {
 	Nlike    *String   `json:"_nlike,omitempty"`
 	Nsimilar *String   `json:"_nsimilar,omitempty"`
 	Similar  *String   `json:"_similar,omitempty"`
-}
-
-type BranchAggregateOrderBy struct {
-	Count *OrderBy          `json:"count,omitempty"`
-	Max   *BranchMaxOrderBy `json:"max,omitempty"`
-	Min   *BranchMinOrderBy `json:"min,omitempty"`
-}
-
-type BranchArrRelInsertInput struct {
-	Data       *[]BranchInsertInput `json:"data,omitempty"`
-	OnConflict *BranchOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type BranchBoolExp struct {
-	And       *[]BranchBoolExp          `json:"_and,omitempty"`
-	Not       *BranchBoolExp            `json:"_not,omitempty"`
-	Or        *[]BranchBoolExp          `json:"_or,omitempty"`
-	CreatedAt *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Files     *FileBoolExp              `json:"files,omitempty"`
-	HasMerged *BooleanComparisonExp     `json:"has_merged,omitempty"`
-	Modules   *ModuleBoolExp            `json:"modules,omitempty"`
-	Name      *StringComparisonExp      `json:"name,omitempty"`
-	Protected *BooleanComparisonExp     `json:"protected,omitempty"`
-	Versions  *ModuleVersionBoolExp     `json:"versions,omitempty"`
-}
-
-type BranchInsertInput struct {
-	CreatedAt *Timestamptz                    `json:"created_at,omitempty"`
-	Files     *FileArrRelInsertInput          `json:"files,omitempty"`
-	HasMerged *Boolean                        `json:"has_merged,omitempty"`
-	Modules   *ModuleArrRelInsertInput        `json:"modules,omitempty"`
-	Name      *String                         `json:"name,omitempty"`
-	Protected *Boolean                        `json:"protected,omitempty"`
-	Versions  *ModuleVersionArrRelInsertInput `json:"versions,omitempty"`
-}
-
-type BranchMaxOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-}
-
-type BranchMinOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-}
-
-type BranchObjRelInsertInput struct {
-	Data       BranchInsertInput `json:"data"`
-	OnConflict *BranchOnConflict `json:"on_conflict,omitempty"`
-}
-
-type BranchOnConflict struct {
-	Constraint    BranchConstraint      `json:"constraint"`
-	UpdateColumns *[]BranchUpdateColumn `json:"update_columns,omitempty"`
-	Where         *BranchBoolExp        `json:"where,omitempty"`
-}
-
-type BranchOrderBy struct {
-	CreatedAt         *OrderBy                       `json:"created_at,omitempty"`
-	FilesAggregate    *FileAggregateOrderBy          `json:"files_aggregate,omitempty"`
-	HasMerged         *OrderBy                       `json:"has_merged,omitempty"`
-	ModulesAggregate  *ModuleAggregateOrderBy        `json:"modules_aggregate,omitempty"`
-	Name              *OrderBy                       `json:"name,omitempty"`
-	Protected         *OrderBy                       `json:"protected,omitempty"`
-	VersionsAggregate *ModuleVersionAggregateOrderBy `json:"versions_aggregate,omitempty"`
-}
-
-type BranchPkColumnsInput struct {
-	Name String `json:"name"`
-}
-
-type BranchSetInput struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	HasMerged *Boolean     `json:"has_merged,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-	Protected *Boolean     `json:"protected,omitempty"`
 }
 
 type CredentialAggregateOrderBy struct {
@@ -3681,289 +2631,121 @@ type ExporterSetInput struct {
 	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
 }
 
-type FileAggregateOrderBy struct {
-	Count *OrderBy        `json:"count,omitempty"`
-	Max   *FileMaxOrderBy `json:"max,omitempty"`
-	Min   *FileMinOrderBy `json:"min,omitempty"`
+type IntegrationAggregateOrderBy struct {
+	Count *OrderBy               `json:"count,omitempty"`
+	Max   *IntegrationMaxOrderBy `json:"max,omitempty"`
+	Min   *IntegrationMinOrderBy `json:"min,omitempty"`
 }
 
-type FileAppendInput struct {
-	CompileErrors *Jsonb `json:"compile_errors,omitempty"`
-}
-
-type FileArrRelInsertInput struct {
-	Data       *[]FileInsertInput `json:"data,omitempty"`
-	OnConflict *FileOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type FileBoolExp struct {
-	And           *[]FileBoolExp          `json:"_and,omitempty"`
-	Not           *FileBoolExp            `json:"_not,omitempty"`
-	Or            *[]FileBoolExp          `json:"_or,omitempty"`
-	BaseFileId    *UuidComparisonExp      `json:"base_file_id,omitempty"`
-	Branch        *BranchBoolExp          `json:"branch,omitempty"`
-	BranchName    *StringComparisonExp    `json:"branch_name,omitempty"`
-	CompileErrors *JsonbComparisonExp     `json:"compile_errors,omitempty"`
-	Contents      *StringComparisonExp    `json:"contents,omitempty"`
-	CreatedAt     *TimestampComparisonExp `json:"created_at,omitempty"`
-	Dts           *StringComparisonExp    `json:"dts,omitempty"`
-	Ext           *StringComparisonExp    `json:"ext,omitempty"`
-	ID            *UuidComparisonExp      `json:"id,omitempty"`
-	Js            *StringComparisonExp    `json:"js,omitempty"`
-	Map           *StringComparisonExp    `json:"map,omitempty"`
-	MarkDeleted   *BooleanComparisonExp   `json:"mark_deleted,omitempty"`
-	Module        *ModuleBoolExp          `json:"module,omitempty"`
-	ModuleName    *StringComparisonExp    `json:"module_name,omitempty"`
-	ModuleScope   *StringComparisonExp    `json:"module_scope,omitempty"`
-	ModuleVersion *StringComparisonExp    `json:"module_version,omitempty"`
-	Path          *StringComparisonExp    `json:"path,omitempty"`
-	Version       *ModuleVersionBoolExp   `json:"version,omitempty"`
-}
-
-type FileDeleteAtPathInput struct {
-	CompileErrors *[]String `json:"compile_errors,omitempty"`
-}
-
-type FileDeleteElemInput struct {
-	CompileErrors *Int `json:"compile_errors,omitempty"`
-}
-
-type FileDeleteKeyInput struct {
-	CompileErrors *String `json:"compile_errors,omitempty"`
-}
-
-type FileInsertInput struct {
-	BaseFileId    *UUID                           `json:"base_file_id,omitempty"`
-	Branch        *BranchObjRelInsertInput        `json:"branch,omitempty"`
-	BranchName    *String                         `json:"branch_name,omitempty"`
-	CompileErrors *Jsonb                          `json:"compile_errors,omitempty"`
-	Contents      *String                         `json:"contents,omitempty"`
-	CreatedAt     *Timestamp                      `json:"created_at,omitempty"`
-	Dts           *String                         `json:"dts,omitempty"`
-	Ext           *String                         `json:"ext,omitempty"`
-	ID            *UUID                           `json:"id,omitempty"`
-	Js            *String                         `json:"js,omitempty"`
-	Map           *String                         `json:"map,omitempty"`
-	MarkDeleted   *Boolean                        `json:"mark_deleted,omitempty"`
-	Module        *ModuleObjRelInsertInput        `json:"module,omitempty"`
-	ModuleName    *String                         `json:"module_name,omitempty"`
-	ModuleScope   *String                         `json:"module_scope,omitempty"`
-	ModuleVersion *String                         `json:"module_version,omitempty"`
-	Path          *String                         `json:"path,omitempty"`
-	Version       *ModuleVersionObjRelInsertInput `json:"version,omitempty"`
-}
-
-type FileMaxOrderBy struct {
-	BaseFileId    *OrderBy `json:"base_file_id,omitempty"`
-	BranchName    *OrderBy `json:"branch_name,omitempty"`
-	Contents      *OrderBy `json:"contents,omitempty"`
-	CreatedAt     *OrderBy `json:"created_at,omitempty"`
-	Dts           *OrderBy `json:"dts,omitempty"`
-	Ext           *OrderBy `json:"ext,omitempty"`
-	ID            *OrderBy `json:"id,omitempty"`
-	Js            *OrderBy `json:"js,omitempty"`
-	Map           *OrderBy `json:"map,omitempty"`
-	ModuleName    *OrderBy `json:"module_name,omitempty"`
-	ModuleScope   *OrderBy `json:"module_scope,omitempty"`
-	ModuleVersion *OrderBy `json:"module_version,omitempty"`
-	Path          *OrderBy `json:"path,omitempty"`
-}
-
-type FileMinOrderBy struct {
-	BaseFileId    *OrderBy `json:"base_file_id,omitempty"`
-	BranchName    *OrderBy `json:"branch_name,omitempty"`
-	Contents      *OrderBy `json:"contents,omitempty"`
-	CreatedAt     *OrderBy `json:"created_at,omitempty"`
-	Dts           *OrderBy `json:"dts,omitempty"`
-	Ext           *OrderBy `json:"ext,omitempty"`
-	ID            *OrderBy `json:"id,omitempty"`
-	Js            *OrderBy `json:"js,omitempty"`
-	Map           *OrderBy `json:"map,omitempty"`
-	ModuleName    *OrderBy `json:"module_name,omitempty"`
-	ModuleScope   *OrderBy `json:"module_scope,omitempty"`
-	ModuleVersion *OrderBy `json:"module_version,omitempty"`
-	Path          *OrderBy `json:"path,omitempty"`
-}
-
-type FileObjRelInsertInput struct {
-	Data       FileInsertInput `json:"data"`
-	OnConflict *FileOnConflict `json:"on_conflict,omitempty"`
-}
-
-type FileOnConflict struct {
-	Constraint    FileConstraint      `json:"constraint"`
-	UpdateColumns *[]FileUpdateColumn `json:"update_columns,omitempty"`
-	Where         *FileBoolExp        `json:"where,omitempty"`
-}
-
-type FileOrderBy struct {
-	BaseFileId    *OrderBy              `json:"base_file_id,omitempty"`
-	Branch        *BranchOrderBy        `json:"branch,omitempty"`
-	BranchName    *OrderBy              `json:"branch_name,omitempty"`
-	CompileErrors *OrderBy              `json:"compile_errors,omitempty"`
-	Contents      *OrderBy              `json:"contents,omitempty"`
-	CreatedAt     *OrderBy              `json:"created_at,omitempty"`
-	Dts           *OrderBy              `json:"dts,omitempty"`
-	Ext           *OrderBy              `json:"ext,omitempty"`
-	ID            *OrderBy              `json:"id,omitempty"`
-	Js            *OrderBy              `json:"js,omitempty"`
-	Map           *OrderBy              `json:"map,omitempty"`
-	MarkDeleted   *OrderBy              `json:"mark_deleted,omitempty"`
-	Module        *ModuleOrderBy        `json:"module,omitempty"`
-	ModuleName    *OrderBy              `json:"module_name,omitempty"`
-	ModuleScope   *OrderBy              `json:"module_scope,omitempty"`
-	ModuleVersion *OrderBy              `json:"module_version,omitempty"`
-	Path          *OrderBy              `json:"path,omitempty"`
-	Version       *ModuleVersionOrderBy `json:"version,omitempty"`
-}
-
-type FilePkColumnsInput struct {
-	ID UUID `json:"id"`
-}
-
-type FilePrependInput struct {
-	CompileErrors *Jsonb `json:"compile_errors,omitempty"`
-}
-
-type FileSetInput struct {
-	BaseFileId    *UUID      `json:"base_file_id,omitempty"`
-	BranchName    *String    `json:"branch_name,omitempty"`
-	CompileErrors *Jsonb     `json:"compile_errors,omitempty"`
-	Contents      *String    `json:"contents,omitempty"`
-	CreatedAt     *Timestamp `json:"created_at,omitempty"`
-	Dts           *String    `json:"dts,omitempty"`
-	Ext           *String    `json:"ext,omitempty"`
-	ID            *UUID      `json:"id,omitempty"`
-	Js            *String    `json:"js,omitempty"`
-	Map           *String    `json:"map,omitempty"`
-	MarkDeleted   *Boolean   `json:"mark_deleted,omitempty"`
-	ModuleName    *String    `json:"module_name,omitempty"`
-	ModuleScope   *String    `json:"module_scope,omitempty"`
-	ModuleVersion *String    `json:"module_version,omitempty"`
-	Path          *String    `json:"path,omitempty"`
-}
-
-type IntegrationsAggregateOrderBy struct {
-	Count *OrderBy                `json:"count,omitempty"`
-	Max   *IntegrationsMaxOrderBy `json:"max,omitempty"`
-	Min   *IntegrationsMinOrderBy `json:"min,omitempty"`
-}
-
-type IntegrationsAppendInput struct {
+type IntegrationAppendInput struct {
 	Data            *Jsonb `json:"data,omitempty"`
 	GrafanaMetadata *Jsonb `json:"grafana_metadata,omitempty"`
 }
 
-type IntegrationsArrRelInsertInput struct {
-	Data       *[]IntegrationsInsertInput `json:"data,omitempty"`
-	OnConflict *IntegrationsOnConflict    `json:"on_conflict,omitempty"`
+type IntegrationArrRelInsertInput struct {
+	Data       *[]IntegrationInsertInput `json:"data,omitempty"`
+	OnConflict *IntegrationOnConflict    `json:"on_conflict,omitempty"`
 }
 
-type IntegrationsBoolExp struct {
-	And             *[]IntegrationsBoolExp  `json:"_and,omitempty"`
-	Not             *IntegrationsBoolExp    `json:"_not,omitempty"`
-	Or              *[]IntegrationsBoolExp  `json:"_or,omitempty"`
+type IntegrationBoolExp struct {
+	And             *[]IntegrationBoolExp   `json:"_and,omitempty"`
+	Not             *IntegrationBoolExp     `json:"_not,omitempty"`
+	Or              *[]IntegrationBoolExp   `json:"_or,omitempty"`
 	CreatedAt       *TimestampComparisonExp `json:"created_at,omitempty"`
 	Data            *JsonbComparisonExp     `json:"data,omitempty"`
 	GrafanaMetadata *JsonbComparisonExp     `json:"grafana_metadata,omitempty"`
 	ID              *UuidComparisonExp      `json:"id,omitempty"`
 	Kind            *StringComparisonExp    `json:"kind,omitempty"`
 	Name            *StringComparisonExp    `json:"name,omitempty"`
-	Status          *StringComparisonExp    `json:"status,omitempty"`
 	Tenant          *TenantBoolExp          `json:"tenant,omitempty"`
 	TenantId        *UuidComparisonExp      `json:"tenant_id,omitempty"`
 	UpdatedAt       *TimestampComparisonExp `json:"updated_at,omitempty"`
 }
 
-type IntegrationsDeleteAtPathInput struct {
+type IntegrationDeleteAtPathInput struct {
 	Data            *[]String `json:"data,omitempty"`
 	GrafanaMetadata *[]String `json:"grafana_metadata,omitempty"`
 }
 
-type IntegrationsDeleteElemInput struct {
+type IntegrationDeleteElemInput struct {
 	Data            *Int `json:"data,omitempty"`
 	GrafanaMetadata *Int `json:"grafana_metadata,omitempty"`
 }
 
-type IntegrationsDeleteKeyInput struct {
+type IntegrationDeleteKeyInput struct {
 	Data            *String `json:"data,omitempty"`
 	GrafanaMetadata *String `json:"grafana_metadata,omitempty"`
 }
 
-type IntegrationsInsertInput struct {
+type IntegrationInsertInput struct {
 	CreatedAt       *Timestamp               `json:"created_at,omitempty"`
 	Data            *Jsonb                   `json:"data,omitempty"`
 	GrafanaMetadata *Jsonb                   `json:"grafana_metadata,omitempty"`
 	ID              *UUID                    `json:"id,omitempty"`
 	Kind            *String                  `json:"kind,omitempty"`
 	Name            *String                  `json:"name,omitempty"`
-	Status          *String                  `json:"status,omitempty"`
 	Tenant          *TenantObjRelInsertInput `json:"tenant,omitempty"`
 	TenantId        *UUID                    `json:"tenant_id,omitempty"`
 	UpdatedAt       *Timestamp               `json:"updated_at,omitempty"`
 }
 
-type IntegrationsMaxOrderBy struct {
+type IntegrationMaxOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
 	ID        *OrderBy `json:"id,omitempty"`
 	Kind      *OrderBy `json:"kind,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
-	Status    *OrderBy `json:"status,omitempty"`
 	TenantId  *OrderBy `json:"tenant_id,omitempty"`
 	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
 }
 
-type IntegrationsMinOrderBy struct {
+type IntegrationMinOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
 	ID        *OrderBy `json:"id,omitempty"`
 	Kind      *OrderBy `json:"kind,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
-	Status    *OrderBy `json:"status,omitempty"`
 	TenantId  *OrderBy `json:"tenant_id,omitempty"`
 	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
 }
 
-type IntegrationsObjRelInsertInput struct {
-	Data       IntegrationsInsertInput `json:"data"`
-	OnConflict *IntegrationsOnConflict `json:"on_conflict,omitempty"`
+type IntegrationObjRelInsertInput struct {
+	Data       IntegrationInsertInput `json:"data"`
+	OnConflict *IntegrationOnConflict `json:"on_conflict,omitempty"`
 }
 
-type IntegrationsOnConflict struct {
-	Constraint    IntegrationsConstraint      `json:"constraint"`
-	UpdateColumns *[]IntegrationsUpdateColumn `json:"update_columns,omitempty"`
-	Where         *IntegrationsBoolExp        `json:"where,omitempty"`
+type IntegrationOnConflict struct {
+	Constraint    IntegrationConstraint      `json:"constraint"`
+	UpdateColumns *[]IntegrationUpdateColumn `json:"update_columns,omitempty"`
+	Where         *IntegrationBoolExp        `json:"where,omitempty"`
 }
 
-type IntegrationsOrderBy struct {
+type IntegrationOrderBy struct {
 	CreatedAt       *OrderBy       `json:"created_at,omitempty"`
 	Data            *OrderBy       `json:"data,omitempty"`
 	GrafanaMetadata *OrderBy       `json:"grafana_metadata,omitempty"`
 	ID              *OrderBy       `json:"id,omitempty"`
 	Kind            *OrderBy       `json:"kind,omitempty"`
 	Name            *OrderBy       `json:"name,omitempty"`
-	Status          *OrderBy       `json:"status,omitempty"`
 	Tenant          *TenantOrderBy `json:"tenant,omitempty"`
 	TenantId        *OrderBy       `json:"tenant_id,omitempty"`
 	UpdatedAt       *OrderBy       `json:"updated_at,omitempty"`
 }
 
-type IntegrationsPkColumnsInput struct {
+type IntegrationPkColumnsInput struct {
 	ID UUID `json:"id"`
 }
 
-type IntegrationsPrependInput struct {
+type IntegrationPrependInput struct {
 	Data            *Jsonb `json:"data,omitempty"`
 	GrafanaMetadata *Jsonb `json:"grafana_metadata,omitempty"`
 }
 
-type IntegrationsSetInput struct {
+type IntegrationSetInput struct {
 	CreatedAt       *Timestamp `json:"created_at,omitempty"`
 	Data            *Jsonb     `json:"data,omitempty"`
 	GrafanaMetadata *Jsonb     `json:"grafana_metadata,omitempty"`
 	ID              *UUID      `json:"id,omitempty"`
 	Kind            *String    `json:"kind,omitempty"`
 	Name            *String    `json:"name,omitempty"`
-	Status          *String    `json:"status,omitempty"`
 	TenantId        *UUID      `json:"tenant_id,omitempty"`
 	UpdatedAt       *Timestamp `json:"updated_at,omitempty"`
 }
@@ -3997,177 +2779,6 @@ type JsonbComparisonExp struct {
 	Nin         *[]Jsonb  `json:"_nin,omitempty"`
 }
 
-type ModuleAggregateOrderBy struct {
-	Count *OrderBy          `json:"count,omitempty"`
-	Max   *ModuleMaxOrderBy `json:"max,omitempty"`
-	Min   *ModuleMinOrderBy `json:"min,omitempty"`
-}
-
-type ModuleArrRelInsertInput struct {
-	Data       *[]ModuleInsertInput `json:"data,omitempty"`
-	OnConflict *ModuleOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type ModuleBoolExp struct {
-	And        *[]ModuleBoolExp          `json:"_and,omitempty"`
-	Not        *ModuleBoolExp            `json:"_not,omitempty"`
-	Or         *[]ModuleBoolExp          `json:"_or,omitempty"`
-	Branch     *BranchBoolExp            `json:"branch,omitempty"`
-	BranchName *StringComparisonExp      `json:"branch_name,omitempty"`
-	CreatedAt  *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Files      *FileBoolExp              `json:"files,omitempty"`
-	Name       *StringComparisonExp      `json:"name,omitempty"`
-	Scope      *StringComparisonExp      `json:"scope,omitempty"`
-	Versions   *ModuleVersionBoolExp     `json:"versions,omitempty"`
-}
-
-type ModuleInsertInput struct {
-	Branch     *BranchObjRelInsertInput        `json:"branch,omitempty"`
-	BranchName *String                         `json:"branch_name,omitempty"`
-	CreatedAt  *Timestamptz                    `json:"created_at,omitempty"`
-	Files      *FileArrRelInsertInput          `json:"files,omitempty"`
-	Name       *String                         `json:"name,omitempty"`
-	Scope      *String                         `json:"scope,omitempty"`
-	Versions   *ModuleVersionArrRelInsertInput `json:"versions,omitempty"`
-}
-
-type ModuleMaxOrderBy struct {
-	BranchName *OrderBy `json:"branch_name,omitempty"`
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	Name       *OrderBy `json:"name,omitempty"`
-	Scope      *OrderBy `json:"scope,omitempty"`
-}
-
-type ModuleMinOrderBy struct {
-	BranchName *OrderBy `json:"branch_name,omitempty"`
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	Name       *OrderBy `json:"name,omitempty"`
-	Scope      *OrderBy `json:"scope,omitempty"`
-}
-
-type ModuleObjRelInsertInput struct {
-	Data       ModuleInsertInput `json:"data"`
-	OnConflict *ModuleOnConflict `json:"on_conflict,omitempty"`
-}
-
-type ModuleOnConflict struct {
-	Constraint    ModuleConstraint      `json:"constraint"`
-	UpdateColumns *[]ModuleUpdateColumn `json:"update_columns,omitempty"`
-	Where         *ModuleBoolExp        `json:"where,omitempty"`
-}
-
-type ModuleOrderBy struct {
-	Branch            *BranchOrderBy                 `json:"branch,omitempty"`
-	BranchName        *OrderBy                       `json:"branch_name,omitempty"`
-	CreatedAt         *OrderBy                       `json:"created_at,omitempty"`
-	FilesAggregate    *FileAggregateOrderBy          `json:"files_aggregate,omitempty"`
-	Name              *OrderBy                       `json:"name,omitempty"`
-	Scope             *OrderBy                       `json:"scope,omitempty"`
-	VersionsAggregate *ModuleVersionAggregateOrderBy `json:"versions_aggregate,omitempty"`
-}
-
-type ModulePkColumnsInput struct {
-	BranchName String `json:"branch_name"`
-	Name       String `json:"name"`
-	Scope      String `json:"scope"`
-}
-
-type ModuleSetInput struct {
-	BranchName *String      `json:"branch_name,omitempty"`
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Scope      *String      `json:"scope,omitempty"`
-}
-
-type ModuleVersionAggregateOrderBy struct {
-	Count *OrderBy                 `json:"count,omitempty"`
-	Max   *ModuleVersionMaxOrderBy `json:"max,omitempty"`
-	Min   *ModuleVersionMinOrderBy `json:"min,omitempty"`
-}
-
-type ModuleVersionArrRelInsertInput struct {
-	Data       *[]ModuleVersionInsertInput `json:"data,omitempty"`
-	OnConflict *ModuleVersionOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type ModuleVersionBoolExp struct {
-	And         *[]ModuleVersionBoolExp   `json:"_and,omitempty"`
-	Not         *ModuleVersionBoolExp     `json:"_not,omitempty"`
-	Or          *[]ModuleVersionBoolExp   `json:"_or,omitempty"`
-	Branch      *BranchBoolExp            `json:"branch,omitempty"`
-	BranchName  *StringComparisonExp      `json:"branch_name,omitempty"`
-	CreatedAt   *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Files       *FileBoolExp              `json:"files,omitempty"`
-	Module      *ModuleBoolExp            `json:"module,omitempty"`
-	ModuleName  *StringComparisonExp      `json:"module_name,omitempty"`
-	ModuleScope *StringComparisonExp      `json:"module_scope,omitempty"`
-	Version     *StringComparisonExp      `json:"version,omitempty"`
-}
-
-type ModuleVersionInsertInput struct {
-	Branch      *BranchObjRelInsertInput `json:"branch,omitempty"`
-	BranchName  *String                  `json:"branch_name,omitempty"`
-	CreatedAt   *Timestamptz             `json:"created_at,omitempty"`
-	Files       *FileArrRelInsertInput   `json:"files,omitempty"`
-	Module      *ModuleObjRelInsertInput `json:"module,omitempty"`
-	ModuleName  *String                  `json:"module_name,omitempty"`
-	ModuleScope *String                  `json:"module_scope,omitempty"`
-	Version     *String                  `json:"version,omitempty"`
-}
-
-type ModuleVersionMaxOrderBy struct {
-	BranchName  *OrderBy `json:"branch_name,omitempty"`
-	CreatedAt   *OrderBy `json:"created_at,omitempty"`
-	ModuleName  *OrderBy `json:"module_name,omitempty"`
-	ModuleScope *OrderBy `json:"module_scope,omitempty"`
-	Version     *OrderBy `json:"version,omitempty"`
-}
-
-type ModuleVersionMinOrderBy struct {
-	BranchName  *OrderBy `json:"branch_name,omitempty"`
-	CreatedAt   *OrderBy `json:"created_at,omitempty"`
-	ModuleName  *OrderBy `json:"module_name,omitempty"`
-	ModuleScope *OrderBy `json:"module_scope,omitempty"`
-	Version     *OrderBy `json:"version,omitempty"`
-}
-
-type ModuleVersionObjRelInsertInput struct {
-	Data       ModuleVersionInsertInput `json:"data"`
-	OnConflict *ModuleVersionOnConflict `json:"on_conflict,omitempty"`
-}
-
-type ModuleVersionOnConflict struct {
-	Constraint    ModuleVersionConstraint      `json:"constraint"`
-	UpdateColumns *[]ModuleVersionUpdateColumn `json:"update_columns,omitempty"`
-	Where         *ModuleVersionBoolExp        `json:"where,omitempty"`
-}
-
-type ModuleVersionOrderBy struct {
-	Branch         *BranchOrderBy        `json:"branch,omitempty"`
-	BranchName     *OrderBy              `json:"branch_name,omitempty"`
-	CreatedAt      *OrderBy              `json:"created_at,omitempty"`
-	FilesAggregate *FileAggregateOrderBy `json:"files_aggregate,omitempty"`
-	Module         *ModuleOrderBy        `json:"module,omitempty"`
-	ModuleName     *OrderBy              `json:"module_name,omitempty"`
-	ModuleScope    *OrderBy              `json:"module_scope,omitempty"`
-	Version        *OrderBy              `json:"version,omitempty"`
-}
-
-type ModuleVersionPkColumnsInput struct {
-	BranchName  String `json:"branch_name"`
-	ModuleName  String `json:"module_name"`
-	ModuleScope String `json:"module_scope"`
-	Version     String `json:"version"`
-}
-
-type ModuleVersionSetInput struct {
-	BranchName  *String      `json:"branch_name,omitempty"`
-	CreatedAt   *Timestamptz `json:"created_at,omitempty"`
-	ModuleName  *String      `json:"module_name,omitempty"`
-	ModuleScope *String      `json:"module_scope,omitempty"`
-	Version     *String      `json:"version,omitempty"`
-}
-
 type TenantAggregateOrderBy struct {
 	Count *OrderBy          `json:"count,omitempty"`
 	Max   *TenantMaxOrderBy `json:"max,omitempty"`
@@ -4187,7 +2798,7 @@ type TenantBoolExp struct {
 	Credentials  *CredentialBoolExp      `json:"credentials,omitempty"`
 	Exporters    *ExporterBoolExp        `json:"exporters,omitempty"`
 	ID           *UuidComparisonExp      `json:"id,omitempty"`
-	Integrations *IntegrationsBoolExp    `json:"integrations,omitempty"`
+	Integrations *IntegrationBoolExp     `json:"integrations,omitempty"`
 	Key          *StringComparisonExp    `json:"key,omitempty"`
 	Name         *StringComparisonExp    `json:"name,omitempty"`
 	Type         *StringComparisonExp    `json:"type,omitempty"`
@@ -4195,15 +2806,15 @@ type TenantBoolExp struct {
 }
 
 type TenantInsertInput struct {
-	CreatedAt    *Timestamp                     `json:"created_at,omitempty"`
-	Credentials  *CredentialArrRelInsertInput   `json:"credentials,omitempty"`
-	Exporters    *ExporterArrRelInsertInput     `json:"exporters,omitempty"`
-	ID           *UUID                          `json:"id,omitempty"`
-	Integrations *IntegrationsArrRelInsertInput `json:"integrations,omitempty"`
-	Key          *String                        `json:"key,omitempty"`
-	Name         *String                        `json:"name,omitempty"`
-	Type         *String                        `json:"type,omitempty"`
-	UpdatedAt    *Timestamp                     `json:"updated_at,omitempty"`
+	CreatedAt    *Timestamp                    `json:"created_at,omitempty"`
+	Credentials  *CredentialArrRelInsertInput  `json:"credentials,omitempty"`
+	Exporters    *ExporterArrRelInsertInput    `json:"exporters,omitempty"`
+	ID           *UUID                         `json:"id,omitempty"`
+	Integrations *IntegrationArrRelInsertInput `json:"integrations,omitempty"`
+	Key          *String                       `json:"key,omitempty"`
+	Name         *String                       `json:"name,omitempty"`
+	Type         *String                       `json:"type,omitempty"`
+	UpdatedAt    *Timestamp                    `json:"updated_at,omitempty"`
 }
 
 type TenantMaxOrderBy struct {
@@ -4236,15 +2847,15 @@ type TenantOnConflict struct {
 }
 
 type TenantOrderBy struct {
-	CreatedAt             *OrderBy                      `json:"created_at,omitempty"`
-	CredentialsAggregate  *CredentialAggregateOrderBy   `json:"credentials_aggregate,omitempty"`
-	ExportersAggregate    *ExporterAggregateOrderBy     `json:"exporters_aggregate,omitempty"`
-	ID                    *OrderBy                      `json:"id,omitempty"`
-	IntegrationsAggregate *IntegrationsAggregateOrderBy `json:"integrations_aggregate,omitempty"`
-	Key                   *OrderBy                      `json:"key,omitempty"`
-	Name                  *OrderBy                      `json:"name,omitempty"`
-	Type                  *OrderBy                      `json:"type,omitempty"`
-	UpdatedAt             *OrderBy                      `json:"updated_at,omitempty"`
+	CreatedAt             *OrderBy                     `json:"created_at,omitempty"`
+	CredentialsAggregate  *CredentialAggregateOrderBy  `json:"credentials_aggregate,omitempty"`
+	ExportersAggregate    *ExporterAggregateOrderBy    `json:"exporters_aggregate,omitempty"`
+	ID                    *OrderBy                     `json:"id,omitempty"`
+	IntegrationsAggregate *IntegrationAggregateOrderBy `json:"integrations_aggregate,omitempty"`
+	Key                   *OrderBy                     `json:"key,omitempty"`
+	Name                  *OrderBy                     `json:"name,omitempty"`
+	Type                  *OrderBy                     `json:"type,omitempty"`
+	UpdatedAt             *OrderBy                     `json:"updated_at,omitempty"`
 }
 
 type TenantPkColumnsInput struct {
@@ -4489,45 +3100,6 @@ type StatusResponse struct {
 	Success          Boolean    `json:"success"`
 }
 
-type Branch struct {
-	CreatedAt         Timestamptz            `json:"created_at"`
-	Files             *[]File                `json:"files,omitempty"`
-	FilesAggregate    FileAggregate          `json:"files_aggregate"`
-	HasMerged         Boolean                `json:"has_merged"`
-	Modules           *[]Module              `json:"modules,omitempty"`
-	ModulesAggregate  ModuleAggregate        `json:"modules_aggregate"`
-	Name              String                 `json:"name"`
-	Protected         Boolean                `json:"protected"`
-	Versions          *[]ModuleVersion       `json:"versions,omitempty"`
-	VersionsAggregate ModuleVersionAggregate `json:"versions_aggregate"`
-}
-
-type BranchAggregate struct {
-	Aggregate *BranchAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]Branch              `json:"nodes,omitempty"`
-}
-
-type BranchAggregateFields struct {
-	Count *Int             `json:"count,omitempty"`
-	Max   *BranchMaxFields `json:"max,omitempty"`
-	Min   *BranchMinFields `json:"min,omitempty"`
-}
-
-type BranchMaxFields struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-}
-
-type BranchMinFields struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-}
-
-type BranchMutationResponse struct {
-	AffectedRows Int       `json:"affected_rows"`
-	Returning    *[]Branch `json:"returning,omitempty"`
-}
-
 type Credential struct {
 	CreatedAt          Timestamptz       `json:"created_at"`
 	Exporters          *[]Exporter       `json:"exporters,omitempty"`
@@ -4618,246 +3190,72 @@ type ExporterMutationResponse struct {
 	Returning    *[]Exporter `json:"returning,omitempty"`
 }
 
-type File struct {
-	BaseFileId    *UUID          `json:"base_file_id,omitempty"`
-	Branch        Branch         `json:"branch"`
-	BranchName    String         `json:"branch_name"`
-	CompileErrors *Jsonb         `json:"compile_errors,omitempty"`
-	Contents      String         `json:"contents"`
-	CreatedAt     Timestamp      `json:"created_at"`
-	Dts           *String        `json:"dts,omitempty"`
-	Ext           String         `json:"ext"`
-	ID            UUID           `json:"id"`
-	Js            *String        `json:"js,omitempty"`
-	Map           *String        `json:"map,omitempty"`
-	MarkDeleted   Boolean        `json:"mark_deleted"`
-	Module        *Module        `json:"module,omitempty"`
-	ModuleName    String         `json:"module_name"`
-	ModuleScope   String         `json:"module_scope"`
-	ModuleVersion String         `json:"module_version"`
-	Path          String         `json:"path"`
-	Version       *ModuleVersion `json:"version,omitempty"`
-}
-
-type FileAggregate struct {
-	Aggregate *FileAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]File              `json:"nodes,omitempty"`
-}
-
-type FileAggregateFields struct {
-	Count *Int           `json:"count,omitempty"`
-	Max   *FileMaxFields `json:"max,omitempty"`
-	Min   *FileMinFields `json:"min,omitempty"`
-}
-
-type FileMaxFields struct {
-	BaseFileId    *UUID      `json:"base_file_id,omitempty"`
-	BranchName    *String    `json:"branch_name,omitempty"`
-	Contents      *String    `json:"contents,omitempty"`
-	CreatedAt     *Timestamp `json:"created_at,omitempty"`
-	Dts           *String    `json:"dts,omitempty"`
-	Ext           *String    `json:"ext,omitempty"`
-	ID            *UUID      `json:"id,omitempty"`
-	Js            *String    `json:"js,omitempty"`
-	Map           *String    `json:"map,omitempty"`
-	ModuleName    *String    `json:"module_name,omitempty"`
-	ModuleScope   *String    `json:"module_scope,omitempty"`
-	ModuleVersion *String    `json:"module_version,omitempty"`
-	Path          *String    `json:"path,omitempty"`
-}
-
-type FileMinFields struct {
-	BaseFileId    *UUID      `json:"base_file_id,omitempty"`
-	BranchName    *String    `json:"branch_name,omitempty"`
-	Contents      *String    `json:"contents,omitempty"`
-	CreatedAt     *Timestamp `json:"created_at,omitempty"`
-	Dts           *String    `json:"dts,omitempty"`
-	Ext           *String    `json:"ext,omitempty"`
-	ID            *UUID      `json:"id,omitempty"`
-	Js            *String    `json:"js,omitempty"`
-	Map           *String    `json:"map,omitempty"`
-	ModuleName    *String    `json:"module_name,omitempty"`
-	ModuleScope   *String    `json:"module_scope,omitempty"`
-	ModuleVersion *String    `json:"module_version,omitempty"`
-	Path          *String    `json:"path,omitempty"`
-}
-
-type FileMutationResponse struct {
-	AffectedRows Int     `json:"affected_rows"`
-	Returning    *[]File `json:"returning,omitempty"`
-}
-
-type Integrations struct {
+type Integration struct {
 	CreatedAt       Timestamp `json:"created_at"`
 	Data            Jsonb     `json:"data"`
 	GrafanaMetadata Jsonb     `json:"grafana_metadata"`
 	ID              UUID      `json:"id"`
 	Kind            String    `json:"kind"`
 	Name            String    `json:"name"`
-	Status          String    `json:"status"`
 	Tenant          Tenant    `json:"tenant"`
 	TenantId        UUID      `json:"tenant_id"`
 	UpdatedAt       Timestamp `json:"updated_at"`
 }
 
-type IntegrationsAggregate struct {
-	Aggregate *IntegrationsAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]Integrations              `json:"nodes,omitempty"`
+type IntegrationAggregate struct {
+	Aggregate *IntegrationAggregateFields `json:"aggregate,omitempty"`
+	Nodes     *[]Integration              `json:"nodes,omitempty"`
 }
 
-type IntegrationsAggregateFields struct {
-	Count *Int                   `json:"count,omitempty"`
-	Max   *IntegrationsMaxFields `json:"max,omitempty"`
-	Min   *IntegrationsMinFields `json:"min,omitempty"`
+type IntegrationAggregateFields struct {
+	Count *Int                  `json:"count,omitempty"`
+	Max   *IntegrationMaxFields `json:"max,omitempty"`
+	Min   *IntegrationMinFields `json:"min,omitempty"`
 }
 
-type IntegrationsMaxFields struct {
+type IntegrationMaxFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
 	Kind      *String    `json:"kind,omitempty"`
 	Name      *String    `json:"name,omitempty"`
-	Status    *String    `json:"status,omitempty"`
 	TenantId  *UUID      `json:"tenant_id,omitempty"`
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
-type IntegrationsMinFields struct {
+type IntegrationMinFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
 	Kind      *String    `json:"kind,omitempty"`
 	Name      *String    `json:"name,omitempty"`
-	Status    *String    `json:"status,omitempty"`
 	TenantId  *UUID      `json:"tenant_id,omitempty"`
 	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
-type IntegrationsMutationResponse struct {
-	AffectedRows Int             `json:"affected_rows"`
-	Returning    *[]Integrations `json:"returning,omitempty"`
-}
-
-type Module struct {
-	Branch            Branch                 `json:"branch"`
-	BranchName        String                 `json:"branch_name"`
-	CreatedAt         Timestamptz            `json:"created_at"`
-	Files             *[]File                `json:"files,omitempty"`
-	FilesAggregate    FileAggregate          `json:"files_aggregate"`
-	Name              String                 `json:"name"`
-	Scope             String                 `json:"scope"`
-	Versions          *[]ModuleVersion       `json:"versions,omitempty"`
-	VersionsAggregate ModuleVersionAggregate `json:"versions_aggregate"`
-}
-
-type ModuleAggregate struct {
-	Aggregate *ModuleAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]Module              `json:"nodes,omitempty"`
-}
-
-type ModuleAggregateFields struct {
-	Count *Int             `json:"count,omitempty"`
-	Max   *ModuleMaxFields `json:"max,omitempty"`
-	Min   *ModuleMinFields `json:"min,omitempty"`
-}
-
-type ModuleMaxFields struct {
-	BranchName *String      `json:"branch_name,omitempty"`
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Scope      *String      `json:"scope,omitempty"`
-}
-
-type ModuleMinFields struct {
-	BranchName *String      `json:"branch_name,omitempty"`
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Scope      *String      `json:"scope,omitempty"`
-}
-
-type ModuleMutationResponse struct {
-	AffectedRows Int       `json:"affected_rows"`
-	Returning    *[]Module `json:"returning,omitempty"`
-}
-
-type ModuleVersion struct {
-	Branch         Branch        `json:"branch"`
-	BranchName     String        `json:"branch_name"`
-	CreatedAt      Timestamptz   `json:"created_at"`
-	Files          *[]File       `json:"files,omitempty"`
-	FilesAggregate FileAggregate `json:"files_aggregate"`
-	Module         *Module       `json:"module,omitempty"`
-	ModuleName     String        `json:"module_name"`
-	ModuleScope    String        `json:"module_scope"`
-	Version        String        `json:"version"`
-}
-
-type ModuleVersionAggregate struct {
-	Aggregate *ModuleVersionAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]ModuleVersion              `json:"nodes,omitempty"`
-}
-
-type ModuleVersionAggregateFields struct {
-	Count *Int                    `json:"count,omitempty"`
-	Max   *ModuleVersionMaxFields `json:"max,omitempty"`
-	Min   *ModuleVersionMinFields `json:"min,omitempty"`
-}
-
-type ModuleVersionMaxFields struct {
-	BranchName  *String      `json:"branch_name,omitempty"`
-	CreatedAt   *Timestamptz `json:"created_at,omitempty"`
-	ModuleName  *String      `json:"module_name,omitempty"`
-	ModuleScope *String      `json:"module_scope,omitempty"`
-	Version     *String      `json:"version,omitempty"`
-}
-
-type ModuleVersionMinFields struct {
-	BranchName  *String      `json:"branch_name,omitempty"`
-	CreatedAt   *Timestamptz `json:"created_at,omitempty"`
-	ModuleName  *String      `json:"module_name,omitempty"`
-	ModuleScope *String      `json:"module_scope,omitempty"`
-	Version     *String      `json:"version,omitempty"`
-}
-
-type ModuleVersionMutationResponse struct {
-	AffectedRows Int              `json:"affected_rows"`
-	Returning    *[]ModuleVersion `json:"returning,omitempty"`
+type IntegrationMutationResponse struct {
+	AffectedRows Int            `json:"affected_rows"`
+	Returning    *[]Integration `json:"returning,omitempty"`
 }
 
 type MutationRoot struct {
 	DeleteRuleGroup          *StatusResponse                 `json:"deleteRuleGroup,omitempty"`
-	DeleteBranch             *BranchMutationResponse         `json:"delete_branch,omitempty"`
-	DeleteBranchByPk         *Branch                         `json:"delete_branch_by_pk,omitempty"`
 	DeleteCredential         *CredentialMutationResponse     `json:"delete_credential,omitempty"`
 	DeleteCredentialByPk     *Credential                     `json:"delete_credential_by_pk,omitempty"`
 	DeleteExporter           *ExporterMutationResponse       `json:"delete_exporter,omitempty"`
 	DeleteExporterByPk       *Exporter                       `json:"delete_exporter_by_pk,omitempty"`
-	DeleteFile               *FileMutationResponse           `json:"delete_file,omitempty"`
-	DeleteFileByPk           *File                           `json:"delete_file_by_pk,omitempty"`
-	DeleteIntegrations       *IntegrationsMutationResponse   `json:"delete_integrations,omitempty"`
-	DeleteIntegrationsByPk   *Integrations                   `json:"delete_integrations_by_pk,omitempty"`
-	DeleteModule             *ModuleMutationResponse         `json:"delete_module,omitempty"`
-	DeleteModuleByPk         *Module                         `json:"delete_module_by_pk,omitempty"`
-	DeleteModuleVersion      *ModuleVersionMutationResponse  `json:"delete_module_version,omitempty"`
-	DeleteModuleVersionByPk  *ModuleVersion                  `json:"delete_module_version_by_pk,omitempty"`
+	DeleteIntegration        *IntegrationMutationResponse    `json:"delete_integration,omitempty"`
+	DeleteIntegrationByPk    *Integration                    `json:"delete_integration_by_pk,omitempty"`
 	DeleteTenant             *TenantMutationResponse         `json:"delete_tenant,omitempty"`
 	DeleteTenantByPk         *Tenant                         `json:"delete_tenant_by_pk,omitempty"`
 	DeleteUser               *UserMutationResponse           `json:"delete_user,omitempty"`
 	DeleteUserByPk           *User                           `json:"delete_user_by_pk,omitempty"`
 	DeleteUserPreference     *UserPreferenceMutationResponse `json:"delete_user_preference,omitempty"`
 	DeleteUserPreferenceByPk *UserPreference                 `json:"delete_user_preference_by_pk,omitempty"`
-	InsertBranch             *BranchMutationResponse         `json:"insert_branch,omitempty"`
-	InsertBranchOne          *Branch                         `json:"insert_branch_one,omitempty"`
 	InsertCredential         *CredentialMutationResponse     `json:"insert_credential,omitempty"`
 	InsertCredentialOne      *Credential                     `json:"insert_credential_one,omitempty"`
 	InsertExporter           *ExporterMutationResponse       `json:"insert_exporter,omitempty"`
 	InsertExporterOne        *Exporter                       `json:"insert_exporter_one,omitempty"`
-	InsertFile               *FileMutationResponse           `json:"insert_file,omitempty"`
-	InsertFileOne            *File                           `json:"insert_file_one,omitempty"`
-	InsertIntegrations       *IntegrationsMutationResponse   `json:"insert_integrations,omitempty"`
-	InsertIntegrationsOne    *Integrations                   `json:"insert_integrations_one,omitempty"`
-	InsertModule             *ModuleMutationResponse         `json:"insert_module,omitempty"`
-	InsertModuleOne          *Module                         `json:"insert_module_one,omitempty"`
-	InsertModuleVersion      *ModuleVersionMutationResponse  `json:"insert_module_version,omitempty"`
-	InsertModuleVersionOne   *ModuleVersion                  `json:"insert_module_version_one,omitempty"`
+	InsertIntegration        *IntegrationMutationResponse    `json:"insert_integration,omitempty"`
+	InsertIntegrationOne     *Integration                    `json:"insert_integration_one,omitempty"`
 	InsertTenant             *TenantMutationResponse         `json:"insert_tenant,omitempty"`
 	InsertTenantOne          *Tenant                         `json:"insert_tenant_one,omitempty"`
 	InsertUser               *UserMutationResponse           `json:"insert_user,omitempty"`
@@ -4866,20 +3264,12 @@ type MutationRoot struct {
 	InsertUserPreferenceOne  *UserPreference                 `json:"insert_user_preference_one,omitempty"`
 	UpdateAlertmanager       *StatusResponse                 `json:"updateAlertmanager,omitempty"`
 	UpdateRuleGroup          *StatusResponse                 `json:"updateRuleGroup,omitempty"`
-	UpdateBranch             *BranchMutationResponse         `json:"update_branch,omitempty"`
-	UpdateBranchByPk         *Branch                         `json:"update_branch_by_pk,omitempty"`
 	UpdateCredential         *CredentialMutationResponse     `json:"update_credential,omitempty"`
 	UpdateCredentialByPk     *Credential                     `json:"update_credential_by_pk,omitempty"`
 	UpdateExporter           *ExporterMutationResponse       `json:"update_exporter,omitempty"`
 	UpdateExporterByPk       *Exporter                       `json:"update_exporter_by_pk,omitempty"`
-	UpdateFile               *FileMutationResponse           `json:"update_file,omitempty"`
-	UpdateFileByPk           *File                           `json:"update_file_by_pk,omitempty"`
-	UpdateIntegrations       *IntegrationsMutationResponse   `json:"update_integrations,omitempty"`
-	UpdateIntegrationsByPk   *Integrations                   `json:"update_integrations_by_pk,omitempty"`
-	UpdateModule             *ModuleMutationResponse         `json:"update_module,omitempty"`
-	UpdateModuleByPk         *Module                         `json:"update_module_by_pk,omitempty"`
-	UpdateModuleVersion      *ModuleVersionMutationResponse  `json:"update_module_version,omitempty"`
-	UpdateModuleVersionByPk  *ModuleVersion                  `json:"update_module_version_by_pk,omitempty"`
+	UpdateIntegration        *IntegrationMutationResponse    `json:"update_integration,omitempty"`
+	UpdateIntegrationByPk    *Integration                    `json:"update_integration_by_pk,omitempty"`
 	UpdateTenant             *TenantMutationResponse         `json:"update_tenant,omitempty"`
 	UpdateTenantByPk         *Tenant                         `json:"update_tenant_by_pk,omitempty"`
 	UpdateUser               *UserMutationResponse           `json:"update_user,omitempty"`
@@ -4889,30 +3279,18 @@ type MutationRoot struct {
 }
 
 type QueryRoot struct {
-	Branch                  *[]Branch               `json:"branch,omitempty"`
-	BranchAggregate         BranchAggregate         `json:"branch_aggregate"`
-	BranchByPk              *Branch                 `json:"branch_by_pk,omitempty"`
 	Credential              *[]Credential           `json:"credential,omitempty"`
 	CredentialAggregate     CredentialAggregate     `json:"credential_aggregate"`
 	CredentialByPk          *Credential             `json:"credential_by_pk,omitempty"`
 	Exporter                *[]Exporter             `json:"exporter,omitempty"`
 	ExporterAggregate       ExporterAggregate       `json:"exporter_aggregate"`
 	ExporterByPk            *Exporter               `json:"exporter_by_pk,omitempty"`
-	File                    *[]File                 `json:"file,omitempty"`
-	FileAggregate           FileAggregate           `json:"file_aggregate"`
-	FileByPk                *File                   `json:"file_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
-	Integrations            *[]Integrations         `json:"integrations,omitempty"`
-	IntegrationsAggregate   IntegrationsAggregate   `json:"integrations_aggregate"`
-	IntegrationsByPk        *Integrations           `json:"integrations_by_pk,omitempty"`
+	Integration             *[]Integration          `json:"integration,omitempty"`
+	IntegrationAggregate    IntegrationAggregate    `json:"integration_aggregate"`
+	IntegrationByPk         *Integration            `json:"integration_by_pk,omitempty"`
 	ListRules               *Rules                  `json:"listRules,omitempty"`
-	Module                  *[]Module               `json:"module,omitempty"`
-	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
-	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
-	ModuleVersion           *[]ModuleVersion        `json:"module_version,omitempty"`
-	ModuleVersionAggregate  ModuleVersionAggregate  `json:"module_version_aggregate"`
-	ModuleVersionByPk       *ModuleVersion          `json:"module_version_by_pk,omitempty"`
 	Tenant                  *[]Tenant               `json:"tenant,omitempty"`
 	TenantAggregate         TenantAggregate         `json:"tenant_aggregate"`
 	TenantByPk              *Tenant                 `json:"tenant_by_pk,omitempty"`
@@ -4927,30 +3305,18 @@ type QueryRoot struct {
 }
 
 type SubscriptionRoot struct {
-	Branch                  *[]Branch               `json:"branch,omitempty"`
-	BranchAggregate         BranchAggregate         `json:"branch_aggregate"`
-	BranchByPk              *Branch                 `json:"branch_by_pk,omitempty"`
 	Credential              *[]Credential           `json:"credential,omitempty"`
 	CredentialAggregate     CredentialAggregate     `json:"credential_aggregate"`
 	CredentialByPk          *Credential             `json:"credential_by_pk,omitempty"`
 	Exporter                *[]Exporter             `json:"exporter,omitempty"`
 	ExporterAggregate       ExporterAggregate       `json:"exporter_aggregate"`
 	ExporterByPk            *Exporter               `json:"exporter_by_pk,omitempty"`
-	File                    *[]File                 `json:"file,omitempty"`
-	FileAggregate           FileAggregate           `json:"file_aggregate"`
-	FileByPk                *File                   `json:"file_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
-	Integrations            *[]Integrations         `json:"integrations,omitempty"`
-	IntegrationsAggregate   IntegrationsAggregate   `json:"integrations_aggregate"`
-	IntegrationsByPk        *Integrations           `json:"integrations_by_pk,omitempty"`
+	Integration             *[]Integration          `json:"integration,omitempty"`
+	IntegrationAggregate    IntegrationAggregate    `json:"integration_aggregate"`
+	IntegrationByPk         *Integration            `json:"integration_by_pk,omitempty"`
 	ListRules               *Rules                  `json:"listRules,omitempty"`
-	Module                  *[]Module               `json:"module,omitempty"`
-	ModuleAggregate         ModuleAggregate         `json:"module_aggregate"`
-	ModuleByPk              *Module                 `json:"module_by_pk,omitempty"`
-	ModuleVersion           *[]ModuleVersion        `json:"module_version,omitempty"`
-	ModuleVersionAggregate  ModuleVersionAggregate  `json:"module_version_aggregate"`
-	ModuleVersionByPk       *ModuleVersion          `json:"module_version_by_pk,omitempty"`
 	Tenant                  *[]Tenant               `json:"tenant,omitempty"`
 	TenantAggregate         TenantAggregate         `json:"tenant_aggregate"`
 	TenantByPk              *Tenant                 `json:"tenant_by_pk,omitempty"`
@@ -4965,18 +3331,18 @@ type SubscriptionRoot struct {
 }
 
 type Tenant struct {
-	CreatedAt             Timestamp             `json:"created_at"`
-	Credentials           *[]Credential         `json:"credentials,omitempty"`
-	CredentialsAggregate  CredentialAggregate   `json:"credentials_aggregate"`
-	Exporters             *[]Exporter           `json:"exporters,omitempty"`
-	ExportersAggregate    ExporterAggregate     `json:"exporters_aggregate"`
-	ID                    UUID                  `json:"id"`
-	Integrations          *[]Integrations       `json:"integrations,omitempty"`
-	IntegrationsAggregate IntegrationsAggregate `json:"integrations_aggregate"`
-	Key                   String                `json:"key"`
-	Name                  String                `json:"name"`
-	Type                  String                `json:"type"`
-	UpdatedAt             Timestamp             `json:"updated_at"`
+	CreatedAt             Timestamp            `json:"created_at"`
+	Credentials           *[]Credential        `json:"credentials,omitempty"`
+	CredentialsAggregate  CredentialAggregate  `json:"credentials_aggregate"`
+	Exporters             *[]Exporter          `json:"exporters,omitempty"`
+	ExportersAggregate    ExporterAggregate    `json:"exporters_aggregate"`
+	ID                    UUID                 `json:"id"`
+	Integrations          *[]Integration       `json:"integrations,omitempty"`
+	IntegrationsAggregate IntegrationAggregate `json:"integrations_aggregate"`
+	Key                   String               `json:"key"`
+	Name                  String               `json:"name"`
+	Type                  String               `json:"type"`
+	UpdatedAt             Timestamp            `json:"updated_at"`
 }
 
 type TenantAggregate struct {

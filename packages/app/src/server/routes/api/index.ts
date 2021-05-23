@@ -17,11 +17,9 @@
 import express from "express";
 
 import { GeneralServerError } from "server/errors";
-import datasourceHandler from "./datasource";
 import createAuthHandler from "./authentication";
 import createGraphqlHandler from "./graphql";
 import pubUiCfgHandler from "./uicfg";
-import createModuleHandler from "./modules";
 import authRequired from "server/middleware/auth";
 import setCortexRuntimeConfigHandler from "./cortexRuntimeConfig";
 
@@ -31,9 +29,7 @@ function createAPIRoutes(): express.Router {
   api.use("/public-ui-config", pubUiCfgHandler);
 
   // Authentication required
-  api.use("/modules", authRequired, createModuleHandler());
   api.use("/graphql", authRequired, createGraphqlHandler());
-  api.use("/datasource/:target", authRequired, datasourceHandler);
 
   // being able to access this implies having access to cortex config for
   // all tenants, i.e. this is a privileged / superuser action.

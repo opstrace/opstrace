@@ -17,7 +17,7 @@
 import useSWR from "swr";
 import axios from "axios";
 
-import { grafanaUrl } from "client/viewsBasic/paths";
+import { grafanaUrl } from "client/utils/grafana";
 
 export const useLoki = (path: string, tenantName: string = "system") => {
   const url = `${grafanaUrl({

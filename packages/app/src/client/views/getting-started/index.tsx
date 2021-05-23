@@ -16,11 +16,11 @@
 
 import React from "react";
 
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
-import { grafanaUrl } from "client/viewsBasic/paths";
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
+import { grafanaUrl } from "client/utils/grafana";
 
 import { cmdID, useCommandService } from "client/services/Command";
-import { openTenantPickerCommandId } from "../tenant/TenantPicker";
+import { openTenantPickerCommandId } from "client/views/tenants/TenantPicker";
 import { getKeysFromKeybinding } from "client/services/Command/util";
 
 import Grid from "@material-ui/core/Grid";
@@ -31,9 +31,8 @@ import { Button } from "client/components/Button";
 import { ExternalLink, Link } from "client/components/Link";
 
 const GettingStarted = () => {
-  const tenant = useSelectedTenant();
+  const tenant = useSelectedTenantWithFallback();
   const cmdService = useCommandService();
-  const tenantName = tenant ? tenant.name : "system";
 
   let content = (
     <>
@@ -48,12 +47,12 @@ const GettingStarted = () => {
               <Grid item xs={12} md={6}>
                 <Typography color="textSecondary" variant="body2">
                   Get all the configured yaml required to send logs to the{" "}
-                  <strong>{tenantName}</strong> tenant.
+                  <strong>{tenant.name}</strong> tenant.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Box display="flex" justifyContent="flex-end">
-                  <Link to={`/tenant/${tenantName}/integrations/all`}>
+                  <Link to={`/tenant/${tenant.name}/integrations/all`}>
                     Create the Kubernetes Logs Integration →
                   </Link>
                 </Box>
@@ -73,12 +72,12 @@ const GettingStarted = () => {
               <Grid item xs={12} md={6}>
                 <Typography color="textSecondary" variant="body2">
                   Get all the configured yaml required to send Metrics to the{" "}
-                  <strong>{tenantName}</strong> tenant.
+                  <strong>{tenant.name}</strong> tenant.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Box display="flex" justifyContent="flex-end">
-                  <Link to={`/tenant/${tenantName}/integrations/all`}>
+                  <Link to={`/tenant/${tenant.name}/integrations/all`}>
                     Create the Kubernetes Metrics Integration →
                   </Link>
                 </Box>
@@ -97,15 +96,15 @@ const GettingStarted = () => {
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <Typography color="textSecondary" variant="body2">
-                  Visit the Grafana web UI for the <strong>{tenantName}</strong>{" "}
-                  tenant.
+                  Visit the Grafana web UI for the{" "}
+                  <strong>{tenant.name}</strong> tenant.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Box display="flex" justifyContent="flex-end">
                   <ExternalLink
                     href={grafanaUrl({
-                      tenant: tenantName
+                      tenant: tenant.name
                     })}
                   >
                     View Grafana →

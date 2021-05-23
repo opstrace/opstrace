@@ -26,7 +26,11 @@ import {
 
 import { KubeConfig } from "@kubernetes/client-node";
 
-import { KUBECONFIG } from "../../server";
+const KUBECONFIG = new KubeConfig();
+// This will only work if running in remote-dev mode or in cluster
+try {
+  KUBECONFIG.loadFromCluster();
+} catch (err) {}
 
 function genCortexRuntimeConfigCM(kubeconfig: KubeConfig, yamldoc: string) {
   // name and namespace and data key: are all convention-based, must be in sync

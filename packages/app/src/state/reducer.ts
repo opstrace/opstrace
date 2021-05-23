@@ -15,23 +15,15 @@
  */
 
 import { combineReducers } from "redux";
-import { reducer as branchReducer } from "./branch/reducer";
-import { reducer as moduleReducer } from "./module/reducer";
-import { reducer as moduleVersionReducer } from "./moduleVersion/reducer";
-import { reducer as fileReducer } from "./file/reducer";
 import { reducer as userReducer } from "./user/reducer";
 import { reducer as tenantReducer } from "./tenant/reducer";
-import { reducer as sandboxReducer } from "./sandbox/reducer";
+import { reducer as integrationReducer } from "./integration/reducer";
 import { reducer as formReducer } from "./form/reducer";
 
 export const mainReducers = {
   users: userReducer,
-  files: fileReducer,
   tenants: tenantReducer,
-  branches: branchReducer,
-  modules: moduleReducer,
-  moduleVersions: moduleVersionReducer,
-  sandbox: sandboxReducer,
+  integrations: integrationReducer,
   form: formReducer
 };
 

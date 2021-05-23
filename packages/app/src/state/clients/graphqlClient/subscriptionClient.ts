@@ -54,8 +54,8 @@ const subscriptionClient = () => {
   const wsLink = new WebSocketLink({
     uri: endpoint,
     options: {
-      reconnect: process.env.RUNTIME !== "sandbox",
-      lazy: process.env.RUNTIME === "sandbox",
+      reconnect: true,
+      lazy: false,
       connectionParams: {
         headers
       }

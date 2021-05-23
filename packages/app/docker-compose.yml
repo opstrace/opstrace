@@ -69,26 +69,6 @@ services:
       CORTEX_RULER_ENDPOINT: http://172.17.0.1:9000 # docker0 virtual interface ip
       #  kubectl port-forward -n cortex --address=0.0.0.0 deployment/alertmanager 9001:80
       CORTEX_ALERTMANAGER_ENDPOINT: http://172.17.0.1:9001 # docker0 virtual interface ip
-  # S3 service for storing modules
-  s3:
-    image: minio/minio
-    ports:
-      - 9000:9000
-    environment:
-      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
-      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-    command: server /data
-    healthcheck:
-      test:
-        - CMD
-        - curl
-        - -f
-        - http://minio:9000/minio/health/live
-      interval: 30s
-      timeout: 20s
-      retries: 3
-    logging:
-      driver: none
   # Used by app directly
   redis:
     image: bitnami/redis:6.0.9

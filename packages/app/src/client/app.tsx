@@ -52,7 +52,7 @@ import {
   AddIntegration,
   ShowIntegration,
   EditIntegration
-} from "client/viewsBasic/tenantIntegrations";
+} from "client/views/integrations";
 import TenantAlerting from "client/views/alerting";
 import LoginView from "client/views/login";
 import HelpDialog from "client/views/help";
@@ -61,12 +61,8 @@ import ClusterOverview from "./views/cluster-overview";
 import UsersTable from "client/views/users/list";
 import TenantsTable from "client/views/tenants/list";
 import TenantDashboards from "client/views/dashboards";
-
 import UserDetail from "client/views/users/detail";
-// import TenantDetail from "client/views/tenant/TenantDetail";
-// import AlertmanagerConfigEditor from "client/views/tenant/alertmanagerConfig/editor";
-import { CloudMetrics } from "client/viewsBasic/cloudMetrics";
-import TenantExplore from "./views/explore";
+import TenantExplore from "client/views/explore";
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -266,12 +262,6 @@ const AuthProtectedApplication = () => {
             />
             <Route
               exact
-              key="tenant-cloud-metrics"
-              path="/tenant/:tenantId/cloud-metrics"
-              component={CloudMetrics}
-            />
-            <Route
-              exact
               key="cluster-health"
               path="/cluster/health"
               component={ClusterOverview}
@@ -340,33 +330,3 @@ const App = () => {
 };
 
 export default App;
-
-// Not currently used while module routes are TEMPORARILY disabled
-// import SelectedModule from "client/views/module/SelectedModule";
-// import Modules from "client/views/module/Modules";
-// export const scopedModulePathParams = ":branch/@:scope/:name@:version/:path*";
-// export const modulePathParams = ":branch/:name@:version/:path*";
-/* {EARLY_PREVIEW && (
-    <Route
-      key={`/module/${scopedModulePathParams}`}
-      path={`/module/${scopedModulePathParams}`}
-      component={SelectedModule}
-    />
-  )}
-  {EARLY_PREVIEW && (
-    <Route
-      key={`/module/${modulePathParams}`}
-      path={`/module/${modulePathParams}`}
-      component={SelectedModule}
-    />
-  )}
-  {EARLY_PREVIEW && (
-    <Route
-      key={`/module/:branch`}
-      path={`/module/:branch`}
-      component={Modules}
-    />
-  )}
-  {EARLY_PREVIEW && (
-    <Redirect exact key="/module" from="/module" to="/module/main" />
-  )} */

@@ -33,7 +33,7 @@ import { getKeysFromKeybinding } from "client/services/Command/util";
 import { useCommandService, cmdID } from "client/services/Command";
 import TenantPicker, {
   openTenantPickerCommandId
-} from "../tenant/TenantPicker";
+} from "client/views/tenants/TenantPicker";
 import { useSelectedTenant } from "state/tenant/hooks/useTenant";
 
 export const appBarHeight = 64;
