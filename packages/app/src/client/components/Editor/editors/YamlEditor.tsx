@@ -87,7 +87,10 @@ const YamlEditor = ({
   else return null; // TODO: show loading component here?
 };
 
-function AutoSizingEditor(props: { model: editor.ITextModel }) {
+function AutoSizingEditor(props: {
+  model: editor.ITextModel;
+  configViewer?: boolean;
+}) {
   return (
     <AutoSizer>
       {({ height, width }: Size) => {
@@ -111,20 +114,23 @@ function BaseEditor({
   const editorRef = useRef<null | editor.ICodeEditor>(null);
   const currentModelRef = useRef<editor.IModel>(model);
 
-  const editorContainer = useCallback(async node => {
-    if (node) {
-      editorRef.current = editor.create(
-        node,
-        getTextEditorOptions({
-          readOnly: configViewer === true ? true : false,
-          model: currentModelRef.current
-        })
-      );
-    } else {
-      editorRef.current?.dispose();
-      editorRef.current = null;
-    }
-  }, []);
+  const editorContainer = useCallback(
+    async node => {
+      if (node) {
+        editorRef.current = editor.create(
+          node,
+          getTextEditorOptions({
+            readOnly: configViewer === true,
+            model: currentModelRef.current
+          })
+        );
+      } else {
+        editorRef.current?.dispose();
+        editorRef.current = null;
+      }
+    },
+    [configViewer]
+  );
 
   // Update editor layout when width/height changes
   useEffect(() => {

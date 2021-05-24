@@ -24,7 +24,7 @@ import * as commands from "./templates/commands";
 import * as grafana from "client/utils/grafana";
 
 import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
-import { ViewConfigDialogBtn } from "client/utils/ViewConfigDialogBtn";
+import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
 import { DeleteBtn } from "client/integrations/common/DeleteIntegrationButton";
 
 import { Box } from "client/components/Box";

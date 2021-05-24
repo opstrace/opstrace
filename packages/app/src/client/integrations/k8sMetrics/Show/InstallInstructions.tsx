@@ -27,7 +27,7 @@ import * as grafana from "client/utils/grafana";
 import graphqlClient from "state/clients/graphqlClient";
 
 import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
-import { ViewConfigDialogBtn } from "client/utils/ViewConfigDialogBtn";
+import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
 
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
