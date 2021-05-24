@@ -32,10 +32,12 @@ import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
 import {
   EnsureInfraExistsResponse,
-  ensureAWSInfraExists
+  ensureAWSInfraExists,
+  ensureGCPInfraExists
 } from "@opstrace/installer";
 
 import { State } from "./reducer";
+import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
 
 //
 // Set the controller deployment image version to the one defined in buildinfo.
@@ -77,7 +79,9 @@ export function* upgradeControllerDeployment(config: {
 
 export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
   const state: State = yield select();
-  const cm = state.kubernetes.cluster.ConfigMaps.resources.find((cm) => cm.name === CONFIGMAP_NAME);
+  const cm = state.kubernetes.cluster.ConfigMaps.resources.find(
+    cm => cm.name === CONFIGMAP_NAME
+  );
   if (cm === undefined) {
     die(`could not find Opstrace controller config map`);
   }
@@ -94,7 +98,7 @@ export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
   try {
     cfg = upgradeControllerConfigMapToLatest(cfgJSON);
   } catch (e) {
-    die(`failed to upgrade controller configuration: ${e.message}`)
+    die(`failed to upgrade controller configuration: ${e.message}`);
   }
 
   log.debug(`upgraded controller config ${JSON.stringify(cfg, null, 2)}`);
@@ -103,14 +107,26 @@ export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
 }
 
 export function* upgradeInfra(cloudProvider: string) {
-  switch(cloudProvider) {
+  switch (cloudProvider) {
     case "aws": {
       const res: EnsureInfraExistsResponse = yield call(ensureAWSInfraExists);
       log.debug(`upgraded infra results: ${JSON.stringify(res)}`);
       break;
     }
     case "gcp": {
-      die(`TBD`);
+      const gcpCredFilePath: string = process.env[
+        "GOOGLE_APPLICATION_CREDENTIALS"
+      ]!;
+      const gcpAuthOptions = getValidatedGCPAuthOptionsFromFile(
+        gcpCredFilePath
+      );
+
+      const res: EnsureInfraExistsResponse = yield call(
+        ensureGCPInfraExists,
+        gcpAuthOptions
+      );
+
+      log.debug(`upgraded infra results: ${JSON.stringify(res)}`);
       break;
     }
     default:
