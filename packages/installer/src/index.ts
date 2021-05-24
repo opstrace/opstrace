@@ -76,6 +76,7 @@ import { EnsureInfraExistsResponse } from "./types";
 // typescript barrel export: https://basarat.gitbook.io/typescript/main-1/barrel
 export { EnsureInfraExistsResponse } from "./types";
 export { ensureAWSInfraExists } from "./aws";
+export { ensureGCPInfraExists } from "./gcp";
 
 // GCP-specific cluster creation code can rely on this being set. First I tried
 // to wrap this into the non-user-given cluster config schema but then realized

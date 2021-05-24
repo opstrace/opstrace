@@ -49,6 +49,9 @@ import * as util from "./util";
 import * as ctoken from "./createTenantAuthToken";
 import { BUILD_INFO } from "@opstrace/buildinfo";
 
+// typescript barrel export: https://basarat.gitbook.io/typescript/main-1/barrel
+export { gcpValidateCredFileAndGetDetailOrError } from "./util";
+
 const DEFAULT_LOG_LEVEL_STDERR = "info";
 
 const START_TIME_JODA = ZonedDateTime.now(ZoneOffset.UTC);

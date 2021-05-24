@@ -32,10 +32,12 @@ import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
 import {
   EnsureInfraExistsResponse,
-  ensureAWSInfraExists
+  ensureAWSInfraExists,
+  ensureGCPInfraExists
 } from "@opstrace/installer";
 
 import { State } from "./reducer";
+import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
 
 //
 // Set the controller deployment image version to the one defined in buildinfo.
@@ -115,7 +117,19 @@ export function* upgradeInfra(cloudProvider: string) {
       break;
     }
     case "gcp": {
-      die(`TBD`);
+      const gcpCredFilePath: string = process.env[
+        "GOOGLE_APPLICATION_CREDENTIALS"
+      ]!;
+      const gcpAuthOptions = getValidatedGCPAuthOptionsFromFile(
+        gcpCredFilePath
+      );
+
+      const res: EnsureInfraExistsResponse = yield call(
+        ensureGCPInfraExists,
+        gcpAuthOptions
+      );
+
+      log.debug(`upgraded infra results: ${JSON.stringify(res)}`);
       break;
     }
     default:

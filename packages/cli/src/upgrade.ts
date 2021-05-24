@@ -27,6 +27,7 @@ import * as cli from "./index";
 import * as util from "./util";
 import * as schemas from "./schemas";
 import * as ucc from "./ucc";
+import { setGcpProjectID } from "@opstrace/installer";
 
 export async function upgrade(): Promise<void> {
   log.info(
@@ -67,6 +68,13 @@ export async function upgrade(): Promise<void> {
     const gcpopts = util.gcpValidateCredFileAndGetDetailOrError();
     gcpProjectID = gcpopts.projectId;
     gcpRegion = util.gcpGetClusterRegion();
+
+    log.info("GCP project ID: %s", gcpopts.projectId);
+    log.info(
+      "GCP service account email notation: %s",
+      gcpopts.credentials.client_email
+    );
+    setGcpProjectID(gcpopts.projectId);
   }
 
   let awsRegion: string | undefined;
