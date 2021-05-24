@@ -211,6 +211,7 @@ module.exports = {
                 [require.resolve("@loadable/babel-plugin")],
                 [require.resolve("babel-plugin-dynamic-import-node")],
                 [require.resolve("babel-plugin-styled-components")],
+                "@babel/plugin-proposal-nullish-coalescing-operator",
                 [
                   require.resolve("babel-plugin-named-asset-import"),
                   {
@@ -261,6 +262,7 @@ module.exports = {
               ],
               plugins: [
                 "@babel/plugin-proposal-optional-chaining",
+                "@babel/plugin-proposal-nullish-coalescing-operator",
                 [require.resolve("@loadable/babel-plugin")]
               ],
               cacheDirectory: true,
