@@ -186,7 +186,7 @@ function* createClusterCore() {
 
   if (ccfg.cloud_provider === "gcp") {
     if (!gcpAuthOptions) {
-      throw Error("could not location authentication credentials for gcp");
+      throw Error("could not locate authentication credentials for gcp");
     }
     const res: EnsureInfraExistsResponse = yield call(
       ensureGCPInfraExists,
