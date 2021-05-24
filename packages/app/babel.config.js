@@ -23,6 +23,7 @@ module.exports = {
     "@babel/plugin-transform-runtime",
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-proposal-nullish-coalescing-operator",
     "babel-plugin-styled-components"
   ]
 };
