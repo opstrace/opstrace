@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { ExporterCloudwatchForm } from "./Form";
-import { ExporterCloudwatchShow } from "./Show";
-import ExporterCloudwatchStatus from "./Status";
-import ExporterCloudwatchLogo from "./Logo.png";
+import { ExporterCloudWatchForm } from "./Form";
+import { ExporterCloudWatchShow } from "./Show";
+import ExporterCloudWatchStatus from "./Status";
+import ExporterCloudWatchLogo from "./Logo.png";
 
 import { IntegrationDef } from "../types";
 
-export const exporterCloudwatchIntegration: IntegrationDef = {
-  kind: "exporter-cloudwatch",
+export const exporterCloudWatchIntegration: IntegrationDef = {
+  kind: "exporter-cloud-watch",
   category: "exporter",
-  label: "Amazon Cloudwatch",
-  desc: "Amazon Cloudwatch Exporter description goes here",
-  Form: ExporterCloudwatchForm,
-  Show: ExporterCloudwatchShow,
-  Status: ExporterCloudwatchStatus,
+  label: "Amazon CloudWatch",
+  desc: "Amazon CloudWatch Exporter description goes here",
+  Form: ExporterCloudWatchForm,
+  Show: ExporterCloudWatchShow,
+  Status: ExporterCloudWatchStatus,
   enabled: true,
-  Logo: ExporterCloudwatchLogo
+  Logo: ExporterCloudWatchLogo
 };

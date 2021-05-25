@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import React from "react";
+import { ExporterStackdriverForm } from "./Form";
+import { ExporterStackdriverShow } from "./Show";
+import ExporterStackdriverStatus from "./Status";
+import ExporterStackdriverLogo from "./Logo.jpg";
 
 import { IntegrationDef } from "client/integrations/types";
 
 export const exporterStackDriverIntegration: IntegrationDef = {
-  kind: "exporter-stack-driver",
+  kind: "exporter-stackdriver",
   category: "exporter",
-  label: "Stack Driver",
-  desc: () => <i>Coming soon</i>,
-  Form: () => <div />,
-  Show: () => <div />,
-  Status: () => <div />,
-  enabled: false
+  label: "Google Stackdriver",
+  desc: "Google Starckdriver Exporter description goes here",
+  Form: ExporterStackdriverForm,
+  Show: ExporterStackdriverShow,
+  Status: ExporterStackdriverStatus,
+  enabled: true,
+  Logo: ExporterStackdriverLogo
 };
