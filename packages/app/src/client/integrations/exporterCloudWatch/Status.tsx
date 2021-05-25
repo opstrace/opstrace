@@ -55,7 +55,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function ExporterCloudwatchStatus({
+export default function ExporterCloudWatchStatus({
   integration,
   tenant
 }: Props) {

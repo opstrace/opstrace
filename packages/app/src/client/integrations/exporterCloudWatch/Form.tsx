@@ -19,7 +19,7 @@ import { useForm, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { exporterCloudwatchIntegration as integrationDef } from "./index";
+import { exporterCloudWatchIntegration as integrationDef } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
 
@@ -53,7 +53,7 @@ type Props = {
   handleCreate: Function;
 };
 
-export const ExporterCloudwatchForm = ({ handleCreate }: Props) => {
+export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -136,7 +136,7 @@ export const ExporterCloudwatchForm = ({ handleCreate }: Props) => {
                   label="Config"
                   helperText={
                     <span>
-                      Cloudwatch exporter{" "}
+                      Amazon CloudWatch exporter{" "}
                       <ExternalLink
                         target="_blank"
                         href="https://github.com/prometheus/cloudwatch_exporter#user-content-configuration"
