@@ -1,0 +1,8 @@
+tenants:
+  - default
+env_label: opstrace-ci
+node_count: 5
+log_retention_days: 30
+metric_retention_days: 60
+aws:
+  instance_type: r5.xlarge
