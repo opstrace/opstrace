@@ -567,7 +567,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "ingesters: TSDB head chunk creation rate  ($timewindow mean, tenant '$tenant')",
+      "title": "ingesters: TSDB head chunk creation rate  ($timewindow mean, tenant: '$tenant')",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -770,7 +770,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "compactors: total number of blocks in storage bucket (tenant: '$tenant')",
+      "title": "compactor: total number of blocks in storage bucket (tenant: '$tenant')",
       "tooltip": {
         "shared": true,
         "sort": 0,
