@@ -17,11 +17,11 @@
 import express from "express";
 
 import { GeneralServerError } from "server/errors";
-import createAuthHandler from "./authentication";
-import createGraphqlHandler from "./graphql";
-import pubUiCfgHandler from "./uicfg";
 import authRequired from "server/middleware/auth";
-import setCortexRuntimeConfigHandler from "./cortexRuntimeConfig";
+
+import createAuthHandler from "./authentication";
+import pubUiCfgHandler from "./uicfg";
+import createGraphqlHandler from "./graphql";
 import createCortexHandler from "./cortex";
 
 function createAPIRoutes(): express.Router {
@@ -31,15 +31,8 @@ function createAPIRoutes(): express.Router {
 
   // Authentication required
   api.use("/graphql", authRequired, createGraphqlHandler());
+  api.use("/cortex", authRequired, createCortexHandler());
 
-  // being able to access this implies having access to cortex config for
-  // all tenants, i.e. this is a privileged / superuser action.
-  api.post(
-    "/config/cortex/runtime",
-    authRequired,
-    setCortexRuntimeConfigHandler
-  );
-  api.use("/cortex", createCortexHandler());
   api.all("*", function (req, res, next) {
     next(new GeneralServerError(404, "api route not found"));
   });

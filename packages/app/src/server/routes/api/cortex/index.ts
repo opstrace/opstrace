@@ -18,6 +18,7 @@ import express from "express";
 
 import { log } from "@opstrace/utils/lib/log";
 import { onProxyReq } from "server/utils";
+import setCortexRuntimeConfigHandler from "./cortexRuntimeConfig";
 
 export const cortexProxy = httpProxy.createProxyServer({ ignorePath: true });
 
@@ -46,6 +47,7 @@ const proxyTo = (target: string) => (
 
 export default function createCortexHandler(): express.Router {
   const cortex = express.Router();
+
   // https://cortexmetrics.io/docs/api/#ruler
 
   cortex.use(
@@ -95,7 +97,12 @@ export default function createCortexHandler(): express.Router {
   // });
 
   // only available if -runtime-config.file specified when running cortex components https://cortexmetrics.io/docs/api/#runtime-configuration
-  cortex.use("/runtime_config", (req, res) => {
+  cortex.use("/runtime_config", (req, res) => {});
+  // Being able to access this implies having access to cortex config for
+  // all tenants, i.e. this is a privileged / superuser action.
+  cortex.post("/runtime_config", setCortexRuntimeConfigHandler);
+
+  cortex.get("/runtime_config", (req, res) => {
     proxyTo(`http://ruler.cortex.svc.cluster.local/runtime_config`, req, res);
   });
 
