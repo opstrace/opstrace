@@ -485,12 +485,12 @@
       "yaxes": [
         {
           "$$hashKey": "object:123",
-          "decimals": 3,
+          "decimals": 2,
           "format": "short",
           "label": "duration [s]",
           "logBase": 10,
           "max": "300",
-          "min": "0.0001",
+          "min": "0.001",
           "show": true
         },
         {
@@ -589,7 +589,7 @@
           "label": "",
           "logBase": 10,
           "max": null,
-          "min": "0.1",
+          "min": "0.005",
           "show": true
         },
         {
