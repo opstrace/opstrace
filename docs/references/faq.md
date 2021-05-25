@@ -8,7 +8,7 @@ description: The answers to some of the most common questions we hear.
 
 If you're already using Prometheus, it's very easy to get started with Opstrace.
 As shown in our [docs](../guides/user/sending-metrics-with-prometheus.md#remote_write-configuration-block-the-basics), all you need to do is add a couple of lines to your Prometheus configuration and your data will also be sent securely to the Opstrace cluster.
-One great advantage is that you may be able to reduce the footprint of your Prometheus instance, as all long-term storage is now safely done by a [Cortex](https://github.com/cortexproject/cortex/) instance in your S3 buckets.
+One great advantage is that you may be able to reduce the footprint of your Prometheus instance, as all long-term storage is now safely done by a [Cortex](https://github.com/cortexproject/cortex) instance in your S3 buckets.
 
 ## Can I run this on my own Kubernetes cluster?
 

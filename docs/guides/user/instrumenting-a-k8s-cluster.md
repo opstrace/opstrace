@@ -1,6 +1,6 @@
 # Sending logs and metrics from a Kubernetes cluster
 
-This guide will show how you can monitor a [Kubernetes](https://kubernetes.io/) (k8s) cluster using your Opstrace cluster.
+This guide will show how you can monitor a [Kubernetes](https://kubernetes.io) (k8s) cluster using your Opstrace cluster.
 
 Specifically, the goal is to
 

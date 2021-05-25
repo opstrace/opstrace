@@ -70,5 +70,5 @@ This is required for example when using `letsencrypt-staging` as `cert_issuer`.
 The following resources provide further assistance in understanding and configuring Prometheus' `remote_write` protocol:
 
 * [Prometheus docs: remote_write reference](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write)
-* [Prometheus docs: remote_write best practices](https://prometheus.io/docs/practices/remote_write/)
+* [Prometheus docs: remote_write best practices](https://prometheus.io/docs/practices/remote_write)
 * [Prometheus docs: remote storage integrations](https://prometheus.io/docs/prometheus/latest/storage/#remote-storage-integrations)
