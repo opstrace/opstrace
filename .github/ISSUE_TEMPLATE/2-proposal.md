@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-:stop: Your issue may already be reported!  Please search on the [issue tracker](../) before creating one.
+:stop_sign: Your issue may already be reported!  Please search the open issues before creating  a new one.
 
 ## Current Behavior / Proposed Behavior
 <!--- Explain the difference in system behavior, ideally from the user's point of view -->
