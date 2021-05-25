@@ -163,15 +163,16 @@ function* triggerControllerDeploymentUpgrade() {
 
   yield call(upgradeControllerConfigMap, kubeConfig);
 
-  yield call(upgradeControllerDeployment, {
+  const rolloutStarted: boolean = yield call(upgradeControllerDeployment, {
     opstraceClusterName: upgradeConfig.clusterName,
     kubeConfig: kubeConfig
   });
 
-  yield call(waitForControllerDeployment);
-
-  log.info('wait for upgrade to complete ("wait for deployments/..." phase)');
-  yield call(upgradeProgressReporter);
+  if (rolloutStarted) {
+    yield call(waitForControllerDeployment);
+    log.info('wait for upgrade to complete ("wait for deployments/..." phase)');
+    yield call(upgradeProgressReporter);
+  }
 
   // Cancel the forked informers so we can exit
   yield cancel(informers);

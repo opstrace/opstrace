@@ -39,12 +39,13 @@ import { State } from "./reducer";
 
 //
 // Set the controller deployment image version to the one defined in buildinfo.
+// Returns boolean to indicate controller deployment rollout initiated or not.
 //
 ///eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* upgradeControllerDeployment(config: {
   opstraceClusterName: string;
   kubeConfig: KubeConfig;
-}) {
+}): Generator<any, boolean, any> {
   // Exit if controller deployment does not exist.
   const state: State = yield select();
   const { Deployments } = state.kubernetes.cluster;
@@ -60,7 +61,7 @@ export function* upgradeControllerDeployment(config: {
     log.info(
       `controller image is already at desired version: ${CONTROLLER_IMAGE_DEFAULT}`
     );
-    return;
+    return false;
   }
 
   log.info(
@@ -73,11 +74,15 @@ export function* upgradeControllerDeployment(config: {
     kubeConfig: config.kubeConfig,
     deploymentStrategy: ControllerResourcesDeploymentStrategy.Update
   });
+
+  return true;
 }
 
 export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
   const state: State = yield select();
-  const cm = state.kubernetes.cluster.ConfigMaps.resources.find((cm) => cm.name === CONFIGMAP_NAME);
+  const cm = state.kubernetes.cluster.ConfigMaps.resources.find(
+    cm => cm.name === CONFIGMAP_NAME
+  );
   if (cm === undefined) {
     die(`could not find Opstrace controller config map`);
   }
@@ -94,7 +99,7 @@ export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
   try {
     cfg = upgradeControllerConfigMapToLatest(cfgJSON);
   } catch (e) {
-    die(`failed to upgrade controller configuration: ${e.message}`)
+    die(`failed to upgrade controller configuration: ${e.message}`);
   }
 
   log.debug(`upgraded controller config ${JSON.stringify(cfg, null, 2)}`);
@@ -103,7 +108,7 @@ export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
 }
 
 export function* upgradeInfra(cloudProvider: string) {
-  switch(cloudProvider) {
+  switch (cloudProvider) {
     case "aws": {
       const res: EnsureInfraExistsResponse = yield call(ensureAWSInfraExists);
       log.debug(`upgraded infra results: ${JSON.stringify(res)}`);
