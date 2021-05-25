@@ -54,9 +54,12 @@ export const ViewConfigDialogBtn = ({
 
   const [width, height] = useMemo(() => {
     const maxWidth = 1000;
-
-    const width = size.width > maxWidth ? maxWidth : size.width;
-    const height = size.height;
+    // Height and width here are for the contents of the Dialog. The Dialog
+    // itself has some padding and margins. This removes and double scrollbars
+    const dialogMargins = 32 * 2 + 25 * 2 + 30;
+    const width =
+      (size.width > maxWidth ? maxWidth : size.width) - dialogMargins;
+    const height = size.height - dialogMargins - 100; // Subtract 100px for the header and footer
 
     return [width, height];
   }, [size.width, size.height]);
