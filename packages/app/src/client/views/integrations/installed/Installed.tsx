@@ -61,7 +61,7 @@ export const InstalledIntegrations = () => {
           </TableHead>
           <TableBody>
             {integrations.map(i9n => {
-              const def = integrationDefRecords[i9n.kind];
+              const i9nDef = integrationDefRecords[i9n.kind];
               return (
                 <TableRow
                   hover={true}
@@ -76,9 +76,9 @@ export const InstalledIntegrations = () => {
                   <TableCell component="th" scope="row">
                     {i9n.name}
                   </TableCell>
-                  <TableCell>{i9n.kind}</TableCell>
+                  <TableCell>{i9nDef.label}</TableCell>
                   <TableCell>
-                    <def.Status integration={i9n} tenant={tenant} />
+                    <i9nDef.Status integration={i9n} tenant={tenant} />
                   </TableCell>
                   <TableCell>
                     {format(parseISO(i9n.created_at), "Pppp")}
