@@ -253,9 +253,16 @@ func (c *integrationAPI) validateIntegration(existingKinds map[string]string, in
 		return false, err
 	}
 
-	// Check that the integration value is valid JSON
-	if err := validateCredentialValue(integration.Name, integration.Kind, integration.DataJSON); err != nil {
-		return false, err
+	var dataJSON map[string]interface{}
+	if err := json.Unmarshal([]byte(integration.DataJSON), dataJSON); err != nil {
+		return false, fmt.Errorf("decoding %s '%s' JSON value failed: %s", integration.Kind, integration.Name, err.Error())
+	}
+
+	if dataJSON["credential"] != nil {
+		// Check that the integration content is valid JSON
+		if err := validateIntegrationCredential(integration.Name, integration.Kind, dataJSON["credential"]); err != nil {
+			return false, err
+		}
 	}
 
 	// Check that the integration kind is not being changed from an existing integration of the same name
