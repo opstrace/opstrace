@@ -691,6 +691,13 @@ deploy-testremote-teardown:
 testupgrade-%:
 	./ci/test-upgrade/$*.sh
 
+#
+# Target that runs a script in the ci/cd/ directory. Check
+# .buildkite/cd-pipeline.yml to see how it can be used.
+#
+.PHONY: cd-%
+cd-%:
+	./ci/cd/$*.sh
 
 #
 # Run all the unit tests.

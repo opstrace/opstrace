@@ -1,0 +1,9 @@
+steps:
+  - label: "continuous deployment test (AWS)"
+    key: "cdtest-upgrade-aws"
+    env:
+      OPSTRACE_CLUSTER_NAME: "cdtest"
+      OPSTRACE_CLOUD_PROVIDER: "aws"
+      AWS_CLI_REGION: "us-west-2"
+    command:
+      - ci/cd/run.sh
