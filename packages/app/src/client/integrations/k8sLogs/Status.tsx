@@ -55,7 +55,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function IntegrationStatus({ integration, tenant }: Props) {
+export default function K8sLogsStatus({ integration, tenant }: Props) {
   const [status, setStatus] = useState("pending");
   const [queryTime, setQueryTime] = useState(new Date());
   const classes = useStyles();

@@ -21,14 +21,9 @@ import { format, parseISO } from "date-fns";
 import { installedIntegrationsPath } from "client/integrations/paths";
 import { grafanaUrl } from "client/utils/grafana";
 
-import { prometheusYaml } from "./templates/config";
-
 import IntegrationStatus from "client/integrations/k8sLogs/Status";
 
 import { CondRender } from "client/utils/rendering";
-
-import { InstallInstructions } from "./InstallInstructions";
-import { UninstallInstructions } from "./UninstallInstructions";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
@@ -37,12 +32,11 @@ import { Button } from "client/components/Button";
 
 import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
-
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
 import { integrationDefRecords } from "client/integrations";
 
-export const K8sMetricsShow = () => {
+export const ExporterCloudwatchShow = () => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
@@ -55,18 +49,6 @@ export const K8sMetricsShow = () => {
       latestMetadata?.folder_path
     ];
   }, [integration?.grafana_metadata]);
-
-  const config = useMemo(() => {
-    if (integration?.id) {
-      return prometheusYaml({
-        clusterHost: window.location.host,
-        tenantName: tenant.name,
-        integrationId: integration.id,
-        deployNamespace: integration.data.deployNamespace
-      });
-    }
-    return "";
-  }, [tenant.name, integration?.id, integration?.data.deployNamespace]);
 
   if (!integration) {
     // TODO: add loading or NotFound here
@@ -136,18 +118,6 @@ export const K8sMetricsShow = () => {
           </CardContent>
         </Card>
       </Box>
-      <InstallInstructions
-        integration={integration}
-        tenant={tenant}
-        isDashboardInstalled={isDashboardInstalled}
-        config={config}
-      />
-      <UninstallInstructions
-        integration={integration}
-        tenant={tenant}
-        isDashboardInstalled={isDashboardInstalled}
-        config={config}
-      />
     </>
   );
 };

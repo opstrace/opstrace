@@ -27,6 +27,7 @@ export type Integration = Pick<
   | "created_at"
   | "updated_at"
 >;
+
 export type Integrations = Integration[];
 
 export type IntegrationGrafanaMetadata = {
