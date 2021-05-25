@@ -24,8 +24,8 @@ import { IntegrationDef } from "../types";
 export const exporterCloudwatchIntegration: IntegrationDef = {
   kind: "exporter-cloudwatch",
   category: "exporter",
-  label: "Cloudwatch",
-  desc: "Cloudwatch Exporter description goes here",
+  label: "Amazon Cloudwatch",
+  desc: "Amazon Cloudwatch Exporter description goes here",
   Form: ExporterCloudwatchForm,
   Show: ExporterCloudwatchShow,
   Status: ExporterCloudwatchStatus,
