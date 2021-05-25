@@ -18,10 +18,10 @@ import React from "react";
 
 import { IntegrationDef } from "../types";
 
-export const cloudwatchIntegration: IntegrationDef = {
-  kind: "cloudwatch",
+export const exporterBlackBoxIntegration: IntegrationDef = {
+  kind: "exporter-blackbox",
   category: "exporter",
-  label: "Cloudwatch",
+  label: "Black Box",
   desc: () => <i>Coming soon</i>,
   Form: () => <div />,
   Show: () => <div />,

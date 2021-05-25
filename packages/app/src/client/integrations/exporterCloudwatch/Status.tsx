@@ -24,7 +24,7 @@ import Warning from "@material-ui/icons/Warning";
 import green from "@material-ui/core/colors/green";
 import orange from "@material-ui/core/colors/orange";
 
-import { usePrometheus } from "client/hooks/useGrafana";
+import { useLoki } from "client/hooks/useGrafana";
 
 import {
   Integration,
@@ -55,7 +55,10 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function K8sMetricsStatus({ integration, tenant }: Props) {
+export default function ExporterCloudwatchStatus({
+  integration,
+  tenant
+}: Props) {
   const [status, setStatus] = useState("pending");
   const [queryTime, setQueryTime] = useState(new Date());
   const classes = useStyles();
@@ -74,15 +77,17 @@ export default function K8sMetricsStatus({ integration, tenant }: Props) {
   });
 
   const statusCheckUri = useMemo(() => {
-    const promQl = `process_cpu_seconds_total{integration_id="${integration.id}"}`;
+    const logQl = `{integration_id="${integration.id}"}`;
     const start = subHours(queryTime, 1);
 
     return encodeURI(
-      `query_range?query=${promQl}&start=${start.toISOString()}&end=${queryTime.toISOString()}&step=300`
+      `query_range?query=${logQl}&start=${1000 * 1000 * start.getTime()}&end=${
+        1000 * 1000 * queryTime.getTime()
+      }&limit=1&step=300`
     );
   }, [integration.id, queryTime]);
 
-  const { data } = usePrometheus(statusCheckUri, tenant.name);
+  const { data } = useLoki(statusCheckUri, tenant.name);
 
   useEffect(() => {
     if (data !== undefined) {

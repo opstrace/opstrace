@@ -18,8 +18,8 @@ import React from "react";
 
 import { IntegrationDef } from "client/integrations/types";
 
-export const stackDriverIntegration: IntegrationDef = {
-  kind: "stack-driver",
+export const exporterStackDriverIntegration: IntegrationDef = {
+  kind: "exporter-stack-driver",
   category: "exporter",
   label: "Stack Driver",
   desc: () => <i>Coming soon</i>,

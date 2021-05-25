@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import React from "react";
+import { ExporterCloudwatchForm } from "./Form";
+import { ExporterCloudwatchShow } from "./Show";
+import ExporterCloudwatchStatus from "./Status";
+import ExporterCloudwatchLogo from "./Logo.png";
 
 import { IntegrationDef } from "../types";
 
-export const blackBoxIntegration: IntegrationDef = {
-  kind: "blackbox",
+export const exporterCloudwatchIntegration: IntegrationDef = {
+  kind: "exporter-cloudwatch",
   category: "exporter",
-  label: "Black Box",
-  desc: () => <i>Coming soon</i>,
-  Form: () => <div />,
-  Show: () => <div />,
-  Status: () => <div />,
-  enabled: false
+  label: "Cloudwatch",
+  desc: "Cloudwatch Exporter description goes here",
+  Form: ExporterCloudwatchForm,
+  Show: ExporterCloudwatchShow,
+  Status: ExporterCloudwatchStatus,
+  enabled: true,
+  Logo: ExporterCloudwatchLogo
 };
