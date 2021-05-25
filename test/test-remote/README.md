@@ -1,6 +1,6 @@
 # test-remote
 
-Opstrace cluster test suite. To be run against a remote opstrace cluster.
+Opstrace cluster test suite. To be run against a remote Opstrace cluster.
 
 Reference instructions for how to run the test runner against a remote cluster can be found in our [main README](https://github.com/opstrace/opstrace/blob/main/Readme.md).
 
@@ -9,9 +9,9 @@ This README is relevant for developing tests.
 Concept:
 
 * `test-remote` is the name of this test runner.
-* `test-remote` requires `kubectl` to be configured against a specific remote opstrace cluster:
-  - it uses `kubectl port-forward ...` to connect to individual [Kubernetes network services](https://kubernetes.io/docs/concepts/services-networking/service/) in the remote cluster to communicate with them.
-  - it deploys [test harnesses](https://github.com/grafana/cortex-tools/blob/main/docs/e2ealerting.md) into the cluster to interact with cluster alerts
+* `test-remote` requires `kubectl` to be configured against a specific remote Opstrace cluster:
+  * it uses `kubectl port-forward ...` to connect to individual [Kubernetes network services](https://kubernetes.io/docs/concepts/services-networking/service) in the remote cluster to communicate with them.
+  * it deploys [test harnesses](https://github.com/grafana/cortex-tools/blob/main/docs/e2ealerting.md) into the cluster to interact with cluster alerts
 * `test-remote` is executed by the NodeJS runtime and -- for separation of concerns -- is set up as an isolated NPM package; defined by the directory that this README resides in.
 
 ## Architecture overview
@@ -21,7 +21,7 @@ Concept:
 ## `make test-remote`
 
 One way to run `test-remote` is from within a Docker container.
-That is what `make test-remote` does (when invoked in the root directory of the opstrace repository).
+That is what `make test-remote` does (when invoked in the root directory of the Opstrace repository).
 This method is also used by the buildkite CI:
 running `make test-remote` locally is equivalent to what CI does (except for minor platform differences).
 
@@ -67,7 +67,7 @@ Also see [Mocha command line interface docs](https://mochajs.org/#command-line-u
 ## Notes
 
 * Each test must be written so that it can be run arbitrarily often against the same cluster and still succeed.
-  That usually means that metrics or logs injected into the opstrace cluster must have unique properties.
+  That usually means that metrics or logs injected into the Opstrace cluster must have unique properties.
 
 * Mocha test (suite) teardown is as of now not always reliably executed.
   A SIGINT-aborted test runner might leave resources behind such as running child processes.
@@ -76,5 +76,5 @@ Also see [Mocha command line interface docs](https://mochajs.org/#command-line-u
 
 Tooling:
 
-* The test runner is built using the [MochaJS](https://mochajs.org/) framework.
+* The test runner is built using the [MochaJS](https://mochajs.org) framework.
 * For HTTP interaction the [got](https://github.com/sindresorhus/got) HTTP client is used.
