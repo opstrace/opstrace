@@ -31,18 +31,15 @@ import (
 type HasuraHandler struct {
 	alertmanagerURL *url.URL
 	expectedSecret  string
-	api             *integrationAPI
 }
 
 func NewHasuraHandler(
 	alertmanagerURL *url.URL,
 	expectedSecret string,
-	api *integrationAPI,
 ) *HasuraHandler {
 	return &HasuraHandler{
 		alertmanagerURL,
 		expectedSecret,
-		api,
 	}
 }
 

@@ -59,25 +59,12 @@ export function OpstraceAPIResources(
   ];
   const commandEnv: V1EnvVar[] = [
     {
-      name: "GRAPHQL_ENDPOINT",
-      value: `http://graphql.${namespace}.svc.cluster.local:8080/v1/graphql`
-    },
-    {
       name: "CORTEX_RULER_ENDPOINT",
       value: "http://ruler.cortex.svc.cluster.local"
     },
     {
       name: "CORTEX_ALERTMANAGER_ENDPOINT",
       value: "http://alertmanager.cortex.svc.cluster.local"
-    },
-    {
-      name: "HASURA_GRAPHQL_ADMIN_SECRET",
-      valueFrom: {
-        secretKeyRef: {
-          name: "hasura-admin-secret",
-          key: "HASURA_ADMIN_SECRET"
-        }
-      }
     },
     {
       name: "HASURA_ACTION_SECRET",
