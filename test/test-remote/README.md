@@ -2,7 +2,7 @@
 
 Opstrace cluster test suite. To be run against a remote Opstrace cluster.
 
-Reference instructions for how to run the test runner against a remote cluster can be found in our [main README](https://github.com/opstrace/opstrace/blob/main/Readme.md).
+Reference instructions for how to run the test runner against a remote cluster can be found in our [main README](https://github.com/opstrace/opstrace/blob/main/README.md).
 
 This README is relevant for developing tests.
 
