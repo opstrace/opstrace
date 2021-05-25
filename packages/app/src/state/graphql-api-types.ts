@@ -114,6 +114,441 @@ export type String_Comparison_Exp = {
   _similar?: Maybe<Scalars["String"]>;
 };
 
+/** columns and relationships of "credential" */
+export type Credential = {
+  created_at: Scalars["timestamptz"];
+  /** An array relationship */
+  exporters: Array<Exporter>;
+  /** An aggregated array relationship */
+  exporters_aggregate: Exporter_Aggregate;
+  name: Scalars["String"];
+  tenant: Scalars["String"];
+  /** An object relationship */
+  tenantByTenant: Tenant;
+  type: Scalars["String"];
+  updated_at: Scalars["timestamptz"];
+  value: Scalars["json"];
+};
+
+/** columns and relationships of "credential" */
+export type CredentialExportersArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** columns and relationships of "credential" */
+export type CredentialExporters_AggregateArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** columns and relationships of "credential" */
+export type CredentialValueArgs = {
+  path?: Maybe<Scalars["String"]>;
+};
+
+/** aggregated selection of "credential" */
+export type Credential_Aggregate = {
+  aggregate?: Maybe<Credential_Aggregate_Fields>;
+  nodes: Array<Credential>;
+};
+
+/** aggregate fields of "credential" */
+export type Credential_Aggregate_Fields = {
+  count?: Maybe<Scalars["Int"]>;
+  max?: Maybe<Credential_Max_Fields>;
+  min?: Maybe<Credential_Min_Fields>;
+};
+
+/** aggregate fields of "credential" */
+export type Credential_Aggregate_FieldsCountArgs = {
+  columns?: Maybe<Array<Credential_Select_Column>>;
+  distinct?: Maybe<Scalars["Boolean"]>;
+};
+
+/** order by aggregate values of table "credential" */
+export type Credential_Aggregate_Order_By = {
+  count?: Maybe<Order_By>;
+  max?: Maybe<Credential_Max_Order_By>;
+  min?: Maybe<Credential_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "credential" */
+export type Credential_Arr_Rel_Insert_Input = {
+  data: Array<Credential_Insert_Input>;
+  on_conflict?: Maybe<Credential_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "credential". All fields are combined with a logical 'AND'. */
+export type Credential_Bool_Exp = {
+  _and?: Maybe<Array<Maybe<Credential_Bool_Exp>>>;
+  _not?: Maybe<Credential_Bool_Exp>;
+  _or?: Maybe<Array<Maybe<Credential_Bool_Exp>>>;
+  created_at?: Maybe<Timestamptz_Comparison_Exp>;
+  exporters?: Maybe<Exporter_Bool_Exp>;
+  name?: Maybe<String_Comparison_Exp>;
+  tenant?: Maybe<String_Comparison_Exp>;
+  tenantByTenant?: Maybe<Tenant_Bool_Exp>;
+  type?: Maybe<String_Comparison_Exp>;
+  updated_at?: Maybe<Timestamptz_Comparison_Exp>;
+  value?: Maybe<Json_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "credential" */
+export enum Credential_Constraint {
+  /** unique or primary key constraint */
+  CredentialPkey = "credential_pkey"
+}
+
+/** input type for inserting data into table "credential" */
+export type Credential_Insert_Input = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  tenantByTenant?: Maybe<Tenant_Obj_Rel_Insert_Input>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+  value?: Maybe<Scalars["json"]>;
+};
+
+/** aggregate max on columns */
+export type Credential_Max_Fields = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** order by max() on columns of table "credential" */
+export type Credential_Max_Order_By = {
+  created_at?: Maybe<Order_By>;
+  name?: Maybe<Order_By>;
+  tenant?: Maybe<Order_By>;
+  type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Credential_Min_Fields = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** order by min() on columns of table "credential" */
+export type Credential_Min_Order_By = {
+  created_at?: Maybe<Order_By>;
+  name?: Maybe<Order_By>;
+  tenant?: Maybe<Order_By>;
+  type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** response of any mutation on the table "credential" */
+export type Credential_Mutation_Response = {
+  /** number of affected rows by the mutation */
+  affected_rows: Scalars["Int"];
+  /** data of the affected rows by the mutation */
+  returning: Array<Credential>;
+};
+
+/** input type for inserting object relation for remote table "credential" */
+export type Credential_Obj_Rel_Insert_Input = {
+  data: Credential_Insert_Input;
+  on_conflict?: Maybe<Credential_On_Conflict>;
+};
+
+/** on conflict condition type for table "credential" */
+export type Credential_On_Conflict = {
+  constraint: Credential_Constraint;
+  update_columns: Array<Credential_Update_Column>;
+  where?: Maybe<Credential_Bool_Exp>;
+};
+
+/** ordering options when selecting data from "credential" */
+export type Credential_Order_By = {
+  created_at?: Maybe<Order_By>;
+  exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
+  name?: Maybe<Order_By>;
+  tenant?: Maybe<Order_By>;
+  tenantByTenant?: Maybe<Tenant_Order_By>;
+  type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+  value?: Maybe<Order_By>;
+};
+
+/** primary key columns input for table: "credential" */
+export type Credential_Pk_Columns_Input = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
+};
+
+/** select columns of table "credential" */
+export enum Credential_Select_Column {
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Name = "name",
+  /** column name */
+  Tenant = "tenant",
+  /** column name */
+  Type = "type",
+  /** column name */
+  UpdatedAt = "updated_at",
+  /** column name */
+  Value = "value"
+}
+
+/** input type for updating data in table "credential" */
+export type Credential_Set_Input = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+  value?: Maybe<Scalars["json"]>;
+};
+
+/** update columns of table "credential" */
+export enum Credential_Update_Column {
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Name = "name",
+  /** column name */
+  Tenant = "tenant",
+  /** column name */
+  Type = "type",
+  /** column name */
+  UpdatedAt = "updated_at",
+  /** column name */
+  Value = "value"
+}
+
+/** columns and relationships of "exporter" */
+export type Exporter = {
+  config: Scalars["json"];
+  created_at: Scalars["timestamptz"];
+  credential?: Maybe<Scalars["String"]>;
+  /** An object relationship */
+  credentialByCredentialTenant?: Maybe<Credential>;
+  name: Scalars["String"];
+  tenant: Scalars["String"];
+  /** An object relationship */
+  tenantByTenant: Tenant;
+  type: Scalars["String"];
+  updated_at: Scalars["timestamptz"];
+};
+
+/** columns and relationships of "exporter" */
+export type ExporterConfigArgs = {
+  path?: Maybe<Scalars["String"]>;
+};
+
+/** aggregated selection of "exporter" */
+export type Exporter_Aggregate = {
+  aggregate?: Maybe<Exporter_Aggregate_Fields>;
+  nodes: Array<Exporter>;
+};
+
+/** aggregate fields of "exporter" */
+export type Exporter_Aggregate_Fields = {
+  count?: Maybe<Scalars["Int"]>;
+  max?: Maybe<Exporter_Max_Fields>;
+  min?: Maybe<Exporter_Min_Fields>;
+};
+
+/** aggregate fields of "exporter" */
+export type Exporter_Aggregate_FieldsCountArgs = {
+  columns?: Maybe<Array<Exporter_Select_Column>>;
+  distinct?: Maybe<Scalars["Boolean"]>;
+};
+
+/** order by aggregate values of table "exporter" */
+export type Exporter_Aggregate_Order_By = {
+  count?: Maybe<Order_By>;
+  max?: Maybe<Exporter_Max_Order_By>;
+  min?: Maybe<Exporter_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "exporter" */
+export type Exporter_Arr_Rel_Insert_Input = {
+  data: Array<Exporter_Insert_Input>;
+  on_conflict?: Maybe<Exporter_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "exporter". All fields are combined with a logical 'AND'. */
+export type Exporter_Bool_Exp = {
+  _and?: Maybe<Array<Maybe<Exporter_Bool_Exp>>>;
+  _not?: Maybe<Exporter_Bool_Exp>;
+  _or?: Maybe<Array<Maybe<Exporter_Bool_Exp>>>;
+  config?: Maybe<Json_Comparison_Exp>;
+  created_at?: Maybe<Timestamptz_Comparison_Exp>;
+  credential?: Maybe<String_Comparison_Exp>;
+  credentialByCredentialTenant?: Maybe<Credential_Bool_Exp>;
+  name?: Maybe<String_Comparison_Exp>;
+  tenant?: Maybe<String_Comparison_Exp>;
+  tenantByTenant?: Maybe<Tenant_Bool_Exp>;
+  type?: Maybe<String_Comparison_Exp>;
+  updated_at?: Maybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "exporter" */
+export enum Exporter_Constraint {
+  /** unique or primary key constraint */
+  ExporterPkey = "exporter_pkey"
+}
+
+/** input type for inserting data into table "exporter" */
+export type Exporter_Insert_Input = {
+  config?: Maybe<Scalars["json"]>;
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  credential?: Maybe<Scalars["String"]>;
+  credentialByCredentialTenant?: Maybe<Credential_Obj_Rel_Insert_Input>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  tenantByTenant?: Maybe<Tenant_Obj_Rel_Insert_Input>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** aggregate max on columns */
+export type Exporter_Max_Fields = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  credential?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** order by max() on columns of table "exporter" */
+export type Exporter_Max_Order_By = {
+  created_at?: Maybe<Order_By>;
+  credential?: Maybe<Order_By>;
+  name?: Maybe<Order_By>;
+  tenant?: Maybe<Order_By>;
+  type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Exporter_Min_Fields = {
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  credential?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** order by min() on columns of table "exporter" */
+export type Exporter_Min_Order_By = {
+  created_at?: Maybe<Order_By>;
+  credential?: Maybe<Order_By>;
+  name?: Maybe<Order_By>;
+  tenant?: Maybe<Order_By>;
+  type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** response of any mutation on the table "exporter" */
+export type Exporter_Mutation_Response = {
+  /** number of affected rows by the mutation */
+  affected_rows: Scalars["Int"];
+  /** data of the affected rows by the mutation */
+  returning: Array<Exporter>;
+};
+
+/** input type for inserting object relation for remote table "exporter" */
+export type Exporter_Obj_Rel_Insert_Input = {
+  data: Exporter_Insert_Input;
+  on_conflict?: Maybe<Exporter_On_Conflict>;
+};
+
+/** on conflict condition type for table "exporter" */
+export type Exporter_On_Conflict = {
+  constraint: Exporter_Constraint;
+  update_columns: Array<Exporter_Update_Column>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** ordering options when selecting data from "exporter" */
+export type Exporter_Order_By = {
+  config?: Maybe<Order_By>;
+  created_at?: Maybe<Order_By>;
+  credential?: Maybe<Order_By>;
+  credentialByCredentialTenant?: Maybe<Credential_Order_By>;
+  name?: Maybe<Order_By>;
+  tenant?: Maybe<Order_By>;
+  tenantByTenant?: Maybe<Tenant_Order_By>;
+  type?: Maybe<Order_By>;
+  updated_at?: Maybe<Order_By>;
+};
+
+/** primary key columns input for table: "exporter" */
+export type Exporter_Pk_Columns_Input = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
+};
+
+/** select columns of table "exporter" */
+export enum Exporter_Select_Column {
+  /** column name */
+  Config = "config",
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Credential = "credential",
+  /** column name */
+  Name = "name",
+  /** column name */
+  Tenant = "tenant",
+  /** column name */
+  Type = "type",
+  /** column name */
+  UpdatedAt = "updated_at"
+}
+
+/** input type for updating data in table "exporter" */
+export type Exporter_Set_Input = {
+  config?: Maybe<Scalars["json"]>;
+  created_at?: Maybe<Scalars["timestamptz"]>;
+  credential?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  tenant?: Maybe<Scalars["String"]>;
+  type?: Maybe<Scalars["String"]>;
+  updated_at?: Maybe<Scalars["timestamptz"]>;
+};
+
+/** update columns of table "exporter" */
+export enum Exporter_Update_Column {
+  /** column name */
+  Config = "config",
+  /** column name */
+  CreatedAt = "created_at",
+  /** column name */
+  Credential = "credential",
+  /** column name */
+  Name = "name",
+  /** column name */
+  Tenant = "tenant",
+  /** column name */
+  Type = "type",
+  /** column name */
+  UpdatedAt = "updated_at"
+}
+
 /** columns and relationships of "integration" */
 export type Integration = {
   created_at: Scalars["timestamp"];
@@ -408,6 +843,14 @@ export type Jsonb_Comparison_Exp = {
 export type Mutation_Root = {
   /** perform the action: "deleteRuleGroup" */
   deleteRuleGroup?: Maybe<StatusResponse>;
+  /** delete data from the table: "credential" */
+  delete_credential?: Maybe<Credential_Mutation_Response>;
+  /** delete single row from the table: "credential" */
+  delete_credential_by_pk?: Maybe<Credential>;
+  /** delete data from the table: "exporter" */
+  delete_exporter?: Maybe<Exporter_Mutation_Response>;
+  /** delete single row from the table: "exporter" */
+  delete_exporter_by_pk?: Maybe<Exporter>;
   /** delete data from the table: "integration" */
   delete_integration?: Maybe<Integration_Mutation_Response>;
   /** delete single row from the table: "integration" */
@@ -424,6 +867,14 @@ export type Mutation_Root = {
   delete_user_preference?: Maybe<User_Preference_Mutation_Response>;
   /** delete single row from the table: "user_preference" */
   delete_user_preference_by_pk?: Maybe<User_Preference>;
+  /** insert data into the table: "credential" */
+  insert_credential?: Maybe<Credential_Mutation_Response>;
+  /** insert a single row into the table: "credential" */
+  insert_credential_one?: Maybe<Credential>;
+  /** insert data into the table: "exporter" */
+  insert_exporter?: Maybe<Exporter_Mutation_Response>;
+  /** insert a single row into the table: "exporter" */
+  insert_exporter_one?: Maybe<Exporter>;
   /** insert data into the table: "integration" */
   insert_integration?: Maybe<Integration_Mutation_Response>;
   /** insert a single row into the table: "integration" */
@@ -444,6 +895,14 @@ export type Mutation_Root = {
   updateAlertmanager?: Maybe<StatusResponse>;
   /** perform the action: "updateRuleGroup" */
   updateRuleGroup?: Maybe<StatusResponse>;
+  /** update data of the table: "credential" */
+  update_credential?: Maybe<Credential_Mutation_Response>;
+  /** update single row of the table: "credential" */
+  update_credential_by_pk?: Maybe<Credential>;
+  /** update data of the table: "exporter" */
+  update_exporter?: Maybe<Exporter_Mutation_Response>;
+  /** update single row of the table: "exporter" */
+  update_exporter_by_pk?: Maybe<Exporter>;
   /** update data of the table: "integration" */
   update_integration?: Maybe<Integration_Mutation_Response>;
   /** update single row of the table: "integration" */
@@ -467,6 +926,28 @@ export type Mutation_RootDeleteRuleGroupArgs = {
   namespace: Scalars["String"];
   rule_group_name: Scalars["String"];
   tenant_id: Scalars["String"];
+};
+
+/** mutation root */
+export type Mutation_RootDelete_CredentialArgs = {
+  where: Credential_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootDelete_Credential_By_PkArgs = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
+};
+
+/** mutation root */
+export type Mutation_RootDelete_ExporterArgs = {
+  where: Exporter_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootDelete_Exporter_By_PkArgs = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
 };
 
 /** mutation root */
@@ -507,6 +988,30 @@ export type Mutation_RootDelete_User_PreferenceArgs = {
 /** mutation root */
 export type Mutation_RootDelete_User_Preference_By_PkArgs = {
   id: Scalars["uuid"];
+};
+
+/** mutation root */
+export type Mutation_RootInsert_CredentialArgs = {
+  objects: Array<Credential_Insert_Input>;
+  on_conflict?: Maybe<Credential_On_Conflict>;
+};
+
+/** mutation root */
+export type Mutation_RootInsert_Credential_OneArgs = {
+  object: Credential_Insert_Input;
+  on_conflict?: Maybe<Credential_On_Conflict>;
+};
+
+/** mutation root */
+export type Mutation_RootInsert_ExporterArgs = {
+  objects: Array<Exporter_Insert_Input>;
+  on_conflict?: Maybe<Exporter_On_Conflict>;
+};
+
+/** mutation root */
+export type Mutation_RootInsert_Exporter_OneArgs = {
+  object: Exporter_Insert_Input;
+  on_conflict?: Maybe<Exporter_On_Conflict>;
 };
 
 /** mutation root */
@@ -568,6 +1073,30 @@ export type Mutation_RootUpdateRuleGroupArgs = {
   namespace: Scalars["String"];
   rule_group: RuleGroupInput;
   tenant_id: Scalars["String"];
+};
+
+/** mutation root */
+export type Mutation_RootUpdate_CredentialArgs = {
+  _set?: Maybe<Credential_Set_Input>;
+  where: Credential_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootUpdate_Credential_By_PkArgs = {
+  _set?: Maybe<Credential_Set_Input>;
+  pk_columns: Credential_Pk_Columns_Input;
+};
+
+/** mutation root */
+export type Mutation_RootUpdate_ExporterArgs = {
+  _set?: Maybe<Exporter_Set_Input>;
+  where: Exporter_Bool_Exp;
+};
+
+/** mutation root */
+export type Mutation_RootUpdate_Exporter_By_PkArgs = {
+  _set?: Maybe<Exporter_Set_Input>;
+  pk_columns: Exporter_Pk_Columns_Input;
 };
 
 /** mutation root */
@@ -646,6 +1175,18 @@ export enum Order_By {
 
 /** query root */
 export type Query_Root = {
+  /** fetch data from the table: "credential" */
+  credential: Array<Credential>;
+  /** fetch aggregated fields from the table: "credential" */
+  credential_aggregate: Credential_Aggregate;
+  /** fetch data from the table: "credential" using primary key columns */
+  credential_by_pk?: Maybe<Credential>;
+  /** fetch data from the table: "exporter" */
+  exporter: Array<Exporter>;
+  /** fetch aggregated fields from the table: "exporter" */
+  exporter_aggregate: Exporter_Aggregate;
+  /** fetch data from the table: "exporter" using primary key columns */
+  exporter_by_pk?: Maybe<Exporter>;
   /** perform the action: "getAlertmanager" */
   getAlertmanager?: Maybe<Alertmanager>;
   /** perform the action: "getRuleGroup" */
@@ -676,8 +1217,54 @@ export type Query_Root = {
   user_preference_aggregate: User_Preference_Aggregate;
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
-  /** perform the action: "validateIntegration" */
-  validateIntegration?: Maybe<StatusResponse>;
+};
+
+/** query root */
+export type Query_RootCredentialArgs = {
+  distinct_on?: Maybe<Array<Credential_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Credential_Order_By>>;
+  where?: Maybe<Credential_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootCredential_AggregateArgs = {
+  distinct_on?: Maybe<Array<Credential_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Credential_Order_By>>;
+  where?: Maybe<Credential_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootCredential_By_PkArgs = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
+};
+
+/** query root */
+export type Query_RootExporterArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootExporter_AggregateArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** query root */
+export type Query_RootExporter_By_PkArgs = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
 };
 
 /** query root */
@@ -789,16 +1376,20 @@ export type Query_RootUser_Preference_By_PkArgs = {
   id: Scalars["uuid"];
 };
 
-/** query root */
-export type Query_RootValidateIntegrationArgs = {
-  name: Scalars["String"];
-  tenant_id: Scalars["String"];
-  type: Scalars["String"];
-  value: Scalars["json"];
-};
-
 /** subscription root */
 export type Subscription_Root = {
+  /** fetch data from the table: "credential" */
+  credential: Array<Credential>;
+  /** fetch aggregated fields from the table: "credential" */
+  credential_aggregate: Credential_Aggregate;
+  /** fetch data from the table: "credential" using primary key columns */
+  credential_by_pk?: Maybe<Credential>;
+  /** fetch data from the table: "exporter" */
+  exporter: Array<Exporter>;
+  /** fetch aggregated fields from the table: "exporter" */
+  exporter_aggregate: Exporter_Aggregate;
+  /** fetch data from the table: "exporter" using primary key columns */
+  exporter_by_pk?: Maybe<Exporter>;
   /** perform the action: "getAlertmanager" */
   getAlertmanager?: Maybe<Alertmanager>;
   /** perform the action: "getRuleGroup" */
@@ -829,8 +1420,54 @@ export type Subscription_Root = {
   user_preference_aggregate: User_Preference_Aggregate;
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
-  /** perform the action: "validateIntegration" */
-  validateIntegration?: Maybe<StatusResponse>;
+};
+
+/** subscription root */
+export type Subscription_RootCredentialArgs = {
+  distinct_on?: Maybe<Array<Credential_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Credential_Order_By>>;
+  where?: Maybe<Credential_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootCredential_AggregateArgs = {
+  distinct_on?: Maybe<Array<Credential_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Credential_Order_By>>;
+  where?: Maybe<Credential_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootCredential_By_PkArgs = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
+};
+
+/** subscription root */
+export type Subscription_RootExporterArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootExporter_AggregateArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** subscription root */
+export type Subscription_RootExporter_By_PkArgs = {
+  name: Scalars["String"];
+  tenant: Scalars["String"];
 };
 
 /** subscription root */
@@ -942,17 +1579,17 @@ export type Subscription_RootUser_Preference_By_PkArgs = {
   id: Scalars["uuid"];
 };
 
-/** subscription root */
-export type Subscription_RootValidateIntegrationArgs = {
-  name: Scalars["String"];
-  tenant_id: Scalars["String"];
-  type: Scalars["String"];
-  value: Scalars["json"];
-};
-
 /** columns and relationships of "tenant" */
 export type Tenant = {
   created_at: Scalars["timestamp"];
+  /** An array relationship */
+  credentials: Array<Credential>;
+  /** An aggregated array relationship */
+  credentials_aggregate: Credential_Aggregate;
+  /** An array relationship */
+  exporters: Array<Exporter>;
+  /** An aggregated array relationship */
+  exporters_aggregate: Exporter_Aggregate;
   id: Scalars["uuid"];
   /** An array relationship */
   integrations: Array<Integration>;
@@ -962,6 +1599,42 @@ export type Tenant = {
   name: Scalars["String"];
   type: Scalars["String"];
   updated_at: Scalars["timestamp"];
+};
+
+/** columns and relationships of "tenant" */
+export type TenantCredentialsArgs = {
+  distinct_on?: Maybe<Array<Credential_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Credential_Order_By>>;
+  where?: Maybe<Credential_Bool_Exp>;
+};
+
+/** columns and relationships of "tenant" */
+export type TenantCredentials_AggregateArgs = {
+  distinct_on?: Maybe<Array<Credential_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Credential_Order_By>>;
+  where?: Maybe<Credential_Bool_Exp>;
+};
+
+/** columns and relationships of "tenant" */
+export type TenantExportersArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
+};
+
+/** columns and relationships of "tenant" */
+export type TenantExporters_AggregateArgs = {
+  distinct_on?: Maybe<Array<Exporter_Select_Column>>;
+  limit?: Maybe<Scalars["Int"]>;
+  offset?: Maybe<Scalars["Int"]>;
+  order_by?: Maybe<Array<Exporter_Order_By>>;
+  where?: Maybe<Exporter_Bool_Exp>;
 };
 
 /** columns and relationships of "tenant" */
@@ -1020,6 +1693,8 @@ export type Tenant_Bool_Exp = {
   _not?: Maybe<Tenant_Bool_Exp>;
   _or?: Maybe<Array<Maybe<Tenant_Bool_Exp>>>;
   created_at?: Maybe<Timestamp_Comparison_Exp>;
+  credentials?: Maybe<Credential_Bool_Exp>;
+  exporters?: Maybe<Exporter_Bool_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
   integrations?: Maybe<Integration_Bool_Exp>;
   key?: Maybe<String_Comparison_Exp>;
@@ -1041,6 +1716,8 @@ export enum Tenant_Constraint {
 /** input type for inserting data into table "tenant" */
 export type Tenant_Insert_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
+  credentials?: Maybe<Credential_Arr_Rel_Insert_Input>;
+  exporters?: Maybe<Exporter_Arr_Rel_Insert_Input>;
   id?: Maybe<Scalars["uuid"]>;
   integrations?: Maybe<Integration_Arr_Rel_Insert_Input>;
   key?: Maybe<Scalars["String"]>;
@@ -1113,6 +1790,8 @@ export type Tenant_On_Conflict = {
 /** ordering options when selecting data from "tenant" */
 export type Tenant_Order_By = {
   created_at?: Maybe<Order_By>;
+  credentials_aggregate?: Maybe<Credential_Aggregate_Order_By>;
+  exporters_aggregate?: Maybe<Exporter_Aggregate_Order_By>;
   id?: Maybe<Order_By>;
   integrations_aggregate?: Maybe<Integration_Aggregate_Order_By>;
   key?: Maybe<Order_By>;
@@ -1591,26 +2270,6 @@ export type DeleteIntegrationMutation = {
   delete_integration?: Maybe<{ returning: Array<Pick<Integration, "id">> }>;
 };
 
-export type GetIntegrationQueryVariables = Exact<{
-  tenant_id: Scalars["uuid"];
-  name: Scalars["String"];
-}>;
-
-export type GetIntegrationQuery = {
-  integration: Array<
-    Pick<
-      Integration,
-      | "id"
-      | "tenant_id"
-      | "name"
-      | "kind"
-      | "data"
-      | "created_at"
-      | "updated_at"
-    >
-  >;
-};
-
 export type GetIntegrationsQueryVariables = Exact<{
   tenant_id: Scalars["uuid"];
 }>;
@@ -1651,16 +2310,6 @@ export type InsertIntegrationMutation = {
       | "updated_at"
     >
   >;
-};
-
-export type InsertIntegrationsMutationVariables = Exact<{
-  integrations: Array<Integration_Insert_Input> | Integration_Insert_Input;
-}>;
-
-export type InsertIntegrationsMutation = {
-  insert_integration?: Maybe<{
-    returning: Array<Pick<Integration, "tenant_id" | "id" | "name">>;
-  }>;
 };
 
 export type SubscribeToIntegrationListSubscriptionVariables = Exact<{
@@ -1911,21 +2560,6 @@ export const DeleteIntegrationDocument = gql`
     }
   }
 `;
-export const GetIntegrationDocument = gql`
-  query GetIntegration($tenant_id: uuid!, $name: String!) {
-    integration(
-      where: { tenant_id: { _eq: $tenant_id }, name: { _eq: $name } }
-    ) {
-      id
-      tenant_id
-      name
-      kind
-      data
-      created_at
-      updated_at
-    }
-  }
-`;
 export const GetIntegrationsDocument = gql`
   query GetIntegrations($tenant_id: uuid!) {
     integration(where: { tenant_id: { _eq: $tenant_id } }) {
@@ -1957,17 +2591,6 @@ export const InsertIntegrationDocument = gql`
       grafana_metadata
       created_at
       updated_at
-    }
-  }
-`;
-export const InsertIntegrationsDocument = gql`
-  mutation InsertIntegrations($integrations: [integration_insert_input!]!) {
-    insert_integration(objects: $integrations) {
-      returning {
-        tenant_id
-        id
-        name
-      }
     }
   }
 `;
@@ -2254,22 +2877,6 @@ export function getSdk(
         )
       );
     },
-    GetIntegration(
-      variables: GetIntegrationQueryVariables
-    ): Promise<{
-      data?: GetIntegrationQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<GetIntegrationQuery>(
-          print(GetIntegrationDocument),
-          variables
-        )
-      );
-    },
     GetIntegrations(
       variables: GetIntegrationsQueryVariables
     ): Promise<{
@@ -2298,22 +2905,6 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<InsertIntegrationMutation>(
           print(InsertIntegrationDocument),
-          variables
-        )
-      );
-    },
-    InsertIntegrations(
-      variables: InsertIntegrationsMutationVariables
-    ): Promise<{
-      data?: InsertIntegrationsMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<InsertIntegrationsMutation>(
-          print(InsertIntegrationsDocument),
           variables
         )
       );
