@@ -413,7 +413,7 @@ export function CortexResources(
         peers: `alertmanager.${namespace}.svc.cluster.local:9094`
       },
       // Disabled for now. As of March 4 2021 this isn't ready yet per cortex team.
-      sharding_enabled: false,
+      sharding_enabled: true,
       sharding_ring: {
         kvstore: {
           store: "memberlist"
