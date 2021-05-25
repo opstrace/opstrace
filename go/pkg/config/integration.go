@@ -109,18 +109,34 @@ func (c *IntegrationAccess) Insert(tenantId string, inserts []graphql.Integratio
 	return c.access.Execute(req.Request, &result)
 }
 
-// Update updates an existing integration, returns an error if an integration of the same tenant/name doesn't exist.
-/*
-func (c *IntegrationAccess) Update(tenant string, update graphql.UpdateIntegrationVariables) error {
-	// Ensure the update has the correct tenant name
-	update.Tenant = graphql.String(tenant)
-
-	req, err := graphql.NewUpdateIntegrationRequest(c.access.URL, &update)
+// UpdateData updates an existing integration's configuration data.
+// Returns an error if an integration of the same ID doesn't exist.
+func (c *IntegrationAccess) UpdateData(integrationId string, data string) error {
+	update := graphql.UpdateIntegrationDataVariables{
+		ID: graphql.UUID(integrationId),
+		Data: graphql.Jsonb(data),
+	}
+	req, err := graphql.NewUpdateIntegrationDataRequest(c.access.URL, &update)
 	if err != nil {
 		return err
 	}
 
-	var result graphql.UpdateIntegrationResponse
+	var result graphql.UpdateIntegrationDataResponse
 	return c.access.Execute(req.Request, &result)
 }
-*/
+
+// UpdateName updates an existing integration's user-facing name.
+// Returns an error if an integration of the same ID doesn't exist.
+func (c *IntegrationAccess) UpdateName(integrationId string, name string) error {
+	update := graphql.UpdateIntegrationNameVariables{
+		ID: graphql.UUID(integrationId),
+		Name: graphql.String(name),
+	}
+	req, err := graphql.NewUpdateIntegrationNameRequest(c.access.URL, &update)
+	if err != nil {
+		return err
+	}
+
+	var result graphql.UpdateIntegrationNameResponse
+	return c.access.Execute(req.Request, &result)
+}

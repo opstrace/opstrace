@@ -47,16 +47,6 @@ type Mutation {
 }
 
 
-type Query {
-  validateIntegration (
-    tenant_id: String!
-    name: String!
-    type: String!
-    value: json!
-  ): StatusResponse
-}
-
-
 
 
 enum ErrorType {

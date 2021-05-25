@@ -165,16 +165,6 @@ func (h *HasuraHandler) handler(w http.ResponseWriter, r *http.Request) {
 		path := fmt.Sprintf("/api/v1/rules/%s/%s", request.Input.Namespace, request.Input.RuleGroupName)
 		httpresp, err := h.cortexQuery(request.Input.TenantID, "DELETE", path, "")
 		response = actions.ToDeleteResponse("Rule group", httpresp, err)
-
-	case "validateIntegration":
-		var request actions.ValidateIntegrationPayload
-		err = json.Unmarshal(reqbody, &request)
-		if err != nil {
-			writeGraphQLError(w, "invalid request payload")
-			return
-		}
-
-		response = h.validateIntegration(request)
 	}
 
 	data, err := json.Marshal(response)
@@ -337,29 +327,6 @@ func toGetRuleGroupResponse(
 			RuleGroup:     &respBodyStr,
 			Online:        true,
 		}, nil
-	}
-}
-
-func (h *HasuraHandler) validateIntegration(request actions.ValidateIntegrationPayload) actions.StatusResponse {
-	existingKinds, err := h.api.listIntegrationKinds(request.Input.TenantID)
-	if err != nil {
-		return actions.ToValidateError(actions.ServiceErrorType, "listing integrations failed", err.Error())
-	}
-
-	// Combine the graphql fields into a Credential object for validation
-	credential := Integration{
-		Name:     request.Input.Name,
-		Kind:     request.Input.Kind,
-		DataJSON: request.Input.Data,
-	}
-
-	_, err = h.api.validateIntegration(existingKinds, credential)
-	if err != nil {
-		return actions.ToValidateError(actions.ValidationFailedType, "integration validation failed", err.Error())
-	}
-
-	return actions.StatusResponse{
-		Success: true,
 	}
 }
 
