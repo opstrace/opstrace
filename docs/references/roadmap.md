@@ -2,28 +2,15 @@
 
 <!-- markdownlint-disable MD036 -->
 
-Our early access version provides a foundation that solves many [real pain points](https://opstrace.com/blog/public-launch-announcement) that people have today.
-But we know there is still a lot more to do to have a _complete_ observability platform that is more than just private, secure and cost-effective.
-This high-level roadmap highlights major guideposts along our path toward that goal.
-
-**Opstrace Collaborative UI**
-
-* Today's observability tools are disjoint from the day-to-day development process.
-For example, dashboards can break easily with a deploy and sharing analyses is hard (screenshots anyone?).
-By integrating your data with code we can solve these existing problems and create new capabilities (think VScode meets Python notebooks).
-Stay tuned to our blog and/or sign up for our [newsletter](https://opstrace.com/#newsletter).
+The Opstrace Distribution provides a foundation that solves many [real pain points](https://opstrace.com/blog/introducing-the-open-source-distribution) that people have today.
+But we know there is still a lot more to do to have a _complete_ observability distribution that is more than just private, secure and cost-effective.
+This high-level roadmap highlights features along our path toward that goal.
 
 **First-class Alerts**
 
 * Similarly, alerts shouldn't be a disjoint concept.
 Often alerts are left until the end, and usualy wired up through a separate system.
 When you write code you _assert_ certain code paths work—alerts should be the same.
-
-**CloudWatch and Stackdriver Collection**
-
-* Some metrics and logs for lower-level cloud infrastructure can only be found in the provider's native APIs.
-For example, in the case of AWS, metrics for S3, SQS, and load balancers are stored in CloudWatch.
-Collecting these centrally can be done by setting up the [CloudWatch](https://github.com/prometheus/cloudwatch_exporter) or [Stackdriver](https://github.com/prometheus-community/stackdriver_exporter) Prometheus exporters, but this requires operational expertise.
 
 **Synthetic Monitoring**
 
