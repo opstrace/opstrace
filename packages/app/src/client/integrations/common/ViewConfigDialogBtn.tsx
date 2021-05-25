@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useEffect, useMemo } from "react";
+
+import useWindowSize from "client/hooks/useWindowSize";
 
 import { YamlEditor } from "client/components/Editor";
 
@@ -33,6 +35,7 @@ export const ViewConfigDialogBtn = ({
   filename: string;
   config: string;
 }) => {
+  const size = useWindowSize();
   const [open, setOpen] = React.useState(false);
 
   const handleOpen = () => setOpen(true);
@@ -40,7 +43,7 @@ export const ViewConfigDialogBtn = ({
 
   const descriptionElementRef = React.useRef<HTMLElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       const { current: descriptionElement } = descriptionElementRef;
       if (descriptionElement !== null) {
@@ -48,6 +51,15 @@ export const ViewConfigDialogBtn = ({
       }
     }
   }, [open]);
+
+  const [width, height] = useMemo(() => {
+    const maxWidth = 1000;
+
+    const width = size.width > maxWidth ? maxWidth : size.width;
+    const height = size.height;
+
+    return [width, height];
+  }, [size.width, size.height]);
 
   return (
     <>
@@ -58,7 +70,7 @@ export const ViewConfigDialogBtn = ({
         <DialogTitle>{filename}</DialogTitle>
         <DialogContent dividers={true}>
           <DialogContentText ref={descriptionElementRef} tabIndex={-1}>
-            <Box width="600px" height="600px">
+            <Box width={`${width}px`} height={`${height}px`}>
               <YamlEditor
                 filename={filename}
                 data={config}
