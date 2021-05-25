@@ -210,7 +210,8 @@ function getExporterName(type: string) {
   return `testexporters-${rndstring().slice(0, 5).toLowerCase().replace(/_/g, '0')}-${type}`;
 }
 
-suite("Metric exporter tests", function () {
+// TODO(nick): rewrite these tests as integration UI tests
+suite.skip("Metric exporter tests", function () {
   suiteSetup(async function () {
     log.info("suite setup");
     globalTestSuiteSetupOnce();
