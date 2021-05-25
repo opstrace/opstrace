@@ -37,7 +37,7 @@ To build locally, visit our [Developer Workflows](./workflows.md#local-checkout-
 We are currently using Golang 1.15.
 Go code is a small portion of our code base (under the `go/` directory), so this is not terribly important.
 
-We use [golangci-lint](https://golangci-lint.run/) to lint the Go codebase.
+We use [golangci-lint](https://golangci-lint.run) to lint the Go codebase.
 You'll need to [install](https://golangci-lint.run/usage/install/#local-installation) it and have it available in your PATH to run the pre-commit hooks locally.
 
 You may need to set `GOPRIVATE` to be able to build the project in Visual Studio Code.

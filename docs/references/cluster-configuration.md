@@ -73,7 +73,7 @@ aws:
         - AWSReservedSSO_AdministratorAccess_133333abc3333337
 ```
 
-Use the `eks_admin_roles` parameter (an enumeration of strings) to define individual AWS IAM roles that should have administrator access to the underlying EKS cluster, via e.g. the [EKS console](https://aws.amazon.com/blogs/containers/introducing-the-new-amazon-eks-console/).
+Use the `eks_admin_roles` parameter (an enumeration of strings) to define individual AWS IAM roles that should have administrator access to the underlying EKS cluster, via e.g. the [EKS console](https://aws.amazon.com/blogs/containers/introducing-the-new-amazon-eks-console).
 
 **Note:**
 we develop and test mainly with `region` set to `us-west-2`.
@@ -170,7 +170,7 @@ Note:
 
 * `letsencrypt-staging` should be used for test cluster setups and playgrounds.
   This results in certificates that are not automatically trusted by browsers, i.e. users are likely to see security warnings.
-* `letsencrypt-prod` results in browser-trusted certificates, but is subject to quota/limits: [https://letsencrypt.org/docs/rate-limits/](https://letsencrypt.org/docs/rate-limits/).
+* `letsencrypt-prod` results in browser-trusted certificates, but is subject to quota/limits: [https://letsencrypt.org/docs/rate-limits/](https://letsencrypt.org/docs/rate-limits).
 
 ### `controller_image`
 

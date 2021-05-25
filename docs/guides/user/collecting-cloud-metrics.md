@@ -36,7 +36,7 @@ This diagram shows an example deployment, where the `CI tenant` is running an AW
 
 ## AWS CloudWatch
 
-These instructions show how you can extract metrics from [AWS CloudWatch](https://aws.amazon.com/cloudwatch/) and bring them into Opstrace.
+These instructions show how you can extract metrics from [AWS CloudWatch](https://aws.amazon.com/cloudwatch) and bring them into Opstrace.
 
 ### Credentials
 
@@ -74,7 +74,7 @@ These are then listed in the main `metrics` section of the configuration.
 CloudMatch metrics are grouped into "namespaces" according to the service they are associated with.
 In this example we will look at [CloudWatch metrics](https://docs.aws.amazon.com/cli/latest/reference/cloudwatch/list-metrics.html) under the `AWS/EC2` namespace, and custom Buildkite metrics under a `Buildkite` namespace.
 Some common metrics are listed in the [AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html), or a listing of available metrics for your AWS account can be retrieved using the [Console](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html#list-ec2-metrics-console) or [CLI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html#list-ec2-metrics-cli).
-Keep in mind that fetching metrics is billed by AWS on a [per-metric basis](https://aws.amazon.com/cloudwatch/pricing/) so overly broad metric filters will come with a cost.
+Keep in mind that fetching metrics is billed by AWS on a [per-metric basis](https://aws.amazon.com/cloudwatch/pricing) so overly broad metric filters will come with a cost.
 
 ```bash
 $ echo '
@@ -176,7 +176,7 @@ You can configure several exporters in the same Opstrace tenant, for example to 
 
 ## Azure Monitor
 
-These instructions show how you can extract metrics from [Azure Monitor](https://docs.microsoft.com/en-us/azure/azure-monitor/) and bring them into Opstrace.
+These instructions show how you can extract metrics from [Azure Monitor](https://docs.microsoft.com/en-us/azure/azure-monitor) and bring them into Opstrace.
 
 ### Credentials
 
@@ -216,7 +216,7 @@ The main thing to determine is what metrics should be collected.
 These are configured via sections named `targets`, `resource_groups`, and/or `resource_tags`.
 In the below example we are collecting Storage Account metrics against a `resource_group` named `my_group`.
 For a current list of available metrics divided by resource type, see the [metrics list documentation](https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported).
-Keep in mind that fetching Azure Monitor metrics is billed by Azure on a [per-MiB and/or per-query basis](https://azure.microsoft.com/en-us/pricing/details/monitor/) so overly broad metric filters will come with a cost.
+Keep in mind that fetching Azure Monitor metrics is billed by Azure on a [per-MiB and/or per-query basis](https://azure.microsoft.com/en-us/pricing/details/monitor) so overly broad metric filters will come with a cost.
 
 ```bash
 $ echo '

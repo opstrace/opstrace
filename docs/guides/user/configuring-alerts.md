@@ -3,11 +3,11 @@
 Opstrace supports configuring Alertmanager rules and alert outputs on a per-tenant basis.
 For example, you might have an alerting rule that metric `X` must be less than 5 and an Alertmanager configuration to send a Slack message when the rule is failing.
 
-If you haven't used Prometheus Alertmanager before, we recommend checking out [https://prometheus.io](https://prometheus.io/docs/introduction/overview/).
+If you haven't used Prometheus Alertmanager before, we recommend checking out [https://prometheus.io](https://prometheus.io/docs/introduction/overview).
 Opstrace uses Cortex which adds support for scaling and multiple tenants on top of Prometheus.
 
 This user guide primarily covers the locations and formats for submitting configurations.
-To learn more about the configuration content itself, look at the Prometheus documentation for [Recording Rules](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/), [Alerting Rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/), and [Alertmanager](https://www.prometheus.io/docs/alerting/latest/alertmanager/) documentation.
+To learn more about the configuration content itself, look at the Prometheus documentation for [Recording Rules](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules), [Alerting Rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules), and [Alertmanager](https://www.prometheus.io/docs/alerting/latest/alertmanager) documentation.
 
 ## Using the UI to configure Alertmanager
 
@@ -19,7 +19,7 @@ You'll then be presented with the configuration page:
 
 Here you can paste your existing configuration yaml you use with Prometheus or start creating your own.
 If you have previously used the CLI to manually upload your Alertmanager Configuration it'll now be available here to continue editing.
-This form validates the YAML as you type, using the [Alertmanager Configuration specification](https://www.prometheus.io/docs/alerting/latest/configuration/) and won't let you publish something invalid.
+This form validates the YAML as you type, using the [Alertmanager Configuration specification](https://www.prometheus.io/docs/alerting/latest/configuration) and won't let you publish something invalid.
 
 ### Limitations
 
@@ -152,8 +152,8 @@ From this point, you should have the basic building blocks for configuring your 
 
 ### References
 
-* [Prometheus Alertmanager](https://www.prometheus.io/docs/alerting/latest/alertmanager/)
-* [Cortex Scalable Alertmanager](https://cortexmetrics.io/docs/proposals/scalable-alertmanager/)
-* [Alertmanager Configuration](https://www.prometheus.io/docs/alerting/latest/configuration/)
-* [Recording rules](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/)
-* [Alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
+* [Prometheus Alertmanager](https://www.prometheus.io/docs/alerting/latest/alertmanager)
+* [Cortex Scalable Alertmanager](https://cortexmetrics.io/docs/proposals/scalable-alertmanager)
+* [Alertmanager Configuration](https://www.prometheus.io/docs/alerting/latest/configuration)
+* [Recording rules](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules)
+* [Alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules)

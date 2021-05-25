@@ -137,5 +137,5 @@ PRs welcome!
 Opstrace CI runs `make check-license-headers` to see if you maybe try to add (a) new code file(s) to the repository without setting the expected license header.
 You can run `make check-license-headers` locally -- it is expected to modify relevant source files in place, in your current checkout (you can then review the changes, and commit them if they look good).
 
-We follow [Google's guidance](https://opensource.google/docs/copyright/) for expressing copyright in each source file.
+We follow [Google's guidance](https://opensource.google/docs/copyright) for expressing copyright in each source file.
 If you do not work for Opstrace, you may assert your copyright in the license of each file you contribute to by following the guidance from the [Apache License, Version 2](https://www.apache.org/licenses/LICENSE-2.0#apply).
