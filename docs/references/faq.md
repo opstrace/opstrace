@@ -4,6 +4,13 @@ description: The answers to some of the most common questions we hear.
 
 # Frequently Asked Questions
 
+## How are you different?
+
+We are different because we are not focused on building a new storage backend or building a proprietary SaaS.
+We’re trying to make open source observability easier, more accessible, and more effective by building an open source distribution that _you_ can run (in your own account) just as easily as a SaaS is to use.
+Basically, this is how we wanted to do open source observability when we were in your shoes.
+There are many benefits to this—not least of which is cost management—so [follow our blog](https://opstrace.com/blog) to keep up to date.
+
 ## How does this work with—or replace—my existing Prometheus?
 
 If you're already using Prometheus, it's very easy to get started with Opstrace.
@@ -12,14 +19,10 @@ One great advantage is that you may be able to reduce the footprint of your Prom
 
 ## Can I run this on my own Kubernetes cluster?
 
-In order to provide a reliable experience, we control the entire infrastructure from end to end.
+In order to provide a reliable experience for Opstrace, we control the entire infrastructure from end to end.
 Your Opstrace cluster is best kept separate from the infrastructure its meant to monitor.
-Running Opstrace on your own Kubernetes cluster would defeat the purpose by putting the burden of resource management and operations on your own team.
-
-## Can I use this in production?
-
-Opstrace is currently released as early access.
-We wanted to get it out to the public as soon as it had enough to be useful to some people.
+We do have a Cortex Operator that you can use to run Cortex on your own.
+Check it out on GitHub here: [https://github.com/opstrace/cortex-operator](https://github.com/opstrace/cortex-operator).
 
 ## How do I use my own domain?
 
@@ -30,9 +33,3 @@ To use a custom domain, [email us](mailto:hello@opstrace.com) about our commerci
 
 The built-in authentication is provided to our users for free as a convenience.
 To freely configure single sign-on [email us](mailto:hello@opstrace.com) about our commercial version.
-
-## How is your commercial version priced?
-
-Just because you send more and more data to the Opstrace cluster doesn't mean you should pay us more.
-We charge a flat _per-user_ price.
-Because we make money by people who gain value from our platform, we are therefore highly aligned with our users to be both transparent about the overall costs and to work to drive down those costs (which is typically dominated by storage).
