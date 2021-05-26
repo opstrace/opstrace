@@ -1,0 +1,10 @@
+# Returns all integrations for all tenants.
+query GetIntegrationsDump {
+  integration {
+    id
+    tenant_id
+    name
+    kind
+    data
+  }
+}

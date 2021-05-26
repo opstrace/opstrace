@@ -18,7 +18,7 @@ import yaml from "js-yaml";
 
 import { State } from "./reducer";
 import { LatestControllerConfigType } from "@opstrace/controller-config";
-import { Tenant } from "@opstrace/tenants";
+import { Tenant, Tenants } from "@opstrace/tenants";
 import { log } from "@opstrace/utils";
 
 export { generateSecretValue } from "@opstrace/controller-config";
@@ -86,6 +86,35 @@ export const getControllerLokiConfigOverrides = (state: State): any => {
 
 export const toTenantNamespace = (tenantName: string): string =>
   `${tenantName}-tenant`;
+
+/**
+ * Searches tenants for the matching name, returns the ID.
+ */
+export const toTenantId = (tenantName: string, tenants: Tenants): string | null => {
+  const matches = tenants.filter(t => t.name === tenantName);
+  if (matches.length == 1) {
+    const match = matches[0];
+    // ID may be missing if the tenant hasn't been synced to GraphQL yet
+    // This should only happen on initial controller launch or if GraphQL isn't syncing
+    return match.id ? match.id : null;
+  } else if (matches.length > 1) {
+    log.warning("found two tenants with same name=%s: %s", tenantName, matches);
+  }
+  return null;
+}
+
+/**
+ * Searches tenants for the matching ID, returns the name.
+ */
+export const toTenantName = (tenantId: string, tenants: Tenants): string | null => {
+  const matches = tenants.filter(t => t.id === tenantId);
+  if (matches.length == 1) {
+    return matches[0].name;
+  } else if (matches.length > 1) {
+    log.warning("found two tenants with same id=%s: %s", tenantId, matches);
+  }
+  return null;
+}
 
 export const getTenantNamespace = (tenant: Tenant): string =>
   toTenantNamespace(tenant.name);

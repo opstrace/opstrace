@@ -32,49 +32,54 @@ export function* syncTenants(
       );
       return;
     }
+    // In the lifespan of a cluster, this does the following:
+    // 0. The installer writes the list of tenant names/types to a ConfigMap.
+    // 1a. When the controller is first run, the sync detects that GraphQL is empty and syncs from the ConfigMap to GraphQL.
+    //     After this initial sync, all syncing is from GraphQL back to the ConfigMap for the lifetime of the cluster.
+    // 1b. The initial tenants are assigned UUIDs by GraphQL automatically, and those are synced back to the ConfigMap.
+    // 2. Later, when new tenants are added via the UI to GraphQL, they are synced from GraphQL back to the ConfigMap.
     while (true) {
       try {
         const state: State = yield select();
-        const existingTenants = state.tenants.list.tenants;
+        const configmapTenants = state.tenants.list.tenants;
 
         const res: ClientResponse<typeof dbClient.GetTenants> = yield call(
           dbClient.GetTenants
         );
-        const tenants = res.data?.tenant;
-        if (!tenants) {
+        const dbTenants = res.data?.tenant;
+        if (!dbTenants) {
           // this case should never happen because the request would throw an error status
           throw Error("res.data.tenant doesn't exist in response");
         }
-        if (tenants.length === 0) {
-          log.info("no tenants found in db, syncing existing tenants to db");
+        if (dbTenants.length === 0) {
+          log.info("no tenants found in db, syncing existing tenants to db: %s", configmapTenants);
           // Because we always have tenants, a zero length array here means we've never reconciled
           // the tenants created during install with the db. So let's sync the existingTenants
-          // to the db.
+          // from the ConfigMap to GraphQL. This should only occur once for any opstrace cluster.
           yield call(dbClient.CreateTenants, {
-            tenants: existingTenants.map(t => ({
+            // We just write the name and type of each tenant.
+            // The database will assign an ID automatically, and we will pick up that ID via the next sync.
+            tenants: configmapTenants.map(t => ({
               name: t.name,
               type: t.type
             }))
           });
         } else {
-          // check for changes
-          const existingTenantNames = existingTenants.map(t => t.name);
-          const tenantNames = tenants.map(t => t.name);
-          if (
-            existingTenantNames.length !== tenantNames.length ||
-            tenantNames
-              .map(t => !existingTenantNames.includes(t))
-              .find(notFound => notFound)
-          ) {
-            log.info("tenant config changed in db, new: %s", tenants);
-            log.info("tenant config changed in db, old: %s", existingTenants);
-            // sync
+          // Sync changes from GraphQL back into the ConfigMap, which will update our local state in the process.
+          // If GraphQL has IDs for the tenants, this adds the IDs to the ConfigMap as well, which is then reflected in the controller state object.
+          // We also sort the tenants so that they are compared and written to the ConfigMap with a consistent ordering.
+          const dbTenantsState = dbTenants.map(t => ({
+            name: t.name,
+            id: t.id,
+            type: t.type === "SYSTEM" ? "SYSTEM" : "USER"
+          })).sort((t1, t2) => t1.name.localeCompare(t2.name)) as Tenants;
+          if (dbTenantsState !== configmapTenants) {
+            log.info("tenant config changed in db: old=%s new=%s", configmapTenants, dbTenantsState);
+            // Write the new tenant list to the ConfigMap.
+            // When the update takes effect, the controller State will be updated via the K8s client subscription.
             yield call(
               updateTenants,
-              tenants.map(t => ({
-                name: t.name,
-                type: t.type === "SYSTEM" ? "SYSTEM" : "USER"
-              })) as Tenants,
+              dbTenantsState,
               kubeConfig
             );
           }

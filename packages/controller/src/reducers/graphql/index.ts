@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export * as credentials from "./credentials";
-export * as exporters from "./exporters";
+export * as integrations from "./integrations";

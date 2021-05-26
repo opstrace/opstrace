@@ -37,9 +37,8 @@ import { KubeConfig } from "@kubernetes/client-node";
 import { APIResources } from "../resources/apis";
 import { ApplicationResources } from "../resources/app";
 import { CortexResources } from "../resources/cortex";
-import { CredentialResources } from "../resources/credentials";
-import { ExporterResources } from "../resources/exporters";
 import { IngressResources } from "../resources/ingress";
+import { IntegrationResources } from "../resources/integrations";
 import { LokiResources } from "../resources/loki";
 import { MemcacheResources } from "../resources/memcache";
 import { MonitoringResources } from "../resources/monitoring";
@@ -83,8 +82,7 @@ export function* reconciliationLoop(
     desired.add(ApplicationResources(state, kubeConfig, "application"));
     desired.add(RedisResources(state, kubeConfig, "application"));
     desired.add(TenantResources(state, kubeConfig));
-    desired.add(CredentialResources(state, kubeConfig));
-    desired.add(ExporterResources(state, kubeConfig));
+    desired.add(IntegrationResources(state, kubeConfig));
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);
   }
