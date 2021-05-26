@@ -27,21 +27,21 @@ import graphqlClient from "state/clients/graphqlClient";
 
 import { Button } from "client/components/Button";
 
-export const DeleteBtn = ({
+export const UninstallBtn = ({
   integration,
   tenant,
   disabled,
-  deleteCallback
+  uninstallCallback
 }: {
   integration: Integration;
   tenant: Tenant;
   disabled: boolean;
-  deleteCallback?: Function;
+  uninstallCallback?: Function;
 }) => {
   const history = useHistory();
 
-  const handleDelete = async () => {
-    if (deleteCallback !== undefined) await deleteCallback();
+  const handleUninstall = async () => {
+    if (uninstallCallback !== undefined) await uninstallCallback();
 
     await graphqlClient.DeleteIntegration({
       tenant_id: tenant.id,
@@ -53,8 +53,8 @@ export const DeleteBtn = ({
 
   const { activatePickerWithText } = usePickerService(
     {
-      title: `Delete "${integration.name}"?`,
-      activationPrefix: `delete integration "${integration.name}" directly?:`,
+      title: `Uninstall "${integration.name}"?`,
+      activationPrefix: `uninstall integration "${integration.name}" directly?:`,
       disableFilter: true,
       disableInput: true,
       options: [
@@ -68,10 +68,10 @@ export const DeleteBtn = ({
         }
       ],
       onSelected: option => {
-        if (option.id === "yes") handleDelete();
+        if (option.id === "yes") handleUninstall();
       }
     },
-    [integration.name, handleDelete]
+    [integration.name, handleUninstall]
   );
 
   return (
@@ -83,11 +83,11 @@ export const DeleteBtn = ({
       onClick={e => {
         e.stopPropagation();
         activatePickerWithText(
-          `delete integration "${integration.name}" directly?:`
+          `uninstall integration "${integration.name}" directly?:`
         );
       }}
     >
-      Delete Integration
+      Uninstall Integration
     </Button>
   );
 };

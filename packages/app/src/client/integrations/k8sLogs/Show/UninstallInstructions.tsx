@@ -24,7 +24,9 @@ import * as commands from "./templates/commands";
 import * as grafana from "client/utils/grafana";
 
 import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
+
 import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
+import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
 import { DeleteBtn } from "client/integrations/common/DeleteIntegrationButton";
 
 import { Box } from "client/components/Box";
@@ -85,7 +87,7 @@ export const UninstallInstructions = ({
     saveAs(configBlob, configFilename);
   };
 
-  const deleteIntegrationHandler = async () => {
+  const uninstallIntegrationHandler = async () => {
     try {
       // Dashboard folder might not exist
       await grafana.deleteFolder(integration, tenant);
@@ -167,14 +169,14 @@ export const UninstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  Delete this Integration including Dashboards.
+                  Uninstall this Integration including Dashboards.
                   <br />
                   <br />
-                  <DeleteBtn
+                  <UninstallBtn
                     integration={integration}
                     tenant={tenant}
                     disabled={false}
-                    deleteCallback={deleteIntegrationHandler}
+                    uninstallCallback={uninstallIntegrationHandler}
                   />
                 </Box>
               </TimelineContent>
