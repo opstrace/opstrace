@@ -49,6 +49,7 @@ ALLOWLIST="\
 ^.gitignore|\
 ^README.md|\
 ^.markdownlint.json|\
+^test/test-remote/README.md|\
 ^ci/check-if-docs-pr.sh\
 "
 
