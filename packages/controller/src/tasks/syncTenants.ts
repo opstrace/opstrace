@@ -15,6 +15,7 @@
  */
 
 import { call, delay, select, CallEffect } from "redux-saga/effects";
+import { equals } from "ramda";
 
 import { KubeConfig } from "@kubernetes/client-node";
 import { set as updateTenants, Tenants } from "@opstrace/tenants";
@@ -52,7 +53,7 @@ export function* syncTenants(
           throw Error("res.data.tenant doesn't exist in response");
         }
         if (dbTenants.length === 0) {
-          log.info("no tenants found in db, syncing existing tenants to db: %s", configmapTenants);
+          log.info("no tenants found in db, syncing existing tenants to db: %s", JSON.stringify(configmapTenants));
           // Because we always have tenants, a zero length array here means we've never reconciled
           // the tenants created during install with the db. So let's sync the existingTenants
           // from the ConfigMap to GraphQL. This should only occur once for any opstrace cluster.
@@ -61,7 +62,12 @@ export function* syncTenants(
             // The database will assign an ID automatically, and we will pick up that ID via the next sync.
             tenants: configmapTenants.map(t => ({
               name: t.name,
-              type: t.type
+              type: t.type,
+              // Try to pass IDs, even though they should normally be null.
+              // If the IDs are null, GraphQL will assign IDs automatically.
+              // If they are non-null in the ConfigMap (e.g. maybe someone manually deleted the tenants from GraphQL after a prior sync?),
+              // then ensure GraphQL DOESN'T assign new IDs.
+              id: t.id
             }))
           });
         } else {
@@ -73,8 +79,8 @@ export function* syncTenants(
             id: t.id,
             type: t.type === "SYSTEM" ? "SYSTEM" : "USER"
           })).sort((t1, t2) => t1.name.localeCompare(t2.name)) as Tenants;
-          if (dbTenantsState !== configmapTenants) {
-            log.info("tenant config changed in db: old=%s new=%s", configmapTenants, dbTenantsState);
+          if (!equals(dbTenantsState, configmapTenants)) {
+            log.info("tenant config changed in db: old=%s new=%s", JSON.stringify(configmapTenants), JSON.stringify(dbTenantsState));
             // Write the new tenant list to the ConfigMap.
             // When the update takes effect, the controller State will be updated via the K8s client subscription.
             yield call(
