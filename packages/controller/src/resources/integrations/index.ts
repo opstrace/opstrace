@@ -110,6 +110,9 @@ const toKubeResources = (
   }
   const k8sLabels = {
     app: k8sName,
+    // DO NOT remove tenant label: used by Prometheus operator to filter the ServiceMonitors
+    tenant: tenantName,
+    "opstrace.com/integration-name": integration.name,
     "opstrace.com/integration-kind": integration.kind,
   };
   const k8sMetadata = {
@@ -412,16 +415,15 @@ const toKubeResources = (
         kind: "ServiceMonitor",
         metadata: k8sMetadata,
         spec: {
-          // Include the user-provided integration name as the 'job' label in metrics.
-          // Per below, we also provide the integration ID as an "integration_id" label.
-          jobLabel: integration.name,
+          // Use the integration name (value of this label) for the "job" annotation in metrics
+          jobLabel: "opstrace.com/integration-name",
           endpoints: (customMonitorEndpoints.length != 0)
             ? customMonitorEndpoints
             : [{
               interval: "30s",
               port: "metrics",
               path: "/metrics",
-              // Inject an integration_id label
+              // Inject an "integration_id" annotation in metrics
               relabelings: [{
                 sourceLabels: [],
                 targetLabel: "integration_id",
