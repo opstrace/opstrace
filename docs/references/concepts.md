@@ -13,6 +13,7 @@ Once chosen, an instance name cannot be changed.
 
 ## Tenants
 
+<<<<<<< HEAD
 A "tenant" is a unit of isolation.
 [Multi-tenant systems](https://en.wikipedia.org/wiki/Multitenancy) allow for logical separation of concerns, while otherwise sharing the same underlying system.
 
@@ -29,6 +30,18 @@ It cannot be deleted.
 
 During creation at least one "user tenant" must be specified.
 Additional user tenants can be added to a running Opstrace instance (see our [Managing Tenants](../guides/administrator/managing-tenants.md) Guide).
+=======
+The concept of [multitenancy](https://en.wikipedia.org/wiki/Multitenancy) allows for logical separation of concerns, while otherwise sharing the same underlying system.
+
+Tenants can be used for logical siolation of environments \(e.g., `prod`. vs. `ci`\), for isolating teams and people \(e.g., `team-revenue` vs. `team-fraud`\), or for any kind of other categorization that makes sense in your specific use case.
+
+Each Opstrace cluster comes with a "system tenant" which ingests cluster-internal system logs and metrics.
+The system tenant is useful for the administrator to monitor the overall health of Opstrace, across tenants.
+It cannot be deleted.
+
+Upon Opstrace cluster creation, at least one "user tenant" must be specified.
+Additional user tenants can be added to a running Opstrace instance (see our Tenants Guide).
+>>>>>>> b0cf99f5 (docs(concepts): update tenant section with additional information)
 
 ## Data API
 
