@@ -21,6 +21,7 @@ export type Integration = Pick<
   | "id"
   | "kind"
   | "name"
+  | "key"
   | "data"
   | "tenant_id"
   | "grafana_metadata"

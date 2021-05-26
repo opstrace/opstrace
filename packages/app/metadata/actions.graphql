@@ -47,6 +47,27 @@ type Mutation {
 }
 
 
+type Query {
+  validateCredential (
+    tenant_id: String!
+    name: String!
+    type: String!
+    value: json!
+  ): StatusResponse
+}
+
+
+type Query {
+  validateExporter (
+    tenant_id: String!
+    name: String!
+    type: String!
+    config: json!
+    credential: String
+  ): StatusResponse
+}
+
+
 
 
 enum ErrorType {

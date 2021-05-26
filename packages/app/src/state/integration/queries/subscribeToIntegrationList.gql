@@ -4,6 +4,7 @@ subscription SubscribeToIntegrationList($tenant_name: String!) {
       id
       kind
       name
+      key
       data
       tenant_id
       grafana_metadata

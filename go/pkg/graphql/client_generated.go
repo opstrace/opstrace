@@ -164,6 +164,7 @@ type GetIntegrationsResponse struct {
 		ID        string `json:"id"`
 		TenantId  string `json:"tenant_id"`
 		Name      string `json:"name"`
+		Key       string `json:"key"`
 		Kind      string `json:"kind"`
 		Data      string `json:"data"`
 		CreatedAt string `json:"created_at"`
@@ -187,6 +188,7 @@ func NewGetIntegrationsRequest(url string, vars *GetIntegrationsVariables) (*Get
     id
     tenant_id
     name
+    key
     kind
     data
     created_at
@@ -238,6 +240,7 @@ type GetIntegrationsDumpResponse struct {
 		ID       string `json:"id"`
 		TenantId string `json:"tenant_id"`
 		Name     string `json:"name"`
+		Key      string `json:"key"`
 		Kind     string `json:"kind"`
 		Data     string `json:"data"`
 	} `json:"integration"`
@@ -254,6 +257,7 @@ func NewGetIntegrationsDumpRequest(url string) (*GetIntegrationsDumpRequest, err
     id
     tenant_id
     name
+    key
     kind
     data
   }
@@ -1696,6 +1700,7 @@ const (
 type IntegrationConstraint string
 
 const (
+	IntegrationConstraintIntegrationKeyKey           IntegrationConstraint = "integration_key_key"
 	IntegrationConstraintIntegrationsNameTenantIdKey IntegrationConstraint = "integrations_name_tenant_id_key"
 	IntegrationConstraintIntegrationsPkey            IntegrationConstraint = "integrations_pkey"
 )
@@ -1707,6 +1712,7 @@ const (
 	IntegrationSelectColumnData            IntegrationSelectColumn = "data"
 	IntegrationSelectColumnGrafanaMetadata IntegrationSelectColumn = "grafana_metadata"
 	IntegrationSelectColumnID              IntegrationSelectColumn = "id"
+	IntegrationSelectColumnKey             IntegrationSelectColumn = "key"
 	IntegrationSelectColumnKind            IntegrationSelectColumn = "kind"
 	IntegrationSelectColumnName            IntegrationSelectColumn = "name"
 	IntegrationSelectColumnTenantId        IntegrationSelectColumn = "tenant_id"
@@ -1720,6 +1726,7 @@ const (
 	IntegrationUpdateColumnData            IntegrationUpdateColumn = "data"
 	IntegrationUpdateColumnGrafanaMetadata IntegrationUpdateColumn = "grafana_metadata"
 	IntegrationUpdateColumnID              IntegrationUpdateColumn = "id"
+	IntegrationUpdateColumnKey             IntegrationUpdateColumn = "key"
 	IntegrationUpdateColumnKind            IntegrationUpdateColumn = "kind"
 	IntegrationUpdateColumnName            IntegrationUpdateColumn = "name"
 	IntegrationUpdateColumnTenantId        IntegrationUpdateColumn = "tenant_id"
@@ -2073,6 +2080,7 @@ type IntegrationBoolExp struct {
 	Data            *JsonbComparisonExp     `json:"data,omitempty"`
 	GrafanaMetadata *JsonbComparisonExp     `json:"grafana_metadata,omitempty"`
 	ID              *UuidComparisonExp      `json:"id,omitempty"`
+	Key             *StringComparisonExp    `json:"key,omitempty"`
 	Kind            *StringComparisonExp    `json:"kind,omitempty"`
 	Name            *StringComparisonExp    `json:"name,omitempty"`
 	Tenant          *TenantBoolExp          `json:"tenant,omitempty"`
@@ -2100,6 +2108,7 @@ type IntegrationInsertInput struct {
 	Data            *Jsonb                   `json:"data,omitempty"`
 	GrafanaMetadata *Jsonb                   `json:"grafana_metadata,omitempty"`
 	ID              *UUID                    `json:"id,omitempty"`
+	Key             *String                  `json:"key,omitempty"`
 	Kind            *String                  `json:"kind,omitempty"`
 	Name            *String                  `json:"name,omitempty"`
 	Tenant          *TenantObjRelInsertInput `json:"tenant,omitempty"`
@@ -2110,6 +2119,7 @@ type IntegrationInsertInput struct {
 type IntegrationMaxOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
 	ID        *OrderBy `json:"id,omitempty"`
+	Key       *OrderBy `json:"key,omitempty"`
 	Kind      *OrderBy `json:"kind,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
 	TenantId  *OrderBy `json:"tenant_id,omitempty"`
@@ -2119,6 +2129,7 @@ type IntegrationMaxOrderBy struct {
 type IntegrationMinOrderBy struct {
 	CreatedAt *OrderBy `json:"created_at,omitempty"`
 	ID        *OrderBy `json:"id,omitempty"`
+	Key       *OrderBy `json:"key,omitempty"`
 	Kind      *OrderBy `json:"kind,omitempty"`
 	Name      *OrderBy `json:"name,omitempty"`
 	TenantId  *OrderBy `json:"tenant_id,omitempty"`
@@ -2141,6 +2152,7 @@ type IntegrationOrderBy struct {
 	Data            *OrderBy       `json:"data,omitempty"`
 	GrafanaMetadata *OrderBy       `json:"grafana_metadata,omitempty"`
 	ID              *OrderBy       `json:"id,omitempty"`
+	Key             *OrderBy       `json:"key,omitempty"`
 	Kind            *OrderBy       `json:"kind,omitempty"`
 	Name            *OrderBy       `json:"name,omitempty"`
 	Tenant          *TenantOrderBy `json:"tenant,omitempty"`
@@ -2162,6 +2174,7 @@ type IntegrationSetInput struct {
 	Data            *Jsonb     `json:"data,omitempty"`
 	GrafanaMetadata *Jsonb     `json:"grafana_metadata,omitempty"`
 	ID              *UUID      `json:"id,omitempty"`
+	Key             *String    `json:"key,omitempty"`
 	Kind            *String    `json:"kind,omitempty"`
 	Name            *String    `json:"name,omitempty"`
 	TenantId        *UUID      `json:"tenant_id,omitempty"`
@@ -2613,6 +2626,7 @@ type Integration struct {
 	Data            Jsonb     `json:"data"`
 	GrafanaMetadata Jsonb     `json:"grafana_metadata"`
 	ID              UUID      `json:"id"`
+	Key             String    `json:"key"`
 	Kind            String    `json:"kind"`
 	Name            String    `json:"name"`
 	Tenant          Tenant    `json:"tenant"`
@@ -2634,6 +2648,7 @@ type IntegrationAggregateFields struct {
 type IntegrationMaxFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Kind      *String    `json:"kind,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	TenantId  *UUID      `json:"tenant_id,omitempty"`
@@ -2643,6 +2658,7 @@ type IntegrationMaxFields struct {
 type IntegrationMinFields struct {
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
 	ID        *UUID      `json:"id,omitempty"`
+	Key       *String    `json:"key,omitempty"`
 	Kind      *String    `json:"kind,omitempty"`
 	Name      *String    `json:"name,omitempty"`
 	TenantId  *UUID      `json:"tenant_id,omitempty"`
@@ -2718,6 +2734,8 @@ type QueryRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
+	ValidateCredential      *StatusResponse         `json:"validateCredential,omitempty"`
+	ValidateExporter        *StatusResponse         `json:"validateExporter,omitempty"`
 }
 
 type SubscriptionRoot struct {
@@ -2742,6 +2760,8 @@ type SubscriptionRoot struct {
 	UserPreference          *[]UserPreference       `json:"user_preference,omitempty"`
 	UserPreferenceAggregate UserPreferenceAggregate `json:"user_preference_aggregate"`
 	UserPreferenceByPk      *UserPreference         `json:"user_preference_by_pk,omitempty"`
+	ValidateCredential      *StatusResponse         `json:"validateCredential,omitempty"`
+	ValidateExporter        *StatusResponse         `json:"validateExporter,omitempty"`
 }
 
 type Tenant struct {
