@@ -40,9 +40,6 @@ import TimelineContent from "@material-ui/lab/TimelineContent";
 import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import styled from "styled-components";
-import { installedIntegrationsPath } from "client/integrations";
-import graphqlClient from "state/clients/graphqlClient";
-import { useHistory } from "react-router";
 import { Tenant } from "state/tenant/types";
 
 const TimelineDotWrapper = styled(TimelineDot)`
@@ -69,7 +66,6 @@ export const UninstallInstructions = ({
   tenant,
   config
 }: UnInstallInstructionsProps) => {
-  const history = useHistory();
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
