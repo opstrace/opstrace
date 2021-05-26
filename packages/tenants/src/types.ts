@@ -17,6 +17,7 @@
 import * as yup from "yup";
 
 export const tenantSchema = yup.object({
+  // Provided by the user
   name: yup
     .string()
     .required("Must provide a name")
@@ -24,7 +25,14 @@ export const tenantSchema = yup.object({
       /^[A-Za-z0-9-]+$/,
       "must only contain alphanumeric characters and -"
     ),
-  type: yup.mixed<"USER" | "SYSTEM">().oneOf(["SYSTEM", "USER"]).default("USER")
+
+  // Provided by the user
+  type: yup.mixed<"USER" | "SYSTEM">().oneOf(["SYSTEM", "USER"]).default("USER"),
+
+  // Generated when the tenant is written to GraphQL, and then synced back to here.
+  id: yup
+    .string()
+    .optional()
 });
 
 export type Tenant = yup.InferType<typeof tenantSchema>;

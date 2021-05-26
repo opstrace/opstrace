@@ -54,8 +54,7 @@ import {
 } from "@opstrace/kubernetes";
 
 import {
-  credentials,
-  exporters
+  integrations
 } from "./reducers/graphql";
 
 export const rootReducers = {
@@ -97,8 +96,7 @@ export const rootReducers = {
     })
   }),
   graphql: combineReducers({
-    Credentials: credentials.reducer,
-    Exporters: exporters.reducer
+    Integrations: integrations.reducer
   }),
 };
 

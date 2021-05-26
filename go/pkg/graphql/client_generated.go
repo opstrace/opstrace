@@ -230,6 +230,71 @@ func (client *Client) GetIntegrations(vars *GetIntegrationsVariables) (*GetInteg
 }
 
 //
+// query GetIntegrationsDump
+//
+
+type GetIntegrationsDumpResponse struct {
+	Integration []struct {
+		ID       string `json:"id"`
+		TenantId string `json:"tenant_id"`
+		Name     string `json:"name"`
+		Kind     string `json:"kind"`
+		Data     string `json:"data"`
+	} `json:"integration"`
+}
+
+type GetIntegrationsDumpRequest struct {
+	*http.Request
+}
+
+func NewGetIntegrationsDumpRequest(url string) (*GetIntegrationsDumpRequest, error) {
+	b, err := json.Marshal(&GraphQLOperation{
+		Query: `query GetIntegrationsDump {
+  integration {
+    id
+    tenant_id
+    name
+    kind
+    data
+  }
+}`,
+	})
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return &GetIntegrationsDumpRequest{req}, nil
+}
+
+func (req *GetIntegrationsDumpRequest) Execute(client *http.Client) (*GetIntegrationsDumpResponse, error) {
+	resp, err := execute(client, req.Request)
+	if err != nil {
+		return nil, err
+	}
+	var result GetIntegrationsDumpResponse
+	if err := json.Unmarshal(resp.Data, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func GetIntegrationsDump(url string, client *http.Client) (*GetIntegrationsDumpResponse, error) {
+	req, err := NewGetIntegrationsDumpRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	return req.Execute(client)
+}
+
+func (client *Client) GetIntegrationsDump() (*GetIntegrationsDumpResponse, error) {
+	return GetIntegrationsDump(client.Url, client.Client)
+}
+
+//
 // mutation InsertIntegration($name: String!, $kind: String!, $data: jsonb!, $tenant_id: uuid!)
 //
 

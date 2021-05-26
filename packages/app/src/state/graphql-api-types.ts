@@ -2289,6 +2289,14 @@ export type GetIntegrationsQuery = {
   >;
 };
 
+export type GetIntegrationsDumpQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetIntegrationsDumpQuery = {
+  integration: Array<
+    Pick<Integration, "id" | "tenant_id" | "name" | "kind" | "data">
+  >;
+};
+
 export type InsertIntegrationMutationVariables = Exact<{
   name: Scalars["String"];
   kind: Scalars["String"];
@@ -2570,6 +2578,17 @@ export const GetIntegrationsDocument = gql`
       data
       created_at
       updated_at
+    }
+  }
+`;
+export const GetIntegrationsDumpDocument = gql`
+  query GetIntegrationsDump {
+    integration {
+      id
+      tenant_id
+      name
+      kind
+      data
     }
   }
 `;
@@ -2889,6 +2908,22 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<GetIntegrationsQuery>(
           print(GetIntegrationsDocument),
+          variables
+        )
+      );
+    },
+    GetIntegrationsDump(
+      variables?: GetIntegrationsDumpQueryVariables
+    ): Promise<{
+      data?: GetIntegrationsDumpQuery | undefined;
+      extensions?: any;
+      headers: Headers;
+      status: number;
+      errors?: GraphQLError[] | undefined;
+    }> {
+      return withWrapper(() =>
+        client.rawRequest<GetIntegrationsDumpQuery>(
+          print(GetIntegrationsDumpDocument),
           variables
         )
       );
