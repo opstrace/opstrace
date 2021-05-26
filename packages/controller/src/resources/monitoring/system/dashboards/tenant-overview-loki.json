@@ -900,7 +900,7 @@
       ]
     },
     "time": {
-      "from": "now-7d",
+      "from": "now-24h",
       "to": "now"
     },
     "timepicker": {
