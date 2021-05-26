@@ -16,15 +16,16 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { pathOr } from "ramda";
-import classNames from "classnames";
 import { subHours } from "date-fns";
+
+import { useLoki } from "client/hooks/useGrafana";
+
+import classNames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckCircle from "@material-ui/icons/CheckCircle";
 import Warning from "@material-ui/icons/Warning";
 import green from "@material-ui/core/colors/green";
 import orange from "@material-ui/core/colors/orange";
-
-import { useLoki } from "client/hooks/useGrafana";
 
 import {
   Integration,
