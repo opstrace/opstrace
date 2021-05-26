@@ -56,6 +56,7 @@ export const getControllerConfig = (
 // then parses the `key` field and returns the corresponding object. If the
 // ConfigMap does not exist it returns an empty object. If there's an error
 // parsing the config overrides it logs the error and returns an empty object.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getControllerConfigOverrides(state: State, key: string): any {
   if (state.config.config === undefined) {
     throw Error("Controller configmap is not present or missing fields");
@@ -75,11 +76,13 @@ function getControllerConfigOverrides(state: State, key: string): any {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getControllerCortexConfigOverrides = (state: State): any => {
   return getControllerConfigOverrides(state, "cortex");
 };
 
 // same as getControllerCortexConfigOverrides but for loki
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getControllerLokiConfigOverrides = (state: State): any => {
   return getControllerConfigOverrides(state, "loki");
 };
@@ -156,10 +159,12 @@ export const getPrometheusName = (tenant: Tenant): string =>
 // object merging with typescript.
 //
 interface IIsObject {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (item: any): boolean;
 }
 
 interface IObject {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -173,6 +178,7 @@ interface IDeepMerge {
  * @param item - The item that needs to be checked
  * @return {Boolean} Whether or not @item is an object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isObject: IIsObject = (item: any): boolean => {
   return item === Object(item) && !Array.isArray(item);
 };
@@ -198,6 +204,7 @@ export const deepMerge: IDeepMerge = (
     const len: number = sources.length;
 
     for (let i = 0; i < len; i += 1) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const elm: any = sources[i];
 
       if (isObject(elm)) {

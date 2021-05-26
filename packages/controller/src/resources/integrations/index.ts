@@ -75,7 +75,7 @@ type StackdriverIntegrationData = {
   // config: nested JSON object
   // The keys are expected to be strings like "google.project-id" which is converted to an "STACKDRIVER_EXPORTER_GOOGLE_PROJECT_ID" envvar.
   // The values are expected to either be strings or arrays of strings.
-  config: object;
+  config: Record<string, unknown>;
   // credentials: json file content passthrough
   credentials: string;
 };
@@ -331,7 +331,7 @@ const toKubeResources = (
       );
       // Ensure that the per-probe metrics are each labeled with the probe info.
       // In practice this means that 'module' and 'target' labels should be included in the probe metrics.
-      var relabelings = Object.entries(exporterConfig.probes[probeIdx])
+      const relabelings = Object.entries(exporterConfig.probes[probeIdx])
         .map(([k, v]) => ({
           sourceLabels: [],
           targetLabel: k,

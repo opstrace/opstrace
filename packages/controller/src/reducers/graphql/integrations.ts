@@ -31,6 +31,7 @@ export interface Integration {
   name: string;
   // This data is defined on a per-integration basis, see *IntegrationData types.
   // Some integration kinds do not involve the controller at all, so we allow this to be any.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
 }
 export type Integrations = Integration[];
