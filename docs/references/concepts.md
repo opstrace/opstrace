@@ -13,7 +13,6 @@ Once chosen, an instance name cannot be changed.
 
 ## Tenants
 
-<<<<<<< HEAD
 A "tenant" is a unit of isolation.
 [Multi-tenant systems](https://en.wikipedia.org/wiki/Multitenancy) allow for logical separation of concerns, while otherwise sharing the same underlying system.
 
@@ -30,54 +29,42 @@ It cannot be deleted.
 
 During creation at least one "user tenant" must be specified.
 Additional user tenants can be added to a running Opstrace instance (see our [Managing Tenants](../guides/administrator/managing-tenants.md) Guide).
-=======
-The concept of [multitenancy](https://en.wikipedia.org/wiki/Multitenancy) allows for logical separation of concerns, while otherwise sharing the same underlying system.
-
-Tenants can be used for logical siolation of environments \(e.g., `prod`. vs. `ci`\), for isolating teams and people \(e.g., `team-revenue` vs. `team-fraud`\), or for any kind of other categorization that makes sense in your specific use case.
-
-Each Opstrace cluster comes with a "system tenant" which ingests cluster-internal system logs and metrics.
-The system tenant is useful for the administrator to monitor the overall health of Opstrace, across tenants.
-It cannot be deleted.
-
-Upon Opstrace cluster creation, at least one "user tenant" must be specified.
-Additional user tenants can be added to a running Opstrace instance (see our Tenants Guide).
->>>>>>> b0cf99f5 (docs(concepts): update tenant section with additional information)
 
 ## Data API
 
-The data API of an Opstrace cluster encompasses HTTP API endpoints meant for pushing data into and querying from that Opstrace cluster.
+The data API encompasses HTTP API endpoints meant for pushing data into and querying from an Opstrace instance.
 
-That is, if you consider an Opstrace cluster as a black box, the data API is how you get your payload data into the cluster, and how you can look it up again.
+That is, if you consider an Opstrace instance as a black box, the data API is how you get your payload data into the instance, and how you can look it up again.
 
 The most prominent use case for the data API is for external systems to push logs \(via e.g.
-FluentD or Promtail\) or metrics \(via Prometheus' remote\_write protocol\) into an Opstrace cluster.
+FluentD or Promtail\) or metrics \(via Prometheus' remote\_write protocol\) into an Opstrace instance.
 
 ### Data API authentication
 
 An external system that desires to integrate with the data API needs to present authentication proof, a "data API token".
 
-Upon Opstrace cluster creation, one such API token file is generated per tenant.
-These tokens are long-lived and need to be managed carefully by the Opstrace cluster administrator.
+Upon Opstrace creation, one such API token file is generated per tenant.
+These tokens are long-lived and need to be managed carefully by the administrator.
 
 #### Anatomy of a data API token, and how to present it
 
 A data API token is a long-lived JSON Web Token \(JWT\) signed with an RSA private key.
-It gets issued by the Opstrace cluster management CLI as part of the cluster `create` operation.
+It gets issued by the Opstrace CLI as part of the `create` operation.
 
-A data API token contains a set of standard JWT claims as well as an Opstrace cluster-specific claim set.
+A data API token contains a set of standard JWT claims as well as an Opstrace instance-specific claim set.
 
-To authenticate an HTTP request towards the data API, the API token must be presented within an `Authorization` header using the so-called `Bearer` scheme:
+To authenticate an HTTP request towards the data API, the API token must be presented within an `Authorization` header using the `Bearer` scheme:
 
 ```text
 Authorization: Bearer <token>
 ```
 
-#### Background: key material, and the concept of a non-sensitive cluster config
+#### Background: key material, and the concept of a non-sensitive config
 
-At the time of writing, the _private_ key for token creation is generated upon cluster creation time within the Opstrace cluster management CLI.
-It never enters the Opstrace cluster itself and is in fact persisted nowhere.
+At the time of writing, the _private_ key for token creation is generated upon instance creation time within the Opstrace CLI.
+It never enters the Opstrace instance itself and is in fact persisted nowhere.
 
-The corresponding _public_ key, though, is passed into the Opstrace cluster and is then subsequently used within the data API _authenticator_ to cryptographically validate each putative authentication token presented within incoming HTTP requests.
+The corresponding _public_ key, though, is passed into the Opstrace instance and is then subsequently used within the data API _authenticator_ to cryptographically validate each putative authentication token presented within incoming HTTP requests.
 
 Given these details, you can think of the API tokens as long-lived client certificates -- it's just that instead X.509 the system uses JWT as the meta data container format.
 
