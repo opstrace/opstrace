@@ -93,8 +93,8 @@ const toKubeResources = (
   integration: Integration,
   kubeConfig: KubeConfig,
 ): K8sResource[] => {
-  // Integration ID-based name across any k8s objects like Deployment, ConfigMap, and/or Secret
-  const k8sName = `integration-${integration.id}`;
+  // Name for any k8s objects like Deployment, ConfigMap, and/or Secret associated with this secret
+  const k8sName = `integration-${integration.key}`;
 
   // Look up tenant name from the id
   const tenantName = toTenantName(integration.tenant_id, state.tenants.list.tenants);
@@ -415,7 +415,7 @@ const toKubeResources = (
         kind: "ServiceMonitor",
         metadata: k8sMetadata,
         spec: {
-          // Use the integration name (value of this label) for the "job" annotation in metrics
+          // Use the user-defined integration name (value of this label) for the "job" annotation in metrics
           jobLabel: "opstrace.com/integration-name",
           endpoints: (customMonitorEndpoints.length != 0)
             ? customMonitorEndpoints
