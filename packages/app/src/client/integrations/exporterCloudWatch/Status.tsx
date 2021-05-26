@@ -16,15 +16,17 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { pathOr } from "ramda";
-import classNames from "classnames";
-import { subHours } from "date-fns";
+import { format, parseISO, getUnixTime, subHours } from "date-fns";
+
+import { useLoki } from "client/hooks/useGrafana";
+
 import { makeStyles } from "@material-ui/core/styles";
 import CheckCircle from "@material-ui/icons/CheckCircle";
 import Warning from "@material-ui/icons/Warning";
+import HighlightOff from "@material-ui/icons/HighlightOff";
 import green from "@material-ui/core/colors/green";
 import orange from "@material-ui/core/colors/orange";
-
-import { useLoki } from "client/hooks/useGrafana";
+import red from "@material-ui/core/colors/red";
 
 import {
   Integration,
@@ -46,20 +48,25 @@ const useStyles = makeStyles(theme => ({
     alignItems: "center",
     flexWrap: "wrap"
   },
-  statusIcon: { color: green["500"] },
+  statusActive: { color: green["500"] },
   statusText: {
     marginRight: 10
   },
   statusPending: {
     color: orange["500"]
+  },
+  statusError: {
+    color: red["500"]
   }
 }));
+
+const ERROR_STR = "Exception:";
 
 export default function ExporterCloudWatchStatus({
   integration,
   tenant
 }: Props) {
-  const [status, setStatus] = useState("pending");
+  const [status, setStatus] = useState(Status.pending);
   const [queryTime, setQueryTime] = useState(new Date());
   const classes = useStyles();
 
@@ -76,18 +83,55 @@ export default function ExporterCloudWatchStatus({
     };
   });
 
-  const statusCheckUri = useMemo(() => {
-    const logQl = `{integration_id="${integration.id}"}`;
-    const start = subHours(queryTime, 1);
+  const getUnixNanoSecTime = (date: Date) => getUnixTime(date) * 1000000000;
+
+  const findErrorsInLogsUri = useMemo(() => {
+    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^exporter-${integration.key}-[a-z0-9-]*"} |= "stderr" |= "${ERROR_STR}"`;
+    const end = new Date();
+    const start = subHours(end, 1);
 
     return encodeURI(
-      `query_range?query=${logQl}&start=${1000 * 1000 * start.getTime()}&end=${
-        1000 * 1000 * queryTime.getTime()
-      }&limit=1&step=300`
+      `query_range?direction=BACKWARD&limit=1000&query=${logQl}&start=${getUnixNanoSecTime(
+        start
+      )}&end=${getUnixNanoSecTime(end)}`
     );
-  }, [integration.id, queryTime]);
+  }, [tenant.name, integration.key]);
 
-  const { data } = useLoki(statusCheckUri, tenant.name);
+  // const errorLogsUrl = useMemo(() => {
+  //   const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22logs%22,%7B%22expr%22:%22%7Bk8s_namespace_name%3D%5C%22${tenant.name}-tenant%5C%22,k8s_container_name%3D%5C%22exporter%5C%22,k8s_pod_name%3D~%5C%22%5Eexporter-${integration.key}-%5Ba-z0-9-%5D*%5C%22%7D%20%7C%3D%20%5C%22stderr%5C%22%20%7C%3D%20%5C%22${ERROR_STR}%5C%22%22%7D%5D`;
+  //   return `${window.location.protocol}//system.${window.location.host}/grafana/explore?${path}`;
+  // }, [tenant.name, integration.key]);
+
+  // const logsUrl = useMemo(() => {
+  //   const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22logs%22,%7B%22expr%22:%22%7Bk8s_namespace_name%3D%5C%22${tenant.name}-tenant%5C%22,k8s_container_name%3D%5C%22exporter%5C%22,k8s_pod_name%3D~%5C%22%5Eexporter-${integration.key}-%5Ba-z0-9-%5D*%5C%22%7D%22%7D%5D`;
+  //   return `${window.location.protocol}//system.${window.location.host}/grafana/explore?${path}`;
+  // }, [tenant.name, integration.key]);
+
+  const { data: errorLogs } = useLoki(findErrorsInLogsUri, tenant.name);
+
+  const errorCount = useMemo(() => {
+
+    if errorLogs === undefined
+
+    const errors = pathOr([], ["data", "result", 0, "values"])(errorLogs);
+    const errorCount = errors.length;
+    const text = "in the last hour";
+
+    if (logs === undefined) return <span>unknown</span>;
+    else if (errorCount === 1)
+      return (
+        <a href={url} target="_blank" rel="noreferrer">
+          1 error {text}
+        </a>
+      );
+    else if (errorCount > 1)
+      return (
+        <a href={url} target="_blank" rel="noreferrer">
+          {errorCount} errors {text}
+        </a>
+      );
+    else return null;
+  }, [exporterLogs]);
 
   useEffect(() => {
     if (data !== undefined) {
@@ -101,21 +145,25 @@ export default function ExporterCloudWatchStatus({
     }
   }, [data]);
 
-  return (
-    <div>
-      {status === Status.active ? (
-        <div className={classes.statusCell}>
-          <span className={classes.statusText}>Active </span>
-          <CheckCircle className={classes.statusIcon} />
-        </div>
-      ) : (
-        <div className={classes.statusCell}>
-          <span className={classes.statusText}>Inactive </span>
-          <Warning
-            className={classNames(classes.statusIcon, classes.statusPending)}
-          />
-        </div>
-      )}
-    </div>
-  );
+  if (status === Status.active)
+    return (
+      <div className={classes.statusCell}>
+        <span className={classes.statusText}>Active </span>
+        <CheckCircle className={classes.statusActive} />
+      </div>
+    );
+  else if (status === Status.error)
+    return (
+      <div className={classes.statusCell}>
+        <span className={classes.statusText}>Error </span>
+        <HighlightOff className={classes.statusError} />
+      </div>
+    );
+  else
+    return (
+      <div className={classes.statusCell}>
+        <span className={classes.statusText}>Inactive </span>
+        <Warning className={classes.statusPending} />
+      </div>
+    );
 }

@@ -21,7 +21,7 @@ import { format, parseISO } from "date-fns";
 import { installedIntegrationsPath } from "client/integrations/paths";
 import { grafanaUrl } from "client/utils/grafana";
 
-import IntegrationStatus from "client/integrations/k8sLogs/Status";
+import IntegrationStatus from "./Status";
 
 import { CondRender } from "client/utils/rendering";
 
