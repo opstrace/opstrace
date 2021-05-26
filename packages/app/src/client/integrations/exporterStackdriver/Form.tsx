@@ -46,7 +46,7 @@ const Schema = yup.object().shape({
   googleProjectId: yup.string().optional(),
   monitoringMetricsTypePrefixes: yup.string().required(),
   monitoringMetricsInterval: yup.string().required(),
-  monitoringMetricsOffset: yup.string().required(),
+  monitoringMetricsOffset: yup.string().required()
 });
 
 const defaultValues: Values = {
@@ -55,7 +55,7 @@ const defaultValues: Values = {
   googleProjectId: "",
   monitoringMetricsTypePrefixes: "",
   monitoringMetricsInterval: "5m",
-  monitoringMetricsOffset: "0s",
+  monitoringMetricsOffset: "0s"
 };
 
 type Props = {
@@ -80,10 +80,14 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
       data: {
         credentials: data.credentials,
         config: {
-          "google.project-id": data.googleProjectId.split(",").map(id => id.trim()),
-          "monitoring.metrics-type-prefixes": data.monitoringMetricsTypePrefixes.split(",").map(prefix => prefix.trim()),
+          "google.project-id": data.googleProjectId
+            .split(",")
+            .map(id => id.trim()),
+          "monitoring.metrics-type-prefixes": data.monitoringMetricsTypePrefixes
+            .split(",")
+            .map(prefix => prefix.trim()),
           "monitoring.metrics-interval": data.monitoringMetricsInterval,
-          "monitoring.metrics-offset": data.monitoringMetricsOffset,
+          "monitoring.metrics-offset": data.monitoringMetricsOffset
         }
       }
     });
@@ -187,3 +191,5 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
     </Box>
   );
 };
+
+export default ExporterStackdriverForm;

@@ -121,3 +121,5 @@ export const ExporterStackdriverShow = () => {
     </>
   );
 };
+
+export default ExporterStackdriverShow;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ExporterStackdriverForm } from "./Form";
-import { ExporterStackdriverShow } from "./Show";
-import ExporterStackdriverStatus from "./Status";
-import ExporterStackdriverLogo from "./Logo.jpg";
+import Form from "./Form";
+import Show from "./Show";
+import Status from "./Status";
+import Logo from "./Logo.jpg";
 
 import { IntegrationDef } from "client/integrations/types";
 
@@ -27,9 +27,9 @@ export const exporterStackdriverIntegration: IntegrationDef = {
   label: "Google Stackdriver",
   desc:
     "A Prometheus exporter for Google Stackdriver Monitoring metrics. It acts as a proxy that requests Stackdriver API for the metric's time-series everytime prometheus scrapes it.",
-  Form: ExporterStackdriverForm,
-  Show: ExporterStackdriverShow,
-  Status: ExporterStackdriverStatus,
-  enabled: true,
-  Logo: ExporterStackdriverLogo
+  Form: Form,
+  Show: Show,
+  Status: Status,
+  Logo: Logo,
+  enabled: true
 };
