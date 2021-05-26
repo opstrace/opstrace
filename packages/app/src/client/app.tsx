@@ -57,7 +57,7 @@ import TenantAlerting from "client/views/alerting";
 import LoginView from "client/views/login";
 import HelpDialog from "client/views/help";
 import NotFound from "client/views/404/404";
-import ClusterOverview from "./views/cluster-overview";
+import ClusterOverview from "./views/cluster-health";
 import UsersTable from "client/views/users/list";
 import TenantsTable from "client/views/tenants/list";
 import TenantDashboards from "client/views/dashboards";
