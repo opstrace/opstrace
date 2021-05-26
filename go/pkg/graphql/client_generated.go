@@ -314,6 +314,7 @@ type InsertIntegrationResponse struct {
 		ID              string `json:"id"`
 		Kind            string `json:"kind"`
 		Name            string `json:"name"`
+		Key             string `json:"key"`
 		Data            string `json:"data"`
 		TenantId        string `json:"tenant_id"`
 		GrafanaMetadata string `json:"grafana_metadata"`
@@ -338,6 +339,7 @@ func NewInsertIntegrationRequest(url string, vars *InsertIntegrationVariables) (
     id
     kind
     name
+    key
     data
     tenant_id
     grafana_metadata

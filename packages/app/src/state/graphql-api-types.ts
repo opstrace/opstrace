@@ -2369,6 +2369,7 @@ export type InsertIntegrationMutation = {
       | "id"
       | "kind"
       | "name"
+      | "key"
       | "data"
       | "tenant_id"
       | "grafana_metadata"
@@ -2666,6 +2667,7 @@ export const InsertIntegrationDocument = gql`
       id
       kind
       name
+      key
       data
       tenant_id
       grafana_metadata
