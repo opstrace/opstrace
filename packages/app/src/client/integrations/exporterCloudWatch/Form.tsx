@@ -165,3 +165,5 @@ export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {
     </Box>
   );
 };
+
+export default ExporterCloudWatchForm;

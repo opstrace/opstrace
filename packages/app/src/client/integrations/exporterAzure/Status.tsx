@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-import Form from "./Form";
-import Show from "./Show";
-import Status from "./Status";
-import Logo from "./Logo.png";
+import React from "react";
 
-import { IntegrationDef } from "../types";
+import { Integration } from "state/integration/types";
+import { Tenant } from "state/tenant/types";
 
-export const exporterCloudWatchIntegration: IntegrationDef = {
-  kind: "exporter-cloudwatch",
-  category: "exporter",
-  label: "Amazon CloudWatch",
-  desc: "An exporter for Amazon CloudWatch, for Prometheus.",
-  Form: Form,
-  Show: Show,
-  Status: Status,
-  Logo: Logo,
-  enabled: true
-};
+import ExporterStatus from "client/integrations/common/ExporterStatus";
+
+export const ExporterAzureStatus = (props: {
+  integration: Integration;
+  tenant: Tenant;
+}) => <ExporterStatus {...props} errorQuery="level=error" />;
+
+export default ExporterAzureStatus;
