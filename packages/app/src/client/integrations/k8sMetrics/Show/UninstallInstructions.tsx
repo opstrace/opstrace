@@ -91,18 +91,6 @@ export const UninstallInstructions = ({
     } catch (err) {
       console.log(err);
     }
-    try {
-      await graphqlClient
-        .DeleteIntegration({
-          tenant_id: integration.tenant_id,
-          id: integration.id
-        })
-        .then(() => {
-          history.push(installedIntegrationsPath({ tenant }));
-        });
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   return (

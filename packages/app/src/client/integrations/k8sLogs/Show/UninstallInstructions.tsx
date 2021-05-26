@@ -27,7 +27,6 @@ import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
 
 import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
 import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
-import { DeleteBtn } from "client/integrations/common/DeleteIntegrationButton";
 
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
@@ -91,18 +90,6 @@ export const UninstallInstructions = ({
     try {
       // Dashboard folder might not exist
       await grafana.deleteFolder(integration, tenant);
-    } catch (err) {
-      console.log(err);
-    }
-    try {
-      await graphqlClient
-        .DeleteIntegration({
-          tenant_id: integration.tenant_id,
-          id: integration.id
-        })
-        .then(() => {
-          history.push(installedIntegrationsPath({ tenant }));
-        });
     } catch (err) {
       console.log(err);
     }
