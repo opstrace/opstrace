@@ -19,7 +19,7 @@ import { pluck, zipObj } from "ramda";
 import { k8sLogsIntegration } from "./k8sLogs";
 import { k8sMetricsIntegration } from "./k8sMetrics";
 import { exporterCloudWatchIntegration } from "./exporterCloudWatch";
-import { exporterStackDriverIntegration } from "./exporterStackDriver";
+import { exporterStackdriverIntegration } from "./exporterStackdriver";
 import { exporterBlackBoxIntegration } from "./exporterBlackBox";
 
 import { IntegrationDefs, IntegrationDefRecords } from "./types";
@@ -31,7 +31,7 @@ export const integrationsDefs: IntegrationDefs = [
   k8sMetricsIntegration,
   k8sLogsIntegration,
   exporterCloudWatchIntegration,
-  exporterStackDriverIntegration,
+  exporterStackdriverIntegration,
   exporterBlackBoxIntegration
 ];
 

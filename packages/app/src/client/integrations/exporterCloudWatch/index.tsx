@@ -25,7 +25,7 @@ export const exporterCloudWatchIntegration: IntegrationDef = {
   kind: "exporter-cloud-watch",
   category: "exporter",
   label: "Amazon CloudWatch",
-  desc: "Amazon CloudWatch Exporter description goes here",
+  desc: "An exporter for Amazon CloudWatch, for Prometheus.",
   Form: ExporterCloudWatchForm,
   Show: ExporterCloudWatchShow,
   Status: ExporterCloudWatchStatus,
