@@ -113,7 +113,6 @@
   - role: user_admin
     permission:
       filter: {}
-
 - table:
     schema: public
     name: integration
@@ -128,6 +127,7 @@
       columns:
       - data
       - grafana_metadata
+      - key
       - kind
       - name
       - tenant_id
@@ -136,14 +136,15 @@
   - role: user_admin
     permission:
       columns:
+      - created_at
       - data
       - grafana_metadata
+      - id
+      - key
       - kind
       - name
-      - created_at
-      - updated_at
-      - id
       - tenant_id
+      - updated_at
       filter: {}
   update_permissions:
   - role: user_admin
@@ -159,7 +160,6 @@
   - role: user_admin
     permission:
       filter: {}
-
 - table:
     schema: public
     name: tenant

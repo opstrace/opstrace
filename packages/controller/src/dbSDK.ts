@@ -555,6 +555,7 @@ export type Integration = {
   data: Scalars["jsonb"];
   grafana_metadata: Scalars["jsonb"];
   id: Scalars["uuid"];
+  key: Scalars["String"];
   kind: Scalars["String"];
   name: Scalars["String"];
   /** An object relationship */
@@ -620,6 +621,7 @@ export type Integration_Bool_Exp = {
   data?: Maybe<Jsonb_Comparison_Exp>;
   grafana_metadata?: Maybe<Jsonb_Comparison_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
+  key?: Maybe<String_Comparison_Exp>;
   kind?: Maybe<String_Comparison_Exp>;
   name?: Maybe<String_Comparison_Exp>;
   tenant?: Maybe<Tenant_Bool_Exp>;
@@ -629,6 +631,8 @@ export type Integration_Bool_Exp = {
 
 /** unique or primary key constraints on table "integration" */
 export enum Integration_Constraint {
+  /** unique or primary key constraint */
+  IntegrationKeyKey = "integration_key_key",
   /** unique or primary key constraint */
   IntegrationsNameTenantIdKey = "integrations_name_tenant_id_key",
   /** unique or primary key constraint */
@@ -659,6 +663,7 @@ export type Integration_Insert_Input = {
   data?: Maybe<Scalars["jsonb"]>;
   grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   tenant?: Maybe<Tenant_Obj_Rel_Insert_Input>;
@@ -670,6 +675,7 @@ export type Integration_Insert_Input = {
 export type Integration_Max_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
   id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   tenant_id?: Maybe<Scalars["uuid"]>;
@@ -680,6 +686,7 @@ export type Integration_Max_Fields = {
 export type Integration_Max_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   tenant_id?: Maybe<Order_By>;
@@ -690,6 +697,7 @@ export type Integration_Max_Order_By = {
 export type Integration_Min_Fields = {
   created_at?: Maybe<Scalars["timestamp"]>;
   id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   tenant_id?: Maybe<Scalars["uuid"]>;
@@ -700,6 +708,7 @@ export type Integration_Min_Fields = {
 export type Integration_Min_Order_By = {
   created_at?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   tenant_id?: Maybe<Order_By>;
@@ -733,6 +742,7 @@ export type Integration_Order_By = {
   data?: Maybe<Order_By>;
   grafana_metadata?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
+  key?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
   name?: Maybe<Order_By>;
   tenant?: Maybe<Tenant_Order_By>;
@@ -762,6 +772,8 @@ export enum Integration_Select_Column {
   /** column name */
   Id = "id",
   /** column name */
+  Key = "key",
+  /** column name */
   Kind = "kind",
   /** column name */
   Name = "name",
@@ -777,6 +789,7 @@ export type Integration_Set_Input = {
   data?: Maybe<Scalars["jsonb"]>;
   grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
+  key?: Maybe<Scalars["String"]>;
   kind?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   tenant_id?: Maybe<Scalars["uuid"]>;
@@ -793,6 +806,8 @@ export enum Integration_Update_Column {
   GrafanaMetadata = "grafana_metadata",
   /** column name */
   Id = "id",
+  /** column name */
+  Key = "key",
   /** column name */
   Kind = "kind",
   /** column name */
@@ -1217,6 +1232,10 @@ export type Query_Root = {
   user_preference_aggregate: User_Preference_Aggregate;
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
+  /** perform the action: "validateCredential" */
+  validateCredential?: Maybe<StatusResponse>;
+  /** perform the action: "validateExporter" */
+  validateExporter?: Maybe<StatusResponse>;
 };
 
 /** query root */
@@ -1376,6 +1395,23 @@ export type Query_RootUser_Preference_By_PkArgs = {
   id: Scalars["uuid"];
 };
 
+/** query root */
+export type Query_RootValidateCredentialArgs = {
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
+  value: Scalars["json"];
+};
+
+/** query root */
+export type Query_RootValidateExporterArgs = {
+  config: Scalars["json"];
+  credential?: Maybe<Scalars["String"]>;
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
+};
+
 /** subscription root */
 export type Subscription_Root = {
   /** fetch data from the table: "credential" */
@@ -1420,6 +1456,10 @@ export type Subscription_Root = {
   user_preference_aggregate: User_Preference_Aggregate;
   /** fetch data from the table: "user_preference" using primary key columns */
   user_preference_by_pk?: Maybe<User_Preference>;
+  /** perform the action: "validateCredential" */
+  validateCredential?: Maybe<StatusResponse>;
+  /** perform the action: "validateExporter" */
+  validateExporter?: Maybe<StatusResponse>;
 };
 
 /** subscription root */
@@ -1577,6 +1617,23 @@ export type Subscription_RootUser_Preference_AggregateArgs = {
 /** subscription root */
 export type Subscription_RootUser_Preference_By_PkArgs = {
   id: Scalars["uuid"];
+};
+
+/** subscription root */
+export type Subscription_RootValidateCredentialArgs = {
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
+  value: Scalars["json"];
+};
+
+/** subscription root */
+export type Subscription_RootValidateExporterArgs = {
+  config: Scalars["json"];
+  credential?: Maybe<Scalars["String"]>;
+  name: Scalars["String"];
+  tenant_id: Scalars["String"];
+  type: Scalars["String"];
 };
 
 /** columns and relationships of "tenant" */
@@ -2281,6 +2338,7 @@ export type GetIntegrationsQuery = {
       | "id"
       | "tenant_id"
       | "name"
+      | "key"
       | "kind"
       | "data"
       | "created_at"
@@ -2293,7 +2351,7 @@ export type GetIntegrationsDumpQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetIntegrationsDumpQuery = {
   integration: Array<
-    Pick<Integration, "id" | "tenant_id" | "name" | "kind" | "data">
+    Pick<Integration, "id" | "tenant_id" | "name" | "key" | "kind" | "data">
   >;
 };
 
@@ -2332,6 +2390,7 @@ export type SubscribeToIntegrationListSubscription = {
         | "id"
         | "kind"
         | "name"
+        | "key"
         | "data"
         | "tenant_id"
         | "grafana_metadata"
@@ -2574,6 +2633,7 @@ export const GetIntegrationsDocument = gql`
       id
       tenant_id
       name
+      key
       kind
       data
       created_at
@@ -2587,6 +2647,7 @@ export const GetIntegrationsDumpDocument = gql`
       id
       tenant_id
       name
+      key
       kind
       data
     }
@@ -2620,6 +2681,7 @@ export const SubscribeToIntegrationListDocument = gql`
         id
         kind
         name
+        key
         data
         tenant_id
         grafana_metadata

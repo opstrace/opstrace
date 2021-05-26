@@ -53,6 +53,24 @@ actions:
       value_from_env: ACTION_CONFIG_API_SECRET
   permissions:
   - role: user_admin
+- name: validateCredential
+  definition:
+    kind: ""
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
+- name: validateExporter
+  definition:
+    kind: ""
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
 custom_types:
   enums:
   - name: ErrorType

@@ -4,6 +4,7 @@ query GetIntegrationsDump {
     id
     tenant_id
     name
+    key
     kind
     data
   }

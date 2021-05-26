@@ -1,0 +1,1 @@
+DROP TRIGGER t_integration_insert ON integration;
