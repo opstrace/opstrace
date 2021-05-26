@@ -15,39 +15,32 @@
  */
 
 import React from "react";
+import Grid from "@material-ui/core/Grid";
 
 import { Box } from "client/components/Box";
-import Typography from "client/components/Typography/Typography";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import { Tabs } from "client/components/Tabs";
+import GrafanaIframe from "client/components/Grafana/Iframe";
 
-import Metrics from "./metrics";
-import Logs from "./logs";
-
-const TenantOverview = () => {
+const TenantOverviewLogs = () => {
   const tenant = useSelectedTenantWithFallback();
 
   return (
-    <>
-      <Box pt={1} pb={4}>
-        <Typography variant="h1">Tenant Overview</Typography>
-      </Box>
-      <Tabs
-        tabs={[
-          {
-            path: `/tenant/${tenant.name}/overview/metrics`,
-            title: "Metrics",
-            component: Metrics
-          },
-          {
-            path: `/tenant/${tenant.name}/overview/logs`,
-            title: "Logs",
-            component: Logs
-          }
-        ]}
-      />
-    </>
+    <Box pt={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <GrafanaIframe
+            initialHeight={1200}
+            tenant="system"
+            title="Tenant Overview: Logs (Loki)"
+            path="/d/c92shqQZz/tenant-overview-loki"
+            params={{
+              "var-tenant": tenant.name
+            }}
+          />
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 
-export default TenantOverview;
+export default TenantOverviewLogs;

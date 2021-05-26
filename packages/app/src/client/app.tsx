@@ -106,7 +106,17 @@ const AuthProtectedApplication = () => {
           {
             title: "Overview",
             icon: <BarChart2 />,
-            path: `/tenant/${tenantName}/overview`
+            path: `/tenant/${tenantName}/overview`,
+            nestedItems: [
+              {
+                title: "Metrics",
+                path: `/tenant/${tenantName}/overview/metrics`
+              },
+              {
+                title: "Logs",
+                path: `/tenant/${tenantName}/overview/logs`
+              }
+            ]
           },
           {
             title: "Dashboards",
@@ -190,8 +200,14 @@ const AuthProtectedApplication = () => {
             />
             <Route
               exact
-              key="tenant-overview"
-              path="/tenant/:tenantId/overview"
+              key="tenant-overview-metrics"
+              path="/tenant/:tenantId/overview/metrics"
+              component={TenantOverview}
+            />
+            <Route
+              exact
+              key="tenant-overview-logs"
+              path="/tenant/:tenantId/overview/logs"
               component={TenantOverview}
             />
             <Route
