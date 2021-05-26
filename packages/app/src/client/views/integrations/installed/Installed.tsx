@@ -21,8 +21,6 @@ import { format, parseISO } from "date-fns";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import useIntegrationList from "state/integration/hooks/useIntegration";
 
-import { IntegrationDef } from "client/integrations/types";
-
 import {
   integrationDefRecords,
   showIntegrationPath
