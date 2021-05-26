@@ -27,7 +27,7 @@ usage: opstrace create [-h] [--log-level LEVEL] [-c CONFIG_FILE_PATH] [--yes]
 positional arguments:
   PROVIDER              The cloud provider to act on (aws, gcp).
   CLUSTER_NAME          The Opstrace cluster name ([a-z0-9-_], no more than
-                        13 characters).
+                        23 characters).
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -83,7 +83,7 @@ usage: opstrace destroy [-h] [--log-level LEVEL] [--yes] [--region REGION]
 
 positional arguments:
   PROVIDER           The cloud provider to act on (aws, gcp).
-  CLUSTER_NAME       The Opstrace cluster name ([a-z0-9-_], no more than 13
+  CLUSTER_NAME       The Opstrace cluster name ([a-z0-9-_], no more than 23
                      characters).
 
 optional arguments:
@@ -137,8 +137,6 @@ optional arguments:
 
 Upgrade Opstrace from the version running in your account to the version defined by the current CLI you are using.
 
-NOTE: GCP platform is not yet supported.
-
 Example (to upgrade an instance named `test` in AWS):
 
 ```text
@@ -149,14 +147,14 @@ Help text:
 
 ```text
 $ ./opstrace upgrade --help
-usage: opstrace upgrade [-h] [--log-level LEVEL] [-c CONFIG_FILE_PATH] [--yes] [--region REGION]
-                        PROVIDER CLUSTER_NAME
+usage: opstrace upgrade [-h] [--log-level LEVEL] [-c CONFIG_FILE_PATH]
+                        [--yes] [--region REGION] PROVIDER CLUSTER_NAME
 
 positional arguments:
   PROVIDER              The cloud provider to act on (aws, gcp).
-  CLUSTER_NAME          The Opstrace cluster name ([a-z0-9-_], no more than 23 characters).
+  CLUSTER_NAME          The Opstrace cluster name ([a-z0-9-_], no more
+                        than 23 characters).
 
-optional arguments:
 optional arguments:
   -h, --help         show this help message and exit
   --log-level LEVEL  Set log level for output on stderr. One of: debug, info,
