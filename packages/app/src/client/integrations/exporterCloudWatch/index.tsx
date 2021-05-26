@@ -22,7 +22,7 @@ import ExporterCloudWatchLogo from "./Logo.png";
 import { IntegrationDef } from "../types";
 
 export const exporterCloudWatchIntegration: IntegrationDef = {
-  kind: "exporter-cloud-watch",
+  kind: "exporter-cloudwatch",
   category: "exporter",
   label: "Amazon CloudWatch",
   desc: "An exporter for Amazon CloudWatch, for Prometheus.",

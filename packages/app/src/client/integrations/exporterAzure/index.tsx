@@ -18,10 +18,28 @@ import React from "react";
 
 import { IntegrationDef } from "../types";
 
-export const exporterBlackBoxIntegration: IntegrationDef = {
-  kind: "exporter-blackbox",
+/*
+// example credentials
+// this is OPTIONAL - the user may instead provide credentials via the "credentials" section of the config yaml
+type Credentials = {
+  AZURE_SUBSCRIPTION_ID: "my-subscription-uuid",
+  AZURE_TENANT_ID: "my-directory-uuid",
+  AZURE_CLIENT_ID: "my-application-uuid",
+  AZURE_CLIENT_SECRET: "my-app-client-secret"
+}
+type Data = {
+  // overrides config.credentials if present
+  credentials: Credentials | undefined,
+  // YAML data. per above the "credentials" field can be omitted. example config:
+  // see https://github.com/RobustPerception/azure_metrics_exporter#example-azure-metrics-exporter-config
+  config: string
+}
+*/
+
+export const exporterAzureIntegration: IntegrationDef = {
+  kind: "exporter-azure",
   category: "exporter",
-  label: "Black Box",
+  label: "Azure",
   desc: () => <i>Coming soon</i>,
   Form: () => <div />,
   Show: () => <div />,

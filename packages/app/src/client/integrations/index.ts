@@ -20,7 +20,8 @@ import { k8sLogsIntegration } from "./k8sLogs";
 import { k8sMetricsIntegration } from "./k8sMetrics";
 import { exporterCloudWatchIntegration } from "./exporterCloudWatch";
 import { exporterStackdriverIntegration } from "./exporterStackdriver";
-import { exporterBlackBoxIntegration } from "./exporterBlackBox";
+import { exporterAzureIntegration } from "./exporterAzure";
+import { exporterBlackboxIntegration } from "./exporterBlackbox";
 
 import { IntegrationDefs, IntegrationDefRecords } from "./types";
 
@@ -32,7 +33,8 @@ export const integrationsDefs: IntegrationDefs = [
   k8sLogsIntegration,
   exporterCloudWatchIntegration,
   exporterStackdriverIntegration,
-  exporterBlackBoxIntegration
+  exporterAzureIntegration,
+  exporterBlackboxIntegration
 ];
 
 export const integrationDefRecords: IntegrationDefRecords = zipObj(
