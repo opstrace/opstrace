@@ -9,3 +9,14 @@ steps:
       - ci/test-upgrade/run.sh
     artifact_paths:
       - "bk-artifacts/**/*"
+  - label: "🔨 main upgrade test (GCP)"
+    key: "maintest-upgrade-gcp"
+    env:
+      OPSTRACE_CLUSTER_NAME: "upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_CLOUD_PROVIDER: "gcp"
+      GCLOUD_CLI_REGION: "us-west2"
+      GCLOUD_CLI_ZONE: "us-west2-a"
+    command:
+      - ci/test-upgrade/run.sh
+    artifact_paths:
+      - "bk-artifacts/**/*"

@@ -506,6 +506,11 @@ ci-%: checkenv-builddir
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-e AWS_SHARED_CREDENTIALS_FILE=/awsconfig/credentials \
 	-e AWS_CLI_REGION \
+	-e OPSTRACE_KUBECONFIG \
+	-e GCLOUD_CLI_REGION \
+	-e GCLOUD_CLI_ZONE \
+	-e GOOGLE_APPLICATION_CREDENTIALS \
+	-e OPSTRACE_GCP_PROJECT_ID \
 	-e AWS_ACCESS_KEY_ID \
 	-e AWS_SECRET_ACCESS_KEY \
 	-e HOME=/build \

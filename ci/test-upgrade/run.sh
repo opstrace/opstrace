@@ -11,10 +11,21 @@ make rebuild-looker-container-images
 make ci-fetch-secrets
 
 # Override the target kubeconfig directory to point to the checkout directory.
-export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/.kube
+# Account for cloud provider to allow multiple simultaneous runs of this build.
+export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/${OPSTRACE_CLOUD_PROVIDER}/.kube
+export OPSTRACE_KUBECONFIG=$(pwd)/${OPSTRACE_CLOUD_PROVIDER}/.kube/config
+mkdir -p $(pwd)/${OPSTRACE_CLOUD_PROVIDER}/.kube/
 
 # Note: sourcing this file exports AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 source secrets/aws-dev-svc-acc-env.sh
+
+if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "gcp" ]]; then
+    # Shard across GCP CI projects.
+    #export OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb ci-shard-ccc)
+    export OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-ddd ci-shard-eee ci-shard-fff)
+    echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
+    export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
+fi
 
 make ci-testupgrade-fetch-cli-artifacts
 make ci-testupgrade-dns-service-credentials
