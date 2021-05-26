@@ -30,22 +30,19 @@ import { ExternalLink } from "client/components/Link";
 
 type Values = {
   name: string;
-  accessKeyId: string;
-  secretAccessKey: string;
+  credentials: string;
   config: string;
 };
 
 const Schema = yup.object().shape({
   name: yup.string().required(),
-  accessKeyId: yup.string().required(),
-  secretAccessKey: yup.string().required(),
+  credentials: yup.string().required(),
   config: yup.string().required()
 });
 
 const defaultValues: Values = {
   name: "",
-  accessKeyId: "",
-  secretAccessKey: "",
+  credentials: "",
   config: ""
 };
 
@@ -69,10 +66,7 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
     handleCreate({
       name: data.name,
       data: {
-        credentials: {
-          accessKeyId: data.accessKeyId,
-          secretAccessKey: data.secretAccessKey
-        },
+        credentials: data.credentials,
         config: data.config
       }
     });
@@ -107,20 +101,16 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
               </Box>
               <Box mb={3}>
                 <ControlledInput
-                  name="accessKeyId"
+                  name="credentials"
                   control={control}
-                  inputProps={{ fullWidth: true }}
-                  label="Access Key ID"
-                  helperText="AWS access key with sufficient permissions for accessing Stackdriver"
-                />
-              </Box>
-              <Box mb={3}>
-                <ControlledInput
-                  name="secretAccessKey"
-                  control={control}
-                  inputProps={{ fullWidth: true }}
-                  label="Secret Access Key"
-                  helperText="Important: the AWS credentials are stored as plain text."
+                  inputProps={{
+                    fullWidth: true,
+                    multiline: true,
+                    rows: 5,
+                    rowsMax: 5
+                  }}
+                  label="Access Doc"
+                  helperText="Important: these credentials are stored as plain text."
                 />
               </Box>
               <Box mb={3}>
@@ -136,13 +126,14 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                   label="Config"
                   helperText={
                     <span>
-                      Amazon Stackdriver exporter{" "}
+                      Google Stackdriver exporter{" "}
                       <ExternalLink
                         target="_blank"
-                        href="https://github.com/prometheus/cloudwatch_exporter#user-content-configuration"
+                        href="https://github.com/prometheus-community/stackdriver_exporter#user-content-flags"
                       >
-                        YAML formatted configuration
-                      </ExternalLink>
+                        configuration format
+                      </ExternalLink>{" "}
+                      documentation
                     </span>
                   }
                 />

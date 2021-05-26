@@ -21,11 +21,12 @@ import ExporterStackdriverLogo from "./Logo.jpg";
 
 import { IntegrationDef } from "client/integrations/types";
 
-export const exporterStackDriverIntegration: IntegrationDef = {
+export const exporterStackdriverIntegration: IntegrationDef = {
   kind: "exporter-stackdriver",
   category: "exporter",
   label: "Google Stackdriver",
-  desc: "Google Starckdriver Exporter description goes here",
+  desc:
+    "A Prometheus exporter for Google Stackdriver Monitoring metrics. It acts as a proxy that requests Stackdriver API for the metric's time-series everytime prometheus scrapes it.",
   Form: ExporterStackdriverForm,
   Show: ExporterStackdriverShow,
   Status: ExporterStackdriverStatus,

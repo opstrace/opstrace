@@ -76,7 +76,12 @@ export const InstalledIntegrations = () => {
                   <TableCell component="th" scope="row">
                     {i9n.name}
                   </TableCell>
-                  <TableCell>{i9nDef.label}</TableCell>
+                  <TableCell>
+                    <span>
+                      <img src={i9nDef.Logo} width={15} height={15} alt="" />{" "}
+                      {i9nDef.label}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <i9nDef.Status integration={i9n} tenant={tenant} />
                   </TableCell>
