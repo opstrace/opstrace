@@ -26,7 +26,6 @@ import { ControlledInput } from "client/components/Form/ControlledInput";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
-import { ExternalLink } from "client/components/Link";
 
 type Values = {
   name: string;
@@ -43,7 +42,11 @@ type Values = {
 const Schema = yup.object().shape({
   name: yup.string().required(),
   credentials: yup.string().required(),
-  config: yup.string().required()
+  // May be empty:
+  googleProjectId: yup.string().optional(),
+  monitoringMetricsTypePrefixes: yup.string().required(),
+  monitoringMetricsInterval: yup.string().required(),
+  monitoringMetricsOffset: yup.string().required(),
 });
 
 const defaultValues: Values = {
@@ -79,7 +82,7 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
         config: {
           "google.project-id": data.googleProjectId.split(",").map(id => id.trim()),
           "monitoring.metrics-type-prefixes": data.monitoringMetricsTypePrefixes.split(",").map(prefix => prefix.trim()),
-          "monitoring.metrics-interval": data.monitoringMetricsTypePrefixes,
+          "monitoring.metrics-interval": data.monitoringMetricsInterval,
           "monitoring.metrics-offset": data.monitoringMetricsOffset,
         }
       }
@@ -123,7 +126,7 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                     rows: 5,
                     rowsMax: 5
                   }}
-                  label="Access Doc"
+                  label="Credentials JSON File"
                   helperText="Important: these credentials are stored as plain text."
                 />
               </Box>
@@ -131,9 +134,14 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                 <ControlledInput
                   name="monitoringMetricsTypePrefixes"
                   control={control}
-                  inputProps={{ fullWidth: true }}
+                  inputProps={{
+                    fullWidth: true,
+                    multiline: true,
+                    rows: 10,
+                    rowsMax: 10
+                  }}
                   label="monitoring.metrics-type-prefixes"
-                  helperText="Comma separated Google Stackdriver Monitoring Metric Type prefixes (required)"
+                  helperText="Comma-separated Google Stackdriver Monitoring Metric Type prefixes"
                 />
               </Box>
               <Box mb={3}>
@@ -142,7 +150,7 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                   control={control}
                   inputProps={{ fullWidth: true }}
                   label="google.project-id"
-                  helperText="Comma separated list of Google Project IDs, otherwise this is autodetected (optional)"
+                  helperText="Comma-separated list of Google Project IDs, autodetected if empty"
                 />
               </Box>
               <Box mb={3}>
@@ -151,7 +159,7 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                   control={control}
                   inputProps={{ fullWidth: true }}
                   label="monitoring.metrics-interval"
-                  helperText="Metric's timestamp interval to request from the Google Stackdriver Monitoring Metrics API (optional)"
+                  helperText="Metric timestamp interval to request from the Google Stackdriver Monitoring Metrics API"
                 />
               </Box>
               <Box mb={3}>
@@ -160,32 +168,7 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                   control={control}
                   inputProps={{ fullWidth: true }}
                   label="monitoring.metrics-offset"
-                  helperText="Offset (into the past) for the metric's timestamp interval to request from the Google Stackdriver Monitoring Metrics API, to handle latency in published metrics (optional)"
-                />
-              </Box>
-              <Box mb={3}>
-                <ControlledInput
-                  name="config"
-                  control={control}
-                  inputProps={{
-                    fullWidth: true,
-                    multiline: true,
-                    rows: 10,
-                    rowsMax: 10
-                  }}
-                  label="Config"
-                  helperText={
-                    <span>
-                      Google Stackdriver exporter{" "}
-                      <ExternalLink
-                        target="_blank"
-                        href="https://github.com/prometheus-community/stackdriver_exporter#user-content-flags"
-                      >
-                        configuration format
-                      </ExternalLink>{" "}
-                      documentation
-                    </span>
-                  }
+                  helperText="Offset (into the past) for the metric's timestamp interval, to handle latency in published metrics"
                 />
               </Box>
               <Button
