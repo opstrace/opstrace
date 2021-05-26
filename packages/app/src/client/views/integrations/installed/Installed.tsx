@@ -17,13 +17,18 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
-import { makeStyles } from "@material-ui/core/styles";
+
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
+import useIntegrationList from "state/integration/hooks/useIntegration";
+
+import { IntegrationDef } from "client/integrations/types";
 
 import {
   integrationDefRecords,
   showIntegrationPath
 } from "client/integrations";
 
+import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "client/components/Box";
 import { Card } from "client/components/Card";
 import Table from "@material-ui/core/Table";
@@ -32,12 +37,18 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import useIntegrationList from "state/integration/hooks/useIntegration";
 
 const useStyles = makeStyles(theme => ({
   integrationRow: {
     cursor: "pointer"
+  },
+  logoCell: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap"
+  },
+  logoText: {
+    marginLeft: 10
   }
 }));
 
@@ -77,10 +88,10 @@ export const InstalledIntegrations = () => {
                     {i9n.name}
                   </TableCell>
                   <TableCell>
-                    <span>
-                      <img src={i9nDef.Logo} width={15} height={15} alt="" />{" "}
-                      {i9nDef.label}
-                    </span>
+                    <div className={classes.logoCell}>
+                      <img src={i9nDef.Logo} width={15} height={15} alt="" />
+                      <span className={classes.logoText}> {i9nDef.label}</span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <i9nDef.Status integration={i9n} tenant={tenant} />
