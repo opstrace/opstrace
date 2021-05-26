@@ -8,7 +8,7 @@ Note: please also use the `--help` switch to discover additional reference infor
 
 ### `create`
 
-Creates a new Opstrace cluster.
+Creates a new Opstrace cluster with a [configuration document](cluster-configuration.md).
 
 Example (for creating a cluster named `testcluster` in AWS):
 
@@ -21,7 +21,7 @@ Help text:
 ```text
 $ ./opstrace create --help
 usage: opstrace create [-h] [--log-level LEVEL] [-c CONFIG_FILE_PATH] [--yes]
-                       [--hold-controller]
+                       [--hold-controller] [--write-kubeconfig-file PATH]
                        PROVIDER CLUSTER_NAME
 
 positional arguments:
@@ -40,6 +40,10 @@ optional arguments:
                         all prompts andrun non-interactively
   --hold-controller     Do not deploy controller into k8s cluster (for
                         development purposes).
+  --write-kubeconfig-file PATH
+                        Write kubectl config file (for KUBECONFIG env var)
+                        as soon as data is available (right after K8s cluster
+                        has been set up).
 ```
 
 Notes:
@@ -67,7 +71,7 @@ Example (for tearing down a cluster named `testcluster` in AWS):
 ```
 
 In the happy case, no input beyond cloud provider and cluster name is needed.
-However, in certain ambiguous cases the CLI may ask for the `--region` argument
+However, in certain ambiguous cases the CLI may ask for the `--region` argument.
 
 Help text:
 
@@ -180,6 +184,32 @@ Notes:
 * For some permanent, non-retryable errors the `upgrade` operation will exit immediately, providing a clear error message.
 * When the `upgrade` operation errors out expectedly or unexpectedly or when you interrupt it manually (for instance, by sending `SIGINT` via `Ctrl+C`) then you can safely re-run it.
   It is designed to pick up the work where it was left.
+
+### Tenant API Authentication with `ta-*` Commands
+
+The `ta-` prefix represents the idea of "tenant API authentication."
+See our upcoming Tenant Guide for usage examples.
+
+```bash
+$ ./opstrace --help
+usage: opstrace [-h] [--version] [--log-level LEVEL]
+
+    {create,destroy,list,status,upgrade,ta-create-keypair,ta-create-token,ta-pubkeys-add,ta-pubkeys-list,ta-pubkeys-remove}
+
+    ...
+
+    ta-create-keypair   Tenant authentication: create a new RSA key pair.
+    ta-create-token     Tenant authentication: create a tenant API authentication token signed with a custom private key.
+                        Write token to stdout.
+    ta-pubkeys-add      Tenant authentication: add public key to a running Opstrace cluster so that it accepts tokens
+                        signed with the corresponding private key.
+    ta-pubkeys-list     Tenant authentication: list public keys for a running Opstrace cluster, i.e. the set of trust
+                        anchors for signed authentication tokens.
+    ta-pubkeys-remove   Tenant authentication: remove a specific public key from the set of trust anchors, i.e. do not
+                        accept corresponding authentication tokens anymore.
+```
+
+All `ta-*` commands offered by the Opstrace CLI are new and should be thought of as experimental (command names and signatures are subject to potentially big changes in the future).
 
 ## Cloud credential discovery
 
