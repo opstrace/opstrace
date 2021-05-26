@@ -30,8 +30,14 @@ import { ExternalLink } from "client/components/Link";
 
 type Values = {
   name: string;
+  // GCP credentials are in a JSON file. We pass it through as-is.
   credentials: string;
-  config: string;
+  // See list of properties: https://github.com/prometheus-community/stackdriver_exporter#flags
+  // "web.listen-address" and "web.telemetry-path" are assigned by the controller cannot be overridden here.
+  googleProjectId: string;
+  monitoringMetricsTypePrefixes: string; // TODO this must be non-empty (required option)
+  monitoringMetricsInterval: string;
+  monitoringMetricsOffset: string;
 };
 
 const Schema = yup.object().shape({
@@ -43,7 +49,10 @@ const Schema = yup.object().shape({
 const defaultValues: Values = {
   name: "",
   credentials: "",
-  config: ""
+  googleProjectId: "",
+  monitoringMetricsTypePrefixes: "",
+  monitoringMetricsInterval: "5m",
+  monitoringMetricsOffset: "0s",
 };
 
 type Props = {
@@ -67,7 +76,12 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
       name: data.name,
       data: {
         credentials: data.credentials,
-        config: data.config
+        config: {
+          "google.project-id": data.googleProjectId.split(",").map(id => id.trim()),
+          "monitoring.metrics-type-prefixes": data.monitoringMetricsTypePrefixes.split(",").map(prefix => prefix.trim()),
+          "monitoring.metrics-interval": data.monitoringMetricsTypePrefixes,
+          "monitoring.metrics-offset": data.monitoringMetricsOffset,
+        }
       }
     });
   };
@@ -111,6 +125,42 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                   }}
                   label="Access Doc"
                   helperText="Important: these credentials are stored as plain text."
+                />
+              </Box>
+              <Box mb={3}>
+                <ControlledInput
+                  name="monitoringMetricsTypePrefixes"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="monitoring.metrics-type-prefixes"
+                  helperText="Comma separated Google Stackdriver Monitoring Metric Type prefixes (required)"
+                />
+              </Box>
+              <Box mb={3}>
+                <ControlledInput
+                  name="googleProjectId"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="google.project-id"
+                  helperText="Comma separated list of Google Project IDs, otherwise this is autodetected (optional)"
+                />
+              </Box>
+              <Box mb={3}>
+                <ControlledInput
+                  name="monitoringMetricsInterval"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="monitoring.metrics-interval"
+                  helperText="Metric's timestamp interval to request from the Google Stackdriver Monitoring Metrics API (optional)"
+                />
+              </Box>
+              <Box mb={3}>
+                <ControlledInput
+                  name="monitoringMetricsOffset"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="monitoring.metrics-offset"
+                  helperText="Offset (into the past) for the metric's timestamp interval to request from the Google Stackdriver Monitoring Metrics API, to handle latency in published metrics (optional)"
                 />
               </Box>
               <Box mb={3}>

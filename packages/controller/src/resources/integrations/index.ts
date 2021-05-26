@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import yaml from "js-yaml";
 import { KubeConfig, V1EnvVar, V1PodSpec } from "@kubernetes/client-node";
 import { DockerImages } from "@opstrace/controller-config";
 import {
@@ -49,12 +48,11 @@ type BlackboxConfig = {
   // Probes, each entry in the array is a set of key value pairs to be set as params in the HTTP url.
   // Passed to the prometheus operator as endpoints to monitor.
   // For example {target: "example.com", module: "http_2xx"} -> "/probe?target=example.com&module=http_2xx"
-  probes: Record<string, string>[] | undefined,
-  // Modules that may be referenced by probes.
+  probes: { [key: string]: string }[],
+  // Config listing modules that may be referenced by probes.
   // Passed to the blackbox integration configuration, or the default configuration is used if this is undefined.
   // For example this may configure an "http_2xx" module to be referenced by the probes.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  modules: any | undefined
+  configFile: string | null
 };
 type BlackboxIntegrationData = {
   // config: nested JSON object
@@ -87,7 +85,7 @@ type AzureIntegrationData = {
   config: string;
   // credentials: Envvar passthrough
   // In practice this is expected to contain AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, AZURE_CLIENT_ID, and AZURE_CLIENT_SECRET
-  credentials: { [key: string]: string };
+  credentials: { [key: string]: string } | null;
 };
 
 const toKubeResources = (
@@ -127,7 +125,8 @@ const toKubeResources = (
   let configMapData: { [key: string]: string } | null = null;
   // If the integration needs a secret (named k8sName), the base64-encoded data is set here
   let secretData: { [key: string]: string } | null = null;
-  if (integration.kind == "cloudwatch") {
+
+  if (integration.kind == "exporter-cloudwatch") {
     const integrationData = integration.data as CloudwatchIntegrationData;
     configMapData = { "config.yml": integrationData.config };
     secretData = integrationData.credentials;
@@ -163,7 +162,7 @@ const toKubeResources = (
         }
       }]
     };
-  } else if (integration.kind == "stackdriver") {
+  } else if (integration.kind == "exporter-stackdriver") {
     const integrationData = integration.data as StackdriverIntegrationData;
     secretData = {"secret.json": integrationData.credentials};
 
@@ -236,7 +235,7 @@ const toKubeResources = (
         }
       }]
     };
-  } else if (integration.kind == "azure") {
+  } else if (integration.kind == "exporter-azure") {
     const integrationData = integration.data as AzureIntegrationData;
     configMapData = { "azure.yml": integrationData.config };
     secretData = integrationData.credentials;
@@ -271,17 +270,13 @@ const toKubeResources = (
         configMap: { name: k8sName }
       }]
     };
-  } else if (integration.kind == "blackbox") {
+  } else if (integration.kind == "exporter-blackbox") {
     const integrationData = integration.data as BlackboxIntegrationData;
     const exporterConfig = integrationData.config;
 
     // modules: Override the default exporter module configuration yaml file (optional)
-    if (exporterConfig.modules) {
-      configMapData = {
-        // Convert JSON string to YAML string.
-        // Blackbox exporter expects a root-level 'modules' section.
-        "config.yml": yaml.dump({modules: exporterConfig.modules})
-      };
+    if (exporterConfig.configFile) {
+      configMapData = { "config.yml": exporterConfig.configFile };
     }
 
     // If modules is defined, configure configmap volume.
@@ -292,7 +287,7 @@ const toKubeResources = (
         image: DockerImages.exporterBlackbox,
         ports: [{ name: "metrics", containerPort: 9115 }],
         // Enable configmap mount if modules override is provided
-        volumeMounts: (exporterConfig.modules)
+        volumeMounts: (exporterConfig.configFile)
           ? [{ name: "config", mountPath: "/etc/blackbox_exporter" }]
           : [],
         // Use the 'healthy' endpoint
@@ -311,11 +306,8 @@ const toKubeResources = (
         }
       }],
       // Enable configmap mount if modules override is provided
-      volumes: (exporterConfig.modules)
-        ? [{
-          name: "config",
-          configMap: { name: k8sName }
-        }]
+      volumes: (exporterConfig.configFile)
+        ? [{ name: "config", configMap: { name: k8sName } }]
         : [],
     };
 
@@ -362,7 +354,10 @@ const toKubeResources = (
     }
   } else {
     // Ignore unsupported integration, may not even be relevant to the controller.
-    log.debug("Ignoring integration %s/%s with kind: %s", integration.tenant_id, integration.id, integration.kind);
+    log.debug(
+      "Ignoring integration %s/%s with kind: %s",
+      integration.tenant_id, integration.id, integration.kind
+    );
     return [];
   }
 

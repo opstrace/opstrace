@@ -32,6 +32,8 @@ type Values = {
   name: string;
   accessKeyId: string;
   secretAccessKey: string;
+  // raw yaml file content passthrough
+  // see examples: https://github.com/prometheus/cloudwatch_exporter#configuration
   config: string;
 };
 
@@ -70,8 +72,8 @@ export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {
       name: data.name,
       data: {
         credentials: {
-          accessKeyId: data.accessKeyId,
-          secretAccessKey: data.secretAccessKey
+          AWS_ACCESS_KEY_ID: data.accessKeyId,
+          AWS_SECRET_ACCESS_KEY: data.secretAccessKey
         },
         config: data.config
       }
