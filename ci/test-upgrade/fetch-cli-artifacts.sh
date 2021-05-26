@@ -15,16 +15,6 @@ then
 fi
 
 #
-# Initial cluster install version.
-#
-FROM=cli/main/${OPSTRACE_CLI_VERSION_FROM}/opstrace-cli-linux-amd64-${OPSTRACE_CLI_VERSION_FROM}.tar.bz2
-
-#
-# Upgrade the cluster to this version.
-#
-TO=cli/main/${OPSTRACE_CLI_VERSION_TO}/opstrace-cli-linux-amd64-${OPSTRACE_CLI_VERSION_TO}.tar.bz2
-
-#
 # Funtion that downloads cli artifact from s3 bucket and extracts it to a target
 # dir.
 #
@@ -41,5 +31,5 @@ fetch_cli_artifact() {
 }
 
 echo "--- fetching cli artifacts"
-fetch_cli_artifact ${FROM} from
-fetch_cli_artifact ${TO} to
+fetch_cli_artifact ${OPSTRACE_CLI_VERSION_FROM} from
+fetch_cli_artifact ${OPSTRACE_CLI_VERSION_TO} to
