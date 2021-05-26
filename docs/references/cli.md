@@ -1,19 +1,19 @@
 # Opstrace Command Line Interface (CLI) Reference
 
-This document provides reference information about the Opstrace cluster management command line interface (CLI).
+This document provides reference information about the Opstrace command line interface (CLI).
 
 ## Commands
 
-Note: please also use the `--help` switch to discover additional reference information that the CLI emits about itself.
+Please use the `--help` switch to discover additional reference information that the CLI emits about itself.
 
 ### `create`
 
-Creates a new Opstrace cluster with a [configuration document](cluster-configuration.md).
+Creates a new Opstrace instance with a [configuration document](cluster-configuration.md).
 
-Example (for creating a cluster named `testcluster` in AWS):
+Example (for creating an instance named `test` in AWS):
 
 ```text
-./opstrace create aws testcluster -c config.yaml
+./opstrace create aws test -c config.yaml
 ```
 
 Help text:
@@ -48,10 +48,10 @@ optional arguments:
 
 Notes:
 
-* Cloud provider and cluster name are not part of the cluster configuration document.
-That means that the same cluster configuration document can be re-used across cloud providers and also across clusters with different names.
+* Cloud provider and instance name are not part of the configuration document.
+That means that the same configuration document can be re-used across cloud providers and also across instances with different names.
 * The `create` operation has internal timeout and retry logic.
-  Unless you know better, it makes sense to keep this procedure running.
+  Unless you know better, it makes sense to keep this operation running.
 * When the `create` operation detects a problem that needs to be resolved through human intervention then it does not necessarily error out immediately.
   Instead, it presents the problem through its logs, retries periodically, and waits for you to take action behind the scenes.
   For example, when a cloud resource can't be created as of a quota error then you can infer that from the CLI's log output and can take action while the CLI keeps retrying.
@@ -62,16 +62,17 @@ That means that the same cluster configuration document can be re-used across cl
 
 ### `destroy`
 
-Tear down an existing Opstrace cluster.
+Remove an existing Opstrace instance and all its supporting cloud resources.
 
-Example (for tearing down a cluster named `testcluster` in AWS):
+Example (for tearing down an instance named `test` in AWS):
 
 ```text
-./opstrace destroy aws testcluster
+./opstrace destroy aws test
 ```
 
-In the happy case, no input beyond cloud provider and cluster name is needed.
-However, in certain ambiguous cases the CLI may ask for the `--region` argument.
+In the happy path no input beyond cloud provider and instance name is needed.
+However, in certain ambiguous cases where the CLI can not automatically detect the region your instance is in, it will ask for the `--region` argument.
+Once provided, the CLI will remove all resources created for that instance name in the given region.
 
 Help text:
 
@@ -99,8 +100,8 @@ optional arguments:
 
 Notes:
 
-* Cloud provider, cloud credentials and Opstrace cluster name are the fundamental input parameters for the `destroy` operation.
-* The `destroy` operation has internal timeout and retry logic.
+* Cloud provider, cloud credentials and Opstrace instance name are the fundamental input parameters for the `destroy` operation.
+* The `destroy` operation has internal timeout and retry logic, similar to the `create` operation.
   Unless you know better, it makes sense to keep this procedure running.
 * When the `destroy` operation errors out expectedly or unexpectedly or when you interrupt it manually (for instance, by sending `SIGINT` via `Ctrl+C`) then you can safely re-run it.
   It largely is designed to pick up the work where it was left.
@@ -138,10 +139,10 @@ Upgrade Opstrace from the version running in your account to the version defined
 
 NOTE: GCP platform is not yet supported.
 
-Example (to upgrade a cluster named `testcluster` in AWS):
+Example (to upgrade an instance named `test` in AWS):
 
 ```text
-./opstrace upgrade aws testcluster -c config.yaml
+./opstrace upgrade aws test -c config.yaml
 ```
 
 Help text:
@@ -174,8 +175,8 @@ optional arguments:
 Notes:
 
 * The CLI version that executes the upgrade command defines the Opstrace target version.
-* The original config file used to create the cluster is required. However, changes to it are not yet supported. This requirement might change in the future.
-* The `upgrade` operation has internal timeout and retry logic.
+* The original config file used to create the instance is required. However, changes to it are not yet supported. This requirement might change in the future.
+* The `upgrade` operation has internal timeout and retry logic, similar to the `create` operation.
   Unless you know better, it makes sense to keep this procedure running.
 * When the `upgrade` operation detects a problem that needs to be resolved through human intervention then it does not necessarily error out immediately.
   Instead, it presents the problem through its logs, retries periodically, and waits for you to take action behind the scenes.
@@ -228,7 +229,7 @@ An more detailed specification can be found in the AWS SDK reference documentati
 
 ### GCP
 
-For managing Opstrace clusters on GCP, the Opstrace CLI requires the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to be set.
+For managing Opstrace on GCP, the Opstrace CLI requires the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to be set.
 
 The value is expected to be a file path to a GCP service account credential file in JSON format.
 
