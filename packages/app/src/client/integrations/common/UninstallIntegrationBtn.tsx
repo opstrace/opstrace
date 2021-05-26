@@ -43,12 +43,18 @@ export const UninstallBtn = ({
   const handleUninstall = async () => {
     if (uninstallCallback !== undefined) await uninstallCallback();
 
-    await graphqlClient.DeleteIntegration({
-      tenant_id: tenant.id,
-      id: integration.id
-    });
-
-    history.push(installedIntegrationsPath({ tenant }));
+    try {
+      await graphqlClient
+        .DeleteIntegration({
+          tenant_id: tenant.id,
+          id: integration.id
+        })
+        .then(() => {
+          history.push(installedIntegrationsPath({ tenant }));
+        });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const { activatePickerWithText } = usePickerService(
