@@ -77,7 +77,7 @@ const TenantOverview = () => {
             initialHeight={1000}
             tenant="system"
             title="Tenant Overview: Logs (Loki)"
-            path="/d/TODO/tenant-overview-loki"
+            path="/d/c92shqQZz/tenant-overview-loki"
             params={{
               "var-tenant": tenant.name
             }}
