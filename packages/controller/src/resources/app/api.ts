@@ -116,7 +116,9 @@ export function OpstraceAPIResources(
           strategy: {
             type: "RollingUpdate",
             rollingUpdate: {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               maxSurge: "25%" as any,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               maxUnavailable: "25%" as any
             }
           },
