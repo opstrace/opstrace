@@ -22,11 +22,7 @@ case "${OPSTRACE_CLOUD_PROVIDER}" in
 esac
 
 # Override the target kubeconfig directory to point to the checkout directory.
-# Account for cloud provider to allow multiple simultaneous runs of this build.
-export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/${OPSTRACE_CLOUD_PROVIDER}/.kube
-export OPSTRACE_KUBECONFIG=$(pwd)/${OPSTRACE_CLOUD_PROVIDER}/.kube/config
-mkdir -p $(pwd)/${OPSTRACE_CLOUD_PROVIDER}/.kube/
-
+export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/.kube
 
 teardown() {
     LAST_EXIT_CODE=$?
