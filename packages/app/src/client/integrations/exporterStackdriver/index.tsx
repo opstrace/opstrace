@@ -26,9 +26,9 @@ import { EARLY_PREVIEW } from "client/flags";
 export const exporterStackdriverIntegration: IntegrationDef = {
   kind: "exporter-stackdriver",
   category: "exporter",
-  label: "Google Stackdriver",
+  label: "Google Cloud Monitoring",
   desc:
-    "A Prometheus exporter for Google Stackdriver Monitoring metrics. It acts as a proxy that requests Stackdriver API for the metric's time-series everytime prometheus scrapes it.",
+    "Pipe any of your metrics from Google Cloud Monitoring into Opstrace. You can select metrics from any of the Google Cloud Services such as BigTable or Load Balancers, as long as you've enabled monitoring on the service in the Google Cloud Console.",
   Form: Form,
   Show: Show,
   Status: Status,
