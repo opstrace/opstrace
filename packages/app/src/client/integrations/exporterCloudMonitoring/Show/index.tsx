@@ -37,7 +37,7 @@ import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
 import { integrationDefRecords } from "client/integrations";
 
-export const ExporterStackdriverShow = () => {
+export const ExporterCloudMonitoringShow = () => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
@@ -141,4 +141,4 @@ export const ExporterStackdriverShow = () => {
   );
 };
 
-export default ExporterStackdriverShow;
+export default ExporterCloudMonitoringShow;

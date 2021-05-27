@@ -19,7 +19,7 @@ import { useForm, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { exporterStackdriverIntegration as integrationDef } from "./index";
+import { exporterCloudMonitoringIntegration as integrationDef } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
 
@@ -63,7 +63,7 @@ type Props = {
   handleCreate: Function;
 };
 
-export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
+export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -212,4 +212,4 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
   );
 };
 
-export default ExporterStackdriverForm;
+export default ExporterCloudMonitoringForm;

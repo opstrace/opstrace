@@ -23,8 +23,8 @@ import { IntegrationDef } from "client/integrations/types";
 
 import { EARLY_PREVIEW } from "client/flags";
 
-export const exporterStackdriverIntegration: IntegrationDef = {
-  kind: "exporter-stackdriver",
+export const exporterCloudMonitoringIntegration: IntegrationDef = {
+  kind: "exporter-cloud-monitoring",
   category: "exporter",
   label: "Google Cloud Monitoring",
   desc:
