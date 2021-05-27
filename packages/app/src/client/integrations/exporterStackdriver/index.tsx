@@ -21,6 +21,8 @@ import Logo from "./Logo.jpg";
 
 import { IntegrationDef } from "client/integrations/types";
 
+import { EARLY_PREVIEW } from "client/flags";
+
 export const exporterStackdriverIntegration: IntegrationDef = {
   kind: "exporter-stackdriver",
   category: "exporter",
@@ -31,5 +33,5 @@ export const exporterStackdriverIntegration: IntegrationDef = {
   Show: Show,
   Status: Status,
   Logo: Logo,
-  enabled: true
+  enabled: EARLY_PREVIEW
 };
