@@ -26,6 +26,8 @@ import { ControlledInput } from "client/components/Form/ControlledInput";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
+import { Typography } from "client/components/Typography";
+import { ExternalLink } from "client/components/Link";
 
 type Values = {
   name: string;
@@ -42,7 +44,6 @@ type Values = {
 const Schema = yup.object().shape({
   name: yup.string().required(),
   credentials: yup.string().required(),
-  // May be empty:
   googleProjectId: yup.string().optional(),
   monitoringMetricsTypePrefixes: yup.string().required(),
   monitoringMetricsInterval: yup.string().required(),
@@ -104,13 +105,13 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
       p={1}
     >
       <Box>
-        <Card>
-          <CardHeader
-            titleTypographyProps={{ variant: "h5" }}
-            title={`Add ${integrationDef.label} Integration`}
-          />
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title={`Add ${integrationDef.label} Integration`}
+            />
+            <CardContent>
               <Box mb={3} mt={2}>
                 <ControlledInput
                   name="name"
@@ -134,6 +135,34 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                   helperText="Important: these credentials are stored as plain text."
                 />
               </Box>
+
+              <Box mb={3}>
+                <Typography variant="subtitle1">Configuration Flags</Typography>
+                <Typography
+                  variant="subtitle2"
+                  color="textSecondary"
+                  gutterBottom={true}
+                >
+                  See the{" "}
+                  <ExternalLink
+                    target="_blank"
+                    href="https://github.com/prometheus-community/stackdriver_exporter#flags"
+                  >
+                    documentation
+                  </ExternalLink>{" "}
+                  for further details
+                </Typography>
+              </Box>
+
+              <Box mb={3}>
+                <ControlledInput
+                  name="googleProjectId"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="google.project-id"
+                  helperText="Comma-separated list of Google Project IDs, autodetected if empty"
+                />
+              </Box>
               <Box mb={3}>
                 <ControlledInput
                   name="monitoringMetricsTypePrefixes"
@@ -146,15 +175,6 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
                   }}
                   label="monitoring.metrics-type-prefixes"
                   helperText="Comma-separated Google Stackdriver Monitoring Metric Type prefixes"
-                />
-              </Box>
-              <Box mb={3}>
-                <ControlledInput
-                  name="googleProjectId"
-                  control={control}
-                  inputProps={{ fullWidth: true }}
-                  label="google.project-id"
-                  helperText="Comma-separated list of Google Project IDs, autodetected if empty"
                 />
               </Box>
               <Box mb={3}>
@@ -184,9 +204,9 @@ export const ExporterStackdriverForm = ({ handleCreate }: Props) => {
               >
                 Create
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </form>
       </Box>
     </Box>
   );
