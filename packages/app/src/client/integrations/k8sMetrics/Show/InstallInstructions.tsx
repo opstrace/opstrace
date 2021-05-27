@@ -86,7 +86,7 @@ export const InstallInstructions = ({
   };
 
   const dashboardHandler = async () => {
-    const folder = await grafana.createFolder(integration, tenant);
+    const folder = await grafana.createFolder({ integration, tenant });
 
     for (const d of makePrometheusDashboardRequests({
       integrationId: integration.id,

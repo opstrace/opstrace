@@ -24,19 +24,21 @@ const makeUuid = (integration: Integration) => `i9n-${integration.id}`;
 const makeUrl = (tenant: Tenant, path: string) =>
   `${grafanaUrl({ tenant })}/grafana/api/${path}`;
 
-type createFolderInfo = {
-  // The numeric ID for the folder that was created (or updated).
-  // This ID must be included when creating dashboards within the folder.
-  id: number;
-  // The '/grafana/...' path linking to the folder in Grafana.
-  urlPath: String;
+type folderProps = {
+  integration: Integration;
+  tenant: Tenant;
 };
 
-export async function createFolder(
-  integration: Integration,
-  tenant: Tenant
-): Promise<createFolderInfo> {
-  // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
+type folderInfo = {
+  id: number; // This ID must be included when creating dashboards within the folder.
+  urlPath: String; // The '/grafana/...' path linking to the folder in Grafana.
+};
+
+// see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
+export async function createFolder({
+  integration,
+  tenant
+}: folderProps): Promise<folderInfo> {
   const responseData = await axios({
     method: "post",
     url: makeUrl(tenant, "folders"),
@@ -53,13 +55,30 @@ export async function createFolder(
   };
 }
 
-export async function deleteFolder(
-  integration: Integration,
-  tenant: Tenant
-): Promise<{
+// see also: https://grafana.com/docs/grafana/latest/http_api/folder/#get-folder-by-uid
+export async function getFolder({
+  integration,
+  tenant
+}: folderProps): Promise<folderInfo | null> {
+  const responseData = await axios({
+    method: "get",
+    url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
+    withCredentials: true
+  }).then(res => res.data);
+
+  return {
+    id: responseData.id,
+    urlPath: responseData.url
+  };
+}
+
+// see also: https://grafana.com/docs/grafana/latest/http_api/folder/#delete-folder
+export async function deleteFolder({
+  integration,
+  tenant
+}: folderProps): Promise<{
   id: number;
 }> {
-  // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#delete-folder
   const responseData = await axios({
     method: "delete",
     url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
@@ -76,11 +95,11 @@ type dashboardInfo = {
   urlPath: String;
 };
 
+// see also: https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard
 export async function createDashboard(
   tenant: Tenant,
   dashboard: object
 ): Promise<dashboardInfo> {
-  // see also: https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard
   const responseData = await axios({
     method: "post",
     url: makeUrl(tenant, "dashboards/db"),
