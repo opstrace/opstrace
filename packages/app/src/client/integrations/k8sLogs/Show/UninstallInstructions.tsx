@@ -85,7 +85,7 @@ export const UninstallInstructions = ({
   const uninstallIntegrationHandler = async () => {
     try {
       // Dashboard folder might not exist
-      await grafana.deleteFolder(integration, tenant);
+      await grafana.deleteFolder({ integration, tenant });
     } catch (err) {
       console.log(err);
     }
