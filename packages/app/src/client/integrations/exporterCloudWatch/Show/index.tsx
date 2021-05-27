@@ -21,7 +21,8 @@ import { format, parseISO } from "date-fns";
 import { installedIntegrationsPath } from "client/integrations/paths";
 import { grafanaUrl } from "client/utils/grafana";
 
-import IntegrationStatus from "client/integrations/k8sLogs/Status";
+import Status from "client/integrations/exporterCloudWatch/Status";
+import { Actions } from "./Actions";
 
 import { CondRender } from "client/utils/rendering";
 
@@ -36,7 +37,7 @@ import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
 import { integrationDefRecords } from "client/integrations";
 
-export const ExporterStackdriverShow = () => {
+export const ExporterCloudWatchShow = () => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
@@ -49,6 +50,19 @@ export const ExporterStackdriverShow = () => {
       latestMetadata?.folder_path
     ];
   }, [integration?.grafana_metadata]);
+
+  // NOTE: the timeranges for these urls is not the same as that used by the status component
+  // const errorLogsUrl = useMemo(() => {
+  //   const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22logs%22,%7B%22expr%22:%22%7Bk8s_namespace_name%3D%5C%22${tenant.name}-tenant%5C%22,k8s_container_name%3D%5C%22exporter%5C%22,k8s_pod_name%3D~%5C%22%5Eexporter-${integration.key}-%5Ba-z0-9-%5D*%5C%22%7D%20%7C%3D%20%5C%22stderr%5C%22%20%7C%3D%20%5C%22${ERROR_STR}%5C%22%22%7D%5D`;
+  //   return `${window.location.protocol}//system.${window.location.host}/grafana/explore?${path}`;
+  // }, [tenant.name, integration.key]);
+
+  const logsUrl = useMemo(() => {
+    if (integration?.key) {
+      const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22logs%22,%7B%22expr%22:%22%7Bk8s_namespace_name%3D%5C%22${tenant.name}-tenant%5C%22,k8s_container_name%3D%5C%22exporter%5C%22,k8s_pod_name%3D~%5C%22%5Eexporter-${integration.key}-%5Ba-z0-9-%5D*%5C%22%7D%22%7D%5D`;
+      return `${window.location.protocol}//system.${window.location.host}/grafana/explore?${path}`;
+    } else return "";
+  }, [tenant.name, integration?.key]);
 
   if (!integration) {
     // TODO: add loading or NotFound here
@@ -79,10 +93,7 @@ export const ExporterStackdriverShow = () => {
             action={
               <Box ml={3} display="flex" flexWrap="wrap">
                 <Box p={1}>
-                  <IntegrationStatus
-                    integration={integration}
-                    tenant={tenant}
-                  />
+                  <Status integration={integration} tenant={tenant} />
                 </Box>
               </Box>
             }
@@ -102,6 +113,13 @@ export const ExporterStackdriverShow = () => {
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>
               </Box>
+              <Attribute.Key>
+                <ExternalLink target="_blank" href={logsUrl}>
+                  <Button state="primary" variant="outlined" size="medium">
+                    View Exporter Logs
+                  </Button>
+                </ExternalLink>
+              </Attribute.Key>
               <CondRender when={isDashboardInstalled}>
                 <Attribute.Key>
                   <ExternalLink
@@ -118,8 +136,9 @@ export const ExporterStackdriverShow = () => {
           </CardContent>
         </Card>
       </Box>
+      <Actions integration={integration} tenant={tenant} />
     </>
   );
 };
 
-export default ExporterStackdriverShow;
+export default ExporterCloudWatchShow;

@@ -54,7 +54,7 @@ const TimelineWrapper = styled(Timeline)`
   }
 `;
 
-type UnInstallInstructionsProps = {
+type UninstallInstructionsProps = {
   tenant: Tenant;
   integration: Integration;
   isDashboardInstalled: boolean;
@@ -65,7 +65,7 @@ export const UninstallInstructions = ({
   integration,
   tenant,
   config
-}: UnInstallInstructionsProps) => {
+}: UninstallInstructionsProps) => {
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
