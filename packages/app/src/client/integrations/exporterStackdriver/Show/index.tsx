@@ -21,7 +21,8 @@ import { format, parseISO } from "date-fns";
 import { installedIntegrationsPath } from "client/integrations/paths";
 import { grafanaUrl } from "client/utils/grafana";
 
-import IntegrationStatus from "./Status";
+import Status from "client/integrations/k8sLogs/Status";
+import { Actions } from "./Actions";
 
 import { CondRender } from "client/utils/rendering";
 
@@ -36,7 +37,7 @@ import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
 import { integrationDefRecords } from "client/integrations";
 
-export const ExporterCloudWatchShow = () => {
+export const ExporterStackdriverShow = () => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
@@ -92,10 +93,7 @@ export const ExporterCloudWatchShow = () => {
             action={
               <Box ml={3} display="flex" flexWrap="wrap">
                 <Box p={1}>
-                  <IntegrationStatus
-                    integration={integration}
-                    tenant={tenant}
-                  />
+                  <Status integration={integration} tenant={tenant} />
                 </Box>
               </Box>
             }
@@ -138,8 +136,9 @@ export const ExporterCloudWatchShow = () => {
           </CardContent>
         </Card>
       </Box>
+      <Actions integration={integration} tenant={tenant} />
     </>
   );
 };
 
-export default ExporterCloudWatchShow;
+export default ExporterStackdriverShow;
