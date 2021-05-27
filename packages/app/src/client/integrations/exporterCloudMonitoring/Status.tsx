@@ -21,9 +21,9 @@ import { Tenant } from "state/tenant/types";
 
 import ExporterStatus from "client/integrations/common/ExporterStatus";
 
-export const ExporterStackdriverStatus = (props: {
+export const ExporterCloudMonitoringStatus = (props: {
   integration: Integration;
   tenant: Tenant;
 }) => <ExporterStatus {...props} errorQuery="level=error" />;
 
-export default ExporterStackdriverStatus;
+export default ExporterCloudMonitoringStatus;
