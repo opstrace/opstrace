@@ -27,7 +27,8 @@ export const exporterCloudWatchIntegration: IntegrationDef = {
   kind: "exporter-cloudwatch",
   category: "exporter",
   label: "Amazon CloudWatch",
-  desc: "An exporter for Amazon CloudWatch, for Prometheus.",
+  desc:
+    "Pipe any of your metrics from CloudWatch into Opstrace. You can select metrics from any of the AWS Services such as RDS or Load Balancers, as long as you've enabled CloudWatch monitoring on the service in the AWS console.",
   Form: Form,
   Show: Show,
   Status: Status,
