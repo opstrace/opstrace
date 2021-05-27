@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import React from "react";
 import styled, { css } from "styled-components";
-import MuiButton, {
-  ButtonProps as MuiButtonProps
-} from "@material-ui/core/Button";
-
+import MuiButton from "@material-ui/core/Button";
 import { ITheme } from "client/themes";
 
 type ButtonState =
@@ -29,18 +25,6 @@ type ButtonState =
   | "primary"
   | "secondary"
   | "info";
-
-export type ButtonProps = MuiButtonProps & {
-  state?: ButtonState;
-};
-
-const BaseButton = ({ children, state, ...rest }: ButtonProps) => {
-  return (
-    <MuiButton size={rest.size || "small"} {...rest}>
-      {children}
-    </MuiButton>
-  );
-};
 
 const getColorForState = (theme: ITheme, state?: ButtonState) => {
   switch (state) {
@@ -59,7 +43,9 @@ const getColorForState = (theme: ITheme, state?: ButtonState) => {
   }
 };
 
-const Button = styled(BaseButton)`
+const Button = styled(MuiButton)<{
+  state?: ButtonState;
+}>`
   text-decoration: none;
   color: ${props => getColorForState(props.theme, props.state).contrastText};
   ${props =>
@@ -90,5 +76,9 @@ const Button = styled(BaseButton)`
     `}
   }}
 `;
+
+Button.defaultProps = {
+  size: "small"
+};
 
 export default Button;
