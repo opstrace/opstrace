@@ -22,6 +22,7 @@ import { installedIntegrationsPath } from "client/integrations/paths";
 import { grafanaUrl } from "client/utils/grafana";
 
 import Status from "client/integrations/k8sLogs/Status";
+import { Details } from "./Details";
 import { Actions } from "./Actions";
 
 import { CondRender } from "client/utils/rendering";
@@ -136,6 +137,7 @@ export const ExporterCloudMonitoringShow = () => {
           </CardContent>
         </Card>
       </Box>
+      <Details integration={integration} />
       <Actions integration={integration} tenant={tenant} />
     </>
   );
