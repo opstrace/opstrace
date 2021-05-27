@@ -1,0 +1,1 @@
+UPDATE "public"."integration" i SET kind = 'exporter-stackdriver' where i.kind = 'exporter-cloud-monitoring';
