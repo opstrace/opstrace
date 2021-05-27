@@ -16,14 +16,11 @@
 
 import React from "react";
 
-import { Tenant } from "state/tenant/types";
 import { Integration } from "state/integration/types";
-
-import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
-import { Card, CardContent, CardHeader } from "client/components/Card";
+import { Card, CardContent } from "client/components/Card";
 import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
 
