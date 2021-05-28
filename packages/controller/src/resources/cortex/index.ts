@@ -221,7 +221,7 @@ export function CortexResources(
     // rate limits.
     // https://cortexmetrics.io/docs/configuration/arguments/#runtime-configuration-file
     runtime_config: {
-      period: "10s",
+      period: "5s",
       file: "/etc/cortex-runtime-cfg/runtime-config.yaml"
     },
     api: {
