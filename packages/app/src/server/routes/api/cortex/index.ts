@@ -31,7 +31,10 @@ export const cortexProxy = httpProxy.createProxyServer({ ignorePath: true });
  */
 cortexProxy.on("proxyReq", onProxyReq);
 
-function proxyTo(target: string, req: express.Request, res: express.Response) {
+const proxyTo = (target: string) => (
+  req: express.Request,
+  res: express.Response
+) => {
   return cortexProxy.web(
     req,
     res,
@@ -47,7 +50,7 @@ function proxyTo(target: string, req: express.Request, res: express.Response) {
       log.warning("error in http cortex proxy upstream (ignoring): %s", err);
     }
   );
-}
+};
 
 export default function createCortexHandler(): express.Router {
   const cortex = express.Router();
@@ -100,8 +103,6 @@ export default function createCortexHandler(): express.Router {
   //   );
   // });
 
-  // only available if -runtime-config.file specified when running cortex components https://cortexmetrics.io/docs/api/#runtime-configuration
-  cortex.use("/runtime_config", (req, res) => {});
   // Being able to access this implies having access to cortex config for
   // all tenants, i.e. this is a privileged / superuser action.
   cortex.post("/runtime_config", setCortexRuntimeConfigHandler);
@@ -110,14 +111,16 @@ export default function createCortexHandler(): express.Router {
   cortex.get("/runtime_config_file", readCortexRuntimeConfigHandler);
 
   // This is the runtime config as recognized by cortex. Cortex can take up to runtime_config.period to load
-  cortex.get("/runtime_config", (req, res) => {
-    proxyTo(`http://ruler.cortex.svc.cluster.local/runtime_config`, req, res);
-  });
+  cortex.get(
+    "/runtime_config",
+    proxyTo(`http://ruler.cortex.svc.cluster.local/runtime_config`)
+  );
 
   // All Cortex config
-  cortex.get("/config", (req, res) => {
-    proxyTo(`http://ingester.cortex.svc.cluster.local/config`, req, res);
-  });
+  cortex.get(
+    "/config",
+    proxyTo(`http://ingester.cortex.svc.cluster.local/config`)
+  );
 
   return cortex;
 }
