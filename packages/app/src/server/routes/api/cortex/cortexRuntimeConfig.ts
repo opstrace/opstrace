@@ -40,6 +40,7 @@ try {
   process.exit(1);
 }
 
+const DATA_KEY = "runtime-config.yaml";
 
 function genCortexRuntimeConfigCM(kubeconfig: KubeConfig, yamldoc: string) {
   // name and namespace and data key: are all convention-based, must be in sync
@@ -49,7 +50,7 @@ function genCortexRuntimeConfigCM(kubeconfig: KubeConfig, yamldoc: string) {
     {
       apiVersion: "v1",
       data: {
-        "runtime-config.yaml": yamldoc
+        [DATA_KEY]: yamldoc
       },
       kind: "ConfigMap",
       metadata: {
