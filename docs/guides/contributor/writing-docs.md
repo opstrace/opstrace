@@ -66,11 +66,14 @@ All that being said, proper grammar and punctuation should always be used—this
 
 Here is a laundry list of various style, grammar, and other choices we've made over time:
 
-* We follow [sembr.org](https://sembr.org), requiring each sentence written in Markdown to be on its own line.
-* Use _title case_ for top-level headings (`h1`); use _sentence case_ for all other headings.
+* We follow [semantic line breaks (sembr.org)](https://sembr.org), requiring each sentence written in Markdown to be on its own line.
+* Capitalization should be used to signal the start of a new sentence, differentiate titles and major headings from the body of the text (using [title case](https://en.wikipedia.org/wiki/Title_case)), and show proper nouns and official titles.
 * Use colons when introducing a block quote or code block.
 * Use the verb _log in to_ over _log into_ or _login to_; as a noun, use _login_.  ([Reference](https://grammarist.com/spelling/log-in-login))
 * Prefer the singular use of _data,_ as in _this data_.
-* Prefer the phrase _the cluster_ or _the Opstrace cluster_ over other phrases such as _send data to Opstrace._
-* [Quotation marks](https://en.wikipedia.org/wiki/Quotation_marks_in_English#Nonstandard_usage) can be tricky to use in English: use them for quotations, highlighting unusual usage, an invented term, or calling out someone else's terms; do not use them for irony or emphasis, and beware of the downsides of [scare quotes](https://en.wikipedia.org/wiki/Scare_quotes). Alternatives may include italicization or capitalization. When in doubt, use quotation marks sparingly.
-* Capitalization should be used to signal the start of a new sentence, differentiate titles and major headings from the body of the text, and show proper nouns and official titles.
+* Avoid referring to Opstrace as a "cluster".
+  Instead, prefer referring to _an Opstrace instance_, _an Opstrace installation_, or simply by the proper noun _Opstrace_.
+  For example: _log in to the Opstrace instance_ or _send data to Opstrace._
+* [Quotation marks](https://en.wikipedia.org/wiki/Quotation_marks_in_English#Nonstandard_usage) can be tricky to use in English: use them for quotations, highlighting unusual usage, an invented term, or calling out someone else's terms; do not use them for irony or emphasis, and beware of the downsides of [scare quotes](https://en.wikipedia.org/wiki/Scare_quotes).
+  Alternatives may include italicization or capitalization.
+  When in doubt, use quotation marks sparingly.
