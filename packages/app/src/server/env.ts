@@ -15,6 +15,7 @@
  */
 
 export const isDevEnvironment = process.env.NODE_ENV === "development";
+export const isRemoteDevEnvironment = !!process.env.REMOTE_DEV;
 // hardcode the port so we can set the auth callbacks reliably
 const PORT = 3001;
 
