@@ -206,9 +206,7 @@ export function CortexResources(
   const storageBackend = target === "gcp" ? "gcs" : "s3";
 
   // can use `state.tenants.list.tenants` if we'd like to.
-  // Note(JP): Is this just the initial state? This is used in a configmap
-  // data value below. Will the controller overwrite this configmap again
-  // when mutated by a different entity?
+  // This is used in a configmap data value below.
   const runtimeConfigDefault = {
     overrides: {}
   };
