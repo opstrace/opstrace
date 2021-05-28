@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import yaml from "js-yaml";
 import { NextFunction, Request, Response } from "express";
-
-import { log } from "@opstrace/utils/lib/log";
 
 import {
   createOrUpdateConfigMapWithRetry,
   ConfigMap
 } from "@opstrace/kubernetes";
-
 import { KubeConfig } from "@kubernetes/client-node";
+
+import { isDevEnvironment, isRemoteDevEnvironment } from "server/env";
+import { GeneralServerError } from "server/errors";
+import { log } from "@opstrace/utils/lib/log";
+import { validateAndExtractRuntimeConfig } from "state/cortex-config/utils";
 
 const KUBECONFIG = new KubeConfig();
 
@@ -84,23 +85,19 @@ export default async function setCortexRuntimeConfigHandler(
   res: Response,
   next: NextFunction
 ) {
-  log.info("setCortexRuntimeConfigHandler: got request body: %s", req.body);
-
   try {
-    yaml.load(req.body);
+    // Make sure we're setting a valid runtime config. This will throw if validation fails
+    await validateAndExtractRuntimeConfig(req.body);
   } catch (err) {
-    res
-      .status(400)
-      .send(`bad request: could not deserialize body as YAML: ${err.message}`);
-    return;
+    // Will structure the error for the client in a consistent struct and will log a consistent error log structure
+    // with the message from failed validation
+    return next(new GeneralServerError(400, `bad request: ${err.message}`));
   }
 
   if (KUBECONFIG === undefined) {
-    log.warning(
-      "setCortexRuntimeConfigHandler: cannot process request: kubeconfig not set; graceful degradation"
-    );
-    res.status(500).send("internal error: kubeconfig not set");
-    return;
+    // This will be logged with a stack trace and handled correctly by our error middleware,
+    // issueing a 500 back to the user with the error message below in the resonse body
+    throw new Error("internal error: kubeconfig not set");
   }
 
   // Assume that `req.body` is the new config map's payload content.
@@ -127,21 +124,25 @@ export default async function setCortexRuntimeConfigHandler(
       // 2021-05-19 18:33:24
       //     "status": "Failure",
       const kr = err.response;
-      // forward status code.
-      res
-        .status(kr.statusCode)
-        .send(
-          `Error during config map update. ` +
+      // forward status code and log the message with the error logging middleware
+      return next(
+        new GeneralServerError(
+          kr.statusCode,
+          `Error during cortex runtime config map update. ` +
             `Kubernetes API returned status code ${kr.statusCode}. ` +
             `Message: ${kr.body.message}`
+        )
         );
-      return;
     }
 
     // When no HTTP response was received, i.e. upon transient errors.
     log.warning("error during config map update: %s", err); // log with stack trace
-    res.status(500).send(`error during config map update: ${err.message}`);
-    return;
+    return next(
+      new GeneralServerError(
+        500,
+        `error during config map update: ${err.message}`
+      )
+    );
   }
 
   res.status(202).send("accepted: change is expected to take effect soon");
