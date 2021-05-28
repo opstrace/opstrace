@@ -43,6 +43,14 @@
           "title": "Administrator Guide",
           "routes": [
             {
+              "title": "Adding and Managing Tenants",
+              "path": "/docs/guides/administrator/tenants.md"
+            },
+            {
+              "title": "Adding and Managing Users",
+              "path": "/docs/guides/administrator/users.md"
+            },
+            {
               "title": "Hands-on Troubleshooting",
               "path": "/docs/guides/administrator/troubleshooting.md"
             },
