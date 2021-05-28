@@ -16,6 +16,9 @@
 
 import axios from "axios";
 import { isString } from "ramda-adjunct";
+import useSWR from "swr";
+
+import useDeepMemo from "client/hooks/useDeepMemo";
 
 import { Tenant } from "state/tenant/types";
 import { Integration } from "state/integration/types";
@@ -55,22 +58,24 @@ export async function createFolder({
   };
 }
 
-// see also: https://grafana.com/docs/grafana/latest/http_api/folder/#get-folder-by-uid
-export async function getFolder({
+export function useFolder({
   integration,
   tenant
-}: folderProps): Promise<folderInfo | null> {
-  const responseData = await axios({
+}: {
+  integration?: Integration;
+  tenant: Tenant;
+}) {
+  const token = useDeepMemo(() => [integration, tenant], [integration, tenant]);
+  return useSWR(token, getFolder);
+}
+
+// see also: https://grafana.com/docs/grafana/latest/http_api/folder/#get-folder-by-uid
+export const getFolder = ({ integration, tenant }: folderProps) =>
+  axios({
     method: "get",
     url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
     withCredentials: true
   }).then(res => res.data);
-
-  return {
-    id: responseData.id,
-    urlPath: responseData.url
-  };
-}
 
 // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#delete-folder
 export async function deleteFolder({
