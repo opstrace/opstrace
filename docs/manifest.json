@@ -101,8 +101,8 @@
           "path": "/docs/references/roadmap.md"
         },
         {
-          "title": "Cluster Configuration",
-          "path": "/docs/references/cluster-configuration.md"
+          "title": "Configuration",
+          "path": "/docs/references/configuration.md"
         },
         {
           "title": "Command Line Interface (CLI)",
