@@ -38,7 +38,9 @@ export function IntegrationResources(
 
   // Get all integrations from GraphQL/Postgres
   state.graphql.Integrations.resources.forEach(integration => {
-    toKubeResources(state, integration, kubeConfig).forEach(resource => collection.add(resource));
+    toKubeResources(state, integration, kubeConfig).forEach(resource =>
+      collection.add(resource)
+    );
   });
 
   return collection;
@@ -48,11 +50,11 @@ type BlackboxConfig = {
   // Probes, each entry in the array is a set of key value pairs to be set as params in the HTTP url.
   // Passed to the prometheus operator as endpoints to monitor.
   // For example {target: "example.com", module: "http_2xx"} -> "/probe?target=example.com&module=http_2xx"
-  probes: { [key: string]: string }[],
+  probes: { [key: string]: string }[];
   // Config listing modules that may be referenced by probes.
   // Passed to the blackbox integration configuration, or the default configuration is used if this is undefined.
   // For example this may configure an "http_2xx" module to be referenced by the probes.
-  configFile: string | null
+  configFile: string | null;
 };
 type BlackboxIntegrationData = {
   // config: nested JSON object
@@ -91,13 +93,16 @@ type AzureIntegrationData = {
 const toKubeResources = (
   state: State,
   integration: Integration,
-  kubeConfig: KubeConfig,
+  kubeConfig: KubeConfig
 ): K8sResource[] => {
   // Name for any k8s objects like Deployment, ConfigMap, and/or Secret associated with this secret
   const k8sName = `integration-${integration.key}`;
 
   // Look up tenant name from the id
-  const tenantName = toTenantName(integration.tenant_id, state.tenants.list.tenants);
+  const tenantName = toTenantName(
+    integration.tenant_id,
+    state.tenants.list.tenants
+  );
   if (tenantName == null) {
     log.warning(
       "Skipping deployment of %s integration '%s': missing tenant_id=%s in local state: %s",
@@ -113,13 +118,13 @@ const toKubeResources = (
     // DO NOT remove tenant label: used by Prometheus operator to filter the ServiceMonitors
     tenant: tenantName,
     "opstrace.com/integration-name": integration.name,
-    "opstrace.com/integration-kind": integration.kind,
+    "opstrace.com/integration-kind": integration.kind
   };
   const k8sMetadata = {
     name: k8sName,
     namespace: toTenantNamespace(tenantName),
     labels: k8sLabels
-  }
+  };
 
   const resources: Array<K8sResource> = [];
   let podSpec: V1PodSpec;
@@ -135,39 +140,43 @@ const toKubeResources = (
     secretData = integrationData.credentials;
 
     podSpec = {
-      containers: [{
-        name: "exporter",
-        image: DockerImages.exporterCloudwatch,
-        // Import all of the key/value pairs from the credentials as secrets.
-        // For example this may include AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-        envFrom: [{ secretRef: { name: k8sName }}],
-        ports: [{ name: "metrics", containerPort: 9106 }],
-        volumeMounts: [{ name: "config", mountPath: "/config" }],
-        // Use the 'healthy' endpoint
-        // See https://github.com/prometheus/cloudwatch_exporter/blob/f0e84d6/src/main/java/io/prometheus/cloudwatch/WebServer.java#L43
-        startupProbe: {
-          httpGet: {
-            path: "/-/healthy",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            port: "metrics" as any
-          },
-          failureThreshold: 3,
-          initialDelaySeconds: 10,
-          periodSeconds: 30,
-          successThreshold: 1,
-          timeoutSeconds: 5
+      containers: [
+        {
+          name: "exporter",
+          image: DockerImages.exporterCloudwatch,
+          // Import all of the key/value pairs from the credentials as secrets.
+          // For example this may include AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+          envFrom: [{ secretRef: { name: k8sName } }],
+          ports: [{ name: "metrics", containerPort: 9106 }],
+          volumeMounts: [{ name: "config", mountPath: "/config" }],
+          // Use the 'healthy' endpoint
+          // See https://github.com/prometheus/cloudwatch_exporter/blob/f0e84d6/src/main/java/io/prometheus/cloudwatch/WebServer.java#L43
+          startupProbe: {
+            httpGet: {
+              path: "/-/healthy",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              port: "metrics" as any
+            },
+            failureThreshold: 3,
+            initialDelaySeconds: 10,
+            periodSeconds: 30,
+            successThreshold: 1,
+            timeoutSeconds: 5
+          }
         }
-      }],
-      volumes: [{
-        name: "config",
-        configMap: {
-          name: k8sName
+      ],
+      volumes: [
+        {
+          name: "config",
+          configMap: {
+            name: k8sName
+          }
         }
-      }]
+      ]
     };
-  } else if (integration.kind == "exporter-stackdriver") {
+  } else if (integration.kind == "exporter-cloud-monitoring") {
     const integrationData = integration.data as StackdriverIntegrationData;
-    secretData = {"secret.json": integrationData.credentials};
+    secretData = { "secret.json": integrationData.credentials };
 
     // We do not support changing the following envvars, because they are part of the integration:
     // - GOOGLE_APPLICATION_CREDENTIALS must be "/credential/secret.json"
@@ -177,15 +186,15 @@ const toKubeResources = (
     const env: Array<V1EnvVar> = [];
     env.push({
       name: "GOOGLE_APPLICATION_CREDENTIALS",
-      value: "/credential/secret.json",
+      value: "/credential/secret.json"
     });
     env.push({
       name: "STACKDRIVER_EXPORTER_WEB_LISTEN_ADDRESS",
-      value: ":9255",
+      value: ":9255"
     });
     env.push({
       name: "STACKDRIVER_EXPORTER_WEB_TELEMETRY_PATH",
-      value: "/metrics",
+      value: "/metrics"
     });
 
     const bannedEnv = new Set<string>();
@@ -197,46 +206,52 @@ const toKubeResources = (
     Object.entries(integrationData.config).forEach(([k, v]) => {
       // Env name: Add prefix, uppercase, and replace any punctuation with '_'
       // Example: google.project-id => STACKDRIVER_EXPORTER_GOOGLE_PROJECT_ID
-      const name = "STACKDRIVER_EXPORTER_" + k.toUpperCase().replace(/\W/g, '_');
+      const name =
+        "STACKDRIVER_EXPORTER_" + k.toUpperCase().replace(/\W/g, "_");
       if (bannedEnv.has(name)) {
         // Disallow user override of this env setting
         return;
       }
       // Env value: Original string as-is, or array converted to comma-separated string.
-      const value = (v instanceof Array)
-        ? v.toString() // convert array to comma-separated string (e.g. ["foo","bar"] => "foo,bar" without [])
-        : v as string; // plain string conversion, but for arrays this would include the []
+      const value =
+        v instanceof Array
+          ? v.toString() // convert array to comma-separated string (e.g. ["foo","bar"] => "foo,bar" without [])
+          : (v as string); // plain string conversion, but for arrays this would include the []
       env.push({ name, value });
     });
 
     podSpec = {
-      containers: [{
-        name: "exporter",
-        image: DockerImages.exporterStackdriver,
-        env,
-        ports: [{ name: "metrics", containerPort: 9255 }],
-        volumeMounts: [{ name: "credential", mountPath: "/credential" }],
-        // Use the root path, which just returns a stub HTML page
-        // see https://github.com/prometheus-community/stackdriver_exporter/blob/42badeb/stackdriver_integration.go#L178
-        startupProbe: {
-          httpGet: {
-            path: "/",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            port: "metrics" as any
-          },
-          failureThreshold: 3,
-          initialDelaySeconds: 10,
-          periodSeconds: 30,
-          successThreshold: 1,
-          timeoutSeconds: 5
+      containers: [
+        {
+          name: "exporter",
+          image: DockerImages.exporterStackdriver,
+          env,
+          ports: [{ name: "metrics", containerPort: 9255 }],
+          volumeMounts: [{ name: "credential", mountPath: "/credential" }],
+          // Use the root path, which just returns a stub HTML page
+          // see https://github.com/prometheus-community/stackdriver_exporter/blob/42badeb/stackdriver_integration.go#L178
+          startupProbe: {
+            httpGet: {
+              path: "/",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              port: "metrics" as any
+            },
+            failureThreshold: 3,
+            initialDelaySeconds: 10,
+            periodSeconds: 30,
+            successThreshold: 1,
+            timeoutSeconds: 5
+          }
         }
-      }],
-      volumes: [{
-        name: "credential",
-        secret: {
-          secretName: k8sName,
+      ],
+      volumes: [
+        {
+          name: "credential",
+          secret: {
+            secretName: k8sName
+          }
         }
-      }]
+      ]
     };
   } else if (integration.kind == "exporter-azure") {
     const integrationData = integration.data as AzureIntegrationData;
@@ -244,34 +259,41 @@ const toKubeResources = (
     secretData = integrationData.credentials;
 
     podSpec = {
-      containers: [{
-        name: "exporter",
-        image: DockerImages.exporterAzure,
-        command: ["/bin/azure_metrics_exporter", "--config.file=/config/azure.yml"],
-        // Import all of the key/value pairs from the credentials as secrets.
-        // For example create AZURE_TENANT_ID and AZURE_CLIENT_ID envvars.
-        envFrom: [{ secretRef: { name: k8sName }}],
-        ports: [{ name: "metrics", containerPort: 9276 }],
-        volumeMounts: [{ name: "config", mountPath: "/config" }],
-        // Use the root path, which just returns a stub HTML page
-        // see https://github.com/RobustPerception/azure_metrics_exporter/blob/f5baabe/main.go#L363
-        startupProbe: {
-          httpGet: {
-            path: "/",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            port: "metrics" as any
-          },
-          failureThreshold: 3,
-          initialDelaySeconds: 10,
-          periodSeconds: 30,
-          successThreshold: 1,
-          timeoutSeconds: 5
+      containers: [
+        {
+          name: "exporter",
+          image: DockerImages.exporterAzure,
+          command: [
+            "/bin/azure_metrics_exporter",
+            "--config.file=/config/azure.yml"
+          ],
+          // Import all of the key/value pairs from the credentials as secrets.
+          // For example create AZURE_TENANT_ID and AZURE_CLIENT_ID envvars.
+          envFrom: [{ secretRef: { name: k8sName } }],
+          ports: [{ name: "metrics", containerPort: 9276 }],
+          volumeMounts: [{ name: "config", mountPath: "/config" }],
+          // Use the root path, which just returns a stub HTML page
+          // see https://github.com/RobustPerception/azure_metrics_exporter/blob/f5baabe/main.go#L363
+          startupProbe: {
+            httpGet: {
+              path: "/",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              port: "metrics" as any
+            },
+            failureThreshold: 3,
+            initialDelaySeconds: 10,
+            periodSeconds: 30,
+            successThreshold: 1,
+            timeoutSeconds: 5
+          }
         }
-      }],
-      volumes: [{
-        name: "config",
-        configMap: { name: k8sName }
-      }]
+      ],
+      volumes: [
+        {
+          name: "config",
+          configMap: { name: k8sName }
+        }
+      ]
     };
   } else if (integration.kind == "exporter-blackbox") {
     const integrationData = integration.data as BlackboxIntegrationData;
@@ -285,33 +307,35 @@ const toKubeResources = (
     // If modules is defined, configure configmap volume.
     // Line things up so that the config ends up at the default path of /etc/blackbox_exporter/config.yml
     podSpec = {
-      containers: [{
-        name: "exporter",
-        image: DockerImages.exporterBlackbox,
-        ports: [{ name: "metrics", containerPort: 9115 }],
-        // Enable configmap mount if modules override is provided
-        volumeMounts: (exporterConfig.configFile)
-          ? [{ name: "config", mountPath: "/etc/blackbox_exporter" }]
-          : [],
-        // Use the 'healthy' endpoint
-        // See https://github.com/prometheus/blackbox_exporter/blob/70bce1a/main.go#L312
-        startupProbe: {
-          httpGet: {
-            path: "/-/healthy",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            port: "metrics" as any
-          },
-          failureThreshold: 3,
-          initialDelaySeconds: 10,
-          periodSeconds: 30,
-          successThreshold: 1,
-          timeoutSeconds: 5
+      containers: [
+        {
+          name: "exporter",
+          image: DockerImages.exporterBlackbox,
+          ports: [{ name: "metrics", containerPort: 9115 }],
+          // Enable configmap mount if modules override is provided
+          volumeMounts: exporterConfig.configFile
+            ? [{ name: "config", mountPath: "/etc/blackbox_exporter" }]
+            : [],
+          // Use the 'healthy' endpoint
+          // See https://github.com/prometheus/blackbox_exporter/blob/70bce1a/main.go#L312
+          startupProbe: {
+            httpGet: {
+              path: "/-/healthy",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              port: "metrics" as any
+            },
+            failureThreshold: 3,
+            initialDelaySeconds: 10,
+            periodSeconds: 30,
+            successThreshold: 1,
+            timeoutSeconds: 5
+          }
         }
-      }],
+      ],
       // Enable configmap mount if modules override is provided
-      volumes: (exporterConfig.configFile)
+      volumes: exporterConfig.configFile
         ? [{ name: "config", configMap: { name: k8sName } }]
-        : [],
+        : []
     };
 
     // probes: List of probes to run against exporter modules (required)
@@ -329,17 +353,20 @@ const toKubeResources = (
       // Convert the object values to be arrays to match ServiceMonitor schema:
       //   {module: "http_2xx", target: "example.com"} => {module: ["http_2xx"], target: ["example.com"]}
       const params = Object.fromEntries(
-        Object.entries(exporterConfig.probes[probeIdx])
-          .map(([k,v]) => [k, [v]])
+        Object.entries(exporterConfig.probes[probeIdx]).map(([k, v]) => [
+          k,
+          [v]
+        ])
       );
       // Ensure that the per-probe metrics are each labeled with the probe info.
       // In practice this means that 'module' and 'target' labels should be included in the probe metrics.
-      const relabelings = Object.entries(exporterConfig.probes[probeIdx])
-        .map(([k, v]) => ({
+      const relabelings = Object.entries(exporterConfig.probes[probeIdx]).map(
+        ([k, v]) => ({
           sourceLabels: [],
           targetLabel: k,
           replacement: v
-        }));
+        })
+      );
       // Ensure the default integration_id label is also being assigned.
       relabelings.push({
         sourceLabels: [],
@@ -352,14 +379,16 @@ const toKubeResources = (
         path: "/probe",
         // HTTP GET params must be provided as separate object field, not as part of path:
         params,
-        relabelings,
+        relabelings
       });
     }
   } else {
     // Ignore unsupported integration, may not even be relevant to the controller.
     log.debug(
       "Ignoring integration %s/%s with kind: %s",
-      integration.tenant_id, integration.id, integration.kind
+      integration.tenant_id,
+      integration.id,
+      integration.kind
     );
     return [];
   }
@@ -417,19 +446,24 @@ const toKubeResources = (
         spec: {
           // Use the user-defined integration name (value of this label) for the "job" annotation in metrics
           jobLabel: "opstrace.com/integration-name",
-          endpoints: (customMonitorEndpoints.length != 0)
-            ? customMonitorEndpoints
-            : [{
-              interval: "30s",
-              port: "metrics",
-              path: "/metrics",
-              // Inject an "integration_id" annotation in metrics
-              relabelings: [{
-                sourceLabels: [],
-                targetLabel: "integration_id",
-                replacement: integration.id
-              }]
-            }],
+          endpoints:
+            customMonitorEndpoints.length != 0
+              ? customMonitorEndpoints
+              : [
+                  {
+                    interval: "30s",
+                    port: "metrics",
+                    path: "/metrics",
+                    // Inject an "integration_id" annotation in metrics
+                    relabelings: [
+                      {
+                        sourceLabels: [],
+                        targetLabel: "integration_id",
+                        replacement: integration.id
+                      }
+                    ]
+                  }
+                ],
           selector: {
             matchLabels: { app: k8sName }
           }
@@ -440,33 +474,39 @@ const toKubeResources = (
   );
 
   if (configMapData) {
-    resources.push(new ConfigMap(
-      {
-        apiVersion: "v1",
-        kind: "ConfigMap",
-        metadata: k8sMetadata,
-        data: configMapData
-      },
-      kubeConfig
-    ));
+    resources.push(
+      new ConfigMap(
+        {
+          apiVersion: "v1",
+          kind: "ConfigMap",
+          metadata: k8sMetadata,
+          data: configMapData
+        },
+        kubeConfig
+      )
+    );
   }
 
   if (secretData) {
     // K8s wants Secret values to be base64-encoded
     const datab64 = Object.fromEntries(
-      Object.entries(secretData)
-        .map(([k, v]) => [k, Buffer.from(v).toString("base64")])
+      Object.entries(secretData).map(([k, v]) => [
+        k,
+        Buffer.from(v).toString("base64")
+      ])
     );
 
-    resources.push(new Secret(
-      {
-        apiVersion: "v1",
-        kind: "Secret",
-        metadata: k8sMetadata,
-        data: datab64
-      },
-      kubeConfig
-    ));
+    resources.push(
+      new Secret(
+        {
+          apiVersion: "v1",
+          kind: "Secret",
+          metadata: k8sMetadata,
+          data: datab64
+        },
+        kubeConfig
+      )
+    );
   }
 
   return resources;
