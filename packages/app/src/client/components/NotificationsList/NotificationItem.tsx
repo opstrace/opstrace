@@ -18,31 +18,43 @@ import React from "react";
 import Alert from "@material-ui/lab/Alert";
 import AlertTitle from "@material-ui/lab/AlertTitle";
 import NotificationsActions, { ActionsProps } from "./NotificationsActions";
+import styled from "styled-components";
 
-export type NotificationState =
-  | "error"
-  | "warning"
-  | "info"
-  | "success";
+export type NotificationState = "error" | "warning" | "info" | "success";
+
+const StyledAlert = styled(Alert)(props => ({
+  borderRadius: 0,
+  "&:last-child": {
+    borderBottomLeftRadius: props.theme.shape.borderRadius,
+    borderBottomRightRadius: props.theme.shape.borderRadius
+  }
+}));
 
 export type NotificationItemProps = {
   children: React.ReactNode;
   title?: string;
-  state?: NotificationState;
+  state: NotificationState;
   handleClose?: () => void;
   actions?: ActionsProps[];
 };
-const NotificationItem = ({ handleClose, children, title, state, actions }: NotificationItemProps) => {
+const NotificationItem = ({
+  handleClose,
+  children,
+  title,
+  state,
+  actions
+}: NotificationItemProps) => {
   return (
-    <Alert
-      severity={state || "info"}
-      onClose={handleClose}
-    >
+    <StyledAlert severity={state} onClose={handleClose}>
       {title ? <AlertTitle>{title}</AlertTitle> : null}
       {children}
-      {actions ? <NotificationsActions actions={actions}/> : null}
-    </Alert>
+      {actions ? <NotificationsActions actions={actions} /> : null}
+    </StyledAlert>
   );
+};
+
+NotificationItem.defaultProps = {
+  state: "info"
 };
 
 export default NotificationItem;
