@@ -18,9 +18,15 @@ import { spawn, all, call } from "@redux-saga/core/effects";
 import userManager from "./user/sagas";
 import tenantManager from "./tenant/sagas";
 import integrationManager from "./integration/sagas";
+import cortexConfigManager from "./cortex-config/sagas";
 
 export default function* main() {
-  const sagas = [userManager, tenantManager, integrationManager];
+  const sagas = [
+    userManager,
+    tenantManager,
+    integrationManager,
+    cortexConfigManager
+  ];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
   // https://redux-saga.js.org/docs/advanced/RootSaga.html
