@@ -27,10 +27,19 @@ import {
 import { KubeConfig } from "@kubernetes/client-node";
 
 const KUBECONFIG = new KubeConfig();
-// This will only work if running in remote-dev mode or in cluster
+
 try {
+  if (isDevEnvironment || isRemoteDevEnvironment) {
+    KUBECONFIG.loadFromDefault();
+  } else {
+    // This will only work if running in cluster
   KUBECONFIG.loadFromCluster();
-} catch (err) {}
+  }
+} catch (err) {
+  log.error("failed to load kubeconfig");
+  process.exit(1);
+}
+
 
 function genCortexRuntimeConfigCM(kubeconfig: KubeConfig, yamldoc: string) {
   // name and namespace and data key: are all convention-based, must be in sync
