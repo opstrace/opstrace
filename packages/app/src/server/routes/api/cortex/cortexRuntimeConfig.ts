@@ -34,7 +34,7 @@ try {
     KUBECONFIG.loadFromDefault();
   } else {
     // This will only work if running in cluster
-  KUBECONFIG.loadFromCluster();
+    KUBECONFIG.loadFromCluster();
   }
 } catch (err) {
   log.error("failed to load kubeconfig");
@@ -76,6 +76,26 @@ function genCortexRuntimeConfigCM(kubeconfig: KubeConfig, yamldoc: string) {
   // const { body } = await k8sapi.readNamespacedConfigMap(cmname, cmnamespace);
   // but below we use `createOrUpdateConfigMapWithRetry()` which is made for
   // our @opstrace/kubernetes abstraction
+}
+
+async function readCortexRuntimeConfigCM(kubeconfig: KubeConfig) {
+  const c = new ConfigMap(
+    {
+      apiVersion: "v1",
+      kind: "ConfigMap",
+      metadata: {
+        name: "cortex-runtime-config",
+        namespace: "cortex"
+      }
+    },
+    kubeconfig
+  );
+  const resource = await c.read();
+  if (resource.body?.data && DATA_KEY in resource.body.data) {
+    return resource.body.data[DATA_KEY];
+  } else {
+    throw new Error("Cortex runtime configmap not found");
+  }
 }
 
 // Expect a valid cortex runtime config document
@@ -132,7 +152,7 @@ export default async function setCortexRuntimeConfigHandler(
             `Kubernetes API returned status code ${kr.statusCode}. ` +
             `Message: ${kr.body.message}`
         )
-        );
+      );
     }
 
     // When no HTTP response was received, i.e. upon transient errors.
@@ -147,4 +167,62 @@ export default async function setCortexRuntimeConfigHandler(
 
   res.status(202).send("accepted: change is expected to take effect soon");
   return;
+}
+
+/**
+ * Reads and returns the Cortex runtime config as specified in the ConfigMap.
+ * This is the source of truth for runtime config. Cortex provides the "observed"
+ * runtime config through it's API, but the value of that can lag because
+ * Cortex will poll for changes in this file periodically to refresh
+ * the "observed" runtime config.
+ */
+export async function readCortexRuntimeConfigHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  if (KUBECONFIG === undefined) {
+    // This will be logged with a stack trace and handled correctly by our error middleware,
+    // issueing a 500 back to the user with the error message below in the resonse body
+    throw new Error("internal error: kubeconfig not set");
+  }
+
+  try {
+    const config = await readCortexRuntimeConfigCM(KUBECONFIG);
+    const data = await validateAndExtractRuntimeConfig(config);
+
+    res.status(202).send(data);
+  } catch (err) {
+    if (err.response !== undefined) {
+      const kr = err.response;
+      /**
+      forward status code and log the message with the error logging middleware. Example of error for client:
+      status: 500
+      body: {
+            errorType: "OpstraceServerError"
+            message: "error during config map read: ENOENT: no such file or directory, open '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'"
+            name: "GeneralServerError"
+            originalError: null --> populated when the error is unexpected (e.g. when using throw new Error(...))
+            statusCode: 500
+        }
+        */
+      return next(
+        new GeneralServerError(
+          kr.statusCode,
+          `Error during cortex runtime config map read. ` +
+            `Kubernetes API returned status code ${kr.statusCode}. ` +
+            `Message: ${kr.body.message}`
+        )
+      );
+    }
+    // If validating the existing config map data failed, we'll land here.
+    // This will help identify a required config migration
+    log.warning("error during config map read: %s", err); // log with stack trace
+    return next(
+      new GeneralServerError(
+        500,
+        `error during config map read: ${err.message}`
+      )
+    );
+  }
 }
