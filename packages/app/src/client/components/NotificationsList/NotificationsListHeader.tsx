@@ -15,10 +15,18 @@
  */
 
 import React from "react";
-import CloseIcon from '@material-ui/icons/Close';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from "@material-ui/icons/Close";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import IconButton from "@material-ui/core/IconButton";
 import { Box } from "../Box";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles(theme => ({
+  box: {
+    borderTopLeftRadius: theme.shape.borderRadius,
+    borderTopRightRadius: theme.shape.borderRadius
+  }
+}));
 
 export type NotificationsListHeaderProps = {
   counter: number;
@@ -26,34 +34,36 @@ export type NotificationsListHeaderProps = {
   onClose?: () => void;
 };
 
-const NotificationsListHeader = ({ onClose, onDeleteAll, counter }: NotificationsListHeaderProps) => {
+const NotificationsListHeader = ({
+  onClose,
+  onDeleteAll,
+  counter
+}: NotificationsListHeaderProps) => {
+  const classes = useStyles();
   return (
     <Box
       display="flex"
       justifyContent="space-between"
       alignItems="center"
       bgcolor="grey.600"
+      color="white"
       p={1}
+      className={classes.box}
     >
-      {
-        counter ? `Notifications (${counter})` : "No notifications"
-      }
+      {counter ? `Notifications (${counter})` : "No notifications"}
       <Box>
-        <IconButton
-          title="Hide notifications"
-          size="small"
-          onClick={onClose}
-        >
-          <ExpandMoreIcon fontSize="small"/>
+        <IconButton title="Hide notifications" size="small" onClick={onClose}>
+          <ExpandMoreIcon style={{ color: "white" }} fontSize="small" />
         </IconButton>
 
         <IconButton
           disabled={!counter}
           title="Clear all notifications"
           size="small"
+          style={{ color: "white" }}
           onClick={onDeleteAll}
         >
-          <CloseIcon fontSize="small"/>
+          <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
     </Box>
