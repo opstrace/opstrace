@@ -19,7 +19,10 @@ import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
 import { installedIntegrationsPath } from "client/integrations/paths";
-import { grafanaUrl } from "client/utils/grafana";
+import {
+  grafanaUrl,
+  useFolder as useGrafanaFolder
+} from "client/utils/grafana";
 
 import { promtailYaml, PromtailLogFormat } from "./templates/config";
 
@@ -45,6 +48,9 @@ export const K8sLogsShow = () => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
+
+  const folder = useGrafanaFolder({ integration, tenant });
+  console.log("folder", folder);
 
   const [isDashboardInstalled, grafanaFolderPath] = useMemo(() => {
     const latestMetadata = integration?.grafana_metadata;
@@ -125,7 +131,9 @@ export const K8sLogsShow = () => {
                 <Attribute.Key>
                   <ExternalLink
                     target="_blank"
-                    href={`${grafanaUrl({ tenant })}${grafanaFolderPath}`}
+                    href={`${grafanaUrl({
+                      tenant
+                    })}${grafanaFolderPath}`}
                   >
                     <Button state="primary" variant="outlined" size="medium">
                       View Grafana Dashboards
