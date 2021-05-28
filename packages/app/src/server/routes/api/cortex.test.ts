@@ -32,8 +32,11 @@ const getTestServer = () => {
 describe("cortex api", () => {
   describe("ring health", () => {
     test.each([
-      [`/ingester/ring`, `http://ruler.cortex.svc.cluster.local/ingester/ring`],
-      [`/ingester/ring`, `http://ingester.cortex.svc.cluster.local`, `/ring`],
+      [
+        `/ingester/ring`,
+        `http://ruler.cortex.svc.cluster.local`,
+        "/ingester/ring"
+      ],
       [`/ruler/ring`, `http://ruler.cortex.svc.cluster.local`, `/ruler/ring`],
       [
         `/compactor/ring`,
