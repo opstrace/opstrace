@@ -16,18 +16,22 @@
 import httpProxy from "http-proxy";
 import express from "express";
 
-import { log } from "@opstrace/utils/lib/log";
 import { onProxyReq } from "server/utils";
-import setCortexRuntimeConfigHandler from "./cortexRuntimeConfig";
+import { log } from "@opstrace/utils/lib/log";
+import setCortexRuntimeConfigHandler, {
+  readCortexRuntimeConfigHandler
+} from "./cortexRuntimeConfig";
 
 export const cortexProxy = httpProxy.createProxyServer({ ignorePath: true });
-
+/**
+ * bodyParser middleware (which we use earlier in chain to parse POST body content), doesn't play
+ * well with the http-proxy, since the body is parsed and altered. It results in POSTs hanging until the connection times out.
+ *
+ * This is a workaround to restream the already parsed body, for the proxy target to consume.
+ */
 cortexProxy.on("proxyReq", onProxyReq);
 
-const proxyTo = (target: string) => (
-  req: express.Request,
-  res: express.Response
-) => {
+function proxyTo(target: string, req: express.Request, res: express.Response) {
   return cortexProxy.web(
     req,
     res,
@@ -43,7 +47,7 @@ const proxyTo = (target: string) => (
       log.warning("error in http cortex proxy upstream (ignoring): %s", err);
     }
   );
-};
+}
 
 export default function createCortexHandler(): express.Router {
   const cortex = express.Router();
@@ -102,8 +106,17 @@ export default function createCortexHandler(): express.Router {
   // all tenants, i.e. this is a privileged / superuser action.
   cortex.post("/runtime_config", setCortexRuntimeConfigHandler);
 
+  // This is the runtime config as set in the config map
+  cortex.get("/runtime_config_file", readCortexRuntimeConfigHandler);
+
+  // This is the runtime config as recognized by cortex. Cortex can take up to runtime_config.period to load
   cortex.get("/runtime_config", (req, res) => {
     proxyTo(`http://ruler.cortex.svc.cluster.local/runtime_config`, req, res);
+  });
+
+  // All Cortex config
+  cortex.get("/config", (req, res) => {
+    proxyTo(`http://ingester.cortex.svc.cluster.local/config`, req, res);
   });
 
   return cortex;
