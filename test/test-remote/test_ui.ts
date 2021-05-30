@@ -285,7 +285,7 @@ suite("test_ui_with_headless_browser", function () {
 
     log.info("cookie header value: %s", cookie_header_value);
 
-    const url = `${CLUSTER_BASE_URL}/_/config/cortex/runtime`;
+    const url = `${CLUSTER_BASE_URL}/_/cortex/runtime_config`;
     const headers = {
       "Content-Type": "text/plain", // for bodyParser.text() express middleware
       Cookie: cookie_header_value
