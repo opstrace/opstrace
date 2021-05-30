@@ -15,7 +15,6 @@
  */
 
 import { NextFunction, Request, Response } from "express";
-import yaml from "js-yaml";
 import {
   createOrUpdateConfigMapWithRetry,
   ConfigMap
@@ -105,6 +104,14 @@ export default async function setCortexRuntimeConfigHandler(
   res: Response,
   next: NextFunction
 ) {
+  if (!req.is("text/plain")) {
+    return next(
+      new GeneralServerError(
+        400,
+        `bad request: contentType must be text/plain, with the runtime config yaml string as the body`
+      )
+    );
+  }
   try {
     // Make sure we're setting a valid runtime config. This will throw if validation fails
     await validateAndExtractRuntimeConfig(req.body);
@@ -115,13 +122,13 @@ export default async function setCortexRuntimeConfigHandler(
   }
 
   if (KUBECONFIG === undefined) {
-    // This will be logged with a stack trace and handled correctly by our error middleware,
+    // This will be caught and logged with a stack trace and handled correctly by our error middleware,
     // issueing a 500 back to the user with the error message below in the resonse body
     throw new Error("internal error: kubeconfig not set");
   }
 
   // Assume that `req.body` is the new config map's payload content.
-  const newcm = genCortexRuntimeConfigCM(KUBECONFIG, yaml.dump(req.body));
+  const newcm = genCortexRuntimeConfigCM(KUBECONFIG, req.body);
   try {
     await createOrUpdateConfigMapWithRetry(newcm, true);
   } catch (err) {
