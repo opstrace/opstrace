@@ -15,8 +15,10 @@
  */
 
 import { createReducer, ActionType } from "typesafe-actions";
-import { RuntimeConfig, Config } from "./types";
+import { RuntimeConfig, Config, CortexLimits } from "./types";
 import * as actions from "./actions";
+import { mergeDeepRight } from "ramda";
+import { unset, isEqual } from "lodash";
 
 type CortexConfigActions = ActionType<typeof actions>;
 
@@ -25,16 +27,35 @@ type CortexConfigState = {
   loadingRecognizedRuntimeConfig: boolean;
   loadingConfig: boolean;
   loadingError?: string;
+  saveRuntimeConfigError?: string;
+  // Holds the user edited values (first populated on first successful api response for runtimeConfigFile)
   runtimeConfig?: RuntimeConfig;
+  // Represents the value from the config map
+  runtimeConfigFile?: RuntimeConfig;
+  // Represents the value as seen in Cortex via /runtime_config
   recognizedRuntimeConfig?: RuntimeConfig;
+  hasUnsavedChanges: boolean;
   config?: Config;
 };
 
 const CortexConfigInitialState: CortexConfigState = {
   loadingRuntimeConfig: true,
   loadingRecognizedRuntimeConfig: true,
-  loadingConfig: true
+  loadingConfig: true,
+  hasUnsavedChanges: false
 };
+
+function hasChanges(state: CortexConfigState) {
+  // Check for changes in any of the tenants
+  return Object.keys(state.runtimeConfig?.overrides || {}).some(tenant => {
+    const existingTenantOverrides =
+      (state.runtimeConfigFile?.overrides || {})[tenant] || {};
+    const tenantOverrides =
+      (state.runtimeConfig?.overrides || {})[tenant] || {};
+
+    return !isEqual(existingTenantOverrides, tenantOverrides);
+  });
+}
 
 export const reducer = createReducer<CortexConfigState, CortexConfigActions>(
   CortexConfigInitialState
@@ -49,10 +70,65 @@ export const reducer = createReducer<CortexConfigState, CortexConfigActions>(
   )
   .handleAction(
     actions.setCortexRuntimeConfig,
+    (state, action): CortexConfigState => {
+      let newState = {
+        ...state,
+        loadingRuntimeConfig: false,
+        runtimeConfigFile: action.payload
+      };
+      if (!newState.runtimeConfig) {
+        // First time we've loaded the runtimeConfig.
+        newState = { ...newState, runtimeConfig: action.payload };
+      }
+      return newState;
+    }
+  )
+  .handleAction(
+    actions.updateCortexRuntimeConfig,
+    (state, action): CortexConfigState => {
+      const newState = mergeDeepRight(state, {
+        runtimeConfig: {
+          overrides: {
+            [action.payload.tenant]: {
+              [action.payload.configOption]: action.payload.value
+            } as CortexLimits
+          }
+        }
+      });
+
+      return {
+        ...newState,
+        hasUnsavedChanges: hasChanges(newState)
+      };
+    }
+  )
+  .handleAction(
+    actions.deleteCortexRuntimeConfig,
+    (state, action): CortexConfigState => {
+      // This is a dirty way to delete because if we chance our reducer schema then
+      // this will break (lost our typings).
+      unset(
+        state,
+        `runtimeConfig.overrides.${action.payload.tenant}.${action.payload.configOption}`
+      );
+
+      return { ...state, hasUnsavedChanges: hasChanges(state) };
+    }
+  )
+  .handleAction(
+    actions.saveCortexRuntimeConfig,
     (state, action): CortexConfigState => ({
       ...state,
-      loadingRuntimeConfig: false,
-      runtimeConfig: action.payload
+      runtimeConfigFile: state.runtimeConfig,
+      hasUnsavedChanges: false
+    })
+  )
+  .handleAction(
+    actions.saveCortexRuntimeConfigError,
+    (state, action): CortexConfigState => ({
+      ...state,
+      hasUnsavedChanges: true,
+      saveRuntimeConfigError: action.payload
     })
   )
   .handleAction(

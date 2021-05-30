@@ -19,6 +19,19 @@ import { SubscriptionID, Config, RuntimeConfig } from "./types";
 export const setCortexRuntimeConfig = createAction(
   "SET_CORTEX_RUNTIME_CONFIG"
 )<RuntimeConfig>();
+export const updateCortexRuntimeConfig = createAction(
+  "UPDATE_CORTEX_RUNTIME_CONFIG_OPTION"
+)<{
+  tenant: string;
+  configOption: string;
+  value: string | boolean | number | undefined;
+}>();
+export const deleteCortexRuntimeConfig = createAction(
+  "DELETE_CORTEX_RUNTIME_CONFIG_OPTION"
+)<{
+  tenant: string;
+  configOption: string;
+}>();
 export const setRecognizedCortexRuntimeConfig = createAction(
   "SET_CORTEX_RECOGNIZED_RUNTIME_CONFIG"
 )<RuntimeConfig>();
@@ -31,6 +44,9 @@ export const setCortexConfigError = createAction(
 export const saveCortexRuntimeConfig = createAction(
   "SAVE_CORTEX_RUNTIME_CONFIG"
 )<RuntimeConfig>();
+export const saveCortexRuntimeConfigError = createAction(
+  "SAVE_CORTEX_RUNTIME_CONFIG_ERROR"
+)<string>();
 
 export const subscribeToCortexConfig = createAction(
   "SUBSCRIBE_CORTEX_CONFIG"
