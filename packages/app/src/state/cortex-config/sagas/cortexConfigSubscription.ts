@@ -32,6 +32,7 @@ import {
   validateAndExtractRuntimeConfig,
   validateCortexConfig
 } from "../utils";
+import { ServerError } from "server/errors";
 
 type Actions = ActionType<typeof actions>;
 
@@ -113,7 +114,12 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
             emitter(actions.setCortexRuntimeConfig(res.data));
           })
           .catch(err => {
-            emitter(actions.setCortexConfigError(err.toString()));
+            if (ServerError.isInstance(err.response.data)) {
+              // Extract the specific error message
+              emitter(actions.setCortexConfigError(err.response.data.message));
+            } else {
+              emitter(actions.setCortexConfigError(err.toString()));
+            }
           });
         // Load runtime_config as recognized by Cortex
         axios
@@ -125,7 +131,12 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
             emitter(actions.setRecognizedCortexRuntimeConfig(data));
           })
           .catch(err => {
-            emitter(actions.setCortexConfigError(err.toString()));
+            if (ServerError.isInstance(err.response.data)) {
+              // Extract the specific error message
+              emitter(actions.setCortexConfigError(err.response.data.message));
+            } else {
+              emitter(actions.setCortexConfigError(err.toString()));
+            }
           });
         // Get base config
         axios
@@ -137,7 +148,12 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
             emitter(actions.setCortexConfig(data));
           })
           .catch(err => {
-            emitter(actions.setCortexConfigError(err.toString()));
+            if (ServerError.isInstance(err.response.data)) {
+              // Extract the specific error message
+              emitter(actions.setCortexConfigError(err.response.data.message));
+            } else {
+              emitter(actions.setCortexConfigError(err.toString()));
+            }
           });
       } catch (err) {
         emitter(actions.setCortexConfigError(err.toString()));

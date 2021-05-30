@@ -15,6 +15,8 @@
  */
 import { all, call, spawn, takeEvery, put } from "redux-saga/effects";
 import axios from "axios";
+import yaml from "js-yaml";
+import { ServerError } from "server/errors";
 
 import * as actions from "../actions";
 
@@ -52,10 +54,19 @@ function* saveRuntimeConfig(
     yield axios.request({
       method: "POST",
       url: "/_/cortex/runtime_config",
-      data: action.payload
+      headers: {
+        "Content-Type": "text/plain"
+      },
+      data: yaml.dump(action.payload)
     });
   } catch (err) {
-    yield put(actions.saveCortexRuntimeConfigError(err.toString()));
-    console.error(err);
+    if (ServerError.isInstance(err.response.data)) {
+      // Extract the specific error message
+      yield put(
+        actions.saveCortexRuntimeConfigError(err.response.data.message)
+      );
+    } else {
+      yield put(actions.saveCortexRuntimeConfigError(err.toString()));
+    }
   }
 }
