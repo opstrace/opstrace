@@ -28,7 +28,8 @@ import {
   Layers,
   Activity,
   Compass,
-  Layout
+  Layout,
+  Settings
 } from "react-feather";
 
 import WithAuthentication from "client/components/withAuthentication";
@@ -58,6 +59,7 @@ import LoginView from "client/views/login";
 import HelpDialog from "client/views/help";
 import NotFound from "client/views/404/404";
 import ClusterOverview from "./views/cluster-health";
+import ClusterConfig from "./views/cluster-config";
 import UsersTable from "client/views/users/list";
 import TenantsTable from "client/views/tenants/list";
 import TenantDashboards from "client/views/dashboards";
@@ -190,6 +192,17 @@ const AuthProtectedApplication = () => {
             title: "Tenants",
             icon: <Layers />,
             path: `/cluster/tenants`
+          },
+          {
+            title: "Configuration",
+            icon: <Settings />,
+            path: `/cluster/configuration`,
+            nestedItems: [
+              {
+                title: "Cortex",
+                path: `/cluster/configuration/cortex`
+              }
+            ]
           }
         ]}
       />
@@ -293,12 +306,15 @@ const AuthProtectedApplication = () => {
               path="/cluster/health/system"
               component={ClusterOverview}
             />
-            <Route
-              key="cluster-health-metrics"
-              path="/cluster/health/metrics"
-            >
+            <Route key="cluster-health-metrics" path="/cluster/health/metrics">
               <RingHealth baseUrl="/cluster/health/metrics" />
             </Route>
+            <Route
+              exact
+              key="cluster-config-cortex"
+              path="/cluster/configuration/cortex"
+              component={ClusterConfig}
+            />
             <Route
               exact
               key="cluster-user-list"
