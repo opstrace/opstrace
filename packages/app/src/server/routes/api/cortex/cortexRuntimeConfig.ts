@@ -15,7 +15,7 @@
  */
 
 import { NextFunction, Request, Response } from "express";
-
+import yaml from "js-yaml";
 import {
   createOrUpdateConfigMapWithRetry,
   ConfigMap
@@ -121,7 +121,7 @@ export default async function setCortexRuntimeConfigHandler(
   }
 
   // Assume that `req.body` is the new config map's payload content.
-  const newcm = genCortexRuntimeConfigCM(KUBECONFIG, req.body);
+  const newcm = genCortexRuntimeConfigCM(KUBECONFIG, yaml.dump(req.body));
   try {
     await createOrUpdateConfigMapWithRetry(newcm, true);
   } catch (err) {
