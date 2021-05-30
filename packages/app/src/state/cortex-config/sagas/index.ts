@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { all, select, call, spawn, takeEvery, put } from "redux-saga/effects";
-// import axios from "axios";
+import { all, call, spawn, takeEvery, put } from "redux-saga/effects";
+import axios from "axios";
 
 import * as actions from "../actions";
 
 import userListSubscriptionManager from "./cortexConfigSubscription";
-import { State } from "state/reducer";
 
 export default function* userTaskManager() {
   const sagas = [userListSubscriptionManager, saveRuntimeConfigListener];
@@ -50,10 +49,13 @@ function* saveRuntimeConfig(
   action: ReturnType<typeof actions.saveCortexRuntimeConfig>
 ) {
   try {
-    const state: State = yield select();
-    console.log(state);
+    yield axios.request({
+      method: "POST",
+      url: "/_/cortex/runtime_config",
+      data: action.payload
+    });
   } catch (err) {
-    yield put(actions.setCortexConfigError(err.toString()));
+    yield put(actions.saveCortexRuntimeConfigError(err.toString()));
     console.error(err);
   }
 }
