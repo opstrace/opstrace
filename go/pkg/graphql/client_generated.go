@@ -1641,64 +1641,6 @@ const (
 	ErrorTypeVALIDATIONFAILED ErrorType = "VALIDATION_FAILED"
 )
 
-type CredentialConstraint string
-
-const (
-	CredentialConstraintCredentialPkey CredentialConstraint = "credential_pkey"
-)
-
-type CredentialSelectColumn string
-
-const (
-	CredentialSelectColumnCreatedAt CredentialSelectColumn = "created_at"
-	CredentialSelectColumnName      CredentialSelectColumn = "name"
-	CredentialSelectColumnTenant    CredentialSelectColumn = "tenant"
-	CredentialSelectColumnType      CredentialSelectColumn = "type"
-	CredentialSelectColumnUpdatedAt CredentialSelectColumn = "updated_at"
-	CredentialSelectColumnValue     CredentialSelectColumn = "value"
-)
-
-type CredentialUpdateColumn string
-
-const (
-	CredentialUpdateColumnCreatedAt CredentialUpdateColumn = "created_at"
-	CredentialUpdateColumnName      CredentialUpdateColumn = "name"
-	CredentialUpdateColumnTenant    CredentialUpdateColumn = "tenant"
-	CredentialUpdateColumnType      CredentialUpdateColumn = "type"
-	CredentialUpdateColumnUpdatedAt CredentialUpdateColumn = "updated_at"
-	CredentialUpdateColumnValue     CredentialUpdateColumn = "value"
-)
-
-type ExporterConstraint string
-
-const (
-	ExporterConstraintExporterPkey ExporterConstraint = "exporter_pkey"
-)
-
-type ExporterSelectColumn string
-
-const (
-	ExporterSelectColumnConfig     ExporterSelectColumn = "config"
-	ExporterSelectColumnCreatedAt  ExporterSelectColumn = "created_at"
-	ExporterSelectColumnCredential ExporterSelectColumn = "credential"
-	ExporterSelectColumnName       ExporterSelectColumn = "name"
-	ExporterSelectColumnTenant     ExporterSelectColumn = "tenant"
-	ExporterSelectColumnType       ExporterSelectColumn = "type"
-	ExporterSelectColumnUpdatedAt  ExporterSelectColumn = "updated_at"
-)
-
-type ExporterUpdateColumn string
-
-const (
-	ExporterUpdateColumnConfig     ExporterUpdateColumn = "config"
-	ExporterUpdateColumnCreatedAt  ExporterUpdateColumn = "created_at"
-	ExporterUpdateColumnCredential ExporterUpdateColumn = "credential"
-	ExporterUpdateColumnName       ExporterUpdateColumn = "name"
-	ExporterUpdateColumnTenant     ExporterUpdateColumn = "tenant"
-	ExporterUpdateColumnType       ExporterUpdateColumn = "type"
-	ExporterUpdateColumnUpdatedAt  ExporterUpdateColumn = "updated_at"
-)
-
 type IntegrationConstraint string
 
 const (
@@ -1876,188 +1818,6 @@ type StringComparisonExp struct {
 	Similar  *String   `json:"_similar,omitempty"`
 }
 
-type CredentialAggregateOrderBy struct {
-	Count *OrderBy              `json:"count,omitempty"`
-	Max   *CredentialMaxOrderBy `json:"max,omitempty"`
-	Min   *CredentialMinOrderBy `json:"min,omitempty"`
-}
-
-type CredentialArrRelInsertInput struct {
-	Data       *[]CredentialInsertInput `json:"data,omitempty"`
-	OnConflict *CredentialOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type CredentialBoolExp struct {
-	And            *[]CredentialBoolExp      `json:"_and,omitempty"`
-	Not            *CredentialBoolExp        `json:"_not,omitempty"`
-	Or             *[]CredentialBoolExp      `json:"_or,omitempty"`
-	CreatedAt      *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Exporters      *ExporterBoolExp          `json:"exporters,omitempty"`
-	Name           *StringComparisonExp      `json:"name,omitempty"`
-	Tenant         *StringComparisonExp      `json:"tenant,omitempty"`
-	TenantByTenant *TenantBoolExp            `json:"tenantByTenant,omitempty"`
-	Type           *StringComparisonExp      `json:"type,omitempty"`
-	UpdatedAt      *TimestamptzComparisonExp `json:"updated_at,omitempty"`
-	Value          *JsonComparisonExp        `json:"value,omitempty"`
-}
-
-type CredentialInsertInput struct {
-	CreatedAt      *Timestamptz               `json:"created_at,omitempty"`
-	Exporters      *ExporterArrRelInsertInput `json:"exporters,omitempty"`
-	Name           *String                    `json:"name,omitempty"`
-	Tenant         *String                    `json:"tenant,omitempty"`
-	TenantByTenant *TenantObjRelInsertInput   `json:"tenantByTenant,omitempty"`
-	Type           *String                    `json:"type,omitempty"`
-	UpdatedAt      *Timestamptz               `json:"updated_at,omitempty"`
-	Value          *Json                      `json:"value,omitempty"`
-}
-
-type CredentialMaxOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Tenant    *OrderBy `json:"tenant,omitempty"`
-	Type      *OrderBy `json:"type,omitempty"`
-	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
-}
-
-type CredentialMinOrderBy struct {
-	CreatedAt *OrderBy `json:"created_at,omitempty"`
-	Name      *OrderBy `json:"name,omitempty"`
-	Tenant    *OrderBy `json:"tenant,omitempty"`
-	Type      *OrderBy `json:"type,omitempty"`
-	UpdatedAt *OrderBy `json:"updated_at,omitempty"`
-}
-
-type CredentialObjRelInsertInput struct {
-	Data       CredentialInsertInput `json:"data"`
-	OnConflict *CredentialOnConflict `json:"on_conflict,omitempty"`
-}
-
-type CredentialOnConflict struct {
-	Constraint    CredentialConstraint      `json:"constraint"`
-	UpdateColumns *[]CredentialUpdateColumn `json:"update_columns,omitempty"`
-	Where         *CredentialBoolExp        `json:"where,omitempty"`
-}
-
-type CredentialOrderBy struct {
-	CreatedAt          *OrderBy                  `json:"created_at,omitempty"`
-	ExportersAggregate *ExporterAggregateOrderBy `json:"exporters_aggregate,omitempty"`
-	Name               *OrderBy                  `json:"name,omitempty"`
-	Tenant             *OrderBy                  `json:"tenant,omitempty"`
-	TenantByTenant     *TenantOrderBy            `json:"tenantByTenant,omitempty"`
-	Type               *OrderBy                  `json:"type,omitempty"`
-	UpdatedAt          *OrderBy                  `json:"updated_at,omitempty"`
-	Value              *OrderBy                  `json:"value,omitempty"`
-}
-
-type CredentialPkColumnsInput struct {
-	Name   String `json:"name"`
-	Tenant String `json:"tenant"`
-}
-
-type CredentialSetInput struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-	Tenant    *String      `json:"tenant,omitempty"`
-	Type      *String      `json:"type,omitempty"`
-	UpdatedAt *Timestamptz `json:"updated_at,omitempty"`
-	Value     *Json        `json:"value,omitempty"`
-}
-
-type ExporterAggregateOrderBy struct {
-	Count *OrderBy            `json:"count,omitempty"`
-	Max   *ExporterMaxOrderBy `json:"max,omitempty"`
-	Min   *ExporterMinOrderBy `json:"min,omitempty"`
-}
-
-type ExporterArrRelInsertInput struct {
-	Data       *[]ExporterInsertInput `json:"data,omitempty"`
-	OnConflict *ExporterOnConflict    `json:"on_conflict,omitempty"`
-}
-
-type ExporterBoolExp struct {
-	And                          *[]ExporterBoolExp        `json:"_and,omitempty"`
-	Not                          *ExporterBoolExp          `json:"_not,omitempty"`
-	Or                           *[]ExporterBoolExp        `json:"_or,omitempty"`
-	Config                       *JsonComparisonExp        `json:"config,omitempty"`
-	CreatedAt                    *TimestamptzComparisonExp `json:"created_at,omitempty"`
-	Credential                   *StringComparisonExp      `json:"credential,omitempty"`
-	CredentialByCredentialTenant *CredentialBoolExp        `json:"credentialByCredentialTenant,omitempty"`
-	Name                         *StringComparisonExp      `json:"name,omitempty"`
-	Tenant                       *StringComparisonExp      `json:"tenant,omitempty"`
-	TenantByTenant               *TenantBoolExp            `json:"tenantByTenant,omitempty"`
-	Type                         *StringComparisonExp      `json:"type,omitempty"`
-	UpdatedAt                    *TimestamptzComparisonExp `json:"updated_at,omitempty"`
-}
-
-type ExporterInsertInput struct {
-	Config                       *Json                        `json:"config,omitempty"`
-	CreatedAt                    *Timestamptz                 `json:"created_at,omitempty"`
-	Credential                   *String                      `json:"credential,omitempty"`
-	CredentialByCredentialTenant *CredentialObjRelInsertInput `json:"credentialByCredentialTenant,omitempty"`
-	Name                         *String                      `json:"name,omitempty"`
-	Tenant                       *String                      `json:"tenant,omitempty"`
-	TenantByTenant               *TenantObjRelInsertInput     `json:"tenantByTenant,omitempty"`
-	Type                         *String                      `json:"type,omitempty"`
-	UpdatedAt                    *Timestamptz                 `json:"updated_at,omitempty"`
-}
-
-type ExporterMaxOrderBy struct {
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	Credential *OrderBy `json:"credential,omitempty"`
-	Name       *OrderBy `json:"name,omitempty"`
-	Tenant     *OrderBy `json:"tenant,omitempty"`
-	Type       *OrderBy `json:"type,omitempty"`
-	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
-}
-
-type ExporterMinOrderBy struct {
-	CreatedAt  *OrderBy `json:"created_at,omitempty"`
-	Credential *OrderBy `json:"credential,omitempty"`
-	Name       *OrderBy `json:"name,omitempty"`
-	Tenant     *OrderBy `json:"tenant,omitempty"`
-	Type       *OrderBy `json:"type,omitempty"`
-	UpdatedAt  *OrderBy `json:"updated_at,omitempty"`
-}
-
-type ExporterObjRelInsertInput struct {
-	Data       ExporterInsertInput `json:"data"`
-	OnConflict *ExporterOnConflict `json:"on_conflict,omitempty"`
-}
-
-type ExporterOnConflict struct {
-	Constraint    ExporterConstraint      `json:"constraint"`
-	UpdateColumns *[]ExporterUpdateColumn `json:"update_columns,omitempty"`
-	Where         *ExporterBoolExp        `json:"where,omitempty"`
-}
-
-type ExporterOrderBy struct {
-	Config                       *OrderBy           `json:"config,omitempty"`
-	CreatedAt                    *OrderBy           `json:"created_at,omitempty"`
-	Credential                   *OrderBy           `json:"credential,omitempty"`
-	CredentialByCredentialTenant *CredentialOrderBy `json:"credentialByCredentialTenant,omitempty"`
-	Name                         *OrderBy           `json:"name,omitempty"`
-	Tenant                       *OrderBy           `json:"tenant,omitempty"`
-	TenantByTenant               *TenantOrderBy     `json:"tenantByTenant,omitempty"`
-	Type                         *OrderBy           `json:"type,omitempty"`
-	UpdatedAt                    *OrderBy           `json:"updated_at,omitempty"`
-}
-
-type ExporterPkColumnsInput struct {
-	Name   String `json:"name"`
-	Tenant String `json:"tenant"`
-}
-
-type ExporterSetInput struct {
-	Config     *Json        `json:"config,omitempty"`
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Credential *String      `json:"credential,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Tenant     *String      `json:"tenant,omitempty"`
-	Type       *String      `json:"type,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
-}
-
 type IntegrationAggregateOrderBy struct {
 	Count *OrderBy               `json:"count,omitempty"`
 	Max   *IntegrationMaxOrderBy `json:"max,omitempty"`
@@ -2228,8 +1988,6 @@ type TenantBoolExp struct {
 	Not          *TenantBoolExp          `json:"_not,omitempty"`
 	Or           *[]TenantBoolExp        `json:"_or,omitempty"`
 	CreatedAt    *TimestampComparisonExp `json:"created_at,omitempty"`
-	Credentials  *CredentialBoolExp      `json:"credentials,omitempty"`
-	Exporters    *ExporterBoolExp        `json:"exporters,omitempty"`
 	ID           *UuidComparisonExp      `json:"id,omitempty"`
 	Integrations *IntegrationBoolExp     `json:"integrations,omitempty"`
 	Key          *StringComparisonExp    `json:"key,omitempty"`
@@ -2240,8 +1998,6 @@ type TenantBoolExp struct {
 
 type TenantInsertInput struct {
 	CreatedAt    *Timestamp                    `json:"created_at,omitempty"`
-	Credentials  *CredentialArrRelInsertInput  `json:"credentials,omitempty"`
-	Exporters    *ExporterArrRelInsertInput    `json:"exporters,omitempty"`
 	ID           *UUID                         `json:"id,omitempty"`
 	Integrations *IntegrationArrRelInsertInput `json:"integrations,omitempty"`
 	Key          *String                       `json:"key,omitempty"`
@@ -2281,8 +2037,6 @@ type TenantOnConflict struct {
 
 type TenantOrderBy struct {
 	CreatedAt             *OrderBy                     `json:"created_at,omitempty"`
-	CredentialsAggregate  *CredentialAggregateOrderBy  `json:"credentials_aggregate,omitempty"`
-	ExportersAggregate    *ExporterAggregateOrderBy    `json:"exporters_aggregate,omitempty"`
 	ID                    *OrderBy                     `json:"id,omitempty"`
 	IntegrationsAggregate *IntegrationAggregateOrderBy `json:"integrations_aggregate,omitempty"`
 	Key                   *OrderBy                     `json:"key,omitempty"`
@@ -2533,96 +2287,6 @@ type StatusResponse struct {
 	Success          Boolean    `json:"success"`
 }
 
-type Credential struct {
-	CreatedAt          Timestamptz       `json:"created_at"`
-	Exporters          *[]Exporter       `json:"exporters,omitempty"`
-	ExportersAggregate ExporterAggregate `json:"exporters_aggregate"`
-	Name               String            `json:"name"`
-	Tenant             String            `json:"tenant"`
-	TenantByTenant     Tenant            `json:"tenantByTenant"`
-	Type               String            `json:"type"`
-	UpdatedAt          Timestamptz       `json:"updated_at"`
-	Value              Json              `json:"value"`
-}
-
-type CredentialAggregate struct {
-	Aggregate *CredentialAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]Credential              `json:"nodes,omitempty"`
-}
-
-type CredentialAggregateFields struct {
-	Count *Int                 `json:"count,omitempty"`
-	Max   *CredentialMaxFields `json:"max,omitempty"`
-	Min   *CredentialMinFields `json:"min,omitempty"`
-}
-
-type CredentialMaxFields struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-	Tenant    *String      `json:"tenant,omitempty"`
-	Type      *String      `json:"type,omitempty"`
-	UpdatedAt *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type CredentialMinFields struct {
-	CreatedAt *Timestamptz `json:"created_at,omitempty"`
-	Name      *String      `json:"name,omitempty"`
-	Tenant    *String      `json:"tenant,omitempty"`
-	Type      *String      `json:"type,omitempty"`
-	UpdatedAt *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type CredentialMutationResponse struct {
-	AffectedRows Int           `json:"affected_rows"`
-	Returning    *[]Credential `json:"returning,omitempty"`
-}
-
-type Exporter struct {
-	Config                       Json        `json:"config"`
-	CreatedAt                    Timestamptz `json:"created_at"`
-	Credential                   *String     `json:"credential,omitempty"`
-	CredentialByCredentialTenant *Credential `json:"credentialByCredentialTenant,omitempty"`
-	Name                         String      `json:"name"`
-	Tenant                       String      `json:"tenant"`
-	TenantByTenant               Tenant      `json:"tenantByTenant"`
-	Type                         String      `json:"type"`
-	UpdatedAt                    Timestamptz `json:"updated_at"`
-}
-
-type ExporterAggregate struct {
-	Aggregate *ExporterAggregateFields `json:"aggregate,omitempty"`
-	Nodes     *[]Exporter              `json:"nodes,omitempty"`
-}
-
-type ExporterAggregateFields struct {
-	Count *Int               `json:"count,omitempty"`
-	Max   *ExporterMaxFields `json:"max,omitempty"`
-	Min   *ExporterMinFields `json:"min,omitempty"`
-}
-
-type ExporterMaxFields struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Credential *String      `json:"credential,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Tenant     *String      `json:"tenant,omitempty"`
-	Type       *String      `json:"type,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type ExporterMinFields struct {
-	CreatedAt  *Timestamptz `json:"created_at,omitempty"`
-	Credential *String      `json:"credential,omitempty"`
-	Name       *String      `json:"name,omitempty"`
-	Tenant     *String      `json:"tenant,omitempty"`
-	Type       *String      `json:"type,omitempty"`
-	UpdatedAt  *Timestamptz `json:"updated_at,omitempty"`
-}
-
-type ExporterMutationResponse struct {
-	AffectedRows Int         `json:"affected_rows"`
-	Returning    *[]Exporter `json:"returning,omitempty"`
-}
-
 type Integration struct {
 	CreatedAt       Timestamp `json:"created_at"`
 	Data            Jsonb     `json:"data"`
@@ -2674,10 +2338,6 @@ type IntegrationMutationResponse struct {
 
 type MutationRoot struct {
 	DeleteRuleGroup          *StatusResponse                 `json:"deleteRuleGroup,omitempty"`
-	DeleteCredential         *CredentialMutationResponse     `json:"delete_credential,omitempty"`
-	DeleteCredentialByPk     *Credential                     `json:"delete_credential_by_pk,omitempty"`
-	DeleteExporter           *ExporterMutationResponse       `json:"delete_exporter,omitempty"`
-	DeleteExporterByPk       *Exporter                       `json:"delete_exporter_by_pk,omitempty"`
 	DeleteIntegration        *IntegrationMutationResponse    `json:"delete_integration,omitempty"`
 	DeleteIntegrationByPk    *Integration                    `json:"delete_integration_by_pk,omitempty"`
 	DeleteTenant             *TenantMutationResponse         `json:"delete_tenant,omitempty"`
@@ -2686,10 +2346,6 @@ type MutationRoot struct {
 	DeleteUserByPk           *User                           `json:"delete_user_by_pk,omitempty"`
 	DeleteUserPreference     *UserPreferenceMutationResponse `json:"delete_user_preference,omitempty"`
 	DeleteUserPreferenceByPk *UserPreference                 `json:"delete_user_preference_by_pk,omitempty"`
-	InsertCredential         *CredentialMutationResponse     `json:"insert_credential,omitempty"`
-	InsertCredentialOne      *Credential                     `json:"insert_credential_one,omitempty"`
-	InsertExporter           *ExporterMutationResponse       `json:"insert_exporter,omitempty"`
-	InsertExporterOne        *Exporter                       `json:"insert_exporter_one,omitempty"`
 	InsertIntegration        *IntegrationMutationResponse    `json:"insert_integration,omitempty"`
 	InsertIntegrationOne     *Integration                    `json:"insert_integration_one,omitempty"`
 	InsertTenant             *TenantMutationResponse         `json:"insert_tenant,omitempty"`
@@ -2700,10 +2356,6 @@ type MutationRoot struct {
 	InsertUserPreferenceOne  *UserPreference                 `json:"insert_user_preference_one,omitempty"`
 	UpdateAlertmanager       *StatusResponse                 `json:"updateAlertmanager,omitempty"`
 	UpdateRuleGroup          *StatusResponse                 `json:"updateRuleGroup,omitempty"`
-	UpdateCredential         *CredentialMutationResponse     `json:"update_credential,omitempty"`
-	UpdateCredentialByPk     *Credential                     `json:"update_credential_by_pk,omitempty"`
-	UpdateExporter           *ExporterMutationResponse       `json:"update_exporter,omitempty"`
-	UpdateExporterByPk       *Exporter                       `json:"update_exporter_by_pk,omitempty"`
 	UpdateIntegration        *IntegrationMutationResponse    `json:"update_integration,omitempty"`
 	UpdateIntegrationByPk    *Integration                    `json:"update_integration_by_pk,omitempty"`
 	UpdateTenant             *TenantMutationResponse         `json:"update_tenant,omitempty"`
@@ -2715,12 +2367,6 @@ type MutationRoot struct {
 }
 
 type QueryRoot struct {
-	Credential              *[]Credential           `json:"credential,omitempty"`
-	CredentialAggregate     CredentialAggregate     `json:"credential_aggregate"`
-	CredentialByPk          *Credential             `json:"credential_by_pk,omitempty"`
-	Exporter                *[]Exporter             `json:"exporter,omitempty"`
-	ExporterAggregate       ExporterAggregate       `json:"exporter_aggregate"`
-	ExporterByPk            *Exporter               `json:"exporter_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
 	Integration             *[]Integration          `json:"integration,omitempty"`
@@ -2741,12 +2387,6 @@ type QueryRoot struct {
 }
 
 type SubscriptionRoot struct {
-	Credential              *[]Credential           `json:"credential,omitempty"`
-	CredentialAggregate     CredentialAggregate     `json:"credential_aggregate"`
-	CredentialByPk          *Credential             `json:"credential_by_pk,omitempty"`
-	Exporter                *[]Exporter             `json:"exporter,omitempty"`
-	ExporterAggregate       ExporterAggregate       `json:"exporter_aggregate"`
-	ExporterByPk            *Exporter               `json:"exporter_by_pk,omitempty"`
 	GetAlertmanager         *Alertmanager           `json:"getAlertmanager,omitempty"`
 	GetRuleGroup            *RuleGroup              `json:"getRuleGroup,omitempty"`
 	Integration             *[]Integration          `json:"integration,omitempty"`
@@ -2768,10 +2408,6 @@ type SubscriptionRoot struct {
 
 type Tenant struct {
 	CreatedAt             Timestamp            `json:"created_at"`
-	Credentials           *[]Credential        `json:"credentials,omitempty"`
-	CredentialsAggregate  CredentialAggregate  `json:"credentials_aggregate"`
-	Exporters             *[]Exporter          `json:"exporters,omitempty"`
-	ExportersAggregate    ExporterAggregate    `json:"exporters_aggregate"`
 	ID                    UUID                 `json:"id"`
 	Integrations          *[]Integration       `json:"integrations,omitempty"`
 	IntegrationsAggregate IntegrationAggregate `json:"integrations_aggregate"`
