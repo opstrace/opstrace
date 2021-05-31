@@ -25,12 +25,35 @@ import Tab from "@material-ui/core/Tab";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
     borderBottom: `1px solid ${theme.palette.divider}`
   }
 }));
+
+export const TABS = [
+  {
+    title: "Ingester",
+    path: `/ingester`,
+    endpoint: "/_/cortex/ingester/ring"
+  },
+  {
+    title: "Ruler",
+    path: `/ruler`,
+    endpoint: "/_/cortex/ruler/ring"
+  },
+  {
+    title: "Compactor",
+    path: `/compactor`,
+    endpoint: "/_/cortex/compactor/ring"
+  },
+  {
+    title: "Store-gateway",
+    path: `/store-gateway`,
+    endpoint: "/_/cortex/store-gateway/ring"
+  }
+];
 
 type Props = {
   baseUrl: string;
@@ -40,29 +63,8 @@ const RingHealth = ({ baseUrl }: Props) => {
   const location = useLocation();
   const classes = useStyles();
 
-  const tabs = [
-    {
-      title: "Ingester",
-      path: `${baseUrl}/ingester`,
-      endpoint: "/_/cortex/ingester/ring"
-    },
-    {
-      title: "Ruler",
-      path: `${baseUrl}/ruler`,
-      endpoint: "/_/cortex/ruler/ring"
-    },
-    {
-      title: "Compactor",
-      path: `${baseUrl}/compactor`,
-      endpoint: "/_/cortex/compactor/ring"
-    },
-    {
-      title: "Store-gateway",
-      path: `${baseUrl}/store-gateway`,
-      endpoint: "/_/cortex/store-gateway/ring"
-    }
-  ];
-  
+  const tabs = TABS.map(tab => ({ ...tab, absolutePath: baseUrl + tab.path }));
+
   return (
     <>
       <Box pt={1} pb={4}>
@@ -78,25 +80,28 @@ const RingHealth = ({ baseUrl }: Props) => {
       >
         {tabs.map(tab => (
           <Tab
-            value={location.pathname.includes(tab.path)}
+            value={location.pathname.includes(tab.absolutePath)}
             key={tab.title}
             label={tab.title}
             component={Link}
-            to={tab.path}
+            to={tab.absolutePath}
           />
         ))}
       </MuiTabs>
       <Switch>
         {tabs.map(tab => (
-          <Route key={tab.path} path={tab.path}>
+          <Route key={tab.absolutePath} path={tab.absolutePath}>
             <Box mt={3}>
-              <RingTable baseUrl={tab.path} ringEndpoint={tab.endpoint} />
+              <RingTable
+                baseUrl={tab.absolutePath}
+                ringEndpoint={tab.endpoint}
+              />
             </Box>
           </Route>
         ))}
         <Route>
           {/* default to first tab if none is determined by URL */}
-          <Redirect to={tabs[0].path} />;
+          <Redirect to={tabs[0].absolutePath} />;
         </Route>
       </Switch>
     </>

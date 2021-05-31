@@ -132,6 +132,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
                   <TableCell>{shard.address}</TableCell>
                   <TableCell>
                     <Button
+                      aria-label="show token dialog"
                       onClick={() => {
                         history.push(`${baseUrl}/${shard.id}/token`);
                       }}
