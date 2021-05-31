@@ -20,8 +20,8 @@ import { format, parseISO } from "date-fns";
 
 import { installedIntegrationsPath } from "client/integrations/paths";
 import {
-  grafanaUrl,
-  useFolder as useGrafanaFolder
+  grafanaUrl
+  // useFolder as useGrafanaFolder
 } from "client/utils/grafana";
 
 import { promtailYaml, PromtailLogFormat } from "./templates/config";
@@ -49,8 +49,8 @@ export const K8sLogsShow = () => {
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
 
-  const folder = useGrafanaFolder({ integration, tenant });
-  console.log("folder", folder);
+  // const folder = useGrafanaFolder({ integration, tenant });
+  // console.log("folder", folder);
 
   const [isDashboardInstalled, grafanaFolderPath] = useMemo(() => {
     const latestMetadata = integration?.grafana_metadata;

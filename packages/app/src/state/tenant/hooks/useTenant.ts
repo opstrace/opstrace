@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import { useEffect } from "react";
 import { useRouteMatch } from "react-router";
 import { createSelector } from "reselect";
-import { useSelector, State, useDispatch } from "state/provider";
-import getSubscriptionID from "state/utils/getSubscriptionID";
-import { subscribeToTenantList, unsubscribeFromTenantList } from "../actions";
-import { Tenant } from "../types";
+
+import { useSelector, State } from "state/provider";
+
+import { Tenant } from "state/tenant/types";
+import { useTenantListSubscription } from "./useTenantList";
 
 export const selectTenant = createSelector(
   (state: State) => state.tenants.loading,
   (state, _) => state.tenants.tenants,
-  (_: State, tenantName: string) => tenantName,
-  (loading, tenants, tenantName: string) =>
-    loading ? null : tenants[tenantName]
+  (_: State, name: string) => name,
+  (loading, tenants, name: string) => (loading ? null : tenants[name])
 );
 
 export function useSelectedTenantWithFallback(): Tenant {
@@ -56,15 +55,7 @@ export function useSelectedTenant() {
 export default function useTenant(
   tenantName: string
 ): Tenant | null | undefined {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const subId = getSubscriptionID();
-    dispatch(subscribeToTenantList(subId));
-    return () => {
-      dispatch(unsubscribeFromTenantList(subId));
-    };
-  }, [dispatch]);
+  useTenantListSubscription();
   // can return undefined if the tenantName does not exist
   return useSelector((state: State) => selectTenant(state, tenantName));
 }

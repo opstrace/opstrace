@@ -30,6 +30,7 @@ export type Integration = Pick<
 >;
 
 export type Integrations = Integration[];
+export type IntegrationRecords = Record<string, Integration>;
 
 export type IntegrationGrafanaMetadata = {
   folder_id?: number;

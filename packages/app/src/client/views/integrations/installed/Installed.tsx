@@ -19,7 +19,7 @@ import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import useIntegrationList from "state/integration/hooks/useIntegration";
+import { useIntegrationList } from "state/integration/hooks/useIntegrationList";
 
 import {
   integrationDefRecords,

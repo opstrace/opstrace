@@ -23,7 +23,7 @@ import { Box } from "client/components/Box";
 import Typography from "client/components/Typography/Typography";
 import { Tabs } from "client/components/Tabs";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import useIntegrationList from "state/integration/hooks/useIntegration";
+import { useIntegrationList } from "state/integration/hooks/useIntegrationList";
 
 export { AddIntegration } from "./all/Add";
 export { ShowIntegration } from "./all/Show";

@@ -18,31 +18,39 @@ import { values } from "ramda";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector, State } from "state/provider";
 
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
+
 import {
-  subscribeToTenantList,
-  unsubscribeFromTenantList
-} from "state/tenant/actions";
+  subscribeToIntegrationList,
+  unsubscribeFromIntegrationList
+} from "../actions";
 import getSubscriptionID from "state/utils/getSubscriptionID";
 
-export const selectTenantList = createSelector(
-  (state: State) => state.tenants.loading,
-  (state: State) => state.tenants.tenants,
-  (loading, tenants) => (loading ? [] : values(tenants))
+export const selectIntegrationList = createSelector(
+  (state: State) => state.integrations.loading,
+  (state: State) => state.integrations.integrations,
+  (loading, integrations) => (loading ? [] : values(integrations))
 );
 
-export default function useTenantList() {
-  useTenantListSubscription();
-  return useSelector(selectTenantList);
-}
+export const useIntegrationList = () => {
+  useIntegrationListSubscription();
+  return useSelector(selectIntegrationList);
+};
 
-export const useTenantListSubscription = () => {
+export const useIntegrationListSubscription = () => {
+  const tenant = useSelectedTenantWithFallback();
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // if (tenant) {
     const subId = getSubscriptionID();
-    dispatch(subscribeToTenantList(subId));
+    // make local ref of this inside useEffect scope so unsubscribe works
+    const tenantName = tenant.name;
+    dispatch(subscribeToIntegrationList({ subId, tenant: tenantName }));
+
     return () => {
-      dispatch(unsubscribeFromTenantList(subId));
+      dispatch(unsubscribeFromIntegrationList({ subId, tenant: tenantName }));
     };
-  }, [dispatch]);
+    // } else return null;
+  }, [dispatch, tenant.name]);
 };
