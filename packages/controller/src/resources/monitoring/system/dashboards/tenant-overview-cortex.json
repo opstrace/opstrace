@@ -17,8 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "id": 32,
-  "iteration": 1621599508771,
+  "iteration": 1622448663929,
   "links": [],
   "panels": [
     {
@@ -125,6 +124,66 @@
       }
     },
     {
+      "datasource": "metrics",
+      "description": "Summed over all ingesters and divided by the replication factor. Based on the 'active series' definition, using an idle period of 10 minutes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 53,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value"
+      },
+      "pluginVersion": "7.4.3",
+      "targets": [
+        {
+          "expr": "sum(cortex_ingester_active_series{user=\"$tenant\"}) / max(cortex_distributor_replication_factor{namespace=\"cortex\", job=\"cortex.distributor\"})",
+          "interval": "",
+          "legendFormat": "",
+          "queryType": "randomWalk",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Number of active time series (tenant: '$tenant')",
+      "type": "stat"
+    },
+    {
       "aliasColors": {
         "byte rate": "semi-dark-purple"
       },
@@ -145,8 +204,8 @@
       "gridPos": {
         "h": 6,
         "w": 12,
-        "x": 12,
-        "y": 0
+        "x": 0,
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 16,
@@ -228,77 +287,6 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
-      },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateSpectral",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "tsbuckets",
-      "datasource": "metrics",
-      "description": "I think this total duration includes reading the request body.",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 0,
-        "y": 6
-      },
-      "heatmap": {},
-      "hideZeroBuckets": true,
-      "highlightCards": true,
-      "id": 2,
-      "legend": {
-        "show": true
-      },
-      "reverseYBuckets": false,
-      "targets": [
-        {
-          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"POST\",status_code=~\"200|202\",route=\"api_v1_push\"}[$timewindow]))",
-          "format": "heatmap",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{le}}",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "API proxy /api/v1/push, 2xx-acked POSTs, request duration, event rate [1/s] ($timewindow mean)",
-      "tooltip": {
-        "show": true,
-        "showHistogram": true
-      },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": 0,
-        "format": "s",
-        "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "upper",
-      "yBucketNumber": null,
-      "yBucketSize": null
     },
     {
       "aliasColors": {
@@ -405,108 +393,75 @@
       }
     },
     {
-      "aliasColors": {
-        "{status_code=\"204\"}": "semi-dark-green",
-        "{status_code=\"400\"}": "dark-orange",
-        "{status_code=\"500\"}": "red"
+      "cards": {
+        "cardPadding": null,
+        "cardRound": null
       },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
+      "color": {
+        "cardColor": "#b4ff00",
+        "colorScale": "sqrt",
+        "colorScheme": "interpolateSpectral",
+        "exponent": 0.5,
+        "mode": "spectrum"
+      },
+      "dataFormat": "tsbuckets",
       "datasource": "metrics",
-      "description": "",
+      "description": "I think this total duration includes reading the request body.",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
-      "fill": 3,
-      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
         "y": 12
       },
-      "hiddenSeries": false,
-      "id": 46,
+      "heatmap": {},
+      "hideZeroBuckets": true,
+      "highlightCards": true,
+      "id": 2,
       "legend": {
-        "avg": false,
-        "current": true,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": true
+        "show": true
       },
-      "lines": true,
-      "linewidth": 2,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.4.3",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
+      "reverseYBuckets": false,
       "targets": [
         {
-          "expr": "sum by (code) (rate(grafana_datasource_request_duration_seconds_sum{namespace=\"$tenant-tenant\", datasource=\"metrics\"}[$timewindow]) / rate(grafana_datasource_request_duration_seconds_count{namespace=\"$tenant-tenant\", datasource=\"metrics\"}[$timewindow]))\n",
+          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"POST\",status_code=~\"200|202\",route=\"api_v1_push\"}[$timewindow]))",
+          "format": "heatmap",
+          "instant": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{le}}",
           "refId": "A"
         }
       ],
-      "thresholds": [],
       "timeFrom": null,
-      "timeRegions": [],
       "timeShift": null,
-      "title": "Queries through Grafana, req duration by status code ($timewindow mean, tenant: '$tenant')",
+      "title": "API proxy /api/v1/push, 2xx-acked POSTs, request duration, event rate [1/s] ($timewindow mean)",
       "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
         "show": true,
-        "values": []
+        "showHistogram": true
       },
-      "yaxes": [
-        {
-          "$$hashKey": "object:123",
-          "decimals": 2,
-          "format": "short",
-          "label": "duration [s]",
-          "logBase": 10,
-          "max": "300",
-          "min": "0.001",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:124",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "type": "heatmap",
+      "xAxis": {
+        "show": true
+      },
+      "xBucketNumber": null,
+      "xBucketSize": null,
+      "yAxis": {
+        "decimals": 0,
+        "format": "s",
+        "logBase": 1,
+        "max": null,
+        "min": null,
+        "show": true,
+        "splitFactor": null
+      },
+      "yBucketBound": "upper",
+      "yBucketNumber": null,
+      "yBucketSize": null
     },
     {
       "aliasColors": {},
@@ -617,6 +572,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -633,12 +589,12 @@
         "y": 18
       },
       "hiddenSeries": false,
-      "id": 21,
+      "id": 46,
       "legend": {
         "avg": false,
         "current": true,
-        "max": true,
-        "min": true,
+        "max": false,
+        "min": false,
         "show": true,
         "total": false,
         "values": true
@@ -660,7 +616,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (status_code) (rate(cortex_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.cortex-api\",method=\"GET\",route=~\"api_v1_query.*\"}[$timewindow]))",
+          "expr": "sum by (code) (rate(grafana_datasource_request_duration_seconds_sum{namespace=\"$tenant-tenant\", datasource=\"metrics\"}[$timewindow]) / rate(grafana_datasource_request_duration_seconds_count{namespace=\"$tenant-tenant\", datasource=\"metrics\"}[$timewindow]))\n",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -670,7 +626,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "API proxy /api/v1/query[_range], GETs, rate by status code ($timewindow mean)",
+      "title": "Queries through Grafana, req duration by status code ($timewindow mean, tenant: '$tenant')",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -689,10 +645,10 @@
           "$$hashKey": "object:123",
           "decimals": 2,
           "format": "short",
-          "label": "rate [1/s]",
+          "label": "duration [s]",
           "logBase": 10,
-          "max": null,
-          "min": "0.0001",
+          "max": "300",
+          "min": "0.001",
           "show": true
         },
         {
@@ -810,75 +766,107 @@
       }
     },
     {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
+      "aliasColors": {
+        "{status_code=\"204\"}": "semi-dark-green",
+        "{status_code=\"400\"}": "dark-orange",
+        "{status_code=\"500\"}": "red"
       },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateSpectral",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "tsbuckets",
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "metrics",
-      "description": "I think this total duration includes reading the request body.",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
+      "fill": 3,
+      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
         "y": 24
       },
-      "heatmap": {},
-      "hideZeroBuckets": true,
-      "highlightCards": true,
-      "id": 29,
+      "hiddenSeries": false,
+      "id": 21,
       "legend": {
-        "show": true
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
       },
-      "reverseYBuckets": false,
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
       "targets": [
         {
-          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"GET\",status_code=\"200\",route=~\"api_v1_query.*\"}[$timewindow]))",
-          "format": "heatmap",
-          "instant": false,
+          "expr": "sum by (status_code) (rate(cortex_api_proxy_request_duration_seconds_count{job=\"$tenant-tenant.cortex-api\",method=\"GET\",route=~\"api_v1_query.*\"}[$timewindow]))",
           "interval": "",
-          "legendFormat": "{{le}}",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
+      "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "API proxy /api/v1/query[_range], 200-acked GETs, request duration, event rate [1/s] ($timewindow mean)",
+      "title": "API proxy /api/v1/query[_range], GETs, rate by status code ($timewindow mean)",
       "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
         "show": true,
-        "showHistogram": true
+        "values": []
       },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": 0,
-        "format": "s",
-        "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "upper",
-      "yBucketNumber": null,
-      "yBucketSize": null
+      "yaxes": [
+        {
+          "$$hashKey": "object:123",
+          "decimals": 2,
+          "format": "short",
+          "label": "rate [1/s]",
+          "logBase": 10,
+          "max": null,
+          "min": "0.0001",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:124",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -979,6 +967,77 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cards": {
+        "cardPadding": null,
+        "cardRound": null
+      },
+      "color": {
+        "cardColor": "#b4ff00",
+        "colorScale": "sqrt",
+        "colorScheme": "interpolateSpectral",
+        "exponent": 0.5,
+        "mode": "spectrum"
+      },
+      "dataFormat": "tsbuckets",
+      "datasource": "metrics",
+      "description": "I think this total duration includes reading the request body.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "heatmap": {},
+      "hideZeroBuckets": true,
+      "highlightCards": true,
+      "id": 29,
+      "legend": {
+        "show": true
+      },
+      "reverseYBuckets": false,
+      "targets": [
+        {
+          "expr": "sum by (le) (rate(cortex_api_proxy_request_duration_seconds_bucket{job=\"$tenant-tenant.cortex-api\",method=\"GET\",status_code=\"200\",route=~\"api_v1_query.*\"}[$timewindow]))",
+          "format": "heatmap",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "API proxy /api/v1/query[_range], 200-acked GETs, request duration, event rate [1/s] ($timewindow mean)",
+      "tooltip": {
+        "show": true,
+        "showHistogram": true
+      },
+      "type": "heatmap",
+      "xAxis": {
+        "show": true
+      },
+      "xBucketNumber": null,
+      "xBucketSize": null,
+      "yAxis": {
+        "decimals": 0,
+        "format": "s",
+        "logBase": 1,
+        "max": null,
+        "min": null,
+        "show": true,
+        "splitFactor": null
+      },
+      "yBucketBound": "upper",
+      "yBucketNumber": null,
+      "yBucketSize": null
     }
   ],
   "refresh": "5s",
@@ -990,9 +1049,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "system",
-          "value": "system"
+          "selected": true,
+          "text": "prod",
+          "value": "prod"
         },
         "datasource": "metrics",
         "definition": "",
@@ -1088,5 +1147,5 @@
   "timezone": "",
   "title": "Tenant Overview / Cortex",
   "uid": "c82shqQZz",
-  "version": 4
+  "version": 1
 }
