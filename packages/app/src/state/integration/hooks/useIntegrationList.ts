@@ -32,9 +32,19 @@ export const selectIntegrationList = createSelector(
   (loading, integrations) => (loading ? [] : values(integrations))
 );
 
+export const selectIntegrationListCount = createSelector(
+  selectIntegrationList,
+  integrationList => integrationList.length
+);
+
 export const useIntegrationList = () => {
   useIntegrationListSubscription();
   return useSelector(selectIntegrationList);
+};
+
+export const useIntegrationListCount = () => {
+  useIntegrationListSubscription();
+  return useSelector(selectIntegrationListCount);
 };
 
 export const useIntegrationListSubscription = () => {

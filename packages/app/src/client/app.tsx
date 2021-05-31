@@ -45,6 +45,7 @@ import SideBar, {
 } from "client/views/common/SideBar";
 import AppBar, { appBarHeight } from "client/views/common/AppBar";
 import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { useIntegrationListCount } from "state/integration/hooks/useIntegrationList";
 
 import GettingStarted from "client/views/getting-started";
 import TenantOverview from "client/views/overview";
@@ -84,6 +85,7 @@ const AuthProtectedApplication = () => {
   const classes = useStyles();
   const clusterRoutesMatch = useRouteMatch<{ tenantId: string }>("/cluster/*");
   const tenant = useSelectedTenant();
+  const integrationCount = useIntegrationListCount();
 
   if (tenant === null) {
     // Still loading tenants
@@ -161,7 +163,7 @@ const AuthProtectedApplication = () => {
                 path: `/tenant/${tenantName}/integrations/all`
               },
               {
-                title: "Installed",
+                title: `Installed (${integrationCount})`,
                 path: `/tenant/${tenantName}/integrations/installed`
               }
             ]
