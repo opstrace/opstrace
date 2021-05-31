@@ -15,12 +15,15 @@
  */
 
 import React from "react";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import { useCommandService } from "client/services/Command";
 import useTenantList from "state/tenant/hooks/useTenantList";
 
 import { Tenant } from "state/tenant/types";
+
+import { clearIntegrations } from "state/integration/actions";
 
 import { PickerOption, usePickerService } from "client/services/Picker";
 
@@ -34,6 +37,7 @@ function tenantToPickerOption(tenant: Tenant): PickerOption {
 export const openTenantPickerCommandId = "select-tenant-picker";
 
 const TenantPicker = () => {
+  const dispatch = useDispatch();
   const history = useHistory();
   const tenants = useTenantList();
 
@@ -42,7 +46,8 @@ const TenantPicker = () => {
       activationPrefix: "tenant:",
       options: tenants ? tenants.map(tenantToPickerOption) : [],
       onSelected: option => {
-        history.push(`/tenant/${option.id}`);
+        dispatch(clearIntegrations()); // note: ideally we would dispatch a "global" action here that each reducer could respond to if required
+        history.push(`/tenant/${option.id}`); // todo: would be nice to keep the current path and simply change the tenant rather than send user back to the home for the tenant
       }
     },
     [tenants, history]

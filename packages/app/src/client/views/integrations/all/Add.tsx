@@ -38,8 +38,8 @@ export const AddIntegration = () => {
   const { integrationKind: kind } = useParams<{
     integrationKind: string;
   }>();
-  const history = useHistory();
   const dispatch = useDispatch();
+  const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
 
   const integration = integrationDefRecords[kind];

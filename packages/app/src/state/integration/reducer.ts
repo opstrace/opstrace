@@ -71,4 +71,10 @@ export const reducer = createReducer<IntegrationState, IntegrationActions>(
         integrations: omit([action.payload.id])(state.integrations)
       };
     }
+  )
+  .handleAction(
+    actions.clearIntegrations,
+    (state, action): IntegrationState => {
+      return IntegrationInitialState;
+    }
   );
