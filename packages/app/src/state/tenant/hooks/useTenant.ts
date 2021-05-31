@@ -16,6 +16,7 @@
 
 import { useRouteMatch } from "react-router";
 import { createSelector } from "reselect";
+import {values}
 
 import { useSelector, State } from "state/provider";
 
@@ -27,6 +28,13 @@ export const selectTenant = createSelector(
   (state, _) => state.tenants.tenants,
   (_: State, name: string) => name,
   (loading, tenants, name: string) => (loading ? null : tenants[name])
+);
+
+export const selectTenantById = createSelector(
+  (state: State) => state.tenants.loading,
+  (state, _) => state.tenants.tenants,
+  (_: State, id: string) => id,
+  (loading, tenants, id: string) => (loading ? null : tenants[name])
 );
 
 export function useSelectedTenantWithFallback(): Tenant {

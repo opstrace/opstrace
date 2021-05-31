@@ -103,7 +103,7 @@ export default function* integrationListSubscriptionManager() {
       if (activeSubscription && subscribers.size === 0) {
         yield cancel(activeSubscription);
         // Reset list
-        yield put(actions.setIntegrationList([]));
+        yield put(actions.updateIntegrations([]));
         activeSubscription = undefined;
       }
     }
@@ -127,7 +127,7 @@ export function integrationListSubscriptionEventChannel(tenantName: string) {
           next: res => {
             if (res.data?.tenant_by_pk?.integrations) {
               emitter(
-                actions.setIntegrationList(res.data.tenant_by_pk.integrations)
+                actions.updateIntegrations(res.data.tenant_by_pk.integrations)
               );
             }
           }
