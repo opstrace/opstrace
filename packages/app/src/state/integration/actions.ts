@@ -36,3 +36,5 @@ export const unsubscribeFromIntegrationList = createAction(
 export const setIntegrationList = createAction(
   "SET_INTEGRATION_LIST"
 )<Integrations>();
+
+export const clearIntegrations = createAction("CLEAR_INTEGRATIONS")();
