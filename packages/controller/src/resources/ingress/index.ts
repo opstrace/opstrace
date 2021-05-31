@@ -19,7 +19,6 @@ import { ResourceCollection, Namespace, Ingress } from "@opstrace/kubernetes";
 import { getTenantDomain, getTenantNamespace, getDomain } from "../../helpers";
 import { State } from "../../reducer";
 import { CertManagerResources } from "./certManager";
-import { KubedResources } from "./kubed";
 import { ExternalDnsResources } from "./externalDns";
 import { NginxIngressResources } from "./nginxIngress";
 
@@ -49,7 +48,6 @@ export function IngressResources(
   );
 
   collection.add(CertManagerResources(state, kubeConfig, namespace));
-  collection.add(KubedResources(state, kubeConfig, namespace));
   collection.add(ExternalDnsResources(state, kubeConfig, namespace));
   collection.add(NginxIngressResources(state, kubeConfig, namespace));
 
