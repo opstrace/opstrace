@@ -197,7 +197,7 @@ export type Integration_Bool_Exp = {
 /** unique or primary key constraints on table "integration" */
 export enum Integration_Constraint {
   /** unique or primary key constraint */
-  IntegrationKeyKey = "integration_key_key",
+  IntegrationKeyTenantIdKey = "integration_key_tenant_id_key",
   /** unique or primary key constraint */
   IntegrationsNameTenantIdKey = "integrations_name_tenant_id_key",
   /** unique or primary key constraint */

@@ -1644,7 +1644,7 @@ const (
 type IntegrationConstraint string
 
 const (
-	IntegrationConstraintIntegrationKeyKey           IntegrationConstraint = "integration_key_key"
+	IntegrationConstraintIntegrationKeyTenantIdKey   IntegrationConstraint = "integration_key_tenant_id_key"
 	IntegrationConstraintIntegrationsNameTenantIdKey IntegrationConstraint = "integrations_name_tenant_id_key"
 	IntegrationConstraintIntegrationsPkey            IntegrationConstraint = "integrations_pkey"
 )
