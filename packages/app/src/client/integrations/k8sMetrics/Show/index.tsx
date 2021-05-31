@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
@@ -27,6 +28,11 @@ import IntegrationStatus from "client/integrations/k8sLogs/Status";
 
 import { CondRender } from "client/utils/rendering";
 
+import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
+import { useSelectedIntegration } from "state/integration/hooks";
+import { integrationDefRecords } from "client/integrations";
+import { loadGrafanaStateForIntegration } from "state/integration/actions";
+
 import { InstallInstructions } from "./InstallInstructions";
 import { UninstallInstructions } from "./UninstallInstructions";
 
@@ -34,18 +40,19 @@ import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
-
 import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 
-import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import { useSelectedIntegration } from "state/integration/hooks";
-import { integrationDefRecords } from "client/integrations";
-
 export const K8sMetricsShow = () => {
+  const dispatch = useDispatch();
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
+
+  useEffect(() => {
+    if (integration?.id)
+      dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
+  }, [integration?.id]);
 
   const [isDashboardInstalled, grafanaFolderPath] = useMemo(() => {
     const latestMetadata = integration?.grafana_metadata;

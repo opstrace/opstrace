@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { values, find, propEq } from "ramda";
 import { useRouteMatch } from "react-router";
 import { createSelector } from "reselect";
-import {values}
 
 import { useSelector, State } from "state/provider";
 
@@ -25,16 +25,17 @@ import { useTenantListSubscription } from "./useTenantList";
 
 export const selectTenant = createSelector(
   (state: State) => state.tenants.loading,
-  (state, _) => state.tenants.tenants,
+  (state: State) => state.tenants.tenants,
   (_: State, name: string) => name,
   (loading, tenants, name: string) => (loading ? null : tenants[name])
 );
 
 export const selectTenantById = createSelector(
   (state: State) => state.tenants.loading,
-  (state, _) => state.tenants.tenants,
+  (state: State) => state.tenants.tenants,
   (_: State, id: string) => id,
-  (loading, tenants, id: string) => (loading ? null : tenants[name])
+  (loading, tenants, id: string) =>
+    loading ? null : find(propEq("id", id))(values(tenants))
 );
 
 export function useSelectedTenantWithFallback(): Tenant {

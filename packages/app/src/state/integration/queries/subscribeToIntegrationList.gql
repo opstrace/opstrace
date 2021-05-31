@@ -2,12 +2,11 @@ subscription SubscribeToIntegrationList($tenant_name: String!) {
   tenant_by_pk(name: $tenant_name) {
     integrations {
       id
-      kind
+      tenant_id
       name
       key
+      kind
       data
-      tenant_id
-      grafana_metadata
       created_at
       updated_at
     }

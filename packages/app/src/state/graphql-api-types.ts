@@ -1673,7 +1673,6 @@ export type InsertIntegrationMutation = {
       | "key"
       | "data"
       | "tenant_id"
-      | "grafana_metadata"
       | "created_at"
       | "updated_at"
     >
@@ -1690,12 +1689,11 @@ export type SubscribeToIntegrationListSubscription = {
       Pick<
         Integration,
         | "id"
-        | "kind"
+        | "tenant_id"
         | "name"
         | "key"
+        | "kind"
         | "data"
-        | "tenant_id"
-        | "grafana_metadata"
         | "created_at"
         | "updated_at"
       >
@@ -1971,7 +1969,6 @@ export const InsertIntegrationDocument = gql`
       key
       data
       tenant_id
-      grafana_metadata
       created_at
       updated_at
     }
@@ -1982,12 +1979,11 @@ export const SubscribeToIntegrationListDocument = gql`
     tenant_by_pk(name: $tenant_name) {
       integrations {
         id
-        kind
+        tenant_id
         name
         key
+        kind
         data
-        tenant_id
-        grafana_metadata
         created_at
         updated_at
       }

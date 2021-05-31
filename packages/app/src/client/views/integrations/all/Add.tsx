@@ -23,10 +23,7 @@ import {
   showIntegrationPath
 } from "client/integrations";
 
-import {
-  addIntegration,
-  loadGrafanaStateForIntegration
-} from "state/integration/actions";
+import { addIntegration } from "state/integration/actions";
 import graphqlClient from "state/clients/graphqlClient";
 
 import NotFound from "client/views/404/404";
@@ -60,7 +57,6 @@ export const AddIntegration = () => {
         const integration = response?.data?.insert_integration_one;
         if (integration) {
           dispatch(addIntegration({ integration }));
-          dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
           history.push(
             showIntegrationPath({
               tenant,

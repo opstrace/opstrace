@@ -14,12 +14,31 @@
  * limitations under the License.
  */
 
-import { all, call, spawn, takeEvery, select } from "redux-saga/effects"; // put
+import { all, call, spawn, takeEvery, select, put } from "redux-saga/effects"; // put
 
 import * as actions from "../actions";
 import integrationListSubscriptionManager from "./integrationListSubscription";
 
 import { selectIntegration } from "state/integration/hooks/useIntegration";
+import { selectTenantById } from "state/tenant/hooks/useTenant";
+
+import {
+  Integration,
+  IntegrationGrafanaMetadata
+} from "state/integration/types";
+import { Tenant } from "state/tenant/types";
+
+import { getFolder } from "client/utils/grafana";
+
+// create a generic type
+type AsyncReturnType<T extends (...args: any) => any> =
+  // if T matches this signature and returns a Promise, extract
+  // U (the type of the resolved promise) and use that, or...
+  T extends (...args: any) => Promise<infer U>
+    ? U // if T matches this signature and returns anything else, // extract the return value U and use that, or...
+    : T extends (...args: any) => infer U
+    ? U // if everything goes to hell, return an `any`
+    : any;
 
 export default function* integrationTaskManager() {
   const sagas = [
@@ -57,37 +76,38 @@ function* loadGrafanaStateForIntegration(
   action: ReturnType<typeof actions.loadGrafanaStateForIntegration>
 ) {
   try {
-    const integration = yield select(selectIntegration, action.payload.id);
-    console.log("saga", integration.tenant.name, integration);
+    const integration: Integration = yield select(
+      selectIntegration,
+      action.payload.id
+    );
 
-    // const response: AsyncReturnType<
-    //   typeof graphqlClient.GetAlertmanager
-    // > = yield graphqlClient.GetAlertmanager({
-    //   tenant_id: action.payload
-    // });
-    // if (response.data?.loadGrafanaStateForIntegration?.config) {
-    //   const cortexConfig = yamlParser.load(
-    //     response.data?.loadGrafanaStateForIntegration?.config,
-    //     {
-    //       schema: yamlParser.JSON_SCHEMA
-    //     }
-    //   );
-    //   yield put(
-    //     actions.alertmanagerLoaded({
-    //       tenantName: action.payload,
-    //       config: cortexConfig.alertmanager_config,
-    //       online: true
-    //     })
-    //   );
-    // } else {
-    //   yield put(
-    //     actions.alertmanagerLoaded({
-    //       tenantName: action.payload,
-    //       config: "",
-    //       online: true
-    //     })
-    //   );
-    // }
+    const tenant: Tenant = yield select(
+      selectTenantById,
+      integration.tenant_id
+    );
+
+    const response: AsyncReturnType<typeof getFolder> = yield getFolder({
+      integration,
+      tenant
+    });
+
+    let grafanaMetadata: IntegrationGrafanaMetadata = {
+      folder_id: undefined,
+      folder_path: undefined
+    };
+    if (response?.id) {
+      grafanaMetadata.folder_id = response.id;
+      grafanaMetadata.folder_path = response.urlPath;
+    }
+
+    yield put(
+      actions.updateIntegrations([
+        {
+          ...integration,
+          grafana_metadata: grafanaMetadata
+        }
+      ])
+    );
   } catch (err) {
     console.error(err);
   }
