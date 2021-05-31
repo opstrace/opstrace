@@ -21,7 +21,7 @@ import { isTenantStorage, deserialize } from "../utils";
 
 type Actions = ActionType<typeof configMapActions>;
 
-type TenantsState = {
+export type TenantsState = {
   tenants: Tenants;
   loading: boolean;
   backendExists: boolean | null;

@@ -148,11 +148,7 @@ export function CertManagerResources(
       kind: "Secret",
       metadata: {
         name: "https-cert",
-        namespace: namespace,
-        annotations: {
-          // select the namespaces that have a label named `tenant`
-          "kubed.appscode.com/sync": "tenant"
-        }
+        namespace: namespace
       },
       type: "kubernetes.io/tls"
     },
@@ -1174,10 +1170,7 @@ export function CertManagerResources(
             spec: {
               containers: [
                 {
-                  args: [
-                    "--v=2",
-                    "--leader-elect=false"
-                  ],
+                  args: ["--v=2", "--leader-elect=false"],
                   env: [
                     {
                       name: "POD_NAMESPACE",

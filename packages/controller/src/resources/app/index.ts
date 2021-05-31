@@ -27,14 +27,25 @@ import { OpstraceApplicationResources } from "./app";
 export function ApplicationResources(
   state: State,
   kubeConfig: KubeConfig,
-  namespace: string
+  namespace: string,
+  ingressNamespace: string,
+  ingressCertSecretName: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
   const domain = getDomain(state);
 
   // App UI
-  collection.add(OpstraceApplicationResources(state, kubeConfig, namespace, domain));
+  collection.add(
+    OpstraceApplicationResources(
+      state,
+      kubeConfig,
+      namespace,
+      domain,
+      ingressNamespace,
+      ingressCertSecretName
+    )
+  );
   // Config API
   collection.add(OpstraceAPIResources(state, kubeConfig, namespace));
 

@@ -27,17 +27,17 @@ import {
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
-import {
-  generateSecretValue,
-  getControllerConfig
-} from "../../helpers";
+import { generateSecretValue, getControllerConfig } from "../../helpers";
 import { DockerImages } from "@opstrace/controller-config";
+import { getCertSecretCopy } from "../utils";
 
 export function OpstraceApplicationResources(
   state: State,
   kubeConfig: KubeConfig,
   namespace: string,
-  domain: string
+  domain: string,
+  ingressNamespace: string,
+  ingressCertSecretName: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
@@ -56,10 +56,6 @@ export function OpstraceApplicationResources(
         metadata: {
           name: namespace,
           labels: {
-            // although this isn't actually a "tenant", we use this label to trick
-            // kubed into thinking it's a tenant so that the certificates are copied into
-            // this namespace too.
-            tenant: "opstrace-application",
             "cert-manager.io/disable-validation": "true"
           }
         }
@@ -67,6 +63,18 @@ export function OpstraceApplicationResources(
       kubeConfig
     )
   );
+
+  const certSecret = getCertSecretCopy(
+    namespace,
+    state,
+    kubeConfig,
+    ingressNamespace,
+    ingressCertSecretName
+  );
+
+  if (certSecret) {
+    collection.add(certSecret);
+  }
 
   collection.add(
     new Service(
@@ -182,7 +190,9 @@ export function OpstraceApplicationResources(
       apiVersion: "v1",
       data: {
         // Shared between graphql and config-api
-        HASURA_CONFIG_API_SECRET: Buffer.from(generateSecretValue()).toString("base64")
+        HASURA_CONFIG_API_SECRET: Buffer.from(generateSecretValue()).toString(
+          "base64"
+        )
       },
       kind: "Secret",
       metadata: {
@@ -451,7 +461,7 @@ export function OpstraceApplicationResources(
                     },
                     {
                       name: "ACTION_CONFIG_API_ENDPOINT",
-                      value: `http://opstrace-api.${namespace}.svc.cluster.local:8081`,
+                      value: `http://opstrace-api.${namespace}.svc.cluster.local:8081`
                     },
                     {
                       name: "ACTION_CONFIG_API_SECRET",
