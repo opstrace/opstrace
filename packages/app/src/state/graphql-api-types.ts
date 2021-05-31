@@ -118,7 +118,6 @@ export type String_Comparison_Exp = {
 export type Integration = {
   created_at: Scalars["timestamp"];
   data: Scalars["jsonb"];
-  grafana_metadata: Scalars["jsonb"];
   id: Scalars["uuid"];
   key: Scalars["String"];
   kind: Scalars["String"];
@@ -131,11 +130,6 @@ export type Integration = {
 
 /** columns and relationships of "integration" */
 export type IntegrationDataArgs = {
-  path?: Maybe<Scalars["String"]>;
-};
-
-/** columns and relationships of "integration" */
-export type IntegrationGrafana_MetadataArgs = {
   path?: Maybe<Scalars["String"]>;
 };
 
@@ -168,7 +162,6 @@ export type Integration_Aggregate_Order_By = {
 /** append existing jsonb value of filtered columns with new jsonb value */
 export type Integration_Append_Input = {
   data?: Maybe<Scalars["jsonb"]>;
-  grafana_metadata?: Maybe<Scalars["jsonb"]>;
 };
 
 /** input type for inserting array relation for remote table "integration" */
@@ -184,7 +177,6 @@ export type Integration_Bool_Exp = {
   _or?: Maybe<Array<Maybe<Integration_Bool_Exp>>>;
   created_at?: Maybe<Timestamp_Comparison_Exp>;
   data?: Maybe<Jsonb_Comparison_Exp>;
-  grafana_metadata?: Maybe<Jsonb_Comparison_Exp>;
   id?: Maybe<Uuid_Comparison_Exp>;
   key?: Maybe<String_Comparison_Exp>;
   kind?: Maybe<String_Comparison_Exp>;
@@ -197,7 +189,7 @@ export type Integration_Bool_Exp = {
 /** unique or primary key constraints on table "integration" */
 export enum Integration_Constraint {
   /** unique or primary key constraint */
-  IntegrationKeyKey = "integration_key_key",
+  IntegrationKeyTenantIdKey = "integration_key_tenant_id_key",
   /** unique or primary key constraint */
   IntegrationsNameTenantIdKey = "integrations_name_tenant_id_key",
   /** unique or primary key constraint */
@@ -207,26 +199,22 @@ export enum Integration_Constraint {
 /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
 export type Integration_Delete_At_Path_Input = {
   data?: Maybe<Array<Maybe<Scalars["String"]>>>;
-  grafana_metadata?: Maybe<Array<Maybe<Scalars["String"]>>>;
 };
 
 /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
 export type Integration_Delete_Elem_Input = {
   data?: Maybe<Scalars["Int"]>;
-  grafana_metadata?: Maybe<Scalars["Int"]>;
 };
 
 /** delete key/value pair or string element. key/value pairs are matched based on their key value */
 export type Integration_Delete_Key_Input = {
   data?: Maybe<Scalars["String"]>;
-  grafana_metadata?: Maybe<Scalars["String"]>;
 };
 
 /** input type for inserting data into table "integration" */
 export type Integration_Insert_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   data?: Maybe<Scalars["jsonb"]>;
-  grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
   kind?: Maybe<Scalars["String"]>;
@@ -305,7 +293,6 @@ export type Integration_On_Conflict = {
 export type Integration_Order_By = {
   created_at?: Maybe<Order_By>;
   data?: Maybe<Order_By>;
-  grafana_metadata?: Maybe<Order_By>;
   id?: Maybe<Order_By>;
   key?: Maybe<Order_By>;
   kind?: Maybe<Order_By>;
@@ -323,7 +310,6 @@ export type Integration_Pk_Columns_Input = {
 /** prepend existing jsonb value of filtered columns with new jsonb value */
 export type Integration_Prepend_Input = {
   data?: Maybe<Scalars["jsonb"]>;
-  grafana_metadata?: Maybe<Scalars["jsonb"]>;
 };
 
 /** select columns of table "integration" */
@@ -332,8 +318,6 @@ export enum Integration_Select_Column {
   CreatedAt = "created_at",
   /** column name */
   Data = "data",
-  /** column name */
-  GrafanaMetadata = "grafana_metadata",
   /** column name */
   Id = "id",
   /** column name */
@@ -352,7 +336,6 @@ export enum Integration_Select_Column {
 export type Integration_Set_Input = {
   created_at?: Maybe<Scalars["timestamp"]>;
   data?: Maybe<Scalars["jsonb"]>;
-  grafana_metadata?: Maybe<Scalars["jsonb"]>;
   id?: Maybe<Scalars["uuid"]>;
   key?: Maybe<Scalars["String"]>;
   kind?: Maybe<Scalars["String"]>;
@@ -367,8 +350,6 @@ export enum Integration_Update_Column {
   CreatedAt = "created_at",
   /** column name */
   Data = "data",
-  /** column name */
-  GrafanaMetadata = "grafana_metadata",
   /** column name */
   Id = "id",
   /** column name */
@@ -1712,17 +1693,6 @@ export type UpdateIntegrationDataMutation = {
   >;
 };
 
-export type UpdateIntegrationGrafanaMetadataMutationVariables = Exact<{
-  id: Scalars["uuid"];
-  grafana_metadata: Scalars["jsonb"];
-}>;
-
-export type UpdateIntegrationGrafanaMetadataMutation = {
-  update_integration_by_pk?: Maybe<
-    Pick<Integration, "id" | "grafana_metadata" | "updated_at">
-  >;
-};
-
 export type UpdateIntegrationNameMutationVariables = Exact<{
   id: Scalars["uuid"];
   name: Scalars["String"];
@@ -1995,21 +1965,6 @@ export const UpdateIntegrationDataDocument = gql`
     update_integration_by_pk(pk_columns: { id: $id }, _set: { data: $data }) {
       id
       data
-      updated_at
-    }
-  }
-`;
-export const UpdateIntegrationGrafanaMetadataDocument = gql`
-  mutation UpdateIntegrationGrafanaMetadata(
-    $id: uuid!
-    $grafana_metadata: jsonb!
-  ) {
-    update_integration_by_pk(
-      pk_columns: { id: $id }
-      _set: { grafana_metadata: $grafana_metadata }
-    ) {
-      id
-      grafana_metadata
       updated_at
     }
   }
@@ -2333,22 +2288,6 @@ export function getSdk(
       return withWrapper(() =>
         client.rawRequest<UpdateIntegrationDataMutation>(
           print(UpdateIntegrationDataDocument),
-          variables
-        )
-      );
-    },
-    UpdateIntegrationGrafanaMetadata(
-      variables: UpdateIntegrationGrafanaMetadataMutationVariables
-    ): Promise<{
-      data?: UpdateIntegrationGrafanaMetadataMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
-      return withWrapper(() =>
-        client.rawRequest<UpdateIntegrationGrafanaMetadataMutation>(
-          print(UpdateIntegrationGrafanaMetadataDocument),
           variables
         )
       );

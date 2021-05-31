@@ -19,15 +19,14 @@ import { Integration as DBIntegration } from "state/clients/graphqlClient";
 export type Integration = Pick<
   DBIntegration,
   | "id"
-  | "kind"
+  | "tenant_id"
   | "name"
   | "key"
+  | "kind"
   | "data"
-  | "tenant_id"
-  | "grafana_metadata"
   | "created_at"
   | "updated_at"
->;
+> & { grafana_metadata?: IntegrationGrafanaMetadata };
 
 export type Integrations = Integration[];
 export type IntegrationRecords = Record<string, Integration>;

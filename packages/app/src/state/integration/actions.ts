@@ -16,7 +16,12 @@
 
 import { createAction } from "typesafe-actions";
 
-import { Integration, Integrations, SubscriptionID } from "./types";
+import {
+  Integration,
+  Integrations,
+  IntegrationGrafanaMetadata,
+  SubscriptionID
+} from "./types";
 
 export const addIntegration = createAction("ADD_INTEGRATION")<{
   integration: Integration;
@@ -42,3 +47,7 @@ export const clearIntegrations = createAction("CLEAR_INTEGRATIONS")();
 export const loadGrafanaStateForIntegration = createAction(
   "LOAD_GRAFANA_STATE_FOR_INTEGRATION"
 )<{ id: string }>();
+
+export const updateGrafanaStateForIntegration = createAction(
+  "UPDATE_GRAFANA_STATE_FOR_INTEGRATION"
+)<{ id: string; grafanaMetadata: IntegrationGrafanaMetadata }>();

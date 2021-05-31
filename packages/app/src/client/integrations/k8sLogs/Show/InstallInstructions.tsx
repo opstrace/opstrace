@@ -15,6 +15,7 @@
  */
 
 import React, { useMemo } from "react";
+import { useDispatch } from "react-redux";
 import { saveAs } from "file-saver";
 
 import { Integration } from "state/integration/types";
@@ -24,7 +25,7 @@ import { makePromtailDashboardRequests } from "./dashboards";
 
 import * as grafana from "client/utils/grafana";
 
-import graphqlClient from "state/clients/graphqlClient";
+import { updateGrafanaStateForIntegration } from "state/integration/actions";
 
 import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
 import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
@@ -68,6 +69,8 @@ export const InstallInstructions = ({
   isDashboardInstalled,
   config
 }: InstallInstructionsProps) => {
+  const dispatch = useDispatch();
+
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
@@ -95,13 +98,12 @@ export const InstallInstructions = ({
       await grafana.createDashboard(tenant, d);
     }
 
-    await graphqlClient.UpdateIntegrationGrafanaMetadata({
-      id: integration.id,
-      grafana_metadata: {
-        folder_id: folder.id,
-        folder_path: folder.urlPath as string
-      }
-    });
+    dispatch(
+      updateGrafanaStateForIntegration({
+        id: integration.id,
+        grafanaMetadata: { folder_id: folder.id, folder_path: folder.urlPath }
+      })
+    );
   };
 
   return (
