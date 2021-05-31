@@ -101,12 +101,10 @@ function* loadGrafanaStateForIntegration(
     }
 
     yield put(
-      actions.updateIntegrations([
-        {
-          ...integration,
-          grafana_metadata: grafanaMetadata
-        }
-      ])
+      actions.updateGrafanaStateForIntegration({
+        id: integration.id,
+        grafanaMetadata: grafanaMetadata
+      })
     );
   } catch (err) {
     console.error(err);

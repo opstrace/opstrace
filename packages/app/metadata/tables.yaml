@@ -11,7 +11,6 @@
       check: {}
       columns:
       - data
-      - grafana_metadata
       - key
       - kind
       - name
@@ -21,26 +20,23 @@
   - role: user_admin
     permission:
       columns:
-      - created_at
       - data
-      - grafana_metadata
-      - id
       - key
       - kind
       - name
-      - tenant_id
+      - created_at
       - updated_at
+      - id
+      - tenant_id
       filter: {}
   update_permissions:
   - role: user_admin
     permission:
       columns:
       - data
-      - grafana_metadata
-      - kind
       - name
       filter: {}
-      check: null
+      check: {}
   delete_permissions:
   - role: user_admin
     permission:

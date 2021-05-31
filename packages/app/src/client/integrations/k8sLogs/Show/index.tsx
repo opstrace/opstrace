@@ -55,7 +55,7 @@ export const K8sLogsShow = () => {
   useEffect(() => {
     if (integration?.id)
       dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
-  }, [integration?.id]);
+  }, [dispatch, integration?.id]);
 
   const [isDashboardInstalled, grafanaFolderPath] = useMemo(() => {
     const latestMetadata = integration?.grafana_metadata;

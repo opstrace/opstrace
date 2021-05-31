@@ -53,6 +53,18 @@ export const reducer = createReducer<IntegrationState, IntegrationActions>(
     }
   )
   .handleAction(
+    actions.updateGrafanaStateForIntegration,
+    (state, action): IntegrationState => {
+      return mergeDeepRight(state, {
+        integrations: {
+          [action.payload.id]: {
+            grafana_metadata: action.payload.grafanaMetadata
+          }
+        }
+      });
+    }
+  )
+  .handleAction(
     actions.addIntegration,
     (state, action): IntegrationState => {
       return {

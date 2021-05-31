@@ -453,77 +453,6 @@ func (client *Client) UpdateIntegrationData(vars *UpdateIntegrationDataVariables
 }
 
 //
-// mutation UpdateIntegrationGrafanaMetadata($id: uuid!, $grafana_metadata: jsonb!)
-//
-
-type UpdateIntegrationGrafanaMetadataVariables struct {
-	ID              UUID  `json:"id"`
-	GrafanaMetadata Jsonb `json:"grafana_metadata"`
-}
-
-type UpdateIntegrationGrafanaMetadataResponse struct {
-	UpdateIntegrationByPk struct {
-		ID              string `json:"id"`
-		GrafanaMetadata string `json:"grafana_metadata"`
-		UpdatedAt       string `json:"updated_at"`
-	} `json:"update_integration_by_pk"`
-}
-
-type UpdateIntegrationGrafanaMetadataRequest struct {
-	*http.Request
-}
-
-func NewUpdateIntegrationGrafanaMetadataRequest(url string, vars *UpdateIntegrationGrafanaMetadataVariables) (*UpdateIntegrationGrafanaMetadataRequest, error) {
-	variables, err := json.Marshal(vars)
-	if err != nil {
-		return nil, err
-	}
-	b, err := json.Marshal(&GraphQLOperation{
-		Variables: variables,
-		Query: `mutation UpdateIntegrationGrafanaMetadata($id: uuid!, $grafana_metadata: jsonb!) {
-  update_integration_by_pk(pk_columns: {id: $id}, _set: {grafana_metadata: $grafana_metadata}) {
-    id
-    grafana_metadata
-    updated_at
-  }
-}`,
-	})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	return &UpdateIntegrationGrafanaMetadataRequest{req}, nil
-}
-
-func (req *UpdateIntegrationGrafanaMetadataRequest) Execute(client *http.Client) (*UpdateIntegrationGrafanaMetadataResponse, error) {
-	resp, err := execute(client, req.Request)
-	if err != nil {
-		return nil, err
-	}
-	var result UpdateIntegrationGrafanaMetadataResponse
-	if err := json.Unmarshal(resp.Data, &result); err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
-
-func UpdateIntegrationGrafanaMetadata(url string, client *http.Client, vars *UpdateIntegrationGrafanaMetadataVariables) (*UpdateIntegrationGrafanaMetadataResponse, error) {
-	req, err := NewUpdateIntegrationGrafanaMetadataRequest(url, vars)
-	if err != nil {
-		return nil, err
-	}
-	return req.Execute(client)
-}
-
-func (client *Client) UpdateIntegrationGrafanaMetadata(vars *UpdateIntegrationGrafanaMetadataVariables) (*UpdateIntegrationGrafanaMetadataResponse, error) {
-	return UpdateIntegrationGrafanaMetadata(client.Url, client.Client, vars)
-}
-
-//
 // mutation UpdateIntegrationName($id: uuid!, $name: String!)
 //
 
@@ -1650,29 +1579,27 @@ const (
 type IntegrationSelectColumn string
 
 const (
-	IntegrationSelectColumnCreatedAt       IntegrationSelectColumn = "created_at"
-	IntegrationSelectColumnData            IntegrationSelectColumn = "data"
-	IntegrationSelectColumnGrafanaMetadata IntegrationSelectColumn = "grafana_metadata"
-	IntegrationSelectColumnID              IntegrationSelectColumn = "id"
-	IntegrationSelectColumnKey             IntegrationSelectColumn = "key"
-	IntegrationSelectColumnKind            IntegrationSelectColumn = "kind"
-	IntegrationSelectColumnName            IntegrationSelectColumn = "name"
-	IntegrationSelectColumnTenantId        IntegrationSelectColumn = "tenant_id"
-	IntegrationSelectColumnUpdatedAt       IntegrationSelectColumn = "updated_at"
+	IntegrationSelectColumnCreatedAt IntegrationSelectColumn = "created_at"
+	IntegrationSelectColumnData      IntegrationSelectColumn = "data"
+	IntegrationSelectColumnID        IntegrationSelectColumn = "id"
+	IntegrationSelectColumnKey       IntegrationSelectColumn = "key"
+	IntegrationSelectColumnKind      IntegrationSelectColumn = "kind"
+	IntegrationSelectColumnName      IntegrationSelectColumn = "name"
+	IntegrationSelectColumnTenantId  IntegrationSelectColumn = "tenant_id"
+	IntegrationSelectColumnUpdatedAt IntegrationSelectColumn = "updated_at"
 )
 
 type IntegrationUpdateColumn string
 
 const (
-	IntegrationUpdateColumnCreatedAt       IntegrationUpdateColumn = "created_at"
-	IntegrationUpdateColumnData            IntegrationUpdateColumn = "data"
-	IntegrationUpdateColumnGrafanaMetadata IntegrationUpdateColumn = "grafana_metadata"
-	IntegrationUpdateColumnID              IntegrationUpdateColumn = "id"
-	IntegrationUpdateColumnKey             IntegrationUpdateColumn = "key"
-	IntegrationUpdateColumnKind            IntegrationUpdateColumn = "kind"
-	IntegrationUpdateColumnName            IntegrationUpdateColumn = "name"
-	IntegrationUpdateColumnTenantId        IntegrationUpdateColumn = "tenant_id"
-	IntegrationUpdateColumnUpdatedAt       IntegrationUpdateColumn = "updated_at"
+	IntegrationUpdateColumnCreatedAt IntegrationUpdateColumn = "created_at"
+	IntegrationUpdateColumnData      IntegrationUpdateColumn = "data"
+	IntegrationUpdateColumnID        IntegrationUpdateColumn = "id"
+	IntegrationUpdateColumnKey       IntegrationUpdateColumn = "key"
+	IntegrationUpdateColumnKind      IntegrationUpdateColumn = "kind"
+	IntegrationUpdateColumnName      IntegrationUpdateColumn = "name"
+	IntegrationUpdateColumnTenantId  IntegrationUpdateColumn = "tenant_id"
+	IntegrationUpdateColumnUpdatedAt IntegrationUpdateColumn = "updated_at"
 )
 
 type OrderBy string
@@ -1823,8 +1750,7 @@ type IntegrationAggregateOrderBy struct {
 }
 
 type IntegrationAppendInput struct {
-	Data            *Jsonb `json:"data,omitempty"`
-	GrafanaMetadata *Jsonb `json:"grafana_metadata,omitempty"`
+	Data *Jsonb `json:"data,omitempty"`
 }
 
 type IntegrationArrRelInsertInput struct {
@@ -1833,47 +1759,42 @@ type IntegrationArrRelInsertInput struct {
 }
 
 type IntegrationBoolExp struct {
-	And             *[]IntegrationBoolExp   `json:"_and,omitempty"`
-	Not             *IntegrationBoolExp     `json:"_not,omitempty"`
-	Or              *[]IntegrationBoolExp   `json:"_or,omitempty"`
-	CreatedAt       *TimestampComparisonExp `json:"created_at,omitempty"`
-	Data            *JsonbComparisonExp     `json:"data,omitempty"`
-	GrafanaMetadata *JsonbComparisonExp     `json:"grafana_metadata,omitempty"`
-	ID              *UuidComparisonExp      `json:"id,omitempty"`
-	Key             *StringComparisonExp    `json:"key,omitempty"`
-	Kind            *StringComparisonExp    `json:"kind,omitempty"`
-	Name            *StringComparisonExp    `json:"name,omitempty"`
-	Tenant          *TenantBoolExp          `json:"tenant,omitempty"`
-	TenantId        *UuidComparisonExp      `json:"tenant_id,omitempty"`
-	UpdatedAt       *TimestampComparisonExp `json:"updated_at,omitempty"`
+	And       *[]IntegrationBoolExp   `json:"_and,omitempty"`
+	Not       *IntegrationBoolExp     `json:"_not,omitempty"`
+	Or        *[]IntegrationBoolExp   `json:"_or,omitempty"`
+	CreatedAt *TimestampComparisonExp `json:"created_at,omitempty"`
+	Data      *JsonbComparisonExp     `json:"data,omitempty"`
+	ID        *UuidComparisonExp      `json:"id,omitempty"`
+	Key       *StringComparisonExp    `json:"key,omitempty"`
+	Kind      *StringComparisonExp    `json:"kind,omitempty"`
+	Name      *StringComparisonExp    `json:"name,omitempty"`
+	Tenant    *TenantBoolExp          `json:"tenant,omitempty"`
+	TenantId  *UuidComparisonExp      `json:"tenant_id,omitempty"`
+	UpdatedAt *TimestampComparisonExp `json:"updated_at,omitempty"`
 }
 
 type IntegrationDeleteAtPathInput struct {
-	Data            *[]String `json:"data,omitempty"`
-	GrafanaMetadata *[]String `json:"grafana_metadata,omitempty"`
+	Data *[]String `json:"data,omitempty"`
 }
 
 type IntegrationDeleteElemInput struct {
-	Data            *Int `json:"data,omitempty"`
-	GrafanaMetadata *Int `json:"grafana_metadata,omitempty"`
+	Data *Int `json:"data,omitempty"`
 }
 
 type IntegrationDeleteKeyInput struct {
-	Data            *String `json:"data,omitempty"`
-	GrafanaMetadata *String `json:"grafana_metadata,omitempty"`
+	Data *String `json:"data,omitempty"`
 }
 
 type IntegrationInsertInput struct {
-	CreatedAt       *Timestamp               `json:"created_at,omitempty"`
-	Data            *Jsonb                   `json:"data,omitempty"`
-	GrafanaMetadata *Jsonb                   `json:"grafana_metadata,omitempty"`
-	ID              *UUID                    `json:"id,omitempty"`
-	Key             *String                  `json:"key,omitempty"`
-	Kind            *String                  `json:"kind,omitempty"`
-	Name            *String                  `json:"name,omitempty"`
-	Tenant          *TenantObjRelInsertInput `json:"tenant,omitempty"`
-	TenantId        *UUID                    `json:"tenant_id,omitempty"`
-	UpdatedAt       *Timestamp               `json:"updated_at,omitempty"`
+	CreatedAt *Timestamp               `json:"created_at,omitempty"`
+	Data      *Jsonb                   `json:"data,omitempty"`
+	ID        *UUID                    `json:"id,omitempty"`
+	Key       *String                  `json:"key,omitempty"`
+	Kind      *String                  `json:"kind,omitempty"`
+	Name      *String                  `json:"name,omitempty"`
+	Tenant    *TenantObjRelInsertInput `json:"tenant,omitempty"`
+	TenantId  *UUID                    `json:"tenant_id,omitempty"`
+	UpdatedAt *Timestamp               `json:"updated_at,omitempty"`
 }
 
 type IntegrationMaxOrderBy struct {
@@ -1908,16 +1829,15 @@ type IntegrationOnConflict struct {
 }
 
 type IntegrationOrderBy struct {
-	CreatedAt       *OrderBy       `json:"created_at,omitempty"`
-	Data            *OrderBy       `json:"data,omitempty"`
-	GrafanaMetadata *OrderBy       `json:"grafana_metadata,omitempty"`
-	ID              *OrderBy       `json:"id,omitempty"`
-	Key             *OrderBy       `json:"key,omitempty"`
-	Kind            *OrderBy       `json:"kind,omitempty"`
-	Name            *OrderBy       `json:"name,omitempty"`
-	Tenant          *TenantOrderBy `json:"tenant,omitempty"`
-	TenantId        *OrderBy       `json:"tenant_id,omitempty"`
-	UpdatedAt       *OrderBy       `json:"updated_at,omitempty"`
+	CreatedAt *OrderBy       `json:"created_at,omitempty"`
+	Data      *OrderBy       `json:"data,omitempty"`
+	ID        *OrderBy       `json:"id,omitempty"`
+	Key       *OrderBy       `json:"key,omitempty"`
+	Kind      *OrderBy       `json:"kind,omitempty"`
+	Name      *OrderBy       `json:"name,omitempty"`
+	Tenant    *TenantOrderBy `json:"tenant,omitempty"`
+	TenantId  *OrderBy       `json:"tenant_id,omitempty"`
+	UpdatedAt *OrderBy       `json:"updated_at,omitempty"`
 }
 
 type IntegrationPkColumnsInput struct {
@@ -1925,20 +1845,18 @@ type IntegrationPkColumnsInput struct {
 }
 
 type IntegrationPrependInput struct {
-	Data            *Jsonb `json:"data,omitempty"`
-	GrafanaMetadata *Jsonb `json:"grafana_metadata,omitempty"`
+	Data *Jsonb `json:"data,omitempty"`
 }
 
 type IntegrationSetInput struct {
-	CreatedAt       *Timestamp `json:"created_at,omitempty"`
-	Data            *Jsonb     `json:"data,omitempty"`
-	GrafanaMetadata *Jsonb     `json:"grafana_metadata,omitempty"`
-	ID              *UUID      `json:"id,omitempty"`
-	Key             *String    `json:"key,omitempty"`
-	Kind            *String    `json:"kind,omitempty"`
-	Name            *String    `json:"name,omitempty"`
-	TenantId        *UUID      `json:"tenant_id,omitempty"`
-	UpdatedAt       *Timestamp `json:"updated_at,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Data      *Jsonb     `json:"data,omitempty"`
+	ID        *UUID      `json:"id,omitempty"`
+	Key       *String    `json:"key,omitempty"`
+	Kind      *String    `json:"kind,omitempty"`
+	Name      *String    `json:"name,omitempty"`
+	TenantId  *UUID      `json:"tenant_id,omitempty"`
+	UpdatedAt *Timestamp `json:"updated_at,omitempty"`
 }
 
 type JsonComparisonExp struct {
@@ -2286,16 +2204,15 @@ type StatusResponse struct {
 }
 
 type Integration struct {
-	CreatedAt       Timestamp `json:"created_at"`
-	Data            Jsonb     `json:"data"`
-	GrafanaMetadata Jsonb     `json:"grafana_metadata"`
-	ID              UUID      `json:"id"`
-	Key             String    `json:"key"`
-	Kind            String    `json:"kind"`
-	Name            String    `json:"name"`
-	Tenant          Tenant    `json:"tenant"`
-	TenantId        UUID      `json:"tenant_id"`
-	UpdatedAt       Timestamp `json:"updated_at"`
+	CreatedAt Timestamp `json:"created_at"`
+	Data      Jsonb     `json:"data"`
+	ID        UUID      `json:"id"`
+	Key       String    `json:"key"`
+	Kind      String    `json:"kind"`
+	Name      String    `json:"name"`
+	Tenant    Tenant    `json:"tenant"`
+	TenantId  UUID      `json:"tenant_id"`
+	UpdatedAt Timestamp `json:"updated_at"`
 }
 
 type IntegrationAggregate struct {
