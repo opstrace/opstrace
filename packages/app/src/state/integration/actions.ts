@@ -16,12 +16,10 @@
 
 import { createAction } from "typesafe-actions";
 
-import { Integrations, SubscriptionID } from "./types";
+import { Integration, Integrations, SubscriptionID } from "./types";
 
-export const insertIntegration = createAction("INSERT_INTEGRATION")<{
-  tenantId: string;
-  kind: string;
-  name: string;
+export const addIntegration = createAction("ADD_INTEGRATION")<{
+  integration: Integration;
 }>();
 export const deleteIntegration = createAction("DELETE_INTEGRATION")<{
   tenantId: string;

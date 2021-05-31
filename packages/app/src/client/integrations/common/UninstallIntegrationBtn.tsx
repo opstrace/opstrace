@@ -15,6 +15,7 @@
  */
 
 import React from "react";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import { usePickerService } from "client/services/Picker";
@@ -23,6 +24,7 @@ import { Integration } from "state/integration/types";
 import { Tenant } from "state/tenant/types";
 import { installedIntegrationsPath } from "../paths";
 
+import { deleteIntegration } from "state/integration/actions";
 import graphqlClient from "state/clients/graphqlClient";
 
 import { Button } from "client/components/Button";
@@ -38,6 +40,7 @@ export const UninstallBtn = ({
   disabled: boolean;
   uninstallCallback?: Function;
 }) => {
+  const dispatch = useDispatch();
   const history = useHistory();
 
   const handleUninstall = async () => {
@@ -50,6 +53,9 @@ export const UninstallBtn = ({
           id: integration.id
         })
         .then(() => {
+          dispatch(
+            deleteIntegration({ tenantId: tenant.id, id: integration.id })
+          );
           history.push(installedIntegrationsPath({ tenant }));
         });
     } catch (err) {
