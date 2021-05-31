@@ -1218,7 +1218,9 @@ export function CortexResources(
         spec: {
           serviceName: "ingester",
           replicas: config.ingester.replicas,
-          podManagementPolicy: "OrderedReady",
+          // Avoid circular dependency between ingester-X failing readiness checks due to ingester-Y being down.
+          // In this situation, the StatefulSet will not deploy ingester-Y if the podManagementPolicy is OrderedReady.
+          podManagementPolicy: "Parallel",
           selector: {
             matchLabels: {
               name: "ingester"
