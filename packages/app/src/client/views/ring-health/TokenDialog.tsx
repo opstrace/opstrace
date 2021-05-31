@@ -14,28 +14,54 @@
  * limitations under the License.
  */
 
-import { Box } from "client/components/Box";
-import { Dialog, DialogTitle } from "client/components/Dialog";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from "client/components/Dialog";
 import React from "react";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { useTheme } from "@material-ui/core/styles";
+import { Button } from "client/components/Button";
+import Grid from "@material-ui/core/Grid";
 
 type Props = {
-  tokens?: Array<number>,
-  onClose: () => void
-}
+  tokens?: Array<number>;
+  onClose: () => void;
+};
 
 const TokenDialog = ({ tokens, onClose }: Props) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <Dialog open={!!tokens} onClose={onClose} aria-labelledby="simple-dialog-title">
-      <DialogTitle id="simple-dialog-title">Tokens</DialogTitle>
-      <Box pl={3} width={300} height={500}>
-        {tokens?.map(token => (
-          <div key={token}>
-            {token}
-          </div>
-        ))}
-      </Box>
+    <Dialog
+      fullScreen={fullScreen}
+      open={!!tokens}
+      onClose={onClose}
+      aria-labelledby="token-dialog"
+    >
+      <DialogTitle id="token-dialog">Tokens</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          <Grid container spacing={3}>
+            {tokens?.map(token => (
+              <Grid item xs={12} sm={6} md={4}>
+                <div>{token}</div>
+              </Grid>
+            ))}
+          </Grid>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button autoFocus onClick={onClose} color="primary">
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };
 
-export default TokenDialog
+export default TokenDialog;
