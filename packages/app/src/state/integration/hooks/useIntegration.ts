@@ -14,52 +14,30 @@
  * limitations under the License.
  */
 
-import { useEffect } from "react";
 import { useParams } from "react-router";
+import { createSelector } from "reselect";
 
-import { useSelector, State, useDispatch } from "state/provider";
-import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import getSubscriptionID from "state/utils/getSubscriptionID";
-import {
-  subscribeToIntegrationList,
-  unsubscribeFromIntegrationList
-} from "../actions";
+import { useSelector, State } from "state/provider";
 
-export const getIntegrationList = (state: State) => {
-  return state.integrations.list;
-};
+import { Integration } from "state/integration/types";
+import { useIntegrationListSubscription } from "./useIntegrationList";
+
+export const selectIntegration = createSelector(
+  (state: State) => state.integrations.loading,
+  (state, _) => state.integrations.integrations,
+  (_: State, id: string) => id,
+  (loading, integrations, id: string) => (loading ? null : integrations[id])
+);
 
 export function useSelectedIntegration() {
   const params = useParams<{ integrationId: string }>();
   return useIntegration(params.integrationId || "");
 }
 
-export const useIntegration = (id: string) => {
-  const integrations = useIntegrationList();
-
-  return integrations.find(integration => integration.id === id);
-};
-
-/**
- * Subscribes to integrations and will update on
- * any changes. Automatically unsubscribeFromIntegrationLists
- * on unmount.
- */
-export default function useIntegrationList() {
-  const tenant = useSelectedTenantWithFallback();
-  const integrations = useSelector(getIntegrationList);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const subId = getSubscriptionID();
-    // make local ref of this inside useEffect scope so unsubscribe works
-    const tenantName = tenant.name;
-    dispatch(subscribeToIntegrationList({ subId, tenant: tenantName }));
-
-    return () => {
-      dispatch(unsubscribeFromIntegrationList({ subId, tenant: tenantName }));
-    };
-  }, [dispatch, tenant.name]);
-
-  return integrations;
+export default function useIntegration(
+  id: string
+): Integration | null | undefined {
+  useIntegrationListSubscription();
+  // can return undefined if the id does not exist
+  return useSelector((state: State) => selectIntegration(state, id));
 }

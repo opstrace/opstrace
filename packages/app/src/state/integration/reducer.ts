@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
+import { pluck, zipObj, mergeDeepRight } from "ramda";
+
 import { createReducer, ActionType } from "typesafe-actions";
 
-import { Integrations } from "./types";
+import { IntegrationRecords } from "./types";
 import * as actions from "./actions";
 
 type IntegrationActions = ActionType<typeof actions>;
 
 type IntegrationState = {
   loading: boolean;
-  list: Integrations;
+  integrations: IntegrationRecords;
 };
 
 const IntegrationInitialState: IntegrationState = {
   loading: true,
-  list: []
+  integrations: {}
 };
 
 export const reducer = createReducer<IntegrationState, IntegrationActions>(
@@ -36,6 +38,11 @@ export const reducer = createReducer<IntegrationState, IntegrationActions>(
 ).handleAction(
   actions.setIntegrationList,
   (state, action): IntegrationState => {
-    return { loading: false, list: action.payload };
+    const ids: string[] = pluck("id", action.payload);
+    const integrations: IntegrationRecords = zipObj(ids, action.payload);
+    return mergeDeepRight(state, {
+      loading: false,
+      integrations: integrations
+    });
   }
 );
