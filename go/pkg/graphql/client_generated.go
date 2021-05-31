@@ -311,15 +311,14 @@ type InsertIntegrationVariables struct {
 
 type InsertIntegrationResponse struct {
 	InsertIntegrationOne struct {
-		ID              string `json:"id"`
-		Kind            string `json:"kind"`
-		Name            string `json:"name"`
-		Key             string `json:"key"`
-		Data            string `json:"data"`
-		TenantId        string `json:"tenant_id"`
-		GrafanaMetadata string `json:"grafana_metadata"`
-		CreatedAt       string `json:"created_at"`
-		UpdatedAt       string `json:"updated_at"`
+		ID        string `json:"id"`
+		Kind      string `json:"kind"`
+		Name      string `json:"name"`
+		Key       string `json:"key"`
+		Data      string `json:"data"`
+		TenantId  string `json:"tenant_id"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
 	} `json:"insert_integration_one"`
 }
 
@@ -342,7 +341,6 @@ func NewInsertIntegrationRequest(url string, vars *InsertIntegrationVariables) (
     key
     data
     tenant_id
-    grafana_metadata
     created_at
     updated_at
   }
