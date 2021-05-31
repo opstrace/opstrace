@@ -15,14 +15,15 @@
  */
 
 import React from "react";
-import { useParams } from "react-router-dom";
-import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useParams, useHistory } from "react-router-dom";
 
 import {
   integrationDefRecords,
   showIntegrationPath
 } from "client/integrations";
 
+import { addIntegration } from "state/integration/actions";
 import graphqlClient from "state/clients/graphqlClient";
 
 import NotFound from "client/views/404/404";
@@ -38,6 +39,7 @@ export const AddIntegration = () => {
     integrationKind: string;
   }>();
   const history = useHistory();
+  const dispatch = useDispatch();
   const tenant = useSelectedTenantWithFallback();
 
   const integration = integrationDefRecords[kind];
@@ -53,13 +55,15 @@ export const AddIntegration = () => {
       })
       .then(response => {
         const integration = response?.data?.insert_integration_one;
-        if (integration)
+        if (integration) {
+          dispatch(addIntegration({ integration }));
           history.push(
             showIntegrationPath({
               tenant,
               integration: integration
             })
           );
+        }
       });
   };
 

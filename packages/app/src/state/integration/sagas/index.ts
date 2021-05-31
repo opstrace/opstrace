@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-import { all, call, spawn, takeEvery } from "redux-saga/effects";
+import { all, call, spawn } from "redux-saga/effects";
 
-import * as actions from "../actions";
-import graphqlClient from "state/clients/graphqlClient";
 import integrationListSubscriptionManager from "./integrationListSubscription";
 
 export default function* integrationTaskManager() {
-  const sagas = [
-    integrationListSubscriptionManager,
-    insertIntegrationListener,
-    deleteIntegrationListener
-  ];
+  const sagas = [integrationListSubscriptionManager];
 
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
@@ -44,40 +38,4 @@ export default function* integrationTaskManager() {
       })
     )
   );
-}
-
-function* insertIntegrationListener() {
-  yield takeEvery(actions.insertIntegration, insertIntegration);
-}
-
-function* insertIntegration(
-  action: ReturnType<typeof actions.insertIntegration>
-) {
-  try {
-    yield graphqlClient.InsertIntegration({
-      tenant_id: action.payload.tenantId,
-      kind: action.payload.kind,
-      name: action.payload.name,
-      data: {}
-    });
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function* deleteIntegrationListener() {
-  yield takeEvery(actions.deleteIntegration, deleteIntegration);
-}
-
-function* deleteIntegration(
-  action: ReturnType<typeof actions.deleteIntegration>
-) {
-  try {
-    yield graphqlClient.DeleteIntegration({
-      tenant_id: action.payload.tenantId,
-      id: action.payload.id
-    });
-  } catch (err) {
-    console.error(err);
-  }
 }

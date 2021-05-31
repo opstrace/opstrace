@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { pluck, zipObj, mergeDeepRight } from "ramda";
+import { pluck, zipObj, mergeDeepRight, omit } from "ramda";
 
 import { createReducer, ActionType } from "typesafe-actions";
 
@@ -35,14 +35,40 @@ const IntegrationInitialState: IntegrationState = {
 
 export const reducer = createReducer<IntegrationState, IntegrationActions>(
   IntegrationInitialState
-).handleAction(
-  actions.setIntegrationList,
-  (state, action): IntegrationState => {
-    const ids: string[] = pluck("id", action.payload);
-    const integrations: IntegrationRecords = zipObj(ids, action.payload);
-    return mergeDeepRight(state, {
-      loading: false,
-      integrations: integrations
-    });
-  }
-);
+)
+  .handleAction(
+    actions.setIntegrationList,
+    (state, action): IntegrationState => {
+      const updatedIds: string[] = pluck("id", action.payload);
+      const updatedIntegrations: IntegrationRecords = zipObj(
+        updatedIds,
+        action.payload
+      );
+
+      // note: by merging with our current redux state rather than replace we keep state from other sources such as grafana
+      return {
+        loading: false,
+        integrations: mergeDeepRight(state.integrations)(updatedIntegrations)
+      };
+    }
+  )
+  .handleAction(
+    actions.addIntegration,
+    (state, action): IntegrationState => {
+      return {
+        loading: state.loading,
+        integrations: mergeDeepRight(state.integrations)({
+          [action.payload.integration.id]: action.payload.integration
+        })
+      };
+    }
+  )
+  .handleAction(
+    actions.deleteIntegration,
+    (state, action): IntegrationState => {
+      return {
+        loading: state.loading,
+        integrations: omit([action.payload.id])(state.integrations)
+      };
+    }
+  );
