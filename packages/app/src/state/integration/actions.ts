@@ -33,8 +33,12 @@ export const unsubscribeFromIntegrationList = createAction(
   "UNSUBSCRIBE_INTEGRATION_LIST"
 )<{ subId: SubscriptionID; tenant: string }>();
 
-export const setIntegrationList = createAction(
-  "SET_INTEGRATION_LIST"
+export const updateIntegrations = createAction(
+  "UPDATE_INTEGRATIONS"
 )<Integrations>();
 
 export const clearIntegrations = createAction("CLEAR_INTEGRATIONS")();
+
+export const loadGrafanaStateForIntegration = createAction(
+  "LOAD_GRAFANA_STATE_FOR_INTEGRATION"
+)<{ id: string }>();

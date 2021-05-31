@@ -26,7 +26,8 @@ export const selectIntegration = createSelector(
   (state: State) => state.integrations.loading,
   (state, _) => state.integrations.integrations,
   (_: State, id: string) => id,
-  (loading, integrations, id: string) => (loading ? null : integrations[id])
+  (loading, integrations, id: string) =>
+    loading === false ? integrations[id] : null
 );
 
 export function useSelectedIntegration() {

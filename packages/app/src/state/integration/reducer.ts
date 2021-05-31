@@ -37,7 +37,7 @@ export const reducer = createReducer<IntegrationState, IntegrationActions>(
   IntegrationInitialState
 )
   .handleAction(
-    actions.setIntegrationList,
+    actions.updateIntegrations,
     (state, action): IntegrationState => {
       const updatedIds: string[] = pluck("id", action.payload);
       const updatedIntegrations: IntegrationRecords = zipObj(
