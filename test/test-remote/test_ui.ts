@@ -363,4 +363,27 @@ suite("test_ui_with_headless_browser", function () {
       await sleep(10);
     }
   });
+
+  test("view_ring_health", async function () {
+    // Same consideration as above: this test is here in this module for now
+    // just because it's easy to use the authentication state after actual
+    // UI-based login.
+    assert(COOKIES_AFTER_LOGIN, "Auth cookies are present");
+    const page = await BROWSER.contexts()[0].newPage();
+    await page.goto(CLUSTER_BASE_URL);
+    await page.waitForNavigation();
+
+    await page.click("text=Health");
+    await page.click("text=Metrics");
+    assert(await page.isVisible("text=Cortex Ring Health"), "page loaded");
+
+    for (const tabName of ["Ingester", "Ruler", "Compactor", "Store-gateway"]) {
+      await page.click(`text=${tabName}`);
+      page.waitForSelector(`css=tab >> text=${tabName} [aria-selected="true"]`);
+      assert(
+        await page.waitForSelector("text=less than a minute ago"),
+        `Loading ${tabName} table`
+      );
+    }
+  });
 });
