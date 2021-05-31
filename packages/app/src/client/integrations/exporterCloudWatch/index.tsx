@@ -21,8 +21,6 @@ import Logo from "./Logo.png";
 
 import { IntegrationDef } from "../types";
 
-import { EARLY_PREVIEW } from "client/flags";
-
 export const exporterCloudWatchIntegration: IntegrationDef = {
   kind: "exporter-cloudwatch",
   category: "exporter",
@@ -33,5 +31,5 @@ export const exporterCloudWatchIntegration: IntegrationDef = {
   Show: Show,
   Status: Status,
   Logo: Logo,
-  enabled: EARLY_PREVIEW
+  enabled: true
 };
