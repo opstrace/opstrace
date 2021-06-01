@@ -44,7 +44,7 @@
           "routes": [
             {
               "title": "Adding and Managing Tenants",
-              "path": "/docs/guides/administrator/tenants.md"
+              "path": "/docs/guides/administrator/adding-and-managing-tenants.md"
             },
             {
               "title": "Adding and Managing Users",
