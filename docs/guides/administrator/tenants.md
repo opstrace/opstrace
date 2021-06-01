@@ -23,6 +23,8 @@ For example, isolate by:
 
 Sometimes this isolation is used to address security concerns, but more generally, it helps keep things well-organized: because, after all, separation of concerns is a valuable best practice to keep in mind.
 
+![tenant overview page](../../assets/tenants-guide-overview-1.png)
+
 If you want a quick reference you can dip in and out of, see our [tenant reference](../../references/tenants.md) doc.
 
 If you’re coming from the quick start, and haven’t yet sent data to one of your tenants, check out [integrations guide](../user/integrations.md).
@@ -99,7 +101,7 @@ generated in the previous step, we have to put the public key into the instance:
 Visit `https://showdown.opstrace.io/cluster/tenants` and press the `Add Tenant` button.
 Type the name of the new tenant (here: `newtenant`).
 
-GIF
+![add tenant gif](../../assets/tenants-guide-add.gif)
 
 **Warning**: we do not yet do strict tenant name validation.
 To make sure things
@@ -153,18 +155,12 @@ to `https://cortex.newtenant.showdown.opstrace.io/api/v1/push`.
 
 Opstrace provides integrations that simplify collection of data from various.
 This includes automating the configuration of the API tokens.
-For example, from a Kubernetes cluster:
+For example, from a Kubernetes cluster.
 
-GIF
-
-For more information, visit our Integrations Guide.
-
-## Change the Rate Limit for the Tenant
-
-TODO
+For more information, visit our forthcoming Integrations Guide.
 
 ## Delete a Tenant
 
 Deleting a tenant is simple, and permanent.
 
-GIF
+![deleting a tenant gif](../../assets/tenants-guide-delete.gif)
