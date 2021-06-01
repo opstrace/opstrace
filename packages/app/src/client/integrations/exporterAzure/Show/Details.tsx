@@ -94,6 +94,7 @@ export const Details = ({ integration }: Props) => {
           <ViewConfig
             filename={`integration-${integration.id}-config.yaml`}
             config={config}
+            fixedHeight={600}
           />
         </CardContent>
       </Card>
