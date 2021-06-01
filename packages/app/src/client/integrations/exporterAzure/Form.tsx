@@ -122,7 +122,7 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
                   color="textSecondary"
                   gutterBottom={true}
                 >
-                  Unmanaged identity, see the{" "}
+                  This is for an <i>Unmanaged Identity</i>, see the{" "}
                   <ExternalLink
                     target="_blank"
                     href="https://github.com/RobustPerception/azure_metrics_exporter#example-azure-metrics-exporter-config"

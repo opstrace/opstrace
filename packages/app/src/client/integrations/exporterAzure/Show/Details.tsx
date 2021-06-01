@@ -18,6 +18,8 @@ import React from "react";
 
 import { Integration } from "state/integration/types";
 
+import { ViewConfig } from "client/integrations/common/ViewConfig";
+
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent } from "client/components/Card";
@@ -29,13 +31,50 @@ type Props = {
 };
 
 export const Details = ({ integration }: Props) => {
-  const config = integration.data.config;
+  const { credentials, config } = integration.data;
   return (
     <Box width="100%" height="100%" p={1}>
       <Card>
         <CardContent>
-          <Box mb={3}>
-            <Typography variant="h5">Configuration Flags</Typography>
+          <Box mb={2}>
+            <Typography variant="subtitle1">Credentials</Typography>
+            <Typography
+              variant="subtitle2"
+              color="textSecondary"
+              gutterBottom={true}
+            >
+              This is for an <i>Unmanaged Identity</i>, see the{" "}
+              <ExternalLink
+                target="_blank"
+                href="https://github.com/RobustPerception/azure_metrics_exporter#example-azure-metrics-exporter-config"
+              >
+                documentation
+              </ExternalLink>{" "}
+              for further information
+            </Typography>
+          </Box>
+
+          <Box display="flex">
+            <Box display="flex" flexDirection="column">
+              <Attribute.Key>Subscription ID</Attribute.Key>
+              <Attribute.Key>Tenant ID</Attribute.Key>
+              <Attribute.Key>Client ID</Attribute.Key>
+            </Box>
+            <Box display="flex" flexDirection="column" flexGrow={1}>
+              <Attribute.Value>
+                {credentials["AZURE_SUBSCRIPTION_ID"]}
+              </Attribute.Value>
+              <Attribute.Value>
+                {credentials["AZURE_TENANT_ID"]}
+              </Attribute.Value>
+              <Attribute.Value>
+                {credentials["AZURE_CLIENT_ID"]}
+              </Attribute.Value>
+            </Box>
+          </Box>
+
+          <Box mt={2} mb={2}>
+            <Typography variant="subtitle1">Configuration</Typography>
             <Typography
               variant="subtitle2"
               color="textSecondary"
@@ -44,35 +83,18 @@ export const Details = ({ integration }: Props) => {
               See the{" "}
               <ExternalLink
                 target="_blank"
-                href="https://github.com/prometheus-community/stackdriver_exporter#flags"
+                href="https://github.com/RobustPerception/azure_metrics_exporter#example-azure-metrics-exporter-config"
               >
                 documentation
               </ExternalLink>{" "}
               for further details
             </Typography>
           </Box>
-          <Box display="flex">
-            <Box display="flex" flexDirection="column">
-              <Attribute.Key>google.project-id</Attribute.Key>
-              <Attribute.Key>monitoring.metrics-type-prefixes</Attribute.Key>
-              <Attribute.Key>monitoring.metrics-interval</Attribute.Key>
-              <Attribute.Key>monitoringMetricsOffset</Attribute.Key>
-            </Box>
-            <Box display="flex" flexDirection="column" flexGrow={1}>
-              <Attribute.Value>
-                {config["google.project-id"].join(",")}
-              </Attribute.Value>
-              <Attribute.Value>
-                {config["monitoring.metrics-type-prefixes"].join(",")}
-              </Attribute.Value>
-              <Attribute.Value>
-                {config["monitoring.metrics-interval"]}
-              </Attribute.Value>
-              <Attribute.Value>
-                {config["monitoring.metrics-offset"]}
-              </Attribute.Value>
-            </Box>
-          </Box>
+
+          <ViewConfig
+            filename={`integration-${integration.id}-config.yaml`}
+            config={config}
+          />
         </CardContent>
       </Card>
     </Box>
