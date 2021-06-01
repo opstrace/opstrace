@@ -24,7 +24,8 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  TableBody
+  TableBody,
+  Typography
 } from "@material-ui/core";
 import { Card } from "client/components/Card";
 import { formatDistanceToNow } from "date-fns";
@@ -113,6 +114,9 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
               <TableCell>Zone</TableCell>
               <TableCell>Address</TableCell>
               <TableCell>Tokens</TableCell>
+              <TableCell>
+                <Typography variant="srOnly">Forget Shard</Typography>
+              </TableCell>
             </TableRow>
           </TableHead>
           {shards ? (
@@ -142,11 +146,33 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
                       <Eye />
                     </Button>
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const bodyFormData = new FormData();
+                          bodyFormData.append("forget", shard.id);
+                          const response = await axios.post(
+                            ringEndpoint,
+                            bodyFormData,
+                            {
+                              headers: { "Content-Type": "multipart/form-data" }
+                            }
+                          );
+                          console.log(response);
+                        } catch (e) {
+                          console.error(e);
+                        }
+                      }}
+                    >
+                      Forget
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           ) : (
-            <SkeletonTableBody numberColumns={6} numberRows={5} />
+            <SkeletonTableBody numberColumns={7} numberRows={5} />
           )}
         </Table>
       </TableContainer>
