@@ -19,6 +19,8 @@ import nock from "nock";
 
 import createCortexHandler from "./cortex";
 
+jest.mock("../../env", () => ({}));
+
 beforeEach(() => {
   nock.cleanAll();
 });
