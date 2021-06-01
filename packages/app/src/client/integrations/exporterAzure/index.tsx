@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import React from "react";
+import Form from "./Form";
+import Show from "./Show";
+import Status from "./Status";
+import Logo from "./Logo.png";
 
 import { IntegrationDef } from "../types";
+
+import { EARLY_PREVIEW } from "client/flags";
 
 /*
 // example credentials
@@ -39,10 +44,12 @@ type Data = {
 export const exporterAzureIntegration: IntegrationDef = {
   kind: "exporter-azure",
   category: "exporter",
-  label: "Azure",
-  desc: () => <i>Coming soon</i>,
-  Form: () => <div />,
-  Show: () => <div />,
-  Status: () => <div />,
-  enabled: false
+  label: "Microsoft Azure",
+  desc:
+    "Pipe any of your metrics from Microsoft Azure into Opstrace. You can select metrics from any of the Microsoft Azure Services such as Blog Storage or Load Balancer, as long as you've enabled monitoring on the service in the Microsoft Azure Console.",
+  Form: Form,
+  Show: Show,
+  Status: Status,
+  Logo: Logo,
+  enabled: EARLY_PREVIEW
 };
