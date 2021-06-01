@@ -19,13 +19,10 @@ import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
 import { installedIntegrationsPath } from "client/integrations/paths";
-import { grafanaUrl } from "client/utils/grafana";
 
 import Status from "client/integrations/k8sLogs/Status";
 import { Details } from "./Details";
 import { Actions } from "./Actions";
-
-import { CondRender } from "client/utils/rendering";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
@@ -42,15 +39,6 @@ export const ExporterCloudMonitoringShow = () => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
-
-  const [isDashboardInstalled, grafanaFolderPath] = useMemo(() => {
-    const latestMetadata = integration?.grafana_metadata;
-
-    return [
-      latestMetadata?.folder_path !== undefined,
-      latestMetadata?.folder_path
-    ];
-  }, [integration?.grafana_metadata]);
 
   // NOTE: the timeranges for these urls is not the same as that used by the status component
   // const errorLogsUrl = useMemo(() => {
@@ -104,9 +92,6 @@ export const ExporterCloudMonitoringShow = () => {
               <Box display="flex" flexDirection="column">
                 <Attribute.Key>Integration:</Attribute.Key>
                 <Attribute.Key>Created:</Attribute.Key>
-                <CondRender when={isDashboardInstalled}>
-                  <Attribute.Key> </Attribute.Key>
-                </CondRender>
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
                 <Attribute.Value>{integrationDef.label}</Attribute.Value>
@@ -121,18 +106,6 @@ export const ExporterCloudMonitoringShow = () => {
                   </Button>
                 </ExternalLink>
               </Attribute.Key>
-              <CondRender when={isDashboardInstalled}>
-                <Attribute.Key>
-                  <ExternalLink
-                    target="_blank"
-                    href={`${grafanaUrl({ tenant })}${grafanaFolderPath}`}
-                  >
-                    <Button state="primary" variant="outlined" size="medium">
-                      View Grafana Dashboards
-                    </Button>
-                  </ExternalLink>
-                </Attribute.Key>
-              </CondRender>
             </Box>
           </CardContent>
         </Card>

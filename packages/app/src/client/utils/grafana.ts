@@ -34,7 +34,7 @@ type FolderProps = {
 
 type FolderInfo = {
   id: number; // This ID must be included when creating dashboards within the folder.
-  urlPath: string; // The '/grafana/...' path linking to the folder in Grafana.
+  path: string; // The '/grafana/...' path linking to the folder in Grafana.
 };
 
 // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
@@ -54,7 +54,7 @@ export async function createFolder({
 
   return {
     id: responseData.id,
-    urlPath: responseData.url
+    path: responseData.url
   };
 }
 
@@ -73,7 +73,7 @@ export function useFolder({
 export async function getFolder({
   integration,
   tenant
-}: FolderProps): Promise<FolderInfo | null> {
+}: FolderProps): Promise<FolderInfo | undefined> {
   return axios({
     method: "get",
     url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
@@ -81,9 +81,9 @@ export async function getFolder({
   })
     .then(response => ({
       id: response.data.id,
-      urlPath: response.data.url
+      path: response.data.url
     }))
-    .catch(err => null);
+    .catch(err => undefined);
 }
 
 // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#delete-folder
@@ -106,7 +106,7 @@ export async function deleteFolder({
 
 type dashboardInfo = {
   // The '/grafana/...' path linking to the dashboard in Grafana.
-  urlPath: String;
+  path: String;
 };
 
 // see also: https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard
@@ -122,7 +122,7 @@ export async function createDashboard(
   }).then(res => res.data);
 
   return {
-    urlPath: responseData.url
+    path: responseData.url
   };
 }
 
