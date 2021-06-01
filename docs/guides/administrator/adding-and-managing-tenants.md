@@ -1,10 +1,9 @@
-# Tenants Guide
+# Adding and Managing Tenants Guide
 
-This "tenant" guide will show you how to:
+This guide will show you how to:
 
 * Add tenants during the initial create operation
 * Add new tenant to a running cluster (with public and private keys)
-* Rate limit that new tenant
 * Delete a tenant
 
 ## Introduction
@@ -27,12 +26,12 @@ Sometimes this isolation is used to address security concerns, but more generall
 
 If you want a quick reference you can dip in and out of, see our [tenant reference](../../references/tenants.md) doc.
 
-If you’re coming from the quick start, and haven’t yet sent data to one of your tenants, check out [integrations guide](../user/integrations.md).
+If you’re coming from the quick start, and haven’t yet sent data to one of your tenants, stay tuned for our forthcoming integrations guide.
 
 ## Create a Tenant Token with the CLI
 
 Because Opstrace is secure by default we will first create a public/private keypair that will be used to authenticate clients that wish to access the tenant API.
-If you have created your cluster with the `insecure` option you can skip to the [add a tenant with the UI](#user-content-create-a-new-tenant-in-the UI) section.
+If you have created your cluster with the `insecure` option you can skip to the [add a tenant with the UI](adding-and-managing-tenants.md#add-a-new-tenant-with-the-ui) section.
 
 Let's walk through an example:  adding a new tenant named `newtenant` to a running Opstrace instance named `showdown`.
 
@@ -94,9 +93,7 @@ generated in the previous step, we have to put the public key into the instance:
 ./opstrace ta-pubkeys-add aws showdown custom-keypair.pem
 ```
 
-## Create a New Tenant in the UI
-
-### 4) Create a New Tenant with the UI
+## Add a New Tenant in the UI
 
 Visit `https://showdown.opstrace.io/cluster/tenants` and press the `Add Tenant` button.
 Type the name of the new tenant (here: `newtenant`).
