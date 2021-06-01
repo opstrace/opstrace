@@ -16,7 +16,7 @@
 
 import React from "react";
 
-import { IntegrationDef } from "../types";
+import { IntegrationDef } from "client/integrations/types";
 
 /*
 type Config = {

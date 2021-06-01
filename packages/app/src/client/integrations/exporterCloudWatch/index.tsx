@@ -19,7 +19,7 @@ import Show from "./Show";
 import Status from "./Status";
 import Logo from "./Logo.png";
 
-import { IntegrationDef } from "../types";
+import { IntegrationDef } from "client/integrations/types";
 
 export const exporterCloudWatchIntegration: IntegrationDef = {
   kind: "exporter-cloudwatch",
