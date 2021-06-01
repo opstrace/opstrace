@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 
-import useWindowSize from "client/hooks/useWindowSize";
-
-import { YamlEditor } from "client/components/Editor";
+import { ViewConfig } from "client/integrations/common/ViewConfig";
 
 import { Button } from "client/components/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -26,7 +24,6 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { Box } from "client/components/Box";
 
 export const ViewConfigDialogBtn = ({
   filename,
@@ -35,7 +32,6 @@ export const ViewConfigDialogBtn = ({
   filename: string;
   config: string;
 }) => {
-  const size = useWindowSize();
   const [open, setOpen] = React.useState(false);
 
   const handleOpen = () => setOpen(true);
@@ -52,18 +48,6 @@ export const ViewConfigDialogBtn = ({
     }
   }, [open]);
 
-  const [width, height] = useMemo(() => {
-    const maxWidth = 1000;
-    // Height and width here are for the contents of the Dialog. The Dialog
-    // itself has some padding and margins. This removes and double scrollbars
-    const dialogMargins = 32 * 2 + 25 * 2 + 30;
-    const width =
-      (size.width > maxWidth ? maxWidth : size.width) - dialogMargins;
-    const height = size.height - dialogMargins - 100; // Subtract 100px for the header and footer
-
-    return [width, height];
-  }, [size.width, size.height]);
-
   return (
     <>
       <Button variant="outlined" size="small" onClick={handleOpen}>
@@ -73,13 +57,11 @@ export const ViewConfigDialogBtn = ({
         <DialogTitle>{filename}</DialogTitle>
         <DialogContent dividers={true}>
           <DialogContentText ref={descriptionElementRef} tabIndex={-1}>
-            <Box width={`${width}px`} height={`${height}px`}>
-              <YamlEditor
-                filename={filename}
-                data={config}
-                configViewer={true}
-              />
-            </Box>
+            <ViewConfig
+              filename={filename}
+              config={config}
+              heightBuffer={100}
+            />
           </DialogContentText>
         </DialogContent>
         <DialogActions>

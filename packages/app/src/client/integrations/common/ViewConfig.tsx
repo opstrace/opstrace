@@ -26,23 +26,25 @@ export const ViewConfig = ({
   filename,
   config,
   maxWidth = 1000,
-  maxHeight = 600
+  fixedHeight,
+  heightBuffer = 0
 }: {
   filename: string;
   config: string;
   maxWidth?: number;
-  maxHeight?: number;
+  fixedHeight?: number;
+  heightBuffer?: number;
 }) => {
   const size = useWindowSize();
 
   const [boxWidth, boxHeight] = useMemo(() => {
-    const boxMargins = 32 * 2 + 25 * 2 + 30;
-    const width = (size.width > maxWidth ? maxWidth : size.width) - boxMargins;
+    const margins = 32 * 2 + 25 * 2 + 30;
+    const width = (size.width > maxWidth ? maxWidth : size.width) - margins;
     const height =
-      (size.height > maxHeight ? maxHeight : size.height) - boxMargins;
+      (fixedHeight ? fixedHeight : size.height) - margins - heightBuffer;
 
     return [width, height];
-  }, [size.width, size.height]);
+  }, [size.width, size.height, maxWidth, fixedHeight, heightBuffer]);
 
   return (
     <Box width={`${boxWidth}px`} height={`${boxHeight}px`}>
