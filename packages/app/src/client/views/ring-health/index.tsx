@@ -52,6 +52,11 @@ export const TABS = [
     title: "Store-gateway",
     path: `/store-gateway`,
     endpoint: "/_/cortex/store-gateway/ring"
+  },
+  {
+    title: "Alertmanager",
+    path: `/alert-manager`,
+    endpoint: "/_/cortex/alertmanager/ring"
   }
 ];
 

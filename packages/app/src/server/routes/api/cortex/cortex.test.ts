@@ -17,9 +17,9 @@ import supertest from "supertest";
 import express from "express";
 import nock from "nock";
 
-import createCortexHandler from "./cortex";
+import createCortexHandler from ".";
 
-jest.mock("../../env", () => ({}));
+jest.mock("../../../env", () => ({}));
 
 beforeEach(() => {
   nock.cleanAll();
@@ -49,6 +49,11 @@ describe("cortex api", () => {
         `/store-gateway/ring`,
         `http://store-gateway.cortex.svc.cluster.local`,
         `/store-gateway/ring`
+      ],
+      [
+        `/alertmanager/ring`,
+        `http://alertmanager.cortex.svc.cluster.local`,
+        `/multitenant_alertmanager/ring`
       ]
     ])("%s", async (endpoint, proxyDestination, route) => {
       const mockResponse = "<div>markup response</div>";
