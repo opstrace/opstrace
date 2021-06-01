@@ -21,22 +21,50 @@ import { SECOND } from "@opstrace/utils";
 
 import { iamClient } from "./util";
 
-export const getPolicy = async ({
-  PolicyName
+const listPolicies = ({
+  params
 }: {
-  PolicyName: string;
-}): Promise<IAM.Policy | undefined> => {
+  params: IAM.ListPoliciesRequest;
+}): Promise<IAM.ListPoliciesResponse | undefined> => {
   return new Promise((resolve, reject) => {
-    iamClient().listPolicies({}, (err, data) => {
+    iamClient().listPolicies(params, (err, data) => {
       if (err) {
         reject(err);
       }
-      resolve(
-        data.Policies && data.Policies.find(r => r.PolicyName === PolicyName)
-      );
+      resolve(data);
     });
   });
 };
+
+// getPolicy queries for the list of IAM policies and returns the one that
+// matches the given PolicyName. Returns undefined if a match is not found.
+// Handles paginated results using the Marker as described in
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/IAM.html#listPolicies-property
+export function* getPolicy({
+  PolicyName
+}: {
+  PolicyName: string;
+}): Generator<unknown, IAM.Policy | undefined, IAM.ListPoliciesResponse> {
+  let truncated: boolean | undefined = true;
+  const params: IAM.ListPoliciesRequest = {};
+
+  while (truncated) {
+    const data: IAM.ListPoliciesResponse | undefined = yield call(
+      listPolicies,
+      { params }
+    );
+
+    truncated = data?.IsTruncated;
+    params.Marker = data?.Marker;
+
+    const p = data?.Policies?.find(r => r.PolicyName === PolicyName);
+    if (p !== undefined) {
+      return p;
+    }
+  }
+
+  return undefined;
+}
 
 export const createPolicy = ({
   PolicyName,
@@ -78,7 +106,7 @@ export function* ensurePolicyExists({
   PolicyDocument: string;
 }): Generator<unknown, IAM.Policy, IAM.Policy> {
   while (true) {
-    const existingPolicy: IAM.Policy = yield call(getPolicy, {
+    const existingPolicy: IAM.Policy | undefined = yield call(getPolicy, {
       PolicyName
     });
     if (!existingPolicy) {
@@ -111,7 +139,7 @@ export function* ensurePolicyDoesNotExist({
   PolicyName: string;
 }): Generator<unknown, void, IAM.Policy> {
   while (true) {
-    const existingPolicy: IAM.Policy = yield call(getPolicy, {
+    const existingPolicy: IAM.Policy | undefined = yield call(getPolicy, {
       PolicyName
     });
     if (!existingPolicy || !existingPolicy.Arn) {
