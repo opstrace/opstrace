@@ -26,16 +26,19 @@ export type Integration = Pick<
   | "data"
   | "created_at"
   | "updated_at"
-> & { grafana_metadata?: IntegrationGrafanaMetadata };
+> & { grafana?: IntegrationGrafana };
 
 export type Integrations = Integration[];
 export type IntegrationRecords = Record<string, Integration>;
 
-export type IntegrationGrafanaMetadata = {
-  folder_id?: number;
-  folder_path?: string;
-} & {};
+export type IntegrationGrafana = {
+  folder?: IntegrationGrafanaFolder;
+};
 
+export type IntegrationGrafanaFolder = {
+  id?: number;
+  path?: string;
+};
 // use this same id to unsubscribe
 export type SubscriptionID = number;
 

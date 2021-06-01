@@ -22,10 +22,7 @@ import integrationListSubscriptionManager from "./integrationListSubscription";
 import { selectIntegration } from "state/integration/hooks/useIntegration";
 import { selectTenantById } from "state/tenant/hooks/useTenant";
 
-import {
-  Integration,
-  IntegrationGrafanaMetadata
-} from "state/integration/types";
+import { Integration } from "state/integration/types";
 import { Tenant } from "state/tenant/types";
 
 import { getFolder } from "client/utils/grafana";
@@ -86,24 +83,17 @@ function* loadGrafanaStateForIntegration(
       integration.tenant_id
     );
 
-    const response: AsyncReturnType<typeof getFolder> = yield getFolder({
+    const folderResponse: AsyncReturnType<typeof getFolder> = yield getFolder({
       integration,
       tenant
     });
 
-    let grafanaMetadata: IntegrationGrafanaMetadata = {
-      folder_id: undefined,
-      folder_path: undefined
-    };
-    if (response?.id) {
-      grafanaMetadata.folder_id = response.id;
-      grafanaMetadata.folder_path = response.urlPath;
-    }
-
     yield put(
       actions.updateGrafanaStateForIntegration({
         id: integration.id,
-        grafanaMetadata: grafanaMetadata
+        grafana: {
+          folder: folderResponse
+        }
       })
     );
   } catch (err) {

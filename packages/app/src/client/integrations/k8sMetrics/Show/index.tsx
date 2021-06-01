@@ -54,14 +54,10 @@ export const K8sMetricsShow = () => {
       dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
   }, [dispatch, integration?.id]);
 
-  const [isDashboardInstalled, grafanaFolderPath] = useMemo(() => {
-    const latestMetadata = integration?.grafana_metadata;
-
-    return [
-      latestMetadata?.folder_path !== undefined,
-      latestMetadata?.folder_path
-    ];
-  }, [integration?.grafana_metadata]);
+  const isDashboardInstalled = useMemo(
+    () => !!integration?.grafana?.folder?.id,
+    [integration?.grafana?.folder?.id]
+  );
 
   const config = useMemo(() => {
     if (integration?.id) {
@@ -131,7 +127,9 @@ export const K8sMetricsShow = () => {
                 <Attribute.Key>
                   <ExternalLink
                     target="_blank"
-                    href={`${grafanaUrl({ tenant })}${grafanaFolderPath}`}
+                    href={`${grafanaUrl({ tenant })}${
+                      integration.grafana?.folder?.path
+                    }`}
                   >
                     <Button state="primary" variant="outlined" size="medium">
                       View Grafana Dashboards

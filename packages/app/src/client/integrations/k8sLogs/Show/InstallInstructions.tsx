@@ -101,7 +101,7 @@ export const InstallInstructions = ({
     dispatch(
       updateGrafanaStateForIntegration({
         id: integration.id,
-        grafanaMetadata: { folder_id: folder.id, folder_path: folder.urlPath }
+        grafana: { folder }
       })
     );
   };

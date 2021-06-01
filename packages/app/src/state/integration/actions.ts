@@ -19,7 +19,7 @@ import { createAction } from "typesafe-actions";
 import {
   Integration,
   Integrations,
-  IntegrationGrafanaMetadata,
+  IntegrationGrafana,
   SubscriptionID
 } from "./types";
 
@@ -50,4 +50,4 @@ export const loadGrafanaStateForIntegration = createAction(
 
 export const updateGrafanaStateForIntegration = createAction(
   "UPDATE_GRAFANA_STATE_FOR_INTEGRATION"
-)<{ id: string; grafanaMetadata: IntegrationGrafanaMetadata }>();
+)<{ id: string; grafana: IntegrationGrafana }>();
