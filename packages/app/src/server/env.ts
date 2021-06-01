@@ -14,58 +14,51 @@
  * limitations under the License.
  */
 
-export const isDevEnvironment = process.env.NODE_ENV === "development";
-export const isRemoteDevEnvironment = !!process.env.REMOTE_DEV;
+import { parseRequiredEnv, parseEnv } from "./envParsers";
+
+export const isDevEnvironment = parseEnv(
+  "REMOTE_DEV",
+  val => val === "development",
+  false
+);
+export const isRemoteDevEnvironment = parseEnv("REMOTE_DEV", Boolean, false);
 // hardcode the port so we can set the auth callbacks reliably
 const PORT = 3001;
 
-let DOMAIN = process.env.DOMAIN;
-if (!DOMAIN) {
-  throw Error(
-    `must specify env var DOMAIN that represents the domain at which this server can be reached at (http://localhost:${PORT} for local dev)`
-  );
-}
+const DOMAIN = parseRequiredEnv(
+  "DOMAIN",
+  String,
+  `must specify env var DOMAIN that represents the domain at which this server can be reached at (http://localhost:${PORT} for local dev)`
+);
 
 const UI_DOMAIN = isDevEnvironment ? `http://localhost:3000` : DOMAIN; // during dev, we use the webpack dev server as a separate process running on port 3000.
 
-let COOKIE_SECRET = process.env.COOKIE_SECRET;
-if (!COOKIE_SECRET) {
-  throw Error(
-    `must specify env var COOKIE_SECRET that represents the domain at which this server can be reached at (http://localhost:${PORT} for local dev)`
-  );
-}
+let COOKIE_SECRET = parseRequiredEnv(
+  "COOKIE_SECRET",
+  String,
+  `must specify env var COOKIE_SECRET that represents the domain at which this server can be reached at (http://localhost:${PORT} for local dev)`
+);
 
 // These are required for now, since this is the only option we support.
 // If we default to an Auth0 implemenation, then these can be optional
 // and if provided, will override the default Auth0 auth method.
-const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID;
-const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
-if (!AUTH0_CLIENT_ID || !AUTH0_DOMAIN) {
-  throw Error("must provide env vars: AUTH0_CLIENT_ID & AUTH0_DOMAIN");
-}
+const AUTH0_CLIENT_ID = parseRequiredEnv("AUTH0_CLIENT_ID", String);
+const AUTH0_DOMAIN = parseRequiredEnv("AUTH0_DOMAIN", String);
 
-const GRAPHQL_ENDPOINT_PORT = process.env.GRAPHQL_ENDPOINT_PORT;
-const GRAPHQL_ENDPOINT_HOST = process.env.GRAPHQL_ENDPOINT_HOST;
-if (!GRAPHQL_ENDPOINT_HOST || !GRAPHQL_ENDPOINT_PORT) {
-  throw Error(
-    "must provide env vars: GRAPHQL_ENDPOINT_HOST & GRAPHQL_ENDPOINT_PORT"
-  );
-}
+const GRAPHQL_ENDPOINT_HOST = parseRequiredEnv("GRAPHQL_ENDPOINT_HOST", String);
+const GRAPHQL_ENDPOINT_PORT = parseRequiredEnv("GRAPHQL_ENDPOINT_PORT", Number);
 
-const HASURA_GRAPHQL_ADMIN_SECRET = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
-if (!HASURA_GRAPHQL_ADMIN_SECRET) {
-  throw Error("must provide env vars: HASURA_GRAPHQL_ADMIN_SECRET");
-}
+const HASURA_GRAPHQL_ADMIN_SECRET = parseRequiredEnv(
+  "HASURA_GRAPHQL_ADMIN_SECRET",
+  String
+);
 
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
-if (!REDIS_PASSWORD && !isDevEnvironment) {
-  throw Error("must provide env vars: REDIS_PASSWORD");
-}
-
-const REDIS_HOST = process.env.REDIS_HOST;
-if (!REDIS_HOST && !isDevEnvironment) {
-  throw Error("must provide env vars: REDIS_HOST");
-}
+const REDIS_HOST = isDevEnvironment
+  ? parseEnv("REDIS_HOST", String, null)
+  : parseRequiredEnv("REDIS_HOST", String);
+const REDIS_PASSWORD = isDevEnvironment
+  ? parseEnv("REDIS_PASSWORD", String, null)
+  : parseRequiredEnv("REDIS_PASSWORD", String);
 
 const envars = {
   PORT,
