@@ -19,27 +19,7 @@ import Show from "./Show";
 import Status from "./Status";
 import Logo from "./Logo.png";
 
-import { IntegrationDef } from "../types";
-
-import { EARLY_PREVIEW } from "client/flags";
-
-/*
-// example credentials
-// this is OPTIONAL - the user may instead provide credentials via the "credentials" section of the config yaml
-type Credentials = {
-  AZURE_SUBSCRIPTION_ID: "my-subscription-uuid",
-  AZURE_TENANT_ID: "my-directory-uuid",
-  AZURE_CLIENT_ID: "my-application-uuid",
-  AZURE_CLIENT_SECRET: "my-app-client-secret"
-}
-type Data = {
-  // overrides config.credentials if present
-  credentials: Credentials | undefined,
-  // YAML data. per above the "credentials" field can be omitted. example config:
-  // see https://github.com/RobustPerception/azure_metrics_exporter#example-azure-metrics-exporter-config
-  config: string
-}
-*/
+import { IntegrationDef } from "client/integrations/types";
 
 export const exporterAzureIntegration: IntegrationDef = {
   kind: "exporter-azure",
@@ -51,5 +31,5 @@ export const exporterAzureIntegration: IntegrationDef = {
   Show: Show,
   Status: Status,
   Logo: Logo,
-  enabled: EARLY_PREVIEW
+  enabled: true
 };
