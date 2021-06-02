@@ -8,38 +8,27 @@ This guide will show you how to:
 
 ## Introduction
 
-A "tenant" is a unit of isolation.
-[Multi-tenant systems](https://en.wikipedia.org/wiki/Multitenancy) allow for logical separation of concerns, while otherwise sharing the same underlying system.
+Opstrace instances support multiple, secured tenants to logically isolate concerns on otherwise shared infrastructure.
+If you are not familiar with what a "tenant" is, see our [tenant key concepts](../../references/concepts.md#tenants) documentation.
 
-Opstrace instances support multiple, secured tenants.
-The tenant primitive extended from the underlying projects—Cortex and Loki.
-Tenants isolate isolate data, dashboards, and API endpoints.
-For example, isolate by:
-
-* Teams (e.g., `team-revenue` vs. `team-fraud`)
-* Environment (e.g., `prod`, `staging`, `dev`)
-* A combination of these things, or anything else important to you.
-
-Sometimes this isolation is used to address security concerns, but more generally, it helps keep things well-organized: because, after all, separation of concerns is a valuable best practice to keep in mind.
+Tenants are presented neatly in the Cluster Admin section of our UI:
 
 ![tenant overview page](../../assets/tenants-guide-overview-1.png)
 
-If you want a quick reference you can dip in and out of, see our [tenant reference](../../references/tenants.md) doc.
+Let's walk through an example of adding a new tenant named `newtenant` to a running Opstrace instance named `showdown`.
 
-If you’re coming from the quick start, and haven’t yet sent data to one of your tenants, stay tuned for our forthcoming integrations guide.
+If you’re coming from the [quick start](../../quickstart.md), and haven’t yet sent data to one of your tenants, stay tuned for our forthcoming integrations guide to make that process easy.
 
-## Create a Tenant Token with the CLI
+## Create a Tenant API Token with the CLI
 
 Because Opstrace is secure by default we will first create a public/private keypair that will be used to authenticate clients that wish to access the tenant API.
-If you have created your cluster with the `insecure` option you can skip to the [add a tenant with the UI](adding-and-managing-tenants.md#add-a-new-tenant-with-the-ui) section.
-
-Let's walk through an example:  adding a new tenant named `newtenant` to a running Opstrace instance named `showdown`.
+If you have created your cluster with [authentication disabled](https://opstrace.com/docs/references/cluster-configuration#data_api_authentication_disabled), option you can skip to the [add a new tenant with the UI](adding-and-managing-tenants.md#add-a-new-tenant-with-the-ui) section.
 
 ### 1) Create a new RSA Key Pair
 
 Create a new RSA key pair and store it in a file with this command:
 
-```text
+```bash
 ./opstrace ta-create-keypair ./custom-keypair.pem
 ```
 
@@ -53,12 +42,12 @@ file system, with locked-down file permissions.
 It is important to understand
 that this file contains a secret, the _private_ key.
 
-### 2) Create an Authentication Token
+### 2) Create the Token
 
 The following command creates a new authentication token, signed with the
 private key of the key pair generated in the first step:
 
-```text
+```bash
 ./opstrace ta-create-token showdown newtenant custom-keypair.pem > token-showdown-newtenant.jwt
 ```
 
@@ -89,7 +78,7 @@ key material and not the private key data—that's the beauty).
 So, to make an existing Opstrace instance _trust_ the authentication token
 generated in the previous step, we have to put the public key into the instance:
 
-```text
+```bash
 ./opstrace ta-pubkeys-add aws showdown custom-keypair.pem
 ```
 
@@ -111,7 +100,7 @@ Effectively, we're now waiting for the DNS name
 
 We can probe that from our point of view with `curl`:
 
-```text
+```bash
 curl https://cortex.newtenant.showdown.opstrace.io/api/v1/labels
 ```
 
@@ -125,7 +114,7 @@ up, expect an HTTP response with status code `401`, showing the error message
 Let's add said header and make an example API call against the Cortex API for
 the new tenant:
 
-```text
+```bash
 $ curl -vH "Authorization: Bearer $(cat token-showdown-newtenant.jwt)" \
     https://cortex.newtenant.showdown.opstrace.io/api/v1/labels
 ...
@@ -134,19 +123,11 @@ $ curl -vH "Authorization: Bearer $(cat token-showdown-newtenant.jwt)" \
 {"status":"success","data":[]}
 ```
 
-Getting a `200` response (and not a `401` response) means: the authentication
-token provided in the request was accepted.
-The so-called _authenticator_ in the
-Opstrace instance extracted the public key ID from the token's header section,
-found a corresponding public key in its trust store (think: "set of public keys
-that I am configured to trust"), and then performed a cryptographic verification
-using that public key.
-It also confirmed that the tenant name encoded in the
-token matches the tenant associated with the API endpoint.
+Getting a `200` response (and not a `401` response) means: the authentication token provided in the request was accepted.
+The so-called _authenticator_ in the Opstrace instance extracted the public key ID from the token's header section, found a corresponding public key in its trust store (think: "set of public keys that I am configured to trust"), and then performed a cryptographic verification using that public key.
+It also confirmed that the tenant name encoded in the token matches the tenant associated with the API endpoint.
 
-You could now go ahead and take this authentication token and configure serious
-API clients with it, such as a Prometheus instance to be able to `remote_write`
-to `https://cortex.newtenant.showdown.opstrace.io/api/v1/push`.
+You could now go ahead and take this authentication token and configure serious API clients with it, such as a Prometheus instance to be able to `remote_write` to `https://cortex.newtenant.showdown.opstrace.io/api/v1/push`.
 
 ## Send Data to a new Tenant with an Integration
 
