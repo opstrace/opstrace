@@ -17,6 +17,8 @@
 import React, { useState, useCallback } from "react";
 import { Eye } from "react-feather";
 
+import { makeStyles } from "@material-ui/core/styles";
+import classNames from "classnames";
 import axios from "axios";
 import {
   TableContainer,
@@ -37,6 +39,12 @@ import TokenDialog from "./TokenDialog";
 import { useRouteMatch, useHistory } from "react-router-dom";
 import useInterval from "@use-it/interval";
 import { usePickerService } from "client/services/Picker";
+
+const useStyles = makeStyles(theme => ({
+  shardWarning: {
+    backgroundColor: theme.palette.warning.main
+  }
+}));
 
 type Shard = {
   id: string;
@@ -201,8 +209,15 @@ const RingShard = ({
     },
     [shard.id, onForget]
   );
+  const classes = useStyles();
+
   return (
-    <TableRow key={shard.id}>
+    <TableRow
+      key={shard.id}
+      className={classNames({
+        [classes.shardWarning]: shard.state !== "ACTIVE"
+      })}
+    >
       <TableCell component="th" scope="row">
         {shard.id}
       </TableCell>
