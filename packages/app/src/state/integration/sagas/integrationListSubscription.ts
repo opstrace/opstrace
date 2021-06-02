@@ -102,8 +102,6 @@ export default function* integrationListSubscriptionManager() {
       // Cancel active subscription if there are no subscribers
       if (activeSubscription && subscribers.size === 0) {
         yield cancel(activeSubscription);
-        // Reset list
-        yield put(actions.updateIntegrations([]));
         activeSubscription = undefined;
       }
     }
