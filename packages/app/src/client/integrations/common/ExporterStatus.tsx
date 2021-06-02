@@ -84,7 +84,7 @@ export default function ExporterStatus({
   });
 
   const findErrorsInLogsUri = useMemo(() => {
-    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^exporter-${integration.key}-[a-z0-9-]*"} |= "stderr" |= "${errorQuery}"`;
+    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} |= "stderr" |= "${errorQuery}"`;
     const end = new Date();
     const start = subHours(end, 1);
 
@@ -97,7 +97,7 @@ export default function ExporterStatus({
 
   // we need to get all logs to see if there are any in the case when there are no errors, as if there are no errors or logs then we're still waiting for the exporter to start
   const findAllLogsUri = useMemo(() => {
-    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^exporter-${integration.key}-[a-z0-9-]*"}`;
+    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"}`;
     const end = new Date();
     const start = subHours(end, 1);
 
