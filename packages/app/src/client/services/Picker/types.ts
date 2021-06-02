@@ -18,6 +18,7 @@ import { ReactNode } from "react";
 export type PickerOption = {
   id: string;
   text: string;
+  data?: any;
 };
 
 export type PickerListProps = {
