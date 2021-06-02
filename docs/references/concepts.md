@@ -4,16 +4,35 @@ description: Fundamental user-facing concepts
 
 # Key Concepts
 
+## Instance
+
+An "instance" of Opstrace runs inside your cloud account.
+It is installed with the CLI `opstrace create` command.
+This name must be _globally_ unique and limited to 23 characters (`[a-z0-9-_]`) because it used to provide a conveient DNS name:  `<instance_name>.opstrace.io`.
+Once chosen, an instance name cannot be changed.
+
 ## Tenants
 
-The concept of multitenancy allows for isolating environments within the same Opstrace cluster.
-Tenants are logically isolated, but otherwise share the same \(physical\) base system.
+A "tenant" is a unit of isolation.
+[Multi-tenant systems](https://en.wikipedia.org/wiki/Multitenancy) allow for logical separation of concerns, while otherwise sharing the same underlying system.
 
-Tenants can be used for logical separation of concerns \(e.g., `prod`. vs. `ci`\), for isolating teams and people, or for any kind of categorization that makes sense in your specific use case.
+Opstrace instances support multiple, secured tenants.
+The tenant primitive extended from the underlying projects—Cortex and Loki.
+Tenants isolate isolate data, dashboards, and API endpoints.
+For example, isolate by:
 
-Each Opstrace cluster comes with a "system tenant" which ingests cluster-internal system logs and metrics.
+* Teams (e.g., `team-revenue` vs. `team-fraud`)
+* Environment (e.g., `prod`, `staging`, `dev`)
+* A combination of these things, or anything else important to you.
 
-Upon Opstrace cluster creation, at least one "user tenant" must be specified.
+Sometimes this isolation is used to address security concerns, but more generally, it helps keep things well-organized: because, after all, separation of concerns is a valuable best practice to keep in mind.
+
+Opstrace comes with a default "system tenant" which ingests internal system logs and metrics.
+The system tenant is useful for the administrator to monitor the overall health of Opstrace, across tenants.
+It cannot be deleted.
+
+During creation at least one "user tenant" must be specified.
+Additional user tenants can be added to a running Opstrace instance (see our [Adding and Managing Tenants](../guides/administrator/adding-and-managing-tenants.md) Guide).
 
 ## Data API
 
