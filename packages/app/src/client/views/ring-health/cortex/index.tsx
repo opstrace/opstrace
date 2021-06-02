@@ -18,12 +18,13 @@ import React from "react";
 
 import { Box } from "client/components/Box";
 import Typography from "client/components/Typography/Typography";
-import RingTable from "./RingTable";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import MuiTabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
+
+import RingTable from "../RingTable";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -73,7 +74,7 @@ const RingHealth = ({ baseUrl }: Props) => {
   return (
     <>
       <Box pt={1} pb={4}>
-        <Typography variant="h1">Ring Health</Typography>
+        <Typography variant="h1">Cortex Ring Health</Typography>
       </Box>
 
       <MuiTabs
