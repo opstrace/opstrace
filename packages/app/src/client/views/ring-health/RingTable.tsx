@@ -43,7 +43,8 @@ type Shard = {
   timestamp: string;
   zone: string;
   address: string;
-  tokens: number[];
+  // Can be empty when tokens have been forgotten and have not been reassigned, or when a new component starts and doesn't have tokens assigned yet
+  tokens?: number[];
   registered_timestamp: string;
 };
 
@@ -163,7 +164,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
                         history.push(`${baseUrl}/${shard.id}/token`);
                       }}
                     >
-                      {shard.tokens.length}
+                      {shard.tokens ? shard.tokens.length : 0}
                       <Box pl={1} />
                       <Eye />
                     </Button>
