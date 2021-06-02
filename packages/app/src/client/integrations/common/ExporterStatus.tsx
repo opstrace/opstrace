@@ -58,7 +58,7 @@ const useStyles = makeStyles(theme => ({
 type Props = {
   integration: Integration;
   tenant: Tenant;
-  errorQuery: string;
+  errorQuery?: string;
 };
 
 export default function ExporterStatus({
@@ -84,7 +84,8 @@ export default function ExporterStatus({
   });
 
   const findErrorsInLogsUri = useMemo(() => {
-    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} |= "stderr" |= "${errorQuery}"`;
+    let logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} |= "stderr"`;
+    if (errorQuery) logQl += ` |= "${errorQuery}"`;
     const end = new Date();
     const start = subHours(end, 1);
 
@@ -108,8 +109,8 @@ export default function ExporterStatus({
     );
   }, [tenant.name, integration.key, queryTime]);
 
-  const { data: errorLogs } = useLoki(findErrorsInLogsUri, tenant.name);
-  const { data: allLogs } = useLoki(findAllLogsUri, tenant.name);
+  const { data: errorLogs } = useLoki(findErrorsInLogsUri, "system");
+  const { data: allLogs } = useLoki(findAllLogsUri, "system");
 
   useEffect(() => {
     if (errorLogs !== undefined && allLogs !== undefined) {
