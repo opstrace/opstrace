@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Eye } from "react-feather";
 
 import axios from "axios";
@@ -35,6 +35,7 @@ import { Button } from "client/components/Button";
 import { Box } from "client/components/Box";
 import TokenDialog from "./TokenDialog";
 import { useRouteMatch, useHistory } from "react-router-dom";
+import useInterval from "@use-it/interval";
 
 type Shard = {
   id: string;
@@ -67,30 +68,51 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
     unregisterNotification
   } = useNotificationService();
   const [shards, setShards] = useState<Array<Shard>>();
-  useEffect(() => {
-    async function fetchShards() {
-      try {
-        const response = await axios.get<Payload>(ringEndpoint);
-        setShards(response.data.shards);
-      } catch (e) {
-        const messageId = `${getRandomInt()}`;
-        const newNotification = {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  function notifyError(error: Error, message: string) {
+    const messageId = `${getRandomInt()}`;
+    const newNotification = {
+      id: messageId,
+      state: "error" as const,
+      title: message,
+      information: error.message,
+      handleClose: () =>
+        unregisterNotification({
           id: messageId,
-          state: "error" as const,
-          title: `Could not load table`,
-          information: e.message,
-          handleClose: () =>
-            unregisterNotification({
-              id: messageId,
-              title: "",
-              information: ""
-            })
-        };
-        registerNotification(newNotification);
-      }
+          title: "",
+          information: ""
+        })
+    };
+    registerNotification(newNotification);
+  }
+
+  const forgetShard = async (shardId: Shard["id"]) => {
+    try {
+      const bodyFormData = new FormData();
+      bodyFormData.append("forget", shardId);
+      setIsRefreshing(true);
+      const response = await axios.post<Payload>(ringEndpoint, bodyFormData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setShards(response.data.shards);
+      setIsRefreshing(false);
+    } catch (e) {
+      setIsRefreshing(false);
+      notifyError(e, `Could not forget shard`);
     }
-    fetchShards();
-  }, [ringEndpoint, registerNotification, unregisterNotification]);
+  };
+
+  const fetchShards = async () => {
+    try {
+      const response = await axios.get<Payload>(ringEndpoint);
+      setShards(response.data.shards);
+    } catch (e) {
+      notifyError(e, `Could not load table`);
+    }
+  };
+
+  useInterval(fetchShards, 2000);
 
   const tokenShardIdToDisplay = useRouteMatch<{ shardId: string }>(
     `${baseUrl}/:shardId/token`
@@ -119,7 +141,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
               </TableCell>
             </TableRow>
           </TableHead>
-          {shards ? (
+          {shards && !isRefreshing ? (
             <TableBody>
               {shards.map(shard => (
                 <TableRow key={shard.id}>
@@ -148,22 +170,9 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
                   </TableCell>
                   <TableCell>
                     <Button
-                      onClick={async () => {
-                        try {
-                          const bodyFormData = new FormData();
-                          bodyFormData.append("forget", shard.id);
-                          const response = await axios.post(
-                            ringEndpoint,
-                            bodyFormData,
-                            {
-                              headers: { "Content-Type": "multipart/form-data" }
-                            }
-                          );
-                          console.log(response);
-                        } catch (e) {
-                          console.error(e);
-                        }
-                      }}
+                      variant="text"
+                      state="error"
+                      onClick={() => forgetShard(shard.id)}
                     >
                       Forget
                     </Button>

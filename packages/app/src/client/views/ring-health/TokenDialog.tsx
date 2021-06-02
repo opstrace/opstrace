@@ -18,7 +18,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle
 } from "client/components/Dialog";
 import React from "react";
@@ -45,15 +44,13 @@ const TokenDialog = ({ tokens, onClose }: Props) => {
     >
       <DialogTitle id="token-dialog">Tokens</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          <Grid container spacing={3}>
-            {tokens?.map(token => (
-              <Grid item xs={12} sm={6} md={4}>
-                <div>{token}</div>
-              </Grid>
-            ))}
-          </Grid>
-        </DialogContentText>
+        <Grid container spacing={3}>
+          {tokens?.map(token => (
+            <Grid key={token} item xs={12} sm={6} md={4}>
+              {token}
+            </Grid>
+          ))}
+        </Grid>
       </DialogContent>
       <DialogActions>
         <Button autoFocus onClick={onClose} color="primary">
