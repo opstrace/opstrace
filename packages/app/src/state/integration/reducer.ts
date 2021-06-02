@@ -20,8 +20,11 @@ import { createReducer, ActionType } from "typesafe-actions";
 
 import { IntegrationRecords } from "./types";
 import * as actions from "./actions";
+import * as globalActions from "state/global/actions";
 
-type IntegrationActions = ActionType<typeof actions>;
+const allActions = mergeDeepRight(globalActions, actions);
+
+type IntegrationActions = ActionType<typeof allActions>;
 
 type IntegrationState = {
   loading: boolean;
@@ -85,7 +88,7 @@ export const reducer = createReducer<IntegrationState, IntegrationActions>(
     }
   )
   .handleAction(
-    actions.clearIntegrations,
+    globalActions.selectedTenantChanged,
     (state, action): IntegrationState => {
       return IntegrationInitialState;
     }

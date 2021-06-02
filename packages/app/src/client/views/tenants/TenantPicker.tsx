@@ -23,14 +23,17 @@ import useTenantList from "state/tenant/hooks/useTenantList";
 
 import { Tenant } from "state/tenant/types";
 
-import { clearIntegrations } from "state/integration/actions";
+import { selectedTenantChanged } from "state/global/actions";
 
 import { PickerOption, usePickerService } from "client/services/Picker";
 
-function tenantToPickerOption(tenant: Tenant): PickerOption {
+type TenantPickerOption = Pick<PickerOption, "id" | "text"> & { data: Tenant };
+
+function tenantToPickerOption(tenant: Tenant): TenantPickerOption {
   return {
     text: tenant.name,
-    id: tenant.name
+    id: tenant.name,
+    data: tenant
   };
 }
 
@@ -46,7 +49,7 @@ const TenantPicker = () => {
       activationPrefix: "tenant:",
       options: tenants ? tenants.map(tenantToPickerOption) : [],
       onSelected: option => {
-        dispatch(clearIntegrations()); // note: ideally we would dispatch a "global" action here that each reducer could respond to if required
+        dispatch(selectedTenantChanged({ tenant: option.data }));
         history.push(`/tenant/${option.id}`); // todo: would be nice to keep the current path and simply change the tenant rather than send user back to the home for the tenant
       }
     },
