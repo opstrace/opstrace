@@ -66,7 +66,8 @@ import TenantsTable from "client/views/tenants/list";
 import TenantDashboards from "client/views/dashboards";
 import UserDetail from "client/views/users/detail";
 import TenantExplore from "client/views/explore";
-import RingHealth from "./views/ring-health";
+import CortexRingHealth from "./views/ring-health/cortex";
+import LokiRingHealth from "./views/ring-health/loki";
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -182,6 +183,10 @@ const AuthProtectedApplication = () => {
               {
                 title: "Metrics",
                 path: `/cluster/health/metrics`
+              },
+              {
+                title: "Logs",
+                path: `/cluster/health/logs`
               }
             ]
           },
@@ -309,7 +314,10 @@ const AuthProtectedApplication = () => {
               component={ClusterOverview}
             />
             <Route key="cluster-health-metrics" path="/cluster/health/metrics">
-              <RingHealth baseUrl="/cluster/health/metrics" />
+              <CortexRingHealth baseUrl="/cluster/health/metrics" />
+            </Route>
+            <Route key="cluster-health-logs" path="/cluster/health/logs">
+              <LokiRingHealth baseUrl="/cluster/health/logs" />
             </Route>
             <Route
               exact

@@ -16,7 +16,7 @@
 
 import React from "react";
 import RingHealth, { TABS } from ".";
-import Services from "../../services";
+import Services from "client/services";
 import light from "client/themes/light";
 import ThemeProvider from "client/themes/Provider";
 import { StoreProvider } from "state/provider";
@@ -33,7 +33,7 @@ beforeEach(() => {
   // @ts-ignore
   nock.cleanAll();
   // mocking requests made on initial rendering
-  nock("http://localhost").get("/_/cortex/ingester/ring").reply(200, {
+  nock("http://localhost").get("/_/loki/ingester/ring").reply(200, {
     shards: [],
     now: Date.now()
   });
@@ -61,7 +61,7 @@ const createMockShards = () => {
   });
 };
 
-describe("RingHealth", () => {
+describe("LokiRingHealth", () => {
   test("selects first tab by default", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
