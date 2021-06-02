@@ -53,6 +53,7 @@
     "@types/semver": "^7.3.4",
     "@types/shelljs": "^0.8.8",
     "@types/styled-components": "^5.1.0",
+    "@use-it/interval": "^1.0.0",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "classnames": "^2.3.1",
