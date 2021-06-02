@@ -20,7 +20,7 @@ import { format, parseISO } from "date-fns";
 
 import { installedIntegrationsPath } from "client/integrations/paths";
 
-import Status from "client/integrations/k8sLogs/Status";
+import Status from "client/integrations/exporterCloudMonitoring/Status";
 import { Details } from "./Details";
 import { Actions } from "./Actions";
 
