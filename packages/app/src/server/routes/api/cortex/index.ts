@@ -96,12 +96,12 @@ export default function createCortexHandler(): express.Router {
     `/store-gateway/ring`,
     proxyTo(`http://store-gateway.cortex.svc.cluster.local/store-gateway/ring`)
   );
-  // cortex.use(`/alertmanager/ring`, proxyTo(`http://alertmanager.cortex.svc.cluster.local/multitenant_alertmanager/ring`)) // sharding currenctly disabled
-  //     `http://ruler.cortex.svc.cluster.local/api/v1/rules/${req.params.namespace}/${req.params.group}`,
-  //     req,
-  //     res
-  //   );
-  // });
+  cortex.use(
+    `/alertmanager/ring`,
+    proxyTo(
+      `http://alertmanager.cortex.svc.cluster.local/multitenant_alertmanager/ring`
+    )
+  );
 
   // Being able to access this implies having access to cortex config for
   // all tenants, i.e. this is a privileged / superuser action.
