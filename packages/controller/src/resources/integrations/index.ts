@@ -117,7 +117,8 @@ const toKubeResources = (
     app: k8sName,
     // DO NOT remove tenant label: used by Prometheus operator to filter the ServiceMonitors
     tenant: tenantName,
-    "opstrace.com/integration-name": integration.name,
+    // DO NOT use user-provided integration.name: label values cannot contain e.g. spaces or symbols
+    "opstrace.com/integration-key": integration.key,
     "opstrace.com/integration-kind": integration.kind
   };
   const k8sMetadata = {
@@ -444,14 +445,18 @@ const toKubeResources = (
         kind: "ServiceMonitor",
         metadata: k8sMetadata,
         spec: {
-          // Use the user-defined integration name (value of this label) for the "job" annotation in metrics
-          jobLabel: "opstrace.com/integration-name",
+          // Use the name-derived integration key (value of this label) for the "job" annotation in metrics
+          // Intent is to uniquely identify integrations in a user-friendly way, while avoiding weird issues around symbols/etc in the name.
+          jobLabel: "opstrace.com/integration-key",
           endpoints:
             customMonitorEndpoints.length != 0
               ? customMonitorEndpoints
-              : [
-                  {
-                    interval: "30s",
+              : [{
+                    // Increase the timeout (default 10s).
+                    // AWS/Cloudwatch exporter in particular was found to take ~16s
+                    scrapeTimeout: "45s",
+                    // Go with 60s so that it's at least larger than the above timeout
+                    interval: "60s",
                     port: "metrics",
                     path: "/metrics",
                     // Inject an "integration_id" annotation in metrics
