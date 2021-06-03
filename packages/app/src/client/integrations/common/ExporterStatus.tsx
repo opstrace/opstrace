@@ -108,7 +108,7 @@ export default function ExporterStatus({
         1000 * 1000 * start.getTime()
       }&end=${1000 * 1000 * queryTime.getTime()}&step=86400`
     );
-  }, [tenant.name, integration.key, queryTime]);
+  }, [tenant.name, integration.key, queryTime, activeFilter]);
 
   const { data: errorLogs } = useLoki(findErrorsInLogsUri, "system");
   const { data: allLogs } = useLoki(findAllLogsUri, "system");
