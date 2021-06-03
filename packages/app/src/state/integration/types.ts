@@ -33,6 +33,7 @@ export type IntegrationRecords = Record<string, Integration>;
 
 export type IntegrationGrafana = {
   folder?: IntegrationGrafanaFolder;
+  status?: "pending" | "active" | "error" | "unknown";
 };
 
 export type IntegrationGrafanaFolder = {
@@ -42,7 +43,10 @@ export type IntegrationGrafanaFolder = {
 // use this same id to unsubscribe
 export type SubscriptionID = number;
 
-export const IntegrationStatus = {
+export type IntegrationStatus = "pending" | "active" | "error" | "unknown";
+export type IntegrationStatusRecords = Record<string, IntegrationStatus>;
+
+export const INTEGRATION_STATUS: IntegrationStatusRecords = {
   pending: "pending",
   active: "active",
   error: "error",

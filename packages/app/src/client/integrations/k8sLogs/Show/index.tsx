@@ -27,7 +27,7 @@ import {
 
 import { promtailYaml, PromtailLogFormat } from "./templates/config";
 
-import IntegrationStatus from "client/integrations/k8sLogs/Status";
+import Status from "client/integrations/k8sLogs/Status";
 
 import { CondRender } from "client/utils/rendering";
 
@@ -105,10 +105,7 @@ export const K8sLogsShow = () => {
             action={
               <Box ml={3} display="flex" flexWrap="wrap">
                 <Box p={1}>
-                  <IntegrationStatus
-                    integration={integration}
-                    tenant={tenant}
-                  />
+                  <Status integration={integration} tenant={tenant} />
                 </Box>
               </Box>
             }
