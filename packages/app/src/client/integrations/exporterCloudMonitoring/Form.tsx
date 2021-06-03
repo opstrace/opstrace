@@ -131,8 +131,20 @@ export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
                     rows: 5,
                     rowsMax: 5
                   }}
-                  label="Credentials JSON File"
-                  helperText="Important: these credentials are stored as plain text."
+                  label="Service Account Credentials JSON"
+                  helperText={
+                    <span>
+                      Important: these credentials are stored as plain text.
+                      Please refer to the{" "}
+                      <ExternalLink
+                        target="_blank"
+                        href="https://github.com/prometheus-community/stackdriver_exporter#user-content-credentials-and-permissions"
+                      >
+                        documentation
+                      </ExternalLink>{" "}
+                      for info about the needed permissions.
+                    </span>
+                  }
                 />
               </Box>
 
