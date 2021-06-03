@@ -24,6 +24,12 @@ import ExporterStatus from "client/integrations/common/ExporterStatus";
 export const ExporterAzureStatus = (props: {
   integration: Integration;
   tenant: Tenant;
-}) => <ExporterStatus {...props} />;
+}) => (
+  <ExporterStatus
+    {...props}
+    errorFilter={`!= "listening on port :9276"`}
+    activeFilter={`|= "listening on port :9276"`}
+  />
+);
 
 export default ExporterAzureStatus;

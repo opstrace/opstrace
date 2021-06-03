@@ -24,6 +24,6 @@ import ExporterStatus from "client/integrations/common/ExporterStatus";
 export const ExporterBlackboxStatus = (props: {
   integration: Integration;
   tenant: Tenant;
-}) => <ExporterStatus {...props} errorQuery="level=error" />;
+}) => <ExporterStatus {...props} errorQuery={`|= "level=error"`} />;
 
 export default ExporterBlackboxStatus;

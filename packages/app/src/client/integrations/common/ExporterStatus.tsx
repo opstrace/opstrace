@@ -16,7 +16,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { pathOr } from "ramda";
-import { subHours } from "date-fns";
+import { subHours, subYears } from "date-fns";
 
 import { useLoki } from "client/hooks/useGrafana";
 
@@ -58,13 +58,15 @@ const useStyles = makeStyles(theme => ({
 type Props = {
   integration: Integration;
   tenant: Tenant;
-  errorQuery?: string;
+  errorFilter: string;
+  activeFilter: string;
 };
 
 export default function ExporterStatus({
   integration,
   tenant,
-  errorQuery
+  errorFilter,
+  activeFilter
 }: Props) {
   const [status, setStatus] = useState(Status.pending);
   const [queryTime, setQueryTime] = useState(new Date());
@@ -84,8 +86,7 @@ export default function ExporterStatus({
   });
 
   const findErrorsInLogsUri = useMemo(() => {
-    let logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} |= "stderr"`;
-    if (errorQuery) logQl += ` |= "${errorQuery}"`;
+    let logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} |= "stderr" ${errorFilter}`;
     const end = new Date();
     const start = subHours(end, 1);
 
@@ -94,23 +95,26 @@ export default function ExporterStatus({
         1000 * 1000 * queryTime.getTime()
       }&limit=1&step=300`
     );
-  }, [tenant.name, integration.key, queryTime, errorQuery]);
+  }, [tenant.name, integration.key, queryTime, errorFilter]);
 
   // we need to get all logs to see if there are any in the case when there are no errors, as if there are no errors or logs then we're still waiting for the exporter to start
   const findAllLogsUri = useMemo(() => {
-    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"}`;
+    const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} ${activeFilter}`;
     const end = new Date();
-    const start = subHours(end, 1);
+    const start = subYears(end, 5);
 
     return encodeURI(
-      `query_range?query=${logQl}&start=${1000 * 1000 * start.getTime()}&end=${
-        1000 * 1000 * queryTime.getTime()
-      }&limit=1&step=300`
+      `query_range?query=${logQl}&direction=BACKWARD&limit=1&start=${
+        1000 * 1000 * start.getTime()
+      }&end=${1000 * 1000 * queryTime.getTime()}&step=86400`
     );
   }, [tenant.name, integration.key, queryTime]);
 
   const { data: errorLogs } = useLoki(findErrorsInLogsUri, "system");
   const { data: allLogs } = useLoki(findAllLogsUri, "system");
+
+  // console.log("errorLogs", errorLogs);
+  // console.log("allLogs", allLogs);
 
   useEffect(() => {
     if (errorLogs !== undefined && allLogs !== undefined) {
