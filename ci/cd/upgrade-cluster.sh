@@ -8,7 +8,7 @@ source ci/utils.sh
 echo "--- upgrading cluster"
 ./to/opstrace upgrade ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
     --region=${AWS_CLI_REGION} \
-    --cluster-config=ci/cd/cluster-config.yaml \
+    --instance-config=ci/cd/cluster-config.yaml \
     --log-level=debug \
     --yes
 
