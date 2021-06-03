@@ -138,7 +138,8 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
                   name="subscriptionId"
                   control={control}
                   inputProps={{ fullWidth: true }}
-                  label="Subscription Id"
+                  label="Azure Subscription UUID"
+                  helperText="The ID of the billing Subscription."
                 />
               </Box>
               <Box mb={3}>
@@ -146,8 +147,8 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
                   name="azureTenantId"
                   control={control}
                   inputProps={{ fullWidth: true }}
-                  label="Tenant Id"
-                  helperText="Note: this is the Azure Tenant ID, not this Opstrace Tenant ID :-)"
+                  label="Directory (tenant) UUID"
+                  helperText="The ID of the Azure AD instance where the Application is located."
                 />
               </Box>
               <Box mb={3}>
@@ -155,7 +156,8 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
                   name="clientId"
                   control={control}
                   inputProps={{ fullWidth: true }}
-                  label="Client Id"
+                  label="Application (client) UUID"
+                  helperText="The ID of the Application that had been added to Azure AD."
                 />
               </Box>
               <Box mb={3}>
@@ -163,8 +165,8 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
                   name="clientSecret"
                   control={control}
                   inputProps={{ fullWidth: true }}
-                  label="Client Secret"
-                  helperText="Important: these credentials are stored as plain text."
+                  label="Client Secret Value"
+                  helperText="The Value of the Client Secret that had been added to the Application. Important: this is stored as plain text."
                 />
               </Box>
 
@@ -196,7 +198,7 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
                     rows: 10,
                     rowsMax: 10
                   }}
-                  helperText="YAML formatted config file excluding credentials section."
+                  helperText="YAML formatted config file excluding the credentials section."
                 />
               </Box>
 
