@@ -19,7 +19,7 @@ esac
 echo "--- upgrading cluster"
 ./to/opstrace upgrade ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
     --region=${REGION} \
-    --cluster-config=ci/cluster-config.yaml \
+    --instance-config=ci/cluster-config.yaml \
     --log-level=debug \
     --yes
 

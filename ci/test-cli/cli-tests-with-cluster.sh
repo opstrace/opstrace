@@ -76,4 +76,4 @@ test_list
 test_tenant_authenticator_custom_keypair_flow
 
 # Confirm status command returns exit code 0
-./build/bin/opstrace status ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} --cluster-config ./ci/cluster-config.yaml
+./build/bin/opstrace status ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} --instance-config ./ci/cluster-config.yaml
