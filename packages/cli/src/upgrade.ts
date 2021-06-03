@@ -31,7 +31,7 @@ import { setGcpProjectID } from "@opstrace/installer";
 
 export async function upgrade(): Promise<void> {
   log.info(
-    `About to upgrade cluster ${cli.CLIARGS.clusterName} (${cli.CLIARGS.cloudProvider}).`
+    `About to upgrade cluster ${cli.CLIARGS.instanceName} (${cli.CLIARGS.cloudProvider}).`
   );
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
@@ -50,7 +50,7 @@ export async function upgrade(): Promise<void> {
       aws: infraConfigAWS,
       gcp: infraConfigGCP,
       cloud_provider: cli.CLIARGS.cloudProvider,
-      cluster_name: cli.CLIARGS.clusterName,
+      cluster_name: cli.CLIARGS.instanceName,
       // Important note. This field is intentionally set to the empty string
       // during the upgrade since we do not want to override it. The value is
       // instead read from the controller configuration stored in the config map.
@@ -84,7 +84,7 @@ export async function upgrade(): Promise<void> {
 
   setUpgradeConfig({
     cloudProvider: cli.CLIARGS.cloudProvider,
-    clusterName: cli.CLIARGS.clusterName,
+    clusterName: cli.CLIARGS.instanceName,
     gcpProjectID: gcpProjectID,
     gcpRegion: gcpRegion,
     awsRegion: awsRegion

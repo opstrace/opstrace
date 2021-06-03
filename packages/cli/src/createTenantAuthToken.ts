@@ -31,7 +31,7 @@ export async function create(): Promise<void> {
 
   const token = cryp.generateJWTforTenantAPIfromKeyPair(
     cli.CLIARGS.tenantName,
-    cli.CLIARGS.clusterName,
+    cli.CLIARGS.instanceName,
     keypair
   );
 
