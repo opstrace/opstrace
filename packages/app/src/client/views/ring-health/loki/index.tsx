@@ -62,27 +62,26 @@ const RingHealth = ({ baseUrl }: Props) => {
       <Box pt={1} pb={4}>
         <Typography variant="h1">Loki Ring Health</Typography>
       </Box>
-
-      <MuiTabs
-        value={true}
-        indicatorColor="primary"
-        variant="scrollable"
-        scrollButtons="auto"
-        classes={classes}
-      >
-        {tabs.map(tab => (
-          <Tab
-            value={location.pathname.includes(tab.absolutePath)}
-            key={tab.title}
-            label={tab.title}
-            component={Link}
-            to={tab.absolutePath}
-          />
-        ))}
-      </MuiTabs>
       <Switch>
         {tabs.map(tab => (
           <Route key={tab.absolutePath} path={tab.absolutePath}>
+            <MuiTabs
+              value={true}
+              indicatorColor="primary"
+              variant="scrollable"
+              scrollButtons="auto"
+              classes={classes}
+            >
+              {tabs.map(tab => (
+                <Tab
+                  value={location.pathname.includes(tab.absolutePath)}
+                  key={tab.title}
+                  label={tab.title}
+                  component={Link}
+                  to={tab.absolutePath}
+                />
+              ))}
+            </MuiTabs>
             <Box mt={3}>
               <RingTable
                 baseUrl={tab.absolutePath}
