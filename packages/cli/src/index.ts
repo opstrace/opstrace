@@ -59,7 +59,7 @@ const START_TIME_JODA = ZonedDateTime.now(ZoneOffset.UTC);
 interface CliOptsInterface {
   command: string;
   cloudProvider: "gcp" | "aws";
-  clusterName: string;
+  instanceName: string;
   clusterConfigFilePath: string;
   logLevel: "debug" | "info" | "warning" | "error";
   holdController: boolean;
@@ -81,8 +81,8 @@ async function main() {
   logBuildInfo();
   readCloudCredsOrExit();
 
-  if (CLIARGS.clusterName !== undefined) {
-    util.validateClusterNameOrDie(CLIARGS.clusterName);
+  if (CLIARGS.instanceName !== undefined) {
+    util.validateClusterNameOrDie(CLIARGS.instanceName);
   }
 
   if (CLIARGS.command == "destroy") {
@@ -178,20 +178,21 @@ function parseCmdlineArgs() {
   });
 
   const parserCreate = subparsers.add_parser("create", {
-    help: "Create a new Opstrace cluster."
+    help: "Create a new Opstrace instance."
   });
   const parserDestroy = subparsers.add_parser("destroy", {
-    help: "Tear down an existing Opstrace cluster."
+    help: "Tear down an existing Opstrace instance."
   });
   const parserList = subparsers.add_parser("list", {
     help:
-      "List existing Opstrace clusters (visible with the configured cloud credentials)."
+      "List existing Opstrace instances (visible with the configured cloud credentials)."
   });
   const parserStatus = subparsers.add_parser("status", {
-    help: "Check the status of an Opstrace cluster (experimental, no promises)."
+    help:
+      "Check the status of an Opstrace instance (experimental, no promises)."
   });
   const parserUpgrade = subparsers.add_parser("upgrade", {
-    help: "Upgrade an existing Opstrace cluster."
+    help: "Upgrade an existing Opstrace instance."
   });
 
   const parserTACreateKeypair = subparsers.add_parser("ta-create-keypair", {
@@ -207,7 +208,7 @@ function parseCmdlineArgs() {
 
   const parserTAPubKeysAdd = subparsers.add_parser("ta-pubkeys-add", {
     help:
-      "Tenant authentication: add public key to a running Opstrace cluster " +
+      "Tenant authentication: add public key to a running Opstrace instance " +
       "so that it accepts tokens signed with the corresponding private key."
   });
 
@@ -215,7 +216,7 @@ function parseCmdlineArgs() {
   // pops up when showing --help for this specific sub command. The high-level
   // help should be part of the more fine-grained description.
   const parserTAPubKeysListHelp =
-    "Tenant authentication: list public keys for a running Opstrace cluster, " +
+    "Tenant authentication: list public keys for a running Opstrace instance, " +
     "i.e. the set of trust anchors for signed authentication tokens.";
   const parserTAPubKeysList = subparsers.add_parser("ta-pubkeys-list", {
     help: parserTAPubKeysListHelp,
@@ -276,18 +277,18 @@ function parseCmdlineArgs() {
   }
 
   for (const p of [parserCreate, parserDestroy, parserStatus, parserUpgrade]) {
-    p.add_argument("clusterName", {
+    p.add_argument("instanceName", {
       help:
-        "The Opstrace cluster name ([a-z0-9-_], no more than 23 characters).",
+        "The Opstrace instance name ([a-z0-9-_], no more than 23 characters).",
       type: "str",
-      metavar: "CLUSTER_NAME"
+      metavar: "INSTANCE_NAME"
     });
   }
 
   for (const p of [parserCreate, parserStatus, parserUpgrade]) {
     p.add_argument("-c", "--cluster-config", {
       help:
-        "File path to cluster config document (YAML). Read from stdin otherwise.",
+        "File path to the config document (YAML). Read from stdin otherwise.",
       metavar: "CONFIG_FILE_PATH",
       dest: "clusterConfigFilePath",
       type: "str",
@@ -368,7 +369,7 @@ function parseCmdlineArgs() {
   for (const p of [parserDestroy, parserUpgrade]) {
     p.add_argument("--region", {
       help:
-        "Set the cluster AWS region. Only needed when the automatic " +
+        "Set the AWS region. Only needed when the automatic " +
         "region detection fails (when the corresponding EKS cluster " +
         "cannot be found or inspected). Not yet supported for GCP.",
       type: "str",
@@ -416,12 +417,12 @@ function parseCmdlineArgs() {
 
 // Mutate parser in place.
 function configureParserTACreateToken(parser: argparse.ArgumentParser) {
-  parser.add_argument("clusterName", {
+  parser.add_argument("instanceName", {
     help:
-      "The name of the cluster to generate the token for. " +
+      "The name of the Opstrace instance to generate the token for. " +
       "Be sure to set it correctly, otherwise the token will not be accepted.",
     type: "str",
-    metavar: "CLUSTER_NAME"
+    metavar: "INSTANCE_NAME"
   });
 
   parser.add_argument("tenantName", {
@@ -446,17 +447,17 @@ function configureParserTACreateToken(parser: argparse.ArgumentParser) {
 // Mutate parser in place.
 function configureParserTAPubKeysAdd(parser: argparse.ArgumentParser) {
   parser.add_argument("cloudProvider", {
-    help: "The cloud provider to look up the Opstrace cluster in (aws, gcp).",
+    help: "The cloud provider to look up the Opstrace instance in (aws, gcp).",
     type: "str",
     choices: ["aws", "gcp"],
     metavar: "PROVIDER"
   });
 
-  parser.add_argument("clusterName", {
+  parser.add_argument("instanceName", {
     help:
-      "The name of the cluster to change the authenticator configuration for.",
+      "The name of the Opstrace instance to change the authenticator configuration for.",
     type: "str",
-    metavar: "CLUSTER_NAME"
+    metavar: "INSTANCE_NAME"
   });
 
   parser.add_argument("tenantApiAuthenticatorKeyFilePath", {
@@ -474,34 +475,34 @@ function configureParserTAPubKeysAdd(parser: argparse.ArgumentParser) {
 // Mutate parser in place.
 function configureParserTAPubKeysList(parser: argparse.ArgumentParser) {
   parser.add_argument("cloudProvider", {
-    help: "The cloud provider to look up the Opstrace cluster in (aws, gcp).",
+    help: "The cloud provider to look up the Opstrace instance in (aws, gcp).",
     type: "str",
     choices: ["aws", "gcp"],
     metavar: "PROVIDER"
   });
 
-  parser.add_argument("clusterName", {
+  parser.add_argument("instanceName", {
     help:
-      "The name of the cluster to look up the authenticator configuration for.",
+      "The name of the Opstrace instance to look up the authenticator configuration for.",
     type: "str",
-    metavar: "CLUSTER_NAME"
+    metavar: "INSTANCE_NAME"
   });
 }
 
 // Mutate parser in place.
 function configureParserTAPubKeysRemove(parser: argparse.ArgumentParser) {
   parser.add_argument("cloudProvider", {
-    help: "The cloud provider to look up the Opstrace cluster in (aws, gcp).",
+    help: "The cloud provider to look up the Opstrace instance in (aws, gcp).",
     type: "str",
     choices: ["aws", "gcp"],
     metavar: "PROVIDER"
   });
 
-  parser.add_argument("clusterName", {
+  parser.add_argument("instanceName", {
     help:
-      "The name of the cluster to change the authenticator configuration in.",
+      "The name of the instance to change the authenticator configuration in.",
     type: "str",
-    metavar: "CLUSTER_NAME"
+    metavar: "INSTANCE_NAME"
   });
 
   parser.add_argument("keyId", {
