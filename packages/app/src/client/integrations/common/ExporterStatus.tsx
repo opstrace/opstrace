@@ -16,9 +16,11 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { pathOr } from "ramda";
+import { useDispatch } from "react-redux";
 import { subHours, subYears } from "date-fns";
 
 import { useLoki } from "client/hooks/useGrafana";
+import { updateGrafanaStateForIntegration } from "state/integration/actions";
 
 import { makeStyles } from "@material-ui/core/styles";
 import CheckCircle from "@material-ui/icons/CheckCircle";
@@ -28,10 +30,7 @@ import green from "@material-ui/core/colors/green";
 import orange from "@material-ui/core/colors/orange";
 import red from "@material-ui/core/colors/red";
 
-import {
-  Integration,
-  IntegrationStatus as Status
-} from "state/integration/types";
+import { Integration, INTEGRATION_STATUS } from "state/integration/types";
 import { Tenant } from "state/tenant/types";
 
 const useStyles = makeStyles(theme => ({
@@ -68,9 +67,12 @@ export default function ExporterStatus({
   errorFilter,
   activeFilter
 }: Props) {
-  const [status, setStatus] = useState(Status.pending);
+  const [status, setStatus] = useState(
+    integration.grafana?.status || INTEGRATION_STATUS.pending
+  );
   const [queryTime, setQueryTime] = useState(new Date());
   const classes = useStyles();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let unmounted = false;
@@ -87,8 +89,7 @@ export default function ExporterStatus({
 
   const findErrorsInLogsUri = useMemo(() => {
     let logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} |= "stderr" ${errorFilter}`;
-    const end = new Date();
-    const start = subHours(end, 1);
+    const start = subHours(queryTime, 1);
 
     return encodeURI(
       `query_range?query=${logQl}&start=${1000 * 1000 * start.getTime()}&end=${
@@ -100,8 +101,7 @@ export default function ExporterStatus({
   // we need to get all logs to see if there are any in the case when there are no errors, as if there are no errors or logs then we're still waiting for the exporter to start
   const findAllLogsUri = useMemo(() => {
     const logQl = `{k8s_namespace_name="${tenant.name}-tenant",k8s_container_name="exporter",k8s_pod_name=~"^integration-${integration.key}-[a-z0-9-]*"} ${activeFilter}`;
-    const end = new Date();
-    const start = subYears(end, 5);
+    const start = subYears(queryTime, 5);
 
     return encodeURI(
       `query_range?query=${logQl}&direction=BACKWARD&limit=1&start=${
@@ -113,9 +113,6 @@ export default function ExporterStatus({
   const { data: errorLogs } = useLoki(findErrorsInLogsUri, "system");
   const { data: allLogs } = useLoki(findAllLogsUri, "system");
 
-  // console.log("errorLogs", errorLogs);
-  // console.log("allLogs", allLogs);
-
   useEffect(() => {
     if (errorLogs !== undefined && allLogs !== undefined) {
       const errorCount = pathOr([], ["data", "result", 0, "values"])(errorLogs)
@@ -123,20 +120,32 @@ export default function ExporterStatus({
       const logCount = pathOr([], ["data", "result", 0, "values"])(allLogs)
         .length;
 
-      if (errorCount > 0) setStatus(Status.error);
-      else if (logCount > 0) setStatus(Status.active);
-      else setStatus(Status.pending);
-    }
-  }, [errorLogs, allLogs]);
+      let latestStatus = INTEGRATION_STATUS.pending;
+      if (errorCount > 0) latestStatus = INTEGRATION_STATUS.error;
+      else if (logCount > 0) latestStatus = INTEGRATION_STATUS.active;
 
-  if (status === Status.active)
+      if (latestStatus !== status) {
+        dispatch(
+          updateGrafanaStateForIntegration({
+            id: integration.id,
+            grafana: {
+              status: latestStatus
+            }
+          })
+        );
+        setStatus(latestStatus);
+      }
+    }
+  }, [errorLogs, allLogs, status, dispatch, integration.id]);
+
+  if (status === INTEGRATION_STATUS.active)
     return (
       <div className={classes.statusCell}>
         <span className={classes.statusText}>Active</span>
         <CheckCircle className={classes.statusActive} />
       </div>
     );
-  else if (status === Status.error)
+  else if (status === INTEGRATION_STATUS.error)
     return (
       <div className={classes.statusCell}>
         <span className={classes.statusText}>Error</span>

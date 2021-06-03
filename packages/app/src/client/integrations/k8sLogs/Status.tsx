@@ -27,10 +27,7 @@ import Warning from "@material-ui/icons/Warning";
 import green from "@material-ui/core/colors/green";
 import orange from "@material-ui/core/colors/orange";
 
-import {
-  Integration,
-  IntegrationStatus as Status
-} from "state/integration/types";
+import { Integration, INTEGRATION_STATUS } from "state/integration/types";
 import { Tenant } from "state/tenant/types";
 
 type Props = {
@@ -93,15 +90,15 @@ export default function K8sLogsStatus({ integration, tenant }: Props) {
       const metrics = pathOr([], ["data", "result"])(data);
       setStatus(
         status === "success" && metrics.length > 0
-          ? Status.active
-          : Status.pending
+          ? INTEGRATION_STATUS.active
+          : INTEGRATION_STATUS.pending
       );
     }
   }, [data]);
 
   return (
     <div>
-      {status === Status.active ? (
+      {status === INTEGRATION_STATUS.active ? (
         <div className={classes.statusCell}>
           <span className={classes.statusText}>Active </span>
           <CheckCircle className={classes.statusIcon} />
