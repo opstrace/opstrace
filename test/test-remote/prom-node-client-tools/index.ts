@@ -169,24 +169,27 @@ export class TimeseriesFragment {
 
   public serialize(): TimeseriesFragmentPushMessage {
     this.serialized = true;
-    return new TimeseriesFragmentPushMessage(this);
+    return new TimeseriesFragmentPushMessage([this]);
   }
 }
 
 export class TimeseriesFragmentPushMessage {
-  fragment: TimeseriesFragment;
-  labels: LabelSet;
+  fragments: TimeseriesFragment[];
+  //labels: LabelSet;
   datamd5: string;
   data: Buffer;
   dataLengthBytes: number;
   dataLengthMiB: number;
+  // to keep track of the raw data size
+  payloadByteCount: bigint;
   serializationTimeSeconds: number;
   postHeaders: Record<string, string>;
 
-  constructor(seriesFragment: TimeseriesFragment) {
-    this.fragment = seriesFragment;
-    this.labels = seriesFragment.labels;
+  constructor(seriesFragments: TimeseriesFragment[]) {
+    this.fragments = seriesFragments;
+    //this.labels = seriesFragment.labels;
 
+    this.payloadByteCount = BigInt(0);
     const [data, datamd5, serializationTimeSeconds] = this.serialize();
 
     this.datamd5 = datamd5;
@@ -248,7 +251,9 @@ export class TimeseriesFragmentPushMessage {
         // In the corresponding DummyStream object keep track of the fact that
         // this was successfully pushed out, important for e.g. read-based
         // validation after write.
-        this.fragment.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
+        for (const fragment of this.fragments) {
+          fragment.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
+        }
         return;
       }
 
@@ -325,41 +330,56 @@ export class TimeseriesFragmentPushMessage {
     const t0 = mtime();
     const dataHash = crypto.createHash("md5");
 
-    const pblabels = [];
-    for (const [key, val] of Object.entries(this.labels)) {
-      pblabels.push(
-        pbTypeLabel.create({
-          name: key,
-          value: val
-        })
-      );
-    }
+    // Allow for putting more than one time series into this push request.
+    const seriesList = [];
 
-    // Create individual protobuf samples, and build up a checksum from the
-    // textual content of all log messages.
-    const pbsamples = [];
-    for (const sample of this.fragment.getSamples()) {
-      pbsamples.push(
-        pbTypeSample.fromObject({
-          timestamp: sample.time,
-          value: sample.value
-        })
-      );
-      // naive hash, maybe use toFixed. other resources:
-      // https://stackoverflow.com/q/6009268/145400
-      // https://github.com/alexgorbatchev/node-crc
-      // https://nodejs.org/docs/v12.18.0/api/buffer.html#buffer_buf_writeint16le_value_offset
-      // and the other write() funcs of buf: https://stackoverflow.com/a/8044900/145400
-      dataHash.update(sample.value.toString());
+    for (const fragment of this.fragments) {
+      // Do a bit of book-keeping, so that this push request object after all
+      // also has the byte count representing the _raw data_ readily available.
+      this.payloadByteCount += fragment.payloadByteCount();
+
+      // Construct the 'labels' part of this time series, where the combination
+      // of key/value pairs actually identifies _this_ time series.
+      const pblabels = [];
+      for (const [key, val] of Object.entries(fragment.labels)) {
+        pblabels.push(
+          pbTypeLabel.create({
+            name: key,
+            value: val
+          })
+        );
+      }
+
+      // Create individual protobuf samples and build up a checksum from the
+      // content of all samples, across time series (if there's more than one
+      // fragment here).
+      const pbsamples = [];
+      for (const sample of fragment.getSamples()) {
+        pbsamples.push(
+          pbTypeSample.fromObject({
+            timestamp: sample.time,
+            value: sample.value
+          })
+        );
+        // naive hash, maybe use toFixed. other resources:
+        // https://stackoverflow.com/q/6009268/145400
+        // https://github.com/alexgorbatchev/node-crc
+        // https://nodejs.org/docs/v12.18.0/api/buffer.html#buffer_buf_writeint16le_value_offset
+        // and the other write() funcs of buf: https://stackoverflow.com/a/8044900/145400
+        dataHash.update(sample.value.toString());
+      }
+
+      // This "series" is a single time series.
+      const series = pbTypeTimeseries.create({
+        labels: pblabels,
+        samples: pbsamples
+      });
+
+      seriesList.push(series);
     }
+    const wr = pbTypeWriterequest.create({ timeseries: seriesList });
+
     const datamd5: string = dataHash.digest("hex");
-
-    const series = pbTypeTimeseries.create({
-      labels: pblabels,
-      samples: pbsamples
-    });
-
-    const wr = pbTypeWriterequest.create({ timeseries: [series] });
 
     // This is the actual (and costly) serialization into the protobuf message
     // representing the write request.

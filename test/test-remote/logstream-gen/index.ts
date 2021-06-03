@@ -124,7 +124,7 @@ let CYCLE_STOP_WRITE_AFTER_SECONDS: number;
 let COUNTER_STREAM_FRAGMENTS_PUSHED = BigInt(0);
 
 let COUNTER_HTTP_RESP_LOG_THROTTLE = 0;
-let COUNTER_FRAGMENT_STATS_LOG_THROTTLE = 0;
+let COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE = 0;
 
 let BEARER_TOKEN: undefined | string;
 
@@ -919,20 +919,27 @@ async function _produceAndPOSTpushrequest(
     const name = `prProducerPOSTer for ${stream.uniqueName}`;
 
     if (
-      COUNTER_FRAGMENT_STATS_LOG_THROTTLE < 1 ||
-      COUNTER_FRAGMENT_STATS_LOG_THROTTLE % 200 == 0
+      COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE < 1 ||
+      COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE % 200 == 0
     ) {
+      const firstFragment = pr.fragments[0];
+      const lastFragment = pr.fragments.slice(-1)[0];
       log.info(
-        "%s: generated serialized fragment in %s s for stream %s (index: %s/%s size: %s MiB). POST it (not logged for every case).",
-        name,
-        genduration.toFixed(2),
-        pr.fragment.parent?.uniqueName,
-        pr.fragment.indexString(3),
-        CFG.stream_write_n_fragments,
-        pr.dataLengthMiB.toFixed(4)
+        `${name}: generated pushrequest msg in ${genduration.toFixed(
+          2
+        )} s with ` +
+          `${pr.fragments.length} series ` +
+          `(first: ${
+            firstFragment.parent?.uniqueName
+          }, index ${firstFragment.indexString(3)} -- ` +
+          `last: ${
+            lastFragment.parent?.uniqueName
+          }, index ${lastFragment.indexString(3)}), ` +
+          `size: ${pr.dataLengthMiB.toFixed(4)} MiB). ` +
+          "POST it (not logged for every case)."
       );
     }
-    COUNTER_FRAGMENT_STATS_LOG_THROTTLE++;
+    COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE++;
 
     const postT0 = mtime();
     try {
@@ -958,7 +965,7 @@ async function _produceAndPOSTpushrequest(
     // numerical sample data (8 bytes per sample).
 
     // Convert BigInt to Number and assume that the numbers are small enough
-    counter_payload_bytes_pushed.inc(Number(pr.fragment.payloadByteCount()));
+    counter_payload_bytes_pushed.inc(Number(pr.payloadByteCount));
     counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
     gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
   }
@@ -1148,16 +1155,20 @@ async function customPostWithRetryOrError(
       // Keep track of the fact that this was successfully pushed out,
       // important for e.g. read-based validation after write.
 
-      // dummystream version
-      // also works for dummyseries but is noop
-      pr.fragment.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
+      // Plan for this push request to contain potentially more than one
+      // time series (metrics or logs).
+      for (const frgmnt of pr.fragments) {
+        // dummystream version
+        // also works for dummyseries but is noop
+        frgmnt.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
 
-      pr.fragment.buildStatisticsAndDropData();
+        frgmnt.buildStatisticsAndDropData();
 
-      // dummyseries version
-      // drop actual samples (otherwise mem usage would grow quite fast).
-      if (pr.fragment instanceof TimeseriesFragment) {
-        pr.fragment.parent!.postedFragmentsSinceLastValidate.push(pr.fragment);
+        // dummyseries version
+        // drop actual samples (otherwise mem usage would grow quite fast).
+        if (frgmnt instanceof TimeseriesFragment) {
+          frgmnt.parent!.postedFragmentsSinceLastValidate.push(frgmnt);
+        }
       }
       return;
     }
