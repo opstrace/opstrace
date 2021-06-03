@@ -220,7 +220,7 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<
   let c: list.EKSOpstraceClusterRegionRelation | undefined;
 
   try {
-    c = await awsGetClusterRegionDynamic(cli.CLIARGS.clusterName);
+    c = await awsGetClusterRegionDynamic(cli.CLIARGS.instanceName);
   } catch (e) {
     if (e instanceof list.ListEksInRegionError) {
       // Assume (rely on) that error details were already logged, in a useful
@@ -256,7 +256,7 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<
   //    `... destroy foo --region=eu-central-1` -> remainders are
   //    discovered and cleaned up after.
   die(
-    `No EKS cluster found for Opstrace cluster name '${cli.CLIARGS.clusterName}. ` +
+    `No EKS cluster found for Opstrace cluster name '${cli.CLIARGS.instanceName}. ` +
       "Assume that the Opstrace cluster does not exist (anymore). " +
       "You can force running the requested operation in a specific AWS region " +
       "by setting the --region <region> command line parameter."

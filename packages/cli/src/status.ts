@@ -82,7 +82,7 @@ async function checkClusterStatus() {
       aws: infraConfigAWS,
       gcp: infraConfigGCP,
       cloud_provider: cli.CLIARGS.cloudProvider,
-      cluster_name: cli.CLIARGS.clusterName,
+      cluster_name: cli.CLIARGS.instanceName,
       tenant_api_authenticator_pubkey_set_json: ""
     }
   };

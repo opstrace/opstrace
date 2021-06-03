@@ -42,14 +42,14 @@ export async function destroy(): Promise<void> {
 
   setDestroyConfig({
     cloudProvider: cli.CLIARGS.cloudProvider,
-    clusterName: cli.CLIARGS.clusterName,
+    clusterName: cli.CLIARGS.instanceName,
     gcpProjectID: gcpProjectID,
     gcpRegion: gcpRegion,
     awsRegion: awsRegion
   });
 
   log.info(
-    `About to destroy cluster ${cli.CLIARGS.clusterName} (${cli.CLIARGS.cloudProvider}).`
+    `About to destroy cluster ${cli.CLIARGS.instanceName} (${cli.CLIARGS.cloudProvider}).`
   );
   await util.promptForProceed();
   await destroyCluster(util.smErrorLastResort);

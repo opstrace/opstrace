@@ -79,7 +79,7 @@ export async function addKeyToAuthenticatorConfig(): Promise<void> {
 
   const kubeconfig = await util.getKubeConfigForOpstraceClusterOrDie(
     cli.CLIARGS.cloudProvider,
-    cli.CLIARGS.clusterName
+    cli.CLIARGS.instanceName
   );
 
   await mutateClusterStateAddAuthenticatorKey(kubeconfig, pubkeypem);
@@ -88,7 +88,7 @@ export async function addKeyToAuthenticatorConfig(): Promise<void> {
 export async function listKeys(): Promise<void> {
   const kubeconfig = await util.getKubeConfigForOpstraceClusterOrDie(
     cli.CLIARGS.cloudProvider,
-    cli.CLIARGS.clusterName
+    cli.CLIARGS.instanceName
   );
 
   await listAuthenticatorKeys(kubeconfig);
@@ -101,7 +101,7 @@ export async function removeKey(): Promise<void> {
 
   const kubeconfig = await util.getKubeConfigForOpstraceClusterOrDie(
     cli.CLIARGS.cloudProvider,
-    cli.CLIARGS.clusterName
+    cli.CLIARGS.instanceName
   );
 
   await removeAuthenticatorKey(kubeconfig, cli.CLIARGS.keyId);
