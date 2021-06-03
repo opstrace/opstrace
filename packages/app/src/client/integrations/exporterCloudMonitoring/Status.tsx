@@ -24,6 +24,12 @@ import ExporterStatus from "client/integrations/common/ExporterStatus";
 export const ExporterCloudMonitoringStatus = (props: {
   integration: Integration;
   tenant: Tenant;
-}) => <ExporterStatus {...props} errorQuery="level=error" />;
+}) => (
+  <ExporterStatus
+    {...props}
+    errorFilter={`|= "level=error"`}
+    activeFilter={`|= "Listening on"`}
+  />
+);
 
 export default ExporterCloudMonitoringStatus;

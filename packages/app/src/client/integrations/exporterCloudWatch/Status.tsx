@@ -24,6 +24,12 @@ import ExporterStatus from "client/integrations/common/ExporterStatus";
 export const ExporterCloudWatchStatus = (props: {
   integration: Integration;
   tenant: Tenant;
-}) => <ExporterStatus {...props} errorQuery="Exception:" />;
+}) => (
+  <ExporterStatus
+    {...props}
+    errorFilter={`|= "Exception:"`}
+    activeFilter={`|= "INFO: Started @"`}
+  />
+);
 
 export default ExporterCloudWatchStatus;
