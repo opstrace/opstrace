@@ -15,23 +15,7 @@
  */
 
 import React from "react";
-
-import { Box } from "client/components/Box";
-import Typography from "client/components/Typography/Typography";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
-import MuiTabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import { Link } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
-
-import RingTable from "../RingTable";
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    borderBottom: `1px solid ${theme.palette.divider}`
-  }
-}));
+import RingHealth from "../RingHealth";
 
 export const TABS = [
   {
@@ -65,52 +49,10 @@ type Props = {
   baseUrl: string;
 };
 
-const RingHealth = ({ baseUrl }: Props) => {
-  const location = useLocation();
-  const classes = useStyles();
+const CortexRingHealth = ({ baseUrl }: Props) => {
+  const tabs = TABS.map(tab => ({ ...tab, path: baseUrl + tab.path }));
 
-  const tabs = TABS.map(tab => ({ ...tab, absolutePath: baseUrl + tab.path }));
-
-  return (
-    <>
-      <Box pt={1} pb={4}>
-        <Typography variant="h1">Cortex Ring Health</Typography>
-      </Box>
-      <Switch>
-        {tabs.map(tab => (
-          <Route key={tab.absolutePath} path={tab.absolutePath}>
-            <MuiTabs
-              value={true}
-              indicatorColor="primary"
-              variant="scrollable"
-              scrollButtons="auto"
-              classes={classes}
-            >
-              {tabs.map(tab => (
-                <Tab
-                  value={location.pathname.includes(tab.absolutePath)}
-                  key={tab.title}
-                  label={tab.title}
-                  component={Link}
-                  to={tab.absolutePath}
-                />
-              ))}
-            </MuiTabs>
-            <Box mt={3}>
-              <RingTable
-                baseUrl={tab.absolutePath}
-                ringEndpoint={tab.endpoint}
-              />
-            </Box>
-          </Route>
-        ))}
-        <Route>
-          {/* default to first tab if none is determined by URL */}
-          <Redirect to={tabs[0].absolutePath} />;
-        </Route>
-      </Switch>
-    </>
-  );
+  return <RingHealth tabs={tabs} />;
 };
 
-export default RingHealth;
+export default CortexRingHealth;
