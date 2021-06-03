@@ -286,7 +286,7 @@ function parseCmdlineArgs() {
   }
 
   for (const p of [parserCreate, parserStatus, parserUpgrade]) {
-    p.add_argument("-c", "--cluster-config", {
+    p.add_argument("-c", "--instance-config", {
       help:
         "File path to the config document (YAML). Read from stdin otherwise.",
       metavar: "CONFIG_FILE_PATH",
