@@ -162,6 +162,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
             <TableBody>
               {shards.map(shard => (
                 <RingShard
+                  key={shard.id}
                   shard={shard}
                   onForget={forgetShard}
                   baseUrl={baseUrl}
