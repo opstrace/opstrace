@@ -23,7 +23,6 @@ Terminal C:
 ```
 opstrace/go/cmd/config$ go build && \
 GRAPHQL_ENDPOINT=http://127.0.0.1:8080/v1/graphql \
-HASURA_GRAPHQL_ADMIN_SECRET=myadminsecret \
 HASURA_ACTION_SECRET=myactionsecret \
 ./config \
   --loglevel debug \
