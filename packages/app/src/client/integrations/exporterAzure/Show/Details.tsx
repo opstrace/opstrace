@@ -56,9 +56,9 @@ export const Details = ({ integration }: Props) => {
 
           <Box display="flex">
             <Box display="flex" flexDirection="column">
-              <Attribute.Key>Subscription ID</Attribute.Key>
-              <Attribute.Key>Tenant ID</Attribute.Key>
-              <Attribute.Key>Client ID</Attribute.Key>
+              <Attribute.Key>Azure Subscription UUID</Attribute.Key>
+              <Attribute.Key>Directory (tenant) UUID</Attribute.Key>
+              <Attribute.Key>Application (client) UUID</Attribute.Key>
             </Box>
             <Box display="flex" flexDirection="column" flexGrow={1}>
               <Attribute.Value>
