@@ -26,7 +26,7 @@ export const exporterAzureIntegration: IntegrationDef = {
   category: "exporter",
   label: "Microsoft Azure",
   desc:
-    "Pipe any of your metrics from Microsoft Azure into Opstrace. You can select metrics from any of the Microsoft Azure Services such as Blog Storage or Load Balancer, as long as you've enabled monitoring on the service in the Microsoft Azure Console.",
+    "Pipe any of your metrics from Microsoft Azure into Opstrace. You can select metrics from any of the Microsoft Azure Services such as Service Fabric or Load Balancer, as long as you've enabled monitoring on the service in the Microsoft Azure Console.",
   Form: Form,
   Show: Show,
   Status: Status,
