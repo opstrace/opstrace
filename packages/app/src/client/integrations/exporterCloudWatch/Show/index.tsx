@@ -101,7 +101,7 @@ export const ExporterCloudWatchShow = () => {
               <Attribute.Key>
                 <ExternalLink target="_blank" href={logsUrl}>
                   <Button state="primary" variant="outlined" size="medium">
-                    View Exporter Logs
+                    View Integration Logs
                   </Button>
                 </ExternalLink>
               </Attribute.Key>

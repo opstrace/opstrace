@@ -113,7 +113,18 @@ export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {
                   control={control}
                   inputProps={{ fullWidth: true }}
                   label="Access Key ID"
-                  helperText="AWS access key with sufficient permissions for accessing CloudWatch"
+                  helperText={
+                    <span>
+                      AWS access key with{" "}
+                      <ExternalLink
+                        target="_blank"
+                        href="https://github.com/prometheus/cloudwatch_exporter#user-content-credentials-and-permissions"
+                      >
+                        sufficient permissions
+                      </ExternalLink>{" "}
+                      for accessing CloudWatch
+                    </span>
+                  }
                 />
               </Box>
               <Box mb={3}>
