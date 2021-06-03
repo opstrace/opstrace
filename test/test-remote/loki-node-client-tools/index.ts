@@ -193,23 +193,26 @@ export class LogStreamFragment {
 
   public serialize(): LogStreamFragmentPushRequest {
     this.serialized = true;
-    return new LogStreamFragmentPushRequest(this);
+    return new LogStreamFragmentPushRequest([this]);
   }
 }
 
 export class LogStreamFragmentPushRequest {
-  fragment: LogStreamFragment;
-  labels: LogStreamLabelset;
+  fragments: LogStreamFragment[];
+  //labels: LogStreamLabelset;
   textmd5: string;
   data: Buffer;
   dataLengthBytes: number;
   dataLengthMiB: number;
+  // to keep track of the raw data size
+  payloadByteCount: bigint;
   serializationTimeSeconds: number;
   postHeaders: Record<string, string>;
 
-  constructor(logStreamFragment: LogStreamFragment) {
-    this.fragment = logStreamFragment;
-    this.labels = logStreamFragment.labels;
+  constructor(logStreamFragment: LogStreamFragment[]) {
+    this.fragments = logStreamFragment;
+    //this.labels = logStreamFragment.labels;
+    this.payloadByteCount = BigInt(0);
 
     const [
       data,
@@ -275,7 +278,9 @@ export class LogStreamFragmentPushRequest {
         // In the corresponding DummyStream object keep track of the fact that
         // this was successfully pushed out, important for e.g. read-based
         // validation after write.
-        this.fragment.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
+        for (const fragment of this.fragments) {
+          fragment.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
+        }
         return;
       }
 
@@ -343,37 +348,48 @@ export class LogStreamFragmentPushRequest {
     */
     const t0 = mtime();
     const logTextHash = crypto.createHash("md5");
-    const labelsEncodedAsString = logqlLabelString(this.labels);
 
-    // Create individual protobuf entries, and build up a checksum from the
-    // textual content of all log messages.
-    const pbentries = [];
-    for (const entry of this.fragment.getEntries()) {
-      pbentries.push(
-        pbTypeEntry.create({
-          timestamp: pbTypeTimestamp.create(entry.time),
-          // Note(JP): it is a bit unclear which text encoding is actually
-          // applied here. The protobuf definition has type `string`:
-          // https://github.com/grafana/loki/blob/14b2c093c19e17103e564b0aa6af0cf16ff0e5bc/pkg/logproto/types.go#L20
-          // the protobufjs library has to apply _some_ text encoding, and it's
-          // likely to be UTF-8.
-          line: entry.text
-        })
-      );
-      // Update log text hash with the UTF-8-encoded version of the text.
-      // From docs: "If encoding is not provided, and the data is a string,
-      // an encoding of 'utf8' is enforced"
-      logTextHash.update(entry.text);
+    // Allow for putting more than one time series into this push request.
+    const streamsList = [];
+
+    for (const fragment of this.fragments) {
+      // Do a bit of book-keeping, so that this push request object after all
+      // also has the byte count representing the _raw data_ readily available.
+      this.payloadByteCount += fragment.payloadByteCount();
+
+      const labelsEncodedAsString = logqlLabelString(fragment.labels);
+
+      // Create individual protobuf entries, and build up a checksum from the
+      // textual content of all log messages.
+      const pbentries = [];
+      for (const entry of fragment.getEntries()) {
+        pbentries.push(
+          pbTypeEntry.create({
+            timestamp: pbTypeTimestamp.create(entry.time),
+            // Note(JP): it is a bit unclear which text encoding is actually
+            // applied here. The protobuf definition has type `string`:
+            // https://github.com/grafana/loki/blob/14b2c093c19e17103e564b0aa6af0cf16ff0e5bc/pkg/logproto/types.go#L20
+            // the protobufjs library has to apply _some_ text encoding, and it's
+            // likely to be UTF-8.
+            line: entry.text
+          })
+        );
+        // Update log text hash with the UTF-8-encoded version of the text.
+        // From docs: "If encoding is not provided, and the data is a string,
+        // an encoding of 'utf8' is enforced"
+        logTextHash.update(entry.text);
+      }
+
+      const stream = pbTypeStream.create({
+        labels: labelsEncodedAsString,
+        entries: pbentries
+      });
+      streamsList.push(stream);
     }
+
+    const pr = pbTypePushrequest.create({ streams: streamsList });
+
     const logtextmd5: string = logTextHash.digest("hex");
-
-    const stream = pbTypeStream.create({
-      labels: labelsEncodedAsString,
-      entries: pbentries
-    });
-
-    const pr = pbTypePushrequest.create({ streams: [stream] });
-
     // This is the actual (and costly) serialization into the protobuf message
     // representing the push request.
     const prbuffer = pbTypePushrequest.encode(pr).finish();

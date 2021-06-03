@@ -270,6 +270,7 @@ export class DummyStream {
     lokiBaseUrl: string,
     additionalHeaders?: Record<string, string>
   ) {
+    // For now: one HTTP request per fragment
     for (let i = 1; i <= nFragments; i++) {
       const fragment = this.generateAndGetNextFragment();
       const t0 = mtime();
@@ -282,7 +283,8 @@ export class DummyStream {
           this.uniqueName,
           genduration.toFixed(2),
           pushrequest.dataLengthMiB.toFixed(4),
-          pushrequest.fragment.entryCount()
+          // for now: assume that there is _one_ fragment here
+          pushrequest.fragments[0].entryCount()
         );
       }
       await pushrequest.postWithRetryOrError(lokiBaseUrl, 3, additionalHeaders);

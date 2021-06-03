@@ -266,7 +266,8 @@ export class DummyTimeseries {
           this.uniqueName,
           genduration.toFixed(2),
           pm.dataLengthMiB.toFixed(4),
-          pm.fragment.sampleCount()
+          // intermediate state: assume / know that there is _one_ fragment here.
+          pm.fragments[0].sampleCount()
         );
       }
       await pm.postWithRetryOrError(cortexBaseUrl, 3, additionalHeaders);
