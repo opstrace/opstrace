@@ -18,16 +18,16 @@ import React from "react";
 
 import { integrationDefRecords } from "client/integrations";
 
-import NotFound from "client/views/404/404";
 import { useSelectedIntegration } from "state/integration/hooks";
+import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+
+import NotFound from "client/views/404/404";
 
 export const ShowIntegration = () => {
   const integration = useSelectedIntegration();
-  const tenant = useSelectedTenantWithFallback();
+  const tenant = useSelectedTenant();
 
-  if (!integration) {
-    return null;
-  }
+  if (!integration || !tenant) return <NotFound />;
 
   const integrationDef = integrationDefRecords[integration.kind];
 
