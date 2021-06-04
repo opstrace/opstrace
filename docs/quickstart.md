@@ -48,7 +48,7 @@ Download the latest Opstrace CLI binary from S3, which you will use to install O
 
 ```bash
 # Download the CLI from S3 and extract it
-curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
+curl -L https://go.opstrace.com/cli-latest-release-macos | tar xjf -
 
 # Test the extracted binary
 ./opstrace --help
@@ -58,7 +58,7 @@ curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
 
 ```bash
 # Download the CLI from S3 and extract it
-curl -L https://go.opstrace.com/cli-latest-linux | tar xjf -
+curl -L https://go.opstrace.com/cli-latest-release-linux | tar xjf -
 
 # Test the extracted binary
 ./opstrace --help

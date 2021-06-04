@@ -12,13 +12,13 @@ First, download and extract the CLI:
 ### MacOS
 
 ```bash
-curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
+curl -L https://go.opstrace.com/cli-latest-release-macos | tar xjf -
 ```
 
 ### Linux
 
 ```bash
-curl -L https://go.opstrace.com/cli-latest-linux | tar xjf -
+curl -L https://go.opstrace.com/cli-latest-release-linux | tar xjf -
 ```
 
 <!-- /tabs -->
