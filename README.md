@@ -51,7 +51,7 @@ info: Log in here: https://tracy.opstrace.io
 
 # a week later...
 
-$ curl -L https://go.opstrace.com/cli-latest-macos | tar xjf -
+$ curl -L https://go.opstrace.com/cli-latest-release-macos | tar xjf -
 $ ./opstrace upgrade aws tracy -c config.yaml
 ...
 info: Opstrace cluster upgrade done for tracy (aws)
