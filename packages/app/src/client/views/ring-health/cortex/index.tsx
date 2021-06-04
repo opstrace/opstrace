@@ -52,7 +52,7 @@ type Props = {
 const CortexRingHealth = ({ baseUrl }: Props) => {
   const tabs = TABS.map(tab => ({ ...tab, path: baseUrl + tab.path }));
 
-  return <RingHealth tabs={tabs} />;
+  return <RingHealth title="Cortex Ring Health" tabs={tabs} />;
 };
 
 export default CortexRingHealth;
