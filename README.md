@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD033 -->
 
-[![Build status](https://badge.buildkite.com/df9e995b3a5e4b0bebce8b432b0bf48b092fd261b7017b65c1.svg)](https://buildkite.com/opstrace/scheduled-main-builds)
+![Build status](https://badge.buildkite.com/df9e995b3a5e4b0bebce8b432b0bf48b092fd261b7017b65c1.svg)
 [![License](https://img.shields.io/github/license/opstrace/opstrace)](https://github.com/opstrace/opstrace/blob/main/LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
@@ -113,7 +113,7 @@ You can find out more on [our community page](https://opstrace.com/community), i
 
 ## Documentation
 
-You can find the Opstrace documentation in [/docs](/docs).
+You can find the Opstrace documentation in [/docs](./docs).
 We invite you to improve these docs together with us, and have a [corresponding guide](./docs/guides/contributor/writing-docs.md) for that.
 
 ## Contributing
