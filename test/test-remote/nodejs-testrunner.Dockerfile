@@ -1,5 +1,5 @@
 # Use current NodeJS LTS release. Derive from Debian Buster.
-FROM node:14-buster
+FROM --platform=linux/amd64 node:14-buster
 
 # Set up dependencies for playwright/chromium
 # See https://github.com/opstrace/opstrace/pull/182#issuecomment-747426156
