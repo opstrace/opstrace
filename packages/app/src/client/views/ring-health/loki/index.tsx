@@ -38,7 +38,7 @@ type Props = {
 const LokiRingHealth = ({ baseUrl }: Props) => {
   const tabs = TABS.map(tab => ({ ...tab, path: baseUrl + tab.path }));
 
-  return <RingHealth tabs={tabs} />;
+  return <RingHealth title="Loki Ring Health" tabs={tabs} />;
 };
 
 export default LokiRingHealth;

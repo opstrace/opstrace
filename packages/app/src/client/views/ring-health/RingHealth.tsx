@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { ReactNode } from "react";
 
 import { Box } from "client/components/Box";
 import Typography from "client/components/Typography/Typography";
@@ -40,17 +40,18 @@ type Tab = {
 };
 
 type Props = {
+  title: ReactNode;
   tabs: Array<Tab>;
 };
 
-const RingHealth = ({ tabs }: Props) => {
+const RingHealth = ({ tabs, title }: Props) => {
   const location = useLocation();
   const classes = useStyles();
 
   return (
     <div>
       <Box pt={1} pb={4}>
-        <Typography variant="h1">Cortex Ring Health</Typography>
+        <Typography variant="h1">{title}</Typography>
       </Box>
       <Switch>
         {tabs.map(tab => (

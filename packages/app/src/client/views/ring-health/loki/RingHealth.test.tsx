@@ -62,6 +62,19 @@ const createMockShards = () => {
 };
 
 describe("LokiRingHealth", () => {
+  test("renders title correctly", async () => {
+    const baseUrl = "/route/to/ring-health";
+    const history = createMemoryHistory({ initialEntries: [baseUrl] });
+    const container = renderComponent(
+      <Router history={history}>
+        <RingHealth baseUrl={baseUrl} />
+      </Router>
+    );
+
+    const ingesterTab = container.getByRole("heading");
+    expect(ingesterTab).toHaveTextContent("Loki Ring Health");
+  });
+
   test("selects first tab by default", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
