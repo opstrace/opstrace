@@ -1,23 +1,25 @@
-# Adding and Managing Tenants Guide
+# Managing Tenants Guide
 
 This guide will show you how to:
 
 * Add tenants during the initial create operation
-* Add new tenant to a running cluster (with public and private keys)
+* Add a new tenant to a running cluster
 * Delete a tenant
 
 ## Introduction
 
-Opstrace instances support multiple, secured tenants to logically isolate concerns on otherwise shared infrastructure.
+Opstrace supports multiple, secured tenants to logically isolate concerns on otherwise shared infrastructure.
 If you are not familiar with what a "tenant" is, see our [tenant key concepts](../../references/concepts.md#tenants) documentation.
 
-Tenants are presented neatly in the Cluster Admin section of our UI:
+Tenants are presented in the Cluster Admin section of our UI:
 
 ![tenant overview page](../../assets/tenants-guide-overview-1.png)
 
 Let's walk through an example of adding a new tenant named `newtenant` to a running Opstrace instance named `showdown`.
 
+<!-- TODO link to the integrations guide when it exists
 If you’re coming from the [quick start](../../quickstart.md), and haven’t yet sent data to one of your tenants, stay tuned for our forthcoming integrations guide to make that process easy.
+-->
 
 ## Create a Tenant API Token with the CLI
 
@@ -131,14 +133,12 @@ You could now go ahead and take this authentication token and configure serious 
 
 ## Send Data to a new Tenant with an Integration
 
-Opstrace provides integrations that simplify collection of data from various.
-This includes automating the configuration of the API tokens.
-For example, from a Kubernetes cluster.
-
-For more information, visit our forthcoming Integrations Guide.
+Opstrace provides integrations that simplify collection of data from various data sources.
+This includes automating the use of the API tokens in the assocated configuration.
+For example, collecting metrics and logs from a Kubernetes cluster.
 
 ## Delete a Tenant
 
-Deleting a tenant is simple, and permanent.
+Deleting a tenant is simple, although we do not currently purge the data automatically.  We don't deploy the purgers for Cortex or Loki yet, so we, therefore, don't purge the data that exists in Cortex or Loki for a tenant. (In other words, while we delete the tenants, there are still remnants of the data in storage, which means a new tenant could be created with the same name, and it would have access to the existing data left behind.) We will ship this in a future release.
 
 ![deleting a tenant gif](../../assets/tenants-guide-delete.gif)
