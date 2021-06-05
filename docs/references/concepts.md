@@ -28,7 +28,7 @@ The system tenant is useful for the administrator to monitor the overall health 
 It cannot be deleted.
 
 During creation at least one "user tenant" must be specified.
-Additional user tenants can be added to a running Opstrace instance (see our [Adding and Managing Tenants](../guides/administrator/adding-and-managing-tenants.md) Guide).
+Additional user tenants can be added to a running Opstrace instance (see our [Managing Tenants](../guides/administrator/managing-tenants.md) Guide).
 
 ## Data API
 
