@@ -2,8 +2,8 @@
 
 ## Introduction
 
-An administrator can provision and manage users in Opstrace.
-Users allow authentication against our web UI and the per-tenant Grafana UI.
+An administrator can provision and manage "users" in Opstrace.
+A "user" represents a human interacting with the Opstrace UI in an interactive session; the authentication proof is meant to be presented by a browser.
 An administrator can then* provide fine-grained permissions for what users can and cannot do.
 
 ![users management UI overview](../../assets/users-guide-overview-1.jpg)
@@ -18,7 +18,6 @@ Adding a user is easy.
 
 ## How to remove a user
 
-Removing a user can be done.
-However, as you might expect, **this operation cannot be undone**.
+Removing a user is easy.
 
 ![deleting a user gif](../../assets/users-guide-delete.gif)
