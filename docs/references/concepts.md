@@ -8,7 +8,7 @@ description: Fundamental user-facing concepts
 
 An "instance" of Opstrace runs inside your cloud account.
 It is installed with the CLI `opstrace create` command.
-This name must be _globally_ unique and limited to 23 characters (`[a-z0-9-_]`) because it used to provide a conveient DNS name:  `<instance_name>.opstrace.io`.
+This name must be _globally_ unique and limited to 23 characters (`[a-z0-9-_]`) because it used to provide a convenient DNS name:  `<instance_name>.opstrace.io`.
 Once chosen, an instance name cannot be changed.
 
 ## Tenants
@@ -16,14 +16,10 @@ Once chosen, an instance name cannot be changed.
 A "tenant" is a unit of isolation.
 [Multi-tenant systems](https://en.wikipedia.org/wiki/Multitenancy) allow for logical separation of concerns, while otherwise sharing the same underlying system.
 
-Opstrace instances support multiple, secured tenants.
-The tenant primitive extended from the underlying projects—Cortex and Loki.
-Tenants isolate isolate data, dashboards, and API endpoints.
-For example, isolate by:
-
-* Teams (e.g., `team-revenue` vs. `team-fraud`)
-* Environment (e.g., `prod`, `staging`, `dev`)
-* A combination of these things, or anything else important to you.
+An Opstrace instance supports multiple tenants.
+The tenant primitive is extended from the underlying projects—Cortex and Loki.
+Tenants isolate data, dashboards, and API endpoints.
+For example, you can use tenants to achieve separation by team (e.g., `team-revenue` vs. `team-fraud`) or environment (e.g., `prod`, `staging`, `dev`).
 
 Sometimes this isolation is used to address security concerns, but more generally, it helps keep things well-organized: because, after all, separation of concerns is a valuable best practice to keep in mind.
 
