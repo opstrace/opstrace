@@ -13,6 +13,8 @@ tenants:
     - ci
 ```
 
+To add tenants after installation, see our [Managing Tenants Guide](../guides/administrator/managing-tenants.md).
+
 The following sections list individual configuration parameters and aim to provide a detailed specification for their purpose and meaning.
 
 At a high level, there are two different types of parameters:
