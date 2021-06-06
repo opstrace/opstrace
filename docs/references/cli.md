@@ -8,7 +8,7 @@ Please use the `--help` switch to discover additional reference information that
 
 ### `create`
 
-Creates a new Opstrace instance with a [configuration document](cluster-configuration.md).
+Creates a new Opstrace instance with a [configuration document](configuration.md).
 
 Example (for creating an instance named `test` in AWS):
 
@@ -22,19 +22,19 @@ Help text:
 $ ./opstrace create --help
 usage: opstrace create [-h] [--log-level LEVEL] [-c CONFIG_FILE_PATH] [--yes]
                        [--hold-controller] [--write-kubeconfig-file PATH]
-                       PROVIDER CLUSTER_NAME
+                       PROVIDER INSTANCE_NAME
 
 positional arguments:
   PROVIDER              The cloud provider to act on (aws, gcp).
-  CLUSTER_NAME          The Opstrace cluster name ([a-z0-9-_], no more than
+  INSTANCE_NAME          The Opstrace instance name ([a-z0-9-_], no more than
                         23 characters).
 
 optional arguments:
   -h, --help            show this help message and exit
   --log-level LEVEL     Set log level for output on stderr. One of: debug,
                         info, warning, error. Default: info
-  -c CONFIG_FILE_PATH, --cluster-config CONFIG_FILE_PATH
-                        File path to cluster config document (YAML). Read
+  -c CONFIG_FILE_PATH, --instance-config CONFIG_FILE_PATH
+                        File path to instance config document (YAML). Read
                         from stdin otherwise.
   --yes                 Automatic yes to prompts; assume 'yes' as answer to
                         all prompts andrun non-interactively
@@ -79,11 +79,11 @@ Help text:
 ```text
 $ ./opstrace destroy --help
 usage: opstrace destroy [-h] [--log-level LEVEL] [--yes] [--region REGION]
-                        PROVIDER CLUSTER_NAME
+                        PROVIDER INSTANCE_NAME
 
 positional arguments:
   PROVIDER           The cloud provider to act on (aws, gcp).
-  CLUSTER_NAME       The Opstrace cluster name ([a-z0-9-_], no more than 23
+  INSTANCE_NAME      The Opstrace instance name ([a-z0-9-_], no more than 23
                      characters).
 
 optional arguments:
@@ -110,7 +110,7 @@ Notes:
 
 ### `list`
 
-List existing Opstrace clusters (visible with the configured cloud credentials).
+List existing Opstrace instances (visible with the configured cloud credentials).
 
 Example:
 
@@ -148,19 +148,19 @@ Help text:
 ```text
 $ ./opstrace upgrade --help
 usage: opstrace upgrade [-h] [--log-level LEVEL] [-c CONFIG_FILE_PATH]
-                        [--yes] [--region REGION] PROVIDER CLUSTER_NAME
+                        [--yes] [--region REGION] PROVIDER INSTANCE_NAME
 
 positional arguments:
   PROVIDER              The cloud provider to act on (aws, gcp).
-  CLUSTER_NAME          The Opstrace cluster name ([a-z0-9-_], no more
+  INSTANCE_NAME         The Opstrace instance name ([a-z0-9-_], no more
                         than 23 characters).
 
 optional arguments:
   -h, --help         show this help message and exit
   --log-level LEVEL  Set log level for output on stderr. One of: debug, info,
                      warning, error. Default: info
-  -c CONFIG_FILE_PATH, --cluster-config CONFIG_FILE_PATH
-                        File path to cluster config document (YAML). Read
+  -c CONFIG_FILE_PATH, --instance-config CONFIG_FILE_PATH
+                        File path to instance config document (YAML). Read
                         from stdin otherwise.
   --yes              Automatic yes to prompts; assume 'yes' as answer to all
                      prompts andrun non-interactively
@@ -200,9 +200,9 @@ usage: opstrace [-h] [--version] [--log-level LEVEL]
     ta-create-keypair   Tenant authentication: create a new RSA key pair.
     ta-create-token     Tenant authentication: create a tenant API authentication token signed with a custom private key.
                         Write token to stdout.
-    ta-pubkeys-add      Tenant authentication: add public key to a running Opstrace cluster so that it accepts tokens
+    ta-pubkeys-add      Tenant authentication: add public key to a running Opstrace instance so that it accepts tokens
                         signed with the corresponding private key.
-    ta-pubkeys-list     Tenant authentication: list public keys for a running Opstrace cluster, i.e. the set of trust
+    ta-pubkeys-list     Tenant authentication: list public keys for a running Opstrace instance, i.e. the set of trust
                         anchors for signed authentication tokens.
     ta-pubkeys-remove   Tenant authentication: remove a specific public key from the set of trust anchors, i.e. do not
                         accept corresponding authentication tokens anymore.
