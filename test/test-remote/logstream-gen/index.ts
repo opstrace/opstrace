@@ -65,6 +65,7 @@ interface CfgInterface {
   n_chars_per_msg: number;
   n_entries_per_stream_fragment: number;
   n_cycles: number;
+  n_fragments_per_push_message: number;
   stream_write_n_fragments: number;
   stream_write_n_seconds: number;
   max_concurrent_writes: number;
@@ -249,6 +250,13 @@ function parseCmdlineArgs() {
     required: true
   });
 
+  parser.add_argument("--n-fragments-per-push-message", {
+    help:
+      "number of stream fragments to serialize into a single binary push message " +
+      "(HTTP POST request body), mixed from different streams. Default: 1",
+    type: "int",
+    default: 1
+  });
   parser.add_argument("--n-chars-per-msg", {
     help: "number of characters per log message (ignored in metrics mode)",
     type: "int",
@@ -866,10 +874,10 @@ export async function postFragments(
     CFG.n_concurrent_streams
   );
 
-  const N_STREAMS_PER_PUSH_REQUEST = 1;
+  //const N_STREAM_FRAGMENTS_PER_PUSH_REQUEST = 80;
   const streamChunks = chunkify<DummyStream | DummyTimeseries>(
     streams,
-    N_STREAMS_PER_PUSH_REQUEST
+    CFG.n_fragments_per_push_message
   );
 
   for (const sc of streamChunks) {
