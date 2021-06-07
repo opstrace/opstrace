@@ -24,7 +24,7 @@ If you’re coming from the [quick start](../../quickstart.md), and haven’t ye
 ## Create a Tenant API Token with the CLI
 
 Because Opstrace is secure by default we will first create a public/private keypair that will be used to authenticate clients that wish to access the tenant API.
-If you have created your cluster with [authentication disabled](https://opstrace.com/docs/references/cluster-configuration#data_api_authentication_disabled), option you can skip to the [add a new tenant with the UI](managing-tenants.md#add-a-new-tenant-with-the-ui) section.
+If you have created your cluster with [authentication disabled](../../references/configuration#data_api_authentication_disabled), option you can skip to the [add a new tenant with the UI](managing-tenants.md#add-a-new-tenant-with-the-ui) section.
 
 ### 1) Create a new RSA Key Pair
 
