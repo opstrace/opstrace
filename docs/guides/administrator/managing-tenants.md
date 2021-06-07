@@ -23,7 +23,7 @@ If you’re coming from the [quick start](../../quickstart.md), and haven’t ye
 ## Create a Tenant API Token with the CLI
 
 Because Opstrace is secure by default we will first create a public/private keypair that will be used to authenticate clients that wish to access the tenant API.
-If you have created your cluster with [authentication disabled](../../references/configuration#data_api_authentication_disabled), option you can skip to the [add a new tenant with the UI](managing-tenants.md#add-a-new-tenant-with-the-ui) section.
+If you have created your cluster with [authentication disabled](../../references/configuration.md#data_api_authentication_disabled), option you can skip to the [add a new tenant with the UI](./managing-tenants.md#user-content-add-a-new-tenant-with-the-ui) section.
 
 ### 1) Create a new RSA Key Pair
 
@@ -67,7 +67,7 @@ So, to make an existing Opstrace instance _trust_ the authentication token gener
 ./opstrace ta-pubkeys-add aws showdown custom-keypair.pem
 ```
 
-## Add a New Tenant in the UI
+## Add a New Tenant with the UI
 
 Visit `https://showdown.opstrace.io/cluster/tenants` and press the `Add Tenant` button.
 Type the name of the new tenant (here: `newtenant`).
