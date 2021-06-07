@@ -163,23 +163,27 @@ export class S3BucketRes extends AWSResource<true> {
   }
 
   async tryCreate(): Promise<true> {
+    const bucketSpec = {
+      Bucket: this.bname
+    };
+
+    // `LocationConstraint`: "Specifies the Region where the bucket will be
+    // created. If you don't specify a Region, the bucket is created in the
+    // US East (N. Virginia) Region (us-east-1)." Update: if the target is
+    // indeed us-east-1 then we seemingly must leave out the LocationConstraint,
+    // see https://github.com/opstrace/opstrace/issues/841.
+    if (s3Client().config.region !== "us-east-1") {
+      //@ts-ignore: implicit any
+      bucketSpec["CreateBucketConfiguration"] = {
+        LocationConstraint: s3Client().config.region
+      };
+    }
+
     try {
       // Rely on the client lib to throw an Error in all(!) cases where the
       // bucket was not created. Still not 100 % sure if aws-sdk-jk is doing
       // that or not, but let's see.
-      await awsPromErrFilter(
-        s3Client()
-          .createBucket({
-            Bucket: this.bname,
-            CreateBucketConfiguration: {
-              // "Specifies the Region where the bucket will be created. If you
-              // don't specify a Region, the bucket is created in the US East (N.
-              // Virginia) Region (us-east-1)."
-              LocationConstraint: s3Client().config.region
-            }
-          })
-          .promise()
-      );
+      await awsPromErrFilter(s3Client().createBucket().promise());
     } catch (e) {
       // fail on any error except if it's 409 BucketAlreadyOwnedByYou error
       if (!(e instanceof AWSApiError) || e.statusCode != 409) {
