@@ -62,15 +62,15 @@ info: Opstrace cluster upgrade done for tracy (aws)
 Alertmanager can be difficult to configure, especially [for Cortex](https://cortexmetrics.io/docs/architecture/#alertmanager) where they correspond with tenants you have created.
 Our goal is to improve this with editors that provide realtime validation feedback:
 
-![alertmanager configuration ui](https://p-aa3d33.f1.n0.cdn.getcloudapp.com/items/RBuYDxD8/a7f04563-71f0-4d18-a5e5-d8ca86663a36.jpg?v=699f44b3f89f096a6bde61e3310169f4)
+![alertmanager configuration ui](https://p95.p4.n0.cdn.getcloudapp.com/items/eDuy9lnR/1a7a1030-4b27-4dfc-bf52-774f9f61d365.jpg?v=d0e8968befa6e0e3e1922594e61f9189)
 
 ### Tenant Management
 
-Tenants provide isolation for logically separate entities.
+[Tenants](docs/references/concepts.md#tenants) provide isolation for logically separate entities.
 For example, they enable authn/authz for groups of users (e.g., different teams) and provide rate limiting of your data on both the write and read paths.
-Managing tenants with a central UI can be helpful for visualizing and managing multiple tenants:
+A central UI can be helpful for visualizing and [managing multiple tenants](docs/guides/administrator/managing-tenants.md):
 
-![tenants can be managed holistically](https://p-aa3d33.f1.n0.cdn.getcloudapp.com/items/7KuPrGD8/60fae09c-1b20-4db5-9513-a5d9d56ff47c.jpg?v=4d3ff54b6ee8d5b0623bf9ea470b5e64)
+![tenants can be managed holistically](https://p95.p4.n0.cdn.getcloudapp.com/items/4gunxZZe/0d056830-92be-4417-aa90-21c8fa261f48.jpg?source=viewer&v=3ce7d21798ba7cf02869e35dfcfa70c6)
 
 ## Quick Start
 
