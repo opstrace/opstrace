@@ -246,10 +246,11 @@ function* rootTaskUpgrade() {
   yield call(upgradeControllerDeploymentWithTimeout);
 
   log.info(
-    "Opstrace cluster upgrade done for %s (%s)",
+    "upgrade operation finished for %s (%s)",
     upgradeConfig.clusterName,
     upgradeConfig.cloudProvider
   );
+  log.info(`Log in here: https://${upgradeConfig.clusterName}.opstrace.io`);
 }
 
 /**

@@ -288,7 +288,7 @@ function* createClusterCore() {
 
   if (clusterCreateConfig.holdController) {
     log.info(
-      `Not deploying controller. Raw cluster creation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
+      `Not deploying controller. Raw instance creation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
     );
     return;
   }
@@ -332,7 +332,7 @@ function* createClusterCore() {
   yield call(waitUntilUIIsReachable, ccfg.cluster_name, ccfg.tenants);
 
   log.info(
-    `cluster creation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
+    `create operation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
   );
   log.info(`Log in here: https://${ccfg.cluster_name}.opstrace.io`);
 }
