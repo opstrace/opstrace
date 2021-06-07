@@ -17,6 +17,7 @@
 
 import fs from "fs";
 import os from "os";
+import { strict as assert } from "assert";
 
 import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 import argparse from "argparse";
@@ -638,8 +639,15 @@ async function performWriteReadCycle(
     );
   }
 
+  const dsLenthBeforeWrite = dummystreams.length;
+
   log.info("cycle %s: entering write phase", cyclenum);
   const writestats = await writePhase(dummystreams);
+
+  // This is to protect against bugs in `writePhase()` where the `dummystreams`
+  // array becomes accidentally mutated (had this before: dummystreams got
+  // depopulated, read validation was happy in no time: 0 streams to validate)
+  assert(dsLenthBeforeWrite === dummystreams.length);
 
   log.info("cycle %s: entering read phase", cyclenum);
   const readstats = await readPhase(dummystreams);
@@ -859,7 +867,7 @@ export async function postFragments(
   );
 
   const N_STREAMS_PER_PUSH_REQUEST = 1;
-  const streamChunks: Array<Array<DummyStream | DummyTimeseries>> = chunkify(
+  const streamChunks = chunkify<DummyStream | DummyTimeseries>(
     streams,
     N_STREAMS_PER_PUSH_REQUEST
   );
@@ -1521,17 +1529,18 @@ function rndFloatFromInterval(min: number, max: number) {
  * Split array into chunks, last element in return value may have less then
  * desired chunk size.
  *
+ * Do not mutate original array.
+ *
  * props to
- * https://ourcodeworld.com/articles/read/278/how-to-split-an-array-into-chunks-of-the-same-size-easily-in-javascript
+ * https://stackoverflow.com/questions/8495687/split-array-into-chunks#comment114499622_24782004
  * chunkArray([1,2,3,4,5,6,7,8], 3);
  * Output: [ [1,2,3] , [4,5,6] ,[7,8] ]
  */
-function chunkify(a: Array<any>, chunkSize: number) {
-  const results = [];
-  while (a.length) {
-    results.push(a.splice(0, chunkSize));
-  }
-  return results;
+function chunkify<T>(a: T[], chunkSize: number): T[][] {
+  const R = [];
+  for (let i = 0, len = a.length; i < len; i += chunkSize)
+    R.push(a.slice(i, i + chunkSize));
+  return R;
 }
 
 // https://stackoverflow.com/a/6090287/145400
