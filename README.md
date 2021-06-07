@@ -21,7 +21,7 @@ Highlights:
 * **Secure** by default with TLS and authenticated endpoints.
 * **Easy to configure** with GUIs and APIs.
 
-We walk on the shoulders of giants; Opstrace contains the open source projects you know and love in one place:
+We walk on the shoulders of giants; Opstrace uses open source projects you know and love in one place:
 
 * [Cortex](https://github.com/cortexproject/cortex)
 * [Loki](https://github.com/grafana/loki)
@@ -98,6 +98,8 @@ Don't forget to clean up if you're done kicking the tires:
 ```bash
 opstrace destroy aws <choose_a_name>
 ```
+
+Note: if you run into trouble cleaning up after a failed install, add the `--region` flag to ensure the CLI can locate any dangling resources.
 
 ## Community
 
