@@ -8,7 +8,7 @@ Please use the `--help` switch to discover additional reference information that
 
 ### `create`
 
-Creates a new Opstrace instance with a [configuration document](cluster-configuration.md).
+Creates a new Opstrace instance with a [configuration document](configuration.md).
 
 Example (for creating an instance named `test` in AWS):
 

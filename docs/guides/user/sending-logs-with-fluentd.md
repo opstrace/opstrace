@@ -58,7 +58,7 @@ bearer_token_file /var/run/default-tenant/tenant-api-token-default
 
 TLS is used for establishing a secure, private transport between the FluentD instance and the Opstrace cluster.
 By default, FluentD attempts to verify the certificate exposed by the Opstrace cluster against its trust store, for establishing authenticity of the Opstrace cluster towards itself.
-Depending on the `cert_issuer` cluster configuration option (see [cluster configuration](../../references/cluster-configuration.md)) you may want to disable server certificate verification for testing purposes, which can be achieved via
+Depending on the `cert_issuer` cluster configuration option (see [cluster configuration](../../references/configuration.md)) you may want to disable server certificate verification for testing purposes, which can be achieved via
 
 ```xml
 insecure_tls true

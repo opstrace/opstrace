@@ -91,7 +91,7 @@ EOF
 
 In addition to AWS we also support GCP.
 
-See our configuration reference for details: [docs/references/cluster-configuration.md](docs/references/cluster-configuration.md).
+See our configuration reference for details: [docs/references/configuration.md](docs/references/configuration.md).
 
 Don't forget to clean up if you're done kicking the tires:
 

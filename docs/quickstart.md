@@ -83,7 +83,7 @@ export OPSTRACE_NAME=<choose_a_name>
 
 The name will globally identify you in our domain as `$OPSTRACE_NAME.opstrace.io`, which we provide for you by default as a convenience.
 
-Then, you'll create a simple [configuration file](./references/cluster-configuration.md) with the most basic options.
+Then, you'll create a simple [configuration file](./references/configuration.md) with the most basic options.
 Note that we define two tenants named `staging` and `prod` that are separate from the `system` tenant that hosts internal metrics about Opstrace.
 We will send our application metrics to `staging` to demonstrate how data can be isolated between logical units such as deployment environments.
 Learn more about tenant isolation in our [key concepts references](./references/concepts.md#tenants).
