@@ -2,7 +2,7 @@
 <!-- markdownlint-disable MD033 -->
 
 ![Build status](https://badge.buildkite.com/df9e995b3a5e4b0bebce8b432b0bf48b092fd261b7017b65c1.svg)
-[![License](https://img.shields.io/github/license/opstrace/opstrace)](https://github.com/opstrace/opstrace/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/opstrace/opstrace)](LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 <img src="https://user-images.githubusercontent.com/19239758/97793010-00161b00-1ba3-11eb-949b-e62eae6fdb9c.png" width="350">
