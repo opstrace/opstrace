@@ -99,8 +99,6 @@ Don't forget to clean up if you're done kicking the tires:
 opstrace destroy aws <choose_a_name>
 ```
 
-Note: if you run into trouble cleaning up after a failed install, add the `--region` flag to ensure the CLI can locate any dangling resources.
-
 ## Community
 
 Authentic collaboration in a community setting is important to us.
