@@ -200,9 +200,7 @@ export function timestampForFilenames(ts: ZonedDateTime): string {
  * - use what was provided via --region on cmdline
  * - error out if --region was not provided
  */
-export async function awsGetClusterRegionWithCmdlineFallback(): Promise<
-  string
-> {
+export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> {
   if (cli.CLIARGS.region !== "") {
     log.debug("region to destroy in from cli args: %s", cli.CLIARGS.region);
 
@@ -256,8 +254,8 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<
   //    `... destroy foo --region=eu-central-1` -> remainders are
   //    discovered and cleaned up after.
   die(
-    `No EKS cluster found for Opstrace cluster name '${cli.CLIARGS.instanceName}. ` +
-      "Assume that the Opstrace cluster does not exist (anymore). " +
+    `No EKS cluster found for Opstrace instance name '${cli.CLIARGS.instanceName}. ` +
+      "Assume that the Opstrace instance does not exist (anymore). " +
       "You can force running the requested operation in a specific AWS region " +
       "by setting the --region <region> command line parameter."
   );
