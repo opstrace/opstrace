@@ -34,6 +34,7 @@ import {
   DummyStream,
   LogStreamFragmentPushRequest,
   LogStreamLabelset,
+  LogStreamFragment,
   DummyStreamFetchAndValidateOpts
 } from "../loki-node-client-tools";
 
@@ -856,8 +857,16 @@ export async function postFragments(
     "create %s pushrequestProducerAndPOSTer()",
     CFG.n_concurrent_streams
   );
-  for (const stream of streams) {
-    actors.push(pushrequestProducerAndPOSTer(stream, writeConcurSemaphore));
+
+  const N_STREAMS_PER_PUSH_REQUEST = 1;
+  const streamChunks: Array<Array<DummyStream | DummyTimeseries>> = chunkify(
+    streams,
+    N_STREAMS_PER_PUSH_REQUEST
+  );
+
+  for (const sc of streamChunks) {
+    // new concept: N streams per pushrequestproducernadPOSTer
+    actors.push(pushrequestProducerAndPOSTer(sc, writeConcurSemaphore));
   }
 
   await Promise.all(actors);
@@ -866,7 +875,7 @@ export async function postFragments(
 // Part of the body of the while(true) {} main loop of
 // pushrequestProducerAndPOSTer().
 async function _produceAndPOSTpushrequest(
-  stream: DummyStream | DummyTimeseries,
+  streams: Array<DummyStream | DummyTimeseries>,
   semaphore: Semaphore
 ) {
   // TODO: THROTTLE
@@ -901,8 +910,12 @@ async function _produceAndPOSTpushrequest(
     // Note: generateAndGetNextFragment() does not have a stop criterion
     // itself, the stop criteria are defined above, based on wall time passed
     // or the number of fragments already consumed for this stream.
-    const fragment = stream.generateAndGetNextFragment();
-    stream.lastFragmentConsumed = fragment;
+    const fragments: Array<LogStreamFragment | TimeseriesFragment> = [];
+    for (const s of streams) {
+      const f = s.generateAndGetNextFragment();
+      fragments.push(f);
+      s.lastFragmentConsumed = f;
+    }
 
     // NOTE(JP): here we can calculate the lag between the first or last sample
     // in the fragment and the actual wall time. Matters a lot for metrics
@@ -912,11 +925,25 @@ async function _produceAndPOSTpushrequest(
     // timestamps w/o keeping all data that was written).
 
     const t0 = mtime();
-    const pushrequest = fragment.serialize(); //toPushrequest();
+
+    let pr: LogStreamFragmentPushRequest | TimeseriesFragmentPushMessage;
+
+    if (streams[0] instanceof DummyTimeseries) {
+      pr = new TimeseriesFragmentPushMessage(fragments as TimeseriesFragment[]);
+    } else {
+      pr = new LogStreamFragmentPushRequest(fragments as LogStreamFragment[]);
+    }
+
+    //const pushrequest = fragment.serialize(); //toPushrequest();
     const genduration = mtimeDiffSeconds(t0);
 
-    const pr = pushrequest;
-    const name = `prProducerPOSTer for ${stream.uniqueName}`;
+    //const pr = pushrequest;
+    let name: string;
+    if (streams.length === 1) {
+      name = `prProducerPOSTer for ${streams[0].uniqueName}`;
+    } else {
+      name = `prProducerPOSTer for ${streams.length} streams, first one is: ${streams[0].uniqueName}`;
+    }
 
     if (
       COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE < 1 ||
@@ -987,11 +1014,17 @@ async function _produceAndPOSTpushrequest(
 }
 
 async function pushrequestProducerAndPOSTer(
-  stream: DummyStream | DummyTimeseries,
+  streams: Array<DummyStream | DummyTimeseries>,
   semaphore: Semaphore
 ) {
   let fragmentsPushed = 0;
 
+  let name: string;
+  if (streams.length === 1) {
+    name = streams[0].uniqueName;
+  } else {
+    name = `nstreams=${streams.length},first=${streams[0].uniqueName}`;
+  }
   while (true) {
     if (CYCLE_STOP_WRITE_AFTER_SECONDS !== 0) {
       const secondsSinceCycleStart = mtimeDiffSeconds(
@@ -1000,7 +1033,7 @@ async function pushrequestProducerAndPOSTer(
       if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
         log.debug(
           "prProducerPOSTer for %s: %s seconds passed: stop producer",
-          stream.uniqueName,
+          name,
           secondsSinceCycleStart.toFixed(2)
         );
         return;
@@ -1010,13 +1043,13 @@ async function pushrequestProducerAndPOSTer(
     if (CFG.stream_write_n_fragments == fragmentsPushed) {
       log.debug(
         "prProducerPOSTer for %s: %s fragments created and pushed: stop producer",
-        stream.uniqueName,
+        name,
         fragmentsPushed
       );
       return;
     }
 
-    await _produceAndPOSTpushrequest(stream, semaphore);
+    await _produceAndPOSTpushrequest(streams, semaphore);
     // perspective: consumed from stream object, and also pushed out. if a
     // fragment is consumed from a stream object and the push subsequently
     // fails, then the program crashes. That is, by the _end of a write cycle_
@@ -1482,6 +1515,23 @@ function setupPromExporter() {
 function rndFloatFromInterval(min: number, max: number) {
   // half-closed: [min, max)
   return Math.random() * (max - min) + min;
+}
+
+/**
+ * Split array into chunks, last element in return value may have less then
+ * desired chunk size.
+ *
+ * props to
+ * https://ourcodeworld.com/articles/read/278/how-to-split-an-array-into-chunks-of-the-same-size-easily-in-javascript
+ * chunkArray([1,2,3,4,5,6,7,8], 3);
+ * Output: [ [1,2,3] , [4,5,6] ,[7,8] ]
+ */
+function chunkify(a: Array<any>, chunkSize: number) {
+  const results = [];
+  while (a.length) {
+    results.push(a.splice(0, chunkSize));
+  }
+  return results;
 }
 
 // https://stackoverflow.com/a/6090287/145400
