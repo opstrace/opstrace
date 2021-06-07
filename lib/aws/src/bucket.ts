@@ -183,7 +183,7 @@ export class S3BucketRes extends AWSResource<true> {
       // Rely on the client lib to throw an Error in all(!) cases where the
       // bucket was not created. Still not 100 % sure if aws-sdk-jk is doing
       // that or not, but let's see.
-      await awsPromErrFilter(s3Client().createBucket().promise());
+      await awsPromErrFilter(s3Client().createBucket(bucketSpec).promise());
     } catch (e) {
       // fail on any error except if it's 409 BucketAlreadyOwnedByYou error
       if (!(e instanceof AWSApiError) || e.statusCode != 409) {
