@@ -110,7 +110,7 @@ export class TimeseriesFragment {
       return this.stats.sampleCount * BigInt(20);
     }
 
-    log.info("NUMBER OF SAMPLES IN FRAGMENT: %s", this.samples.length);
+    //log.info("NUMBER OF SAMPLES IN FRAGMENT: %s", this.samples.length);
     return BigInt(this.samples.length) * BigInt(20);
   }
 
@@ -165,6 +165,14 @@ export class TimeseriesFragment {
     // see https://stackoverflow.com/a/1232046/145400
     this.samples.length = 0;
     this.stats = stats;
+  }
+
+  /**
+   * Use this to indicate that this fragment was serialized (into a binary
+   * msg) out-of-band, i..e not with the `serialize()` method.
+   */
+  public setSerialized(): void {
+    this.serialized = true;
   }
 
   public serialize(): TimeseriesFragmentPushMessage {
@@ -376,6 +384,9 @@ export class TimeseriesFragmentPushMessage {
       });
 
       seriesList.push(series);
+
+      // mark fragment as serialized, for book-keeping.
+      fragment.setSerialized();
     }
     const wr = pbTypeWriterequest.create({ timeseries: seriesList });
 

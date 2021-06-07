@@ -191,6 +191,14 @@ export class LogStreamFragment {
     this.stats = stats;
   }
 
+  /**
+   * Use this to indicate that this fragment was serialized (into a binary
+   * msg) out-of-band, i..e not with the `serialize()` method.
+   */
+  public setSerialized(): void {
+    this.serialized = true;
+  }
+
   public serialize(): LogStreamFragmentPushRequest {
     this.serialized = true;
     return new LogStreamFragmentPushRequest([this]);
