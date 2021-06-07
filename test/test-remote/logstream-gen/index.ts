@@ -257,6 +257,7 @@ function parseCmdlineArgs() {
     type: "int",
     default: 1
   });
+
   parser.add_argument("--n-chars-per-msg", {
     help: "number of characters per log message (ignored in metrics mode)",
     type: "int",
@@ -294,7 +295,9 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--max-concurrent-reads", {
     help:
-      "Maximum number of GET HTTP requests to perform concurrently during the read/validation phase. Default: 0 (do as many as given by --n-concurrent-streams).",
+      "Maximum number of GET HTTP requests to perform concurrently during " +
+      "the read/validation phase. Default: 0 " +
+      "(do as many as given by --n-concurrent-streams).",
     type: "int",
     default: 0
   });
@@ -316,8 +319,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--change-streams-every-n-cycles", {
     help:
-      "Use the same log stream for N cycles, then create a new set of " +
-      "log streams (with unique label sets)",
+      "Use the same log/metric stream for N cycles, then create a new set of " +
+      "streams (unique label sets)",
     type: "int",
     default: 1
   });
@@ -340,7 +343,7 @@ function parseCmdlineArgs() {
   stopgroup.add_argument("--stream-write-n-fragments", {
     help:
       "within a write/read cycle, stop write (and enter read phase) when " +
-      "this many fragments were written for a log stream",
+      "this many fragments were written for a log/metric stream",
     type: "int",
     default: 0
   });
@@ -363,7 +366,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--fetch-n-entries-per-query", {
     help:
-      "Maximum number of log entries to fetch per query during read/validation phase",
+      "Maximum number of log entries to fetch per query during " +
+      "read/validation phase (honored in metric mode? TODO)",
 
     type: "int",
     default: 60000
