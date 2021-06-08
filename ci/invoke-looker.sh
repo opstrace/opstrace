@@ -127,5 +127,5 @@ docker run ${COMMON_ARGS} looker \
     --metrics-time-increment-ms 2000 \
     --max-concurrent-writes 6 \
     --skip-read \
-    > looker-metrics-${TSTRING}.log 2>&1
+    > looker-metrics-2-${TSTRING}.log 2>&1
 cat looker-metrics-2-${TSTRING}.log | tail -n 10
