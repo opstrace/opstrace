@@ -77,7 +77,7 @@ docker run ${COMMON_ARGS} looker \
 cat looker-${TSTRING}.log | tail -n 10
 
 
-# Different invocation, cover --max-concurrent-writes
+# Different invocation, cover --stream-write-n-seconds-jitter
 TSTRING="$(date +%Y%m%d-%H%M%S)"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
