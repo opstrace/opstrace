@@ -28,7 +28,10 @@ import { CONTROLLER_NAME } from "@opstrace/controller-config";
 import { State } from "./reducer";
 
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function* waitForControllerDeployment(): Generator<Effect, void, State> {
+export function* waitForControllerDeployment(config: {
+  desiredReadyReplicas: number | undefined;
+}): Generator<Effect, void, State>  {
+
   // Exit if controller deployment does not exist.
   const state: State = yield select();
   const { Deployments } = state.kubernetes.cluster;
@@ -138,12 +141,8 @@ export function* waitForControllerDeployment(): Generator<Effect, void, State> {
       cd.spec.status?.readyReplicas || 0
     );
 
-    const rr = cd.spec.status?.readyReplicas;
-
-    if (rr !== undefined && rr >= 1) {
-      log.info(
-        "at least one replica is READY: desired state reached, continue"
-      );
+    if (cd.spec.status?.readyReplicas === config.desiredReadyReplicas) {
+      log.info("desired state reached, continue");
       break;
     }
     yield delay(15000);
