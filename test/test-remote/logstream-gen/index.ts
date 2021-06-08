@@ -88,6 +88,7 @@ interface CfgInterface {
   retry_post_min_delay_seconds: number;
   retry_post_max_delay_seconds: number;
   retry_post_jitter: number;
+  skip_read: boolean;
 }
 
 let CFG: CfgInterface;
@@ -293,13 +294,21 @@ function parseCmdlineArgs() {
     default: 0
   });
 
-  parser.add_argument("--max-concurrent-reads", {
+  const readgroup = parser.add_mutually_exclusive_group();
+  readgroup.add_argument("--max-concurrent-reads", {
     help:
       "Maximum number of GET HTTP requests to perform concurrently during " +
       "the read/validation phase. Default: 0 " +
       "(do as many as given by --n-concurrent-streams).",
     type: "int",
     default: 0
+  });
+
+  readgroup.add_argument("--skip-read", {
+    help:
+      "skip the readout in the write/read cycle, proceed to the next cycle instead",
+    action: "store_true",
+    default: false
   });
 
   parser.add_argument("--compressability", {
@@ -803,14 +812,18 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
   const validators = [];
   const vt0 = mtime();
 
-  if (CFG.max_concurrent_reads === 0) {
-    for (const stream of dummystreams) {
-      validators.push(unthrottledFetchAndValidate(stream));
-    }
+  if (CFG.skip_read) {
+    log.info("skipping readout as of config option");
   } else {
-    const semaphore = new Semaphore(CFG.max_concurrent_reads);
-    for (const stream of dummystreams) {
-      validators.push(throttledFetchAndValidate(semaphore, stream));
+    if (CFG.max_concurrent_reads === 0) {
+      for (const stream of dummystreams) {
+        validators.push(unthrottledFetchAndValidate(stream));
+      }
+    } else {
+      const semaphore = new Semaphore(CFG.max_concurrent_reads);
+      for (const stream of dummystreams) {
+        validators.push(throttledFetchAndValidate(semaphore, stream));
+      }
     }
   }
 
