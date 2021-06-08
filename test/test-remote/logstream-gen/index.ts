@@ -616,8 +616,10 @@ async function createNewDummyStreams(
     }
 
     const msg = `Initialized dummystream: ${stream}. Time of first entry in stream: ${stream.currentTimeRFC3339Nano()}`;
-    if (i % 1000 == 0) {
-      log.info(msg + " (999 msgs like this hidden)");
+
+    const logEveryN = logEveryNcalc(CFG.n_concurrent_streams);
+    if (i % logEveryN == 0) {
+      log.info(msg + ` (${logEveryN - 1} msgs like this hidden)`);
       // Allow for more or less snappy SIGINTing this initialization step.
       await sleep(0.0001);
     } else {
@@ -1535,6 +1537,23 @@ function setupPromExporter() {
 function rndFloatFromInterval(min: number, max: number) {
   // half-closed: [min, max)
   return Math.random() * (max - min) + min;
+}
+
+// A helper to for throttling log messages, towards keeping the number of
+// actual log messages emitted on the order of 10^1.
+function logEveryNcalc(total: number) {
+  // Assume `number` is a positive integer.
+
+  if (total <= 10) {
+    return 1;
+  }
+
+  // Get order of magnitude of the `total`. For example,
+  // this is 5 (as in O(10^5)) when the input `total=400000`.
+  const o = Math.floor(Math.log10(total));
+
+  // Return one order of magnitude less.
+  return Math.pow(10, o - 1);
 }
 
 /**
