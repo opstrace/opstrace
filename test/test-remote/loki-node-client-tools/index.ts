@@ -393,6 +393,9 @@ export class LogStreamFragmentPushRequest {
         entries: pbentries
       });
       streamsList.push(stream);
+
+      // mark fragment as serialized, for book-keeping.
+      fragment.setSerialized();
     }
 
     const pr = pbTypePushrequest.create({ streams: streamsList });
