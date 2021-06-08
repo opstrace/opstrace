@@ -962,9 +962,9 @@ async function _produceAndPOSTpushrequest(
     //const pr = pushrequest;
     let name: string;
     if (streams.length === 1) {
-      name = `prProducerPOSTer for ${streams[0].uniqueName}`;
+      name = `prProducerPOSTer(${streams[0].uniqueName})`;
     } else {
-      name = `prProducerPOSTer for ${streams.length} streams, first one is: ${streams[0].uniqueName}`;
+      name = `prProducerPOSTer(nstreams=${streams.length}, first=${streams[0].uniqueName})`;
     }
 
     if (
