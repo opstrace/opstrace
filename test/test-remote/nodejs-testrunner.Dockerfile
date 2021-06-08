@@ -35,26 +35,21 @@ COPY packages/buildinfo/ /build/packages/buildinfo/
 
 WORKDIR /build/test/test-remote
 
-# browserType.launch: Failed to launch chromium because executable doesn't
-# exist at
-# /var/lib/buildkite-agent/.cache/ms-playwright/chromium-833159/chrome-linux/chrome
-# [2020-12-17T10:46:05Z] Try re-installing playwright with "npm install
-# playwright"
-# https://github.com/microsoft/playwright/pull/2192
-ENV PLAYWRIGHT_BROWSERS_PATH=0
-
+# note: there is a known and unresolved issue where yarn can fail to download playwright browser binaries,
+# npm (and node itself) doesn't have this issue. https://github.com/yarnpkg/yarn/issues/7887
+# The suggested workaround is to manually install the binaries as referenced here:
+# https://github.com/microsoft/playwright/issues/581#issuecomment-585506945
+# https://github.com/microsoft/playwright/issues/598#issuecomment-590151978
+# So at first we'll force installing playwright without the browser binaries and then manually install them
 RUN cat package.json tsconfig.json && \
     echo /build: && ls -al /build/* && \
     yarn install --frozen-lockfile && \
-    yarn add playwright --frozen-lockfile
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn add playwright --frozen-lockfile
 
-# note: there is a known and unresolved issue where yarn can fail to download playwright browser
-# binaries, npm doesn't have this issue. https://github.com/yarnpkg/yarn/issues/7887
-# The suggested workaround is to manually install the binaries:
-# https://github.com/microsoft/playwright/issues/581#issuecomment-585506945
-# https://github.com/microsoft/playwright/issues/598#issuecomment-590151978
 WORKDIR /build
-run node node_modules/playwright/install.js
+# This ENV is needed for both browser installing and when running playwright
+ENV PLAYWRIGHT_BROWSERS_PATH=0
+RUN node node_modules/playwright/install.js
 
 WORKDIR /build/test/test-remote
 
