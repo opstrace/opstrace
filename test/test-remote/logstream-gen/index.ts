@@ -1005,7 +1005,8 @@ async function _produceAndPOSTpushrequest(
     hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
 
     COUNTER_STREAM_FRAGMENTS_PUSHED =
-      COUNTER_STREAM_FRAGMENTS_PUSHED + CFG.n_fragments_per_push_message;
+      COUNTER_STREAM_FRAGMENTS_PUSHED +
+      BigInt(CFG.n_fragments_per_push_message);
     counter_fragments_pushed.inc(CFG.n_fragments_per_push_message);
     counter_log_entries_pushed.inc(CFG.n_entries_per_stream_fragment);
 
