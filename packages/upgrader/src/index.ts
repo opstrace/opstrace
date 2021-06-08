@@ -200,7 +200,7 @@ function* triggerControllerDeploymentUpgrade() {
     });
 
     if (rolloutStarted) {
-      yield call(waitForControllerDeployment);
+      yield call(waitForControllerDeployment, { desiredReadyReplicas: 1 });
       log.info(
         'wait for upgrade to complete ("wait for deployments/..." phase)'
       );
