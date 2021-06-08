@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import React from "react";
+import Form from "./Form";
+import Show from "./Show";
+import Status from "./Status";
+import Logo from "./Logo.png";
 
 import { IntegrationDef } from "client/integrations/types";
 
@@ -68,9 +71,11 @@ export const exporterBlackboxIntegration: IntegrationDef = {
   kind: "exporter-blackbox",
   category: "exporter",
   label: "Blackbox",
-  desc: () => <i>Coming soon</i>,
-  Form: () => <div />,
-  Show: () => <div />,
-  Status: () => <div />,
-  enabled: false
+  desc:
+    "PLACEHOLDER: The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP and ICMP.",
+  Form: Form,
+  Show: Show,
+  Status: Status,
+  Logo: Logo,
+  enabled: true
 };
