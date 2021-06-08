@@ -112,8 +112,9 @@ cat looker-${TSTRING}.log | tail -n 10
 # series) to synthetically generate data from. Here, the parameters are chosen
 # so that the expected HTTP request payload size (snappy-compressed protobuf)
 # is about 0.95 MiB, just a little bit below the limit of 1.00 MiB implemented
-# on the receiving end. The readout is done stream-by-stream and therefore it
-# takes a while (O(1) HTTP request per time series).
+# on the receiving end. The readout is skipped because otherwise it would
+# take way too long (when done stream-by-stream and therefore it
+# taking while (O(1) HTTP request per time series, i.e. O(10^5) HTTP requests).
 TSTRING="$(date +%Y%m%d-%H%M%S)"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
@@ -125,6 +126,6 @@ docker run ${COMMON_ARGS} looker \
     --stream-write-n-fragments 2 \
     --metrics-time-increment-ms 2000 \
     --max-concurrent-writes 6 \
-    --max-concurrent-reads 300 \
+    --skip-read \
     > looker-metrics-${TSTRING}.log 2>&1
 cat looker-metrics-2-${TSTRING}.log | tail -n 10
