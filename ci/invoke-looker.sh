@@ -90,6 +90,22 @@ docker run ${COMMON_ARGS} looker \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10
 
+
+# Different invocation, cover --max-concurrent-reads
+# and also cover --n-fragments-per-push-message in logs mode
+TSTRING="$(date +%Y%m%d-%H%M%S)"
+docker run ${COMMON_ARGS} looker \
+    "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
+    --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
+    --n-concurrent-streams 5 \
+    --n-entries-per-stream-fragment 1000 \
+    --n-fragments-per-push-message 2 \
+    --n-chars-per-msg 100 \
+    --max-concurrent-reads 2 \
+    --stream-write-n-seconds 10 \
+    > looker-${TSTRING}.log 2>&1
+cat looker-${TSTRING}.log | tail -n 10
+
 # Metrics mode: use --n-fragments-per-push-message to create an HTTP request
 # payload that contains samples from _many_ streams (individual time series);
 # allowing for cranking up the number of concurrent streams (individual time
