@@ -19,7 +19,7 @@ COMMON_ARGS="-v ${OPSTRACE_BUILD_DIR}:/rundir \
 --dns ${DNSIP} \
 ${LOOKER_IMAGE_NAME}"
 
-# Test metrics mode of looker (super hacky)
+# Test metrics mode of looker
 # do not show output in main build log (it's a lot!)
 # instead make sure that the *.log files are collected as build
 # artifacts.
@@ -34,7 +34,6 @@ docker run ${COMMON_ARGS} looker \
     --n-cycles 2 \
     > looker-metrics-${TSTRING}.log 2>&1
 cat looker-metrics-${TSTRING}.log | tail -n 10
-
 
 TSTRING="$(date +%Y%m%d-%H%M%S)"
 docker run ${COMMON_ARGS} looker \
@@ -90,3 +89,26 @@ docker run ${COMMON_ARGS} looker \
     --stream-write-n-seconds-jitter 5 \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10
+
+# Metrics mode: use --n-fragments-per-push-message to create an HTTP request
+# payload that contains samples from _many_ streams (individual time series);
+# allowing for cranking up the number of concurrent streams (individual time
+# series) to synthetically generate data from. Here, the parameters are chosen
+# so that the expected HTTP request payload size (snappy-compressed protobuf)
+# is about 0.95 MiB, just a little bit below the limit of 1.00 MiB implemented
+# on the receiving end. The readout is done stream-by-stream and therefore it
+# takes a while (O(1) HTTP request per time series).
+TSTRING="$(date +%Y%m%d-%H%M%S)"
+docker run ${COMMON_ARGS} looker \
+    "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
+    --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
+    --metrics-mode \
+    --n-concurrent-streams 100000 \
+    --n-entries-per-stream-fragment 5 \
+    --n-fragments-per-push-message 15000 \
+    --stream-write-n-fragments 2 \
+    --metrics-time-increment-ms 2000 \
+    --max-concurrent-writes 6 \
+    --max-concurrent-reads 300 \
+    > looker-metrics-${TSTRING}.log 2>&1
+cat looker-metrics-2-${TSTRING}.log | tail -n 10
