@@ -46,7 +46,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=0
 RUN cat package.json tsconfig.json && \
     echo /build: && ls -al /build/* && \
     yarn install --frozen-lockfile && \
-    yarn add playwright --frozen-lockfile
+    yarn add playwright-chromium --frozen-lockfile
 
 # Disable automatic NPM update check (would always show "npm update check
 # failed").
