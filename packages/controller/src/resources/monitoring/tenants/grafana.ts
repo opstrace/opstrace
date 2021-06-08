@@ -243,8 +243,8 @@ export function GrafanaResources(
                       value: "debug"
                     },
                     {
-                      name: "GF_ALERTING",
-                      value: "false"
+                      name: "GF_FEATURE_TOGGLES_ENABLE",
+                      value: "ngalert"
                     },
                     {
                       name: "GF_SERVER_DOMAIN",
