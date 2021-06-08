@@ -43,6 +43,7 @@ import {
   waitForControllerDeployment
 } from "./readiness";
 import {
+  cortexOperatorPreamble,
   upgradeControllerConfigMap,
   upgradeControllerDeployment,
   upgradeInfra
@@ -192,6 +193,11 @@ function* triggerControllerDeploymentUpgrade() {
   yield call(blockUntilCacheHydrated);
 
   if (!dryRun()) {
+    yield call(upgradeControllerConfigMap, kubeConfig);
+
+    // handle upgrades from clusters that are not running the cortex-operator
+    yield call(cortexOperatorPreamble, kubeConfig);
+
     yield call(upgradeControllerConfigMap, kubeConfig);
 
     const rolloutStarted: boolean = yield call(upgradeControllerDeployment, {

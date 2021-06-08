@@ -30,6 +30,8 @@ import {
   upgradeControllerConfigMapToLatest
 } from "@opstrace/controller-config";
 
+import { Deployment, updateResource } from "@opstrace/kubernetes";
+
 import {
   EnsureInfraExistsResponse,
   ensureAWSInfraExists,
@@ -38,6 +40,7 @@ import {
 
 import { State } from "./reducer";
 import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
+import { waitForControllerDeployment } from "./readiness";
 
 const CONTROLLER_IMAGE_DEFAULT = `opstrace/controller:${BUILD_INFO.VERSION_STRING}`;
 
@@ -144,5 +147,28 @@ export function* upgradeInfra(cloudProvider: string) {
     }
     default:
       die(`cloud provider not supported: ${cloudProvider}`);
+  }
+}
+
+export function* cortexOperatorPreamble(kubeConfig: KubeConfig) {
+  const state: State = yield select();
+  const deploy = state.kubernetes.cluster.Deployments.resources.find(
+    d => d.name === CONTROLLER_NAME
+  );
+  if (deploy === undefined) {
+    die(`could not find Opstrace controller deployment`);
+  }
+
+  // disable opstrace controller to be able to transfer ownership of cortex
+  // deployment to the cortex-operator; it will be enabled later
+  if (deploy.spec.status?.readyReplicas !== undefined) {
+    deploy.spec.spec!.replicas = 0;
+    const resource = new Deployment(deploy.spec, kubeConfig);
+    yield call(updateResource, resource);
+
+    // disabling the controller means status.readyReplicas is undefined
+    yield call(waitForControllerDeployment, {
+      desiredReadyReplicas: undefined
+    });
   }
 }
