@@ -56,6 +56,8 @@ import { sleep } from "@opstrace/utils";
 
 let BROWSER: ChromiumBrowser;
 
+const DEBUG_MODE = process.env.OPSTRACE_PLAYWRIGHT_DEBUG === "true";
+
 // Generate and return a path in the artifact directory
 function artipath(filename: string) {
   return path.join(TEST_REMOTE_ARTIFACT_DIRECTORY, filename);
@@ -136,7 +138,7 @@ suite("test_ui_with_headless_browser", function () {
 
     log.info("chromium.launch()");
     BROWSER = await chromium.launch({
-      // headless: false, // set to false to see browser on your desktop
+      headless: !DEBUG_MODE, // to see browser on your desktop set to false or set the ENV VAR "OPSTRACE_PLAYWRIGHT_DEBUG" to "true"
       args: [
         // https://github.com/microsoft/playwright/blob/761bd78879c83ed810ae38ef39513b2d874badb1/docs/ci.md#docker
         "--disable-dev-shm-usage",

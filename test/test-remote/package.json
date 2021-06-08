@@ -49,6 +49,6 @@
     "winston": "^3.3.3"
   },
   "optionalDependencies": {
-    "playwright": "1.10.0"
+    "playwright-chromium": "^1.11.1"
   }
 }
