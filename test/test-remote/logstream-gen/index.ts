@@ -220,7 +220,10 @@ function parseCmdlineArgs() {
   });
 
   parser.add_argument("--log-level", {
-    help: `Set log level for output on stderr. One of: debug, info, warning, error. Default: ${DEFAULT_LOG_LEVEL_STDERR}`,
+    help:
+      `Set log level for output on stderr. ` +
+      `One of: debug, info, warning, error. ` +
+      `Default: ${DEFAULT_LOG_LEVEL_STDERR}`,
     type: "str",
     choices: ["debug", "info", "warning", "error"],
     default: DEFAULT_LOG_LEVEL_STDERR,
@@ -230,7 +233,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--metrics-mode", {
     help:
-      "metrics mode (Cortex) instead of logs mode (Loki) -- metrics mode was added later in quick and dirty fashion",
+      "metrics mode (Cortex) instead of logs mode (Loki) -- " +
+      "metrics mode was added later in a quick and dirty fashion, still visible",
     action: "store_true",
     default: false
   });
@@ -239,7 +243,8 @@ function parseCmdlineArgs() {
   // differently
   parser.add_argument("--n-concurrent-streams", {
     help:
-      "number of log streams to create per write/read cycle (or number of metric streams)",
+      "number of log streams to create per write/read cycle " +
+      "(or number of metric streams)",
     type: "int",
     required: true
   });
@@ -268,7 +273,9 @@ function parseCmdlineArgs() {
   // note: looking for a more expressive name
   parser.add_argument("--log-start-time", {
     help:
-      "Timestamp of first log entry in all generated log streams. ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. Default: invocation time",
+      "Timestamp of first log entry in all generated log streams. " +
+      "ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. " +
+      "Default: invocation time. TODO: metrics mode?",
     type: "str"
   });
 
@@ -289,7 +296,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--max-concurrent-writes", {
     help:
-      "Maximum number of POST HTTP requests to perform concurrently. Default: 0 (do as many as given by --n-concurrent-streams).",
+      "Maximum number of POST HTTP requests to perform concurrently. " +
+      "Default: 0 (do as many as given by --n-concurrent-streams).",
     type: "int",
     default: 0
   });
@@ -313,7 +321,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--compressability", {
     help:
-      "compressability characteristic of generated log messages (ignored in metrics mode)",
+      "compressability characteristic of generated log messages " +
+      "(ignored in metrics mode)",
     type: "str",
     choices: ["min", "max", "medium"],
     default: "min"
@@ -408,7 +417,8 @@ function parseCmdlineArgs() {
 
   parser.add_argument("--bearer-token-file", {
     help:
-      "Read authentication token from file. Add header `Authorization: Bearer <token>` to each HTTP request.",
+      "Read authentication token from file. Add header " +
+      "`Authorization: Bearer <token>` to each HTTP request.",
     type: "str",
     default: ""
   });
@@ -425,7 +435,7 @@ function parseCmdlineArgs() {
   CFG.invocation_id = uniqueInvocationId;
 
   if (CFG.log_start_time) {
-    // let this blow up for now
+    // validate input, let this blow up for now if input is invalid
     ZonedDateTime.parse(CFG.log_start_time);
   } else {
     // Set default for log starttime: invocation time.
