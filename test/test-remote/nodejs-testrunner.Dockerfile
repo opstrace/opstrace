@@ -48,6 +48,16 @@ RUN cat package.json tsconfig.json && \
     yarn install --frozen-lockfile && \
     yarn add playwright --frozen-lockfile
 
+# note: there is a known and unresolved issue where yarn can fail to download playwright browser
+# binaries, npm doesn't have this issue. https://github.com/yarnpkg/yarn/issues/7887
+# The suggested workaround is to manually install the binaries:
+# https://github.com/microsoft/playwright/issues/581#issuecomment-585506945
+# https://github.com/microsoft/playwright/issues/598#issuecomment-590151978
+WORKDIR /build
+run node node_modules/playwright/install.js
+
+WORKDIR /build/test/test-remote
+
 # Disable automatic NPM update check (would always show "npm update check
 # failed").
 ENV NO_UPDATE_NOTIFIER true
