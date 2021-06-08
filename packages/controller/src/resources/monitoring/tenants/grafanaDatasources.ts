@@ -75,53 +75,6 @@ export function GrafanaDatasourceResources(
     ]
   };
 
-  // For the system tenant's view -- e.g., when accessing
-  // https://system.jp.gcp.opstrace.io/grafana,
-  // show in addition to what's shown above all the other tenant's data sources,
-  // too.
-  if (tenant.name === "system") {
-    state.tenants.list.tenants
-      .filter(t => t.name !== "system")
-      .forEach(t =>
-        datasources.datasources.push(
-          {
-            access: "proxy",
-            editable: false,
-            name: `tenant-${t.name}-metrics`,
-            orgId: 1,
-            type: "prometheus",
-            url: "http://query-frontend.cortex.svc.cluster.local",
-            version: 1,
-            jsonData: {
-              httpHeaderName1: "HeaderName",
-              httpHeaderName2: "X-Scope-OrgID"
-            },
-            secureJsonData: {
-              httpHeaderValue1: "HeaderValue",
-              httpHeaderValue2: `${t.name}`
-            }
-          },
-          {
-            name: `tenant-${t.name}-logs`,
-            editable: false,
-            type: "loki",
-            orgId: 1,
-            url: "http://querier.loki.svc.cluster.local:1080",
-            access: "proxy",
-            version: 1,
-            jsonData: {
-              httpHeaderName1: "HeaderName",
-              httpHeaderName2: "X-Scope-OrgID"
-            },
-            secureJsonData: {
-              httpHeaderValue1: "HeaderValue",
-              httpHeaderValue2: `${t.name}`
-            }
-          }
-        )
-      );
-  }
-
   collection.add(
     new Secret(
       {
