@@ -22,20 +22,49 @@ import { SECOND, log } from "@opstrace/utils";
 import { awsPromErrFilter, iamClient } from "./util";
 import { AWSApiError } from "./types";
 
-const getRole = async ({
-  RoleName
+const listRoles = ({
+  params
 }: {
-  RoleName: string;
-}): Promise<IAM.Role | undefined> => {
+  params: IAM.ListRolesRequest;
+}): Promise<IAM.ListRolesResponse | undefined> => {
   return new Promise((resolve, reject) => {
-    iamClient().listRoles({}, (err, data) => {
+    iamClient().listRoles(params, (err, data) => {
       if (err) {
         reject(err);
       }
-      resolve(data.Roles.find(r => r.RoleName === RoleName));
+      resolve(data);
     });
   });
 };
+
+// getRole queries for the list of IAM roles and returns the one that matches
+// the given RoleName. Returns undefined if a match is not found. Handles
+// paginated results using the Marker as described in
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/IAM.html#listRoles-property
+export function* getRole({
+  RoleName
+}: {
+  RoleName: string;
+}): Generator<unknown, IAM.Role | undefined, IAM.ListRolesResponse> {
+  let truncated: boolean | undefined = true;
+  const params: IAM.ListRolesRequest = {};
+
+  while (truncated) {
+    const data: IAM.ListRolesResponse | undefined = yield call(listRoles, {
+      params
+    });
+
+    truncated = data?.IsTruncated;
+    params.Marker = data?.Marker;
+
+    const p = data?.Roles?.find(r => r.RoleName === RoleName);
+    if (p !== undefined) {
+      return p;
+    }
+  }
+
+  return undefined;
+}
 
 const createRole = ({
   role
@@ -102,7 +131,7 @@ export function* ensureRoleExists({
   AssumeRolePolicyDocument: string;
 }): Generator<unknown, IAM.Role, IAM.Role> {
   while (true) {
-    const existingRole: IAM.Role = yield call(getRole, {
+    const existingRole: IAM.Role | undefined = yield call(getRole, {
       RoleName
     });
 
@@ -139,7 +168,7 @@ export function* ensureRoleDoesNotExist({
   log.info(`Ensuring IAM role ${RoleName} does not exist`);
 
   while (true) {
-    const existingRole: IAM.Role = yield call(getRole, {
+    const existingRole: IAM.Role | undefined = yield call(getRole, {
       RoleName
     });
 
