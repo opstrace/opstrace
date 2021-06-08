@@ -1,0 +1,17 @@
+Braindump, might be good or bad ideas
+
+- for changing the weight between write and read phase:
+    - read validation only for every Nth stream
+
+- a write-only mode (--skip-read or --write-only, ...)
+
+- time source:
+    - wall time of executing machine, must be combined with --write-only
+      because it does not allow for deep read validation
+
+- metrics mode: solve time skew problem:
+    - with --write-only mode, using wall time
+    - or with regular checkpoints where the synthetic time source gets
+      synced to wall time (when it has fallen _behind_ compared to wall time)
+      then these checkpoints can be stored in mem (cheaply) for the deep
+      read validation.
