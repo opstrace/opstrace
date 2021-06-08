@@ -79,6 +79,8 @@ export async function upgrade(): Promise<void> {
 
   let awsRegion: string | undefined;
   if (cli.CLIARGS.cloudProvider == "aws") {
+    // TODO: The function has destroy-specific user feedback (log output);
+    // which does not read nicely when it fails in the context of `upgrade`.
     awsRegion = await util.awsGetClusterRegionWithCmdlineFallback();
   }
 

@@ -195,8 +195,8 @@ export function timestampForFilenames(ts: ZonedDateTime): string {
 }
 
 /**
- * Try a dynamic lookup using the provided cluster name (auto-detect the
- * region). Fall back to other options when that fails:
+ * Try a dynamic lookup using the provided Opstrace instance name (auto-detect
+ * the region). Fall back to other options when that fails:
  * - use what was provided via --region on cmdline
  * - error out if --region was not provided
  */
@@ -225,7 +225,7 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
       // way for the admin/user to understand what went wrong.
       die(
         "Could not reliably look up the AWS region corresponding to the " +
-          "specified Opstrace cluster. Abort operation. " +
+          "specified Opstrace instance. Abort operation. " +
           "If you know what you are doing, you can retry " +
           "with skipping this region lookup by setting the --region <region> " +
           "command line parameter."
@@ -239,6 +239,11 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
   if (c !== undefined) {
     return c.awsRegion;
   }
+
+  log.info(
+    "Scanned all configured AWS regions successfully, but no EKS cluster found for Opstrace instance: ",
+    cli.CLIARGS.instanceName
+  );
 
   // Note(JP): or instead of erroring out here fall back to some 'default'
   // region? Might feel nicer in some cases. But: I'd rather make this
@@ -254,10 +259,13 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
   //    `... destroy foo --region=eu-central-1` -> remainders are
   //    discovered and cleaned up after.
   die(
-    `No EKS cluster found for Opstrace instance name '${cli.CLIARGS.instanceName}. ` +
-      "Assume that the Opstrace instance does not exist (anymore). " +
-      "You can force running the requested operation in a specific AWS region " +
-      "by setting the --region <region> command line parameter."
+    "Operation aborted: an intact Opstrace instance with the given name " +
+      "was not found across " +
+      "all inspected AWS regions. For cleaning up resource residuals " +
+      "of a previously only partially destroyed Opstrace instance, " +
+      "you can force-run the 'destroy' operation in a specific AWS region: " +
+      "repeat the command and additionally set the --region <region> " +
+      "command line parameter."
   );
 }
 
