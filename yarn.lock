@@ -16387,10 +16387,10 @@ pkg@^4.4.9:
     resolve "^1.15.1"
     stream-meter "^1.0.4"
 
-playwright@1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.10.0.tgz#a14d295f1ad886caf4cc5e674afe03ac832066bc"
-  integrity sha512-b7SGBcCPq4W3pb4ImEDmNXtO0ZkJbZMuWiShsaNJd+rGfY/6fqwgllsAojmxGSgFmijYw7WxCoPiAIEDIH16Kw==
+playwright@1.11.1:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.11.1.tgz#c5f2946db5195bd099a57ce4e188c01057876cff"
+  integrity sha512-UuMrYuvzttbJXUD7sTVcQBsGRojelGepvuQPD+QtVm/n5zyKvkiUErU/DGRXfX8VDZRdQ5D6qVqZndrydC2b4w==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -16405,6 +16405,7 @@ playwright@1.10.0:
     rimraf "^3.0.2"
     stack-utils "^2.0.3"
     ws "^7.3.1"
+    yazl "^2.5.1"
 
 please-upgrade-node@^3.2.0:
   version "3.2.0"
@@ -22486,6 +22487,13 @@ yauzl@^2.10.0:
   dependencies:
     buffer-crc32 "~0.2.3"
     fd-slicer "~1.1.0"
+
+yazl@^2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/yazl/-/yazl-2.5.1.tgz#a3d65d3dd659a5b0937850e8609f22fffa2b5c35"
+  integrity sha512-phENi2PLiHnHb6QBVot+dJnaAZ0xosj7p3fWl+znIjBDlnMI2PsZCJZ306BPTFOaHf5qdDEI8x5qFrSOBN5vrw==
+  dependencies:
+    buffer-crc32 "~0.2.3"
 
 yeast@0.1.2:
   version "0.1.2"
