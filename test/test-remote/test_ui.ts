@@ -50,8 +50,8 @@ import {
 // this does not work, too late probably. set via Makefile entrypoint
 // process.env.DEBUG = "pw:api";
 
-import type { ChromiumBrowser, Browser, Cookie } from "playwright";
-import { chromium } from "playwright";
+import type { ChromiumBrowser, Browser, Cookie } from "playwright-chromium";
+import { chromium } from "playwright-chromium";
 import { sleep } from "@opstrace/utils";
 
 let BROWSER: ChromiumBrowser;
