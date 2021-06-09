@@ -131,7 +131,7 @@ async function performLoginFlow(br: Browser) {
   COOKIES_AFTER_LOGIN = cookies;
 }
 
-suite("test_ui_with_headless_browser", function () {
+suite("test_ui_api", function () {
   suiteSetup(async function () {
     log.info("suite setup");
     globalTestSuiteSetupOnce();
