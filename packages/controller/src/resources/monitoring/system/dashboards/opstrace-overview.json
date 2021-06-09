@@ -522,15 +522,22 @@
         {
           "expr": "sum(cortex_ingester_memory_series{job=~\"cortex.ingester\"}\n/ on(namespace) group_left\nmax by (namespace) (cortex_distributor_replication_factor{job=~\"cortex.distributor\"}))\n",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "In-memory series",
           "refId": "A"
+        },
+        {
+          "expr": "sum(cortex_ingester_active_series{job=~\"cortex.ingester\"}\n/ on(namespace) group_left\nmax by (namespace) (cortex_distributor_replication_factor{job=~\"cortex.distributor\"}))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Recently active series",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[METRICS] Active Series",
+      "title": "[METRICS] In-Memory/Active Series",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -648,7 +655,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "[LOGS]  Rate of log entries vs. bytes per entry; total bytes per second (5m mean) ALL tenants",
+      "title": "[LOGS] Rate of log entries vs. bytes per entry; total bytes per second (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -694,6 +701,400 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "hiddenSeries": false,
+      "id": 85,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "max(cortex_ingester_instance_limits{limit=\"max_inflight_push_requests\"})",
+          "interval": "",
+          "legendFormat": "Limit",
+          "queryType": "randomWalk",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(cortex_inflight_requests{route=\"/cortex.Ingester/Push\",service=\"ingester\"}) by (pod)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "[METRICS] Ingester inflight push requests",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "hiddenSeries": false,
+      "id": 89,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(loki_inflight_requests{route=\"/logproto.Pusher/Push\",service=\"ingester\"}) by (pod)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[LOGS] Ingester inflight push requests",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "decimals": 1,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 33
+      },
+      "hiddenSeries": false,
+      "id": 88,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "avg(go_memstats_heap_objects{namespace=\"cortex\",service=\"ingester\"}) by (pod)",
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[METRICS] Ingester Heap Objects",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "decimals": 1,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 33
+      },
+      "hiddenSeries": false,
+      "id": 87,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "avg(go_memstats_heap_objects{namespace=\"loki\",service=\"ingester\"}) by (pod)",
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[LOGS] Ingester Heap Objects",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -708,7 +1109,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 16,
@@ -826,7 +1227,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 41
       },
       "hiddenSeries": false,
       "id": 32,
@@ -947,7 +1348,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 33
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 80,
@@ -1047,7 +1448,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 33
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 81,
@@ -1144,9 +1545,224 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 57
+      },
+      "hiddenSeries": false,
+      "id": 90,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(rate(cortex_compactor_group_compactions_failures_total[60m])) by (pod)",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[WIP] Compactor error rate?",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 57
+      },
+      "hiddenSeries": false,
+      "id": 83,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(cortex_compactor_meta_sync_duration_seconds_bucket[5m])) by (le, pod))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{pod}} 95pct meta sync duration",
+          "queryType": "randomWalk",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(cortex_compactor_group_compaction_runs_completed_total) by (pod)",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "{{pod}} compactions since last restart",
+          "refId": "B"
+        },
+        {
+          "expr": "cortex_compactor_block_cleanup_started_total-cortex_compactor_block_cleanup_completed_total",
+          "hide": true,
+          "interval": "",
+          "legendFormat": "{{pod}} pending block cleanups",
+          "refId": "C"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(cortex_compactor_garbage_collection_duration_seconds_bucket[5m])) by (le, pod))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{pod}} 95pct collection duration",
+          "refId": "D"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "[WIP] Compactor metrics scratch pad",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "metrics",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 65
       },
       "hiddenSeries": false,
       "id": 72,
@@ -1246,7 +1862,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 49
+        "y": 73
       },
       "hiddenSeries": false,
       "id": 78,
@@ -1352,7 +1968,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 49
+        "y": 73
       },
       "hiddenSeries": false,
       "id": 79,
@@ -1461,7 +2077,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 57
+        "y": 81
       },
       "hiddenSeries": false,
       "id": 46,
@@ -1564,7 +2180,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 57
+        "y": 81
       },
       "hiddenSeries": false,
       "id": 47,
@@ -1648,7 +2264,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 65
+        "y": 89
       },
       "id": 24,
       "panels": [],
@@ -1674,7 +2290,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 66
+        "y": 90
       },
       "hiddenSeries": false,
       "id": 4,
@@ -1789,7 +2405,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 66
+        "y": 90
       },
       "hiddenSeries": false,
       "id": 10,
@@ -1896,7 +2512,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 74
+        "y": 98
       },
       "hiddenSeries": false,
       "id": 6,
@@ -2006,7 +2622,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 74
+        "y": 98
       },
       "hiddenSeries": false,
       "id": 8,
@@ -2115,7 +2731,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 82
+        "y": 106
       },
       "hiddenSeries": false,
       "id": 69,
@@ -2212,7 +2828,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 82
+        "y": 106
       },
       "hiddenSeries": false,
       "id": 70,
@@ -2311,7 +2927,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 90
+        "y": 114
       },
       "hiddenSeries": false,
       "id": 28,
@@ -2473,14 +3089,14 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 90
+        "y": 114
       },
       "id": 75,
       "options": {
         "showHeader": true,
         "sortBy": [
           {
-            "desc": false,
+            "desc": true,
             "displayName": "Time"
           }
         ]
@@ -2488,7 +3104,7 @@
       "pluginVersion": "7.4.3",
       "targets": [
         {
-          "expr": "kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\"}\n",
+          "expr": "kube_pod_container_status_last_terminated_reason{reason=\"OOMKilled\"} > 0",
           "format": "table",
           "interval": "",
           "legendFormat": "",
@@ -2520,7 +3136,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 98
+        "y": 122
       },
       "hiddenSeries": false,
       "id": 76,
@@ -2640,7 +3256,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 98
+        "y": 122
       },
       "hiddenSeries": false,
       "id": 55,
@@ -2735,7 +3351,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 106
+        "y": 130
       },
       "hiddenSeries": false,
       "id": 66,
@@ -2767,7 +3383,7 @@
         {
           "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"cortex\"})\n",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{persistentvolumeclaim}}",
           "queryType": "randomWalk",
           "refId": "A"
         }
@@ -2841,7 +3457,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 106
+        "y": 130
       },
       "hiddenSeries": false,
       "id": 67,
@@ -2873,7 +3489,7 @@
         {
           "expr": "(\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n  -\n  sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})\n)\n/\nsum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", namespace=\"loki\"})",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{persistentvolumeclaim}}",
           "queryType": "randomWalk",
           "refId": "A"
         }
@@ -2948,7 +3564,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 114
+        "y": 138
       },
       "hiddenSeries": false,
       "id": 12,
@@ -3081,7 +3697,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 123
+        "y": 147
       },
       "hiddenSeries": false,
       "id": 14,
@@ -3159,7 +3775,7 @@
       }
     }
   ],
-  "refresh": "30s",
+  "refresh": "60s",
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
