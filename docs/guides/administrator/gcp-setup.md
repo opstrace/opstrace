@@ -16,6 +16,7 @@ We will use it down below.
 Next up, enable billing for that new project: link a GCP billing account to it, via the [GCP UI](https://console.cloud.google.com/billing/linkedaccount). Some of the next steps will not work if you don't link a billing account.
 
 **Note:** If you are using a new GCP account, please keep in mind the [quotas](https://cloud.google.com/compute/quotas). Every new account has a limited quota for resources like vCPU per region among others. New accounts, receives a quota of 8vCPUs, less than the minimum required for this quickstart.
+
 ## Step 2: set up the  `gcloud` CLI
 
 The `gcloud` command-line tool is a part of the Google Cloud SDK.
