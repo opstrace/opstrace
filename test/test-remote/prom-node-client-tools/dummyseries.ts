@@ -218,10 +218,47 @@ export class DummyTimeseries {
   /**
    * When the time of the last sample in the last generated fragment has fallen
    * behind too far compared to the current wall time, this method can be used
-   * to make the first sample of the next fragment to be generated be closer
-   * to the current wall time again.
+   * to make the first sample of the next fragment to be generated be closer to
+   * the current wall time again.
    *
-   * Meant to be called between two calls to `generateAndGetNextFragment()`.
+   * If this method ever needs to be called externally, it should be called
+   * between two calls to `generateAndGetNextFragment()`. For now it is a
+   * private method and is called at the beginning of the implementation of
+   * `generateNextFragment()`.
+   *
+   * ## Background
+   *
+   * With the Cortex Blocks Storage engine, we cannot push samples that go into
+   * the future (compared to wall time in the ingest system), and we also
+   * cannot push samples that are older than 1 hour compared to the wall time
+   * in the ingest system. In both cases, Cortex rejects these samples.
+   *
+   * Context: https://github.com/opstrace/opstrace-corp/issues/147 and
+   * https://github.com/cortexproject/cortex/issues/2366.
+   *
+   * The challenge: for deep read validation we need to _know_ the timestamps
+   * for individual metric samples that were written into the remote storage
+   * system. Keeping them all in memory is not an option towards validation,
+   * i.e. they need to follow a predictable pattern. That is, they can't be
+   * consumed from a clock source of this machine, but they need to be
+   * generated synthetically, following said pattern. The simple pattern being
+   * used here: adjacent timestamps in the synthetically generated samples have
+   * a fixed time distance between them (`this.timediffMilliseconds`).
+   *
+   * Now, during execution, this synthetic generation of timestamps, is either
+   * faster or slower than the evolution of the actual time. This depends on
+   * many factors, but certainly on the user-given choice of
+   * `this.timediffMilliseconds`.
+   *
+   * This method here provides a correction for one of both cases: when the
+   * synthetic clock source evolves _slower_ than wall time, i.e. when it
+   * slowly falls behind. When it has fallen behind by a specific amount, it
+   * leaps the synthetic time source forward by a particular correction amount.
+   *
+   * Also note: this strategy makes use of the fact that fragments are
+   * validated _individually_ based on their first and last sample's
+   * timestamps, i.e. the leap forward is done _between_ fragments, and not
+   * _within_ an individual fragment.
    */
   private bringCloserToWalltimeIfFallenBehind(): void {
     const lastSampleSecondsSinceEpoch = this.millisSinceEpochOfLastGeneratedSample
@@ -237,13 +274,14 @@ export class DummyTimeseries {
 
     // If we've fallen behind by more than 40 minutes, forward by 20 minutes.
     // These numbers are adjusted to the 1-hour ingest window provided by
-    // Cortex with the blocks storage engine.
-    if (shiftIntoPastSeconds > 33 * 60) {
+    // Cortex with the blocks storage engine. TODO: expose these parameters to
+    // users via CLI -- might also be nice to set them rather gith, i.e. to
+    // leap forward by just a little bit when falled behind just a little bit.
+    if (shiftIntoPastSeconds > 40 * 60) {
       log.info("MADE TIME ADJUSTMENT");
       this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
-        5 * 60 * 1000
+        20 * 60 * 1000
       );
-      //.subtract(this.timediffMilliseconds);
     }
   }
 
