@@ -68,6 +68,8 @@ export class DummyTimeseries {
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: BigInt;
 
+  //private logLagBehindWalltimeEveryNseconds: private;
+
   uniqueName: string;
   metricName: string;
   starttime: ZonedDateTime;
@@ -85,6 +87,8 @@ export class DummyTimeseries {
 
     this.uniqueName = opts.uniqueName;
     this.metricName = opts.metricName;
+
+    //this.logLagBehindWalltimeEveryNseconds = 60;
 
     // Merge the metric name into it using the well-known special prom label
     // __name__. If labelset is provided then use that. If labelset is not
@@ -287,8 +291,12 @@ export class DummyTimeseries {
         leapForwardMinutes * 60 * 1000
       );
     } else {
-      if (this.nFragmentsConsumed % 50 === 0) {
+      if (
+        this.nFragmentsConsumed > 0 &&
+        this.nFragmentsConsumed % 10000 === 0
+      ) {
         const m = shiftIntoPastSeconds / 60.0;
+        // too noisy for large stream count.
         log.info("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
       }
     }
