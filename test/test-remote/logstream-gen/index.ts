@@ -275,9 +275,10 @@ function parseCmdlineArgs() {
   parser.add_argument("--log-start-time", {
     help:
       "Timestamp of the first sample for all synthetic " +
-      "log/metric streams." +
+      "log streams." +
       "ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. " +
-      "Default: invocation time. TODO: metrics mode?",
+      "Default: invocation time. Does not apply in metrics mode " +
+      "(which is always guided by the current wall time)",
     type: "str"
   });
 
@@ -363,8 +364,10 @@ function parseCmdlineArgs() {
   parser.add_argument("--change-streams-every-n-cycles", {
     help:
       "Use the same log/metric stream for N cycles, then create a new set of " +
-      "streams (unique label sets). TODO: Re-uses the start time as set before " +
-      "and does therefore not work well in metrics mode.",
+      "streams (unique label sets). Default: new streams are created with every " +
+      "write/read cycle. For log streams, when a new stream is initialized it " +
+      "re-uses the same synthetic start time as set before (program invocation time " +
+      "or log_start_time). Metric streams are always guided by wall time.",
     type: "int",
     default: 1
   });
@@ -463,10 +466,12 @@ function parseCmdlineArgs() {
   if (CFG.log_start_time) {
     // validate input, let this blow up for now if input is invalid
     ZonedDateTime.parse(CFG.log_start_time);
+    // In metrics mode, don't support this feature
     assert(!CFG.metrics_mode);
   } else {
-    // Set default for log/metric stream starttime: invocation time.
-    // Always use this in metrics mode.
+    // Set default for log stream starttime: program invocation time.
+    // Note: in metrics mode, this is never used; alway use the current
+    // wall time upon DummyStream object initialization.
     CFG.log_start_time = timestampToRFC3339Nano(START_TIME_JODA);
   }
 
