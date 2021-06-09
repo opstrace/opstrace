@@ -646,22 +646,22 @@ async function createNewDummyStreams(
           CFG.n_entries_per_stream_fragment
         ),
 
-        // Start earlier than given by starttime so that default ('now') works.
         // With Cortex' Blocks Storage system, we cannot go into the future
         // compared to "now" (from Cortex' system time point of view), but we
         // also cannot fall behind for more than 60 minutes, see
         // https://github.com/cortexproject/cortex/issues/2366. That means that
         // the wall time passed after DummyTimeseries initialization matters.
         // How exactly it matters depends on the synthetically created time
-        // difference between adjacent metric samples and the push rate. Before
-        // building a system that allows for precise control here (and a
-        // potential automatic correction), let the human operator of Looker
-        // use the one hour leeway that we have here in a 'smart' way. Let
-        // each DummyTimeseries start in the _center_ of the timewindow, i.e
-        // 30 minutes in the past compared to now.
-        starttime: ZonedDateTime.parse(CFG.log_start_time)
-          .minusMinutes(30)
-          .withNano(0),
+        // difference between adjacent metric samples and the push rate. Use
+        // the one hour leeway that we have here in a 'smart' way; let each
+        // DummyTimeseries start in the _center_ of the timewindow, i.e 30
+        // minutes in the past compared to "now", where "now" really is
+        // DummyTimeseries() initialization: use wall time as start time, so
+        // that when generating new streams during runtime (from cycle to
+        // cycle) that we don't keep going back to using the program's
+        // invocation time, as is done for logs (where Loki accepts incoming
+        // data from far in the past),
+        starttime: ZonedDateTime.now().minusMinutes(30).withNano(0),
         uniqueName: streamname,
         timediffMilliSeconds: CFG.metrics_time_increment_ms,
         labelset: labelset
