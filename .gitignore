@@ -58,6 +58,9 @@ packages/buildinfo/src/buildinfo.ts
 
 *.jwt
 
+# playwright output
+test/test-remote/uishot-*
+
 packages/app/.env
 packages/app/.env.client.development
 packages/app/.env.server.remote
