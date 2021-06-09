@@ -272,16 +272,25 @@ export class DummyTimeseries {
     const shiftIntoPastSeconds =
       nowSecondsSinceEpoch - lastSampleSecondsSinceEpoch;
 
-    // If we've fallen behind by more than 40 minutes, forward by 20 minutes.
-    // These numbers are adjusted to the 1-hour ingest window provided by
-    // Cortex with the blocks storage engine. TODO: expose these parameters to
-    // users via CLI -- might also be nice to set them rather gith, i.e. to
-    // leap forward by just a little bit when falled behind just a little bit.
-    if (shiftIntoPastSeconds > 40 * 60) {
-      log.info("MADE TIME ADJUSTMENT");
+    // If we've fallen behind by more than e.g. 40 minutes, forward by e.g. 20
+    // minutes (note that as of time of writing this comment, a DummyTimeseries
+    // starts 30 minutes behind wall time). These numbers are adjusted to the
+    // 1-hour ingest window provided by Cortex with the blocks storage engine.
+    // TODO: expose these parameters to users via CLI -- might also be nice to
+    // set them rather gith, i.e. to leap forward by just a little bit when
+    // falled behind just a little bit.
+    const maxLagMinutes = 35;
+    const leapForwardMinutes = 10;
+    if (shiftIntoPastSeconds > maxLagMinutes * 60) {
+      log.info("%s: leaped forward by %s minutes", this, leapForwardMinutes);
       this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
-        20 * 60 * 1000
+        leapForwardMinutes * 60 * 1000
       );
+    } else {
+      if (this.nFragmentsConsumed % 50 === 0) {
+        const m = shiftIntoPastSeconds / 60.0;
+        log.info("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
+      }
     }
   }
 
