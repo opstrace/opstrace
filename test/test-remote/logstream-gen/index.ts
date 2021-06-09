@@ -881,6 +881,11 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
         dummystreams,
         CFG.read_n_streams_only
       );
+      // For a small selection, show the names of the streams, for debuggability
+      if (CFG.read_n_streams_only < 10) {
+        const names = streamsToValidate.map(s => s.uniqueName).join(", ");
+        log.info("selected: %s", names);
+      }
     }
 
     if (CFG.max_concurrent_reads === 0) {
