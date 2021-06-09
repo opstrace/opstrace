@@ -16,7 +16,7 @@
 
 import { strict as assert } from "assert";
 
-import { ZonedDateTime } from "@js-joda/core";
+import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 import got, { Response as GotResponse } from "got";
 import Long from "long";
 
@@ -211,12 +211,49 @@ export class DummyTimeseries {
   }
 
   public currentTimeRFC3339Nano(): string {
+    // this is not the correct answer yet
     return this.millisSinceEpochOfLastGeneratedSample.toString(); // todo: ..
+  }
+
+  /**
+   * When the time of the last sample in the last generated fragment has fallen
+   * behind too far compared to the current wall time, this method can be used
+   * to make the first sample of the next fragment to be generated be closer
+   * to the current wall time again.
+   *
+   * Meant to be called between two calls to `generateAndGetNextFragment()`.
+   */
+  private bringCloserToWalltimeIfFallenBehind(): void {
+    const lastSampleSecondsSinceEpoch = this.millisSinceEpochOfLastGeneratedSample
+      .divide(1000)
+      .toNumber();
+
+    const nowSecondsSinceEpoch = ZonedDateTime.now(
+      ZoneOffset.UTC
+    ).toEpochSecond();
+
+    const shiftIntoPastSeconds =
+      nowSecondsSinceEpoch - lastSampleSecondsSinceEpoch;
+
+    // If we've fallen behind by more than 40 minutes, forward by 20 minutes.
+    // These numbers are adjusted to the 1-hour ingest window provided by
+    // Cortex with the blocks storage engine.
+    if (shiftIntoPastSeconds > 33 * 60) {
+      log.info("MADE TIME ADJUSTMENT");
+      this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
+        5 * 60 * 1000
+      );
+      //.subtract(this.timediffMilliseconds);
+    }
   }
 
   // no stop criterion: dummyseries is an infinite concept (definite start, it
   // indefinite end) -- the caller decides how many fragments to generate.
   private generateNextFragment() {
+    // TODO: this might get expensive, maybe use a monotonic time source
+    // to make sure that we call this only once per minute or so.
+    this.bringCloserToWalltimeIfFallenBehind();
+
     const t0 = mtime();
     const fragment = new TimeseriesFragment(
       this.labels,
