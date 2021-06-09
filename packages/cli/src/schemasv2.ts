@@ -92,10 +92,9 @@ export const ClusterConfigFileSchemaV2 = yup
       .of(yup.string())
       .default(["0.0.0.0/0"]),
 
-    // provider-dependent
-    // machine_type: yup.string().default("n1-standard-4"),
-    // region: yup.string().default("us-west2"),
-    // zone: yup.string().default("a"),
+    // Added later to V2, but is an optional parameter, therefore not strictly
+    // justifying a new schema version. Content and name need to be iterated on.
+    custom_dns_tld: yup.string().notRequired(),
 
     // requiring 'one of .... keys' is complicated:
     // https://github.com/jquense/yup/issues/248 --  validate this out-of-band,
