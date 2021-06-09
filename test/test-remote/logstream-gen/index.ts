@@ -89,6 +89,7 @@ interface CfgInterface {
   retry_post_max_delay_seconds: number;
   retry_post_jitter: number;
   skip_read: boolean;
+  read_n_streams_only: number;
 }
 
 let CFG: CfgInterface;
@@ -320,6 +321,24 @@ function parseCmdlineArgs() {
     default: false
   });
 
+  // This must not be used with `--skip-read`, but it can be used with
+  // --max-concurrent-reads. The `add_mutually_exclusive_group()` architecture
+  // of argparse is not really the right way to solve this, also see
+  // https://stackoverflow.com/a/60958103/145400 and
+  // https://bugs.python.org/issue10984. Simply do ad-hoch manual validation
+  // below. Caveat: the [ ... | ... ]- like notation in the auto-generated
+  // help text will not be entirely correct.
+  parser.add_argument("--read-n-streams-only", {
+    help:
+      "Maximum number of streams to read (validate) in the read phase of a " +
+      "write/read cycle. Use this if you want to read (validate) less data " +
+      "than what was written. The subset of streams is picked randomly at the " +
+      "beginning of each read phase. Default: 0 " +
+      "(read back everything that was written).",
+    type: "int",
+    default: 0
+  });
+
   parser.add_argument("--compressability", {
     help:
       "compressability characteristic of generated log messages " +
@@ -515,6 +534,20 @@ function parseCmdlineArgs() {
 
   if (CFG.retry_post_jitter <= 0 || CFG.retry_post_jitter >= 1) {
     log.error("retry_post_jitter must be larger than 0 and smaller than 1");
+    process.exit(1);
+  }
+
+  if (CFG.skip_read && CFG.read_n_streams_only !== 0) {
+    // see above, can't easily be covered by the mutually_exclusive_group
+    // technique; this here is a cheap but at least quite helpful validation.
+    log.error("skip_read must not be used with read_n_streams_only");
+    process.exit(1);
+  }
+
+  if (CFG.read_n_streams_only > CFG.n_concurrent_streams) {
+    log.error(
+      "read_n_streams_only must not be larger than n_concurrent_streams"
+    );
     process.exit(1);
   }
 
@@ -832,20 +865,38 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
   const vt0 = mtime();
 
   if (CFG.skip_read) {
-    log.info("skipping readout as of config option");
+    log.info("skipping readout as of --skip-read");
   } else {
+    let streamsToValidate: Array<DummyStream | DummyTimeseries>;
+
+    if (CFG.read_n_streams_only === 0) {
+      streamsToValidate = dummystreams;
+    } else {
+      log.info(
+        "randomly picking %s/%s streams for validation",
+        CFG.read_n_streams_only,
+        CFG.n_concurrent_streams
+      );
+      streamsToValidate = randomSampleFromArray(
+        dummystreams,
+        CFG.read_n_streams_only
+      );
+    }
+
     if (CFG.max_concurrent_reads === 0) {
-      for (const stream of dummystreams) {
-        validators.push(unthrottledFetchAndValidate(stream));
+      for (const s of streamsToValidate) {
+        validators.push(unthrottledFetchAndValidate(s));
       }
     } else {
       const semaphore = new Semaphore(CFG.max_concurrent_reads);
-      for (const stream of dummystreams) {
-        validators.push(throttledFetchAndValidate(semaphore, stream));
+      for (const s of streamsToValidate) {
+        validators.push(throttledFetchAndValidate(semaphore, s));
       }
     }
   }
 
+  // This code section must still be reached when using --skip-read, to
+  // generate a 'correct' report, indicating that nothing was read.
   let nEntriesReadArr;
   try {
     // each validator returns the number of entries read (and validated)
@@ -1606,6 +1657,29 @@ function chunkify<T>(a: T[], chunkSize: number): T[][] {
   for (let i = 0, len = a.length; i < len; i += chunkSize)
     R.push(a.slice(i, i + chunkSize));
   return R;
+}
+
+// Choose N elements from array. No repetition. Uniform distribution.
+// "A (partial) fisher-yates shuffle", non-destructive for the original array,
+// according to the author "Bergi". Kudos to
+// https://stackoverflow.com/a/19270021/145400 -- adjusted to TS from there. On
+// the other hand: I would so much love to rely on a well-established stdlib
+// method instead of an SO answer.
+// type `n` is bigint really just to make this an integer.
+function randomSampleFromArray(a: Array<any>, n: number) {
+  const result = new Array(n);
+  let len = a.length;
+  const taken = new Array(len);
+  if (n > len)
+    throw new Error(
+      "randomSampleFromArray(): more elements taken than available"
+    );
+  while (n--) {
+    const x = Math.floor(Math.random() * len);
+    result[n] = a[x in taken ? taken[x] : x];
+    taken[x] = --len in taken ? taken[len] : len;
+  }
+  return result;
 }
 
 // https://stackoverflow.com/a/6090287/145400
