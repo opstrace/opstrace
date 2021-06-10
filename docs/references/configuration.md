@@ -4,7 +4,7 @@ description: Parameter reference
 
 # Configuration
 
-When installing Opstrace, one has to provide a corresponding configuration document in YAML format.
+When creating a new Opstrace instance, one has to provide a corresponding configuration document in YAML format.
 A minimal variant might look like this:
 
 ```yaml
@@ -43,7 +43,7 @@ tenants:
 
 ### `node_count`
 
-The number of underlying nodes for Opstrace to use.
+The number of underlying nodes (VMs/machines) to use.
 
 *Value type:* number \(integer\)
 
@@ -133,7 +133,7 @@ Notes:
 
 Naming:
 
-* might be renamed in the future
+* might be renamed in the future (to `tenant_api_...`)
 
 ### `data_api_authorized_ip_ranges`
 
@@ -151,6 +151,28 @@ data_api_authorized_ip_ranges:
 ```
 
 Locking this down makes sense when setting `data_api_authentication_disabled` to `true`.
+
+### `custom_dns_fqdn`
+
+Specifies a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) (FQDN) to your Opstrace instance.
+
+Use this when you do not want your Opstrace instance to be reachable under `<instance_name>.opstrace.io`, but with a custom DNS name instead.
+
+*Default:* undefined
+
+*Value type:* string, in FQDN format (including the trailing dot)
+
+*Example:*
+
+```yaml
+custom_dns_fqdn:
+    - myopstrace.powerteam.com
+```
+
+If you install the Opstrace instance in your GCP account, this FQDN must correspond to a "managed zone" in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart)
+
+If you install the Opstrace instance in your AWS account, this FQDN must correspond to a “hosted zone” in AWS Route53 which you must set up prior to installing Opstrace. A guide can be found [here](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html)
+
 
 ### `cert_issuer`
 
