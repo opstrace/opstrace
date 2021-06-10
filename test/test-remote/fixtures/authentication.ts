@@ -28,7 +28,7 @@ type AuthenticationFixtures = {
   authCookies: Cookie[];
 };
 
-export const test = base.extend<{}, AuthenticationFixtures>({
+export const test = base.extend<Record<string, never>, AuthenticationFixtures>({
   authCookies: [
     async ({ browser }, use) => {
       log.info("suite setup");
