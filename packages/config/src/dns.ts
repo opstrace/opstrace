@@ -19,6 +19,8 @@ export type DnsConfig = {
   provider: "gcp" | "aws";
 };
 
+// Why not inject "custom DNS TLD" here as dnsName?
+// It ends up being written to the controller config.
 export const getDnsConfig = (provider: "gcp" | "aws"): DnsConfig => {
   return {
     dnsName: `opstrace.io.`,
