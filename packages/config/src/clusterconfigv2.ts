@@ -45,4 +45,5 @@ export interface ClusterConfigTypeV2 {
   node_count: number; // bigint to force this to integer?
   aws: AWSInfraConfigTypeV2 | undefined;
   gcp: GCPInfraConfigTypeV2 | undefined;
+  custom_dns_tld?: string;
 }
