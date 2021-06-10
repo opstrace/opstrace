@@ -206,14 +206,6 @@ export const hasSecretChanged = (
   desired: SecretType,
   existing: SecretType
 ): boolean => {
-  // If the secret has this annotation then it means it'll be updated by
-  // cert-manager and synchronized by kubed.
-  if (
-    desired.spec.metadata?.annotations &&
-    desired.spec.metadata?.annotations["kubed.appscode.com/sync"] !== undefined
-  ) {
-    return false;
-  }
   if (
     !isDeepStrictEqual(desired.spec.data, existing.spec.data) ||
     !isDeepStrictEqual(desired.spec.stringData, existing.spec.stringData)

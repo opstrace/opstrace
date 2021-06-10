@@ -13,7 +13,6 @@
   "externalDNS": "k8s.gcr.io/external-dns/external-dns:v0.7.4",
   "systemlogFluentd": "opstrace/systemlog-fluentd:fe6d0d84-dev",
   "grafana": "grafana/grafana:7.4.3-ubuntu",
-  "kubed": "appscode/kubed:v0.12.0",
   "kubeRBACProxy": "quay.io/brancz/kube-rbac-proxy:v0.8.0",
   "kubeStateMetrics": "quay.io/coreos/kube-state-metrics:v1.7.2",
   "localVolumeProvisioner": "quay.io/external_storage/local-volume-provisioner:v2.2.0",
