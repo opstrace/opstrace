@@ -125,12 +125,17 @@ export function* ensureAWSInfraExists(): Generator<
 
   // State-mutating API calls below.
   yield call([new ServiceLinkedRoleRes(ccfg.cluster_name), "setup"]);
-  yield call(ensureDNSExists, {
-    opstraceClusterName: ccfg.cluster_name,
-    dnsName: getDnsConfig(ccfg.cloud_provider).dnsName,
-    target: ccfg.cloud_provider,
-    dnsProvider: ccfg.cloud_provider
-  });
+
+  if (ccfg.custom_dns_tld === undefined) {
+    yield call(ensureDNSExists, {
+      opstraceClusterName: ccfg.cluster_name,
+      dnsName: getDnsConfig(ccfg.cloud_provider).dnsName,
+      target: ccfg.cloud_provider,
+      dnsProvider: ccfg.cloud_provider
+    });
+  } else {
+    log.info("skip DNS setup, custom DNS name set");
+  }
 
   const lokiBucketName = getBucketName({
     clusterName: ccfg.cluster_name,

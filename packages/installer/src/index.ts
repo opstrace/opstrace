@@ -172,7 +172,8 @@ function* createClusterCore() {
     //data_api_authn_pubkey_pem: ccfg.data_api_authn_pubkey_pem,
     tenant_api_authenticator_pubkey_set_json:
       ccfg.tenant_api_authenticator_pubkey_set_json,
-    disable_data_api_authentication: ccfg.data_api_authentication_disabled
+    disable_data_api_authentication: ccfg.data_api_authentication_disabled,
+    custom_dns_tld: ccfg.custom_dns_tld
   };
 
   // Fail fast if specified controller docker image cannot be found on docker
@@ -312,12 +313,18 @@ function* createClusterCore() {
   // `informers` is a so-called attached fork. Cancel this task.
   yield cancel(informers);
 
-  if (ccfg.cloud_provider == "aws") {
-    yield call(
-      waitUntilRoute53EntriesAreAvailable,
-      ccfg.cluster_name,
-      ccfg.tenants
-    );
+  // Is this needed with the custom DNS setup?
+  // if (ccfg.cloud_provider == "aws") {
+  //   yield call(
+  //     waitUntilRoute53EntriesAreAvailable,
+  //     ccfg.cluster_name,
+  //     ccfg.tenants
+  //   );
+  // }
+
+  let opstraceInstanceDNSname = `${ccfg.cluster_name}.opstrace.io`;
+  if (ccfg.custom_dns_tld !== undefined) {
+    opstraceInstanceDNSname = ccfg.custom_dns_tld;
   }
 
   yield call(
@@ -335,7 +342,7 @@ function* createClusterCore() {
   log.info(
     `create operation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
   );
-  log.info(`Log in here: https://${ccfg.cluster_name}.opstrace.io`);
+  log.info(`Log in here: https://${opstraceInstanceDNSname}`);
 }
 
 /**
@@ -344,7 +351,7 @@ function* createClusterCore() {
  * issues.
  */
 export async function waitUntilDataAPIEndpointsAreReachable(
-  opstraceClusterName: string,
+  opstraceInstanceDNSname: string,
   tenantNames: string[]
 ): Promise<void> {
   // key: unique url, value: corresponding tenant name
@@ -355,7 +362,8 @@ export async function waitUntilDataAPIEndpointsAreReachable(
   tnames.push("system");
 
   for (const tname of tnames) {
-    const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
+    //const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
+    const mid = `${tname}.${opstraceInstanceDNSname}`;
     // opstrace-prelaunch/issues/1570
     probeUrls[`https://cortex.${mid}/api/v1/labels`] = tname;
     probeUrls[`https://loki.${mid}/loki/api/v1/labels`] = tname;
@@ -376,7 +384,7 @@ export async function waitUntilDataAPIEndpointsAreReachable(
 }
 
 export async function waitUntilDDAPIEndpointsAreReachable(
-  opstraceClusterName: string,
+  opstraceInstanceDNSname: string,
   tenantNames: string[]
 ): Promise<void> {
   // Do not check for system tenant (not deployed for it).
@@ -384,7 +392,8 @@ export async function waitUntilDDAPIEndpointsAreReachable(
   const probeUrls: Dict<string> = {};
 
   for (const tname of tenantNames) {
-    const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
+    //const mid = `${tname}.${opstraceClusterName}.opstrace.io`;
+    const mid = `${tname}.${opstraceInstanceDNSname}`;
     // opstrace-prelaunch/issues/1570
     probeUrls[`https://dd.${mid}/api/v1/series`] = tname;
   }
@@ -404,7 +413,7 @@ export async function waitUntilDDAPIEndpointsAreReachable(
 }
 
 export async function waitUntilUIIsReachable(
-  opstraceClusterName: string,
+  opstraceInstanceDNSname: string,
   tenantNames: string[]
 ): Promise<void> {
   // key: unique url, value: corresponding tenant name
@@ -417,7 +426,7 @@ export async function waitUntilUIIsReachable(
   // As of today this actually checks for Grafana, HTTP 200 response with
   // body `<a href="/grafana/login">Found</a>.` is expected.
   for (const tname of tnames) {
-    probeUrls[`https://${tname}.${opstraceClusterName}.opstrace.io/`] = tname;
+    probeUrls[`https://${tname}.${opstraceInstanceDNSname}/`] = tname;
   }
 
   log.info(

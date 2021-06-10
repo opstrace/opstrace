@@ -177,14 +177,25 @@ export function* destroyAWSInfra(): Generator<
 
   const taskGroup4 = [];
 
-  const route53dnsname = `${destroyConfig.clusterName}.opstrace.io.`;
-  taskGroup4.push(yield fork(route53PurgeZonesForDnsName, route53dnsname));
-  taskGroup4.push(
-    yield fork(
-      [opstraceClient, opstraceClient.delete],
-      destroyConfig.clusterName
-    )
-  );
+  //const route53dnsname = `${destroyConfig.clusterName}.opstrace.io.`;
+
+  // Note(JP): I am confused.. why was this here? since having our DNS service
+  // I think any DELETE operation against route53 involving .opstrace.io.
+  // should not be called from within the uninstaller -- our users don't have
+  // the credentials anyway to delete things in our .opstrace.io. Or is this
+  // a sub-zone in _their_ route53? Probably that.
+
+  //taskGroup4.push(yield fork(route53PurgeZonesForDnsName, route53dnsname));
+
+  // TODO: when the Opstrace instance configuration document is not
+  // input for the destroy operation, we cannot 'know' that this instance
+  // was configured to use a custom DNS name. Can we peek into the cluster?
+  // taskGroup4.push(
+  //   yield fork(
+  //     [opstraceClient, opstraceClient.delete],
+  //     destroyConfig.clusterName
+  //   )
+  // );
 
   for (const bn of [
     lokiBucketName,
