@@ -42,7 +42,7 @@ import {
   removeRole,
   detachPolicy,
   getPolicy,
-  route53PurgeZonesForDnsName,
+  //route53PurgeZonesForDnsName,
   S3BucketRes,
   NatGatewayRes,
   VpcEndpointRes,
@@ -50,7 +50,7 @@ import {
   RouteTablePublicRes,
   RDSSubnetGroupRes
 } from "@opstrace/aws";
-import { DNSClient } from "@opstrace/dns";
+//import { DNSClient } from "@opstrace/dns";
 
 import { log, getBucketName } from "@opstrace/utils";
 
@@ -90,7 +90,7 @@ export function* destroyAWSInfra(): Generator<
   const EKSClusterRoleName = `${destroyConfig.clusterName}-eks-controlplane`;
   const CertManagerRoleName = `${destroyConfig.clusterName}-cert-manager`;
 
-  const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
+  // const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
 
   // Note(JP): fork "effect": is an "attached" fork (task). Use that for
   // implementing concurrently executing (and crash-looping) micro teardown
@@ -190,6 +190,7 @@ export function* destroyAWSInfra(): Generator<
   // TODO: when the Opstrace instance configuration document is not
   // input for the destroy operation, we cannot 'know' that this instance
   // was configured to use a custom DNS name. Can we peek into the cluster?
+
   // taskGroup4.push(
   //   yield fork(
   //     [opstraceClient, opstraceClient.delete],
