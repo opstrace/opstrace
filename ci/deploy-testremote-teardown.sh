@@ -214,7 +214,8 @@ fi
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-
+    # WIP, test only GCP
+    exit 0
     cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
         --log-level=debug --yes \
         --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
@@ -243,9 +244,12 @@ export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
 # use of insecure_skip_verify in the tests
 echo "--- checking cluster is using certificate issued by LetsEncrypt"
 
-retry_check_certificate loki.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
-retry_check_certificate cortex.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
-retry_check_certificate system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
+#export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
+export OPSTRACE_INSTANCE_DNS_NAME="opstracegcp.com"
+
+retry_check_certificate loki.system.${OPSTRACE_INSTANCE_DNS_NAME}:443
+retry_check_certificate cortex.system.${OPSTRACE_INSTANCE_DNS_NAME}:443
+retry_check_certificate system.${OPSTRACE_INSTANCE_DNS_NAME}:443
 
 echo "--- check if deployed docker images match docker-images.json"
 #
