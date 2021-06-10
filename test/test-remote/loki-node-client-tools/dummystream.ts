@@ -319,6 +319,10 @@ export class DummyStream {
     return timestampToRFC3339Nano(this.currentTime());
   }
 
+  public dropValidationInfo(): void {
+    // a noop so far, see DummyTimeseries for what this is about
+  }
+
   private timeofEntryN(N: bigint): bigint {
     // Get the time of the first entry (1) in the stream as an integer number
     // representing the number of nanoseconds passed since epoch.

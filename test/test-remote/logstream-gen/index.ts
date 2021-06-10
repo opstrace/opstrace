@@ -903,6 +903,15 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
         validators.push(throttledFetchAndValidate(semaphore, s));
       }
     }
+
+    log.info("drop 'validation info' for all streams");
+    for (const s of dummystreams) {
+      // Say there are 100000 streams and we just read/validated one of them,
+      // then there's a lot of data in memory (that would be needed to to do
+      // read validation for all the other streams, which we know we would not
+      // do). Assume that this is idempotent and fast.
+      s.dropValidationInfo();
+    }
   }
 
   // This code section must still be reached when using --skip-read, to

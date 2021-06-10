@@ -399,6 +399,10 @@ export class DummyTimeseries {
     return samplesValidated;
   }
 
+  public dropValidationInfo(): void {
+    this.postedFragmentsSinceLastValidate = [];
+  }
+
   private queryParamsForFragment(fragment: TimeseriesFragment) {
     // these query parameters implement the
     // instant-query-range-vector-selector-validation-method. also see ch1767
