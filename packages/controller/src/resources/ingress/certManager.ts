@@ -133,8 +133,9 @@ export function CertManagerResources(
     )
   );
 
-  // Create a certificate and kubed will synchronize it to
-  // tenant namespaces. https://github.com/jetstack/cert-manager/issues/494#issuecomment-382687271
+  // Create a certificate. The secret it generates is copied over to the tenant
+  // namespaces and application to avoid creating a certificate for each
+  // ingress.
   collection.add(
     new V1CertificateResource(
       {
