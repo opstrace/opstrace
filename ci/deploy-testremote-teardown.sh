@@ -246,7 +246,7 @@ retry_check_certificate loki.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate cortex.system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 retry_check_certificate system.${OPSTRACE_CLUSTER_NAME}.opstrace.io:443
 
-echo "+++ check if deployed docker images match docker-images.json"
+echo "--- check if deployed docker images match docker-images.json"
 #
 # The Buildkite pipeline before starting a step runs a git checkout. The
 # preamble step that sets up docker-images.json runs before the step that call

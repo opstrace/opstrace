@@ -1,3 +1,4 @@
+set +o xtrace
 #
 # https://kubernetes.io/docs/tasks/access-application-cluster/list-all-running-container-images/#list-all-container-images-in-all-namespaces
 #
@@ -8,7 +9,7 @@ tr -s '[[:space:]]' '\n' |\
 sort |\
 uniq)
 
-echo "list of images deployed to the cluster"
+echo "--- list of images deployed to the cluster"
 echo "${DEPLOYED_IMAGES}"
 echo
 
@@ -69,3 +70,5 @@ done
 if [ ${FAIL} -eq 1 ]; then
     exit 1
 fi
+
+set -o xtrace
