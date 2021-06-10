@@ -171,7 +171,7 @@ suite("test_ui_api", function () {
     // tenants does not have a distinct css class or property set, etc). Use
     // the suiteSetup() here to obtain valid authentication state, and then
     // reuse that state by sending all relevant cookies. Note that technically
-    // the test_ui.ts was/is meant to do only _actual_ browser interaction.
+    // the test_ui_api.ts was/is meant to do only _actual_ browser interaction.
     // This test here isn't doing that. It's in here for now for dependency
     // management: using the state created by setupSuite(). It's also in here
     // so that it can be replaced by the UI-based flow for creating the tenant!

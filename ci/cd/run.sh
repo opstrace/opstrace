@@ -30,4 +30,5 @@ make ci-cd-upgrade-cluster
 # for long running clusters.
 make test-remote || true
 make test-remote-looker
-make test-remote-ui
+make test-remote-ui-api
+make test-remote-browser

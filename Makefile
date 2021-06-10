@@ -612,7 +612,7 @@ test-remote: kubectl-cluster-info
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		yarn run mocha --grep test_ui --invert
+		yarn run mocha --grep test_ui_api --invert
 
 .PHONY: test-remote-looker
 test-remote-looker:
@@ -620,16 +620,16 @@ test-remote-looker:
 
 # Note(JP): dirty duplication. This is supposed to be the _exact_ same as the
 # test-remote target abvove, but instead of
-#    yarn run mocha --grep test_ui --invert
+#    yarn run mocha --grep test_ui_api --invert
 # do
 #    DEBUG=pw:api
-#    yarn run mocha --grep test_ui
-# -> `make test-remote` runs all tests except those that have `test_ui` in their
-#     suite/test name. `make test-remote-ui` runs all tests that match.
+#    yarn run mocha --grep test_ui_api
+# -> `make test-remote` runs all tests except those that have `test_ui_api` in their
+#     suite/test name. `make test-remote-ui-api` runs all tests that match.
 #     Note: `--invert, -i  Inverts --grep and --fgrep matches`.
-.PHONY: test-remote-ui
-test-remote-ui: kubectl-cluster-info
-	echo "--- running test-remote-ui"
+.PHONY: test-remote-ui-api
+test-remote-ui-api: kubectl-cluster-info
+	echo "--- running test-remote-ui-api"
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	docker run --tty --interactive --rm \
 		--net=host \
@@ -658,7 +658,42 @@ test-remote-ui: kubectl-cluster-info
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		yarn run mocha --grep test_ui
+		yarn run mocha --grep test_ui_api
+
+
+# This runs our set of browser based tests using the Playwright Test Runner
+.PHONY: test-remote-browser
+test-remote-browser: kubectl-cluster-info
+	echo "--- running test-remote-browser"
+	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
+	docker run --tty --interactive --rm \
+		--net=host \
+		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
+		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
+		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
+		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
+		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
+		-v /build/test/test-remote/node_modules \
+		-v /tmp:/tmp \
+		-u $(shell id -u):${DOCKER_GID_HOST} \
+		-v /etc/passwd:/etc/passwd \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-e KUBECONFIG=/kubeconfig/config \
+		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
+		-e OPSTRACE_CLUSTER_NAME \
+		-e OPSTRACE_CLOUD_PROVIDER \
+		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=${TENANT_DEFAULT_API_TOKEN_FILEPATH}\
+		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
+		-e TENANT_RND_NAME_FOR_TESTING_ADD_TENANT \
+		-e TENANT_RND_AUTHTOKEN \
+		-e AWS_ACCESS_KEY_ID \
+		-e AWS_SECRET_ACCESS_KEY \
+		-e DEBUG=pw:api \
+		--dns $(shell ci/dns_cache.sh) \
+		--workdir /build/test/test-remote \
+		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
+		yarn playwright test --browser=all
 
 
 # Used by CI:
