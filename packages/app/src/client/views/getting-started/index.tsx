@@ -210,7 +210,9 @@ const GettingStarted = () => {
   return (
     <>
       <Box pt={1} pb={4}>
-        <Typography variant="h1">Getting Started</Typography>
+        <Typography variant="h1" data-pw="gettingStarted">
+          Getting Started
+        </Typography>
       </Box>
       <Grid container spacing={3}>
         {content}

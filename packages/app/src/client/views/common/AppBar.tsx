@@ -96,6 +96,7 @@ export default function AppBar() {
             <Box ml={1}>
               <Button
                 className={classes.tenantButton}
+                data-pw-tenant={selectedTenant.name}
                 color="inherit"
                 size="small"
                 endIcon={<ChevronDown />}
