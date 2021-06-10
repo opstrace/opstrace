@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts --quiet",
     "mocha": "mocha",
+    "playwright": "playwright",
     "tsc": "tsc -b",
     "clean": "rimraf _tscbuild"
   },
@@ -49,6 +50,7 @@
     "winston": "^3.3.3"
   },
   "optionalDependencies": {
-    "playwright": "1.12.0"
+    "playwright": "1.12.0",
+    "@playwright/test": "1.12.0"
   }
 }

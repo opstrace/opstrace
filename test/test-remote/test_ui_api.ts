@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,9 @@ import {
   CLUSTER_BASE_URL,
   CLUSTER_NAME,
   TENANT_SYSTEM_CORTEX_API_BASE_URL,
-  TEST_REMOTE_ARTIFACT_DIRECTORY
+  TEST_REMOTE_ARTIFACT_DIRECTORY,
+  CI_LOGIN_EMAIL,
+  CI_LOGIN_PASSWORD
 } from "./testutils";
 
 // Set debug mode for playwright, before importing it
@@ -107,8 +109,8 @@ async function performLoginFlow(br: Browser) {
   // Wait for CI-specific username/pw login form to appear
   await page.waitForSelector("text=Don't remember your password?");
 
-  await page.fill("css=input[type=email]", "ci-test@opstrace.com");
-  await page.fill("css=input[type=password]", "This-is-not-a-secret!");
+  await page.fill("css=input[type=email]", CI_LOGIN_EMAIL);
+  await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
 
   await page.screenshot({
     path: artipath("uishot-auth0-login-page.png")

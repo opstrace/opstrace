@@ -44,7 +44,8 @@ WORKDIR /build/test/test-remote
 RUN cat package.json tsconfig.json && \
     echo /build: && ls -al /build/* && \
     yarn install --frozen-lockfile && \
-    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn add playwright --frozen-lockfile
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn add playwright --frozen-lockfile && \
+    yarn add @playwright/test --frozen-lockfile
 
 WORKDIR /build
 # This ENV is needed for both browser installing and when running playwright

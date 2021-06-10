@@ -90,6 +90,9 @@ export let TENANT_SYSTEM_CORTEX_API_BASE_URL: string;
 export let TENANT_SYSTEM_LOKI_API_BASE_URL: string;
 export let TENANT_SYSTEM_API_TOKEN_FILEPATH: string | undefined;
 
+export const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
+export const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
+
 let globalTestSuiteSetupPerformed = false;
 export function globalTestSuiteSetupOnce() {
   log.info("globalTestSuiteSetupOnce()");

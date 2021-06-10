@@ -27,7 +27,9 @@
     "loki-node-client-tools/resources/*.json",
     "loki-node-client-tools/*.ts",
     "prom-node-client-tools/resources/*.json",
-    "prom-node-client-tools/*.ts"
+    "prom-node-client-tools/*.ts",
+    "tests/*.ts",
+    "playwright.config.ts"
   ],
   "references": [
     { "path": "../../lib/utils" },
