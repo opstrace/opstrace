@@ -61,8 +61,8 @@ import {
 import { rootReducer } from "./reducer";
 import { ensureGCPInfraExists } from "./gcp";
 import {
-  ensureAWSInfraExists,
-  waitUntilRoute53EntriesAreAvailable
+  ensureAWSInfraExists
+  //waitUntilRoute53EntriesAreAvailable
 } from "./aws";
 import { ClusterCreateTimeoutError } from "./errors";
 import { runInformers } from "./informers";
