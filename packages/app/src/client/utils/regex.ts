@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line no-useless-escape
-export const subdomainValidator = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/;
+// note: webkit doesn't support "look behind" syntax which means can't use the preferred regex for this
+// const subdomainValidatorWithLookBehind = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/;
+export const subdomainValidator = /^[A-Za-z0-9][-A-Za-z0-9]{0,61}[A-Za-z0-9]$/;
