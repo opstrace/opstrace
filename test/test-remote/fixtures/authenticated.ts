@@ -25,12 +25,16 @@ import {
 } from "../testutils";
 
 type AuthenticationFixtures = {
+  user: { email: string };
   authCookies: Cookie[];
 };
 
 // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
 export const test = base
   .extend<Record<string, never>, AuthenticationFixtures>({
+    user: {
+      email: CI_LOGIN_EMAIL
+    },
     authCookies: [
       async ({ browser }, use) => {
         log.info("suite setup");
