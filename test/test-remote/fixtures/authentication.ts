@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { test as base } from "@playwright/test";
+import { test as base, Cookie } from "@playwright/test";
 
 import {
   log,
@@ -28,6 +28,7 @@ type AuthenticationFixtures = {
   authCookies: Cookie[];
 };
 
+// @ts-ignore
 export const test = base.extend<Record<string, never>, AuthenticationFixtures>({
   authCookies: [
     async ({ browser }, use) => {
