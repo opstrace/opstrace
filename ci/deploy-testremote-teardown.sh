@@ -68,9 +68,12 @@ source secrets/opstrace_dockerhub_creds.sh
 # https://github.com/opstrace/opstrace/pull/128#issuecomment-742519078 and
 # https://stackoverflow.com/q/5189913/145400.
 #OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb ci-shard-ccc)
-OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-ddd ci-shard-eee ci-shard-fff)
-echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
-export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
+#OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-ddd ci-shard-eee ci-shard-fff)
+#echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
+#export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
+
+# tmp state of affairs, for staying within vast-pad-240918
+export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-dev-dns-service.json
 
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
