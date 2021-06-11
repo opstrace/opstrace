@@ -67,6 +67,7 @@ export function* runInformers(
       k8s.V1CertificateResource.startInformer(kubeConfig, channel),
       k8s.V1ClusterissuerResource.startInformer(kubeConfig, channel),
       k8s.V1IssuerResource.startInformer(kubeConfig, channel),
+      k8s.V1Alpha1CortexResource.startInformer(kubeConfig, channel),
       graphqlIntegrations.startInformer(channel)
     ];
 
