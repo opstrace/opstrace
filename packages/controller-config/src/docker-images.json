@@ -1,4 +1,5 @@
 {
+  "nginx": "nginx:stable",
   "addonResizer": "k8s.gcr.io/addon-resizer:1.8.4",
   "certManagerCAInjector": "quay.io/jetstack/cert-manager-cainjector:v1.2.0",
   "certManagerController": "quay.io/jetstack/cert-manager-controller:v1.2.0",
@@ -16,7 +17,7 @@
   "kubeRBACProxy": "quay.io/brancz/kube-rbac-proxy:v0.8.0",
   "kubeStateMetrics": "quay.io/coreos/kube-state-metrics:v1.7.2",
   "localVolumeProvisioner": "quay.io/external_storage/local-volume-provisioner:v2.2.0",
-  "loki": "grafana/loki:2.2.0",
+  "loki": "grafana/loki:2.2.1",
   "lokiApiProxy": "opstrace/loki-api:794cb9445bde0fa5e920d21eed093306520fc3c3",
   "memcached": "memcached:1.6.9-alpine",
   "memcachedExporter": "prom/memcached-exporter:v0.6.0",
