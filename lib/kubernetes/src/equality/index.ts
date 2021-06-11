@@ -39,7 +39,10 @@ import {
 } from "..";
 
 import { logDifference } from "./general";
-import { V1CertificateResource } from "../custom-resources";
+import {
+  V1Alpha1CortexResource,
+  V1CertificateResource
+} from "../custom-resources";
 import { isCertificateEqual } from "./Certificate";
 import { log } from "@opstrace/utils";
 
@@ -377,6 +380,57 @@ export const hasCustomResourceDefinitionChanged = (
     // like the CRD schema and it'll stall for a few seconds for each CRD it
     // compares
     log.debug(`CRD ${desired.spec.metadata?.name} requires update`);
+    return true;
+  }
+
+  return false;
+};
+
+export const hasCortexSpecChanged = (
+  desired: V1Alpha1CortexResource,
+  existing: V1Alpha1CortexResource
+): boolean => {
+  if (
+    !isDeepStrictEqual(
+      desired.spec.spec?.alertmanager_spec,
+      existing.spec.spec?.alertmanager_spec
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.compactor_spec,
+      existing.spec.spec?.compactor_spec
+    ) ||
+    !isDeepStrictEqual(desired.spec.spec?.config, existing.spec.spec?.config) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.distributor_spec,
+      existing.spec.spec?.distributor_spec
+    ) ||
+    !isDeepStrictEqual(desired.spec.spec?.image, existing.spec.spec?.image) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.ingester_spec,
+      existing.spec.spec?.ingester_spec
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.memcached,
+      existing.spec.spec?.memcached
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.querier_spec,
+      existing.spec.spec?.querier_spec
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.query_frontend_spec,
+      existing.spec.spec?.query_frontend_spec
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.ruler_spec,
+      existing.spec.spec?.ruler_spec
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.spec?.store_gateway_spec,
+      existing.spec.spec?.store_gateway_spec
+    )
+  ) {
+    logDifference("", desired.spec.spec, existing.spec.spec);
     return true;
   }
 

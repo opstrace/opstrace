@@ -50,12 +50,11 @@ import {
   V1ChallengeReducer,
   V1ClusterissuerReducer,
   V1IssuerReducer,
-  V1OrderReducer
+  V1OrderReducer,
+  V1Alpha1CortexReducer
 } from "@opstrace/kubernetes";
 
-import {
-  integrations
-} from "./reducers/graphql";
+import { integrations } from "./reducers/graphql";
 
 export const rootReducers = {
   tenants: tenantReducer,
@@ -92,12 +91,13 @@ export const rootReducers = {
       Challenges: V1ChallengeReducer,
       ClusterIssuers: V1ClusterissuerReducer,
       Issuers: V1IssuerReducer,
-      Orders: V1OrderReducer
+      Orders: V1OrderReducer,
+      Cortices: V1Alpha1CortexReducer
     })
   }),
   graphql: combineReducers({
     Integrations: integrations.reducer
-  }),
+  })
 };
 
 export const rootReducer = combineReducers(rootReducers);
