@@ -323,8 +323,8 @@ function* createClusterCore() {
   // }
 
   let opstraceInstanceDNSname = `${ccfg.cluster_name}.opstrace.io`;
-  if (ccfg.custom_dns_tld !== undefined) {
-    opstraceInstanceDNSname = ccfg.custom_dns_tld;
+  if (ccfg.custom_dns_fqdn !== undefined) {
+    opstraceInstanceDNSname = ccfg.custom_dns_fqdn;
   }
 
   yield call(
