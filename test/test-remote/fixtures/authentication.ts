@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { test as base, Cookie } from "@playwright/test";
+import { test as base, Cookie, Page } from "@playwright/test";
 
 import {
   log,
@@ -29,7 +29,7 @@ type AuthenticationFixtures = {
 };
 
 // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-export const test = base.extend<Record<string, never>, AuthenticationFixtures>({
+let test = base.extend<Record<string, never>, AuthenticationFixtures>({
   authCookies: [
     async ({ browser }, use) => {
       log.info("suite setup");
@@ -72,3 +72,14 @@ export const test = base.extend<Record<string, never>, AuthenticationFixtures>({
     { scope: "worker" }
   ]
 });
+
+test = test.extend<{ loggedInPage: Page }>({
+  loggedInPage: async ({ page, context, authCookies }, use) => {
+    context.addCookies(authCookies);
+    await page.goto(CLUSTER_BASE_URL);
+    await page.waitForSelector("text=Getting Started");
+    await use(page);
+  }
+});
+
+export { test };

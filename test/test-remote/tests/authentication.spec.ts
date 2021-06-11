@@ -17,20 +17,14 @@
 import { test } from "../fixtures/authentication";
 import { expect } from "@playwright/test";
 
-import { CLUSTER_BASE_URL, CI_LOGIN_EMAIL } from "../testutils";
+import { CI_LOGIN_EMAIL } from "../testutils";
 
 test.describe("auth0 authentication", () => {
-  test.beforeEach(async ({ context, page, authCookies }) => {
-    context.addCookies(authCookies);
-    await page.goto(CLUSTER_BASE_URL);
-    await page.waitForSelector("text=Getting Started");
-  });
-
-  test("should see homepage", async ({ page }) => {
+  test("should see homepage", async ({ loggedInPage: page }) => {
     expect(await page.isVisible("text=Getting Started")).toBeTruthy();
   });
 
-  test("should have self in user list", async ({ page }) => {
+  test("should have self in user list", async ({ loggedInPage: page }) => {
     await page.click("text=Users");
     expect(await page.isVisible(`text=${CI_LOGIN_EMAIL}`)).toBeTruthy();
   });
