@@ -50,13 +50,30 @@ export function LokiResources(
   const { infrastructureName, target, region, gcp } = getControllerConfig(
     state
   );
-  const bucketName = getBucketName({
+  const dataBucketName = getBucketName({
     clusterName: infrastructureName,
     suffix: "loki"
+  });
+  const configBucketName = getBucketName({
+    clusterName: infrastructureName,
+    suffix: "loki-config"
   });
   const clusterName = infrastructureName;
 
   const deploymentConfig = {
+    ruler: {
+      resources: {},
+      replicas: select(getNodeCount(state), [
+        {
+          "<=": 5,
+          choose: 2
+        },
+        {
+          "<=": Infinity,
+          choose: 3
+        }
+      ])
+    },
     ingester: {
       resources: {
         //   limits: {
@@ -255,6 +272,27 @@ export function LokiResources(
       working_directory: "/loki/compactor",
       shared_store: target === "gcp" ? "gcs" : "s3"
     },
+    ruler: {
+      enable_api: true,
+      alertmanager_url: `http://alertmanager.cortex.svc.cluster.local/alertmanager/`,
+      enable_sharding: true,
+      enable_alertmanager_v2: true,
+      rule_path: "/tmp/rules",
+      ring: {
+        kvstore: {
+          store: "memberlist"
+        }
+      },
+      storage: {
+        type: target === "gcp" ? "gcs" : "s3",
+        gcs: {
+          bucket_name: configBucketName
+        },
+        s3: {
+          s3: `s3://${region}/${configBucketName}`
+        }
+      }
+    },
     storage_config: {
       boltdb_shipper: {
         active_index_directory: "/loki/index",
@@ -262,10 +300,10 @@ export function LokiResources(
         cache_location: "/loki/boltdb-cache"
       },
       gcs: {
-        bucket_name: bucketName
+        bucket_name: dataBucketName
       },
       aws: {
-        s3: `s3://${region}/${bucketName}`
+        s3: `s3://${region}/${dataBucketName}`
       },
       index_queries_cache_config: {
         memcached_client: {
@@ -1021,6 +1059,162 @@ export function LokiResources(
               ]
             }
           }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          labels: {
+            job: `${namespace}.ruler`,
+            name: "ruler"
+          },
+          name: "ruler",
+          namespace
+        },
+        spec: {
+          ports: [
+            {
+              name: "ruler-http-metrics",
+              port: 1080,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              targetPort: 1080 as any
+            },
+            {
+              name: "ruler-grpc",
+              port: 9095,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              targetPort: 9095 as any
+            }
+          ],
+          selector: {
+            name: "ruler"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new StatefulSet(
+      {
+        apiVersion: "apps/v1",
+        kind: "StatefulSet",
+        metadata: {
+          name: "ruler",
+          namespace
+        },
+        spec: {
+          serviceName: "ruler",
+          replicas: deploymentConfig.ruler.replicas,
+          revisionHistoryLimit: 10,
+          podManagementPolicy: "Parallel",
+          selector: {
+            matchLabels: {
+              name: "ruler",
+              memberlist: "loki-gossip-ring"
+            }
+          },
+          template: {
+            metadata: {
+              labels: {
+                name: "ruler",
+                memberlist: "loki-gossip-ring"
+              }
+            },
+            spec: {
+              affinity: withPodAntiAffinityRequired({
+                name: "ruler"
+              }),
+              containers: [
+                {
+                  args: ["-config.file=/etc/loki/config.yaml", "-target=ruler"],
+
+                  env: deploymentConfig.env,
+                  image: DockerImages.loki,
+                  imagePullPolicy: "IfNotPresent",
+                  name: "ruler",
+                  ports: [
+                    {
+                      containerPort: 1080,
+                      name: "http-metrics"
+                    },
+                    {
+                      containerPort: 9095,
+                      name: "grpc"
+                    }
+                  ],
+
+                  readinessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      port: 1080 as any,
+                      scheme: "HTTP"
+                    },
+                    initialDelaySeconds: 45,
+                    timeoutSeconds: 1,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 3
+                  },
+
+                  resources: deploymentConfig.ruler.resources,
+                  volumeMounts: [
+                    {
+                      mountPath: "/etc/loki",
+                      name: "loki"
+                    },
+                    {
+                      name: "ruler-data",
+                      mountPath: "/data"
+                    }
+                  ]
+                }
+              ],
+              serviceAccountName: serviceAccountName,
+              securityContext: {
+                fsGroup: 2000
+              },
+              volumes: [
+                {
+                  configMap: {
+                    name: "loki"
+                  },
+                  name: "loki"
+                },
+                {
+                  name: "ruler-data",
+                  persistentVolumeClaim: {
+                    claimName: "ruler-data"
+                  }
+                }
+              ]
+            }
+          },
+          volumeClaimTemplates: [
+            {
+              metadata: {
+                name: "ruler-data"
+              },
+              spec: {
+                storageClassName: "pd-ssd",
+                accessModes: ["ReadWriteOnce"],
+                resources: {
+                  requests: {
+                    storage: "10Gi"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       kubeConfig
