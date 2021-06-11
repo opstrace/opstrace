@@ -136,6 +136,10 @@ export function* ensureAWSInfraExists(): Generator<
     clusterName: ccfg.cluster_name,
     suffix: "loki"
   });
+  const lokiConfigBucketName = getBucketName({
+    clusterName: ccfg.cluster_name,
+    suffix: "loki-config"
+  });
   const cortexDataBucketName = getBucketName({
     clusterName: ccfg.cluster_name,
     suffix: "cortex"
@@ -153,6 +157,17 @@ export function* ensureAWSInfraExists(): Generator<
         ccfg.cluster_name,
         lokiBucketName,
         ccfg.log_retention_days,
+        ccfg.tenants
+      ),
+      "setup"
+    ])
+  );
+  tasks.push(
+    yield fork([
+      new S3BucketRes(
+        ccfg.cluster_name,
+        lokiConfigBucketName,
+        0, // no TTL this bucket: configs should not expire
         ccfg.tenants
       ),
       "setup"
@@ -429,6 +444,33 @@ export function* ensureAWSInfraExists(): Generator<
     })
   });
 
+  // Loki Config Policy
+  const LokiConfigS3PolicyName = `${lokiConfigBucketName}-s3`;
+  log.info(`Ensuring ${LokiConfigS3PolicyName} policy exists`);
+  const lokiConfigBucketPolicy: AWS.IAM.Policy = yield call(
+    ensurePolicyExists,
+    {
+      PolicyName: LokiConfigS3PolicyName,
+      PolicyDocument: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Sid: "ListObjectsInBucket",
+            Effect: "Allow",
+            Action: ["s3:ListBucket"],
+            Resource: [`arn:aws:s3:::${lokiConfigBucketName}`]
+          },
+          {
+            Sid: "AllObjectActions",
+            Effect: "Allow",
+            Action: "s3:*Object",
+            Resource: [`arn:aws:s3:::${lokiConfigBucketName}/*`]
+          }
+        ]
+      })
+    }
+  );
+
   // Cortex Data Bucket Policy
   const CortexDataS3PolicyName = `${cortexDataBucketName}-s3`;
   log.info(`Ensuring ${CortexDataS3PolicyName} policy exists`);
@@ -555,6 +597,10 @@ export function* ensureAWSInfraExists(): Generator<
     },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: route53Policy.Arn! },
     { RoleName: EKSWorkerNodesRoleName, PolicyArn: lokiBucketPolicy.Arn! },
+    {
+      RoleName: EKSWorkerNodesRoleName,
+      PolicyArn: lokiConfigBucketPolicy.Arn!
+    },
     {
       RoleName: EKSWorkerNodesRoleName,
       PolicyArn: cortexDataBucketPolicy.Arn!

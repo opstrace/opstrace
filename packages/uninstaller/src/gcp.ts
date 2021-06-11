@@ -90,6 +90,10 @@ export function* destroyGCPInfra(): Generator<
     clusterName: destroyConfig.clusterName,
     suffix: "loki"
   });
+  const lokiConfigBucketName = getBucketName({
+    clusterName: destroyConfig.clusterName,
+    suffix: "loki-config"
+  });
   const cortexDataBucketName = getBucketName({
     clusterName: destroyConfig.clusterName,
     suffix: "cortex"
@@ -141,6 +145,13 @@ export function* destroyGCPInfra(): Generator<
   });
 
   log.info(
+    `Setting Bucket Lifecycle on ${lokiConfigBucketName} to delete after 0 days`
+  );
+  yield call(emptyBucket, {
+    bucketName: lokiConfigBucketName
+  });
+
+  log.info(
     `Setting Bucket Lifecycle on ${cortexDataBucketName} to delete after 0 days`
   );
   yield call(emptyBucket, {
@@ -158,8 +169,9 @@ export function* destroyGCPInfra(): Generator<
     "GCS has been instructed to wipe the data buckets behind the scenes, " +
       "asynchronously. This process may take minutes, hours or days. After " +
       "completion, three empty GCS buckets will be left behind which you " +
-      "have to delete manually: %s, %s, %s",
+      "have to delete manually: %s, %s, %s, %s",
     lokiBucketName,
+    lokiConfigBucketName,
     cortexDataBucketName,
     cortexConfigBucketName
   );

@@ -91,6 +91,15 @@ export function* ensureGCPInfraExists(
   yield call(ensureBucketExists, {
     bucketName: getBucketName({
       clusterName: ccfg.cluster_name,
+      suffix: "loki-config"
+    }),
+    retentionDays: null, // no TTL this bucket: configs should not expire
+    region: ccfg.gcp.region
+  });
+
+  yield call(ensureBucketExists, {
+    bucketName: getBucketName({
+      clusterName: ccfg.cluster_name,
       suffix: "cortex-config"
     }),
     retentionDays: null, // no TTL this bucket: configs should not expire
