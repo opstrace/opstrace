@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import { test } from "../fixtures/authentication";
+import { test } from "../fixtures/authenticated";
 import { expect } from "@playwright/test";
 
 import { CI_LOGIN_EMAIL } from "../testutils";
 
-test.describe("auth0 authentication", () => {
-  test("should see homepage", async ({ loggedInPage: page }) => {
+test.describe("after auth0 authentication", () => {
+  test("user should see homepage", async ({ loggedInPage: page }) => {
     expect(await page.isVisible("text=Getting Started")).toBeTruthy();
   });
 
-  test("should have self in user list", async ({ loggedInPage: page }) => {
+  test("user should see own email in user list", async ({
+    loggedInPage: page
+  }) => {
     await page.click("text=Users");
     expect(await page.isVisible(`text=${CI_LOGIN_EMAIL}`)).toBeTruthy();
   });
