@@ -28,3 +28,5 @@ export * from "./kube-prometheus/prometheusrule";
 export * from "./kube-prometheus/servicemonitor";
 export * from "./kube-prometheus/probe";
 export * from "./kube-prometheus/thanosruler";
+
+export * from "./cortex-operator/cortices";
