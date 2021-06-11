@@ -429,7 +429,7 @@ function parseCmdlineArgs() {
   parser.add_argument("--retry-post-min-delay-seconds", {
     help: "Minimal delay between POST request retries, in seconds",
     type: "int",
-    default: 2
+    default: 3
   });
 
   parser.add_argument("--retry-post-max-delay-seconds", {
@@ -803,13 +803,14 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
     megaPayloadBytesSentPerSec.toFixed(2)
   );
 
-  for (const stream of streams) {
-    log.debug(
-      "Stats of last-consumed fragment of stream %s: %s",
-      stream.uniqueName,
-      stream.lastFragmentConsumed?.stats //currentTimeRFC3339Nano()
-    );
-  }
+  // Dangerous iteration for 10^6 streams?
+  // for (const stream of streams) {
+  //   log.debug(
+  //     "Stats of last-consumed fragment of stream %s: %s",
+  //     stream.uniqueName,
+  //     stream.lastFragmentConsumed?.stats //currentTimeRFC3339Nano()
+  //   );
+  // }
 
   return stats;
 }
@@ -882,10 +883,12 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
         CFG.read_n_streams_only,
         CFG.n_concurrent_streams
       );
+
       streamsToValidate = randomSampleFromArray(
         dummystreams,
         CFG.read_n_streams_only
       );
+
       // For a small selection, show the names of the streams, for debuggability
       if (CFG.read_n_streams_only < 10) {
         const names = streamsToValidate.map(s => s.uniqueName).join(", ");
@@ -1338,7 +1341,12 @@ async function customPostWithRetryOrError(
     }
 
     if (response.statusCode === 429) {
-      log.info(`429 resp, sleep 2, body[:200]: ${response.body.slice(0, 200)}`);
+      log.info(
+        `POST ${pr}: 429 resp, sleep 2, body[:200]: ${response.body.slice(
+          0,
+          200
+        )}`
+      );
       // Move on to next attempt.
       continue;
     }
@@ -1355,7 +1363,8 @@ async function customPostWithRetryOrError(
         if (response.body.includes("out of order sample")) {
           if (previousPushSuccessAmbiguous) {
             log.warning(
-              "saw 'out of order' error but do not treat fatal as of previous ambiguous push result"
+              "POST %s: saw 'out of order' error but do not treat fatal as of previous ambiguous push result",
+              pr
             );
             // Treat this push message as successfully inserted.
             markPushMessageAsSuccessfullySent(pr);
@@ -1364,7 +1373,7 @@ async function customPostWithRetryOrError(
         }
       }
 
-      throw new Error("Bad HTTP request (see log above)");
+      throw new Error(`POST ${pr}: Bad HTTP request (see log above)`);
     }
 
     if (response.statusCode === 500) {
@@ -1375,13 +1384,14 @@ async function customPostWithRetryOrError(
       if (response.body.includes("DeadlineExceeded")) {
         previousPushSuccessAmbiguous = true;
         log.warning(
-          "previousPushSuccessAmbiguous: set as of 500/DeadlineExceeded response, next 'out or order' error not fatal"
+          "POST %s: previousPushSuccessAmbiguous: set as of 500/DeadlineExceeded response, next 'out or order' error not fatal",
+          pr
         );
       }
     }
 
     // All other HTTP responses: treat as transient problems
-    log.info("Treat as transient problem, retry after sleep");
+    log.info("POST %s: Treat as transient problem, retry after sleep", pr);
   }
 }
 
@@ -1740,7 +1750,6 @@ function chunkify<T>(a: T[], chunkSize: number): T[][] {
 // https://stackoverflow.com/a/19270021/145400 -- adjusted to TS from there. On
 // the other hand: I would so much love to rely on a well-established stdlib
 // method instead of an SO answer.
-// type `n` is bigint really just to make this an integer.
 function randomSampleFromArray(a: Array<any>, n: number) {
   const result = new Array(n);
   let len = a.length;
@@ -1756,6 +1765,39 @@ function randomSampleFromArray(a: Array<any>, n: number) {
   }
   return result;
 }
+
+// Try to do a better job for a small selection (e.g. 1) of a larger array
+// (e.g. 10^6) -- kudos to https://stackoverflow.com/a/61078260/145400
+// modified: don't mutate original array
+// function randomSampleFromArray2(pool: Array<any>, k: number) {
+//   const n = pool.length;
+
+//   const destructive = false;
+
+//   if (k < 0 || k > n)
+//     throw new RangeError("Sample larger than population or is negative");
+
+//   if (
+//     destructive ||
+//     n <=
+//       (k <= 5 ? 21 : 21 + Math.pow(4, Math.ceil(Math.log(k * 3) / Math.log(4))))
+//   ) {
+//     if (!destructive) pool = Array.prototype.slice.call(pool);
+//     for (let i = 0; i < k; i++) {
+//       // invariant: non-selected at [i,n)
+//       const j = (i + Math.random() * (n - i)) | 0;
+//       const x = pool[i];
+//       pool[i] = pool[j];
+//       pool[j] = x;
+//     }
+//     pool.length = k; // truncate
+//     return pool;
+//   } else {
+//     const selected = new Set();
+//     while (selected.add((Math.random() * n) | 0).size < k) {}
+//     return Array.prototype.map.call(selected, i => pool[i]);
+//   }
+// }
 
 // https://stackoverflow.com/a/6090287/145400
 if (require.main === module) {
