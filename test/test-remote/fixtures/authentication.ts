@@ -28,7 +28,7 @@ type AuthenticationFixtures = {
   authCookies: Cookie[];
 };
 
-// @ts-ignore
+// @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
 export const test = base.extend<Record<string, never>, AuthenticationFixtures>({
   authCookies: [
     async ({ browser }, use) => {
