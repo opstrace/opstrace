@@ -135,7 +135,7 @@ export const getQueueEndpoint = (): string =>
 export const getDomain = (state: State): string => {
   const stack = getControllerConfig(state);
 
-  if (stack.custom_dns_tld !== undefined) {
+  if (stack.custom_dns_fqdn !== undefined) {
     // const dn = `${stack.name}.${stack.custom_dns_tld}`;
 
     // Oh I think I realize that what Mat envisioned here is that we do not
