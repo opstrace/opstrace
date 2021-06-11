@@ -286,7 +286,7 @@ export class DummyTimeseries {
     const maxLagMinutes = 35;
     const leapForwardMinutes = 10;
     if (shiftIntoPastSeconds > maxLagMinutes * 60) {
-      log.info("%s: leaped forward by %s minutes", this, leapForwardMinutes);
+      log.debug("%s: leaped forward by %s minutes", this, leapForwardMinutes);
       this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
         leapForwardMinutes * 60 * 1000
       );
@@ -297,7 +297,7 @@ export class DummyTimeseries {
       ) {
         const m = shiftIntoPastSeconds / 60.0;
         // too noisy for large stream count.
-        log.info("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
+        log.debug("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
       }
     }
   }
