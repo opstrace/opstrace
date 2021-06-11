@@ -12,6 +12,7 @@
     { "path": "../../lib/kubernetes" },
     { "path": "../config" },
     { "path": "../controller" },
-    { "path": "../buildinfo" }
+    { "path": "../buildinfo" },
+    { "path": "../installer" }
   ]
 }
