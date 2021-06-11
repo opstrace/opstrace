@@ -144,8 +144,8 @@ export const getDomain = (state: State): string => {
     // then the _tld part is also misleading because it might not necessarily
     // be a top-level domain.
 
-    const dn = stack.custom_dns_tld;
-    log.info("opstrace instance DNS name built from custom DNS name: %s", dn);
+    const dn = stack.custom_dns_fqdn;
+    //log.info("opstrace instance DNS name built from custom DNS name: %s", dn);
     return dn;
   }
 
