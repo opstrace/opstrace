@@ -129,3 +129,19 @@ docker run ${COMMON_ARGS} looker \
     --skip-read \
     > looker-metrics-2-${TSTRING}.log 2>&1
 cat looker-metrics-2-${TSTRING}.log | tail -n 10
+
+# Test --read-n-streams-only
+TSTRING="$(date +%Y%m%d-%H%M%S)"
+docker run ${COMMON_ARGS} looker \
+    "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
+    --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
+    --metrics-mode \
+    --n-concurrent-streams 100000 \
+    --n-entries-per-stream-fragment 5 \
+    --n-fragments-per-push-message 15000 \
+    --stream-write-n-fragments 10 \
+    --metrics-time-increment-ms 2000 \
+    --max-concurrent-writes 6 \
+    --read-n-streams-only 1 \
+    > looker-metrics-3-${TSTRING}.log 2>&1
+cat looker-metrics-3-${TSTRING}.log | tail -n 10
