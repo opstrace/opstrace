@@ -21,7 +21,52 @@ import { KubeConfig } from "@kubernetes/client-node";
 import { set as updateTenants, Tenants } from "@opstrace/tenants";
 import dbClient, { ClientResponse } from "../dbClient";
 import { State } from "../reducer";
-import { log, SECOND } from "@opstrace/utils";
+import { log, SECOND, httpcl } from "@opstrace/utils";
+import { Response as GotResponse } from "got";
+
+function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
+  try {
+    const res: GotResponse<string> = yield httpcl(
+      `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
+      {
+        method: "GET",
+        headers: {
+          "X-Scope-OrgID": tenant
+        }
+      }
+    );
+
+    if (res.body) {
+      return;
+    }
+  } catch (err) {
+    // continue and POST the default config
+  }
+
+  try {
+    yield httpcl(`http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`, {
+      method: "POST",
+      headers: {
+        "X-Scope-OrgID": tenant
+      },
+      body: `alertmanager_config: |
+  route:
+    receiver: default-receiver
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+    group_by: [alertname]
+  receivers:
+    - name: default-receiver
+`
+    });
+  } catch (err) {
+    log.error(
+      `could not write default alertmanager config to ${tenant} tenant: %s`,
+      err
+    );
+  }
+}
 
 export function* syncTenants(
   kubeConfig: KubeConfig
@@ -53,41 +98,56 @@ export function* syncTenants(
           throw Error("res.data.tenant doesn't exist in response");
         }
         if (dbTenants.length === 0) {
-          log.info("no tenants found in db, syncing existing tenants to db: %s", JSON.stringify(configmapTenants));
+          log.info(
+            "no tenants found in db, syncing existing tenants to db: %s",
+            JSON.stringify(configmapTenants)
+          );
           // Because we always have tenants, a zero length array here means we've never reconciled
           // the tenants created during install with the db. So let's sync the existingTenants
           // from the ConfigMap to GraphQL. This should only occur once for any opstrace cluster.
+
+          // We just write the name and type of each tenant.
+          // The database will assign an ID automatically, and we will pick up that ID via the next sync.
+          const tenants = configmapTenants.map(t => ({
+            name: t.name,
+            type: t.type,
+            // Try to pass IDs, even though they should normally be null.
+            // If the IDs are null, GraphQL will assign IDs automatically.
+            // If they are non-null in the ConfigMap (e.g. maybe someone manually deleted the tenants from GraphQL after a prior sync?),
+            // then ensure GraphQL DOESN'T assign new IDs.
+            id: t.id
+          }));
           yield call(dbClient.CreateTenants, {
-            // We just write the name and type of each tenant.
-            // The database will assign an ID automatically, and we will pick up that ID via the next sync.
-            tenants: configmapTenants.map(t => ({
-              name: t.name,
-              type: t.type,
-              // Try to pass IDs, even though they should normally be null.
-              // If the IDs are null, GraphQL will assign IDs automatically.
-              // If they are non-null in the ConfigMap (e.g. maybe someone manually deleted the tenants from GraphQL after a prior sync?),
-              // then ensure GraphQL DOESN'T assign new IDs.
-              id: t.id
-            }))
+            tenants
           });
+
+          for (const tenant of tenants) {
+            yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
+          }
         } else {
           // Sync changes from GraphQL back into the ConfigMap, which will update our local state in the process.
           // If GraphQL has IDs for the tenants, this adds the IDs to the ConfigMap as well, which is then reflected in the controller state object.
           // We also sort the tenants so that they are compared and written to the ConfigMap with a consistent ordering.
-          const dbTenantsState = dbTenants.map(t => ({
-            name: t.name,
-            id: t.id,
-            type: t.type === "SYSTEM" ? "SYSTEM" : "USER"
-          })).sort((t1, t2) => t1.name.localeCompare(t2.name)) as Tenants;
+          const dbTenantsState = dbTenants
+            .map(t => ({
+              name: t.name,
+              id: t.id,
+              type: t.type === "SYSTEM" ? "SYSTEM" : "USER"
+            }))
+            .sort((t1, t2) => t1.name.localeCompare(t2.name)) as Tenants;
           if (!equals(dbTenantsState, configmapTenants)) {
-            log.info("tenant config changed in db: old=%s new=%s", JSON.stringify(configmapTenants), JSON.stringify(dbTenantsState));
+            log.info(
+              "tenant config changed in db: old=%s new=%s",
+              JSON.stringify(configmapTenants),
+              JSON.stringify(dbTenantsState)
+            );
             // Write the new tenant list to the ConfigMap.
             // When the update takes effect, the controller State will be updated via the K8s client subscription.
-            yield call(
-              updateTenants,
-              dbTenantsState,
-              kubeConfig
-            );
+            yield call(updateTenants, dbTenantsState, kubeConfig);
+
+            for (const tenant of dbTenantsState) {
+              yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
+            }
           }
         }
       } catch (err) {
