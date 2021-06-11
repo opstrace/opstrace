@@ -30,58 +30,61 @@ type AuthenticationFixtures = {
 };
 
 // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-export const test = base
-  .extend<Record<string, never>, AuthenticationFixtures>({
-    user: {
-      email: CI_LOGIN_EMAIL
-    },
-    authCookies: [
-      async ({ browser }, use) => {
-        log.info("suite setup");
-        globalTestSuiteSetupOnce();
+let test = base.extend<Record<string, never>, AuthenticationFixtures>({
+  user: {
+    email: CI_LOGIN_EMAIL
+  },
+  authCookies: [
+    async ({ browser }, use) => {
+      log.info("suite setup");
+      globalTestSuiteSetupOnce();
 
-        log.info("browser.newContext()");
-        const context = await browser.newContext({ ignoreHTTPSErrors: true });
-        log.info("context.newPage()");
-        const page = await context.newPage();
+      log.info("browser.newContext()");
+      const context = await browser.newContext({ ignoreHTTPSErrors: true });
+      log.info("context.newPage()");
+      const page = await context.newPage();
 
-        log.info("page.goto(%s)", CLUSTER_BASE_URL);
-        await page.goto(CLUSTER_BASE_URL);
-        log.info("`load` event");
-
-        // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
-        // <span class="MuiButton-label">Log in</span>
-        log.info('page.waitForSelector("css=button")');
-        await page.waitForSelector("css=button");
-
-        log.info('page.click("text=Log in")');
-        await page.click("text=Log in");
-
-        // Wait for CI-specific username/pw login form to appear
-        await page.waitForSelector("text=Don't remember your password?");
-
-        await page.fill("css=input[type=email]", CI_LOGIN_EMAIL);
-        await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
-
-        await page.click("css=button[type=submit]");
-
-        // The first view after successful login is expected to be the details page
-        // for the `system` tenant, showing a link to Grafana.
-        await page.waitForSelector("text=Getting Started");
-
-        const cookies = await page.context().cookies();
-        await page.close();
-
-        await use(cookies);
-      },
-      { scope: "worker" }
-    ]
-  }) // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-  .extend<{ loggedInPage: Page }>({
-    loggedInPage: async ({ page, context, authCookies }, use) => {
-      context.addCookies(authCookies);
+      log.info("page.goto(%s)", CLUSTER_BASE_URL);
       await page.goto(CLUSTER_BASE_URL);
+      log.info("`load` event");
+
+      // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
+      // <span class="MuiButton-label">Log in</span>
+      log.info('page.waitForSelector("css=button")');
+      await page.waitForSelector("css=button");
+
+      log.info('page.click("text=Log in")');
+      await page.click("text=Log in");
+
+      // Wait for CI-specific username/pw login form to appear
+      await page.waitForSelector("text=Don't remember your password?");
+
+      await page.fill("css=input[type=email]", CI_LOGIN_EMAIL);
+      await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
+
+      await page.click("css=button[type=submit]");
+
+      // The first view after successful login is expected to be the details page
+      // for the `system` tenant, showing a link to Grafana.
       await page.waitForSelector("text=Getting Started");
-      await use(page);
-    }
-  });
+
+      const cookies = await page.context().cookies();
+      await page.close();
+
+      await use(cookies);
+    },
+    { scope: "worker" }
+  ]
+});
+
+// @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
+test = test.extend<{ loggedInPage: Page }>({
+  loggedInPage: async ({ page, context, authCookies }, use) => {
+    context.addCookies(authCookies);
+    await page.goto(CLUSTER_BASE_URL);
+    await page.waitForSelector("text=Getting Started");
+    await use(page);
+  }
+});
+
+export { test };

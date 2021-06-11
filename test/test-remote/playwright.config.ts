@@ -16,19 +16,10 @@
 
 import { PlaywrightTestConfig } from "@playwright/test";
 
-const DEBUG_MODE = process.env.OPSTRACE_PLAYWRIGHT_DEBUG === "true";
-
 const config: PlaywrightTestConfig = {
   use: {
-    headless: !DEBUG_MODE, // to see browser on your desktop set to false or set the ENV VAR "OPSTRACE_PLAYWRIGHT_DEBUG=true"
-
-    // slowMo: 500,
-
-    // Context options
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
-
-    // Artifacts
     screenshot: "only-on-failure",
     video: "retry-with-video"
   },
