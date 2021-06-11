@@ -693,7 +693,7 @@ test-remote-browser: kubectl-cluster-info
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		yarn playwright test --browser=all
+		yarn playwright test
 
 
 # Used by CI:
