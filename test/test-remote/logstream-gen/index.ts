@@ -1242,6 +1242,13 @@ async function customPostWithRetryOrError(
 ) {
   const deadline = mtimeDeadlineInSeconds(CFG.retry_post_deadline_seconds);
   let attempt = 0;
+
+  // There are HTTP responses that indicate a problem in the receiving end, but
+  // the insert of the data may nevertheless have succeeded. Typical
+  // distributed systems problem. Keep note of that, so that a subsequent push
+  // retry which fails with '400 out of order' is _not_ fatal.
+  let previousPushSuccessAmbiguous = false;
+
   while (true) {
     attempt++;
 
@@ -1299,6 +1306,16 @@ async function customPostWithRetryOrError(
         );
         // Move on to next attempt.
         continue;
+
+        // Note that the request might have been written successfully and maybe
+        // we're missing a success response because of an unfortunate TCP
+        // connection breakdown. In this case, the write was successful but we
+        // didn't receive the confirmation. We would land in here AFAIU, in the
+        // `RequestError` handler and _could_ set
+        // `previousPushSuccessAmbiguous` so that a subsequent 'out of order'
+        // error wouldn't be fatal. But this should be done so that it's clear
+        // that the request was actually written. Should be detectable, can
+        // look into that later.
       } else {
         // Assume that this is a programming error, let program crash.
         throw e;
@@ -1311,24 +1328,7 @@ async function customPostWithRetryOrError(
 
     if ([200, 204].includes(response.statusCode)) {
       logHTTPResponseLight(response, `${pr}`);
-      // Keep track of the fact that this was successfully pushed out,
-      // important for e.g. read-based validation after write.
-
-      // Plan for this push request to contain potentially more than one
-      // time series (metrics or logs).
-      for (const frgmnt of pr.fragments) {
-        // dummystream version
-        // also works for dummyseries but is noop
-        frgmnt.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
-
-        frgmnt.buildStatisticsAndDropData();
-
-        // dummyseries version
-        // drop actual samples (otherwise mem usage would grow quite fast).
-        if (frgmnt instanceof TimeseriesFragment) {
-          frgmnt.parent!.postedFragmentsSinceLastValidate.push(frgmnt);
-        }
-      }
+      markPushMessageAsSuccessfullySent(pr);
       return;
     }
 
@@ -1343,13 +1343,64 @@ async function customPostWithRetryOrError(
     // response in more detail.
     logHTTPResponse(response, `${pr}`);
 
-    // Handle what's most likely permanent errors with the request
+    // Handle 4xx responses (most likely permanent errors with the request)
     if (response.statusCode.toString().startsWith("4")) {
+      // Special-case treatment of out-of-order err after ambiguous previous push
+      if (response.statusCode === 400) {
+        if (response.body.includes("out of order sample")) {
+          if (previousPushSuccessAmbiguous) {
+            log.warning(
+              "saw 'out of order' error but do not treat fatal as of previous ambiguous push result"
+            );
+            // Treat this push message as successfully inserted.
+            markPushMessageAsSuccessfullySent(pr);
+            return;
+          }
+        }
+      }
+
       throw new Error("Bad HTTP request (see log above)");
+    }
+
+    if (response.statusCode === 500) {
+      // Note(JP): this is a real-world example I have seen where the receiving
+      // system internally generated a 'DeadlineExceeded' error and wrapped it
+      // into a 500 response -- the next push retry then failed with a 400 out
+      // of order error.
+      if (response.body.includes("DeadlineExceeded")) {
+        previousPushSuccessAmbiguous = true;
+        log.warning(
+          "previousPushSuccessAmbiguous: set as of 500/DeadlineExceeded response, next 'out or order' error not fatal"
+        );
+      }
     }
 
     // All other HTTP responses: treat as transient problems
     log.info("Treat as transient problem, retry after sleep");
+  }
+}
+
+// should this be a method on the class?
+function markPushMessageAsSuccessfullySent(
+  pr: LogStreamFragmentPushRequest | TimeseriesFragmentPushMessage
+) {
+  // Keep track of the fact that this was successfully pushed out,
+  // important for e.g. read-based validation after write.
+
+  // Plan for this push request to contain potentially more than one
+  // time series (metrics or logs).
+  for (const frgmnt of pr.fragments) {
+    // dummystream version
+    // also works for dummyseries but is noop
+    frgmnt.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
+
+    // drop actual samples (otherwise mem usage would grow quite fast).
+    frgmnt.buildStatisticsAndDropData();
+
+    // dummyseries version
+    if (frgmnt instanceof TimeseriesFragment) {
+      frgmnt.parent!.postedFragmentsSinceLastValidate.push(frgmnt);
+    }
   }
 }
 
