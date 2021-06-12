@@ -25,22 +25,28 @@ import { log, SECOND, httpcl } from "@opstrace/utils";
 import { Response as GotResponse } from "got";
 
 function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
-  try {
-    const res: GotResponse<string> = yield httpcl(
-      `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
-      {
-        method: "GET",
-        headers: {
-          "X-Scope-OrgID": tenant
-        }
-      }
-    );
-
-    if (res.body) {
-      return;
+  const res: GotResponse<string> = yield httpcl(
+    `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
+    {
+      method: "GET",
+      headers: {
+        "X-Scope-OrgID": tenant
+      },
+      throwHttpErrors: false
     }
-  } catch (err) {
-    // continue and POST the default config
+  );
+
+  if (res.statusCode > 499) {
+    // Network error, don't potentially overwrite existing config
+    log.error(
+      `could not read alertmanager config for tenant: ${tenant}, got resp: ${res.statusCode}, ${res.statusMessage}`
+    );
+    return;
+  }
+
+  if (res.body.length) {
+    // Already has config set
+    return;
   }
 
   try {
