@@ -3162,10 +3162,10 @@
   resolved "https://registry.yarnpkg.com/@panva/asn1.js/-/asn1.js-1.0.0.tgz#dd55ae7b8129e02049f009408b97c61ccf9032f6"
   integrity sha512-UdkG3mLEqXgnlKsWanWcgb6dOjUzJ+XC5f+aWw30qrtjxeNUSfKX1cd5FBzOaXQumoe9nIqeZUvrRJS03HCCtw==
 
-"@playwright/test@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.12.0.tgz#9c833528e42859d9049cde08505f6e4deefed8ea"
-  integrity sha512-EwvFbbtLulXt0QHmQ/UTB1CSWDkZpIRA3L+XxgiM6x/YTnbeJjbqwWfKwi+Cp9hgNqZMiaS6uoD387VFLGBiGQ==
+"@playwright/test@1.12.2":
+  version "1.12.2"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.12.2.tgz#f71977e489292f5625c69a4eae41d25e5032cf15"
+  integrity sha512-F2I5C/7P/UKAoFMR0Pc1GCh1zrvu2s2x5U7uYwKOjSBrzbVfPl5GLAYlIspW8wBSeXLk5US/Zz5aIng6+4KJlA==
   dependencies:
     "@babel/code-frame" "^7.12.13"
     "@babel/core" "^7.14.0"
@@ -16800,10 +16800,10 @@ pkg@^4.4.9:
     resolve "^1.15.1"
     stream-meter "^1.0.4"
 
-playwright@1.12.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.12.0.tgz#906b9dac1a2c8281235c3d7f53e5f3f40374a60b"
-  integrity sha512-FrR16vgaTulbs6cVr+wTjj6Dgp5ig5nlGZ13n6RolmyiIkXxXL8O51sVz6Fbhwuup853RnnGIRyEOw34Fx2WJA==
+playwright@1.12.2:
+  version "1.12.2"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.12.2.tgz#a484447177b061dd76247734fe65d77e3fb139fa"
+  integrity sha512-tSZGeILY70T4imhCMCsvzhoaDm9baosIG5fQncSWprpjVc/X4yYdBQCLBMvOi98H50hvu9fhgy2hpsgFKCsUaw==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
