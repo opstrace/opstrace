@@ -24,16 +24,26 @@ import {
   CI_LOGIN_PASSWORD
 } from "../testutils";
 
-type AuthenticationFixtures = {
-  user: { email: string };
-  authCookies: Cookie[];
+type UserFixture = {
+  email: string;
 };
 
-// @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-let test = base.extend<Record<string, never>, AuthenticationFixtures>({
-  user: {
-    email: CI_LOGIN_EMAIL
-  },
+type AuthenticationFixture = {
+  user: UserFixture;
+  authCookies: Cookie[];
+  loggedInPage: Page;
+};
+
+let test = base.extend<{}, AuthenticationFixture>({
+  user: [
+    async ({}, use) => {
+      const user: UserFixture = {
+        email: CI_LOGIN_EMAIL
+      };
+      await use(user);
+    },
+    { scope: "worker" }
+  ],
   authCookies: [
     async ({ browser }, use) => {
       log.info("suite setup");
@@ -73,12 +83,16 @@ let test = base.extend<Record<string, never>, AuthenticationFixtures>({
 
       await use(cookies);
     },
-    { scope: "worker" }
+    { scope: "worker", auto: true }
   ]
 });
 
-// @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-test = test.extend<{ loggedInPage: Page }>({
+type LoggedInFixture = {
+  loggedInPage: Page;
+};
+
+test = test.extend<LoggedInFixture>({
+  // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
   loggedInPage: async ({ page, context, authCookies }, use) => {
     context.addCookies(authCookies);
     await page.goto(CLUSTER_BASE_URL);
