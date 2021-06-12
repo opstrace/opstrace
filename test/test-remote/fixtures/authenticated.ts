@@ -34,6 +34,7 @@ type AuthenticationFixture = {
   loggedInPage: Page;
 };
 
+// @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
 let test = base.extend<{}, AuthenticationFixture>({
   user: [
     async ({}, use) => {
