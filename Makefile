@@ -690,10 +690,11 @@ test-remote-browser: kubectl-cluster-info
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		-e DEBUG=pw:api \
+		-e PWDEBUG=console \
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		yarn playwright test
+		npx playwright test --project=Firefox
 
 
 # Used by CI:
