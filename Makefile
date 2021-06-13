@@ -689,8 +689,7 @@ test-remote-browser: kubectl-cluster-info
 		-e TENANT_RND_AUTHTOKEN \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
-		-e DEBUG=pw:api \
-		-e PWDEBUG=console \
+		-e DEBUG=pw:api,pw:protocol,pw:browser \
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
