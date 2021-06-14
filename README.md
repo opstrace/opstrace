@@ -9,19 +9,18 @@
 
 # The Open Source Observability Distribution
 
-Opstrace is secure, horizontally-scalable, open source observability installed in your cloud account.
-It combines open APIs to reduce toil.
+Opstrace is a secure, horizontally-scalable, open source observability platform installed in your cloud account.
 
 Highlights:
 
-* Horizontally **scalable** for ingestion and queries.
-* Durable with inexpensive **long-term** retention.
+* Horizontally **scalable**.
+* Inexpensive **long-term** retention ob observability data.
 * Rigoriously **tested** end-to-end.
 * Large efforts towards confident **upgrades**.
 * **Secure** by default with TLS and authenticated endpoints.
 * **Easy to configure** with GUIs and APIs.
 
-We walk on the shoulders of giants; Opstrace uses open source projects you know and love in one place:
+We walk on the shoulders of giants; Opstrace uses open source projects you know and love:
 
 * [Cortex](https://github.com/cortexproject/cortex)
 * [Loki](https://github.com/grafana/loki)
@@ -34,7 +33,7 @@ We walk on the shoulders of giants; Opstrace uses open source projects you know 
 
 ### Installation and Upgrades
 
-Both installation and upgrades are initiated by a single CLI command.
+Both installation and upgrades are initiated by a simple CLI command.
 In this example, you can see an abbreviated installation and upgrade cycle:
 
 ```bash
@@ -43,14 +42,18 @@ $ cat << EOF > config.yaml
   - staging
   - prod
 EOF
+```
 
+```text
 $ ./opstrace create aws tracy -c config.yaml
 ...
 info: cluster creation finished: tracy (aws)
 info: Log in here: https://tracy.opstrace.io
+```
 
-# a week later...
+A week later...
 
+```text
 $ curl -L https://go.opstrace.com/cli-latest-release-macos | tar xjf -
 $ ./opstrace upgrade aws tracy -c config.yaml
 ...
@@ -59,18 +62,21 @@ info: Opstrace cluster upgrade done for tracy (aws)
 
 ### Alert Management
 
-Alertmanager can be difficult to configure, especially [for Cortex](https://cortexmetrics.io/docs/architecture/#alertmanager) where they correspond with tenants you have created.
-Our goal is to improve this with editors that provide realtime validation feedback:
+Alertmanager can be difficult to configure, especially [for Cortex](https://cortexmetrics.io/docs/architecture/#alertmanager) when multiple tenants are used.
+Our goal is to improve this with editors that provide real-time validation feedback:
 
 ![alertmanager configuration ui](https://p95.p4.n0.cdn.getcloudapp.com/items/eDuy9lnR/1a7a1030-4b27-4dfc-bf52-774f9f61d365.jpg?v=d0e8968befa6e0e3e1922594e61f9189)
 
 ### Tenant Management
 
-[Tenants](docs/references/concepts.md#tenants) provide isolation for logically separate entities.
-For example, they enable authn/authz for groups of users (e.g., different teams) and provide rate limiting of your data on both the write and read paths.
-A central UI can be helpful for visualizing and [managing multiple tenants](docs/guides/administrator/managing-tenants.md):
+The Opstrace UI allows for dynamic [tenant creation and deletion](docs/guides/administrator/managing-tenants.md):
 
 ![tenants can be managed holistically](https://p95.p4.n0.cdn.getcloudapp.com/items/4gunxZZe/0d056830-92be-4417-aa90-21c8fa261f48.jpg?source=viewer&v=3ce7d21798ba7cf02869e35dfcfa70c6)
+
+[Tenants](docs/references/concepts.md#tenants) provide isolation for logically separate entities.
+For example, they can be used to represent different teams.
+The Opstrace UI also allows for setting per-tenant configuration, which can be used for example to set write/read rate limits on a per-tenant basis.
+
 
 ## Quick Start
 
@@ -99,7 +105,7 @@ Don't forget to clean up if you're done kicking the tires:
 opstrace destroy aws <choose_a_name>
 ```
 
-Note: add the `--region` flag to ensure the CLI can locate any dangling resources, should you run into any sort of trouble cleaning up (for example, after a failed install).
+Note: add the `--region` flag to ensure the CLI can locate any dangling resources, should you run into any sort of trouble cleaning up on AWS (for example, after a failed install).
 
 ## Community
 
