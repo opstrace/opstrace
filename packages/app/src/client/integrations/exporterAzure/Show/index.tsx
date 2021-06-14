@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
 import { installedIntegrationsPath } from "client/integrations/paths";
+import { grafanaUrl } from "client/utils/grafana";
 
 import Status from "client/integrations/exporterAzure/Status";
 import { Details } from "./Details";
 import { Actions } from "./Actions";
 
+import { CondRender } from "client/utils/rendering";
+
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
 import { integrationDefRecords } from "client/integrations";
+import { loadGrafanaStateForIntegration } from "state/integration/actions";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
@@ -36,9 +41,15 @@ import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 
 export const ExporterAzureShow = () => {
+  const dispatch = useDispatch();
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
+
+  useEffect(() => {
+    if (integration?.id)
+      dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
+  }, [dispatch, integration?.id]);
 
   // NOTE: the timeranges for these urls is not the same as that used by the status component
   // const errorLogsUrl = useMemo(() => {
@@ -99,13 +110,29 @@ export const ExporterAzureShow = () => {
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>
               </Box>
-              <Attribute.Key>
-                <ExternalLink target="_blank" href={logsUrl}>
-                  <Button state="primary" variant="outlined" size="medium">
-                    View Integration Logs
-                  </Button>
-                </ExternalLink>
-              </Attribute.Key>
+              <Box display="flex" flexDirection="column">
+                <CondRender when={!!integration?.grafana?.folder?.id}>
+                  <Attribute.Key>
+                    <ExternalLink
+                      target="_blank"
+                      href={`${grafanaUrl({ tenant })}${
+                        integration.grafana?.folder?.path
+                      }`}
+                    >
+                      <Button state="primary" variant="outlined" size="medium">
+                        Grafana Dashboard Folder
+                      </Button>
+                    </ExternalLink>
+                  </Attribute.Key>
+                </CondRender>
+                <Attribute.Key>
+                  <ExternalLink target="_blank" href={logsUrl}>
+                    <Button state="primary" variant="outlined" size="medium">
+                      View Integration Logs
+                    </Button>
+                  </ExternalLink>
+                </Attribute.Key>
+              </Box>
             </Box>
           </CardContent>
         </Card>
