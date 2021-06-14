@@ -14,7 +14,7 @@ Opstrace is a secure, horizontally-scalable, open source observability platform 
 Highlights:
 
 * Horizontally **scalable**.
-* Inexpensive **long-term** retention ob observability data.
+* Inexpensive **long-term** retention of observability data.
 * Rigoriously **tested** end-to-end.
 * Large efforts towards confident **upgrades**.
 * **Secure** by default with TLS and authenticated endpoints.
