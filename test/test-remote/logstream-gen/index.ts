@@ -1381,12 +1381,18 @@ async function customPostWithRetryOrError(
       // system internally generated a 'DeadlineExceeded' error and wrapped it
       // into a 500 response -- the next push retry then failed with a 400 out
       // of order error.
-      if (response.body.includes("DeadlineExceeded")) {
-        previousPushSuccessAmbiguous = true;
-        log.warning(
-          "POST %s: previousPushSuccessAmbiguous: set as of 500/DeadlineExceeded response, next 'out or order' error not fatal",
-          pr
-        );
+      const needles = [
+        "DeadlineExceeded",
+        "code = Unavailable desc = transport is closing"
+      ];
+      for (const n in needles) {
+        if (response.body.includes(n)) {
+          previousPushSuccessAmbiguous = true;
+          log.warning(
+            `POST ${pr}: previousPushSuccessAmbiguous: set as of a` +
+              `500(${n}) response, next 'out or order' error not fatal`
+          );
+        }
       }
     }
 
