@@ -68,16 +68,19 @@ export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {
   });
 
   const onSubmit = (data: Values) => {
-    handleCreate({
-      name: data.name,
-      data: {
-        credentials: {
-          AWS_ACCESS_KEY_ID: data.accessKeyId,
-          AWS_SECRET_ACCESS_KEY: data.secretAccessKey
-        },
-        config: data.config
-      }
-    });
+    handleCreate(
+      {
+        name: data.name,
+        data: {
+          credentials: {
+            AWS_ACCESS_KEY_ID: data.accessKeyId,
+            AWS_SECRET_ACCESS_KEY: data.secretAccessKey
+          },
+          config: data.config
+        }
+      },
+      { createGrafanaFolder: true }
+    );
   };
 
   return (

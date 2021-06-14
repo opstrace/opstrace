@@ -73,18 +73,21 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
   });
 
   const onSubmit = (data: Values) => {
-    handleCreate({
-      name: data.name,
-      data: {
-        credentials: {
-          AZURE_SUBSCRIPTION_ID: data.subscriptionId,
-          AZURE_TENANT_ID: data.azureTenantId,
-          AZURE_CLIENT_ID: data.clientId,
-          AZURE_CLIENT_SECRET: data.clientSecret
-        },
-        config: data.config
-      }
-    });
+    handleCreate(
+      {
+        name: data.name,
+        data: {
+          credentials: {
+            AZURE_SUBSCRIPTION_ID: data.subscriptionId,
+            AZURE_TENANT_ID: data.azureTenantId,
+            AZURE_CLIENT_ID: data.clientId,
+            AZURE_CLIENT_SECRET: data.clientSecret
+          },
+          config: data.config
+        }
+      },
+      { createGrafanaFolder: true }
+    );
   };
 
   return (

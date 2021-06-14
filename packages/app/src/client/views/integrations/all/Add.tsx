@@ -23,8 +23,13 @@ import {
   showIntegrationPath
 } from "client/integrations";
 
-import { addIntegration } from "state/integration/actions";
+import {
+  addIntegration,
+  loadGrafanaStateForIntegration
+} from "state/integration/actions";
 import graphqlClient from "state/clients/graphqlClient";
+
+import { createFolder } from "client/utils/grafana";
 
 import NotFound from "client/views/404/404";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
@@ -32,6 +37,10 @@ import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 export type NewIntegration = {
   name: string;
   data: {};
+};
+
+type NewIntegrationOptions = {
+  createGrafanaFolder?: boolean;
 };
 
 export const AddIntegration = () => {
@@ -45,7 +54,7 @@ export const AddIntegration = () => {
   const integration = integrationDefRecords[kind];
   if (!integration) return <NotFound />;
 
-  const onCreate = (data: NewIntegration) => {
+  const onCreate = (data: NewIntegration, options?: NewIntegrationOptions) => {
     graphqlClient
       .InsertIntegration({
         name: data.name,
@@ -57,6 +66,13 @@ export const AddIntegration = () => {
         const integration = response?.data?.insert_integration_one;
         if (integration) {
           dispatch(addIntegration({ integration }));
+
+          if (options?.createGrafanaFolder) {
+            createFolder({ integration, tenant }).then(() =>
+              dispatch(loadGrafanaStateForIntegration({ id: integration.id }))
+            );
+          }
+
           history.push(
             showIntegrationPath({
               tenant,
