@@ -76,22 +76,25 @@ export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
   });
 
   const onSubmit = (data: Values) => {
-    handleCreate({
-      name: data.name,
-      data: {
-        credentials: data.credentials,
-        config: {
-          "google.project-id": data.googleProjectId
-            .split(",")
-            .map(id => id.trim()),
-          "monitoring.metrics-type-prefixes": data.monitoringMetricsTypePrefixes
-            .split(",")
-            .map(prefix => prefix.trim()),
-          "monitoring.metrics-interval": data.monitoringMetricsInterval,
-          "monitoring.metrics-offset": data.monitoringMetricsOffset
+    handleCreate(
+      {
+        name: data.name,
+        data: {
+          credentials: data.credentials,
+          config: {
+            "google.project-id": data.googleProjectId
+              .split(",")
+              .map(id => id.trim()),
+            "monitoring.metrics-type-prefixes": data.monitoringMetricsTypePrefixes
+              .split(",")
+              .map(prefix => prefix.trim()),
+            "monitoring.metrics-interval": data.monitoringMetricsInterval,
+            "monitoring.metrics-offset": data.monitoringMetricsOffset
+          }
         }
-      }
-    });
+      },
+      { createGrafanaFolder: true }
+    );
   };
 
   return (

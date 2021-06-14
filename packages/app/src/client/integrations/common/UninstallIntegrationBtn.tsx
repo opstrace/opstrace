@@ -27,6 +27,8 @@ import { installedIntegrationsPath } from "../paths";
 import { deleteIntegration } from "state/integration/actions";
 import graphqlClient from "state/clients/graphqlClient";
 
+import { deleteFolder } from "client/utils/grafana";
+
 import { Button } from "client/components/Button";
 
 export const UninstallBtn = ({
@@ -53,6 +55,10 @@ export const UninstallBtn = ({
           id: integration.id
         })
         .then(() => {
+          deleteFolder({ integration, tenant }).catch(err => {
+            // Dashboard folder might not exist
+            console.log(err);
+          });
           dispatch(
             deleteIntegration({ tenantId: tenant.id, id: integration.id })
           );
