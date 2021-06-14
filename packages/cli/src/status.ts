@@ -32,9 +32,7 @@ import {
 import {
   ClusterCreateConfigInterface,
   setCreateConfig,
-  waitUntilUIIsReachable,
-  waitUntilDDAPIEndpointsAreReachable,
-  waitUntilDataAPIEndpointsAreReachable
+  waitUntilHTTPEndpointsAreReachable
 } from "@opstrace/installer";
 import * as schemas from "./schemas";
 
@@ -66,6 +64,8 @@ async function checkClusterStatus() {
   //
   // Definitely technical debt leaking as an interface, needs to be
   // consolidated.
+  // Update(JP, June 2021): now this also needs 'custom DNS' info from the
+  // cluster config file
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
     schemas.LatestClusterConfigFileSchemaType,
     LatestAWSInfraConfigType | undefined,
@@ -96,9 +96,7 @@ async function checkClusterStatus() {
   };
   setCreateConfig(createConfig);
 
-  await waitUntilDataAPIEndpointsAreReachable(ccfg.cluster_name, ccfg.tenants);
-  await waitUntilDDAPIEndpointsAreReachable(ccfg.cluster_name, ccfg.tenants);
-  await waitUntilUIIsReachable(ccfg.cluster_name, ccfg.tenants);
+  await waitUntilHTTPEndpointsAreReachable(ccfg);
 }
 
 // Race to check cluster status and fail if it takes longer than 60 seconds.
