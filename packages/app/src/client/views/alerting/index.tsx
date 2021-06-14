@@ -15,16 +15,17 @@
  */
 
 import React from "react";
+import Grid from "@material-ui/core/Grid";
+
+import { grafanaUrl } from "client/utils/grafana";
 
 import { Box } from "client/components/Box";
+import { Card, CardContent, CardHeader } from "client/components/Card";
 import Typography from "client/components/Typography/Typography";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import { Tabs } from "client/components/Tabs";
+import { ExternalLink } from "client/components/Link";
 
-import Alerts from "./alerts";
-import Configuration from "./configuration";
-
-const Alerting = () => {
+const TenantAlerting = () => {
   const tenant = useSelectedTenantWithFallback();
 
   return (
@@ -32,22 +33,127 @@ const Alerting = () => {
       <Box pt={1} pb={4}>
         <Typography variant="h1">Alerting</Typography>
       </Box>
-      <Tabs
-        tabs={[
-          {
-            path: `/tenant/${tenant.name}/alerting/alerts`,
-            title: "Alerts",
-            component: Alerts
-          },
-          {
-            path: `/tenant/${tenant.name}/alerting/configuration`,
-            title: "Configuration",
-            component: Configuration
-          }
-        ]}
-      />
+
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title={`View & Manage Alerts`}
+            />
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography color="textSecondary" variant="body2">
+                    View and manage alerts for the{" "}
+                    <strong>{tenant.name}</strong> tenant.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" justifyContent="flex-end">
+                    <ExternalLink
+                      href={`${grafanaUrl({
+                        tenant
+                      })}/grafana/alerting/list`}
+                    >
+                      Alerts →
+                    </ExternalLink>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title={`Manage Silences`}
+            />
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography color="textSecondary" variant="body2">
+                    Manage alert silences for the <strong>{tenant.name}</strong>{" "}
+                    tenant.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" justifyContent="flex-end">
+                    <ExternalLink
+                      href={`${grafanaUrl({
+                        tenant
+                      })}/grafana/alerting/silences?alertmanager=alertmanager`}
+                    >
+                      Manage silences →
+                    </ExternalLink>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title={`Manage Contact Points`}
+            />
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography color="textSecondary" variant="body2">
+                    Manage contact points for the <strong>{tenant.name}</strong>{" "}
+                    tenant.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" justifyContent="flex-end">
+                    <ExternalLink
+                      href={`${grafanaUrl({
+                        tenant
+                      })}/grafana/alerting/notifications?alertmanager=alertmanager`}
+                    >
+                      Manage contact points →
+                    </ExternalLink>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader
+              titleTypographyProps={{ variant: "h5" }}
+              title={`Manage Notification Policies`}
+            />
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography color="textSecondary" variant="body2">
+                    Manage notification policies for the{" "}
+                    <strong>{tenant.name}</strong> tenant.
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" justifyContent="flex-end">
+                    <ExternalLink
+                      href={`${grafanaUrl({
+                        tenant
+                      })}/grafana/alerting/routes?alertmanager=alertmanager`}
+                    >
+                      Manage notification policies →
+                    </ExternalLink>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     </>
   );
 };
 
-export default Alerting;
+export default TenantAlerting;

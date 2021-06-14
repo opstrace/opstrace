@@ -38,7 +38,7 @@ export function GrafanaDatasourceResources(
   // Delete datasources and Grafana will recreate them. This ensures we remove all old/unused datasources that we may have previously deployed
   // https://grafana.com/docs/grafana/latest/administration/provisioning/#example-data-source-config-file
   const getDatasourcesToDelete = () => {
-    let datasourcesToDelete: { name: string; orgId: number }[] = [];
+    const datasourcesToDelete: { name: string; orgId: number }[] = [];
 
     if (tenant.name === "system") {
       state.tenants.list.tenants
