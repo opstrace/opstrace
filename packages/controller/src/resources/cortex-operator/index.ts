@@ -501,7 +501,7 @@ leaderElection:
                     "--leader-elect"
                   ],
                   command: ["/manager"],
-                  image: "sreis/cortex-operator:8",
+                  image: "sreis/cortex-operator:1",
                   imagePullPolicy: "IfNotPresent",
                   livenessProbe: {
                     failureThreshold: 3,

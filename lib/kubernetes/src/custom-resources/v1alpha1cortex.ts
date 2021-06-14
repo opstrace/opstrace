@@ -184,6 +184,12 @@ export interface V1Alpha1Cortex {
       };
       [k: string]: any;
     };
+    service_account_spec?: {
+      annotations?: {
+        [k: string]: string;
+      };
+      [k: string]: any;
+    };
     store_gateway_spec?: {
       datadir_size?: number | string;
       replicas?: number;
