@@ -327,17 +327,22 @@ function* createClusterCore() {
     opstraceInstanceDNSname = ccfg.custom_dns_fqdn;
   }
 
+  log.info(
+    "expected DNS name for this Opstrace instance: %s",
+    opstraceInstanceDNSname
+  );
+
   yield call(
     waitUntilDataAPIEndpointsAreReachable,
-    ccfg.cluster_name,
+    opstraceInstanceDNSname,
     ccfg.tenants
   );
   yield call(
     waitUntilDDAPIEndpointsAreReachable,
-    ccfg.cluster_name,
+    opstraceInstanceDNSname,
     ccfg.tenants
   );
-  yield call(waitUntilUIIsReachable, ccfg.cluster_name, ccfg.tenants);
+  yield call(waitUntilUIIsReachable, opstraceInstanceDNSname, ccfg.tenants);
 
   log.info(
     `create operation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
