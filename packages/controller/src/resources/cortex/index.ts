@@ -195,7 +195,13 @@ export function CortexResources(
           choose: 9
         },
         {
+          "<=": 20,
+          // TODO does rounding down to odd matter?
+          choose: roundDownToOdd(getNodeCount(state))
+        },
+        {
           "<=": Infinity,
+          // TODO reconsider whether dividing by 2 is the right thing
           choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
