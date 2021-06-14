@@ -38,11 +38,7 @@ export function GrafanaDatasourceResources(
   // Delete datasources and Grafana will recreate them. This ensures we remove all old/unused datasources that we may have previously deployed
   // https://grafana.com/docs/grafana/latest/administration/provisioning/#example-data-source-config-file
   const getDatasourcesToDelete = () => {
-    let datasourcesToDelete = [
-      { name: "logs", orgId: 1 },
-      { name: "metrics", orgId: 1 },
-      { name: "alertmanager", orgId: 1 }
-    ];
+    let datasourcesToDelete: { name: string; orgId: number }[] = [];
 
     if (tenant.name === "system") {
       state.tenants.list.tenants
@@ -74,7 +70,7 @@ export function GrafanaDatasourceResources(
         orgId: 1,
         type: "prometheus",
         url: `http://grafana-datasource-splitter-cortex.${namespace}.svc.cluster.local`,
-        version: 1
+        version: 2
       },
       {
         name: "logs",
@@ -83,7 +79,7 @@ export function GrafanaDatasourceResources(
         orgId: 1,
         url: `http://grafana-datasource-splitter-loki.${namespace}.svc.cluster.local`,
         access: "proxy",
-        version: 1
+        version: 2
       },
       {
         name: "alertmanager",
