@@ -322,32 +322,43 @@ function* createClusterCore() {
   //   );
   // }
 
-  let opstraceInstanceDNSname = `${ccfg.cluster_name}.opstrace.io`;
-  if (ccfg.custom_dns_fqdn !== undefined) {
-    opstraceInstanceDNSname = ccfg.custom_dns_fqdn;
-  }
-
+  const opstraceInstanceDNSname = instanceDNSNameFromClusterConfig(ccfg);
   log.info(
     "expected DNS name for this Opstrace instance: %s",
     opstraceInstanceDNSname
   );
 
-  yield call(
-    waitUntilDataAPIEndpointsAreReachable,
-    opstraceInstanceDNSname,
-    ccfg.tenants
-  );
-  yield call(
-    waitUntilDDAPIEndpointsAreReachable,
-    opstraceInstanceDNSname,
-    ccfg.tenants
-  );
-  yield call(waitUntilUIIsReachable, opstraceInstanceDNSname, ccfg.tenants);
+  yield call(waitUntilHTTPEndpointsAreReachable, ccfg);
 
   log.info(
     `create operation finished: ${ccfg.cluster_name} (${ccfg.cloud_provider})`
   );
   log.info(`Log in here: https://${opstraceInstanceDNSname}`);
+}
+
+function instanceDNSNameFromClusterConfig(ccfg: LatestClusterConfigType) {
+  let opstraceInstanceDNSname = `${ccfg.cluster_name}.opstrace.io`;
+  if (ccfg.custom_dns_fqdn !== undefined) {
+    opstraceInstanceDNSname = ccfg.custom_dns_fqdn;
+  }
+
+  return opstraceInstanceDNSname;
+}
+
+export async function waitUntilHTTPEndpointsAreReachable(
+  ccfg: LatestClusterConfigType
+): Promise<void> {
+  const opstraceInstanceDNSname = instanceDNSNameFromClusterConfig(ccfg);
+
+  await waitUntilDataAPIEndpointsAreReachable(
+    opstraceInstanceDNSname,
+    ccfg.tenants
+  );
+  await waitUntilDDAPIEndpointsAreReachable(
+    opstraceInstanceDNSname,
+    ccfg.tenants
+  );
+  await waitUntilUIIsReachable(opstraceInstanceDNSname, ccfg.tenants);
 }
 
 /**
