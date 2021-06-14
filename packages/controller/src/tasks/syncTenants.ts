@@ -39,7 +39,9 @@ function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
   if (res.statusCode > 499) {
     // Network error, don't potentially overwrite existing config
     log.error(
-      `could not read alertmanager config for tenant: ${tenant}, got resp: ${res.statusCode}, ${res.statusMessage}`
+      `could not read alertmanager config for tenant: ${tenant}, got resp: ${
+        res.statusCode
+      }, ${res.body.slice(0, 500)}...` // truncate to the first 500 chars as a maximum
     );
     return;
   }
