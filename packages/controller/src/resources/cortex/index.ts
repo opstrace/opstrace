@@ -31,7 +31,6 @@ import {
   Namespace,
   ResourceCollection,
   Service,
-  ServiceAccount,
   V1Alpha1CortexResource,
   V1ServicemonitorResource,
   withPodAntiAffinityRequired
@@ -220,23 +219,6 @@ export function CortexResources(
     annotations = {
       "iam.gke.io/gcp-service-account": gcp.cortexServiceAccount
     };
-
-    // TODO(sreis): check if adding these annotations are not overwritten by the
-    // cortex-operator
-    collection.add(
-      new ServiceAccount(
-        {
-          apiVersion: "v1",
-          kind: "ServiceAccount",
-          metadata: {
-            name: "cortex",
-            namespace,
-            annotations: annotations
-          }
-        },
-        kubeConfig
-      )
-    );
   }
 
   collection.add(
@@ -307,6 +289,9 @@ export function CortexResources(
               max_item_size: config.memcached.max_item_size,
               memory_limit: config.memcached.memory_limit
             }
+          },
+          service_account_spec: {
+            annotations: annotations
           },
           config: {
             server: {

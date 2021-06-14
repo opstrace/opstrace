@@ -203,6 +203,13 @@ spec:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
                 type: object
+              service_account_spec:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
               store_gateway_spec:
                 properties:
                   datadir_size:
