@@ -137,17 +137,7 @@ const AuthProtectedApplication = () => {
           {
             title: "Alerting",
             icon: <Bell />,
-            path: `/tenant/${tenantName}/alerting`,
-            nestedItems: [
-              {
-                title: "Alerts",
-                path: `/tenant/${tenantName}/alerting/alerts`
-              },
-              {
-                title: "Configuration",
-                path: `/tenant/${tenantName}/alerting/configuration`
-              }
-            ]
+            path: `/tenant/${tenantName}/alerting`
           },
           {
             title: "Users",
@@ -255,14 +245,8 @@ const AuthProtectedApplication = () => {
             />
             <Route
               exact
-              key="tenant-alerting-alerts"
-              path="/tenant/:tenantId/alerting/alerts"
-              component={TenantAlerting}
-            />
-            <Route
-              exact
-              key="tenant-alerting-configuration"
-              path="/tenant/:tenantId/alerting/configuration"
+              key="tenant-alerting"
+              path="/tenant/:tenantId/alerting"
               component={TenantAlerting}
             />
             <Route
