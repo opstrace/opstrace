@@ -14,58 +14,11 @@ Braindump, might be good or bad ideas
     400 'out of order' errors
 
 
-When 400 out or order folows a 500 it most likely means that the previous push
-succeeded w/o the client getting to know it, i.e. this is perfectly fine and
-we may not want to crash looker.
+- maybe add a command line flag allowing for ignoring 'out of order' errors in general
 
-a 400 out of bounds however means that the time alignment didn't work as expected
-and we want to crash
-
-
-instead of crashing
-
------
-out of bounds example:
-
-  status: 400
-  body[:500]: user=default: err: out of bounds. timestamp=2021-06-10T02:22:01Z, series={__name__="metric_looker_aBRpwB", streamname="looker-1623254751-NsI1kirtS_-00001-AZkFp-0081"}
-
-
-------
-500-400-out-of-order example:
-
-2021-06-10T17:33:29.126Z info: Treat as transient problem, retry after sleep
-2021-06-10T17:33:29.126Z info: POST PushMessage(md5=d7caca08369959f52ac8d2641cf0b100): schedule to perform attempt 2 in 2.77 s
-2021-06-10T17:33:29.202Z info: HTTP resp to POST(https://cortex.default.jp-1623064457.opstrace.io/api/v1/push (PushMessage(md5=c3138e06d18c54ce8ef905cfa9dd5bc0))):
-  status: 500
-  body[:500]: rpc error: code = DeadlineExceeded desc = context deadline exceeded
-
-  headers: {"date":"Thu, 10 Jun 2021 17:33:29 GMT","content-type":"text/plain; charset=utf-8","content-length":"68","connection":"close","vary":"Accept-Encoding","x-content-type-options":"nosniff","strict-transport-security":"max-age=15724800; includeSubDomains"}
-  totalTime: 3.921 s
-  dnsDone->TCPconnectDone: 0.184 s
-  connectDone->reqSent 0.77 s
-  reqSent->firstResponseByte: 2.773 s
-
-2021-06-10T17:33:29.202Z info: Treat as transient problem, retry after sleep
-2021-06-10T17:33:29.202Z info: POST PushMessage(md5=c3138e06d18c54ce8ef905cfa9dd5bc0): schedule to perform attempt 2 in 1.77 s
-2021-06-10T17:33:32.744Z info: HTTP resp to POST(https://cortex.default.jp-1623064457.opstrace.io/api/v1/push (PushMessage(md5=c3138e06d18c54ce8ef905cfa9dd5bc0))):
-  status: 400
-  body[:500]: user=default: err: out of order sample. timestamp=2021-06-10T17:08:22Z, series={__name__="metric_looker_N01ZOl", streamname="looker-1623336391-7eebZ5jvNr-00001-T1dpa-0001"}
-
-  headers: {"date":"Thu, 10 Jun 2021 17:33:32 GMT","content-type":"text/plain; charset=utf-8","content-length":"173","connection":"close","vary":"Accept-Encoding","x-content-type-options":"nosniff","strict-transport-security":"max-age=15724800; includeSubDomains"}
-  totalTime: 1.768 s
-  dnsDone->TCPconnectDone: 0.183 s
-  connectDone->reqSent 0.751 s
-  reqSent->firstResponseByte: 0.645 s
-
-note: the push message hash shows that these are the _same_.
-
-
-------
-
-- maybe add a command line flag allowing for ignoring 'out of order';
-
-----
 
 - allow for keeping some streams longer than others, following a certain
   distribution
+
+- for time series generation, allow for a random walk within predictable bounds
+
