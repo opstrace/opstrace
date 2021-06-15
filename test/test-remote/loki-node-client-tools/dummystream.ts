@@ -73,6 +73,7 @@ export class DummyStream {
   private labels: LogStreamLabelset;
   private nEntriesValidatedSoFar: bigint;
   private genChars: (n: number) => string;
+  private shouldBeValidatedflag: boolean;
 
   uniqueName: string;
   starttime: ZonedDateTime;
@@ -91,7 +92,7 @@ export class DummyStream {
   constructor(opts: DummyStreamOpts) {
     // For toString.
     this.opts = opts;
-
+    this.shouldBeValidatedflag = true;
     this.uniqueName = opts.uniqueName;
 
     //Always set `looker_uniquename`. If `opts.labelset` is provided then treat
@@ -327,12 +328,16 @@ export class DummyStream {
     return timestampToRFC3339Nano(this.currentTime());
   }
 
-  public disableValidationInfoCollection(): void {
-    // noop, only built for dummytimeseries
+  public disableValidation(): void {
+    this.shouldBeValidatedflag = false;
   }
 
-  public enableValidationInfoCollection(): void {
-    // noop, only built for dummytimeseries
+  public enableValidation(): void {
+    this.shouldBeValidatedflag = true;
+  }
+
+  public shouldBeValidated(): boolean {
+    return this.shouldBeValidatedflag;
   }
 
   public dropValidationInfo(): void {

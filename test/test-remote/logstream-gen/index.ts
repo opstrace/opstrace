@@ -760,14 +760,14 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
       "mark all streams to not keep track of validation info: --skip-read"
     );
     for (const s of streams) {
-      s.disableValidationInfoCollection();
+      s.disableValidation();
     }
   } else if (CFG.read_n_streams_only === 0) {
     log.info(
       "mark all streams to keep track of validation info: no --skip-read, and no --read-n-streams-only"
     );
     for (const s of streams) {
-      s.enableValidationInfoCollection();
+      s.enableValidation();
     }
   }
 
@@ -782,7 +782,7 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
       "mark all streams to not keep track of validation info: --read-n-streams-only is set"
     );
     for (const s of streams) {
-      s.disableValidationInfoCollection();
+      s.disableValidation();
     }
 
     log.info(
@@ -802,7 +802,7 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
     }
 
     for (const s of streamsToValidate) {
-      s.enableValidationInfoCollection();
+      s.enableValidation();
     }
   }
   const labelForValidationDurationSeconds = mtimeDiffSeconds(lt0);
@@ -935,11 +935,16 @@ async function readPhase(streams: Array<DummyStream | DummyTimeseries>) {
   } else {
     // Note that the 'sparse readout' where --skip-read is not set but
     // --read-n-streams-only is set is implemented per series object: the
-    // validation method is effectively a noop for streams that were set
-    // to not collect validation info.
+    // validation method is effectively a noop for streams that were set to not
+    // collect validation info. However, do not call functions where not
+    // needed, that's why there is the `s.shouldBeValidated()`-based condition
+    // Also, calling millions of noop functions does not work:
+    // `RangeError: Too many elements passed to Promise.all`
     if (CFG.max_concurrent_reads === 0) {
       for (const s of streams) {
-        validators.push(unthrottledFetchAndValidate(s));
+        if (s.shouldBeValidated()) {
+          validators.push(unthrottledFetchAndValidate(s));
+        }
       }
     } else {
       const semaphore = new Semaphore(CFG.max_concurrent_reads);
