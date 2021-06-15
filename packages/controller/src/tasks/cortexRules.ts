@@ -16,8 +16,9 @@
 
 import { call, delay, select, CallEffect } from "redux-saga/effects";
 import * as yaml from "js-yaml";
+import axios from "axios";
 
-import { log, SECOND, httpcl } from "@opstrace/utils";
+import { log, SECOND } from "@opstrace/utils";
 import { State } from "../reducer";
 import { getDomain } from "../helpers";
 import getRules from "../system/rules";
@@ -45,36 +46,22 @@ export function* cortexSystemRulesReconciler(): Generator<
     while (true) {
       try {
         // Apply rules to system tenant
-        yield httpcl(
-          `http://ruler.cortex.svc.cluster.local/api/v1/rules/system`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/yaml",
-              "X-Scope-OrgID": "system"
-            },
-            body: yaml.safeDump(rules)
-          }
+        yield Promise.all(
+          [...rules, ...alerts].map(group =>
+            axios({
+              url: `http://ruler.cortex.svc.cluster.local/api/v1/rules/system`,
+              method: "POST",
+              headers: {
+                "Content-Type": "application/yaml",
+                "X-Scope-OrgID": "system"
+              },
+              timeout: 30 * SECOND,
+              data: yaml.safeDump(group)
+            })
+          )
         );
       } catch (err) {
-        log.error("failed applying system rules: %s", err);
-      }
-
-      try {
-        // Apply alerts to system tenant
-        yield httpcl(
-          `http://ruler.cortex.svc.cluster.local/api/v1/alerts/system`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/yaml",
-              "X-Scope-OrgID": "system"
-            },
-            body: yaml.safeDump(alerts)
-          }
-        );
-      } catch (err) {
-        log.error("failed applying system alerts: %s", err);
+        log.error("failed applying system rules/alerts: %s", err);
       }
       // loop through again in 1 min
       yield delay(60 * SECOND);

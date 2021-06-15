@@ -21,43 +21,41 @@ import { KubeConfig } from "@kubernetes/client-node";
 import { set as updateTenants, Tenants } from "@opstrace/tenants";
 import dbClient, { ClientResponse } from "../dbClient";
 import { State } from "../reducer";
-import { log, SECOND, httpcl } from "@opstrace/utils";
-import { Response as GotResponse } from "got";
+import { log, SECOND } from "@opstrace/utils";
+import axios, { AxiosResponse } from "axios";
 
 function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
-  const res: GotResponse<string> = yield httpcl(
-    `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
-    {
-      method: "GET",
-      headers: {
-        "X-Scope-OrgID": tenant
-      },
-      throwHttpErrors: false
+  const res: AxiosResponse<string> = yield axios({
+    url: `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
+    method: "GET",
+    headers: {
+      "X-Scope-OrgID": tenant
     }
-  );
+  });
 
-  if (res.statusCode > 499) {
+  if (res.status > 499) {
     // Network error, don't potentially overwrite existing config
     log.error(
       `could not read alertmanager config for tenant: ${tenant}, got resp: ${
-        res.statusCode
-      }, ${res.body.slice(0, 500)}...` // truncate to the first 500 chars as a maximum
+        res.status
+      }, ${res.data.slice(0, 500)}...` // truncate to the first 500 chars as a maximum
     );
     return;
   }
 
-  if (res.body.length) {
+  if (res.data.length) {
     // Already has config set
     return;
   }
 
   try {
-    yield httpcl(`http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`, {
+    yield axios({
+      url: `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
       method: "POST",
       headers: {
         "X-Scope-OrgID": tenant
       },
-      body: `alertmanager_config: |
+      data: `alertmanager_config: |
   route:
     receiver: default-receiver
     group_wait: 30s
