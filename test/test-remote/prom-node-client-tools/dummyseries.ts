@@ -63,10 +63,10 @@ export interface DummyTimeseriesFetchAndValidateOpts {
 export class DummyTimeseries {
   private millisSinceEpochOfLastGeneratedSample: Long;
   private nFragmentsConsumed: number;
-  private opts: any;
   private labels: LabelSet;
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: number;
+  private optionstring: string;
 
   //private logLagBehindWalltimeEveryNseconds: private;
 
@@ -80,9 +80,6 @@ export class DummyTimeseries {
   postedFragmentsSinceLastValidate: Array<TimeseriesFragment>;
 
   constructor(opts: DummyTimeseriesOpts) {
-    // For toString().
-    this.opts = opts;
-
     this.postedFragmentsSinceLastValidate = [];
 
     this.uniqueName = opts.uniqueName;
@@ -91,13 +88,14 @@ export class DummyTimeseries {
     //this.logLagBehindWalltimeEveryNseconds = 60;
 
     // Merge the metric name into it using the well-known special prom label
-    // __name__. If labelset is provided then use that. If labelset is not
-    // provided then set a single label using uniquename.
+    // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
+    // provided then treat this as _additional_ label set.
     if (opts.labelset !== undefined) {
       this.labels = opts.labelset;
+      this.labels.uniquename = this.uniqueName;
       this.labels.__name__ = this.metricName;
     } else {
-      this.labels = { dummyseries: this.uniqueName, __name__: this.metricName };
+      this.labels = { uniquename: this.uniqueName, __name__: this.metricName };
     }
 
     if (opts.starttime.nano() != 0) {
@@ -193,11 +191,17 @@ export class DummyTimeseries {
     // stream). Used by fetchAndValidate().
     this.nSamplesValidatedSoFar = 0;
 
+    // drop config object to save memory (I hope this is actually true)
+    this.optionstring = `${JSON.stringify(opts)}`;
   }
 
-  public toString = (): string => {
-    return `DummyTimeseries(opts=${JSON.stringify(this.opts)})`;
-  };
+  public toString(): string {
+    return `DummyTimeseries(opts=${this.optionstring})`;
+  }
+
+  public promQueryString(): string {
+    return `${this.metricName}{uniquename="${this.uniqueName}"}`;
+  }
 
   private nextValue() {
     // Note: this ignores the compressability concept so far.
