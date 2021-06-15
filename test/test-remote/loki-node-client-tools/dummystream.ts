@@ -94,10 +94,14 @@ export class DummyStream {
 
     this.uniqueName = opts.uniqueName;
 
+    //Always set `looker_uniquename`. If `opts.labelset` is provided then treat
+    // this as _additional_ label set.
+
     if (opts.labelset !== undefined) {
       this.labels = opts.labelset;
+      this.labels.looker_uniquename = this.uniqueName;
     } else {
-      this.labels = { dummystream: this.uniqueName };
+      this.labels = { looker_uniquename: this.uniqueName };
     }
 
     this.starttime = opts.starttime;
@@ -169,6 +173,10 @@ export class DummyStream {
   public toString = (): string => {
     return `DummyStream(opts=${JSON.stringify(this.opts)})`;
   };
+
+  public promQueryString(): string {
+    return `{looker_uniquename="${this.uniqueName}"}`;
+  }
 
   private buildMsgText(): string {
     let text: string;

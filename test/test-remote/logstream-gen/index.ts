@@ -116,7 +116,7 @@ const DEFAULT_LOG_LEVEL_STDERR = "info";
 // let STATS_READ: ReadStats;
 
 const START_TIME_JODA = ZonedDateTime.now(ZoneOffset.UTC);
-const START_TIME_EPOCH = START_TIME_JODA.toEpochSecond();
+// const START_TIME_EPOCH = START_TIME_JODA.toEpochSecond();
 const START_TIME_MONOTONIC = mtime();
 
 // these are set dynamically per-cycle.
@@ -460,7 +460,8 @@ function parseCmdlineArgs() {
     })
   );
 
-  const uniqueInvocationId = `looker-${START_TIME_EPOCH}-${rndstring(10)}`;
+  // const uniqueInvocationId = `looker-${START_TIME_EPOCH}-${rndstring(6)}`;
+  const uniqueInvocationId = `looker-${rndstring(6)}`;
   CFG.invocation_id = uniqueInvocationId;
 
   if (CFG.log_start_time) {
@@ -575,8 +576,8 @@ async function main() {
   for (let cyclenum = 1; cyclenum < CFG.n_cycles + 1; cyclenum++) {
     setUptimeGauge();
 
-    const numString = `${cyclenum.toString().padStart(5, "0")}`;
-    const guniqueCycleId = `${CFG.invocation_id}-${numString}-${rndstring(5)}`;
+    const numString = `${cyclenum.toString().padStart(3, "0")}`;
+    const guniqueCycleId = `${CFG.invocation_id}-${numString}-${rndstring(4)}`;
 
     log.info("enter write/read cycle  %s", cyclenum);
 
@@ -619,11 +620,12 @@ async function createNewDummyStreams(
   const streams = [];
 
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
-    const streamname = `${guniqueCycleId}-${i.toString().padStart(4, "0")}`;
+    // do not pad, might save some memory
+    const streamname = `${guniqueCycleId}-${i.toString()}`; //.padStart(3, "0")}`;
 
     // by default attach one label to the stream
     const labelset: LogStreamLabelset = {
-      streamname: streamname
+      //  streamname: streamname
     };
 
     // add more labels (key/value pairs) as given by command line
@@ -641,10 +643,9 @@ async function createNewDummyStreams(
     let stream: DummyTimeseries | DummyStream;
     if (CFG.metrics_mode) {
       stream = new DummyTimeseries({
-        metricName: `metric_looker_${rndstring(6)}`,
-        n_samples_per_series_fragment: Number(
-          CFG.n_entries_per_stream_fragment
-        ),
+        metricName: `looker_${rndstring(4)}`, // might collide among streams, which is OK as long as the label set adds uniqueness
+        uniqueName: streamname, // must not collide among streams
+        n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
 
         // With Cortex' Blocks Storage system, we cannot go into the future
         // compared to "now" (from Cortex' system time point of view), but we
@@ -662,16 +663,13 @@ async function createNewDummyStreams(
         // invocation time, as is done for logs (where Loki accepts incoming
         // data from far in the past),
         starttime: ZonedDateTime.now().minusMinutes(30).withNano(0),
-        uniqueName: streamname,
         timediffMilliSeconds: CFG.metrics_time_increment_ms,
         labelset: labelset
       });
     } else {
       stream = new DummyStream({
-        n_entries_per_stream_fragment: Number(
-          CFG.n_entries_per_stream_fragment
-        ),
-        n_chars_per_message: Number(CFG.n_chars_per_msg),
+        n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
+        n_chars_per_message: CFG.n_chars_per_msg,
         starttime: ZonedDateTime.parse(CFG.log_start_time),
         uniqueName: streamname,
         timediffNanoseconds: CFG.log_time_increment_ns,
@@ -681,7 +679,7 @@ async function createNewDummyStreams(
       });
     }
 
-    const msg = `Initialized dummystream: ${stream}. Time of first entry in stream: ${stream.currentTimeRFC3339Nano()}`;
+    const msg = `Initialized series: ${stream}. Time of first sample: ${stream.currentTimeRFC3339Nano()}`;
 
     const logEveryN = logEveryNcalc(CFG.n_concurrent_streams);
     if (i % logEveryN == 0) {
@@ -1072,9 +1070,11 @@ async function _produceAndPOSTpushrequest(
     //const pr = pushrequest;
     let name: string;
     if (streams.length === 1) {
-      name = `prProducerPOSTer(${streams[0].uniqueName})`;
+      name = `prProducerPOSTer(${streams[0].promQueryString()})`;
     } else {
-      name = `prProducerPOSTer(nstreams=${streams.length}, first=${streams[0].uniqueName})`;
+      name = `prProducerPOSTer(nstreams=${
+        streams.length
+      }, first=${streams[0].promQueryString()})`;
     }
 
     if (
