@@ -19,3 +19,4 @@ export * from "./informers";
 export * from "./wait";
 export * from "./readiness";
 export * from "./syncTenants";
+export * from "./cortexRules";
