@@ -77,6 +77,10 @@ export declare interface Dict<T = any> {
  * We then started using this module in other contexts (looker) and the side
  * effect of import became intolerable.
  */
+
+// `OPSTRACE_INSTANCE_DNS_NAME` points to a specific Opstrace instance,
+// opens the UI if accessed in the browser via https://....
+export let OPSTRACE_INSTANCE_DNS_NAME: string;
 export let CLUSTER_BASE_URL: string;
 export let CLUSTER_NAME: string;
 export let TEST_REMOTE_ARTIFACT_DIRECTORY: string;
@@ -183,13 +187,27 @@ export function globalTestSuiteSetupOnce() {
     }
   }
 
-  CLUSTER_BASE_URL = `https://${clusterName}.opstrace.io`;
   CLUSTER_NAME = clusterName;
-  TENANT_DEFAULT_LOKI_API_BASE_URL = `https://loki.default.${clusterName}.opstrace.io`;
-  TENANT_DEFAULT_DD_API_BASE_URL = `https://dd.default.${clusterName}.opstrace.io`;
-  TENANT_DEFAULT_CORTEX_API_BASE_URL = `https://cortex.default.${clusterName}.opstrace.io`;
-  TENANT_SYSTEM_LOKI_API_BASE_URL = `https://loki.system.${clusterName}.opstrace.io`;
-  TENANT_SYSTEM_CORTEX_API_BASE_URL = `https://cortex.system.${clusterName}.opstrace.io`;
+
+  // default, if   OPSTRACE_INSTANCE_DNS_NAME is not set via env
+  OPSTRACE_INSTANCE_DNS_NAME = `${clusterName}.opstrace.io`;
+
+  if (process.env.OPSTRACE_INSTANCE_DNS_NAME) {
+    log.info(
+      "env variable OPSTRACE_INSTANCE_DNS_NAME is set: %s",
+      process.env.OPSTRACE_INSTANCE_DNS_NAME
+    );
+    OPSTRACE_INSTANCE_DNS_NAME = process.env.OPSTRACE_INSTANCE_DNS_NAME;
+  }
+
+  // no trailing slash
+  CLUSTER_BASE_URL = `https://${OPSTRACE_INSTANCE_DNS_NAME}`;
+
+  TENANT_DEFAULT_LOKI_API_BASE_URL = `https://loki.default.${OPSTRACE_INSTANCE_DNS_NAME}`;
+  TENANT_DEFAULT_DD_API_BASE_URL = `https://dd.default.${OPSTRACE_INSTANCE_DNS_NAME}`;
+  TENANT_DEFAULT_CORTEX_API_BASE_URL = `https://cortex.default.${OPSTRACE_INSTANCE_DNS_NAME}`;
+  TENANT_SYSTEM_LOKI_API_BASE_URL = `https://loki.system.${OPSTRACE_INSTANCE_DNS_NAME}`;
+  TENANT_SYSTEM_CORTEX_API_BASE_URL = `https://cortex.system.${OPSTRACE_INSTANCE_DNS_NAME}`;
 
   log.info("CLUSTER_BASE_URL: %s", CLUSTER_BASE_URL);
 
