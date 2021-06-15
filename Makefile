@@ -533,16 +533,19 @@ ci-%: checkenv-builddir
 	bash -c "cd /build && echo && pwd && ls -a && make $*"
 
 
-
 .PHONY: rebuild-testrunner-container-images
 rebuild-testrunner-container-images:
 	@echo "--- building testrunner container image"
 	docker build . --rm --force-rm \
 		-t opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		-f ./test/test-remote/nodejs-testrunner.Dockerfile
+	docker build ./test/browser --rm --force-rm \
+		-t opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+		-f ./test/browser/Dockerfile
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
 	docker pull gcr.io/datadoghq/agent:7
+
 
 .PHONY: rebuild-looker-container-images
 rebuild-looker-container-images:
@@ -662,39 +665,22 @@ test-remote-ui-api: kubectl-cluster-info
 
 
 # This runs our set of browser based tests using the Playwright Test Runner
-.PHONY: test-remote-browser
-test-remote-browser: kubectl-cluster-info
-	echo "--- running test-remote-browser"
-	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
+.PHONY: test-browser
+test-browser: kubectl-cluster-info
+	echo "--- running test-browser"
+	mkdir -p ${OPSTRACE_BUILD_DIR}/test-browser-artifacts
 	docker run --tty --interactive --rm \
 		--net=host \
-		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
-		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
-		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
-		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
-		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
-		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
-		-v /build/test/test-remote/node_modules \
+		-v ${OPSTRACE_BUILD_DIR}:/test-browser-artifacts \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
-		-v /etc/passwd:/etc/passwd \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-e KUBECONFIG=/kubeconfig/config \
-		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
+		-e TEST_BROWSER_ARTIFACT_DIRECTORY=/test-browser-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
-		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=${TENANT_DEFAULT_API_TOKEN_FILEPATH}\
-		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
-		-e TENANT_RND_NAME_FOR_TESTING_ADD_TENANT \
-		-e TENANT_RND_AUTHTOKEN \
-		-e AWS_ACCESS_KEY_ID \
-		-e AWS_SECRET_ACCESS_KEY \
-		-e DEBUG=pw:api,pw:protocol,pw:browser \
 		--dns $(shell ci/dns_cache.sh) \
-		--workdir /build/test/test-remote \
-		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		npx playwright test --project=Firefox
-
+		--workdir /build/test/browser \
+		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+		yarn playwright test
 
 # Used by CI:
 # three outcomes:

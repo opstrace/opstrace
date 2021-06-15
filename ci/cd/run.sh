@@ -28,7 +28,7 @@ make ci-cd-upgrade-cluster
 # TODO(sreis): the system logs test suite (check loki ingester logs, check
 # cortex ingester logs, check systemlog Fluentd instance logs) needs to account
 # for long running clusters.
-make test-remote-browser
+make test-browser
 make test-remote || true
 make test-remote-looker
 make test-remote-ui-api
