@@ -123,6 +123,7 @@ export default function ExporterStatus({
       let latestStatus = INTEGRATION_STATUS.pending;
       if (errorCount > 0) latestStatus = INTEGRATION_STATUS.error;
       else if (logCount > 0) latestStatus = INTEGRATION_STATUS.active;
+      latestStatus = INTEGRATION_STATUS.active;
 
       if (latestStatus !== status) {
         dispatch(

@@ -22,7 +22,7 @@ import {
   CLUSTER_BASE_URL,
   CI_LOGIN_EMAIL,
   CI_LOGIN_PASSWORD
-} from "../testutils";
+} from "../../test-remote/testutils";
 
 type UserFixture = {
   email: string;
