@@ -67,6 +67,7 @@ export class DummyTimeseries {
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: BigInt;
   private optionstring: string;
+  private lastValue: number;
   private collectValidationInfo: boolean;
 
   //private logLagBehindWalltimeEveryNseconds: private;
@@ -192,6 +193,13 @@ export class DummyTimeseries {
 
     this.nSamplesValidatedSoFar = BigInt(0);
 
+    // Initialize value for random walk, between -5 and 5, and cut to a certain
+    // level of precision.
+    // Example:
+    // > Number(((Math.random() - 0.5) * 10.0).toFixed(1))
+    //   3.2
+    this.lastValue = Number(((Math.random() - 0.5) * 10.0).toFixed(1));
+
     // drop config object to save memory (I hope this is actually true)
     this.optionstring = `${JSON.stringify(opts)}`;
   }
@@ -214,7 +222,14 @@ export class DummyTimeseries {
 
   private nextValue() {
     // Note: this ignores the compressability concept so far.
-    return Math.random();
+    // Math.random() is inclusive of 0, but not of 1.
+    // Implement random walk without boundaries, and fixed step size.
+    if (Math.random() >= 0.5) {
+      this.lastValue = this.lastValue + 0.01;
+    } else {
+      this.lastValue = this.lastValue - 0.01;
+    }
+    return this.lastValue;
   }
 
   private nextSample() {
