@@ -327,6 +327,14 @@ export class DummyStream {
     return timestampToRFC3339Nano(this.currentTime());
   }
 
+  public disableValidationInfoCollection(): void {
+    // noop, only built for dummytimeseries
+  }
+
+  public enableValidationInfoCollection(): void {
+    // noop, only built for dummytimeseries
+  }
+
   public dropValidationInfo(): void {
     // a noop so far, see DummyTimeseries for what this is about
   }

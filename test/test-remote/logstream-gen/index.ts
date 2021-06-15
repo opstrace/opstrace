@@ -749,11 +749,74 @@ async function performWriteReadCycle(
 
 async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
   const fragmentsPushedBefore = COUNTER_STREAM_FRAGMENTS_PUSHED;
+
+  const lt0 = mtime();
+
+  // First, mark all streams so that (no) validation info is collected (to
+  // override state from previous cycle, if the stream objects were carried
+  // over from the previous cycle). Special case for --skip-read.
+  if (CFG.skip_read) {
+    log.info(
+      "mark all streams to not keep track of validation info: --skip-read"
+    );
+    for (const s of streams) {
+      s.disableValidationInfoCollection();
+    }
+  } else if (CFG.read_n_streams_only === 0) {
+    log.info(
+      "mark all streams to keep track of validation info: no --skip-read, and no --read-n-streams-only"
+    );
+    for (const s of streams) {
+      s.enableValidationInfoCollection();
+    }
+  }
+
+  // Optimize for the case where there are many streams of which a small
+  // fraction is supposed to be read-validated after the write phase. Only keep
+  // record of the data that was written for that little fraction. I.eq., mark
+  // most streams with a validation-info-not-needed flag, which reduces the
+  // memory usage during the write phase.
+  if (CFG.read_n_streams_only !== 0) {
+    // this implies that --skip-read is _not_ set.
+    log.info(
+      "mark all streams to not keep track of validation info: --read-n-streams-only is set"
+    );
+    for (const s of streams) {
+      s.disableValidationInfoCollection();
+    }
+
+    log.info(
+      "randomly marking %s/%s streams for validation",
+      CFG.read_n_streams_only,
+      CFG.n_concurrent_streams
+    );
+
+    const streamsToValidate: Array<
+      DummyStream | DummyTimeseries
+    > = randomSampleFromArray(streams, CFG.read_n_streams_only);
+
+    // For a small selection, show the names of the streams, for debuggability
+    if (CFG.read_n_streams_only < 20) {
+      const names = streamsToValidate.map(s => s.uniqueName).join(", ");
+      log.info("selected: %s", names);
+    }
+
+    for (const s of streamsToValidate) {
+      s.enableValidationInfoCollection();
+    }
+  }
+  const labelForValidationDurationSeconds = mtimeDiffSeconds(lt0);
+
+  // It's interesting to see how long these iterations took for millions of
+  // streams.
+  log.info(
+    "re-labeling series for validation info collection took %s s",
+    labelForValidationDurationSeconds.toFixed(2)
+  );
+
+  // Now enter the actual write phase.
   const wt0 = mtime();
-
-  await postFragments(streams, CFG.apibaseurl);
-
-  // A little summary about pushing all data.
+  await generateAndPostFragments(streams);
   const writeDurationSeconds = mtimeDiffSeconds(wt0);
 
   const nStreamFragmentsSent = Number(
@@ -801,7 +864,6 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
     megaPayloadBytesSentPerSec.toFixed(2)
   );
 
-  // Dangerous iteration for 10^6 streams?
   // for (const stream of streams) {
   //   log.debug(
   //     "Stats of last-consumed fragment of stream %s: %s",
@@ -863,7 +925,7 @@ async function unthrottledFetchAndValidate(
   return await stream.fetchAndValidate(opts);
 }
 
-async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
+async function readPhase(streams: Array<DummyStream | DummyTimeseries>) {
   log.info("entering read / validation phase");
   const validators = [];
   const vt0 = mtime();
@@ -871,36 +933,17 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
   if (CFG.skip_read) {
     log.info("skipping readout as of --skip-read");
   } else {
-    let streamsToValidate: Array<DummyStream | DummyTimeseries>;
-
-    if (CFG.read_n_streams_only === 0) {
-      streamsToValidate = dummystreams;
-    } else {
-      log.info(
-        "randomly picking %s/%s streams for validation",
-        CFG.read_n_streams_only,
-        CFG.n_concurrent_streams
-      );
-
-      streamsToValidate = randomSampleFromArray(
-        dummystreams,
-        CFG.read_n_streams_only
-      );
-
-      // For a small selection, show the names of the streams, for debuggability
-      if (CFG.read_n_streams_only < 10) {
-        const names = streamsToValidate.map(s => s.uniqueName).join(", ");
-        log.info("selected: %s", names);
-      }
-    }
-
+    // Note that the 'sparse readout' where --skip-read is not set but
+    // --read-n-streams-only is set is implemented per series object: the
+    // validation method is effectively a noop for streams that were set
+    // to not collect validation info.
     if (CFG.max_concurrent_reads === 0) {
-      for (const s of streamsToValidate) {
+      for (const s of streams) {
         validators.push(unthrottledFetchAndValidate(s));
       }
     } else {
       const semaphore = new Semaphore(CFG.max_concurrent_reads);
-      for (const s of streamsToValidate) {
+      for (const s of streams) {
         validators.push(throttledFetchAndValidate(semaphore, s));
       }
     }
@@ -920,7 +963,7 @@ async function readPhase(dummystreams: Array<DummyStream | DummyTimeseries>) {
 
   if (CFG.read_n_streams_only !== 0) {
     log.info("drop 'validation info' for all streams");
-    for (const s of dummystreams) {
+    for (const s of streams) {
       // Say there are 10^6 streams and we just read/validated a tiny fraction
       // of them, then there's a lot of data in memory (that would be needed to
       // to do read validation for all the other streams, which we know we
@@ -971,10 +1014,9 @@ For each DummyStream, create one function that produces and POSTs pushrequests.
 A "pushrequest" is a Prometheus term for a (snappy-compressed) protobuf message
 carrying log/metric payload data.
 */
-export async function postFragments(
-  streams: Array<DummyStream | DummyTimeseries>,
-  lokiPushBaseUrl: string
-) {
+export async function generateAndPostFragments(
+  streams: Array<DummyStream | DummyTimeseries>
+): Promise<void> {
   const actors = [];
 
   const writeConcurSemaphore = new Semaphore(CFG.max_concurrent_writes);

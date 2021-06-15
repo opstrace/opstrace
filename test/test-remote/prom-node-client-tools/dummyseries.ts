@@ -67,6 +67,7 @@ export class DummyTimeseries {
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: BigInt;
   private optionstring: string;
+  private collectValidationInfo: boolean;
 
   //private logLagBehindWalltimeEveryNseconds: private;
 
@@ -82,10 +83,9 @@ export class DummyTimeseries {
   constructor(opts: DummyTimeseriesOpts) {
     this.postedFragmentsSinceLastValidate = [];
 
+    this.collectValidationInfo = true;
     this.uniqueName = opts.uniqueName;
     this.metricName = opts.metricName;
-
-    //this.logLagBehindWalltimeEveryNseconds = 60;
 
     // Merge the metric name into it using the well-known special prom label
     // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
@@ -202,6 +202,14 @@ export class DummyTimeseries {
 
   public promQueryString(): string {
     return `${this.metricName}{uniquename="${this.uniqueName}"}`;
+  }
+
+  public disableValidationInfoCollection(): void {
+    this.collectValidationInfo = false;
+  }
+
+  public enableValidationInfoCollection(): void {
+    this.collectValidationInfo = true;
   }
 
   private nextValue() {
@@ -372,7 +380,12 @@ export class DummyTimeseries {
 
       // drop actual samples (otherwise mem usage would grow quite fast).
       fragment.buildStatisticsAndDropData();
-      this.postedFragmentsSinceLastValidate.push(fragment);
+
+      // if this stream is marked to never be validated then don't collect
+      // information about this fragment at all
+      if (this.collectValidationInfo) {
+        this.postedFragmentsSinceLastValidate.push(fragment);
+      }
     }
   }
 
@@ -385,6 +398,9 @@ export class DummyTimeseries {
 
     let samplesValidated = 0;
     let fragmentsValidated = 0;
+
+    // `this.postedFragmentsSinceLastValidate` is an empty array if
+    // `this.collectValidationInfo` was set to `false`.
     for (const fragment of this.postedFragmentsSinceLastValidate) {
       const validated = await this.fetchAndValidateFragment(fragment, opts);
       samplesValidated += validated;
