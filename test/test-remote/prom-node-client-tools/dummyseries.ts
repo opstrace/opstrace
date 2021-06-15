@@ -68,7 +68,6 @@ export class DummyTimeseries {
   private fragmentWidthSecondsForQuery: BigInt;
   private optionstring: string;
   private lastValue: number;
-  private collectValidationInfo: boolean;
 
   //private logLagBehindWalltimeEveryNseconds: private;
 
@@ -79,12 +78,14 @@ export class DummyTimeseries {
   nFragmentsSuccessfullySentSinceLastValidate: number;
   nSamplesValidatedSoFar: bigint;
   lastFragmentConsumed: TimeseriesFragment | undefined;
-  postedFragmentsSinceLastValidate: Array<TimeseriesFragment>;
+
+  // `undefined` means: do not collect validation info; this is so
+  // that we ideally save memory
+  postedFragmentsSinceLastValidate: Array<TimeseriesFragment> | undefined;
 
   constructor(opts: DummyTimeseriesOpts) {
-    this.postedFragmentsSinceLastValidate = [];
+    this.postedFragmentsSinceLastValidate = undefined;
 
-    this.collectValidationInfo = true;
     this.uniqueName = opts.uniqueName;
     this.metricName = opts.metricName;
 
@@ -190,7 +191,6 @@ export class DummyTimeseries {
 
     // Keep track of how many entries were validated (from the start of the
     // stream). Used by fetchAndValidate().
-
     this.nSamplesValidatedSoFar = BigInt(0);
 
     // Initialize value for random walk, between -5 and 5, and cut to a certain
@@ -213,11 +213,11 @@ export class DummyTimeseries {
   }
 
   public disableValidationInfoCollection(): void {
-    this.collectValidationInfo = false;
+    this.postedFragmentsSinceLastValidate = undefined;
   }
 
   public enableValidationInfoCollection(): void {
-    this.collectValidationInfo = true;
+    this.postedFragmentsSinceLastValidate = [];
   }
 
   private nextValue() {
@@ -398,7 +398,7 @@ export class DummyTimeseries {
 
       // if this stream is marked to never be validated then don't collect
       // information about this fragment at all
-      if (this.collectValidationInfo) {
+      if (this.postedFragmentsSinceLastValidate !== undefined) {
         this.postedFragmentsSinceLastValidate.push(fragment);
       }
     }
@@ -414,8 +414,12 @@ export class DummyTimeseries {
     let samplesValidated = 0;
     let fragmentsValidated = 0;
 
-    // `this.postedFragmentsSinceLastValidate` is an empty array if
+    // `this.postedFragmentsSinceLastValidate` is `undefined` if
     // `this.collectValidationInfo` was set to `false`.
+    if (this.postedFragmentsSinceLastValidate === undefined) {
+      return 0;
+    }
+
     for (const fragment of this.postedFragmentsSinceLastValidate) {
       const validated = await this.fetchAndValidateFragment(fragment, opts);
       samplesValidated += validated;
