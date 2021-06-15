@@ -65,7 +65,7 @@ export class DummyTimeseries {
   private nFragmentsConsumed: number;
   private labels: LabelSet;
   private timediffMilliseconds: Long;
-  private fragmentWidthSecondsForQuery: number;
+  private fragmentWidthSecondsForQuery: BigInt;
   private optionstring: string;
 
   //private logLagBehindWalltimeEveryNseconds: private;
@@ -75,7 +75,7 @@ export class DummyTimeseries {
   starttime: ZonedDateTime;
   n_samples_per_series_fragment: number;
   nFragmentsSuccessfullySentSinceLastValidate: number;
-  nSamplesValidatedSoFar: number;
+  nSamplesValidatedSoFar: bigint;
   lastFragmentConsumed: TimeseriesFragment | undefined;
   postedFragmentsSinceLastValidate: Array<TimeseriesFragment>;
 
@@ -133,7 +133,7 @@ export class DummyTimeseries {
     // actual time width of a fragment, but precisely one delta_t between two
     // samples more than that.. That's by design: this number must be an
     // integer, and is used for query construction.
-    this.fragmentWidthSecondsForQuery = Math.ceil(fragmentWidthSeconds);
+    this.fragmentWidthSecondsForQuery = BigInt(Math.ceil(fragmentWidthSeconds));
 
     // Distinguish two special cases, also see ch1767;
     if (opts.timediffMilliSeconds < 1000) {
@@ -189,7 +189,8 @@ export class DummyTimeseries {
 
     // Keep track of how many entries were validated (from the start of the
     // stream). Used by fetchAndValidate().
-    this.nSamplesValidatedSoFar = 0;
+
+    this.nSamplesValidatedSoFar = BigInt(0);
 
     // drop config object to save memory (I hope this is actually true)
     this.optionstring = `${JSON.stringify(opts)}`;
@@ -565,10 +566,7 @@ export class DummyTimeseries {
     log.debug("for comparison: %s", stats);
 
     assert.deepEqual(fragment.stats, stats);
-    // This was once BigInt to get rid of the wrapping issue, but for
-    // memory and performance maybe try out how well this works with a naive
-    // numeric type.
-    this.nSamplesValidatedSoFar += values.length;
+    this.nSamplesValidatedSoFar += BigInt(values.length);
 
     // return the number of validated samples to the caller of this method, too
     return values.length;
