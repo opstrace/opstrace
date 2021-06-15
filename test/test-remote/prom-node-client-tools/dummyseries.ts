@@ -212,12 +212,19 @@ export class DummyTimeseries {
     return `${this.metricName}{uniquename="${this.uniqueName}"}`;
   }
 
-  public disableValidationInfoCollection(): void {
+  public disableValidation(): void {
     this.postedFragmentsSinceLastValidate = undefined;
   }
 
-  public enableValidationInfoCollection(): void {
+  public enableValidation(): void {
     this.postedFragmentsSinceLastValidate = [];
+  }
+
+  public shouldBeValidated(): boolean {
+    if (this.postedFragmentsSinceLastValidate === undefined) {
+      return false;
+    }
+    return true;
   }
 
   private nextValue() {
