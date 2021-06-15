@@ -1672,8 +1672,8 @@ async function httpPostProtobuf(
     https: { rejectUnauthorized: false }, // disable TLS server cert verification for now
     timeout: {
       // If a TCP connect() takes longer then ~5 seconds then most certainly there
-      // is a networking issue, fail fast in that case.
-      connect: 5000,
+      // is a backpressure or networking issue, fail fast in that case.
+      connect: 12000,
       request: 60000
     }
   });
