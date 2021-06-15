@@ -8,12 +8,6 @@ Braindump, might be good or bad ideas
     - with --write-only mode, using wall time
 
 
-- ability to differentiate
-    400 'out of bounds' errors
-  from
-    400 'out of order' errors
-
-
 - maybe add a command line flag allowing for ignoring 'out of order' errors in general
 
 
@@ -22,3 +16,5 @@ Braindump, might be good or bad ideas
 
 - for time series generation, allow for a random walk within predictable bounds
 
+- metrics mode: detect when a write would happen into the future, do not crash in this case, but
+  adapt to wall time.
