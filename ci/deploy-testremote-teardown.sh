@@ -316,9 +316,9 @@ if [ "${EXITCODE_MAKE_TESTREMOTE}" -ne 0 ]; then
 fi
 
 # Delayed exit if `make test-remote-ui-api` failed
-if [ "${EXITCODE_MAKE_TESTREMOTE_UI}" -ne 0 ]; then
-    echo "make test-remote-ui-api did exit with code ${EXITCODE_MAKE_TESTREMOTE_UI}. Exit now."
-    exit "${EXITCODE_MAKE_TESTREMOTE_UI}"
+if [ "${EXITCODE_MAKE_TESTREMOTE_UI_API}" -ne 0 ]; then
+    echo "make test-remote-ui-api did exit with code ${EXITCODE_MAKE_TESTREMOTE_UI_API}. Exit now."
+    exit "${EXITCODE_MAKE_TESTREMOTE_UI_API}"
 fi
 
 # Delayed exit if `make test-browser` failed
