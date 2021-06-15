@@ -93,7 +93,7 @@ export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
           }
         }
       },
-      { createGrafanaFolder: true }
+      { createGrafanaFolder: false }
     );
   };
 

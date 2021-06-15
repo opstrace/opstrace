@@ -79,7 +79,7 @@ export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {
           config: data.config
         }
       },
-      { createGrafanaFolder: true }
+      { createGrafanaFolder: false }
     );
   };
 

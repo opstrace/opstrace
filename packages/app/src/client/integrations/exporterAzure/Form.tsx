@@ -86,7 +86,7 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
           config: data.config
         }
       },
-      { createGrafanaFolder: true }
+      { createGrafanaFolder: false }
     );
   };
 
