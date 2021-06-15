@@ -1466,7 +1466,11 @@ function markPushMessageAsSuccessfullySent(
 
     // dummyseries version
     if (frgmnt instanceof TimeseriesFragment) {
-      frgmnt.parent!.postedFragmentsSinceLastValidate.push(frgmnt);
+      // `postedFragmentsSinceLastValidate` is an array if this object is meant
+      // to collect information for read-validation, or `undefined` otherwise.
+      if (frgmnt.parent!.postedFragmentsSinceLastValidate !== undefined) {
+        frgmnt.parent!.postedFragmentsSinceLastValidate.push(frgmnt);
+      }
     }
   }
 }
