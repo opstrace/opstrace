@@ -377,7 +377,13 @@ suite("test_ui_with_headless_browser", function () {
     await page.click("text=Metrics");
     assert(await page.isVisible("text=Cortex Ring Health"), "page loaded");
 
-    for (const tabName of ["Ingester", "Ruler", "Compactor", "Store-gateway"]) {
+    for (const tabName of [
+      "Ingester",
+      "Ruler",
+      "Compactor",
+      "Store-gateway",
+      "Alertmanager"
+    ]) {
       await page.click(`text=${tabName}`);
       page.waitForSelector(`css=tab >> text=${tabName} [aria-selected="true"]`);
       assert(
