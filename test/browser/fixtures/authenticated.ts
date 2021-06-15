@@ -42,7 +42,7 @@ type AuthenticationFixture = {
 };
 
 // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-let test = base.extend<Record<string, never>, AuthenticationFixture>({
+const test = base.extend<Record<string, never>, AuthenticationFixture>({
   cluster: [
     async ({ browser }, use) => {
       const user: ClusterFixture = {
