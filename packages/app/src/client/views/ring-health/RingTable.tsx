@@ -37,7 +37,8 @@ import { Button } from "client/components/Button";
 import { Box } from "client/components/Box";
 import TokenDialog from "./TokenDialog";
 import { useRouteMatch, useHistory } from "react-router-dom";
-import useInterval from "@use-it/interval";
+import useInterval from "react-use/lib/useInterval";
+import useMountedState from "react-use/lib/useMountedState";
 import { usePickerService } from "client/services/Picker";
 
 const useStyles = makeStyles(theme => ({
@@ -101,6 +102,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
   const [keepPolling, setKeepPolling] = useState(true);
   const [shards, setShards] = useState<Array<Shard>>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isMounted = useMountedState();
 
   const notifyError = useCallback(
     (error: Error, message: string) => {
@@ -144,6 +146,19 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
   const fetchShards = async () => {
     try {
       const response = await axios.get<void, Response>(ringEndpoint);
+      if (!isMounted()) {
+        /* As we poll the shards every few seconds, we occassionaly
+         * run into the situation that, in between request and response,
+         * the component did unmount.
+         *
+         * To prevent errors and warnings like
+         * "Can't perform a React state update on an unmounted component",
+         * we check for the mounted state and cancel any further operation
+         * if the component in fact did unmount.
+         */
+        return;
+      }
+
       if (!isJSONResponse(response)) {
         // some error messages are returned via HTML
         // So we throw an error here to trigger an error toast
