@@ -25,27 +25,34 @@ import { log, SECOND } from "@opstrace/utils";
 import axios, { AxiosResponse } from "axios";
 
 function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
-  const res: AxiosResponse<string> = yield axios({
-    url: `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
-    method: "GET",
-    headers: {
-      "X-Scope-OrgID": tenant
+  try {
+    const res: AxiosResponse<string> = yield axios({
+      url: `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
+      method: "GET",
+      headers: {
+        "X-Scope-OrgID": tenant
+      }
+    });
+
+    if (res.data.length) {
+      // Already has config set
+      return;
     }
-  });
-
-  if (res.status > 499) {
-    // Network error, don't potentially overwrite existing config
-    log.error(
-      `could not read alertmanager config for tenant: ${tenant}, got resp: ${
-        res.status
-      }, ${res.data.slice(0, 500)}...` // truncate to the first 500 chars as a maximum
-    );
-    return;
-  }
-
-  if (res.data.length) {
-    // Already has config set
-    return;
+  } catch (err) {
+    if (!err.response) {
+      return;
+    }
+    // Cortex will return a 404 if config hasn't been set for this tenant already, so
+    // we want to continue on if we get a 404
+    if (err.response.status != 404) {
+      // Don't risk overwriting existing config
+      log.error(
+        `could not read alertmanager config for tenant: ${tenant}, got resp: ${
+          err.response.status
+        }, ${err.response.data.slice(0, 500)}...` // truncate to the first 500 chars as a maximum
+      );
+      return;
+    }
   }
 
   try {
@@ -84,6 +91,7 @@ export function* syncTenants(
       );
       return;
     }
+    let controllerStartup = true;
     // In the lifespan of a cluster, this does the following:
     // 0. The installer writes the list of tenant names/types to a ConfigMap.
     // 1a. When the controller is first run, the sync detects that GraphQL is empty and syncs from the ConfigMap to GraphQL.
@@ -141,6 +149,14 @@ export function* syncTenants(
               type: t.type === "SYSTEM" ? "SYSTEM" : "USER"
             }))
             .sort((t1, t2) => t1.name.localeCompare(t2.name)) as Tenants;
+
+          if (controllerStartup) {
+            // Set default alerting config on startup for smooth upgrade path for instances that don't have config set
+            for (const tenant of dbTenantsState) {
+              yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
+            }
+            controllerStartup = false;
+          }
           if (!equals(dbTenantsState, configmapTenants)) {
             log.info(
               "tenant config changed in db: old=%s new=%s",
