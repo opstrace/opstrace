@@ -40,7 +40,8 @@ import {
   runInformers,
   blockUntilCacheHydrated,
   runReporter,
-  syncTenants
+  syncTenants,
+  cortexSystemRulesReconciler
 } from "./tasks";
 import { rootReducer } from "./reducer";
 
@@ -94,6 +95,9 @@ function* core() {
 
   log.info(`starting tenant sync`);
   yield fork(syncTenants, kubeConfig);
+
+  log.info(`starting system rules reconciler`);
+  yield fork(cortexSystemRulesReconciler);
 
   log.info(`starting reconciliation`);
   yield fork(reconciliationLoop, kubeConfig);
