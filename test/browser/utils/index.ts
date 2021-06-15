@@ -35,6 +35,7 @@ export const log = winston.createLogger({
 });
 
 export let CLUSTER_BASE_URL: string;
+export let CLOUD_PROVIDER: string;
 
 export const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
 export const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
@@ -54,8 +55,8 @@ export function globalTestSuiteSetupOnce() {
     process.exit(1);
   }
 
-  const provider: string = process.env.OPSTRACE_CLOUD_PROVIDER || "";
-  if (!provider) {
+  CLOUD_PROVIDER = process.env.OPSTRACE_CLOUD_PROVIDER || "";
+  if (!CLOUD_PROVIDER) {
     log.error(
       "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
     );

@@ -18,14 +18,17 @@ import { test } from "../fixtures/authenticated";
 import { expect } from "@playwright/test";
 
 test.describe("after auth0 authentication", () => {
-  test("user should see homepage", async ({ loggedInPage: page }) => {
+  test.beforeEach(async ({ page, context, authCookies, cluster }) => {
+    context.addCookies(authCookies);
+    await page.goto(cluster.baseUrl);
+    await page.waitForSelector("text=Getting Started");
+  });
+
+  test("user should see homepage", async ({ page }) => {
     expect(await page.isVisible("text=Getting Started")).toBeTruthy();
   });
 
-  test("user should see own email in user list", async ({
-    loggedInPage: page,
-    user
-  }) => {
+  test("user should see own email in user list", async ({ page, user }) => {
     await page.click("text=Users");
     expect(await page.isVisible(`text=${user.email}`)).toBeTruthy();
   });

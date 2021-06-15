@@ -14,28 +14,45 @@
  * limitations under the License.
  */
 
-import { test as base, Cookie, Page } from "@playwright/test";
+import { test as base, Cookie } from "@playwright/test";
 
 import {
   log,
   globalTestSuiteSetupOnce,
   CLUSTER_BASE_URL,
+  CLOUD_PROVIDER,
   CI_LOGIN_EMAIL,
   CI_LOGIN_PASSWORD
-} from "../../test-remote/testutils";
+} from "../utils";
+
+type ClusterFixture = {
+  baseUrl: string;
+  cloudProvider;
+  string;
+};
 
 type UserFixture = {
   email: string;
 };
 
 type AuthenticationFixture = {
+  cluster: ClusterFixture;
   user: UserFixture;
   authCookies: Cookie[];
-  loggedInPage: Page;
 };
 
 // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
 let test = base.extend<Record<string, never>, AuthenticationFixture>({
+  cluster: [
+    async ({ browser }, use) => {
+      const user: ClusterFixture = {
+        baseUrl: CLUSTER_BASE_URL,
+        cloudProvider: CLOUD_PROVIDER
+      };
+      await use(user);
+    },
+    { scope: "worker" }
+  ],
   user: [
     async ({ browser }, use) => {
       const user: UserFixture = {
@@ -86,20 +103,6 @@ let test = base.extend<Record<string, never>, AuthenticationFixture>({
     },
     { scope: "worker", auto: true }
   ]
-});
-
-type LoggedInFixture = {
-  loggedInPage: Page;
-};
-
-test = test.extend<LoggedInFixture>({
-  // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-  loggedInPage: async ({ page, context, authCookies }, use) => {
-    context.addCookies(authCookies);
-    await page.goto(CLUSTER_BASE_URL);
-    await page.waitForSelector("text=Getting Started");
-    await use(page);
-  }
 });
 
 export { test };
