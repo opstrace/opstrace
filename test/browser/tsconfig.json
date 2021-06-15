@@ -21,9 +21,9 @@
     "skipLibCheck": true
   },
   "include": [
-    "./test*.ts",
     "utils/**/*.ts",
-    "tests/*.ts",
+    "fixtures/**/*.ts",
+    "tests/**/*.ts",
     "playwright.config.ts",
     "playwright.dev-config.ts"
   ]
