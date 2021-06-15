@@ -1117,8 +1117,12 @@ async function _produceAndPOSTpushrequest(
     COUNTER_STREAM_FRAGMENTS_PUSHED =
       COUNTER_STREAM_FRAGMENTS_PUSHED +
       BigInt(CFG.n_fragments_per_push_message);
+
     counter_fragments_pushed.inc(CFG.n_fragments_per_push_message);
-    counter_log_entries_pushed.inc(CFG.n_entries_per_stream_fragment);
+
+    counter_log_entries_pushed.inc(
+      CFG.n_entries_per_stream_fragment * CFG.n_fragments_per_push_message
+    );
 
     // NOTE: payloadByteCount() includes timestamps. For logs, the timestamp
     // payload data (12 bytes per entry) might be small compared to the log
