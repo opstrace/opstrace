@@ -433,14 +433,16 @@ export class DummyTimeseries {
     for (let i = 1; i <= nFragments; i++) {
       let fragment: TimeseriesFragment;
       while (true) {
-        const [currentlag, f] = this.generateAndGetNextFragment();
+        const [shiftIntoPastSeconds, f] = this.generateAndGetNextFragment();
         if (f !== undefined) {
           fragment = f;
           break;
         }
 
         log.debug(
-          `${this}: current lag compared to wall time is  too small. Delay fragment generation.`
+          `${this}: current lag compared to wall time ` +
+            `(${shiftIntoPastSeconds.toFixed(1)} s)` +
+            "is too small. Delay fragment generation."
         );
         await sleep(5);
       }
