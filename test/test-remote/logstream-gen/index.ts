@@ -1089,10 +1089,39 @@ async function _produceAndPOSTpushrequest(
     // itself, the stop criteria are defined above, based on wall time passed
     // or the number of fragments already consumed for this stream.
     const fragments: Array<LogStreamFragment | TimeseriesFragment> = [];
-    for (const s of streams) {
-      const f = s.generateAndGetNextFragment();
-      fragments.push(f);
-      s.lastFragmentConsumed = f;
+
+    //
+    if (!CFG.metrics_mode)
+      for (const s of streams as DummyStream[]) {
+        const f = s.generateAndGetNextFragment();
+        fragments.push(f);
+        s.lastFragmentConsumed = f;
+      }
+    else {
+      for (const s of streams as DummyTimeseries[]) {
+        let fragment: TimeseriesFragment;
+
+        while (true) {
+          const [shiftIntoPastSeconds, f] = s.generateAndGetNextFragment();
+          if (f !== undefined) {
+            fragment = f;
+            break;
+          }
+
+          const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
+          log.debug(
+            `${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
+              1
+            )} minutes. Fragment generation is too fast. Delay fragment generation.`
+          );
+          // TODO: add counter so that we can monitor the rate of
+          // artificial throttling
+          await sleep(10);
+        }
+
+        fragments.push(fragment);
+        s.lastFragmentConsumed = fragment;
+      }
     }
 
     // NOTE(JP): here we can calculate the lag between the first or last sample
