@@ -127,7 +127,15 @@ export function ControllerResources({
                       name: "GRAPHQL_ENDPOINT",
                       value: `http://graphql.application.svc.cluster.local:8080/v1/graphql`
                     }
-                  ]
+                  ],
+                  readinessProbe: {
+                    httpGet: {
+                      path: "/ready",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      port: 9000 as any,
+                      scheme: "HTTP"
+                    }
+                  }
                 }
               ]
             }
