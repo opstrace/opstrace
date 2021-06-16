@@ -43,7 +43,7 @@ type NewIntegrationOptions = {
   createGrafanaFolder?: boolean;
 };
 
-export const AddIntegration = () => {
+export const InstallIntegration = () => {
   const { integrationKind: kind } = useParams<{
     integrationKind: string;
   }>();

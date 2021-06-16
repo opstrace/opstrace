@@ -51,7 +51,7 @@ import GettingStarted from "client/views/getting-started";
 import TenantOverview from "client/views/overview";
 import {
   TenantIntegrations,
-  AddIntegration,
+  InstallIntegration,
   ShowIntegration,
   EditIntegration
 } from "client/views/integrations";
@@ -275,9 +275,9 @@ const AuthProtectedApplication = () => {
             />
             <Route
               exact
-              key="/tenant/:tenantId/integrations/all/add/:integrationKind"
-              path="/tenant/:tenantId/integrations/all/add/:integrationKind"
-              component={AddIntegration}
+              key="/tenant/:tenantId/integrations/all/install/:integrationKind"
+              path="/tenant/:tenantId/integrations/all/install/:integrationKind"
+              component={InstallIntegration}
             />
             <Route
               exact

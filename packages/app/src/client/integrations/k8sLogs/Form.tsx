@@ -79,7 +79,7 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
         <Card>
           <CardHeader
             titleTypographyProps={{ variant: "h5" }}
-            title={`Add ${integrationDef.label} Integration`}
+            title={`Install ${integrationDef.label} Integration`}
           />
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -108,7 +108,7 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
                 size="large"
                 disabled={!isValid}
               >
-                Create
+                Install
               </Button>
             </form>
           </CardContent>
