@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-import { expect } from "@playwright/test";
-
-import { test } from "../fixtures/authenticated";
-import { logUserIn } from "../utils/authentication";
-
-test.describe("after auth0 authentication", () => {
-  test.beforeEach(logUserIn);
-
-  test("user should see homepage", async ({ page }) => {
-    expect(await page.isVisible("text=Getting Started")).toBeTruthy();
-  });
-
-  test("user should see own email in user list", async ({ page, user }) => {
-    await page.click("text=Users");
-    expect(await page.isVisible(`text=${user.email}`)).toBeTruthy();
-  });
-});
+export const logUserIn = async ({ page, context, authCookies, cluster }) => {
+  context.addCookies(authCookies);
+  await page.goto(cluster.baseUrl);
+  await page.waitForSelector("text=Getting Started");
+};
