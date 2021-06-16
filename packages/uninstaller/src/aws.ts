@@ -177,20 +177,19 @@ export function* destroyAWSInfra(): Generator<
 
   const taskGroup4 = [];
 
-  //const route53dnsname = `${destroyConfig.clusterName}.opstrace.io.`;
+  // Note(JP): do not delete any DNS-related infra when the Opstrace instance
+  // was set up with a custom DNS name. TODO: when the Opstrace instance
+  // configuration document is not input for the destroy operation, we cannot
+  // 'know' that this instance was configured to use a custom DNS name. Can we
+  // peek into the cluster?
 
-  // Note(JP): I am confused.. why was this here? since having our DNS service
-  // I think any DELETE operation against route53 involving .opstrace.io.
-  // should not be called from within the uninstaller -- our users don't have
-  // the credentials anyway to delete things in our .opstrace.io. Or is this
-  // a sub-zone in _their_ route53? Probably that.
+  // First, delete the DNS zone in the user's cloud infrastructure For
+  // example, this is an AWS Route 53 managed zone for *.foo.opstrace.io.
+  // const route53dnsname = `${destroyConfig.clusterName}.opstrace.io.`;
+  // taskGroup4.push(yield fork(route53PurgeZonesForDnsName, route53dnsname));
 
-  //taskGroup4.push(yield fork(route53PurgeZonesForDnsName, route53dnsname));
-
-  // TODO: when the Opstrace instance configuration document is not
-  // input for the destroy operation, we cannot 'know' that this instance
-  // was configured to use a custom DNS name. Can we peek into the cluster?
-
+  // Now, instruct the Opstrace DNS service to also remove the corresponding
+  // configuration in Opstrace's DNS zone for *.opstrace.io.
   // taskGroup4.push(
   //   yield fork(
   //     [opstraceClient, opstraceClient.delete],
