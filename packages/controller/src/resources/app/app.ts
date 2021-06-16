@@ -28,7 +28,7 @@ import {
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
 import { generateSecretValue, getControllerConfig } from "../../helpers";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 import { getCertSecretCopy } from "../utils";
 
 export function OpstraceApplicationResources(
@@ -243,6 +243,7 @@ export function OpstraceApplicationResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               serviceAccountName: "opstrace-application",
               terminationGracePeriodSeconds: 80, // we give the app 60 seconds to drain existing connections
               affinity: withPodAntiAffinityRequired({
@@ -426,6 +427,7 @@ export function OpstraceApplicationResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 app: "graphql"
               }),

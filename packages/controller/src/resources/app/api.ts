@@ -26,7 +26,8 @@ import { KubeConfig, V1EnvVar } from "@kubernetes/client-node";
 import { getControllerConfig } from "../../helpers";
 import {
   DockerImages,
-  LatestControllerConfigType
+  LatestControllerConfigType,
+  getImagePullSecrets
 } from "@opstrace/controller-config";
 
 export function OpstraceAPIResources(
@@ -36,7 +37,9 @@ export function OpstraceAPIResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(
+    state
+  );
 
   const name = `opstrace-api`;
 
@@ -53,10 +56,7 @@ export function OpstraceAPIResources(
     failureThreshold: 3
   };
 
-  const commandArgs = [
-    "-config=:8080",
-    "-action=:8081",
-  ];
+  const commandArgs = ["-config=:8080", "-action=:8081"];
   const commandEnv: V1EnvVar[] = [
     {
       name: "CORTEX_RULER_ENDPOINT",
@@ -85,7 +85,8 @@ export function OpstraceAPIResources(
       value: controllerConfig.tenant_api_authenticator_pubkey_set_json
     });
 
-    const data_api_authn_pubkey_pem = controllerConfig.data_api_authn_pubkey_pem ?? "";
+    const data_api_authn_pubkey_pem =
+      controllerConfig.data_api_authn_pubkey_pem ?? "";
     if (data_api_authn_pubkey_pem !== "") {
       commandEnv.push({
         name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
@@ -129,6 +130,7 @@ export function OpstraceAPIResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 app: name
               }),

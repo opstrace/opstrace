@@ -24,7 +24,7 @@ import {
 } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
 import { generateSecretValue } from "../../helpers";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function RedisResources(
   state: State,
@@ -145,6 +145,7 @@ export function RedisResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   name: "master",
@@ -213,6 +214,7 @@ export function RedisResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 app: "redis",
                 role: "slave"

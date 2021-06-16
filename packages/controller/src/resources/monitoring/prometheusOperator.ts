@@ -34,7 +34,7 @@ import {
 
 import { State } from "../../reducer";
 import { KubeConfig } from "@kubernetes/client-node";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function PrometheusOperatorResources(
   state: State,
@@ -170,11 +170,12 @@ export function PrometheusOperatorResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   args: [
                     "--kubelet-service=kube-system/kubelet",
-                    `--prometheus-config-reloader=${DockerImages.prometheusConfigReloader}`,
+                    `--prometheus-config-reloader=${DockerImages.prometheusConfigReloader}`
                   ],
                   image: DockerImages.prometheusOperator,
                   name: "prometheus-operator",

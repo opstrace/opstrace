@@ -38,7 +38,7 @@ import {
   V1ServicemonitorResource,
   withPodAntiAffinityRequired
 } from "@opstrace/kubernetes";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 import { log } from "@opstrace/utils";
 
 export function CortexResources(
@@ -1035,6 +1035,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "distributor"
               }),
@@ -1764,6 +1765,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "querier"
               }),
@@ -1919,6 +1921,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "query-frontend"
               }),
@@ -2069,6 +2072,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               initContainers: [
                 {
                   image: DockerImages.postgresClient,
@@ -2236,6 +2240,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "ruler"
               }),
@@ -2380,6 +2385,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "alertmanager"
               }),

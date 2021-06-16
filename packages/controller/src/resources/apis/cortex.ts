@@ -36,7 +36,8 @@ import { addApiIngress } from "./ingress";
 import { nodecountToReplicacount } from "./index";
 import {
   DockerImages,
-  LatestControllerConfigType
+  LatestControllerConfigType,
+  getImagePullSecrets
 } from "@opstrace/controller-config";
 
 // This should really be called "Cortex API"
@@ -57,7 +58,9 @@ export function CortexAPIResources(
     resources: {}
   };
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(
+    state
+  );
 
   const namespace = getTenantNamespace(tenant);
 
@@ -88,7 +91,8 @@ export function CortexAPIResources(
       }
     ];
 
-    const data_api_authn_pubkey_pem = controllerConfig.data_api_authn_pubkey_pem ?? "";
+    const data_api_authn_pubkey_pem =
+      controllerConfig.data_api_authn_pubkey_pem ?? "";
     if (data_api_authn_pubkey_pem !== "") {
       cortexApiProxyEnv.push({
         name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
@@ -126,6 +130,7 @@ export function CortexAPIResources(
               affinity: withPodAntiAffinityRequired({
                 "k8s-app": name
               }),
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   name: "cortex-api",
