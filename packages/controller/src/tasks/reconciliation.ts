@@ -45,6 +45,7 @@ import { MonitoringResources } from "../resources/monitoring";
 import { RedisResources } from "../resources/redis";
 import { StorageResources } from "../resources/storage";
 import { TenantResources } from "../resources/tenants";
+import { DockerHubResources } from "../resources/dockerhub";
 
 import { getControllerConfig } from "../helpers";
 import { setToReady } from "./kubernetesReadinessProbe";
@@ -95,6 +96,7 @@ export function* reconciliationLoop(
     desired.add(RedisResources(state, kubeConfig, "application"));
     desired.add(TenantResources(state, kubeConfig, "ingress", "https-cert"));
     desired.add(IntegrationResources(state, kubeConfig));
+    desired.add(DockerHubResources(state, kubeConfig));
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);
 
