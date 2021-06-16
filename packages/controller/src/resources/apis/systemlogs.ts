@@ -26,7 +26,7 @@ import { State } from "../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { KubeConfig } from "@kubernetes/client-node";
 import { getTenantNamespace } from "../../helpers";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function SystemLogAgentResources(
   state: State,
@@ -164,6 +164,7 @@ export function SystemLogAgentResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               tolerations: [
                 {
                   key: "node-role.kubernetes.io/master",

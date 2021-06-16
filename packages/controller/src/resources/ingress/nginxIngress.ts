@@ -31,7 +31,7 @@ import {
 import { State } from "../../reducer";
 import { entries } from "@opstrace/utils";
 import { getDomain, getControllerConfig } from "../../helpers";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function NginxIngressResources(
   state: State,
@@ -148,6 +148,7 @@ export function NginxIngressResources(
                 }
               },
               spec: {
+                imagePullSecrets: getImagePullSecrets(),
                 terminationGracePeriodSeconds: 300,
                 serviceAccountName: "nginx-ingress-serviceaccount",
                 containers: [
