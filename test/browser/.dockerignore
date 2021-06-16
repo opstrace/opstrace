@@ -1,0 +1,4 @@
+Dockerfile
+node_modules
+playwright.dev.config.ts
+yarn-error.log

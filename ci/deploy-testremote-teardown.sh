@@ -296,6 +296,12 @@ EXITCODE_MAKE_TESTREMOTE_UI=$?
 set -e
 echo "--- Exit status of make test-remote-ui: ${EXITCODE_MAKE_TESTREMOTE_UI}"
 
+set +e
+make test-browser
+EXITCODE_MAKE_TEST_BROWSER=$?
+set -e
+echo "--- Exit status of make test-browser: ${EXITCODE_MAKE_TEST_BROWSER}"
+
 # Rely on screenshots to be created with a certain file name prefix.
 cp uishot-*.png /build/bk-artifacts || true
 
@@ -314,6 +320,12 @@ fi
 if [ "${EXITCODE_MAKE_TESTREMOTE_UI}" -ne 0 ]; then
     echo "make test-remote-ui did exit with code ${EXITCODE_MAKE_TESTREMOTE_UI}. Exit now."
     exit "${EXITCODE_MAKE_TESTREMOTE_UI}"
+fi
+
+# Delayed exit if `make test-browser` failed
+if [ "${EXITCODE_MAKE_TEST_BROWSER}" -ne 0 ]; then
+    echo "make test-browser did exit with code ${EXITCODE_MAKE_TEST_BROWSER}. Exit now."
+    exit "${EXITCODE_MAKE_TEST_BROWSER}"
 fi
 
 # One child process was spawned (see start_data_collection_deployment_loop()).

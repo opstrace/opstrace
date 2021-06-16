@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "outDir": "_tscbuild",
+    "strict": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "target": "es2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "inlineSourceMap": true,
+    "experimentalDecorators": true,
+    "pretty": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    // skipLibCheck might be considered unacceptable,
+    // also see this discussion:
+    // https://github.com/firebase/firebase-functions/issues/551
+    "skipLibCheck": true
+  },
+  "include": [
+    "utils/**/*.ts",
+    "fixtures/**/*.ts",
+    "tests/**/*.ts",
+    "playwright.config.ts",
+    "playwright.dev-config.ts"
+  ]
+}
