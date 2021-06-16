@@ -193,6 +193,12 @@ const counter_rw_cycles = new promclient.Counter({
   help: "number of read/write cycles performed"
 });
 
+const counter_fragment_generation_delayed = new promclient.Counter({
+  name: "counter_fragment_generation_delayed",
+  help:
+    "number of times fragment generation was delayed (in metrics mode) because otherwise we would overtake walltime"
+});
+
 const gauge_last_http_request_body_size_bytes = new promclient.Gauge({
   name: "gauge_last_http_request_body_size_bytes",
   help:
@@ -1101,9 +1107,16 @@ async function _produceAndPOSTpushrequest(
       for (const s of streams as DummyTimeseries[]) {
         let fragment: TimeseriesFragment;
 
+        // This while loop is effectively a throttling mechanism, only
+        // built for metrics mode.
         while (true) {
           const [shiftIntoPastSeconds, f] = s.generateAndGetNextFragment();
           if (f !== undefined) {
+            // TODO: the current time shift compared to wall time should
+            // be monitored, maybe via a histogram? Does not make sense
+            // to update a gauge with it because the shift is a distribution
+            // over _all_ streams in this looker session, might might be
+            // O(10^6).
             fragment = f;
             break;
           }
@@ -1114,8 +1127,8 @@ async function _produceAndPOSTpushrequest(
               1
             )} minutes. Fragment generation is too fast. Delay fragment generation.`
           );
-          // TODO: add counter so that we can monitor the rate of
-          // artificial throttling
+          // We want to monitor the artificial throttling
+          counter_fragment_generation_delayed.inc(1);
           await sleep(10);
         }
 
