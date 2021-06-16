@@ -381,9 +381,10 @@ function parseCmdlineArgs() {
   });
 
   parser.add_argument("--http-server-port", {
-    help: "HTTP server listen port (serves /metrics Prometheus endpoint)",
+    help:
+      "HTTP server listen port (serves /metrics Prometheus endpoint). Default: try 8900-8990.",
     type: "int",
-    default: 8900
+    default: 0
   });
 
   const stopgroup = parser.add_mutually_exclusive_group({ required: true });
@@ -1751,9 +1752,40 @@ function setupPromExporter() {
     }
   );
 
-  const httpserver = httpapp.listen(CFG.http_server_port, () =>
-    log.info("HTTP server listening on port %s", CFG.http_server_port)
-  );
+  // dunno how to import `http.Server` type from express :(.
+  let httpserver: any;
+
+  if (CFG.http_server_port === 0) {
+    // implement default: try all ports between 8900 and 8990 (inclusive)
+    for (let tryport = 8900; tryport < 8901; tryport++) {
+      try {
+        httpserver = httpapp.listen(tryport, () =>
+          log.info("HTTP server listening on port %s", tryport)
+        );
+      } catch (err) {
+        if (err.message.includes("EADDRINUSE")) {
+          log.debug("port %s is in use, try another one", tryport);
+        } else {
+          // re-throw all other errors
+          throw err;
+        }
+      }
+      break;
+    }
+
+    // handle case where all attempts failed with EADDRINUSE
+    if (httpserver === undefined) {
+      log.error(
+        "could not start http server: all port that were tried out seem to be in use"
+      );
+      process.exit(1);
+    }
+  } else {
+    // Try just the port that was manually specified.
+    httpserver = httpapp.listen(CFG.http_server_port, () =>
+      log.info("HTTP server listening on port %s", CFG.http_server_port)
+    );
+  }
 
   // httpserver.close() will not initiate a clean shutdown.
   // see opstrace-prelaunch/issues/640
