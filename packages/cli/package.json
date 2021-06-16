@@ -32,6 +32,7 @@
     "@opstrace/installer": "^0.0.0",
     "@opstrace/uninstaller": "^0.0.0",
     "@opstrace/upgrader": "^0.0.0",
+    "@opstrace/controller-config": "^0.0.0",
     "@types/jsonwebtoken": "^8.5.0",
     "yesno": "^0.3.1",
     "argparse": "2.0.1",
