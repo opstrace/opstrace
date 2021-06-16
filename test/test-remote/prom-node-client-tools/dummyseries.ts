@@ -194,7 +194,7 @@ export class DummyTimeseries {
     this.nSamplesValidatedSoFar = BigInt(0);
 
     // Initialize value for random walk, between -5 and 5, and cut to a certain
-    // level of precision.
+    // level of precision. TODO: make interval width a parameter (currently 10).
     // Example:
     // > Number(((Math.random() - 0.5) * 10.0).toFixed(1))
     //   3.2
@@ -231,10 +231,11 @@ export class DummyTimeseries {
     // Note: this ignores the compressability concept so far.
     // Math.random() is inclusive of 0, but not of 1.
     // Implement random walk without boundaries, and fixed step size.
+    // TODO: make step size a parameter (currently 0.1)
     if (Math.random() >= 0.5) {
-      this.lastValue = this.lastValue + 0.01;
+      this.lastValue = this.lastValue + 0.1;
     } else {
-      this.lastValue = this.lastValue - 0.01;
+      this.lastValue = this.lastValue - 0.1;
     }
     return this.lastValue;
   }
