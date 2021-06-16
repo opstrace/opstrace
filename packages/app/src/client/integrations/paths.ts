@@ -33,7 +33,7 @@ export const addIntegrationPath = ({
 }: {
   tenant: Tenant;
   integrationDef: IntegrationDef;
-}) => `${baseIntegrationsPath(tenant)}/all/add/${integrationDef.kind}`;
+}) => `${baseIntegrationsPath(tenant)}/all/install/${integrationDef.kind}`;
 
 export const showIntegrationPath = ({
   tenant,

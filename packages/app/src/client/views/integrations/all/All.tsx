@@ -76,7 +76,7 @@ const IntegrationDefCards = ({ integrationDefs }: Props) => {
                         disabled={!i9n.enabled}
                         onClick={() => onAdd(i9n)}
                       >
-                        Add
+                        Install
                       </Button>
                     </Box>
                   </Box>

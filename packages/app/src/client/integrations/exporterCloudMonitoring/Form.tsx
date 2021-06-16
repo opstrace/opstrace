@@ -112,7 +112,7 @@ export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
           <Card>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
-              title={`Add ${integrationDef.label} Integration`}
+              title={`Install ${integrationDef.label} Integration`}
             />
             <CardContent>
               <Box mb={3} mt={2}>
@@ -217,7 +217,7 @@ export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
                 size="large"
                 disabled={!isValid}
               >
-                Create
+                Install
               </Button>
             </CardContent>
           </Card>
