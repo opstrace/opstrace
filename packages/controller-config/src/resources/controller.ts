@@ -23,6 +23,7 @@ import {
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { generateSecretValue } from "../helpers";
+import { getImagePullSecrets, dockerHubCredsSecret } from "./dockerhub";
 
 export const CONTROLLER_NAME = "opstrace-controller";
 
@@ -40,6 +41,10 @@ export function ControllerResources({
   const name = CONTROLLER_NAME;
 
   const controllerCmdlineArgs = [`${opstraceClusterName}`];
+
+  // create dockerhub credentials secret if we have the credentials set
+  // as environment variables
+  collection.add(dockerHubCredsSecret(kubeConfig));
 
   // create this secret in the kube-system namespace. The controller
   // itself will copy this secret over to the application namespace
@@ -95,6 +100,7 @@ export function ControllerResources({
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               serviceAccountName: "opstrace-controller",
               containers: [
                 {

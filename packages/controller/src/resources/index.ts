@@ -25,4 +25,3 @@ export * from "./monitoring";
 export * from "./redis";
 export * from "./storage";
 export * from "./tenants";
-export * from "./dockerhub";
