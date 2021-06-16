@@ -34,12 +34,16 @@ function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
       }
     });
 
-    if (res.data.length) {
+    if (res.status === 200) {
       // Already has config set
       return;
     }
   } catch (err) {
     if (!err.response) {
+      log.error(
+        `could not read alertmanager config for tenant: ${tenant}, got unknown error: %s`,
+        err
+      );
       return;
     }
     // Cortex will return a 404 if config hasn't been set for this tenant already, so
@@ -73,6 +77,7 @@ function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
     - name: default-receiver
 `
     });
+    log.info(`successfully set default alertmanager config ${tenant} tenant`);
   } catch (err) {
     log.error(
       `could not write default alertmanager config to ${tenant} tenant: %s`,
@@ -91,7 +96,6 @@ export function* syncTenants(
       );
       return;
     }
-    let controllerStartup = true;
     // In the lifespan of a cluster, this does the following:
     // 0. The installer writes the list of tenant names/types to a ConfigMap.
     // 1a. When the controller is first run, the sync detects that GraphQL is empty and syncs from the ConfigMap to GraphQL.
@@ -134,10 +138,6 @@ export function* syncTenants(
           yield call(dbClient.CreateTenants, {
             tenants
           });
-
-          for (const tenant of tenants) {
-            yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
-          }
         } else {
           // Sync changes from GraphQL back into the ConfigMap, which will update our local state in the process.
           // If GraphQL has IDs for the tenants, this adds the IDs to the ConfigMap as well, which is then reflected in the controller state object.
@@ -150,13 +150,6 @@ export function* syncTenants(
             }))
             .sort((t1, t2) => t1.name.localeCompare(t2.name)) as Tenants;
 
-          if (controllerStartup) {
-            // Set default alerting config on startup for smooth upgrade path for instances that don't have config set
-            for (const tenant of dbTenantsState) {
-              yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
-            }
-            controllerStartup = false;
-          }
           if (!equals(dbTenantsState, configmapTenants)) {
             log.info(
               "tenant config changed in db: old=%s new=%s",
@@ -166,15 +159,15 @@ export function* syncTenants(
             // Write the new tenant list to the ConfigMap.
             // When the update takes effect, the controller State will be updated via the K8s client subscription.
             yield call(updateTenants, dbTenantsState, kubeConfig);
+          }
 
-            for (const tenant of dbTenantsState) {
-              yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
-            }
+          for (const tenant of dbTenantsState) {
+            yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
           }
         }
       } catch (err) {
         log.error(
-          "could not read/write from/to db during tenant sync, retrying in 2s: %s",
+          "could not read/write from/to db during tenant sync, retrying in 5s: %s",
           err
         );
       }
