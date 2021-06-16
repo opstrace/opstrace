@@ -23,7 +23,7 @@ import {
 } from "@opstrace/kubernetes";
 import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
-import { getTenantNamespace } from "../../../helpers";
+import { getTenantNamespace, getControllerConfig } from "../../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
 import { DockerImages } from "@opstrace/controller-config";
 
@@ -58,6 +58,24 @@ export function GrafanaDatasourceResources(
     }
     return datasourcesToDelete;
   };
+
+  // Check https://github.com/opstrace/opstrace/issues/896 for more details.
+  // Using a variable in proxy_pass forces re-resolution of the DNS names
+  // because NGINX treats variables differently to static configuration. From
+  // the NGINX proxy_pass documentation
+  // http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass. For
+  // this to work we need to also set a resolver but EKS and GKE use different
+  // ClusterIPs for the pod DNS upstream resolver.
+  let dnsResolver = "";
+  const { target } = getControllerConfig(state);
+
+  if (target === "aws") {
+    dnsResolver = "10.100.0.10";
+  }
+
+  if (target === "gcp") {
+    dnsResolver = "10.0.0.10";
+  }
 
   const datasources = {
     apiVersion: 1,
@@ -196,7 +214,7 @@ http {
     set $proxy_upstream_name "-";
 
     ${locations}
-    
+
   }
 
   # Obtain best http host
@@ -235,45 +253,76 @@ http {
             `
             location / {
               ${generalProxyConfig}
-              proxy_pass http://querier.loki.svc.cluster.local:1080/;
+
+              resolver ${dnsResolver};
+              set $backend http://querier.loki.svc.cluster.local:1080/$request_uri;
+              proxy_pass $backend;
             }
 
             location /prometheus/api/v1/rules {
               ${generalProxyConfig}
-              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules;
+
+              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+              resolver ${dnsResolver};
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules$request_uri;
+              proxy_pass $backend;
             }
 
             location /prometheus/api/v1/rules/ {
               ${generalProxyConfig}
-              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules/;
+
+              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+              resolver ${dnsResolver};
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules/$request_uri;
+              proxy_pass $backend;
             }
 
             location /prometheus/api/v1/alerts {
               ${generalProxyConfig}
-              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts;
+
+              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+              resolver ${dnsResolver};
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts$request_uri;
+              proxy_pass $backend;
             }
 
             location /prometheus/api/v1/alerts/ {
               ${generalProxyConfig}
-              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts/;
+
+              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+              resolver ${dnsResolver};
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts/$request_uri;
+              proxy_pass $backend;
             }
 
             # Loki specific ruler routes
 
             location /loki/api/v1/rules {
               ${generalProxyConfig}
-              proxy_pass http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules;
+
+              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+              resolver ${dnsResolver};
+              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$request_uri;
+              proxy_pass $backend;
             }
 
             location /loki/api/v1/rules/ {
               ${generalProxyConfig}
-              proxy_pass http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/;
+
+              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+              resolver ${dnsResolver};
+              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/$request_uri;
+              proxy_pass $backend;
             }
 
             # Loki legacy route for saving rules (legacy routes which the Grafana 8 alerting feature uses)
             location /api/prom/rules/ {
               ${generalProxyConfig}
-              proxy_pass http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/;
+
+              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+              resolver ${dnsResolver};
+              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/$request_uri;
+              proxy_pass $backend;
             }
             `
           )
@@ -297,39 +346,65 @@ http {
             `
           location / {
             ${generalProxyConfig}
-            proxy_pass http://query-frontend.cortex.svc.cluster.local/;
+
+            # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+            resolver ${dnsResolver};
+            set $backend "http://query-frontend.cortex.svc.cluster.local:80$request_uri";
+            proxy_pass $backend;
           }
 
           location /api/v1/rules {
             ${generalProxyConfig}
-            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules;
+
+            # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+            resolver ${dnsResolver};
+            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$request_uri";
+            proxy_pass $backend;
+
           }
 
           location /api/v1/rules/ {
             ${generalProxyConfig}
-            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules/;
+
+            # Check https://github.com/opstrace/opstrace/issues/896 for more details.
+
+            resolver ${dnsResolver};
+            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules/$request_uri;
+
           }
 
           location /api/v1/alerts {
             ${generalProxyConfig}
-            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts;
+
+            resolver ${dnsResolver};
+            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$request_uri";
+            proxy_pass $backend;
           }
 
           location /api/v1/alerts/ {
             ${generalProxyConfig}
-            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts/;
+
+            resolver ${dnsResolver};
+            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts/$request_uri;
+            proxy_pass $backend;
           }
 
           # Cortex specific ruler routes (legacy routes which the Grafana 8 alerting feature uses)
 
           location /rules {
             ${generalProxyConfig}
-            proxy_pass http://ruler.cortex.svc.cluster.local/api/v1/rules;
+
+            resolver ${dnsResolver};
+            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$request_uri;
+            proxy_pass $backend;
           }
 
           location /rules/ {
             ${generalProxyConfig}
-            proxy_pass http://ruler.cortex.svc.cluster.local/api/v1/rules/;
+
+            resolver ${dnsResolver};
+            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules/$request_uri;
+            proxy_pass $backend;
           }
           `
           )
