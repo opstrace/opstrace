@@ -669,7 +669,14 @@ async function createNewDummyStreams(
         // cycle) that we don't keep going back to using the program's
         // invocation time, as is done for logs (where Loki accepts incoming
         // data from far in the past),
-        starttime: ZonedDateTime.now().minusMinutes(30).withNano(0),
+
+        // Set start time to a time between now-30min and now-20min - -smear
+        // this out by plus/minus 5 minutes, because of the throttling
+        // mechanism otherwise hitting in for all series at the same time.
+        // Note that Math.random() returns [0,1) (not including 1).
+        starttime: ZonedDateTime.now()
+          .minusMinutes(25 + 10 * (Math.random() - 0.5))
+          .withNano(0),
         timediffMilliSeconds: CFG.metrics_time_increment_ms,
         labelset: labelset
       });
