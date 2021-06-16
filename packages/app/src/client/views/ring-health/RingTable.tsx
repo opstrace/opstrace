@@ -63,30 +63,10 @@ type Payload = {
   now: string;
 };
 
-type JSONResponse = {
-  headers: {
-    ["content-type"]: "application/json";
-  };
-  data: Payload;
-};
-
-type HTMLResponse = {
-  headers: {
-    ["content-type"]: "text/html; charset=utf-8";
-  };
-  data: string;
-};
-
-type Response = JSONResponse | HTMLResponse;
-
 type Props = {
   ringEndpoint: string;
   baseUrl: string;
 };
-
-function isJSONResponse(resp: Response): resp is JSONResponse {
-  return resp.headers["content-type"] === "application/json";
-}
 
 function getRandomInt() {
   return Math.floor(Math.random() * Math.floor(100000));
@@ -145,7 +125,6 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
 
   const fetchShards = async () => {
     try {
-      const response = await axios.get<void, Response>(ringEndpoint);
       if (!isMounted()) {
         /* As we poll the shards every few seconds, we occassionaly
          * run into the situation that, in between request and response,
@@ -158,14 +137,8 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
          */
         return;
       }
-
-      if (!isJSONResponse(response)) {
-        // some error messages are returned via HTML
-        // So we throw an error here to trigger an error toast
-        throw new Error("The endpoint did not return a JSON object.");
-      } else {
-        setShards(response.data.shards);
-      }
+      const response = await axios.get<Payload>(ringEndpoint);
+      setShards(response.data.shards);
     } catch (e) {
       notifyError(e, `Could not load table`);
       setKeepPolling(false);

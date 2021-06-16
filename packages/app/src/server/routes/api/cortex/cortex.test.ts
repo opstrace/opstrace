@@ -32,35 +32,57 @@ const getTestServer = () => {
 };
 
 describe("cortex api", () => {
-  describe("ring health", () => {
-    test.each([
-      [
-        `/ingester/ring`,
-        `http://ruler.cortex.svc.cluster.local`,
-        "/ingester/ring"
-      ],
-      [`/ruler/ring`, `http://ruler.cortex.svc.cluster.local`, `/ruler/ring`],
-      [
-        `/compactor/ring`,
-        `http://compactor.cortex.svc.cluster.local`,
-        `/compactor/ring`
-      ],
-      [
-        `/store-gateway/ring`,
-        `http://store-gateway.cortex.svc.cluster.local`,
-        `/store-gateway/ring`
-      ],
-      [
-        `/alertmanager/ring`,
-        `http://alertmanager.cortex.svc.cluster.local`,
-        `/multitenant_alertmanager/ring`
-      ]
-    ])("%s", async (endpoint, proxyDestination, route) => {
-      const mockResponse = "<div>markup response</div>";
+  describe.each([
+    [
+      `/ingester/ring`,
+      `http://ruler.cortex.svc.cluster.local`,
+      "/ingester/ring"
+    ],
+    [`/ruler/ring`, `http://ruler.cortex.svc.cluster.local`, `/ruler/ring`],
+    [
+      `/compactor/ring`,
+      `http://compactor.cortex.svc.cluster.local`,
+      `/compactor/ring`
+    ],
+    [
+      `/store-gateway/ring`,
+      `http://store-gateway.cortex.svc.cluster.local`,
+      `/store-gateway/ring`
+    ],
+    [
+      `/alertmanager/ring`,
+      `http://alertmanager.cortex.svc.cluster.local`,
+      `/multitenant_alertmanager/ring`
+    ]
+  ])("%s", (endpoint, proxyDestination, route) => {
+    test("proxies request", async () => {
+      const mockResponse = { my: "response" };
       nock(proxyDestination).get(route).reply(200, mockResponse);
 
       const result = await getTestServer().get(endpoint);
-      expect(result.text).toBe(mockResponse);
+      expect(JSON.parse(result.text)).toEqual(mockResponse);
+    });
+
+    test("handle HTML errors", async () => {
+      const errorMessage = "My Error Message."
+      const mockResponse = `
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Cortex Some Ring</title>
+        </head>
+        <body>
+          <h1>Cortex Some Ring</h1>
+          <p>${errorMessage}</p>
+        </body>
+      </html>
+      `;
+      nock(proxyDestination).get(route).reply(200, mockResponse, {
+        'Content-Type': "text/html; charset=utf-8",
+      });
+
+      const result = await getTestServer().get(endpoint);
+      expect(result.text).toEqual(errorMessage);
     });
   });
 });

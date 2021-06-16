@@ -21,6 +21,7 @@ import { log } from "@opstrace/utils/lib/log";
 import setCortexRuntimeConfigHandler, {
   readCortexRuntimeConfigHandler
 } from "./cortexRuntimeConfig";
+import { parse } from "node-html-parser";
 
 export const cortexProxy = httpProxy.createProxyServer({ ignorePath: true });
 /**
@@ -31,6 +32,33 @@ export const cortexProxy = httpProxy.createProxyServer({ ignorePath: true });
  */
 cortexProxy.on("proxyReq", onProxyReq);
 
+cortexProxy.on("proxyRes", (proxyRes, req, res) => {
+  const isHTMLResponse = proxyRes.headers["content-type"]?.includes("text/html")
+  const body: Array<any> = [];
+  res.writeHead(proxyRes.statusCode!, proxyRes.headers);
+  proxyRes.on("data", function (chunk) {
+    if (!isHTMLResponse) {
+      res.write(chunk)
+    }
+    body.push(chunk)
+  });
+  proxyRes.on("end", function () {
+    if (isHTMLResponse) {
+      /* Some error messages are returned via HTML.
+       * We have mainly seen it with configuration errors, e.g. when sharding 
+       * is disabled. 
+       *
+       * For example HTML responses please check the tests.
+       */
+      const parsedHTML = parse(body);
+      const data = parsedHTML.querySelector("p").text;
+      res.end(data);
+    } else {
+      res.end();
+    }
+  })
+});
+
 const proxyTo = (target: string) => (
   req: express.Request,
   res: express.Response
@@ -39,6 +67,7 @@ const proxyTo = (target: string) => (
     req,
     res,
     {
+      selfHandleResponse: true,
       target,
       headers: req.params.tenant
         ? {
