@@ -142,6 +142,7 @@ fetch-secrets:
 	--include "aws-credentials.json" \
 	--include "aws-dev-svc-acc-env.sh" \
 	--include "docker-credentials.json" \
+	--include "opstrace_dockerhub_creds.sh" \
 	--include "ci.id_rsa" \
 	--include "ci.id_rsa.pub" \
 	--include "opstrace-collection-cluster-authtoken-secrets.yaml" \

@@ -53,6 +53,10 @@ echo "current working directory: $(pwd)"
 # Note: sourcing this file exports AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 source secrets/aws-dev-svc-acc-env.sh
 
+# Set our dockerhub env vars so that opstrace create will deploy the image pull secret
+# therefore authenticating with dockerhub to avoid the aggressive anonymous user rate limits
+source secrets/opstrace_dockerhub_creds.sh
+
 # Set GCP service account credentials (also used for opstrace create gcp ...)
 
 #export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-credentials.json
