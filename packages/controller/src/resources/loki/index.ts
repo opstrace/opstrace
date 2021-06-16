@@ -821,6 +821,7 @@ export function LokiResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "ingester"
               }),
@@ -1131,6 +1132,7 @@ export function LokiResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "ruler"
               }),
@@ -1250,6 +1252,7 @@ export function LokiResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "querier"
               }),

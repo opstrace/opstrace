@@ -26,7 +26,7 @@ import {
 import { State } from "../../reducer";
 import { min, roundDown, select } from "@opstrace/utils";
 import { getNodeCount } from "../../helpers";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function MemcacheResources(
   state: State,
@@ -252,6 +252,7 @@ export function MemcacheResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "memcached-index-queries"
               }),
@@ -328,6 +329,7 @@ export function MemcacheResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "memcached-index-writes"
               }),
@@ -403,6 +405,7 @@ export function MemcacheResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "memcached"
               }),

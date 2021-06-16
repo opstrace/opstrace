@@ -637,6 +637,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "memcached-results"
               }),
@@ -780,6 +781,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "memcached-metadata"
               }),
@@ -1234,6 +1236,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "ingester"
               }),
@@ -1434,6 +1437,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "store-gateway"
               }),
@@ -1617,6 +1621,7 @@ export function CortexResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "compactor"
               }),
