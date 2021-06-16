@@ -47,6 +47,7 @@ import { StorageResources } from "../resources/storage";
 import { TenantResources } from "../resources/tenants";
 
 import { getControllerConfig } from "../helpers";
+import { setToReady } from "./kubernetesReadinessProbe";
 
 export function* reconciliationLoop(
   kubeConfig: KubeConfig
@@ -68,6 +69,9 @@ export function* reconciliationLoop(
     if (getControllerConfig(state).terminate) {
       yield call(reconcile, desired, reduceCollection(actualCollection), true);
 
+      // The controller has been instructed to shut down, set the readiness
+      // probe to ready to mark the kubernetes deployment as ready.
+      setToReady();
       continue;
     }
 
@@ -93,5 +97,12 @@ export function* reconciliationLoop(
     desired.add(IntegrationResources(state, kubeConfig));
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);
+
+    // Set the controller as ready after running the reconcile loop. At this
+    // point the deployments/statefulsets etc have been reconciled and the pod
+    // rollouts will start. We mark the controller ready now to signal to the
+    // CLI (install and upgrade commands) that the reconcile loop ran and they
+    // should now wait for the deployments to finish the rollout.
+    setToReady();
   }
 }
