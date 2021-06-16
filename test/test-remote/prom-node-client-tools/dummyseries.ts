@@ -27,7 +27,8 @@ import {
   logHTTPResponse,
   httpTimeoutSettings,
   mtime,
-  mtimeDiffSeconds
+  mtimeDiffSeconds,
+  sleep
 } from "../testutils";
 
 import * as mathjs from "mathjs";
@@ -120,6 +121,20 @@ export class DummyTimeseries {
           "timediffMilliSeconds must be integer multiple of 1000 if larger than 1000"
         );
       }
+    }
+
+    // Calculate how much later the last sample of the next fragment would be
+    // compare to the last sample of the previous fragment. Do not do
+    // (opts.n_samples_per_series_fragment-1) because this time width is
+    // actually compared to the last sample in the previous fragment
+    const maxTimeLeapComparedToPreviousFragmentSeconds =
+      (opts.n_samples_per_series_fragment * opts.timediffMilliSeconds) / 1000;
+    if (maxTimeLeapComparedToPreviousFragmentSeconds >= 10 * 60) {
+      throw new Error(
+        "a single fragment may cover 10 minutes worth of data. " +
+          "That may put us too far into the future. Reduce sample count in a " +
+          "fragment or reduce time between samples."
+      );
     }
 
     // The actual time width of a fragment in seconds, may be a float.
@@ -301,7 +316,7 @@ export class DummyTimeseries {
    * timestamps, i.e. the leap forward is done _between_ fragments, and not
    * _within_ an individual fragment.
    */
-  private bringCloserToWalltimeIfFallenBehind(): void {
+  private bringCloserToWalltimeIfFallenBehind(): number {
     const lastSampleSecondsSinceEpoch = this.millisSinceEpochOfLastGeneratedSample
       .divide(1000)
       .toNumber();
@@ -321,12 +336,16 @@ export class DummyTimeseries {
     // set them rather gith, i.e. to leap forward by just a little bit when
     // falled behind just a little bit.
     const maxLagMinutes = 35;
-    const leapForwardMinutes = 10;
+    const leapForwardMinutes = 5;
     if (shiftIntoPastSeconds > maxLagMinutes * 60) {
       log.debug("%s: leaped forward by %s minutes", this, leapForwardMinutes);
       this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
         leapForwardMinutes * 60 * 1000
       );
+
+      // Return negative number: means that this was just leaped forward
+      // by so many minutes.
+      return -leapForwardMinutes;
     } else {
       if (
         this.nFragmentsConsumed > 0 &&
@@ -337,14 +356,38 @@ export class DummyTimeseries {
         log.debug("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
       }
     }
+
+    // return number: this is the current lag in seconds compared to walltime.
+    // Can actually also be positive, meaning we are in the future compared to
+    // wall time.
+    return shiftIntoPastSeconds;
   }
 
   // no stop criterion: dummyseries is an infinite concept (definite start, it
   // indefinite end) -- the caller decides how many fragments to generate.
-  private generateNextFragment() {
+  private generateNextFragment(): [number, TimeseriesFragment | undefined] {
     // TODO: this might get expensive, maybe use a monotonic time source
     // to make sure that we call this only once per minute or so.
-    this.bringCloserToWalltimeIfFallenBehind();
+    const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();
+
+    // Start building a criterion that allows artificial throttling, and that
+    // prevents this time series to get dangerously close to 'now', which also
+    // prevents it from going into the future (at least, when the time width
+    // between the oldest and newest sample in a single fragment is not lager
+    // than this interval -- assuming that this check is only ever done between
+    // generating two fragments. This should not happen as of the
+    // maxTimeLeapComparedToPreviousFragmentSeconds check above
+    const minLagMinutes = 10;
+
+    if (shiftIntoPastSeconds < minLagMinutes * 60) {
+      if (shiftIntoPastSeconds < 0) {
+        // the last sample of the last fragment generated is in the future
+        // compared to current wall time. We should never get here, this is
+        // the whole point.
+        throw new Error(`${this}: shiftIntoPastSeconds < 0`);
+      }
+      return [shiftIntoPastSeconds, undefined];
+    }
 
     const t0 = mtime();
     const fragment = new TimeseriesFragment(
@@ -362,13 +405,18 @@ export class DummyTimeseries {
       "TimeseriesFragment addSample loop took: %s s",
       genduration.toFixed(3)
     );
-    return fragment;
+    return [shiftIntoPastSeconds, fragment];
   }
 
-  public generateAndGetNextFragment(): TimeseriesFragment {
-    const seriesFragment = this.generateNextFragment();
-    this.nFragmentsConsumed += 1;
-    return seriesFragment;
+  public generateAndGetNextFragment(): [
+    number,
+    TimeseriesFragment | undefined
+  ] {
+    const [shiftIntoPastSeconds, seriesFragment] = this.generateNextFragment();
+    if (seriesFragment !== undefined) {
+      this.nFragmentsConsumed += 1;
+    }
+    return [shiftIntoPastSeconds, seriesFragment];
   }
 
   /**
@@ -383,7 +431,20 @@ export class DummyTimeseries {
     additionalHeaders?: Record<string, string>
   ): Promise<void> {
     for (let i = 1; i <= nFragments; i++) {
-      const fragment = this.generateAndGetNextFragment();
+      let fragment: TimeseriesFragment;
+      while (true) {
+        const [currentlag, f] = this.generateAndGetNextFragment();
+        if (f !== undefined) {
+          fragment = f;
+          break;
+        }
+
+        log.debug(
+          `${this}: current lag compared to wall time is  too small. Delay fragment generation.`
+        );
+        await sleep(5);
+      }
+
       const t0 = mtime();
       const pm = fragment.serialize();
       const genduration = mtimeDiffSeconds(t0);
