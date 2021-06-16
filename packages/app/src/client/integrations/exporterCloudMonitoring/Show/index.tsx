@@ -65,11 +65,11 @@ export const ExporterCloudMonitoringShow = () => {
   }, [tenant.name, integration?.key]);
 
   const metricsUrl = useMemo(() => {
-    if (integration?.key) {
+    if (integration?.id) {
       const path = `orgId=1&left=%5B%22now-1h%22,%22now%22,%22metrics%22,%7B%22expr%22:%22%7Bintegration_id%3D%5C%22${integration.id}%5C%22%7D%22%7D%5D`;
       return `${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/explore?${path}`;
     } else return "";
-  }, [tenant.name, integration?.key]);
+  }, [tenant.name, integration?.id]);
 
   if (!integration) {
     // TODO: add loading or NotFound here
