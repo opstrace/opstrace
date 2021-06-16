@@ -37,7 +37,7 @@ import {
 } from "@opstrace/kubernetes";
 import { getControllerConfig, getDomain, getTenantDomain } from "../../helpers";
 import { State } from "../../reducer";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 import { V1IssuerResource } from "@opstrace/kubernetes/build/custom-resources/v1issuer";
 
 export function CertManagerResources(
@@ -1141,6 +1141,7 @@ export function CertManagerResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   args: ["--v=2", "--leader-elect=false"],
@@ -1208,6 +1209,7 @@ export function CertManagerResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   args: [

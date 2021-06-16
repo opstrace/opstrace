@@ -37,7 +37,7 @@ import {
   getControllerLokiConfigOverrides,
   getNodeCount
 } from "../../helpers";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 import { log } from "@opstrace/utils";
 
 export function LokiResources(
@@ -727,6 +727,7 @@ export function LokiResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "distributor"
               }),
@@ -976,6 +977,7 @@ export function LokiResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 name: "compactor"
               }),

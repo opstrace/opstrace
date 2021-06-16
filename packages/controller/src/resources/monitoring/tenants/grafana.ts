@@ -31,7 +31,7 @@ import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { getTenantNamespace, getTenantDomain } from "../../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function GrafanaResources(
   state: State,
@@ -169,6 +169,7 @@ export function GrafanaResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               initContainers: [
                 {
                   image: DockerImages.postgresClient,

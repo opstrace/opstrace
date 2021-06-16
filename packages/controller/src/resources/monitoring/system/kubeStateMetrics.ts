@@ -27,7 +27,7 @@ import {
 } from "@opstrace/kubernetes";
 import { State } from "../../../reducer";
 import { KubeConfig } from "@kubernetes/client-node";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function KubeStateMetricsResources(
   state: State,
@@ -163,6 +163,7 @@ export function KubeStateMetricsResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   args: [

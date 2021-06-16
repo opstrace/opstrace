@@ -36,7 +36,8 @@ import { addApiIngress } from "./ingress";
 import { nodecountToReplicacount } from "./index";
 import {
   DockerImages,
-  LatestControllerConfigType
+  LatestControllerConfigType,
+  getImagePullSecrets
 } from "@opstrace/controller-config";
 
 export function DDAPIResources(
@@ -56,7 +57,9 @@ export function DDAPIResources(
     resources: {}
   };
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(
+    state
+  );
 
   const namespace = getTenantNamespace(tenant);
   const apiName = "dd";
@@ -83,7 +86,8 @@ export function DDAPIResources(
       }
     ];
 
-    const data_api_authn_pubkey_pem = controllerConfig.data_api_authn_pubkey_pem ?? "";
+    const data_api_authn_pubkey_pem =
+      controllerConfig.data_api_authn_pubkey_pem ?? "";
     if (data_api_authn_pubkey_pem !== "") {
       ddApiEnv.push({
         name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
@@ -118,6 +122,7 @@ export function DDAPIResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 "k8s-app": deplName
               }),

@@ -25,7 +25,7 @@ import {
 } from "@opstrace/kubernetes";
 import { getControllerConfig, getDomain } from "../../helpers";
 import { State } from "../../reducer";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function ExternalDnsResources(
   state: State,
@@ -150,6 +150,7 @@ export function ExternalDnsResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               serviceAccountName: "external-dns",
               containers: [
                 {

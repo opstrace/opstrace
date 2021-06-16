@@ -15,7 +15,7 @@
  */
 
 import { KubeConfig, V1EnvVar, V1PodSpec } from "@kubernetes/client-node";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 import {
   ConfigMap,
   Deployment,
@@ -308,6 +308,7 @@ const toKubeResources = (
     // If modules is defined, configure configmap volume.
     // Line things up so that the config ends up at the default path of /etc/blackbox_exporter/config.yml
     podSpec = {
+      imagePullSecrets: getImagePullSecrets(),
       containers: [
         {
           name: "exporter",
@@ -451,7 +452,8 @@ const toKubeResources = (
           endpoints:
             customMonitorEndpoints.length != 0
               ? customMonitorEndpoints
-              : [{
+              : [
+                  {
                     // Increase the timeout (default 10s).
                     // AWS/Cloudwatch exporter in particular was found to take ~16s
                     scrapeTimeout: "45s",

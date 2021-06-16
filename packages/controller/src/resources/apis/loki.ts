@@ -36,7 +36,8 @@ import { nodecountToReplicacount } from "./index";
 import { addApiIngress } from "./ingress";
 import {
   DockerImages,
-  LatestControllerConfigType
+  LatestControllerConfigType,
+  getImagePullSecrets
 } from "@opstrace/controller-config";
 
 export function LokiAPIResources(
@@ -51,7 +52,9 @@ export function LokiAPIResources(
     resources: {}
   };
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(state);
+  const controllerConfig: LatestControllerConfigType = getControllerConfig(
+    state
+  );
 
   const namespace = getTenantNamespace(tenant);
   const api = "loki";
@@ -76,7 +79,8 @@ export function LokiAPIResources(
       }
     ];
 
-    const data_api_authn_pubkey_pem = controllerConfig.data_api_authn_pubkey_pem ?? "";
+    const data_api_authn_pubkey_pem =
+      controllerConfig.data_api_authn_pubkey_pem ?? "";
     if (data_api_authn_pubkey_pem !== "") {
       lokiApiProxyEnv.push({
         name: "API_AUTHTOKEN_VERIFICATION_PUBKEY",
@@ -114,6 +118,7 @@ export function LokiAPIResources(
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               affinity: withPodAntiAffinityRequired({
                 "k8s-app": name
               }),

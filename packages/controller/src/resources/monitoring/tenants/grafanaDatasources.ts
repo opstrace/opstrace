@@ -25,7 +25,7 @@ import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { getTenantNamespace, getControllerConfig } from "../../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
-import { DockerImages } from "@opstrace/controller-config";
+import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function GrafanaDatasourceResources(
   state: State,
@@ -502,6 +502,7 @@ http {
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   image: DockerImages.nginx,
@@ -564,6 +565,7 @@ http {
               }
             },
             spec: {
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   image: DockerImages.nginx,
