@@ -152,26 +152,35 @@ data_api_authorized_ip_ranges:
 
 Locking this down makes sense when setting `data_api_authentication_disabled` to `true`.
 
-### `custom_dns_fqdn`
+### `custom_dns_name`
 
-Specifies a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) (FQDN) to your Opstrace instance.
+Use this when you want your Opstrace instance to be reachable under a custom DNS name.
+For example, the UI will then be served under `https://<custom_dns_name>/`.
 
-Use this when you do not want your Opstrace instance to be reachable under `<instance_name>.opstrace.io`, but with a custom DNS name instead.
+This disables the default mechanism (which makes the Opstrace instance available under `<instance_name>.opstrace.io`, using Opstrace's DNS configuration service).
+
+The parameter value needs to be a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) (without the trailing dot).
+It can be a top-level domain, but does not need to be.
+
+This DNS name will point to the specific Opstrace instance you are planning to create (`<instance_name>.` is not going to be prepended).
+
 
 *Default:* undefined
 
-*Value type:* string, in FQDN format (including the trailing dot)
+*Value type:* string
 
 *Example:*
 
 ```yaml
-custom_dns_fqdn:
+custom_dns_name:
     - myopstrace.powerteam.com
 ```
 
-If you install the Opstrace instance in your GCP account, this FQDN must correspond to a "managed zone" in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart)
+If you install the Opstrace instance in your GCP account, this DNS name must correspond to a "managed zone" in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart).
 
-If you install the Opstrace instance in your AWS account, this FQDN must correspond to a “hosted zone” in AWS Route53 which you must set up prior to installing Opstrace. A guide can be found [here](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html)
+If you install the Opstrace instance in your AWS account, this DNS name must correspond to a “hosted zone” in AWS Route53 which you must set up prior to installing Opstrace. A guide can be found [here](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html).
+
+During creation, the Opstrace instance will interact with the AWS/GCP API and reconfigure that DNS zone to add records for more fine-grained DNS names.
 
 
 ### `cert_issuer`
