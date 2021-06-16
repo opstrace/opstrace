@@ -680,7 +680,7 @@ test-browser: kubectl-cluster-info
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/browser \
 		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
-		yarn playwright test --project=Chromium
+		yarn playwright test --workers 1
 
 # Used by CI:
 # three outcomes:
