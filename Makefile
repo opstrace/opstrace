@@ -540,6 +540,9 @@ rebuild-testrunner-container-images:
 	docker build . --rm --force-rm \
 		-t opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		-f ./test/test-remote/nodejs-testrunner.Dockerfile
+	docker build ./test/browser --rm --force-rm \
+		-t opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+		-f ./test/browser/Dockerfile
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
 	docker pull gcr.io/datadoghq/agent:7
@@ -660,6 +663,24 @@ test-remote-ui: kubectl-cluster-info
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		yarn run mocha --grep test_ui
 
+
+# This runs our set of browser based tests using the Playwright Test Runner
+.PHONY: test-browser
+test-browser: kubectl-cluster-info
+	echo "--- running test-browser"
+	mkdir -p ${OPSTRACE_BUILD_DIR}/test-browser-artifacts
+	docker run --tty --interactive --rm \
+		--net=host \
+		-v ${OPSTRACE_BUILD_DIR}:/test-browser-artifacts \
+		-v /tmp:/tmp \
+		-u $(shell id -u):${DOCKER_GID_HOST} \
+		-e TEST_BROWSER_ARTIFACT_DIRECTORY=/test-browser-artifacts \
+		-e OPSTRACE_CLUSTER_NAME \
+		-e OPSTRACE_CLOUD_PROVIDER \
+		--dns $(shell ci/dns_cache.sh) \
+		--workdir /build/test/browser \
+		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+		yarn playwright test --project=Chromium
 
 # Used by CI:
 # three outcomes:

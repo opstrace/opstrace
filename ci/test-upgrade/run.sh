@@ -42,3 +42,4 @@ make ci-testupgrade-upgrade-cluster
 make test-remote
 make test-remote-looker
 make test-remote-ui
+make test-browser

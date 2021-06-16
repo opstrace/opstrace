@@ -31,3 +31,4 @@ make ci-cd-upgrade-cluster
 make test-remote || true
 make test-remote-looker
 make test-remote-ui
+make test-browser
