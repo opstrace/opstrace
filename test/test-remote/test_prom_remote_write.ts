@@ -24,7 +24,7 @@ import {
   rndstring,
   sendMetricsWithPromContainer,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
-  TENANT_DEFAULT_CORTEX_API_BASE_URL,
+  TENANT_DEFAULT_CORTEX_API_BASE_URL
 } from "./testutils";
 
 import { waitForCortexMetricResult } from "./testutils/metrics";
@@ -106,7 +106,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const searchStart = now.minusMinutes(5);
     const searchEnd = now.plusMinutes(5);
     const queryParams = {
-      query: `${mname}{dummyseries="${uniquevalue}"}`,
+      query: `${mname}{uniquename="${uniquevalue}"}`,
       start: searchStart.toEpochSecond().toString(),
       end: searchEnd.toEpochSecond().toString(),
       step: "1"
@@ -119,7 +119,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     );
     // this just confirms that the query response contains some data from
     // the time series that was just written. the data itself is not looked at.
-    assert.strictEqual(resultArray[0]["metric"]["dummyseries"], uniquevalue);
+    assert.strictEqual(resultArray[0]["metric"]["uniquename"], uniquevalue);
   });
 
   test("dummyseries short write, fetchAndValidate", async function () {
