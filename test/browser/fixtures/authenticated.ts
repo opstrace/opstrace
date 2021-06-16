@@ -16,16 +16,19 @@
 
 import { test as base, Cookie } from "@playwright/test";
 
-import {
-  log,
-  globalTestSuiteSetupOnce,
-  CLUSTER_BASE_URL,
-  CLOUD_PROVIDER,
-  CI_LOGIN_EMAIL,
-  CI_LOGIN_PASSWORD
-} from "../utils";
+import { log } from "../utils";
+
+const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME;
+const CLUSTER_BASE_URL: string = CLUSTER_NAME
+  ? `https://${CLUSTER_NAME}.opstrace.io`
+  : undefined;
+const CLOUD_PROVIDER: string = process.env.OPSTRACE_CLOUD_PROVIDER;
+
+const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
+const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
 
 type ClusterFixture = {
+  name: string;
   baseUrl: string;
   cloudProvider;
   string;
@@ -46,6 +49,7 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
   cluster: [
     async ({ browser }, use) => {
       const user: ClusterFixture = {
+        name: CLUSTER_NAME,
         baseUrl: CLUSTER_BASE_URL,
         cloudProvider: CLOUD_PROVIDER
       };
@@ -64,24 +68,27 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
   ],
   authCookies: [
     async ({ browser }, use) => {
-      log.info("suite setup");
-      globalTestSuiteSetupOnce();
+      if (!process.env.OPSTRACE_CLUSTER_NAME) {
+        log.error("env variable OPSTRACE_CLUSTER_NAME must be set");
+        process.exit(1);
+      }
 
-      log.info("browser.newContext()");
+      if (!process.env.OPSTRACE_CLOUD_PROVIDER) {
+        log.error(
+          "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
+        );
+        process.exit(1);
+      }
+
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
-      log.info("context.newPage()");
       const page = await context.newPage();
 
-      log.info("page.goto(%s)", CLUSTER_BASE_URL);
       await page.goto(CLUSTER_BASE_URL);
-      log.info("`load` event");
 
       // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
       // <span class="MuiButton-label">Log in</span>
-      log.info('page.waitForSelector("css=button")');
       await page.waitForSelector("css=button");
 
-      log.info('page.click("text=Log in")');
       await page.click("text=Log in");
 
       // Wait for CI-specific username/pw login form to appear

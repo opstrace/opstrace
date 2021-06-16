@@ -33,36 +33,3 @@ export const log = winston.createLogger({
   ),
   transports: [new winston.transports.Console()]
 });
-
-export let CLUSTER_BASE_URL: string;
-export let CLOUD_PROVIDER: string;
-
-export const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
-export const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
-
-let globalTestSuiteSetupPerformed = false;
-export function globalTestSuiteSetupOnce() {
-  log.info("globalTestSuiteSetupOnce()");
-
-  if (globalTestSuiteSetupPerformed) {
-    return;
-  }
-  globalTestSuiteSetupPerformed = true;
-
-  const clusterName: string = process.env.OPSTRACE_CLUSTER_NAME || "";
-  if (!clusterName) {
-    log.error("env variable OPSTRACE_CLUSTER_NAME must be set");
-    process.exit(1);
-  }
-
-  CLOUD_PROVIDER = process.env.OPSTRACE_CLOUD_PROVIDER || "";
-  if (!CLOUD_PROVIDER) {
-    log.error(
-      "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
-    );
-    process.exit(1);
-  }
-
-  CLUSTER_BASE_URL = `https://${clusterName}.opstrace.io`;
-  log.info("CLUSTER_BASE_URL: %s", CLUSTER_BASE_URL);
-}
