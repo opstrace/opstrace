@@ -44,6 +44,22 @@ const config: PlaywrightTestConfig = {
     {
       name: "WebKit",
       use: { browserName: "webkit" }
+    },
+    {
+      name: "Pixel-4",
+      use: {
+        browserName: "chromium",
+        ...devices["Pixel 4"]
+      }
+    },
+
+    // "iPhone 11" tests use WebKit browser.
+    {
+      name: "iPhone-11",
+      use: {
+        browserName: "webkit",
+        ...devices["iPhone 11"]
+      }
     }
   ]
 };
