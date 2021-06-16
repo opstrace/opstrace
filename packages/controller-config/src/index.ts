@@ -22,6 +22,7 @@ export * from "./tasks";
 export * from "./errors";
 export * from "./docker-images";
 export * from "./aks";
+export * from "./resources/dockerhub";
 
 export { CONTROLLER_NAME } from "./resources/controller";
 export { CONFIGMAP_NAME, STORAGE_KEY } from "./utils";

@@ -31,6 +31,10 @@ import {
   K8sResource,
   reduceCollection
 } from "@opstrace/kubernetes";
+import {
+  DockerHubResources,
+  memoizeImagePullSecrets
+} from "@opstrace/controller-config";
 
 import { KubeConfig } from "@kubernetes/client-node";
 
@@ -45,7 +49,6 @@ import { MonitoringResources } from "../resources/monitoring";
 import { RedisResources } from "../resources/redis";
 import { StorageResources } from "../resources/storage";
 import { TenantResources } from "../resources/tenants";
-import { DockerHubResources } from "../resources/dockerhub";
 
 import { getControllerConfig } from "../helpers";
 import { setToReady } from "./kubernetesReadinessProbe";
@@ -57,6 +60,9 @@ export function* reconciliationLoop(
     yield delay(1 * SECOND);
 
     const state: State = yield select();
+    // Set memoized image pull secrets for all podspecs
+    memoizeImagePullSecrets(state.kubernetes.cluster.Secrets.resources);
+
     const desired = new ResourceCollection();
 
     const actualCollection: K8sResource[] = [];
@@ -76,6 +82,13 @@ export function* reconciliationLoop(
       continue;
     }
 
+    desired.add(
+      DockerHubResources(
+        state.kubernetes.cluster.Secrets.resources,
+        state.kubernetes.cluster.Namespaces.resources,
+        kubeConfig
+      )
+    );
     desired.add(StorageResources(state, kubeConfig));
     desired.add(MemcacheResources(state, kubeConfig, "loki"));
     desired.add(LokiResources(state, kubeConfig, "loki"));
@@ -96,7 +109,6 @@ export function* reconciliationLoop(
     desired.add(RedisResources(state, kubeConfig, "application"));
     desired.add(TenantResources(state, kubeConfig, "ingress", "https-cert"));
     desired.add(IntegrationResources(state, kubeConfig));
-    desired.add(DockerHubResources(state, kubeConfig));
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);
 
