@@ -149,13 +149,13 @@ cat looker-metrics-3-${TSTRING}.log | tail -n 10
 
 # Test throttling in metrics mode. Send from just one series/stream, and make
 # each HTTP request cover a 100 seconds wide time window (diff between
-# timestamp) of first and last sample. Within just a small amount of POST HTTP
-# requests we're approaching walltime with the generated samples. This is
-# supposed to happen before the write-stop criterion (which is: stop after 20
-# seconds of writing). Enable debug log to see these log messages:
-# "DummyTimeseries(..): current lag compared to wall time is 9.9 minutes. Sample
-# generation is too fast. Delay generating and pushing the next fragment. This
-# may take up to 10 minutes."
+# timestamp of first and last sample). Starting ~30 mins in the past, within
+# just a small amount of POST HTTP requests we're approaching 'now' (walltime)
+# with the generated samples. This is supposed to happen before the write-stop
+# criterion (which is: stop after 20 seconds of writing). Enable debug log to
+# see these log messages: "DummyTimeseries(..): current lag compared to wall
+# time is 9.9 minutes. Sample generation is too fast. Delay generating and
+# pushing the next fragment. This may take up to 10 minutes."
 TSTRING="$(date +%Y%m%d-%H%M%S)"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
