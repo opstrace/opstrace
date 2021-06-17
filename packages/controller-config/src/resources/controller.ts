@@ -125,7 +125,15 @@ export function ControllerResources({
                     },
                     {
                       name: "GRAPHQL_ENDPOINT",
-                      value: `http://graphql.application.svc.cluster.local:8080/v1/graphql`
+                      value: "http://graphql.application.svc.cluster.local:8080/v1/graphql"
+                    },
+                    {
+                      name: "ALERTMANAGER_ENDPOINT",
+                      value: "http://alertmanager.cortex.svc.cluster.local/api/v1/alerts"
+                    },
+                    {
+                      name: "RULER_ENDPOINT",
+                      value: "http://ruler.cortex.svc.cluster.local/api/v1/rules"
                     }
                   ],
                   readinessProbe: {

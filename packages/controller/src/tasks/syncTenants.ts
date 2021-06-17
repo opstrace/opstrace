@@ -24,10 +24,14 @@ import { State } from "../reducer";
 import { log, SECOND } from "@opstrace/utils";
 import axios, { AxiosResponse } from "axios";
 
-function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
+// Make this optional, so that running the controller locally during dev
+// doesn't require a connection to the service.
+const alertmanagerEndpoint = process.env.ALERTMANAGER_ENDPOINT ?? "";
+
+function* setDefaultAlertmanagerConfigIfEmpty(endpoint: string, tenant: string) {
   try {
     const res: AxiosResponse<string> = yield axios({
-      url: `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
+      url: endpoint,
       method: "GET",
       headers: {
         "X-Scope-OrgID": tenant
@@ -61,7 +65,7 @@ function* setDefaultAlertmanagerConfigIfEmpty(tenant: string) {
 
   try {
     yield axios({
-      url: `http://alertmanager.cortex.svc.cluster.local/api/v1/alerts`,
+      url: endpoint,
       method: "POST",
       headers: {
         "X-Scope-OrgID": tenant
@@ -161,8 +165,10 @@ export function* syncTenants(
             yield call(updateTenants, dbTenantsState, kubeConfig);
           }
 
-          for (const tenant of dbTenantsState) {
-            yield call(setDefaultAlertmanagerConfigIfEmpty, tenant.name);
+          if (alertmanagerEndpoint !== "") {
+            for (const tenant of dbTenantsState) {
+              yield call(setDefaultAlertmanagerConfigIfEmpty, alertmanagerEndpoint, tenant.name);
+            }
           }
         }
       } catch (err) {
