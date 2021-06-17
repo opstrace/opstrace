@@ -70,6 +70,9 @@ export class DummyTimeseries {
   private optionstring: string;
   private lastValue: number;
 
+  //Supposed to contain a prometheus counter object, providing an inc() method.
+  private counterForwardLeap: any | undefined;
+
   //private logLagBehindWalltimeEveryNseconds: private;
 
   uniqueName: string;
@@ -84,11 +87,21 @@ export class DummyTimeseries {
   // that we ideally save memory
   postedFragmentsSinceLastValidate: Array<TimeseriesFragment> | undefined;
 
-  constructor(opts: DummyTimeseriesOpts) {
+  constructor(opts: DummyTimeseriesOpts, counterForwardLeap?: any) {
     this.postedFragmentsSinceLastValidate = undefined;
 
     this.uniqueName = opts.uniqueName;
     this.metricName = opts.metricName;
+
+    this.counterForwardLeap = undefined;
+    if (counterForwardLeap !== undefined) {
+      this.counterForwardLeap = counterForwardLeap;
+      if (counterForwardLeap.inc === undefined) {
+        throw new Error(
+          "the counterForwardLeap arg needs to have an `inc()` method"
+        );
+      }
+    }
 
     // Merge the metric name into it using the well-known special prom label
     // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
@@ -367,6 +380,9 @@ export class DummyTimeseries {
       // TODO: allow for injecting a counter (e.g., a Prometheus counter)
       // so that when this happens there is a way to do bookkeeping about it.
       //return -leapForwardMinutes;
+      if (this.counterForwardLeap !== undefined) {
+        this.counterForwardLeap.inc();
+      }
 
       // Return the _updated_ shift-into-past.
       return shiftIntoPastSeconds - leapForwardMinutes * 60;
