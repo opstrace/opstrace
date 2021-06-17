@@ -28,21 +28,40 @@ export const OPSTRACE_DOCKERHUB_TOKEN = "OPSTRACE_DOCKERHUB_TOKEN";
 export const DOCKERHUB_CREDS_SECRET_NAME = "dockerhub-credentials";
 const DOCKERHUB_CREDS_NAMESPACE = "kube-system";
 
+export function logDockerHubCredentialsMessage(
+  lifecycleType: "create" | "upgrade"
+) {
+  const username = process.env[OPSTRACE_DOCKERHUB_USERNAME];
+  const token = process.env[OPSTRACE_DOCKERHUB_TOKEN];
+
+  if (!(username && token)) {
+    log.info(
+      `${OPSTRACE_DOCKERHUB_USERNAME}, ${OPSTRACE_DOCKERHUB_TOKEN} not present, will skip ${
+        lifecycleType == "create" ? "creating" : "updating"
+      } image pull secret for DockerHub`
+    );
+  } else {
+    log.info(
+      `will ${
+        lifecycleType == "create" ? "create" : "update"
+      } image pull secret for DockerHub with username: ${username}, token: ${token.charAt(
+        0
+      )}...${token.slice(-1)}`
+    );
+  }
+}
+
 export function dockerHubCredsSecret(kubeConfig: KubeConfig) {
   const collection = new ResourceCollection();
   const username = process.env[OPSTRACE_DOCKERHUB_USERNAME];
   const token = process.env[OPSTRACE_DOCKERHUB_TOKEN];
 
   if (!(username && token)) {
-    log.info(
-      "OPSTRACE_DOCKERHUB_USERNAME, OPSTRACE_DOCKERHUB_TOKEN not present, skip image pull secrets"
-    );
     return collection;
   }
 
-  const dockerconfig = `{"auths":{"https://index.docker.io/v2/":{"auth":"${Buffer.from(
-    `${username}:${token}`
-  ).toString("base64")}"}}}`;
+  const credsEncoded = Buffer.from(`${username}:${token}`).toString("base64");
+  const jsonString = `{"auths":{"https://index.docker.io/v2/":{"auth":"${credsEncoded}"}}}`;
 
   collection.add(
     new Secret(
@@ -51,7 +70,7 @@ export function dockerHubCredsSecret(kubeConfig: KubeConfig) {
         kind: "Secret",
         type: "kubernetes.io/dockerconfigjson",
         data: {
-          ".dockerconfigjson": Buffer.from(dockerconfig).toString("base64")
+          ".dockerconfigjson": Buffer.from(jsonString).toString("base64")
         },
         metadata: {
           name: DOCKERHUB_CREDS_SECRET_NAME,
