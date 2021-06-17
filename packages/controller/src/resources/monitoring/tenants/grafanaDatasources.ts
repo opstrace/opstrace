@@ -255,7 +255,7 @@ http {
               ${generalProxyConfig}
 
               resolver ${dnsResolver};
-              set $backend http://querier.loki.svc.cluster.local:1080/$request_uri;
+              set $backend http://querier.loki.svc.cluster.local:1080$request_uri;
               proxy_pass $backend;
             }
 
