@@ -179,7 +179,8 @@ const counter_get_responses = new promclient.Counter({
 const counter_unexpected_query_results = new promclient.Counter({
   name: "counter_unexpected_query_results",
   help:
-    "Error counter for unexpected Loki query results (such as unexpected log entry count in query result)",
+    "Error counter for unexpected Loki query results " +
+    "(such as unexpected log entry count in query result)",
   labelNames: ["statuscode"]
 });
 
@@ -196,7 +197,15 @@ const counter_rw_cycles = new promclient.Counter({
 const counter_fragment_generation_delayed = new promclient.Counter({
   name: "counter_fragment_generation_delayed",
   help:
-    "number of times fragment generation was delayed (in metrics mode) because otherwise we would overtake walltime"
+    "number of times fragment generation was delayed (in metrics mode) " +
+    "because otherwise we would overtake walltime"
+});
+
+const counter_forward_leap = new promclient.Counter({
+  name: "counter_forward_leap",
+  help:
+    "number of times a time series was forward-leaped (by N minutes) " +
+    "to not fall behind walltime too much"
 });
 
 const gauge_last_http_request_body_size_bytes = new promclient.Gauge({
@@ -649,37 +658,40 @@ async function createNewDummyStreams(
 
     let stream: DummyTimeseries | DummyStream;
     if (CFG.metrics_mode) {
-      stream = new DummyTimeseries({
-        metricName: `looker_${rndstring(4)}`, // might collide among streams, which is OK as long as the label set adds uniqueness
-        uniqueName: streamname, // must not collide among streams
-        n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
+      stream = new DummyTimeseries(
+        {
+          metricName: `looker_${rndstring(4)}`, // might collide among streams, which is OK as long as the label set adds uniqueness
+          uniqueName: streamname, // must not collide among streams
+          n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
 
-        // With Cortex' Blocks Storage system, we cannot go into the future
-        // compared to "now" (from Cortex' system time point of view), but we
-        // also cannot fall behind for more than 60 minutes, see
-        // https://github.com/cortexproject/cortex/issues/2366. That means that
-        // the wall time passed after DummyTimeseries initialization matters.
-        // How exactly it matters depends on the synthetically created time
-        // difference between adjacent metric samples and the push rate. Use
-        // the one hour leeway that we have here in a 'smart' way; let each
-        // DummyTimeseries start in the _center_ of the timewindow, i.e 30
-        // minutes in the past compared to "now", where "now" really is
-        // DummyTimeseries() initialization: use wall time as start time, so
-        // that when generating new streams during runtime (from cycle to
-        // cycle) that we don't keep going back to using the program's
-        // invocation time, as is done for logs (where Loki accepts incoming
-        // data from far in the past),
+          // With Cortex' Blocks Storage system, we cannot go into the future
+          // compared to "now" (from Cortex' system time point of view), but we
+          // also cannot fall behind for more than 60 minutes, see
+          // https://github.com/cortexproject/cortex/issues/2366. That means that
+          // the wall time passed after DummyTimeseries initialization matters.
+          // How exactly it matters depends on the synthetically created time
+          // difference between adjacent metric samples and the push rate. Use
+          // the one hour leeway that we have here in a 'smart' way; let each
+          // DummyTimeseries start in the _center_ of the timewindow, i.e 30
+          // minutes in the past compared to "now", where "now" really is
+          // DummyTimeseries() initialization: use wall time as start time, so
+          // that when generating new streams during runtime (from cycle to
+          // cycle) that we don't keep going back to using the program's
+          // invocation time, as is done for logs (where Loki accepts incoming
+          // data from far in the past),
 
-        // Set start time to a time between now-30min and now-20min - -smear
-        // this out by plus/minus 5 minutes, because of the throttling
-        // mechanism otherwise hitting in for all series at the same time.
-        // Note that Math.random() returns [0,1) (not including 1).
-        starttime: ZonedDateTime.now()
-          .minusMinutes(25 + 10 * (Math.random() - 0.5))
-          .withNano(0),
-        timediffMilliSeconds: CFG.metrics_time_increment_ms,
-        labelset: labelset
-      });
+          // Set start time to a time between now-30min and now-20min - -smear
+          // this out by plus/minus 5 minutes, because of the throttling
+          // mechanism otherwise hitting in for all series at the same time.
+          // Note that Math.random() returns [0,1) (not including 1).
+          starttime: ZonedDateTime.now()
+            .minusMinutes(25 + 10 * (Math.random() - 0.5))
+            .withNano(0),
+          timediffMilliSeconds: CFG.metrics_time_increment_ms,
+          labelset: labelset
+        },
+        counter_forward_leap
+      );
     } else {
       stream = new DummyStream({
         n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
