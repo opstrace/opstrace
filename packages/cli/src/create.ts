@@ -42,7 +42,8 @@ import * as schemas from "./schemas";
 import { BUILD_INFO } from "@opstrace/buildinfo";
 import {
   OPSTRACE_DOCKERHUB_TOKEN,
-  OPSTRACE_DOCKERHUB_USERNAME
+  OPSTRACE_DOCKERHUB_USERNAME,
+  logDockerHubCredentialsMessage
 } from "@opstrace/controller-config";
 
 type KeysetPemType = string;
@@ -61,11 +62,12 @@ export async function create(): Promise<void> {
   // for image pulling https://www.docker.com/increase-rate-limits
   // To be safe, we'll exit out of cluster creation early if they don't have
   // env vars set containing dockerhub credentials.
+  // Assert dockerhub username and token are set as environment variables.
+  // These env vars (if they exist) will be used during the deployControllerResources phase of install/upgrade
+  const username = process.env[OPSTRACE_DOCKERHUB_USERNAME];
+  const token = process.env[OPSTRACE_DOCKERHUB_TOKEN];
+
   if (userClusterConfig.node_count > 5) {
-    // Assert dockerhub username and token are set as environment variables.
-    // These env vars (if they exist) will be used during the deployControllerResources phase of install/upgrade
-    const username = process.env[OPSTRACE_DOCKERHUB_USERNAME];
-    const token = process.env[OPSTRACE_DOCKERHUB_TOKEN];
     if (!(username && token)) {
       die(
         "OPSTRACE_DOCKERHUB_USERNAME, OPSTRACE_DOCKERHUB_TOKEN environment variables must be set to avoid image pull rate-limits from dockerhub (https://www.docker.com/increase-rate-limits)." +
@@ -140,6 +142,8 @@ export async function create(): Promise<void> {
     }
     setAWSRegion(infraConfigAWS.region);
   }
+  // Log the DockerHub credentials just before prompt so user can verify (if they're present)
+  logDockerHubCredentialsMessage("create");
 
   await promptForResourceCreation(renderedClusterConfig);
 

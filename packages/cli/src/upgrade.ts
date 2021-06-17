@@ -28,6 +28,7 @@ import * as util from "./util";
 import * as schemas from "./schemas";
 import * as ucc from "./ucc";
 import { setGcpProjectID } from "@opstrace/installer";
+import { logDockerHubCredentialsMessage } from "@opstrace/controller-config";
 
 export async function upgrade(): Promise<void> {
   log.info(
@@ -91,6 +92,8 @@ export async function upgrade(): Promise<void> {
     gcpRegion: gcpRegion,
     awsRegion: awsRegion
   });
+  // Log the DockerHub credentials just before prompt so user can verify (if they're present)
+  logDockerHubCredentialsMessage("upgrade");
 
   await util.promptForProceed();
   await upgradeCluster(util.smErrorLastResort);
