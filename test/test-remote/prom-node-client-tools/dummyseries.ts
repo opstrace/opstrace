@@ -325,27 +325,51 @@ export class DummyTimeseries {
       ZoneOffset.UTC
     ).toEpochSecond();
 
+    // How much is the timestamp of the last generated sample lagging behind
+    // "now"? This is a positive number, and the larger it is the larger is the
+    // gap.
     const shiftIntoPastSeconds =
       nowSecondsSinceEpoch - lastSampleSecondsSinceEpoch;
 
+    // Can of course also be negative, meaning `lastSampleSecondsSinceEpoch` is
+    // in the future compared to wall time. This state is not allowed.
+    if (shiftIntoPastSeconds < 0) {
+      // The last sample of the last fragment generated is in the future
+      // compared to current wall time. We should never get here, this is the
+      // whole point. This can happen as of a bug in looker or as of wall time
+      // changing unexpectedly around us. Either should be fatal (lead up to a
+      // crash).
+      throw new Error(
+        `${this}: shiftIntoPastSeconds < 0: ${shiftIntoPastSeconds.toFixed(
+          4
+        )} -- lastSampleSecondsSinceEpoch: ${lastSampleSecondsSinceEpoch.toFixed(
+          4
+        )} -- nowSecondsSinceEpoch: ${nowSecondsSinceEpoch.toFixed(4)}`
+      );
+    }
+
     // If we've fallen behind by more than e.g. 40 minutes, forward by e.g. 20
     // minutes (note that as of time of writing this comment, a DummyTimeseries
-    // starts 30 minutes behind wall time). These numbers are adjusted to the
+    // starts ~30 minutes behind wall time). These numbers are adjusted to the
     // 1-hour ingest window provided by Cortex with the blocks storage engine.
     // TODO: expose these parameters to users via CLI -- might also be nice to
-    // set them rather gith, i.e. to leap forward by just a little bit when
+    // set them rather tight, i.e. to leap forward by just a little bit when
     // falled behind just a little bit.
-    const maxLagMinutes = 35;
+    const maxLagMinutes = 40;
     const leapForwardMinutes = 5;
+
     if (shiftIntoPastSeconds > maxLagMinutes * 60) {
       log.debug("%s: leaped forward by %s minutes", this, leapForwardMinutes);
       this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
         leapForwardMinutes * 60 * 1000
       );
 
-      // Return negative number: means that this was just leaped forward
-      // by so many minutes.
-      return -leapForwardMinutes;
+      // TODO: allow for injecting a counter (e.g., a Prometheus counter)
+      // so that when this happens there is a way to do bookkeeping about it.
+      //return -leapForwardMinutes;
+
+      // Return the _updated_ shift-into-past.
+      return shiftIntoPastSeconds - leapForwardMinutes * 60;
     } else {
       if (
         this.nFragmentsConsumed > 0 &&
@@ -357,9 +381,8 @@ export class DummyTimeseries {
       }
     }
 
-    // return number: this is the current lag in seconds compared to walltime.
-    // Can actually also be positive, meaning we are in the future compared to
-    // wall time.
+    // return 0 or positive number: this is the current lag in seconds compared
+    // to walltime, specifically _behind_ walltime.
     return shiftIntoPastSeconds;
   }
 
@@ -379,13 +402,10 @@ export class DummyTimeseries {
     // maxTimeLeapComparedToPreviousFragmentSeconds check above
     const minLagMinutes = 10;
 
+    // Behind wall time, but too close to wall time. Do not actually generate a
+    // new fragment. Work with the guarantee/assumption that
+    // `shiftIntoPastSeconds >= 0`.
     if (shiftIntoPastSeconds < minLagMinutes * 60) {
-      if (shiftIntoPastSeconds < 0) {
-        // the last sample of the last fragment generated is in the future
-        // compared to current wall time. We should never get here, this is
-        // the whole point.
-        throw new Error(`${this}: shiftIntoPastSeconds < 0`);
-      }
       return [shiftIntoPastSeconds, undefined];
     }
 
