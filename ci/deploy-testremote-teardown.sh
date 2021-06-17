@@ -316,10 +316,8 @@ echo "--- Exit status of make test-remote-ui: ${EXITCODE_MAKE_TESTREMOTE_UI}"
 # Rely on screenshots to be created with a certain file name prefix.
 cp test-remote-artifacts/uishot-*.png /build/bk-artifacts || true
 
-
 echo "--- run looker tests"
 source ci/invoke-looker.sh
-
 
 
 # Delayed exit if `make test-browser` failed
