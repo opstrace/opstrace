@@ -24,17 +24,27 @@ import { getDomain } from "../helpers";
 import getRules from "../system/rules";
 import getAlerts from "../system/alerts";
 
+// Make this optional, so that running the controller locally during dev
+// doesn't require a connection to the service.
+const rulerEndpoint = process.env.RULER_ENDPOINT ?? "";
+
 export function* cortexSystemRulesReconciler(): Generator<
   CallEffect,
   unknown,
   unknown
 > {
   return yield call(function* () {
+    if (rulerEndpoint === "") {
+      log.info("disabled system alert rules reconciliation: ruler endpoint not configured");
+      return;
+    }
+
     const state: State = yield select();
     const domain = getDomain(state);
 
+    // TODO this could reference the SHA of the controller build
     const runbookUrl =
-      "https://github.com/opstrace/opstrace/blob/master/docs/alerts";
+      "https://github.com/opstrace/opstrace/blob/main/docs/alerts";
     const grafanaArgs = "?orgId=1&refresh=10s&from=now-30m&to=now";
     const grafanaUrl =
       `https://system.${domain}/grafana/d/bF4hjRpZk/opstrace-system` +
@@ -49,7 +59,7 @@ export function* cortexSystemRulesReconciler(): Generator<
         yield Promise.all(
           [...rules, ...alerts].map(group =>
             axios({
-              url: `http://ruler.cortex.svc.cluster.local/api/v1/rules/system`,
+              url: `${rulerEndpoint}/system`,
               method: "POST",
               headers: {
                 "Content-Type": "application/yaml",
