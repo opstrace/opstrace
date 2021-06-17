@@ -1132,7 +1132,8 @@ async function _produceAndPOSTpushrequest(
           log.debug(
             `${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
               1
-            )} minutes. Fragment generation is too fast. Delay fragment generation.`
+            )} minutes. Sample generation is too fast. Delay generating ` +
+              "and pushing the next fragment. This may take up to 10 minutes."
           );
           // We want to monitor the artificial throttling
           counter_fragment_generation_delayed.inc(1);
