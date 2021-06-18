@@ -93,67 +93,64 @@ describe("CortexRingHealth", () => {
     path,
     endpoint
   ]);
-  xtest.each(tabTestCases)(
-    "%s tab",
-    async (tabLabel, tabRoute, tabEndpoint) => {
-      const mockShards = createMockShards();
-      nock("http://localhost").get(tabEndpoint).reply(200, {
-        shards: mockShards,
-        now: Date.now()
-      });
+  xtest.each(tabTestCases)("%s tab", async (tabLabel, tabRoute, tabEndpoint) => {
+    const mockShards = createMockShards();
+    nock("http://localhost").get(tabEndpoint).reply(200, {
+      shards: mockShards,
+      now: Date.now()
+    });
 
-      const baseUrl = "/route/to/ring-health";
-      const history = createMemoryHistory({ initialEntries: [baseUrl] });
-      const container = renderComponent(
-        <Router history={history}>
-          <RingHealth baseUrl={baseUrl} />
-        </Router>
-      );
+    const baseUrl = "/route/to/ring-health";
+    const history = createMemoryHistory({ initialEntries: [baseUrl] });
+    const container = renderComponent(
+      <Router history={history}>
+        <RingHealth baseUrl={baseUrl} />
+      </Router>
+    );
 
-      // wait for polling
-      jest.runOnlyPendingTimers();
+    // wait for polling
+    jest.runOnlyPendingTimers();
 
-      // Select tab
-      const ingesterTab = container.getByRole("tab", { name: tabLabel });
-      userEvent.click(ingesterTab);
+    // Select tab
+    const ingesterTab = container.getByRole("tab", { name: tabLabel });
+    userEvent.click(ingesterTab);
 
-      // wait for polling
-      jest.runOnlyPendingTimers();
+    // wait for polling
+    jest.runOnlyPendingTimers();
 
-      // assert that reroute was successful
-      await container.findByRole("tab", { name: tabLabel, selected: true });
-      expect(history.location.pathname).toBe(baseUrl + tabRoute);
+    // assert that reroute was successful
+    await container.findByRole("tab", { name: tabLabel, selected: true });
+    expect(history.location.pathname).toBe(baseUrl + tabRoute);
 
-      // assert table is rendered properly
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].id })
-      ).toBeInTheDocument();
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].state })
-      ).toBeInTheDocument();
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].zone })
-      ).toBeInTheDocument();
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].address })
-      ).toBeInTheDocument();
+    // assert table is rendered properly
+    expect(
+      await container.findByRole("cell", { name: mockShards[0].id })
+    ).toBeInTheDocument();
+    expect(
+      await container.findByRole("cell", { name: mockShards[0].state })
+    ).toBeInTheDocument();
+    expect(
+      await container.findByRole("cell", { name: mockShards[0].zone })
+    ).toBeInTheDocument();
+    expect(
+      await container.findByRole("cell", { name: mockShards[0].address })
+    ).toBeInTheDocument();
 
-      // assert token dialog
-      const tokenDialogButton = container.getAllByRole("button", {
-        name: "show token dialog"
-      })[0];
-      userEvent.click(tokenDialogButton);
-      expect(
-        await container.findByText(mockShards[0].tokens[0])
-      ).toBeInTheDocument();
-      expect(
-        await container.findByText(mockShards[0].tokens[1])
-      ).toBeInTheDocument();
-      expect(
-        await container.findByText(mockShards[0].tokens[2])
-      ).toBeInTheDocument();
-    }
-  );
+    // assert token dialog
+    const tokenDialogButton = container.getAllByRole("button", {
+      name: "show token dialog"
+    })[0];
+    userEvent.click(tokenDialogButton);
+    expect(
+      await container.findByText(mockShards[0].tokens[0])
+    ).toBeInTheDocument();
+    expect(
+      await container.findByText(mockShards[0].tokens[1])
+    ).toBeInTheDocument();
+    expect(
+      await container.findByText(mockShards[0].tokens[2])
+    ).toBeInTheDocument();
+  });
 });
 
 const renderComponent = (children: React.ReactNode) => {
