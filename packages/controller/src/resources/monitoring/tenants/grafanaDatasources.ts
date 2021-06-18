@@ -340,18 +340,16 @@ http {
           location / {
             ${generalProxyConfig}
 
-            # Check https://github.com/opstrace/opstrace/issues/896 for more details.
             resolver ${dnsResolver};
-            set $backend "http://query-frontend.cortex.svc.cluster.local:80$request_uri";
+            set $backend "http://query-frontend.cortex.svc.cluster.local:80";
             proxy_pass $backend;
           }
 
           location /api/v1/rules {
             ${generalProxyConfig}
 
-            # Check https://github.com/opstrace/opstrace/issues/896 for more details.
             resolver ${dnsResolver};
-            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$request_uri";
+            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$is_args$query_string";
             proxy_pass $backend;
 
           }
@@ -359,10 +357,9 @@ http {
           location /api/v1/rules/ {
             ${generalProxyConfig}
 
-            # Check https://github.com/opstrace/opstrace/issues/896 for more details.
 
             resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules/$request_uri;
+            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$is_args$query_string;
 
           }
 
@@ -370,7 +367,7 @@ http {
             ${generalProxyConfig}
 
             resolver ${dnsResolver};
-            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$request_uri";
+            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$is_args$query_string";
             proxy_pass $backend;
           }
 
@@ -378,7 +375,7 @@ http {
             ${generalProxyConfig}
 
             resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts/$request_uri;
+            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$is_args$query_string;
             proxy_pass $backend;
           }
 
@@ -388,7 +385,7 @@ http {
             ${generalProxyConfig}
 
             resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$request_uri;
+            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$is_args$query_string;
             proxy_pass $backend;
           }
 
@@ -396,7 +393,7 @@ http {
             ${generalProxyConfig}
 
             resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules/$request_uri;
+            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$is_args$query_string;
             proxy_pass $backend;
           }
           `
