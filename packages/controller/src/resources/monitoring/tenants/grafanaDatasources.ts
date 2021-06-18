@@ -283,13 +283,6 @@ http {
               proxy_pass $backend;
             }
 
-            location /prometheus/api/v1/alerts/ {
-              ${generalProxyConfig}
-
-              resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts$is_args$query_string;
-              proxy_pass $backend;
-            }
 
             # Loki specific ruler routes
 
@@ -297,15 +290,10 @@ http {
               ${generalProxyConfig}
 
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$is_args$query_string;
-              proxy_pass $backend;
-            }
-
-            location /loki/api/v1/rules/ {
-              ${generalProxyConfig}
-
-              resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$is_args$query_string;
+              # Do not change the request URL, this works for the following endpoints:
+              # /loki/api/v1/rules
+              # /loki/api/v1/rules/{namespace}
+              set $backend http://ruler.loki.svc.cluster.local:1080;
               proxy_pass $backend;
             }
 
