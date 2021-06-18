@@ -165,6 +165,133 @@ suite("test_ui_api", function () {
     log.info("suite teardown done");
   });
 
+  test("test_grafana_datasource_proxy_loki_get_labels", async function () {
+    assert(COOKIES_AFTER_LOGIN);
+
+    const cookie_header_value = COOKIES_AFTER_LOGIN.map(
+      c => `${c.name}=${c.value}`
+    ).join("; ");
+
+    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/label`;
+
+    const ts = ZonedDateTime.now();
+    // Allow for testing clusters that started a couple of days ago
+    const searchStart = ts.minusHours(100);
+    const searchEnd = ts.plusHours(1);
+    const queryParams = {
+      start: timestampToNanoSinceEpoch(searchStart),
+      end: timestampToNanoSinceEpoch(searchEnd)
+    };
+
+    const httpopts = {
+      throwHttpErrors: false,
+      searchParams: new URLSearchParams(queryParams),
+      timeout: {
+        connect: 5000,
+        request: 30000
+      },
+      headers: {
+        Cookie: cookie_header_value
+      },
+      https: { rejectUnauthorized: false }
+    };
+
+    const maxWaitSeconds = 2100;
+    const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
+    log.info("Waiting for system log labels to be returned by %s", url);
+
+    while (true) {
+      if (mtime() > deadline) {
+        throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+      }
+
+      let resp: GotResponse<string> | undefined;
+      try {
+        resp = await httpcl(url, httpopts);
+      } catch (err) {
+        log.info(`request failed: ${err}`);
+      }
+
+      if (resp !== undefined) {
+        logHTTPResponse(resp);
+        if (resp.statusCode === 200) {
+          const r = JSON.parse(resp.body);
+          if (r.data !== undefined) {
+            const labels = r.data as Array<string>;
+            log.info("r.data: %s", r.data);
+            if (labels.includes("k8s_container_name")) {
+              log.info("found `k8s_container_name` label, success");
+              return;
+            }
+          }
+        }
+      }
+
+      log.info("outer retry: try again in 10 s");
+      await sleep(10);
+    }
+  });
+
+  test("test_grafana_datasource_proxy_loki_get_rules", async function () {
+    assert(COOKIES_AFTER_LOGIN);
+
+    const cookie_header_value = COOKIES_AFTER_LOGIN.map(
+      c => `${c.name}=${c.value}`
+    ).join("; ");
+
+    // Documented with "List all rules configured for the authenticated tenant"
+    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/rules`;
+
+    const ts = ZonedDateTime.now();
+    // Allow for testing clusters that started a couple of days ago
+    const searchStart = ts.minusHours(100);
+    const searchEnd = ts.plusHours(1);
+    const queryParams = {
+      start: timestampToNanoSinceEpoch(searchStart),
+      end: timestampToNanoSinceEpoch(searchEnd)
+    };
+
+    const httpopts = {
+      throwHttpErrors: false,
+      searchParams: new URLSearchParams(queryParams),
+      timeout: {
+        connect: 5000,
+        request: 30000
+      },
+      headers: {
+        Cookie: cookie_header_value
+      },
+      https: { rejectUnauthorized: false }
+    };
+
+    const maxWaitSeconds = 2100;
+    const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
+    log.info("Waiting for rules to be returned by %s", url);
+
+    while (true) {
+      if (mtime() > deadline) {
+        throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+      }
+
+      let resp: GotResponse<string> | undefined;
+      try {
+        resp = await httpcl(url, httpopts);
+      } catch (err) {
+        log.info(`request failed: ${err}`);
+      }
+
+      if (resp !== undefined) {
+        logHTTPResponse(resp);
+        if (resp.statusCode === 200) {
+          log.info("got rules doc: %s", resp.body);
+        }
+      }
+
+      log.info("outer retry: try again in 10 s");
+      await sleep(10);
+    }
+  });
+
   test("create_tenant_and_use_custom_authn_token", async function () {
     // Note(JP): pragmatic first step: synthetically emit HTTP request with
     // `got`, do not actually let the browser emit it. That was easier to
@@ -270,73 +397,6 @@ suite("test_ui_api", function () {
         logHTTPResponse(resp);
         if (resp.statusCode === 200) {
           return;
-        }
-      }
-
-      log.info("outer retry: try again in 10 s");
-      await sleep(10);
-    }
-  });
-
-  test("test_grafana_datasource_proxy_loki_get_labels", async function () {
-    assert(COOKIES_AFTER_LOGIN);
-
-    const cookie_header_value = COOKIES_AFTER_LOGIN.map(
-      c => `${c.name}=${c.value}`
-    ).join("; ");
-
-    const url = `https://system.${CLUSTER_NAME}/grafana/api/datasources/proxy/2/loki/api/v1/label`;
-
-    const ts = ZonedDateTime.now();
-    // Allow for testing clusters that started a couple of days ago
-    const searchStart = ts.minusHours(100);
-    const searchEnd = ts.plusHours(1);
-    const queryParams = {
-      start: timestampToNanoSinceEpoch(searchStart),
-      end: timestampToNanoSinceEpoch(searchEnd)
-    };
-
-    const httpopts = {
-      throwHttpErrors: false,
-      searchParams: new URLSearchParams(queryParams),
-      timeout: {
-        connect: 5000,
-        request: 30000
-      },
-      headers: {
-        Cookie: cookie_header_value
-      },
-      https: { rejectUnauthorized: false }
-    };
-
-    const maxWaitSeconds = 2100;
-    const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-    log.info("Waiting for system log labels to be returned by %s", url);
-
-    while (true) {
-      if (mtime() > deadline) {
-        throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
-      }
-
-      let resp: GotResponse<string> | undefined;
-      try {
-        resp = await httpcl(url, httpopts);
-      } catch (err) {
-        log.info(`request failed: ${err}`);
-      }
-
-      if (resp !== undefined) {
-        logHTTPResponse(resp);
-        if (resp.statusCode === 200) {
-          const r = JSON.parse(resp.body);
-          if (r.data !== undefined) {
-            const labels = r.data as Array<string>;
-            log.info("r.data: %s", r.data);
-            if (labels.includes("k8s_container_name")) {
-              log.info("found `k8s_container_name` label, success");
-              return;
-            }
-          }
         }
       }
 
