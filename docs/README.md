@@ -26,7 +26,7 @@ And even if a team does all of this, they often skimp on certain critical aspect
 
 Opstrace looks a little something like this...
 
-![high-level overview](https://share.balsamiq.com/c/kaP69UqhbdMMmzaaHB8u1a.png)
+![high-level overview](https://opstrace.com/images/how_it_works.png)
 
 ## How can I use it?
 
