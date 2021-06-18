@@ -3,7 +3,7 @@ FROM --platform=linux/amd64 mcr.microsoft.com/playwright:v1.12.2-focal
 RUN mkdir -p /build/test/browser
 WORKDIR /build/test/browser
 
-COPY package.json tsconfig.json /build/test/browser
+COPY package.json tsconfig.json /build/test/browser/
 
 RUN yarn install
 
