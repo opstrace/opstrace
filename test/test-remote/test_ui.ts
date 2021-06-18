@@ -227,6 +227,8 @@ suite("test_ui_api", function () {
       c => `${c.name}=${c.value}`
     ).join("; ");
 
+    // This relies on proxy/2 pointing to Loki. Depends on the order of
+    // data sources defined in grafanaDatasources.ts
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/label`;
 
     const ts = ZonedDateTime.now();
@@ -261,7 +263,8 @@ suite("test_ui_api", function () {
       c => `${c.name}=${c.value}`
     ).join("; ");
 
-    // proxy/1 means: Cortex
+    // This relies on proxy/1 pointing to Cortex. Depends on the order of
+    // data sources defined in grafanaDatasources.ts
     // Grafana 8 accesses /rules of the Cortex ruler
     // "GET /rules HTTP/1.1" 404 21 "-" "Grafana/8.0.0"
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/1/rules`;
@@ -280,6 +283,8 @@ suite("test_ui_api", function () {
       c => `${c.name}=${c.value}`
     ).join("; ");
 
+    // This relies on proxy/2 pointing to Loki. Depends on the order of
+    // data sources defined in grafanaDatasources.ts
     // Documented with "List all rules configured for the authenticated tenant"
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/rules`;
 
@@ -305,6 +310,8 @@ suite("test_ui_api", function () {
       c => `${c.name}=${c.value}`
     ).join("; ");
 
+    // This relies on proxy/2 pointing to Loki. Depends on the order of
+    // data sources defined in grafanaDatasources.ts
     // GET /prometheus/api/v1/alerts
     // Prometheus-compatible rules endpoint to list all active alerts.
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/prometheus/api/v1/alerts`;
