@@ -93,7 +93,7 @@ describe("CortexRingHealth", () => {
     path,
     endpoint
   ]);
-  test.each(tabTestCases)("%s tab", async (tabLabel, tabRoute, tabEndpoint) => {
+  xtest.each(tabTestCases)("%s tab", async (tabLabel, tabRoute, tabEndpoint) => {
     const mockShards = createMockShards();
     nock("http://localhost").get(tabEndpoint).reply(200, {
       shards: mockShards,

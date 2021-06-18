@@ -94,7 +94,7 @@ describe("LokiRingHealth", () => {
     path,
     endpoint
   ]);
-  test.each(tabTestCases)(
+  xtest.each(tabTestCases)(
     "%s tab",
     async (tabLabel, tabRoute, tabEndpoint) => {
       const mockShards = createMockShards();
