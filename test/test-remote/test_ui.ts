@@ -134,6 +134,39 @@ async function performLoginFlow(br: Browser) {
   COOKIES_AFTER_LOGIN = cookies;
 }
 
+async function waitFor200Resp(
+  url: string,
+  httpopts: any
+): Promise<GotResponse<string>> {
+  const maxWaitSeconds = 2100;
+  const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
+  log.info("Waiting for rules to be returned by %s", url);
+
+  while (true) {
+    if (mtime() > deadline) {
+      throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+    }
+
+    let resp: GotResponse<string> | undefined;
+    try {
+      resp = await httpcl(url, httpopts);
+    } catch (err) {
+      log.info(`request failed: ${err}`);
+    }
+
+    if (resp !== undefined) {
+      logHTTPResponse(resp);
+      if (resp.statusCode === 200) {
+        log.info("goot 200 response");
+        return resp;
+      }
+    }
+
+    log.info("outer retry: try again in 10 s");
+    await sleep(10);
+  }
+}
+
 suite("test_ui_api", function () {
   suiteSetup(async function () {
     log.info("suite setup");
@@ -196,40 +229,18 @@ suite("test_ui_api", function () {
       https: { rejectUnauthorized: false }
     };
 
-    const maxWaitSeconds = 2100;
-    const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-    log.info("Waiting for system log labels to be returned by %s", url);
-
-    while (true) {
-      if (mtime() > deadline) {
-        throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+    const resp = await waitFor200Resp(url, httpopts);
+    const r = JSON.parse(resp.body);
+    if (r.data !== undefined) {
+      const labels = r.data as Array<string>;
+      log.info("r.data: %s", r.data);
+      if (labels.includes("k8s_container_name")) {
+        log.info("found `k8s_container_name` label, success");
+        return;
       }
-
-      let resp: GotResponse<string> | undefined;
-      try {
-        resp = await httpcl(url, httpopts);
-      } catch (err) {
-        log.info(`request failed: ${err}`);
-      }
-
-      if (resp !== undefined) {
-        logHTTPResponse(resp);
-        if (resp.statusCode === 200) {
-          const r = JSON.parse(resp.body);
-          if (r.data !== undefined) {
-            const labels = r.data as Array<string>;
-            log.info("r.data: %s", r.data);
-            if (labels.includes("k8s_container_name")) {
-              log.info("found `k8s_container_name` label, success");
-              return;
-            }
-          }
-        }
-      }
-
-      log.info("outer retry: try again in 10 s");
-      await sleep(10);
     }
+
+    throw new Error("unexpected response");
   });
 
   test("test_grafana_datasource_proxy_loki_get_rules", async function () {
@@ -242,18 +253,8 @@ suite("test_ui_api", function () {
     // Documented with "List all rules configured for the authenticated tenant"
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/rules`;
 
-    const ts = ZonedDateTime.now();
-    // Allow for testing clusters that started a couple of days ago
-    const searchStart = ts.minusHours(100);
-    const searchEnd = ts.plusHours(1);
-    const queryParams = {
-      start: timestampToNanoSinceEpoch(searchStart),
-      end: timestampToNanoSinceEpoch(searchEnd)
-    };
-
     const httpopts = {
       throwHttpErrors: false,
-      searchParams: new URLSearchParams(queryParams),
       timeout: {
         connect: 5000,
         request: 30000
@@ -263,33 +264,34 @@ suite("test_ui_api", function () {
       },
       https: { rejectUnauthorized: false }
     };
+    const resp = await waitFor200Resp(url, httpopts);
+    log.info("got rules doc: %s", resp.body);
+  });
 
-    const maxWaitSeconds = 2100;
-    const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-    log.info("Waiting for rules to be returned by %s", url);
+  test("test_grafana_datasource_proxy_loki_get_alerts_legacy", async function () {
+    assert(COOKIES_AFTER_LOGIN);
 
-    while (true) {
-      if (mtime() > deadline) {
-        throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
-      }
+    const cookie_header_value = COOKIES_AFTER_LOGIN.map(
+      c => `${c.name}=${c.value}`
+    ).join("; ");
 
-      let resp: GotResponse<string> | undefined;
-      try {
-        resp = await httpcl(url, httpopts);
-      } catch (err) {
-        log.info(`request failed: ${err}`);
-      }
+    // GET /prometheus/api/v1/alerts
+    // Prometheus-compatible rules endpoint to list all active alerts.
+    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/prometheus/api/v1/alerts`;
 
-      if (resp !== undefined) {
-        logHTTPResponse(resp);
-        if (resp.statusCode === 200) {
-          log.info("got rules doc: %s", resp.body);
-        }
-      }
-
-      log.info("outer retry: try again in 10 s");
-      await sleep(10);
-    }
+    const httpopts = {
+      throwHttpErrors: false,
+      timeout: {
+        connect: 5000,
+        request: 30000
+      },
+      headers: {
+        Cookie: cookie_header_value
+      },
+      https: { rejectUnauthorized: false }
+    };
+    const resp = await waitFor200Resp(url, httpopts);
+    log.info("got alerts doc: %s", resp.body);
   });
 
   test("create_tenant_and_use_custom_authn_token", async function () {
