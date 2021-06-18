@@ -140,7 +140,7 @@ async function waitFor200Resp(
 ): Promise<GotResponse<string>> {
   const maxWaitSeconds = 2100;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-  log.info("Waiting for rules to be returned by %s", url);
+  log.info("Waiting for a 200 OK response to be returned by %s", url);
 
   while (true) {
     if (mtime() > deadline) {
