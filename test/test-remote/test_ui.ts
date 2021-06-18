@@ -58,6 +58,8 @@ import {
 import type { ChromiumBrowser, Browser, Cookie } from "playwright";
 import { chromium } from "playwright";
 import { sleep } from "@opstrace/utils";
+import { query } from "express";
+import { http } from "winston";
 
 let BROWSER: ChromiumBrowser;
 
@@ -132,6 +134,20 @@ async function performLoginFlow(br: Browser) {
 
   // expose globally
   COOKIES_AFTER_LOGIN = cookies;
+}
+
+function httpClientOptsWithCookie(cookie_header_value: string) {
+  return {
+    throwHttpErrors: false,
+    timeout: {
+      connect: 5000,
+      request: 30000
+    },
+    headers: {
+      Cookie: cookie_header_value
+    },
+    https: { rejectUnauthorized: false }
+  } as GotOptions;
 }
 
 async function waitFor200Resp(
@@ -216,19 +232,8 @@ suite("test_ui_api", function () {
       end: timestampToNanoSinceEpoch(searchEnd)
     };
 
-    const httpopts = {
-      throwHttpErrors: false,
-      searchParams: new URLSearchParams(queryParams),
-      timeout: {
-        connect: 5000,
-        request: 30000
-      },
-      headers: {
-        Cookie: cookie_header_value
-      },
-      https: { rejectUnauthorized: false }
-    };
-
+    const httpopts = httpClientOptsWithCookie(cookie_header_value);
+    httpopts.searchParams = new URLSearchParams(queryParams);
     const resp = await waitFor200Resp(url, httpopts);
     const r = JSON.parse(resp.body);
     if (r.data !== undefined) {
@@ -255,18 +260,10 @@ suite("test_ui_api", function () {
     // "GET /rules HTTP/1.1" 404 21 "-" "Grafana/8.0.0"
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/1/rules`;
 
-    const httpopts = {
-      throwHttpErrors: false,
-      timeout: {
-        connect: 5000,
-        request: 30000
-      },
-      headers: {
-        Cookie: cookie_header_value
-      },
-      https: { rejectUnauthorized: false }
-    };
-    const resp = await waitFor200Resp(url, httpopts);
+    const resp = await waitFor200Resp(
+      url,
+      httpClientOptsWithCookie(cookie_header_value)
+    );
     log.info("got rules doc: %s", resp.body);
   });
 
@@ -280,18 +277,10 @@ suite("test_ui_api", function () {
     // Documented with "List all rules configured for the authenticated tenant"
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/rules`;
 
-    const httpopts = {
-      throwHttpErrors: false,
-      timeout: {
-        connect: 5000,
-        request: 30000
-      },
-      headers: {
-        Cookie: cookie_header_value
-      },
-      https: { rejectUnauthorized: false }
-    };
-    const resp = await waitFor200Resp(url, httpopts);
+    const resp = await waitFor200Resp(
+      url,
+      httpClientOptsWithCookie(cookie_header_value)
+    );
     log.info("got rules doc: %s", resp.body);
   });
 
@@ -305,19 +294,10 @@ suite("test_ui_api", function () {
     // GET /prometheus/api/v1/alerts
     // Prometheus-compatible rules endpoint to list all active alerts.
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/prometheus/api/v1/alerts`;
-
-    const httpopts = {
-      throwHttpErrors: false,
-      timeout: {
-        connect: 5000,
-        request: 30000
-      },
-      headers: {
-        Cookie: cookie_header_value
-      },
-      https: { rejectUnauthorized: false }
-    };
-    const resp = await waitFor200Resp(url, httpopts);
+    const resp = await waitFor200Resp(
+      url,
+      httpClientOptsWithCookie(cookie_header_value)
+    );
     log.info("got alerts doc: %s", resp.body);
   });
 
