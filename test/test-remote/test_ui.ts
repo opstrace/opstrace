@@ -58,8 +58,6 @@ import {
 import type { ChromiumBrowser, Browser, Cookie } from "playwright";
 import { chromium } from "playwright";
 import { sleep } from "@opstrace/utils";
-import { query } from "express";
-import { http } from "winston";
 
 let BROWSER: ChromiumBrowser;
 
