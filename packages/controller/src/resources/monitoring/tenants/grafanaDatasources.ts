@@ -74,9 +74,22 @@ export function GrafanaDatasourceResources(
   }
 
   if (target === "gcp") {
-    dnsResolver = "10.0.0.10";
+    // This IP address depends on the GKE cluster, see
+    // https://cloud.google.com/kubernetes-engine/docs/concepts/service-discovery
+    // We could parse /etc/resolv.conf but it seems like
+    // a _dynamic_ resolver should also work:
+    // kube-dns.kube-system.svc.cluster.local valid=5s;
+    // Refs:
+    //   https://www.nginx.com/blog/announcing-nginx-ingress-controller-for-kubernetes-release-1-4-0/
+    //   https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/
+    // Does/should this work for AWS, too?
+    dnsResolver = "kube-dns.kube-system.svc.cluster.local valid=5s";
   }
 
+  // Warning: the order in the `datasources` array defines the IDs assigned to
+  // individual data sources -- these IDs are being used in certain tests,
+  // and changing the order might break them. Also see
+  // https://github.com/opstrace/opstrace/pull/914
   const datasources = {
     apiVersion: 1,
     deleteDatasources: getDatasourcesToDelete(),
