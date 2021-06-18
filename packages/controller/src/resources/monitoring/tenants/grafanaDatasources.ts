@@ -289,7 +289,7 @@ http {
             }
 
             # Loki legacy route for saving rules (legacy routes which the Grafana 8 alerting feature uses)
-            location ~ ^/api/prom/rules(?<urlsuffix>.*)$
+            location ~ ^/api/prom/rules(?<urlsuffix>.*)$ {
               ${generalProxyConfig}
               resolver ${dnsResolver};
               set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$urlsuffix;
@@ -322,14 +322,14 @@ http {
             proxy_pass $backend;
           }
 
-          location ~ ^/api/v1/rules(?<urlsuffix>.*)$
+          location ~ ^/api/v1/rules(?<urlsuffix>.*)$ {
             ${generalProxyConfig}
             resolver ${dnsResolver};
             set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$urlsuffix";
             proxy_pass $backend;
           }
 
-          location ~ ^/api/v1/alerts(?<urlsuffix>.*)$
+          location ~ ^/api/v1/alerts(?<urlsuffix>.*)$ {
             ${generalProxyConfig}
             resolver ${dnsResolver};
             set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$urlsuffix";
@@ -337,7 +337,7 @@ http {
           }
 
           # Cortex specific ruler routes (legacy routes which the Grafana 8 alerting feature uses)
-          location ~ ^/rules(?<urlsuffix>.*)$
+          location ~ ^/rules(?<urlsuffix>.*)$ {
             ${generalProxyConfig}
             resolver ${dnsResolver};
             set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$urlsuffix;
