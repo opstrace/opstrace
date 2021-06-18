@@ -317,61 +317,30 @@ http {
             `
           location / {
             ${generalProxyConfig}
-
             resolver ${dnsResolver};
             set $backend "http://query-frontend.cortex.svc.cluster.local:80";
             proxy_pass $backend;
           }
 
-          location /api/v1/rules {
+          location ~ ^/api/v1/rules(?<urlsuffix>.*)$
             ${generalProxyConfig}
-
             resolver ${dnsResolver};
-            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$is_args$query_string";
-            proxy_pass $backend;
-
-          }
-
-          location /api/v1/rules/ {
-            ${generalProxyConfig}
-
-
-            resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$is_args$query_string;
-
-          }
-
-          location /api/v1/alerts {
-            ${generalProxyConfig}
-
-            resolver ${dnsResolver};
-            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$is_args$query_string";
+            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$urlsuffix";
             proxy_pass $backend;
           }
 
-          location /api/v1/alerts/ {
+          location ~ ^/api/v1/alerts(?<urlsuffix>.*)$
             ${generalProxyConfig}
-
             resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$is_args$query_string;
+            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$urlsuffix";
             proxy_pass $backend;
           }
 
           # Cortex specific ruler routes (legacy routes which the Grafana 8 alerting feature uses)
-
-          location /rules {
+          location ~ ^/rules(?<urlsuffix>.*)$
             ${generalProxyConfig}
-
             resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$is_args$query_string;
-            proxy_pass $backend;
-          }
-
-          location /rules/ {
-            ${generalProxyConfig}
-
-            resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$is_args$query_string;
+            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$urlsuffix;
             proxy_pass $backend;
           }
           `
