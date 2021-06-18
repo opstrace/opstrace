@@ -251,6 +251,8 @@ http {
         data: {
           "nginx.conf": getNginxConfig(
             `
+
+            # Pass most requests on to the querier
             location / {
               ${generalProxyConfig}
 
@@ -259,36 +261,25 @@ http {
               proxy_pass $backend;
             }
 
+            # For specific routes, pass on to the ruler
             location /prometheus/api/v1/rules {
               ${generalProxyConfig}
-
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules$is_args$query_string;
-              proxy_pass $backend;
-            }
-
-            location /prometheus/api/v1/rules/ {
-              ${generalProxyConfig}
-
-              resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules$is_args$query_string;
+              # Do not change the request URL
+              set $backend http://ruler.loki.svc.cluster.local:1080;
               proxy_pass $backend;
             }
 
             location /prometheus/api/v1/alerts {
               ${generalProxyConfig}
-
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts$is_args$query_string;
+              # Do not change the request URL
+              set $backend http://ruler.loki.svc.cluster.local:1080;
               proxy_pass $backend;
             }
 
-
-            # Loki specific ruler routes
-
             location /loki/api/v1/rules {
               ${generalProxyConfig}
-
               resolver ${dnsResolver};
               # Do not change the request URL, this works for the following endpoints:
               # /loki/api/v1/rules
@@ -300,7 +291,6 @@ http {
             # Loki legacy route for saving rules (legacy routes which the Grafana 8 alerting feature uses)
             location ~ ^/api/prom/rules(?<urlsuffix>.*)$
               ${generalProxyConfig}
-
               resolver ${dnsResolver};
               set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$urlsuffix;
               proxy_pass $backend;
