@@ -255,43 +255,39 @@ http {
               ${generalProxyConfig}
 
               resolver ${dnsResolver};
-              set $backend http://querier.loki.svc.cluster.local:1080/$request_uri;
+              set $backend http://querier.loki.svc.cluster.local:1080;
               proxy_pass $backend;
             }
 
             location /prometheus/api/v1/rules {
               ${generalProxyConfig}
 
-              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules$request_uri;
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules$is_args$query_string;
               proxy_pass $backend;
             }
 
             location /prometheus/api/v1/rules/ {
               ${generalProxyConfig}
 
-              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules/$request_uri;
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules$is_args$query_string;
               proxy_pass $backend;
             }
 
             location /prometheus/api/v1/alerts {
               ${generalProxyConfig}
 
-              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts$request_uri;
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts$is_args$query_string;
               proxy_pass $backend;
             }
 
             location /prometheus/api/v1/alerts/ {
               ${generalProxyConfig}
 
-              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts/$request_uri;
+              set $backend http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts$is_args$query_string;
               proxy_pass $backend;
             }
 
@@ -300,18 +296,16 @@ http {
             location /loki/api/v1/rules {
               ${generalProxyConfig}
 
-              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$request_uri;
+              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$is_args$query_string;
               proxy_pass $backend;
             }
 
             location /loki/api/v1/rules/ {
               ${generalProxyConfig}
 
-              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/$request_uri;
+              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$is_args$query_string;
               proxy_pass $backend;
             }
 
@@ -319,9 +313,8 @@ http {
             location /api/prom/rules/ {
               ${generalProxyConfig}
 
-              # Check https://github.com/opstrace/opstrace/issues/896 for more details.
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/$request_uri;
+              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$is_args$query_string;
               proxy_pass $backend;
             }
             `
