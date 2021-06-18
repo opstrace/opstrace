@@ -310,11 +310,11 @@ http {
             }
 
             # Loki legacy route for saving rules (legacy routes which the Grafana 8 alerting feature uses)
-            location /api/prom/rules/ {
+            location ~ ^/api/prom/rules(?<urlsuffix>.*)$
               ${generalProxyConfig}
 
               resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$is_args$query_string;
+              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$urlsuffix;
               proxy_pass $backend;
             }
             `
