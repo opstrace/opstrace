@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import fs from "fs";
 import { fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
 import createSagaMiddleware from "redux-saga";
@@ -28,7 +30,9 @@ import {
   log,
   SECOND,
   retryUponAnyError,
-  checkIfDockerImageExistsOrErrorOut
+  checkIfDockerImageExistsOrErrorOut,
+  die,
+  Dict
 } from "@opstrace/utils";
 
 import { rootReducer } from "./reducer";
@@ -44,6 +48,13 @@ import {
   upgradeInfra
 } from "./upgrade";
 import { getClusterConfig, LatestClusterConfigType } from "@opstrace/config";
+import {
+  ClusterCreateConfigInterface,
+  setCreateConfig,
+  waitUntilDataAPIEndpointsAreReachable,
+  waitUntilDDAPIEndpointsAreReachable,
+  waitUntilUIIsReachable
+} from "@opstrace/installer";
 
 // Note: a largish number of attempts as long as micro retries are not yet
 // implemented carefully and thoughtfully.
@@ -119,6 +130,23 @@ function* triggerInfraUpgrade() {
 
   const ucc: LatestClusterConfigType = getClusterConfig();
 
+  try {
+    // Check the tenant API tokens are available and fail as early as possible
+    // if they are not.
+    const tenantApiTokens = readTenantApiTokenFiles(ucc.tenants);
+    const createConfig: ClusterCreateConfigInterface = {
+      holdController: true,
+      tenantApiTokens: tenantApiTokens,
+      kubeconfigFilePath: ""
+    };
+    // This is required by the waitUntil*AreReachable functions called by
+    // triggerControllerDeploymentUpgrade to check the endpoints are available
+    // when the upgrade finishes.
+    setCreateConfig(createConfig);
+  } catch (e) {
+    die(`could not find tenant api token files: ${e}`);
+  }
+
   yield call(checkIfDockerImageExistsOrErrorOut, ucc.controller_image);
 
   // Explicitly test the availability of the k8s api and exit if interaction
@@ -176,6 +204,33 @@ function* triggerControllerDeploymentUpgrade() {
 
   // Cancel the forked informers so we can exit
   yield cancel(informers);
+
+  // ensure the data endpoint, datadog api endpoints and ui are reachable
+  yield call(
+    waitUntilDataAPIEndpointsAreReachable,
+    ucc.cluster_name,
+    ucc.tenants
+  );
+  yield call(
+    waitUntilDDAPIEndpointsAreReachable,
+    ucc.cluster_name,
+    ucc.tenants
+  );
+  yield call(waitUntilUIIsReachable, ucc.cluster_name, ucc.tenants);
+}
+
+function readTenantApiTokenFiles(tenantNames: string[]): Dict<string> {
+  const tenantApiTokens: Dict<string> = {};
+  // also read system tenant api token
+  const tnames = [...tenantNames];
+  tnames.push("system");
+
+  for (const tname of tnames) {
+    const fpath = `tenant-api-token-${tname}`;
+    const token = fs.readFileSync(fpath);
+    tenantApiTokens[tname] = token.toString();
+  }
+  return tenantApiTokens;
 }
 
 /**
