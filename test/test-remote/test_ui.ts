@@ -243,6 +243,33 @@ suite("test_ui_api", function () {
     throw new Error("unexpected response");
   });
 
+  test("test_grafana_datasource_proxy_cortex_get_rules_legacy", async function () {
+    assert(COOKIES_AFTER_LOGIN);
+
+    const cookie_header_value = COOKIES_AFTER_LOGIN.map(
+      c => `${c.name}=${c.value}`
+    ).join("; ");
+
+    // proxy/1 means: Cortex
+    // Grafana 8 accesses /rules of the Cortex ruler
+    // "GET /rules HTTP/1.1" 404 21 "-" "Grafana/8.0.0"
+    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/1/rules`;
+
+    const httpopts = {
+      throwHttpErrors: false,
+      timeout: {
+        connect: 5000,
+        request: 30000
+      },
+      headers: {
+        Cookie: cookie_header_value
+      },
+      https: { rejectUnauthorized: false }
+    };
+    const resp = await waitFor200Resp(url, httpopts);
+    log.info("got rules doc: %s", resp.body);
+  });
+
   test("test_grafana_datasource_proxy_loki_get_rules", async function () {
     assert(COOKIES_AFTER_LOGIN);
 
