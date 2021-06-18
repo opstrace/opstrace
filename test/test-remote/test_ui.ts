@@ -148,13 +148,18 @@ function httpClientOptsWithCookie(cookie_header_value: string) {
   } as GotOptions;
 }
 
-async function waitFor200Resp(
+async function waitForResp(
   url: string,
-  httpopts: any
+  httpopts: any,
+  expectedStatusCode = 200
 ): Promise<GotResponse<string>> {
   const maxWaitSeconds = 2100;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-  log.info("Waiting for a 200 OK response to be returned by %s", url);
+  log.info(
+    "Waiting for a response with status code %s to be returned by %s",
+    expectedStatusCode,
+    url
+  );
 
   while (true) {
     if (mtime() > deadline) {
@@ -170,8 +175,11 @@ async function waitFor200Resp(
 
     if (resp !== undefined) {
       logHTTPResponse(resp);
-      if (resp.statusCode === 200) {
-        log.info("goot 200 response");
+      if (resp.statusCode === expectedStatusCode) {
+        log.info(
+          "got response with expected status code %s",
+          expectedStatusCode
+        );
         return resp;
       }
     }
@@ -232,7 +240,7 @@ suite("test_ui_api", function () {
 
     const httpopts = httpClientOptsWithCookie(cookie_header_value);
     httpopts.searchParams = new URLSearchParams(queryParams);
-    const resp = await waitFor200Resp(url, httpopts);
+    const resp = await waitForResp(url, httpopts);
     const r = JSON.parse(resp.body);
     if (r.data !== undefined) {
       const labels = r.data as Array<string>;
@@ -258,7 +266,7 @@ suite("test_ui_api", function () {
     // "GET /rules HTTP/1.1" 404 21 "-" "Grafana/8.0.0"
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/1/rules`;
 
-    const resp = await waitFor200Resp(
+    const resp = await waitForResp(
       url,
       httpClientOptsWithCookie(cookie_header_value)
     );
@@ -275,11 +283,19 @@ suite("test_ui_api", function () {
     // Documented with "List all rules configured for the authenticated tenant"
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/rules`;
 
-    const resp = await waitFor200Resp(
+    // expect 404 response with 'no rule groups found' in body
+    const resp = await waitForResp(
       url,
-      httpClientOptsWithCookie(cookie_header_value)
+      httpClientOptsWithCookie(cookie_header_value),
+      404
     );
-    log.info("got rules doc: %s", resp.body);
+    log.info("got resp with body: %s", resp.body);
+
+    if (resp.body.includes("no rule groups found")) {
+      log.info("saw expected response body, success");
+      return;
+    }
+    throw new Error("unexpected body in 404 response");
   });
 
   test("test_grafana_datasource_proxy_loki_get_alerts_legacy", async function () {
@@ -292,7 +308,7 @@ suite("test_ui_api", function () {
     // GET /prometheus/api/v1/alerts
     // Prometheus-compatible rules endpoint to list all active alerts.
     const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/prometheus/api/v1/alerts`;
-    const resp = await waitFor200Resp(
+    const resp = await waitForResp(
       url,
       httpClientOptsWithCookie(cookie_header_value)
     );
