@@ -52,17 +52,6 @@ export function CortexResources(
     metricRetentionDays
   } = getControllerConfig(state);
 
-  const dataBucketName = getBucketName({
-    clusterName: infrastructureName,
-    suffix: "cortex"
-  });
-  const configBucketName = getBucketName({
-    clusterName: infrastructureName,
-    suffix: "cortex-config"
-  });
-
-  const bucketRegion = `s3.${region}.amazonaws.com`;
-
   const configsDBName = "cortex";
   const dbconfig = new URL(state.config.config?.postgreSQLEndpoint || "");
   const dbURL = urlJoin(state.config.config?.postgreSQLEndpoint, configsDBName);
@@ -221,6 +210,57 @@ export function CortexResources(
     };
   }
 
+  const dataBucketName = getBucketName({
+    clusterName: infrastructureName,
+    suffix: "cortex"
+  });
+  const configBucketName = getBucketName({
+    clusterName: infrastructureName,
+    suffix: "cortex-config"
+  });
+
+  let dataStorageBackend = {};
+  let configStorageBackend = {};
+  switch (target) {
+    case "aws": {
+      const bucketRegion = `s3.${region}.amazonaws.com`;
+
+      dataStorageBackend = {
+        backend: "s3",
+        s3: {
+          bucket_name: dataBucketName,
+          endpoint: bucketRegion
+        }
+      };
+
+      configStorageBackend = {
+        backend: "s3",
+        s3: {
+          bucket_name: configBucketName,
+          endpoint: bucketRegion
+        }
+      };
+
+      break;
+    }
+    case "gcp": {
+      dataStorageBackend = {
+        backend: "gcs",
+        gcs: {
+          bucket_name: dataBucketName
+        }
+      };
+
+      configStorageBackend = {
+        backend: "gcs",
+        gcs: {
+          bucket_name: configBucketName
+        }
+      };
+      break;
+    }
+  }
+
   collection.add(
     new V1Alpha1CortexResource(
       {
@@ -363,11 +403,7 @@ export function CortexResources(
                 // block_ranges_period: "2h0m0s,", //default
                 retention_period: "6h"
               },
-              backend: "s3",
-              s3: {
-                bucket_name: dataBucketName,
-                endpoint: bucketRegion
-              }
+              ...dataStorageBackend
             },
             configs: {
               database: {
@@ -376,18 +412,10 @@ export function CortexResources(
               }
             },
             alertmanager_storage: {
-              backend: "s3",
-              s3: {
-                bucket_name: configBucketName,
-                endpoint: bucketRegion
-              }
+              ...configStorageBackend
             },
             ruler_storage: {
-              backend: "s3",
-              s3: {
-                bucket_name: configBucketName,
-                endpoint: bucketRegion
-              }
+              ...configStorageBackend
             }
           },
           runtime_config: {
