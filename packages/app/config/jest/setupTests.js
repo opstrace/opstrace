@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+const { configure } = require("@testing-library/react");
+const nock = require("nock");
+
 require("regenerator-runtime/runtime");
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -27,3 +30,15 @@ jest.mock("workers", () => {
     getOpScriptWorker: () => {}
   };
 });
+
+jest.setTimeout(15000)
+configure({
+  asyncUtilTimeout: 15000
+})
+/* limiting net requests to localhost, see
+ * https://github.com/nock/nock#enabledisable-real-http-requests
+ */
+nock.disableNetConnect()
+nock.enableNetConnect(
+  host => host.includes('127.0.0.1') || host.includes('localhost')
+)
