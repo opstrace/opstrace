@@ -51,11 +51,7 @@ const createMockShards = () => {
       timestamp: "2021-05-31T13:02:47+00:00",
       zone: `shard-zone-${id}`,
       address: `shard-address-${id}`,
-      tokens: [
-        `shard-token-${id}-a`,
-        `shard-token-${id}-b`,
-        `shard-token-${id}-c`
-      ],
+      tokens: [],
       registered_timestamp: `shard-registered_timestamp-${id}`
     };
   });
@@ -75,7 +71,7 @@ describe("LokiRingHealth", () => {
     expect(ingesterTab).toHaveTextContent("Loki Ring Health");
   });
 
-  test("selects first tab by default", async () => {
+  test("selects ingester tab by default", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
     const container = renderComponent(
@@ -94,67 +90,45 @@ describe("LokiRingHealth", () => {
     path,
     endpoint
   ]);
-  test.each(tabTestCases)(
-    "%s tab",
-    async (tabLabel, tabRoute, tabEndpoint) => {
-      const mockShards = createMockShards();
-      nock("http://localhost").get(tabEndpoint).reply(200, {
-        shards: mockShards,
-        now: Date.now()
-      });
+  describe("tabs", () => {
+    test.each(tabTestCases)(
+      "%s tab",
+      async (tabLabel, tabRoute, tabEndpoint) => {
+        const mockShards = createMockShards();
+        nock("http://localhost").get(tabEndpoint).reply(200, {
+          shards: mockShards,
+          now: Date.now()
+        });
 
-      const baseUrl = "/route/to/ring-health";
-      const history = createMemoryHistory({ initialEntries: [baseUrl] });
-      const container = renderComponent(
-        <Router history={history}>
-          <RingHealth baseUrl={baseUrl} />
-        </Router>
-      );
+        const baseUrl = "/route/to/ring-health";
+        const history = createMemoryHistory({ initialEntries: [baseUrl] });
+        const container = renderComponent(
+          <Router history={history}>
+            <RingHealth baseUrl={baseUrl} />
+          </Router>
+        );
 
-      // wait for polling
-      jest.runOnlyPendingTimers();
+        // wait for polling
+        jest.runOnlyPendingTimers();
 
-      // Select tab
-      const ingesterTab = container.getByRole("tab", { name: tabLabel });
-      userEvent.click(ingesterTab);
+        // Select tab
+        const ingesterTab = container.getByRole("tab", { name: tabLabel });
+        userEvent.click(ingesterTab);
 
-      // wait for polling
-      jest.runOnlyPendingTimers();
+        // wait for polling
+        jest.runOnlyPendingTimers();
 
-      // assert that reroute was successful
-      await container.findByRole("tab", { name: tabLabel, selected: true });
-      expect(history.location.pathname).toBe(baseUrl + tabRoute);
+        // assert that reroute was successful
+        await container.findByRole("tab", { name: tabLabel, selected: true });
+        expect(history.location.pathname).toBe(baseUrl + tabRoute);
 
-      // assert table is rendered properly
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].id })
-      ).toBeInTheDocument();
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].state })
-      ).toBeInTheDocument();
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].zone })
-      ).toBeInTheDocument();
-      expect(
-        await container.findByRole("cell", { name: mockShards[0].address })
-      ).toBeInTheDocument();
-
-      // assert token dialog
-      const tokenDialogButton = container.getAllByRole("button", {
-        name: "show token dialog"
-      })[0];
-      userEvent.click(tokenDialogButton);
-      expect(
-        await container.findByText(mockShards[0].tokens[0])
-      ).toBeInTheDocument();
-      expect(
-        await container.findByText(mockShards[0].tokens[1])
-      ).toBeInTheDocument();
-      expect(
-        await container.findByText(mockShards[0].tokens[2])
-      ).toBeInTheDocument();
-    }
-  );
+        // assert table is rendered properly
+        expect(
+          await container.findByRole("cell", { name: mockShards[0].id })
+        ).toBeInTheDocument();
+      }
+    );
+  });
 });
 
 const renderComponent = (children: React.ReactNode) => {
