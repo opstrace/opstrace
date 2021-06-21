@@ -23,7 +23,7 @@ import {
 } from "@opstrace/kubernetes";
 import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
-import { getTenantNamespace, getControllerConfig } from "../../../helpers";
+import { getTenantNamespace } from "../../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
@@ -58,33 +58,6 @@ export function GrafanaDatasourceResources(
     }
     return datasourcesToDelete;
   };
-
-  // Check https://github.com/opstrace/opstrace/issues/896 for more details.
-  // Using a variable in proxy_pass forces re-resolution of the DNS names
-  // because NGINX treats variables differently to static configuration. From
-  // the NGINX proxy_pass documentation
-  // http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass. For
-  // this to work we need to also set a resolver but EKS and GKE use different
-  // ClusterIPs for the pod DNS upstream resolver.
-  let dnsResolver = "";
-  const { target } = getControllerConfig(state);
-
-  if (target === "aws") {
-    dnsResolver = "10.100.0.10";
-  }
-
-  if (target === "gcp") {
-    // This IP address depends on the GKE cluster, see
-    // https://cloud.google.com/kubernetes-engine/docs/concepts/service-discovery
-    // We could parse /etc/resolv.conf but it seems like
-    // a _dynamic_ resolver should also work:
-    // kube-dns.kube-system.svc.cluster.local valid=5s;
-    // Refs:
-    //   https://www.nginx.com/blog/announcing-nginx-ingress-controller-for-kubernetes-release-1-4-0/
-    //   https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/
-    // Does/should this work for AWS, too?
-    dnsResolver = "kube-dns.kube-system.svc.cluster.local valid=5s";
-  }
 
   // Warning: the order in the `datasources` array defines the IDs assigned to
   // individual data sources -- these IDs are being used in certain tests,
@@ -269,44 +242,52 @@ http {
             location / {
               ${generalProxyConfig}
 
-              resolver ${dnsResolver};
-              set $backend http://querier.loki.svc.cluster.local:1080;
-              proxy_pass $backend;
+              proxy_pass http://querier.loki.svc.cluster.local:1080;
             }
 
             # For specific routes, pass on to the ruler
             location /prometheus/api/v1/rules {
               ${generalProxyConfig}
-              resolver ${dnsResolver};
               # Do not change the request URL
-              set $backend http://ruler.loki.svc.cluster.local:1080;
-              proxy_pass $backend;
+              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules;
+            }
+
+            location /prometheus/api/v1/rules/ {
+              ${generalProxyConfig}
+              # Do not change the request URL
+              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/rules/;
             }
 
             location /prometheus/api/v1/alerts {
               ${generalProxyConfig}
-              resolver ${dnsResolver};
               # Do not change the request URL
-              set $backend http://ruler.loki.svc.cluster.local:1080;
-              proxy_pass $backend;
+              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts;
+            }
+
+
+            location /prometheus/api/v1/alerts/ {
+              ${generalProxyConfig}
+              # Do not change the request URL
+              proxy_pass http://ruler.loki.svc.cluster.local:1080/prometheus/api/v1/alerts/;
             }
 
             location /loki/api/v1/rules {
               ${generalProxyConfig}
-              resolver ${dnsResolver};
-              # Do not change the request URL, this works for the following endpoints:
-              # /loki/api/v1/rules
-              # /loki/api/v1/rules/{namespace}
-              set $backend http://ruler.loki.svc.cluster.local:1080;
-              proxy_pass $backend;
+
+              proxy_pass http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules;
+            }
+
+            location /loki/api/v1/rules/ {
+              ${generalProxyConfig}
+
+              proxy_pass http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/;
             }
 
             # Loki legacy route for saving rules (legacy routes which the Grafana 8 alerting feature uses)
-            location ~ ^/api/prom/rules(?<urlsuffix>.*)$ {
+            location /api/prom/rules/ {
               ${generalProxyConfig}
-              resolver ${dnsResolver};
-              set $backend http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules$urlsuffix;
-              proxy_pass $backend;
+
+              proxy_pass http://ruler.loki.svc.cluster.local:1080/loki/api/v1/rules/;
             }
             `
           )
@@ -330,31 +311,39 @@ http {
             `
           location / {
             ${generalProxyConfig}
-            resolver ${dnsResolver};
-            set $backend "http://query-frontend.cortex.svc.cluster.local:80";
-            proxy_pass $backend;
+
+            proxy_pass http://query-frontend.cortex.svc.cluster.local:80;
           }
 
-          location ~ ^/api/v1/rules(?<urlsuffix>.*)$ {
+          location /api/v1/rules {
             ${generalProxyConfig}
-            resolver ${dnsResolver};
-            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules$urlsuffix";
-            proxy_pass $backend;
+
+            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules;
           }
 
-          location ~ ^/api/v1/alerts(?<urlsuffix>.*)$ {
+          location /api/v1/rules/ {
             ${generalProxyConfig}
-            resolver ${dnsResolver};
-            set $backend "http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts$urlsuffix";
-            proxy_pass $backend;
+
+            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/rules/;
+          }
+
+          location /api/v1/alerts/ {
+            ${generalProxyConfig}
+
+            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts/;
+          }
+
+          location /api/v1/alerts {
+            ${generalProxyConfig}
+
+            proxy_pass http://ruler.cortex.svc.cluster.local/prometheus/api/v1/alerts;
           }
 
           # Cortex specific ruler routes (legacy routes which the Grafana 8 alerting feature uses)
-          location ~ ^/rules(?<urlsuffix>.*)$ {
+          location /rules {
             ${generalProxyConfig}
-            resolver ${dnsResolver};
-            set $backend http://ruler.cortex.svc.cluster.local/api/v1/rules$urlsuffix;
-            proxy_pass $backend;
+
+            proxy_pass http://ruler.cortex.svc.cluster.local/api/v1/rules;
           }
           `
           )
