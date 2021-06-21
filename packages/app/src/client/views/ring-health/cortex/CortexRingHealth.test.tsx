@@ -26,6 +26,7 @@ import { createMemoryHistory } from "history";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { render } from "@testing-library/react";
+import { createMockShard } from "../testUtils";
 
 jest.useFakeTimers();
 
@@ -38,24 +39,6 @@ beforeEach(() => {
     now: Date.now()
   });
 });
-
-const createMockShards = () => {
-  function getRandomInt() {
-    return Math.floor(Math.random() * 1000);
-  }
-  return new Array(5).fill(true).map(() => {
-    const id = getRandomInt();
-    return {
-      id: `shard-id-${id}`,
-      state: `shard-state-${id}`,
-      timestamp: "2021-05-31T13:02:47+00:00",
-      zone: `shard-zone-${id}`,
-      address: `shard-address-${id}`,
-      tokens: [],
-      registered_timestamp: `shard-registered_timestamp-${id}`
-    };
-  });
-};
 
 describe("CortexRingHealth", () => {
   test("renders title correctly", async () => {
@@ -93,11 +76,13 @@ describe("CortexRingHealth", () => {
     test.each(tabTestCases)(
       "%s tab",
       async (tabLabel, tabRoute, tabEndpoint) => {
-        const mockShards = createMockShards();
-        nock("http://localhost").get(tabEndpoint).reply(200, {
-          shards: mockShards,
-          now: Date.now()
-        });
+        const mockShard = createMockShard("first-shard");
+        nock("http://localhost")
+          .get(tabEndpoint)
+          .reply(200, {
+            shards: [mockShard],
+            now: Date.now()
+          });
 
         const baseUrl = "/route/to/ring-health";
         const history = createMemoryHistory({ initialEntries: [baseUrl] });
@@ -123,7 +108,7 @@ describe("CortexRingHealth", () => {
 
         // assert table is rendered properly
         expect(
-          await container.findByRole("cell", { name: mockShards[0].id })
+          await container.findByRole("cell", { name: mockShard.id })
         ).toBeInTheDocument();
       }
     );

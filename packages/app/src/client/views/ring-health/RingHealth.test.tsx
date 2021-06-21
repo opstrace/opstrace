@@ -25,6 +25,7 @@ import { MemoryRouter } from "react-router";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { render } from "@testing-library/react";
+import { createMockShard } from "./testUtils";
 
 jest.useFakeTimers();
 
@@ -33,29 +34,7 @@ beforeEach(() => {
   nock.cleanAll();
 });
 
-const createMockShards = () => {
-  function getRandomInt() {
-    return Math.floor(Math.random() * 1000);
-  }
-  return new Array(5).fill(true).map(() => {
-    const id = getRandomInt();
-    return {
-      id: `shard-id-${id}`,
-      state: `shard-state-${id}`,
-      timestamp: "2021-05-31T13:02:47+00:00",
-      zone: `shard-zone-${id}`,
-      address: `shard-address-${id}`,
-      tokens: [
-        `shard-token-${id}-a`,
-        `shard-token-${id}-b`,
-        `shard-token-${id}-c`
-      ],
-      registered_timestamp: `shard-registered_timestamp-${id}`
-    };
-  });
-};
-
-describe("CortexRingHealth", () => {
+describe("RingHealth", () => {
   test("renders title correctly", async () => {
     const title = "my title";
     const container = renderComponent(
@@ -117,11 +96,14 @@ describe("CortexRingHealth", () => {
       path: `/tab`,
       endpoint: "/tab-endpoint"
     };
-    const mockShards = createMockShards();
-    nock("http://localhost").get(tab.endpoint).reply(200, {
-      shards: mockShards,
-      now: Date.now()
-    });
+    const mockShard = createMockShard("first-shard");
+    mockShard.tokens = [111, 222, 333];
+    nock("http://localhost")
+      .get(tab.endpoint)
+      .reply(200, {
+        shards: [mockShard],
+        now: Date.now()
+      });
 
     const container = renderComponent(
       <RingHealth title="some title" tabs={[tab]} />
@@ -132,16 +114,16 @@ describe("CortexRingHealth", () => {
 
     // assert table is rendered properly
     expect(
-      await container.findByRole("cell", { name: mockShards[0].id })
+      await container.findByRole("cell", { name: mockShard.id })
     ).toBeInTheDocument();
     expect(
-      await container.findByRole("cell", { name: mockShards[0].state })
+      await container.findByRole("cell", { name: mockShard.state })
     ).toBeInTheDocument();
     expect(
-      await container.findByRole("cell", { name: mockShards[0].zone })
+      await container.findByRole("cell", { name: mockShard.zone })
     ).toBeInTheDocument();
     expect(
-      await container.findByRole("cell", { name: mockShards[0].address })
+      await container.findByRole("cell", { name: mockShard.address })
     ).toBeInTheDocument();
 
     // assert token dialog
@@ -149,18 +131,10 @@ describe("CortexRingHealth", () => {
       name: "show token dialog"
     })[0];
     userEvent.click(tokenDialogButton);
-    expect(
-      await container.findByText(mockShards[0].tokens[0])
-    ).toBeInTheDocument();
-    expect(
-      await container.findByText(mockShards[0].tokens[1])
-    ).toBeInTheDocument();
-    expect(
-      await container.findByText(mockShards[0].tokens[2])
-    ).toBeInTheDocument();
+    expect(await container.findByText(mockShard.tokens[0])).toBeInTheDocument();
+    expect(await container.findByText(mockShard.tokens[1])).toBeInTheDocument();
+    expect(await container.findByText(mockShard.tokens[2])).toBeInTheDocument();
   });
-
-  
 
   test("fetches new results every 2s", async () => {
     const tab = {
@@ -168,7 +142,7 @@ describe("CortexRingHealth", () => {
       path: `/tab`,
       endpoint: "/tab-endpoint"
     };
-    const firstBatch = createMockShards();
+    const firstBatch = [createMockShard("some-shard")];
     nock("http://localhost").get(tab.endpoint).reply(200, {
       shards: firstBatch,
       now: Date.now()
@@ -186,17 +160,16 @@ describe("CortexRingHealth", () => {
       await container.findByRole("cell", { name: firstBatch[0].id })
     ).toBeInTheDocument();
 
-
-    const secondBatch = createMockShards();
+    const secondBatch = [createMockShard("some-other-shard")];
     nock("http://localhost").get(tab.endpoint).reply(200, {
       shards: secondBatch,
       now: Date.now()
     });
-    
+
     // wait for polling
     jest.advanceTimersByTime(2000);
     expect(
-      await container.findByRole("cell", { name: secondBatch[0].id})
+      await container.findByRole("cell", { name: secondBatch[0].id })
     ).toBeInTheDocument();
   });
 });
@@ -207,7 +180,7 @@ test("handles request errors", async () => {
     path: `/tab`,
     endpoint: "/tab-endpoint"
   };
-  
+
   nock("http://localhost").get(tab.endpoint).reply(500);
 
   const container = renderComponent(
@@ -216,8 +189,12 @@ test("handles request errors", async () => {
 
   jest.runOnlyPendingTimers();
 
-  expect(await container.findByText("Could not load table")).toBeInTheDocument()
-  expect(await container.findByText("Request failed with status code 500")).toBeInTheDocument()
+  expect(
+    await container.findByText("Could not load table")
+  ).toBeInTheDocument();
+  expect(
+    await container.findByText("Request failed with status code 500")
+  ).toBeInTheDocument();
 });
 
 const renderComponent = (children: React.ReactNode) => {
