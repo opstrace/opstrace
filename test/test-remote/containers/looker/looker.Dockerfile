@@ -20,7 +20,7 @@ RUN echo /build: && \
     ls -al /build/* && \
     yarn install --frozen-lockfile
 
-COPY test/test-remote/logstream-gen /build/test/test-remote/logstream-gen
+COPY test/test-remote/looker /build/test/test-remote/looker
 RUN yarn run tsc -b tsconfig.json
 
 # I tried for 45 minutes to set up a binary using the `bin` property in
@@ -28,8 +28,8 @@ RUN yarn run tsc -b tsconfig.json
 # install -force`, reading yarn docs forth and back, and blog posts. Then fell
 # back to basic unix tools to do that manually: worked within 1 minute.
 ENV PATH="/build/test/test-remote:${PATH}"
-RUN chmod ugo+x /build/test/test-remote/_tscbuild/logstream-gen/index.js
-RUN ln -s /build/test/test-remote/_tscbuild/logstream-gen/index.js /build/test/test-remote/looker
+RUN chmod ugo+x /build/test/test-remote/_tscbuild/looker/index.js
+RUN ln -s /build/test/test-remote/_tscbuild/looker/index.js /build/test/test-remote/looker
 
 # See if the looker path works
 RUN looker -h
