@@ -21,9 +21,8 @@
     "skipLibCheck": true
   },
   "include": [
-    "./test*.ts",
     "testutils/**/*.ts",
-    "looker/**/*.ts",
-    "looker/resources/*.json",
+    "looker/**/*.*",
+    "looker/resources/*.json"
   ]
 }
