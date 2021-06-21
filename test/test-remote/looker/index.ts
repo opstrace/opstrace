@@ -60,6 +60,8 @@ import {
 
 import { log, buildLogger, setLogger } from "./log";
 
+import * as pm from "./prommetrics";
+
 interface CfgInterface {
   n_concurrent_streams: number;
   n_chars_per_msg: number;
@@ -132,98 +134,6 @@ let COUNTER_HTTP_RESP_LOG_THROTTLE = 0;
 let COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE = 0;
 
 let BEARER_TOKEN: undefined | string;
-
-const counter_fragments_pushed = new promclient.Counter({
-  name: "counter_fragments_pushed",
-  help: "number of log stream fragments successfully pushed"
-});
-
-const counter_serialized_fragments_bytes_pushed = new promclient.Counter({
-  name: "counter_serialized_fragments_bytes_pushed",
-  help:
-    "cumulative size of snappy-compressed protobuf messages (serialized log stream fragments) successfully POSTed to Loki API"
-  // note that this should be the ~amount of data written into HTTP request
-  // bodies over the wire -- however, it's unclear if maybe some additional
-  // gzip compression happens on top of this
-});
-
-const counter_log_entries_pushed = new promclient.Counter({
-  name: "counter_log_entries_pushed",
-  help: "number of log entries successfully pushed"
-});
-
-const counter_payload_bytes_pushed = new promclient.Counter({
-  name: "counter_payload_bytes_pushed",
-  help:
-    "byte length of all pushed log entries / metric samples so far " +
-    "(12 byte per timestamp, assume utf-8 encoding for logs and 8 bytes per sample for metrics)"
-});
-
-const counter_post_responses = new promclient.Counter({
-  name: "counter_post_responses",
-  help: "HTTP responses to POST requests by status code",
-  labelNames: ["statuscode"]
-});
-
-const counter_post_non_http_errors = new promclient.Counter({
-  name: "counter_post_non_http_errors",
-  help: "connection errors and the likes, must refer to logs for detail"
-});
-
-const counter_get_responses = new promclient.Counter({
-  name: "counter_get_responses",
-  help: "HTTP responses to GET requests by status code",
-  labelNames: ["statuscode"]
-});
-
-const counter_unexpected_query_results = new promclient.Counter({
-  name: "counter_unexpected_query_results",
-  help:
-    "Error counter for unexpected Loki query results " +
-    "(such as unexpected log entry count in query result)",
-  labelNames: ["statuscode"]
-});
-
-const counter_get_non_http_errors = new promclient.Counter({
-  name: "counter_get_non_http_errors",
-  help: "connection errors and the likes, must refer to logs for detail"
-});
-
-const counter_rw_cycles = new promclient.Counter({
-  name: "counter_rw_cycles",
-  help: "number of read/write cycles performed"
-});
-
-const counter_fragment_generation_delayed = new promclient.Counter({
-  name: "counter_fragment_generation_delayed",
-  help:
-    "number of times fragment generation was delayed (in metrics mode) " +
-    "because otherwise we would overtake walltime"
-});
-
-const counter_forward_leap = new promclient.Counter({
-  name: "counter_forward_leap",
-  help:
-    "number of times a time series was forward-leaped (by N minutes) " +
-    "to not fall behind walltime too much"
-});
-
-const gauge_last_http_request_body_size_bytes = new promclient.Gauge({
-  name: "gauge_last_http_request_body_size_bytes",
-  help:
-    "size of last successfully POSTed HTTP request body (snappy-compressed protobuf message: a serialized log stream fragments)"
-});
-
-const hist_duration_post_with_retry_seconds = new promclient.Histogram({
-  name: "duration_post_with_retry_seconds",
-  help: "Duration between entering postWithRetry and leaving it with success",
-  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 20, 30, 60, 120]
-});
-
-const gauge_uptime = new promclient.Gauge({
-  name: "gauge_uptime",
-  help: "uptime of current looker process in seconds"
-});
 
 function parseCmdlineArgs() {
   const parser = new argparse.ArgumentParser({
@@ -579,7 +489,7 @@ function parseCmdlineArgs() {
 function setUptimeGauge() {
   // Set this in various places of the program visted regularly.
   const uptimeSeconds = mtimeDiffSeconds(START_TIME_MONOTONIC);
-  gauge_uptime.set(Math.round(uptimeSeconds));
+  pm.gauge_uptime.set(Math.round(uptimeSeconds));
 }
 
 async function main() {
@@ -609,7 +519,7 @@ async function main() {
       );
     }
 
-    counter_rw_cycles.inc();
+    pm.counter_rw_cycles.inc();
 
     // wrap performWriteReadCycle() in an overgeneralized error handler "just"
     // to more reliably crash looker, see CH1288. I'd love for all unexpected
@@ -690,7 +600,7 @@ async function createNewDummyStreams(
           timediffMilliSeconds: CFG.metrics_time_increment_ms,
           labelset: labelset
         },
-        counter_forward_leap
+        pm.counter_forward_leap
       );
     } else {
       stream = new DummyStream({
@@ -1148,7 +1058,7 @@ async function _produceAndPOSTpushrequest(
               "and pushing the next fragment. This may take up to 10 minutes."
           );
           // We want to monitor the artificial throttling
-          counter_fragment_generation_delayed.inc(1);
+          pm.counter_fragment_generation_delayed.inc(1);
           await sleep(10);
         }
 
@@ -1222,15 +1132,15 @@ async function _produceAndPOSTpushrequest(
     }
 
     const postDurationSeconds = mtimeDiffSeconds(postT0);
-    hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
+    pm.hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
 
     COUNTER_STREAM_FRAGMENTS_PUSHED =
       COUNTER_STREAM_FRAGMENTS_PUSHED +
       BigInt(CFG.n_fragments_per_push_message);
 
-    counter_fragments_pushed.inc(CFG.n_fragments_per_push_message);
+    pm.counter_fragments_pushed.inc(CFG.n_fragments_per_push_message);
 
-    counter_log_entries_pushed.inc(
+    pm.counter_log_entries_pushed.inc(
       CFG.n_entries_per_stream_fragment * CFG.n_fragments_per_push_message
     );
 
@@ -1240,9 +1150,9 @@ async function _produceAndPOSTpushrequest(
     // numerical sample data (8 bytes per sample).
 
     // Convert BigInt to Number and assume that the numbers are small enough
-    counter_payload_bytes_pushed.inc(Number(pr.payloadByteCount));
-    counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
-    gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
+    pm.counter_payload_bytes_pushed.inc(Number(pr.payloadByteCount));
+    pm.counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
+    pm.gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
   }
 
   // Note(JP): any error in _genAndPost(), at the time of writing, should by
@@ -1418,7 +1328,7 @@ async function customPostWithRetryOrError(
         // Reflect this transient error in Prom counter. We could add a stream
         // name label here so that this error is associated with a specific
         // dummystream.
-        counter_post_non_http_errors.inc();
+        pm.counter_post_non_http_errors.inc();
 
         // Example log message: `POST
         // PushRequest(md5=434f0758a5df51275ba0f188ab9b07a2): attempt 1 failed
@@ -1446,7 +1356,7 @@ async function customPostWithRetryOrError(
 
     // Rely on that when we're here that we actually got an HTTP response, i.e.
     // a status code is known.
-    counter_post_responses.inc({ statuscode: response.statusCode });
+    pm.counter_post_responses.inc({ statuscode: response.statusCode });
 
     if ([200, 204].includes(response.statusCode)) {
       logHTTPResponseLight(response, `${pr}`);
@@ -1577,7 +1487,7 @@ async function httpGETRetryUntil200OrError(
         // Reflect this transient error in Prom counter. We could add a stream
         // name label here so that this error is associated with a specific
         // dummystream.
-        counter_get_non_http_errors.inc();
+        pm.counter_get_non_http_errors.inc();
 
         log.warning(`Query: attempt ${attempt} failed with ${e.message}`);
 
@@ -1594,7 +1504,7 @@ async function httpGETRetryUntil200OrError(
 
     // Rely on that when we're here that we actually got an HTTP response,
     // i.e. a status code is known.
-    counter_get_responses.inc({ statuscode: response.statusCode });
+    pm.counter_get_responses.inc({ statuscode: response.statusCode });
 
     if (response.statusCode === 200) {
       logHTTPResponseLight(response);
@@ -1699,7 +1609,7 @@ async function queryLokiWithRetryOrError(
     try {
       return await _queryAndCountEntries(lokiQuerierBaseUrl, queryParams);
     } catch (err) {
-      counter_unexpected_query_results.inc();
+      pm.counter_unexpected_query_results.inc();
       log.warning(
         `_queryAndCountEntries() failed with \`${err.message}\`, retry soon`
       );
