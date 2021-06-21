@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-type Shard = {
+export type Shard = {
   id: string;
   state: string;
   timestamp: string;

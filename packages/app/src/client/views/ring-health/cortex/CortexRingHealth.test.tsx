@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import { createMemoryHistory } from "history";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { render } from "@testing-library/react";
+import { createMockShard } from "../testUtils";
 
 jest.useFakeTimers();
 
@@ -38,28 +39,6 @@ beforeEach(() => {
     now: Date.now()
   });
 });
-
-const createMockShards = () => {
-  function getRandomInt() {
-    return Math.floor(Math.random() * 1000);
-  }
-  return new Array(5).fill(true).map(() => {
-    const id = getRandomInt();
-    return {
-      id: `shard-id-${id}`,
-      state: `shard-state-${id}`,
-      timestamp: "2021-05-31T13:02:47+00:00",
-      zone: `shard-zone-${id}`,
-      address: `shard-address-${id}`,
-      tokens: [
-        `shard-token-${id}-a`,
-        `shard-token-${id}-b`,
-        `shard-token-${id}-c`
-      ],
-      registered_timestamp: `shard-registered_timestamp-${id}`
-    };
-  });
-};
 
 describe("CortexRingHealth", () => {
   test("renders title correctly", async () => {
@@ -74,7 +53,7 @@ describe("CortexRingHealth", () => {
     const ingesterTab = container.getByRole("heading");
     expect(ingesterTab).toHaveTextContent("Cortex Ring Health");
   });
-  test("selects first tab by default", async () => {
+  test("selects ingester tab by default", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
     const container = renderComponent(
@@ -93,63 +72,46 @@ describe("CortexRingHealth", () => {
     path,
     endpoint
   ]);
-  test.each(tabTestCases)("%s tab", async (tabLabel, tabRoute, tabEndpoint) => {
-    const mockShards = createMockShards();
-    nock("http://localhost").get(tabEndpoint).reply(200, {
-      shards: mockShards,
-      now: Date.now()
-    });
+  describe("tabs", () => {
+    test.each(tabTestCases)(
+      "%s tab",
+      async (tabLabel, tabRoute, tabEndpoint) => {
+        const mockShard = createMockShard("first-shard");
+        nock("http://localhost")
+          .get(tabEndpoint)
+          .reply(200, {
+            shards: [mockShard],
+            now: Date.now()
+          });
 
-    const baseUrl = "/route/to/ring-health";
-    const history = createMemoryHistory({ initialEntries: [baseUrl] });
-    const container = renderComponent(
-      <Router history={history}>
-        <RingHealth baseUrl={baseUrl} />
-      </Router>
+        const baseUrl = "/route/to/ring-health";
+        const history = createMemoryHistory({ initialEntries: [baseUrl] });
+        const container = renderComponent(
+          <Router history={history}>
+            <RingHealth baseUrl={baseUrl} />
+          </Router>
+        );
+
+        // wait for polling
+        jest.runOnlyPendingTimers();
+
+        // Select tab
+        const ingesterTab = container.getByRole("tab", { name: tabLabel });
+        userEvent.click(ingesterTab);
+
+        // wait for polling
+        jest.runOnlyPendingTimers();
+
+        // assert that reroute was successful
+        await container.findByRole("tab", { name: tabLabel, selected: true });
+        expect(history.location.pathname).toBe(baseUrl + tabRoute);
+
+        // assert table is rendered properly
+        expect(
+          await container.findByRole("cell", { name: mockShard.id })
+        ).toBeInTheDocument();
+      }
     );
-
-    // wait for polling
-    jest.runOnlyPendingTimers();
-
-    // Select tab
-    const ingesterTab = container.getByRole("tab", { name: tabLabel });
-    userEvent.click(ingesterTab);
-
-    // wait for polling
-    jest.runOnlyPendingTimers();
-
-    // assert that reroute was successful
-    await container.findByRole("tab", { name: tabLabel, selected: true });
-    expect(history.location.pathname).toBe(baseUrl + tabRoute);
-
-    // assert table is rendered properly
-    expect(
-      await container.findByRole("cell", { name: mockShards[0].id })
-    ).toBeInTheDocument();
-    expect(
-      await container.findByRole("cell", { name: mockShards[0].state })
-    ).toBeInTheDocument();
-    expect(
-      await container.findByRole("cell", { name: mockShards[0].zone })
-    ).toBeInTheDocument();
-    expect(
-      await container.findByRole("cell", { name: mockShards[0].address })
-    ).toBeInTheDocument();
-
-    // assert token dialog
-    const tokenDialogButton = container.getAllByRole("button", {
-      name: "show token dialog"
-    })[0];
-    userEvent.click(tokenDialogButton);
-    expect(
-      await container.findByText(mockShards[0].tokens[0])
-    ).toBeInTheDocument();
-    expect(
-      await container.findByText(mockShards[0].tokens[1])
-    ).toBeInTheDocument();
-    expect(
-      await container.findByText(mockShards[0].tokens[2])
-    ).toBeInTheDocument();
   });
 });
 
