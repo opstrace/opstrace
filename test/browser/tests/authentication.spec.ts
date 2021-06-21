@@ -27,6 +27,7 @@ test.describe("after auth0 authentication", () => {
   });
 
   test("user should see own email in user list", async ({ page, user }) => {
+    await page.hover("[data-pw='sidebar/Users']", { force: true });
     await page.click("text=Users");
     expect(await page.isVisible(`text=${user.email}`)).toBeTruthy();
   });
