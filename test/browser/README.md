@@ -4,13 +4,13 @@ We use [Playwrigtht](https://playwright.dev/docs/intro) for our browser testing,
 
 ## Prerequisites
 
-* You'll need an Opstrace cluster running in CI mode, for example using [this config](https://github.com/opstrace/opstrace/blob/main/ci/cluster-config.yaml) - it sets up the Authentication differently allowing username/password logins rather than using a thirdparty authentication provider.
+- You'll need an Opstrace cluster running in CI mode, for example using [this config](https://github.com/opstrace/opstrace/blob/main/ci/cluster-config.yaml) - it sets up the Authentication differently allowing username/password logins rather than using a thirdparty authentication provider.
 
-* Have followed the [Remote cluster development](https://github.com/opstrace/opstrace/blob/main/packages/app/README.md#remote-cluster-development) section of the App readme.
+- Have followed the [Remote cluster development](https://github.com/opstrace/opstrace/blob/main/packages/app/README.md#remote-cluster-development) section of the App readme.
 
-* Docker
+- Docker
 
-* NodeJS & Yarn
+- NodeJS & Yarn
 
 ## Install
 
@@ -50,7 +50,15 @@ This is handy as sometimes you need to reproduce CI to resolve a failing test th
 
 ## Suggested developer workflow
 
+### Telepresence
+
 When creating tests for new features we recommend using [Telepresense](https://github.com/opstrace/opstrace/blob/main/packages/app/README.md#remote-cluster-development). This will expose your local dev instance of the React app via your cloud hosted CI Cluster, so any uncommitted changes you make will be immediately available to anybody, including Playwright, using your CI Cluster.
+
+### Local instance running
+
+If for some reason you're unable to use Telepresence then you can override the HOST the tests are run against to have the Playwright Test runner execute against your local dev instance:
+
+`OPSTRACE_CLUSTER_BASE_URL="http://localhost:3000" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --project=Firefox --headed`
 
 ## How authentication works
 
@@ -74,5 +82,4 @@ test.describe("after auth0 authentication", () => {
     expect(await page.isVisible("text=Getting Started")).toBeTruthy();
   });
 });
-
 ```
