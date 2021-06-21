@@ -51,7 +51,8 @@ export function* runInformers(
       k8s.PersistentVolume.startInformer(kubeConfig, channel),
       k8s.StatefulSet.startInformer(kubeConfig, channel),
       k8s.StatefulSet.startInformer(kubeConfig, channel),
-      k8s.ConfigMap.startInformer(kubeConfig, channel)
+      k8s.ConfigMap.startInformer(kubeConfig, channel),
+      k8s.Service.startInformer(kubeConfig, channel)
     ];
 
     // return the unsubscribe function for eventChannel. This will be called when the channel

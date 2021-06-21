@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { select, call } from "redux-saga/effects";
+import { select, call, all } from "redux-saga/effects";
 import { KubeConfig } from "@kubernetes/client-node";
 
 import { log, die } from "@opstrace/utils";
@@ -135,4 +135,42 @@ export function* upgradeInfra(cloudProvider: string) {
     default:
       die(`cloud provider not supported: ${cloudProvider}`);
   }
+}
+
+// If we don't find the query-frontend-discovery service, we need to delete some
+// deprecated cortex services; otherwise, the newly deployed controller will
+// override the spec.clusterIP field  and fail because this field is immutable.
+export function* cleanupDeprecatedCortexServices(): Generator<any, void, any> {
+  const state: State = yield select();
+
+  const markerService = {
+    namespace: "cortex",
+    name: "query-frontend-discovery"
+  };
+
+  const marker = state.kubernetes.cluster.Services.resources.find(
+    s =>
+      s.namespace === markerService.namespace && s.name === markerService.name
+  );
+
+  if (marker !== undefined) {
+    log.debug(
+      `instance contains marker service: ${markerService.namespace}/${markerService.name}`
+    );
+    return;
+  }
+
+  log.debug(`removing deprecated services`);
+  const deprecatedServices = [
+    { namespace: "cortex", name: "query-frontend" },
+    { namespace: "cortex", name: "ruler" }
+  ];
+
+  const svcs = state.kubernetes.cluster.Services.resources.filter(s =>
+    deprecatedServices.some(
+      d => d.namespace === s.namespace && d.name === s.name
+    )
+  );
+
+  yield all(svcs.map(d => d.delete()));
 }

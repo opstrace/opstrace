@@ -43,6 +43,7 @@ import {
   waitForControllerDeployment
 } from "./readiness";
 import {
+  cleanupDeprecatedCortexServices,
   upgradeControllerConfigMap,
   upgradeControllerDeployment,
   upgradeInfra
@@ -188,6 +189,8 @@ function* triggerControllerDeploymentUpgrade() {
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);
+
+  yield call(cleanupDeprecatedCortexServices);
 
   yield call(upgradeControllerConfigMap, kubeConfig);
 
