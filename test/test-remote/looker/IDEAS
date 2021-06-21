@@ -13,8 +13,3 @@ Braindump, might be good or bad ideas
 
 - allow for keeping some streams longer than others, following a certain
   distribution
-
-- for time series generation, allow for a random walk within predictable bounds
-
-- metrics mode: detect when a write would happen into the future, do not crash in this case, but
-  adapt to wall time.
