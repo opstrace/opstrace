@@ -20,7 +20,7 @@ import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 import got, { Response as GotResponse } from "got";
 import Long from "long";
 
-import { logqlLabelString } from "../loki-node-client-tools";
+import { logqlLabelString } from "../logs";
 
 import {
   log,
@@ -29,7 +29,7 @@ import {
   mtime,
   mtimeDiffSeconds,
   sleep
-} from "../testutils";
+} from "../../testutils";
 
 import * as mathjs from "mathjs";
 

@@ -37,14 +37,14 @@ import {
   LogStreamLabelset,
   LogStreamFragment,
   DummyStreamFetchAndValidateOpts
-} from "../loki-node-client-tools";
+} from "./logs";
 
 import {
   DummyTimeseries,
   TimeseriesFragment,
   TimeseriesFragmentPushMessage,
   DummyTimeseriesFetchAndValidateOpts
-} from "../prom-node-client-tools";
+} from "./metrics";
 
 import { LokiQueryResult } from "../testutils/logs";
 
