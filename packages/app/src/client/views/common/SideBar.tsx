@@ -104,7 +104,7 @@ const NavItemContents = ({
     <ListItem
       dense
       onClick={onClick}
-      data-pw={`sidebar/${item.title}`}
+      data-test={`sidebar/${item.title}`}
       className={className({
         [classes.activeItem]: routeMatch,
         [classes.listItem]: true,

@@ -19,12 +19,14 @@ import { devices } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
   reporter: "dot",
+  forbidOnly: process.env.BUILDKITE === "true",
   use: {
     headless: true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
-    video: "retry-with-video"
+    trace: "retain-on-failure",
+    video: "retain-on-failure"
   },
   projects: [
     {
@@ -40,7 +42,7 @@ const config: PlaywrightTestConfig = {
     },
     {
       name: "Firefox",
-      use: { browserName: "firefox", viewport: { width: 1600, height: 1200 } }
+      use: { browserName: "firefox" }
     },
     {
       name: "WebKit",
