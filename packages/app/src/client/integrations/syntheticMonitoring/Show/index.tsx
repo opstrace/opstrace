@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
 import { IntegrationShowProps } from "client/integrations/types";
 import { installedIntegrationsPath } from "client/integrations/paths";
 
-import Status from "client/integrations/exporterAzure/Status";
-import { Details } from "./Details";
+import Status from "client/integrations/syntheticMonitoring/Status";
 import { Actions } from "./Actions";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
-import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 
-export const ExporterBlackboxShow = ({
+export const SyntheticMonitoringShow = ({
   integration,
   tenant,
   integrationDef
@@ -78,21 +76,13 @@ export const ExporterBlackboxShow = ({
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>
               </Box>
-              <Attribute.Key>
-                <ExternalLink target="_blank" href={logsUrl}>
-                  <Button state="primary" variant="outlined" size="medium">
-                    View Integration Logs
-                  </Button>
-                </ExternalLink>
-              </Attribute.Key>
             </Box>
           </CardContent>
         </Card>
       </Box>
-      <Details integration={integration} />
       <Actions integration={integration} tenant={tenant} />
     </>
   );
 };
 
-export default ExporterAzureShow;
+export default SyntheticMonitoringShow;

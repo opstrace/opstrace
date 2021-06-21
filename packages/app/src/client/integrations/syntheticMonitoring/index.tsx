@@ -67,10 +67,10 @@ modules:
       query_type: MX
 */
 
-export const exporterBlackboxIntegration: IntegrationDef = {
-  kind: "exporter-blackbox",
+export const syntheticMonitoringIntegration: IntegrationDef = {
+  kind: "synthetic-monitoring",
   category: "exporter",
-  label: "Blackbox",
+  label: "Synthetic Monitoring",
   desc:
     "PLACEHOLDER: The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP and ICMP.",
   Form: Form,

@@ -43,6 +43,7 @@ export const ExporterAzureShow = ({
   tenant,
   integrationDef
 }: IntegrationShowProps) => {
+  const dispatch = useDispatch();
   const history = useHistory();
 
   useEffect(() => {

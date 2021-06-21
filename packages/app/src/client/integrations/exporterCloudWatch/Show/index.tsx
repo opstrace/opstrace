@@ -42,6 +42,7 @@ export const ExporterCloudWatchShow = ({
   tenant,
   integrationDef
 }: IntegrationShowProps) => {
+  const dispatch = useDispatch();
   const history = useHistory();
 
   useEffect(() => {
