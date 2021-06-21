@@ -28,7 +28,7 @@ import {
   sleep,
   logHTTPResponseLight,
   logHTTPResponse
-} from "../testutils";
+} from "../../testutils";
 
 import { DummyStream } from "./dummystream";
 
@@ -36,7 +36,7 @@ export * from "./dummystream";
 
 // https://github.com/grafana/loki/blob/v1.2.0/pkg/logproto/logproto.proto
 const logPbfRoot = protobuf.loadSync(
-  `${__dirname}/resources/logproto_bundle.json`
+  `${__dirname}/../resources/logproto_bundle.json`
 );
 
 const pbTypePushrequest = logPbfRoot.lookupType("logproto.PushRequest");

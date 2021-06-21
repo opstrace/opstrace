@@ -31,14 +31,14 @@ import {
   sleep,
   logHTTPResponseLight,
   logHTTPResponse
-} from "../testutils";
+} from "../../testutils";
 
 import { DummyTimeseries } from "./dummyseries";
 
 export * from "./dummyseries";
 
 const pbfRoot = protobuf.loadSync(
-  `${__dirname}/resources/promproto_bundle.json`
+  `${__dirname}/../resources/promproto_bundle.json`
 );
 
 const pbTypeWriterequest = pbfRoot.lookupType("prometheus.WriteRequest");

@@ -43,7 +43,7 @@ import {
   LogStreamFragment,
   LogStreamFragmentPushRequest,
   DummyStream
-} from "./loki-node-client-tools";
+} from "./looker/logs";
 
 import { waitForLokiQueryResult } from "./testutils/logs";
 

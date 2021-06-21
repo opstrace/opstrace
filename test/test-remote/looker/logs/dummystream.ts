@@ -23,9 +23,9 @@ import {
   timestampToRFC3339Nano,
   mtime,
   mtimeDiffSeconds
-} from "../testutils";
+} from "../../testutils";
 
-import { waitForLokiQueryResult, LokiQueryResult } from "../testutils/logs";
+import { waitForLokiQueryResult, LokiQueryResult } from "../../testutils/logs";
 
 import {
   LogStreamEntry,
