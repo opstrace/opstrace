@@ -1303,7 +1303,47 @@ export function LokiResources(
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-
+                  //
+                  // From https://github.com/grafana/loki/issues/3085. The
+                  // queriers initialize the storage credentials in the query
+                  // evaluation code path. To ensure the querier is initialized
+                  // before being marked ready to receive requests we query the
+                  // labels endpoint in the system tenant until we get a 200 OK.
+                  // The system tenant is created by default. This means the
+                  // queriers startupProbe waits for the ingesters to receive
+                  // some data.
+                  //
+                  // The startupProbe indicates whether the application within
+                  // the container is started. All other probes are disabled if
+                  // a startup probe is provided, until it succeeds. The
+                  // readinessProbe indicates whether the container is ready to
+                  // respond to requests. If the readiness probe fails, teh
+                  // endpoints controller removes the Pod's IP address from the
+                  // endpoints of all Services that match the Pod.
+                  //
+                  // https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+                  // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+                  //
+                  startupProbe: {
+                    httpGet: {
+                      path: "/loki/api/v1/labels",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      port: 1080 as any,
+                      httpHeaders: [
+                        {
+                          name: "X-Scope-OrgID",
+                          value: "system"
+                        }
+                      ]
+                    },
+                    // We are being liberal with these settings to cover a worst
+                    // case startup time.
+                    initialDelaySeconds: 90,
+                    timeoutSeconds: 30,
+                    periodSeconds: 10,
+                    successThreshold: 1,
+                    failureThreshold: 10
+                  },
                   resources: deploymentConfig.querier.resources,
                   volumeMounts: [
                     {
