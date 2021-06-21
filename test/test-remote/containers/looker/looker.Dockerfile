@@ -27,9 +27,9 @@ RUN yarn run tsc -b tsconfig.json
 # back to basic unix tools to do that manually: worked within 1 minute.
 ENV PATH="/build/test/test-remote:${PATH}"
 RUN chmod ugo+x /build/test/test-remote/_tscbuild/looker/index.js
-RUN ln -s /build/test/test-remote/_tscbuild/looker/index.js /build/test/test-remote/looker
+RUN ln -s /build/test/test-remote/_tscbuild/looker/index.js /build/test/test-remote/looker-cmd
 
 # See if the looker path works
-RUN looker -h
+RUN looker-cmd -h
 WORKDIR /rundir
-CMD looker
+CMD looker-cmd
