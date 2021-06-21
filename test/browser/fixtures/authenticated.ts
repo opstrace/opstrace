@@ -110,8 +110,6 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
       const cookies = await page.context().cookies();
       await page.close();
 
-      log.info("Authentication Cookies", cookies);
-
       await use(cookies);
     },
     { scope: "worker", auto: true }

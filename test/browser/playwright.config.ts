@@ -15,7 +15,7 @@
  */
 
 import { PlaywrightTestConfig } from "@playwright/test";
-// import { devices } from "playwright";
+import { devices } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
   reporter: "dot",
@@ -40,12 +40,12 @@ const config: PlaywrightTestConfig = {
     },
     {
       name: "Firefox",
-      use: { browserName: "firefox" }
+      use: { browserName: "firefox", viewport: { width: 1600, height: 1200 } }
     },
     {
       name: "WebKit",
       use: { browserName: "webkit" }
-    }
+    },
     // {
     //   name: "Pixel-4",
     //   use: {
@@ -53,13 +53,13 @@ const config: PlaywrightTestConfig = {
     //     ...devices["Pixel 4"]
     //   }
     // },
-    // {
-    //   name: "iPhone-11",
-    //   use: {
-    //     browserName: "webkit",
-    //     ...devices["iPhone 11"]
-    //   }
-    // }
+    {
+      name: "iPhone-11",
+      use: {
+        browserName: "webkit",
+        ...devices["iPhone 11"]
+      }
+    }
   ]
 };
 
