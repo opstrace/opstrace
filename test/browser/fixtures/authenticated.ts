@@ -21,7 +21,7 @@ import { log } from "../utils";
 const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME;
 
 let CLUSTER_BASE_URL = process.env.OPSTRACE_CLUSTER_BASE_URL;
-if (!CLUSTER_BASE_URL && CLUSTER_NAME)
+if (!CLUSTER_BASE_URL && !!CLUSTER_NAME)
   CLUSTER_BASE_URL = `https://${CLUSTER_NAME}.opstrace.io`;
 
 const CLOUD_PROVIDER: string = process.env.OPSTRACE_CLOUD_PROVIDER;
@@ -70,12 +70,14 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
   ],
   authCookies: [
     async ({ browser }, use) => {
-      if (!process.env.OPSTRACE_CLUSTER_NAME) {
-        log.error("env variable OPSTRACE_CLUSTER_NAME must be set");
+      if (!CLUSTER_BASE_URL) {
+        log.error(
+          "env variables OPSTRACE_CLUSTER_NAME or OPSTRACE_CLUSTER_BASE_URL must be set"
+        );
         process.exit(1);
       }
 
-      if (!process.env.OPSTRACE_CLOUD_PROVIDER) {
+      if (!CLOUD_PROVIDER) {
         log.error(
           "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
         );
