@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1615972210760,
+  "iteration": 1623746399062,
   "links": [],
   "panels": [
     {
@@ -152,7 +152,9 @@
         "justifyMode": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -186,7 +188,7 @@
         "mode": "spectrum"
       },
       "dataFormat": "tsbuckets",
-      "datasource": "tenant-loadtest-metrics",
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -946,7 +948,7 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 12,
         "x": 0,
         "y": 27
@@ -1041,7 +1043,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${source}",
-      "description": "unexpected query results (communicated in an HTTP success response) result in a retrying. If a retry succeeds then looker does not crash. This counter keeps track of every unexpected query result (such as unexpected number of entries in a query result).",
+      "description": "unexpected query results (communicated in an HTTP success response) result in a retrying loop. If a retry succeeds then looker does not crash. This counter keeps track of every unexpected query result (such as unexpected number of entries in a query result).",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -1127,6 +1129,105 @@
           "max": null,
           "min": null,
           "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${source}",
+      "description": "Rate built from counter: number of times a time series was forward-leaped (by N minutes) to not fall behind wall time too much",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "hiddenSeries": false,
+      "id": 24,
+      "legend": {
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "rate(counter_forward_leap{job=\"looker\"}[30s])",
+          "interval": "",
+          "legendFormat": " {{looker_invocation_id}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "metrics mode: rate of 'forward leaps'",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:160",
+          "format": "short",
+          "label": "rate [1/s]",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:161",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
         }
       ],
       "yaxis": {
@@ -1245,6 +1346,106 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${source}",
+      "description": "Rate built from counter: number of times fragment generation was delayed (in metrics mode) because otherwise we would overtake wall time",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "hiddenSeries": false,
+      "id": 25,
+      "legend": {
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "rate(counter_fragment_generation_delayed{job=\"looker\"}[30s])",
+          "interval": "",
+          "legendFormat": " {{looker_invocation_id}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "metrics mode: rate of 'fragment generation delayed'",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:160",
+          "decimals": 4,
+          "format": "short",
+          "label": "rate [1/s]",
+          "logBase": 10,
+          "max": null,
+          "min": "0.001",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:161",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${source}",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -1338,7 +1539,7 @@
       }
     }
   ],
-  "refresh": "5s",
+  "refresh": "1m",
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
@@ -1347,8 +1548,8 @@
       {
         "current": {
           "selected": true,
-          "text": "tenant-loadtest-metrics",
-          "value": "tenant-loadtest-metrics"
+          "text": "tenant-goodteam-metrics",
+          "value": "tenant-goodteam-metrics"
         },
         "description": null,
         "error": null,
@@ -1368,7 +1569,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
