@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import { Integration } from "state/integration/types";
+import { Tenant } from "state/tenant/types";
+
 export type IntegrationDef = {
   kind: string;
   category: string;
@@ -28,3 +31,9 @@ export type IntegrationDef = {
 
 export type IntegrationDefs = IntegrationDef[];
 export type IntegrationDefRecords = Record<string, IntegrationDef>;
+
+export type IntegrationShowProps = {
+  integration: Integration;
+  tenant: Tenant;
+  integrationDef: IntegrationDef;
+};

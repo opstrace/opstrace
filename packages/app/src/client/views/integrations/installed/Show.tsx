@@ -23,6 +23,7 @@ import { useSelectedIntegration } from "state/integration/hooks";
 
 export const ShowIntegration = () => {
   const integration = useSelectedIntegration();
+  const tenant = useSelectedTenantWithFallback();
 
   if (!integration) {
     return null;
@@ -35,6 +36,7 @@ export const ShowIntegration = () => {
   return (
     <integrationDef.Show
       integration={integration}
+      tenant={tenant}
       integrationDef={integrationDef}
     />
   );

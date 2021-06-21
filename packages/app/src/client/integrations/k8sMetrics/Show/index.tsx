@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
+import { IntegrationShowProps } from "client/integrations/types";
 import { installedIntegrationsPath } from "client/integrations/paths";
 import { grafanaUrl } from "client/utils/grafana";
 
@@ -28,9 +29,6 @@ import Status from "client/integrations/k8sMetrics/Status";
 
 import { CondRender } from "client/utils/rendering";
 
-import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import { useSelectedIntegration } from "state/integration/hooks";
-import { integrationDefRecords } from "client/integrations";
 import { loadGrafanaStateForIntegration } from "state/integration/actions";
 
 import { InstallInstructions } from "./InstallInstructions";
@@ -43,11 +41,13 @@ import { Button } from "client/components/Button";
 import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 
-export const K8sMetricsShow = () => {
+export const K8sMetricsShow = ({
+  integration,
+  tenant,
+  integrationDef
+}: IntegrationShowProps) => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const tenant = useSelectedTenantWithFallback();
-  const integration = useSelectedIntegration();
 
   useEffect(() => {
     if (integration?.id)
@@ -70,13 +70,6 @@ export const K8sMetricsShow = () => {
     }
     return "";
   }, [tenant.name, integration?.id, integration?.data.deployNamespace]);
-
-  if (!integration) {
-    // TODO: add loading or NotFound here
-    return null;
-  }
-
-  const integrationDef = integrationDefRecords[integration.kind];
 
   return (
     <>
