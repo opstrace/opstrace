@@ -1,12 +1,13 @@
-# loki-node-client-tools
+# Looker
 
-These are the first baby steps towards a reusable NPM package providing Loki
-client tooling.
+## Usage as a TypeScript library
 
-## Usage
+These are the first baby steps towards a reusable NPM package providing Cortex/Loki client tooling.
+
+### Logs
 
 ```javascript
-import { DummyStream } from "./loki-node-client-tools";
+import { DummyStream } from "./looker/logs";
 
 const stream = new DummyStream({
   n_entries_per_stream_fragment: 10 ** 4,
