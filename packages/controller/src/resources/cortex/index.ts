@@ -1998,6 +1998,35 @@ export function CortexResources(
           namespace
         },
         spec: {
+          ports: [
+            {
+              port: 9095,
+              name: "grcp"
+            },
+            {
+              port: 80,
+              name: "http"
+            }
+          ],
+          selector: {
+            name: "query-frontend"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          name: "query-frontend-discovery",
+          namespace
+        },
+        spec: {
           clusterIP: "None",
           ports: [
             {
@@ -2315,7 +2344,6 @@ export function CortexResources(
           namespace
         },
         spec: {
-          clusterIP: "None",
           ports: [
             {
               port: 80,
