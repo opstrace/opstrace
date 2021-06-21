@@ -10,8 +10,6 @@ COPY package.json tsconfig.json /build/
 COPY yarn.lock test/test-remote/containers/looker/package.json test/test-remote/containers/looker/tsconfig.json /build/test/test-remote/
 
 COPY test/test-remote/testutils /build/test/test-remote/testutils
-COPY test/test-remote/loki-node-client-tools /build/test/test-remote/loki-node-client-tools
-COPY test/test-remote/prom-node-client-tools /build/test/test-remote/prom-node-client-tools
 
 WORKDIR /build/test/test-remote
 

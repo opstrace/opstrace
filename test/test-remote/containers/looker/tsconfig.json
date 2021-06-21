@@ -23,10 +23,7 @@
   "include": [
     "./test*.ts",
     "testutils/**/*.ts",
-    "looker/*.ts",
-    "loki-node-client-tools/resources/*.json",
-    "loki-node-client-tools/*.ts",
-    "prom-node-client-tools/resources/*.json",
-    "prom-node-client-tools/*.ts"
+    "looker/**/*.ts",
+    "looker/resources/*.json",
   ]
 }
