@@ -105,7 +105,7 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
 
       // The first view after successful login is expected to be the details page
       // for the `system` tenant, showing a link to Grafana.
-      await page.waitForSelector("text=Getting Started");
+      await page.waitForSelector("[data-test=getting-started]");
 
       const cookies = await page.context().cookies();
       await page.close();
