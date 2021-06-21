@@ -16,7 +16,7 @@
  */
 
 import fs from "fs";
-import os from "os";
+
 import { strict as assert } from "assert";
 
 import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
@@ -24,11 +24,6 @@ import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 import got, { Response as GotResponse } from "got";
 
 import { Semaphore } from "await-semaphore";
-
-import * as promclient from "prom-client";
-import express from "express";
-
-import { createHttpTerminator } from "http-terminator";
 
 import {
   DummyStream,
@@ -108,7 +103,7 @@ function setUptimeGauge() {
 
 async function main() {
   parseCmdlineArgs();
-  const httpServerTerminator = setupPromExporter();
+  const httpServerTerminator = pm.setupPromExporter();
 
   //let dummystreams: Array<DummyStream>;
   let dummystreams: Array<DummyStream | DummyTimeseries>;
@@ -1261,71 +1256,6 @@ async function httpPostProtobuf(
     }
   });
   return response;
-}
-
-function setupPromExporter() {
-  // Collect NodeJS runtime metrics and others, see /metrics
-  promclient.collectDefaultMetrics();
-
-  const defaultLabels = {
-    looker_invocation_id: CFG.invocation_id,
-    looker_hostname: os.hostname()
-  };
-  promclient.register.setDefaultLabels(defaultLabels);
-
-  const httpapp = express();
-
-  httpapp.get(
-    "/metrics",
-    function (req: express.Request, res: express.Response) {
-      log.info("handling request to /metrics");
-      res.send(promclient.register.metrics());
-    }
-  );
-
-  // dunno how to import `http.Server` type from express :(.
-  let httpserver: any;
-
-  if (CFG.http_server_port === 0) {
-    // implement default: try all ports between 8900 and 8990 (inclusive)
-    for (let tryport = 8900; tryport < 8901; tryport++) {
-      try {
-        httpserver = httpapp.listen(tryport, () =>
-          log.info("HTTP server listening on port %s", tryport)
-        );
-      } catch (err) {
-        if (err.message.includes("EADDRINUSE")) {
-          log.debug("port %s is in use, try another one", tryport);
-        } else {
-          // re-throw all other errors
-          throw err;
-        }
-      }
-      break;
-    }
-
-    // handle case where all attempts failed with EADDRINUSE
-    if (httpserver === undefined) {
-      log.error(
-        "could not start http server: all port that were tried out seem to be in use"
-      );
-      process.exit(1);
-    }
-  } else {
-    // Try just the port that was manually specified.
-    httpserver = httpapp.listen(CFG.http_server_port, () =>
-      log.info("HTTP server listening on port %s", CFG.http_server_port)
-    );
-  }
-
-  // httpserver.close() will not initiate a clean shutdown.
-  // see opstrace-prelaunch/issues/640
-
-  const httpServerTerminator = createHttpTerminator({
-    server: httpserver
-  });
-
-  return httpServerTerminator;
 }
 
 // https://stackoverflow.com/a/6090287/145400
