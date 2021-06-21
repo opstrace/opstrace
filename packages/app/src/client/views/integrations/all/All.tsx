@@ -17,10 +17,10 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-import { integrationsDefs } from "client/integrations";
+import { integrationPlugins } from "client/integrations";
 import {
-  IntegrationDefs,
-  IntegrationDef,
+  IntegrationPlugins,
+  IntegrationPlugin,
   addIntegrationPath
 } from "client/integrations";
 
@@ -33,28 +33,28 @@ import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 
 export const AllIntegrations = () => (
   <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
+    <IntegrationPluginCards integrationPlugins={integrationPlugins} />
   </Box>
 );
 
-type Props = { integrationDefs: IntegrationDefs };
+type Props = { integrationPlugins: IntegrationPlugins };
 
-const IntegrationDefCards = ({ integrationDefs }: Props) => {
+const IntegrationPluginCards = ({ integrationPlugins }: Props) => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
 
-  const onAdd = (i9n: IntegrationDef) => {
+  const onAdd = (i9n: IntegrationPlugin) => {
     history.push(
       addIntegrationPath({
         tenant: tenant,
-        integrationDef: i9n
+        integrationPlugin: i9n
       })
     );
   };
 
   return (
     <Grid container spacing={3}>
-      {integrationDefs.map(i9n => {
+      {integrationPlugins.map(i9n => {
         if (!i9n.enabled) {
           return null;
         }

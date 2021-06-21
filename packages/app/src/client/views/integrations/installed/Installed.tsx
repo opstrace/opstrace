@@ -22,7 +22,7 @@ import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useIntegrationList } from "state/integration/hooks/useIntegrationList";
 
 import {
-  integrationDefRecords,
+  integrationPluginRecords,
   showIntegrationPath
 } from "client/integrations";
 
@@ -70,7 +70,7 @@ export const InstalledIntegrations = () => {
           </TableHead>
           <TableBody>
             {integrations.map(i9n => {
-              const i9nDef = integrationDefRecords[i9n.kind];
+              const i9nDef = integrationPluginRecords[i9n.kind];
               return (
                 <TableRow
                   hover={true}

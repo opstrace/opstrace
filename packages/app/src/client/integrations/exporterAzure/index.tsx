@@ -19,9 +19,9 @@ import Show from "./Show";
 import Status from "./Status";
 import Logo from "./Logo.png";
 
-import { IntegrationDef } from "client/integrations/types";
+import { IntegrationPlugin } from "client/integrations/types";
 
-export const exporterAzureIntegration: IntegrationDef = {
+export const exporterAzureIntegration: IntegrationPlugin = {
   kind: "exporter-azure",
   category: "exporter",
   label: "Microsoft Azure",

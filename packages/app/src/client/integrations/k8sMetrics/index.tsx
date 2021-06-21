@@ -19,9 +19,9 @@ import { K8sMetricsShow } from "./Show";
 import K8sMetricsStatus from "./Status";
 import K8sMetricsLogo from "./Logo.png";
 
-import { IntegrationDef } from "client/integrations/types";
+import { IntegrationPlugin } from "client/integrations/types";
 
-export const k8sMetricsIntegration: IntegrationDef = {
+export const k8sMetricsIntegration: IntegrationPlugin = {
   kind: "k8s-metrics",
   category: "infrastructure",
   label: "Kubernetes Metrics",

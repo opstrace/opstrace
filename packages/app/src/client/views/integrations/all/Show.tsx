@@ -16,7 +16,7 @@
 
 import React from "react";
 
-import { integrationDefRecords } from "client/integrations";
+import { integrationPluginRecords } from "client/integrations";
 
 import NotFound from "client/views/404/404";
 import { useSelectedIntegration } from "state/integration/hooks";
@@ -28,14 +28,14 @@ export const ShowIntegration = () => {
     return null;
   }
 
-  const integrationDef = integrationDefRecords[integration.kind];
+  const integrationPlugin = integrationPluginRecords[integration.kind];
 
-  if (!integrationDef) return <NotFound />;
+  if (!integrationPlugin) return <NotFound />;
 
   return (
-    <integrationDef.Show
+    <integrationPlugin.Show
       integration={integration}
-      integrationDef={integrationDef}
+      integrationPlugin={integrationPlugin}
     />
   );
 };

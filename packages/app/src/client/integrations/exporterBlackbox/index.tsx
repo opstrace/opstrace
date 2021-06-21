@@ -16,7 +16,7 @@
 
 import React from "react";
 
-import { IntegrationDef } from "client/integrations/types";
+import { IntegrationPlugin } from "client/integrations/types";
 
 /*
 type Config = {
@@ -64,7 +64,7 @@ modules:
       query_type: MX
 */
 
-export const exporterBlackboxIntegration: IntegrationDef = {
+export const exporterBlackboxIntegration: IntegrationPlugin = {
   kind: "exporter-blackbox",
   category: "exporter",
   label: "Blackbox",

@@ -19,7 +19,7 @@ import { useForm, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { k8sMetricsIntegration as integrationDef } from "./index";
+import { k8sMetricsIntegration as integrationPlugin } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
 
@@ -79,7 +79,7 @@ export const K8sMetricsForm = ({ handleCreate }: Props) => {
         <Card>
           <CardHeader
             titleTypographyProps={{ variant: "h5" }}
-            title={`Install ${integrationDef.label} Integration`}
+            title={`Install ${integrationPlugin.label} Integration`}
           />
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>

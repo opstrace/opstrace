@@ -19,9 +19,9 @@ import Show from "./Show";
 import Status from "./Status";
 import Logo from "./Logo.jpg";
 
-import { IntegrationDef } from "client/integrations/types";
+import { IntegrationPlugin } from "client/integrations/types";
 
-export const exporterCloudMonitoringIntegration: IntegrationDef = {
+export const exporterCloudMonitoringIntegration: IntegrationPlugin = {
   kind: "exporter-cloud-monitoring",
   category: "exporter",
   label: "Google Cloud Monitoring",

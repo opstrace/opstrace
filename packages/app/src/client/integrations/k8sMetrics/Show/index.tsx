@@ -30,7 +30,7 @@ import { CondRender } from "client/utils/rendering";
 
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
-import { integrationDefRecords } from "client/integrations";
+import { integrationPluginRecords } from "client/integrations";
 import { loadGrafanaStateForIntegration } from "state/integration/actions";
 
 import { InstallInstructions } from "./InstallInstructions";
@@ -76,7 +76,7 @@ export const K8sMetricsShow = () => {
     return null;
   }
 
-  const integrationDef = integrationDefRecords[integration.kind];
+  const integrationPlugin = integrationPluginRecords[integration.kind];
 
   return (
     <>
@@ -93,7 +93,7 @@ export const K8sMetricsShow = () => {
         <Card>
           <CardHeader
             avatar={
-              <img src={integrationDef.Logo} width={80} height={80} alt="" />
+              <img src={integrationPlugin.Logo} width={80} height={80} alt="" />
             }
             titleTypographyProps={{ variant: "h1" }}
             title={integration.name}
@@ -115,7 +115,7 @@ export const K8sMetricsShow = () => {
                 </CondRender>
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
-                <Attribute.Value>{integrationDef.label}</Attribute.Value>
+                <Attribute.Value>{integrationPlugin.label}</Attribute.Value>
                 <Attribute.Value>
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>

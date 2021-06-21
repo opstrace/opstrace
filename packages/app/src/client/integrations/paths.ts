@@ -15,7 +15,7 @@
  */
 
 import { Integration } from "state/integration/types";
-import { IntegrationDef } from "client/integrations/types";
+import { IntegrationPlugin } from "client/integrations/types";
 import { Tenant } from "state/tenant/types";
 
 const baseIntegrationsPath = (tenant: Tenant) =>
@@ -29,11 +29,11 @@ export const installedIntegrationsPath = ({ tenant }: { tenant: Tenant }) =>
 
 export const addIntegrationPath = ({
   tenant,
-  integrationDef
+  integrationPlugin
 }: {
   tenant: Tenant;
-  integrationDef: IntegrationDef;
-}) => `${baseIntegrationsPath(tenant)}/all/install/${integrationDef.kind}`;
+  integrationPlugin: IntegrationPlugin;
+}) => `${baseIntegrationsPath(tenant)}/all/install/${integrationPlugin.kind}`;
 
 export const showIntegrationPath = ({
   tenant,

@@ -19,7 +19,7 @@ import { useForm, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { exporterAzureIntegration as integrationDef } from "./index";
+import { exporterAzureIntegration as integrationPlugin } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
 
@@ -105,7 +105,7 @@ export const ExporterAzureForm = ({ handleCreate }: Props) => {
           <Card>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
-              title={`Install ${integrationDef.label} Integration`}
+              title={`Install ${integrationPlugin.label} Integration`}
             />
             <CardContent>
               <Box mb={3} mt={2}>

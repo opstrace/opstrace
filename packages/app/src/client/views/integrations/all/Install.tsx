@@ -19,7 +19,7 @@ import { useDispatch } from "react-redux";
 import { useParams, useHistory } from "react-router-dom";
 
 import {
-  integrationDefRecords,
+  integrationPluginRecords,
   showIntegrationPath
 } from "client/integrations";
 
@@ -51,7 +51,7 @@ export const InstallIntegration = () => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
 
-  const integration = integrationDefRecords[kind];
+  const integration = integrationPluginRecords[kind];
   if (!integration) return <NotFound />;
 
   const onCreate = (data: NewIntegration, options?: NewIntegrationOptions) => {

@@ -23,12 +23,12 @@ import { exporterCloudMonitoringIntegration } from "./exporterCloudMonitoring";
 import { exporterAzureIntegration } from "./exporterAzure";
 import { exporterBlackboxIntegration } from "./exporterBlackbox";
 
-import { IntegrationDefs, IntegrationDefRecords } from "./types";
+import { IntegrationPlugins, IntegrationPluginRecords } from "./types";
 
 export * from "./types";
 export * from "./paths";
 
-export const integrationsDefs: IntegrationDefs = [
+export const integrationPlugins: IntegrationPlugins = [
   k8sMetricsIntegration,
   k8sLogsIntegration,
   exporterCloudWatchIntegration,
@@ -37,9 +37,9 @@ export const integrationsDefs: IntegrationDefs = [
   exporterBlackboxIntegration
 ];
 
-export const integrationDefRecords: IntegrationDefRecords = zipObj(
-  pluck("kind", integrationsDefs),
-  integrationsDefs
+export const integrationPluginRecords: IntegrationPluginRecords = zipObj(
+  pluck("kind", integrationPlugins),
+  integrationPlugins
 );
 
-export default integrationsDefs;
+export default integrationPlugins;

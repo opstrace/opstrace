@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type IntegrationDef = {
+export type IntegrationPlugin = {
   kind: string;
   category: string;
   label: string;
@@ -26,5 +26,5 @@ export type IntegrationDef = {
   Logo?: string;
 };
 
-export type IntegrationDefs = IntegrationDef[];
-export type IntegrationDefRecords = Record<string, IntegrationDef>;
+export type IntegrationPlugins = IntegrationPlugin[];
+export type IntegrationPluginRecords = Record<string, IntegrationPlugin>;

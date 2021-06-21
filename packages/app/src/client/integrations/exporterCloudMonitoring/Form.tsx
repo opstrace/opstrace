@@ -19,7 +19,7 @@ import { useForm, useFormState } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { exporterCloudMonitoringIntegration as integrationDef } from "./index";
+import { exporterCloudMonitoringIntegration as integrationPlugin } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
 
@@ -112,7 +112,7 @@ export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
           <Card>
             <CardHeader
               titleTypographyProps={{ variant: "h5" }}
-              title={`Install ${integrationDef.label} Integration`}
+              title={`Install ${integrationPlugin.label} Integration`}
             />
             <CardContent>
               <Box mb={3} mt={2}>

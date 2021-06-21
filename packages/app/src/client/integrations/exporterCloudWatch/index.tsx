@@ -19,9 +19,9 @@ import Show from "./Show";
 import Status from "./Status";
 import Logo from "./Logo.png";
 
-import { IntegrationDef } from "client/integrations/types";
+import { IntegrationPlugin } from "client/integrations/types";
 
-export const exporterCloudWatchIntegration: IntegrationDef = {
+export const exporterCloudWatchIntegration: IntegrationPlugin = {
   kind: "exporter-cloudwatch",
   category: "exporter",
   label: "Amazon CloudWatch",

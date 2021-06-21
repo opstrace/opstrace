@@ -19,9 +19,9 @@ import { K8sLogsShow } from "./Show";
 import K8sLogsStatus from "./Status";
 import K8sLogsLogo from "./Logo.png";
 
-import { IntegrationDef } from "client/integrations/types";
+import { IntegrationPlugin } from "client/integrations/types";
 
-export const k8sLogsIntegration: IntegrationDef = {
+export const k8sLogsIntegration: IntegrationPlugin = {
   kind: "k8s-logs",
   category: "infrastructure",
   label: "Kubernetes Logs",
