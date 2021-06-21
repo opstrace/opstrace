@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-// This module defines Prometheus metrics exposed by looker's HTTP server
-// at the /metrics endpoint.
+// This module defines Prometheus metrics exposed by an express-driven HTTP
+// server at the /metrics endpoint.
 
+import os from "os";
+
+import express from "express";
 import * as promclient from "prom-client";
+
+import { createHttpTerminator } from "http-terminator";
+
+import { CFG } from "./args";
+import { log } from "./log";
 
 export const counter_fragments_pushed = new promclient.Counter({
   name: "counter_fragments_pushed",
@@ -112,3 +120,68 @@ export const gauge_uptime = new promclient.Gauge({
   name: "gauge_uptime",
   help: "uptime of current looker process in seconds"
 });
+
+export function setupPromExporter() {
+  // Collect NodeJS runtime metrics and others, see /metrics
+  promclient.collectDefaultMetrics();
+
+  const defaultLabels = {
+    looker_invocation_id: CFG.invocation_id,
+    looker_hostname: os.hostname()
+  };
+  promclient.register.setDefaultLabels(defaultLabels);
+
+  const httpapp = express();
+
+  httpapp.get(
+    "/metrics",
+    function (req: express.Request, res: express.Response) {
+      log.info("handling request to /metrics");
+      res.send(promclient.register.metrics());
+    }
+  );
+
+  // dunno how to import `http.Server` type from express :(.
+  let httpserver: any;
+
+  if (CFG.http_server_port === 0) {
+    // implement default: try all ports between 8900 and 8990 (inclusive)
+    for (let tryport = 8900; tryport < 8901; tryport++) {
+      try {
+        httpserver = httpapp.listen(tryport, () =>
+          log.info("HTTP server listening on port %s", tryport)
+        );
+      } catch (err) {
+        if (err.message.includes("EADDRINUSE")) {
+          log.debug("port %s is in use, try another one", tryport);
+        } else {
+          // re-throw all other errors
+          throw err;
+        }
+      }
+      break;
+    }
+
+    // handle case where all attempts failed with EADDRINUSE
+    if (httpserver === undefined) {
+      log.error(
+        "could not start http server: all port that were tried out seem to be in use"
+      );
+      process.exit(1);
+    }
+  } else {
+    // Try just the port that was manually specified.
+    httpserver = httpapp.listen(CFG.http_server_port, () =>
+      log.info("HTTP server listening on port %s", CFG.http_server_port)
+    );
+  }
+
+  // httpserver.close() will not initiate a clean shutdown.
+  // see opstrace-prelaunch/issues/640
+
+  const httpServerTerminator = createHttpTerminator({
+    server: httpserver
+  });
+
+  return httpServerTerminator;
+}
