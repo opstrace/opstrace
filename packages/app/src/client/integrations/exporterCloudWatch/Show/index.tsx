@@ -40,7 +40,7 @@ import { Button } from "client/components/Button";
 export const ExporterCloudWatchShow = ({
   integration,
   tenant,
-  integrationPlugin
+  plugin
 }: IntegrationShowProps) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -84,9 +84,7 @@ export const ExporterCloudWatchShow = ({
         </Box>
         <Card>
           <CardHeader
-            avatar={
-              <img src={integrationPlugin.Logo} width={80} height={80} alt="" />
-            }
+            avatar={<img src={plugin.Logo} width={80} height={80} alt="" />}
             titleTypographyProps={{ variant: "h1" }}
             title={integration.name}
             action={
@@ -104,7 +102,7 @@ export const ExporterCloudWatchShow = ({
                 <Attribute.Key>Created:</Attribute.Key>
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
-                <Attribute.Value>{integrationPlugin.label}</Attribute.Value>
+                <Attribute.Value>{plugin.label}</Attribute.Value>
                 <Attribute.Value>
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>

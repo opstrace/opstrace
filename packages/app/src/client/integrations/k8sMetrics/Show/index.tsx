@@ -44,7 +44,7 @@ import { ArrowLeft } from "react-feather";
 export const K8sMetricsShow = ({
   integration,
   tenant,
-  integrationPlugin
+  plugin
 }: IntegrationShowProps) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -85,9 +85,7 @@ export const K8sMetricsShow = ({
         </Box>
         <Card>
           <CardHeader
-            avatar={
-              <img src={integrationPlugin.Logo} width={80} height={80} alt="" />
-            }
+            avatar={<img src={plugin.Logo} width={80} height={80} alt="" />}
             titleTypographyProps={{ variant: "h1" }}
             title={integration.name}
             action={
@@ -108,7 +106,7 @@ export const K8sMetricsShow = ({
                 </CondRender>
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
-                <Attribute.Value>{integrationPlugin.label}</Attribute.Value>
+                <Attribute.Value>{plugin.label}</Attribute.Value>
                 <Attribute.Value>
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>
