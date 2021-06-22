@@ -21,7 +21,7 @@ import { Tenant } from "state/tenant/types";
 
 import ExporterStatus from "client/integrations/common/ExporterStatus";
 
-export const ExporterBlackboxStatus = (props: {
+export const SyntheticMonitoringStatus = (props: {
   integration: Integration;
   tenant: Tenant;
 }) => (
@@ -32,4 +32,4 @@ export const ExporterBlackboxStatus = (props: {
   />
 );
 
-export default ExporterBlackboxStatus;
+export default SyntheticMonitoringStatus;

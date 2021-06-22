@@ -26,7 +26,7 @@ import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useIntegrationList } from "state/integration/hooks/useIntegrationList";
 
 export { InstallIntegration } from "./all/Install";
-export { ShowIntegration } from "./all/Show";
+export { ShowIntegration } from "./installed/Show";
 export { EditIntegration } from "./installed/Edit";
 
 export const TenantIntegrations = () => {

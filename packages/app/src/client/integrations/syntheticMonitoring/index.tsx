@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import React from "react";
+import Form from "./Form";
+import Show from "./Show";
+import Status from "./Status";
+import Logo from "./Logo.png";
 
 import { IntegrationPlugin } from "client/integrations/types";
 
@@ -64,13 +67,15 @@ modules:
       query_type: MX
 */
 
-export const exporterBlackboxIntegration: IntegrationPlugin = {
-  kind: "exporter-blackbox",
+export const syntheticMonitoringIntegration: IntegrationPlugin = {
+  kind: "synthetic-monitoring",
   category: "exporter",
-  label: "Blackbox",
-  desc: () => <i>Coming soon</i>,
-  Form: () => <div />,
-  Show: () => <div />,
-  Status: () => <div />,
-  enabled: false
+  label: "Synthetic Monitoring",
+  desc:
+    "PLACEHOLDER: The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP and ICMP.",
+  Form: Form,
+  Show: Show,
+  Status: Status,
+  Logo: Logo,
+  enabled: true
 };

@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
+import { IntegrationShowProps } from "client/integrations/types";
 import { installedIntegrationsPath } from "client/integrations/paths";
 import { grafanaUrl } from "client/utils/grafana";
 
@@ -27,23 +28,22 @@ import { Actions } from "./Actions";
 
 import { CondRender } from "client/utils/rendering";
 
-import { ExternalLink } from "client/components/Link";
-import { ArrowLeft } from "react-feather";
-import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-import { useSelectedIntegration } from "state/integration/hooks";
-import { integrationPluginRecords } from "client/integrations";
 import { loadGrafanaStateForIntegration } from "state/integration/actions";
 
+import { ExternalLink } from "client/components/Link";
+import { ArrowLeft } from "react-feather";
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
 
-export const ExporterCloudWatchShow = () => {
+export const ExporterCloudWatchShow = ({
+  integration,
+  tenant,
+  integrationDef
+}: IntegrationShowProps) => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const tenant = useSelectedTenantWithFallback();
-  const integration = useSelectedIntegration();
 
   useEffect(() => {
     if (integration?.id)
@@ -74,8 +74,6 @@ export const ExporterCloudWatchShow = () => {
     // TODO: add loading or NotFound here
     return null;
   }
-
-  const integrationPlugin = integrationPluginRecords[integration.kind];
 
   return (
     <>

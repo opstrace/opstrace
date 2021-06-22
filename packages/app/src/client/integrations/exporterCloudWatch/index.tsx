@@ -31,5 +31,5 @@ export const exporterCloudWatchIntegration: IntegrationPlugin = {
   Show: Show,
   Status: Status,
   Logo: Logo,
-  enabled: true
+  enabled: false
 };

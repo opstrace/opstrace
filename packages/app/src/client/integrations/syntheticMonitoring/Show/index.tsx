@@ -14,62 +14,28 @@
  * limitations under the License.
  */
 
-import React, { useMemo, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import React from "react";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
 import { IntegrationShowProps } from "client/integrations/types";
 import { installedIntegrationsPath } from "client/integrations/paths";
-import { grafanaUrl } from "client/utils/grafana";
 
-import { prometheusYaml } from "./templates/config";
-
-import Status from "client/integrations/k8sMetrics/Status";
-
-import { CondRender } from "client/utils/rendering";
-
-import { loadGrafanaStateForIntegration } from "state/integration/actions";
-
-import { InstallInstructions } from "./InstallInstructions";
-import { UninstallInstructions } from "./UninstallInstructions";
+import Status from "client/integrations/syntheticMonitoring/Status";
+import { Actions } from "./Actions";
 
 import { Box } from "client/components/Box";
 import Attribute from "client/components/Attribute";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
-import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 
-export const K8sMetricsShow = ({
+export const SyntheticMonitoringShow = ({
   integration,
   tenant,
   integrationDef
 }: IntegrationShowProps) => {
-  const dispatch = useDispatch();
   const history = useHistory();
-
-  useEffect(() => {
-    if (integration?.id)
-      dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
-  }, [dispatch, integration?.id]);
-
-  const isDashboardInstalled = useMemo(
-    () => !!integration?.grafana?.folder?.id,
-    [integration?.grafana?.folder?.id]
-  );
-
-  const config = useMemo(() => {
-    if (integration?.id) {
-      return prometheusYaml({
-        clusterHost: window.location.host,
-        tenantName: tenant.name,
-        integrationId: integration.id,
-        deployNamespace: integration.data.deployNamespace
-      });
-    }
-    return "";
-  }, [tenant.name, integration?.id, integration?.data.deployNamespace]);
 
   return (
     <>
@@ -86,7 +52,7 @@ export const K8sMetricsShow = ({
         <Card>
           <CardHeader
             avatar={
-              <img src={integrationPlugin.Logo} width={80} height={80} alt="" />
+              <img src={integrationDef.Logo} width={80} height={80} alt="" />
             }
             titleTypographyProps={{ variant: "h1" }}
             title={integration.name}
@@ -103,46 +69,20 @@ export const K8sMetricsShow = ({
               <Box display="flex" flexDirection="column">
                 <Attribute.Key>Integration:</Attribute.Key>
                 <Attribute.Key>Created:</Attribute.Key>
-                <CondRender when={isDashboardInstalled}>
-                  <Attribute.Key> </Attribute.Key>
-                </CondRender>
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
-                <Attribute.Value>{integrationPlugin.label}</Attribute.Value>
+                <Attribute.Value>{integrationDef.label}</Attribute.Value>
                 <Attribute.Value>
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>
               </Box>
-              <CondRender when={isDashboardInstalled}>
-                <Attribute.Key>
-                  <ExternalLink
-                    target="_blank"
-                    href={`${grafanaUrl({ tenant })}${
-                      integration.grafana?.folder?.path
-                    }`}
-                  >
-                    <Button state="primary" variant="outlined" size="medium">
-                      View Grafana Dashboards
-                    </Button>
-                  </ExternalLink>
-                </Attribute.Key>
-              </CondRender>
             </Box>
           </CardContent>
         </Card>
       </Box>
-      <InstallInstructions
-        integration={integration}
-        tenant={tenant}
-        isDashboardInstalled={isDashboardInstalled}
-        config={config}
-      />
-      <UninstallInstructions
-        integration={integration}
-        tenant={tenant}
-        isDashboardInstalled={isDashboardInstalled}
-        config={config}
-      />
+      <Actions integration={integration} tenant={tenant} />
     </>
   );
 };
+
+export default SyntheticMonitoringShow;
