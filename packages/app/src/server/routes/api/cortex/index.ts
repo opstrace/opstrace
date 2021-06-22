@@ -33,30 +33,52 @@ export const cortexProxy = httpProxy.createProxyServer({ ignorePath: true });
 cortexProxy.on("proxyReq", onProxyReq);
 
 cortexProxy.on("proxyRes", (proxyRes, req, res) => {
-  const isHTMLResponse = proxyRes.headers["content-type"]?.includes("text/html")
-  const body: Array<any> = [];
-  res.writeHead(proxyRes.statusCode!, proxyRes.headers);
+  // if it is an HTML response, it is most likely an error message
+  const isHTMLErrorResponse = proxyRes.headers["content-type"]?.includes(
+    "text/html"
+  );
+  if (isHTMLErrorResponse) {
+  } else {
+    res.writeHead(proxyRes.statusCode!, proxyRes.headers);
+  }
+
+  const chunks: Array<any> = [];
   proxyRes.on("data", function (chunk) {
-    if (!isHTMLResponse) {
-      res.write(chunk)
+    if (isHTMLErrorResponse) {
+      /* In case of HTML error, we do not want to stream the response directly
+       * to the client, but instead extract the error message in `proxyRes.on("end")`
+       * and send that.
+       */
+      chunks.push(chunk);
+    } else {
+      res.write(chunk);
     }
-    body.push(chunk)
   });
   proxyRes.on("end", function () {
-    if (isHTMLResponse) {
-      /* Some error messages are returned via HTML.
-       * We have mainly seen it with configuration errors, e.g. when sharding 
-       * is disabled. 
-       *
-       * For example HTML responses please check the tests.
+    if (isHTMLErrorResponse) {
+      /* Error messages are returned via HTML via a specific layout.
+       * See examples here:
+       * - https://github.com/cortexproject/cortex/blob/82b32ec65ed16920e6053ac7fb748c42e3cae452/pkg/storegateway/gateway_http.go#L16-L25
+       * - https://github.com/cortexproject/cortex/blob/82b32ec65ed16920e6053ac7fb748c42e3cae452/pkg/compactor/compactor_http.go#L16-L25
        */
+      const body = chunks.join();
       const parsedHTML = parse(body);
-      const data = parsedHTML.querySelector("p").text;
-      res.end(data);
+      const errorMessage = parsedHTML.querySelector("html body p")?.text;
+
+      /* setting the status code as 412, as usually HTML error responses
+       * of cortex are due to misconfigurations
+       */
+      res.writeHead(errorMessage ? 412 : 500, {
+        "content-type": "text/plain"
+      });
+      res.end(errorMessage ?? "An unknown error occured.");
     } else {
+      /* if response is not HTML, the chunks have already been written
+       * in `proxyRes.on("data")`, no need to add it to `res.end`
+       */
       res.end();
     }
-  })
+  });
 });
 
 const proxyTo = (target: string) => (

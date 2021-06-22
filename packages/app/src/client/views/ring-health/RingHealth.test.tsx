@@ -181,7 +181,9 @@ test("handles request errors", async () => {
     endpoint: "/tab-endpoint"
   };
 
-  nock("http://localhost").get(tab.endpoint).reply(500);
+  const errorMessage = "Something bad happened"
+
+  nock("http://localhost").get(tab.endpoint).reply(500, errorMessage);
 
   const container = renderComponent(
     <RingHealth title="some title" tabs={[tab]} />
@@ -193,7 +195,7 @@ test("handles request errors", async () => {
     await container.findByText("Could not load table")
   ).toBeInTheDocument();
   expect(
-    await container.findByText("Request failed with status code 500")
+    await container.findByText(errorMessage)
   ).toBeInTheDocument();
 });
 

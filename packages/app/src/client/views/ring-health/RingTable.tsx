@@ -85,13 +85,13 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
   const isMounted = useMountedState();
 
   const notifyError = useCallback(
-    (error: Error, message: string) => {
+    (title: string, message: string) => {
       const messageId = `${getRandomInt()}`;
       const newNotification = {
         id: messageId,
         state: "error" as const,
-        title: message,
-        information: error.message,
+        title,
+        information: message,
         handleClose: () =>
           unregisterNotification({
             id: messageId,
@@ -117,7 +117,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
         setIsRefreshing(false);
       } catch (e) {
         setIsRefreshing(false);
-        notifyError(e, `Could not forget shard`);
+        notifyError(`Could not forget shard`, e.message);
       }
     },
     [ringEndpoint, notifyError]
@@ -140,7 +140,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
       const response = await axios.get<Payload>(ringEndpoint);
       setShards(response.data.shards);
     } catch (e) {
-      notifyError(e, `Could not load table`);
+      notifyError("Could not load table", e.response.data ?? e.message);
       setKeepPolling(false);
     }
   };

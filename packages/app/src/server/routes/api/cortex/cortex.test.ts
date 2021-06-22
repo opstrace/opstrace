@@ -61,10 +61,14 @@ describe("cortex api", () => {
 
       const result = await getTestServer().get(endpoint);
       expect(JSON.parse(result.text)).toEqual(mockResponse);
+      expect(result.statusCode).toBe(200);
     });
 
     test("handle HTML errors", async () => {
-      const errorMessage = "My Error Message."
+      /* Error messages are modelled after the standard cortex error messages
+       * E.g. here https://github.com/cortexproject/cortex/blob/82b32ec65ed16920e6053ac7fb748c42e3cae452/pkg/storegateway/gateway_http.go#L16-L25
+       */
+      const errorMessage = "My Error Message.";
       const mockResponse = `
       <html>
         <head>
@@ -78,11 +82,36 @@ describe("cortex api", () => {
       </html>
       `;
       nock(proxyDestination).get(route).reply(200, mockResponse, {
-        'Content-Type': "text/html; charset=utf-8",
+        "Content-Type": "text/html; charset=utf-8"
       });
 
       const result = await getTestServer().get(endpoint);
       expect(result.text).toEqual(errorMessage);
+      expect(result.statusCode).toBe(412);
+    });
+
+    test("handle 'unknown' HTML format", async () => {
+      /* Error messages are modelled after the standard cortex error messages
+       * E.g. here https://github.com/cortexproject/cortex/blob/82b32ec65ed16920e6053ac7fb748c42e3cae452/pkg/storegateway/gateway_http.go#L16-L25
+       */
+      const mockResponse = `
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Cortex Some Ring</title>
+        </head>
+        <body>
+         <div>No p tag here!</div>
+        </body>
+      </html>
+      `;
+      nock(proxyDestination).get(route).reply(200, mockResponse, {
+        "Content-Type": "text/html; charset=utf-8"
+      });
+
+      const result = await getTestServer().get(endpoint);
+      expect(result.text).toEqual("An unknown error occured.");
+      expect(result.statusCode).toBe(500);
     });
   });
 });
