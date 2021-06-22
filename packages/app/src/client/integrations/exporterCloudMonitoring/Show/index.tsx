@@ -41,7 +41,7 @@ import { Button } from "client/components/Button";
 export const ExporterCloudMonitoringShow = ({
   integration,
   tenant,
-  integrationDef
+  integrationPlugin
 }: IntegrationShowProps) => {
   const dispatch = useDispatch();
   const history = useHistory();

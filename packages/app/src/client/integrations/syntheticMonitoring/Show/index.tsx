@@ -33,7 +33,7 @@ import { ArrowLeft } from "react-feather";
 export const SyntheticMonitoringShow = ({
   integration,
   tenant,
-  integrationDef
+  integrationPlugin
 }: IntegrationShowProps) => {
   const history = useHistory();
 
@@ -52,7 +52,7 @@ export const SyntheticMonitoringShow = ({
         <Card>
           <CardHeader
             avatar={
-              <img src={integrationDef.Logo} width={80} height={80} alt="" />
+              <img src={integrationPlugin.Logo} width={80} height={80} alt="" />
             }
             titleTypographyProps={{ variant: "h1" }}
             title={integration.name}
@@ -71,7 +71,7 @@ export const SyntheticMonitoringShow = ({
                 <Attribute.Key>Created:</Attribute.Key>
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
-                <Attribute.Value>{integrationDef.label}</Attribute.Value>
+                <Attribute.Value>{integrationPlugin.label}</Attribute.Value>
                 <Attribute.Value>
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>

@@ -41,7 +41,7 @@ import { ArrowLeft } from "react-feather";
 export const ExporterAzureShow = ({
   integration,
   tenant,
-  integrationDef
+  integrationPlugin
 }: IntegrationShowProps) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -70,11 +70,6 @@ export const ExporterAzureShow = ({
       return `${window.location.protocol}//${tenant.name}.${window.location.host}/grafana/explore?${path}`;
     } else return "";
   }, [tenant.name, integration?.id]);
-
-  if (!integration) {
-    // TODO: add loading or NotFound here
-    return null;
-  }
 
   return (
     <>

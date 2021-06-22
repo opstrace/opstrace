@@ -47,7 +47,7 @@ import { ArrowLeft } from "react-feather";
 export const K8sLogsShow = ({
   integration,
   tenant,
-  integrationDef
+  integrationPlugin
 }: IntegrationShowProps) => {
   const dispatch = useDispatch();
   const history = useHistory();

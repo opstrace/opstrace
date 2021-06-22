@@ -35,5 +35,5 @@ export type IntegrationPluginRecords = Record<string, IntegrationPlugin>;
 export type IntegrationShowProps = {
   integration: Integration;
   tenant: Tenant;
-  integrationDef: IntegrationDef;
+  integrationPlugin: IntegrationPlugin;
 };
