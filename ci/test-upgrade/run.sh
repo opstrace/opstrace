@@ -5,7 +5,10 @@ set -eou pipefail
 make ci-fetch-secrets
 
 make ci-testupgrade-fetch-cli-artifacts
-make ci-testupgrade-dns-service-credentials
+
+echo "--- setting up dns-service credentials"
+# The `access.jwt` file is what the CLI is going to look for.
+cp secrets/dns-service-magic-id-token-for-ci access.jwt
 
 case "${OPSTRACE_CLOUD_PROVIDER}" in
     aws)
