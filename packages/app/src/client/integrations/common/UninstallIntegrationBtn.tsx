@@ -15,13 +15,13 @@
  */
 
 import React from "react";
+import { isFunction } from "ramda-adjunct";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import { usePickerService } from "client/services/Picker";
 
-import { Integration } from "state/integration/types";
-import { Tenant } from "state/tenant/types";
+import { IntegrationProps } from "client/integrations/types";
 import { installedIntegrationsPath } from "../paths";
 
 import { deleteIntegration } from "state/integration/actions";
@@ -31,22 +31,14 @@ import { deleteFolder } from "client/utils/grafana";
 
 import { Button } from "client/components/Button";
 
-export const UninstallBtn = ({
-  integration,
-  tenant,
-  disabled,
-  uninstallCallback
-}: {
-  integration: Integration;
-  tenant: Tenant;
-  disabled: boolean;
-  uninstallCallback?: Function;
-}) => {
+export const UninstallBtn = (props: IntegrationProps) => {
+  const { integration, tenant, plugin } = props;
   const dispatch = useDispatch();
   const history = useHistory();
 
   const handleUninstall = async () => {
-    if (uninstallCallback !== undefined) await uninstallCallback();
+    if (isFunction(plugin.uninstallCallback))
+      await plugin.uninstallCallback(props);
 
     try {
       await graphqlClient
@@ -97,7 +89,6 @@ export const UninstallBtn = ({
       variant="contained"
       size="small"
       state="error"
-      disabled={disabled}
       onClick={e => {
         e.stopPropagation();
         activatePickerWithText(

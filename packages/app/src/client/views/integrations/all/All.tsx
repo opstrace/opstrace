@@ -55,7 +55,7 @@ const IntegrationPluginCards = ({ integrationPlugins }: Props) => {
   return (
     <Grid container spacing={3}>
       {integrationPlugins.map(i9n => {
-        if (!i9n.enabled) {
+        if (i9n.disabled) {
           return null;
         }
 
@@ -73,7 +73,7 @@ const IntegrationPluginCards = ({ integrationPlugins }: Props) => {
                         variant="contained"
                         state="primary"
                         size="small"
-                        disabled={!i9n.enabled}
+                        disabled={i9n.disabled}
                         onClick={() => onAdd(i9n)}
                       >
                         Install
