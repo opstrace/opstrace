@@ -231,10 +231,12 @@ export class DNSClient {
         ACCESS_TOKEN_FILE_PATH
       );
 
-      this.accessToken = fs.readFileSync(ACCESS_TOKEN_FILE_PATH, {
-        encoding: "utf8",
-        flag: "r"
-      });
+      this.accessToken = fs
+        .readFileSync(ACCESS_TOKEN_FILE_PATH, {
+          encoding: "utf8",
+          flag: "r"
+        })
+        .trim();
       this.additionalHeaders["authorization"] = `Bearer ${this.accessToken}`;
     }
 
@@ -244,10 +246,12 @@ export class DNSClient {
         ID_TOKEN_FILE_PATH
       );
 
-      this.idToken = fs.readFileSync(ID_TOKEN_FILE_PATH, {
-        encoding: "utf8",
-        flag: "r"
-      });
+      this.idToken = fs
+        .readFileSync(ID_TOKEN_FILE_PATH, {
+          encoding: "utf8",
+          flag: "r"
+        })
+        .trim();
       this.additionalHeaders["x-opstrace-id-token"] = this.idToken;
     }
   }
