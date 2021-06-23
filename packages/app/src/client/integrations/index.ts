@@ -16,12 +16,12 @@
 
 import { pluck, zipObj } from "ramda";
 
-import { k8sLogsIntegration } from "./k8sLogs";
-import { k8sMetricsIntegration } from "./k8sMetrics";
-import { exporterCloudWatchIntegration } from "./exporterCloudWatch";
-import { exporterCloudMonitoringIntegration } from "./exporterCloudMonitoring";
-import { exporterAzureIntegration } from "./exporterAzure";
-import { syntheticMonitoringIntegration } from "./syntheticMonitoring";
+import { k8sLogsIntegration } from "./plugins/k8sLogs";
+import { k8sMetricsIntegration } from "./plugins/k8sMetrics";
+import { exporterCloudWatchIntegration } from "./plugins/exporterCloudWatch";
+import { exporterCloudMonitoringIntegration } from "./plugins/exporterCloudMonitoring";
+import { exporterAzureIntegration } from "./plugins/exporterAzure";
+import { syntheticMonitoringIntegration } from "./plugins/syntheticMonitoring";
 
 import { IntegrationPlugins, IntegrationPluginRecords } from "./types";
 

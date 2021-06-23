@@ -22,17 +22,35 @@ export type IntegrationPlugin = {
   category: string;
   label: string;
   desc: string | React.ReactType;
-  Form: React.ReactType;
-  Show: React.ReactType;
-  Status: React.ReactType;
-  enabled: boolean;
   Logo?: string;
+  Status: React.ReactType;
+  disabled?: boolean;
+  Form: React.ReactType;
+  detailSections?: IntegrationPluginDetailSection[];
+  actions?: IntegrationPluginAction[];
+  installCallback?: (props: IntegrationProps) => Promise<void>;
+  uninstallCallback?: (props: IntegrationProps) => Promise<void>;
+  hasInstallCompleted?: (props: IntegrationProps) => Promise<boolean>;
+  canUninstall?: boolean | ((props: IntegrationProps) => boolean);
+};
+
+export type IntegrationPluginAction = {
+  label: string | ((props: IntegrationProps) => string);
+  enabled?: (props: IntegrationProps) => boolean;
+  confirmation?: boolean;
+  callback?: (props: IntegrationProps) => null;
+  Component: (props: IntegrationProps) => JSX.Element;
+};
+
+export type IntegrationPluginDetailSection = {
+  label: string | ((props: IntegrationProps) => string);
+  Component: (props: IntegrationProps) => JSX.Element;
 };
 
 export type IntegrationPlugins = IntegrationPlugin[];
 export type IntegrationPluginRecords = Record<string, IntegrationPlugin>;
 
-export type IntegrationShowProps = {
+export type IntegrationProps = {
   integration: Integration;
   tenant: Tenant;
   plugin: IntegrationPlugin;
