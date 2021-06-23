@@ -210,11 +210,11 @@ export function LokiResources(
         backoff_on_ratelimits: true
       }
     },
+    // https://grafana.com/docs/loki/latest/configuration/examples/#almost-zero-dependencies-setup
     ingester: {
-      chunk_retain_period: "5m", // default: 15m. How long to keep in mem after flush.
+      chunk_retain_period: "30s", // default: 15m. How long to keep in mem after flush.
       chunk_target_size: 2000000, // ~2 MB (compressed). Flush criterion 1. For high-throughput log streams.
-      max_chunk_age: "2h", // default: 1h. Flush criterion 2. Time window of timestamps in log entries.
-      chunk_idle_period: "2h", // Flush criterion 3. Inactivity from Loki's point of view.
+      chunk_idle_period: "5m", // Flush criterion 3. Inactivity from Loki's point of view.
       max_returned_stream_errors: 25, // default: 10
       lifecycler: {
         join_after: "30s",
@@ -224,7 +224,8 @@ export function LokiResources(
           kvstore: {
             store: "memberlist"
           }
-        }
+        },
+        final_sleep: "0s"
       }
     },
     distributor: {
