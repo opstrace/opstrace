@@ -17,7 +17,10 @@ export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/.kube
 source secrets/aws-dev-svc-acc-env.sh
 
 make ci-cd-fetch-cli-artifacts
-make ci-cd-dns-service-credentials
+
+echo "--- setting up dns-service credentials"
+# The `access.jwt` file is what the CLI is going to look for.
+cp secrets/dns-service-magic-id-token-for-ci access.jwt
 
 # Note: sourcing this file exports AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 # cdtest cluster was created in a separate account.
