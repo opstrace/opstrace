@@ -881,19 +881,6 @@ export function LokiResources(
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-                  livenessProbe: {
-                    httpGet: {
-                      path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 1080 as any,
-                      scheme: "HTTP"
-                    },
-                    initialDelaySeconds: 45,
-                    timeoutSeconds: 1,
-                    periodSeconds: 10,
-                    successThreshold: 1,
-                    failureThreshold: 3
-                  },
                   resources: deploymentConfig.ingester.resources,
                   volumeMounts: [
                     {
