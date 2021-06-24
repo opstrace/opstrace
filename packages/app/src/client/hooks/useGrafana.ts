@@ -14,25 +14,39 @@
  * limitations under the License.
  */
 
-call data source api to get ID, filter by prom or loki
-
+import { isFunction } from "ramda-adjunct";
 import useSWR from "swr";
 import axios from "axios";
 
 import { grafanaUrl } from "client/utils/grafana";
 
-export const useLoki = (path: string, tenantName: string = "system") => {
-  const url = `${grafanaUrl({
-    tenant: tenantName
-  })}/grafana/api/datasources/proxy/2/loki/api/v1/${path}`;
+// If 'path' is a function then the caller may be doing a conditional/dependent call through to useSWR so echo this.
+// more info: https://swr.vercel.app/docs/conditional-fetching
+
+export const useLoki = (
+  path: string | (() => string),
+  tenantName: string = "system"
+) => {
+  const makeUrl = (p: string) =>
+    `${grafanaUrl({
+      tenant: tenantName
+    })}/grafana/api/datasources/proxy/2/loki/api/v1/${p}`;
+
+  const url = isFunction(path) ? () => makeUrl(path()) : makeUrl(path);
 
   return useSWR(url, fetcher);
 };
 
-export const usePrometheus = (path: string, tenantName: string = "system") => {
-  const url = `${grafanaUrl({
-    tenant: tenantName
-  })}/grafana/api/datasources/proxy/1/api/v1/${path}`;
+export const usePrometheus = (
+  path: string | (() => string),
+  tenantName: string = "system"
+) => {
+  const makeUrl = (p: string) =>
+    `${grafanaUrl({
+      tenant: tenantName
+    })}/grafana/api/datasources/proxy/1/api/v1/${p}`;
+
+  const url = isFunction(path) ? () => makeUrl(path()) : makeUrl(path);
 
   return useSWR(url, fetcher);
 };
