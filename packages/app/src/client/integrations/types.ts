@@ -28,10 +28,33 @@ export type IntegrationPlugin = {
   Form: React.ReactType;
   detailSections?: IntegrationPluginDetailSection[];
   actions?: IntegrationPluginAction[];
+  status: IntegrationPluginStatus;
   installCallback?: (props: IntegrationProps) => Promise<void>;
   uninstallCallback?: (props: IntegrationProps) => Promise<void>;
   hasInstallCompleted?: (props: IntegrationProps) => Promise<boolean>;
   canUninstall?: boolean | ((props: IntegrationProps) => boolean);
+};
+
+// export type IntegrationPluginCallbacks = {
+//   install?: (props: IntegrationProps) => Promise<void>;
+//   uninstall?: (props: IntegrationProps) => Promise<void>;
+//   hasInstall?: (props: IntegrationProps) => Promise<boolean>;
+// }
+
+type IntegrationPluginStatus = {
+  started: IntegrationPluginStatusCheck;
+  error: IntegrationPluginStatusCheck;
+};
+
+type IntegrationPluginStatusCheck = {
+  lokiFilter?: string;
+  promQl?: string;
+  callback: (
+    props: {
+      lokiData: {};
+      prometheusData: {};
+    } & IntegrationProps
+  ) => Promise<boolean>;
 };
 
 export type IntegrationPluginAction = {

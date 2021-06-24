@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+call data source api to get ID, filter by prom or loki
+
 import useSWR from "swr";
 import axios from "axios";
 
