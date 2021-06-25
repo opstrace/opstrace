@@ -174,6 +174,7 @@ function* createClusterCore() {
       ccfg.tenant_api_authenticator_pubkey_set_json,
     disable_data_api_authentication: ccfg.data_api_authentication_disabled,
     custom_dns_name: ccfg.custom_dns_name,
+    custom_auth0_client_id: ccfg.custom_auth0_client_id
   };
 
   // Fail fast if specified controller docker image cannot be found on docker

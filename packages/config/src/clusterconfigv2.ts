@@ -46,4 +46,5 @@ export interface ClusterConfigTypeV2 {
   aws: AWSInfraConfigTypeV2 | undefined;
   gcp: GCPInfraConfigTypeV2 | undefined;
   custom_dns_name?: string;
+  custom_auth0_client_id?: string;
 }

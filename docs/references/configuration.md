@@ -202,6 +202,28 @@ Note:
   This results in certificates that are not automatically trusted by browsers, i.e. users are likely to see security warnings.
 * `letsencrypt-prod` results in browser-trusted certificates, but is subject to quota/limits: [https://letsencrypt.org/docs/rate-limits/](https://letsencrypt.org/docs/rate-limits).
 
+
+### `custom_auth0_client_id`
+
+Use this when you want to log in to the web UI of your Opstrace instance via your custom Auth0 'application'.
+
+This makes sense especially when you would like to connect to a special identity provider, and is obligatory when using a `custom_dns_name` (see above).
+
+TODO
+
+*Default:* undefined
+
+*Value type:* string
+
+*Example:*
+
+```yaml
+custom_auth0_client_id: 1333337
+```
+
+TODO
+
+
 ### `controller_image`
 
 Defines the Docker image to run the controller from.
