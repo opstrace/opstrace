@@ -18,11 +18,30 @@ import { Cookie } from "@playwright/test";
 
 import { log } from "../utils";
 
+let OPSTRACE_INSTANCE_DNS_NAME: string;
+
 const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME || "unknown";
 
-export const CLUSTER_BASE_URL: string = !process.env.OPSTRACE_CLUSTER_BASE_URL
-  ? `https://${CLUSTER_NAME}.opstrace.io`
-  : process.env.OPSTRACE_CLUSTER_BASE_URL;
+// default, if OPSTRACE_INSTANCE_DNS_NAME is not set via env
+OPSTRACE_INSTANCE_DNS_NAME = `${CLUSTER_NAME}.opstrace.io`;
+
+if (process.env.OPSTRACE_INSTANCE_DNS_NAME) {
+  log.info(
+    "env variable OPSTRACE_INSTANCE_DNS_NAME is set: %s",
+    process.env.OPSTRACE_INSTANCE_DNS_NAME
+  );
+  OPSTRACE_INSTANCE_DNS_NAME = process.env.OPSTRACE_INSTANCE_DNS_NAME;
+}
+
+export let CLUSTER_BASE_URL = `https://${OPSTRACE_INSTANCE_DNS_NAME}`;
+
+if (process.env.OPSTRACE_CLUSTER_BASE_URL) {
+  log.info(
+    "env variable OPSTRACE_CLUSTER_BASE_URL is set: %s",
+    process.env.OPSTRACE_CLUSTER_BASE_URL
+  );
+  CLUSTER_BASE_URL = process.env.OPSTRACE_CLUSTER_BASE_URL;
+}
 
 export const CLOUD_PROVIDER: string =
   process.env.OPSTRACE_CLOUD_PROVIDER || "unknown";
