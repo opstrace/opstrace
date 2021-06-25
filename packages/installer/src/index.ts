@@ -163,7 +163,7 @@ function* createClusterCore() {
     infrastructureName: ccfg.cluster_name,
     logRetentionDays: ccfg.log_retention_days,
     metricRetentionDays: ccfg.metric_retention_days,
-    dnsName: dnsConf.dnsName,
+    dnsName: dnsConf.dnsName, // note that this is meaningless(?) when `custom_dns_name` is set -- consolidate
     terminate: false,
     controllerTerminated: false,
     tlsCertificateIssuer: ccfg.cert_issuer,
@@ -173,7 +173,7 @@ function* createClusterCore() {
     tenant_api_authenticator_pubkey_set_json:
       ccfg.tenant_api_authenticator_pubkey_set_json,
     disable_data_api_authentication: ccfg.data_api_authentication_disabled,
-    custom_dns_fqdn: ccfg.custom_dns_fqdn
+    custom_dns_name: ccfg.custom_dns_name,
   };
 
   // Fail fast if specified controller docker image cannot be found on docker

@@ -1,6 +1,6 @@
 tenants:
   - default
-custom_dns_fqdn: opstracegcp.com
+custom_dns_name: opstracegcp.com
 env_label: opstrace-ci
 cert_issuer: letsencrypt-staging
 aws:
