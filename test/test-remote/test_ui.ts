@@ -96,8 +96,21 @@ async function performLoginFlow(br: Browser) {
 
   // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
   // <span class="MuiButton-label">Log in</span>
-  log.info('page.waitForSelector("css=button")');
-  await page.waitForSelector("css=button");
+  try {
+    log.info('page.waitForSelector("css=button")');
+    await page.waitForSelector("css=button");
+  } catch (err) {
+    log.info("page.screenshot() because of err %s", err);
+    try {
+      await page.screenshot({
+        path: artipath("uishot-lasterr.png")
+      });
+    } catch (innerErr) {
+      log.warning("ignoring error in error handler: %s", innerErr);
+    }
+    log.info("rethrow error");
+    throw err;
+  }
 
   log.info("page.screenshot()");
   await page.screenshot({
