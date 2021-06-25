@@ -41,11 +41,15 @@ export function OpstraceApplicationResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const { envLabel } = getControllerConfig(state);
+  const { custom_auth0_client_id } = getControllerConfig(state);
 
   let auth0_client_id = "vs6bgTunbVK4dvdLRj02DptWjOmAVWVM";
-  if (envLabel === "opstrace-ci") {
-    auth0_client_id = "5MoCYfPXPuEzceBLRUr6T6SAklT2GDys";
+  // if (envLabel === "opstrace-ci") {
+  //   auth0_client_id = "5MoCYfPXPuEzceBLRUr6T6SAklT2GDys";
+  // }
+
+  if (custom_auth0_client_id !== undefined) {
+    auth0_client_id = custom_auth0_client_id;
   }
 
   collection.add(
