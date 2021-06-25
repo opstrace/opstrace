@@ -172,8 +172,7 @@ This DNS name will point to the specific Opstrace instance you are planning to c
 *Example:*
 
 ```yaml
-custom_dns_name:
-    - myopstrace.powerteam.com
+custom_dns_name: myopstrace.powerteam.com
 ```
 
 If you install the Opstrace instance in your GCP account, this DNS name must correspond to a "managed zone" in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart).

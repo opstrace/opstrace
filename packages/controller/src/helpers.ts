@@ -135,22 +135,13 @@ export const getQueueEndpoint = (): string =>
 export const getDomain = (state: State): string => {
   const stack = getControllerConfig(state);
 
-  if (stack.custom_dns_fqdn !== undefined) {
-    // const dn = `${stack.name}.${stack.custom_dns_tld}`;
-
-    // Oh I think I realize that what Mat envisioned here is that we do not
-    // construct ${stack.name}.${stack.custom_dns_tld}, but that
-    // stack.custom_dns_tld is representing the specific Opstrace instance, and
-    // then the _tld part is also misleading because it might not necessarily
-    // be a top-level domain.
-
-    const dn = stack.custom_dns_fqdn;
-    //log.info("opstrace instance DNS name built from custom DNS name: %s", dn);
+  if (stack.custom_dns_name !== undefined) {
+    const dn = stack.custom_dns_name;
     return dn;
   }
 
   // No custom DNS TLD/system provided,
-  // stack.dnsName is, with current WIP code, always .opstrace.io
+  // stack.dnsName is, with current WIP code, always <instance_name>.opstrace.io
   return `${stack.name}.${stack.dnsName.replace(/\.$/, "")}`;
 };
 
