@@ -22,19 +22,22 @@ import { logUserIn } from "../utils/authentication";
 test.describe("after auth0 authentication", () => {
   test.beforeEach(logUserIn);
 
-  test("user should see homepage", async ({ page, cluster }) => {
-    expect(
-      await page.isVisible("[data-test=getting-started]", {
-        timeout: cluster.cloudProvider.aws ? 60_000 : 30_000 // timeout: keeps failing on AWS CI and not GCP probably because AWS is much slower that GCP
-      })
-    ).toBeTruthy();
-  });
+  test("user should click around the entire site", async ({ page, user }) => {
+    expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
 
-  test("user should see own email in user list", async ({ page, user }) => {
     await page.hover("[data-test='sidebar/tenant/Users']");
     await page.click("[data-test='sidebar/tenant/Users']");
     expect(
       await page.isVisible(`[data-test='userList/${user.email}']`)
+    ).toBeTruthy();
+
+    await page.hover("[data-test='sidebar/tenant/Integrations']");
+    await page.click("[data-test='sidebar/tenant/Integrations']");
+    await page.click("[data-test='sidebar/tenant/Integrations/All']");
+    expect(
+      await page.isVisible(
+        `[data-test='integrations/grid/exporter-cloud-monitoring']`
+      )
     ).toBeTruthy();
   });
 });
