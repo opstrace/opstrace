@@ -26,13 +26,15 @@ COPY packages/controller-config /build/packages/controller-config/
 
 WORKDIR /build/packages/controller
 
+# Note(JP): It's important to make use of the image layer cache after RUN yarn
+# --frozen-lockfile. Therefore, copy `packages/buildinfo` _before_ yarn package
+# installation is not a good thing to do.
+COPY packages/buildinfo /build/packages/buildinfo/
+
 ENV NODE_OPTIONS "--max-old-space-size=1536"
 RUN yarn --frozen-lockfile
 
-# It's important to make use of the image layer cache after RUN yarn
-# --frozen-lockfile. Therefore, copy `packages/buildinfo` _after_ yarn package
-# installation because these files changes for each build.
-COPY packages/buildinfo /build/packages/buildinfo/
+
 
 # NTW: [2021.03.04] Yarn seems to have stopped recursively building our packages for some currently
 # unknown reason, doing this manually in this precise order is required for `yarn tsc -b` to work when
