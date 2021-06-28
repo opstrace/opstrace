@@ -15,7 +15,7 @@
  */
 
 import { PlaywrightTestConfig } from "@playwright/test";
-import { devices } from "@playwright/test";
+// import { devices } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
   reporter: "dot",
@@ -23,10 +23,10 @@ const config: PlaywrightTestConfig = {
   use: {
     headless: true,
     viewport: { width: 1280, height: 720 },
-    ignoreHTTPSErrors: true,
-    screenshot: "only-on-failure",
-    trace: "retain-on-failure",
-    video: "retain-on-failure"
+    ignoreHTTPSErrors: true
+    // screenshot: "only-on-failure",
+    // trace: "retain-on-failure",
+    // video: "retain-on-failure"
   },
   projects: [
     {
