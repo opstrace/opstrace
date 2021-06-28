@@ -20,7 +20,7 @@ import { strict as assert } from "assert";
 import argparse from "argparse";
 import { ZonedDateTime } from "@js-joda/core";
 
-import { rndstring, timestampToRFC3339Nano } from "../testutils";
+import { rndstring, timestampToRFC3339Nano } from "./util";
 
 import { log, buildLogger, setLogger } from "./log";
 

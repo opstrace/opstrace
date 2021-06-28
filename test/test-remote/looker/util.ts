@@ -14,12 +14,28 @@
  * limitations under the License.
  */
 
+import crypto from "crypto";
+
 import { Response as GotResponse } from "got";
+import { ZonedDateTime, DateTimeFormatter } from "@js-joda/core";
 
 import { log } from "./log";
 
 let COUNTER_HTTP_RESP_LOG_THROTTLE = 0;
 //import { COUNTER_HTTP_RESP_LOG_THROTTLE } from "./index";
+
+// Generic HTTP timeout settings object for HTTP requests made with `got`. Note
+// that every time that this test suite fires off an HTTP request we should
+// timeout-control the individual request phases (by default `got` waits
+// indefinitely, in every phase of the request). For that, either use the
+// following generic settings or some more specific settings adjusted to the
+// test. Ref: https://www.npmjs.com/package/got/v/9.6.0#timeout
+export const httpTimeoutSettings = {
+  // If a TCP connect() takes longer then ~5 seconds then most certainly there
+  // is a networking issue, fail fast in that case.
+  connect: 10000,
+  request: 60000
+};
 
 export function rndFloatFromInterval(min: number, max: number) {
   // half-closed: [min, max)
@@ -59,6 +75,73 @@ export function chunkify<T>(a: T[], chunkSize: number): T[][] {
   for (let i = 0, len = a.length; i < len; i += chunkSize)
     R.push(a.slice(i, i + chunkSize));
   return R;
+}
+
+export function rndstring(length = 5) {
+  /*
+  Calling
+
+    rndstrings.push(rndstring(10));
+
+  10^6 times on my machine takes ~4 seconds.
+  */
+  return crypto
+    .randomBytes(length + 1)
+    .toString("base64")
+    .replace(/\//g, "_")
+    .replace(/\+/g, "_")
+    .replace(/=/g, "")
+    .slice(0, length);
+}
+
+export function rndstringFast(length = 5) {
+  return crypto
+    .randomBytes(length + 1)
+    .toString("base64")
+    .slice(0, length);
+}
+
+export function rndstringFastBoringFill(rndlen: number, boringlen: number) {
+  return (
+    crypto
+      .randomBytes(rndlen + 1)
+      .toString("base64")
+      .slice(0, rndlen) + "a".repeat(boringlen)
+  );
+}
+
+/**
+ * Translate a joda datetime object into a an integer string, indicating the
+   number of nanoseconds passed since epoch. Example:
+
+  timestamp('2001-01-05T10:00:01.123456789Z') --> '978688801123456789'
+
+  The outcome is used common way to represent a specific point in time in the
+  Prometheus ecosystem, e.g. used in the HTTP API.
+
+  The `ZonedDateTime` object `ts` might not have a sub-second resolution, in
+  which case `ts.nano()` seems to still return `0`. Zero-pad the nano-second
+  part, i.e. if `ts.nano()` returns 1, append a '000000001'.
+ */
+export function timestampToNanoSinceEpoch(ts: ZonedDateTime): string {
+  return `${ts.toEpochSecond()}${ts.nano().toString().padStart(9, "0")}`;
+}
+
+export function timestampToRFC3339Nano(ts: ZonedDateTime): string {
+  /*
+  Return a timestamp string using the text format that Go's standard library
+  calls RFC3339Nano, an ISO 8601 timestamp string with nanosecond resolution.
+
+  Ref: https://js-joda.github.io/js-joda/manual/formatting.html
+
+  DateTimeFormatter is seemingly not documented, but
+  https://github.com/js-joda/js-joda/issues/181 shows how to make complex
+  patterns, in particular how to escape arbitrary text within the pattern
+  string.
+
+  */
+  if (ts.zone().toString() !== "Z") throw Error("code assumes Zulu time");
+  return ts.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.n'Z'"));
 }
 
 // Choose N elements from array. No repetition. Uniform distribution.
