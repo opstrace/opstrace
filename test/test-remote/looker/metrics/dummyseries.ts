@@ -22,14 +22,9 @@ import Long from "long";
 
 import { logqlLabelString } from "../logs";
 
-import {
-  log,
-  logHTTPResponse,
-  httpTimeoutSettings,
-  mtime,
-  mtimeDiffSeconds,
-  sleep
-} from "../../testutils";
+import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
+import { log } from "../log";
+import { logHTTPResponse, httpTimeoutSettings } from "../util";
 
 import * as mathjs from "mathjs";
 

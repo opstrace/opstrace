@@ -30,7 +30,8 @@ import {
   LogStreamFragmentPushRequest,
   LogStreamLabelset,
   LogStreamFragment,
-  DummyStreamFetchAndValidateOpts
+  DummyStreamFetchAndValidateOpts,
+  LokiQueryResult
 } from "./logs";
 
 import {
@@ -40,19 +41,17 @@ import {
   DummyTimeseriesFetchAndValidateOpts
 } from "./metrics";
 
-import { LokiQueryResult } from "../testutils/logs";
-
 import {
-  rndstring,
   sleep,
   mtimeDiffSeconds,
   mtimeDeadlineInSeconds,
-  mtime,
-  timestampToRFC3339Nano,
-  httpTimeoutSettings
-} from "../testutils";
+  mtime
+} from "./mtime";
 
 import { log } from "./log";
+
+// TODO consolidate these two imports
+import { rndstring, timestampToRFC3339Nano, httpTimeoutSettings } from "./util";
 import * as util from "./util";
 
 export const START_TIME_JODA = ZonedDateTime.now(ZoneOffset.UTC);

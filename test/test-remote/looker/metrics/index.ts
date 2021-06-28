@@ -24,14 +24,9 @@ import Long from "long";
 
 import * as mathjs from "mathjs";
 
-import {
-  log,
-  mtimeDiffSeconds,
-  mtime,
-  sleep,
-  logHTTPResponseLight,
-  logHTTPResponse
-} from "../../testutils";
+import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
+import { log } from "../log";
+import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
 import { DummyTimeseries } from "./dummyseries";
 

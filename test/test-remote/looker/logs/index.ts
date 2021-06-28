@@ -21,14 +21,9 @@ import protobuf from "protobufjs";
 import snappy from "snappy";
 import got from "got";
 
-import {
-  log,
-  mtimeDiffSeconds,
-  mtime,
-  sleep,
-  logHTTPResponseLight,
-  logHTTPResponse
-} from "../../testutils";
+import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
+import { log } from "../log";
+import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
 import { DummyStream } from "./dummystream";
 
