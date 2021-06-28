@@ -15,6 +15,7 @@
  */
 
 import { values, find, propEq } from "ramda";
+import { useEffect, useState } from "react";
 import { useRouteMatch } from "react-router";
 import { createSelector } from "reselect";
 
@@ -60,6 +61,19 @@ export function useSelectedTenant() {
   );
   return useTenant(tenantRouteMatch?.params.tenantId || "");
 }
+
+export const useLastSelectedTenant = () => {
+  /* The difference between `useSelectedTenant` and `useLastSelectedTenant`
+   * is that the latter remembers the last, previous selected tenant in case
+   * none is selected right now. 
+   */
+  const tenant = useSelectedTenant();
+  const [lastSelectedTenant, setLastSelectedTenant] = useState(tenant);
+  useEffect(() => {
+    if (tenant) setLastSelectedTenant(tenant);
+  }, [tenant]);
+  return lastSelectedTenant;
+};
 
 export default function useTenant(
   tenantName: string
