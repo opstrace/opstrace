@@ -1,10 +1,10 @@
-FROM node:14-alpine AS stage-tsc-build
+FROM node:16-alpine AS stage-tsc-build
 
 # Installation of `snappy` uses `node-gyp` to build binaries, and that needs
 # Python, make,  g++. Also see
 # https://github.com/nodejs/docker-node/issues/282. This is not used in the
 # 'production' layer below.
-RUN apk add --no-cache --virtual .gyp python make g++
+RUN apk add --no-cache --virtual .gyp python3 make g++
 
 # Copy just what's needed to install packages with yarn (invalidate this cache
 # layer only when one of these files change). For now, do not use a yarn.lock
@@ -28,8 +28,8 @@ RUN yarn run tsc -b tsconfig.json
 
 # Another stage to do `yarn install --production` which requires some build
 # tooling for `snappy` /`node-gyp`that should not be in the final image.
-FROM node:14-alpine AS stage-yarn-install-prod
-RUN apk add --no-cache --virtual .gyp python make g++
+FROM node:16-alpine AS stage-yarn-install-prod
+RUN apk add --no-cache --virtual .gyp python3 make g++
 WORKDIR /build
 COPY tsconfig.json package.json /build/
 RUN yarn install --production
@@ -41,7 +41,7 @@ RUN yarn install --production
 
 # Third stage, copying node_modules from `stage-yarn-install-prod` and
 # tsc build outcome from `stage-tsc-build
-FROM node:14-alpine AS stage-prod
+FROM node:16-alpine AS stage-prod
 COPY --from=stage-tsc-build /build/_tscbuild /build/_tscbuild
 COPY --from=stage-yarn-install-prod /build/node_modules /build/node_modules
 
