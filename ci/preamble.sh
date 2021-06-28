@@ -65,17 +65,6 @@ echo "--- build looker image"
 # `make image` is supposed to inherit the env variable CHECKOUT_VERSION_STRING
 ( cd test/test-remote/looker ; make image ; make publish )
 
-echo "--- build looker in non-isolated environment (for local dev)"
-# Note(JP): the looker build via Dockerfile is special. During local looker
-# dev, I am used to using a different build method. Which might break when it's
-# not covered by CI. Cover that here. Also see
-# https://github.com/opstrace/opstrace/issues/493 Run `yarn add playwright`
-# to install the 'optional dependency' playwright. Playwright is a dep for
-# test-remote, though, and not for looker. To split out the looker project /
-# build makes a lot of sense, with its own tsconfig and package.json
-( cd test/test-remote/looker; yarn run tsc )
-
-
 # Do this early when the checkout is fresh (no non-repo files within /packages
 # or /lib as of previous tsc invocations -- these could erroenously invalidate
 # the controller image cache layers).
@@ -121,12 +110,7 @@ echo "--- build looker image"
 echo "--- build looker in non-isolated environment (for local dev)"
 # Note(JP): the looker build via Dockerfile is special. During local looker
 # dev, I am used to using a different build method. Which might break when it's
-# not covered by CI. Cover that here. Also see
-# https://github.com/opstrace/opstrace/issues/493 Run `yarn add playwright`
-# to install the 'optional dependency' playwright. Playwright is a dep for
-# test-remote, though, and not for looker. To split out the looker project /
-# build makes a lot of sense, with its own tsconfig and package.json
-( cd test/test-remote/looker; yarn run tsc )
+( cd test/test-remote/looker; yarn run tsc --project tsconfig.json)
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
