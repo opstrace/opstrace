@@ -22,9 +22,11 @@ import { logUserIn } from "../utils/authentication";
 test.describe("after auth0 authentication", () => {
   test.beforeEach(logUserIn);
 
-  test("user should see homepage", async ({ page }) => {
+  test.only("user should see homepage", async ({ page, cluster }) => {
     expect(
-      await page.isVisible("[data-test=getting-started]", { timeout: 60_000 })
+      await page.isVisible("[data-test=getting-started]", {
+        timeout: cluster.cloudProvider.aws ? 60_000 : 30_000
+      })
     ).toBeTruthy();
   });
 

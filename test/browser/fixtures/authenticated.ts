@@ -18,22 +18,27 @@ import { test as base, Cookie } from "@playwright/test";
 
 import { log } from "../utils";
 
-const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME;
+const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME || "unknown";
 
-let CLUSTER_BASE_URL = process.env.OPSTRACE_CLUSTER_BASE_URL;
-if (!CLUSTER_BASE_URL && !!CLUSTER_NAME)
-  CLUSTER_BASE_URL = `https://${CLUSTER_NAME}.opstrace.io`;
+const CLUSTER_BASE_URL: string = !process.env.OPSTRACE_CLUSTER_BASE_URL
+  ? `https://${CLUSTER_NAME}.opstrace.io`
+  : process.env.OPSTRACE_CLUSTER_BASE_URL;
 
-const CLOUD_PROVIDER: string = process.env.OPSTRACE_CLOUD_PROVIDER;
+const CLOUD_PROVIDER: string = process.env.OPSTRACE_CLOUD_PROVIDER || "unknown";
 
 const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
 const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
 
+type SystemFixture = {
+  runningInCI: boolean;
+};
+
+const CLOUD_PROVIDER_DEFAULTS = { aws: false, gcp: false, unknown: false };
+
 type ClusterFixture = {
   name: string;
   baseUrl: string;
-  cloudProvider;
-  string;
+  cloudProvider: Record<string, boolean>;
 };
 
 type UserFixture = {
@@ -41,6 +46,7 @@ type UserFixture = {
 };
 
 type AuthenticationFixture = {
+  system: SystemFixture;
   cluster: ClusterFixture;
   user: UserFixture;
   authCookies: Cookie[];
@@ -48,14 +54,24 @@ type AuthenticationFixture = {
 
 // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
 const test = base.extend<Record<string, never>, AuthenticationFixture>({
+  system: [
+    async ({ browser }, use) => {
+      const system: SystemFixture = {
+        runningInCI: process.env.BUILDKITE === "true"
+      };
+      await use(system);
+    },
+    { scope: "worker" }
+  ],
   cluster: [
     async ({ browser }, use) => {
-      const user: ClusterFixture = {
+      let cluster: ClusterFixture = {
         name: CLUSTER_NAME,
         baseUrl: CLUSTER_BASE_URL,
-        cloudProvider: CLOUD_PROVIDER
+        cloudProvider: CLOUD_PROVIDER_DEFAULTS
       };
-      await use(user);
+      cluster.cloudProvider[CLOUD_PROVIDER] = true;
+      await use(cluster);
     },
     { scope: "worker" }
   ],
