@@ -58,7 +58,7 @@ When creating tests for new features we recommend using [Telepresense](https://g
 
 If for some reason you're unable to use Telepresence then you can override the HOST the tests are run against to have the Playwright Test runner execute against your local dev instance:
 
-`OPSTRACE_CLUSTER_BASE_URL="http://localhost:3000" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --project=Firefox --headed`
+`OPSTRACE_CLUSTER_BASE_URL="http://localhost:3000" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --project=Chromium --headed`
 
 ## How authentication works
 
