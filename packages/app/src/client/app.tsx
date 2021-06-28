@@ -44,7 +44,7 @@ import SideBar, {
   sidebarWidth
 } from "client/views/common/SideBar";
 import AppBar, { appBarHeight } from "client/views/common/AppBar";
-import { useSelectedTenant } from "state/tenant/hooks/useTenant";
+import { useLastSelectedTenant } from "state/tenant/hooks/useTenant";
 import { useIntegrationListCount } from "state/integration/hooks/useIntegrationList";
 
 import GettingStarted from "client/views/getting-started";
@@ -85,7 +85,7 @@ const useStyles = makeStyles(theme => ({
 const AuthProtectedApplication = () => {
   const classes = useStyles();
   const clusterRoutesMatch = useRouteMatch<{ tenantId: string }>("/cluster/*");
-  const tenant = useSelectedTenant();
+  const tenant = useLastSelectedTenant();
   const integrationCount = useIntegrationListCount();
 
   if (tenant === null) {
