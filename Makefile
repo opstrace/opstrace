@@ -549,8 +549,8 @@ rebuild-testrunner-container-images:
 	docker pull prom/prometheus:v2.21.0
 	docker pull gcr.io/datadoghq/agent:7
 
-.PHONY: rebuild-looker-container-images
-rebuild-looker-container-images:
+.PHONY: rebuild-looker-container-image
+rebuild-looker-container-image:
 	@echo "--- building looker container image"
 	make -C test/test-remote/looker image
 
