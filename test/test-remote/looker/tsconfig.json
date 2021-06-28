@@ -18,7 +18,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "**/*.ts",
-    "resources/*.json",
+    "src/**/*.ts",
+    "src/resources/*.json",
   ],
 }
