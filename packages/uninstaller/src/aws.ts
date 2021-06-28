@@ -186,18 +186,16 @@ export function* destroyAWSInfra(): Generator<
     )
   );
 
-  taskGroup4.push(
-    yield fork([
-      new S3BucketRes(destroyConfig.clusterName, lokiBucketName),
-      "teardown"
-    ])
-  );
-  taskGroup4.push(
-    yield fork([
-      new S3BucketRes(destroyConfig.clusterName, lokiBucketName),
-      "teardown"
-    ])
-  );
+  for (const bn of [
+    lokiBucketName,
+    lokiConfigBucketName,
+    cortexDataBucketName,
+    cortexConfigBucketName
+  ]) {
+    taskGroup4.push(
+      yield fork([new S3BucketRes(destroyConfig.clusterName, bn), "teardown"])
+    );
+  }
 
   yield join([...taskGroup1]);
   log.debug("task group 1 finished");
