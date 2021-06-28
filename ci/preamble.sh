@@ -58,6 +58,13 @@ echo "--- Update docker-images.json"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ${DIR}/build-docker-images-update-controller-config.sh
 
+
+echo "--- build looker image"
+# looker: does image build? push it, too!
+# run `make image` in subshell so that cwd stays as-is
+# `make image` is supposed to inherit the env variable CHECKOUT_VERSION_STRING
+( cd test/test-remote/looker ; make image ; make publish )
+
 # Do this early when the checkout is fresh (no non-repo files within /packages
 # or /lib as of previous tsc invocations -- these could erroenously invalidate
 # the controller image cache layers).
@@ -93,11 +100,13 @@ echo "--- CLI single-binary sanity check"
 
 echo "--- make rebuild-testrunner-container-images"
 make rebuild-testrunner-container-images
+
 echo "--- build looker image"
 # looker: does image build? push it, too!
 # run `make image` in subshell so that cwd stays as-is
 # `make image` is supposed to inherit the env variable CHECKOUT_VERSION_STRING
 ( cd test/test-remote/looker ; make image ; make publish )
+
 
 echo "--- build looker in non-isolated environment (for local dev)"
 # Note(JP): the looker build via Dockerfile is special. During local looker
