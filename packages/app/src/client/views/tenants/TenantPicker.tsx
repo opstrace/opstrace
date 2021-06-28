@@ -26,6 +26,7 @@ import { Tenant } from "state/tenant/types";
 import { selectedTenantChanged } from "state/global/actions";
 
 import { PickerOption, usePickerService } from "client/services/Picker";
+import { useLastSelectedTenant } from "state/tenant/hooks/useTenant";
 
 type TenantPickerOption = Pick<PickerOption, "id" | "text"> & { data: Tenant };
 
@@ -43,6 +44,7 @@ const TenantPicker = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const tenants = useTenantList();
+  const lastSelectedTenant = useLastSelectedTenant();
 
   const { activatePickerWithText } = usePickerService(
     {
@@ -50,10 +52,19 @@ const TenantPicker = () => {
       options: tenants ? tenants.map(tenantToPickerOption) : [],
       onSelected: option => {
         dispatch(selectedTenantChanged({ tenant: option.data }));
-        history.push(`/tenant/${option.id}`); // todo: would be nice to keep the current path and simply change the tenant rather than send user back to the home for the tenant
+        const { pathname } = history.location;
+        const newRoute = lastSelectedTenant
+          ? // if we're on a page with a tenant selected, stay on page and just replace the tenant
+            pathname.replace(
+              `/tenant/${lastSelectedTenant.name}`,
+              `/tenant/${option.id}`
+            )
+          : // if no tenant has been selected yet, reroute to root tenant
+            `/tenant/${option.id}`;
+        history.push(newRoute);
       }
     },
-    [tenants, history]
+    [tenants, lastSelectedTenant, history]
   );
 
   useCommandService({
