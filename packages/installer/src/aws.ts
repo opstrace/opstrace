@@ -126,7 +126,7 @@ export function* ensureAWSInfraExists(): Generator<
   // State-mutating API calls below.
   yield call([new ServiceLinkedRoleRes(ccfg.cluster_name), "setup"]);
 
-  if (ccfg.custom_dns_fqdn === undefined) {
+  if (ccfg.custom_dns_name === undefined) {
     yield call(ensureDNSExists, {
       opstraceClusterName: ccfg.cluster_name,
       dnsName: getDnsConfig(ccfg.cloud_provider).dnsName,

@@ -339,8 +339,8 @@ function* createClusterCore() {
 
 function instanceDNSNameFromClusterConfig(ccfg: LatestClusterConfigType) {
   let opstraceInstanceDNSname = `${ccfg.cluster_name}.opstrace.io`;
-  if (ccfg.custom_dns_fqdn !== undefined) {
-    opstraceInstanceDNSname = ccfg.custom_dns_fqdn;
+  if (ccfg.custom_dns_name !== undefined) {
+    opstraceInstanceDNSname = ccfg.custom_dns_name;
   }
 
   return opstraceInstanceDNSname;
