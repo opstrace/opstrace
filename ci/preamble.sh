@@ -97,7 +97,7 @@ echo "--- build looker image"
 # looker: does image build? push it, too!
 # run `make image` in subshell so that cwd stays as-is
 # `make image` is supposed to inherit the env variable CHECKOUT_VERSION_STRING
-( cd test/test-remote/containers/looker ; make image ; make publish )
+( cd test/test-remote/looker ; make image ; make publish )
 
 echo "--- build looker in non-isolated environment (for local dev)"
 # Note(JP): the looker build via Dockerfile is special. During local looker
