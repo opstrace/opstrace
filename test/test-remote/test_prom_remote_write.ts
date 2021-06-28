@@ -29,7 +29,7 @@ import {
 
 import { waitForCortexMetricResult } from "./testutils/metrics";
 
-import { DummyTimeseries } from "./looker/metrics";
+import { DummyTimeseries } from "./looker/src/metrics";
 
 suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
   suiteSetup(async function () {
