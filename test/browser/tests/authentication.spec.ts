@@ -33,4 +33,12 @@ test.describe("after auth0 authentication", () => {
       await page.isVisible(`[data-test='userList/${user.email}']`)
     ).toBeTruthy();
   });
+
+  test("this test should fail", async ({ page, user }) => {
+    await page.hover("[data-test='nthnthnhnhnthvwmvmmwv']");
+    await page.click("[data-test='sidebar/Users']");
+    expect(
+      await page.isVisible(`[data-test='userList/${user.email}']`)
+    ).toBeTruthy();
+  });
 });

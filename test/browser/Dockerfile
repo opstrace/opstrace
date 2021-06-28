@@ -1,6 +1,8 @@
 FROM --platform=linux/amd64 mcr.microsoft.com/playwright:v1.12.3-focal
 
-RUN mkdir -p /build/test/browser
+ENV DOCKER v14.15.4
+
+RUN mkdir -p /build/test/browser/test-results
 WORKDIR /build/test/browser
 
 COPY package.json tsconfig.json /build/test/browser/
