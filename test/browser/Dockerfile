@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 mcr.microsoft.com/playwright:v1.12.2-focal
+FROM --platform=linux/amd64 mcr.microsoft.com/playwright:v1.12.3-focal
 
 RUN mkdir -p /build/test/browser
 WORKDIR /build/test/browser
