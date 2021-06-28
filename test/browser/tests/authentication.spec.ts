@@ -26,10 +26,7 @@ test.describe("after auth0 authentication", () => {
     expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
   });
 
-  test.only("user should see own email in user list", async ({
-    page,
-    user
-  }) => {
+  test("user should see own email in user list", async ({ page, user }) => {
     await page.hover("[data-test='sidebar/Users']");
     await page.click("[data-test='sidebar/Users']");
     expect(
