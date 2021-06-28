@@ -58,7 +58,7 @@ export function* ensureGCPInfraExists(
     throw Error("`gcp` property expected");
   }
 
-  if (ccfg.custom_dns_fqdn === undefined) {
+  if (ccfg.custom_dns_name === undefined) {
     const dnsConf = getDnsConfig(ccfg.cloud_provider);
     const dnsname = yield call(ensureDNSExists, {
       opstraceClusterName: ccfg.cluster_name,
