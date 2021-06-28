@@ -30,6 +30,8 @@ import { grafanaUrl } from "client/utils/grafana";
 import { Sections } from "./Sections";
 import { Actions } from "./Actions";
 
+import IntegrationStatus from "client/integrations/common/Status";
+
 import { CondRender } from "client/utils/rendering";
 
 import { loadGrafanaStateForIntegration } from "state/integration/actions";
@@ -92,7 +94,11 @@ const Show = ({ integration, tenant, plugin }: IntegrationProps) => {
             action={
               <Box ml={3} display="flex" flexWrap="wrap">
                 <Box p={1}>
-                  <plugin.Status integration={integration} tenant={tenant} />
+                  <IntegrationStatus
+                    integration={integration}
+                    tenant={tenant}
+                    plugin={plugin}
+                  />
                 </Box>
               </Box>
             }

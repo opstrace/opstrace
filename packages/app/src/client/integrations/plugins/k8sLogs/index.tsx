@@ -16,7 +16,6 @@
 
 import { K8sLogsForm } from "./Form";
 import K8sLogsShow from "./Show";
-import K8sLogsStatus from "./Status";
 import K8sLogsLogo from "./Logo.png";
 
 import { IntegrationPlugin, IntegrationProps } from "client/integrations/types";
@@ -39,7 +38,10 @@ export const k8sLogsIntegration: IntegrationPlugin = {
     "Generate all the yaml required to send logs from your Kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
   Form: K8sLogsForm,
   detailSections: K8sLogsShow,
-  Status: K8sLogsStatus,
+  status: {
+    started: {},
+    error: {}
+  },
   Logo: K8sLogsLogo,
   uninstallCallback: uninstallCallback,
   canUninstall: false

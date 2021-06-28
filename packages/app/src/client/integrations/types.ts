@@ -23,7 +23,6 @@ export type IntegrationPlugin = {
   label: string;
   desc: string | React.ReactType;
   Logo?: string;
-  Status: React.ReactType;
   disabled?: boolean;
   Form: React.ReactType;
   detailSections?: IntegrationPluginDetailSection[];
@@ -46,15 +45,20 @@ type IntegrationPluginStatus = {
   error: IntegrationPluginStatusCheck;
 };
 
+export type IntegrationPluginStatusCheckFilterType =
+  | string
+  | ((props: IntegrationProps) => string | undefined)
+  | undefined;
+
+export type IntegrationpluginStatusCheckCallbackType = {
+  lokiData?: {};
+  prometheusData?: {};
+} & IntegrationProps;
+
 type IntegrationPluginStatusCheck = {
-  lokiFilter?: string;
-  promQl?: string;
-  callback: (
-    props: {
-      lokiData: {};
-      prometheusData: {};
-    } & IntegrationProps
-  ) => Promise<boolean>;
+  lokiFilter?: IntegrationPluginStatusCheckFilterType;
+  promQl?: IntegrationPluginStatusCheckFilterType;
+  callback?: (props: IntegrationpluginStatusCheckCallbackType) => [];
 };
 
 export type IntegrationPluginAction = {

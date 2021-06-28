@@ -4895,6 +4895,13 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.42.tgz#ff343be01fca44b59e785e20b840357cb704a7f2"
   integrity sha512-g+w2QgbW7k2CWLOXzQXbO37a7v5P9ObPvYahKphdBLV5aqpbVZRhTpWCT0SMRqX1i30Aig791ZmIM2fJGL2S8A==
 
+"@types/nodemon@latest":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@types/nodemon/-/nodemon-1.19.0.tgz#7ff8e53c61e7a21f9f8dc65444d5904621afc080"
+  integrity sha512-nf0PKjNv3wo0pyhlPkHjfpU2oUYMdOIsCXceiFG6kvhYxbTwn2ne9mz2iWvJ/4QtCrJUEPJLNXuyGleyTacdaw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
@@ -15930,15 +15937,15 @@ node-releases@^1.1.71:
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.73.tgz#dd4e81ddd5277ff846b80b52bb40c49edf7a7b20"
   integrity sha512-uW7fodD6pyW2FZNZnp/Z3hvWKeEW1Y8R1+1CnErE8cXFXzl5blBOoVB41CvMer6P6Q0S5FXDwcHgFd1Wj0U9zg==
 
-nodemon-webpack-plugin@^4.3.2:
-  version "4.4.4"
-  resolved "https://registry.yarnpkg.com/nodemon-webpack-plugin/-/nodemon-webpack-plugin-4.4.4.tgz#57d2fa517bd4bb3cd080cebdeec06ec0f5b2b69e"
-  integrity sha512-fgRAkKNvek1r5hOY25i9Gxx95nSuHX2hHndgHbTO0HFXNq1ItBjmaBR7U7a2FbQJj4ttfMfKnhqYMzSpM92yBQ==
+nodemon-webpack-plugin@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/nodemon-webpack-plugin/-/nodemon-webpack-plugin-4.5.2.tgz#76aeee7f9c73815f64de5e0ae8578122bc3d2639"
+  integrity sha512-+TNh++lIY6qcKOdEP07XhFFW0cN1a2YfyfP3idP7dOtJOUzwcMYZpNRk5iTMtQmMwzJF04obpltwE2KT5FISGw==
   dependencies:
+    "@types/nodemon" latest
     nodemon "2.0.7"
-    ramda "0.27.1"
 
-nodemon@2.0.7, nodemon@^2.0.4:
+nodemon@2.0.7, nodemon@^2.0.7:
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.7.tgz#6f030a0a0ebe3ea1ba2a38f71bf9bab4841ced32"
   integrity sha512-XHzK69Awgnec9UzHr1kc8EomQh4sjTQ8oRf8TsGrSmHDx9/UmiGG9E/mM3BuTfNeFwdNBvrqQq/RHL0xIeyFOA==
@@ -18097,15 +18104,15 @@ ramda-adjunct@^2.31.1:
   resolved "https://registry.yarnpkg.com/ramda-adjunct/-/ramda-adjunct-2.31.1.tgz#214251bda6492ddf75a4986c0f85651cfd416f6d"
   integrity sha512-mWms5mGVg+TWT6YBEkNAHXnVfSDOL/nlvkapHxYJdWkA0mr7GwyqpoV/XV/A09v1P3XF0HlLQZm5cGqGIpEwMQ==
 
-ramda@0.27.1, ramda@^0.27.1:
-  version "0.27.1"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
-  integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
-
 ramda@^0.21.0:
   version "0.21.0"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.21.0.tgz#a001abedb3ff61077d4ff1d577d44de77e8d0a35"
   integrity sha1-oAGr7bP/YQd9T/HVd9RN536NCjU=
+
+ramda@^0.27.1:
+  version "0.27.1"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
+  integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
 
 random-bytes@~1.0.0:
   version "1.0.0"

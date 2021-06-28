@@ -16,10 +16,12 @@
 
 import Form from "./Form";
 import Show from "./Show";
-import Status from "./Status";
 import Logo from "./Logo.png";
 
-import { IntegrationPlugin } from "client/integrations/types";
+import {
+  IntegrationPlugin,
+  IntegrationpluginStatusCheckCallbackType
+} from "client/integrations/types";
 
 export const exporterAzureIntegration: IntegrationPlugin = {
   kind: "exporter-azure",
@@ -29,6 +31,21 @@ export const exporterAzureIntegration: IntegrationPlugin = {
     "Pipe any of your metrics from Microsoft Azure into Opstrace. You can select metrics from any of the Microsoft Azure Services such as Service Fabric or Load Balancer, as long as you've enabled monitoring on the service in the Microsoft Azure Console.",
   Form: Form,
   detailSections: Show,
-  Status: Status,
+  status: {
+    started: {
+      lokiFilter: `|= "listening on port :9276"`,
+      callback: (props: IntegrationpluginStatusCheckCallbackType) => {
+        console.log("started", props);
+        return [];
+      }
+    },
+    error: {
+      lokiFilter: `|= "stderr" != "listening on port :9276"`,
+      callback: (props: IntegrationpluginStatusCheckCallbackType) => {
+        console.log("error", props);
+        return [];
+      }
+    }
+  },
   Logo: Logo
 };

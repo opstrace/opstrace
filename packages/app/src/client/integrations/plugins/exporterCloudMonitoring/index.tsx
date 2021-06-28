@@ -16,7 +16,6 @@
 
 import Form from "./Form";
 import Show from "./Show";
-import Status from "./Status";
 import Logo from "./Logo.jpg";
 
 import { IntegrationPlugin } from "client/integrations/types";
@@ -29,6 +28,9 @@ export const exporterCloudMonitoringIntegration: IntegrationPlugin = {
     "Pipe any of your metrics from Google Cloud Monitoring into Opstrace. You can select metrics from any of the Google Cloud Services such as BigTable or Load Balancers, as long as you've enabled monitoring on the service in the Google Cloud Console.",
   Form: Form,
   detailSections: Show,
-  Status: Status,
+  status: {
+    started: {},
+    error: {}
+  },
   Logo: Logo
 };

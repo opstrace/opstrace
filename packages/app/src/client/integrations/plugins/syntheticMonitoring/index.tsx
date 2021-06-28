@@ -16,7 +16,6 @@
 
 import Form from "./Form";
 import ShowSections from "./Show";
-import Status from "./Status";
 import Logo from "./Logo.png";
 
 import { IntegrationPlugin } from "client/integrations/types";
@@ -75,6 +74,9 @@ export const syntheticMonitoringIntegration: IntegrationPlugin = {
     "PLACEHOLDER: The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP and ICMP.",
   Form: Form,
   detailSections: ShowSections,
-  Status: Status,
+  status: {
+    started: {},
+    error: {}
+  },
   Logo: Logo
 };

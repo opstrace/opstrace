@@ -26,6 +26,8 @@ import {
   showIntegrationPath
 } from "client/integrations";
 
+import IntegrationStatus from "client/integrations/common/Status";
+
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "client/components/Box";
 import { Card } from "client/components/Card";
@@ -70,7 +72,7 @@ export const InstalledIntegrations = () => {
           </TableHead>
           <TableBody>
             {integrations.map(i9n => {
-              const i9nDef = integrationPluginRecords[i9n.kind];
+              const plugin = integrationPluginRecords[i9n.kind];
               return (
                 <TableRow
                   hover={true}
@@ -87,12 +89,16 @@ export const InstalledIntegrations = () => {
                   </TableCell>
                   <TableCell>
                     <div className={classes.logoCell}>
-                      <img src={i9nDef.Logo} width={15} height={15} alt="" />
-                      <span className={classes.logoText}> {i9nDef.label}</span>
+                      <img src={plugin.Logo} width={15} height={15} alt="" />
+                      <span className={classes.logoText}> {plugin.label}</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <i9nDef.Status integration={i9n} tenant={tenant} />
+                    <IntegrationStatus
+                      integration={i9n}
+                      tenant={tenant}
+                      plugin={plugin}
+                    />
                   </TableCell>
                   <TableCell>
                     {format(parseISO(i9n.created_at), "Pppp")}
