@@ -89,22 +89,25 @@ const NavItemContents = ({
   nested,
   narrow,
   onClick,
-  children
+  children,
+  testKey
 }: {
   item: NavItem;
   narrow: boolean;
   nested?: boolean;
   onClick?: () => void;
   children?: React.ReactNode;
+  testKey?: string;
 }) => {
   const classes = useStyles();
   const routeMatch = useRouteMatch(item.path);
+  console.log(testKey);
 
   return (
     <ListItem
       dense
       onClick={onClick}
-      data-test={`sidebar/${item.title}`}
+      data-test={testKey}
       className={className({
         [classes.activeItem]: routeMatch,
         [classes.listItem]: true,
@@ -135,7 +138,11 @@ const NavItemContents = ({
   );
 };
 
-const NavItemLink = (item: NavItem, narrow: boolean) => {
+const NavItemLink = (
+  item: NavItem,
+  narrow: boolean,
+  testKey: string = "sidebar"
+) => {
   const routeMatch = useRouteMatch(item.path);
   const [collapsed, setCollapsed] = useState(!routeMatch);
   const theme = useTheme();
@@ -147,6 +154,7 @@ const NavItemLink = (item: NavItem, narrow: boolean) => {
         <NavItemContents
           narrow={narrow}
           item={item}
+          testKey={`${testKey}/${item.title}`}
           onClick={() => setCollapsed(!collapsed)}
         >
           {collapsed ? (
@@ -166,7 +174,12 @@ const NavItemLink = (item: NavItem, narrow: boolean) => {
                   key={nestedItem.title}
                   title={nestedItem.title}
                 >
-                  <NavItemContents narrow={narrow} item={nestedItem} nested />
+                  <NavItemContents
+                    narrow={narrow}
+                    item={nestedItem}
+                    nested
+                    testKey={`${testKey}/${item.title}/${nestedItem.title}`}
+                  />
                 </NavLink>
               );
             })}
@@ -183,7 +196,11 @@ const NavItemLink = (item: NavItem, narrow: boolean) => {
       key={item.title}
       title={item.title}
     >
-      <NavItemContents narrow={narrow} item={item} />
+      <NavItemContents
+        narrow={narrow}
+        item={item}
+        testKey={`${testKey}/${item.title}`}
+      />
     </NavLink>
   );
 };
@@ -201,7 +218,11 @@ const Sidebar = ({ tenantNavItems, clusterNavItems }: SidebarProps) => {
       overflow="hidden"
     >
       <Box p={1}>
-        <List>{tenantNavItems.map(item => NavItemLink(item, narrow))}</List>
+        <List>
+          {tenantNavItems.map(item =>
+            NavItemLink(item, narrow, "sidebar/tenant")
+          )}
+        </List>
       </Box>
       <Divider />
       <Box p={1}>
@@ -210,7 +231,11 @@ const Sidebar = ({ tenantNavItems, clusterNavItems }: SidebarProps) => {
             Cluster Admin
           </Typography>
         </Box>
-        <List>{clusterNavItems.map(item => NavItemLink(item, narrow))}</List>
+        <List>
+          {clusterNavItems.map(item =>
+            NavItemLink(item, narrow, "sidebar/clusterAdmin")
+          )}
+        </List>
       </Box>
       <Box flexGrow={1} />
       <Box m={2} p={2}>

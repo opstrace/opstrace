@@ -60,7 +60,13 @@ const IntegrationDefCards = ({ integrationDefs }: Props) => {
         }
 
         return (
-          <Grid key={i9n.kind} item xs={12} sm={6}>
+          <Grid
+            key={i9n.kind}
+            item
+            xs={12}
+            sm={6}
+            data-test={`integrations/grid/${i9n.kind}`}
+          >
             <Card>
               <CardHeader
                 avatar={<img src={i9n.Logo} width={50} height={50} alt="" />}
