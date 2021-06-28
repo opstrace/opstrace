@@ -95,6 +95,7 @@
     "monaco-editor-webpack-plugin": "^2.1.0",
     "monaco-yaml": "^2.5.1",
     "new-github-issue-url": "^0.2.1",
+    "node-html-parser": "3.3.5",
     "polished": "^3.6.6",
     "qs": "^6.9.4",
     "ramda": "^0.27.1",

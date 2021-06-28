@@ -192,11 +192,8 @@ echo "--- file system usage after entering CI container"
 df -h
 
 echo "--- set up dns-service credentials"
-curl --request POST \
-    --url https://opstrace-dev.us.auth0.com/oauth/token \
-    --header 'content-type: application/json' \
-    --data-binary "@secrets/dns-service-login-for-ci.json" \
-    | jq -jr .access_token > access.jwt
+# The `access.jwt` file is what the CLI is going to look for.
+cp secrets/dns-service-magic-id-token-for-ci access.jwt
 
 
 # CI_DATA_COLLECTION is an env var set in the Buildkite pipeline -- when set to

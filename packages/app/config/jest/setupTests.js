@@ -31,14 +31,16 @@ jest.mock("workers", () => {
   };
 });
 
-jest.setTimeout(15000)
+const testTimeout = 5 * 60 * 1000; // 5 mins
+
+jest.setTimeout(testTimeout);
 configure({
-  asyncUtilTimeout: 15000
-})
+  asyncUtilTimeout: testTimeout
+});
 /* limiting net requests to localhost, see
  * https://github.com/nock/nock#enabledisable-real-http-requests
  */
-nock.disableNetConnect()
+nock.disableNetConnect();
 nock.enableNetConnect(
-  host => host.includes('127.0.0.1') || host.includes('localhost')
-)
+  host => host.includes("127.0.0.1") || host.includes("localhost")
+);

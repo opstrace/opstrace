@@ -216,6 +216,32 @@ export function LokiResources(
       max_chunk_age: "2h", // default: 1h. Flush criterion 2. Time window of timestamps in log entries.
       chunk_idle_period: "2h", // Flush criterion 3. Inactivity from Loki's point of view.
       max_returned_stream_errors: 25, // default: 10
+      //
+      // Enabling wal requires setting this to 0 (zero). Otherwise ingesters
+      // fail to start with this error message:
+      //
+      // caller=main.go:87 msg="validating config" err="invalid ingester config:
+      // the use of the write ahead log (WAL) is incompatible with chunk
+      // transfers. It's suggested to use the WAL. Please try setting
+      // ingester.max-transfer-retries to 0 to disable transfers"
+      //
+      max_transfer_retries: 0,
+      wal: {
+        enabled: true,
+        // Directory where the WAL data should be stored and/or recovered from.
+        // Should point to a directory in the attached volume which is mounted
+        // at "/loki".
+        dir: "/loki/wal",
+        // Maximum memory size the WAL may use during replay. After hitting this
+        // it will flush data to storage before continuing. A unit suffix (KB,
+        // MB, GB) may be applied.
+        //
+        // Default is 4GB. We set a lower value to have a faster process
+        // bootstrap and especially to reduce memory usage because we also run
+        // cortex ingesters on the same nodes and want to reduce the chances of
+        // a OOM.
+        replay_memory_ceiling: "1GB"
+      },
       lifecycler: {
         join_after: "30s",
         observe_period: "30s",
@@ -774,9 +800,6 @@ export function LokiResources(
                   ]
                 }
               ],
-              // https://cortexmetrics.io/docs/guides/running-cortex-on-kubernetes/#take-extra-care-with-ingesters
-              // The link is for cortex ingesters but loki ingesters share the same architecture.
-              terminationGracePeriodSeconds: 2400,
               volumes: [
                 {
                   configMap: {
@@ -858,19 +881,6 @@ export function LokiResources(
                     successThreshold: 1,
                     failureThreshold: 3
                   },
-                  livenessProbe: {
-                    httpGet: {
-                      path: "/ready",
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 1080 as any,
-                      scheme: "HTTP"
-                    },
-                    initialDelaySeconds: 45,
-                    timeoutSeconds: 1,
-                    periodSeconds: 10,
-                    successThreshold: 1,
-                    failureThreshold: 3
-                  },
                   resources: deploymentConfig.ingester.resources,
                   volumeMounts: [
                     {
@@ -888,6 +898,10 @@ export function LokiResources(
               securityContext: {
                 fsGroup: 2000
               },
+              // https://cortexmetrics.io/docs/guides/running-cortex-on-kubernetes/#take-extra-care-with-ingesters
+              // The link is for cortex ingesters but loki ingesters share the
+              // same architecture.
+              terminationGracePeriodSeconds: 2400,
               volumes: [
                 {
                   configMap: {
