@@ -552,7 +552,7 @@ rebuild-testrunner-container-images:
 .PHONY: rebuild-looker-container-images
 rebuild-looker-container-images:
 	@echo "--- building looker container image"
-	make -C test/test-remote/containers/looker image
+	make -C test/test-remote/looker image
 
 
 .PHONY: kubectl-cluster-info
