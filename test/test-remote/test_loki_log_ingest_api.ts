@@ -43,7 +43,7 @@ import {
   LogStreamFragment,
   LogStreamFragmentPushRequest,
   DummyStream
-} from "./looker/logs";
+} from "./looker/src/logs";
 
 import { waitForLokiQueryResult } from "./testutils/logs";
 
