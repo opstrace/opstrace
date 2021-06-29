@@ -24,6 +24,14 @@ import {
 } from "../fixtures/authenticated";
 
 test.describe("debugging", () => {
+  test("this should PASS all the time", async ({ page }) => {
+    expect(true).toBeTruthy();
+  });
+
+  test("this should FAIL all the time", async ({ page }) => {
+    expect(false).toBeTruthy();
+  });
+
   test("can I get Firefox to login this way?", async ({ page }) => {
     await page.goto(CLUSTER_BASE_URL);
 
