@@ -541,7 +541,10 @@ suite("Loki API test suite", function () {
     );
     const vt0 = mtime();
 
-    await stream.fetchAndValidate({ querierBaseUrl: lurl });
+    await stream.fetchAndValidate({
+      querierBaseUrl: lurl,
+      additionalHeaders: enrichHeadersWithAuthToken(lurl, {})
+    });
     log.info("validation took %s s overall", mtimeDiffSeconds(vt0).toFixed(1));
   });
 
@@ -611,7 +614,11 @@ suite("Loki API test suite", function () {
     for (const stream of streams) {
       validators.push(
         stream.fetchAndValidate({
-          querierBaseUrl: TENANT_DEFAULT_LOKI_API_BASE_URL
+          querierBaseUrl: TENANT_DEFAULT_LOKI_API_BASE_URL,
+          additionalHeaders: enrichHeadersWithAuthToken(
+            TENANT_DEFAULT_LOKI_API_BASE_URL,
+            {}
+          )
         })
       );
     }
