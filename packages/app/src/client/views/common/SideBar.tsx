@@ -101,7 +101,6 @@ const NavItemContents = ({
 }) => {
   const classes = useStyles();
   const routeMatch = useRouteMatch(item.path);
-  console.log(testKey);
 
   return (
     <ListItem
