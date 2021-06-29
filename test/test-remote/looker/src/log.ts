@@ -29,7 +29,11 @@ export let log: Logger;
 
 export function setLogger(logger: Logger): void {
   if (log !== undefined) {
-    throw Error("logger already set");
+    log.debug(
+      "logger already defined. current logger: %s, new logger: %s",
+      log,
+      logger
+    );
   }
   log = logger;
 }
@@ -130,3 +134,13 @@ export function debugLogErrorDetail(err: Error): void {
     log.debug("could not json-serialize error: %s", e);
   }
 }
+
+// Set default logger So that `log` in this module can actually be used via
+// e.g. `log.info()`, otherwise importing and using `log` from this module w/o
+// calling setLogger() results in difficult-to-debug errors like `Cannot read
+// property 'info' of undefined`.
+setLogger(buildLogger({ stderrLevel: "debug" }));
+
+// If two of these are used in the same program then these `log` objects
+// are _different_ and compete for the same underlying stream, which may
+// result in interleaved log messages I believe.
