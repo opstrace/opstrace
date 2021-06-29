@@ -27,6 +27,8 @@ import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
 import { DummyStream } from "./dummystream";
 
+import { LabelSet } from "../metrics";
+
 export * from "./dummystream";
 
 // https://github.com/grafana/loki/blob/v1.2.0/pkg/logproto/logproto.proto
@@ -55,9 +57,9 @@ Log stream:
 
 */
 
-export interface LogStreamLabelset {
-  [key: string]: string;
-}
+// export interface LogStreamLabelset {
+//   [key: string]: string;
+// }
 
 export interface LogStreamEntryTimestamp {
   seconds: number;
@@ -103,7 +105,7 @@ export class LogStreamFragment {
   private payloadBytecount: number;
   private serialized: boolean;
 
-  public labels: LogStreamLabelset;
+  public labels: LabelSet;
 
   // Sequential number for locating fragment in stream. Set by caller.
   public index: number;
@@ -111,7 +113,7 @@ export class LogStreamFragment {
   public stats: LogStreamFragmentStats | undefined;
 
   constructor(
-    labels: LogStreamLabelset,
+    labels: LabelSet,
     index = 0,
     dummystream: DummyStream | undefined = undefined
   ) {
@@ -424,7 +426,7 @@ export function logqlKvPairTextToObj(lql: string) {
   // The object `intermediate` might have values of two types: either strings
   // or booleans see https://www.npmjs.com/package/logfmt#logfmtparsestring
   // Convert booleans to strings here jut keep things simple, predictable.
-  const labels: LogStreamLabelset = Object.fromEntries(
+  const labels: LabelSet = Object.fromEntries(
     Object.entries(intermediate).map(([k, v]) => [k, v.toString()])
   );
   return labels;

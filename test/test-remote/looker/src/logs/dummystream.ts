@@ -38,21 +38,25 @@ import {
 
 import {
   LogStreamEntry,
-  LogStreamLabelset,
   LogStreamEntryTimestamp,
   LogStreamFragment,
   logqlLabelString
 } from "./index";
 
+import { LabelSet } from "../metrics";
+
+import { DummyTimeseriesBase } from "../metrics";
+
 // Note: maybe expose raw labels later on again.
 export interface DummyStreamOpts {
-  n_entries_per_stream_fragment: number;
+  // think: n log entries per stream/series fragment
+  n_samples_per_series_fragment: number;
   n_chars_per_message: number;
   starttime: ZonedDateTime;
   timediffNanoseconds: number;
   includeTimeInMsg: boolean;
   uniqueName: string;
-  labelset: LogStreamLabelset | undefined;
+  labelset: LabelSet | undefined;
   compressability: string;
 }
 
@@ -76,54 +80,30 @@ export interface DummyStreamFetchAndValidateOpts {
   additionalHeaders?: Record<string, string>;
 }
 
-export class DummyStream {
+export class DummyStream extends DummyTimeseriesBase {
   private currentSeconds: number;
   private currentNanos: number;
-  private nFragmentsConsumed: number;
   private includeTimeInMsg: boolean;
   private firstEntryGenerated: boolean;
-  private opts: unknown;
-  private labels: LogStreamLabelset;
   private nEntriesValidatedSoFar: bigint;
   private genChars: (n: number) => string;
   private shouldBeValidatedflag: boolean;
 
-  uniqueName: string;
-  starttime: ZonedDateTime;
-  n_entries_per_stream_fragment: number;
   n_chars_per_message: number;
   timediffNanoseconds: number;
   nFragmentsSuccessfullySentSinceLastValidate: number;
 
-  //  It's a little unclear how the generator generateFragments runs code
-  //  potentially eagerly or lazily (it seems like it pre-generates the next
-  //  fragment, i.e. runs up to 'yield'). To make it absolutely unambiguous
-  //  allow for the consumer to set the last fragment consumed via this
-  //  method.
-  lastFragmentConsumed: LogStreamFragment | undefined;
-
   constructor(opts: DummyStreamOpts) {
-    // For toString.
-    this.opts = opts;
+    super(opts);
+
     this.shouldBeValidatedflag = true;
     this.uniqueName = opts.uniqueName;
-
-    //Always set `looker_uniquename`. If `opts.labelset` is provided then treat
-    // this as _additional_ label set.
-
-    if (opts.labelset !== undefined) {
-      this.labels = opts.labelset;
-      this.labels.looker_uniquename = this.uniqueName;
-    } else {
-      this.labels = { looker_uniquename: this.uniqueName };
-    }
 
     this.starttime = opts.starttime;
     this.currentSeconds = opts.starttime.toEpochSecond();
     this.currentNanos = opts.starttime.nano();
     this.firstEntryGenerated = false;
 
-    this.n_entries_per_stream_fragment = opts.n_entries_per_stream_fragment;
     this.n_chars_per_message = opts.n_chars_per_message;
     this.timediffNanoseconds = opts.timediffNanoseconds;
     this.nFragmentsConsumed = 0;
@@ -184,9 +164,16 @@ export class DummyStream {
   //   this.n_fragments_total += n;
   // }
 
-  public toString = (): string => {
-    return `DummyStream(opts=${JSON.stringify(this.opts)})`;
-  };
+  protected buildLabelSetFromOpts(opts: DummyStreamOpts) {
+    let ls: LabelSet;
+    if (opts.labelset !== undefined) {
+      ls = opts.labelset;
+      ls.looker_uniquename = this.uniqueName;
+    } else {
+      ls = { looker_uniquename: this.uniqueName };
+    }
+    return ls;
+  }
 
   public promQueryString(): string {
     return `{looker_uniquename="${this.uniqueName}"}`;
@@ -261,7 +248,7 @@ export class DummyStream {
       this.nFragmentsConsumed + 1,
       this
     );
-    for (let i = 0; i < this.n_entries_per_stream_fragment; i++) {
+    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
       logStreamFragment.addEntry(this.nextEntry());
     }
     return logStreamFragment;
@@ -431,7 +418,7 @@ export class DummyStream {
     // chunkSize: think of it as "fetch at most those many entries per query"
     const expectedEntryCount =
       this.nFragmentsSuccessfullySentSinceLastValidate *
-      this.n_entries_per_stream_fragment;
+      this.n_samples_per_series_fragment;
 
     const vt0 = mtime();
     log.debug(
@@ -539,7 +526,7 @@ export class DummyStream {
 
 export interface LokiQueryResult {
   entries: Array<[string, string]>;
-  labels: LogStreamLabelset;
+  labels: LabelSet;
   textmd5: string;
 }
 
@@ -713,7 +700,7 @@ Query parameters: ${JSON.stringify(
         queryCount,
         mtimeDiffSeconds(t0).toFixed(2)
       );
-      const labels: LogStreamLabelset = streams[0].stream; //logqlKvPairTextToObj(data["streams"][0]["labels"]);
+      const labels: LabelSet = streams[0].stream; //logqlKvPairTextToObj(data["streams"][0]["labels"]);
       //log.info("labels on returned log record:\n%s", labels);
 
       // Build a hash over all log message contents in this stream, in the
