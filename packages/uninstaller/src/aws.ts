@@ -364,6 +364,7 @@ function* detachPoliciesFromRoles(
   ];
 
   // look up a some dynamically created policies (known by convention, by name)
+  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const pols1 = yield call(getIamPoliciesByNames, [
     EKSServiceLinkedRolePolicyName
   ]);
@@ -374,6 +375,7 @@ function* detachPoliciesFromRoles(
     });
   }
 
+  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const pols2 = yield call(getIamPoliciesByNames, [
     Route53ExternalDNSPolicyName,
     LokiS3PolicyName,
@@ -403,6 +405,7 @@ function* detachPoliciesFromRoles(
       pol.RoleName
     );
     actors.push(
+      //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
       yield fork(detachPolicy, {
         ...pol
       })
@@ -424,6 +427,7 @@ function* detachPoliciesFromRoles(
   for (const pn of policiesToDelete) {
     log.info("Try to delete policy %s", pn);
     actors2.push(
+      //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
       yield fork(ensurePolicyDoesNotExist, {
         PolicyName: pn
       })

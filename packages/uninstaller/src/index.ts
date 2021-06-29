@@ -148,6 +148,7 @@ function* triggerk8sTeardown(kubeConfig: KubeConfig) {
   log.info("k8s cluster seems to exist, trigger clean cluster shutdown");
 
   log.info("Get current controller config map");
+  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const ccfg = yield call(getControllerConfig, kubeConfig);
   if (ccfg !== undefined) {
     ccfg.terminate = true;
@@ -156,6 +157,7 @@ function* triggerk8sTeardown(kubeConfig: KubeConfig) {
   }
 
   log.info("starting kubernetes informers");
+  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);

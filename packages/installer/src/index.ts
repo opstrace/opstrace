@@ -302,6 +302,7 @@ function* createClusterCore() {
   });
 
   log.info("starting k8s informers");
+  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(waitForControllerDeployment);
