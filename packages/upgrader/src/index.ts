@@ -185,6 +185,7 @@ function* triggerControllerDeploymentUpgrade() {
   log.info("k8s cluster seems to exist, trigger controller deployment upgrade");
 
   log.info("starting kubernetes informers");
+  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const informers = yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);

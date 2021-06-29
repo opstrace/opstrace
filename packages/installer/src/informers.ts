@@ -45,6 +45,7 @@ export function* runInformers(kubeConfig: KubeConfig) {
   while (true) {
     let event;
     try {
+      //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
       event = yield take(clusterChannel);
     } catch (err) {
       log.warning("error during `event = yield take(clusterChannel)`: %s", err);
@@ -58,6 +59,7 @@ export function* runInformers(kubeConfig: KubeConfig) {
         debugLogErrorDetail(err);
       }
     }
+    //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
     if (yield cancelled()) {
       log.info(
         "informer loop got signal: cancelled -- close cluster channels, end loop"
