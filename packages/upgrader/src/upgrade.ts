@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { select, call } from "redux-saga/effects";
+import { select, call, Effect } from "redux-saga/effects";
 import { KubeConfig } from "@kubernetes/client-node";
 
 import { log, die } from "@opstrace/utils";
@@ -42,12 +42,10 @@ import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
 //
 // Set the controller deployment image version to the one defined in buildinfo.
 // Returns boolean to indicate controller deployment rollout initiated or not.
-//
-///eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* upgradeControllerDeployment(config: {
   opstraceClusterName: string;
   kubeConfig: KubeConfig;
-}): Generator<any, boolean, any> {
+}): Generator<Effect, boolean, State> {
   // Exit if controller deployment does not exist.
   const state: State = yield select();
   const { Deployments } = state.kubernetes.cluster;
@@ -80,7 +78,9 @@ export function* upgradeControllerDeployment(config: {
   return true;
 }
 
-export function* upgradeControllerConfigMap(kubeConfig: KubeConfig) {
+export function* upgradeControllerConfigMap(
+  kubeConfig: KubeConfig
+): Generator<Effect, void, State> {
   const state: State = yield select();
   const cm = state.kubernetes.cluster.ConfigMaps.resources.find(
     cm => cm.name === CONFIGMAP_NAME

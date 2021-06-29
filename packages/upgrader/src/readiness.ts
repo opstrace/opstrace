@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { select, delay } from "redux-saga/effects";
+import { select, delay, Effect } from "redux-saga/effects";
 
 import { log, SECOND } from "@opstrace/utils";
 import {
@@ -28,7 +28,7 @@ import { CONTROLLER_NAME } from "@opstrace/controller-config";
 import { State } from "./reducer";
 
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function* waitForControllerDeployment() {
+export function* waitForControllerDeployment(): Generator<Effect, void, State> {
   // Exit if controller deployment does not exist.
   const state: State = yield select();
   const { Deployments } = state.kubernetes.cluster;
@@ -151,7 +151,7 @@ export function* waitForControllerDeployment() {
 }
 
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function* upgradeProgressReporter() {
+export function* upgradeProgressReporter(): Generator<Effect, void, State> {
   while (true) {
     const state: State = yield select();
 
