@@ -595,7 +595,7 @@ test-remote: kubectl-cluster-info
 		--net=host \
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
-		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
+		-v ${OPSTRACE_BUILD_DIR}/test-remote-artifacts:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
@@ -640,7 +640,7 @@ test-remote-ui: kubectl-cluster-info
 		--net=host \
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
-		-v ${OPSTRACE_BUILD_DIR}:/test-remote-artifacts \
+		-v ${OPSTRACE_BUILD_DIR}/test-remote-artifacts:/test-remote-artifacts \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
@@ -670,19 +670,19 @@ test-remote-ui: kubectl-cluster-info
 .PHONY: test-browser
 test-browser: kubectl-cluster-info
 	echo "--- running test-browser"
-	mkdir -p ${OPSTRACE_BUILD_DIR}/test-browser-artifacts
+	mkdir -p ${OPSTRACE_BUILD_DIR}/browser-test-results
 	docker run --tty --interactive --rm \
 		--net=host \
-		-v ${OPSTRACE_BUILD_DIR}:/test-browser-artifacts \
+		-v ${OPSTRACE_BUILD_DIR}/browser-test-results:/build/test/browser/test-results \
 		-v /tmp:/tmp \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
-		-e TEST_BROWSER_ARTIFACT_DIRECTORY=/test-browser-artifacts \
+		-v /etc/passwd:/etc/passwd \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/browser \
 		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
-		yarn playwright test --workers 1
+ 		yarn playwright test --workers 1
 
 # Used by CI:
 # three outcomes:

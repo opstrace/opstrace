@@ -23,11 +23,16 @@ test.describe("after auth0 authentication", () => {
   test.beforeEach(logUserIn);
 
   test("user should see homepage", async ({ page }) => {
-    expect(await page.isVisible("text=Getting Started")).toBeTruthy();
+    expect(
+      await page.isVisible("[data-test=getting-started]", { timeout: 60_000 })
+    ).toBeTruthy();
   });
 
   test("user should see own email in user list", async ({ page, user }) => {
-    await page.click("text=Users");
-    expect(await page.isVisible(`text=${user.email}`)).toBeTruthy();
+    await page.hover("[data-test='sidebar/Users']");
+    await page.click("[data-test='sidebar/Users']");
+    expect(
+      await page.isVisible(`[data-test='userList/${user.email}']`)
+    ).toBeTruthy();
   });
 });

@@ -15,16 +15,18 @@
  */
 
 import { PlaywrightTestConfig } from "@playwright/test";
-// import { devices } from "playwright";
+// import { devices } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
   reporter: "dot",
+  forbidOnly: process.env.BUILDKITE === "true",
   use: {
     headless: true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
-    video: "retry-with-video"
+    trace: "retain-on-failure",
+    video: "retain-on-failure"
   },
   projects: [
     {
@@ -32,6 +34,7 @@ const config: PlaywrightTestConfig = {
       use: {
         browserName: "chromium"
 
+        // terrcin - this is from the old test-remote running of chrome, does not appear to be needed yet and also not sure how to specify it with playwright test runner
         // args: [
         //   // https://github.com/microsoft/playwright/blob/761bd78879c83ed810ae38ef39513b2d874badb1/docs/ci.md#docker
         //   "--disable-dev-shm-usage"
