@@ -38,12 +38,13 @@ import {
 
 import {
   LogStreamEntry,
-  LogStreamLabelset,
   LogStreamEntryTimestamp,
   LogStreamFragment,
   LogStreamFragmentPushRequest,
   DummyStream
 } from "./looker/src/logs";
+
+import { LabelSet } from "./looker/src/metrics";
 
 import { waitForLokiQueryResult } from "./testutils/logs";
 
@@ -73,7 +74,7 @@ export class LogStreamEntryTimestampGenerator {
 
 function createDummyPushRequest(
   starttime: ZonedDateTime,
-  labels: LogStreamLabelset,
+  labels: LabelSet,
   N_entries: number,
   samplegen: () => string
 ): LogStreamFragmentPushRequest {
@@ -520,7 +521,7 @@ suite("Loki API test suite", function () {
 
   test("short dummystream insert, validate via query", async function () {
     const stream = new DummyStream({
-      n_entries_per_stream_fragment: 10 ** 2,
+      n_samples_per_series_fragment: 10 ** 2,
       n_chars_per_message: 90,
       starttime: ZonedDateTime.now(),
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
@@ -557,7 +558,7 @@ suite("Loki API test suite", function () {
       const streamname = `${nameprefix}-${i.toString().padStart(4, "0")}`;
 
       const stream = new DummyStream({
-        n_entries_per_stream_fragment: 10 ** 4,
+        n_samples_per_series_fragment: 10 ** 4,
         n_chars_per_message: 90,
         starttime: ZonedDateTime.now(),
         uniqueName: streamname,
@@ -595,7 +596,7 @@ suite("Loki API test suite", function () {
     const NentriesSent =
       N_concurrent_streams *
       nFragmentsPerStream *
-      streams[0].n_entries_per_stream_fragment;
+      streams[0].n_samples_per_series_fragment;
     const NcharsSent = NentriesSent * streams[0].n_chars_per_message;
     const MegacharsSent = NcharsSent / 10 ** 6; // int division ok?
     const MegacharsPerSec = MegacharsSent / durationSeconds;

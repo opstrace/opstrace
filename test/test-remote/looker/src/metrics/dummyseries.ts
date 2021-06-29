@@ -43,8 +43,8 @@ export abstract class DummyTimeseriesBase {
   protected starttime: ZonedDateTime;
   protected optionstring: string;
   protected labels: LabelSet;
-  protected n_samples_per_series_fragment: number;
 
+  n_samples_per_series_fragment: number;
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
   // last fragment consumed via this method.
