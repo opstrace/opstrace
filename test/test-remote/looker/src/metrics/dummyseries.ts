@@ -41,17 +41,14 @@ import {
 export abstract class DummyTimeseriesBase {
   protected nFragmentsConsumed: number;
   protected starttime: ZonedDateTime;
-  protected uniqueName: string;
   protected optionstring: string;
   protected labels: LabelSet;
   protected n_samples_per_series_fragment: number;
 
+  uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
   // last fragment consumed via this method.
-  protected lastFragmentConsumed:
-    | TimeseriesFragment
-    | LogStreamFragment
-    | undefined;
+  lastFragmentConsumed: TimeseriesFragment | LogStreamFragment | undefined;
 
   constructor(opts: DummyStreamOpts | DummyTimeseriesMetricsOpts) {
     this.nFragmentsConsumed = 0;
@@ -93,7 +90,9 @@ export interface DummyTimeseriesFetchAndValidateOpts {
   ) => Promise<GotResponse<string>>;
 }
 
-export class DummyTimeseriesMetrics extends DummyTimeseriesBase {
+// Maybe rename to DummySeriesMetrics
+// or LookerSeriesMetrics or ...MetricSeries
+export class DummyTimeseries extends DummyTimeseriesBase {
   private millisSinceEpochOfLastGeneratedSample: Long;
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: BigInt;

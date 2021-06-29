@@ -28,13 +28,13 @@ import { Semaphore } from "await-semaphore";
 import {
   DummyStream,
   LogStreamFragmentPushRequest,
-  LogStreamLabelset,
   LogStreamFragment,
   DummyStreamFetchAndValidateOpts,
   LokiQueryResult
 } from "./logs";
 
 import {
+  LabelSet,
   DummyTimeseries,
   TimeseriesFragment,
   TimeseriesFragmentPushMessage,
@@ -158,7 +158,7 @@ async function createNewDummyStreams(
     const streamname = `${guniqueCycleId}-${i.toString()}`; //.padStart(3, "0")}`;
 
     // by default attach one label to the stream
-    const labelset: LogStreamLabelset = {
+    const labelset: LabelSet = {
       //  streamname: streamname
     };
 
@@ -212,7 +212,7 @@ async function createNewDummyStreams(
       );
     } else {
       stream = new DummyStream({
-        n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
+        n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
         n_chars_per_message: CFG.n_chars_per_msg,
         starttime: ZonedDateTime.parse(CFG.log_start_time),
         uniqueName: streamname,
