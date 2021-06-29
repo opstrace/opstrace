@@ -4339,10 +4339,10 @@
   resolved "https://registry.yarnpkg.com/@types/anymatch/-/anymatch-1.3.1.tgz#336badc1beecb9dacc38bea2cf32adf627a8421a"
   integrity sha512-/+CRPXpBDpo2RK9C68N3b2cOvO0Cf5B9aPijHsoDQTHivnGSObdOF2BRQOYjojWTDy6nQvMjmqRXIxH55VjxxA==
 
-"@types/argparse@2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/argparse/-/argparse-2.0.2.tgz#4eb7e626975ff2526a08a12db5e6cc303807e657"
-  integrity sha512-z5yKiFv9jZLXfjLzbPq2Zv0PboFDBZ2NKNs7kC/+AIfqKYcGqGw2ukL0q0NbgCs/ShTTRx+A0/VR+DLnGhAWtw==
+"@types/argparse@2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@types/argparse/-/argparse-2.0.8.tgz#14bebdb0479b610bf11fae8b2d59d6a1a09dc1e5"
+  integrity sha512-H/YVlchGvyHN2LSD3gRueCe8mo5zC0lU505LYqpQL75SMOIIZmtyronj/tETOCUVRzeMp4PHW02BaGWMSuNcxA==
 
 "@types/argparse@^1.0.38":
   version "1.0.38"
@@ -4708,10 +4708,10 @@
     jest-diff "^26.0.0"
     pretty-format "^26.0.0"
 
-"@types/jest@^26.0.21":
-  version "26.0.22"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.22.tgz#8308a1debdf1b807aa47be2838acdcd91e88fbe6"
-  integrity sha512-eeWwWjlqxvBxc4oQdkueW5OF/gtfSceKk4OnOAGlUSwS/liBRtZppbJuz1YkgbrbfGOoeBHun9fOvXnjNwrSOw==
+"@types/jest@^26.0.23":
+  version "26.0.23"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.23.tgz#a1b7eab3c503b80451d019efb588ec63522ee4e7"
+  integrity sha512-ZHLmWMJ9jJ9PTiT58juykZpL7KjwJywFN3Rr2pTSkyQfydf/rk22yS7W8p5DaVUMQ2BQC7oYiU3FjbTM/mYrOA==
   dependencies:
     jest-diff "^26.0.0"
     pretty-format "^26.0.0"
@@ -22150,7 +22150,7 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@4.3.4:
+typescript@4.3.4, typescript@^4.3.4:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.4.tgz#3f85b986945bcf31071decdd96cf8bfa65f9dcbc"
   integrity sha512-uauPG7XZn9F/mo+7MrsRjyvbxFpzemRjKEZXS4AK83oP2KKOJPvb+9cO/gmnv8arWZvhnjVOXz7B49m1l0e9Ew==
