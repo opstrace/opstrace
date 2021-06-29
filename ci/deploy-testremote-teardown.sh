@@ -147,6 +147,11 @@ teardown() {
     else
         ./build/bin/opstrace destroy gcp ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
         EXITCODE_DESTROY=$?
+
+        # The custom_dns_name feature requires 'manual' setup of a DNS zone
+        # before Opstrace instance creation, and therefore also manual
+        # cleanup.
+        gcloud dns managed-zones delete "zone-${OPSTRACE_CLUSTER_NAME}" || true
     fi
 
     echo "+++ Exit status of destroy: $EXITCODE_DESTROY"
@@ -231,9 +236,16 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         cp "${FNAME}" /build/bk-artifacts && \
         cp "${FNAME}" ${OPSTRACE_PREBUILD_DIR}
 else
-    cat ci/cluster-config.yaml | ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} \
-        --log-level=debug --yes \
-        --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
+    export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstracegcp.com"
+    gcloud dns managed-zones create "zone-${OPSTRACE_CLUSTER_NAME}" \
+        --description="zone used by CI cluster ${OPSTRACE_CLUSTER_NAME}" \
+        --dns-name="${OPSTRACE_INSTANCE_DNS_NAME}." # Trailing dot is important (FQDN)
+
+    cat ci/cluster-config.yaml | \
+        sed "s/opstracegcp\.com/${OPSTRACE_INSTANCE_DNS_NAME}/g" | \
+        ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} \
+            --log-level=debug --yes \
+            --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
 fi
 
 echo "--- connect kubectl to the CI cluster"
@@ -248,7 +260,7 @@ export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
 echo "--- checking cluster is using certificate issued by LetsEncrypt"
 
 #export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
-export OPSTRACE_INSTANCE_DNS_NAME="opstracegcp.com"
+#export OPSTRACE_INSTANCE_DNS_NAME="opstracegcp.com"
 
 retry_check_certificate loki.system.${OPSTRACE_INSTANCE_DNS_NAME}:443
 retry_check_certificate cortex.system.${OPSTRACE_INSTANCE_DNS_NAME}:443
