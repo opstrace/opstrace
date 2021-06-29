@@ -65,7 +65,7 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
   ],
   cluster: [
     async ({ browser }, use) => {
-      let cluster: ClusterFixture = {
+      const cluster: ClusterFixture = {
         name: CLUSTER_NAME,
         baseUrl: CLUSTER_BASE_URL,
         cloudProvider: CLOUD_PROVIDER_DEFAULTS
