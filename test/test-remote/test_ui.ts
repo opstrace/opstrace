@@ -39,7 +39,6 @@ import {
   timestampToNanoSinceEpoch,
   CLUSTER_BASE_URL,
   OPSTRACE_INSTANCE_DNS_NAME,
-  TENANT_SYSTEM_CORTEX_API_BASE_URL,
   TEST_REMOTE_ARTIFACT_DIRECTORY,
   CI_LOGIN_EMAIL,
   CI_LOGIN_PASSWORD
@@ -488,7 +487,7 @@ suite("test_ui_api", function () {
       maxWaitSeconds
     );
 
-    const cortexRuntimeCfgUrl = `${TENANT_SYSTEM_CORTEX_API_BASE_URL}/runtime_config`; //?mode=diff`;
+    const cortexRuntimeCfgUrl = `https://cortex.system.${OPSTRACE_INSTANCE_DNS_NAME}/runtime_config`; //?mode=diff`;
     // This is exposed through a proxy to
     //const cortexRuntimeCfgUrl = `${CLUSTER_BASE_URL}/_/cortex/runtime_config`;
     const httpopts: GotOptions = {
