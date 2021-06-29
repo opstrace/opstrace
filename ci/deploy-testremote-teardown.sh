@@ -237,9 +237,29 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         cp "${FNAME}" ${OPSTRACE_PREBUILD_DIR}
 else
     export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstracegcp.com"
-    gcloud dns managed-zones create "zone-${OPSTRACE_CLUSTER_NAME}" \
+
+    # Create a new managed zone, for <foo>.opstracegcp.com
+    SUBZONE_NAME="zone-${OPSTRACE_CLUSTER_NAME}"
+    gcloud dns managed-zones create "${SUBZONE_NAME}" \
         --description="zone used by CI cluster ${OPSTRACE_CLUSTER_NAME}" \
         --dns-name="${OPSTRACE_INSTANCE_DNS_NAME}." # Trailing dot is important (FQDN)
+
+    # Get nameservers corresponding to this zone, in a space-separated list.
+    SUBZONE_NAMESERVERS="$(gcloud dns managed-zones describe "${SUBZONE_NAME}" \
+        --format="value(nameServers)" | sed 's/;/ /g')"
+    # Example output:
+    # ns-cloud-c1.googledomains.com. ns-cloud-c2.googledomains.com. ns-cloud-c3.googledomains.com. ns-cloud-c4.googledomains.com.
+    echo "SUBZONE_NAMESERVERS: ${SUBZONE_NAMESERVERS}"
+
+    # Now add an NS record to the opstracegcp.com zone for the
+    # <foo>.opstracegcp.com DNS name, pointing to the new
+    # name servers.
+    gcloud dns record-sets transaction start --zone=root-opstracegcp
+    gcloud dns record-sets transaction add ${SUBZONE_NAMESERVERS} \
+        --name=${OPSTRACE_INSTANCE_DNS_NAME}. \
+        --ttl=300 --type=NS --zone=root-opstracegcp
+    gcloud dns record-sets transaction execute --zone=root-opstracegcp
+
 
     cat ci/cluster-config.yaml | \
         sed "s/opstracegcp\.com/${OPSTRACE_INSTANCE_DNS_NAME}/g" | \
