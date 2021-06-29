@@ -1154,6 +1154,7 @@ async function httpGETRetryUntil200OrError(
 
 async function queryLokiWithRetryOrError(
   lokiQuerierBaseUrl: string,
+  additionalHeaders: Record<string, string>,
   queryParams: Record<string, string>,
   expectedEntryCount: number,
   chunkIndex: number,
