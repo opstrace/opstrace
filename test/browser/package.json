@@ -19,6 +19,7 @@
     "winston": "^3.3.3"
   },
   "scripts": {
+    "lint": "eslint . --ext .ts --quiet",
     "pw:localhost": "OPSTRACE_CLUSTER_BASE_URL=\"http://localhost:3000\" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts"
   }
 }
