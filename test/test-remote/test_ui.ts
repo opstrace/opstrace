@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// TODO: rename module from test_ui to test_ui_api because really
+// it interacts mainly with the HTTP API that is meant for UI consumptio.
+
 import { strict as assert } from "assert";
 
 import path from "path";
