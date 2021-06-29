@@ -45,6 +45,7 @@ import {
   timestampToNanoSinceEpoch,
   CLUSTER_BASE_URL,
   CLUSTER_NAME,
+  OPSTRACE_INSTANCE_DNS_NAME,
   TENANT_SYSTEM_CORTEX_API_BASE_URL,
   TEST_REMOTE_ARTIFACT_DIRECTORY,
   CI_LOGIN_EMAIL,
@@ -242,7 +243,7 @@ suite("test_ui_api", function () {
 
     // This relies on proxy/2 pointing to Loki. Depends on the order of
     // data sources defined in grafanaDatasources.ts
-    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/label`;
+    const url = `https://system.${OPSTRACE_INSTANCE_DNS_NAME}/grafana/api/datasources/proxy/2/loki/api/v1/label`;
 
     const ts = ZonedDateTime.now();
     // Allow for testing clusters that started a couple of days ago
@@ -280,7 +281,7 @@ suite("test_ui_api", function () {
     // data sources defined in grafanaDatasources.ts
     // Grafana 8 accesses /rules of the Cortex ruler
     // "GET /rules HTTP/1.1" 404 21 "-" "Grafana/8.0.0"
-    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/1/rules`;
+    const url = `${CLUSTER_BASE_URL}/grafana/api/datasources/proxy/1/rules`;
 
     const resp = await waitForResp(
       url,
@@ -299,7 +300,7 @@ suite("test_ui_api", function () {
     // This relies on proxy/2 pointing to Loki. Depends on the order of
     // data sources defined in grafanaDatasources.ts
     // Documented with "List all rules configured for the authenticated tenant"
-    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/loki/api/v1/rules`;
+    const url = `${CLUSTER_BASE_URL}/grafana/api/datasources/proxy/2/loki/api/v1/rules`;
 
     // expect 404 response with 'no rule groups found' in body
     const resp = await waitForResp(
@@ -327,7 +328,7 @@ suite("test_ui_api", function () {
     // data sources defined in grafanaDatasources.ts
     // GET /prometheus/api/v1/alerts
     // Prometheus-compatible rules endpoint to list all active alerts.
-    const url = `https://system.${CLUSTER_NAME}.opstrace.io/grafana/api/datasources/proxy/2/prometheus/api/v1/alerts`;
+    const url = `${CLUSTER_BASE_URL}/grafana/api/datasources/proxy/2/prometheus/api/v1/alerts`;
     const resp = await waitForResp(
       url,
       httpClientOptsWithCookie(cookie_header_value)
@@ -429,7 +430,7 @@ suite("test_ui_api", function () {
       let resp: GotResponse<string> | undefined;
       try {
         resp = await httpcl(
-          `https://cortex.${tenantName}.${CLUSTER_NAME}.opstrace.io/api/v1/labels`,
+          `https://cortex.${tenantName}.${OPSTRACE_INSTANCE_DNS_NAME}/api/v1/labels`,
           httpopts
         );
       } catch (err) {
