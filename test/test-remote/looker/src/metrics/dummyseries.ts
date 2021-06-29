@@ -26,6 +26,8 @@ import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
 import { log } from "../log";
 import { logHTTPResponse, httpTimeoutSettings } from "../util";
 
+import { DummyStreamOpts, LogStreamFragment } from "../logs";
+
 import * as mathjs from "mathjs";
 
 import {
@@ -36,7 +38,42 @@ import {
   formatFloatForComp
 } from "./index";
 
-export interface DummyTimeseriesOpts {
+export abstract class DummyTimeseriesBase {
+  protected nFragmentsConsumed: number;
+  protected starttime: ZonedDateTime;
+  protected uniqueName: string;
+  protected optionstring: string;
+  protected labels: LabelSet;
+  protected n_samples_per_series_fragment: number;
+
+  // To make things absolutely unambiguous allow for the consumer to set the
+  // last fragment consumed via this method.
+  protected lastFragmentConsumed:
+    | TimeseriesFragment
+    | LogStreamFragment
+    | undefined;
+
+  constructor(opts: DummyStreamOpts | DummyTimeseriesMetricsOpts) {
+    this.nFragmentsConsumed = 0;
+    this.starttime = opts.starttime;
+    this.uniqueName = opts.uniqueName;
+    this.optionstring = `${JSON.stringify(opts)}`;
+    this.labels = this.buildLabelSetFromOpts(opts);
+    this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
+  }
+
+  protected abstract buildLabelSetFromOpts(
+    opts: DummyStreamOpts | DummyTimeseriesMetricsOpts
+  ): LabelSet;
+
+  public toString(): string {
+    // does this use the name of the extension class, instead of the name
+    // of the base class? that's the goal here, let's see.
+    return `${this.constructor.name}(opts=${this.optionstring})`;
+  }
+}
+
+export interface DummyTimeseriesMetricsOpts {
   metricName: string;
   starttime: ZonedDateTime;
   uniqueName: string;
@@ -56,36 +93,29 @@ export interface DummyTimeseriesFetchAndValidateOpts {
   ) => Promise<GotResponse<string>>;
 }
 
-export class DummyTimeseries {
+export class DummyTimeseriesMetrics extends DummyTimeseriesBase {
   private millisSinceEpochOfLastGeneratedSample: Long;
-  private nFragmentsConsumed: number;
-  private labels: LabelSet;
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: BigInt;
-  private optionstring: string;
   private lastValue: number;
-
   //Supposed to contain a prometheus counter object, providing an inc() method.
   private counterForwardLeap: any | undefined;
 
   //private logLagBehindWalltimeEveryNseconds: private;
 
-  uniqueName: string;
   metricName: string;
-  starttime: ZonedDateTime;
-  n_samples_per_series_fragment: number;
   nFragmentsSuccessfullySentSinceLastValidate: number;
   nSamplesValidatedSoFar: bigint;
-  lastFragmentConsumed: TimeseriesFragment | undefined;
 
   // `undefined` means: do not collect validation info; this is so
   // that we ideally save memory
   postedFragmentsSinceLastValidate: Array<TimeseriesFragment> | undefined;
 
-  constructor(opts: DummyTimeseriesOpts, counterForwardLeap?: any) {
+  constructor(opts: DummyTimeseriesMetricsOpts, counterForwardLeap?: any) {
+    super(opts);
+
     this.postedFragmentsSinceLastValidate = undefined;
 
-    this.uniqueName = opts.uniqueName;
     this.metricName = opts.metricName;
 
     this.counterForwardLeap = undefined;
@@ -98,22 +128,9 @@ export class DummyTimeseries {
       }
     }
 
-    // Merge the metric name into it using the well-known special prom label
-    // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
-    // provided then treat this as _additional_ label set.
-    if (opts.labelset !== undefined) {
-      this.labels = opts.labelset;
-      this.labels.uniquename = this.uniqueName;
-      this.labels.__name__ = this.metricName;
-    } else {
-      this.labels = { uniquename: this.uniqueName, __name__: this.metricName };
-    }
-
     if (opts.starttime.nano() != 0) {
       throw new Error("start time must not have fraction of seconds");
     }
-
-    this.starttime = opts.starttime;
 
     if (!Number.isInteger(opts.timediffMilliSeconds)) {
       throw new Error("timediffMilliSeconds must be an integer value");
@@ -203,10 +220,6 @@ export class DummyTimeseries {
       .add(starttime_fractional_part_as_ms)
       .subtract(this.timediffMilliseconds);
 
-    this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
-
-    this.nFragmentsConsumed = 0;
-
     // when using the dummystream to generate data and actually POST it
     // to an API use this counter to keep track of the number of fragments
     // successfully sent.
@@ -222,13 +235,21 @@ export class DummyTimeseries {
     // > Number(((Math.random() - 0.5) * 10.0).toFixed(1))
     //   3.2
     this.lastValue = Number(((Math.random() - 0.5) * 10.0).toFixed(1));
-
-    // drop config object to save memory (I hope this is actually true)
-    this.optionstring = `${JSON.stringify(opts)}`;
   }
 
-  public toString(): string {
-    return `DummyTimeseries(opts=${this.optionstring})`;
+  protected buildLabelSetFromOpts(opts: DummyTimeseriesMetricsOpts) {
+    // Merge the metric name into it using the well-known special prom label
+    // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
+    // provided then treat this as _additional_ label set.
+    let ls: LabelSet;
+    if (opts.labelset !== undefined) {
+      ls = opts.labelset;
+      ls.uniquename = opts.uniqueName;
+      ls.__name__ = this.metricName;
+    } else {
+      ls = { uniquename: opts.uniqueName, __name__: this.metricName };
+    }
+    return ls;
   }
 
   public promQueryString(): string {
