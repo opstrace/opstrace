@@ -20,14 +20,15 @@ import { log } from "../utils";
 
 const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME || "unknown";
 
-const CLUSTER_BASE_URL: string = !process.env.OPSTRACE_CLUSTER_BASE_URL
+export const CLUSTER_BASE_URL: string = !process.env.OPSTRACE_CLUSTER_BASE_URL
   ? `https://${CLUSTER_NAME}.opstrace.io`
   : process.env.OPSTRACE_CLUSTER_BASE_URL;
 
-const CLOUD_PROVIDER: string = process.env.OPSTRACE_CLOUD_PROVIDER || "unknown";
+export const CLOUD_PROVIDER: string =
+  process.env.OPSTRACE_CLOUD_PROVIDER || "unknown";
 
-const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
-const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
+export const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
+export const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
 
 type SystemFixture = {
   runningInCI: boolean;
