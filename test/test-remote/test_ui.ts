@@ -28,13 +28,7 @@ import got, {
 import { test, suite, suiteSetup } from "mocha";
 import yaml from "js-yaml";
 
-import {
-  httpcl,
-  mtimeDeadlineInSeconds,
-  mtime
-  //debugLogHTTPResponse,
-  //debugLogHTTPResponseLight
-} from "@opstrace/utils";
+import { httpcl, mtimeDeadlineInSeconds, mtime } from "@opstrace/utils";
 
 import {
   log,
@@ -44,7 +38,6 @@ import {
   logHTTPResponse,
   timestampToNanoSinceEpoch,
   CLUSTER_BASE_URL,
-  CLUSTER_NAME,
   OPSTRACE_INSTANCE_DNS_NAME,
   TENANT_SYSTEM_CORTEX_API_BASE_URL,
   TEST_REMOTE_ARTIFACT_DIRECTORY,
