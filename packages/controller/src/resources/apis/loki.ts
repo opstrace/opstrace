@@ -126,7 +126,7 @@ export function LokiAPIResources(
                 {
                   name: "loki-api",
                   image: DockerImages.lokiApiProxy,
-                  imagePullPolicy: "Always",
+                  imagePullPolicy: "IfNotPresent",
                   args: lokiApiProxyCliArgs,
                   ports: [
                     {
