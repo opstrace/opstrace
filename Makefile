@@ -682,7 +682,8 @@ test-browser: kubectl-cluster-info
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/browser \
 		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
- 		yarn playwright test --workers 1
+		yarn playwright test --project Firefox --workers 1 tests/debugging.spec
+#  		yarn playwright test --workers 1
 
 # Used by CI:
 # three outcomes:
