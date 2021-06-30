@@ -85,7 +85,6 @@ export class DummyStream extends DummyTimeseriesBase {
   private currentNanos: number;
   private includeTimeInMsg: boolean;
   private firstEntryGenerated: boolean;
-  private nEntriesValidatedSoFar: bigint;
   private genChars: (n: number) => string;
   private shouldBeValidatedflag: boolean;
 
@@ -97,9 +96,7 @@ export class DummyStream extends DummyTimeseriesBase {
     super(opts);
 
     this.shouldBeValidatedflag = true;
-    this.uniqueName = opts.uniqueName;
 
-    this.starttime = opts.starttime;
     this.currentSeconds = opts.starttime.toEpochSecond();
     this.currentNanos = opts.starttime.nano();
     this.firstEntryGenerated = false;
@@ -113,10 +110,6 @@ export class DummyStream extends DummyTimeseriesBase {
     // to an API use this counter to keep track of the number of fragments
     // successfully sent. This is public because of external push func.
     this.nFragmentsSuccessfullySentSinceLastValidate = 0;
-
-    // Keep track of how many entries were validated (from the start of the
-    // stream). Used by fetchAndValidate().
-    this.nEntriesValidatedSoFar = BigInt(0);
 
     if (this.timediffNanoseconds > 999999999)
       throw Error("timediffNanoseconds must be smaller than 1 s");
@@ -426,7 +419,7 @@ export class DummyStream extends DummyTimeseriesBase {
       this,
       this.nFragmentsSuccessfullySentSinceLastValidate,
       expectedEntryCount,
-      this.nEntriesValidatedSoFar
+      this.nSamplesValidatedSoFar
     );
 
     let entriesRemainingToBeChecked = expectedEntryCount;
@@ -437,7 +430,7 @@ export class DummyStream extends DummyTimeseriesBase {
       const queryParams = this.queryParamsForVerify(
         BigInt(chunkSize),
         BigInt(chunkIndex),
-        this.nEntriesValidatedSoFar
+        this.nSamplesValidatedSoFar
       );
       // the last chunk might be expected to be smaller than the regular
       // chunk size.
@@ -517,7 +510,7 @@ export class DummyStream extends DummyTimeseriesBase {
     );
 
     this.nFragmentsSuccessfullySentSinceLastValidate = 0;
-    this.nEntriesValidatedSoFar += BigInt(expectedEntryCount);
+    this.nSamplesValidatedSoFar += BigInt(expectedEntryCount);
 
     // return the number of entries read (and validated)
     return expectedEntryCount;
