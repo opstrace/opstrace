@@ -55,6 +55,7 @@ export function* executeActionsChannel(channel: any) {
     }
   } finally {
     // If task cancelled, close the channel
+    //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
     if (yield cancelled()) {
       chan.close();
     }
@@ -78,6 +79,7 @@ export default function* cortexConfigSubscriptionManager() {
         return;
       }
 
+      //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
       const channel = yield call(cortexConfigSubscriptionEventChannel);
 
       // Fork the subscription task
