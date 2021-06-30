@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createStore as createReduxStore, applyMiddleware } from "redux";
+import { createStore as createReduxStore, applyMiddleware, Store } from "redux";
 import createSagaMiddleware from "redux-saga";
 import { composeWithDevTools } from "redux-devtools-extension";
 
 import { mainReducer } from "./reducer";
 import mainSaga from "./sagas";
 
-type StoreType = ReturnType<typeof createMainStore>;
+let _store: Store;
 
-let _store: StoreType;
-
-export default function getStore(): StoreType {
+export default function getStore(): Store {
   if (!_store) {
     _store = createMainStore();
   }
   return _store;
 }
 
-function createMainStore(): StoreType {
+function createMainStore(): Store {
   const sagaMiddleware = createSagaMiddleware();
   const middlewares = [sagaMiddleware];
 
