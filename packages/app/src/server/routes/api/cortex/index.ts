@@ -62,16 +62,30 @@ cortexProxy.on("proxyRes", (proxyRes, req, res) => {
        * - https://github.com/cortexproject/cortex/blob/82b32ec65ed16920e6053ac7fb748c42e3cae452/pkg/compactor/compactor_http.go#L16-L25
        */
       const body = chunks.join();
-      const parsedHTML = parse(body);
-      const errorMessage = parsedHTML.querySelector("html body p")?.text;
+      try {
+        const parsedHTML = parse(body);
+        const errorMessage = parsedHTML.querySelector("html body p")?.text;
 
-      /* setting the status code as 412, as usually HTML error responses
-       * of cortex are due to misconfigurations
-       */
-      res.writeHead(errorMessage ? 412 : 500, {
-        "content-type": "text/plain"
-      });
-      res.end(errorMessage ?? "An unknown error occured.");
+        if (!errorMessage) {
+          throw new Error("Could not extract error message");
+        }
+
+        /* setting the status code as 412, as usually HTML error responses
+         * of cortex are due to misconfigurations
+         */
+        res.writeHead(412, {
+          "content-type": "text/plain"
+        });
+        res.end(errorMessage);
+      } catch (e) {
+        res.writeHead(500, {
+          "content-type": "text/plain"
+        });
+        res.end(
+          "There has been an error parsing a cortex HTML response. Response:\n\n" +
+            body
+        );
+      }
     } else {
       /* if response is not HTML, the chunks have already been written
        * in `proxyRes.on("data")`, no need to add it to `res.end`

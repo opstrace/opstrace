@@ -101,16 +101,29 @@ describe("cortex api", () => {
           <title>Cortex Some Ring</title>
         </head>
         <body>
-         <div>No p tag here!</div>
+          <div>No p tag here!</div>
         </body>
       </html>
-      `;
+`;
       nock(proxyDestination).get(route).reply(200, mockResponse, {
         "Content-Type": "text/html; charset=utf-8"
       });
 
       const result = await getTestServer().get(endpoint);
-      expect(result.text).toEqual("An unknown error occured.");
+      expect(result.text)
+        .toEqual(`There has been an error parsing a cortex HTML response. Response:
+
+
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Cortex Some Ring</title>
+        </head>
+        <body>
+          <div>No p tag here!</div>
+        </body>
+      </html>
+`);
       expect(result.statusCode).toBe(500);
     });
   });
