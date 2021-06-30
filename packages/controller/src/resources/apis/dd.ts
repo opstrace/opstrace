@@ -130,7 +130,7 @@ export function DDAPIResources(
                 {
                   name: "dd-api",
                   image: DockerImages.ddApi,
-                  imagePullPolicy: "Always",
+                  imagePullPolicy: "IfNotPresent",
                   args: ddApiCliArgs,
                   ports: [
                     {

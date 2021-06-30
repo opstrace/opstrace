@@ -135,7 +135,7 @@ export function CortexAPIResources(
                 {
                   name: "cortex-api",
                   image: DockerImages.cortexApiProxy,
-                  imagePullPolicy: "Always",
+                  imagePullPolicy: "IfNotPresent",
                   args: cortexApiProxyCliArgs,
                   ports: [
                     {

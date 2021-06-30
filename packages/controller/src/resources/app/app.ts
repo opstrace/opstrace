@@ -253,7 +253,7 @@ export function OpstraceApplicationResources(
                 {
                   name: "opstrace-application",
                   image: DockerImages.app,
-                  imagePullPolicy: "Always",
+                  imagePullPolicy: "IfNotPresent",
                   command: ["node", "dist/server.js"],
                   env: [
                     {

@@ -138,7 +138,7 @@ export function OpstraceAPIResources(
                 {
                   name,
                   image: DockerImages.configApi,
-                  imagePullPolicy: "Always",
+                  imagePullPolicy: "IfNotPresent",
                   args: commandArgs,
                   env: commandEnv,
                   ports: [

@@ -198,7 +198,7 @@ export function StorageResources(
               containers: [
                 {
                   image: DockerImages.localVolumeProvisioner,
-                  imagePullPolicy: "Always",
+                  imagePullPolicy: "IfNotPresent",
                   name: "provisioner",
                   securityContext: {
                     privileged: true
