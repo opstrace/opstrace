@@ -20,16 +20,18 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import { mainReducer } from "./reducer";
 import mainSaga from "./sagas";
 
-let _store: ReturnType<typeof createMainStore>;
+type StoreType = ReturnType<typeof createMainStore>;
 
-export default function getStore() {
+let _store: StoreType;
+
+export default function getStore(): StoreType {
   if (!_store) {
     _store = createMainStore();
   }
   return _store;
 }
 
-function createMainStore() {
+function createMainStore(): StoreType {
   const sagaMiddleware = createSagaMiddleware();
   const middlewares = [sagaMiddleware];
 
