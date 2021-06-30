@@ -241,8 +241,8 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
   }
 
   log.info(
-    "Scanned all configured AWS regions successfully, but no EKS cluster found for Opstrace instance: ",
-    cli.CLIARGS.instanceName
+    "Scanned all configured AWS regions successfully, but no EKS cluster " +
+      `found for Opstrace instance: ${cli.CLIARGS.instanceName}`
   );
 
   // Note(JP): or instead of erroring out here fall back to some 'default'
