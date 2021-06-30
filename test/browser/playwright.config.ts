@@ -19,7 +19,6 @@ import { PlaywrightTestConfig } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
   reporter: "dot",
-  forbidOnly: process.env.BUILDKITE === "true",
   // Time in milliseconds given to each test, 120 seconds in our case, this is NOT the timeout option that context and page functions accept
   timeout: 120_000,
   use: {
