@@ -236,7 +236,7 @@ export class DummyTimeseries extends DummyTimeseriesBase {
     this.lastValue = Number(((Math.random() - 0.5) * 10.0).toFixed(1));
   }
 
-  protected buildLabelSetFromOpts(opts: DummyTimeseriesMetricsOpts) {
+  protected buildLabelSetFromOpts(opts: DummyTimeseriesMetricsOpts): LabelSet {
     // Merge the metric name into it using the well-known special prom label
     // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
     // provided then treat this as _additional_ label set.
@@ -244,9 +244,9 @@ export class DummyTimeseries extends DummyTimeseriesBase {
     if (opts.labelset !== undefined) {
       ls = opts.labelset;
       ls.uniquename = opts.uniqueName;
-      ls.__name__ = this.metricName;
+      ls.__name__ = opts.metricName;
     } else {
-      ls = { uniquename: opts.uniqueName, __name__: this.metricName };
+      ls = { uniquename: opts.uniqueName, __name__: opts.metricName };
     }
     return ls;
   }
