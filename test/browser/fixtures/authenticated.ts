@@ -105,6 +105,8 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
       const page = await context.newPage();
 
       await page.goto(CLUSTER_BASE_URL);
+      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
       // <span class="MuiButton-label">Log in</span>
@@ -119,6 +121,8 @@ const test = base.extend<Record<string, never>, AuthenticationFixture>({
       await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
 
       await page.click("css=button[type=submit]");
+      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
 
       // The first view after successful login is expected to be the details page
       // for the `system` tenant, showing a link to Grafana.
