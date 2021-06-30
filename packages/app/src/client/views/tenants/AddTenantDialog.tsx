@@ -47,7 +47,8 @@ const AddTenantPicker = () => {
         if (option.id === "yes" && tenant && subdomainValidator.test(tenant)) {
           dispatch(addTenant(tenant));
         }
-      }
+      },
+      dataTest: "addTenant"
     },
     []
   );
