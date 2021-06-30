@@ -47,6 +47,7 @@ export function* executeActionsChannel(channel: any) {
     }
   } finally {
     // If task cancelled, close the channel
+    //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
     if (yield cancelled()) {
       chan.close();
     }
@@ -64,34 +65,37 @@ export default function* tenantListSubscriptionManager() {
   // once everybody has unsubscribed
   const subscribers = new Set<SubscriptionID>();
 
-  yield takeEvery(actions.subscribeToTenantList, function* (
-    action: ReturnType<typeof actions.subscribeToTenantList>
-  ) {
-    // add to tracked subscribers
-    subscribers.add(action.payload);
+  yield takeEvery(
+    actions.subscribeToTenantList,
+    function* (action: ReturnType<typeof actions.subscribeToTenantList>) {
+      // add to tracked subscribers
+      subscribers.add(action.payload);
 
-    if (activeSubscription) {
-      // already subscribed
-      return;
+      if (activeSubscription) {
+        // already subscribed
+        return;
+      }
+
+      //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
+      const channel = yield call(tenantListSubscriptionEventChannel);
+
+      // Fork the subscription task
+      activeSubscription = yield fork(executeActionsChannel, channel);
     }
+  );
 
-    const channel = yield call(tenantListSubscriptionEventChannel);
-
-    // Fork the subscription task
-    activeSubscription = yield fork(executeActionsChannel, channel);
-  });
-
-  yield takeEvery(actions.unsubscribeFromTenantList, function* (
-    action: ReturnType<typeof actions.unsubscribeFromTenantList>
-  ) {
-    // remove from subscribers
-    subscribers.delete(action.payload);
-    // Cancel active subscription if there are no subscribers
-    if (activeSubscription && subscribers.size === 0) {
-      yield cancel(activeSubscription);
-      activeSubscription = undefined;
+  yield takeEvery(
+    actions.unsubscribeFromTenantList,
+    function* (action: ReturnType<typeof actions.unsubscribeFromTenantList>) {
+      // remove from subscribers
+      subscribers.delete(action.payload);
+      // Cancel active subscription if there are no subscribers
+      if (activeSubscription && subscribers.size === 0) {
+        yield cancel(activeSubscription);
+        activeSubscription = undefined;
+      }
     }
-  });
+  );
 }
 
 /**
