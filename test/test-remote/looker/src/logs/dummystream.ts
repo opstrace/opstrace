@@ -168,9 +168,9 @@ export class DummyStream extends DummyTimeseriesBase {
     let ls: LabelSet;
     if (opts.labelset !== undefined) {
       ls = opts.labelset;
-      ls.looker_uniquename = this.uniqueName;
+      ls.looker_uniquename = opts.uniqueName;
     } else {
-      ls = { looker_uniquename: this.uniqueName };
+      ls = { looker_uniquename: opts.uniqueName };
     }
     return ls;
   }
