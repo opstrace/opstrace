@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 mcr.microsoft.com/playwright:v1.12.3-bionic
+FROM --platform=linux/amd64 mcr.microsoft.com/playwright:v1.12.3-focal
 
 ENV DOCKER v14.15.4
 
