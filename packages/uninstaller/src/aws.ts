@@ -263,8 +263,8 @@ export function* destroyAWSInfra(): Generator<
   log.info(
     "S3 has been instructed to wipe the data buckets behind the scenes, " +
       "asynchronously. This process may take a day or longer. After " +
-      "completion, three empty S3 buckets will be left behind which you " +
-      "have to delete manually: %s, %s, %s, %s",
+      "completion, the following S3 buckets will be empty and you can delete" +
+      "them manually at any time: %s, %s, %s, %s",
     lokiBucketName,
     lokiConfigBucketName,
     cortexDataBucketName,
