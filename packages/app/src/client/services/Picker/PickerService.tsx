@@ -55,6 +55,7 @@ function PickerList(props: PickerListProps) {
         selected={index === selectedIndex}
         onClick={() => onSelect(data)}
         key={data.id}
+        data-test={`pickerService/option/${data.id}`}
       >
         <ListItemText primary={data.text} />
         {secondaryAction && (
@@ -154,6 +155,10 @@ function PickerService({ children }: { children: React.ReactNode }) {
       </pickerContext.Provider>
       <Dialog
         data-testid="dialog"
+        data-test={
+          "pickerService/dialog" +
+          (activePicker?.dataTest ? "/" + activePicker.dataTest : "")
+        }
         open={state.activeProviderIndex > -1}
         onClose={close}
         maxWidth="md"
@@ -200,6 +205,7 @@ function PickerService({ children }: { children: React.ReactNode }) {
               autoFocus
               value={state.text || ""}
               inputProps={{ "aria-label": "picker filter" }}
+              data-test="pickerService/input"
               onChange={e => {
                 setText(e.target.value);
               }}

@@ -61,6 +61,7 @@ const Tenants = () => {
           variant="contained"
           state="primary"
           size="medium"
+          data-test="tenant/addBtn"
           onClick={() => cmdService.executeCommand(addTenantCommandId)}
         >
           Add Tenant
@@ -68,7 +69,7 @@ const Tenants = () => {
       </Box>
       <Box>
         <TableContainer component={Card}>
-          <Table aria-label="tenants">
+          <Table aria-label="tenants" data-test="tenant/list">
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
@@ -82,6 +83,7 @@ const Tenants = () => {
                   hover={true}
                   className={classes.tenantRow}
                   key={tenant.name}
+                  data-test={`tenant/row/${tenant.name}`}
                   onClick={() => history.push(`/tenant/${tenant.name}`)}
                 >
                   <TableCell component="th" scope="row">

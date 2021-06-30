@@ -17,7 +17,7 @@
 import config from "./playwright.config";
 
 config.reporter = "line";
-config.use.headless = false;
+// config.use.headless = false;
 config.use.slowMo = 500;
 
 export default config;

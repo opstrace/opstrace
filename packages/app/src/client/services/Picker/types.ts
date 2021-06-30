@@ -41,6 +41,7 @@ export type PickerProvider = {
   onSelected: (option: PickerOption, inputText?: string) => void;
   options: PickerOption[];
   secondaryAction?: (option: PickerOption) => ReactNode;
+  dataTest?: string;
 };
 
 export type PickerApi = {
