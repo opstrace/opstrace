@@ -44,6 +44,10 @@ export abstract class DummyTimeseriesBase {
   protected optionstring: string;
   protected labels: LabelSet;
 
+  // Keep track of how many entries were validated (from the start of the
+  // stream). Used by fetchAndValidate().
+  protected nSamplesValidatedSoFar: bigint;
+
   n_samples_per_series_fragment: number;
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
@@ -57,6 +61,7 @@ export abstract class DummyTimeseriesBase {
     this.optionstring = `${JSON.stringify(opts)}`;
     this.labels = this.buildLabelSetFromOpts(opts);
     this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
+    this.nSamplesValidatedSoFar = BigInt(0);
   }
 
   protected abstract buildLabelSetFromOpts(
@@ -104,7 +109,6 @@ export class DummyTimeseries extends DummyTimeseriesBase {
 
   metricName: string;
   nFragmentsSuccessfullySentSinceLastValidate: number;
-  nSamplesValidatedSoFar: bigint;
 
   // `undefined` means: do not collect validation info; this is so
   // that we ideally save memory
