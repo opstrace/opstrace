@@ -29,9 +29,9 @@ test.describe("after auth0 authentication", () => {
   });
 
   test("user can create a new Tenant", async ({ page, cluster }) => {
-    const newTenant = `treetops-${Math.floor(Math.random() * 10000)}`;
+    const tenantName = `treetops_${Math.floor(Math.random() * 10000)}`;
     expect(
-      await page.isVisible(`[data-test='tenant/row/${newTenant}']`)
+      await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
     ).toBeFalsy();
 
     await page.click("[data-test='tenant/addBtn']");
@@ -40,16 +40,16 @@ test.describe("after auth0 authentication", () => {
     ).toBeTruthy();
     await page.fill(
       "[data-test='pickerService/input'] > input",
-      `add tenant: ${newTenant}`
+      `add tenant: ${tenantName}`
     );
     await page.click("[data-test='pickerService/option/yes']");
     expect(
-      await page.waitForSelector(`[data-test='tenant/row/${newTenant}']`)
+      await page.waitForSelector(`[data-test='tenant/row/${tenantName}']`)
     ).toBeTruthy();
 
-    await page.click(`[data-test='tenant/row/${newTenant}']`);
+    await page.click(`[data-test='tenant/row/${tenantName}']`);
     await page.waitForURL(
-      `${cluster.baseUrl}/tenant/${newTenant}/getting-started`
+      `${cluster.baseUrl}/tenant/${tenantName}/getting-started`
     );
     expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
   });
