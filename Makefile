@@ -681,7 +681,7 @@ test-browser: kubectl-cluster-info
 		-e OPSTRACE_CLOUD_PROVIDER \
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/browser \
-	  opstrace/test-browser:ff-debug \
+	  docker.io/opstrace/test-browser:ff-debug \
 		DEBUG=pw:browser* yarn playwright test --project Firefox --workers 1 tests/debugging.spec
 #  		yarn playwright test --workers 1
 
