@@ -16,7 +16,6 @@
 
 import crypto from "crypto";
 
-// import logfmt from "logfmt";
 import protobuf from "protobufjs";
 import snappy from "snappy";
 import got from "got";
@@ -30,6 +29,8 @@ import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
 import { DummyTimeseries } from "./dummyseries";
 
+import { SampleBase, FragmentBase } from "../series";
+
 export * from "./dummyseries";
 
 const pbfRoot = protobuf.loadSync(
@@ -41,11 +42,7 @@ const pbTypeTimeseries = pbfRoot.lookupType("prometheus.TimeSeries");
 const pbTypeSample = pbfRoot.lookupType("prometheus.Sample");
 const pbTypeLabel = pbfRoot.lookupType("prometheus.Label");
 
-export interface LabelSet {
-  [key: string]: string;
-}
-
-export interface FragmentStats {
+export interface FragmentStatsMetrics {
   timeMillisSinceEpochFirst: number;
   timeMillisSinceEpochLast: number;
   min: string;
@@ -55,41 +52,28 @@ export interface FragmentStats {
   //secondsBetweenSamples: bigint // to stress that this is never fractional
 }
 
-export class TimeseriesSample {
+export class MetricSample extends SampleBase {
+  /** The metric sample value, i.e. a floating point number */
   public value: number;
-  public time: Long; // int64 in prometheus protobuf, cf [ch1786], MillisSinceEpoch
+  /** The metric sample timestamp which is an int64 in the Prometheus protobuf world
+   * -- representing milliseconds since epoch -- here, for the NodeJS runtime we use
+   * a `Long` from the `long` library to keep the integer arithmetics. */
+  public time: Long;
 
   constructor(value: number, time: Long) {
+    // Is this call to super() a performance problem?
+    super();
     this.value = value;
     this.time = time;
   }
 }
 
-export class TimeseriesFragment {
-  private samples: Array<TimeseriesSample>;
-  private serialized: boolean;
-  public labels: LabelSet;
-
-  // Sequential number for locating fragmeng in stream. Set by caller.
-  public index: number;
+// Rename to MetricSeriesFragment?
+export class TimeseriesFragment extends FragmentBase<MetricSample> {
+  // private samples: Array<MetricSample>;
+  // private serialized: boolean;
   public parent: DummyTimeseries | undefined;
-  public stats: FragmentStats | undefined;
-
-  constructor(
-    labels: LabelSet,
-    index = 0,
-    dummyseries: DummyTimeseries | undefined = undefined
-  ) {
-    this.labels = labels;
-    this.samples = new Array<TimeseriesSample>();
-    this.index = index;
-    this.parent = dummyseries;
-    this.serialized = false;
-  }
-
-  public sampleCount() {
-    return this.samples.length;
-  }
+  public stats: FragmentStatsMetrics | undefined;
 
   /*
   Return number of payload bytes. For a Prometheus metric sample, that's 64 bit
@@ -109,7 +93,7 @@ export class TimeseriesFragment {
     return BigInt(this.samples.length) * BigInt(20);
   }
 
-  public getSamples(): Array<TimeseriesSample> {
+  public getSamples(): Array<MetricSample> {
     // Return shallow copy so that mutation of the returned array does not have
     // side effects in here. However, if individual entries were to be mutated
     // this would take effect here, too.
@@ -117,11 +101,11 @@ export class TimeseriesFragment {
   }
 
   // quickndirty compat with LogStreamFragment
-  public getEntries(): Array<TimeseriesSample> {
+  public getEntries(): Array<MetricSample> {
     return this.getSamples();
   }
 
-  public addSample(entry: TimeseriesSample): void {
+  public addSample(entry: MetricSample): void {
     if (this.serialized) {
       throw new Error("cannot mutate TimeseriesFragment anymore");
     }

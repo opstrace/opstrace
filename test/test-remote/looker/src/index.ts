@@ -34,12 +34,13 @@ import {
 } from "./logs";
 
 import {
-  LabelSet,
   DummyTimeseries,
   TimeseriesFragment,
   TimeseriesFragmentPushMessage,
   DummyTimeseriesFetchAndValidateOpts
 } from "./metrics";
+
+import { LabelSet } from "./series";
 
 import {
   sleep,
