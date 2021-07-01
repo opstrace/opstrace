@@ -17,7 +17,5 @@
 export const logUserIn = async ({ page, context, authCookies, cluster }) => {
   context.addCookies(authCookies);
   await page.goto(cluster.baseUrl);
-  await page.waitForLoadState("networkidle");
-  await page.waitForLoadState("domcontentloaded");
   await page.waitForSelector("[data-test=getting-started]");
 };
