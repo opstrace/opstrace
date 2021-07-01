@@ -90,29 +90,11 @@ export class TimeseriesFragment extends FragmentBase<
     return BigInt(this.samples.length) * BigInt(16);
   }
 
-  public getSamples(): Array<MetricSample> {
-    // Return shallow copy so that mutation of the returned array does not have
-    // side effects in here. However, if individual entries were to be mutated
-    // this would take effect here, too.
-    return [...this.samples];
-  }
-
-  // quickndirty compat with LogStreamFragment
-  public getEntries(): Array<MetricSample> {
-    return this.getSamples();
-  }
-
   public addSample(entry: MetricSample): void {
     if (this.serialized) {
       throw new Error("cannot mutate TimeseriesFragment anymore");
     }
     this.samples.push(entry);
-  }
-
-  public indexString(length: number): string {
-    // Return stringified and zero-padded index.
-    const is: string = this.index.toString();
-    return is.padStart(length, "0");
   }
 
   public buildStatisticsAndDropData(): void {

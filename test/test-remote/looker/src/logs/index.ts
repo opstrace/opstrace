@@ -140,13 +140,6 @@ export class LogStreamFragment extends FragmentBase<
     return BigInt(this.payloadbytecounter);
   }
 
-  public getsamples(): Array<LogSample> {
-    // Return shallow copy so that mutation of the returned array does not have
-    // side effects in here. However, if individual samples were to be mutated
-    // this would take effect here, too.
-    return [...this.samples];
-  }
-
   public addEntry(entry: LogSample): void {
     this.samples.push(entry);
     // Keep track of the size of the payload that was added. This might be
@@ -156,12 +149,6 @@ export class LogStreamFragment extends FragmentBase<
     // A protobuf timestamp is int64 + int32, i.e 12 bytes:
     // https://github.com/protocolbuffers/protobuf/blob/4b770cabd7ff042283280bd76b6635650a04aa8a/src/google/protobuf/timestamp.proto#L136
     this.payloadbytecounter += 12 + Buffer.from(entry.value, "utf8").length;
-  }
-
-  public indexString(length: number): string {
-    // Return stringified and zero-padded index.
-    const is: string = this.index.toString();
-    return is.padStart(length, "0");
   }
 
   public buildStatisticsAndDropData(): void {
@@ -181,14 +168,6 @@ export class LogStreamFragment extends FragmentBase<
     // see https://stackoverflow.com/a/1232046/145400
     this.samples.length = 0;
     this.stats = stats;
-  }
-
-  /**
-   * Use this to indicate that this fragment was serialized (into a binary
-   * msg) out-of-band, i..e not with the `serialize()` method.
-   */
-  public setSerialized(): void {
-    this.serialized = true;
   }
 
   public serialize(): LogStreamFragmentPushRequest {
@@ -362,7 +341,7 @@ export class LogStreamFragmentPushRequest {
       // Create individual protobuf samples, and build up a checksum from the
       // textual content of all log messages.
       const pbsamples = [];
-      for (const entry of fragment.getsamples()) {
+      for (const entry of fragment.getSamples()) {
         pbsamples.push(
           pbTypeEntry.create({
             timestamp: pbTypeTimestamp.create(entry.time),

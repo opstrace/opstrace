@@ -61,6 +61,15 @@ export abstract class FragmentBase<SampleType, ParentType> {
 
   protected samples: Array<SampleType>;
 
+  /** Return number of payload bytes in this fragment.
+   *
+   * For a Prometheus metric sample, that's a double precision float (8 bytes)
+   * for sample value, and an int64 per sample timestamp, i.e. 16 bytes per
+   * sample.
+   *
+   * For a Loki log sample, that's a protobuf timestamp (int64 + int32) per
+   * sample (12 bytes), and the size of the sample value text encoded as UTF-8.
+   */
   abstract payloadByteCount(): bigint;
 
   constructor(
@@ -75,10 +84,17 @@ export abstract class FragmentBase<SampleType, ParentType> {
     this.serialized = false;
   }
 
+  /** Return shallow copy so that mutation of the returned array does not have
+   * side effects in here. However, if individual samples were to be mutated
+   * this would take effect here, too.*/
+  public getSamples(): Array<SampleType> {
+    return [...this.samples];
+  }
+
   /** Return the current number of samples in this fragment.
    * Type `bigint` to stress that this is never fractional.
    */
-  sampleCount(): bigint {
+  public sampleCount(): bigint {
     // This might not be well thought through, but when the `stats` property is
     // populated then this fragment is "closed" (no more sampled should/can be
     // added) and the actual data might be gone (consolidate this thinking!).
@@ -86,6 +102,20 @@ export abstract class FragmentBase<SampleType, ParentType> {
       return this.stats.sampleCount;
     }
     return BigInt(this.samples.length);
+  }
+
+  /** Return stringified and zero-padded index. */
+  public indexString(length: number): string {
+    const is: string = this.index.toString();
+    return is.padStart(length, "0");
+  }
+
+  /**
+   * Use this to indicate that this fragment was serialized (into a binary
+   * msg) out-of-band, i..e not with the `serialize()` method.
+   */
+  public setSerialized(): void {
+    this.serialized = true;
   }
 }
 
