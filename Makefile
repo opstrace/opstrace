@@ -542,9 +542,9 @@ rebuild-testrunner-container-images:
 	docker build . --rm --force-rm \
 		-t opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		-f ./test/test-remote/nodejs-testrunner.Dockerfile
-	docker build ./test/browser --rm --force-rm \
-		-t opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
-		-f ./test/browser/Dockerfile
+# 	docker build ./test/browser --rm --force-rm \
+# 		-t opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+# 		-f ./test/browser/Dockerfile
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
 	docker pull gcr.io/datadoghq/agent:7
@@ -681,8 +681,8 @@ test-browser: kubectl-cluster-info
 		-e OPSTRACE_CLOUD_PROVIDER \
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/browser \
-		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
-		yarn playwright test --project Firefox --workers 1 tests/debugging.spec
+	  opstrace/test-browser:ff-debug \
+		DEBUG=pw:browser* yarn playwright test --project Firefox --workers 1 tests/debugging.spec
 #  		yarn playwright test --workers 1
 
 # Used by CI:
