@@ -93,7 +93,10 @@ export const toTenantNamespace = (tenantName: string): string =>
 /**
  * Searches tenants for the matching name, returns the ID.
  */
-export const toTenantId = (tenantName: string, tenants: Tenants): string | null => {
+export const toTenantId = (
+  tenantName: string,
+  tenants: Tenants
+): string | null => {
   const matches = tenants.filter(t => t.name === tenantName);
   if (matches.length == 1) {
     const match = matches[0];
@@ -104,12 +107,15 @@ export const toTenantId = (tenantName: string, tenants: Tenants): string | null 
     log.warning("found two tenants with same name=%s: %s", tenantName, matches);
   }
   return null;
-}
+};
 
 /**
  * Searches tenants for the matching ID, returns the name.
  */
-export const toTenantName = (tenantId: string, tenants: Tenants): string | null => {
+export const toTenantName = (
+  tenantId: string,
+  tenants: Tenants
+): string | null => {
   const matches = tenants.filter(t => t.id === tenantId);
   if (matches.length == 1) {
     return matches[0].name;
@@ -117,7 +123,7 @@ export const toTenantName = (tenantId: string, tenants: Tenants): string | null 
     log.warning("found two tenants with same id=%s: %s", tenantId, matches);
   }
   return null;
-}
+};
 
 export const getTenantNamespace = (tenant: Tenant): string =>
   toTenantNamespace(tenant.name);
@@ -135,13 +141,18 @@ export const getQueueEndpoint = (): string =>
 export const getDomain = (state: State): string => {
   const stack = getControllerConfig(state);
 
+  // TODO: consolidate this into _one_ parameter in the controller config,
+  // containing the DNS name pointing to the opstrace instance, w/o trailing
+  // dot.
+  // so that here we only need to return _that_.
+
   if (stack.custom_dns_name !== undefined) {
-    const dn = stack.custom_dns_name;
-    return dn;
+    return stack.custom_dns_name;
   }
 
   // No custom DNS TLD/system provided,
   // stack.dnsName is, with current WIP code, always <instance_name>.opstrace.io
+  // replace trailing dot if it's there.
   return `${stack.name}.${stack.dnsName.replace(/\.$/, "")}`;
 };
 
