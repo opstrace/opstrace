@@ -27,7 +27,7 @@ import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
 import { DummyStream } from "./dummystream";
 
-import { LabelSet } from "../metrics";
+import { SampleBase, FragmentBase, LabelSet } from "../series";
 
 export * from "./dummystream";
 
@@ -49,7 +49,7 @@ One log stream entry:
   - timestamp
 
 Log stream fragment:
-  - N entries
+  - N samples
 
 Log stream:
   - continuous concept, N fragments (N unknown)
@@ -61,80 +61,87 @@ Log stream:
 //   [key: string]: string;
 // }
 
-export interface LogStreamEntryTimestamp {
+export interface LogSampleTimestamp {
   seconds: number;
   nanos: number;
 }
 
-export class LogStreamEntry {
-  public text: string;
-  public time: LogStreamEntryTimestamp;
+// export class LogSample {
+//   public text: string;
+//   public time: LogSampleTimestamp;
 
-  constructor(text: string, time: LogStreamEntryTimestamp) {
-    this.text = text;
+//   constructor(text: string, time: LogSampleTimestamp) {
+//     this.text = text;
+//     this.time = time;
+//   }
+// }
+
+export class LogSample extends SampleBase {
+  /** The log sample value, i.e. the text message */
+  public value: string;
+  /** The log sample timestamp which is comprised of two components:
+   * seconds since epoch, and a fractional part: nanoseconds
+   */
+  public time: LogSampleTimestamp;
+
+  constructor(value: string, time: LogSampleTimestamp) {
+    // Is this call to super() a performance problem?
+    super();
+    this.value = value;
     this.time = time;
   }
 }
 
-interface LogStreamFragmentStats {
-  entryCount: bigint; // to stress that this is never fractional
+export interface LogStreamFragmentStats {
+  sampleCount: bigint; // to stress that this is never fractional
   timeOfFirstEntry: string;
   timeOfLastEntry: string;
 }
 
-export class LogStreamFragment {
+export class LogStreamFragment extends FragmentBase<LogSample> {
+  //export class LogStreamFragment {
   /*
   A class that allows for building up a log stream fragment.
 
   A Loki log stream is defined by a set of labels, and a (generally continuous)
-  stream of individual log entries in (generally) chronological order.
-  A log stream fragment can be looked at as the set of log entries in a
+  stream of individual log samples ("entries") in (generally) chronological order.
+  A log stream fragment can be looked at as the set of log samples in a
   specific time window [T1, T2] from this generally continuous stream, where T1
   is defined by the oldest entry in the set, and T2 is the youngest entry in
   the set.
 
-  Provides a method for adding individual log entries of type `LogStreamEntry`.
+  Provides a method for adding individual log samples of type `LogSample`.
 
-  Provides a method for serialization of the current set of entries (in the
+  Provides a method for serialization of the current set of samples (in the
   order as they have been added) into a byte sequence (snappy-compressed
   protobuf message) that can be used as the HTTP request body for POSTing the
   log stream fragment to Loki.
   */
-  private entries: Array<LogStreamEntry>;
-  //private payloadCharcount: number;
+
   private payloadBytecount: number;
-  private serialized: boolean;
-
-  public labels: LabelSet;
-
-  // Sequential number for locating fragment in stream. Set by caller.
-  public index: number;
   public parent: DummyStream | undefined;
-  public stats: LogStreamFragmentStats | undefined;
 
   constructor(
     labels: LabelSet,
     index = 0,
     dummystream: DummyStream | undefined = undefined
   ) {
-    this.labels = labels;
-    this.entries = new Array<LogStreamEntry>();
+    super(labels, index, dummystream);
+
     // Number of characters (text perspective) so far added to the fragment.
     // this.payloadCharcount = 0;
     // Number of bytes (after text encoding was applied, data perspective),
     // assuming utf-8 encoding.
     this.payloadBytecount = 0;
-    this.index = index;
-    this.parent = dummystream;
-    this.serialized = false;
+
     this.stats = undefined;
   }
 
-  public entryCount(): bigint {
+  public sampleCount(): bigint {
     if (this.stats !== undefined) {
-      return this.stats.entryCount;
+      return this.stats.sampleCount;
     }
-    return BigInt(this.entries.length);
+    return BigInt(this.samples.length);
   }
 
   /* Return the size of the payload data in this stream fragment.
@@ -145,22 +152,22 @@ export class LogStreamFragment {
     return BigInt(this.payloadBytecount);
   }
 
-  public getEntries(): Array<LogStreamEntry> {
+  public getsamples(): Array<LogSample> {
     // Return shallow copy so that mutation of the returned array does not have
-    // side effects in here. However, if individual entries were to be mutated
+    // side effects in here. However, if individual samples were to be mutated
     // this would take effect here, too.
-    return [...this.entries];
+    return [...this.samples];
   }
 
-  public addEntry(entry: LogStreamEntry): void {
-    this.entries.push(entry);
+  public addEntry(entry: LogSample): void {
+    this.samples.push(entry);
     // Keep track of the size of the payload that was added. This might be
     // expensive, but don't make any premature performance assupmtions here.
     // Measure what's bottlenecking. :)
     //this.payloadCharcount += entry.text.length;
     // A protobuf timestamp is int64 + int32, i.e 12 bytes:
     // https://github.com/protocolbuffers/protobuf/blob/4b770cabd7ff042283280bd76b6635650a04aa8a/src/google/protobuf/timestamp.proto#L136
-    this.payloadBytecount += 12 + Buffer.from(entry.text, "utf8").length;
+    this.payloadBytecount += 12 + Buffer.from(entry.value, "utf8").length;
   }
 
   public indexString(length: number): string {
@@ -175,16 +182,16 @@ export class LogStreamFragment {
     }
 
     const stats = {
-      entryCount: BigInt(this.entries.length),
-      timeOfFirstEntry: JSON.stringify(this.entries[0].time),
-      timeOfLastEntry: JSON.stringify(this.entries.slice(-1)[0].time)
+      sampleCount: BigInt(this.samples.length),
+      timeOfFirstEntry: JSON.stringify(this.samples[0].time),
+      timeOfLastEntry: JSON.stringify(this.samples.slice(-1)[0].time)
     };
     this.stats = stats;
     // log.info("fragmentStat right after generate: %s", stats);
 
     // drop main payload data
     // see https://stackoverflow.com/a/1232046/145400
-    this.entries.length = 0;
+    this.samples.length = 0;
     this.stats = stats;
   }
 
@@ -345,11 +352,11 @@ export class LogStreamFragmentPushRequest {
 
   private toPushrequestBuffer(): [Buffer, string, number] {
     /*
-    Serialize the current set of entries (in the original order) into a
+    Serialize the current set of samples (in the original order) into a
     protobuf message (a Loki "push request" containing a stream fragment
-    containing the label set and the individual entries). Return the
+    containing the label set and the individual samples). Return the
     snappy-compressed protobuf message as Buffer. On the fly, compute a hash
-    over the content (text message) of all log entries.
+    over the content (text message) of all log samples.
     */
     const t0 = mtime();
     const logTextHash = crypto.createHash("md5");
@@ -364,11 +371,11 @@ export class LogStreamFragmentPushRequest {
 
       const labelsEncodedAsString = logqlLabelString(fragment.labels);
 
-      // Create individual protobuf entries, and build up a checksum from the
+      // Create individual protobuf samples, and build up a checksum from the
       // textual content of all log messages.
-      const pbentries = [];
-      for (const entry of fragment.getEntries()) {
-        pbentries.push(
+      const pbsamples = [];
+      for (const entry of fragment.getsamples()) {
+        pbsamples.push(
           pbTypeEntry.create({
             timestamp: pbTypeTimestamp.create(entry.time),
             // Note(JP): it is a bit unclear which text encoding is actually
@@ -376,18 +383,18 @@ export class LogStreamFragmentPushRequest {
             // https://github.com/grafana/loki/blob/14b2c093c19e17103e564b0aa6af0cf16ff0e5bc/pkg/logproto/types.go#L20
             // the protobufjs library has to apply _some_ text encoding, and it's
             // likely to be UTF-8.
-            line: entry.text
+            line: entry.value
           })
         );
         // Update log text hash with the UTF-8-encoded version of the text.
         // From docs: "If encoding is not provided, and the data is a string,
         // an encoding of 'utf8' is enforced"
-        logTextHash.update(entry.text);
+        logTextHash.update(entry.value);
       }
 
       const stream = pbTypeStream.create({
         labels: labelsEncodedAsString,
-        entries: pbentries
+        samples: pbsamples
       });
       streamsList.push(stream);
 

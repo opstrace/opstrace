@@ -37,15 +37,13 @@ import {
 } from "../util";
 
 import {
-  LogStreamEntry,
-  LogStreamEntryTimestamp,
+  LogSample,
+  LogSampleTimestamp,
   LogStreamFragment,
   logqlLabelString
 } from "./index";
 
-import { LabelSet } from "../metrics";
-
-import { DummyTimeseriesBase } from "../metrics";
+import { TimeseriesBase, LabelSet } from "../series";
 
 // Note: maybe expose raw labels later on again.
 export interface DummyStreamOpts {
@@ -80,7 +78,7 @@ export interface DummyStreamFetchAndValidateOpts {
   additionalHeaders?: Record<string, string>;
 }
 
-export class DummyStream extends DummyTimeseriesBase {
+export class DummyStream extends TimeseriesBase {
   private currentSeconds: number;
   private currentNanos: number;
   private includeTimeInMsg: boolean;
@@ -192,7 +190,7 @@ export class DummyStream extends DummyTimeseriesBase {
     return text;
   }
 
-  protected nextSample(): LogStreamEntry {
+  protected nextSample(): LogSample {
     // don't bump time before first entry was generated.
     if (this.firstEntryGenerated) {
       this.currentNanos += this.timediffNanoseconds;
@@ -202,7 +200,7 @@ export class DummyStream extends DummyTimeseriesBase {
       }
     }
 
-    const ts: LogStreamEntryTimestamp = {
+    const ts: LogSampleTimestamp = {
       seconds: this.currentSeconds,
       nanos: this.currentNanos
     };
@@ -210,7 +208,7 @@ export class DummyStream extends DummyTimeseriesBase {
     // of course this only needs to be run once, and I hope that the compiler
     // optimizes this away.
     this.firstEntryGenerated = true;
-    return new LogStreamEntry(this.buildMsgText(), ts);
+    return new LogSample(this.buildMsgText(), ts);
   }
 
   // no stop criterion
@@ -265,7 +263,7 @@ export class DummyStream extends DummyTimeseriesBase {
           genduration.toFixed(2),
           pushrequest.dataLengthMiB.toFixed(4),
           // for now: assume that there is _one_ fragment here
-          pushrequest.fragments[0].entryCount()
+          pushrequest.fragments[0].sampleCount()
         );
       }
       await pushrequest.postWithRetryOrError(lokiBaseUrl, 3, additionalHeaders);
@@ -388,7 +386,7 @@ export class DummyStream extends DummyTimeseriesBase {
     const additionalHeaders = opts.additionalHeaders || {};
 
     // chunkSize: think of it as "fetch at most those many entries per query"
-    const expectedEntryCount =
+    const expectedsampleCount =
       this.nFragmentsSuccessfullySentSinceLastValidate *
       this.n_samples_per_series_fragment;
 
@@ -397,11 +395,11 @@ export class DummyStream extends DummyTimeseriesBase {
       "%s: validate. Sent %s fragments since last validation. Expect %s entries. Previously validated: %s entries",
       this,
       this.nFragmentsSuccessfullySentSinceLastValidate,
-      expectedEntryCount,
+      expectedsampleCount,
       this.nSamplesValidatedSoFar
     );
 
-    let entriesRemainingToBeChecked = expectedEntryCount;
+    let entriesRemainingToBeChecked = expectedsampleCount;
     let chunkIndex = 1;
 
     // cheap way out: do not check the last chunk in this loop.
@@ -489,10 +487,10 @@ export class DummyStream extends DummyTimeseriesBase {
     );
 
     this.nFragmentsSuccessfullySentSinceLastValidate = 0;
-    this.nSamplesValidatedSoFar += BigInt(expectedEntryCount);
+    this.nSamplesValidatedSoFar += BigInt(expectedsampleCount);
 
     // return the number of entries read (and validated)
-    return expectedEntryCount;
+    return expectedsampleCount;
   }
 }
 
@@ -536,7 +534,7 @@ async function waitForLokiQueryResult(
   lokiQuerierBaseUrl: string,
   additionalHeaders: TypeHttpHeaderDict,
   queryParams: TypeQueryParamDict,
-  expectedEntryCount: number | undefined,
+  expectedsampleCount: number | undefined,
   logDetails = true,
   expectedStreamCount = 1,
   buildhash = true,
@@ -658,15 +656,18 @@ Query parameters: ${JSON.stringify(
     // Even if we got multiple streams here go with just one of them.
     assert("values" in streams[0]);
 
-    const entrycount = streams[0]["values"].length;
+    const sampleCount = streams[0]["values"].length;
     log.info(
       "expected nbr of query results: %s, got %s",
-      expectedEntryCount,
-      entrycount
+      expectedsampleCount,
+      sampleCount
     );
 
     // Expect N log entries in the stream.
-    if (expectedEntryCount === undefined || entrycount === expectedEntryCount) {
+    if (
+      expectedsampleCount === undefined ||
+      sampleCount === expectedsampleCount
+    ) {
       log.info(
         "got expected result in query %s after %s s",
         queryCount,
@@ -698,7 +699,7 @@ Query parameters: ${JSON.stringify(
       return result;
     }
 
-    if (entrycount < expectedEntryCount) {
+    if (sampleCount < expectedsampleCount) {
       log.info("not enough entries returned yet, waiting");
       await sleep(1);
       continue;

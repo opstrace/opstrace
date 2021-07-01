@@ -20,84 +20,22 @@ import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 import got, { Response as GotResponse } from "got";
 import Long from "long";
 
-import { DummyStreamFetchAndValidateOpts, logqlLabelString } from "../logs";
+import { logqlLabelString } from "../logs";
 
 import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
 import { log } from "../log";
 import { logHTTPResponse, httpTimeoutSettings } from "../util";
 
-import { DummyStreamOpts, LogStreamFragment, LogStreamEntry } from "../logs";
-
 import * as mathjs from "mathjs";
 
 import {
-  TimeseriesSample,
+  MetricSample,
   TimeseriesFragment,
-  LabelSet,
-  FragmentStats,
+  FragmentStatsMetrics,
   formatFloatForComp
 } from "./index";
 
-export abstract class DummyTimeseriesBase {
-  protected labels: LabelSet;
-  protected nFragmentsConsumed: number;
-  protected starttime: ZonedDateTime;
-  protected optionstring: string;
-
-  // Keep track of how many entries were validated (from the start of the
-  // stream). Used by fetchAndValidate().
-  protected nSamplesValidatedSoFar: bigint;
-
-  n_samples_per_series_fragment: number;
-  uniqueName: string;
-  // To make things absolutely unambiguous allow for the consumer to set the
-  // last fragment consumed via this method.
-  lastFragmentConsumed: TimeseriesFragment | LogStreamFragment | undefined;
-
-  constructor(opts: DummyStreamOpts | DummyTimeseriesMetricsOpts) {
-    this.nFragmentsConsumed = 0;
-    this.starttime = opts.starttime;
-    this.uniqueName = opts.uniqueName;
-    this.optionstring = `${JSON.stringify(opts)}`;
-    this.labels = this.buildLabelSetFromOpts(opts);
-    this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
-    this.nSamplesValidatedSoFar = BigInt(0);
-  }
-
-  protected abstract buildLabelSetFromOpts(
-    opts: DummyStreamOpts | DummyTimeseriesMetricsOpts
-  ): LabelSet;
-
-  abstract disableValidation(): void;
-
-  abstract enableValidation(): void;
-
-  abstract shouldBeValidated(): boolean;
-
-  abstract dropValidationInfo(): void;
-
-  abstract currentTimeRFC3339Nano(): string;
-
-  abstract generateAndGetNextFragment():
-    | [number, TimeseriesFragment | undefined]
-    | LogStreamFragment;
-
-  protected abstract nextSample(): LogStreamEntry | TimeseriesSample;
-
-  protected abstract generateNextFragment():
-    | [number, TimeseriesFragment | undefined]
-    | LogStreamFragment;
-
-  abstract fetchAndValidate(
-    opts: DummyTimeseriesFetchAndValidateOpts | DummyStreamFetchAndValidateOpts
-  ): Promise<number>;
-
-  public toString(): string {
-    // does this use the name of the extension class, instead of the name
-    // of the base class? that's the goal here, let's see.
-    return `${this.constructor.name}(opts=${this.optionstring})`;
-  }
-}
+import { TimeseriesBase, LabelSet } from "../series";
 
 export interface DummyTimeseriesMetricsOpts {
   metricName: string;
@@ -121,7 +59,7 @@ export interface DummyTimeseriesFetchAndValidateOpts {
 
 // Maybe rename to DummySeriesMetrics
 // or LookerSeriesMetrics or ...MetricSeries
-export class DummyTimeseries extends DummyTimeseriesBase {
+export class DummyTimeseries extends TimeseriesBase {
   private millisSinceEpochOfLastGeneratedSample: Long;
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: BigInt;
@@ -312,12 +250,12 @@ export class DummyTimeseries extends DummyTimeseriesBase {
     return this.lastValue;
   }
 
-  protected nextSample(): TimeseriesSample {
+  protected nextSample(): MetricSample {
     this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
       this.timediffMilliseconds
     );
 
-    return new TimeseriesSample(
+    return new MetricSample(
       this.nextValue(),
       this.millisSinceEpochOfLastGeneratedSample
     );
@@ -739,7 +677,7 @@ export class DummyTimeseries extends DummyTimeseriesBase {
       }
     }
 
-    const stats: FragmentStats = {
+    const stats: FragmentStatsMetrics = {
       min: formatFloatForComp(mathjs.min(values)),
       max: formatFloatForComp(mathjs.max(values)),
       var: formatFloatForComp(mathjs.variance(values)),
