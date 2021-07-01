@@ -218,6 +218,7 @@ if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
 fi
 
 
+
 # Run opstrace installer locally. The installer will deploy the controller into
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
@@ -237,6 +238,9 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         cp "${FNAME}" ${OPSTRACE_PREBUILD_DIR}
 else
     export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstracegcp.com"
+
+    # Add install-time parameter to Opstrace install-time configuration file.
+    echo -e "\ncustom_dns_name: ${OPSTRACE_INSTANCE_DNS_NAME}" >> ci/cluster-config.yaml
 
     # Create a new managed zone, for <foo>.opstracegcp.com
     SUBZONE_NAME="zone-${OPSTRACE_CLUSTER_NAME}"
@@ -260,9 +264,7 @@ else
         --ttl=300 --type=NS --zone=root-opstracegcp
     gcloud dns record-sets transaction execute --zone=root-opstracegcp
 
-
     cat ci/cluster-config.yaml | \
-        sed "s/opstracegcp\.com/${OPSTRACE_INSTANCE_DNS_NAME}/g" | \
         ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} \
             --log-level=debug --yes \
             --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
