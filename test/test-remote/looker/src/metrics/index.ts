@@ -76,21 +76,20 @@ export class TimeseriesFragment extends FragmentBase<MetricSample> {
   public stats: FragmentStatsMetrics | undefined;
 
   /*
-  Return number of payload bytes. For a Prometheus metric sample, that's 64 bit
-  (8 Bytes) per metric value, and 96 bit (12 Bytes) per metric timestamp.
+  Return number of payload bytes. For a Prometheus metric sample, that's
+  adouble-precision float (64 bit, 8 Bytes) per metric value, and an int64
+  (also 8 Bytes) per metric timestamp.
 
-  A protobuf timestamp is int64 + int32, i.e 12 bytes:
-  https://github.com/protocolbuffers/protobuf/blob/4b770cabd7ff042283280bd76b6635650a04aa8a/src/google/protobuf/timestamp.proto#L136
+  https://github.com/prometheus/prometheus/blob/90976e7505c225a44d4f0d4b6978f2b42fe0dcb8/prompb/types.proto#L45
 
-  That is, 20 Bytes per sample.
+  That is, 16 Bytes per sample.
   */
   public payloadByteCount(): bigint {
     if (this.stats !== undefined) {
-      return this.stats.sampleCount * BigInt(20);
+      return this.stats.sampleCount * BigInt(16);
     }
 
-    //log.info("NUMBER OF SAMPLES IN FRAGMENT: %s", this.samples.length);
-    return BigInt(this.samples.length) * BigInt(20);
+    return BigInt(this.samples.length) * BigInt(16);
   }
 
   public getSamples(): Array<MetricSample> {
