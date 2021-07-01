@@ -1,9 +1,8 @@
 tenants:
   - default
-custom_dns_name: opstracegcp.com
-custom_auth0_client_id: 5MoCYfPXPuEzceBLRUr6T6SAklT2GDys
 env_label: opstrace-ci
 cert_issuer: letsencrypt-staging
 aws:
   eks_admin_roles:
     - AWSReservedSSO_AdministratorAccess_8488c3da2f880f06
+custom_auth0_client_id: 5MoCYfPXPuEzceBLRUr6T6SAklT2GDys
