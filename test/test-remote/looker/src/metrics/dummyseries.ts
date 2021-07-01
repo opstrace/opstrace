@@ -534,6 +534,12 @@ export class DummyTimeseries extends TimeseriesBase {
   }
 
   private queryParamsForFragment(fragment: TimeseriesFragment) {
+    // Confirm that fragment is 'closed' (serialized, has stats), and override
+    // type from `LogStreamFragmentStats | FragmentStatsMetrics` to just
+    // `FragmentStatsMetrics`.
+    assert(fragment.stats);
+    const stats = fragment.stats as FragmentStatsMetrics;
+
     // these query parameters implement the
     // instant-query-range-vector-selector-validation-method. also see ch1767
     // `timeMillisSinceEpochLast` is time timestamp (in ms since epoch) of the
@@ -541,8 +547,8 @@ export class DummyTimeseries extends TimeseriesBase {
 
     // the following validation is probably not necessary, but don't have the
     // brain power to be 100 % sure right now.
-    if (!Number.isInteger(fragment.stats!.timeMillisSinceEpochLast)) {
-      log.error("not integer: %s", fragment.stats!.timeMillisSinceEpochLast);
+    if (!Number.isInteger(stats.timeMillisSinceEpochLast)) {
+      log.error("not integer: %s", stats.timeMillisSinceEpochLast);
       throw new Error(
         "fragment.stats.timeMillisSinceEpochLast must be an integer value"
       );
@@ -554,7 +560,7 @@ export class DummyTimeseries extends TimeseriesBase {
     // `this.timediffMilliseconds` is n * 1000.
 
     const timeRightBoundarySeconds = Math.ceil(
-      fragment.stats!.timeMillisSinceEpochLast / 1000.0
+      stats.timeMillisSinceEpochLast / 1000.0
     );
 
     log.debug("timeRightBoundarySeconds: %s", timeRightBoundarySeconds);

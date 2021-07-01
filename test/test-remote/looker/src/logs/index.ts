@@ -27,7 +27,12 @@ import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
 import { DummyStream } from "./dummystream";
 
-import { SampleBase, FragmentBase, LabelSet } from "../series";
+import {
+  SampleBase,
+  FragmentBase,
+  LabelSet,
+  FragmentStatsBase
+} from "../series";
 
 export * from "./dummystream";
 
@@ -66,16 +71,6 @@ export interface LogSampleTimestamp {
   nanos: number;
 }
 
-// export class LogSample {
-//   public text: string;
-//   public time: LogSampleTimestamp;
-
-//   constructor(text: string, time: LogSampleTimestamp) {
-//     this.text = text;
-//     this.time = time;
-//   }
-// }
-
 export class LogSample extends SampleBase {
   /** The log sample value, i.e. the text message */
   public value: string;
@@ -92,13 +87,16 @@ export class LogSample extends SampleBase {
   }
 }
 
-export interface LogStreamFragmentStats {
-  sampleCount: bigint; // to stress that this is never fractional
+export interface LogStreamFragmentStats extends FragmentStatsBase {
   timeOfFirstEntry: string;
   timeOfLastEntry: string;
 }
 
-export class LogStreamFragment extends FragmentBase<LogSample> {
+export class LogStreamFragment extends FragmentBase<
+  LogSample,
+  DummyStream
+  //LogStreamFragmentStats
+> {
   //export class LogStreamFragment {
   /*
   A class that allows for building up a log stream fragment.
@@ -118,8 +116,7 @@ export class LogStreamFragment extends FragmentBase<LogSample> {
   log stream fragment to Loki.
   */
 
-  private payloadBytecount: number;
-  public parent: DummyStream | undefined;
+  private payloadbytecounter: number;
 
   constructor(
     labels: LabelSet,
@@ -132,16 +129,7 @@ export class LogStreamFragment extends FragmentBase<LogSample> {
     // this.payloadCharcount = 0;
     // Number of bytes (after text encoding was applied, data perspective),
     // assuming utf-8 encoding.
-    this.payloadBytecount = 0;
-
-    this.stats = undefined;
-  }
-
-  public sampleCount(): bigint {
-    if (this.stats !== undefined) {
-      return this.stats.sampleCount;
-    }
-    return BigInt(this.samples.length);
+    this.payloadbytecounter = 0;
   }
 
   /* Return the size of the payload data in this stream fragment.
@@ -149,7 +137,7 @@ export class LogStreamFragment extends FragmentBase<LogSample> {
   One way to do that would be to return a byte size
   */
   public payloadByteCount(): bigint {
-    return BigInt(this.payloadBytecount);
+    return BigInt(this.payloadbytecounter);
   }
 
   public getsamples(): Array<LogSample> {
@@ -167,7 +155,7 @@ export class LogStreamFragment extends FragmentBase<LogSample> {
     //this.payloadCharcount += entry.text.length;
     // A protobuf timestamp is int64 + int32, i.e 12 bytes:
     // https://github.com/protocolbuffers/protobuf/blob/4b770cabd7ff042283280bd76b6635650a04aa8a/src/google/protobuf/timestamp.proto#L136
-    this.payloadBytecount += 12 + Buffer.from(entry.value, "utf8").length;
+    this.payloadbytecounter += 12 + Buffer.from(entry.value, "utf8").length;
   }
 
   public indexString(length: number): string {

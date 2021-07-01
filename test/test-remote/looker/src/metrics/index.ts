@@ -29,7 +29,7 @@ import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
 import { DummyTimeseries } from "./dummyseries";
 
-import { SampleBase, FragmentBase } from "../series";
+import { SampleBase, FragmentBase, FragmentStatsBase } from "../series";
 
 export * from "./dummyseries";
 
@@ -42,13 +42,12 @@ const pbTypeTimeseries = pbfRoot.lookupType("prometheus.TimeSeries");
 const pbTypeSample = pbfRoot.lookupType("prometheus.Sample");
 const pbTypeLabel = pbfRoot.lookupType("prometheus.Label");
 
-export interface FragmentStatsMetrics {
+export interface FragmentStatsMetrics extends FragmentStatsBase {
   timeMillisSinceEpochFirst: number;
   timeMillisSinceEpochLast: number;
   min: string;
   max: string;
   var: string;
-  sampleCount: bigint; // to stress that this is never fractional
   //secondsBetweenSamples: bigint // to stress that this is never fractional
 }
 
@@ -69,12 +68,11 @@ export class MetricSample extends SampleBase {
 }
 
 // Rename to MetricSeriesFragment?
-export class TimeseriesFragment extends FragmentBase<MetricSample> {
-  // private samples: Array<MetricSample>;
-  // private serialized: boolean;
-  public parent: DummyTimeseries | undefined;
-  public stats: FragmentStatsMetrics | undefined;
-
+export class TimeseriesFragment extends FragmentBase<
+  MetricSample,
+  DummyTimeseries
+  //FragmentStatsMetrics
+> {
   /*
   Return number of payload bytes. For a Prometheus metric sample, that's
   adouble-precision float (64 bit, 8 Bytes) per metric value, and an int64
