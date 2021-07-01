@@ -20,13 +20,13 @@ import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 import got, { Response as GotResponse } from "got";
 import Long from "long";
 
-import { logqlLabelString } from "../logs";
+import { DummyStreamFetchAndValidateOpts, logqlLabelString } from "../logs";
 
 import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
 import { log } from "../log";
 import { logHTTPResponse, httpTimeoutSettings } from "../util";
 
-import { DummyStreamOpts, LogStreamFragment } from "../logs";
+import { DummyStreamOpts, LogStreamFragment, LogStreamEntry } from "../logs";
 
 import * as mathjs from "mathjs";
 
@@ -39,10 +39,10 @@ import {
 } from "./index";
 
 export abstract class DummyTimeseriesBase {
+  protected labels: LabelSet;
   protected nFragmentsConsumed: number;
   protected starttime: ZonedDateTime;
   protected optionstring: string;
-  protected labels: LabelSet;
 
   // Keep track of how many entries were validated (from the start of the
   // stream). Used by fetchAndValidate().
@@ -67,6 +67,30 @@ export abstract class DummyTimeseriesBase {
   protected abstract buildLabelSetFromOpts(
     opts: DummyStreamOpts | DummyTimeseriesMetricsOpts
   ): LabelSet;
+
+  abstract disableValidation(): void;
+
+  abstract enableValidation(): void;
+
+  abstract shouldBeValidated(): boolean;
+
+  abstract dropValidationInfo(): void;
+
+  abstract currentTimeRFC3339Nano(): string;
+
+  abstract generateAndGetNextFragment():
+    | [number, TimeseriesFragment | undefined]
+    | LogStreamFragment;
+
+  protected abstract nextSample(): LogStreamEntry | TimeseriesSample;
+
+  protected abstract generateNextFragment():
+    | [number, TimeseriesFragment | undefined]
+    | LogStreamFragment;
+
+  abstract fetchAndValidate(
+    opts: DummyTimeseriesFetchAndValidateOpts | DummyStreamFetchAndValidateOpts
+  ): Promise<number>;
 
   public toString(): string {
     // does this use the name of the extension class, instead of the name
@@ -215,6 +239,7 @@ export class DummyTimeseries extends DummyTimeseriesBase {
     const starttime_fractional_part_as_ms = Long.fromInt(
       Math.floor(opts.starttime.nano() / 10 ** 6)
     );
+
     const starttime_seconds_part_as_ms = Long.fromInt(
       opts.starttime.toEpochSecond()
     ).multiply(Long.fromInt(1000));
@@ -287,7 +312,7 @@ export class DummyTimeseries extends DummyTimeseriesBase {
     return this.lastValue;
   }
 
-  private nextSample() {
+  protected nextSample(): TimeseriesSample {
     this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
       this.timediffMilliseconds
     );
@@ -423,7 +448,7 @@ export class DummyTimeseries extends DummyTimeseriesBase {
 
   // no stop criterion: dummyseries is an infinite concept (definite start, it
   // indefinite end) -- the caller decides how many fragments to generate.
-  private generateNextFragment(): [number, TimeseriesFragment | undefined] {
+  protected generateNextFragment(): [number, TimeseriesFragment | undefined] {
     // TODO: this might get expensive, maybe use a monotonic time source
     // to make sure that we call this only once per minute or so.
     const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();

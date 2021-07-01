@@ -192,7 +192,7 @@ export class DummyStream extends DummyTimeseriesBase {
     return text;
   }
 
-  private nextEntry() {
+  protected nextSample(): LogStreamEntry {
     // don't bump time before first entry was generated.
     if (this.firstEntryGenerated) {
       this.currentNanos += this.timediffNanoseconds;
@@ -213,36 +213,15 @@ export class DummyStream extends DummyTimeseriesBase {
     return new LogStreamEntry(this.buildMsgText(), ts);
   }
 
-  // public *generateFragments() {
-  //   // `this.nFragmentsConsumed` starts at 0. During stream generation,
-  //   // depending on exactly when one is looking, from the outside point of view
-  //   // it might be off by 1 compared to the _actual_ number of fragments
-  //   // returned by the generator so far. That's ok.
-  //   log.info(
-  //     "%s: entering generateFragments with nFragmentsConsumed, n_fragments_total: %s, %s",
-  //     this,
-  //     this.nFragmentsConsumed,
-  //     this.n_fragments_total
-  //   );
-  //   for (
-  //     this.nFragmentsConsumed;
-  //     this.nFragmentsConsumed < this.n_fragments_total;
-  //     this.nFragmentsConsumed++
-  //   ) {
-  //     const logStreamFragment = this.generateNextFragment();
-  //     yield logStreamFragment;
-  //   }
-  // }
-
   // no stop criterion
-  private generateNextFragment() {
+  protected generateNextFragment(): LogStreamFragment {
     const logStreamFragment = new LogStreamFragment(
       this.labels,
       this.nFragmentsConsumed + 1,
       this
     );
     for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
-      logStreamFragment.addEntry(this.nextEntry());
+      logStreamFragment.addEntry(this.nextSample());
     }
     return logStreamFragment;
   }
