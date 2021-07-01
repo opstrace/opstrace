@@ -117,7 +117,7 @@ func keyLookupCallback(unveriftoken *jwt.Token) (interface{}, error) {
 			)
 		}
 
-		log.Info("kid not set in auth token, use fallback key (is configured)")
+		log.Debug("kid not set in auth token, use fallback key (is configured)")
 		return authtokenVerificationPubKeyFallback, nil
 	}
 }
