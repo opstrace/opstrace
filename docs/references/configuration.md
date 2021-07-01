@@ -170,13 +170,13 @@ Setting this parameter disables the default mechanism via which the Opstrace ins
 custom_dns_name: myopstrace.powerteam.com
 ```
 
-#### Further specification:
+#### Further specification
 
 * The parameter value needs to be a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) _without the trailing dot_. It can be a top-level domain, but does not need to be.
 * This DNS name will point to the specific Opstrace instance you are planning to create (`<instance_name>.` is not automatically prepended). For example, the UI will then be served under `https://<custom_dns_name>/`.
 
 
-#### Prerequisites:
+#### Prerequisites
 
 * **A Google Cloud DNS or AWS Route53 DNS zone** created _a priori_ in your cloud account (during creation, the Opstrace instance will need to interact with the AWS/GCP API and reconfigure that DNS zone to add records for more fine-grained DNS names):
   * If you install the Opstrace instance in a GCP account, this DNS name must correspond to a so-called _managed zone_ in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart).
