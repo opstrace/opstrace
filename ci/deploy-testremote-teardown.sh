@@ -237,13 +237,13 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
 else
     # Create Opstrace instance in GCP. Use custom_dns_name and
     # custom_auth0_client_id features.
+    export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstracegcp.com"
+
     # Add install-time parameter to Opstrace install-time configuration file.
     # The Auth0 client ID corresponds to an Auth0 app configured for our CI
     echo -e "\ncustom_dns_name: ${OPSTRACE_INSTANCE_DNS_NAME}" >> ci/cluster-config.yaml
     # rely on this custom auth0 client id to already be present in the config:
     #echo -e "\custom_auth0_client_id: 5MoCYfPXPuEzceBLRUr6T6SAklT2GDys" >> ci/cluster-config.yaml
-
-    export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstracegcp.com"
 
     # Create a new managed DNS zone, for <foo>.opstracegcp.com -- in the CI
     # shard GCP project.
