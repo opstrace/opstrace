@@ -37,29 +37,38 @@ export interface LabelSet {
   [key: string]: string;
 }
 
+export interface FragmentStatsBase {
+  sampleCount: bigint; // to stress that this is never fractional
+}
+
 export abstract class SampleBase {
   abstract value: number | string;
   abstract time: Long | LogSampleTimestamp;
 }
 
-export abstract class FragmentBase<SampleType> {
+export abstract class FragmentBase<SampleType, ParentType> {
   /** The label set defining the time series this fragment is part of. */
   public labels: LabelSet;
   /** Sequential number for locating fragment in the time series. Set by caller. */
   public index: number;
-  public parent: TimeseriesBase | undefined;
+  /** The time series that this fragment is part of (the "parent"). */
+  public parent: ParentType | undefined;
   public stats: LogStreamFragmentStats | FragmentStatsMetrics | undefined;
+  //public stats: StatsType | undefined;
+
+  // don't modify from outside
+  public serialized: boolean;
 
   protected samples: Array<SampleType>;
-  protected serialized: boolean;
+
+  abstract payloadByteCount(): bigint;
 
   constructor(
     labels: LabelSet,
     index = 0,
-    parentSeries: TimeseriesBase | undefined = undefined
+    parentSeries: ParentType | undefined = undefined
   ) {
     this.labels = labels;
-    // new Array<TimeseriesSample>();
     this.samples = new Array<SampleType>();
     this.index = index;
     this.parent = parentSeries;
