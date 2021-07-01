@@ -68,12 +68,10 @@ source secrets/opstrace_dockerhub_creds.sh
 # https://github.com/opstrace/opstrace/pull/128#issuecomment-742519078 and
 # https://stackoverflow.com/q/5189913/145400.
 #OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb ci-shard-ccc)
-#OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-ddd ci-shard-eee ci-shard-fff)
-#echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
-#export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
+OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-ddd ci-shard-eee ci-shard-fff)
+echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
+export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
-# tmp state of affairs, for staying within vast-pad-240918
-export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-dev-dns-service.json
 
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
@@ -217,7 +215,7 @@ if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
     sleep 5
 fi
 
-
+export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
 # Run opstrace installer locally. The installer will deploy the controller into
 # the cluster and wait until deployments are 'ready'.
@@ -237,12 +235,17 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         cp "${FNAME}" /build/bk-artifacts && \
         cp "${FNAME}" ${OPSTRACE_PREBUILD_DIR}
 else
+    # Create Opstrace instance in GCP. Use custom_dns_name and
+    # custom_auth0_client_id features.
+    # Add install-time parameter to Opstrace install-time configuration file.
+    # The Auth0 client ID corresponds to an Auth0 app configured for our CI
+    echo -e "\ncustom_dns_name: ${OPSTRACE_INSTANCE_DNS_NAME}" >> ci/cluster-config.yaml
+    echo -e "\custom_auth0_client_id: 5MoCYfPXPuEzceBLRUr6T6SAklT2GDys" >> ci/cluster-config.yaml
+
     export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstracegcp.com"
 
-    # Add install-time parameter to Opstrace install-time configuration file.
-    echo -e "\ncustom_dns_name: ${OPSTRACE_INSTANCE_DNS_NAME}" >> ci/cluster-config.yaml
-
-    # Create a new managed zone, for <foo>.opstracegcp.com
+    # Create a new managed DNS zone, for <foo>.opstracegcp.com -- in the CI
+    # shard GCP project.
     SUBZONE_NAME="zone-${OPSTRACE_CLUSTER_NAME}"
     gcloud dns managed-zones create "${SUBZONE_NAME}" \
         --description="zone used by CI cluster ${OPSTRACE_CLUSTER_NAME}" \
@@ -255,6 +258,16 @@ else
     # ns-cloud-c1.googledomains.com. ns-cloud-c2.googledomains.com. ns-cloud-c3.googledomains.com. ns-cloud-c4.googledomains.com.
     echo "SUBZONE_NAMESERVERS: ${SUBZONE_NAMESERVERS}"
 
+    # We use the GCP project CI shard service account credentials to configure
+    # the DNS sub zone ${OPSTRACE_CLUSTER_NAME}.opstracegcp.com. The root DNS
+    # zone (opstracegcp.com.) however can only be managed in/by one specific
+    # GCP project. That is, the svc accounts for the GCP project CI shards
+    # _cannot_ change settings for this root DNS zone. Connecting the two zones
+    # via NS records needs to be done with a svc account for the GCP project
+    # that that manages the root zone. Hence, switch GCP credentials
+    # temporarily here.
+    export GOOGLE_APPLICATION_CREDENTIALS_FOR_RESTORE="${GOOGLE_APPLICATION_CREDENTIALS}"
+    export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-dev-dns-service.json
     # Now add an NS record to the opstracegcp.com zone for the
     # <foo>.opstracegcp.com DNS name, pointing to the new
     # name servers.
@@ -263,6 +276,9 @@ else
         --name=${OPSTRACE_INSTANCE_DNS_NAME}. \
         --ttl=300 --type=NS --zone=root-opstracegcp
     gcloud dns record-sets transaction execute --zone=root-opstracegcp
+
+    # Revert
+    export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS_FOR_RESTORE}"
 
     cat ci/cluster-config.yaml | \
         ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} \
@@ -280,9 +296,6 @@ export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
 # TODO: remove when we add cloud provider managed certificates and remove the
 # use of insecure_skip_verify in the tests
 echo "--- checking cluster is using certificate issued by LetsEncrypt"
-
-#export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
-#export OPSTRACE_INSTANCE_DNS_NAME="opstracegcp.com"
 
 retry_check_certificate loki.system.${OPSTRACE_INSTANCE_DNS_NAME}:443
 retry_check_certificate cortex.system.${OPSTRACE_INSTANCE_DNS_NAME}:443
