@@ -154,16 +154,11 @@ Locking this down makes sense when setting `data_api_authentication_disabled` to
 
 ### `custom_dns_name`
 
-Use this when you want your Opstrace instance to be reachable under a custom DNS name.
-For example, the UI will then be served under `https://<custom_dns_name>/`.
+Use this when your goal is to reach your Opstrace instance under a custom DNS name, using DNS infrastructure managed entirely by you.
 
-This disables the default mechanism (which makes the Opstrace instance available under `<instance_name>.opstrace.io`, using Opstrace's DNS configuration service).
+Requires setting `custom_auth0_client_id` (see below).
 
-The parameter value needs to be a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) (without the trailing dot).
-It can be a top-level domain, but does not need to be.
-
-This DNS name will point to the specific Opstrace instance you are planning to create (`<instance_name>.` is not going to be prepended).
-
+Setting this parameter disables the default mechanism via which the Opstrace instance is made available under `<instance_name>.opstrace.io` (using Opstrace's DNS infrastructure). As a side effect this removes the need for the Opstrace CLI to communicate with the Opstrace DNS configuration service and therefore removes the need to log in to that service during `opstrace create ...` and `opstrace destroy ...`.
 
 *Default:* undefined
 
@@ -175,11 +170,19 @@ This DNS name will point to the specific Opstrace instance you are planning to c
 custom_dns_name: myopstrace.powerteam.com
 ```
 
-If you install the Opstrace instance in your GCP account, this DNS name must correspond to a "managed zone" in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart).
+#### Further specification:
 
-If you install the Opstrace instance in your AWS account, this DNS name must correspond to a “hosted zone” in AWS Route53 which you must set up prior to installing Opstrace. A guide can be found [here](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html).
+* The parameter value needs to be a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) _without the trailing dot_. It can be a top-level domain, but does not need to be.
+* This DNS name will point to the specific Opstrace instance you are planning to create (`<instance_name>.` is not automatically prepended). For example, the UI will then be served under `https://<custom_dns_name>/`.
 
-During creation, the Opstrace instance will interact with the AWS/GCP API and reconfigure that DNS zone to add records for more fine-grained DNS names.
+
+#### Prerequisites:
+
+* **A Google Cloud DNS or AWS Route53 DNS zone** created _a priori_ in your cloud account (during creation, the Opstrace instance will need to interact with the AWS/GCP API and reconfigure that DNS zone to add records for more fine-grained DNS names):
+  * If you install the Opstrace instance in a GCP account, this DNS name must correspond to a so-called _managed zone_ in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart).
+  * If you install the Opstrace instance in an AWS account, this DNS name must correspond to a so-called _hosted zone_ in AWS Route53 which you must set up prior to installing Opstrace. A guide can be found [here](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html).
+* **A custom Auth0 application** which you have to set up in advance. It needs to be configured specifically for the custom DNS name you are planning to use. A guide can be found [here](TODO). Take note of the so-called "client ID" of this Auth0 application and refer to it via `custom_auth0_client_id`. This is necessary for a **secure** single sign-on (SSO) experience; we cannot provide an out-of-the-box SSO experience that works against arbitrary DNS names.
+
 
 
 ### `cert_issuer`
