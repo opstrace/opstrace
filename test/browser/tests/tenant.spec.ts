@@ -29,7 +29,7 @@ test.describe("after auth0 authentication", () => {
   });
 
   test("user can create a new Tenant", async ({ page, cluster }) => {
-    const tenantName = `treetops_${Math.floor(Math.random() * 10000)}`;
+    const tenantName = `treetops${Math.floor(Math.random() * 10000)}`;
     expect(
       await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
     ).toBeFalsy();
