@@ -79,7 +79,7 @@ GCLOUD_CLI_ZONE="us-west2-a"
 # `opstrace create ...` is going to write to this.
 KUBECONFIG_FILEPATH="kubeconfig_${OPSTRACE_CLUSTER_NAME}"
 
-echo "--- cloud auth activate-service-account: ${GOOGLE_APPLICATION_CREDENTIALS}"
+echo "--- gcloud auth activate-service-account: ${GOOGLE_APPLICATION_CREDENTIALS}"
 # Log in to GCP with service account credentials. Note(JP): the authentication
 # state is I think stored in a well-known location in the home dir.
 gcloud auth activate-service-account \
@@ -266,8 +266,9 @@ else
     # via NS records needs to be done with a svc account for the GCP project
     # that that manages the root zone. Hence, switch GCP credentials
     # temporarily here.
-    export GOOGLE_APPLICATION_CREDENTIALS_FOR_RESTORE="${GOOGLE_APPLICATION_CREDENTIALS}"
-    export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-dev-dns-service.json
+    gcloud auth activate-service-account \
+        --key-file="./secrets/gcp-svc-acc-dev-dns-service.json" --project "vast-pad-240918"
+
     # Now add an NS record to the opstracegcp.com zone for the
     # <foo>.opstracegcp.com DNS name, pointing to the new
     # name servers.
@@ -277,8 +278,10 @@ else
         --ttl=300 --type=NS --zone=root-opstracegcp
     gcloud dns record-sets transaction execute --zone=root-opstracegcp
 
-    # Revert
-    export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS_FOR_RESTORE}"
+    # Revert gcloud CLI authentication state to GCP project CI shard.
+    gcloud auth activate-service-account \
+        --key-file=${GOOGLE_APPLICATION_CREDENTIALS} \
+        --project ${OPSTRACE_GCP_PROJECT_ID}
 
     cat ci/cluster-config.yaml | \
         ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} \
