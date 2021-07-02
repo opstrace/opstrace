@@ -18,34 +18,43 @@ import { Cookie } from "@playwright/test";
 
 import { log } from "../utils";
 
+// First, check for _required_ env vars (keep this simple, to comply with README)
+if (
+  process.env.OPSTRACE_CLOUD_PROVIDER !== "aws" &&
+  process.env.OPSTRACE_CLOUD_PROVIDER !== "gcp"
+) {
+  log.error(
+    "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
+  );
+  process.exit(1);
+}
+export const CLOUD_PROVIDER: string = process.env.OPSTRACE_CLOUD_PROVIDER;
+
+if (!process.env.OPSTRACE_CLUSTER_NAME) {
+  log.error("env variable OPSTRACE_CLUSTER_NAME must be set");
+  process.exit(1);
+}
+export const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME;
+
+// Now, deal with optional env var. There is a default DNS name pointing to
+// this Opstrace instance. Use that if OPSTRACE_INSTANCE_DNS_NAME is not set
+// via env
 let OPSTRACE_INSTANCE_DNS_NAME: string;
-
-const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME || "unknown";
-
-// default, if OPSTRACE_INSTANCE_DNS_NAME is not set via env
 OPSTRACE_INSTANCE_DNS_NAME = `${CLUSTER_NAME}.opstrace.io`;
-
 if (process.env.OPSTRACE_INSTANCE_DNS_NAME) {
-  log.info(
+  log.debug(
     "env variable OPSTRACE_INSTANCE_DNS_NAME is set: %s",
     process.env.OPSTRACE_INSTANCE_DNS_NAME
   );
   OPSTRACE_INSTANCE_DNS_NAME = process.env.OPSTRACE_INSTANCE_DNS_NAME;
+} else {
+  log.debug("env variable OPSTRACE_INSTANCE_DNS_NAME not set");
 }
 
-export let CLUSTER_BASE_URL = `https://${OPSTRACE_INSTANCE_DNS_NAME}`;
-
-if (process.env.OPSTRACE_CLUSTER_BASE_URL) {
-  log.info(
-    "env variable OPSTRACE_CLUSTER_BASE_URL is set: %s",
-    process.env.OPSTRACE_CLUSTER_BASE_URL
-  );
-  CLUSTER_BASE_URL = process.env.OPSTRACE_CLUSTER_BASE_URL;
-}
-
-export const CLOUD_PROVIDER: string =
-  process.env.OPSTRACE_CLOUD_PROVIDER || "unknown";
-
+// CLUSTER_BASE_URL is fully specified by OPSTRACE_INSTANCE_DNS_NAME -- that's
+// by definition of that very DNS name. That is, the base URL does not need to
+// be injected via env.
+export const CLUSTER_BASE_URL = `https://${OPSTRACE_INSTANCE_DNS_NAME}`;
 export const CI_LOGIN_EMAIL = "ci-test@opstrace.com";
 export const CI_LOGIN_PASSWORD = "This-is-not-a-secret!";
 
@@ -53,7 +62,7 @@ type SystemFixture = {
   runningInCI: boolean;
 };
 
-const CLOUD_PROVIDER_DEFAULTS = { aws: false, gcp: false, unknown: false };
+const CLOUD_PROVIDER_DEFAULTS = { aws: false, gcp: false };
 
 type ClusterFixture = {
   name: string;
@@ -106,20 +115,6 @@ export const addAuthFixture = test =>
     ],
     authCookies: [
       async ({ browser }, use) => {
-        if (!CLUSTER_BASE_URL) {
-          log.error(
-            "env variables OPSTRACE_CLUSTER_NAME or OPSTRACE_CLUSTER_BASE_URL must be set"
-          );
-          process.exit(1);
-        }
-
-        if (!CLOUD_PROVIDER) {
-          log.error(
-            "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
-          );
-          process.exit(1);
-        }
-
         const context = await browser.newContext({ ignoreHTTPSErrors: true });
         const page = await context.newPage();
 
