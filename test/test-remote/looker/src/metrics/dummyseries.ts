@@ -43,6 +43,8 @@ export interface DummyTimeseriesMetricsOpts {
   uniqueName: string;
   labelset: LabelSet | undefined;
   timediffMilliSeconds: number;
+  // don't use timediff.. but use wall time instead
+  useWallTime?: boolean;
   n_samples_per_series_fragment: number;
 }
 
@@ -67,8 +69,6 @@ export class DummyTimeseries extends TimeseriesBase {
   //Supposed to contain a prometheus counter object, providing an inc() method.
   private counterForwardLeap: any | undefined;
 
-  //private logLagBehindWalltimeEveryNseconds: private;
-
   metricName: string;
   nFragmentsSuccessfullySentSinceLastValidate: number;
 
@@ -78,12 +78,18 @@ export class DummyTimeseries extends TimeseriesBase {
 
   constructor(opts: DummyTimeseriesMetricsOpts, counterForwardLeap?: any) {
     super(opts);
+    this.metricName = opts.metricName;
 
     this.postedFragmentsSinceLastValidate = undefined;
 
-    this.metricName = opts.metricName;
+    // Initialize to 0 here, gets properly initialized conditionally in
+    // this.processOptionsForSyntheticTimesource() below
+    this.fragmentWidthSecondsForQuery = BigInt(0);
 
     this.counterForwardLeap = undefined;
+
+    // Do q&n validation of this object -- not neede when using wall time
+    // as a time source, can be cleaned up.
     if (counterForwardLeap !== undefined) {
       this.counterForwardLeap = counterForwardLeap;
       if (counterForwardLeap.inc === undefined) {
@@ -93,6 +99,56 @@ export class DummyTimeseries extends TimeseriesBase {
       }
     }
 
+    if (!this.useWallTime) {
+      // when using wall time, things get much more simple
+      this.processOptionsForSyntheticTimesource(opts);
+    }
+
+    // For non-1000 ms step fragments  (e.g. 1 ms between adjacent samples)
+    // it's more important to have a 'round' number of samples than an integer
+    // multiple of 1 s as fragment time width: with e.g. 10000 samples per
+    // fragment the first sample can always have the '.000' fractional part,
+    // and the last sample can always have the '.999' fractional part -- with
+    // 100001 samples, these fractional parts change from fragment to fragment.
+
+    // Translate (integer number, public) timediffMilliSeconds into (actual
+    // integer, private) timediffMilliseconds.
+    this.timediffMilliseconds = Long.fromInt(opts.timediffMilliSeconds);
+
+    // Initialize this.millisSinceEpochOfLastGeneratedSample with starttime -
+    // timediffMilliseconds
+    const starttime_fractional_part_as_ms = Long.fromInt(
+      Math.floor(opts.starttime.nano() / 10 ** 6)
+    );
+
+    const starttime_seconds_part_as_ms = Long.fromInt(
+      opts.starttime.toEpochSecond()
+    ).multiply(Long.fromInt(1000));
+
+    this.millisSinceEpochOfLastGeneratedSample = starttime_seconds_part_as_ms
+      .add(starttime_fractional_part_as_ms)
+      .subtract(this.timediffMilliseconds);
+
+    // when using the dummystream to generate data and actually POST it
+    // to an API use this counter to keep track of the number of fragments
+    // successfully sent.
+    this.nFragmentsSuccessfullySentSinceLastValidate = 0;
+
+    // Keep track of how many entries were validated (from the start of the
+    // stream). Used by fetchAndValidate().
+    this.nSamplesValidatedSoFar = BigInt(0);
+
+    // Initialize value for random walk, between -5 and 5, and cut to a certain
+    // level of precision. TODO: make interval width a parameter (currently 10).
+    // Example:
+    // > Number(((Math.random() - 0.5) * 10.0).toFixed(1))
+    //   3.2
+    this.lastValue = Number(((Math.random() - 0.5) * 10.0).toFixed(1));
+  }
+
+  private processOptionsForSyntheticTimesource(
+    opts: DummyTimeseriesMetricsOpts
+  ) {
     if (opts.starttime.nano() != 0) {
       throw new Error("start time must not have fraction of seconds");
     }
@@ -160,47 +216,6 @@ export class DummyTimeseries extends TimeseriesBase {
         );
       }
     }
-
-    // For non-1000 ms step fragments  (e.g. 1 ms between adjacent samples)
-    // it's more important to have a 'round' number of samples than an integer
-    // multiple of 1 s as fragment time width: with e.g. 10000 samples per
-    // fragment the first sample can always have the '.000' fractional part,
-    // and the last sample can always have the '.999' fractional part -- with
-    // 100001 samples, these fractional parts change from fragment to fragment.
-
-    // Translate (integer number, public) timediffMilliSeconds into (actual
-    // integer, private) timediffMilliseconds.
-    this.timediffMilliseconds = Long.fromInt(opts.timediffMilliSeconds);
-
-    // Initialize this.millisSinceEpochOfLastGeneratedSample with starttime -
-    // timediffMilliseconds
-    const starttime_fractional_part_as_ms = Long.fromInt(
-      Math.floor(opts.starttime.nano() / 10 ** 6)
-    );
-
-    const starttime_seconds_part_as_ms = Long.fromInt(
-      opts.starttime.toEpochSecond()
-    ).multiply(Long.fromInt(1000));
-
-    this.millisSinceEpochOfLastGeneratedSample = starttime_seconds_part_as_ms
-      .add(starttime_fractional_part_as_ms)
-      .subtract(this.timediffMilliseconds);
-
-    // when using the dummystream to generate data and actually POST it
-    // to an API use this counter to keep track of the number of fragments
-    // successfully sent.
-    this.nFragmentsSuccessfullySentSinceLastValidate = 0;
-
-    // Keep track of how many entries were validated (from the start of the
-    // stream). Used by fetchAndValidate().
-    this.nSamplesValidatedSoFar = BigInt(0);
-
-    // Initialize value for random walk, between -5 and 5, and cut to a certain
-    // level of precision. TODO: make interval width a parameter (currently 10).
-    // Example:
-    // > Number(((Math.random() - 0.5) * 10.0).toFixed(1))
-    //   3.2
-    this.lastValue = Number(((Math.random() - 0.5) * 10.0).toFixed(1));
   }
 
   protected buildLabelSetFromOpts(opts: DummyTimeseriesMetricsOpts): LabelSet {
@@ -248,6 +263,44 @@ export class DummyTimeseries extends TimeseriesBase {
       this.lastValue = this.lastValue - 0.1;
     }
     return this.lastValue;
+  }
+
+  private nextSampleFromWalltime(): MetricSample {
+    // In JavaScript, `new Date().valueOf()` seems to be the way to get
+    // milliseconds since epoch, as a `number` type. Shift us 20 minutes into
+    // the past compared to _actual_ wall time ( 20 * 60 * 1000 milliseconds)
+    // because we must note overtake the walltime of the receiving end and any
+    // real-world metrics ingestion system receives metrics _from the past_
+    // (sometimes maybe just 30 seconds old, sometimes various minutes old --
+    // make this delay configurable. needs to be tuned against the
+    // write-into-the-future protection time constants below).
+    let newSamplemillisSinceEpoch = Long.fromNumber(
+      new Date().valueOf() - 1200000
+    );
+
+    // If we are too fast (generating more than one sample within the same
+    // millisecond of wall time) then artificially add the smallest required
+    // difference -- which is 1 millisecond (defined by Prometheus data
+    // structures). Via this mechanism we might actually be faster than wall
+    // time. and end up having a rather synthetic time source again. It's up to
+    // the caller / user to choose parameters so that
+    // `nextSampleFromWalltime()` is not called more than once per T. T can be,
+    // depending on the goals: 1 ms, 1 s, 1 minute, ... For obtaining a
+    // realistic write load guided by wall time with a predictable _largish_
+    // time difference between adjacent samples it might make sense to use
+    // the existing approach.
+    if (
+      this.millisSinceEpochOfLastGeneratedSample >= newSamplemillisSinceEpoch
+    ) {
+      newSamplemillisSinceEpoch = this.millisSinceEpochOfLastGeneratedSample.add(
+        1
+      );
+    }
+
+    return new MetricSample(
+      this.nextValue(),
+      this.millisSinceEpochOfLastGeneratedSample
+    );
   }
 
   protected nextSample(): MetricSample {

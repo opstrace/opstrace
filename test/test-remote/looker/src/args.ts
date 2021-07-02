@@ -56,6 +56,7 @@ interface CfgInterface {
   retry_post_jitter: number;
   skip_read: boolean;
   read_n_streams_only: number;
+  use_wall_time: boolean;
 }
 
 export let CFG: CfgInterface;
@@ -87,6 +88,21 @@ export function parseCmdlineArgs(): void {
     help:
       "metrics mode (Cortex) instead of logs mode (Loki) -- " +
       "metrics mode was added later in a quick and dirty fashion, still visible",
+    action: "store_true",
+    default: false
+  });
+
+  parser.add_argument("--use-wall-time", {
+    help:
+      "Instead of using a synthetic time source, use current wall time" +
+      "when generating log/metric samples. This is conceptually incompatible " +
+      "with read validation and therefore requires --skip-read. If sample " +
+      "generation is too fast, then the smallest possible time difference " +
+      "between adjacent samples is applied artificially " +
+      "(1 ms for adjacent metric samples, 1 ns for adjacent log samples). " +
+      "In --metrics-mode, actually shift wall time 20 minutes in the past " +
+      "because we are not allowed to write into the future " +
+      "(TODO: make shift configurable.",
     action: "store_true",
     default: false
   });
@@ -218,7 +234,8 @@ export function parseCmdlineArgs(): void {
       "streams (unique label sets). Default: new streams are created with every " +
       "write/read cycle. For log streams, when a new stream is initialized it " +
       "re-uses the same synthetic start time as set before (program invocation time " +
-      "or log_start_time). Metric streams are always guided by wall time.",
+      "or log_start_time), unless --use-wall-time is set. Metric streams " +
+      "are always guided by wall time.",
     type: "int",
     default: 1
   });
@@ -337,6 +354,27 @@ export function parseCmdlineArgs(): void {
   if (CFG.change_streams_every_n_cycles > CFG.n_cycles) {
     log.error("change_streams_every_n_cycles must not be larger than n_cycles");
     process.exit(1);
+  }
+
+  if (CFG.use_wall_time) {
+    if (!CFG.skip_read) {
+      log.error("--use-wall-time requires --skip-read");
+      process.exit(1);
+    }
+
+    if (!CFG.log_time_increment_ns) {
+      log.error(
+        "--use-wall-time cannot be combined with log_time_increment_ns"
+      );
+      process.exit(1);
+    }
+
+    if (!CFG.metrics_time_increment_ms) {
+      log.error(
+        "--use-wall-time cannot be combined with metrics_time_increment_ms"
+      );
+      process.exit(1);
+    }
   }
 
   if (CFG.max_concurrent_writes > CFG.n_concurrent_streams) {

@@ -140,6 +140,9 @@ export abstract class TimeseriesBase {
    *stream). Used by fetchAndValidate(). */
   protected nSamplesValidatedSoFar: bigint;
 
+  /** If set, don't use timediff.. but use wall time instead */
+  protected useWallTime: boolean;
+
   n_samples_per_series_fragment: number;
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
@@ -154,6 +157,7 @@ export abstract class TimeseriesBase {
     this.labels = this.buildLabelSetFromOpts(opts);
     this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
     this.nSamplesValidatedSoFar = BigInt(0);
+    this.useWallTime = opts.useWallTime || false;
   }
 
   protected abstract buildLabelSetFromOpts(

@@ -212,10 +212,16 @@ async function createNewDummyStreams(
         pm.counter_forward_leap
       );
     } else {
+      // Always make a dummy log series start at the same specific time, even
+      // across cycles; unless --use-wall-time is set.
+      let starttime = ZonedDateTime.parse(CFG.log_start_time);
+      if (CFG.use_wall_time) {
+        starttime = ZonedDateTime.now();
+      }
       stream = new DummyStream({
         n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
         n_chars_per_message: CFG.n_chars_per_msg,
-        starttime: ZonedDateTime.parse(CFG.log_start_time),
+        starttime: starttime,
         uniqueName: streamname,
         timediffNanoseconds: CFG.log_time_increment_ns,
         includeTimeInMsg: true,

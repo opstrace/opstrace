@@ -1,12 +1,5 @@
 Braindump, might be good or bad ideas
 
-- time source:
-    - wall time of executing machine, must be combined with --write-only
-      because it does not allow for deep read validation
-
-- metrics mode: solve time skew problem:
-    - with --write-only mode, using wall time
-
 
 - maybe add a command line flag allowing for ignoring 'out of order' errors in general
 

@@ -52,6 +52,8 @@ export interface DummyStreamOpts {
   n_chars_per_message: number;
   starttime: ZonedDateTime;
   timediffNanoseconds: number;
+  // don't use timediff.. but use wall time instead
+  useWallTime?: boolean;
   includeTimeInMsg: boolean;
   uniqueName: string;
   labelset: LabelSet | undefined;
