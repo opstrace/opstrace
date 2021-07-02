@@ -37,18 +37,18 @@ import {
 } from "./testutils";
 
 import {
-  LogStreamEntry,
-  LogStreamEntryTimestamp,
+  LogSample,
+  LogSampleTimestamp,
   LogStreamFragment,
   LogStreamFragmentPushRequest,
   DummyStream
 } from "./looker/src/logs";
 
-import { LabelSet } from "./looker/src/metrics";
+import { LabelSet } from "./looker/src/series";
 
 import { waitForLokiQueryResult } from "./testutils/logs";
 
-export class LogStreamEntryTimestampGenerator {
+export class LogSampleTimestampGenerator {
   private currentSeconds: number;
   private currentNanos: number;
 
@@ -64,7 +64,7 @@ export class LogStreamEntryTimestampGenerator {
       this.currentSeconds += 1;
     }
 
-    const incrt: LogStreamEntryTimestamp = {
+    const incrt: LogSampleTimestamp = {
       seconds: this.currentSeconds,
       nanos: this.currentNanos
     };
@@ -78,15 +78,13 @@ function createDummyPushRequest(
   N_entries: number,
   samplegen: () => string
 ): LogStreamFragmentPushRequest {
-  const tsGenerator = new LogStreamEntryTimestampGenerator(starttime);
+  const tsGenerator = new LogSampleTimestampGenerator(starttime);
 
   const fragment = new LogStreamFragment(labels);
 
   const t0 = mtime();
   for (let i = 1; i < N_entries + 1; i++) {
-    fragment.addEntry(
-      new LogStreamEntry(samplegen(), tsGenerator.incrementOneNs())
-    );
+    fragment.addEntry(new LogSample(samplegen(), tsGenerator.incrementOneNs()));
   }
 
   log.info(
@@ -313,7 +311,7 @@ suite("Loki API test suite", function () {
 
     const logStreamFragment = new LogStreamFragment(samplelabels);
     logStreamFragment.addEntry(
-      new LogStreamEntry(samplemsg, {
+      new LogSample(samplemsg, {
         seconds: sampletimestamp.toEpochSecond(),
         nanos: sampletimestamp.nano()
       })
