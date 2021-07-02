@@ -633,7 +633,7 @@ test-remote-looker:
 #     suite/test name. `make test-remote-ui` runs all tests that match.
 #     Note: `--invert, -i  Inverts --grep and --fgrep matches`.
 .PHONY: test-remote-ui
-test-remote-ui: kubectl-cluster-info
+test-remote-ui:
 	echo "--- running test-remote-ui"
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	docker run --tty --interactive --rm \
@@ -668,7 +668,7 @@ test-remote-ui: kubectl-cluster-info
 
 # This runs our set of browser based tests using the Playwright Test Runner
 .PHONY: test-browser
-test-browser: kubectl-cluster-info
+test-browser:
 	echo "--- running test-browser"
 	mkdir -p ${OPSTRACE_BUILD_DIR}/browser-test-results
 	docker run --tty --interactive --rm \
