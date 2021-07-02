@@ -19,6 +19,18 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     ./aws/install && \
     rm awscliv2.zip
 
+# gcloud CLI, required to refresh kubeconfig credentials
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+RUN apt-get update && apt-get install -y -q --no-install-recommends google-cloud-sdk
+RUN apt-get -y autoclean
+
+RUN gcloud config set core/disable_usage_reporting true && \
+    gcloud config set component_manager/disable_update_check true && \
+    gcloud config set metrics/environment github_docker_image
+
 # Make the /build/test/test-remote directory in the container image be the NPM package dir
 # for the `test-remote` package. Bake the NPM package dependencies into the container image
 # by running `yarn install`, based on package.json and yarn lock file.

@@ -555,15 +555,22 @@ rebuild-looker-container-image:
 	make -C test/test-remote/looker image
 
 
+#
+# Mounts the secrets in the container for gcloud to access the GCP credentials.
+#
 .PHONY: kubectl-cluster-info
 kubectl-cluster-info:
 	docker run --tty --interactive --rm \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets:ro \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
 		-e KUBECONFIG=/kubeconfig/config \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
+		-e GCLOUD_CLI_REGION \
+		-e GCLOUD_CLI_ZONE \
+		-e GOOGLE_APPLICATION_CREDENTIALS \
 		--dns $(shell ci/dns_cache.sh) \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		kubectl cluster-info
