@@ -680,16 +680,13 @@ test-browser:
 	mkdir -p ${OPSTRACE_BUILD_DIR}/browser-test-results
 	docker run --tty --interactive --rm \
 		--net=host \
+		--dns $(shell ci/dns_cache.sh) \
 		-v ${OPSTRACE_BUILD_DIR}/browser-test-results:/build/test/browser/test-results \
-		-v /tmp:/tmp \
-		-u $(shell id -u):${DOCKER_GID_HOST} \
-		-v /etc/passwd:/etc/passwd \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
-		--dns $(shell ci/dns_cache.sh) \
-		--workdir /build/test/browser \
-		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+	  opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
  		yarn playwright test --workers 1 --forbid-only
+
 
 # Used by CI:
 # three outcomes:
