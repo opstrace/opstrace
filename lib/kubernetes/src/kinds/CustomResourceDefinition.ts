@@ -49,18 +49,16 @@ export const crdActions = {
     { resources: CustomResourceDefinitions },
     { error: Error }
   >(),
-  onUpdated: createAction("ON_UPDATED_K8S_CRDS")<
-    CustomResourceDefinitionType
-  >(),
+  onUpdated: createAction(
+    "ON_UPDATED_K8S_CRDS"
+  )<CustomResourceDefinitionType>(),
   onAdded: createAction("ON_ADDED_K8S_CRDS")<CustomResourceDefinitionType>(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_CRDS")<
-    CustomResourceDefinitionType
-  >()
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_CRDS"
+  )<CustomResourceDefinitionType>()
 };
 export type CustomResourceDefinitionActions = ActionType<typeof crdActions>;
-export type CustomResourceDefinitionState = ResourceCache<
-  CustomResourceDefinitionType
->;
+export type CustomResourceDefinitionState = ResourceCache<CustomResourceDefinitionType>;
 
 const initialState: CustomResourceDefinitionState = {
   loaded: false,
@@ -140,6 +138,7 @@ export class CustomResourceDefinition extends K8sResource {
     const client = kubeConfig.makeApiClient(api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;
@@ -224,7 +223,7 @@ export class CustomResourceDefinition extends K8sResource {
       {
         headers: { "Content-Type": "application/merge-patch+json" }
       }
-    )
+    );
   }
   delete(): Promise<{
     response: IncomingMessage;

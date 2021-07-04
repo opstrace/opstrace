@@ -47,9 +47,9 @@ export const storageClassActions = {
   )<Record<string, unknown>, { resources: StorageClasses }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_STORAGE_CLASSES")<StorageClassType>(),
   onAdded: createAction("ON_ADDED_K8S_STORAGE_CLASSES")<StorageClassType>(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_STORAGE_CLASSES")<
-    StorageClassType
-  >()
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_STORAGE_CLASSES"
+  )<StorageClassType>()
 };
 export type storageClassActions = ActionType<typeof storageClassActions>;
 export type StorageClassState = ResourceCache<StorageClassType>;
@@ -130,6 +130,7 @@ export class StorageClass extends K8sResource {
     const client = kubeConfig.makeApiClient(StorageV1Api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;

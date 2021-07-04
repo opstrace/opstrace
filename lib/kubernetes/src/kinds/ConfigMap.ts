@@ -47,9 +47,9 @@ export const configMapActions = {
   )<Record<string, unknown>, { resources: ConfigMaps }, { error: Error }>(),
   onUpdated: createAction("ON_UPDATED_K8S_CONFIGMAPS_REQUEST")<ConfigMapType>(),
   onAdded: createAction("ON_ADDED_K8S_CONFIGMAPS_REQUEST")<ConfigMapType>(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_CONFIGMAPS_REQUEST")<
-    ConfigMapType
-  >()
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_CONFIGMAPS_REQUEST"
+  )<ConfigMapType>()
 };
 export type ConfigMapActions = ActionType<typeof configMapActions>;
 export type ConfigMapState = ResourceCache<ConfigMapType>;
@@ -130,6 +130,7 @@ export class ConfigMap extends K8sResource {
     const client = kubeConfig.makeApiClient(api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;

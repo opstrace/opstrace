@@ -48,22 +48,20 @@ export const persistentVolumeClaimActions = {
     { resources: PersistentVolumeClaims },
     { error: Error }
   >(),
-  onUpdated: createAction("ON_UPDATED_K8S_PERSISTENT_VOLUME_CLAIMS")<
-    PersistentVolumeClaimType
-  >(),
-  onAdded: createAction("ON_ADDED_K8S_PERSISTENT_VOLUME_CLAIMS")<
-    PersistentVolumeClaimType
-  >(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_PERSISTENT_VOLUME_CLAIMS")<
-    PersistentVolumeClaimType
-  >()
+  onUpdated: createAction(
+    "ON_UPDATED_K8S_PERSISTENT_VOLUME_CLAIMS"
+  )<PersistentVolumeClaimType>(),
+  onAdded: createAction(
+    "ON_ADDED_K8S_PERSISTENT_VOLUME_CLAIMS"
+  )<PersistentVolumeClaimType>(),
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_PERSISTENT_VOLUME_CLAIMS"
+  )<PersistentVolumeClaimType>()
 };
 export type PersistentVolumeClaimActions = ActionType<
   typeof persistentVolumeClaimActions
 >;
-export type PersistentVolumeClaimState = ResourceCache<
-  PersistentVolumeClaimType
->;
+export type PersistentVolumeClaimState = ResourceCache<PersistentVolumeClaimType>;
 
 const initialState: PersistentVolumeClaimState = {
   loaded: false,
@@ -143,6 +141,7 @@ export class PersistentVolumeClaim extends K8sResource {
     const client = kubeConfig.makeApiClient(api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;

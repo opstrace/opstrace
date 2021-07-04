@@ -126,6 +126,7 @@ export class StatefulSet extends K8sResource {
     const client = kubeConfig.makeApiClient(AppsV1Api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;
