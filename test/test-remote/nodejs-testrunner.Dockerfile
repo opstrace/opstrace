@@ -48,10 +48,9 @@ COPY packages/buildinfo/ /build/packages/buildinfo/
 WORKDIR /build/test/test-remote
 
 RUN cat package.json tsconfig.json && echo /build: && ls -al /build/*
-
 RUN yarn install --frozen-lockfile
 
-# Build test modules as well as dependencies such as lib/kubernetes
+# Build TS dependencies such as lib/kubernetes
 RUN yarn tsc
 
 # Install playwright with yarn w/o installing browser binaries. Then call
@@ -63,7 +62,6 @@ RUN yarn tsc
 # https://github.com/microsoft/playwright/issues/598#issuecomment-590151978
 RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn add playwright --frozen-lockfile
 
-
 # Put playwright executable into PATH.
 ENV PATH=${PATH}:/build/node_modules/.bin
 
@@ -72,22 +70,15 @@ RUN playwright -h
 
 # PLAYWRIGHT_BROWSERS_PATH=0 is needed for both browser installing and when
 # running playwright.
-# Note(JP): we only need to install chromium, but also install others.
+# Note(JP): we only need to install chromium
 ENV PLAYWRIGHT_BROWSERS_PATH=0
-WORKDIR /build
-RUN node node_modules/playwright/install.js
-
-WORKDIR /build/test/test-remote
+RUN playwright install chromium
 
 # Disable automatic NPM update check (would always show "npm update check
 # failed").
 ENV NO_UPDATE_NOTIFIER true
 
-
-
-
 # To use this image mount a volume with tests you want to run in a directory
 # under /build, example /build/test-remote, and run `yarn run mocha` in that
 # directory.
-
 CMD ["/bin/bash"]
