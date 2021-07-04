@@ -15,7 +15,7 @@
  */
 
 import { PlaywrightTestConfig } from "@playwright/test";
-// import { devices } from "@playwright/test";
+import { devices } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
   reporter: "dot",
@@ -33,37 +33,34 @@ const config: PlaywrightTestConfig = {
     {
       name: "Chromium",
       use: {
-        browserName: "chromium"
-
-        // terrcin - this is from the old test-remote running of chrome, does not appear to be needed yet and also not sure how to specify it with playwright test runner
-        // args: [
-        //   // https://github.com/microsoft/playwright/blob/761bd78879c83ed810ae38ef39513b2d874badb1/docs/ci.md#docker
-        //   "--disable-dev-shm-usage"
-        // ]
+        browserName: "chromium",
+        launchOptions: {
+          args: ["--disable-dev-shm-usage"] // https://playwright.dev/python/docs/ci/#docker
+        }
       }
     },
-    // {
-    //   name: "Firefox",
-    //   use: { browserName: "firefox" }
-    // },
+    {
+      name: "Firefox",
+      use: { browserName: "firefox" }
+    },
     {
       name: "WebKit",
       use: { browserName: "webkit" }
+    },
+    {
+      name: "Pixel-4",
+      use: {
+        browserName: "chromium",
+        ...devices["Pixel 4"]
+      }
+    },
+    {
+      name: "iPhone-11",
+      use: {
+        browserName: "webkit",
+        ...devices["iPhone 11"]
+      }
     }
-    // {
-    //   name: "Pixel-4",
-    //   use: {
-    //     browserName: "chromium",
-    //     ...devices["Pixel 4"]
-    //   }
-    // },
-    // {
-    //   name: "iPhone-11",
-    //   use: {
-    //     browserName: "webkit",
-    //     ...devices["iPhone 11"]
-    //   }
-    // }
   ]
 };
 
