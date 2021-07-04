@@ -555,15 +555,22 @@ rebuild-looker-container-image:
 	make -C test/test-remote/looker image
 
 
+#
+# Mounts the secrets in the container for gcloud to access the GCP credentials.
+#
 .PHONY: kubectl-cluster-info
 kubectl-cluster-info:
 	docker run --tty --interactive --rm \
 		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets:ro \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
 		-e KUBECONFIG=/kubeconfig/config \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
+		-e GCLOUD_CLI_REGION \
+		-e GCLOUD_CLI_ZONE \
+		-e GOOGLE_APPLICATION_CREDENTIALS \
 		--dns $(shell ci/dns_cache.sh) \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		kubectl cluster-info
@@ -633,7 +640,7 @@ test-remote-looker:
 #     suite/test name. `make test-remote-ui` runs all tests that match.
 #     Note: `--invert, -i  Inverts --grep and --fgrep matches`.
 .PHONY: test-remote-ui
-test-remote-ui: kubectl-cluster-info
+test-remote-ui:
 	echo "--- running test-remote-ui"
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	docker run --tty --interactive --rm \
@@ -668,7 +675,7 @@ test-remote-ui: kubectl-cluster-info
 
 # This runs our set of browser based tests using the Playwright Test Runner
 .PHONY: test-browser
-test-browser: kubectl-cluster-info
+test-browser:
 	echo "--- running test-browser"
 	mkdir -p ${OPSTRACE_BUILD_DIR}/browser-test-results
 	docker run --tty --interactive --rm \
@@ -678,7 +685,8 @@ test-browser: kubectl-cluster-info
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
 	  opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
- 		yarn playwright test --workers 1
+ 		yarn playwright test --workers 1 --forbid-only
+
 
 # Used by CI:
 # three outcomes:
