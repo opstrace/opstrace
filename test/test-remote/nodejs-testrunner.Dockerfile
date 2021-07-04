@@ -47,20 +47,34 @@ COPY packages/buildinfo/ /build/packages/buildinfo/
 
 WORKDIR /build/test/test-remote
 
-# note: there is a known and unresolved issue where yarn can fail to download playwright browser binaries,
-# npm (and node itself) doesn't have this issue. https://github.com/yarnpkg/yarn/issues/7887
-# The suggested workaround is to manually install the binaries as referenced here:
+RUN cat package.json tsconfig.json && echo /build: && ls -al /build/*
+
+RUN yarn install --frozen-lockfile
+
+# Build test modules as well as dependencies such as lib/kubernetes
+RUN yarn tsc
+
+# Install playwright with yarn w/o installing browser binaries. Then call
+# `playwright/install.js` directly for installing browser binaries. This
+# installer is known to not be perfectly robust and instead of yarn shelling
+# out to `playwright/install.js` we want to be able to call it directly, can
+# retry if desired. Also see https://github.com/yarnpkg/yarn/issues/7887
 # https://github.com/microsoft/playwright/issues/581#issuecomment-585506945
 # https://github.com/microsoft/playwright/issues/598#issuecomment-590151978
-# So at first we'll force installing playwright without the browser binaries and then manually install them
-RUN cat package.json tsconfig.json && \
-    echo /build: && ls -al /build/* && \
-    yarn install --frozen-lockfile && \
-    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn add playwright --frozen-lockfile
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 yarn add playwright --frozen-lockfile
 
-WORKDIR /build
-# This ENV is needed for both browser installing and when running playwright
+
+# Put playwright executable into PATH.
+ENV PATH=${PATH}:/build/node_modules/.bin
+
+# Check if it's callable.
+RUN playwright -h
+
+# PLAYWRIGHT_BROWSERS_PATH=0 is needed for both browser installing and when
+# running playwright.
+# Note(JP): we only need to install chromium, but also install others.
 ENV PLAYWRIGHT_BROWSERS_PATH=0
+WORKDIR /build
 RUN node node_modules/playwright/install.js
 
 WORKDIR /build/test/test-remote
@@ -69,14 +83,8 @@ WORKDIR /build/test/test-remote
 # failed").
 ENV NO_UPDATE_NOTIFIER true
 
-# Add the folder where dependency binaries are installed to the containers PATH.
-ENV PATH=${PATH}:/build/node_modules/.bin
 
-# Sanity check that all dependencies/libraries are actually present before running tests
-# If we don't run 'yarn tsc' then we get errors about not being able to find '@opstrace/kubernetes' when running tests.
-RUN playwright -h && \
-    cd /build/test/test-remote && \
-    yarn tsc
+
 
 # To use this image mount a volume with tests you want to run in a directory
 # under /build, example /build/test-remote, and run `yarn run mocha` in that
