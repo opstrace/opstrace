@@ -49,15 +49,15 @@ export const podSecurityPolicyActions = {
     { resources: PodSecurityPolicies },
     { error: Error }
   >(),
-  onUpdated: createAction("ON_UPDATED_K8S_POD_SECURITY_POLICIES")<
-    PodSecurityPolicyType
-  >(),
-  onAdded: createAction("ON_ADDED_K8S_POD_SECURITY_POLICIES")<
-    PodSecurityPolicyType
-  >(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_POD_SECURITY_POLICIES")<
-    PodSecurityPolicyType
-  >()
+  onUpdated: createAction(
+    "ON_UPDATED_K8S_POD_SECURITY_POLICIES"
+  )<PodSecurityPolicyType>(),
+  onAdded: createAction(
+    "ON_ADDED_K8S_POD_SECURITY_POLICIES"
+  )<PodSecurityPolicyType>(),
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_POD_SECURITY_POLICIES"
+  )<PodSecurityPolicyType>()
 };
 export type PodSecurityPolicyActions = ActionType<
   typeof podSecurityPolicyActions
@@ -140,6 +140,7 @@ export class PodSecurityPolicy extends K8sResource {
     const client = kubeConfig.makeApiClient(PolicyV1beta1Api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;

@@ -49,15 +49,15 @@ export const clusterRoleBindingActions = {
     { resources: ClusterRoleBindings },
     { error: Error }
   >(),
-  onUpdated: createAction("ON_UPDATED_K8S_CLUSTER_ROLE_BINDINGS")<
-    ClusterRoleBindingType
-  >(),
-  onAdded: createAction("ON_ADDED_K8S_CLUSTER_ROLE_BINDINGS")<
-    ClusterRoleBindingType
-  >(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_CLUSTER_ROLE_BINDINGS")<
-    ClusterRoleBindingType
-  >()
+  onUpdated: createAction(
+    "ON_UPDATED_K8S_CLUSTER_ROLE_BINDINGS"
+  )<ClusterRoleBindingType>(),
+  onAdded: createAction(
+    "ON_ADDED_K8S_CLUSTER_ROLE_BINDINGS"
+  )<ClusterRoleBindingType>(),
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_CLUSTER_ROLE_BINDINGS"
+  )<ClusterRoleBindingType>()
 };
 export type ClusterRoleBindingActions = ActionType<
   typeof clusterRoleBindingActions
@@ -140,6 +140,7 @@ export class ClusterRoleBinding extends K8sResource {
     const client = kubeConfig.makeApiClient(RbacAuthorizationV1Api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;

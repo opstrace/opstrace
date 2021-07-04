@@ -49,13 +49,13 @@ export const serviceAccountActions = {
     { resources: ServiceAccounts },
     { error: Error }
   >(),
-  onUpdated: createAction("ON_UPDATED_K8S_SERVICE_ACCOUNTS")<
-    ServiceAccountType
-  >(),
+  onUpdated: createAction(
+    "ON_UPDATED_K8S_SERVICE_ACCOUNTS"
+  )<ServiceAccountType>(),
   onAdded: createAction("ON_ADDED_K8S_SERVICE_ACCOUNTS")<ServiceAccountType>(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_SERVICE_ACCOUNTS")<
-    ServiceAccountType
-  >()
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_SERVICE_ACCOUNTS"
+  )<ServiceAccountType>()
 };
 export type ServiceAccountActions = ActionType<typeof serviceAccountActions>;
 export type ServiceAccountState = ResourceCache<ServiceAccountType>;
@@ -133,6 +133,7 @@ export class ServiceAccount extends K8sResource {
     const client = kubeConfig.makeApiClient(CoreV1Api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;

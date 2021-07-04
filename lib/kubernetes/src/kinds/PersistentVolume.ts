@@ -48,15 +48,15 @@ export const persistentVolumeActions = {
     { resources: PersistentVolumes },
     { error: Error }
   >(),
-  onUpdated: createAction("ON_UPDATED_K8S_PERSISTENT_VOLUMES")<
-    PersistentVolumeType
-  >(),
-  onAdded: createAction("ON_ADDED_K8S_PERSISTENT_VOLUMES")<
-    PersistentVolumeType
-  >(),
-  onDestroyed: createAction("ON_DESTROYED_K8S_PERSISTENT_VOLUMES")<
-    PersistentVolumeType
-  >()
+  onUpdated: createAction(
+    "ON_UPDATED_K8S_PERSISTENT_VOLUMES"
+  )<PersistentVolumeType>(),
+  onAdded: createAction(
+    "ON_ADDED_K8S_PERSISTENT_VOLUMES"
+  )<PersistentVolumeType>(),
+  onDestroyed: createAction(
+    "ON_DESTROYED_K8S_PERSISTENT_VOLUMES"
+  )<PersistentVolumeType>()
 };
 export type PersistentVolumeActions = ActionType<
   typeof persistentVolumeActions
@@ -138,6 +138,7 @@ export class PersistentVolume extends K8sResource {
     const client = kubeConfig.makeApiClient(api);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;
