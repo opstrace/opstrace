@@ -239,16 +239,16 @@ export class V1OrderApi {
 
   public addInterceptor(interceptor: Interceptor) {
       this.interceptors.push(interceptor);
-  } 
+  }
 
   /**
    * create a V1Order
    * @param namespace object name and auth scope, such as for teams and projects
-   * @param body 
+   * @param body
    * @param includeUninitialized If true, partially initialized resources are included in the response.
    * @param pretty If &#39;true&#39;, then the output is pretty printed.
    * @param dryRun When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
-   */  
+   */
   public async createNamespacedV1Order (namespace: string, body: V1Order, includeUninitialized?: boolean, pretty?: string, dryRun?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Order;  }> {
     const localVarPath = this.basePath + '/apis/acme.cert-manager.io/v1/namespaces/{namespace}/orders'
         .replace('{' + 'namespace' + '}', encodeURIComponent(String(namespace)));
@@ -403,7 +403,7 @@ export class V1OrderApi {
    * partially update the specified V1Order
    * @param name name of the V1Order
    * @param namespace object name and auth scope, such as for teams and projects
-   * @param body 
+   * @param body
    * @param pretty If &#39;true&#39;, then the output is pretty printed.
    * @param dryRun When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
    */
@@ -489,8 +489,8 @@ export class V1OrderApi {
    * @param gracePeriodSeconds The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
    * @param orphanDependents Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the &quot;orphan&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both.
    * @param propagationPolicy Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground.
-   * @param body 
-   */  
+   * @param body
+   */
   public async deleteNamespacedV1Order (name: string, namespace: string, pretty?: string, dryRun?: string, gracePeriodSeconds?: number, orphanDependents?: boolean, propagationPolicy?: string, body?: any, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: IncomingMessage; body: V1Status;  }> {
     const localVarPath = this.basePath + '/apis/acme.cert-manager.io/v1/namespaces/{namespace}/orders/{name}'
         .replace('{' + 'name' + '}', encodeURIComponent(String(name)))
@@ -763,6 +763,7 @@ export class V1OrderResource extends K8sResource {
     const client = kubeConfig.makeApiClient(V1OrderApi);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;
@@ -815,14 +816,14 @@ export class V1OrderResource extends K8sResource {
     body: V1Order;
   }> {
     return this.api.createNamespacedV1Order(this.namespace, this.resource)
-    
+
   }
   read(): Promise<{
     response: IncomingMessage;
     body: V1Order;
   }> {
     return this.api.readNamespacedV1Order(this.name, this.namespace)
-    
+
   }
   update(): Promise<{
     response: IncomingMessage;
@@ -836,7 +837,7 @@ export class V1OrderResource extends K8sResource {
         undefined,
         { headers: { "Content-Type": "application/merge-patch+json" } }
       )
-    
+
   }
   delete(): Promise<{
     response: IncomingMessage;
