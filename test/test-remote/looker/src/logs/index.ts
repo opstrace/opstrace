@@ -49,22 +49,22 @@ const pbTypeTimestamp = logPbfRoot.lookupType("google.protobuf.Timestamp");
 /*
 Terminology is a little hard.
 
+"Log stream" <-> "Log time series"
+
+Log stream:
+  - continuous concept, N fragments (N unknown)
+  - defined by label set (key/value pairs)
+
 One log stream entry:
   - message (text)
   - timestamp
 
+"entry" <--> "sample"
+
 Log stream fragment:
   - N samples
 
-Log stream:
-  - continuous concept, N fragments (N unknown)
-  - label set
-
 */
-
-// export interface LogStreamLabelset {
-//   [key: string]: string;
-// }
 
 export interface LogSampleTimestamp {
   seconds: number;
