@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { test as base, Cookie } from "@playwright/test";
+import { Cookie } from "@playwright/test";
 
 import { log } from "../utils";
 
@@ -53,84 +53,83 @@ type AuthenticationFixture = {
   authCookies: Cookie[];
 };
 
-// @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
-const test = base.extend<Record<string, never>, AuthenticationFixture>({
-  system: [
-    async ({ browser }, use) => {
-      const system: SystemFixture = {
-        runningInCI: process.env.BUILDKITE === "true"
-      };
-      await use(system);
-    },
-    { scope: "worker" }
-  ],
-  cluster: [
-    async ({ browser }, use) => {
-      const cluster: ClusterFixture = {
-        name: CLUSTER_NAME,
-        baseUrl: CLUSTER_BASE_URL,
-        cloudProvider: CLOUD_PROVIDER_DEFAULTS
-      };
-      cluster.cloudProvider[CLOUD_PROVIDER] = true;
-      await use(cluster);
-    },
-    { scope: "worker" }
-  ],
-  user: [
-    async ({ browser }, use) => {
-      const user: UserFixture = {
-        email: CI_LOGIN_EMAIL
-      };
-      await use(user);
-    },
-    { scope: "worker" }
-  ],
-  authCookies: [
-    async ({ browser }, use) => {
-      if (!CLUSTER_BASE_URL) {
-        log.error(
-          "env variables OPSTRACE_CLUSTER_NAME or OPSTRACE_CLUSTER_BASE_URL must be set"
-        );
-        process.exit(1);
-      }
+export const addAuthFixture = test =>
+  // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
+  test.extend<Record<string, never>, AuthenticationFixture>({
+    system: [
+      async ({ browser }, use) => {
+        const system: SystemFixture = {
+          runningInCI: process.env.BUILDKITE === "true"
+        };
+        await use(system);
+      },
+      { scope: "worker" }
+    ],
+    cluster: [
+      async ({ browser }, use) => {
+        const cluster: ClusterFixture = {
+          name: CLUSTER_NAME,
+          baseUrl: CLUSTER_BASE_URL,
+          cloudProvider: CLOUD_PROVIDER_DEFAULTS
+        };
+        cluster.cloudProvider[CLOUD_PROVIDER] = true;
+        await use(cluster);
+      },
+      { scope: "worker" }
+    ],
+    user: [
+      async ({ browser }, use) => {
+        const user: UserFixture = {
+          email: CI_LOGIN_EMAIL
+        };
+        await use(user);
+      },
+      { scope: "worker" }
+    ],
+    authCookies: [
+      async ({ browser }, use) => {
+        if (!CLUSTER_BASE_URL) {
+          log.error(
+            "env variables OPSTRACE_CLUSTER_NAME or OPSTRACE_CLUSTER_BASE_URL must be set"
+          );
+          process.exit(1);
+        }
 
-      if (!CLOUD_PROVIDER) {
-        log.error(
-          "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
-        );
-        process.exit(1);
-      }
+        if (!CLOUD_PROVIDER) {
+          log.error(
+            "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
+          );
+          process.exit(1);
+        }
 
-      const context = await browser.newContext({ ignoreHTTPSErrors: true });
-      const page = await context.newPage();
+        const context = await browser.newContext({ ignoreHTTPSErrors: true });
+        const page = await context.newPage();
 
-      await page.goto(CLUSTER_BASE_URL);
+        await page.goto(CLUSTER_BASE_URL);
 
-      // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
-      // <span class="MuiButton-label">Log in</span>
-      await page.waitForSelector("css=button");
+        // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
+        // <span class="MuiButton-label">Log in</span>
+        await page.waitForSelector("css=button");
 
-      await page.click("text=Log in");
+        await page.click("text=Log in");
 
-      // Wait for CI-specific username/pw login form to appear
-      await page.waitForSelector("text=Don't remember your password?");
+        // Wait for CI-specific username/pw login form to appear
+        await page.waitForSelector("text=Don't remember your password?");
 
-      await page.fill("css=input[type=email]", CI_LOGIN_EMAIL);
-      await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
+        await page.fill("css=input[type=email]", CI_LOGIN_EMAIL);
+        await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
 
-      await page.click("css=button[type=submit]");
+        await page.click("css=button[type=submit]");
 
-      // The first view after successful login is expected to be the details page
-      // for the `system` tenant, showing a link to Grafana.
-      await page.waitForSelector("[data-test=getting-started]");
+        // The first view after successful login is expected to be the details page
+        // for the `system` tenant, showing a link to Grafana.
+        await page.waitForSelector("[data-test=getting-started]");
 
-      const cookies = await page.context().cookies();
-      await page.close();
+        const cookies = await page.context().cookies();
+        await page.close();
 
-      await use(cookies);
-    },
-    { scope: "worker", auto: true }
-  ]
-});
-
-export { test };
+        await use(cookies);
+      },
+      { scope: "worker", auto: true }
+    ]
+  });
