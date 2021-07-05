@@ -54,7 +54,6 @@ type AuthenticationFixture = {
 };
 
 export const addAuthFixture = test =>
-  // @ts-ignore: to get CI to go past the current point it's failing at to see if anything else fails
   test.extend<Record<string, never>, AuthenticationFixture>({
     system: [
       async ({ browser }, use) => {
