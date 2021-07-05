@@ -77,12 +77,12 @@ export interface LogSampleTimestamp {
 // The log sample value is text, i.e. type string
 export class LogSample extends SampleBase<string, LogSampleTimestamp> {}
 
-export interface LogStreamFragmentStats extends FragmentStatsBase {
+export interface LogSeriesFragmentStats extends FragmentStatsBase {
   timeOfFirstEntry: string;
   timeOfLastEntry: string;
 }
 
-export class LogStreamFragment extends FragmentBase<LogSample, DummyStream> {
+export class LogSeriesFragment extends FragmentBase<LogSample, DummyStream> {
   /*
   A class that allows for building up a log stream fragment.
 
@@ -154,14 +154,14 @@ export class LogStreamFragment extends FragmentBase<LogSample, DummyStream> {
     this.stats = stats;
   }
 
-  public serialize(): LogStreamFragmentPushRequest {
+  public serialize(): LogSeriesFragmentPushRequest {
     this.serialized = true;
-    return new LogStreamFragmentPushRequest([this]);
+    return new LogSeriesFragmentPushRequest([this]);
   }
 }
 
-export class LogStreamFragmentPushRequest {
-  fragments: LogStreamFragment[];
+export class LogSeriesFragmentPushRequest {
+  fragments: LogSeriesFragment[];
   //labels: LogStreamLabelset;
   textmd5: string;
   data: Buffer;
@@ -172,9 +172,9 @@ export class LogStreamFragmentPushRequest {
   serializationTimeSeconds: number;
   postHeaders: Record<string, string>;
 
-  constructor(logStreamFragment: LogStreamFragment[]) {
-    this.fragments = logStreamFragment;
-    //this.labels = logStreamFragment.labels;
+  constructor(LogSeriesFragment: LogSeriesFragment[]) {
+    this.fragments = LogSeriesFragment;
+    //this.labels = LogSeriesFragment.labels;
     this.payloadByteCount = BigInt(0);
 
     const [

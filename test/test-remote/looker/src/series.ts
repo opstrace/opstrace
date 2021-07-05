@@ -18,16 +18,16 @@ import { ZonedDateTime } from "@js-joda/core";
 
 import {
   DummyStreamOpts,
-  LogStreamFragment,
+  LogSeriesFragment,
   LogSample,
   DummyStreamFetchAndValidateOpts,
-  LogStreamFragmentStats
+  LogSeriesFragmentStats
 } from "./logs";
 
 import {
   DummyTimeseriesMetricsOpts,
   DummyTimeseriesFetchAndValidateOpts,
-  TimeseriesFragment,
+  MetricSeriesFragment,
   MetricSample,
   FragmentStatsMetrics
 } from "./metrics";
@@ -57,7 +57,7 @@ export abstract class FragmentBase<SampleType, ParentType> {
   public index: number;
   /** The time series that this fragment is part of (the "parent"). */
   public parent: ParentType | undefined;
-  public stats: LogStreamFragmentStats | FragmentStatsMetrics | undefined;
+  public stats: LogSeriesFragmentStats | FragmentStatsMetrics | undefined;
   //public stats: StatsType | undefined;
 
   // don't modify from outside
@@ -164,7 +164,7 @@ export abstract class TimeseriesBase {
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
   // last fragment consumed via this method.
-  lastFragmentConsumed: TimeseriesFragment | LogStreamFragment | undefined;
+  lastFragmentConsumed: MetricSeriesFragment | LogSeriesFragment | undefined;
 
   constructor(opts: DummyStreamOpts | DummyTimeseriesMetricsOpts) {
     this.nFragmentsConsumed = 0;
@@ -191,14 +191,14 @@ export abstract class TimeseriesBase {
   abstract currentTimeRFC3339Nano(): string;
 
   abstract generateAndGetNextFragment():
-    | [number, TimeseriesFragment | undefined]
-    | LogStreamFragment;
+    | [number, MetricSeriesFragment | undefined]
+    | LogSeriesFragment;
 
   protected abstract nextSample(): LogSample | MetricSample;
 
   protected abstract generateNextFragment():
-    | [number, TimeseriesFragment | undefined]
-    | LogStreamFragment;
+    | [number, MetricSeriesFragment | undefined]
+    | LogSeriesFragment;
 
   abstract fetchAndValidate(
     opts: DummyTimeseriesFetchAndValidateOpts | DummyStreamFetchAndValidateOpts

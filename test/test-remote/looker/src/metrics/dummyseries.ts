@@ -30,7 +30,7 @@ import * as mathjs from "mathjs";
 
 import {
   MetricSample,
-  TimeseriesFragment,
+  MetricSeriesFragment,
   FragmentStatsMetrics,
   formatFloatForComp
 } from "./index";
@@ -74,7 +74,7 @@ export class DummyTimeseries extends TimeseriesBase {
 
   // `undefined` means: do not collect validation info; this is so
   // that we ideally save memory
-  postedFragmentsSinceLastValidate: Array<TimeseriesFragment> | undefined;
+  postedFragmentsSinceLastValidate: Array<MetricSeriesFragment> | undefined;
 
   constructor(opts: DummyTimeseriesMetricsOpts, counterForwardLeap?: any) {
     super(opts);
@@ -386,7 +386,7 @@ export class DummyTimeseries extends TimeseriesBase {
 
   // no stop criterion: dummyseries is an infinite concept (definite start, it
   // indefinite end) -- the caller decides how many fragments to generate.
-  protected generateNextFragment(): [number, TimeseriesFragment | undefined] {
+  protected generateNextFragment(): [number, MetricSeriesFragment | undefined] {
     // TODO: this might get expensive, maybe use a monotonic time source
     // to make sure that we call this only once per minute or so.
     const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();
@@ -408,7 +408,7 @@ export class DummyTimeseries extends TimeseriesBase {
     }
 
     const t0 = mtime();
-    const fragment = new TimeseriesFragment(
+    const fragment = new MetricSeriesFragment(
       this.labels,
       this.nFragmentsConsumed + 1,
       this
@@ -420,7 +420,7 @@ export class DummyTimeseries extends TimeseriesBase {
 
     const genduration = mtimeDiffSeconds(t0);
     log.debug(
-      "TimeseriesFragment addSample loop took: %s s",
+      "MetricSeriesFragment addSample loop took: %s s",
       genduration.toFixed(3)
     );
     return [shiftIntoPastSeconds, fragment];
@@ -428,7 +428,7 @@ export class DummyTimeseries extends TimeseriesBase {
 
   public generateAndGetNextFragment(): [
     number,
-    TimeseriesFragment | undefined
+    MetricSeriesFragment | undefined
   ] {
     const [shiftIntoPastSeconds, seriesFragment] = this.generateNextFragment();
     if (seriesFragment !== undefined) {
@@ -449,7 +449,7 @@ export class DummyTimeseries extends TimeseriesBase {
     additionalHeaders?: Record<string, string>
   ): Promise<void> {
     for (let i = 1; i <= nFragments; i++) {
-      let fragment: TimeseriesFragment;
+      let fragment: MetricSeriesFragment;
       while (true) {
         const [shiftIntoPastSeconds, f] = this.generateAndGetNextFragment();
         if (f !== undefined) {
@@ -533,7 +533,7 @@ export class DummyTimeseries extends TimeseriesBase {
     this.postedFragmentsSinceLastValidate = [];
   }
 
-  private queryParamsForFragment(fragment: TimeseriesFragment) {
+  private queryParamsForFragment(fragment: MetricSeriesFragment) {
     // Confirm that fragment is 'closed' (serialized, has stats), and override
     // type from `LogStreamFragmentStats | FragmentStatsMetrics` to just
     // `FragmentStatsMetrics`.
@@ -576,7 +576,7 @@ export class DummyTimeseries extends TimeseriesBase {
   }
 
   private async fetchAndValidateFragment(
-    fragment: TimeseriesFragment,
+    fragment: MetricSeriesFragment,
     opts: DummyTimeseriesFetchAndValidateOpts
   ): Promise<number> {
     // instant-query-range-vector-selector-validation-method

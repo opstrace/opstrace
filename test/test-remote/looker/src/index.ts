@@ -27,16 +27,16 @@ import { Semaphore } from "await-semaphore";
 
 import {
   DummyStream,
-  LogStreamFragmentPushRequest,
-  LogStreamFragment,
+  LogSeriesFragmentPushRequest,
+  LogSeriesFragment,
   DummyStreamFetchAndValidateOpts,
   LokiQueryResult
 } from "./logs";
 
 import {
   DummyTimeseries,
-  TimeseriesFragment,
-  TimeseriesFragmentPushMessage,
+  MetricSeriesFragment,
+  MetricSeriesFragmentPushMessage,
   DummyTimeseriesFetchAndValidateOpts
 } from "./metrics";
 
@@ -632,7 +632,7 @@ async function _produceAndPOSTpushrequest(
     // Note: generateAndGetNextFragment() does not have a stop criterion
     // itself, the stop criteria are defined above, based on wall time passed
     // or the number of fragments already consumed for this stream.
-    const fragments: Array<LogStreamFragment | TimeseriesFragment> = [];
+    const fragments: Array<LogSeriesFragment | MetricSeriesFragment> = [];
 
     //
     if (!CFG.metrics_mode)
@@ -643,7 +643,7 @@ async function _produceAndPOSTpushrequest(
       }
     else {
       for (const s of streams as DummyTimeseries[]) {
-        let fragment: TimeseriesFragment;
+        let fragment: MetricSeriesFragment;
 
         // This while loop is effectively a throttling mechanism, only
         // built for metrics mode.
@@ -685,12 +685,14 @@ async function _produceAndPOSTpushrequest(
 
     const t0 = mtime();
 
-    let pr: LogStreamFragmentPushRequest | TimeseriesFragmentPushMessage;
+    let pr: LogSeriesFragmentPushRequest | MetricSeriesFragmentPushMessage;
 
     if (streams[0] instanceof DummyTimeseries) {
-      pr = new TimeseriesFragmentPushMessage(fragments as TimeseriesFragment[]);
+      pr = new MetricSeriesFragmentPushMessage(
+        fragments as MetricSeriesFragment[]
+      );
     } else {
-      pr = new LogStreamFragmentPushRequest(fragments as LogStreamFragment[]);
+      pr = new LogSeriesFragmentPushRequest(fragments as LogSeriesFragment[]);
     }
 
     //const pushrequest = fragment.serialize(); //toPushrequest();
@@ -878,7 +880,7 @@ function calcDelayBetweenPostRetries(attempt: number): number {
 }
 
 async function customPostWithRetryOrError(
-  pr: LogStreamFragmentPushRequest | TimeseriesFragmentPushMessage,
+  pr: LogSeriesFragmentPushRequest | MetricSeriesFragmentPushMessage,
   baseUrl: string
 ) {
   const deadline = mtimeDeadlineInSeconds(CFG.retry_post_deadline_seconds);
@@ -1036,7 +1038,7 @@ async function customPostWithRetryOrError(
 
 // should this be a method on the class?
 function markPushMessageAsSuccessfullySent(
-  pr: LogStreamFragmentPushRequest | TimeseriesFragmentPushMessage
+  pr: LogSeriesFragmentPushRequest | MetricSeriesFragmentPushMessage
 ) {
   // Keep track of the fact that this was successfully pushed out,
   // important for e.g. read-based validation after write.
@@ -1052,7 +1054,7 @@ function markPushMessageAsSuccessfullySent(
     frgmnt.buildStatisticsAndDropData();
 
     // dummyseries version
-    if (frgmnt instanceof TimeseriesFragment) {
+    if (frgmnt instanceof MetricSeriesFragment) {
       // `postedFragmentsSinceLastValidate` is an array if this object is meant
       // to collect information for read-validation, or `undefined` otherwise.
       if (frgmnt.parent!.postedFragmentsSinceLastValidate !== undefined) {
