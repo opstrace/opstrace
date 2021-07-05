@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-import { expect } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
+import { pipe } from "ramda";
 
-import { test } from "../fixtures/authenticated";
+import { addAuthFixture } from "../fixtures/authenticated";
+import { addTenantFixture } from "../fixtures/tenant";
 import { logUserIn } from "../utils/authentication";
-import { createTenant } from "../utils/tenant";
+import { createTenant, makeTenantName } from "../utils/tenant";
+
+import { log } from "../utils";
+
+const test = pipe(addAuthFixture, addTenantFixture)(base);
 
 test.describe("after auth0 authentication", () => {
   test.beforeEach(logUserIn);
@@ -29,8 +35,8 @@ test.describe("after auth0 authentication", () => {
     expect(await page.isVisible("[data-test='tenant/list']")).toBeTruthy();
   });
 
-  test("user can create a new Tenant", async ({ page, cluster }) => {
-    const tenantName = `treetops${Math.floor(Math.random() * 10000)}`;
+  test("user can create a new Tenant", async ({ page, cluster, tenant }) => {
+    const tenantName = makeTenantName();
     expect(
       await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
     ).toBeFalsy();
@@ -48,9 +54,13 @@ test.describe("after auth0 authentication", () => {
     expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
   });
 
+  // test("user can delete a new Tenant", async ({ page, cluster, hello }) => {
+  // });
+
   test.describe("validation of tenant name", () => {
-    test("user can create a new Tenant", async ({ page, cluster }) => {
-      expect(false).toBeTruthy();
+    test("user can create a new Tenant", async ({ page, cluster, tenant }) => {
+      const tenantName = makeTenantName();
+      await createTenant(tenantName, { page });
     });
   });
 });
