@@ -355,8 +355,7 @@ set -x
 export TENANT_RND_AUTHTOKEN
 export TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
 
-echo "+++ run test-remote"
-
+echo "+++ run test-browser"
 set +e
 make test-browser
 EXITCODE_MAKE_TEST_BROWSER=$?
@@ -366,14 +365,16 @@ echo "--- Exit status of make test-browser: ${EXITCODE_MAKE_TEST_BROWSER}"
 mkdir -p /build/bk-artifacts/browser-test-result || true
 mv browser-test-results /build/bk-artifacts/ || true
 
+echo "+++ run test-remote"
 set +e
 make test-remote
 EXITCODE_MAKE_TESTREMOTE=$?
 set -e
-echo "+++ Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
+echo "--- Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
 
+echo "+++ test-remote-ui"
 set +e
-make test-remote-ui
+make test-remote-ui  #todo: think/rename: ui-api
 EXITCODE_MAKE_TESTREMOTE_UI=$?
 set -e
 echo "--- Exit status of make test-remote-ui: ${EXITCODE_MAKE_TESTREMOTE_UI}"
@@ -381,7 +382,7 @@ echo "--- Exit status of make test-remote-ui: ${EXITCODE_MAKE_TESTREMOTE_UI}"
 # Rely on screenshots to be created with a certain file name prefix.
 cp test-remote-artifacts/uishot-*.png /build/bk-artifacts || true
 
-echo "--- run looker tests"
+echo "+++ run looker tests"
 source ci/invoke-looker.sh
 
 
