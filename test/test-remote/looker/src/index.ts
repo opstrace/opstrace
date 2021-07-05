@@ -26,18 +26,18 @@ import got, { Response as GotResponse } from "got";
 import { Semaphore } from "await-semaphore";
 
 import {
-  DummyStream,
+  LogSeries,
   LogSeriesFragmentPushRequest,
   LogSeriesFragment,
-  DummyStreamFetchAndValidateOpts,
+  LogSeriesFetchAndValidateOpts,
   LokiQueryResult
 } from "./logs";
 
 import {
-  DummyTimeseries,
+  MetricSeries,
   MetricSeriesFragment,
   MetricSeriesFragmentPushMessage,
-  DummyTimeseriesFetchAndValidateOpts
+  MetricSeriesFetchAndValidateOpts
 } from "./metrics";
 
 import { LabelSet } from "./series";
@@ -105,8 +105,8 @@ async function main() {
   parseCmdlineArgs();
   const httpServerTerminator = pm.setupPromExporter();
 
-  //let dummystreams: Array<DummyStream>;
-  let dummystreams: Array<DummyStream | DummyTimeseries>;
+  //let dummystreams: Array<LogSeries>;
+  let dummystreams: Array<LogSeries | MetricSeries>;
 
   for (let cyclenum = 1; cyclenum < CFG.n_cycles + 1; cyclenum++) {
     setUptimeGauge();
@@ -120,7 +120,7 @@ async function main() {
       // rely on cyclenum to start at 1, 0 % N is 0 so that in the first
       // run some dummystreams are created!
       log.info("cycle %s: create new dummystreams", cyclenum);
-      dummystreams = await createNewDummyStreams(guniqueCycleId);
+      dummystreams = await createNewLogSeriess(guniqueCycleId);
     } else {
       log.info(
         "cycle %s: continue to use dummystreams of previous cycle",
@@ -149,9 +149,9 @@ async function main() {
   httpServerTerminator.terminate();
 }
 
-async function createNewDummyStreams(
+async function createNewLogSeriess(
   guniqueCycleId: string
-): Promise<Array<DummyStream | DummyTimeseries>> {
+): Promise<Array<LogSeries | MetricSeries>> {
   const streams = [];
 
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
@@ -175,9 +175,9 @@ async function createNewDummyStreams(
       }
     }
 
-    let stream: DummyTimeseries | DummyStream;
+    let stream: MetricSeries | LogSeries;
     if (CFG.metrics_mode) {
-      stream = new DummyTimeseries(
+      stream = new MetricSeries(
         {
           metricName: `looker_${rndstring(4)}`, // might collide among streams, which is OK as long as the label set adds uniqueness
           uniqueName: streamname, // must not collide among streams
@@ -187,13 +187,13 @@ async function createNewDummyStreams(
           // compared to "now" (from Cortex' system time point of view), but we
           // also cannot fall behind for more than 60 minutes, see
           // https://github.com/cortexproject/cortex/issues/2366. That means that
-          // the wall time passed after DummyTimeseries initialization matters.
+          // the wall time passed after MetricSeries initialization matters.
           // How exactly it matters depends on the synthetically created time
           // difference between adjacent metric samples and the push rate. Use
           // the one hour leeway that we have here in a 'smart' way; let each
-          // DummyTimeseries start in the _center_ of the timewindow, i.e 30
+          // MetricSeries start in the _center_ of the timewindow, i.e 30
           // minutes in the past compared to "now", where "now" really is
-          // DummyTimeseries() initialization: use wall time as start time, so
+          // MetricSeries() initialization: use wall time as start time, so
           // that when generating new streams during runtime (from cycle to
           // cycle) that we don't keep going back to using the program's
           // invocation time, as is done for logs (where Loki accepts incoming
@@ -212,7 +212,7 @@ async function createNewDummyStreams(
         pm.counter_forward_leap
       );
     } else {
-      stream = new DummyStream({
+      stream = new LogSeries({
         n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
         n_chars_per_message: CFG.n_chars_per_msg,
         starttime: ZonedDateTime.parse(CFG.log_start_time),
@@ -243,7 +243,7 @@ async function createNewDummyStreams(
 
 async function performWriteReadCycle(
   cyclenum: number,
-  dummystreams: Array<DummyStream | DummyTimeseries>,
+  dummystreams: Array<LogSeries | MetricSeries>,
   guniqueCycleId: string
 ) {
   CYCLE_START_TIME_MONOTONIC = mtime();
@@ -292,7 +292,7 @@ async function performWriteReadCycle(
   log.info("wrote report to %s", reportFilePath);
 }
 
-async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
+async function writePhase(streams: Array<LogSeries | MetricSeries>) {
   const fragmentsPushedBefore = COUNTER_STREAM_FRAGMENTS_PUSHED;
 
   const lt0 = mtime();
@@ -337,7 +337,7 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
     );
 
     const streamsToValidate: Array<
-      DummyStream | DummyTimeseries
+      LogSeries | MetricSeries
     > = util.randomSampleFromArray(streams, CFG.read_n_streams_only);
 
     // For a small selection, show the names of the streams, for debuggability
@@ -422,7 +422,7 @@ async function writePhase(streams: Array<DummyStream | DummyTimeseries>) {
 
 async function throttledFetchAndValidate(
   semaphore: Semaphore,
-  stream: DummyStream | DummyTimeseries
+  stream: LogSeries | MetricSeries
 ) {
   let fetchresult;
 
@@ -443,16 +443,14 @@ async function throttledFetchAndValidate(
   return fetchresult;
 }
 
-async function unthrottledFetchAndValidate(
-  stream: DummyStream | DummyTimeseries
-) {
+async function unthrottledFetchAndValidate(stream: LogSeries | MetricSeries) {
   const inspectEveryNthEntry = 200;
   // const headers: Record<string, string> = {};
   // if (BEARER_TOKEN) {
   //   headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
   // }
   if (CFG.metrics_mode) {
-    const opts: DummyTimeseriesFetchAndValidateOpts = {
+    const opts: MetricSeriesFetchAndValidateOpts = {
       querierBaseUrl: CFG.apibaseurl,
       chunkSize: CFG.fetch_n_entries_per_query,
       inspectEveryNthEntry: inspectEveryNthEntry,
@@ -461,16 +459,16 @@ async function unthrottledFetchAndValidate(
     };
     return await stream.fetchAndValidate(opts);
   }
-  const opts: DummyStreamFetchAndValidateOpts = {
+  const opts: LogSeriesFetchAndValidateOpts = {
     querierBaseUrl: CFG.apibaseurl,
     chunkSize: CFG.fetch_n_entries_per_query,
     inspectEveryNthEntry: inspectEveryNthEntry,
-    customLokiQueryFunc: queryLokiWithRetryOrError // only used by DummyStream.fetchAndValidate: has custom header injection
+    customLokiQueryFunc: queryLokiWithRetryOrError // only used by LogSeries.fetchAndValidate: has custom header injection
   };
   return await stream.fetchAndValidate(opts);
 }
 
-async function readPhase(streams: Array<DummyStream | DummyTimeseries>) {
+async function readPhase(streams: Array<LogSeries | MetricSeries>) {
   log.info("entering read / validation phase");
   const validators = [];
   const vt0 = mtime();
@@ -560,12 +558,12 @@ async function readPhase(streams: Array<DummyStream | DummyTimeseries>) {
 /*
 For each stream, send all fragments (until stop criterion is hit).
 
-For each DummyStream, create one function that produces and POSTs pushrequests.
+For each LogSeries, create one function that produces and POSTs pushrequests.
 A "pushrequest" is a Prometheus term for a (snappy-compressed) protobuf message
 carrying log/metric payload data.
 */
 export async function generateAndPostFragments(
-  streams: Array<DummyStream | DummyTimeseries>
+  streams: Array<LogSeries | MetricSeries>
 ): Promise<void> {
   const actors = [];
 
@@ -581,7 +579,7 @@ export async function generateAndPostFragments(
   );
 
   //const N_STREAM_FRAGMENTS_PER_PUSH_REQUEST = 80;
-  const streamChunks = util.chunkify<DummyStream | DummyTimeseries>(
+  const streamChunks = util.chunkify<LogSeries | MetricSeries>(
     streams,
     CFG.n_fragments_per_push_message
   );
@@ -597,7 +595,7 @@ export async function generateAndPostFragments(
 // Part of the body of the while(true) {} main loop of
 // pushrequestProducerAndPOSTer().
 async function _produceAndPOSTpushrequest(
-  streams: Array<DummyStream | DummyTimeseries>,
+  streams: Array<LogSeries | MetricSeries>,
   semaphore: Semaphore
 ) {
   // TODO: THROTTLE
@@ -636,13 +634,13 @@ async function _produceAndPOSTpushrequest(
 
     //
     if (!CFG.metrics_mode)
-      for (const s of streams as DummyStream[]) {
+      for (const s of streams as LogSeries[]) {
         const f = s.generateAndGetNextFragment();
         fragments.push(f);
         s.lastFragmentConsumed = f;
       }
     else {
-      for (const s of streams as DummyTimeseries[]) {
+      for (const s of streams as MetricSeries[]) {
         let fragment: MetricSeriesFragment;
 
         // This while loop is effectively a throttling mechanism, only
@@ -687,7 +685,7 @@ async function _produceAndPOSTpushrequest(
 
     let pr: LogSeriesFragmentPushRequest | MetricSeriesFragmentPushMessage;
 
-    if (streams[0] instanceof DummyTimeseries) {
+    if (streams[0] instanceof MetricSeries) {
       pr = new MetricSeriesFragmentPushMessage(
         fragments as MetricSeriesFragment[]
       );
@@ -783,7 +781,7 @@ async function _produceAndPOSTpushrequest(
 }
 
 async function pushrequestProducerAndPOSTer(
-  streams: Array<DummyStream | DummyTimeseries>,
+  streams: Array<LogSeries | MetricSeries>,
   semaphore: Semaphore
 ) {
   let fragmentsPushed = 0;
@@ -1119,7 +1117,7 @@ async function httpGETRetryUntil200OrError(
 
     if (response.statusCode === 200) {
       util.logHTTPResponseLight(response);
-      // In the corresponding DummyStream object keep track of the fact that
+      // In the corresponding LogSeries object keep track of the fact that
       // this was successfully pushed out, important for e.g. read-based
       // validation after write.
       return response;
@@ -1161,7 +1159,7 @@ async function queryLokiWithRetryOrError(
   queryParams: Record<string, string>,
   expectedEntryCount: number,
   chunkIndex: number,
-  stream: DummyStream
+  stream: LogSeries
 ): Promise<LokiQueryResult> {
   log.info("looker-specific query func");
 

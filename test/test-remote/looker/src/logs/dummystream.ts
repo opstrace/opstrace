@@ -46,7 +46,7 @@ import {
 import { TimeseriesBase, LabelSet } from "../series";
 
 // Note: maybe expose raw labels later on again.
-export interface DummyStreamOpts {
+export interface LogSeriesOpts {
   // think: n log entries per stream/series fragment
   n_samples_per_series_fragment: number;
   n_chars_per_message: number;
@@ -67,10 +67,10 @@ type CustomQueryFuncSigType = (
   arg2: TypeQueryParamDict,
   arg3: number,
   arg4: number,
-  arg5: DummyStream
+  arg5: LogSeries
 ) => Promise<LokiQueryResult>;
 
-export interface DummyStreamFetchAndValidateOpts {
+export interface LogSeriesFetchAndValidateOpts {
   querierBaseUrl: string;
   chunkSize?: number;
   inspectEveryNthEntry?: number | undefined;
@@ -78,7 +78,7 @@ export interface DummyStreamFetchAndValidateOpts {
   additionalHeaders?: Record<string, string>;
 }
 
-export class DummyStream extends TimeseriesBase {
+export class LogSeries extends TimeseriesBase {
   private currentSeconds: number;
   private currentNanos: number;
   private includeTimeInMsg: boolean;
@@ -90,7 +90,7 @@ export class DummyStream extends TimeseriesBase {
   timediffNanoseconds: number;
   nFragmentsSuccessfullySentSinceLastValidate: number;
 
-  constructor(opts: DummyStreamOpts) {
+  constructor(opts: LogSeriesOpts) {
     super(opts);
 
     this.shouldBeValidatedflag = true;
@@ -155,7 +155,7 @@ export class DummyStream extends TimeseriesBase {
   //   this.n_fragments_total += n;
   // }
 
-  protected buildLabelSetFromOpts(opts: DummyStreamOpts) {
+  protected buildLabelSetFromOpts(opts: LogSeriesOpts) {
     let ls: LabelSet;
     if (opts.labelset !== undefined) {
       ls = opts.labelset;
@@ -376,7 +376,7 @@ export class DummyStream extends TimeseriesBase {
   }
 
   public async fetchAndValidate(
-    opts: DummyStreamFetchAndValidateOpts
+    opts: LogSeriesFetchAndValidateOpts
   ): Promise<number> {
     const lokiQuerierBaseURL = opts.querierBaseUrl;
     const chunkSize = opts.chunkSize || 20000;

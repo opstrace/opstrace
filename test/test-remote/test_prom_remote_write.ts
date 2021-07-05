@@ -29,7 +29,7 @@ import {
 
 import { waitForCortexMetricResult } from "./testutils/metrics";
 
-import { DummyTimeseries } from "./looker/src/metrics";
+import { MetricSeries } from "./looker/src/metrics";
 
 suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
   suiteSetup(async function () {
@@ -86,7 +86,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const uniquevalue = `test-remote-${rndstring(5)}`;
     const mname = `test_metric_${rndstring(4)}`;
 
-    const series = new DummyTimeseries({
+    const series = new MetricSeries({
       metricName: mname,
       n_samples_per_series_fragment: 50,
       starttime: now,
@@ -125,7 +125,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
   test("dummyseries short write, fetchAndValidate", async function () {
     const now = ZonedDateTime.now(ZoneOffset.UTC).withNano(0);
     const uniquevalue = `test-remote-${rndstring(5)}`;
-    const series = new DummyTimeseries({
+    const series = new MetricSeries({
       metricName: `test_metric_${rndstring(4)}`,
       n_samples_per_series_fragment: 50,
       starttime: now.minusMinutes(30),
@@ -150,7 +150,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const now = ZonedDateTime.now(ZoneOffset.UTC).withNano(0);
 
     const uniquevalue = `test-remote-${rndstring(5)}`;
-    const series = new DummyTimeseries({
+    const series = new MetricSeries({
       metricName: `test_metric_${rndstring(4)}`,
       n_samples_per_series_fragment: 10000,
       starttime: now.minusMinutes(45), // api does not accept samples from future
@@ -174,7 +174,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const now = ZonedDateTime.now(ZoneOffset.UTC).withNano(0);
 
     const uniquevalue = `test-remote-${rndstring(5)}`;
-    const series = new DummyTimeseries({
+    const series = new MetricSeries({
       metricName: `test_metric_${rndstring(4)}`,
       n_samples_per_series_fragment: 25000,
       starttime: now.minusMinutes(50), // api does not accept samples from future

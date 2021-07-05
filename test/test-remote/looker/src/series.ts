@@ -17,16 +17,16 @@
 import { ZonedDateTime } from "@js-joda/core";
 
 import {
-  DummyStreamOpts,
+  LogSeriesOpts,
   LogSeriesFragment,
   LogSample,
-  DummyStreamFetchAndValidateOpts,
+  LogSeriesFetchAndValidateOpts,
   LogSeriesFragmentStats
 } from "./logs";
 
 import {
-  DummyTimeseriesMetricsOpts,
-  DummyTimeseriesFetchAndValidateOpts,
+  MetricSeriesMetricsOpts,
+  MetricSeriesFetchAndValidateOpts,
   MetricSeriesFragment,
   MetricSample,
   FragmentStatsMetrics
@@ -166,7 +166,7 @@ export abstract class TimeseriesBase {
   // last fragment consumed via this method.
   lastFragmentConsumed: MetricSeriesFragment | LogSeriesFragment | undefined;
 
-  constructor(opts: DummyStreamOpts | DummyTimeseriesMetricsOpts) {
+  constructor(opts: LogSeriesOpts | MetricSeriesMetricsOpts) {
     this.nFragmentsConsumed = 0;
     this.starttime = opts.starttime;
     this.uniqueName = opts.uniqueName;
@@ -177,7 +177,7 @@ export abstract class TimeseriesBase {
   }
 
   protected abstract buildLabelSetFromOpts(
-    opts: DummyStreamOpts | DummyTimeseriesMetricsOpts
+    opts: LogSeriesOpts | MetricSeriesMetricsOpts
   ): LabelSet;
 
   abstract disableValidation(): void;
@@ -201,7 +201,7 @@ export abstract class TimeseriesBase {
     | LogSeriesFragment;
 
   abstract fetchAndValidate(
-    opts: DummyTimeseriesFetchAndValidateOpts | DummyStreamFetchAndValidateOpts
+    opts: MetricSeriesFetchAndValidateOpts | LogSeriesFetchAndValidateOpts
   ): Promise<number>;
 
   public toString(): string {
