@@ -1,5 +1,7 @@
 # to be `source`d as part of teardown after test-remote
 
+docker logs --since "2h" unbound > /build/bk-artifacts/unbound.log
+
 kubectl describe all --all-namespaces 2> kubectl_describe_all.stderr > kubectl_describe_all-${OPSTRACE_CLUSTER_NAME}.log
 
 # Filter out a specific warning that may appear thousands of times on AWS:
