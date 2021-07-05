@@ -361,7 +361,7 @@ export class LogStreamFragmentPushRequest {
 
       const stream = pbTypeStream.create({
         labels: labelsEncodedAsString,
-        samples: pbsamples
+        entries: pbsamples
       });
       streamsList.push(stream);
 
