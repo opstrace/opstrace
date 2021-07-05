@@ -43,22 +43,12 @@ export interface LogRecord {
 /**
  * Expected to throw got.RequestError, handle in caller if desired.
  */
-async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
+async function queryLoki(
+  baseUrl: string,
+  queryParams: URLSearchParams,
+  additionalHeaders?: Record<string, string>
+) {
   /* Notes, in no particular order:
-
-  - test deprecated /api/prom/query endpoint
-    https://github.com/grafana/loki/blob/master/docs/api.md#get-apipromquery
-    this resembles a query parameter set as constructed by the Grafana Explore
-    UI.
-
-  - Ideal would be: do not perform any kind of response body decoding within
-    got's HTTP client implementation, do this explicitly after retrieving the
-    response data as a byte sequence (into a Buffer), and then decode it
-    explicitly first to text using e.g. and then as JSON doc. Currently this
-    gets in the way: https://github.com/sindresorhus/got/issues/1079
-
-  - Do not magically throw an error upon receiving a non-2xx response. Leave
-    this to the test business logic.
 
   - Note that Loki seems to set `'Content-Type': 'text/plain; charset=utf-8'`
     even when it sends a JSON document in the response body. Submit a bug
@@ -66,7 +56,10 @@ async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
   */
   const url = `${baseUrl}/loki/api/v1/query_range`;
 
-  const headers = enrichHeadersWithAuthToken(url, {});
+  const headers = {
+    ...enrichHeadersWithAuthToken(url, {}),
+    ...additionalHeaders
+  };
 
   const options = {
     // Allow up to two retries in the event of spurious timeouts or similar errors.
@@ -83,12 +76,7 @@ async function queryLoki(baseUrl: string, queryParams: URLSearchParams) {
     https: { rejectUnauthorized: LOKI_API_TLS_VERIFY } // https://github.com/sindresorhus/got/issues/1191
   };
 
-  // Note(JP): I wanted to set
-  // responseType: "buffer",
-  // in the `options` object above and then use
-  // `response.body.toString("utf-8")` below but
-  // https://github.com/sindresorhus/got/issues/1079
-  // Note: this may throw got.RequestError for request timeout errors.
+  // Note: this may throw got.RequestError for e.g. request timeout errors.
   const response = await got(url, options);
   if (response.statusCode !== 200) logHTTPResponse(response);
   return JSON.parse(response.body);
@@ -108,7 +96,8 @@ export async function waitForLokiQueryResult(
   expectedStreamCount = 1,
   buildhash = true,
   // Latency should normally vary from 2 to 12 seconds
-  maxWaitSeconds = 30
+  maxWaitSeconds = 30,
+  additionalHeaders?: Record<string, string>
 ): Promise<LokiQueryResult> {
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   if (logDetails) {
@@ -138,7 +127,7 @@ Query parameters: ${JSON.stringify(
 
     let result: any;
     try {
-      result = await queryLoki(lokiQuerierBaseUrl, qparms);
+      result = await queryLoki(lokiQuerierBaseUrl, qparms, additionalHeaders);
     } catch (e) {
       // handle any error that happened during http request processing
       if (e instanceof got.RequestError) {
@@ -205,8 +194,9 @@ Query parameters: ${JSON.stringify(
     if (streams.length === 0) {
       if (queryCount % 10 === 0) {
         log.info("queried %s times, no log entries seen yet", queryCount);
+        log.debug("last response: %s", JSON.stringify(result, null, 2));
       }
-      await sleep(0.5);
+      await sleep(1.0);
       continue;
     }
 
