@@ -51,27 +51,17 @@ export interface FragmentStatsMetrics extends FragmentStatsBase {
   //secondsBetweenSamples: bigint // to stress that this is never fractional
 }
 
-export class MetricSample extends SampleBase {
-  /** The metric sample value, i.e. a floating point number */
-  public value: number;
-  /** The metric sample timestamp which is an int64 in the Prometheus protobuf world
-   * -- representing milliseconds since epoch -- here, for the NodeJS runtime we use
-   * a `Long` from the `long` library to keep the integer arithmetics. */
-  public time: Long;
-
-  constructor(value: number, time: Long) {
-    // Is this call to super() a performance problem?
-    super();
-    this.value = value;
-    this.time = time;
-  }
-}
+/**
+ * The metric sample value, i.e. a floating point number The metric sample
+ * timestamp which is an int64 in the Prometheus protobuf world -- representing
+ * milliseconds since epoch -- here, for the NodeJS runtime we use a `Long`
+ * from the `long` library to keep the integer arithmetics. */
+export class MetricSample extends SampleBase<number, Long> {}
 
 // Rename to MetricSeriesFragment?
 export class TimeseriesFragment extends FragmentBase<
   MetricSample,
   DummyTimeseries
-  //FragmentStatsMetrics
 > {
   /*
   Return number of payload bytes. For a Prometheus metric sample, that's
