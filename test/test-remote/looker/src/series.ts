@@ -41,9 +41,14 @@ export interface FragmentStatsBase {
   sampleCount: bigint; // to stress that this is never fractional
 }
 
-export abstract class SampleBase {
-  abstract value: number | string;
-  abstract time: Long | LogSampleTimestamp;
+export abstract class SampleBase<ValueType, TimeType> {
+  public value: ValueType;
+  public time: TimeType;
+
+  constructor(value: ValueType, time: TimeType) {
+    this.value = value;
+    this.time = time;
+  }
 }
 
 export abstract class FragmentBase<SampleType, ParentType> {

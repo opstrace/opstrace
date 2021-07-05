@@ -66,38 +66,23 @@ Log stream fragment:
 
 */
 
+/** The log sample timestamp which is comprised of two components: seconds
+ * since epoch, and a fractional part: nanoseconds
+ */
 export interface LogSampleTimestamp {
   seconds: number;
   nanos: number;
 }
 
-export class LogSample extends SampleBase {
-  /** The log sample value, i.e. the text message */
-  public value: string;
-  /** The log sample timestamp which is comprised of two components:
-   * seconds since epoch, and a fractional part: nanoseconds
-   */
-  public time: LogSampleTimestamp;
-
-  constructor(value: string, time: LogSampleTimestamp) {
-    // Is this call to super() a performance problem?
-    super();
-    this.value = value;
-    this.time = time;
-  }
-}
+// The log sample value is text, i.e. type string
+export class LogSample extends SampleBase<string, LogSampleTimestamp> {}
 
 export interface LogStreamFragmentStats extends FragmentStatsBase {
   timeOfFirstEntry: string;
   timeOfLastEntry: string;
 }
 
-export class LogStreamFragment extends FragmentBase<
-  LogSample,
-  DummyStream
-  //LogStreamFragmentStats
-> {
-  //export class LogStreamFragment {
+export class LogStreamFragment extends FragmentBase<LogSample, DummyStream> {
   /*
   A class that allows for building up a log stream fragment.
 
