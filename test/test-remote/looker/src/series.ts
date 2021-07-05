@@ -25,11 +25,11 @@ import {
 } from "./logs";
 
 import {
-  MetricSeriesMetricsOpts,
-  MetricSeriesFetchAndValidateOpts,
+  MetricSeriesOpts,
   MetricSeriesFragment,
   MetricSample,
-  FragmentStatsMetrics
+  MetricSeriesFetchAndValidateOpts,
+  MetricSeriesFragmentStats
 } from "./metrics";
 
 export interface LabelSet {
@@ -37,7 +37,9 @@ export interface LabelSet {
 }
 
 export interface FragmentStatsBase {
-  sampleCount: bigint; // to stress that this is never fractional
+  // Use BigInt to stress that this is never fractional -- worry about perf
+  // later.
+  sampleCount: bigint;
 }
 
 export abstract class SampleBase<ValueType, TimeType> {
@@ -53,19 +55,31 @@ export abstract class SampleBase<ValueType, TimeType> {
 export abstract class FragmentBase<SampleType, ParentType> {
   /** The label set defining the time series this fragment is part of. */
   public labels: LabelSet;
-  /** Sequential number for locating fragment in the time series. Set by caller. */
-  public index: number;
-  /** The time series that this fragment is part of (the "parent"). */
-  public parent: ParentType | undefined;
-  public stats: LogSeriesFragmentStats | FragmentStatsMetrics | undefined;
-  //public stats: StatsType | undefined;
 
-  // don't modify from outside
-  public serialized: boolean;
-
+  /** The individual samples in this time series fragment */
   protected samples: Array<SampleType>;
 
-  /** Return number of payload bytes in this fragment.
+  /** Sequential number for locating fragment in the time series. Set by caller. */
+  public index: number;
+
+  /** The time series that this fragment is part of (the "parent"). */
+  public parent: ParentType | undefined;
+
+  /**
+   * An object representing the samples in this fragment -- is built upon
+   * serialization, i.e. when this.serialized is `true` -- in the
+   * implementation, make sure this is built once and not changed afterwards
+   */
+  public stats: LogSeriesFragmentStats | MetricSeriesFragmentStats | undefined;
+
+  /**
+   * For internal book-keeping: is this 'closed' (has been serialized, no more
+   * samples can be added) or can samples still be added?
+   */
+  protected serialized: boolean;
+
+  /**
+   * Return number of payload bytes in this fragment.
    *
    * For a Prometheus metric sample, that's a double precision float (8 bytes)
    * for sample value, and an int64 per sample timestamp, i.e. 16 bytes per
@@ -88,14 +102,16 @@ export abstract class FragmentBase<SampleType, ParentType> {
     this.serialized = false;
   }
 
-  /** Return shallow copy so that mutation of the returned array does not have
+  /**
+   * Return shallow copy so that mutation of the returned array does not have
    * side effects in here. However, if individual samples were to be mutated
    * this would take effect here, too.*/
   public getSamples(): Array<SampleType> {
     return [...this.samples];
   }
 
-  /** Return the current number of samples in this fragment.
+  /**
+   * Return the current number of samples in this fragment.
    * Type `bigint` to stress that this is never fractional.
    */
   public sampleCount(): bigint {
@@ -166,7 +182,7 @@ export abstract class TimeseriesBase {
   // last fragment consumed via this method.
   lastFragmentConsumed: MetricSeriesFragment | LogSeriesFragment | undefined;
 
-  constructor(opts: LogSeriesOpts | MetricSeriesMetricsOpts) {
+  constructor(opts: LogSeriesOpts | MetricSeriesOpts) {
     this.nFragmentsConsumed = 0;
     this.starttime = opts.starttime;
     this.uniqueName = opts.uniqueName;
@@ -177,7 +193,7 @@ export abstract class TimeseriesBase {
   }
 
   protected abstract buildLabelSetFromOpts(
-    opts: LogSeriesOpts | MetricSeriesMetricsOpts
+    opts: LogSeriesOpts | MetricSeriesOpts
   ): LabelSet;
 
   abstract disableValidation(): void;

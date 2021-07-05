@@ -28,16 +28,16 @@ import { logHTTPResponse, httpTimeoutSettings } from "../util";
 
 import * as mathjs from "mathjs";
 
+import { TimeseriesBase, LabelSet } from "../series";
+
 import {
   MetricSample,
   MetricSeriesFragment,
-  FragmentStatsMetrics,
+  MetricSeriesFragmentStats,
   formatFloatForComp
 } from "./index";
 
-import { TimeseriesBase, LabelSet } from "../series";
-
-export interface MetricSeriesMetricsOpts {
+export interface MetricSeriesOpts {
   metricName: string;
   starttime: ZonedDateTime;
   uniqueName: string;
@@ -76,7 +76,7 @@ export class MetricSeries extends TimeseriesBase {
   // that we ideally save memory
   postedFragmentsSinceLastValidate: Array<MetricSeriesFragment> | undefined;
 
-  constructor(opts: MetricSeriesMetricsOpts, counterForwardLeap?: any) {
+  constructor(opts: MetricSeriesOpts, counterForwardLeap?: any) {
     super(opts);
 
     this.postedFragmentsSinceLastValidate = undefined;
@@ -203,7 +203,7 @@ export class MetricSeries extends TimeseriesBase {
     this.lastValue = Number(((Math.random() - 0.5) * 10.0).toFixed(1));
   }
 
-  protected buildLabelSetFromOpts(opts: MetricSeriesMetricsOpts): LabelSet {
+  protected buildLabelSetFromOpts(opts: MetricSeriesOpts): LabelSet {
     // Merge the metric name into it using the well-known special prom label
     // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
     // provided then treat this as _additional_ label set.
@@ -535,10 +535,10 @@ export class MetricSeries extends TimeseriesBase {
 
   private queryParamsForFragment(fragment: MetricSeriesFragment) {
     // Confirm that fragment is 'closed' (serialized, has stats), and override
-    // type from `LogStreamFragmentStats | FragmentStatsMetrics` to just
-    // `FragmentStatsMetrics`.
+    // type from `LogStreamFragmentStats | MetricSeriesFragmentStats` to just
+    // `MetricSeriesFragmentStats`.
     assert(fragment.stats);
-    const stats = fragment.stats as FragmentStatsMetrics;
+    const stats = fragment.stats as MetricSeriesFragmentStats;
 
     // these query parameters implement the
     // instant-query-range-vector-selector-validation-method. also see ch1767
@@ -683,7 +683,7 @@ export class MetricSeries extends TimeseriesBase {
       }
     }
 
-    const stats: FragmentStatsMetrics = {
+    const stats: MetricSeriesFragmentStats = {
       min: formatFloatForComp(mathjs.min(values)),
       max: formatFloatForComp(mathjs.max(values)),
       var: formatFloatForComp(mathjs.variance(values)),
