@@ -48,7 +48,6 @@ export interface FragmentStatsMetrics extends FragmentStatsBase {
   min: string;
   max: string;
   var: string;
-  //secondsBetweenSamples: bigint // to stress that this is never fractional
 }
 
 /**
@@ -80,13 +79,6 @@ export class TimeseriesFragment extends FragmentBase<
     return BigInt(this.samples.length) * BigInt(16);
   }
 
-  public addSample(entry: MetricSample): void {
-    if (this.serialized) {
-      throw new Error("cannot mutate TimeseriesFragment anymore");
-    }
-    this.samples.push(entry);
-  }
-
   public buildStatisticsAndDropData(): void {
     if (!this.serialized) {
       throw new Error("not yet serialized");
@@ -104,7 +96,6 @@ export class TimeseriesFragment extends FragmentBase<
       timeMillisSinceEpochFirst: this.samples[0].time.toNumber(), // NOTE: warning, ignorant conversion for now
       timeMillisSinceEpochLast: this.samples.slice(-1)[0].time.toNumber(),
       sampleCount: BigInt(values.length)
-      //secondsBetweenSamples:
     };
     this.stats = stats;
     // log.info("fragmentStat right after generate: %s", stats);
@@ -115,12 +106,10 @@ export class TimeseriesFragment extends FragmentBase<
     this.stats = stats;
   }
 
-  /**
-   * Use this to indicate that this fragment was serialized (into a binary
-   * msg) out-of-band, i..e not with the `serialize()` method.
-   */
-  public setSerialized(): void {
-    this.serialized = true;
+  // Must be implemented, but make this a noop. I trust that the compiler
+  // after all removes all overhead.
+  protected addSampleHook(): void {
+    return;
   }
 
   public serialize(): TimeseriesFragmentPushMessage {

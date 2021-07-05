@@ -219,7 +219,7 @@ export class DummyStream extends TimeseriesBase {
       this
     );
     for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
-      logStreamFragment.addEntry(this.nextSample());
+      logStreamFragment.addSample(this.nextSample());
     }
     return logStreamFragment;
   }
