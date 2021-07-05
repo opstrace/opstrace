@@ -25,7 +25,7 @@ import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
 import { log } from "../log";
 import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
-import { DummyStream } from "./dummystream";
+import { LogSeries } from "./dummystream";
 
 import {
   SampleBase,
@@ -82,7 +82,7 @@ export interface LogSeriesFragmentStats extends FragmentStatsBase {
   timeOfLastEntry: string;
 }
 
-export class LogSeriesFragment extends FragmentBase<LogSample, DummyStream> {
+export class LogSeriesFragment extends FragmentBase<LogSample, LogSeries> {
   /*
   A class that allows for building up a log stream fragment.
 
@@ -106,7 +106,7 @@ export class LogSeriesFragment extends FragmentBase<LogSample, DummyStream> {
   constructor(
     labels: LabelSet,
     index = 0,
-    dummystream: DummyStream | undefined = undefined
+    dummystream: LogSeries | undefined = undefined
   ) {
     super(labels, index, dummystream);
 
@@ -238,7 +238,7 @@ export class LogSeriesFragmentPushRequest {
 
       if (response.statusCode === 204) {
         logHTTPResponseLight(response);
-        // In the corresponding DummyStream object keep track of the fact that
+        // In the corresponding LogSeries object keep track of the fact that
         // this was successfully pushed out, important for e.g. read-based
         // validation after write.
         for (const fragment of this.fragments) {

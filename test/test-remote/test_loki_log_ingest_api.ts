@@ -39,9 +39,9 @@ import {
 import {
   LogSample,
   LogSampleTimestamp,
-  LogStreamFragment,
-  LogStreamFragmentPushRequest,
-  DummyStream
+  LogSeriesFragment,
+  LogSeriesFragmentPushRequest,
+  LogSeries
 } from "./looker/src/logs";
 
 import { LabelSet } from "./looker/src/series";
@@ -77,14 +77,16 @@ function createDummyPushRequest(
   labels: LabelSet,
   N_entries: number,
   samplegen: () => string
-): LogStreamFragmentPushRequest {
+): LogSeriesFragmentPushRequest {
   const tsGenerator = new LogSampleTimestampGenerator(starttime);
 
-  const fragment = new LogStreamFragment(labels);
+  const fragment = new LogSeriesFragment(labels);
 
   const t0 = mtime();
   for (let i = 1; i < N_entries + 1; i++) {
-    fragment.addEntry(new LogSample(samplegen(), tsGenerator.incrementOneNs()));
+    fragment.addSample(
+      new LogSample(samplegen(), tsGenerator.incrementOneNs())
+    );
   }
 
   log.info(
@@ -310,8 +312,8 @@ suite("Loki API test suite", function () {
     };
 
     // Think of this as a looker library unit test
-    const logStreamFragment = new LogStreamFragment(samplelabels);
-    logStreamFragment.addEntry(
+    const logStreamFragment = new LogSeriesFragment(samplelabels);
+    logStreamFragment.addSample(
       new LogSample(samplemsg, {
         seconds: sampletimestamp.toEpochSecond(),
         nanos: sampletimestamp.nano()
@@ -520,7 +522,7 @@ suite("Loki API test suite", function () {
   });
 
   test("short dummystream insert, validate via query", async function () {
-    const stream = new DummyStream({
+    const stream = new LogSeries({
       n_samples_per_series_fragment: 10 ** 2,
       n_chars_per_message: 90,
       starttime: ZonedDateTime.now(),
@@ -557,7 +559,7 @@ suite("Loki API test suite", function () {
     for (let i = 1; i < N_concurrent_streams + 1; i++) {
       const streamname = `${nameprefix}-${i.toString().padStart(4, "0")}`;
 
-      const stream = new DummyStream({
+      const stream = new LogSeries({
         n_samples_per_series_fragment: 10 ** 4,
         n_chars_per_message: 90,
         starttime: ZonedDateTime.now(),

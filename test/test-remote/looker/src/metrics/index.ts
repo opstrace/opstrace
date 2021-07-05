@@ -27,7 +27,7 @@ import { mtimeDiffSeconds, mtime, sleep } from "../mtime";
 import { log } from "../log";
 import { logHTTPResponseLight, logHTTPResponse } from "../util";
 
-import { DummyTimeseries } from "./dummyseries";
+import { MetricSeries } from "./dummyseries";
 
 import { SampleBase, FragmentBase, FragmentStatsBase } from "../series";
 
@@ -59,7 +59,7 @@ export class MetricSample extends SampleBase<number, Long> {}
 
 export class MetricSeriesFragment extends FragmentBase<
   MetricSample,
-  DummyTimeseries
+  MetricSeries
 > {
   /*
   Return number of payload bytes. For a Prometheus metric sample, that's

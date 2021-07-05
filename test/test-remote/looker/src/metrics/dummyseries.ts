@@ -37,7 +37,7 @@ import {
 
 import { TimeseriesBase, LabelSet } from "../series";
 
-export interface DummyTimeseriesMetricsOpts {
+export interface MetricSeriesMetricsOpts {
   metricName: string;
   starttime: ZonedDateTime;
   uniqueName: string;
@@ -46,7 +46,7 @@ export interface DummyTimeseriesMetricsOpts {
   n_samples_per_series_fragment: number;
 }
 
-export interface DummyTimeseriesFetchAndValidateOpts {
+export interface MetricSeriesFetchAndValidateOpts {
   querierBaseUrl: string;
   additionalHeaders?: Record<string, string>;
   chunkSize?: number;
@@ -59,7 +59,7 @@ export interface DummyTimeseriesFetchAndValidateOpts {
 
 // Maybe rename to DummySeriesMetrics
 // or LookerSeriesMetrics or ...MetricSeries
-export class DummyTimeseries extends TimeseriesBase {
+export class MetricSeries extends TimeseriesBase {
   private millisSinceEpochOfLastGeneratedSample: Long;
   private timediffMilliseconds: Long;
   private fragmentWidthSecondsForQuery: BigInt;
@@ -76,7 +76,7 @@ export class DummyTimeseries extends TimeseriesBase {
   // that we ideally save memory
   postedFragmentsSinceLastValidate: Array<MetricSeriesFragment> | undefined;
 
-  constructor(opts: DummyTimeseriesMetricsOpts, counterForwardLeap?: any) {
+  constructor(opts: MetricSeriesMetricsOpts, counterForwardLeap?: any) {
     super(opts);
 
     this.postedFragmentsSinceLastValidate = undefined;
@@ -203,7 +203,7 @@ export class DummyTimeseries extends TimeseriesBase {
     this.lastValue = Number(((Math.random() - 0.5) * 10.0).toFixed(1));
   }
 
-  protected buildLabelSetFromOpts(opts: DummyTimeseriesMetricsOpts): LabelSet {
+  protected buildLabelSetFromOpts(opts: MetricSeriesMetricsOpts): LabelSet {
     // Merge the metric name into it using the well-known special prom label
     // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
     // provided then treat this as _additional_ label set.
@@ -344,7 +344,7 @@ export class DummyTimeseries extends TimeseriesBase {
     }
 
     // If we've fallen behind by more than e.g. 40 minutes, forward by e.g. 20
-    // minutes (note that as of time of writing this comment, a DummyTimeseries
+    // minutes (note that as of time of writing this comment, a MetricSeries
     // starts ~30 minutes behind wall time). These numbers are adjusted to the
     // 1-hour ingest window provided by Cortex with the blocks storage engine.
     // TODO: expose these parameters to users via CLI -- might also be nice to
@@ -496,7 +496,7 @@ export class DummyTimeseries extends TimeseriesBase {
   // Most of FetchAndValidateOpts is ignored, just here to make this func
   // signature match DummyStream.fetchAndValidate
   public async fetchAndValidate(
-    opts: DummyTimeseriesFetchAndValidateOpts
+    opts: MetricSeriesFetchAndValidateOpts
   ): Promise<number> {
     log.debug("%s fetchAndValidate()", this);
 
@@ -577,7 +577,7 @@ export class DummyTimeseries extends TimeseriesBase {
 
   private async fetchAndValidateFragment(
     fragment: MetricSeriesFragment,
-    opts: DummyTimeseriesFetchAndValidateOpts
+    opts: MetricSeriesFetchAndValidateOpts
   ): Promise<number> {
     // instant-query-range-vector-selector-validation-method
     const url = `${opts.querierBaseUrl}/api/v1/query`;
