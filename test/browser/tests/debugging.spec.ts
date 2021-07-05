@@ -24,10 +24,6 @@ import {
 } from "../fixtures/authenticated";
 
 test.describe("debugging", () => {
-  test("this should PASS all the time", async ({ page }) => {
-    expect(true).toBeTruthy();
-  });
-
   test.skip("this should FAIL all the time", async ({ page }) => {
     expect(false).toBeTruthy();
   });
