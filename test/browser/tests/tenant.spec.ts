@@ -18,6 +18,7 @@ import { expect } from "@playwright/test";
 
 import { test } from "../fixtures/authenticated";
 import { logUserIn } from "../utils/authentication";
+import { createTenant } from "../utils/tenant";
 
 test.describe("after auth0 authentication", () => {
   test.beforeEach(logUserIn);
@@ -34,15 +35,8 @@ test.describe("after auth0 authentication", () => {
       await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
     ).toBeFalsy();
 
-    await page.click("[data-test='tenant/addBtn']");
-    expect(
-      await page.isVisible("[data-test='pickerService/dialog/addTenant']")
-    ).toBeTruthy();
-    await page.fill(
-      "[data-test='pickerService/input'] > input",
-      `add tenant: ${tenantName}`
-    );
-    await page.click("[data-test='pickerService/option/yes']");
+    await createTenant(tenantName, { page });
+
     expect(
       await page.waitForSelector(`[data-test='tenant/row/${tenantName}']`)
     ).toBeTruthy();
@@ -52,5 +46,11 @@ test.describe("after auth0 authentication", () => {
       `${cluster.baseUrl}/tenant/${tenantName}/getting-started`
     );
     expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
+  });
+
+  test.describe("validation of tenant name", () => {
+    test("user can create a new Tenant", async ({ page, cluster }) => {
+      expect(false).toBeTruthy();
+    });
   });
 });
