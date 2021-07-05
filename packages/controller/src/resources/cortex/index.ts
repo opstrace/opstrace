@@ -208,7 +208,19 @@ export function CortexResources(
   // can use `state.tenants.list.tenants` if we'd like to.
   // This is used in a configmap data value below.
   const runtimeConfigDefault = {
-    overrides: {}
+    overrides: {},
+    ingester_limits: {
+      // The maximum number of global inflight requests per ingester pod.
+      // By default this is unlimited, which risks ingesters OOMing under heavy load.
+      // If the limit is reached, the ingester will reject requests, but it keeps the ingester safe.
+      // This has been observed when hundreds of thousands or millions of new metric series are being added into cortex,
+      // where ingester pods can be bogged down with initializing storage for those new series.
+      // In theory this limit could be scaled according to the available RAM on the nodes, but practice the actual value
+      // here isn't super important: if the ingester starts to fall behind then queued requests will generally go from
+      // near-zero to stratospheric levels within a few seconds, so there isn't much difference between a 1k or 10k limit.
+      // See also the identically named limit for distributor pods.
+      max_inflight_push_requests: 1000
+    }
   };
 
   // Cortex config schema: https://cortexmetrics.io/docs/configuration/configuration-file/
@@ -241,6 +253,15 @@ export function CortexResources(
       },
       ha_tracker: {
         enable_ha_tracker: false
+      },
+      instance_limits: {
+        // Global push requests per distributor pod.
+        // By default this is unlimited, and setting it reduces the risk of distributor OOMs under heavy load.
+        // If this limit is reached then the distributor will reject requests.
+        // This was observed when sending metric data with thousands or tens of thousands of labels.
+        // In practice the inflight requests should be <5 territory, even when ingesters are falling behind.
+        // See also the identically named limit for ingester pods.
+        max_inflight_push_requests: 50
       }
     },
     server: {
