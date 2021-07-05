@@ -149,7 +149,21 @@ teardown() {
         # The custom_dns_name feature requires 'manual' setup of a DNS zone
         # before Opstrace instance creation, and therefore also manual
         # cleanup.
-        gcloud dns managed-zones delete "zone-${OPSTRACE_CLUSTER_NAME}" || true
+        source ci/wipe-gcp-dns-subzone.sh
+
+        # First, delete sub zone using CI shard's GCP credentials
+        gcloud_wipe_and_delete_dns_sub_zone "zone-${OPSTRACE_CLUSTER_NAME}"
+
+        # Then temorarily switch credentials and wipe NS records from root
+        # DNS zone.
+        gcloud auth activate-service-account \
+            --key-file="./secrets/gcp-svc-acc-dev-dns-service.json" --project "vast-pad-240918"
+
+        gcloud_remove_ns_records_from_root_opstracegcp "${OPSTRACE_CLUSTER_NAME}.opstracegcp.com"
+        # Revert gcloud CLI authentication state to GCP project CI shard.
+        gcloud auth activate-service-account \
+            --key-file=${GOOGLE_APPLICATION_CREDENTIALS} \
+            --project ${OPSTRACE_GCP_PROJECT_ID}
     fi
 
     echo "+++ Exit status of destroy: $EXITCODE_DESTROY"
