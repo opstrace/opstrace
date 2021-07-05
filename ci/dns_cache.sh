@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # script adapted from https://adaptjs.org/blog/2019/10/14/fixing-dns-timeouts-in-docker, thank you!
 
-: "${IMAGE:=mvance/unbound:1.12.0}"
+: "${IMAGE:=mvance/unbound:1.13.1}"
 : "${NAME:=unbound}"
 : "${DNS_IP_FILE:=/tmp/dns_cache_ip}"
 
