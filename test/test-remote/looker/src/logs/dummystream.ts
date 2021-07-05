@@ -39,7 +39,7 @@ import {
 import {
   LogSample,
   LogSampleTimestamp,
-  LogStreamFragment,
+  LogSeriesFragment,
   logqlLabelString
 } from "./index";
 
@@ -212,16 +212,16 @@ export class DummyStream extends TimeseriesBase {
   }
 
   // no stop criterion
-  protected generateNextFragment(): LogStreamFragment {
-    const logStreamFragment = new LogStreamFragment(
+  protected generateNextFragment(): LogSeriesFragment {
+    const lsf = new LogSeriesFragment(
       this.labels,
       this.nFragmentsConsumed + 1,
       this
     );
     for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
-      logStreamFragment.addSample(this.nextSample());
+      lsf.addSample(this.nextSample());
     }
-    return logStreamFragment;
+    return lsf;
   }
 
   /**
@@ -232,10 +232,10 @@ export class DummyStream extends TimeseriesBase {
    * use this explicit method.
    * no stop criterion
    */
-  public generateAndGetNextFragment(): LogStreamFragment {
-    const logStreamFragment = this.generateNextFragment();
+  public generateAndGetNextFragment(): LogSeriesFragment {
+    const lsf = this.generateNextFragment();
     this.nFragmentsConsumed += 1;
-    return logStreamFragment;
+    return lsf;
   }
 
   /**

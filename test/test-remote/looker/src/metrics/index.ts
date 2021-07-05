@@ -57,8 +57,7 @@ export interface FragmentStatsMetrics extends FragmentStatsBase {
  * from the `long` library to keep the integer arithmetics. */
 export class MetricSample extends SampleBase<number, Long> {}
 
-// Rename to MetricSeriesFragment?
-export class TimeseriesFragment extends FragmentBase<
+export class MetricSeriesFragment extends FragmentBase<
   MetricSample,
   DummyTimeseries
 > {
@@ -112,14 +111,14 @@ export class TimeseriesFragment extends FragmentBase<
     return;
   }
 
-  public serialize(): TimeseriesFragmentPushMessage {
+  public serialize(): MetricSeriesFragmentPushMessage {
     this.serialized = true;
-    return new TimeseriesFragmentPushMessage([this]);
+    return new MetricSeriesFragmentPushMessage([this]);
   }
 }
 
-export class TimeseriesFragmentPushMessage {
-  fragments: TimeseriesFragment[];
+export class MetricSeriesFragmentPushMessage {
+  fragments: MetricSeriesFragment[];
   //labels: LabelSet;
   datamd5: string;
   data: Buffer;
@@ -130,7 +129,7 @@ export class TimeseriesFragmentPushMessage {
   serializationTimeSeconds: number;
   postHeaders: Record<string, string>;
 
-  constructor(seriesFragments: TimeseriesFragment[]) {
+  constructor(seriesFragments: MetricSeriesFragment[]) {
     this.fragments = seriesFragments;
     //this.labels = seriesFragment.labels;
 
