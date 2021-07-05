@@ -15,10 +15,9 @@
  */
 
 import { test as base, expect } from "@playwright/test";
-import { pipe } from "ramda";
 
-import { addAuthFixture } from "../fixtures/authenticated";
-import { addTenantFixture } from "../fixtures/tenant";
+import { addAuthFixture, addTenantFixture, pipe } from "../fixtures";
+
 import { logUserIn } from "../utils/authentication";
 import { createTenant, makeTenantName } from "../utils/tenant";
 

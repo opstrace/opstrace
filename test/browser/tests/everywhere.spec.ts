@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { expect } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
 
-import { test } from "../fixtures/authenticated";
+import { addAuthFixture } from "../fixtures";
 import { logUserIn } from "../utils/authentication";
+
+const test = addAuthFixture(base);
 
 test.describe("after auth0 authentication", () => {
   test.beforeEach(logUserIn);
