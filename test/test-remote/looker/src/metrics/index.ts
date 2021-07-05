@@ -42,7 +42,7 @@ const pbTypeTimeseries = pbfRoot.lookupType("prometheus.TimeSeries");
 const pbTypeSample = pbfRoot.lookupType("prometheus.Sample");
 const pbTypeLabel = pbfRoot.lookupType("prometheus.Label");
 
-export interface FragmentStatsMetrics extends FragmentStatsBase {
+export interface MetricSeriesFragmentStats extends FragmentStatsBase {
   timeMillisSinceEpochFirst: number;
   timeMillisSinceEpochLast: number;
   min: string;
