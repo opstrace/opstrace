@@ -386,7 +386,7 @@ export class DummyStream extends TimeseriesBase {
     const additionalHeaders = opts.additionalHeaders || {};
 
     // chunkSize: think of it as "fetch at most those many entries per query"
-    const expectedsampleCount =
+    const expectedSampleCount =
       this.nFragmentsSuccessfullySentSinceLastValidate *
       this.n_samples_per_series_fragment;
 
@@ -395,11 +395,11 @@ export class DummyStream extends TimeseriesBase {
       "%s: validate. Sent %s fragments since last validation. Expect %s entries. Previously validated: %s entries",
       this,
       this.nFragmentsSuccessfullySentSinceLastValidate,
-      expectedsampleCount,
+      expectedSampleCount,
       this.nSamplesValidatedSoFar
     );
 
-    let entriesRemainingToBeChecked = expectedsampleCount;
+    let entriesRemainingToBeChecked = expectedSampleCount;
     let chunkIndex = 1;
 
     // cheap way out: do not check the last chunk in this loop.
@@ -487,10 +487,10 @@ export class DummyStream extends TimeseriesBase {
     );
 
     this.nFragmentsSuccessfullySentSinceLastValidate = 0;
-    this.nSamplesValidatedSoFar += BigInt(expectedsampleCount);
+    this.nSamplesValidatedSoFar += BigInt(expectedSampleCount);
 
     // return the number of entries read (and validated)
-    return expectedsampleCount;
+    return expectedSampleCount;
   }
 }
 
@@ -534,7 +534,7 @@ async function waitForLokiQueryResult(
   lokiQuerierBaseUrl: string,
   additionalHeaders: TypeHttpHeaderDict,
   queryParams: TypeQueryParamDict,
-  expectedsampleCount: number | undefined,
+  expectedSampleCount: number | undefined,
   logDetails = true,
   expectedStreamCount = 1,
   buildhash = true,
@@ -659,14 +659,14 @@ Query parameters: ${JSON.stringify(
     const sampleCount = streams[0]["values"].length;
     log.info(
       "expected nbr of query results: %s, got %s",
-      expectedsampleCount,
+      expectedSampleCount,
       sampleCount
     );
 
     // Expect N log entries in the stream.
     if (
-      expectedsampleCount === undefined ||
-      sampleCount === expectedsampleCount
+      expectedSampleCount === undefined ||
+      sampleCount === expectedSampleCount
     ) {
       log.info(
         "got expected result in query %s after %s s",
@@ -699,7 +699,7 @@ Query parameters: ${JSON.stringify(
       return result;
     }
 
-    if (sampleCount < expectedsampleCount) {
+    if (sampleCount < expectedSampleCount) {
       log.info("not enough entries returned yet, waiting");
       await sleep(1);
       continue;
