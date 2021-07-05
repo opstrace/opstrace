@@ -309,6 +309,7 @@ suite("Loki API test suite", function () {
       searchcrit: searchcrit
     };
 
+    // Think of this as a looker library unit test
     const logStreamFragment = new LogStreamFragment(samplelabels);
     logStreamFragment.addEntry(
       new LogSample(samplemsg, {

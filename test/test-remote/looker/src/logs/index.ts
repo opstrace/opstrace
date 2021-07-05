@@ -125,15 +125,14 @@ export class LogStreamFragment extends FragmentBase<LogSample, DummyStream> {
     return BigInt(this.payloadbytecounter);
   }
 
-  public addEntry(entry: LogSample): void {
-    this.samples.push(entry);
+  protected addSampleHook(s: LogSample): void {
     // Keep track of the size of the payload that was added. This might be
     // expensive, but don't make any premature performance assupmtions here.
     // Measure what's bottlenecking. :)
     //this.payloadCharcount += entry.text.length;
     // A protobuf timestamp is int64 + int32, i.e 12 bytes:
     // https://github.com/protocolbuffers/protobuf/blob/4b770cabd7ff042283280bd76b6635650a04aa8a/src/google/protobuf/timestamp.proto#L136
-    this.payloadbytecounter += 12 + Buffer.from(entry.value, "utf8").length;
+    this.payloadbytecounter += 12 + Buffer.from(s.value, "utf8").length;
   }
 
   public buildStatisticsAndDropData(): void {

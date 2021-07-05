@@ -19,7 +19,6 @@ import { ZonedDateTime } from "@js-joda/core";
 import {
   DummyStreamOpts,
   LogStreamFragment,
-  LogSampleTimestamp,
   LogSample,
   DummyStreamFetchAndValidateOpts,
   LogStreamFragmentStats
@@ -115,6 +114,16 @@ export abstract class FragmentBase<SampleType, ParentType> {
     return is.padStart(length, "0");
   }
 
+  public addSample(s: SampleType): void {
+    if (this.serialized) {
+      throw new Error("cannot mutate fragment anymore");
+    }
+    this.samples.push(s);
+    // I hope the compiler after all removes all overhead when it sees that
+    // `addSampleHook()` is a noop.
+    this.addSampleHook(s);
+  }
+
   /**
    * Use this to indicate that this fragment was serialized (into a binary
    * msg) out-of-band, i..e not with the `serialize()` method.
@@ -122,6 +131,12 @@ export abstract class FragmentBase<SampleType, ParentType> {
   public setSerialized(): void {
     this.serialized = true;
   }
+
+  /**
+   * Can be used in the child to execute custom functionality when adding a
+   * sample.
+   */
+  protected abstract addSampleHook(s: SampleType): void;
 }
 
 export abstract class TimeseriesBase {
