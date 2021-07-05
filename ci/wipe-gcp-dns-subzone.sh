@@ -42,7 +42,7 @@ gcloud_remove_ns_records_from_root_opstracegcp () {
     gcloud dns record-sets transaction remove --zone=${ROOT_ZONE_NAME} \
         --transaction-file="${TXNFILEPATH}" \
         --name "${RSNAME}" \
-        --type NS --ttl 30 \
+        --type NS --ttl 300 \
             "ns-cloud-b1.googledomains.com." \
             "ns-cloud-b2.googledomains.com." \
             "ns-cloud-b3.googledomains.com." \
@@ -53,7 +53,7 @@ gcloud_remove_ns_records_from_root_opstracegcp () {
     gcloud dns record-sets transaction remove --zone=opstrace-gcp \
         --transaction-file="${TXNFILEPATH}" \
         --name "${RSNAME}" \
-        --type NS --ttl 30 \
+        --type NS --ttl 300 \
             "ns-cloud-c1.googledomains.com." \
             "ns-cloud-c2.googledomains.com." \
             "ns-cloud-c3.googledomains.com." \
