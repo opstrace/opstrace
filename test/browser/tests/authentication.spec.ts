@@ -23,11 +23,7 @@ test.describe("after auth0 authentication", () => {
   test.beforeEach(logUserIn);
 
   test("user should see homepage", async ({ page, cluster }) => {
-    expect(
-      await page.isVisible("[data-test=getting-started]", {
-        timeout: cluster.cloudProvider.aws ? 60_000 : 30_000 // timeout: keeps failing on AWS CI and not GCP probably because AWS is much slower that GCP
-      })
-    ).toBeTruthy();
+    expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
   });
 
   test("user should see own email in user list", async ({ page, user }) => {
