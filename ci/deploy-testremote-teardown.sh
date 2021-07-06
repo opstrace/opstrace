@@ -147,15 +147,14 @@ teardown() {
         EXITCODE_DESTROY=$?
 
         # The custom_dns_name feature requires 'manual' setup of a DNS zone
-        # before Opstrace instance creation, and therefore also manual
-        # cleanup.
+        # before Opstrace instance creation, and therefore also manual cleanup.
         source ci/wipe-gcp-dns-subzone.sh
 
-        # First, delete sub zone using CI shard's GCP credentials
+        # First, delete sub zone using the CI shard's GCP credentials
         gcloud_wipe_and_delete_dns_sub_zone "zone-${OPSTRACE_CLUSTER_NAME}"
 
-        # Then temorarily switch credentials and wipe NS records from root
-        # DNS zone.
+        # Then temporarily switch credentials and wipe NS records from root DNS
+        # zone.
         gcloud auth activate-service-account \
             --key-file="./secrets/gcp-svc-acc-dev-dns-service.json" --project "vast-pad-240918"
 
@@ -229,14 +228,13 @@ if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
     sleep 5
 fi
 
+# Define default for OPSTRACE_INSTANCE_DNS_NAME.
 export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
 # Run opstrace installer locally. The installer will deploy the controller into
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-    # WIP, test only GCP
-    exit 0
     cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
         --log-level=debug --yes \
         --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
@@ -257,7 +255,6 @@ else
     # The Auth0 client ID corresponds to an Auth0 app configured for our CI
     echo -e "\ncustom_dns_name: ${OPSTRACE_INSTANCE_DNS_NAME}" >> ci/cluster-config.yaml
     # rely on this custom auth0 client id to already be present in the config:
-    #echo -e "\custom_auth0_client_id: 5MoCYfPXPuEzceBLRUr6T6SAklT2GDys" >> ci/cluster-config.yaml
 
     # Create a new managed DNS zone, for <foo>.opstracegcp.com -- in the CI
     # shard GCP project.
@@ -277,7 +274,7 @@ else
     # the DNS sub zone ${OPSTRACE_CLUSTER_NAME}.opstracegcp.com. The root DNS
     # zone (opstracegcp.com.) however can only be managed in/by one specific
     # GCP project. That is, the svc accounts for the GCP project CI shards
-    # _cannot_ change settings for this root DNS zone. Connecting the two zones
+    # cannot change settings for this root DNS zone. Connecting the two zones
     # via NS records needs to be done with a svc account for the GCP project
     # that that manages the root zone. Hence, switch GCP credentials
     # temporarily here.
@@ -285,8 +282,8 @@ else
         --key-file="./secrets/gcp-svc-acc-dev-dns-service.json" --project "vast-pad-240918"
 
     # Now add an NS record to the opstracegcp.com zone for the
-    # <foo>.opstracegcp.com DNS name, pointing to the new
-    # name servers.
+    # <foo>.opstracegcp.com DNS name, pointing to the name servers that are
+    # authoritative for the sub zone.
     gcloud dns record-sets transaction start --zone=root-opstracegcp
     gcloud dns record-sets transaction add ${SUBZONE_NAMESERVERS} \
         --name=${OPSTRACE_INSTANCE_DNS_NAME}. \
