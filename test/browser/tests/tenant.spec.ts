@@ -53,13 +53,39 @@ test.describe("after auth0 authentication", () => {
     expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
   });
 
-  // test("user can delete a new Tenant", async ({ page, cluster, hello }) => {
-  // });
+  test("user can delete a Tenant", async ({ page, cluster }) => {
+    // TODO: when deleting tenants is fixed remove this line,
+    // https://github.com/opstrace/opstrace/issues/993
+    test.fail();
+    const tenantName = makeTenantName();
+    expect(
+      await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+    ).toBeFalsy();
 
-  test.describe("validation of tenant name", () => {
-    test("user can create a new Tenant", async ({ page, cluster, tenant }) => {
-      const tenantName = makeTenantName();
-      await createTenant(tenantName, { page });
-    });
+    await createTenant(tenantName, { page });
+
+    await page.hover("[data-test='sidebar/clusterAdmin/Tenants']");
+    await page.click("[data-test='sidebar/clusterAdmin/Tenants']");
+
+    // first, ensure clicking "no" doesn't delete the tenant
+    await page.click(`[data-test='tenant/deleteBtn/${tenantName}']`);
+    await page.click("[data-test='pickerService/option/no']");
+    expect(
+      await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+    ).toBeTruthy();
+
+    // now actually delete it
+    await page.click(`[data-test='tenant/deleteBtn/${tenantName}']`);
+    await page.click("[data-test='pickerService/option/yes']");
+    expect(
+      await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+    ).toBeFalsy();
   });
+
+  // test.describe("validation of tenant name", () => {
+  //   test("user can create a new Tenant", async ({ page, cluster, tenant }) => {
+  //     const tenantName = makeTenantName();
+  //     await createTenant(tenantName, { page });
+  //   });
+  // });
 });

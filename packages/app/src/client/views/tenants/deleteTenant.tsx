@@ -45,7 +45,8 @@ const DeleteTenantButton = ({ tenant }: { tenant: Tenant }) => {
       onSelected: option => {
         if (option.id === "yes" && tenant.name)
           dispatch(deleteTenant(tenant.name));
-      }
+      },
+      dataTest: "deleteTenant"
     },
     [tenant.name]
   );
@@ -56,6 +57,7 @@ const DeleteTenantButton = ({ tenant }: { tenant: Tenant }) => {
       state="error"
       size="small"
       disabled={tenant.type === "SYSTEM"}
+      data-test={`tenant/deleteBtn/${tenant.name}`}
       onClick={e => {
         e.stopPropagation();
         activatePickerWithText(`delete tenant ${tenant.name} directly?: `);
