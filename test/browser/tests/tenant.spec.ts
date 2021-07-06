@@ -123,6 +123,14 @@ test.describe("after auth0 authentication", () => {
       ).toBeFalsy();
     });
 
+    test("uppcase letters are NOT allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenantName");
+      await createTenant(tenantName, { page });
+      expect(
+        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+      ).toBeFalsy();
+    });
+
     test("can't have two with the same name", async ({ page }) => {
       const tenantName = "fancyTenant";
       await createTenant(tenantName, { page });
