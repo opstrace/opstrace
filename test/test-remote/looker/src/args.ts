@@ -215,8 +215,9 @@ export function parseCmdlineArgs(): void {
   parser.add_argument("--change-streams-every-n-cycles", {
     help:
       "Use the same log/metric stream for N cycles, then create a new set of " +
-      "streams (unique label sets). Default: new streams are created with every " +
-      "write/read cycle. For log streams, when a new stream is initialized it " +
+      "streams (unique label sets), or <=0 to reuse streams for the process lifetime. " +
+      "Default: new streams are created with every write/read cycle (1). " +
+      "For log streams, when a new stream is initialized it " +
       "re-uses the same synthetic start time as set before (program invocation time " +
       "or log_start_time). Metric streams are always guided by wall time.",
     type: "int",
@@ -304,6 +305,15 @@ export function parseCmdlineArgs(): void {
     default: ""
   });
 
+  parser.add_argument("--invocation-id", {
+    help:
+      "Name of this looker instance to be included in labels. " +
+      "By default a random looker-<X> string is used. " +
+      "If read validation is enabled then care should be taken to ensure uniqueness at the server.",
+    type: "str",
+    default: ""
+  });
+
   CFG = parser.parse_args();
 
   setLogger(
@@ -312,9 +322,13 @@ export function parseCmdlineArgs(): void {
     })
   );
 
-  // const uniqueInvocationId = `looker-${START_TIME_EPOCH}-${rndstring(6)}`;
-  const uniqueInvocationId = `looker-${rndstring(6)}`;
-  CFG.invocation_id = uniqueInvocationId;
+  if (CFG.invocation_id === "") {
+    // common case: the id was not specified manually, so generate one
+    // ensure it has a good amount of randomness to ensure reads are unique (if enabled)
+    // const uniqueInvocationId = `looker-${START_TIME_EPOCH}-${rndstring(10)}`;
+    const uniqueInvocationId = `looker-${rndstring(10)}`;
+    CFG.invocation_id = uniqueInvocationId;
+  }
 
   if (CFG.log_start_time) {
     // validate input, let this blow up for now if input is invalid
