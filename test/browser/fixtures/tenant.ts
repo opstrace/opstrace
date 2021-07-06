@@ -28,7 +28,7 @@ export const addTenantFixture = test =>
     }
   >({
     tenant: [
-      async ({}, use) => {
+      async ({ browser }, use) => {
         await use({
           newName: makeTenantName()
         });
