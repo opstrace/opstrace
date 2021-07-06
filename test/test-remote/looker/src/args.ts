@@ -400,7 +400,7 @@ export function parseCmdlineArgs(): void {
     }
   }
 
-  if (CFG.max_concurrent_writes === 0) { // TODO this is always zero - remove from CFG?
+  if (CFG.max_concurrent_writes === 0) {
     CFG.max_concurrent_writes = CFG.n_concurrent_streams;
   }
 
