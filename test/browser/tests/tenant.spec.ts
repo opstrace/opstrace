@@ -82,10 +82,55 @@ test.describe("after auth0 authentication", () => {
     ).toBeFalsy();
   });
 
-  // test.describe("validation of tenant name", () => {
-  //   test("user can create a new Tenant", async ({ page, cluster, tenant }) => {
-  //     const tenantName = makeTenantName();
-  //     await createTenant(tenantName, { page });
-  //   });
-  // });
+  test.describe("validation of tenant name", () => {
+    test("spaces are NOT allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenant name");
+      await createTenant(tenantName, { page });
+      expect(
+        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+      ).toBeFalsy();
+    });
+
+    test("dots are NOT allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenant.name");
+      await createTenant(tenantName, { page });
+      expect(
+        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+      ).toBeFalsy();
+    });
+
+    test("dashes are NOT allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenant-name");
+      await createTenant(tenantName, { page });
+      expect(
+        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+      ).toBeFalsy();
+    });
+
+    test("colons are NOT allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenant:name");
+      await createTenant(tenantName, { page });
+      expect(
+        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+      ).toBeFalsy();
+    });
+
+    test("underscores are NOT allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenant_name");
+      await createTenant(tenantName, { page });
+      expect(
+        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+      ).toBeFalsy();
+    });
+
+    test("can't have two with the same name", async ({ page }) => {
+      const tenantName = "fancyTenant";
+      await createTenant(tenantName, { page });
+      await createTenant(tenantName, { page });
+      const dupTenants = await page.$$(
+        `[data-test='tenant/row/${tenantName}']`
+      );
+      expect(dupTenants.length).toBe(1);
+    });
+  });
 });
