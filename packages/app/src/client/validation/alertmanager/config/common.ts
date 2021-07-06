@@ -16,7 +16,7 @@
 
 import * as yup from "yup";
 
-import { subdomainValidator } from "client/utils/regex";
+import { tenantNameValidator } from "client/utils/regex";
 import { TlsConfig, BasicAuth, HttpConfig } from "./types";
 
 export const tlsConfigSchema: yup.SchemaOf<TlsConfig> = yup
@@ -33,7 +33,7 @@ export const tlsConfigSchema: yup.SchemaOf<TlsConfig> = yup
     }),
     server_name: yup
       .string()
-      .matches(subdomainValidator, { excludeEmptyString: true })
+      .matches(tenantNameValidator, { excludeEmptyString: true })
       .meta({
         comment: "ServerName extension to indicate the name of the server.",
         url: "http://tools.ietf.org/html/rfc4366#section-3.1"
