@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import got, { Response as GotResponse, Options as GotOptions } from "got";
 
 import { select, fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
@@ -25,7 +26,7 @@ import { getGKEKubeconfig } from "@opstrace/gcp";
 
 import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
-import { log, SECOND, retryUponAnyError } from "@opstrace/utils";
+import { log, SECOND, retryUponAnyError, sleep } from "@opstrace/utils";
 
 import {
   CONTROLLER_NAME,
@@ -242,4 +243,75 @@ export async function destroyCluster(
 
   // this is helpful when the runtime is supposed to crash but doesn't
   log.debug("end of destroyCluster()");
+}
+
+export async function doesOpstraceIoDNSNameExist(
+  instanceName: string
+): Promise<boolean> {
+  log.info(
+    `trying to determine if DNS name ${instanceName}.opstrace.io exists`
+  );
+
+  const requestSettings: GotOptions = {
+    throwHttpErrors: false,
+    retry: 0,
+    https: { rejectUnauthorized: false },
+    timeout: {
+      connect: 3000,
+      request: 10000
+    }
+  };
+
+  const rs: GotOptions = { ...requestSettings };
+
+  const probeUrl = `https://${instanceName}.opstrace.io`;
+
+  let dnsResolutionErrsInARow = 0;
+
+  let attempt = 0;
+  while (true) {
+    attempt++;
+
+    let resp: GotResponse<string>;
+    try {
+      //@ts-ignore `got(probeUrl, rs)` returns `unknown` from tsc's point of view
+      resp = await got(probeUrl, rs);
+    } catch (e) {
+      if (e instanceof got.RequestError) {
+        log.info(`${probeUrl}: HTTP request failed with: ${e.message}`);
+
+        // DNS resolution error: expected
+        if (e.message.includes("ENOTFOUND")) {
+          dnsResolutionErrsInARow++;
+          if (dnsResolutionErrsInARow === 3) {
+            log.info(
+              `attempt ${attempt}: saw three ENOUTFOUND,` +
+                `assume DNS name ${instanceName}.opstrace.io does not exist`
+            );
+            return false;
+          }
+        } else {
+          log.debug("reset dnsResolutionErrsInARow counter");
+          dnsResolutionErrsInARow = 0;
+        }
+
+        await sleep(5.0);
+        continue;
+      } else {
+        throw e;
+      }
+    }
+
+    if (resp) {
+      // We got an HTTP response, i.e. the DNS name certainly resolved
+      log.info(`DNS name ${instanceName}.opstrace.io seems to exist`);
+      log.debug(`HTTP response details:
+        status: ${resp.statusCode}
+        body[:500]: ${resp.body.slice(0, 500)}`);
+      return true;
+    }
+
+    // should never be here actually
+    await sleep(5.0);
+  }
 }
