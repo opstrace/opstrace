@@ -115,13 +115,15 @@ async function main() {
     log.info("enter write/read cycle  %s", cyclenum);
 
     if (cyclenum === 1) {
+      // we know better than:
+      //  error TS2454: Variable 'dummystreams' is used before being assigned.
       // always create initial streams regardless of update configuration
       log.info("cycle %s: create new dummystreams", cyclenum);
       dummystreams = await createNewSeries(guniqueCycleId);
     } else if (CFG.change_streams_every_n_cycles > 0 &&
                (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0) {
       // update streams at the configured number of cycles
-      log.info("cycle %s: reset dummystreams", cyclenum);
+      log.info("cycle %s: update dummystreams", cyclenum);
       dummystreams = await createNewSeries(guniqueCycleId);
     } else {
       log.info(
@@ -136,9 +138,8 @@ async function main() {
     // to more reliably crash looker, see CH1288. I'd love for all unexpected
     // errors to crash the runtime instead.
     try {
-      // we know better than:
-      //  error TS2454: Variable 'dummystreams' is used before being assigned.
-      // the first iteration sets dummystreams.
+      // we pass the updated cycle id here even if dummystreams doesnt use it
+      // this ensures the cycle report json has a distinct filename
       //@ts-expect-error: see comment above
       await performWriteReadCycle(cyclenum, dummystreams, guniqueCycleId);
     } catch (err) {
@@ -176,6 +177,17 @@ async function createNewSeries(
 
     let stream: MetricSeries | LogSeries;
     if (CFG.metrics_mode) {
+      // Calculate amount to subtract from start time, or avoid random() if subtraction is disabled
+      const subtractSecs = (CFG.metrics_past_start_range_max_seconds === 0)
+        ? 0
+        // By default this is a time between now-30min and now-20min - smear
+        // this out by plus/minus 5 minutes, because of the throttling
+        // mechanism otherwise hitting in for all series at the same time.
+        // Note that Math.random() returns [0,1) (not including 1).
+        : util.rndFloatFromInterval(
+            CFG.metrics_past_start_range_min_seconds,
+            CFG.metrics_past_start_range_max_seconds
+        );
       stream = new MetricSeries(
         {
           // fixed according to the cycle id
@@ -198,13 +210,8 @@ async function createNewSeries(
           // cycle) that we don't keep going back to using the program's
           // invocation time, as is done for logs (where Loki accepts incoming
           // data from far in the past),
-
-          // Set start time to a time between now-30min and now-20min - -smear
-          // this out by plus/minus 5 minutes, because of the throttling
-          // mechanism otherwise hitting in for all series at the same time.
-          // Note that Math.random() returns [0,1) (not including 1).
           starttime: ZonedDateTime.now()
-            .minusMinutes(25 + 10 * (Math.random() - 0.5))
+            .minusSeconds(subtractSecs)
             .withNano(0),
           timediffMilliSeconds: CFG.metrics_time_increment_ms,
           labelset: labelset

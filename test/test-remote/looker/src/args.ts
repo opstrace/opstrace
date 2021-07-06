@@ -48,6 +48,8 @@ interface CfgInterface {
   stream_write_n_seconds_jitter: number;
   fetch_n_entries_per_query: number;
   metrics_mode: boolean;
+  metrics_past_start_range_min_seconds: number;
+  metrics_past_start_range_max_seconds: number;
   metrics_time_increment_ms: number;
   bearer_token_file: string;
   retry_post_deadline_seconds: number;
@@ -139,6 +141,22 @@ export function parseCmdlineArgs(): void {
       "log stream (between log entry timestamps) (ignored in metrics mode)",
     type: "int",
     default: 1
+  });
+
+  parser.add_argument("--metrics-past-start-range-max-seconds", {
+    help:
+      "Starting amount in seconds to subtract from current wall time for metric series starts. " +
+      "Must be greater or equal to --metrics-past-start-range-min-seconds",
+    type: "int",
+    default: 30 * 60
+  });
+
+  parser.add_argument("--metrics-past-start-range-min-seconds", {
+    help:
+      "Ending amount in seconds to subtract from current wall time for metric series starts. " +
+      "Must be less or equal to --metrics-past-start-range-max-seconds",
+    type: "int",
+    default: 20 * 60
   });
 
   parser.add_argument("--metrics-time-increment-ms", {
@@ -353,6 +371,13 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
+  if (CFG.metrics_past_start_range_min_seconds > CFG.metrics_past_start_range_max_seconds) {
+    log.error(
+      "metrics_past_start_range_min_seconds must not be larger than metrics_past_start_range_max_seconds"
+    );
+    process.exit(1);
+  }
+
   if (CFG.max_concurrent_writes > CFG.n_concurrent_streams) {
     log.error(
       "max_concurrent_writes must not be larger than n_concurrent_streams"
@@ -375,7 +400,7 @@ export function parseCmdlineArgs(): void {
     }
   }
 
-  if (CFG.max_concurrent_writes === 0) {
+  if (CFG.max_concurrent_writes === 0) { // TODO this is always zero - remove from CFG?
     CFG.max_concurrent_writes = CFG.n_concurrent_streams;
   }
 
