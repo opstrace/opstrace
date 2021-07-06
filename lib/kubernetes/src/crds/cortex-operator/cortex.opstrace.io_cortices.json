@@ -40,7 +40,6 @@
                   "alertmanager_spec": {
                     "properties": {
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       }
@@ -58,12 +57,10 @@
                             "type": "string"
                           }
                         ],
-                        "default": "1Gi",
                         "pattern": "^(\\+|-)?(([0-9]+(\\.[0-9]*)?)|(\\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\\+|-)?(([0-9]+(\\.[0-9]*)?)|(\\.[0-9]+))))?$",
                         "x-kubernetes-int-or-string": true
                       },
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       },
@@ -81,7 +78,6 @@
                   "distributor_spec": {
                     "properties": {
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       }
@@ -103,12 +99,10 @@
                             "type": "string"
                           }
                         ],
-                        "default": "1Gi",
                         "pattern": "^(\\+|-)?(([0-9]+(\\.[0-9]*)?)|(\\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\\+|-)?(([0-9]+(\\.[0-9]*)?)|(\\.[0-9]+))))?$",
                         "x-kubernetes-int-or-string": true
                       },
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       },
@@ -123,18 +117,15 @@
                       "chunks_cache_spec": {
                         "properties": {
                           "max_item_size": {
-                            "default": "2m",
                             "description": "MaxItemSize adjusts max item size",
                             "type": "string"
                           },
                           "memory_limit": {
-                            "default": 4096,
                             "description": "MemoryLimit is the item memory in megabytes",
                             "format": "int32",
                             "type": "integer"
                           },
                           "replicas": {
-                            "default": 2,
                             "format": "int32",
                             "type": "integer"
                           }
@@ -142,24 +133,20 @@
                         "type": "object"
                       },
                       "image": {
-                        "default": "memcached:1.6.9-alpine",
                         "type": "string"
                       },
                       "index_queries_cache_spec": {
                         "properties": {
                           "max_item_size": {
-                            "default": "2m",
                             "description": "MaxItemSize adjusts max item size",
                             "type": "string"
                           },
                           "memory_limit": {
-                            "default": 4096,
                             "description": "MemoryLimit is the item memory in megabytes",
                             "format": "int32",
                             "type": "integer"
                           },
                           "replicas": {
-                            "default": 2,
                             "format": "int32",
                             "type": "integer"
                           }
@@ -169,18 +156,15 @@
                       "index_writes_cache_spec": {
                         "properties": {
                           "max_item_size": {
-                            "default": "2m",
                             "description": "MaxItemSize adjusts max item size",
                             "type": "string"
                           },
                           "memory_limit": {
-                            "default": 4096,
                             "description": "MemoryLimit is the item memory in megabytes",
                             "format": "int32",
                             "type": "integer"
                           },
                           "replicas": {
-                            "default": 2,
                             "format": "int32",
                             "type": "integer"
                           }
@@ -190,18 +174,15 @@
                       "metadata_cache_spec": {
                         "properties": {
                           "max_item_size": {
-                            "default": "2m",
                             "description": "MaxItemSize adjusts max item size",
                             "type": "string"
                           },
                           "memory_limit": {
-                            "default": 4096,
                             "description": "MemoryLimit is the item memory in megabytes",
                             "format": "int32",
                             "type": "integer"
                           },
                           "replicas": {
-                            "default": 2,
                             "format": "int32",
                             "type": "integer"
                           }
@@ -211,18 +192,15 @@
                       "results_cache_spec": {
                         "properties": {
                           "max_item_size": {
-                            "default": "2m",
                             "description": "MaxItemSize adjusts max item size",
                             "type": "string"
                           },
                           "memory_limit": {
-                            "default": 4096,
                             "description": "MemoryLimit is the item memory in megabytes",
                             "format": "int32",
                             "type": "integer"
                           },
                           "replicas": {
-                            "default": 2,
                             "format": "int32",
                             "type": "integer"
                           }
@@ -235,7 +213,6 @@
                   "querier_spec": {
                     "properties": {
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       }
@@ -245,7 +222,6 @@
                   "query_frontend_spec": {
                     "properties": {
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       }
@@ -255,7 +231,6 @@
                   "ruler_spec": {
                     "properties": {
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       }
@@ -263,13 +238,8 @@
                     "type": "object"
                   },
                   "runtime_config": {
-                    "properties": {
-                      "overrides": {
-                        "type": "object",
-                        "x-kubernetes-preserve-unknown-fields": true
-                      }
-                    },
-                    "type": "object"
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
                   },
                   "service_account_spec": {
                     "properties": {
@@ -293,12 +263,10 @@
                             "type": "string"
                           }
                         ],
-                        "default": "1Gi",
                         "pattern": "^(\\+|-)?(([0-9]+(\\.[0-9]*)?)|(\\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\\+|-)?(([0-9]+(\\.[0-9]*)?)|(\\.[0-9]+))))?$",
                         "x-kubernetes-int-or-string": true
                       },
                       "replicas": {
-                        "default": 2,
                         "format": "int32",
                         "type": "integer"
                       },
