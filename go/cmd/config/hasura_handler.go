@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -162,6 +163,29 @@ func (h *HasuraHandler) handler(w http.ResponseWriter, r *http.Request) {
 		path := fmt.Sprintf("/api/v1/rules/%s/%s", request.Input.Namespace, request.Input.RuleGroupName)
 		httpresp, err := h.cortexQuery(request.Input.TenantID, "DELETE", path, "")
 		response = actions.ToDeleteResponse("Rule group", httpresp, err)
+
+	case "validateTenantName":
+		var request actions.ValidateTenantNamePayload
+		err = json.Unmarshal(reqbody, &request)
+		if err != nil {
+			writeGraphQLError(w, "invalid request payload")
+			return
+		}
+		regex := "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+		reg, _ := regexp.Compile(regex)
+		invalidNames := request.Input.TenantNames[:0]
+		for _, tenantName := range request.Input.TenantNames {
+			if !reg.MatchString(tenantName) {
+				// Append desired values to slice
+				invalidNames = append(invalidNames, tenantName)
+			}
+		}
+
+		if len(invalidNames) > 0 {
+			errorMessage := fmt.Sprintf("Invalid tenant names: %v.\nThey must match %v", invalidNames, regex)
+			writeGraphQLError(w, errorMessage)
+			return
+		}
 	}
 
 	data, err := json.Marshal(response)

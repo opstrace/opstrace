@@ -8,6 +8,15 @@ actions:
       value_from_env: ACTION_CONFIG_API_SECRET
   permissions:
   - role: user_admin
+- name: validateTenantName
+  definition:
+    kind: synchronous
+    handler: '{{ACTION_CONFIG_API_ENDPOINT}}'
+    headers:
+    - name: X-Action-Secret
+      value_from_env: ACTION_CONFIG_API_SECRET
+  permissions:
+  - role: user_admin
 - name: getAlertmanager
   definition:
     kind: ""

@@ -90,6 +90,10 @@ type DeleteRuleGroupArgs struct {
 	RuleGroupName string `json:"rule_group_name"`
 }
 
+type ValidateTenantNameArgs struct {
+	TenantNames []string `json:"tenant_names"`
+}
+
 type ListRulesPayload struct {
 	SessionVariables map[string]interface{} `json:"session_variables"`
 	Input            ListRulesArgs          `json:"input"`
@@ -108,6 +112,11 @@ type UpdateRuleGroupPayload struct {
 type DeleteRuleGroupPayload struct {
 	SessionVariables map[string]interface{} `json:"session_variables"`
 	Input            DeleteRuleGroupArgs    `json:"input"`
+}
+
+type ValidateTenantNamePayload struct {
+	SessionVariables map[string]interface{} `json:"session_variables"`
+	Input            ValidateTenantNameArgs `json:"input"`
 }
 
 type Rules struct {

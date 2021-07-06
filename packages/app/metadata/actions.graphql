@@ -6,6 +6,12 @@ type Mutation {
   ): StatusResponse
 }
 
+type Mutation {
+  validateTenantName (
+    tenant_names: [String!]!
+  ): StatusResponse
+}
+
 
 type Query {
   getAlertmanager (
