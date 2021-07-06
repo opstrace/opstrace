@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { test as base, expect } from "@playwright/test";
+import { test as base, expect, Page } from "@playwright/test";
+import { padCharsEnd } from "ramda-adjunct";
 
 import { addAuthFixture, addTenantFixture, pipe } from "../fixtures";
 
 import { logUserIn } from "../utils/authentication";
 import { createTenant, makeTenantName } from "../utils/tenant";
-
-import { log } from "../utils";
 
 const test = pipe(addAuthFixture, addTenantFixture)(base);
 
@@ -81,55 +80,38 @@ test.describe("after auth0 authentication", () => {
 
   test.describe("validation of tenant name", () => {
     test("spaces are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
+      await testInvalidTenantName(makeTenantName("tenant name"), page);
     });
 
     test("dots are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant.name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
+      await testInvalidTenantName(makeTenantName("tenant.name"), page);
     });
 
     test("dashes are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant-name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
+      await testInvalidTenantName(makeTenantName("tenant-name"), page);
     });
 
     test("colons are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant:name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
+      await testInvalidTenantName(makeTenantName("tenant:name"), page);
     });
 
     test("underscores are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant_name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
+      await testInvalidTenantName(makeTenantName("tenant_name"), page);
     });
 
     test("uppcase letters are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenantName");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
+      await testInvalidTenantName(makeTenantName("tenantName"), page);
+    });
+
+    test("is not too long", async ({ page }) => {
+      await testInvalidTenantName(
+        padCharsEnd("toolong", 64)(makeTenantName("tenantname")),
+        page
+      );
     });
 
     test("can't have two with the same name", async ({ page }) => {
-      const tenantName = "fancytenant";
+      const tenantName = makeTenantName("fancytenant");
 
       await createTenant(tenantName, { page });
       // deliberatly wait slightly for the system to make the Tenants, on CI it progress too fast past the following line as page.$$ doesn't wait for things
@@ -148,3 +130,10 @@ test.describe("after auth0 authentication", () => {
     });
   });
 });
+
+const testInvalidTenantName = async (tenantName: string, page: Page) => {
+  await createTenant(tenantName, { page });
+  expect(
+    await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+  ).toBeFalsy();
+};
