@@ -407,7 +407,7 @@ export class MetricSeries extends TimeseriesBase {
       return [shiftIntoPastSeconds, undefined];
     }
 
-    const t0 = mtime();
+    //const t0 = mtime();
     const fragment = new MetricSeriesFragment(
       this.labels,
       this.nFragmentsConsumed + 1,
@@ -418,11 +418,11 @@ export class MetricSeries extends TimeseriesBase {
       fragment.addSample(this.nextSample());
     }
 
-    const genduration = mtimeDiffSeconds(t0);
-    log.debug(
-      "MetricSeriesFragment addSample loop took: %s s",
-      genduration.toFixed(3)
-    );
+    //const genduration = mtimeDiffSeconds(t0);
+    //log.debug(
+    //  "MetricSeriesFragment addSample loop took: %s s",
+    //  genduration.toFixed(3)
+    //);
     return [shiftIntoPastSeconds, fragment];
   }
 
