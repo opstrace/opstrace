@@ -190,9 +190,12 @@ async function createNewSeries(
         );
       stream = new MetricSeries(
         {
-          // fixed according to the cycle id
-          metricName: guniqueCycleId, // the same across concurrent streams, contains invocation_id
-          uniqueName: streamname, // must not collide among concurrent streams
+          // the same across concurrent streams, contains invocation_id
+          // ensure any dashes in metric name are switched to underscores: required by prometheus
+          // see also: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
+          metricName: guniqueCycleId.replace(/-/g, "_"),
+          // must not collide among concurrent streams
+          uniqueName: streamname,
           n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
 
           // With Cortex' Blocks Storage system, we cannot go into the future
