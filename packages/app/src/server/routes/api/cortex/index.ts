@@ -73,18 +73,20 @@ cortexProxy.on("proxyRes", (proxyRes, req, res) => {
         /* setting the status code as 412, as usually HTML error responses
          * of cortex are due to misconfigurations
          */
-        res.writeHead(412, {
-          "content-type": "text/plain"
+        res.writeHead(500, {
+          "content-type": "application/json"
         });
-        res.end(errorMessage);
+        res.end(JSON.stringify({
+          errorMessage,
+        }));
       } catch (e) {
         res.writeHead(500, {
-          "content-type": "text/plain"
+          "content-type": "application/json"
         });
-        res.end(
-          "There has been an error parsing a cortex HTML response. Response:\n\n" +
-            body
-        );
+        res.end(JSON.stringify({
+          errorMessage: "There has been an error parsing a cortex HTML response.",
+          data: body.slice(0, 500)
+        }));
       }
     } else {
       /* if response is not HTML, the chunks have already been written
@@ -107,8 +109,8 @@ const proxyTo = (target: string) => (
       target,
       headers: req.params.tenant
         ? {
-            "X-Scope-OrgID": req.params.tenant
-          }
+          "X-Scope-OrgID": req.params.tenant
+        }
         : {}
     },
     (err: Error) => {
