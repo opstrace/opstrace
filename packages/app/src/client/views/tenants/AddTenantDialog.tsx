@@ -16,7 +16,7 @@
 
 import React from "react";
 import { useDispatch } from "react-redux";
-import { subdomainValidator } from "client/utils/regex";
+import { tenantNameValidator } from "client/utils/regex";
 
 import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
@@ -44,7 +44,7 @@ const AddTenantPicker = () => {
         }
       ],
       onSelected: (option, tenant) => {
-        if (option.id === "yes" && tenant && subdomainValidator.test(tenant)) {
+        if (option.id === "yes" && tenant && tenantNameValidator.test(tenant)) {
           dispatch(addTenant(tenant));
         }
       },

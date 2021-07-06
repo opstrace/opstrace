@@ -15,8 +15,8 @@
  */
 
 // note: webkit doesn't support "look behind" syntax which means can't use the preferred regex for this
-// const subdomainValidatorWithLookBehind = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)$/;
+// const tenantNameValidatorWithLookBehind = /^(?!-)[a-z0-9-]{1,63}(?<!-)$/;
 
 // 2021.07.06 - [terrcin] I've removed "-" as a valid char as we're having problems with it in Grafana pod names
 //              related issue: https://github.com/opstrace/opstrace/issues/957
-export const subdomainValidator = /^[A-Za-z0-9][A-Za-z0-9]{0,61}[A-Za-z0-9]$/;
+export const tenantNameValidator = /^[a-z0-9][a-z0-9]{0,61}[a-z0-9]$/;
