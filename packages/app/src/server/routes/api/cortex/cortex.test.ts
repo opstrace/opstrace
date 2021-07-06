@@ -86,8 +86,8 @@ describe("cortex api", () => {
       });
 
       const result = await getTestServer().get(endpoint);
-      expect(result.text).toEqual(errorMessage);
-      expect(result.statusCode).toBe(412);
+      expect(result.body).toEqual({ errorMessage });
+      expect(result.statusCode).toBe(500);
     });
 
     test("handle 'unknown' HTML format", async () => {
@@ -110,20 +110,10 @@ describe("cortex api", () => {
       });
 
       const result = await getTestServer().get(endpoint);
-      expect(result.text)
-        .toEqual(`There has been an error parsing a cortex HTML response. Response:
-
-
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Cortex Some Ring</title>
-        </head>
-        <body>
-          <div>No p tag here!</div>
-        </body>
-      </html>
-`);
+      expect(result.body).toEqual({
+        errorMessage: "There has been an error parsing a cortex HTML response.",
+        data: mockResponse
+      });
       expect(result.statusCode).toBe(500);
     });
   });
