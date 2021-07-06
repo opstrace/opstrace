@@ -51,8 +51,6 @@ import {
 
 import { log } from "./log";
 
-// TODO consolidate these two imports
-import { rndstring, timestampToRFC3339Nano, httpTimeoutSettings } from "./util";
 import * as util from "./util";
 
 export const START_TIME_JODA = ZonedDateTime.now(ZoneOffset.UTC);
@@ -105,22 +103,26 @@ async function main() {
   parseCmdlineArgs();
   const httpServerTerminator = pm.setupPromExporter();
 
-  //let dummystreams: Array<LogSeries>;
   let dummystreams: Array<LogSeries | MetricSeries>;
 
   for (let cyclenum = 1; cyclenum < CFG.n_cycles + 1; cyclenum++) {
     setUptimeGauge();
 
     const numString = `${cyclenum.toString().padStart(3, "0")}`;
-    const guniqueCycleId = `${CFG.invocation_id}-${numString}-${rndstring(4)}`;
+    // invocation_id contains 10 characters of random data by default
+    const guniqueCycleId = `${CFG.invocation_id}-${numString}`;
 
     log.info("enter write/read cycle  %s", cyclenum);
 
-    if ((cyclenum - 1) % CFG.change_streams_every_n_cycles === 0) {
-      // rely on cyclenum to start at 1, 0 % N is 0 so that in the first
-      // run some dummystreams are created!
+    if (cyclenum === 1) {
+      // always create initial streams regardless of update configuration
       log.info("cycle %s: create new dummystreams", cyclenum);
-      dummystreams = await createNewLogSeriess(guniqueCycleId);
+      dummystreams = await createNewSeries(guniqueCycleId);
+    } else if (CFG.change_streams_every_n_cycles > 0 &&
+               (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0) {
+      // update streams at the configured number of cycles
+      log.info("cycle %s: reset dummystreams", cyclenum);
+      dummystreams = await createNewSeries(guniqueCycleId);
     } else {
       log.info(
         "cycle %s: continue to use dummystreams of previous cycle",
@@ -149,7 +151,7 @@ async function main() {
   httpServerTerminator.terminate();
 }
 
-async function createNewLogSeriess(
+async function createNewSeries(
   guniqueCycleId: string
 ): Promise<Array<LogSeries | MetricSeries>> {
   const streams = [];
@@ -158,10 +160,7 @@ async function createNewLogSeriess(
     // do not pad, might save some memory
     const streamname = `${guniqueCycleId}-${i.toString()}`; //.padStart(3, "0")}`;
 
-    // by default attach one label to the stream
-    const labelset: LabelSet = {
-      //  streamname: streamname
-    };
+    const labelset: LabelSet = {};
 
     // add more labels (key/value pairs) as given by command line
     // without further validation
@@ -179,8 +178,9 @@ async function createNewLogSeriess(
     if (CFG.metrics_mode) {
       stream = new MetricSeries(
         {
-          metricName: `looker_${rndstring(4)}`, // might collide among streams, which is OK as long as the label set adds uniqueness
-          uniqueName: streamname, // must not collide among streams
+          // fixed according to the cycle id
+          metricName: guniqueCycleId, // the same across concurrent streams, contains invocation_id
+          uniqueName: streamname, // must not collide among concurrent streams
           n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
 
           // With Cortex' Blocks Storage system, we cannot go into the future
@@ -278,7 +278,7 @@ async function performWriteReadCycle(
   const report = {
     argv: process.argv,
     renderedConfig: CFG,
-    invocationTime: timestampToRFC3339Nano(START_TIME_JODA),
+    invocationTime: util.timestampToRFC3339Nano(START_TIME_JODA),
     cycleStats: {
       cycleNum: cyclenum,
       guniqueCycleId: guniqueCycleId,
@@ -1178,7 +1178,7 @@ async function queryLokiWithRetryOrError(
       retry: 0,
       throwHttpErrors: false,
       searchParams: new URLSearchParams(queryParams),
-      timeout: httpTimeoutSettings,
+      timeout: util.httpTimeoutSettings,
       https: { rejectUnauthorized: false } // disable TLS server cert verification for now
     };
 
