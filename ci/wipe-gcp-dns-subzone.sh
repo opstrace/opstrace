@@ -37,27 +37,22 @@ gcloud_remove_ns_records_from_root_opstracegcp () {
         --zone=${ROOT_ZONE_NAME} \
         --transaction-file="${TXNFILEPATH}"
 
-    # Assume that either of the following two record sets exists exactly
-    # as written here, including TTL.
-    gcloud dns record-sets transaction remove --zone=${ROOT_ZONE_NAME} \
-        --transaction-file="${TXNFILEPATH}" \
-        --name "${RSNAME}" \
-        --type NS --ttl 300 \
-            "ns-cloud-b1.googledomains.com." \
-            "ns-cloud-b2.googledomains.com." \
-            "ns-cloud-b3.googledomains.com." \
-            "ns-cloud-b4.googledomains.com." || true
+    # Assume that either of the following two record sets exists exactly as
+    # written here, including TTL. Do not be smart about
+    # ns-cloud-[a,b,c,d][1,2,3,4], just try to delete all four of them -- one
+    # is expected to succeed
 
-    # Do not be smart about ns-cloud-cX instaed of ns-cloud-bX --
-    # try both, one of them fails.
-    gcloud dns record-sets transaction remove --zone=opstrace-gcp \
-        --transaction-file="${TXNFILEPATH}" \
-        --name "${RSNAME}" \
-        --type NS --ttl 300 \
-            "ns-cloud-c1.googledomains.com." \
-            "ns-cloud-c2.googledomains.com." \
-            "ns-cloud-c3.googledomains.com." \
-            "ns-cloud-c4.googledomains.com." || true
+    for _VARIANT in a b c d
+    do
+        gcloud dns record-sets transaction remove --zone=${ROOT_ZONE_NAME} \
+            --transaction-file="${TXNFILEPATH}" \
+            --name "${RSNAME}" \
+            --type NS --ttl 300 \
+                "ns-cloud-${_VARIANT}1.googledomains.com." \
+                "ns-cloud-${_VARIANT}2.googledomains.com." \
+                "ns-cloud-${_VARIANT}3.googledomains.com." \
+                "ns-cloud-${_VARIANT}4.googledomains.com." || true
+    done
 
     gcloud dns record-sets transaction execute \
         --zone=${ROOT_ZONE_NAME} \
