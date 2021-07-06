@@ -127,6 +127,11 @@ test.describe("after auth0 authentication", () => {
       const tenantName = "fancyTenant";
       await createTenant(tenantName, { page });
       await createTenant(tenantName, { page });
+      // deliberatly wait slightly for the system to make the Tenants, on CI it progress too fast past the following line as page.$$ doesn't wait for things
+      // await page.waitForSelector(`[data-test='tenant/row/${tenantName}']`, {
+      //   timeout: 5000
+      // });
+      await page.waitForTimeout(3_000);
       const dupTenants = await page.$$(
         `[data-test='tenant/row/${tenantName}']`
       );
