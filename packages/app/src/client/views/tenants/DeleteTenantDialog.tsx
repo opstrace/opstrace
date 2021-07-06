@@ -57,7 +57,8 @@ const DeleteTenantPicker = () => {
         if (option.id === "yes" && name) {
           dispatch(deleteTenant(name));
         }
-      }
+      },
+      dataTest: "deleteTenant"
     },
     [name]
   );
