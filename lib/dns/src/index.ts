@@ -197,36 +197,25 @@ export function* ensureDNSExists({
 }
 
 // note(jp): quickndirtily changed to only support GCP since
-// opstrace-prelaunch/issues/1225
-export function* destroyDNS({
-  stackName,
-  dnsName
-}: {
-  stackName: string;
-  dnsName: string; // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): Generator<unknown, void, any> {
-  const opstraceClient: DNSClient = yield call([
-    DNSClient,
-    DNSClient.getInstance
-  ]);
-
+// opstrace-prelaunch/issues/1225. Delete the managed zone in the user's cloud
+// infrastructure. For example, this is a GCP Cloud DNS "managed zone" for
+// *.foo.opstrace.io.
+// `dnsName` is expected to be <instance_name>.opstrace.io
+export function* destroyDNSZone(
+  dnsName: string
+): Generator<unknown, void, any> {
   const gcpDNS = new DNS();
-
-  const subZoneName = getSubdomain({ stackName, dnsName });
-
-  const subZone: Zone = yield call(getZone, {
-    dnsName: subZoneName,
+  const z: Zone = yield call(getZone, {
+    dnsName: dnsName,
     dns: gcpDNS as DNS,
     provider: "gcp" as "gcp" | "aws"
   });
 
-  // First, delete the managed zone in the user's cloud infrastructure For
-  // example, this is a GCP Cloud DNS zone managed zone for *.foo.opstrace.io.
-  if (subZone.zone) {
+  if (z.zone) {
     try {
       yield call(deleteZone, {
-        dnsName: subZoneName,
-        name: subZone.zone.name,
+        dnsName: dnsName,
+        name: z.zone.name,
         dns: gcpDNS as DNS
       });
     } catch (err) {
@@ -237,9 +226,4 @@ export function* destroyDNS({
       }
     }
   }
-
-  // Now, instruct the Opstrace DNS service to also remove the corresponding
-  // configuration in Opstrace's DNS zone for *.opstrace.io.
-  // TODO(JP): do _not_ call this when the dnsName is not *.opstrace.io
-  yield call([opstraceClient, opstraceClient.delete], stackName);
 }
