@@ -24,11 +24,12 @@ import {
 } from "../fixtures/authenticated";
 
 test.describe("debugging", () => {
-  test.skip("this should FAIL all the time", async ({ page }) => {
+  test("this should FAIL all the time", async ({ page }) => {
     expect(false).toBeTruthy();
   });
 
-  test.skip("can I get Firefox to login this way?", async ({ page }) => {
+  test("can I get Firefox to login this way?", async ({ page }) => {
+    test.skip();
     await page.goto(CLUSTER_BASE_URL);
 
     // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
