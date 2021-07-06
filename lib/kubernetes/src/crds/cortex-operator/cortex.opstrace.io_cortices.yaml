@@ -39,7 +39,6 @@ spec:
               alertmanager_spec:
                 properties:
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                 type: object
@@ -49,11 +48,9 @@ spec:
                     anyOf:
                     - type: integer
                     - type: string
-                    default: 1Gi
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                   storage_class_name:
@@ -67,7 +64,6 @@ spec:
               distributor_spec:
                 properties:
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                 type: object
@@ -80,11 +76,9 @@ spec:
                     anyOf:
                     - type: integer
                     - type: string
-                    default: 1Gi
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                   storage_class_name:
@@ -95,83 +89,67 @@ spec:
                   chunks_cache_spec:
                     properties:
                       max_item_size:
-                        default: 2m
                         description: MaxItemSize adjusts max item size
                         type: string
                       memory_limit:
-                        default: 4096
                         description: MemoryLimit is the item memory in megabytes
                         format: int32
                         type: integer
                       replicas:
-                        default: 2
                         format: int32
                         type: integer
                     type: object
                   image:
-                    default: memcached:1.6.9-alpine
                     type: string
                   index_queries_cache_spec:
                     properties:
                       max_item_size:
-                        default: 2m
                         description: MaxItemSize adjusts max item size
                         type: string
                       memory_limit:
-                        default: 4096
                         description: MemoryLimit is the item memory in megabytes
                         format: int32
                         type: integer
                       replicas:
-                        default: 2
                         format: int32
                         type: integer
                     type: object
                   index_writes_cache_spec:
                     properties:
                       max_item_size:
-                        default: 2m
                         description: MaxItemSize adjusts max item size
                         type: string
                       memory_limit:
-                        default: 4096
                         description: MemoryLimit is the item memory in megabytes
                         format: int32
                         type: integer
                       replicas:
-                        default: 2
                         format: int32
                         type: integer
                     type: object
                   metadata_cache_spec:
                     properties:
                       max_item_size:
-                        default: 2m
                         description: MaxItemSize adjusts max item size
                         type: string
                       memory_limit:
-                        default: 4096
                         description: MemoryLimit is the item memory in megabytes
                         format: int32
                         type: integer
                       replicas:
-                        default: 2
                         format: int32
                         type: integer
                     type: object
                   results_cache_spec:
                     properties:
                       max_item_size:
-                        default: 2m
                         description: MaxItemSize adjusts max item size
                         type: string
                       memory_limit:
-                        default: 4096
                         description: MemoryLimit is the item memory in megabytes
                         format: int32
                         type: integer
                       replicas:
-                        default: 2
                         format: int32
                         type: integer
                     type: object
@@ -179,30 +157,24 @@ spec:
               querier_spec:
                 properties:
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                 type: object
               query_frontend_spec:
                 properties:
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                 type: object
               ruler_spec:
                 properties:
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                 type: object
               runtime_config:
-                properties:
-                  overrides:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
                 type: object
+                x-kubernetes-preserve-unknown-fields: true
               service_account_spec:
                 properties:
                   annotations:
@@ -216,11 +188,9 @@ spec:
                     anyOf:
                     - type: integer
                     - type: string
-                    default: 1Gi
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   replicas:
-                    default: 2
                     format: int32
                     type: integer
                   storage_class_name:
