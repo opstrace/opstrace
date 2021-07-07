@@ -15,7 +15,15 @@
  */
 import got, { Response as GotResponse, Options as GotOptions } from "got";
 
-import { select, fork, call, race, delay, cancel } from "redux-saga/effects";
+import {
+  select,
+  fork,
+  call,
+  race,
+  delay,
+  cancel,
+  Effect
+} from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
 import createSagaMiddleware from "redux-saga";
 
@@ -27,6 +35,8 @@ import { getGKEKubeconfig } from "@opstrace/gcp";
 import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
 import { log, SECOND, retryUponAnyError, sleep } from "@opstrace/utils";
+
+import { DNSClient } from "@opstrace/dns";
 
 import {
   CONTROLLER_NAME,
@@ -93,7 +103,7 @@ async function getKubecfgIfk8sClusterExists(
   }
 }
 
-function* destroyClusterCore() {
+function* destroyClusterCore(): Generator<Effect, void, any> {
   if (destroyConfig === undefined) {
     throw new Error("call setDestroyConfig() first");
   }
@@ -105,6 +115,21 @@ function* destroyClusterCore() {
 
   if (kubeconfig) {
     yield call(triggerk8sTeardown, kubeconfig);
+  }
+
+  // First, try to determine if the  DNS name <instance_name>.opstrace.io
+  // exists for this Opstrace instance name (it may not when it was set up with
+  // a custom DNS name, which we are trying to find out here); and then attempt
+  // DNS service entry deletion (which may fail after login, when it turns out
+  // that <instance_name>.opstrace.io belongs to someone else, see #861 for
+  // trade-off discussion). Note(JP): for manually preventing false positives,
+  // maybe add a flag --skip-dns-service-login
+  if (yield call(doesOpstraceIoDNSNameExist, destroyConfig.clusterName)) {
+    const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
+    yield call(
+      [opstraceClient, opstraceClient.delete],
+      destroyConfig.clusterName
+    );
   }
 
   if (destroyConfig.cloudProvider === "gcp") {
@@ -249,7 +274,7 @@ export async function doesOpstraceIoDNSNameExist(
   instanceName: string
 ): Promise<boolean> {
   log.info(
-    `trying to determine if DNS name ${instanceName}.opstrace.io exists`
+    `dns service teardown: try to determine if DNS name ${instanceName}.opstrace.io exists`
   );
 
   const requestSettings: GotOptions = {
@@ -278,14 +303,16 @@ export async function doesOpstraceIoDNSNameExist(
       resp = await got(probeUrl, rs);
     } catch (e) {
       if (e instanceof got.RequestError) {
-        log.info(`${probeUrl}: HTTP request failed with: ${e.message}`);
+        log.info(
+          `dns service teardown: ${probeUrl}: HTTP request failed with: ${e.message}`
+        );
 
         // DNS resolution error: expected
         if (e.message.includes("ENOTFOUND")) {
           dnsResolutionErrsInARow++;
           if (dnsResolutionErrsInARow === 3) {
             log.info(
-              `attempt ${attempt}: saw three ENOUTFOUND,` +
+              `dns service teardown: attempt ${attempt}: saw three ENOUTFOUND, ` +
                 `assume DNS name ${instanceName}.opstrace.io does not exist`
             );
             return false;
@@ -304,7 +331,9 @@ export async function doesOpstraceIoDNSNameExist(
 
     if (resp) {
       // We got an HTTP response, i.e. the DNS name certainly resolved
-      log.info(`DNS name ${instanceName}.opstrace.io seems to exist`);
+      log.info(
+        `dns service teardown: DNS name ${instanceName}.opstrace.io seems to exist`
+      );
       log.debug(`HTTP response details:
         status: ${resp.statusCode}
         body[:500]: ${resp.body.slice(0, 500)}`);

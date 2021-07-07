@@ -50,11 +50,10 @@ import {
   RouteTablePublicRes,
   RDSSubnetGroupRes
 } from "@opstrace/aws";
-import { DNSClient } from "@opstrace/dns";
 
 import { log, getBucketName } from "@opstrace/utils";
 
-import { destroyConfig, doesOpstraceIoDNSNameExist } from "./index";
+import { destroyConfig } from "./index";
 
 interface RolenamePolicyarnAssociation {
   RoleName: string;
@@ -187,18 +186,6 @@ export function* destroyAWSInfra(): Generator<
   // will not delete anything, but it will also not hurt.
   const route53dnsname = `${destroyConfig.clusterName}.opstrace.io.`;
   taskGroup4.push(yield fork(route53PurgeZonesForDnsName, route53dnsname));
-
-  if (yield call(doesOpstraceIoDNSNameExist, destroyConfig.clusterName)) {
-    const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
-    // Now, instruct the Opstrace DNS service to also remove the corresponding
-    // configuration in Opstrace's DNS zone for *.opstrace.io.
-    taskGroup4.push(
-      yield fork(
-        [opstraceClient, opstraceClient.delete],
-        destroyConfig.clusterName
-      )
-    );
-  }
 
   for (const bn of [
     lokiBucketName,
