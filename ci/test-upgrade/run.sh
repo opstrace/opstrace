@@ -30,6 +30,7 @@ export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/.kube
 teardown() {
     LAST_EXIT_CODE=$?
 
+    make ci-testupgrade-create-cluster-artifacts
     make ci-testupgrade-teardown && exit ${LAST_EXIT_CODE}
 }
 trap "teardown" EXIT
