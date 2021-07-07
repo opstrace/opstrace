@@ -188,12 +188,14 @@ async function createNewSeries(
             CFG.metrics_past_start_range_min_seconds,
             CFG.metrics_past_start_range_max_seconds
         );
+      // TODO some sort of adjustable cardinality here, where the number of distinct label
+      //      permutations across a series is configurable? (e.g. 10k distinct labels across a series)
       stream = new MetricSeries(
         {
-          // the same across concurrent streams, contains invocation_id
+          // kept distinct across concurrent streams, see above TODO about sharing metric names
           // ensure any dashes in metric name are switched to underscores: required by prometheus
           // see also: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
-          metricName: guniqueCycleId.replace(/-/g, "_"),
+          metricName: streamname.replace(/-/g, "_"),
           // must not collide among concurrent streams
           uniqueName: streamname,
           n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,

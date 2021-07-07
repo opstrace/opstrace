@@ -205,7 +205,7 @@ export class MetricSeries extends TimeseriesBase {
 
   protected buildLabelSetFromOpts(opts: MetricSeriesOpts): LabelSet {
     // Merge the metric name into it using the well-known special prom label
-    // __name__. Always set `__name__`. If `opts.labelset` is
+    // __name__. Always set `uniquename` and `__name__`. If `opts.labelset` is
     // provided then treat this as _additional_ label set.
     let ls: LabelSet;
     if (opts.labelset !== undefined) {
