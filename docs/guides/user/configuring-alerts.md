@@ -14,7 +14,7 @@ You can configure the Alertmanager for each tenant from within the Grafana 8 int
 To do this, in the sidebar, click "Alerting" under the tenant you want to configure.
 You'll be presented with the configuration page:
 
-![alerting page overview](../../assets/alerts-overview.png)
+![alerting page overview](../../assets/alerts-overview.jpg)
 
 TODO
 
