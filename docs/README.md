@@ -3,7 +3,7 @@
 
 # Opstrace Introduction
 
- _**A secure open source observability platform, deployed inside your own network.**_
+The Opstrace Distribution is a secure, horizontally-scalable, open source observability platform that you can install in your cloud account.
 
 ## What does it do?
 
