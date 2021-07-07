@@ -29,9 +29,7 @@ import {
 import { destroyDNSZone } from "@opstrace/dns";
 import { log, getBucketName } from "@opstrace/utils";
 
-import { DNSClient } from "@opstrace/dns";
-
-import { destroyConfig, doesOpstraceIoDNSNameExist } from "./index";
+import { destroyConfig } from "./index";
 
 export function* destroyGCPInfra(): Generator<
   JoinEffect | CallEffect | ForkEffect | Generator<ForkEffect, Task[], Task>,
@@ -132,16 +130,6 @@ export function* destroyGCPInfra(): Generator<
   yield call(ensureNetworkDoesNotExist, {
     name: destroyConfig.clusterName
   });
-
-  if (yield call(doesOpstraceIoDNSNameExist, destroyConfig.clusterName)) {
-    const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
-    // Instruct the Opstrace DNS service to remove the corresponding
-    // configuration in Opstrace's DNS zone for *.opstrace.io.
-    yield call(
-      [opstraceClient, opstraceClient.delete],
-      destroyConfig.clusterName
-    );
-  }
 
   log.info(
     `attempt to destroy managed DNS zone for ${destroyConfig.clusterName}.opstrace.io`
