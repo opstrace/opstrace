@@ -63,9 +63,11 @@ info: Opstrace cluster upgrade done for tracy (aws)
 ### Alert Management
 
 Alertmanager can be difficult to configure, especially [for Cortex](https://cortexmetrics.io/docs/architecture/#alertmanager) when multiple tenants are used.
-Our goal is to improve this with editors that provide real-time validation feedback:
+Opstrace configures a horizontally scalable Ruler and Alertmanager out of the box to support reliable alerts.
+It also deploys a Grafana instance for each tenant, which can be now used to manage Cortex/Loki alerts thanks now to [Grafana 8's Unified Alerting](https://grafana.com/blog/2021/06/14/the-new-unified-alerting-system-for-grafana-everything-you-need-to-know/) feature.
+Before, you'd have to manage each of these components independently, keeping them in sync manually.
 
-![alertmanager configuration ui](https://p95.p4.n0.cdn.getcloudapp.com/items/eDuy9lnR/1a7a1030-4b27-4dfc-bf52-774f9f61d365.jpg?v=d0e8968befa6e0e3e1922594e61f9189)
+![opstrace ui alert overview](docs/assets/alerts-overview.png)
 
 ### Tenant Management
 
