@@ -16,8 +16,8 @@ Highlights:
 * Horizontally **scalable**.
 * Inexpensive **long-term** retention of observability data.
 * Rigoriously **tested** end-to-end.
-* Large efforts towards confident **upgrades**.
-* **Secure** by default with TLS and authenticated endpoints.
+* Easy and reliable **upgrades**.
+* **Secure** by default with [TLS](https://letsencrypt.org) and authenticated endpoints.
 * **Easy to configure** with GUIs and APIs.
 
 We walk on the shoulders of giants; Opstrace uses open source projects you know and love:
@@ -25,8 +25,10 @@ We walk on the shoulders of giants; Opstrace uses open source projects you know 
 * [Cortex](https://github.com/cortexproject/cortex)
 * [Loki](https://github.com/grafana/loki)
 * [Grafana](https://github.com/grafana/grafana)
-* [Prometheus](https://github.com/prometheus/prometheus)
+* [Hasura](https://github.com/hasura/graphql-engine)
 * [Kubernetes](https://github.com/kubernetes/kubernetes)
+* [Prometheus](https://github.com/prometheus/prometheus)
+* [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
 * and many more
 
 ## Key Features
@@ -47,7 +49,7 @@ EOF
 ```text
 $ ./opstrace create aws tracy -c config.yaml
 ...
-info: cluster creation finished: tracy (aws)
+info: create operation finished: tracy (aws)
 info: Log in here: https://tracy.opstrace.io
 ```
 
@@ -57,7 +59,7 @@ A week later...
 $ curl -L https://go.opstrace.com/cli-latest-release-macos | tar xjf -
 $ ./opstrace upgrade aws tracy -c config.yaml
 ...
-info: Opstrace cluster upgrade done for tracy (aws)
+info: upgrade operation finished for tracy (aws)
 ```
 
 ### Alert Management
