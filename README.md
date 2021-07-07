@@ -67,7 +67,7 @@ Opstrace configures a horizontally scalable Ruler and Alertmanager out of the bo
 It also deploys a Grafana instance for each tenant, which can be now used to manage Cortex/Loki alerts thanks now to [Grafana 8's Unified Alerting](https://grafana.com/blog/2021/06/14/the-new-unified-alerting-system-for-grafana-everything-you-need-to-know/) feature.
 Before, you'd have to manage each of these components independently, keeping them in sync manually.
 
-![opstrace ui alert overview](docs/assets/alerts-overview.png)
+![opstrace ui alert overview](docs/assets/alerts-overview.jpg)
 
 ### Tenant Management
 
