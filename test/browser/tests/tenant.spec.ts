@@ -54,9 +54,6 @@ test.describe("after auth0 authentication", () => {
   });
 
   test("user can delete a Tenant", async ({ page, cluster }) => {
-    // TODO: when deleting tenants is fixed remove this line,
-    // https://github.com/opstrace/opstrace/issues/993
-    test.fail();
     const tenantName = makeTenantName();
     expect(
       await page.isVisible(`[data-test='tenant/row/${tenantName}']`)

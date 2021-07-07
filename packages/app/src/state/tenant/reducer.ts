@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { pluck, zipObj, pick, mergeDeepRight } from "ramda";
+import { pluck, zipObj, pick, mergeDeepRight, omit } from "ramda";
 
 import { createReducer, ActionType } from "typesafe-actions";
 import { TenantRecords } from "./types";
@@ -42,6 +42,15 @@ export const reducer = createReducer<TenantState, TenantActions>(
       const tenantIds: string[] = pluck("name", action.payload);
       const tenants: TenantRecords = zipObj(tenantIds, action.payload);
       return mergeDeepRight(state, { loading: false, tenants: tenants });
+    }
+  )
+  .handleAction(
+    actions.deleteTenant,
+    (state, action): TenantState => {
+      return {
+        loading: state.loading,
+        tenants: omit([action.payload])(state.tenants)
+      };
     }
   )
   .handleAction(
