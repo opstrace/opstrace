@@ -25,7 +25,6 @@ import {
 
 test.describe("debugging", () => {
   test("this should FAIL all the time", async ({ page }) => {
-    test.skip();
     expect(false).toBeTruthy();
   });
 
