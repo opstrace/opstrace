@@ -87,10 +87,10 @@ import { expect } from "@playwright/test";
 
 // Note: this is not the playwright "test" object but one that has had the authentication worker fixture added to it
 import { test } from "../fixtures/authenticated";
-import { logUserIn } from "../utils/authentication";
+import { restoreLogin } from "../utils";
 
 test.describe("after auth0 authentication", () => {
-  test.beforeEach(logUserIn);
+  test.beforeEach(restoreLogin);
 
   test("user should see homepage", async ({ page }) => {
     expect(await page.isVisible("text=Getting Started")).toBeTruthy();

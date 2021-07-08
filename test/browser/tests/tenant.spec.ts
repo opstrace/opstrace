@@ -19,13 +19,13 @@ import { padCharsEnd } from "ramda-adjunct";
 
 import { addAuthFixture, addTenantFixture, pipe } from "../fixtures";
 
-import { logUserIn } from "../utils/authentication";
+import { restoreLogin } from "../utils";
 import { createTenant, makeTenantName } from "../utils/tenant";
 
 const test = pipe(addAuthFixture, addTenantFixture)(base);
 
 test.describe("after auth0 authentication", () => {
-  test.beforeEach(logUserIn);
+  test.beforeEach(restoreLogin);
 
   test.beforeEach(async ({ page }) => {
     await page.hover("[data-test='sidebar/clusterAdmin/Tenants']");

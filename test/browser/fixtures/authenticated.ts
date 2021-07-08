@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Cookie } from "@playwright/test";
+import { Cookie, TestType } from "@playwright/test";
 
-import { log } from "../utils";
+import { performLogin, log } from "../utils";
 
 // First, check for _required_ env vars (keep this simple, to comply with README)
 if (
@@ -81,7 +81,7 @@ type AuthenticationFixture = {
   authCookies: Cookie[];
 };
 
-export const addAuthFixture = test =>
+export const addAuthFixture = (test: TestType) =>
   test.extend<Record<string, never>, AuthenticationFixture>({
     system: [
       async ({ browser }, use) => {
@@ -118,25 +118,7 @@ export const addAuthFixture = test =>
         const context = await browser.newContext({ ignoreHTTPSErrors: true });
         const page = await context.newPage();
 
-        await page.goto(CLUSTER_BASE_URL);
-
-        // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
-        // <span class="MuiButton-label">Log in</span>
-        await page.waitForSelector("css=button");
-
-        await page.click("text=Log in");
-
-        // Wait for CI-specific username/pw login form to appear
-        await page.waitForSelector("text=Don't remember your password?");
-
-        await page.fill("css=input[type=email]", CI_LOGIN_EMAIL);
-        await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
-
-        await page.click("css=button[type=submit]");
-
-        // The first view after successful login is expected to be the details page
-        // for the `system` tenant, showing a link to Grafana.
-        await page.waitForSelector("[data-test=getting-started]");
+        await performLogin(page, CI_LOGIN_EMAIL, CI_LOGIN_PASSWORD);
 
         const cookies = await page.context().cookies();
         await page.close();
