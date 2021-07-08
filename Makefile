@@ -255,7 +255,7 @@ cli-pkg:
 	fi; \
 	set -o xtrace && \
 	yarn run pkg packages/cli/package.json --public \
-		--targets node14-$${TPLATFORM}-x64 \
+		--targets node16-$${TPLATFORM}-x64 \
 		--output build/bin/opstrace \
 		--options stack-trace-limit=100 && \
         set +o xtrace && \
@@ -268,7 +268,7 @@ cli-pkg-macos:
 	mkdir -p build/bin/macos && \
 	set -o xtrace && \
         yarn run pkg packages/cli/package.json --public \
-		--targets node14-macos-x64 \
+		--targets node16-macos-x64 \
 		--output build/bin/macos/opstrace \
 		--options stack-trace-limit=100 && \
         set +o xtrace && \
