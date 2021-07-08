@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import got, { Response as GotResponse, Options as GotOptions } from "got";
+
+import dns from "dns/promises";
 
 import {
   select,
@@ -270,77 +271,118 @@ export async function destroyCluster(
   log.debug("end of destroyCluster()");
 }
 
+/**
+ *
+ * Examples:
+ *
+ * 1) NS record for foo.opstrace.io exists in *.opstrace.io DNS zone and points
+ *    to the authoritative name servers in user's DNS zone: resolveNs() returns
+ *    the set of authoritative name servers.
+ *
+ *      -> return true
+ *
+ * 2) NS record for bar.opstrace.io exists in *.opstrace.io DNS zone and points
+ *    to a set of name servers that don't now that DNS name (user's DNS infra
+ *    already cleaned up or never set up in the first place): resolveNs()
+ *    interestingly emits an ESERVFAIL error (which kind of makes sense,
+ *    because the seeminly authoritative name servers don't know the DNS name).
+ *    It would be nicer to directly see the 'link', i.e. the _actual_ NS record
+ *    set in the *.opstrace.io DNS zone, though.
+ *
+ *      -> return true
+ *
+ * 3) NS record for nono.opstrace.io does not exist in *.opstrace.io DNS zone:
+ *    resolveNs() returns ENOTFOUND.
+ *
+ *      -> return false
+ *
+ *
+ *  Tested with:
+ *  records = await r.resolveNs("jp-devcluster2.opstrace.io"); -> record set
+ *  records = await r.resolveNs("notexisting.opstrace.io"); -> ENOTFOUND
+ *  records = await r.resolveNs("prs-bk-4987-861-a.opstrace.io"); -> ESERVFAIL
+ *
+ * For all other errors returned by resolveNs(), perform a retry (we will learn
+ * if there are more of those situations 1, 2, 3 above that map onto different
+ * error codes)
+ */
+
 export async function doesOpstraceIoDNSNameExist(
   instanceName: string
 ): Promise<boolean> {
   log.info(
-    `dns service teardown: try to determine if DNS name ${instanceName}.opstrace.io exists`
+    "DNS service teardown: try to determine if an NS record set " +
+      "exists in the *.opstrace.io DNS zone for DNS name " +
+      `${instanceName}.opstrace.io.`
   );
 
-  const requestSettings: GotOptions = {
-    throwHttpErrors: false,
-    retry: 0,
-    https: { rejectUnauthorized: false },
-    timeout: {
-      connect: 3000,
-      request: 10000
-    }
-  };
+  const dn = `${instanceName}.opstrace.io`;
 
-  const rs: GotOptions = { ...requestSettings };
-
-  const probeUrl = `https://${instanceName}.opstrace.io`;
-
-  let dnsResolutionErrsInARow = 0;
+  // DNS query timeout: defined in milliseconds.
+  const r = new dns.Resolver({ timeout: 10000 });
 
   let attempt = 0;
   while (true) {
     attempt++;
 
-    let resp: GotResponse<string>;
+    let records: string[];
     try {
-      //@ts-ignore `got(probeUrl, rs)` returns `unknown` from tsc's point of view
-      resp = await got(probeUrl, rs);
+      // Try to see if there is an NS record set for ${instanceName}.opstrace.io in
+      // the *.opstrace.io zone (managed by Opstrace).
+      // Note that this does not use OS facilities, but the DNS client
+      // built into NodeJS stdlib.
+      // Also see https://nodejs.org/docs/latest-v16.x/api/dns.html#dns_error_codes
+      records = await r.resolveNs(dn);
     } catch (e) {
-      if (e instanceof got.RequestError) {
-        log.info(
-          `dns service teardown: ${probeUrl}: HTTP request failed with: ${e.message}`
-        );
-
-        // DNS resolution error: expected
-        if (e.message.includes("ENOTFOUND")) {
-          dnsResolutionErrsInARow++;
-          if (dnsResolutionErrsInARow === 3) {
-            log.info(
-              `dns service teardown: attempt ${attempt}: saw three ENOUTFOUND, ` +
-                `assume DNS name ${instanceName}.opstrace.io does not exist`
-            );
-            return false;
-          }
+      // Use the syscall property to separate programming errors from errors
+      // thrown _within_ resolveNs().
+      if (e.syscall === "queryNs") {
+        if (e.code === "ESERVFAIL") {
+          // Note(JP): documented with "DNS server returned general failure",
+          // which I've found to include the situation where the seemingly
+          // _authoritative_ name servers do not know anything about the
+          // DNS name in question.
+          log.info(
+            `DNS service teardown: NS record query attempt ${attempt}: ` +
+              "ESERVFAIL. Assume that NS record set exists on the *.opstrace.io " +
+              "DNS zone, but that the corresponding name servers do not " +
+              `know about ${dn} (anymore).`
+          );
+          return true;
+        } else if (e.code === "ENOTFOUND") {
+          log.info(
+            `DNS service teardown: NS record query attempt ${attempt}: ` +
+              `ENOTFOUND. NS record set for ${dn} does not exist on ` +
+              "the *.opstrace.io DNS zone."
+          );
+          return false;
         } else {
-          log.debug("reset dnsResolutionErrsInARow counter");
-          dnsResolutionErrsInARow = 0;
+          log.info(
+            `DNS service teardown: NS record query attempt ${attempt}: ${e.message} -- retry in 5 s`
+          );
+          await sleep(5.0);
+          continue;
         }
-
-        await sleep(5.0);
-        continue;
       } else {
+        // This is meant to catch _only_ programming errors.
         throw e;
       }
     }
 
-    if (resp) {
-      // We got an HTTP response, i.e. the DNS name certainly resolved
+    if (records.length > 0) {
+      log.debug("record set: %s", records);
       log.info(
-        `dns service teardown: DNS name ${instanceName}.opstrace.io seems to exist`
+        `DNS service teardown: NS record query attempt ${attempt}: ` +
+          `NS record set exists for ${dn} on the *.opstrace.io DNS zone.`
       );
-      log.debug(`HTTP response details:
-        status: ${resp.statusCode}
-        body[:500]: ${resp.body.slice(0, 500)}`);
       return true;
     }
 
-    // should never be here actually
+    // Is this possible? Meaning that there is no NS record set?
+    log.warning(
+      `DNS service teardown: NS record query attempt ${attempt}: ` +
+        `empty record set -- unexpected situation. Retry in 5 seconds.`
+    );
     await sleep(5.0);
   }
 }
