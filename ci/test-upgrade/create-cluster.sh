@@ -15,7 +15,7 @@ fi
 
 echo "--- creating cluster"
 ./from/opstrace create ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
-    --instance-config ci/cluster-config.yaml \
+    --instance-config ci/test-upgrade/initial-cluster-config.yaml \
     --log-level=debug \
     --yes
 
