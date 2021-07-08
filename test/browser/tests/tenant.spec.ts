@@ -79,6 +79,7 @@ test.describe("after auth0 authentication", () => {
   });
 
   test.describe("validation of tenant name", () => {
+    test.skip();
     test("spaces are NOT allowed", async ({ page }) => {
       await testInvalidTenantName(makeTenantName("tenant name"), page);
     });
