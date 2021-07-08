@@ -6,9 +6,9 @@ This document attempts to help setting up a local development environment that r
 
 Overview of requirements:
 
-* Node 14+
+* Node 16+
 * Yarn v1.x
-* Go 1.15+
+* Go 1.16+
 * Docker
 * GCP and/or AWS CLIs (`gcloud`/`aws`)
 * `make`
@@ -18,14 +18,22 @@ Overview of requirements:
 
 The sections below hopefully help with setting up some of these!
 
+## TypeScript editor: use VSCode with ESLint
+
+* Disable TSLint extension in VSCode.
+* Enable ESLint extension in VSCode.
+* Use the workspace settings as defined in the root of the repository.
+* For the ESLint extension, use the default settings, in particular `eslint.codeActionsOnSave.mode` set to `all`. That way, we align on formatting.
+
+
 ## Manage NodeJS with NVM
 
 Our recommendation is to use [NVM](https://github.com/nvm-sh/nvm) for managing NodeJS installations.
-At the time of writing we are using NodeJS 14.x:
+At the time of writing we are using NodeJS 16.x:
 
 ```bash
-nvm install 14
-nvm use 14
+nvm install 16
+nvm use 16
 ```
 
 ## Building locally
