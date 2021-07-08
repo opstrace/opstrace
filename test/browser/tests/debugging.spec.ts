@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-import { test, expect } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
+
+import { addAuthFixture } from "../fixtures";
+import { logUserIn } from "../utils/authentication";
 
 import {
   CLUSTER_BASE_URL,
-  CLOUD_PROVIDER,
   CI_LOGIN_EMAIL,
   CI_LOGIN_PASSWORD
 } from "../fixtures/authenticated";
 
-test.describe("debugging", () => {
-  test("this should FAIL all the time", async ({ page }) => {
+const testWithAuth = addAuthFixture(base);
+const testNoAuth = base;
+
+testWithAuth.describe("debugging", () => {
+  testWithAuth.beforeEach(logUserIn);
+
+  testWithAuth("this should FAIL all the time", async ({ page }) => {
+    // testWithAuthskip();
     expect(false).toBeTruthy();
   });
+});
 
-  test("can I get Firefox to login this way?", async ({ page }) => {
-    test.skip();
+testNoAuth.describe("debugging - no auth", () => {
+  testNoAuth("can I manually login this way?", async ({ page }) => {
+    testNoAuth.skip();
     await page.goto(CLUSTER_BASE_URL);
 
     // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
