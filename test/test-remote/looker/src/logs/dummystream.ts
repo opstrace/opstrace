@@ -48,8 +48,8 @@ import { TimeseriesBase, LabelSet } from "../series";
 // Note: maybe expose raw labels later on again.
 export interface LogSeriesOpts {
   // think: n log entries per stream/series fragment
-  n_samples_per_series_fragment: number;
-  n_chars_per_message: number;
+  n_entries_per_stream_fragment: number;
+  n_chars_per_msg: number;
   starttime: ZonedDateTime;
   timediffNanoseconds: number;
   includeTimeInMsg: boolean;
@@ -86,7 +86,7 @@ export class LogSeries extends TimeseriesBase {
   private genChars: (n: number) => string;
   private shouldBeValidatedflag: boolean;
 
-  n_chars_per_message: number;
+  n_chars_per_msg: number;
   timediffNanoseconds: number;
   nFragmentsSuccessfullySentSinceLastValidate: number;
 
@@ -99,7 +99,7 @@ export class LogSeries extends TimeseriesBase {
     this.currentNanos = opts.starttime.nano();
     this.firstEntryGenerated = false;
 
-    this.n_chars_per_message = opts.n_chars_per_message;
+    this.n_chars_per_msg = opts.n_chars_per_msg;
     this.timediffNanoseconds = opts.timediffNanoseconds;
     this.nFragmentsConsumed = 0;
     this.includeTimeInMsg = opts.includeTimeInMsg;
@@ -112,7 +112,7 @@ export class LogSeries extends TimeseriesBase {
     if (this.timediffNanoseconds > 999999999)
       throw Error("timediffNanoseconds must be smaller than 1 s");
 
-    if (this.includeTimeInMsg && this.n_chars_per_message < 19) {
+    if (this.includeTimeInMsg && this.n_chars_per_msg < 19) {
       throw Error("timestamp consumes 18+1 characters");
     }
 
@@ -172,7 +172,7 @@ export class LogSeries extends TimeseriesBase {
 
   private buildMsgText(): string {
     let text: string;
-    if (!this.includeTimeInMsg) text = this.genChars(this.n_chars_per_message);
+    if (!this.includeTimeInMsg) text = this.genChars(this.n_chars_per_msg);
     else {
       // build integer string, indicating the number of nanoseconds passed
       // since epoch, as is common in the Loki ecosystem.
@@ -185,7 +185,7 @@ export class LogSeries extends TimeseriesBase {
       // From a message length of 100 onwards I believer it is fair to say
       // that "max" compressability is still a very high compressability even
       // when the message is prefixed with this timestring.
-      text = `${timestring}:${this.genChars(this.n_chars_per_message - 19)}`;
+      text = `${timestring}:${this.genChars(this.n_chars_per_msg - 19)}`;
     }
     return text;
   }
@@ -218,7 +218,7 @@ export class LogSeries extends TimeseriesBase {
       this.nFragmentsConsumed + 1,
       this
     );
-    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
+    for (let i = 0; i < this.n_entries_per_stream_fragment; i++) {
       lsf.addSample(this.nextSample());
     }
     return lsf;
@@ -388,7 +388,7 @@ export class LogSeries extends TimeseriesBase {
     // chunkSize: think of it as "fetch at most those many entries per query"
     const expectedSampleCount =
       this.nFragmentsSuccessfullySentSinceLastValidate *
-      this.n_samples_per_series_fragment;
+      this.n_entries_per_stream_fragment;
 
     const vt0 = mtime();
     log.debug(
