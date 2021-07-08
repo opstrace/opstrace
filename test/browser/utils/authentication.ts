@@ -16,14 +16,8 @@
 
 import { expect, Page } from "@playwright/test";
 
-import { CLUSTER_BASE_URL } from "../fixtures/authenticated";
-
-export const performLogin = async (
-  page: Page,
-  email: string,
-  password: string
-) => {
-  await page.goto(CLUSTER_BASE_URL);
+export const performLogin = async ({ page, cluster, user }) => {
+  await page.goto(cluster.baseUrl);
 
   // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
   // <span class="MuiButton-label">Log in</span>
@@ -34,8 +28,8 @@ export const performLogin = async (
   // Wait for CI-specific email/password login form to appear
   await page.waitForSelector("text=Don't remember your password?");
 
-  await page.fill("css=input[type=email]", email);
-  await page.fill("css=input[type=password]", password);
+  await page.fill("css=input[type=email]", user.email);
+  await page.fill("css=input[type=password]", user.password);
 
   await page.click("css=button[type=submit]");
 
@@ -46,8 +40,25 @@ export const performLogin = async (
   expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
 };
 
-export const restoreLogin = async ({ page, context, authCookies, cluster }) => {
-  context.addCookies(authCookies);
-  await page.goto(cluster.baseUrl);
-  await page.waitForSelector("[data-test=getting-started]");
+export const restoreLogin = async ({
+  page,
+  context,
+  authCookies,
+  system,
+  cluster,
+  user
+}) => {
+  if (system.workerAuth) {
+    context.addCookies(authCookies);
+    await page.goto(cluster.baseUrl);
+    await page.waitForSelector("[data-test=getting-started]");
+  } else {
+    await performLogin({ page, cluster, user });
+  }
 };
+
+// export const logout = async ({ page, context, authCookies, cluster }) => {
+//   context.addCookies(authCookies);
+//   await page.goto(cluster.baseUrl);
+//   await page.waitForSelector("[data-test=getting-started]");
+// };
