@@ -14,52 +14,49 @@
  * limitations under the License.
  */
 
-import { test as base, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 
-import { addAuthFixture } from "../fixtures";
-import { logUserIn } from "../utils/authentication";
+import useFixtures, { test } from "../fixtures";
+import { restoreLogin } from "../utils/authentication";
 
-import {
-  CLUSTER_BASE_URL,
-  CI_LOGIN_EMAIL,
-  CI_LOGIN_PASSWORD
-} from "../fixtures/authenticated";
-
-const testWithAuth = addAuthFixture(base);
-const testNoAuth = base;
+const testWithAuth = useFixtures("auth");
+const testNoAuth = test;
 
 testWithAuth.describe("debugging", () => {
-  testWithAuth.beforeEach(logUserIn);
+  testWithAuth.skip();
+  testWithAuth.beforeEach(restoreLogin);
 
   testWithAuth("this should FAIL all the time", async ({ page }) => {
-    testWithAuth.skip();
     expect(false).toBeTruthy();
   });
 });
 
 testNoAuth.describe("debugging - no auth", () => {
-  testNoAuth("can I manually login this way?", async ({ page }) => {
-    testNoAuth.skip();
-    await page.goto(CLUSTER_BASE_URL);
+  testNoAuth.skip();
+  testNoAuth(
+    "can I manually login this way?",
+    async ({ page, cluster, user }) => {
+      await page.goto(cluster.baseUrl);
 
-    // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
-    // <span class="MuiButton-label">Log in</span>
-    await page.waitForSelector("css=button");
+      // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
+      // <span class="MuiButton-label">Log in</span>
+      await page.waitForSelector("css=button");
 
-    await page.click("text=Log in");
+      await page.click("text=Log in");
 
-    // Wait for CI-specific username/pw login form to appear
-    await page.waitForSelector("text=Don't remember your password?");
+      // Wait for CI-specific username/pw login form to appear
+      await page.waitForSelector("text=Don't remember your password?");
 
-    await page.fill("css=input[type=email]", CI_LOGIN_EMAIL);
-    await page.fill("css=input[type=password]", CI_LOGIN_PASSWORD);
+      await page.fill("css=input[type=email]", user.email);
+      await page.fill("css=input[type=password]", user.password);
 
-    await page.click("css=button[type=submit]");
+      await page.click("css=button[type=submit]");
 
-    // The first view after successful login is expected to be the details page
-    // for the `system` tenant, showing a link to Grafana.
-    await page.waitForSelector("[data-test=getting-started]");
+      // The first view after successful login is expected to be the details page
+      // for the `system` tenant, showing a link to Grafana.
+      await page.waitForSelector("[data-test=getting-started]");
 
-    expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
-  });
+      expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
+    }
+  );
 });
