@@ -1,5 +1,5 @@
 # Use current NodeJS LTS release. Derive from Debian Buster.
-FROM node:14.15.1-buster-slim AS build-stage
+FROM node:16.4.2-buster-slim AS build-stage
 
 # Ref: https://medium.com/@ankit.wal/the-why-and-how-of-multi-stage-docker-build-with-typescript-example-bcadbce2686c
 # First image build stage: set up dependencies (ignorantly), compile TS to JS
