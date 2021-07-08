@@ -93,12 +93,10 @@ export function parseCmdlineArgs(): void {
     default: false
   });
 
-  // note: maybe rename to --n-streams, because concurrency is controlled
-  // differently
+  // note: maybe rename to --n-streams or --n-streams-per-cycle,
+  // because concurrency is controlled differently
   parser.add_argument("--n-concurrent-streams", {
-    help:
-      "number of log streams to create per write/read cycle " +
-      "(or number of metric streams)",
+    help: "number of log streams (or metric series) to create per write/read cycle",
     type: "int",
     required: true
   });
@@ -145,7 +143,8 @@ export function parseCmdlineArgs(): void {
 
   parser.add_argument("--metrics-past-start-range-max-seconds", {
     help:
-      "Starting amount in seconds to subtract from current wall time for metric series starts. " +
+      "Metrics time series start in the past compared to the initialization wall time. " +
+      "The exact time is picked randomly from an interval in the recent past, where this is the lower bound. " +
       "Must be greater or equal to --metrics-past-start-range-min-seconds",
     type: "int",
     default: 30 * 60
@@ -153,7 +152,8 @@ export function parseCmdlineArgs(): void {
 
   parser.add_argument("--metrics-past-start-range-min-seconds", {
     help:
-      "Ending amount in seconds to subtract from current wall time for metric series starts. " +
+      "Metrics time series start in the past compared to the initialization wall time. " +
+      "The exact time is picked randomly from an interval in the recent past, where this is the upper bound. " +
       "Must be less or equal to --metrics-past-start-range-max-seconds",
     type: "int",
     default: 20 * 60
@@ -233,11 +233,11 @@ export function parseCmdlineArgs(): void {
   parser.add_argument("--change-streams-every-n-cycles", {
     help:
       "Use the same log/metric stream for N cycles, then create a new set of " +
-      "streams (unique label sets), or <=0 to reuse streams for the process lifetime. " +
+      "streams (unique label sets), or 0 to reuse streams for the process lifetime. " +
       "Default: new streams are created with every write/read cycle (1). " +
       "For log streams, when a new stream is initialized it " +
       "re-uses the same synthetic start time as set before (program invocation time " +
-      "or log_start_time). Metric streams are always guided by wall time.",
+      "or --log-start-time). Metric streams are always guided by wall time.",
     type: "int",
     default: 1
   });
@@ -367,20 +367,32 @@ export function parseCmdlineArgs(): void {
   }
 
   if (CFG.change_streams_every_n_cycles > CFG.n_cycles) {
-    log.error("change_streams_every_n_cycles must not be larger than n_cycles");
+    log.error("--change-streams-every-n-cycles must not be larger than --n-cycles");
+    process.exit(1);
+  }
+  if (CFG.change_streams_every_n_cycles < 0) {
+    log.error("--change-streams-every-n-cycles must not be negative");
     process.exit(1);
   }
 
   if (CFG.metrics_past_start_range_min_seconds > CFG.metrics_past_start_range_max_seconds) {
     log.error(
-      "metrics_past_start_range_min_seconds must not be larger than metrics_past_start_range_max_seconds"
+      "--metrics-past-start-range-min-seconds must not be larger than --metrics-past-start-range-max-seconds"
     );
     process.exit(1);
+  }
+  if (CFG.metrics_past_start_range_max_seconds > 2 * 60 * 60) {
+    // give a friendly warning if the specified time range exceeds the default Cortex 2h block limit
+    // see also https://cortexmetrics.io/docs/blocks-storage/
+    log.warn(
+      "--metrics-past-start-range-max-seconds is greater than two hours, " +
+      "which exceeds default Cortex block limits and may result in dropped data"
+    );
   }
 
   if (CFG.max_concurrent_writes > CFG.n_concurrent_streams) {
     log.error(
-      "max_concurrent_writes must not be larger than n_concurrent_streams"
+      "--max-concurrent-writes must not be larger than --n-concurrent-streams"
     );
     process.exit(1);
   }
@@ -388,13 +400,13 @@ export function parseCmdlineArgs(): void {
   if (CFG.stream_write_n_seconds_jitter) {
     if (CFG.stream_write_n_seconds === 0) {
       log.error(
-        "stream_write_n_seconds_jitter can only be used with stream_write_n_seconds"
+        "--stream-write-n-seconds-jitter can only be used with --stream-write-n-seconds"
       );
       process.exit(1);
     }
     if (CFG.stream_write_n_seconds_jitter > CFG.stream_write_n_seconds) {
       log.error(
-        "stream_write_n_seconds_jitter must be smaller than stream_write_n_seconds"
+        "--stream-write-n-seconds-jitter must be smaller than --stream-write-n-seconds"
       );
       process.exit(1);
     }
@@ -423,27 +435,27 @@ export function parseCmdlineArgs(): void {
       process.exit(1);
     }
     log.info(
-      "authentication token read from bearer_token_file `%s` (%s characters)",
+      "authentication token read from --bearer-token-file `%s` (%s characters)",
       CFG.bearer_token_file,
       BEARER_TOKEN.length
     );
   }
 
   if (CFG.retry_post_jitter <= 0 || CFG.retry_post_jitter >= 1) {
-    log.error("retry_post_jitter must be larger than 0 and smaller than 1");
+    log.error("--retry-post-jitter must be larger than 0 and smaller than 1");
     process.exit(1);
   }
 
   if (CFG.skip_read && CFG.read_n_streams_only !== 0) {
     // see above, can't easily be covered by the mutually_exclusive_group
     // technique; this here is a cheap but at least quite helpful validation.
-    log.error("skip_read must not be used with read_n_streams_only");
+    log.error("--skip-read must not be used with --read-n-streams-only");
     process.exit(1);
   }
 
   if (CFG.read_n_streams_only > CFG.n_concurrent_streams) {
     log.error(
-      "read_n_streams_only must not be larger than n_concurrent_streams"
+      "--read-n-streams-only must not be larger than --n-concurrent-streams"
     );
     process.exit(1);
   }

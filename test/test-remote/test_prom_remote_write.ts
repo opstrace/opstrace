@@ -88,11 +88,11 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
 
     const series = new MetricSeries({
       metricName: mname,
-      n_samples_per_series_fragment: 50,
+      n_entries_per_stream_fragment: 50,
       starttime: now,
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      timediffMilliSeconds: 1000,
+      metrics_time_increment_ms: 1000,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
@@ -127,12 +127,12 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const uniquevalue = `test-remote-${rndstring(5)}`;
     const series = new MetricSeries({
       metricName: `test_metric_${rndstring(4)}`,
-      n_samples_per_series_fragment: 50,
+      n_entries_per_stream_fragment: 50,
       starttime: now.minusMinutes(30),
       //starttime: now,
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      timediffMilliSeconds: 1000,
+      metrics_time_increment_ms: 1000,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
@@ -152,11 +152,11 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const uniquevalue = `test-remote-${rndstring(5)}`;
     const series = new MetricSeries({
       metricName: `test_metric_${rndstring(4)}`,
-      n_samples_per_series_fragment: 10000,
+      n_entries_per_stream_fragment: 10000,
       starttime: now.minusMinutes(45), // api does not accept samples from future
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      timediffMilliSeconds: 1,
+      metrics_time_increment_ms: 1,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
@@ -176,11 +176,11 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const uniquevalue = `test-remote-${rndstring(5)}`;
     const series = new MetricSeries({
       metricName: `test_metric_${rndstring(4)}`,
-      n_samples_per_series_fragment: 25000,
+      n_entries_per_stream_fragment: 25000,
       starttime: now.minusMinutes(50), // api does not accept samples from future
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      timediffMilliSeconds: 1,
+      metrics_time_increment_ms: 1,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
