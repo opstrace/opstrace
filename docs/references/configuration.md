@@ -154,11 +154,11 @@ Locking this down makes sense when setting `data_api_authentication_disabled` to
 
 ### `custom_dns_name`
 
-Use this when your goal is to reach your Opstrace instance under a custom DNS name, using DNS infrastructure managed entirely by you.
+Use this when your goal is to reach the Opstrace instance under a custom DNS name, using DNS infrastructure managed entirely by you.
 
 Requires setting `custom_auth0_client_id` (see below).
 
-Setting this parameter disables the default mechanism via which the Opstrace instance is made available under `<instance_name>.opstrace.io` (using Opstrace's DNS infrastructure). As a side effect this removes the need for the Opstrace CLI to communicate with the Opstrace DNS configuration service and therefore removes the need to log in to that service during `opstrace create ...` and `opstrace destroy ...`.
+Setting this parameter disables the default mechanism via which the Opstrace instance is made available under `<instance_name>.opstrace.io` (using Opstrace's DNS infrastructure). As a side effect, this removes the need for the Opstrace CLI to communicate with the Opstrace DNS configuration service and therefore removes the need to log in to that service during `opstrace create ...` and `opstrace destroy ...`.
 
 *Default:* undefined
 
@@ -173,7 +173,7 @@ custom_dns_name: myopstrace.powerteam.com
 #### Further specification
 
 * The parameter value needs to be a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) _without the trailing dot_. It can be a top-level domain, but does not need to be.
-* This DNS name will point to the specific Opstrace instance you are planning to create (`<instance_name>.` is not automatically prepended). For example, the UI will then be served under `https://<custom_dns_name>/`.
+* This DNS name will point to the specific Opstrace instance you are planning to create. For example, the UI will then be served under `https://<custom_dns_name>/`.
 
 
 #### Prerequisites
