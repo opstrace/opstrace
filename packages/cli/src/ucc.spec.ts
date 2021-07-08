@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
+import fs from "fs";
 import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
 // mock logger and die functions
-const mockDie = jest.fn().mockImplementation((e) => { throw(new Error(e)); });
+const mockDie = jest.fn().mockImplementation(e => {
+  throw new Error(e);
+});
 
 jest.mock("@opstrace/utils", () => ({
   log: {
@@ -33,9 +35,7 @@ import {
   LatestGCPInfraConfigType
 } from "@opstrace/config";
 
-import {
-  LatestClusterConfigFileSchemaType
-} from "./schemas";
+import { LatestClusterConfigFileSchemaType } from "./schemas";
 
 import { uccGetAndValidate } from "./ucc";
 
@@ -43,12 +43,12 @@ let tmpDir = "";
 
 beforeAll(() => {
   // create temp dir to store config files used in the tests
-  tmpDir = fs.mkdtempSync("ucctests")
+  tmpDir = fs.mkdtempSync("ucctests");
 });
 
 afterAll(() => {
   // cleanup the temp dir
-  fs.rmdirSync(tmpDir, { recursive: true });
+  fs.rmSync(tmpDir, { recursive: true });
 });
 
 beforeEach(() => {
@@ -63,7 +63,7 @@ tenants:
 - dev
 env_label: unit-tests
 node_count: 3
-`
+`;
   fs.writeFileSync(filename, configFile);
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
@@ -73,27 +73,22 @@ node_count: 3
   ] = await uccGetAndValidate(filename, "aws");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-prod",
-    "controller_image": CONTROLLER_IMAGE_DEFAULT,
-    "data_api_authentication_disabled": false,
-    "data_api_authorized_ip_ranges": [
-      "0.0.0.0/0",
-    ],
-    "env_label": "unit-tests",
-    "log_retention_days": 7,
-    "metric_retention_days": 7,
-    "node_count": 3,
-    "tenants": [
-      "prod",
-      "dev",
-    ],
+    cert_issuer: "letsencrypt-prod",
+    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    data_api_authentication_disabled: false,
+    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
+    env_label: "unit-tests",
+    log_retention_days: 7,
+    metric_retention_days: 7,
+    node_count: 3,
+    tenants: ["prod", "dev"]
   });
 
   expect(infraConfigAWS).toEqual({
-    "eks_admin_roles": [],
-    "instance_type": "t3.xlarge",
-    "region": "us-west-2",
-    "zone_suffix": "a",
+    eks_admin_roles: [],
+    instance_type: "t3.xlarge",
+    region: "us-west-2",
+    zone_suffix: "a"
   });
   expect(infraConfigGCP).toBeUndefined();
 });
@@ -106,7 +101,7 @@ tenants:
 - dev
 env_label: unit-tests
 node_count: 3
-`
+`;
   fs.writeFileSync(filename, configFile);
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
@@ -116,26 +111,21 @@ node_count: 3
   ] = await uccGetAndValidate(filename, "gcp");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-prod",
-    "controller_image": CONTROLLER_IMAGE_DEFAULT,
-    "data_api_authentication_disabled": false,
-    "data_api_authorized_ip_ranges": [
-      "0.0.0.0/0",
-    ],
-    "env_label": "unit-tests",
-    "log_retention_days": 7,
-    "metric_retention_days": 7,
-    "node_count": 3,
-    "tenants": [
-      "prod",
-      "dev",
-    ],
+    cert_issuer: "letsencrypt-prod",
+    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    data_api_authentication_disabled: false,
+    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
+    env_label: "unit-tests",
+    log_retention_days: 7,
+    metric_retention_days: 7,
+    node_count: 3,
+    tenants: ["prod", "dev"]
   });
   expect(infraConfigAWS).toBeUndefined();
   expect(infraConfigGCP).toEqual({
-    "machine_type": "n1-standard-4",
-    "region": "us-west2",
-    "zone_suffix": "a",
+    machine_type: "n1-standard-4",
+    region: "us-west2",
+    zone_suffix: "a"
   });
 });
 
@@ -143,10 +133,12 @@ test("should fail to parse invalid config file", async () => {
   const filename = tmpDir + "/" + "invalid-test.yaml";
   const configFile = `
 random string
-  `
+  `;
   fs.writeFileSync(filename, configFile);
 
-  const expectedErr = new Error("invalid cluster config document: this must be a `object` type, but the final value was: `\"random string\"`.")
+  const expectedErr = new Error(
+    'invalid cluster config document: this must be a `object` type, but the final value was: `"random string"`.'
+  );
 
   try {
     await uccGetAndValidate(filename, "aws");
@@ -175,37 +167,32 @@ env_label: unit-tests
 node_count: 3
 log_retention: 14
 metric_retention: 30
-`
+`;
   fs.writeFileSync(filename, configFile);
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
     LatestClusterConfigFileSchemaType,
     LatestAWSInfraConfigType | undefined,
     LatestGCPInfraConfigType | undefined
-  ] =  await uccGetAndValidate(filename, "aws");
+  ] = await uccGetAndValidate(filename, "aws");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-staging",
-    "controller_image": CONTROLLER_IMAGE_DEFAULT,
-    "data_api_authentication_disabled": false,
-    "data_api_authorized_ip_ranges": [
-      "0.0.0.0/0",
-    ],
-    "env_label": "unit-tests",
-    "log_retention_days": 14,
-    "metric_retention_days": 30,
-    "node_count": 3,
-    "tenants": [
-      "prod",
-      "dev",
-    ],
+    cert_issuer: "letsencrypt-staging",
+    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    data_api_authentication_disabled: false,
+    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
+    env_label: "unit-tests",
+    log_retention_days: 14,
+    metric_retention_days: 30,
+    node_count: 3,
+    tenants: ["prod", "dev"]
   });
 
   expect(infraConfigAWS).toEqual({
-    "eks_admin_roles": [],
-    "instance_type": "t3.xlarge",
-    "region": "us-west-2",
-    "zone_suffix": "a",
+    eks_admin_roles: [],
+    instance_type: "t3.xlarge",
+    region: "us-west-2",
+    zone_suffix: "a"
   });
   expect(infraConfigGCP).toBeUndefined();
 });
@@ -220,7 +207,7 @@ env_label: unit-tests
 node_count: 3
 log_retention: 14
 metric_retention: 30
-`
+`;
   fs.writeFileSync(filename, configFile);
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
@@ -230,26 +217,21 @@ metric_retention: 30
   ] = await uccGetAndValidate(filename, "gcp");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-staging",
-    "controller_image": CONTROLLER_IMAGE_DEFAULT,
-    "data_api_authentication_disabled": false,
-    "data_api_authorized_ip_ranges": [
-      "0.0.0.0/0",
-    ],
-    "env_label": "unit-tests",
-    "log_retention_days": 14,
-    "metric_retention_days": 30,
-    "node_count": 3,
-    "tenants": [
-      "prod",
-      "dev",
-    ],
+    cert_issuer: "letsencrypt-staging",
+    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    data_api_authentication_disabled: false,
+    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
+    env_label: "unit-tests",
+    log_retention_days: 14,
+    metric_retention_days: 30,
+    node_count: 3,
+    tenants: ["prod", "dev"]
   });
   expect(infraConfigAWS).toBeUndefined();
   expect(infraConfigGCP).toEqual({
-    "machine_type": "n1-standard-4",
-    "region": "us-west2",
-    "zone_suffix": "a",
+    machine_type: "n1-standard-4",
+    region: "us-west2",
+    zone_suffix: "a"
   });
 });
 
@@ -271,39 +253,32 @@ aws:
   instance_type: test-type
   region: eu-west-3
   zone_suffix: z
-`
+`;
   fs.writeFileSync(filename, configFile);
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
     LatestClusterConfigFileSchemaType,
     LatestAWSInfraConfigType | undefined,
     LatestGCPInfraConfigType | undefined
-  ] =  await uccGetAndValidate(filename, "aws");
+  ] = await uccGetAndValidate(filename, "aws");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-staging",
-    "controller_image": CONTROLLER_IMAGE_DEFAULT,
-    "data_api_authentication_disabled": false,
-    "data_api_authorized_ip_ranges": [
-      "0.0.0.0/0",
-    ],
-    "env_label": "unit-tests",
-    "log_retention_days": 14,
-    "metric_retention_days": 30,
-    "node_count": 3,
-    "tenants": [
-      "prod",
-      "dev",
-    ],
+    cert_issuer: "letsencrypt-staging",
+    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    data_api_authentication_disabled: false,
+    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
+    env_label: "unit-tests",
+    log_retention_days: 14,
+    metric_retention_days: 30,
+    node_count: 3,
+    tenants: ["prod", "dev"]
   });
 
   expect(infraConfigAWS).toEqual({
-    "eks_admin_roles": [
-      "SomeRoleName",
-    ],
-    "instance_type": "test-type",
-    "region": "eu-west-3",
-    "zone_suffix": "z",
+    eks_admin_roles: ["SomeRoleName"],
+    instance_type: "test-type",
+    region: "eu-west-3",
+    zone_suffix: "z"
   });
   expect(infraConfigGCP).toBeUndefined();
 });
@@ -322,7 +297,7 @@ gcp:
   machine_type: test-type
   region: test-region
   zone_suffix: test-suffix
-`
+`;
   fs.writeFileSync(filename, configFile);
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
@@ -332,25 +307,20 @@ gcp:
   ] = await uccGetAndValidate(filename, "gcp");
 
   expect(userClusterConfig).toEqual({
-    "cert_issuer": "letsencrypt-staging",
-    "controller_image": CONTROLLER_IMAGE_DEFAULT,
-    "data_api_authentication_disabled": false,
-    "data_api_authorized_ip_ranges": [
-      "0.0.0.0/0",
-    ],
-    "env_label": "unit-tests",
-    "log_retention_days": 14,
-    "metric_retention_days": 30,
-    "node_count": 3,
-    "tenants": [
-      "prod",
-      "dev",
-    ],
+    cert_issuer: "letsencrypt-staging",
+    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    data_api_authentication_disabled: false,
+    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
+    env_label: "unit-tests",
+    log_retention_days: 14,
+    metric_retention_days: 30,
+    node_count: 3,
+    tenants: ["prod", "dev"]
   });
   expect(infraConfigAWS).toBeUndefined();
   expect(infraConfigGCP).toEqual({
-    "machine_type": "test-type",
-    "region": "test-region",
-    "zone_suffix": "test-suffix",
+    machine_type: "test-type",
+    region: "test-region",
+    zone_suffix: "test-suffix"
   });
 });
