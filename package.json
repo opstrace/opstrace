@@ -11,7 +11,7 @@
   "repository": "https://github.com/opstrace/opstrace.git",
   "enginesStrict": true,
   "engines": {
-    "node": ">=14.10.0"
+    "node": ">=16.4.2"
   },
   "description": "Observability Platform",
   "main": "./build/cli.js",
@@ -21,7 +21,7 @@
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@redux-saga/types": "^1.1.0",
-    "@types/node": "^14.17.4",
+    "@types/node": "^16.0.1",
     "@types/source-map-support": "^0.5.2",
     "@types/yup": "^0.28.3",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
