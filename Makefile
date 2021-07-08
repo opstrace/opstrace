@@ -687,6 +687,7 @@ test-browser:
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
 		-e OPSTRACE_INSTANCE_DNS_NAME \
+		-e OPSTRACE_AUTH_METHOD=test \
 		-e DEBUG=pw:api \
 		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
  			yarn playwright test --workers 1 --forbid-only --retries 1
