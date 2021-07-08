@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import { TestType } from "@playwright/test";
+
 import { makeTenantName } from "../utils/tenant";
 
 type TenantFixture = {
   newName: string;
 };
 
-export const addTenantFixture = test =>
+export const addTenantFixture = (test: TestType) =>
   test.extend<
     Record<string, never>,
     {

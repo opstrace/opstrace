@@ -14,7 +14,26 @@
  * limitations under the License.
  */
 
-export { pipe } from "ramda";
+import { test as base } from "@playwright/test";
 
-export { addAuthFixture } from "./authenticated";
-export { addTenantFixture } from "./tenant";
+import { pipe, props, reduce } from "ramda";
+import { ensureArray } from "ramda-adjunct";
+
+import { addConfigFixture } from "./config";
+import { addAuthFixture } from "./authenticated";
+import { addTenantFixture } from "./tenant";
+
+export const test = addConfigFixture(base);
+
+const allFixtures = {
+  auth: addAuthFixture,
+  tenant: addTenantFixture
+};
+
+export const useFixtures = (fixtures: string[] | string) =>
+  pipe(
+    props(ensureArray(fixtures)),
+    reduce((t, f) => f(t), test)
+  )(allFixtures);
+
+export default useFixtures;
