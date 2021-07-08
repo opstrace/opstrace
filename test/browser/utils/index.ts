@@ -16,6 +16,8 @@
 
 import winston from "winston";
 
+export { performLogin, restoreLogin } from "./authentication";
+
 const logFormat = winston.format.printf(
   ({ level, message, label, timestamp }) => {
     return `${timestamp} ${level}: ${message}`;

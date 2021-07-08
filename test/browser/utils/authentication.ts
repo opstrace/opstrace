@@ -14,7 +14,39 @@
  * limitations under the License.
  */
 
-export const logUserIn = async ({ page, context, authCookies, cluster }) => {
+import { expect, Page } from "@playwright/test";
+
+import { CLUSTER_BASE_URL } from "../fixtures/authenticated";
+
+export const performLogin = async (
+  page: Page,
+  email: string,
+  password: string
+) => {
+  await page.goto(CLUSTER_BASE_URL);
+
+  // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
+  // <span class="MuiButton-label">Log in</span>
+  await page.waitForSelector("css=button");
+
+  await page.click("text=Log in");
+
+  // Wait for CI-specific email/password login form to appear
+  await page.waitForSelector("text=Don't remember your password?");
+
+  await page.fill("css=input[type=email]", email);
+  await page.fill("css=input[type=password]", password);
+
+  await page.click("css=button[type=submit]");
+
+  // The first view after successful login is expected to be the details page
+  // for the `system` tenant, showing a link to Grafana.
+  await page.waitForSelector("[data-test=getting-started]");
+
+  expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
+};
+
+export const restoreLogin = async ({ page, context, authCookies, cluster }) => {
   context.addCookies(authCookies);
   await page.goto(cluster.baseUrl);
   await page.waitForSelector("[data-test=getting-started]");

@@ -17,12 +17,12 @@
 import { test as base, expect } from "@playwright/test";
 
 import { addAuthFixture } from "../fixtures";
-import { logUserIn } from "../utils/authentication";
+import { restoreLogin } from "../utils";
 
 const test = addAuthFixture(base);
 
 test.describe("after auth0 authentication", () => {
-  test.beforeEach(logUserIn);
+  test.beforeEach(restoreLogin);
 
   test("user should see homepage", async ({ page, cluster }) => {
     expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
