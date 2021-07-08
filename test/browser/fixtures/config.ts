@@ -18,23 +18,15 @@ import { TestType } from "@playwright/test";
 
 import { log } from "../utils";
 
-const CLUSTER_NAME: string = process.env.OPSTRACE_CLUSTER_NAME || "unknown";
-
-const CLUSTER_BASE_URL: string = !process.env.OPSTRACE_CLUSTER_BASE_URL
-  ? `https://${CLUSTER_NAME}.opstrace.io`
-  : process.env.OPSTRACE_CLUSTER_BASE_URL;
-
-const CLOUD_PROVIDER: string = process.env.OPSTRACE_CLOUD_PROVIDER || "unknown";
+const CLOUD_PROVIDER_DEFAULTS = { aws: false, gcp: false, dev: false };
 
 type SystemFixture = {
   runningInCI: boolean;
   workerAuth: boolean;
 };
 
-const CLOUD_PROVIDER_DEFAULTS = { aws: false, gcp: false, unknown: false };
-
 type ClusterFixture = {
-  name: string;
+  name: string | undefined;
   baseUrl: string;
   cloudProvider: Record<string, boolean>;
 };
@@ -64,26 +56,35 @@ export const addConfigFixture = (test: TestType) =>
     ],
     cluster: [
       async ({ browser }, use) => {
-        if (!CLUSTER_BASE_URL) {
+        const clusterName = process.env.OPSTRACE_CLUSTER_NAME;
+        const dnsName = process.env.OPSTRACE_INSTANCE_DNS_NAME;
+
+        let baseUrl = undefined;
+        if (dnsName) {
+          baseUrl = dnsName;
+        } else if (clusterName) {
+          baseUrl = `https://${clusterName}.opstrace.io`;
+        } else {
           log.error(
-            "env variables OPSTRACE_CLUSTER_NAME or OPSTRACE_CLUSTER_BASE_URL must be set"
+            "env variables OPSTRACE_INSTANCE_DNS_NAME or OPSTRACE_CLUSTER_NAME must be set"
           );
           process.exit(1);
         }
 
-        if (!CLOUD_PROVIDER) {
+        const cloudProvider = process.env.OPSTRACE_CLOUD_PROVIDER;
+        if (!cloudProvider) {
           log.error(
-            "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws` or `gcp`"
+            "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws`, `gcp` or `dev`"
           );
           process.exit(1);
         }
 
         const cluster: ClusterFixture = {
-          name: CLUSTER_NAME,
-          baseUrl: CLUSTER_BASE_URL,
+          name: clusterName,
+          baseUrl: baseUrl,
           cloudProvider: CLOUD_PROVIDER_DEFAULTS
         };
-        cluster.cloudProvider[CLOUD_PROVIDER] = true;
+        cluster.cloudProvider[cloudProvider] = true;
         await use(cluster);
       },
       { scope: "worker" }
