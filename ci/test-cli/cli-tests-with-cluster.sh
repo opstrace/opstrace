@@ -61,7 +61,7 @@ test_tenant_authenticator_custom_keypair_flow() {
   sleep 80
   # Require success status code
   curl -vk --fail -H "Authorization: Bearer $(cat tenant-default-auth-token-from-custom-keypair)" \
-    https://cortex.default.${OPSTRACE_CLUSTER_NAME}.opstrace.io/api/v1/labels
+    https://cortex.default.${OPSTRACE_INSTANCE_DNS_NAME}/api/v1/labels
   set +o xtrace
 
   NEWKEYID=$(cat keyids_modified | grep -v $(cat keyid_initial))

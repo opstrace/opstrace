@@ -33,6 +33,12 @@ export const ControllerConfigSchemaV2 = yup
       .number()
       .required("must specify metric retention in number of days"),
     dnsName: yup.string().required(),
+
+    // Added later to V2, but is an optional parameter, therefore not strictly
+    // justifying a new schema version. Content and name need to be iterated on.
+    custom_dns_name: yup.string().notRequired(),
+    custom_auth0_client_id: yup.string().notRequired(),
+
     terminate: yup.bool().default(false),
     // https://stackoverflow.com/a/63944333/145400 `data_api_authn_pubkey_pem`
     // is optional, is a legacy controller config option, a noop right now
@@ -65,4 +71,6 @@ export const ControllerConfigSchemaV2 = yup
   .noUnknown()
   .defined();
 
-export type ControllerConfigTypeV2 = yup.InferType<typeof ControllerConfigSchemaV2>;
+export type ControllerConfigTypeV2 = yup.InferType<
+  typeof ControllerConfigSchemaV2
+>;

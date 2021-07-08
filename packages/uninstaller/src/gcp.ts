@@ -26,7 +26,7 @@ import {
   emptyBucket,
   ensureServiceAccountDoesNotExist
 } from "@opstrace/gcp";
-import { destroyDNS } from "@opstrace/dns";
+import { destroyDNSZone } from "@opstrace/dns";
 import { log, getBucketName } from "@opstrace/utils";
 
 import { destroyConfig } from "./index";
@@ -131,11 +131,10 @@ export function* destroyGCPInfra(): Generator<
     name: destroyConfig.clusterName
   });
 
-  log.info(`Removing DNS records`);
-  yield call(destroyDNS, {
-    stackName: destroyConfig.clusterName,
-    dnsName: "opstrace.io."
-  });
+  log.info(
+    `attempt to destroy managed DNS zone for ${destroyConfig.clusterName}.opstrace.io`
+  );
+  yield call(destroyDNSZone, `${destroyConfig.clusterName}.opstrace.io`);
 
   log.info(
     `Setting Bucket Lifecycle on ${lokiBucketName} to delete after 0 days`

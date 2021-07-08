@@ -42,8 +42,8 @@ export interface MetricSeriesOpts {
   starttime: ZonedDateTime;
   uniqueName: string;
   labelset: LabelSet | undefined;
-  timediffMilliSeconds: number;
-  n_samples_per_series_fragment: number;
+  metrics_time_increment_ms: number;
+  n_entries_per_stream_fragment: number;
 }
 
 export interface MetricSeriesFetchAndValidateOpts {
@@ -61,7 +61,7 @@ export interface MetricSeriesFetchAndValidateOpts {
 // or LookerSeriesMetrics or ...MetricSeries
 export class MetricSeries extends TimeseriesBase {
   private millisSinceEpochOfLastGeneratedSample: Long;
-  private timediffMilliseconds: Long;
+  private metrics_time_increment_ms: Long;
   private fragmentWidthSecondsForQuery: BigInt;
   private lastValue: number;
   //Supposed to contain a prometheus counter object, providing an inc() method.
@@ -97,28 +97,28 @@ export class MetricSeries extends TimeseriesBase {
       throw new Error("start time must not have fraction of seconds");
     }
 
-    if (!Number.isInteger(opts.timediffMilliSeconds)) {
-      throw new Error("timediffMilliSeconds must be an integer value");
+    if (!Number.isInteger(opts.metrics_time_increment_ms)) {
+      throw new Error("metrics_time_increment_ms must be an integer value");
     }
 
     // The instant-query-range-vector-selector-validation-method has
     // interesting boundary conditions. To not make things too complicated
-    // require integer multiples of 1000 for timediffMilliSeconds when this is
+    // require integer multiples of 1000 for metrics_time_increment_ms when this is
     // larger than 1000.
-    if (opts.timediffMilliSeconds > 1000) {
-      if (opts.timediffMilliSeconds % 1000 !== 0) {
+    if (opts.metrics_time_increment_ms > 1000) {
+      if (opts.metrics_time_increment_ms % 1000 !== 0) {
         throw new Error(
-          "timediffMilliSeconds must be integer multiple of 1000 if larger than 1000"
+          "metrics_time_increment_ms must be integer multiple of 1000 if larger than 1000"
         );
       }
     }
 
     // Calculate how much later the last sample of the next fragment would be
     // compare to the last sample of the previous fragment. Do not do
-    // (opts.n_samples_per_series_fragment-1) because this time width is
+    // (opts.n_entries_per_stream_fragment-1) because this time width is
     // actually compared to the last sample in the previous fragment
     const maxTimeLeapComparedToPreviousFragmentSeconds =
-      (opts.n_samples_per_series_fragment * opts.timediffMilliSeconds) / 1000;
+      (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) / 1000;
     if (maxTimeLeapComparedToPreviousFragmentSeconds >= 10 * 60) {
       throw new Error(
         "a single fragment may cover 10 minutes worth of data. " +
@@ -128,35 +128,30 @@ export class MetricSeries extends TimeseriesBase {
     }
 
     // The actual time width of a fragment in seconds, may be a float.
-    // say, there are 1000 samples per fragment and timediffMilliSeconds is 1.
+    // say, there are 1000 samples per fragment and metrics_time_increment_ms is 1.
     // Then the actual fragment time width is 0.999 seconds.
     const fragmentWidthSeconds =
-      ((opts.n_samples_per_series_fragment - 1) * opts.timediffMilliSeconds) /
+      ((opts.n_entries_per_stream_fragment - 1) * opts.metrics_time_increment_ms) /
       1000.0;
 
-    // For timediffMilliSeconds being integer multiple of 1000 this is the
+    // For metrics_time_increment_ms being integer multiple of 1000 this is the
     // actual time width of a fragment (the time between the first and the last
-    // sample). For smaller values of timediffMilliSeconds this is not the
+    // sample). For smaller values of metrics_time_increment_ms this is not the
     // actual time width of a fragment, but precisely one delta_t between two
     // samples more than that.. That's by design: this number must be an
     // integer, and is used for query construction.
     this.fragmentWidthSecondsForQuery = BigInt(Math.ceil(fragmentWidthSeconds));
 
     // Distinguish two special cases, also see ch1767;
-    if (opts.timediffMilliSeconds < 1000) {
-      log.debug("timediffMilliSeconds  < 1000, special validation");
+    if (opts.metrics_time_increment_ms < 1000) {
       // Does adding one delta_t result in a fragment time width of n * 1 s?
       if (
-        (opts.n_samples_per_series_fragment * opts.timediffMilliSeconds) %
-          1000 ===
+        (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) %
+          1000 !==
         0
       ) {
-        // this means that precisely one sample is missing in a fragment for
-        // it to comprise fragmentWidthSecondsForQuery.
-        log.debug("sample count looks good");
-      } else {
         throw new Error(
-          "with timediffMilliSeconds < 1000 choose sample count S so that (S + 1) * timediffMilliSeconds = N 1 s"
+          "with metrics_time_increment_ms < 1000 choose sample count S so that n_entries_per_stream_fragment * metrics_time_increment_ms = multiple of 1000"
         );
       }
     }
@@ -168,12 +163,12 @@ export class MetricSeries extends TimeseriesBase {
     // and the last sample can always have the '.999' fractional part -- with
     // 100001 samples, these fractional parts change from fragment to fragment.
 
-    // Translate (integer number, public) timediffMilliSeconds into (actual
-    // integer, private) timediffMilliseconds.
-    this.timediffMilliseconds = Long.fromInt(opts.timediffMilliSeconds);
+    // Translate (integer number, public) opts.metrics_time_increment_ms into (actual
+    // integer, private) this.metrics_time_increment_ms.
+    this.metrics_time_increment_ms = Long.fromInt(opts.metrics_time_increment_ms);
 
     // Initialize this.millisSinceEpochOfLastGeneratedSample with starttime -
-    // timediffMilliseconds
+    // metrics_time_increment_ms
     const starttime_fractional_part_as_ms = Long.fromInt(
       Math.floor(opts.starttime.nano() / 10 ** 6)
     );
@@ -184,7 +179,7 @@ export class MetricSeries extends TimeseriesBase {
 
     this.millisSinceEpochOfLastGeneratedSample = starttime_seconds_part_as_ms
       .add(starttime_fractional_part_as_ms)
-      .subtract(this.timediffMilliseconds);
+      .subtract(this.metrics_time_increment_ms);
 
     // when using the dummystream to generate data and actually POST it
     // to an API use this counter to keep track of the number of fragments
@@ -252,7 +247,7 @@ export class MetricSeries extends TimeseriesBase {
 
   protected nextSample(): MetricSample {
     this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
-      this.timediffMilliseconds
+      this.metrics_time_increment_ms
     );
 
     return new MetricSample(
@@ -294,12 +289,12 @@ export class MetricSeries extends TimeseriesBase {
    * consumed from a clock source of this machine, but they need to be
    * generated synthetically, following said pattern. The simple pattern being
    * used here: adjacent timestamps in the synthetically generated samples have
-   * a fixed time distance between them (`this.timediffMilliseconds`).
+   * a fixed time distance between them (`this.metrics_time_increment_ms`).
    *
    * Now, during execution, this synthetic generation of timestamps, is either
    * faster or slower than the evolution of the actual time. This depends on
    * many factors, but certainly on the user-given choice of
-   * `this.timediffMilliseconds`.
+   * `this.metrics_time_increment_ms`.
    *
    * This method here provides a correction for one of both cases: when the
    * synthetic clock source evolves _slower_ than wall time, i.e. when it
@@ -414,7 +409,7 @@ export class MetricSeries extends TimeseriesBase {
       this
     );
 
-    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
+    for (let i = 0; i < this.n_entries_per_stream_fragment; i++) {
       fragment.addSample(this.nextSample());
     }
 
@@ -557,7 +552,7 @@ export class MetricSeries extends TimeseriesBase {
     // the `time` query parameter is a timestamp with 1s resolution (it is not
     // possible to define the right boundary with sub-second resolution). round
     // UP to the next full second. This is a noop when
-    // `this.timediffMilliseconds` is n * 1000.
+    // `this.metrics_time_increment_ms` is n * 1000.
 
     const timeRightBoundarySeconds = Math.ceil(
       stats.timeMillisSinceEpochLast / 1000.0
@@ -645,7 +640,7 @@ export class MetricSeries extends TimeseriesBase {
     }
 
     // The following logic is simple, but difficult to follow by just reading
-    // code. If `timediffMilliseconds < 1000 then `timeRightBoundarySeconds`
+    // code. If `metrics_time_increment_ms < 1000 then `timeRightBoundarySeconds`
     // (the rightmost query boundary which acts _inclusively_) yields a sample
     // that belongs to the _next_ fragment, and not to the current one.
     // correct for that (log output below shows this well: shows mismatch
@@ -669,12 +664,12 @@ export class MetricSeries extends TimeseriesBase {
     //   sampleCount: 10001n
     // }
 
-    if (this.timediffMilliseconds.toNumber() < 1000) {
+    if (this.metrics_time_increment_ms.toNumber() < 1000) {
       // that is, fragment.stats!.timeMillisSinceEpochLast / 1000.0 yields
       // a non-integer value, and (if this is not the last fragment pushed
       // from a dummy series) the query is expected to return the first sample
       // of the subsequent fragment.
-      if (values.length === this.n_samples_per_series_fragment + 1) {
+      if (values.length === this.n_entries_per_stream_fragment + 1) {
         log.debug(
           "last sample in query result belongs to next fragment, ignore"
         );

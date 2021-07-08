@@ -58,15 +58,19 @@ export function* ensureGCPInfraExists(
     throw Error("`gcp` property expected");
   }
 
-  const dnsConf = getDnsConfig(ccfg.cloud_provider);
-  const dnsname = yield call(ensureDNSExists, {
-    opstraceClusterName: ccfg.cluster_name,
-    dnsName: dnsConf.dnsName,
-    target: ccfg.cloud_provider,
-    dnsProvider: ccfg.cloud_provider
-  });
+  if (ccfg.custom_dns_name === undefined) {
+    const dnsConf = getDnsConfig(ccfg.cloud_provider);
+    const dnsname = yield call(ensureDNSExists, {
+      opstraceClusterName: ccfg.cluster_name,
+      dnsName: dnsConf.dnsName,
+      target: ccfg.cloud_provider,
+      dnsProvider: ccfg.cloud_provider
+    });
 
-  log.info("DNS name has been set up: %s", dnsname);
+    log.info("DNS name has been set up: %s", dnsname);
+  } else {
+    log.info("skip DNS setup, custom DNS name set");
+  }
 
   const gkeConf = getGKEClusterConfig(ccfg, gcpAuthOptions);
 

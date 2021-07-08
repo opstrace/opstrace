@@ -255,7 +255,7 @@ cli-pkg:
 	fi; \
 	set -o xtrace && \
 	yarn run pkg packages/cli/package.json --public \
-		--targets node14-$${TPLATFORM}-x64 \
+		--targets node16-$${TPLATFORM}-x64 \
 		--output build/bin/opstrace \
 		--options stack-trace-limit=100 && \
         set +o xtrace && \
@@ -268,7 +268,7 @@ cli-pkg-macos:
 	mkdir -p build/bin/macos && \
 	set -o xtrace && \
         yarn run pkg packages/cli/package.json --public \
-		--targets node14-macos-x64 \
+		--targets node16-macos-x64 \
 		--output build/bin/macos/opstrace \
 		--options stack-trace-limit=100 && \
         set +o xtrace && \
@@ -615,6 +615,7 @@ test-remote: kubectl-cluster-info
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
+		-e OPSTRACE_INSTANCE_DNS_NAME \
 		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=${TENANT_DEFAULT_API_TOKEN_FILEPATH}\
 		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-e TENANT_RND_NAME_FOR_TESTING_ADD_TENANT \
@@ -660,6 +661,7 @@ test-remote-ui:
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
+		-e OPSTRACE_INSTANCE_DNS_NAME \
 		-e TENANT_DEFAULT_API_TOKEN_FILEPATH=${TENANT_DEFAULT_API_TOKEN_FILEPATH}\
 		-e TENANT_SYSTEM_API_TOKEN_FILEPATH=${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-e TENANT_RND_NAME_FOR_TESTING_ADD_TENANT \
@@ -684,9 +686,10 @@ test-browser:
 		-v ${OPSTRACE_BUILD_DIR}/browser-test-results:/build/test/browser/test-results \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
+		-e OPSTRACE_INSTANCE_DNS_NAME \
 		-e DEBUG=pw:api \
-	  opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
- 		yarn playwright test --workers 1 --forbid-only --retries 1
+		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+ 			yarn playwright test --workers 1 --forbid-only --retries 1
 
 
 # Used by CI:

@@ -78,6 +78,12 @@ export const ClusterConfigFileSchemaV2 = yup
     // creation, catch that earlier).
     env_label: yup.string(),
 
+    // Added later to V2, but is an optional parameter, therefore not strictly
+    // justifying a new schema version. Content and name need to be iterated on.
+    custom_dns_name: yup.string().notRequired(),
+
+    custom_auth0_client_id: yup.string().notRequired(),
+
     cert_issuer: yup
       .string()
       .oneOf(["letsencrypt-prod", "letsencrypt-staging"])
@@ -91,11 +97,6 @@ export const ClusterConfigFileSchemaV2 = yup
       .array()
       .of(yup.string())
       .default(["0.0.0.0/0"]),
-
-    // provider-dependent
-    // machine_type: yup.string().default("n1-standard-4"),
-    // region: yup.string().default("us-west2"),
-    // zone: yup.string().default("a"),
 
     // requiring 'one of .... keys' is complicated:
     // https://github.com/jquense/yup/issues/248 --  validate this out-of-band,

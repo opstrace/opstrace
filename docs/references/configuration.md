@@ -4,7 +4,7 @@ description: Parameter reference
 
 # Configuration
 
-When installing Opstrace, one has to provide a corresponding configuration document in YAML format.
+When creating a new Opstrace instance, one has to provide a corresponding configuration document in YAML format.
 A minimal variant might look like this:
 
 ```yaml
@@ -43,7 +43,7 @@ tenants:
 
 ### `node_count`
 
-The number of underlying nodes for Opstrace to use.
+The number of underlying nodes (VMs/machines) to use.
 
 *Value type:* number \(integer\)
 
@@ -133,7 +133,7 @@ Notes:
 
 Naming:
 
-* might be renamed in the future
+* might be renamed in the future (to `tenant_api_...`)
 
 ### `data_api_authorized_ip_ranges`
 
@@ -151,6 +151,39 @@ data_api_authorized_ip_ranges:
 ```
 
 Locking this down makes sense when setting `data_api_authentication_disabled` to `true`.
+
+### `custom_dns_name`
+
+Use this when your goal is to reach the Opstrace instance under a custom DNS name, using DNS infrastructure managed entirely by you.
+
+Requires setting `custom_auth0_client_id` (see below).
+
+Setting this parameter disables the default mechanism via which the Opstrace instance is made available under `<instance_name>.opstrace.io` (using Opstrace's DNS infrastructure). As a side effect, this removes the need for the Opstrace CLI to communicate with the Opstrace DNS configuration service and therefore removes the need to log in to that service during `opstrace create ...` and `opstrace destroy ...`.
+
+*Default:* undefined
+
+*Value type:* string
+
+*Example:*
+
+```yaml
+custom_dns_name: myopstrace.powerteam.com
+```
+
+#### Further specification
+
+* The parameter value needs to be a [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) _without the trailing dot_. It can be a top-level domain, but does not need to be.
+* This DNS name will point to the specific Opstrace instance you are planning to create. For example, the UI will then be served under `https://<custom_dns_name>/`.
+
+
+#### Prerequisites
+
+* **A Google Cloud DNS or AWS Route53 DNS zone** created _a priori_ in your cloud account (during creation, the Opstrace instance will need to interact with the AWS/GCP API and reconfigure that DNS zone to add records for more fine-grained DNS names):
+  * If you install the Opstrace instance in a GCP account, this DNS name must correspond to a so-called _managed zone_ in Google Cloud DNS which you must set up prior to installing Opstrace. A guide can be found [here](https://cloud.google.com/dns/docs/quickstart).
+  * If you install the Opstrace instance in an AWS account, this DNS name must correspond to a so-called _hosted zone_ in AWS Route53 which you must set up prior to installing Opstrace. A guide can be found [here](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html).
+* **A custom Auth0 application** which you have to set up in advance. It needs to be configured specifically for the custom DNS name you are planning to use. A guide can be found [here](TODO). Take note of the so-called "client ID" of this Auth0 application and refer to it via `custom_auth0_client_id`. This is necessary for a **secure** single sign-on (SSO) experience; we cannot provide an out-of-the-box SSO experience that works against arbitrary DNS names.
+
+
 
 ### `cert_issuer`
 
@@ -171,6 +204,28 @@ Note:
 * `letsencrypt-staging` should be used for test setups and playgrounds.
   This results in certificates that are not automatically trusted by browsers, i.e. users are likely to see security warnings.
 * `letsencrypt-prod` results in browser-trusted certificates, but is subject to quota/limits: [https://letsencrypt.org/docs/rate-limits/](https://letsencrypt.org/docs/rate-limits).
+
+
+### `custom_auth0_client_id`
+
+Use this when you want to log in to the web UI of your Opstrace instance via your custom Auth0 'application'.
+
+This makes sense especially when you would like to connect to a special identity provider, and is obligatory when using a `custom_dns_name` (see above).
+
+TODO
+
+*Default:* undefined
+
+*Value type:* string
+
+*Example:*
+
+```yaml
+custom_auth0_client_id: 1333337
+```
+
+TODO
+
 
 ### `controller_image`
 

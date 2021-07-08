@@ -108,9 +108,8 @@ async function main() {
   for (let cyclenum = 1; cyclenum < CFG.n_cycles + 1; cyclenum++) {
     setUptimeGauge();
 
-    const numString = `${cyclenum.toString().padStart(3, "0")}`;
     // invocation_id contains 10 characters of random data by default
-    const guniqueCycleId = `${CFG.invocation_id}-${numString}`;
+    const invocationCycleId = `${CFG.invocation_id}-${cyclenum}`;
 
     log.info("enter write/read cycle  %s", cyclenum);
 
@@ -119,12 +118,12 @@ async function main() {
       //  error TS2454: Variable 'dummystreams' is used before being assigned.
       // always create initial streams regardless of update configuration
       log.info("cycle %s: create new dummystreams", cyclenum);
-      dummystreams = await createNewSeries(guniqueCycleId);
+      dummystreams = await createNewSeries(invocationCycleId);
     } else if (CFG.change_streams_every_n_cycles > 0 &&
                (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0) {
       // update streams at the configured number of cycles
       log.info("cycle %s: update dummystreams", cyclenum);
-      dummystreams = await createNewSeries(guniqueCycleId);
+      dummystreams = await createNewSeries(invocationCycleId);
     } else {
       log.info(
         "cycle %s: continue to use dummystreams of previous cycle",
@@ -141,7 +140,7 @@ async function main() {
       // we pass the updated cycle id here even if dummystreams doesnt use it
       // this ensures the cycle report json has a distinct filename
       //@ts-expect-error: see comment above
-      await performWriteReadCycle(cyclenum, dummystreams, guniqueCycleId);
+      await performWriteReadCycle(cyclenum, dummystreams, invocationCycleId);
     } catch (err) {
       log.crit("err during write/read cycle: %s", err);
       process.exit(1);
@@ -153,13 +152,12 @@ async function main() {
 }
 
 async function createNewSeries(
-  guniqueCycleId: string
+  invocationCycleId: string
 ): Promise<Array<LogSeries | MetricSeries>> {
   const streams = [];
 
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
-    // do not pad, might save some memory
-    const streamname = `${guniqueCycleId}-${i.toString()}`; //.padStart(3, "0")}`;
+    const streamname = `${invocationCycleId}-${i.toString()}`;
 
     const labelset: LabelSet = {};
 
@@ -198,7 +196,7 @@ async function createNewSeries(
           metricName: streamname.replace(/-/g, "_"),
           // must not collide among concurrent streams
           uniqueName: streamname,
-          n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
+          n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
 
           // With Cortex' Blocks Storage system, we cannot go into the future
           // compared to "now" (from Cortex' system time point of view), but we
@@ -218,15 +216,15 @@ async function createNewSeries(
           starttime: ZonedDateTime.now()
             .minusSeconds(subtractSecs)
             .withNano(0),
-          timediffMilliSeconds: CFG.metrics_time_increment_ms,
+          metrics_time_increment_ms: CFG.metrics_time_increment_ms,
           labelset: labelset
         },
         pm.counter_forward_leap
       );
     } else {
       stream = new LogSeries({
-        n_samples_per_series_fragment: CFG.n_entries_per_stream_fragment,
-        n_chars_per_message: CFG.n_chars_per_msg,
+        n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
+        n_chars_per_msg: CFG.n_chars_per_msg,
         starttime: ZonedDateTime.parse(CFG.log_start_time),
         uniqueName: streamname,
         timediffNanoseconds: CFG.log_time_increment_ns,
@@ -256,7 +254,7 @@ async function createNewSeries(
 async function performWriteReadCycle(
   cyclenum: number,
   dummystreams: Array<LogSeries | MetricSeries>,
-  guniqueCycleId: string
+  invocationCycleId: string
 ) {
   CYCLE_START_TIME_MONOTONIC = mtime();
   CYCLE_STOP_WRITE_AFTER_SECONDS = CFG.stream_write_n_seconds;
@@ -293,13 +291,13 @@ async function performWriteReadCycle(
     invocationTime: util.timestampToRFC3339Nano(START_TIME_JODA),
     cycleStats: {
       cycleNum: cyclenum,
-      guniqueCycleId: guniqueCycleId,
+      invocationCycleId: invocationCycleId,
       write: writestats,
       read: readstats
     }
   };
   log.info("Report:\n%s", JSON.stringify(report, null, 2));
-  const reportFilePath = `${guniqueCycleId}.report.json`;
+  const reportFilePath = `${invocationCycleId}.report.json`;
   fs.writeFileSync(reportFilePath, JSON.stringify(report, null, 2));
   log.info("wrote report to %s", reportFilePath);
 }

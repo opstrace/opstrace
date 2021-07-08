@@ -34,6 +34,20 @@ This runs the tests like they are run on CI, headless with minimal reporting out
 
 `OPSTRACE_CLUSTER_NAME=my-cli-cluster OPSTRACE_CLOUD_PROVIDER=aws yarn playwright test --config playwright.dev.config.ts`
 
+By default, the Opstrace instance's base URL is built like this:
+
+```text
+https://<instance_name>.opstrace.io
+```
+
+To override this, set the environment variable `OPSTRACE_INSTANCE_DNS_NAME`.
+Then the base URL is built like this:
+
+```text
+https://<OPSTRACE_INSTANCE_DNS_NAME>
+```
+
+
 ### Docker
 
 To run the tests exactly as they are run in CI we can build the Docker image locally and run it directly against our CI Cluster.

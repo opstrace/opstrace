@@ -176,7 +176,7 @@ export abstract class TimeseriesBase {
    *stream). Used by fetchAndValidate(). */
   protected nSamplesValidatedSoFar: bigint;
 
-  n_samples_per_series_fragment: number;
+  n_entries_per_stream_fragment: number;
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
   // last fragment consumed via this method.
@@ -188,7 +188,7 @@ export abstract class TimeseriesBase {
     this.uniqueName = opts.uniqueName;
     this.optionstring = `${JSON.stringify(opts)}`;
     this.labels = this.buildLabelSetFromOpts(opts);
-    this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
+    this.n_entries_per_stream_fragment = opts.n_entries_per_stream_fragment;
     this.nSamplesValidatedSoFar = BigInt(0);
   }
 

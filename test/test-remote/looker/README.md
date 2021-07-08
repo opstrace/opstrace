@@ -7,6 +7,28 @@ Looker is a Loki / Cortex testing and benchmarking tool.
 Looker originated early 2020 as a black-box storage testing for Loki with strict and deep read validation.
 Since then, it has evolved quite a bit.
 
+## Local development
+
+`cd` to looker's main directory. Set up NodeJS 16 with yarn:
+
+```text
+nvm install 16
+nvm use 16
+npm -g install yarn
+```
+
+Install dependencies:
+
+```text
+yarn
+```
+
+TSC-compile code base, watching for changes:
+
+```text
+yarn run tsc --watch
+```
+
 ## Command line usage
 
 Current `--help` output:
