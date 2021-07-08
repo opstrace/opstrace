@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  createReducer,
-  createAsyncAction,
-  ActionType,
-} from "typesafe-actions";
+import { createReducer, createAsyncAction, ActionType } from "typesafe-actions";
 import { log } from "@opstrace/utils";
 import { ResourceCache } from "./util";
 
@@ -56,10 +52,9 @@ const initialState: IntegrationState = {
   resources: []
 };
 
-export const reducer = createReducer<
-  IntegrationState,
-  IntegrationActions
->(initialState)
+export const reducer = createReducer<IntegrationState, IntegrationActions>(
+  initialState
+)
   .handleAction(
     actions.fetch.request,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -86,12 +81,11 @@ export const reducer = createReducer<
     })
   );
 
-export function startInformer(
-  channel: (input: unknown) => void
-): () => void {
+export function startInformer(channel: (input: unknown) => void): () => void {
   let cancelled = false;
   // We use a polling loop rather than a GraphQL subscription.
   // In CI runs, subscriptions were occasionally failing to get any data, primarily on GCP clusters.
+  //@ts-ignore: TS7023 'poll' implicitly has return type 'any'
   const poll = async () => {
     if (cancelled) {
       return;
