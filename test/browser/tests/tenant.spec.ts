@@ -79,36 +79,96 @@ test.describe("after auth0 authentication", () => {
   });
 
   test.describe("validation of tenant name", () => {
-    test("spaces are NOT allowed", async ({ page }) => {
-      await testInvalidTenantName(makeTenantName("tenant name"), page);
-    });
+    test("valid alphanumeric lowercase name IS allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenant5name");
 
-    test("dots are NOT allowed", async ({ page }) => {
-      await testInvalidTenantName(makeTenantName("tenant.name"), page);
-    });
-
-    test("dashes are NOT allowed", async ({ page }) => {
-      await testInvalidTenantName(makeTenantName("tenant-name"), page);
-    });
-
-    test("colons are NOT allowed", async ({ page }) => {
-      await testInvalidTenantName(makeTenantName("tenant:name"), page);
-    });
-
-    test("underscores are NOT allowed", async ({ page }) => {
-      await testInvalidTenantName(makeTenantName("tenant_name"), page);
-    });
-
-    test("uppcase letters are NOT allowed", async ({ page }) => {
-      await testInvalidTenantName(makeTenantName("tenantName"), page);
-    });
-
-    test("is not too long", async ({ page }) => {
-      await testInvalidTenantName(
-        padCharsEnd("toolong", 64)(makeTenantName("tenantname")),
-        page
+      await page.click("[data-test='tenant/addBtn']");
+      expect(
+        await page.isVisible("[data-test='pickerService/dialog/addTenant']")
+      ).toBeTruthy();
+      await page.fill(
+        "[data-test='pickerService/input'] > input",
+        `add tenant: ${tenantName}`
       );
+
+      expect(
+        await page.isVisible("[data-test='pickerService/dialog/errorMessage']")
+      ).toBeFalsy();
+      expect(
+        await page.isVisible("[data-test='pickerService/option/yes']")
+      ).toBeTruthy();
     });
+
+    const checkTenantNameIsNotValid = ({
+      tenantName,
+      rawTenantName
+    }: {
+      tenantName?: string;
+      rawTenantName?: string;
+    }) => {
+      return async ({ page }: { page: Page }) => {
+        await page.click("[data-test='tenant/addBtn']");
+        expect(
+          await page.isVisible("[data-test='pickerService/dialog/addTenant']")
+        ).toBeTruthy();
+        await page.fill(
+          "[data-test='pickerService/input'] > input",
+          `add tenant: ${rawTenantName || makeTenantName(tenantName)}`
+        );
+
+        expect(
+          await page.isVisible(
+            "[data-test='pickerService/dialog/errorMessage']"
+          )
+        ).toBeTruthy();
+
+        expect(
+          await page.isVisible("[data-test='pickerService/option/yes']")
+        ).toBeFalsy();
+      };
+    };
+
+    test(
+      "single character names are NOT allowed",
+      checkTenantNameIsNotValid({ rawTenantName: "t" })
+    );
+
+    test(
+      "spaces are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant name" })
+    );
+
+    test(
+      "dots are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant.name" })
+    );
+
+    test(
+      "dashes are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant-name" })
+    );
+
+    test(
+      "colons are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant:name" })
+    );
+
+    test(
+      "underscores are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant_name" })
+    );
+
+    test(
+      "uppcase letters are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenantName" })
+    );
+
+    test(
+      "is not too long",
+      checkTenantNameIsNotValid({
+        tenantName: padCharsEnd("toolong", 64)(makeTenantName("tenantname"))
+      })
+    );
 
     test("can't have two with the same name", async ({ page }) => {
       const tenantName = makeTenantName("fancytenant");
@@ -130,10 +190,3 @@ test.describe("after auth0 authentication", () => {
     });
   });
 });
-
-const testInvalidTenantName = async (tenantName: string, page: Page) => {
-  await createTenant(tenantName, { page });
-  expect(
-    await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-  ).toBeFalsy();
-};
