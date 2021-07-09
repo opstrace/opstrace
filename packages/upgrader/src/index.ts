@@ -51,9 +51,7 @@ import { getClusterConfig, LatestClusterConfigType } from "@opstrace/config";
 import {
   ClusterCreateConfigInterface,
   setCreateConfig,
-  waitUntilDataAPIEndpointsAreReachable,
-  waitUntilDDAPIEndpointsAreReachable,
-  waitUntilUIIsReachable
+  waitUntilHTTPEndpointsAreReachable
 } from "@opstrace/installer";
 
 // Note: a largish number of attempts as long as micro retries are not yet
@@ -207,17 +205,7 @@ function* triggerControllerDeploymentUpgrade() {
   yield cancel(informers);
 
   // ensure the data endpoint, datadog api endpoints and ui are reachable
-  yield call(
-    waitUntilDataAPIEndpointsAreReachable,
-    ucc.cluster_name,
-    ucc.tenants
-  );
-  yield call(
-    waitUntilDDAPIEndpointsAreReachable,
-    ucc.cluster_name,
-    ucc.tenants
-  );
-  yield call(waitUntilUIIsReachable, ucc.cluster_name, ucc.tenants);
+  yield call(waitUntilHTTPEndpointsAreReachable, ucc);
 }
 
 function readTenantApiTokenFiles(tenantNames: string[]): Dict<string> {

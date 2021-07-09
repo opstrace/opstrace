@@ -337,7 +337,9 @@ function* createClusterCore() {
   log.info(`Log in here: https://${opstraceInstanceDNSname}`);
 }
 
-function instanceDNSNameFromClusterConfig(ccfg: LatestClusterConfigType) {
+export function instanceDNSNameFromClusterConfig(
+  ccfg: LatestClusterConfigType
+) {
   let opstraceInstanceDNSname = `${ccfg.cluster_name}.opstrace.io`;
   if (ccfg.custom_dns_name !== undefined) {
     opstraceInstanceDNSname = ccfg.custom_dns_name;
