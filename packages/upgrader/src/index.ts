@@ -153,7 +153,9 @@ function* triggerInfraUpgrade() {
 
   log.info("k8s cluster seems to exist, trigger infrastructure upgrade");
 
-  yield call(upgradeInfra, upgradeConfig.cloudProvider);
+  if (!dryRun()) {
+    yield call(upgradeInfra, upgradeConfig.cloudProvider);
+  }
 }
 
 // Upgrade controller deployment and wait for it to finish updating Kubernetes
@@ -188,17 +190,21 @@ function* triggerControllerDeploymentUpgrade() {
 
   yield call(blockUntilCacheHydrated);
 
-  yield call(upgradeControllerConfigMap, kubeConfig);
+  if (!dryRun()) {
+    yield call(upgradeControllerConfigMap, kubeConfig);
 
-  const rolloutStarted: boolean = yield call(upgradeControllerDeployment, {
-    opstraceClusterName: upgradeConfig.clusterName,
-    kubeConfig: kubeConfig
-  });
+    const rolloutStarted: boolean = yield call(upgradeControllerDeployment, {
+      opstraceClusterName: upgradeConfig.clusterName,
+      kubeConfig: kubeConfig
+    });
 
-  if (rolloutStarted) {
-    yield call(waitForControllerDeployment);
-    log.info('wait for upgrade to complete ("wait for deployments/..." phase)');
-    yield call(upgradeProgressReporter);
+    if (rolloutStarted) {
+      yield call(waitForControllerDeployment);
+      log.info(
+        'wait for upgrade to complete ("wait for deployments/..." phase)'
+      );
+      yield call(upgradeProgressReporter);
+    }
   }
 
   // Cancel the forked informers so we can exit
@@ -310,4 +316,8 @@ export async function upgradeCluster(
 
   // this is helpful when the runtime is supposed to crash but doesn't
   log.debug("end of upgradeCluster()");
+}
+
+function dryRun(): boolean {
+  return process.env.DRY_RUN_UPGRADES === "true";
 }
