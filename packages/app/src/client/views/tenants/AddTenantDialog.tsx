@@ -33,6 +33,8 @@ const AddTenantPicker = () => {
       title: "Enter tenant name",
       activationPrefix: "add tenant:",
       disableFilter: true,
+      textValidator: tenantNameValidator,
+      textValidationFailedMessage: "Lowercase alpha-numeric characters only",
       options: [
         {
           id: "yes",
@@ -44,9 +46,8 @@ const AddTenantPicker = () => {
         }
       ],
       onSelected: (option, tenant) => {
-        if (option.id === "yes" && tenant && tenantNameValidator.test(tenant)) {
+        if (option.id === "yes" && tenant && tenantNameValidator.test(tenant))
           dispatch(addTenant(tenant));
-        }
       },
       dataTest: "addTenant"
     },
