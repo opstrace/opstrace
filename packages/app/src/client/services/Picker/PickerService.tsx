@@ -215,7 +215,11 @@ function PickerService({ children }: { children: React.ReactNode }) {
         </Box>
         {hasValidationError ? (
           <Box width={PICKER_WIDTH} height={PICKER_HEIGHT} textAlign="center">
-            <Typography variant="caption" color="textSecondary">
+            <Typography
+              variant="caption"
+              color="textSecondary"
+              data-test="pickerService/dialog/errorMessage"
+            >
               {activePicker?.textValidationFailedMessage ||
                 `Input must satisfy ${activePicker?.textValidator?.toString()}`}
             </Typography>

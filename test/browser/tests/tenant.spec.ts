@@ -80,56 +80,92 @@ test.describe("after auth0 authentication", () => {
   });
 
   test.describe("validation of tenant name", () => {
-    test("spaces are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant name");
-      await createTenant(tenantName, { page });
+    test("valid alphanumeric lowercase name IS allowed", async ({ page }) => {
+      const tenantName = makeTenantName("tenant5name");
+
+      await page.click("[data-test='tenant/addBtn']");
       expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
+        await page.isVisible("[data-test='pickerService/dialog/addTenant']")
+      ).toBeTruthy();
+      await page.fill(
+        "[data-test='pickerService/input'] > input",
+        `add tenant: ${tenantName}`
+      );
+
+      expect(
+        await page.isVisible("[data-test='pickerService/dialog/errorMessage']")
       ).toBeFalsy();
+      expect(
+        await page.isVisible("[data-test='pickerService/option/yes']")
+      ).toBeTruthy();
     });
 
-    test("dots are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant.name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
-    });
+    const checkTenantNameIsNotValid = ({
+      tenantName,
+      rawTenantName
+    }: {
+      tenantName?: string;
+      rawTenantName?: string;
+    }) => {
+      return async ({ page }: { page: Page }) => {
+        await page.click("[data-test='tenant/addBtn']");
+        expect(
+          await page.isVisible("[data-test='pickerService/dialog/addTenant']")
+        ).toBeTruthy();
+        await page.fill(
+          "[data-test='pickerService/input'] > input",
+          `add tenant: ${rawTenantName || makeTenantName(tenantName)}`
+        );
 
-    test("dashes are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant-name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
-    });
+        expect(
+          await page.isVisible(
+            "[data-test='pickerService/dialog/errorMessage']"
+          )
+        ).toBeTruthy();
 
-    test("colons are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant:name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
-    });
+        expect(
+          await page.isVisible("[data-test='pickerService/option/yes']")
+        ).toBeFalsy();
+      };
+    };
 
-    test("underscores are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenant_name");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
-    });
+    test(
+      "single character names are NOT allowed",
+      checkTenantNameIsNotValid({ rawTenantName: "t" })
+    );
 
-    test("uppcase letters are NOT allowed", async ({ page }) => {
-      const tenantName = makeTenantName("tenantName");
-      await createTenant(tenantName, { page });
-      expect(
-        await page.isVisible(`[data-test='tenant/row/${tenantName}']`)
-      ).toBeFalsy();
-    });
+    test(
+      "spaces are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant name" })
+    );
+
+    test(
+      "dots are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant.name" })
+    );
+
+    test(
+      "dashes are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant-name" })
+    );
+
+    test(
+      "colons are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant:name" })
+    );
+
+    test(
+      "underscores are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenant_name" })
+    );
+
+    test(
+      "uppcase letters are NOT allowed",
+      checkTenantNameIsNotValid({ tenantName: "tenantName" })
+    );
 
     test("can't have two with the same name", async ({ page }) => {
-      const tenantName = "fancytenant";
+      const tenantName = makeTenantName("fancytenant");
 
       await createTenant(tenantName, { page });
       // deliberatly wait slightly for the system to make the Tenants, on CI it progress too fast past the following line as page.$$ doesn't wait for things
