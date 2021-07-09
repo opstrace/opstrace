@@ -33,8 +33,9 @@ const AddTenantPicker = () => {
       title: "Enter tenant name",
       activationPrefix: "add tenant:",
       disableFilter: true,
-      textValidator: tenantNameValidator,
-      textValidationFailedMessage: "Lowercase alpha-numeric characters only",
+      textValidator: (filterValue: string) =>
+        tenantNameValidator.test(filterValue) ||
+        "Lowercase alpha-numeric characters only",
       options: [
         {
           id: "yes",
