@@ -21,4 +21,4 @@
 // pod names. This means that only alphanumeric chars are allowed.
 // Related issue: https://github.com/opstrace/opstrace/issues/957
 // export const tenantNameValidator = /^[a-z0-9]{1,63}$/;
-export const tenantNameValidator = /^[A-Za-z0-9][-A-Za-z0-9]{0,61}[A-Za-z0-9]$/;
+export const tenantNameValidator = /^[A-Za-z0-9][A-Za-z0-9]{0,61}[A-Za-z0-9]$/;
