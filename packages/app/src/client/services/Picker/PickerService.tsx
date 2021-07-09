@@ -107,9 +107,10 @@ function PickerService({ children }: { children: React.ReactNode }) {
     ?.replace(activePicker?.activationPrefix || "", "")
     .replace(/^\s+/, "");
 
-  const hasValidationError = activePicker?.textValidator
-    ? !activePicker?.textValidator.test(filterValue || "")
-    : false;
+  const textValidatorResponse = activePicker?.textValidator
+    ? activePicker.textValidator(filterValue || "")
+    : true;
+  const isFilterValueValid = textValidatorResponse === true;
 
   const onSelect = useCallback(
     (selected: PickerOption) => {
@@ -192,7 +193,7 @@ function PickerService({ children }: { children: React.ReactNode }) {
                   );
                 }
                 if (e.key === "Enter") {
-                  if (!hasValidationError) {
+                  if (isFilterValueValid) {
                     onSelect(filteredOptions[selectedIndex]);
                   }
                 }
@@ -213,11 +214,10 @@ function PickerService({ children }: { children: React.ReactNode }) {
           </Box>
           <Divider />
         </Box>
-        {hasValidationError ? (
+        {!isFilterValueValid ? (
           <Box width={PICKER_WIDTH} height={PICKER_HEIGHT} textAlign="center">
             <Typography variant="caption" color="textSecondary">
-              {activePicker?.textValidationFailedMessage ||
-                `Input must satisfy ${activePicker?.textValidator?.toString()}`}
+              {textValidatorResponse}
             </Typography>
           </Box>
         ) : (
