@@ -103,7 +103,7 @@ async function checkClusterStatus() {
 function* rootTaskStatusCore() {
   const { timeout } = yield race({
     status: call(checkClusterStatus),
-    timeout: delay(60 * SECOND)
+    timeout: delay(300 * SECOND)
   });
 
   if (timeout) {
