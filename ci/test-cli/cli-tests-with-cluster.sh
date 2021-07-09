@@ -77,3 +77,8 @@ test_tenant_authenticator_custom_keypair_flow
 
 # Confirm status command returns exit code 0
 ./build/bin/opstrace status ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} --instance-config ./ci/cluster-config.yaml
+
+# Sanity check upgrade command. This test is not supposed to run the full
+# upgrade. Instead, it just checks the config load, and status checking
+# procedures are not broken.
+DRY_RUN_UPGRADES=true ./build/bin/opstrace upgrade ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} --instance-config ./ci/cluster-config.yaml --yes
