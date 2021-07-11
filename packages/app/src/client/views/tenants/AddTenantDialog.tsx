@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useCallback } from "react";
+import { none, propEq } from "ramda";
 import { useDispatch } from "react-redux";
 import { tenantNameValidator } from "client/utils/regex";
 
 import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
+import useTenantList from "state/tenant/hooks/useTenantList";
 
 import { addTenant } from "state/tenant/actions";
 
@@ -27,15 +29,27 @@ export const addTenantCommandId = "add-tenant-picker";
 
 const AddTenantPicker = () => {
   const dispatch = useDispatch();
+  const tenants = useTenantList();
+
+  const isTenantNameUnique = useCallback(
+    (tenantName: string) => none(propEq("name", tenantName))(tenants),
+    [tenants]
+  );
 
   const { activatePickerWithText } = usePickerService(
     {
       title: "Enter tenant name",
       activationPrefix: "add tenant:",
       disableFilter: true,
-      textValidator: (filterValue: string) =>
-        tenantNameValidator.test(filterValue) ||
-        "Lowercase alpha-numeric characters only",
+      textValidator: (filterValue: string) => {
+        if (filterValue.length < 1) return "Enter new Tenant name";
+        else if (!tenantNameValidator.test(filterValue))
+          return "2 or more lowercase alpha-numeric characters";
+        else if (!isTenantNameUnique(filterValue))
+          return "Tenant name must be unique";
+        else return true;
+      },
+
       options: [
         {
           id: "yes",
@@ -46,9 +60,14 @@ const AddTenantPicker = () => {
           text: "cancel"
         }
       ],
-      onSelected: (option, tenant) => {
-        if (option.id === "yes" && tenant && tenantNameValidator.test(tenant))
-          dispatch(addTenant(tenant));
+      onSelected: (option, tenantName) => {
+        if (
+          option.id === "yes" &&
+          tenantName &&
+          tenantNameValidator.test(tenantName) &&
+          isTenantNameUnique(tenantName)
+        )
+          dispatch(addTenant(tenantName));
       },
       dataTest: "addTenant"
     },
