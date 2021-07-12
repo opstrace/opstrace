@@ -170,18 +170,15 @@ test.describe("after auth0 authentication", () => {
       })
     );
 
-    test("can't have two with the same name", async ({ page }) => {
+    test.only("duplicate names are NOT allowed", async ({ page }) => {
       const tenantName = makeTenantName("fancytenant");
 
       await createTenant(tenantName, { page });
-      // deliberatly wait slightly for the system to make the Tenants, on CI it progress too fast past the following line as page.$$ doesn't wait for things
-      await page.waitForSelector(`[data-test='tenant/row/${tenantName}']`, {
-        timeout: 5000
-      });
+      // await page.waitForTimeout(5_000);
 
-      // try and make another tenant with the same name, giving it 5s to appear
-      await createTenant(tenantName, { page });
-      await page.waitForTimeout(5_000);
+      console.log(tenantName);
+
+      await checkTenantNameIsNotValid({ rawTenantName: tenantName })({ page });
 
       const dupTenants = await page.$$(
         `[data-test='tenant/row/${tenantName}']`
