@@ -170,13 +170,10 @@ test.describe("after auth0 authentication", () => {
       })
     );
 
-    test.only("duplicate names are NOT allowed", async ({ page }) => {
+    test("duplicate names are NOT allowed", async ({ page }) => {
       const tenantName = makeTenantName("fancytenant");
 
       await createTenant(tenantName, { page });
-      // await page.waitForTimeout(5_000);
-
-      console.log(tenantName);
 
       await checkTenantNameIsNotValid({ rawTenantName: tenantName })({ page });
 
