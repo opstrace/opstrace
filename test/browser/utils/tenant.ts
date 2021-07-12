@@ -29,6 +29,9 @@ export const createTenant = async (
     `add tenant: ${tenantName}`
   );
   await page.click("[data-test='pickerService/option/yes']");
+  expect(
+    await page.waitForSelector(`[data-test='tenant/row/${tenantName}']`)
+  ).toBeTruthy();
 };
 
 export const makeTenantName = (prefix?: string) =>

@@ -41,10 +41,6 @@ test.describe("after auth0 authentication", () => {
 
     await createTenant(tenantName, { page });
 
-    expect(
-      await page.waitForSelector(`[data-test='tenant/row/${tenantName}']`)
-    ).toBeTruthy();
-
     await page.click(`[data-test='tenant/row/${tenantName}']`);
     await page.waitForURL(
       `${cluster.baseUrl}/tenant/${tenantName}/getting-started`
