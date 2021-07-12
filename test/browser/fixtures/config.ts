@@ -63,7 +63,7 @@ export const addConfigFixture = (test: TestType) =>
         if (dnsName) {
           baseUrl = dnsName;
         } else if (clusterName) {
-          baseUrl = `https://${clusterName}.opstrace.io`;
+          baseUrl = `${clusterName}.opstrace.io`;
         } else {
           log.error(
             "env variables OPSTRACE_INSTANCE_DNS_NAME or OPSTRACE_CLUSTER_NAME must be set"
@@ -71,8 +71,13 @@ export const addConfigFixture = (test: TestType) =>
           process.exit(1);
         }
 
+        baseUrl =
+          process.env.OPSTRACE_CLUSTER_INSECURE === "true"
+            ? `http://${baseUrl}`
+            : `https://${baseUrl}`;
+
         const cloudProvider = process.env.OPSTRACE_CLOUD_PROVIDER;
-        if (!cloudProvider) {
+        if (CLOUD_PROVIDER_DEFAULTS[cloudProvider] !== false) {
           log.error(
             "env variable OPSTRACE_CLOUD_PROVIDER must be set to `aws`, `gcp` or `dev`"
           );
