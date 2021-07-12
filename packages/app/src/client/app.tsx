@@ -88,10 +88,6 @@ const AuthProtectedApplication = () => {
   const tenant = useLastSelectedTenant();
   const integrationCount = useIntegrationListCount();
 
-  if (tenant === null) {
-    // Still loading tenants
-    return null;
-  }
   if (typeof tenant === "undefined" && !clusterRoutesMatch) {
     // Tenant not found, redirect to the system tenant since it's known
     return <Redirect key="invalid-tenant" from="*" to="/tenant/system" />;
