@@ -25,9 +25,23 @@ import (
 //
 //      `Authorization: Bearer <AUTHTOKEN>`
 //
-// set. Extract (and do _not_ verify) the authentication token. Emit error
-// HTTP response and return `false` upon any failure.
+// set. Extract (and do _not_ verify) the authentication token. Emit error HTTP
+// response and return `false` upon any failure.
+//
+// Added later, for legacy software: if this HTTP request has an Authorization
+// header with the Basic scheme then extract the Basic auth credentials
+// (username, password), ignore the username, and treat the password as
+// <AUTHTOKEN>.
 func getAuthTokenUnverifiedFromHeaderOr401(w http.ResponseWriter, r *http.Request) (string, bool) {
+	_, authTokenUnverifiedFromBasicAuth, ok := r.BasicAuth()
+	if ok {
+		// It's not documented what `ok` being `true` really means so this
+		// next check is just for sanity
+		if len(authTokenUnverifiedFromBasicAuth) > 1 {
+			return authTokenUnverifiedFromBasicAuth, true
+		}
+	}
+
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
 	av := r.Header.Get("Authorization")
