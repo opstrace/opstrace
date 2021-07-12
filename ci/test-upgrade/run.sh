@@ -43,6 +43,9 @@ make ci-testupgrade-create-cluster
 
 make ci-testupgrade-upgrade-cluster
 
+# Define default for OPSTRACE_INSTANCE_DNS_NAME.
+export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
+
 make test-remote
 make test-remote-looker
 make test-remote-ui
