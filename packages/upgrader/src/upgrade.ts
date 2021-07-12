@@ -17,6 +17,7 @@
 import { select, call, Effect } from "redux-saga/effects";
 import { KubeConfig } from "@kubernetes/client-node";
 
+import { getClusterConfig } from "@opstrace/config";
 import { log, die } from "@opstrace/utils";
 import {
   ControllerResourcesDeploymentStrategy,
@@ -97,12 +98,20 @@ export function* upgradeControllerConfigMap(
   log.debug(`controller config: ${JSON.stringify(cfgJSON, null, 2)}`);
 
   let cfg: LatestControllerConfigType;
-
   try {
     cfg = upgradeControllerConfigMapToLatest(cfgJSON);
   } catch (e) {
     die(`failed to upgrade controller configuration: ${e.message}`);
   }
+
+  //
+  // At this point, override any new fields that require reading from the user
+  // cluster config.
+  //
+  const ucc = getClusterConfig();
+  // custom_auth0_client_id was introduced to be able to configure the Auth0
+  // client id. CI uses it to automate the login flow using email and password.
+  cfg.custom_auth0_client_id = ucc.custom_auth0_client_id;
 
   log.debug(`upgraded controller config ${JSON.stringify(cfg, null, 2)}`);
 
