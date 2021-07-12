@@ -61,3 +61,7 @@ for RESOURCE in issuer certificate certificaterequest order challenge
 do
     kubectl --namespace=ingress describe ${RESOURCE} > clusterlogs_${RESOURCE}-${OPSTRACE_CLUSTER_NAME}-ingress.log
 done
+
+# make sure that looker-related artifacts are collected
+cp /build/looker*log /build/bk-artifacts
+cp /build/looker*report.json /build/bk-artifacts
