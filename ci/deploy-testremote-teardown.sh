@@ -341,7 +341,7 @@ source ci/test-cli/cli-tests-with-cluster.sh
 # - the path to the authentication token file
 set -x
 set +e; RNDSTRING=$( tr -dc a-z < /dev/urandom | head -c 6 ); set -e
-TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant-${RNDSTRING}"
+TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant${RNDSTRING}"
 ./build/bin/opstrace ta-create-keypair ./ta-custom-keypair.pem
 ./build/bin/opstrace ta-create-token "${OPSTRACE_CLUSTER_NAME}" \
     "${TENANT_RND_NAME_FOR_TESTING_ADD_TENANT}" ta-custom-keypair.pem > tenant-rnd-auth-token-from-custom-keypair
