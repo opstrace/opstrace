@@ -46,7 +46,7 @@ export async function sendLogsWithFluentbitContainer(
 
   log.info("log file content (fluentbit tail input):\n%s", logFileText);
   const contentBytes = Buffer.from(logFileText, "utf-8");
-  const logFilePath = createTempfile("fluentd-log-input-", ".log");
+  const logFilePath = createTempfile("fbit-log-input-", ".log");
   fs.writeFileSync(logFilePath, contentBytes);
 
   // Send a noop string when no tenant API token was passed
@@ -63,6 +63,8 @@ export async function sendLogsWithFluentbitContainer(
   const lokiPushUrl = `https://uname:${apiToken}@${lokiApiDnsName}/loki/api/v1/push`;
   //const lokiPushUrl = `https://uname:${process.env.REDTEAM_APITOKEN}@loki.redteam.jpdemo.opstrace.io/loki/api/v1/push`;
 
+  log.info("constructed loki push URL: %s", lokiPushUrl);
+
   const renderedConfigText = mustache.render(
     fs.readFileSync(
       `${__dirname}/../containers/fluentbit/${fbitConfigTemplateFile}`,
@@ -78,13 +80,13 @@ export async function sendLogsWithFluentbitContainer(
     }
   );
 
-  const fbitConfigFilePath = createTempfile("fluentd-config-", ".conf");
+  const fbitConfigFilePath = createTempfile("fbit-config-", ".conf");
   fs.writeFileSync(fbitConfigFilePath, renderedConfigText, {
     encoding: "utf-8"
   });
 
   log.info("wrote config file to %s", fbitConfigFilePath);
-  const outfilePath = createTempfile("fbfbit-container-", ".outerr");
+  const outfilePath = createTempfile("fbit-container-", ".outerr");
   const outstream = fs.createWriteStream(outfilePath);
   await events.once(outstream, "open");
 
