@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-// TODO: rename module from test_ui to test_ui_api because really
-// it interacts mainly with the HTTP API that is meant for UI consumptio.
+// The purpose of this test module is to interact with the HTTP API that is
+// meant for UI consumption.
 
 import { strict as assert } from "assert";
 
@@ -348,18 +348,6 @@ suite("test_ui_api", function () {
     // management: using the state created by setupSuite(). It's also in here
     // so that it can be replaced by the UI-based flow for creating the tenant!
     assert(COOKIES_AFTER_LOGIN);
-
-    if (process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT === undefined) {
-      log.info(
-        "skip, process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT not defined"
-      );
-      return this.skip();
-    }
-
-    if (process.env.TENANT_RND_AUTHTOKEN === undefined) {
-      log.info("skip, process.env.TENANT_RND_AUTHTOKEN not defined");
-      return this.skip();
-    }
 
     const tenantName = process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT;
     const tenantAuthToken = process.env.TENANT_RND_AUTHTOKEN;
