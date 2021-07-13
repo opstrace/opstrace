@@ -937,6 +937,7 @@ async function sigkillContInNSeconds(
 ): Promise<void> {
   await sleep(n);
   try {
+    log.info("send SIGKILL");
     cont.kill({ signal: "SIGKILL" });
   } catch (err) {
     log.warning("error sending SIGKILL: %s", err.message);
@@ -955,8 +956,9 @@ export async function terminateContainer(
     log.warning("could not kill container: %s", err.message);
   }
 
-  // spawn function that sends SIGKILL in 15 seconds, but don't wait for this
-  // yet
+  // Spawn function that sends SIGKILL in 15 seconds, but don't wait for this
+  // yet. This is because ususally a _clean_ shutdown procedure is initiated
+  // by SIGTERM, but that may actually not lead to timely termination.
   const killjob = sigkillContInNSeconds(cont, 10);
 
   log.info("wait for container to stop");
