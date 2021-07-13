@@ -31,10 +31,13 @@ import {
   testName,
   TENANT_DEFAULT_LOKI_API_BASE_URL,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
+  OPSTRACE_INSTANCE_DNS_NAME,
   LOKI_API_TLS_VERIFY,
   globalTestSuiteSetupOnce,
   enrichHeadersWithAuthToken
 } from "./testutils";
+
+import { sendLogsWithFluentbitContainer } from "./testutils/fbit";
 
 import {
   LogSample,
@@ -195,6 +198,53 @@ suite("Loki API test suite", function () {
       TENANT_DEFAULT_LOKI_API_BASE_URL,
       queryParams,
       2
+    );
+  });
+
+  test("insert w/ cntnrzd Fluentbit(grafana loki plugin), then query", async function () {
+    const loglines = ["aaaaaaa", "bbbbbb", "cccccccc"];
+
+    const idxfieldname = "indexfieldname";
+    const idxfieldvalue = rndstring().slice(0, 5);
+
+    await sendLogsWithFluentbitContainer(
+      `loki.default.${OPSTRACE_INSTANCE_DNS_NAME}`,
+      TENANT_DEFAULT_API_TOKEN_FILEPATH,
+      loglines,
+      idxfieldname,
+      idxfieldvalue,
+      "fbit.config.template",
+      // rely on the fbit stdout output plugin to be used, i.e. all log lines
+      // appear on the container's stdout once read.
+      "cccccccc"
+    );
+
+    // Query for the log records that were just inserted.
+    const ts = ZonedDateTime.now();
+    const searchStart = ts.minusHours(1);
+    const searchEnd = ts.plusHours(1);
+    const queryParams = {
+      query: `{${idxfieldname}="${idxfieldvalue}"}`,
+      direction: "BACKWARD",
+      limit: "1000",
+      start: timestampToNanoSinceEpoch(searchStart),
+      end: timestampToNanoSinceEpoch(searchEnd)
+    };
+
+    // Wait for two entries in the single-stream query result.
+    // TODO: inspect detail.
+    await waitForLokiQueryResult(
+      TENANT_DEFAULT_LOKI_API_BASE_URL,
+      //"https://loki.redteam.jpdemo.opstrace.io/",
+      queryParams,
+      // expect three log entries
+      3,
+      true,
+      // expect precisely one stream (label set)
+      1,
+      true,
+      30
+      //{ authorization: `Bearer ${process.env.REDTEAM_APITOKEN}` }
     );
   });
 
