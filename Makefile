@@ -548,6 +548,7 @@ rebuild-testrunner-container-images:
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
 	docker pull gcr.io/datadoghq/agent:7
+	docker pull grafana/fluent-bit-plugin-loki:main-4a8f62b-amd64
 
 .PHONY: rebuild-looker-container-image
 rebuild-looker-container-image:
