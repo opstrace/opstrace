@@ -86,6 +86,11 @@ async function performLoginFlow(br: Browser) {
   log.info("context.newPage()");
   const page = await context.newPage();
 
+  // debugging: doubling the timeout here to see if that helps with upgrade ci tests failing
+  // issue: https://github.com/opstrace/opstrace/issues/1003
+  page.setDefaultNavigationTimeout(60_000);
+  page.setDefaultTimeout(60_000);
+
   log.info("page.goto(%s)", CLUSTER_BASE_URL);
   await page.goto(CLUSTER_BASE_URL);
   log.info("`load` event");
