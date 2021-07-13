@@ -84,3 +84,13 @@ export async function checkIfDockerImageExistsOrErrorOut(imageName: string) {
     log.debug(`response body, first 500 bytes: ${bodyPrefix}`);
   }
 }
+
+/**
+ *
+ * @param tag is an image tag.
+ * @returns the content of tag following the first ":"
+ */
+ export function parseVersionFromImageTag(imageName: string): string {
+  const splitName = imageName.split(":");
+  return splitName.length > 1 ? splitName[1] : "latest";
+}
