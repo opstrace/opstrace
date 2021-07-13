@@ -24,7 +24,7 @@ export * from "./docker-images";
 export * from "./aks";
 export * from "./resources/dockerhub";
 
-export { CONTROLLER_NAME } from "./resources/controller";
+export { CONTROLLER_NAME, CONTROLLER_NAMESPACE } from "./resources/controller";
 export {
   CONFIGMAP_NAME,
   STORAGE_KEY,
