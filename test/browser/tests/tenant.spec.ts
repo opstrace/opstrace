@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import { test as base, expect, Page } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 import { padCharsEnd } from "ramda-adjunct";
 
-import { addAuthFixture, addTenantFixture, pipe } from "../fixtures";
-
-import { logUserIn } from "../utils/authentication";
+import useFixtures from "../fixtures";
+import { restoreLogin } from "../utils";
 import { createTenant, makeTenantName } from "../utils/tenant";
 
-const test = pipe(addAuthFixture, addTenantFixture)(base);
+const test = useFixtures(["auth", "tenant"]);
 
 test.describe("after auth0 authentication", () => {
-  test.beforeEach(logUserIn);
+  test.beforeEach(restoreLogin);
 
   test.beforeEach(async ({ page }) => {
     await page.hover("[data-test='sidebar/clusterAdmin/Tenants']");

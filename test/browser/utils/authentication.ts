@@ -14,8 +14,51 @@
  * limitations under the License.
  */
 
-export const logUserIn = async ({ page, context, authCookies, cluster }) => {
-  context.addCookies(authCookies);
+import { expect, Page } from "@playwright/test";
+
+export const performLogin = async ({ page, cluster, user }) => {
   await page.goto(cluster.baseUrl);
+
+  // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
+  // <span class="MuiButton-label">Log in</span>
+  await page.waitForSelector("css=button");
+
+  await page.click("text=Log in");
+
+  // Wait for CI-specific email/password login form to appear
+  await page.waitForSelector("text=Don't remember your password?");
+
+  await page.fill("css=input[type=email]", user.email);
+  await page.fill("css=input[type=password]", user.password);
+
+  await page.click("css=button[type=submit]");
+
+  // The first view after successful login is expected to be the details page
+  // for the `system` tenant, showing a link to Grafana.
   await page.waitForSelector("[data-test=getting-started]");
+
+  expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
 };
+
+export const restoreLogin = async ({
+  page,
+  context,
+  authCookies,
+  system,
+  cluster,
+  user
+}) => {
+  if (system.workerAuth) {
+    context.addCookies(authCookies);
+    await page.goto(cluster.baseUrl);
+    await page.waitForSelector("[data-test=getting-started]");
+  } else {
+    await performLogin({ page, cluster, user });
+  }
+};
+
+// export const logout = async ({ page, context, authCookies, cluster }) => {
+//   context.addCookies(authCookies);
+//   await page.goto(cluster.baseUrl);
+//   await page.waitForSelector("[data-test=getting-started]");
+// };

@@ -23,6 +23,6 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts --quiet",
-    "pw:localhost": "OPSTRACE_CLUSTER_BASE_URL=\"http://localhost:3000\" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts"
+    "pw:localhost": "OPSTRACE_INSTANCE_DNS_NAME=\"localhost:3000\" OPSTRACE_CLUSTER_INSECURE=true OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts"
   }
 }
