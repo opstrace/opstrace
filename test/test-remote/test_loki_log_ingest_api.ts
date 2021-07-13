@@ -201,7 +201,7 @@ suite("Loki API test suite", function () {
     );
   });
 
-  test("insert w/ cntnrzd Fluentbit(grafana loki plugin), then query", async function () {
+  test("fluentbit(grafana loki plugin) with basic auth", async function () {
     const loglines = ["aaaaaaa", "bbbbbb", "cccccccc"];
 
     const idxfieldname = "indexfieldname";
