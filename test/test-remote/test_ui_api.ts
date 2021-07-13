@@ -349,6 +349,18 @@ suite("test_ui_api", function () {
     // so that it can be replaced by the UI-based flow for creating the tenant!
     assert(COOKIES_AFTER_LOGIN);
 
+    if (process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT === undefined) {
+      throw new Error(
+        "env var TENANT_RND_NAME_FOR_TESTING_ADD_TENANT is not defined but required"
+      );
+    }
+
+    if (process.env.TENANT_RND_AUTHTOKEN === undefined) {
+      throw new Error(
+        "env var TENANT_RND_AUTHTOKEN is not defined but required"
+      );
+    }
+
     const tenantName = process.env.TENANT_RND_NAME_FOR_TESTING_ADD_TENANT;
     const tenantAuthToken = process.env.TENANT_RND_AUTHTOKEN;
     log.info("create tenant with name %s", tenantName);
