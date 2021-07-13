@@ -1,0 +1,23 @@
+[SERVICE]
+    Flush           1
+    Daemon          off
+    Log_Level       debug
+
+[INPUT]
+    Name        tail
+    Read_from_Head true
+    Path        {{{samples_log_file_path}}}
+
+[OUTPUT]
+    Name   stdout
+    Match  *
+
+[OUTPUT]
+    Name grafana-loki
+    Match *
+    Url {{{lokiPushUrl}}}
+    Labels { {{{indexFieldName}}}="{{{indexFieldValue}}}"}
+    BatchWait 1s
+    BatchSize 3000
+    insecure_skip_verify true
+
