@@ -173,29 +173,23 @@ export function CortexResources(
       resources: {},
       replicas: select(getNodeCount(state), [
         {
-          "<=": 4,
-          choose: 3
-        },
-        {
-          "<=": 6,
-          choose: 5
-        },
-        {
-          "<=": 8,
-          choose: 7
-        },
-        {
-          "<=": 10,
-          choose: 9
-        },
-        {
           "<=": 20,
-          // TODO does rounding down to odd matter?
+          // From 3 to 20 nodes, run ~Nnodes ingesters
+          // Keeping replicas odd to reduce risk of ring contention
+          // Example: 5 nodes => 5 ingesters, 6 nodes => 5 ingesters, 7 nodes => 7 ingesters
           choose: roundDownToOdd(getNodeCount(state))
         },
         {
+          "<=": 42,
+          // From 21 to 42 nodes, stay with 21 ingesters.
+          // This ensures a smooth transition from replicas=Nnodes to replicas=Nnodes/2,
+          // without the number of ingesters dropping as the nodes increase.
+          choose: 21
+        },
+        {
           "<=": Infinity,
-          // TODO reconsider whether dividing by 2 is the right thing
+          // Above 42 nodes, run ~Nnodes/2 ingesters
+          // NOTE: At this scale, its unknown if Nnodes/2 is reasonable.
           choose: roundDownToOdd(getNodeCount(state) / 2)
         }
       ])
