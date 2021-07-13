@@ -108,7 +108,7 @@ export async function sendLogsWithFluentbitContainer(
 
   const cont = await docker.createContainer({
     // TODO: specific version
-    Image: "grafana/fluent-bit-plugin-loki:latest",
+    Image: "grafana/fluent-bit-plugin-loki:main-4a8f62b-amd64",
     AttachStdin: false,
     AttachStdout: false,
     AttachStderr: false,
