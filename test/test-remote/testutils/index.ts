@@ -575,41 +575,10 @@ export async function sendMetricsWithPromContainer(
     logNeedle
   );
 
-  async function terminateContainer() {
-    log.info("terminate container");
-
-    try {
-      await cont.kill({ signal: "SIGTERM" });
-    } catch (err) {
-      log.warning("could not kill container: %s", err.message);
-    }
-
-    log.info("wait for container to stop");
-    try {
-      await cont.wait();
-    } catch (err) {
-      log.warning("error waiting for container: %s", err.message);
-    }
-
-    log.info("force-remove container");
-    try {
-      await cont.remove({ force: true });
-    } catch (err) {
-      log.warning("could not remove container: %s", err.message);
-    }
-    log.info(
-      "log output emitted by container (stdout/err from %s):\n%s",
-      outfilePath,
-      fs.readFileSync(outfilePath, {
-        encoding: "utf-8"
-      })
-    );
-  }
-
   while (true) {
     if (mtime() > deadline) {
       log.info("deadline hit");
-      await terminateContainer();
+      await terminateContainer(cont, outfilePath);
       throw new Error("Prometheus container setup failed: deadline hit");
     }
     const fileHeadBytes = await readFirstNBytes(outfilePath, 10 ** 4);
@@ -635,7 +604,7 @@ export async function sendMetricsWithPromContainer(
 
     if (mtime() > deadline2) {
       log.info("deadline hit");
-      await terminateContainer();
+      await terminateContainer(cont, outfilePath);
       throw new Error(
         `deadline hit while waiting for expected data on ${metricsUrl}`
       );
@@ -668,9 +637,7 @@ export async function sendMetricsWithPromContainer(
     }
   }
 
-  // Note: abstract container into a class, perform cleanup upon test runner
-  // exit. Also: handle errors, don't let errors get in the way of cleanup.
-  await terminateContainer();
+  await terminateContainer(cont, outfilePath);
 }
 
 export async function sendLogsWithFluentDContainer(
@@ -783,16 +750,6 @@ export async function sendLogsWithFluentDContainer(
     logNeedle
   );
 
-  async function terminateContainer() {
-    log.info("terminate container");
-    await cont.kill({ signal: "SIGTERM" });
-    log.info("wait for container to stop");
-    await cont.wait();
-    log.info("force-remove container");
-    await cont.remove({ force: true });
-    log.info("container removed");
-  }
-
   // In case of the HTTP output plugin the "202 Accepted" (only in the fluentd
   // stdout/err when using `log_level debug`) means that the insertion
   // succceeded. That's a reliable criterion. When using the Loki plugin there
@@ -805,7 +762,7 @@ export async function sendLogsWithFluentDContainer(
   while (true) {
     if (mtime() > deadline) {
       log.info("deadline hit");
-      await terminateContainer();
+      await terminateContainer(cont, outfilePath);
       throw new Error("fluentd container setup (or send) failed: deadline hit");
     }
     const fileHeadBytes = await readFirstNBytes(outfilePath, 10 ** 4);
@@ -819,9 +776,7 @@ export async function sendLogsWithFluentDContainer(
     await sleep(0.1);
   }
 
-  // Note: abstract container into a class, perform cleanup upon test runner
-  // exit. Also: handle errors, don't let errors get in the way of cleanup.
-  await terminateContainer();
+  await terminateContainer(cont, outfilePath);
 }
 
 export function logHTTPResponse(
@@ -974,4 +929,57 @@ export async function waitForQueryResult<T>(
     await sleep(5.0);
   }
   throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
+}
+
+async function sigkillContInNSeconds(
+  cont: Docker.Container,
+  n: number
+): Promise<void> {
+  await sleep(n);
+  try {
+    cont.kill({ signal: "SIGKILL" });
+  } catch (err) {
+    log.warning("error sending SIGKILL: %s", err.message);
+  }
+}
+
+export async function terminateContainer(
+  cont: Docker.Container,
+  outfilePath: string
+): Promise<void> {
+  log.info("terminate container, send SIGTERM");
+
+  try {
+    await cont.kill({ signal: "SIGTERM" });
+  } catch (err) {
+    log.warning("could not kill container: %s", err.message);
+  }
+
+  // spawn function that sends SIGKILL in 15 seconds, but don't wait for this
+  // yet
+  const killjob = sigkillContInNSeconds(cont, 10);
+
+  log.info("wait for container to stop");
+  try {
+    await cont.wait();
+  } catch (err) {
+    log.warning("error waiting for container: %s", err.message);
+  }
+
+  log.info("wait for killjob");
+  await killjob;
+
+  log.info("force-remove container");
+  try {
+    await cont.remove({ force: true });
+  } catch (err) {
+    log.warning("could not remove container: %s", err.message);
+  }
+  log.info(
+    "log output emitted by container (stdout/err from %s):\n%s",
+    outfilePath,
+    fs.readFileSync(outfilePath, {
+      encoding: "utf-8"
+    })
+  );
 }
