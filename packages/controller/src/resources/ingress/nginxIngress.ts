@@ -163,7 +163,8 @@ export function NginxIngressResources(
                       "--annotations-prefix=nginx.ingress.kubernetes.io",
                       `--ingress-class=${endpointName}`,
                       `--http-port=${endpointConfig.http}`,
-                      `--https-port=${endpointConfig.https}`
+                      `--https-port=${endpointConfig.https}`,
+                      `--v=3` // shows details about the service, Ingress rule, endpoint changes and it dumps the nginx configuration in JSON format
                     ],
                     securityContext: {
                       allowPrivilegeEscalation: true,
