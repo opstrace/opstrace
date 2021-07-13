@@ -60,9 +60,8 @@ export async function sendLogsWithFluentbitContainer(
 
   // Construct URL with basic auth info. username is ignored, password is
   // interpreted as tenant API authentication token
-
-  //const lokiPushUrl = `https://uname:${apiToken}@${lokiApiDnsName}/loki/api/v1/push`;
-  const lokiPushUrl = `https://uname:${process.env.REDTEAM_APITOKEN}@loki.redteam.jpdemo.opstrace.io/loki/api/v1/push`;
+  const lokiPushUrl = `https://uname:${apiToken}@${lokiApiDnsName}/loki/api/v1/push`;
+  //const lokiPushUrl = `https://uname:${process.env.REDTEAM_APITOKEN}@loki.redteam.jpdemo.opstrace.io/loki/api/v1/push`;
 
   const renderedConfigText = mustache.render(
     fs.readFileSync(
