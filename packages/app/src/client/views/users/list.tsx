@@ -75,7 +75,7 @@ const Users = () => {
       </Box>
       <Box>
         <TableContainer component={Card}>
-          <Table aria-label="users">
+          <Table aria-label="users" data-test="user/list">
             <TableHead>
               <TableRow>
                 <TableCell>Username</TableCell>
@@ -90,7 +90,7 @@ const Users = () => {
                 <TableRow
                   className={classes.userRow}
                   key={user.email}
-                  data-test={`userList/${user.email}`}
+                  data-test={`user/row/${user.email}`}
                   hover={true}
                   onClick={() =>
                     history.push(
