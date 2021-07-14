@@ -130,7 +130,7 @@ export default async function setCortexRuntimeConfigHandler(
   // Assume that `req.body` is the new config map's payload content.
   const newcm = genCortexRuntimeConfigCM(KUBECONFIG, req.body);
   try {
-    await createOrUpdateConfigMapWithRetry(newcm, true);
+    await createOrUpdateConfigMapWithRetry(newcm, { forceUpdate: true });
   } catch (err) {
     // Expected error for invalid documents: response status
     // 422 Unprocessable Entity
