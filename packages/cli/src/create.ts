@@ -77,6 +77,17 @@ export async function create(): Promise<void> {
     }
   }
 
+  // TODO: continuation mode: detect when there is _state_ for this in
+  // well-known file system path(s) (authentication tokens in particular) and
+  // then do not generate new key material, but try to discover authentication
+  // tokens for all tenants specified in the config file. Also inspect 'cluster
+  // name' in auth tokens, compare to what was provided on cmdline. Error out
+  // if there seems to be an inconsistency. If there is no inconsistency:
+  // use tokens from disk.
+  // For storing state, also see https://github.com/opstrace/opstrace/issues/237
+  // and for the larger topic of detecting continuation also see
+  // https://github.com/opstrace/opstrace/issues/20
+
   // `tenantApiTokens`: sensitive data, watch out.
   const [
     tenant_api_authenticator_pubkey_set_json,
