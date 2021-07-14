@@ -48,4 +48,4 @@ export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
 # This runs the bulk of the tests against the Opstrace instance. Also invoked
 # from the regular test pipeline and therefore in its own file.
-source ci/test-core.sh
+OPSTRACE_BIN=./to/opstrace source ci/test-core.sh
