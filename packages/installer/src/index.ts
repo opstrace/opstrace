@@ -39,7 +39,11 @@ import {
   LatestClusterConfigType
 } from "@opstrace/config";
 
-import { getKubeConfig, k8sListNamespacesOrError } from "@opstrace/kubernetes";
+import {
+  getKubeConfig,
+  k8sListNamespacesOrError,
+  createOrUpdateConfigMapWithRetry
+} from "@opstrace/kubernetes";
 
 import {
   getValidatedGCPAuthOptionsFromFile,
@@ -51,11 +55,11 @@ import {
 } from "@opstrace/gcp";
 import { set as updateTenantsConfig } from "@opstrace/tenants";
 import {
-  set as updateControllerConfig,
   ControllerResourcesDeploymentStrategy,
   deployControllerResources,
   LatestControllerConfigType,
-  LatestControllerConfigSchema
+  LatestControllerConfigSchema,
+  serializeControllerConfig
 } from "@opstrace/controller-config";
 
 import { rootReducer } from "./reducer";
@@ -269,7 +273,28 @@ function* createClusterCore() {
   }
 
   const tenantsConfig = getTenantsConfig(ccfg.tenants);
-  yield call(updateControllerConfig, controllerConfig, kubeConfig);
+
+  // Running `create` more than once can in special cases help, but is not
+  // generally well-defined. Also see
+  // https://github.com/opstrace/opstrace/issues/20. A small start towards
+  // improvement: do not overwrite existing controller config.
+  try {
+    yield call(
+      createOrUpdateConfigMapWithRetry,
+      serializeControllerConfig(controllerConfig, kubeConfig),
+      { forceCreate: true }
+    );
+  } catch (e) {
+    if (e.response && e.response.statusCode === 409) {
+      log.warning(
+        "controller config map already exists, do not overwrite (is this a continuation of a partial previous create?)"
+      );
+    } else {
+      throw e;
+    }
+  }
+
+  // TODO: this also should not be updated if it exists.
   yield call(updateTenantsConfig, tenantsConfig, kubeConfig);
 
   let systemTenantAuthToken = clusterCreateConfig.tenantApiTokens["system"];
@@ -282,6 +307,7 @@ function* createClusterCore() {
     systemTenantAuthToken = "not-required";
   }
 
+  // TODO: continuation mode: this should also not be updated if it exists.
   yield call(
     storeSystemTenantApiAuthTokenAsSecret,
     systemTenantAuthToken,
@@ -295,6 +321,7 @@ function* createClusterCore() {
     return;
   }
 
+  // TODO: continuation mode: skip if controller deployment exists.
   log.info("deploying controller");
   yield call(deployControllerResources, {
     controllerImage: ccfg.controller_image,
