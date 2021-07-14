@@ -15,7 +15,10 @@
  */
 
 import { ConfigMap, KubeConfiguration } from "@opstrace/kubernetes";
-import { LatestControllerConfigType, LatestControllerConfigSchema } from "./schema";
+import {
+  LatestControllerConfigType,
+  LatestControllerConfigSchema
+} from "./schema";
 
 export const CONFIGMAP_NAME = "opstrace-controller-config";
 export const STORAGE_KEY = "config.json";
@@ -23,7 +26,9 @@ export const STORAGE_KEY = "config.json";
 export const isConfigStorage = (configMap: ConfigMap): boolean =>
   configMap.name === CONFIGMAP_NAME;
 
-export const deserialize = (configMap: ConfigMap): LatestControllerConfigType => {
+export const deserialize = (
+  configMap: ConfigMap
+): LatestControllerConfigType => {
   return LatestControllerConfigSchema.cast(
     JSON.parse(configMap.spec.data?.[STORAGE_KEY] ?? "")
   );
@@ -45,7 +50,7 @@ export const configmap = (kubeConfig: KubeConfiguration): ConfigMap => {
   );
 };
 
-export const serialize = (
+export const serializeControllerConfig = (
   ccfg: LatestControllerConfigType,
   kubeConfig: KubeConfiguration
 ): ConfigMap => {

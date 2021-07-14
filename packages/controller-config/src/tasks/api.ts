@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { serialize, configmap, deserialize } from "../utils";
+import { serializeControllerConfig, configmap, deserialize } from "../utils";
 
 import { LatestControllerConfigType } from "../schema";
 
@@ -61,7 +61,7 @@ export async function set(
   controllerconfig: LatestControllerConfigType,
   kubeConfig: KubeConfiguration
 ): Promise<void> {
-  const cm = serialize(controllerconfig, kubeConfig);
+  const cm = serializeControllerConfig(controllerconfig, kubeConfig);
 
   // Expect this error structure:
   // "response": {

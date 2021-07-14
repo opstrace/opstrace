@@ -25,4 +25,8 @@ export * from "./aks";
 export * from "./resources/dockerhub";
 
 export { CONTROLLER_NAME } from "./resources/controller";
-export { CONFIGMAP_NAME, STORAGE_KEY } from "./utils";
+export {
+  CONFIGMAP_NAME,
+  STORAGE_KEY,
+  serializeControllerConfig
+} from "./utils";
