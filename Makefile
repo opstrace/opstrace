@@ -628,9 +628,6 @@ test-remote: kubectl-cluster-info
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		yarn run mocha --grep test_ui --invert
 
-.PHONY: test-remote-looker
-test-remote-looker:
-	bash ci/invoke-looker.sh
 
 # Note(JP): dirty duplication. This is supposed to be the _exact_ same as the
 # test-remote target abvove, but instead of
