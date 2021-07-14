@@ -2,16 +2,7 @@
  * Copyright 2020 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
-
-      // Handle transient/retryable errors here, mainly TCP connect() timeout
-      // For context, see opstrace-prelaunch/issues/1039 and
-      // https://github.com/kubernetes-client/javascript/issues/544
-      // TODO: handle other transient ones, ENOUTFOUND and 5xx HTTP responses.
-      if (e.code && e.code === "ETIMEDOUT") {
-        log.info("retry config map creation/update soon (%s)", e.message);
-        await sleep(3);
-        continue;
-      }* you may not use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
