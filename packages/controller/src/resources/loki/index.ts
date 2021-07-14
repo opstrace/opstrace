@@ -170,6 +170,8 @@ export function LokiResources(
     env: []
   };
 
+  const memberlist_bind_port = 7947;
+
   const lokiDefaultConfig = {
     server: {
       http_listen_port: 1080,
@@ -266,11 +268,11 @@ export function LokiResources(
       // don't allow split-brain / individual components that think they are
       // not part of a cluster.
       abort_if_cluster_join_fails: true,
-      bind_port: 7946,
+      bind_port: memberlist_bind_port,
       join_members: [
         // use a kubernetes headless service for all distributor, ingester and
         // querier components
-        `loki-gossip-ring.${namespace}.svc.cluster.local:7946`
+        `loki-gossip-ring.${namespace}.svc.cluster.local:${memberlist_bind_port}`
       ],
       // these settings are taken from examples in  official documentation
       // https://github.com/grafana/loki/blob/master/docs/sources/configuration/examples.md
@@ -457,9 +459,9 @@ export function LokiResources(
           ports: [
             {
               name: "loki-gossip-ring",
-              port: 7946,
+              port: memberlist_bind_port,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              targetPort: 7946 as any
+              targetPort: memberlist_bind_port as any
             }
           ],
           selector: {
