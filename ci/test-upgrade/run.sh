@@ -43,6 +43,25 @@ make ci-testupgrade-create-cluster
 
 make ci-testupgrade-upgrade-cluster
 
+# The tenant API authenticator keypair management capability is confirmed to
+# work -- now create a keypair, push the public key into the cluster and
+# generate a tenant API authentication token for a tenant that does not
+# exist yet in the cluster -- use a random name. Then inject into test-remote:
+# - the name of that tenant
+# - the path to the authentication token file
+set -x
+set +e; RNDSTRING=$( tr -dc a-z < /dev/urandom | head -c 6 ); set -e
+TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant${RNDSTRING}"
+./to/opstrace ta-create-keypair ./ta-custom-keypair.pem
+./to/opstrace ta-create-token "${OPSTRACE_CLUSTER_NAME}" \
+    "${TENANT_RND_NAME_FOR_TESTING_ADD_TENANT}" ta-custom-keypair.pem > tenant-rnd-auth-token-from-custom-keypair
+TENANT_RND_AUTHTOKEN="$(cat tenant-rnd-auth-token-from-custom-keypair)"
+./to/opstrace ta-pubkeys-add \
+    "${OPSTRACE_CLOUD_PROVIDER}" "${OPSTRACE_CLUSTER_NAME}" ta-custom-keypair.pem
+set -x
+export TENANT_RND_AUTHTOKEN
+export TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
+
 # Define default for OPSTRACE_INSTANCE_DNS_NAME.
 export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
