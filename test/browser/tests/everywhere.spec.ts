@@ -47,7 +47,7 @@ test.describe("after auth0 authentication", () => {
       await page.hover("[data-test='sidebar/tenant/Users']");
       await page.click("[data-test='sidebar/tenant/Users']");
       expect(
-        await page.isVisible(`[data-test='userList/${user.email}']`)
+        await page.isVisible(`[data-test='user/row/${user.email}']`)
       ).toBeTruthy();
       await page.click("[data-test='sidebar/tenant/Users']");
 
@@ -71,7 +71,7 @@ test.describe("after auth0 authentication", () => {
       await page.hover("[data-test='sidebar/clusterAdmin/Users']");
       await page.click("[data-test='sidebar/clusterAdmin/Users']");
       expect(
-        await page.isVisible(`[data-test='userList/${user.email}']`)
+        await page.isVisible(`[data-test='user/row/${user.email}']`)
       ).toBeTruthy();
       await page.click("[data-test='sidebar/clusterAdmin/Users']");
 
