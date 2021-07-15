@@ -18,7 +18,7 @@ import { select, call, Effect } from "redux-saga/effects";
 import { KubeConfig } from "@kubernetes/client-node";
 
 import { getClusterConfig } from "@opstrace/config";
-import { log, die } from "@opstrace/utils";
+import { log, die, BUILD_INFO } from "@opstrace/utils";
 import {
   ControllerResourcesDeploymentStrategy,
   CONTROLLER_NAME,
@@ -29,7 +29,6 @@ import {
   set as updateControllerConfig,
   upgradeControllerConfigMapToLatest
 } from "@opstrace/controller-config";
-import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
 
 import {
   EnsureInfraExistsResponse,
@@ -39,6 +38,8 @@ import {
 
 import { State } from "./reducer";
 import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
+
+const CONTROLLER_IMAGE_DEFAULT = `opstrace/controller:${BUILD_INFO.VERSION_STRING}`;
 
 //
 // Set the controller deployment image version to the one defined in buildinfo.
