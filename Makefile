@@ -214,7 +214,7 @@ clean:
 .PHONY: run-app-unit-tests
 run-app-unit-tests:
 	@echo "--- run app unit tests"
-	CI=true yarn workspace @opstrace/app test
+	export OPSTRACE_BUILDINFO_PATH="$(shell pwd)/buildinfo.json" && CI=true yarn workspace @opstrace/app test
 
 .PHONY: cli-crashtest
 cli-crashtest:
@@ -764,9 +764,9 @@ go-unit-tests:
 .PHONY: ts-unit-tests
 ts-unit-tests:
 	@echo "--- run lib unit tests"
-	cd lib/kubernetes && CI=true yarn test
+	export OPSTRACE_BUILDINFO_PATH="$(shell pwd)/buildinfo.json" && cd lib/kubernetes && CI=true yarn test
 	@echo "--- run cli unit tests"
-	cd packages/cli && CI=true yarn test
+	export OPSTRACE_BUILDINFO_PATH="$(shell pwd)/buildinfo.json" &&  cd packages/cli && CI=true yarn test
 
 .PHONY: preamble
 preamble:
