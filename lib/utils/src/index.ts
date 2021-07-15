@@ -27,6 +27,8 @@ export * from "./sagas";
 export * from "./errors";
 export * from "./diffutils";
 export * from "./pubkey";
+export { BUILD_INFO } from "./buildinfo";
+
 export {
   sleep,
   mtime,

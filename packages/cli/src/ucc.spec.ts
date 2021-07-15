@@ -15,7 +15,7 @@
  */
 
 import fs from "fs";
-import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
+import { BUILD_INFO } from "@opstrace/utils";
 
 // mock logger and die functions
 const mockDie = jest.fn().mockImplementation(e => {
@@ -74,7 +74,7 @@ node_count: 3
 
   expect(userClusterConfig).toEqual({
     cert_issuer: "letsencrypt-prod",
-    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
     data_api_authentication_disabled: false,
     data_api_authorized_ip_ranges: ["0.0.0.0/0"],
     env_label: "unit-tests",
@@ -112,7 +112,7 @@ node_count: 3
 
   expect(userClusterConfig).toEqual({
     cert_issuer: "letsencrypt-prod",
-    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
     data_api_authentication_disabled: false,
     data_api_authorized_ip_ranges: ["0.0.0.0/0"],
     env_label: "unit-tests",
@@ -178,7 +178,7 @@ metric_retention: 30
 
   expect(userClusterConfig).toEqual({
     cert_issuer: "letsencrypt-staging",
-    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
     data_api_authentication_disabled: false,
     data_api_authorized_ip_ranges: ["0.0.0.0/0"],
     env_label: "unit-tests",
@@ -218,7 +218,7 @@ metric_retention: 30
 
   expect(userClusterConfig).toEqual({
     cert_issuer: "letsencrypt-staging",
-    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
     data_api_authentication_disabled: false,
     data_api_authorized_ip_ranges: ["0.0.0.0/0"],
     env_label: "unit-tests",
@@ -264,7 +264,7 @@ aws:
 
   expect(userClusterConfig).toEqual({
     cert_issuer: "letsencrypt-staging",
-    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
     data_api_authentication_disabled: false,
     data_api_authorized_ip_ranges: ["0.0.0.0/0"],
     env_label: "unit-tests",
@@ -308,7 +308,7 @@ gcp:
 
   expect(userClusterConfig).toEqual({
     cert_issuer: "letsencrypt-staging",
-    controller_image: CONTROLLER_IMAGE_DEFAULT,
+    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
     data_api_authentication_disabled: false,
     data_api_authorized_ip_ranges: ["0.0.0.0/0"],
     env_label: "unit-tests",

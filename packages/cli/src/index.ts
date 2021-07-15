@@ -36,7 +36,8 @@ import {
   log,
   die,
   ExitError,
-  ExitSuccess
+  ExitSuccess,
+  BUILD_INFO
 } from "@opstrace/utils";
 
 import * as aks from "./aks";
@@ -47,7 +48,6 @@ import * as status from "./status";
 import * as upgrade from "./upgrade";
 import * as util from "./util";
 import * as ctoken from "./createTenantAuthToken";
-import { BUILD_INFO } from "@opstrace/buildinfo";
 
 // typescript barrel export: https://basarat.gitbook.io/typescript/main-1/barrel
 export { gcpValidateCredFileAndGetDetailOrError } from "./util";

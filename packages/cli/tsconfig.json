@@ -14,7 +14,6 @@
     { "path": "../tenants" },
     { "path": "../installer" },
     { "path": "../uninstaller" },
-    { "path": "../buildinfo" },
     { "path": "../upgrader" },
     { "path": "../controller-config" }
   ]
