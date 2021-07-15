@@ -22,7 +22,7 @@
 
 import localVarRequest from "request";
 import { KubeConfig, V1Status } from "@kubernetes/client-node";
-import { BUILD_INFO } from "@opstrace/buildinfo";
+import { BUILD_INFO } from "@opstrace/utils";
 
 export const OPSTRACE_MANAGED_KEY = "opstrace";
 export const OPSTRACE_MANAGED_VERSION_KEY = "opstrace/version";
