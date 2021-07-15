@@ -15,20 +15,31 @@
  */
 
 import fs from "fs";
-import { BUILD_INFO } from "@opstrace/utils";
 
 // mock logger and die functions
 const mockDie = jest.fn().mockImplementation(e => {
   throw new Error(e);
 });
 
+const BUILD_INFO = {
+  BRANCH_NAME: "testbranch",
+  VERSION_STRING: "testversion",
+  COMMIT: "testcommit",
+  BUILD_TIME_RFC3339: "testtime",
+  BUILD_HOSTNAME: "testhost"
+};
+
 jest.mock("@opstrace/utils", () => ({
   log: {
     debug: jest.fn(),
     info: jest.fn()
   },
+  // also needs to be mocked
+  BUILD_INFO: BUILD_INFO,
   die: mockDie
 }));
+
+//import { BUILD_INFO } from "@opstrace/utils";
 
 import {
   LatestAWSInfraConfigType,
