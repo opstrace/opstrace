@@ -65,7 +65,6 @@ export let BUILD_INFO: BUILD_INFO_TYPE;
 const CANDIDATE_PATHS = [
   "/snapshot/opstrace/buildinfo.json",
   "/snapshot/build/buildinfo.json", // this is happening CI-built pkg build
-  "/build/buildinfo.json", // happning in CI containers
   "/buildinfo.json"
 ];
 

@@ -72,6 +72,9 @@ RUN playwright -h
 ENV PLAYWRIGHT_BROWSERS_PATH=0
 RUN playwright install chromium
 
+# Needed by @opstrace/utils
+COPY buildinfo.json /buildinfo.json
+
 # Disable automatic NPM update check (would always show "npm update check
 # failed").
 ENV NO_UPDATE_NOTIFIER true
