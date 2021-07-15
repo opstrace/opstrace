@@ -24,11 +24,10 @@
     "./test*.ts",
     "testutils/**/*.ts",
     "looker/**/*.ts",
-    "looker/resources/*.json",
+    "looker/resources/*.json"
   ],
   "references": [
     { "path": "../../lib/utils" },
-    { "path": "../../lib/kubernetes" },
-    { "path": "../../packages/buildinfo" }
+    { "path": "../../lib/kubernetes" }
   ]
 }
