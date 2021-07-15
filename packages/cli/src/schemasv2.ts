@@ -21,7 +21,7 @@ import {
   KNOWN_AWS_REGIONS
 } from "@opstrace/config";
 
-import { CONTROLLER_IMAGE_DEFAULT } from "@opstrace/buildinfo";
+import { BUILD_INFO } from "@opstrace/utils";
 
 // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
 // For example, `us-west-2` is the _code_ describing a _region_ in AWS.
@@ -64,7 +64,9 @@ export const ClusterConfigFileSchemaV2 = yup
     // Note(JP): CONTROLLER_IMAGE_DEFAULT is supposed to be inserted by
     // CI / the build system (for any build, there is supposed to be a sane
     // default). Also see opstrace-prelaunch/issues/1671
-    controller_image: yup.string().default(CONTROLLER_IMAGE_DEFAULT),
+    controller_image: yup
+      .string()
+      .default(`opstrace/controller:${BUILD_INFO.VERSION_STRING}`),
 
     // see opstrace-prelaunch/issues/1676
     tenants: yup

@@ -16,7 +16,7 @@
 
 import fs from "fs";
 
-import { log, Dict, die, keyIDfromPEM } from "@opstrace/utils";
+import { log, Dict, die, keyIDfromPEM, BUILD_INFO } from "@opstrace/utils";
 import { setAWSRegion } from "@opstrace/aws";
 import { GCPAuthOptions } from "@opstrace/gcp";
 
@@ -39,7 +39,7 @@ import * as cryp from "./crypto";
 import * as ucc from "./ucc";
 import * as util from "./util";
 import * as schemas from "./schemas";
-import { BUILD_INFO } from "@opstrace/buildinfo";
+
 import {
   OPSTRACE_DOCKERHUB_TOKEN,
   OPSTRACE_DOCKERHUB_USERNAME,

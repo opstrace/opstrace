@@ -8,6 +8,9 @@
   "author": "Opstrace, Inc.",
   "license": "Apache-2.0",
   "private": true,
+  "pkg": {
+    "assets": "../../buildinfo.json"
+  },
   "bin": {
     "opstrace": "./build/index.js"
   },
@@ -27,7 +30,6 @@
     "typescript": "^4.3.4"
   },
   "dependencies": {
-    "@opstrace/buildinfo": "^0.0.0",
     "@opstrace/config": "^0.0.0",
     "@opstrace/installer": "^0.0.0",
     "@opstrace/uninstaller": "^0.0.0",
