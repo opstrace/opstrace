@@ -23,13 +23,8 @@ COPY packages/controller /build/packages/controller/
 COPY packages/config /build/packages/config/
 COPY packages/tenants /build/packages/tenants/
 COPY packages/controller-config /build/packages/controller-config/
-
 WORKDIR /build/packages/controller
 
-# Note(JP): It's important to make use of the image layer cache after RUN yarn
-# --frozen-lockfile. Therefore, copy `packages/buildinfo` _before_ yarn package
-# installation is not a good thing to do.
-COPY packages/buildinfo /build/packages/buildinfo/
 
 ENV NODE_OPTIONS "--max-old-space-size=1536"
 RUN yarn --frozen-lockfile
@@ -40,8 +35,6 @@ RUN yarn --frozen-lockfile
 # unknown reason, doing this manually in this precise order is required for `yarn tsc -b` to work when
 # building the Controller
 
-WORKDIR /build/packages/buildinfo
-RUN yarn build
 WORKDIR /build/lib/utils
 RUN yarn build
 WORKDIR /build/lib/kubernetes
@@ -77,6 +70,12 @@ RUN yarn --frozen-lockfile --production
 RUN cd /build && du -ha . | sort -r -h | head -n 50 || true
 
 WORKDIR /build/packages/controller/build
+
+# Copy the structured Opstrace buildinfo file into the container image to a
+# well-known path where code tries to discover it. Do this very late in the
+# container image build because it obviously is not cachable (is different for
+# every build).
+COPY buildinfo.json /buildinfo.json
 
 # Verify that the controller is invocable.
 RUN node ./cmd.js --help
