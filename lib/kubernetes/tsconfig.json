@@ -4,12 +4,6 @@
     "rootDir": "src",
     "outDir": "build"
   },
-  "include": [
-    "src/**/*.ts",
-    "src/crds/**/*.json"
-  ],
-  "references": [
-    { "path": "../utils" },
-    { "path": "../../packages/buildinfo" }
-  ]
+  "include": ["src/**/*.ts", "src/crds/**/*.json"],
+  "references": [{ "path": "../utils" }]
 }
