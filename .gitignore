@@ -4,6 +4,7 @@ not-needed-anymore
 vscode_workspace.config*
 notes
 build
+buildinfo.json
 out
 .npm
 .config
