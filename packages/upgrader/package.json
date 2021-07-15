@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@opstrace/gcp": "^0.0.0",
-    "@opstrace/buildinfo": "^0.0.0",
     "@opstrace/utils": "^0.0.0",
     "@opstrace/config": "^0.0.0",
     "@opstrace/kubernetes": "^0.0.0",
