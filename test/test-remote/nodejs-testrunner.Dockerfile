@@ -42,8 +42,6 @@ COPY yarn.lock test/test-remote/package.json test/test-remote/tsconfig.json /bui
 COPY lib/kubernetes/ /build/lib/kubernetes/
 # opstrace/utils: used by opstrace/kubernetes
 COPY lib/utils/ /build/lib/utils/
-# opstrace/buildinfo: used by opstrace/kubernetes
-COPY packages/buildinfo/ /build/packages/buildinfo/
 
 WORKDIR /build/test/test-remote
 
