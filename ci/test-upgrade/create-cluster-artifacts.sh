@@ -63,5 +63,10 @@ do
 done
 
 # make sure that looker-related artifacts are collected
-cp /build/looker*log /build/bk-artifacts
-cp /build/looker*report.json /build/bk-artifacts
+cp /build/looker*log /build/bk-artifacts || true
+cp /build/looker*report.json /build/bk-artifacts || true
+
+cp test-remote-artifacts/uishot-*.png /build/bk-artifacts || true
+
+mkdir -p /build/bk-artifacts/browser-test-result || true
+mv browser-test-results /build/bk-artifacts/ || true

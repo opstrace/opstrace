@@ -1,3 +1,5 @@
+env:
+  CHECKOUT_VERSION_STRING: "${BUILDKITE_COMMIT:0:8}-ci"
 steps:
   - label: "🔨 preamble"
     key: "preamble"

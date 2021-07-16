@@ -46,6 +46,19 @@ make ci-testupgrade-upgrade-cluster
 # Define default for OPSTRACE_INSTANCE_DNS_NAME.
 export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
-# This runs the bulk of the tests against the Opstrace instance. Also invoked
-# from the regular test pipeline and therefore in its own file.
-OPSTRACE_BIN=./to/opstrace source ci/test-core.sh
+# This step is required for the create_tenant_and_use_custom_authn_token in the
+# test-remote test suite. This step sets up the tenant keys in the opstrace
+# instance and exports the required env vars:
+# - TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
+# - TENANT_RND_AUTHTOKEN
+#
+# We need the env vars to be exported that is why it's source'd here instead of
+# using the make ci-testupgrade-* method.
+source ci/test-upgrade/set-up-test-tenant.sh
+
+make test-remote
+make test-remote-ui
+make test-browser
+
+export OPSTRACE_BUILD_DIR=$(pwd)
+source ci/invoke-looker.sh
