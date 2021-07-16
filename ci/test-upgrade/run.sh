@@ -56,6 +56,11 @@ export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 # using the make ci-testupgrade-* method.
 source ci/test-upgrade/set-up-test-tenant.sh
 
+#
+# TODO(sreis): remove this step when the OPSTRACE_CLI_VERSION_FROM is bumped
+#
+make ci-testupgrade-wait-for-loki-ring
+
 make test-remote
 make test-remote-ui
 make test-browser
