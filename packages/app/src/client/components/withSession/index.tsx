@@ -49,17 +49,14 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
     method: "GET",
     withCredentials: true
   });
-  // remember the landing page before switching to /login for users without sessions
-  const [returnTo] = useState(window.location.pathname);
-
-  const userAppState = useRef<AppState>();
+  const appStateRef = useRef<AppState>({ returnTo: window.location.pathname });
   const dispatch = useDispatch();
 
   const handleUserLoaded = useCallback(
     (userId: string, newSession: boolean = false) => {
       dispatch(setCurrentUser(userId));
       if (newSession) {
-        const pathname = userAppState.current?.returnTo || "/";
+        const pathname = appStateRef.current?.returnTo || "/";
         window.location.href = `${
           window.location.href.split(window.location.pathname)[0]
         }${pathname}`;
@@ -74,8 +71,8 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
     }
   }, [handleUserLoaded, data?.currentUserId]);
 
-  const updateAppState = (appState?: AppState) => {
-    userAppState.current = appState;
+  const reloadAppState = (appState: AppState = {}) => {
+    appStateRef.current = appState;
   };
 
   if (loading) {
@@ -87,7 +84,6 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
         <Route path="*" component={() => <>{children}</>} />
       </Switch>
     );
-    return <>{children}</>;
   } else {
     return (
       <Switch>
@@ -102,11 +98,11 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               redirectUri={`${
                 window.location.href.split(window.location.pathname)[0]
               }/login`}
-              onRedirectCallback={updateAppState}
+              onRedirectCallback={reloadAppState}
             >
               <VerifyUser
                 userLoadedCallback={handleUserLoaded}
-                returnTo={returnTo}
+                appState={appStateRef.current}
               />
             </Auth0Provider>
           )}
@@ -119,20 +115,18 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
 
 const VerifyUser = ({
   userLoadedCallback,
-  returnTo
+  appState
 }: {
   userLoadedCallback: Function;
-  returnTo: string;
+  appState: AppState;
 }) => {
   const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
 
   const loginHandler = useCallback(() => {
     loginWithRedirect({
-      appState: {
-        returnTo
-      }
+      appState
     });
-  }, [loginWithRedirect, returnTo]);
+  }, [loginWithRedirect, appState]);
 
   if (isLoading) return <Loading />;
   else if (isAuthenticated)
