@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import axios from "axios";
+
 import useCurrentUser, {
   useCurrentUserLoaded
 } from "state/user/hooks/useCurrentUser";
 import { setCurrentUser } from "state/user/actions";
+
 /**
- * withAccess wraps a component to ensure the component
+ * WithAuthentication wraps a component to ensure the component
  * is only mounted if access has been granted.
  * @param render function to be called when access granted
  * @param fallback functin to be called when access denied
@@ -47,7 +49,7 @@ export default function WithAuthentication(props: {
       (async function checkHasAccess() {
         try {
           const res = await axios.get("/_/auth/session");
-          dispatch(setCurrentUser(res.data.uid));
+          dispatch(setCurrentUser(res.data.currentUserId));
         } catch (e) {
           !unmounted && setPending(false);
         }
