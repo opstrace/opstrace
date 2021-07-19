@@ -21,6 +21,8 @@ import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import axios from "axios";
 import useAxios from "axios-hooks";
 
+import { useCommandService } from "client/services/Command";
+
 import { setCurrentUser } from "state/user/actions";
 
 import Loading from "client/components/Loadable/Loading";
@@ -47,32 +49,38 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
     method: "GET",
     withCredentials: true
   });
+  // remember the landing page before switching to /login for users without sessions
   const [returnTo] = useState(window.location.pathname);
-  const [newSession, setNewSession] = useState(false);
+
   const userAppState = useRef<AppState>();
   const dispatch = useDispatch();
 
+  const handleUserLoaded = useCallback(
+    (userId: string, newSession: boolean = false) => {
+      dispatch(setCurrentUser(userId));
+      if (newSession) {
+        const pathname =
+          userAppState.current?.returnTo || "/tenant/system/getting-started";
+        window.location.href = `${
+          window.location.href.split(window.location.pathname)[0]
+        }${pathname}`;
+      }
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     if (data?.currentUserId) {
-      dispatch(setCurrentUser(data.currentUserId));
+      handleUserLoaded(data.currentUserId);
     }
-  }, [dispatch, data?.currentUserId]);
+  }, [handleUserLoaded, data?.currentUserId]);
 
-  useEffect(() => {
-    if (newSession) {
-      const pathname =
-        userAppState.current?.returnTo || "/tenant/system/getting-started";
-      window.location.href = `${
-        window.location.href.split(window.location.pathname)[0]
-      }${pathname}`;
-    }
-  }, [newSession]);
-
-  const onRedirectCallback = (appState?: AppState) => {
+  const updateAppState = (appState?: AppState) => {
     userAppState.current = appState;
   };
 
-  if (loading || newSession) {
+  if (loading) {
+    // || newSession) {
     return <Loading />;
   } else if (data?.currentUserId) {
     return <>{children}</>;
@@ -90,9 +98,12 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               redirectUri={`${
                 window.location.href.split(window.location.pathname)[0]
               }/login`}
-              onRedirectCallback={onRedirectCallback}
+              onRedirectCallback={updateAppState}
             >
-              <VerifyUser setNewSession={setNewSession} returnTo={returnTo} />
+              <VerifyUser
+                userLoadedCallback={handleUserLoaded}
+                returnTo={returnTo}
+              />
             </Auth0Provider>
           )}
         />
@@ -103,10 +114,10 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
 };
 
 const VerifyUser = ({
-  setNewSession,
+  userLoadedCallback,
   returnTo
 }: {
-  setNewSession: Function;
+  userLoadedCallback: Function;
   returnTo: string;
 }) => {
   const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
@@ -119,52 +130,17 @@ const VerifyUser = ({
     });
   }, [loginWithRedirect, returnTo]);
 
-  if (isLoading) {
-    return <Loading />;
-  } else if (isAuthenticated) {
-    return <CreateSession setNewSession={setNewSession} />;
-  } else {
-    return <LoginPage loginHandler={loginHandler} />;
-  }
+  if (isLoading) return <Loading />;
+  else if (isAuthenticated)
+    return <CreateSession userLoadedCallback={userLoadedCallback} />;
+  else return <LoginPage loginHandler={loginHandler} />;
 };
 
-const LoginPage = ({
-  loginHandler
+const CreateSession = ({
+  userLoadedCallback
 }: {
-  loginHandler: React.MouseEventHandler<HTMLButtonElement>;
+  userLoadedCallback: Function;
 }) => {
-  return (
-    <Page centered height="100vh" width="100vw">
-      <Box>
-        <Box p={1} mb={4} display="flex" width="100%" justifyContent="center">
-          <Box p={1} height={150} width={100}>
-            <TracyImg />
-          </Box>
-          <Box p={1} height={150} display="flex" alignItems="center">
-            <Typography variant="h3">opstrace</Typography>
-          </Box>
-        </Box>
-        <Box p={1} display="flex" width="100%" justifyContent="center">
-          <Box display="flex" alignItems="center" p={1}>
-            <Button
-              variant="contained"
-              state="primary"
-              size="large"
-              onClick={loginHandler}
-            >
-              Log In
-            </Button>
-          </Box>
-          <Box display="flex" alignItems="center" p={1}>
-            <Typography color="textSecondary"> Hit ENTER to log in.</Typography>
-          </Box>
-        </Box>
-      </Box>
-    </Page>
-  );
-};
-
-const CreateSession = ({ setNewSession }: { setNewSession: Function }) => {
   const { user, getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
 
@@ -195,17 +171,57 @@ const CreateSession = ({ setNewSession }: { setNewSession: Function }) => {
           }
         });
 
-        if (response.data?.currentUserId) {
-          dispatch(setCurrentUser(response.data.currentUserId));
-          setNewSession(true);
-        }
-
         // todo: inspect response to see if successful, maybe email is not in the users table
+
+        if (response.data?.currentUserId)
+          userLoadedCallback(response.data.currentUserId, true);
       } catch (e) {
         console.error(e);
       }
     })();
-  }, [getAccessTokenSilently, dispatch, setNewSession]);
+  }, [getAccessTokenSilently, dispatch, userLoadedCallback]);
 
   return <Loading />;
+};
+
+const LoginPage = ({ loginHandler }: { loginHandler: () => void }) => {
+  useCommandService(
+    {
+      id: "login-on-enter",
+      description: "Login",
+      keybindings: ["enter"],
+      handler: loginHandler
+    },
+    []
+  );
+
+  return (
+    <Page centered height="100vh" width="100vw">
+      <Box>
+        <Box p={1} mb={4} display="flex" width="100%" justifyContent="center">
+          <Box p={1} height={150} width={100}>
+            <TracyImg />
+          </Box>
+          <Box p={1} height={150} display="flex" alignItems="center">
+            <Typography variant="h3">opstrace</Typography>
+          </Box>
+        </Box>
+        <Box p={1} display="flex" width="100%" justifyContent="center">
+          <Box display="flex" alignItems="center" p={1}>
+            <Button
+              variant="contained"
+              state="primary"
+              size="large"
+              onClick={loginHandler}
+            >
+              Log In
+            </Button>
+          </Box>
+          <Box display="flex" alignItems="center" p={1}>
+            <Typography color="textSecondary"> Hit ENTER to log in.</Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Page>
+  );
 };
