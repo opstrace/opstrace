@@ -25,13 +25,13 @@ import { Typography } from "client/components/Typography";
 
 import TracyImg from "client/views/common/Tracy";
 
-export const LoginPage = ({ loginHandler }: { loginHandler: () => void }) => {
+export const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
   useCommandService(
     {
       id: "login-on-enter",
       description: "Login",
       keybindings: ["enter"],
-      handler: loginHandler
+      handler: onLogin
     },
     []
   );
@@ -53,7 +53,7 @@ export const LoginPage = ({ loginHandler }: { loginHandler: () => void }) => {
               variant="contained"
               state="primary"
               size="large"
-              onClick={loginHandler}
+              onClick={onLogin}
             >
               Log In
             </Button>
