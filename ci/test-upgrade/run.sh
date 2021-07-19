@@ -52,9 +52,9 @@ export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 # - TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
 # - TENANT_RND_AUTHTOKEN
 #
-# We need the env vars to be exported that is why it's source'd here instead of
-# using the make ci-testupgrade-* method.
-source ci/test-upgrade/set-up-test-tenant.sh
+make ci-testupgrade-set-up-test-tenant
+export TENANT_RND_NAME_FOR_TESTING_ADD_TENANT=$(cat tenant-rnd-name)
+export TENANT_RND_AUTHTOKEN=$(cat tenant-rnd-auth-token-from-custom-keypair)
 
 #
 # TODO(sreis): remove this step when the OPSTRACE_CLI_VERSION_FROM is bumped
