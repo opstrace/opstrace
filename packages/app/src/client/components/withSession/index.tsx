@@ -21,16 +21,10 @@ import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import axios from "axios";
 import useAxios from "axios-hooks";
 
-import { useCommandService } from "client/services/Command";
-
 import { setCurrentUser } from "state/user/actions";
+import { GeneralServerError } from "server/errors";
 
-import Loading from "client/components/Loadable/Loading";
-import { Page } from "client/components/Page";
-import { Box } from "client/components/Box";
-import { Button } from "client/components/Button";
-import { Typography } from "client/components/Typography";
-import TracyImg from "client/views/common/Tracy";
+import { LoadingPage, LoginPage, AccessDeniedPage } from "./pages";
 
 const auth0Audience = "https://user-cluster.opstrace.io/api";
 const clusterName = window.location.host.endsWith("opstrace.io")
@@ -44,7 +38,7 @@ type AppState = {
 // TODO: "WithSession" re-mounts after user logs into Auth0 and creates a new session causing a subsequent status check
 
 export const WithSession = ({ children }: { children: React.ReactNode }) => {
-  const [{ data, loading, error: _statusError }] = useAxios({
+  const [{ data, loading: loadingStatus, error: statusError }] = useAxios({
     url: "/_/auth/status",
     method: "GET",
     withCredentials: true
@@ -52,7 +46,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
   const appStateRef = useRef<AppState>({ returnTo: window.location.pathname });
   const dispatch = useDispatch();
 
-  const handleUserLoaded = useCallback(
+  const handleUserLoadedSuccess = useCallback(
     (userId: string, newSession: boolean = false) => {
       dispatch(setCurrentUser(userId));
       if (newSession) {
@@ -67,16 +61,18 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (data?.currentUserId) {
-      handleUserLoaded(data.currentUserId);
+      handleUserLoadedSuccess(data.currentUserId);
     }
-  }, [handleUserLoaded, data?.currentUserId]);
+  }, [handleUserLoadedSuccess, data?.currentUserId]);
 
   const reloadAppState = (appState: AppState = {}) => {
     appStateRef.current = appState;
   };
 
-  if (loading) {
-    return <Loading />;
+  console.log("statusError:", statusError);
+
+  if (loadingStatus) {
+    return <LoadingPage />;
   } else if (data?.currentUserId) {
     return (
       <Switch>
@@ -101,7 +97,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               onRedirectCallback={reloadAppState}
             >
               <VerifyUser
-                userLoadedCallback={handleUserLoaded}
+                userLoadedSuccess={handleUserLoadedSuccess}
                 appState={appStateRef.current}
               />
             </Auth0Provider>
@@ -114,10 +110,10 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
 };
 
 const VerifyUser = ({
-  userLoadedCallback,
+  userLoadedSuccess,
   appState
 }: {
-  userLoadedCallback: Function;
+  userLoadedSuccess: Function;
   appState: AppState;
 }) => {
   const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
@@ -128,18 +124,19 @@ const VerifyUser = ({
     });
   }, [loginWithRedirect, appState]);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <LoadingPage />;
   else if (isAuthenticated)
-    return <CreateSession userLoadedCallback={userLoadedCallback} />;
+    return <CreateSession userLoadedSuccess={userLoadedSuccess} />;
   else return <LoginPage loginHandler={loginHandler} />;
 };
 
 const CreateSession = ({
-  userLoadedCallback
+  userLoadedSuccess
 }: {
-  userLoadedCallback: Function;
+  userLoadedSuccess: Function;
 }) => {
   const { user, getAccessTokenSilently } = useAuth0();
+  const [accessDenied, setAccessDenied] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -169,57 +166,24 @@ const CreateSession = ({
           }
         });
 
-        // todo: inspect response to see if successful, maybe email is not in the users table
-
         if (response.data?.currentUserId)
-          userLoadedCallback(response.data.currentUserId, true);
+          userLoadedSuccess(response.data.currentUserId, true);
       } catch (e) {
-        console.error(e);
+        if (GeneralServerError.isInstance(e.response.data)) {
+          setAccessDenied(true);
+        } else {
+          console.error(e);
+        }
       }
     })();
-  }, [getAccessTokenSilently, dispatch, userLoadedCallback]);
+  }, [
+    user,
+    getAccessTokenSilently,
+    dispatch,
+    userLoadedSuccess,
+    setAccessDenied
+  ]);
 
-  return <Loading />;
-};
-
-const LoginPage = ({ loginHandler }: { loginHandler: () => void }) => {
-  useCommandService(
-    {
-      id: "login-on-enter",
-      description: "Login",
-      keybindings: ["enter"],
-      handler: loginHandler
-    },
-    []
-  );
-
-  return (
-    <Page centered height="100vh" width="100vw">
-      <Box>
-        <Box p={1} mb={4} display="flex" width="100%" justifyContent="center">
-          <Box p={1} height={150} width={100}>
-            <TracyImg />
-          </Box>
-          <Box p={1} height={150} display="flex" alignItems="center">
-            <Typography variant="h3">opstrace</Typography>
-          </Box>
-        </Box>
-        <Box p={1} display="flex" width="100%" justifyContent="center">
-          <Box display="flex" alignItems="center" p={1}>
-            <Button
-              variant="contained"
-              state="primary"
-              size="large"
-              onClick={loginHandler}
-            >
-              Log In
-            </Button>
-          </Box>
-          <Box display="flex" alignItems="center" p={1}>
-            <Typography color="textSecondary"> Hit ENTER to log in.</Typography>
-          </Box>
-        </Box>
-      </Box>
-    </Page>
-  );
+  if (accessDenied) return <AccessDeniedPage />;
+  else return <LoadingPage />;
 };
