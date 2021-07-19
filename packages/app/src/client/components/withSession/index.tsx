@@ -92,9 +92,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               }/login`}
               onRedirectCallback={onRedirectCallback}
             >
-              <VerifyUser setNewSession={setNewSession} returnTo={returnTo}>
-                {children}
-              </VerifyUser>
+              <VerifyUser setNewSession={setNewSession} returnTo={returnTo} />
             </Auth0Provider>
           )}
         />
@@ -104,20 +102,16 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
   }
 };
 
-export default WithSession;
-
 const VerifyUser = ({
   setNewSession,
-  returnTo,
-  children
+  returnTo
 }: {
   setNewSession: Function;
   returnTo: string;
-  children: React.ReactNode;
 }) => {
   const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0();
 
-  const auth0Login = useCallback(() => {
+  const loginHandler = useCallback(() => {
     loginWithRedirect({
       appState: {
         returnTo
@@ -128,53 +122,49 @@ const VerifyUser = ({
   if (isLoading) {
     return <Loading />;
   } else if (isAuthenticated) {
-    return (
-      <CreateSession setNewSession={setNewSession}>{children}</CreateSession>
-    );
+    return <CreateSession setNewSession={setNewSession} />;
   } else {
-    return (
-      <Page centered height="100vh" width="100vw">
-        <Box>
-          <Box p={1} mb={4} display="flex" width="100%" justifyContent="center">
-            <Box p={1} height={150} width={100}>
-              <TracyImg />
-            </Box>
-            <Box p={1} height={150} display="flex" alignItems="center">
-              <Typography variant="h3">opstrace</Typography>
-            </Box>
-          </Box>
-          <Box p={1} display="flex" width="100%" justifyContent="center">
-            <Box display="flex" alignItems="center" p={1}>
-              <Button
-                variant="contained"
-                state="primary"
-                size="large"
-                onClick={auth0Login}
-              >
-                Log In
-              </Button>
-            </Box>
-            <Box display="flex" alignItems="center" p={1}>
-              <Typography color="textSecondary">
-                {" "}
-                Hit ENTER to log in.
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Page>
-    );
+    return <LoginPage loginHandler={loginHandler} />;
   }
 };
 
-const CreateSession = ({
-  setNewSession,
-  children
+const LoginPage = ({
+  loginHandler
 }: {
-  setNewSession: Function;
-  returnToUri?: string;
-  children: React.ReactNode;
+  loginHandler: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
+  return (
+    <Page centered height="100vh" width="100vw">
+      <Box>
+        <Box p={1} mb={4} display="flex" width="100%" justifyContent="center">
+          <Box p={1} height={150} width={100}>
+            <TracyImg />
+          </Box>
+          <Box p={1} height={150} display="flex" alignItems="center">
+            <Typography variant="h3">opstrace</Typography>
+          </Box>
+        </Box>
+        <Box p={1} display="flex" width="100%" justifyContent="center">
+          <Box display="flex" alignItems="center" p={1}>
+            <Button
+              variant="contained"
+              state="primary"
+              size="large"
+              onClick={loginHandler}
+            >
+              Log In
+            </Button>
+          </Box>
+          <Box display="flex" alignItems="center" p={1}>
+            <Typography color="textSecondary"> Hit ENTER to log in.</Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Page>
+  );
+};
+
+const CreateSession = ({ setNewSession }: { setNewSession: Function }) => {
   const { user, getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
 
@@ -215,7 +205,7 @@ const CreateSession = ({
         console.error(e);
       }
     })();
-  }, [getAccessTokenSilently, dispatch]);
+  }, [getAccessTokenSilently, dispatch, setNewSession]);
 
   return <Loading />;
 };
