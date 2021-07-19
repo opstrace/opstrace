@@ -59,8 +59,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
     (userId: string, newSession: boolean = false) => {
       dispatch(setCurrentUser(userId));
       if (newSession) {
-        const pathname =
-          userAppState.current?.returnTo || "/tenant/system/getting-started";
+        const pathname = userAppState.current?.returnTo || "/";
         window.location.href = `${
           window.location.href.split(window.location.pathname)[0]
         }${pathname}`;
@@ -80,9 +79,14 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
   };
 
   if (loading) {
-    // || newSession) {
     return <Loading />;
   } else if (data?.currentUserId) {
+    return (
+      <Switch>
+        <Redirect from="/login" to="/" />
+        <Route path="*" component={() => <>{children}</>} />
+      </Switch>
+    );
     return <>{children}</>;
   } else {
     return (
