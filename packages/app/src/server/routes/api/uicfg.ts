@@ -17,14 +17,16 @@
 import env from "server/env";
 import { NextFunction, Request, Response } from "express";
 
+export const auth0Config = {
+  auth0_client_id: env.AUTH0_CLIENT_ID,
+  auth0_domain: env.AUTH0_DOMAIN
+};
+
 export default function pubUiCfgHandler(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  res.status(200).json({
-    auth0_client_id: env.AUTH0_CLIENT_ID,
-    auth0_domain: env.AUTH0_DOMAIN
-  });
+  res.status(200).json(auth0Config);
   return;
 }

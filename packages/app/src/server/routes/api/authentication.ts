@@ -24,6 +24,8 @@ import { GeneralServerError, UnexpectedServerError } from "server/errors";
 import authRequired from "server/middleware/auth";
 // import { User } from "state/user/types";
 
+import { auth0Config } from "./uicfg";
+
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against
 // the Auth0 JSON Web Key Set
@@ -91,18 +93,28 @@ function createAuthHandler(): express.Router {
       req.session.username = username;
       req.session.avatar = avatar;
 
+      res.status(200).json({ currentUserId: user.id });
+
       log.info("updating session with: %s", req.body);
     } catch (err) {
       return next(new UnexpectedServerError(err));
     }
-
-    res.sendStatus(200);
   });
 
   // Allow clients to request data about the current user
   auth.get("/session", authRequired, async (req, res) => {
     res.status(200).json({
-      uid: req.session.userId
+      currentUserId: req.session.userId
+    });
+  });
+
+  auth.get("/status", (req, res) => {
+    res.status(200).json({
+      currentUserId: req.session?.userId,
+      auth0Config: {
+        domain: auth0Config.auth0_domain,
+        clientId: auth0Config.auth0_client_id
+      }
     });
   });
 
