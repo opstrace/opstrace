@@ -14,7 +14,25 @@
  * limitations under the License.
  */
 
-export { LoadingPage } from "./Loading";
-export { LoginPage } from "./Login";
-export { LogoutPage } from "./Logout";
-export { AccessDeniedPage } from "./AccessDenied";
+import React, { useEffect } from "react";
+import useAxios from "axios-hooks";
+
+import { LoadingPage } from "./Loading";
+
+export const LogoutPage = () => {
+  const [{ loading }] = useAxios({
+    url: "/_/auth/logout",
+    method: "GET",
+    withCredentials: true
+  });
+
+  useEffect(() => {
+    if (!loading) {
+      window.location.href = window.location.href.split(
+        window.location.pathname
+      )[0];
+    }
+  }, [loading]);
+
+  return <LoadingPage />;
+};

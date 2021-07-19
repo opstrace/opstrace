@@ -120,6 +120,7 @@ function createAuthHandler(): express.Router {
 
   auth.get("/logout", (req, res) => {
     req.session.destroy(() => {
+      res.clearCookie("opstrace.sid");
       // session can be undefined if we've already terminated it.
       // if already terminated then still perform the flow with Auth0
       // so we log out of Auth0 and get the redirect back to our UI

@@ -24,10 +24,11 @@ import useAxios from "axios-hooks";
 import { setCurrentUser } from "state/user/actions";
 import { GeneralServerError } from "server/errors";
 
-import { LoadingPage, LoginPage, AccessDeniedPage } from "./pages";
+import { LoadingPage, LoginPage, LogoutPage, AccessDeniedPage } from "./pages";
 
-const auth0Audience = "https://user-cluster.opstrace.io/api";
-const clusterName = window.location.host.endsWith("opstrace.io")
+const DEFAULT_PATHNAME = "/";
+const AUTH0_AUDIENCE = "https://user-cluster.opstrace.io/api";
+const CLUSTER_NAME = window.location.host.endsWith("opstrace.io")
   ? window.location.host.replace(".opstrace.io", "")
   : "localhost";
 
@@ -50,10 +51,16 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
     (userId: string, newSession: boolean = false) => {
       dispatch(setCurrentUser(userId));
       if (newSession) {
-        const pathname = appStateRef.current?.returnTo || "/";
+        let returnTo = appStateRef.current?.returnTo || DEFAULT_PATHNAME;
+        if (returnTo === "/login") {
+          // This covers the case of the user clicking "logout", being redirected to the login page, and then immediately
+          // logging in again. The sysem will see them coming from "/login" so will think that's where they should be
+          // redirected back there. This saves them a hop.
+          returnTo = DEFAULT_PATHNAME;
+        }
         window.location.href = `${
           window.location.href.split(window.location.pathname)[0]
-        }${pathname}`;
+        }${returnTo}`;
       }
     },
     [dispatch]
@@ -69,15 +76,21 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
     appStateRef.current = appState;
   };
 
-  console.log("statusError:", statusError);
+  if (statusError) console.log("WithSession#statusError:", statusError);
 
   if (loadingStatus) {
     return <LoadingPage />;
   } else if (data?.currentUserId) {
     return (
       <Switch>
-        <Redirect from="/login" to="/" />
-        <Route path="*" component={() => <>{children}</>} />
+        <Route
+          exact
+          key="/logout"
+          path="/logout"
+          component={() => <LogoutPage />}
+        />
+        <Redirect key="/login" from="/login" to={DEFAULT_PATHNAME} />
+        <Route key="app" path="*" component={() => <>{children}</>} />
       </Switch>
     );
   } else {
@@ -90,7 +103,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
             <Auth0Provider
               domain={data.auth0Config.domain}
               clientId={data.auth0Config.clientId}
-              audience={auth0Audience}
+              audience={AUTH0_AUDIENCE}
               redirectUri={`${
                 window.location.href.split(window.location.pathname)[0]
               }/login`}
@@ -127,7 +140,7 @@ const VerifyUser = ({
   if (isLoading) return <LoadingPage />;
   else if (isAuthenticated)
     return <CreateSession userLoadedSuccess={userLoadedSuccess} />;
-  else return <LoginPage loginHandler={loginHandler} />;
+  else return <LoginPage onLogin={loginHandler} />;
 };
 
 const CreateSession = ({
@@ -143,8 +156,8 @@ const CreateSession = ({
     (async () => {
       try {
         const accessToken = await getAccessTokenSilently({
-          audience: auth0Audience,
-          opstraceClusterName: clusterName
+          audience: AUTH0_AUDIENCE,
+          opstraceClusterName: CLUSTER_NAME
         });
 
         const response = await axios.request({
