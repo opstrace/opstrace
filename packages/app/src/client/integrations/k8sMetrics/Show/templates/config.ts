@@ -111,7 +111,7 @@ data:
         target_label: __scheme__
         replacement: https
 
-    # Collection of per-node metrics
+    # Collection of metrics about the kubelets themselves (request queues, pod launches, etc)
     - job_name: 'kubernetes-nodes'
       kubernetes_sd_configs:
       - role: node
@@ -133,6 +133,90 @@ data:
       - source_labels: []
         target_label: job
         replacement: kubelet
+      # Include integration ID for autodetection in opstrace
+      - source_labels: []
+        target_label: integration_id
+        replacement: ${integrationId}
+
+    # Collection of full container resource usage metrics from kubelets
+    - job_name: 'kubernetes-cadvisor'
+      kubernetes_sd_configs:
+      - role: node
+
+      metrics_path: /metrics/cadvisor
+      scheme: https
+      # TLS config for getting list of nodes to scrape, not querying nodes themselves
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+      relabel_configs:
+      - target_label: __scheme__
+        replacement: https
+      # Include node hostname
+      - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
+        target_label: instance
+      # Include job label for the nodes
+      - source_labels: []
+        target_label: job
+        replacement: kubelet-cadvisor
+      # Include integration ID for autodetection in opstrace
+      - source_labels: []
+        target_label: integration_id
+        replacement: ${integrationId}
+
+    # Collection of summary container resource usage metrics from kubelets
+    - job_name: 'kubernetes-resource'
+      kubernetes_sd_configs:
+      - role: node
+
+      metrics_path: /metrics/resource
+      scheme: https
+      # TLS config for getting list of nodes to scrape, not querying nodes themselves
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+      relabel_configs:
+      - target_label: __scheme__
+        replacement: https
+      # Include node hostname
+      - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
+        target_label: instance
+      # Include job label for the nodes
+      - source_labels: []
+        target_label: job
+        replacement: kubelet-resource
+      # Include integration ID for autodetection in opstrace
+      - source_labels: []
+        target_label: integration_id
+        replacement: ${integrationId}
+
+    # Collection of readinessProbe/livenessProbe/etc stats from kubelets
+    - job_name: 'kubernetes-probes'
+      kubernetes_sd_configs:
+      - role: node
+
+      metrics_path: /metrics/probes
+      scheme: https
+      # TLS config for getting list of nodes to scrape, not querying nodes themselves
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      authorization:
+        credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+      relabel_configs:
+      - target_label: __scheme__
+        replacement: https
+      # Include node hostname
+      - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
+        target_label: instance
+      # Include job label for the nodes
+      - source_labels: []
+        target_label: job
+        replacement: kubelet-probes
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
