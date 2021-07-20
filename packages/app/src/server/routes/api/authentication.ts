@@ -118,7 +118,7 @@ function createAuthHandler(): express.Router {
     });
   });
 
-  auth.get("/logout", (req, res) => {
+  auth.post("/logout", authRequired, async (req, res) => {
     req.session.destroy(() => {
       res.clearCookie("opstrace.sid");
       // session can be undefined if we've already terminated it.
@@ -126,12 +126,8 @@ function createAuthHandler(): express.Router {
       // so we log out of Auth0 and get the redirect back to our UI
       req.session &&
         log.info("terminated session for user: %s", req.session.email);
-      // logout of Auth0
-      res.redirect(
-        `https://${env.AUTH0_DOMAIN}/v2/logout?client_id=${
-          env.AUTH0_CLIENT_ID
-        }&returnTo=${encodeURIComponent(env.UI_DOMAIN)}`
-      );
+
+      res.sendStatus(200);
     });
   });
 
