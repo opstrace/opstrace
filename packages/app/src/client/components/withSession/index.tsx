@@ -37,6 +37,7 @@ type AppState = {
 };
 
 // TODO: "WithSession" re-mounts after user logs into Auth0 and creates a new session causing a subsequent status check
+// TODO: look to switching to using a "context" for passing things to children components
 
 export const WithSession = ({ children }: { children: React.ReactNode }) => {
   const [{ data, loading: loadingStatus, error: statusError }] = useAxios({
@@ -87,7 +88,18 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
           exact
           key="/logout"
           path="/logout"
-          component={() => <LogoutPage />}
+          component={() => (
+            <Auth0Provider
+              domain={data.auth0Config.domain}
+              clientId={data.auth0Config.clientId}
+              audience={AUTH0_AUDIENCE}
+              redirectUri={`${
+                window.location.href.split(window.location.pathname)[0]
+              }/login`}
+            >
+              <LogoutPage />
+            </Auth0Provider>
+          )}
         />
         <Redirect key="/login" from="/login" to={DEFAULT_PATHNAME} />
         <Route key="app" path="*" component={() => <>{children}</>} />

@@ -15,24 +15,24 @@
  */
 
 import React, { useEffect } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import useAxios from "axios-hooks";
 
 import { LoadingPage } from "./Loading";
 
 export const LogoutPage = () => {
+  const { logout } = useAuth0();
   const [{ loading }] = useAxios({
     url: "/_/auth/logout",
-    method: "GET",
+    method: "POST",
     withCredentials: true
   });
 
   useEffect(() => {
     if (!loading) {
-      window.location.href = window.location.href.split(
-        window.location.pathname
-      )[0];
+      logout();
     }
-  }, [loading]);
+  }, [loading, logout]);
 
   return <LoadingPage />;
 };
