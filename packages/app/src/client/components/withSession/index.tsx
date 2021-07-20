@@ -14,6 +14,50 @@
  * limitations under the License.
  */
 
+/**
+ *
+ * == Background ==
+ *
+ * Opstrace authentication and session management are both handled independently.
+ *
+ * We only use Auth0 as a way of proving who the user is and that they control the
+ * email address used. Once this is done we check their email address against the list
+ * of authorised Opstrace users - if present we create a session for them which grants
+ * them access to the app. From then on we rely solely on the opstrace session and have
+ * no further use of Auth0. Continued access to the website is granted based on the
+ * Opstrace session not the Auth0 session.
+ *
+ * == WithSession ==
+ *
+ * WithSession is a gatekeeper component and will only render props.children for users
+ * with a valid Opstrace session. If they doesn't have one then WithSession will guide
+ * users to authenticate with Auth0, checking they are authorised and then creating a
+ * valid session for them.
+ *
+ * There are 3 flows / processes that WithSession caters for:
+ *
+ * 1. User already logged in, has a valid session
+ *
+ * WithSession has been optimised for this case - it attempts to as quickly as possible
+ * determine if the user is logged in or not. It does not wait for Redux data, websocket
+ * connections etc... to be setup. Upon mounting it immediately makes a direct call to
+ * "/_/auth/status" to find out the the user's session status.
+ *
+ * 2. User does not have a valid Auth0 or Opstrace session
+ *
+ * WithSession redirects the user to be authenticated with Auth0 first, when they are
+ * redirected back a valid Opstrace session is generated for them provided they pass the
+ * authorisation check.
+ *
+ * 3. User logged into Auth0, but no valid Opstrace session
+ *
+ * In this case WithSession silently creates a valid Opstrace session for the user if
+ * they are authorised to access the website.
+ *
+ * Note: users do no "signup" to Opstrace, the will need to have
+ *
+ */
+
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Switch, Route, Redirect } from "react-router";
@@ -59,6 +103,8 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
           // redirected back there. This saves them a hop.
           returnTo = DEFAULT_PATHNAME;
         }
+
+        // Can't use "history.push(returnTo)" here as it doesn't update the url, have not looked into it much
         window.location.href = `${
           window.location.href.split(window.location.pathname)[0]
         }${returnTo}`;
@@ -121,7 +167,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               }/login`}
               onRedirectCallback={reloadAppState}
             >
-              <VerifyUser
+              <DetectUser
                 userLoadedSuccess={handleUserLoadedSuccess}
                 appState={appStateRef.current}
               />
@@ -134,7 +180,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
   }
 };
 
-const VerifyUser = ({
+const DetectUser = ({
   userLoadedSuccess,
   appState
 }: {
