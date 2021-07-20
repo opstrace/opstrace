@@ -101,7 +101,7 @@ data:
       # Include integration ID for separation in opstrace
       - source_labels: []
         target_label: integration_id
-        replacement: ${integrationId}
+        replacement: '${integrationId}'
 
       # Internal labels used by prometheus itself
       # Always use HTTPS for scraping the api server
@@ -136,7 +136,7 @@ data:
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
-        replacement: ${integrationId}
+        replacement: '${integrationId}'
 
     # Collection of full container resource usage metrics from kubelets
     - job_name: 'kubernetes-cadvisor'
@@ -164,7 +164,7 @@ data:
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
-        replacement: ${integrationId}
+        replacement: '${integrationId}'
 
     # Collection of summary container resource usage metrics from kubelets
     - job_name: 'kubernetes-resource'
@@ -192,7 +192,7 @@ data:
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
-        replacement: ${integrationId}
+        replacement: '${integrationId}'
 
     # Collection of readinessProbe/livenessProbe/etc stats from kubelets
     - job_name: 'kubernetes-probes'
@@ -220,7 +220,7 @@ data:
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
-        replacement: ${integrationId}
+        replacement: '${integrationId}'
 
     # Collection of the kubernetes apiserver
     - job_name: 'kubernetes-service'
@@ -246,7 +246,7 @@ data:
       # Include integration ID for autodetection in opstrace
       - source_labels: []
         target_label: integration_id
-        replacement: ${integrationId}
+        replacement: '${integrationId}'
 ---
 apiVersion: v1
 kind: ServiceAccount
