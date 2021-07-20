@@ -58,6 +58,25 @@ steps:
       - bash ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
     artifact_paths:
       - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-aws/bk-artifacts/**/*"
+  - label: "🔨 test upgrades (GCP)"
+    key: "testupgrades-gcp"
+    depends_on:
+      - "unit-tests"
+    env:
+      # Fetch the latest Opstrace CLI artifact from S3 and use that as the
+      # initial cluster version.
+      OPSTRACE_CLI_VERSION_FROM: cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2
+      # Use the Opstrace CLI artifact built from the PR branch to upgrade the
+      # cluster.
+      OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
+      OPSTRACE_CLUSTER_NAME: "pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_CLOUD_PROVIDER: "gcp"
+      GCLOUD_CLI_REGION: "us-west2"
+      GCLOUD_CLI_ZONE: "us-west2-a"
+    command:
+      - ci/test-upgrade/run.sh
+    artifact_paths:
+      - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-gcp/bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"
     key: "cleanup-tmp"
     depends_on:
