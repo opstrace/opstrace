@@ -1444,7 +1444,7 @@ export default function makeDashboard(integrationId) {
       time_options: ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
     },
     timezone: "",
-    title: "Kubernetes / Pod metrics",
+    title: "Kubernetes / Resource metrics",
     uid: "Yr7z7VZnk",
     version: 0
   };
