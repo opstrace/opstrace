@@ -1100,6 +1100,7 @@ export class V1Alpha1CortexResource extends K8sResource {
     const client = kubeConfig.makeApiClient(V1Alpha1CortexApi);
     let cancelled = false;
     let request: Request;
+    //@ts-ignore: error TS7023: 'watch' implicitly has return type 'any'
     const watch = async () => {
       if (cancelled) {
         return;
