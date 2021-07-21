@@ -127,7 +127,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
   if (statusError) console.log("WithSession#statusError:", statusError);
 
   if (loadingStatus) {
-    return <LoadingPage />;
+    return <LoadingPage stage="status-check" />;
   } else if (data?.currentUserId) {
     return (
       <Switch>
@@ -196,7 +196,7 @@ const DetectUser = ({
     });
   }, [loginWithRedirect, appState]);
 
-  if (isLoading) return <LoadingPage />;
+  if (isLoading) return <LoadingPage stage="auth0" />;
   else if (isAuthenticated)
     return <CreateSession userLoadedSuccess={userLoadedSuccess} />;
   else return <LoginPage onLogin={loginHandler} />;
@@ -257,5 +257,5 @@ const CreateSession = ({
   ]);
 
   if (accessDenied) return <AccessDeniedPage />;
-  else return <LoadingPage />;
+  else return <LoadingPage stage="create-session" />;
 };
