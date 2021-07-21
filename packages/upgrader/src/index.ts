@@ -53,6 +53,7 @@ import {
   setCreateConfig,
   waitUntilHTTPEndpointsAreReachable
 } from "@opstrace/installer";
+import { workaroundRestartLokiDistributors } from "./workaround";
 
 // Note: a largish number of attempts as long as micro retries are not yet
 // implemented carefully and thoughtfully.
@@ -204,6 +205,9 @@ function* triggerControllerDeploymentUpgrade() {
         'wait for upgrade to complete ("wait for deployments/..." phase)'
       );
       yield call(upgradeProgressReporter);
+
+      // Workaround for https://github.com/opstrace/opstrace/issues/1066
+      yield call(workaroundRestartLokiDistributors);
     }
   }
 
