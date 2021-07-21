@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { select, call, Effect } from "redux-saga/effects";
+import { all, select, call, Effect } from "redux-saga/effects";
 import { KubeConfig } from "@kubernetes/client-node";
 
 import { getClusterConfig } from "@opstrace/config";
@@ -30,6 +30,8 @@ import {
   upgradeControllerConfigMapToLatest
 } from "@opstrace/controller-config";
 
+import { Deployment, K8sResource, updateResource } from "@opstrace/kubernetes";
+
 import {
   EnsureInfraExistsResponse,
   ensureAWSInfraExists,
@@ -38,6 +40,7 @@ import {
 
 import { State } from "./reducer";
 import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
+import { waitForControllerDeployment } from "./readiness";
 
 const CONTROLLER_IMAGE_DEFAULT = `opstrace/controller:${BUILD_INFO.VERSION_STRING}`;
 
@@ -145,4 +148,126 @@ export function* upgradeInfra(cloudProvider: string) {
     default:
       die(`cloud provider not supported: ${cloudProvider}`);
   }
+}
+// Generator< AllEffect<void[]> | CallEffect<void> | any, void, any>
+export function* cortexOperatorPreamble(
+  kubeConfig: KubeConfig
+): Generator<any, void, any> {
+  const state: State = yield select();
+  const deploy = state.kubernetes.cluster.Deployments.resources.find(
+    d => d.name === CONTROLLER_NAME
+  );
+  if (deploy === undefined) {
+    die(`could not find Opstrace controller deployment`);
+  }
+
+  // disable opstrace controller to be able to transfer ownership of cortex
+  // deployment to the cortex-operator; it will be enabled later when the
+  // upgrade command deploys the new controller image.
+  if (deploy.spec.spec!.replicas! > 0) {
+    yield call(stopOpstraceController, deploy, kubeConfig);
+    yield call(waitForControllerDeployment, {
+      desiredReadyReplicas: undefined
+    });
+  }
+
+  // Set all the resources the cortex-operator will assume ownership of as
+  // immutable. This way the opstrace controller won't try and delete them
+  // durint the reconcile loop when it restarts. When the cortex-operator takes
+  // ownership of the resource it'll clear the annotation.
+  yield call(transferOwnership, state, kubeConfig);
+}
+
+async function stopOpstraceController(
+  deploy: Deployment,
+  kubeConfig: KubeConfig
+): Promise<void> {
+  deploy.spec.spec!.replicas = 0;
+  const resource = new Deployment(
+    {
+      kind: deploy.spec.kind,
+      apiVersion: deploy.spec.apiVersion,
+      metadata: {
+        name: deploy.spec.metadata?.name,
+        namespace: deploy.spec.metadata?.namespace,
+        annotations: deploy.spec.metadata?.annotations,
+        labels: deploy.spec.metadata?.labels
+      },
+      spec: deploy.spec.spec
+    },
+    kubeConfig
+  );
+
+  await updateResource(resource);
+}
+async function setImmutable(r: K8sResource): Promise<void> {
+  // Set the resource to immmutable so the opstrace controller doesn't delete it
+  // when it reconciles all the resources. when the cortex operator takes
+  // ownership of the resource this annotation is deleted.
+  r.setImmutable();
+  await updateResource(r);
+}
+
+function* transferOwnership(
+  state: State,
+  kubeConfig: KubeConfig
+): Generator<any, void, any> {
+  const stsToSkip = [
+    "memcached" // renamed by cortex-operator
+  ];
+  const sts = state.kubernetes.cluster.StatefulSets.resources.filter(
+    s => s.namespace === "cortex" && !stsToSkip.some(n => n === s.name)
+  );
+  yield all(sts.map(setImmutable));
+
+  const deployToSkip = ["configs"];
+  let deployments = state.kubernetes.cluster.Deployments.resources.filter(
+    deploy =>
+      deploy.namespace === "cortex" &&
+      !deployToSkip.some(n => n === deploy.name)
+  );
+  deployments = deployments.map(
+    d =>
+      new Deployment(
+        {
+          kind: d.spec.kind,
+          apiVersion: d.spec.apiVersion,
+          metadata: {
+            name: d.spec.metadata?.name,
+            namespace: d.spec.metadata?.namespace,
+            annotations: d.spec.metadata?.annotations,
+            labels: d.spec.metadata?.labels
+          },
+          spec: d.spec.spec
+        },
+        kubeConfig
+      )
+  );
+  yield all(deployments.map(setImmutable));
+
+  const svcToSkip = ["loki-gossip-ring", "memcached", "configs"];
+  const svc = state.kubernetes.cluster.Services.resources.filter(
+    svc => svc.namespace === "cortex" && !svcToSkip.some(n => n === svc.name)
+  );
+  yield all(svc.map(setImmutable));
+
+  const sa = state.kubernetes.cluster.ServiceAccounts.resources.filter(
+    sa => sa.namespace === "cortex" && sa.name === "cortex"
+  );
+  yield all([sa.map(setImmutable)]);
+
+  const cm = state.kubernetes.cluster.ConfigMaps.resources.filter(
+    cm => cm.namespace === "cortex" && cm.name === "cortex-config"
+  );
+  yield all([cm.map(setImmutable)]);
+
+  // Delete the following deployments because we cannot update the match label
+  // selector.
+  const deleteDeployments = ["distributor", "querier", "query-frontend"];
+  deployments = state.kubernetes.cluster.Deployments.resources.filter(
+    deploy =>
+      deploy.namespace === "cortex" &&
+      deleteDeployments.some(n => n === deploy.name)
+  );
+  yield all(deployments.map(d => d.delete()));
 }

@@ -154,6 +154,9 @@ export class K8sResource implements Resource {
     }
     return {};
   }
+  get kind(): string {
+    return this.resource.kind;
+  }
   get labels(): { [key: string]: string } {
     if (this.resource.metadata?.labels) {
       return this.resource.metadata.labels;

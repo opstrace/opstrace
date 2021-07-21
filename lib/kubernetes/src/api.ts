@@ -78,9 +78,10 @@ export const deleteResource = async (resource: K8sResource): Promise<void> => {
 
 export const updateResource = async (resource: K8sResource): Promise<void> => {
   log.debug(
-    `updateResource for %s(ns: %s) [dryrun=${dryRunKubeApiWrites}]`,
-    resource.name,
-    resource.namespace
+    `updateResource for %s %s/%s [dryrun=${dryRunKubeApiWrites}]`,
+    resource.kind,
+    resource.namespace,
+    resource.name
   );
   if (dryRunKubeApiWrites) {
     return;
@@ -90,10 +91,12 @@ export const updateResource = async (resource: K8sResource): Promise<void> => {
   } catch (e) {
     const err = kubernetesError(e);
     log.info(
-      "api err during updateResource for %s(ns: %s): %s",
-      resource.name,
+      "api err during updateResource for %s %s/%s: %s: %s",
+      resource.kind,
       resource.namespace,
-      err.message
+      resource.name,
+      err.message,
+      e
     );
   }
   return;
