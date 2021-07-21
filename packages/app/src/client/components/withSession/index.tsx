@@ -18,7 +18,8 @@
  *
  * == Background ==
  *
- * Opstrace authentication and session management are both handled independently.
+ * Opstrace authentication and session management are both handled independently from
+ * each other.
  *
  * We only use Auth0 as a way of proving who the user is and that they control the
  * email address used. Once this is done we check their email address against the list

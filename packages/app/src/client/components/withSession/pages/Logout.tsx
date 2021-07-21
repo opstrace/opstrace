@@ -29,9 +29,12 @@ export const LogoutPage = () => {
   });
 
   useEffect(() => {
-    if (!loading) {
-      logout();
-    }
+    if (!loading)
+      logout({
+        returnTo: `${
+          window.location.href.split(window.location.pathname)[0]
+        }/login`
+      });
   }, [loading, logout]);
 
   return <LoadingPage />;
