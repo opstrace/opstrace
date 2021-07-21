@@ -20,10 +20,22 @@ fi
 #
 fetch_cli_s3_artifact() {
     echo "downloading ${artifact}"
-    aws s3 cp --only-show-errors s3://opstrace-ci-main-artifacts/${artifact} .
+    aws s3 cp --only-show-errors ${artifact} .
 
     echo "extracting ${artifact} to target dir ${dir}"
-    tar xjf $(basename ${artifact}) -C ${dir}
+    tar xjf $(basename ${artifact#s3://}) -C ${dir}
+}
+
+#
+# Funtion that downloads cli artifact from http uri and extracts it to a target
+# dir.
+#
+fetch_cli_http_artifact() {
+    echo "downloading ${artifact}"
+    curl -L ${artifact} --output opstrace-cli-artifact.tar.bz2
+
+    echo "extracting ${artifact} to target dir ${dir}"
+    tar xjf opstrace-cli-artifact.tar.bz2 -C ${dir}
 }
 
 fetch_cli_artifact() {
@@ -32,11 +44,18 @@ fetch_cli_artifact() {
 
     mkdir -p ${dir}
 
-    if [ -f "${artifact}" ]; then
-        cp ${artifact} ${dir}
-    else
-        fetch_cli_s3_artifact ${artifact} ${dir}
-    fi
+    case "${artifact}" in
+        http*)
+            fetch_cli_http_artifact ${artifact} ${dir}
+            ;;
+        s3*)
+            fetch_cli_s3_artifact ${artifact} ${dir}
+            ;;
+        *)
+            echo "copying ${artifact} to ${dir}"
+            [ -f "${artifact}" ] && cp ${artifact} ${dir}
+            ;;
+    esac
 }
 
 echo "--- fetching cli artifacts"
