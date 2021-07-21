@@ -88,6 +88,12 @@ export const InstallInstructions = ({
     saveAs(configBlob, configFilename);
   };
 
+  const dashboardButtonText = useMemo(
+    () =>
+      isDashboardInstalled ? "Reinstall Dashboards" : "Install Dashboards",
+    [isDashboardInstalled]
+  );
+
   const dashboardHandler = async () => {
     const folder = await grafana.createFolder({ integration, tenant });
 
@@ -170,15 +176,13 @@ export const InstallInstructions = ({
                 <Box flexGrow={1} pb={2}>
                   Install Dashboards for this Integration.
                   <br />
-                  <br />
                   <Button
                     variant="contained"
                     size="small"
                     state="primary"
-                    disabled={isDashboardInstalled}
                     onClick={dashboardHandler}
                   >
-                    Install Dashboards
+                    `${dashboardButtonText}`
                   </Button>
                 </Box>
               </TimelineContent>
