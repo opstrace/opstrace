@@ -15,30 +15,36 @@ then
 fi
 
 #
-# Funtion that downloads cli artifact from s3 bucket and extracts it to a target
-# dir.
+# Download CLI artifact and extract it to target directory.
 #
-fetch_cli_s3_artifact() {
-    echo "downloading ${artifact}"
-    aws s3 cp --only-show-errors s3://opstrace-ci-main-artifacts/${artifact} .
-
-    echo "extracting ${artifact} to target dir ${dir}"
-    tar xjf $(basename ${artifact}) -C ${dir}
+fetch_cli_artifact() {
+    echo "downloading and extracting ${artifact}"
+    set -x
+    curl -sSL "${artifact}" | tar xjf -C ${dir}
+    set +x
 }
 
-fetch_cli_artifact() {
+# Create output directory and put CLI artifact into that directory (by either
+# downloading it or by copying it from the local file system).
+copy_or_download_cli_artifact() {
     local artifact=${1}
     local dir=${2}
 
     mkdir -p ${dir}
 
+    # Copy from file system location, if it exists.
     if [ -f "${artifact}" ]; then
         cp ${artifact} ${dir}
+        echo "running ./${dir}/opstrace --version"
+        ./${dir}/opstrace --version
     else
-        fetch_cli_s3_artifact ${artifact} ${dir}
+        # Assume that ${artifact} is a URL.
+        fetch_cli_artifact ${artifact} ${dir}
+        echo "running ./${dir}/opstrace --version"
+        ./${dir}/opstrace --version
     fi
 }
 
 echo "--- fetching cli artifacts"
-fetch_cli_artifact ${OPSTRACE_CLI_VERSION_FROM} from
-fetch_cli_artifact ${OPSTRACE_CLI_VERSION_TO} to
+copy_or_download_cli_artifact ${OPSTRACE_CLI_VERSION_FROM} from
+copy_or_download_cli_artifact ${OPSTRACE_CLI_VERSION_TO} to

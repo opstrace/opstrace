@@ -63,9 +63,9 @@ steps:
     depends_on:
       - "unit-tests"
     env:
-      # Fetch the latest Opstrace CLI artifact from S3 and use that as the
-      # initial cluster version.
-      OPSTRACE_CLI_VERSION_FROM: cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2
+      # Fetch the latest Opstrace CLI release and use that as the initial
+      # cluster version.
+      OPSTRACE_CLI_VERSION_FROM: https://go.opstrace.com/cli-latest-release-linux
       # Use the Opstrace CLI artifact built from the PR branch to upgrade the
       # cluster.
       OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
