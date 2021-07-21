@@ -287,22 +287,16 @@ function LoginPageParent() {
   >();
   useEffect(() => {
     (async () => {
-      // Without this early exit criterion, `fetchLoginConfig()` is going to
-      // be called with every render cycle.
-      if (loginConfig !== undefined) {
-        return;
-      }
-
       const lcfg = await fetchLoginConfig();
       setLoginConfig(lcfg);
     })();
-  });
+  }, []);
 
   // Do not render child until loginconfig is populated. Kudos to
   // https://stackoverflow.com/a/57312722/145400 for the `{...loginConfig}` to
   // work around `not assignable to type 'IntrinsicAttributes..` kind of errors
   // when doing `loginconfig={loginconfig}`.
-  return <div>{loginConfig && <LoginPageChild {...loginConfig} />}</div>;
+  return loginConfig ? <LoginPageChild {...loginConfig} /> : null;
 }
 
 function LoginPageChild(lcfg: LoginConfigInterface) {
