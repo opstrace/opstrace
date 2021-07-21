@@ -95,6 +95,16 @@ export const InstallInstructions = ({
   );
 
   const dashboardHandler = async () => {
+    // Delete existing folder, if any. For reinstalling/updating dashboards.
+    try {
+      await grafana.deleteFolder({ integration, tenant });
+    } catch (err) {
+      // Ignore 404 error - expected for initial dashboard install
+      if (err.response.status !== 404) {
+        console.log(err);
+      }
+    }
+
     const folder = await grafana.createFolder({ integration, tenant });
 
     for (const d of makePrometheusDashboardRequests({

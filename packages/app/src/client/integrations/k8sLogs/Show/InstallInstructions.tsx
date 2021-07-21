@@ -88,7 +88,23 @@ export const InstallInstructions = ({
     saveAs(configBlob, configFilename);
   };
 
+  const dashboardButtonText = useMemo(
+    () =>
+      isDashboardInstalled ? "Reinstall Dashboards" : "Install Dashboards",
+    [isDashboardInstalled]
+  );
+
   const dashboardHandler = async () => {
+    // Delete existing folder, if any. For reinstalling/updating dashboards.
+    try {
+      await grafana.deleteFolder({ integration, tenant });
+    } catch (err) {
+      // Ignore 404 error - expected for initial dashboard install
+      if (err.response.status !== 404) {
+        console.log(err);
+      }
+    }
+
     const folder = await grafana.createFolder({ integration, tenant });
 
     for (const d of makePromtailDashboardRequests({
@@ -175,10 +191,9 @@ export const InstallInstructions = ({
                     variant="contained"
                     size="small"
                     state="primary"
-                    disabled={isDashboardInstalled}
                     onClick={dashboardHandler}
                   >
-                    Install Dashboards
+                    `${dashboardButtonText}`
                   </Button>
                 </Box>
               </TimelineContent>
