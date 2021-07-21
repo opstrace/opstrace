@@ -37,5 +37,5 @@ export const LogoutPage = () => {
       });
   }, [loading, logout]);
 
-  return <LoadingPage />;
+  return <LoadingPage stage="logout" />;
 };
