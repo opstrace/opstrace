@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-export const rootUrl = window.location.href.split(window.location.pathname)[0];
-export const makeUrl = (pathname: string) =>
-  `${rootUrl}${pathname.startsWith("/") ? "" : "/"}${pathname}`;
+// note: these are all functions rather than values so as to only be calculated
+// when used there were problems with the window.location sometimes not being
+// initialised when working out the rootUrl as value on js being loaded in the
+// browser. For example this would result in loginUrl being: http:///login
 
-export const loginPath = "/login";
-export const loginUrl = makeUrl(loginPath);
+export const rootUrl = () =>
+  window.location.href.split(window.location.pathname)[0];
+
+export const makeUrl = (pathname: string) =>
+  `${rootUrl()}${pathname.startsWith("/") ? "" : "/"}${pathname}`;
+
+export const loginPath = () => "/login";
+export const loginUrl = () => makeUrl(loginPath());

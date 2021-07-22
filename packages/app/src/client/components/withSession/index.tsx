@@ -107,7 +107,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
           returnTo = DEFAULT_PATHNAME;
         }
 
-        // Can't use "history.push(returnTo)" here as it doesn't update the url, have not looked into it much
+        // Can't use "history.push(returnTo)" here as it doesn't update the url, have not looked into "why" we can't
         window.location.href = makeUrl(returnTo);
       }
     },
@@ -140,7 +140,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               domain={data.auth0Config.domain}
               clientId={data.auth0Config.clientId}
               audience={AUTH0_AUDIENCE}
-              redirectUri={loginUrl}
+              redirectUri={loginUrl()}
             >
               <LogoutPage />
             </Auth0Provider>
@@ -161,7 +161,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               domain={data.auth0Config.domain}
               clientId={data.auth0Config.clientId}
               audience={AUTH0_AUDIENCE}
-              redirectUri={loginUrl}
+              redirectUri={loginUrl()}
               onRedirectCallback={reloadAppState}
             >
               <DetectUser
