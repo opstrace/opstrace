@@ -88,12 +88,6 @@ export const InstallInstructions = ({
     saveAs(configBlob, configFilename);
   };
 
-  const dashboardButtonText = useMemo(
-    () =>
-      isDashboardInstalled ? "Reinstall Dashboards" : "Install Dashboards",
-    [isDashboardInstalled]
-  );
-
   const dashboardHandler = async () => {
     // Delete existing folder, if any. For reinstalling/updating dashboards.
     try {
@@ -184,7 +178,9 @@ export const InstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  Install Dashboards for this Integration.
+                  {isDashboardInstalled
+                    ? "Recreate Dashboards for this Integration."
+                    : "Install Dashboards for this Integration."}
                   <br />
                   <Button
                     variant="contained"
@@ -192,7 +188,9 @@ export const InstallInstructions = ({
                     state="primary"
                     onClick={dashboardHandler}
                   >
-                    `${dashboardButtonText}`
+                    {isDashboardInstalled
+                      ? "Reinstall Dashboards"
+                      : "Install Dashboards"}
                   </Button>
                 </Box>
               </TimelineContent>
