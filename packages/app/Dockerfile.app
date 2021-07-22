@@ -41,7 +41,7 @@ RUN cd /build/lib/kubernetes && yarn run tsc -b
 WORKDIR /build/packages/app
 # temporarily move node_modules
 RUN mv node_modules ../node_modules
-# Copy over the needed parts of the app package
+# Copy over the needed parts of the app ackage
 COPY packages/app /build/packages/app/
 # move node_module back after we've copied everything else in
 RUN mv ../node_modules node_modules
