@@ -16,6 +16,7 @@
 
 const { configure } = require("@testing-library/react");
 const nock = require("nock");
+const axios = require("axios");
 
 require("regenerator-runtime/runtime");
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
@@ -44,3 +45,11 @@ nock.disableNetConnect();
 nock.enableNetConnect(
   host => host.includes("127.0.0.1") || host.includes("localhost")
 );
+
+// If you are using jsdom, axios will default to using the XHR adapter which
+// can't be intercepted by nock. So, configure axios to use the node adapter.
+//
+// References:
+// https://github.com/nock/nock/issues/699#issuecomment-272708264
+// https://github.com/axios/axios/issues/305
+axios.defaults.adapter = require("axios/lib/adapters/http");
