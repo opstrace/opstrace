@@ -50,7 +50,7 @@ export const AccessDeniedPage = () => {
             size="large"
             onClick={() =>
               logout({
-                returnTo: loginUrl
+                returnTo: loginUrl()
               })
             }
           >
