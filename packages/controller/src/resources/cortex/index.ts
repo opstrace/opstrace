@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+import yaml from "js-yaml";
 import { urlJoin } from "url-join-ts";
 import { strict as assert } from "assert";
 import {
   getBucketName,
+  log,
   min,
   roundDown,
   roundDownToOdd,
   select
 } from "@opstrace/utils";
 import { State } from "../../reducer";
-import { getNodeCount, getControllerConfig } from "../../helpers";
+import { getNodeCount, getControllerConfig, deepMerge } from "../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
 import {
   Deployment,
@@ -261,6 +263,52 @@ export function CortexResources(
     }
   }
 
+  // TODO: Investigate if we can (and should) set the user runtime config via
+  // the api directly instead of using this intermediary config map.
+
+  // Read the config map with the user overrides.
+  const cortexUserRuntimeConfig = state.kubernetes.cluster.ConfigMaps.resources.find(
+    cm => cm.namespace === namespace && cm.name === "cortex-runtime-config"
+  );
+  // These are the Opstrace cortex runtime config defaults.
+  const cortexDefaultRuntimeConfig = {
+    ingester_limits: {
+      // The maximum number of global inflight requests per ingester
+      // pod. By default this is unlimited, which risks ingesters OOMing
+      // under heavy load. If the limit is reached, the ingester will
+      // reject requests, but it keeps the ingester safe. This has been
+      // observed when hundreds of thousands or millions of new metric
+      // series are being added into cortex, where ingester pods can be
+      // bogged down with initializing storage for those new series. In
+      // theory this limit could be scaled according to the available
+      // RAM on the nodes, but in practice the actual value here isn't
+      // super important: if the ingester starts to fall behind then
+      // queued requests will generally go from near-zero to
+      // stratospheric levels within a few seconds, so there isn't much
+      // difference between a 1k or 10k limit. See also the identically
+      // named limit for distributor pods.
+      max_inflight_push_requests: 1000
+    }
+  };
+  let cortexRuntimeConfig = {};
+
+  const key = "runtime-config.yaml";
+  if (
+    cortexUserRuntimeConfig !== undefined &&
+    cortexUserRuntimeConfig.spec.data !== undefined &&
+    key in cortexUserRuntimeConfig.spec.data
+  ) {
+    const data = yaml.load(
+      cortexUserRuntimeConfig.spec.data["runtime-config.yaml"]
+    );
+    cortexRuntimeConfig = deepMerge(cortexDefaultRuntimeConfig, data);
+  } else {
+    cortexRuntimeConfig = cortexDefaultRuntimeConfig;
+  }
+  log.debug(
+    `cortex runtime config: ${JSON.stringify(cortexRuntimeConfig, null, 2)}`
+  );
+
   collection.add(
     new V1Alpha1CortexResource(
       {
@@ -347,7 +395,9 @@ export function CortexResources(
               split_queries_by_interval: "24h"
             },
             limits: {
-              compactor_blocks_retention_period: `${(metricRetentionDays + 1) * 24}h`,
+              compactor_blocks_retention_period: `${
+                (metricRetentionDays + 1) * 24
+              }h`,
               // Define the sample ingestion rate, enforced in the individual
               // distributor. The idea is that this limit is applied locally,
               // see "ingestion_rate_strategy" below.
@@ -383,7 +433,7 @@ export function CortexResources(
               active_series_metrics_enabled: true,
               active_series_metrics_update_period: "1m",
               // After what time a series is considered to be inactive.
-              active_series_metrics_idle_timeout: "10m",
+              active_series_metrics_idle_timeout: "10m"
             },
             distributor: {
               instance_limits: {
@@ -418,25 +468,7 @@ export function CortexResources(
               ...configStorageBackend
             }
           },
-          runtime_config: {
-            ingester_limits: {
-              // The maximum number of global inflight requests per ingester
-              // pod. By default this is unlimited, which risks ingesters OOMing
-              // under heavy load. If the limit is reached, the ingester will
-              // reject requests, but it keeps the ingester safe. This has been
-              // observed when hundreds of thousands or millions of new metric
-              // series are being added into cortex, where ingester pods can be
-              // bogged down with initializing storage for those new series. In
-              // theory this limit could be scaled according to the available
-              // RAM on the nodes, but in practice the actual value here isn't
-              // super important: if the ingester starts to fall behind then
-              // queued requests will generally go from near-zero to
-              // stratospheric levels within a few seconds, so there isn't much
-              // difference between a 1k or 10k limit. See also the identically
-              // named limit for distributor pods.
-              max_inflight_push_requests: 1000
-            }
-          },
+          runtime_config: cortexRuntimeConfig
         }
       },
       kubeConfig
