@@ -89,16 +89,6 @@ export const InstallInstructions = ({
   };
 
   const dashboardHandler = async () => {
-    // Delete existing folder, if any. For reinstalling/updating dashboards.
-    try {
-      await grafana.deleteFolder({ integration, tenant });
-    } catch (err) {
-      // Ignore 404 error - expected for initial dashboard install
-      if (err.response.status !== 404) {
-        console.log(err);
-      }
-    }
-
     const folder = await grafana.createFolder({ integration, tenant });
 
     for (const d of makePromtailDashboardRequests({
@@ -178,20 +168,16 @@ export const InstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {isDashboardInstalled
-                    ? "Recreate Dashboards for this Integration."
-                    : "Install Dashboards for this Integration."}
-                  <br />
+                  Install Dashboards for this Integration.
                   <br />
                   <Button
                     variant="contained"
                     size="small"
                     state="primary"
+                    disabled={isDashboardInstalled}
                     onClick={dashboardHandler}
                   >
-                    {isDashboardInstalled
-                      ? "Reinstall Dashboards"
-                      : "Install Dashboards"}
+                    Install Dashboards
                   </Button>
                 </Box>
               </TimelineContent>
