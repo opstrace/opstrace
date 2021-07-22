@@ -63,9 +63,9 @@ steps:
     depends_on:
       - "unit-tests"
     env:
-      # Fetch the latest Opstrace CLI artifact from S3 and use that as the
-      # initial cluster version.
-      OPSTRACE_CLI_VERSION_FROM: cli/main/latest/opstrace-cli-linux-amd64-latest.tar.bz2
+      # Fetch the latest Opstrace CLI artifact and use that as the initial
+      # cluster version.
+      OPSTRACE_CLI_VERSION_FROM: https://go.otr.dev/cli-latest-release-linux
       # Use the Opstrace CLI artifact built from the PR branch to upgrade the
       # cluster.
       OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
@@ -76,7 +76,7 @@ steps:
     command:
       - ci/test-upgrade/run.sh
     artifact_paths:
-      - "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-1-gcp/bk-artifacts/**/*"
+      - "bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"
     key: "cleanup-tmp"
     depends_on:
