@@ -21,13 +21,22 @@ import {
   ControllerConfigSchemaV1alpha,
   ControllerConfigTypeV1alpha
 } from "./schemav1alpha";
-
 import { ControllerConfigSchemaV2, ControllerConfigTypeV2 } from "./schemav2";
+import { ControllerConfigSchemaV3, ControllerConfigTypeV3 } from "./schemav3";
 
 import * as aks from "./aks";
 
-export type LatestControllerConfigType = ControllerConfigTypeV2;
-export const LatestControllerConfigSchema = ControllerConfigSchemaV2;
+export type LatestControllerConfigType = ControllerConfigTypeV3;
+export const LatestControllerConfigSchema = ControllerConfigSchemaV3;
+
+function V2toV3(cfg: ControllerConfigTypeV2): ControllerConfigTypeV3 {
+  return {
+    ...cfg,
+    cliMetadata: {
+      allCLIVersions: []
+    }
+  };
+}
 
 // upgrade function
 function V1toV2(cfg: ControllerConfigTypeV1): ControllerConfigTypeV2 {
@@ -75,14 +84,22 @@ export function upgradeControllerConfigMapToLatest(
     return LatestControllerConfigSchema.validateSync(json);
   }
 
+  let cfgV2: ControllerConfigTypeV2 | undefined;
   if (ControllerConfigSchemaV1.isValidSync(json, { strict: true })) {
     log.debug("got v1 controller config, upgrading...");
-    return V1toV2(ControllerConfigSchemaV1.validateSync(json));
+    cfgV2 = V1toV2(ControllerConfigSchemaV1.validateSync(json));
+  } else if (
+    ControllerConfigSchemaV1alpha.isValidSync(json, { strict: true })
+  ) {
+    log.debug("got v1alpha controller config, upgrading...");
+    cfgV2 = V1alphatoV2(ControllerConfigSchemaV1alpha.validateSync(json));
+  } else if (ControllerConfigSchemaV2.isValidSync(json, { strict: true })) {
+    log.debug("got v2 controller config, upgrading...");
+    cfgV2 = ControllerConfigSchemaV2.validateSync(json);
   }
 
-  if (ControllerConfigSchemaV1alpha.isValidSync(json, { strict: true })) {
-    log.debug("got v1alpha controller config, upgrading...");
-    return V1alphatoV2(ControllerConfigSchemaV1alpha.validateSync(json));
+  if (cfgV2 !== undefined) {
+    return V2toV3(cfgV2);
   }
 
   // Possible user error. Parse again and it'll throw a meaningful error
