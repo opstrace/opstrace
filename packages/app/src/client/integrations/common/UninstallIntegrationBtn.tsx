@@ -30,6 +30,8 @@ import graphqlClient from "state/clients/graphqlClient";
 import { deleteFolder } from "client/utils/grafana";
 
 import { Button } from "client/components/Button";
+import { useNotificationService } from "client/services/Notification";
+import { random } from "lodash";
 
 export const UninstallBtn = ({
   integration,
@@ -44,28 +46,54 @@ export const UninstallBtn = ({
 }) => {
   const dispatch = useDispatch();
   const history = useHistory();
+  const {
+    registerNotification,
+    unregisterNotification
+  } = useNotificationService();
 
   const handleUninstall = async () => {
     if (uninstallCallback !== undefined) await uninstallCallback();
 
     try {
-      await graphqlClient
-        .DeleteIntegration({
-          tenant_id: tenant.id,
-          id: integration.id
-        })
-        .then(() => {
-          deleteFolder({ integration, tenant }).catch(err => {
-            // Dashboard folder might not exist
-            console.log(err);
-          });
-          dispatch(
-            deleteIntegration({ tenantId: tenant.id, id: integration.id })
-          );
-          history.push(installedIntegrationsPath({ tenant }));
-        });
-    } catch (err) {
-      console.log(err);
+      await graphqlClient.DeleteIntegration({
+        tenant_id: tenant.id,
+        id: integration.id
+      });
+      try {
+        await deleteFolder({ integration, tenant });
+      } catch (error) {
+        const messageId = random(0, 9999).toString();
+        const newNotification = {
+          id: messageId,
+          state: "error" as const,
+          title: "Could not delete grafana folder",
+          information: error.response.data.message ?? error.message,
+          handleClose: () =>
+            unregisterNotification({
+              id: messageId,
+              title: "",
+              information: ""
+            })
+        };
+        registerNotification(newNotification);
+      }
+      dispatch(deleteIntegration({ tenantId: tenant.id, id: integration.id }));
+      history.push(installedIntegrationsPath({ tenant }));
+    } catch (error) {
+      const messageId = random(0, 9999).toString();
+      const newNotification = {
+        id: messageId,
+        state: "error" as const,
+        title: "Could not uninstall integration",
+        information: error.response.errors?.[0].message ?? error.message,
+        handleClose: () =>
+          unregisterNotification({
+            id: messageId,
+            title: "",
+            information: ""
+          })
+      };
+      registerNotification(newNotification);
     }
   };
 
