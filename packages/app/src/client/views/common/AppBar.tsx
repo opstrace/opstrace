@@ -77,7 +77,7 @@ export default function AppBar() {
   useCommandService({
     id: "logout",
     description: "Logout",
-    handler: () => (window.location.pathname = "/_/auth/logout")
+    handler: () => (window.location.pathname = "/logout")
   });
 
   const navigateToCurrentUser = useCallback(() => {

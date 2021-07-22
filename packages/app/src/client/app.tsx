@@ -32,7 +32,8 @@ import {
   Settings
 } from "react-feather";
 
-import WithAuthentication from "client/components/withAuthentication";
+import { WithSession } from "client/components/withSession";
+
 import ErrorBoundary from "client/components/Error/Boundary";
 import { Box } from "client/components/Box";
 
@@ -56,7 +57,6 @@ import {
   EditIntegration
 } from "client/views/integrations";
 import TenantAlerting from "client/views/alerting";
-import LoginView from "client/views/login";
 import HelpDialog from "client/views/help";
 import NotFound from "client/views/404/404";
 import ClusterOverview from "./views/cluster-health";
@@ -333,39 +333,23 @@ const AuthProtectedApplication = () => {
   );
 };
 
-const App = () => {
-  return (
-    <StoreProvider>
-      <Theme.ThemeSwitcher>
-        <ErrorBoundary>
-          <Services>
+const App = () => (
+  <StoreProvider>
+    <Theme.ThemeSwitcher>
+      <ErrorBoundary>
+        <Services>
+          <WithSession>
             <Switch>
               <Redirect exact key="/" from="/" to="/tenant/system" />
-              <Route
-                exact
-                key="/login"
-                path="/login"
-                component={() => (
-                  <WithAuthentication onFailure={<LoginView />}>
-                    <Redirect to="/" />
-                  </WithAuthentication>
-                )}
-              />
-              <Route
-                key="*"
-                path="*"
-                component={() => (
-                  <WithAuthentication onFailure={<Redirect to="/login" />}>
-                    <AuthProtectedApplication />
-                  </WithAuthentication>
-                )}
-              />
+              <Route key="*" path="*">
+                <AuthProtectedApplication />
+              </Route>
             </Switch>
-          </Services>
-        </ErrorBoundary>
-      </Theme.ThemeSwitcher>
-    </StoreProvider>
-  );
-};
+          </WithSession>
+        </Services>
+      </ErrorBoundary>
+    </Theme.ThemeSwitcher>
+  </StoreProvider>
+);
 
 export default App;

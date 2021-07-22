@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-import env from "server/env";
-import { NextFunction, Request, Response } from "express";
-
-export const auth0Config = {
-  auth0_client_id: env.AUTH0_CLIENT_ID,
-  auth0_domain: env.AUTH0_DOMAIN
-};
-
-export default function pubUiCfgHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  res.status(200).json(auth0Config);
-  return;
-}
+export { LoadingPage } from "./Loading";
+export { LoginPage } from "./Login";
+export { LogoutPage } from "./Logout";
+export { AccessDeniedPage } from "./AccessDenied";

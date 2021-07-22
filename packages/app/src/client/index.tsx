@@ -47,7 +47,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // 2021.04.16 NTW: this service worker does additional caching for progressive asset loading. After each cluster
-// upgrade users can't login and much clear their caches to get the login working again. Current theory is that
+// upgrade users can't login and must clear their caches to get the login working again. Current theory is that
 // this serviceWorker might be creating a bad cache situation, so disabling it to test that.
 // Also not really providing any benefit at the moment.
 // serviceWorker.register();
