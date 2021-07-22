@@ -32,9 +32,8 @@ export const LogoutPage = () => {
 
   useEffect(() => {
     if (!loading) {
-      console.log("logoutpage:", loginUrl);
       logout({
-        returnTo: loginUrl
+        returnTo: loginUrl()
       });
     }
   }, [loading, logout]);
