@@ -69,6 +69,8 @@ import useAxios from "axios-hooks";
 import { setCurrentUser } from "state/user/actions";
 import { GeneralServerError } from "server/errors";
 
+import { loginUrl, makeUrl } from "client/components/withSession/paths";
+
 import { LoadingPage, LoginPage, LogoutPage, AccessDeniedPage } from "./pages";
 
 const DEFAULT_PATHNAME = "/";
@@ -106,9 +108,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
         }
 
         // Can't use "history.push(returnTo)" here as it doesn't update the url, have not looked into it much
-        window.location.href = `${
-          window.location.href.split(window.location.pathname)[0]
-        }${returnTo}`;
+        window.location.href = makeUrl(returnTo);
       }
     },
     [dispatch]
@@ -140,9 +140,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               domain={data.auth0Config.domain}
               clientId={data.auth0Config.clientId}
               audience={AUTH0_AUDIENCE}
-              redirectUri={`${
-                window.location.href.split(window.location.pathname)[0]
-              }/login`}
+              redirectUri={loginUrl}
             >
               <LogoutPage />
             </Auth0Provider>
@@ -163,9 +161,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
               domain={data.auth0Config.domain}
               clientId={data.auth0Config.clientId}
               audience={AUTH0_AUDIENCE}
-              redirectUri={`${
-                window.location.href.split(window.location.pathname)[0]
-              }/login`}
+              redirectUri={loginUrl}
               onRedirectCallback={reloadAppState}
             >
               <DetectUser
