@@ -17,6 +17,8 @@
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
+import { loginUrl } from "client/components/withSession/paths";
+
 import { Page } from "client/components/Page";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
@@ -48,9 +50,7 @@ export const AccessDeniedPage = () => {
             size="large"
             onClick={() =>
               logout({
-                returnTo: window.location.href.split(
-                  window.location.pathname
-                )[0]
+                returnTo: loginUrl
               })
             }
           >
