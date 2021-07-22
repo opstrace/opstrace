@@ -18,6 +18,8 @@ import React, { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import useAxios from "axios-hooks";
 
+import { loginUrl } from "client/components/withSession/paths";
+
 import { LoadingPage } from "./Loading";
 
 export const LogoutPage = () => {
@@ -29,12 +31,12 @@ export const LogoutPage = () => {
   });
 
   useEffect(() => {
-    if (!loading)
+    if (!loading) {
+      console.log("logoutpage:", loginUrl);
       logout({
-        returnTo: `${
-          window.location.href.split(window.location.pathname)[0]
-        }/login`
+        returnTo: loginUrl
       });
+    }
   }, [loading, logout]);
 
   return <LoadingPage stage="logout" />;
