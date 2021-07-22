@@ -170,7 +170,6 @@ export const InstallInstructions = ({
                 <Box flexGrow={1} pb={2}>
                   Install Dashboards for this Integration.
                   <br />
-                  <br />
                   <Button
                     variant="contained"
                     size="small"
