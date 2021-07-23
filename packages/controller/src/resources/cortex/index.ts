@@ -919,13 +919,13 @@ export function CortexResources(
               volumes: [
                 {
                   configMap: {
-                    name: "cortex-config"
+                    name: "opstrace-cortex-config"
                   },
                   name: "cortex-config"
                 },
                 {
                   configMap: {
-                    name: "cortex-runtime-config"
+                    name: "opstrace-cortex-runtime-config"
                   },
                   name: "cortex-runtime-config"
                 }
