@@ -68,7 +68,26 @@ TODO
 
 ## Silencing an Alert
 
-TODO
+Under the *Silences* tab...
+
+1. First, select `alertmanager` from the *Choose alert manager*" drop-down.
+2. Click the *New Silence* button.
+3. Select the start and end date in *Silence start and end* to indicate when the silence should go into effect and expire.
+4. Optionally, update the *Duration* to alter the time for the end of silence in the previous step to correspond to the start plus the duration.
+5. Enter one or more matching labels by filling out the *Name* and *Value* fields. Matchers determine which rules the silence will apply to.
+6. Optionally enter a comment.
+7. Optionally edit the name of the owner in *Creator*.
+8. Click *Create*.
+
+![create silences example](../../assets/alerts-silences-define.png)
+
+You can inspect your created silences on the same tab:
+
+![inspect existing alerts](../../assets/alerts-silences-inspect.png)
+
+Note:  Silences cannot be deleted manually; expired silences are automatically deleted after 5 days.
+
+Attribution: some content was borrowed from [Grafana's documentation](https://github.com/grafana/grafana/blob/32b74e75a30a253602c630728d46ef2ae141d2c3/docs/sources/alerting/unified-alerting/silences.md#add-a-silence) itself.
 
 ## References
 
