@@ -17,7 +17,9 @@
 import env from "server/env";
 import { NextFunction, Request, Response } from "express";
 
-export default function pubUiCfgHandler(
+import { BUILD_INFO } from "@opstrace/utils";
+
+export function pubUiCfgHandler(
   req: Request,
   res: Response,
   next: NextFunction
@@ -26,5 +28,15 @@ export default function pubUiCfgHandler(
     auth0_client_id: env.AUTH0_CLIENT_ID,
     auth0_domain: env.AUTH0_DOMAIN
   });
+  return;
+}
+
+// require authentication?
+export function buildInfoHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  res.status(200).json(BUILD_INFO);
   return;
 }
