@@ -46,21 +46,21 @@ const config: PlaywrightTestConfig = {
     {
       name: "WebKit",
       use: { browserName: "webkit" }
-    },
-    {
-      name: "Pixel-4",
-      use: {
-        browserName: "chromium",
-        ...devices["Pixel 4"]
-      }
-    },
-    {
-      name: "iPhone-11",
-      use: {
-        browserName: "webkit",
-        ...devices["iPhone 11"]
-      }
     }
+    // {
+    //   name: "Pixel-4",
+    //   use: {
+    //     browserName: "chromium",
+    //     ...devices["Pixel 4"]
+    //   }
+    // },
+    // {
+    //   name: "iPhone-11",
+    //   use: {
+    //     browserName: "webkit",
+    //     ...devices["iPhone 11"]
+    //   }
+    // }
   ]
 };
 
