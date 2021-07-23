@@ -96,6 +96,7 @@ export function RedisResources(
         kind: "Service",
         metadata: {
           name: "redis-slave",
+          namespace,
           labels: {
             app: "redis",
             role: "slave"
