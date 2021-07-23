@@ -15,6 +15,7 @@
  */
 
 import { KubeConfig } from "@kubernetes/client-node";
+import { DockerImages } from "@opstrace/controller-config";
 import {
   CustomResourceDefinition,
   ResourceCollection,
@@ -501,7 +502,7 @@ leaderElection:
                     "--leader-elect"
                   ],
                   command: ["/manager"],
-                  image: "sreis/cortex-operator:1",
+                  image: DockerImages.cortexOperator,
                   imagePullPolicy: "IfNotPresent",
                   livenessProbe: {
                     failureThreshold: 3,
