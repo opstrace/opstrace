@@ -38,6 +38,7 @@ import {
   withPodAntiAffinityRequired
 } from "@opstrace/kubernetes";
 import { DockerImages } from "@opstrace/controller-config";
+import { ConfigMap } from "@opstrace/kubernetes";
 
 export function CortexResources(
   state: State,
@@ -308,6 +309,30 @@ export function CortexResources(
   log.debug(
     `cortex runtime config: ${JSON.stringify(cortexRuntimeConfig, null, 2)}`
   );
+
+  // TODO: Remove when opstrace application is able to apply changes to the
+  // cortex CRD runtime_config field.
+  const rtccm = new ConfigMap(
+    {
+      apiVersion: "v1",
+      data: {
+        "runtime-config.yaml": yaml.safeDump(cortexDefaultRuntimeConfig)
+      },
+      kind: "ConfigMap",
+      metadata: {
+        name: "cortex-runtime-config",
+        namespace
+      }
+    },
+    kubeConfig
+  );
+
+  // Set immutable: annotation-based custom convention, so that the Opstrace
+  // controller will not delete/overwrite this config map when it detects
+  // change. Note that the UI API implementation is expected to mutate this
+  // config map.
+  rtccm.setImmutable();
+  collection.add(rtccm);
 
   collection.add(
     new V1Alpha1CortexResource(
