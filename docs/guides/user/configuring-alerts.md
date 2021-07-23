@@ -1,26 +1,62 @@
 # Configuring Alertmanager
 
+BEFORE YOU START: *If you haven't used Prometheus Alertmanager before, we recommend checking out [their documentation](https://prometheus.io/docs/alerting/latest/alertmanager).*
+*Opstrace uses [Cortex](https://cortexmetrics.io) which adds support for scaling and multiple tenants on top of Prometheus.*
+
 Opstrace supports configuring Alertmanager rules and alert outputs on a per-tenant basis.
-For example, you might have an alerting rule that metric `X` must be less than 5, and an Alertmanager configuration to send a Slack message when the rule is failing.
-This can all be visualized and edited with the unified alerting in Grafana 8.
+For example, you might have an alerting rule that metric `X` must be less than `5`, and an Alertmanager configuration to send a Slack message when the rule is failing.
+This can all be visualized and edited with the new unified alerting in Grafana 8.
 
-If you haven't used Prometheus Alertmanager before, we recommend checking out [https://prometheus.io/docs/alerting/latest/alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager).
-Opstrace uses [Cortex](https://cortexmetrics.io) which adds support for scaling and multiple tenants on top of Prometheus.
+The ability to configure additional datasources for alerts is the other dramatic change in Grafana 8, allowing other providers to leverage the Grafana UI for alerts.
+(The original Grafana alerts—now called "legacy alerts"—is still the default.)
+Opstrace comes configured with Cortex and Loki as Grafana alert datasources.
+This guide will focus on the UI because it is the most visual and self-explanatory.
+The APIs are of course still available for anyone who would like to post changes directly there.
 
+To begin, from the Opstrace UI, first select your tenant and then click "Alerting" in the sidebar:
 
-To learn more about the configuration content itself, look at the Prometheus documentation for [Recording Rules](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules), [Alerting Rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules), and [Alertmanager](https://www.prometheus.io/docs/alerting/latest/alertmanager) documentation.
-
-You can configure the Alertmanager for each tenant from within the Grafana 8 interface.
-To do this, in the sidebar, click "Alerting" under the tenant you want to configure.
-You'll be presented with the configuration page:
-
-![alerting page overview](../../assets/alerts-overview.jpg)
-
-TODO
+![alerting page overview](../../assets/alerts-overview.gif)
 
 ## Configure an Alert Rule
 
-TODO
+[Alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/) allow you to define alert conditions based on the [Prometheus expression language](https://prometheus.io/docs/prometheus/latest/querying/basics/).
+Whenever the alert expression results in one or more vector elements at a given point in time, the alert counts as active for these elements' label sets.
+
+To configure a rule, the UI will lead you through the following steps:
+
+### Step 1: Describe the alert
+
+Describe information about the alert, such as the name and type.
+Select "Cortex/Loki" as the type (instead of Grafana) and then select "metrics" datasource.
+You can choose the namespace and group to organize your alerts.
+
+![describe the alert](../../alerts-rules-1-describe.png)
+
+### Step 2: Create a query
+
+Create a query to be alerted on.  This query should include a condition that, when true, will trigger the alert.
+
+```text
+api_success_rate{pod="myapp-1"} < 0.95
+```
+
+### Step 3: Define alert conditions
+
+The expression from step #2 has to be true for this long for the alert to be fired.
+
+![define alert conditions](../../alert-rules-3-define.png)
+
+### Step 4: Add details for your alert
+
+Add useful information to your alert, so when it comes in you can more quickly understand its meaning.
+For example, provide a summary and description of the alert so anybody can understand what the alert means.
+If you have it, a link to the runbook can make it faster to triage.
+
+![add alert details](../../alert-rules-4-details.png)
+
+See the whole thing in action:
+
+TODO GIF
 
 ## Configure a Contact Point
 
@@ -36,6 +72,7 @@ TODO
 
 ## References
 
+* [Grafana 8 Alerts](https://grafana.com/docs/grafana/latest/alerting/unified-alerting/)
 * [Prometheus Alertmanager](https://www.prometheus.io/docs/alerting/latest/alertmanager)
 * [Cortex Scalable Alertmanager](https://cortexmetrics.io/docs/proposals/scalable-alertmanager)
 * [Alertmanager Configuration](https://www.prometheus.io/docs/alerting/latest/configuration)
