@@ -31,7 +31,6 @@ import { Button } from "client/components/Button";
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
 import TimelineSeparator from "@material-ui/lab/TimelineSeparator";
-import TimelineConnector from "@material-ui/lab/TimelineConnector";
 import TimelineContent from "@material-ui/lab/TimelineContent";
 import TimelineDot from "@material-ui/lab/TimelineDot";
 
@@ -105,7 +104,6 @@ export const ReinstallInstructions = ({
                 <TimelineDotWrapper variant="outlined" color="primary">
                   1
                 </TimelineDotWrapper>
-                <TimelineConnector />
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
