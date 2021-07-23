@@ -28,7 +28,6 @@
 // import chain)
 
 import fs from "fs";
-import { log } from "./log";
 
 export interface BUILD_INFO_TYPE {
   BRANCH_NAME: string;
@@ -102,24 +101,10 @@ function readBuildInfo() {
 
   // None of the candidate file paths led to success. Fall back to env.
   if (!process.env.OPSTRACE_BUILDINFO_PATH) {
-    if (process.env.NODE_ENV === "development") {
-      log.info(
-        "using hardcoded 'local-dev' for BUILD_INFO, to override set environment variable OPSTRACE_BUILDINFO_PATH"
-      );
-      BUILD_INFO = {
-        BRANCH_NAME: "local-dev",
-        VERSION_STRING: "local-dev",
-        COMMIT: "local-dev",
-        BUILD_TIME_RFC3339: "1970-01-01 00:00:00+00:00",
-        BUILD_HOSTNAME: "localhost"
-      };
-      return;
-    } else {
-      throw Error(
-        `environment variable OPSTRACE_BUILDINFO_PATH not set ` +
-          `and none of [${JSON.stringify(CANDIDATE_PATHS)}] found/readable`
-      );
-    }
+    throw Error(
+      `environment variable OPSTRACE_BUILDINFO_PATH not set ` +
+        `and none of [${JSON.stringify(CANDIDATE_PATHS)}] found/readable`
+    );
   }
 
   // If this path is invalid / file cannot be opened, file contents are
