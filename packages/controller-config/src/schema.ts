@@ -99,8 +99,13 @@ export function upgradeControllerConfigMapToLatest(
   }
 
   if (cfgV2 !== undefined) {
+    log.debug("upgrading from v2 to v3");
     return V2toV3(cfgV2);
   }
+
+  log.debug(
+    "no valid controller config schema found, attempting sync with latest"
+  );
 
   // Possible user error. Parse again and it'll throw a meaningful error
   // message.

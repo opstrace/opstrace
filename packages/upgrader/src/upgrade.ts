@@ -106,7 +106,7 @@ export function* upgradeControllerConfigMap(
     cfg = upgradeControllerConfigMapToLatest(cfgJSON);
     cfg.cliMetadata.allCLIVersions.push({
       version: BUILD_INFO.VERSION_STRING,
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     });
   } catch (e) {
     die(`failed to upgrade controller configuration: ${e.message}`);

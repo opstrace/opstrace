@@ -184,7 +184,7 @@ function* createClusterCore() {
       allCLIVersions: [
         {
           version: BUILD_INFO.VERSION_STRING,
-          timestamp: new Date()
+          timestamp: new Date().toISOString()
         }
       ]
     }

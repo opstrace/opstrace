@@ -78,7 +78,7 @@ async function getClusterInfo() {
   // will be present in the latest config version(s) only, but its non-existence should
   // not result in a command error.
   let lastCLIVersion = "undefined";
-  if (LatestControllerConfigSchema.isValidSync(cfgJSON)) {
+  if (LatestControllerConfigSchema.isValidSync(cfgJSON, { strict: true })) {
     const cfg = LatestControllerConfigSchema.validateSync(cfgJSON);
     lastCLIVersion =
       cfg.cliMetadata.allCLIVersions[cfg.cliMetadata.allCLIVersions.length - 1]
