@@ -56,15 +56,77 @@ If you have it, a link to the runbook can make it faster to triage.
 
 See the whole thing in action:
 
-TODO GIF
+![adding alert animation](../../assets/alerts-overview.gif)
 
 ## Configure a Contact Point
 
-TODO
+*Contact points* define where to send notifications about alerts that match a particular notification policy.
+A contact point can contain one or more contact point types, eg email, slack, webhook and so on.
+A notification will dispatched to all contact point types defined on a contact point.
+
+To configure a contact point for the Opstrace external Alertmanager, first select it from the drop down:
+
+![choosing the external alertmanager](../../assets/alerts-contacts-1-external.png)
+
+Next, enter a name and then choose a contact point *type*:
+
+* Email
+* OpsGenie
+* PagerDuty
+* Pushover
+* Slack
+* VictorOps
+* Webhook
+
+Each type provides customizable fields.
+These allow you to choose the information that will be most helpful in the event of an alert.
+For example, with PagerDuty:
+
+![pagerduty config options](../../assets/alerts-contacts-2-pagerduty.png)
+
+To use your contact point, you must attach it to a *notification policy*.
+
+### Example: Configuring Slack
+
+Alerts in Slack are a convenient way to monitor the state of your Opstrace instance.
+First, you need to create a Slack App and configure an *incoming webhook.*
+Just follow their [4-step process document](https://api.slack.com/messaging/webhooks).
+You can then enter it into the configuration for a Slack contact type:
+
+![slack webhook example](../../assets/alerts-contacts-3-webhook.png)
 
 ## Configure a Notification Policy
 
-TODO
+*Notification policies* determine how alerts are routed to contact points.
+
+![notification policy overview](../../assets/alerts-notifications-1-overview.png)
+
+Policies have a tree structure, where each policy can have one or more child policies. Each policy except for the root policy can also match specific alert labels. Each alert enters policy tree at the root and then traverses each child policy. If *continue matching subsequent sibling nodes* is not checked, it stops at the first matching node, otherwise, it continues matching it's siblings as well. If an alert does not match any children of a policy, the alert is handled based on the configuration settings of this policy and notified to the contact point configured on this policy. An alert that does not match any *specific policy* is handled by the *root policy*.
+
+### How label matching works
+
+A policy will match an alert if alert's labels match **all** of the *matching mabels* specified on the policy.
+
+* The *label* field is the name of the label to match. It must exactly match the label name.
+* The *value* field matches against the corresponding value for the specified Label name. How it matches depends on the *regex* and *equal* checkboxes.
+* The *regex* checkbox specifies if the inputted value should be matched against labels as a regular expression. The regular expression is always anchored. If not selected it is an exact string match.
+* The *equal* checkbox specifies if the match should include alert instances that match or do not match.
+
+### Example Setup
+
+#### Set up the Root Policy
+
+1. First, create a basic contact point for your alerts (e.g., Slack).
+2. Edit the root policy and set it to have the contact point you just created.
+3. Edit the root policy grouping to group alerts by cluster, namespace and alertname so you get a notification per alert rule and specific Kubernetes cluster & namespace.
+
+#### Set up Specific Policies
+
+* Create a specific route for alerts with "critical" severity with a different contact point type, like PagerDuty.
+* Create specific route for alerts coming from a development cluster with an appropriate contact point.
+* Create specific routes for particular teams that handle their own onduty rotations.
+
+![specific notification policy](../assets/alerts-notifications-2-specific.png)
 
 ## Silencing an Alert
 
@@ -87,7 +149,9 @@ You can inspect your created silences on the same tab:
 
 Note:  Silences cannot be deleted manually; expired silences are automatically deleted after 5 days.
 
-Attribution: some content was borrowed from [Grafana's documentation](https://github.com/grafana/grafana/blob/32b74e75a30a253602c630728d46ef2ae141d2c3/docs/sources/alerting/unified-alerting/silences.md#add-a-silence) itself.
+## Attribution
+
+Some content was borrowed from [Grafana Labs' documentation](https://github.com/grafana/grafana/blob/32b74e75a30a253602c630728d46ef2ae141d2c3/docs/sources/alerting/unified-alerting/).
 
 ## References
 
