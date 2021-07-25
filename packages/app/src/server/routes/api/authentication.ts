@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import axios from "axios";
 import express from "express";
 import jwt from "express-jwt";
 import jwksRsa from "jwks-rsa";
-import { log } from "@opstrace/utils/lib/log";
-import graphqlClient from "state/clients/graphqlClient";
+
 import env from "server/env";
 import { GeneralServerError, UnexpectedServerError } from "server/errors";
+import { log } from "@opstrace/utils/lib/log";
 import authRequired from "server/middleware/auth";
-// import { User } from "state/user/types";
+
+import graphqlClient from "state/clients/graphqlClient";
 
 import { auth0Config } from "./uicfg";
 
@@ -51,9 +53,25 @@ function createAuthHandler(): express.Router {
   // endpoint for creating a session so we don't have to
   // pass JWTs to every API request.
   auth.post("/session", checkJwt, async (req, res, next) => {
-    const email = req.body.email;
-    const username = req.body.username;
-    const avatar = req.body.avatar;
+    const { data: user } = await axios.get(
+      `https://${env.AUTH0_DOMAIN}/userinfo`,
+      {
+        headers: {
+          // @ts-ignore Object is possibly 'undefined'
+          Authorization: `Bearer ${req.headers.authorization.split(" ")[1]}`
+        }
+      }
+    );
+
+    const email = user.email;
+    const avatar = user.picture || "";
+    const username = (
+      user.nickname ||
+      user.username ||
+      user.given_name ||
+      user.name ||
+      ""
+    ).toLowerCase();
 
     if (!email || !username || !avatar) {
       return next(new GeneralServerError(400, "incomplete payload"));
