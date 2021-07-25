@@ -220,17 +220,6 @@ const CreateSession = ({
           url: "/_/auth/session",
           headers: {
             Authorization: `Bearer ${accessToken}`
-          },
-          data: {
-            email: user.email,
-            avatar: user.picture || "",
-            username: (
-              user.nickname ||
-              user.username ||
-              user.given_name ||
-              user.name ||
-              ""
-            ).toLowerCase()
           }
         });
 
