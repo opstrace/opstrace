@@ -15,8 +15,30 @@
  */
 
 import * as yup from "yup";
+import { parseISO } from "date-fns";
 import { GCPConfig } from "@opstrace/gcp";
 import { AWSConfig } from "@opstrace/aws";
+
+/**
+ * The yup date() schema uses a transformer to parse date strings,
+ * like those retrieved from the controller-config's raw value
+ * stored in a ConfigMap. This works when not running in strict mode,
+ * which turns off transformers. When upgrading the config however,
+ * strict validation must be turned on to make sure an old schema that
+ * is a strict subset (same but fewer values) of of a new one doesn't
+ * coerce to the new schema. Then validation fails. This custom schema
+ * permits a string timestamp with ISO format enforced.
+ */
+const timestampSchema = yup
+  .string()
+  .test("isISO", "must be an ISO date string", (date: string): boolean => {
+    try {
+      const p = parseISO(date);
+      return !isNaN(p!.getTime());
+    } catch {
+      return false;
+    }
+  });
 
 export const ControllerConfigSchemaV3 = yup
   .object({
@@ -70,7 +92,7 @@ export const ControllerConfigSchemaV3 = yup
         .array(
           yup.object({
             version: yup.string(),
-            timestamp: yup.date()
+            timestamp: timestampSchema
           })
         )
         .ensure()
