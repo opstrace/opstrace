@@ -198,8 +198,6 @@ function* triggerControllerDeploymentUpgrade() {
     // handle upgrades from clusters that are not running the cortex-operator
     yield call(cortexOperatorPreamble, kubeConfig);
 
-    yield call(upgradeControllerConfigMap, kubeConfig);
-
     const rolloutStarted: boolean = yield call(upgradeControllerDeployment, {
       opstraceClusterName: upgradeConfig.clusterName,
       kubeConfig: kubeConfig
