@@ -287,7 +287,7 @@ suite("test_ui_api", function () {
       url,
       httpClientOptsWithCookie(cookie_header_value)
     );
-    log.info("got rules doc: %s", resp.body);
+    log.info("got rules doc (first 500 chars): %s", resp.body.slice(0, 500));
   });
 
   test("test_grafana_datasource_proxy_loki_get_rules", async function () {
@@ -528,10 +528,8 @@ suite("test_ui_api", function () {
           log.info("success criterion, leave waiting loop");
           return;
         } else {
-          log.info(
-            'response does not yet contain "tenantnamebar:\n%s',
-            resp.body
-          );
+          log.debug(`response: ${resp.body}`);
+          log.info('response does not yet contain "tenantnamebar"');
         }
       }
 
