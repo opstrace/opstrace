@@ -58,7 +58,8 @@ import {
   V1ChallengeResources,
   V1ClusterissuerResources,
   V1IssuerResources,
-  V1OrderResources
+  V1OrderResources,
+  V1Alpha1CortexResources
 } from "../custom-resources";
 
 import {
@@ -76,7 +77,8 @@ import {
   hasPrometheusChanged,
   hasCertificateChanged,
   hasClusterRoleChanged,
-  hasCustomResourceDefinitionChanged
+  hasCustomResourceDefinitionChanged,
+  hasCortexSpecChanged
 } from "../equality";
 
 import { entries } from "@opstrace/utils";
@@ -113,6 +115,7 @@ export type ReconcileResourceTypes = {
   ClusterIssuers: V1ClusterissuerResources;
   Issuers: V1IssuerResources;
   Orders: V1OrderResources;
+  Cortices: V1Alpha1CortexResources;
 };
 
 export function* reconcile(
@@ -152,6 +155,7 @@ export function* reconcile(
     ClusterIssuers: [],
     Issuers: [],
     Orders: [],
+    Cortices: [],
     ...actual
   };
   try {
@@ -164,7 +168,7 @@ export function* reconcile(
     // Add an annotation with the controller version. This is used to check if
     // the CRD requires an update since typescript fails at comparing the CRD
     // schemas.
-    desiredState.CustomResourceDefinitions.map((e) => {
+    desiredState.CustomResourceDefinitions.map(e => {
       e.setManagementVersion();
     });
 
@@ -463,6 +467,16 @@ export function* reconcile(
       desiredState.Orders,
       actualState.Orders,
       null,
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection
+    );
+
+    reconcileResourceType(
+      desiredState.Cortices,
+      actualState.Cortices,
+      (desired, existing) => hasCortexSpecChanged(desired, existing),
       null,
       createCollection,
       deleteCollection,

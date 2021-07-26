@@ -5,6 +5,7 @@
   "certManagerController": "quay.io/jetstack/cert-manager-controller:v1.2.0",
   "configApi": "opstrace/config-api:f88f81513f6268e74641c4a7c899f46a9e5ca33f",
   "cortex": "cortexproject/cortex:master-fde0a62",
+  "cortexOperator": "opstrace/cortex-operator:v2021.07.23",
   "cortexApiProxy": "opstrace/cortex-api:f88f81513f6268e74641c4a7c899f46a9e5ca33f",
   "ddApi": "opstrace/ddapi:f88f81513f6268e74641c4a7c899f46a9e5ca33f",
   "exporterAzure": "opstrace/azure_metrics_exporter:4f85a01",
