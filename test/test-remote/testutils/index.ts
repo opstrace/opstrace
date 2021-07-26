@@ -880,7 +880,7 @@ export async function waitForQueryResult<T>(
   queryFunc: { (): Promise<T> },
   // Callback for checking the result for an expected value, returning null if the query should retry
   testFunc: { (queryResponse: T): any | null },
-  maxWaitSeconds = 90,
+  maxWaitSeconds = 120,
   logQueryResponse = false
 ) {
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
@@ -891,7 +891,7 @@ export async function waitForQueryResult<T>(
 
   while (true) {
     if (mtime() > deadline) {
-      log.error("Reached %ss deadline, giving up", maxWaitSeconds);
+      log.error("Reached %s s deadline, giving up", maxWaitSeconds);
       break;
     }
 
@@ -920,7 +920,15 @@ export async function waitForQueryResult<T>(
       return testResult;
     }
 
-    await sleep(5.0);
+    // trade-off: snappiness and log volume. info-log every failed attempt,
+    // this has turned out real important for being able to understand and
+    // debug a test run's output.
+    const delayseconds = 8.0;
+    log.info(
+      "query response data not yet as expected, retry query in %s s",
+      delayseconds
+    );
+    await sleep(delayseconds);
   }
   throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
 }
