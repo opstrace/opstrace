@@ -60,6 +60,7 @@
  */
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import { pick } from "ramda";
 import { useDispatch } from "react-redux";
 import { Switch, Route, Redirect } from "react-router";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
@@ -67,7 +68,6 @@ import axios from "axios";
 import useAxios from "axios-hooks";
 
 import { setCurrentUser } from "state/user/actions";
-import { GeneralServerError } from "server/errors";
 
 import { loginUrl, makeUrl } from "client/components/withSession/paths";
 
@@ -204,7 +204,7 @@ const CreateSession = ({
   userLoadedSuccess: Function;
 }) => {
   const { user, getAccessTokenSilently } = useAuth0();
-  const [accessDenied, setAccessDenied] = useState(false);
+  const [errorResponse, setErrorResponse] = useState<{} | null>(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -226,11 +226,7 @@ const CreateSession = ({
         if (response.data?.currentUserId)
           userLoadedSuccess(response.data.currentUserId, true);
       } catch (e) {
-        if (GeneralServerError.isInstance(e.response.data)) {
-          setAccessDenied(true);
-        } else {
-          console.error(e);
-        }
+        setErrorResponse(pick(["data", "status", "statusText"])(e.response));
       }
     })();
   }, [
@@ -238,9 +234,9 @@ const CreateSession = ({
     getAccessTokenSilently,
     dispatch,
     userLoadedSuccess,
-    setAccessDenied
+    setErrorResponse
   ]);
 
-  if (accessDenied) return <AccessDeniedPage />;
+  if (errorResponse) return <AccessDeniedPage data={errorResponse} />;
   else return <LoadingPage stage="create-session" />;
 };
