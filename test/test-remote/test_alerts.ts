@@ -386,7 +386,8 @@ async function testE2EAlertsForTenant(cortexBaseUrl: string, authTokenFilepath: 
     if (mtime() > deadline) {
       throw new Error("Failed to get non-zero alerts metric value after 300s. Are alerts successfully reaching the e2ealerting pod?");
     }
-    await sleep(1.0);
+
+    await sleep(15.0);
   }
 
   log.info("Deleting E2E alerts webhook");
