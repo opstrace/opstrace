@@ -19,13 +19,15 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 import { loginUrl } from "client/components/withSession/paths";
 
+import { CondRender } from "client/utils/rendering";
+
 import { Page } from "client/components/Page";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
 import { ErrorView } from "client/components/Error";
 
-export const AccessDeniedPage = () => {
+export const AccessDeniedPage = ({ data }: { data: {} }) => {
   const { user, logout } = useAuth0();
   return (
     <Page centered height="100vh" width="100vw">
@@ -58,6 +60,13 @@ export const AccessDeniedPage = () => {
           </Button>
         </Box>
       </ErrorView>
+
+      <CondRender when={process.env.BUILDKITE === "true"}>
+        <ErrorView title="" subheader="" actions={null} maxWidth={800}>
+          <Typography variant="h5">Error response</Typography>
+          <pre>{JSON.stringify(data, null, 1)}</pre>
+        </ErrorView>
+      </CondRender>
     </Page>
   );
 };
