@@ -404,7 +404,7 @@ export function enrichHeadersWithAuthTokenFile(
     // shortcut: skip addition if file is not configured
     return headers;
   }
-  log.info("read token from %s", authTokenFilepath);
+  log.debug("read token from %s", authTokenFilepath);
   const tenantAuthToken = fs
     .readFileSync(authTokenFilepath, {
       encoding: "utf8"
