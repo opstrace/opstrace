@@ -89,7 +89,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
     const series = new MetricSeries({
       metricName: mname,
       n_entries_per_stream_fragment: 50,
-      starttime: now,
+      starttime: now.minusMinutes(30),
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
       metrics_time_increment_ms: 1000,
