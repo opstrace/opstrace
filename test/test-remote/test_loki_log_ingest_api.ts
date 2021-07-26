@@ -610,7 +610,7 @@ suite("Loki API test suite", function () {
       const streamname = `${nameprefix}-${i.toString().padStart(4, "0")}`;
 
       const stream = new LogSeries({
-        n_entries_per_stream_fragment: 5 * 10 ** 3,
+        n_entries_per_stream_fragment: 4 * 10 ** 3,
         n_chars_per_msg: 90,
         starttime: ZonedDateTime.now(),
         uniqueName: streamname,
