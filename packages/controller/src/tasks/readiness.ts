@@ -67,11 +67,11 @@ function resourceStatusLogMessage(
   ) {
     // Each entry contains diagnostic info around e.g. waiting for a replicaset to roll out
     // Log the status of the remaining items when there are only a few left
-    return `Waiting for ${rolloutMessages} active ${resourceType}s:\n- ${rolloutMessages.join(
+    return `Waiting for ${rolloutMessages.length} active ${resourceType}s:\n- ${rolloutMessages.join(
       "\n- "
     )}`;
   } else {
-    return `Waiting for ${rolloutMessages} active ${resourceType}s`;
+    return `Waiting for ${rolloutMessages.length} active ${resourceType}s`;
   }
 }
 
