@@ -688,7 +688,7 @@ test-browser:
 		-e OPSTRACE_INSTANCE_DNS_NAME \
 		-e OPSTRACE_AUTH_METHOD=test \
 		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
- 			yarn playwright test --workers 1 --forbid-only --retries 1
+ 			yarn playwright test --workers 2 --forbid-only --retries 1
 
 
 # Used by CI:
