@@ -82,14 +82,14 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
   });
 
   test("dummyseries short write, smoke read", async function () {
-    const now = ZonedDateTime.now().withNano(0);
+    const starttime = ZonedDateTime.now().withNano(0).minusMinutes(30);
     const uniquevalue = `test-remote-${rndstring(5)}`;
     const mname = `test_metric_${rndstring(4)}`;
 
     const series = new MetricSeries({
       metricName: mname,
       n_entries_per_stream_fragment: 50,
-      starttime: now.minusMinutes(30),
+      starttime: starttime,
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
       metrics_time_increment_ms: 1000,
@@ -103,8 +103,8 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       enrichHeadersWithAuthToken(burl, {})
     );
 
-    const searchStart = now.minusMinutes(5);
-    const searchEnd = now.plusMinutes(5);
+    const searchStart = starttime.minusMinutes(5);
+    const searchEnd = starttime.plusMinutes(5);
     const queryParams = {
       query: `${mname}{uniquename="${uniquevalue}"}`,
       start: searchStart.toEpochSecond().toString(),
