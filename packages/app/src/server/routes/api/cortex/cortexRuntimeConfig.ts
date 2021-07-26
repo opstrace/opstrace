@@ -36,8 +36,7 @@ try {
     KUBECONFIG.loadFromCluster();
   }
 } catch (err) {
-  log.error("failed to load kubeconfig");
-  process.exit(1);
+  log.error(`graceful degradation, failed to load kubeconfig: ${err}`);
 }
 
 const DATA_KEY = "runtime-config.yaml";

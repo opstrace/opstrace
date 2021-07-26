@@ -20,7 +20,7 @@ import { GeneralServerError } from "server/errors";
 import authRequired from "server/middleware/auth";
 
 import createAuthHandler from "./authentication";
-import pubUiCfgHandler from "./uicfg";
+import { pubUiCfgHandler, buildInfoHandler } from "./uicfg";
 import createGraphqlHandler from "./graphql";
 import createCortexHandler from "./cortex";
 import createLokiHandler from "./loki";
@@ -29,6 +29,7 @@ function createAPIRoutes(): express.Router {
   const api = express.Router();
   api.use("/auth", createAuthHandler());
   api.use("/public-ui-config", pubUiCfgHandler);
+  api.use("/buildinfo", buildInfoHandler);
 
   // Authentication required
   api.use("/graphql", authRequired, createGraphqlHandler());

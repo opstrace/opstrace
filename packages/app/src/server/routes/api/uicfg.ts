@@ -17,16 +17,28 @@
 import env from "server/env";
 import { NextFunction, Request, Response } from "express";
 
+import { BUILD_INFO } from "@opstrace/utils";
+
 export const auth0Config = {
   auth0_client_id: env.AUTH0_CLIENT_ID,
   auth0_domain: env.AUTH0_DOMAIN
 };
 
-export default function pubUiCfgHandler(
+export function pubUiCfgHandler(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   res.status(200).json(auth0Config);
+  return;
+}
+
+// require authentication?
+export function buildInfoHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  res.status(200).json(BUILD_INFO);
   return;
 }

@@ -39,7 +39,10 @@ import {
 } from "..";
 
 import { logDifference } from "./general";
-import { V1CertificateResource } from "../custom-resources";
+import {
+  V1Alpha1CortexResource,
+  V1CertificateResource
+} from "../custom-resources";
 import { isCertificateEqual } from "./Certificate";
 import { log } from "@opstrace/utils";
 
@@ -377,6 +380,18 @@ export const hasCustomResourceDefinitionChanged = (
     // like the CRD schema and it'll stall for a few seconds for each CRD it
     // compares
     log.debug(`CRD ${desired.spec.metadata?.name} requires update`);
+    return true;
+  }
+
+  return false;
+};
+
+export const hasCortexSpecChanged = (
+  desired: V1Alpha1CortexResource,
+  existing: V1Alpha1CortexResource
+): boolean => {
+  if (!isDeepStrictEqual(desired.spec.spec, existing.spec.spec)) {
+    logDifference("", desired.spec.spec, existing.spec.spec);
     return true;
   }
 
