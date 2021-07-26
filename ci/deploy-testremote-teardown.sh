@@ -188,7 +188,7 @@ teardown() {
     fi
 
     # Exit this program with the exit code of `test-remote`.
-    echo "* teardown() finished. Exit with last exitcode before entering teardown(): $LAST_EXITCODE_BEFORE_TEARDOWN"
+    echo "--- teardown() finished. Exit with last exitcode before entering teardown(): $LAST_EXITCODE_BEFORE_TEARDOWN"
 
     # echo "the N largest files and directories in pwd"
     # pwd

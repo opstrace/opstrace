@@ -16,8 +16,8 @@ Highlights:
 * Horizontally **scalable**.
 * Inexpensive **long-term** retention of observability data.
 * Rigoriously **tested** end-to-end.
-* Large efforts towards confident **upgrades**.
-* **Secure** by default with TLS and authenticated endpoints.
+* Easy and reliable **upgrades**.
+* **Secure** by default with [TLS](https://letsencrypt.org) and authenticated endpoints.
 * **Easy to configure** with GUIs and APIs.
 
 We walk on the shoulders of giants; Opstrace uses open source projects you know and love:
@@ -25,8 +25,10 @@ We walk on the shoulders of giants; Opstrace uses open source projects you know 
 * [Cortex](https://github.com/cortexproject/cortex)
 * [Loki](https://github.com/grafana/loki)
 * [Grafana](https://github.com/grafana/grafana)
-* [Prometheus](https://github.com/prometheus/prometheus)
+* [Hasura](https://github.com/hasura/graphql-engine)
 * [Kubernetes](https://github.com/kubernetes/kubernetes)
+* [Prometheus](https://github.com/prometheus/prometheus)
+* [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
 * and many more
 
 ## Key Features
@@ -47,7 +49,7 @@ EOF
 ```text
 $ ./opstrace create aws tracy -c config.yaml
 ...
-info: cluster creation finished: tracy (aws)
+info: create operation finished: tracy (aws)
 info: Log in here: https://tracy.opstrace.io
 ```
 
@@ -57,15 +59,17 @@ A week later...
 $ curl -L https://go.opstrace.com/cli-latest-release-macos | tar xjf -
 $ ./opstrace upgrade aws tracy -c config.yaml
 ...
-info: Opstrace cluster upgrade done for tracy (aws)
+info: upgrade operation finished for tracy (aws)
 ```
 
 ### Alert Management
 
 Alertmanager can be difficult to configure, especially [for Cortex](https://cortexmetrics.io/docs/architecture/#alertmanager) when multiple tenants are used.
-Our goal is to improve this with editors that provide real-time validation feedback:
+Opstrace configures a horizontally scalable Ruler and Alertmanager out of the box to support reliable alerts.
+It also deploys a Grafana instance for each tenant, which can be now used to manage Cortex/Loki alerts thanks now to [Grafana 8's Unified Alerting](https://grafana.com/blog/2021/06/14/the-new-unified-alerting-system-for-grafana-everything-you-need-to-know/) feature.
+Before, you'd have to manage each of these components independently, keeping them in sync manually.
 
-![alertmanager configuration ui](https://p95.p4.n0.cdn.getcloudapp.com/items/eDuy9lnR/1a7a1030-4b27-4dfc-bf52-774f9f61d365.jpg?v=d0e8968befa6e0e3e1922594e61f9189)
+![opstrace ui alert overview](docs/assets/alerts-overview.jpg)
 
 ### Tenant Management
 

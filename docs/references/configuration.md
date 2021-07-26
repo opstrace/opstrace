@@ -212,7 +212,7 @@ Use this when you want to log in to the web UI of your Opstrace instance via you
 
 This makes sense especially when you would like to connect to a special identity provider, and is obligatory when using a `custom_dns_name` (see above).
 
-TODO
+<!-- TODO -->
 
 *Default:* undefined
 
@@ -224,8 +224,7 @@ TODO
 custom_auth0_client_id: 1333337
 ```
 
-TODO
-
+<!-- TODO -->
 
 ### `controller_image`
 

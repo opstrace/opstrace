@@ -602,7 +602,7 @@ suite("Loki API test suite", function () {
   });
 
   test("long dummystream insert, validate via query", async function () {
-    const N_concurrent_streams = 5;
+    const N_concurrent_streams = 3;
     const nameprefix = `test-remote-ldi-${rndstring(6)}`;
 
     const streams = [];
@@ -610,7 +610,7 @@ suite("Loki API test suite", function () {
       const streamname = `${nameprefix}-${i.toString().padStart(4, "0")}`;
 
       const stream = new LogSeries({
-        n_entries_per_stream_fragment: 10 ** 4,
+        n_entries_per_stream_fragment: 4 * 10 ** 3,
         n_chars_per_msg: 90,
         starttime: ZonedDateTime.now(),
         uniqueName: streamname,

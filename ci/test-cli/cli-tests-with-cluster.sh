@@ -41,6 +41,8 @@ test_list() {
 }
 
 test_tenant_authenticator_custom_keypair_flow() {
+
+  echo "+++ test_tenant_authenticator_custom_keypair_flow"
   set -o xtrace
 
   ./build/bin/opstrace ta-pubkeys-list ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \

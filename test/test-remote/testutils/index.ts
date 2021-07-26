@@ -404,7 +404,7 @@ export function enrichHeadersWithAuthTokenFile(
     // shortcut: skip addition if file is not configured
     return headers;
   }
-  log.info("read token from %s", authTokenFilepath);
+  log.debug("read token from %s", authTokenFilepath);
   const tenantAuthToken = fs
     .readFileSync(authTokenFilepath, {
       encoding: "utf8"
@@ -821,45 +821,39 @@ export function logHTTPResponseLight(resp: GotResponse) {
 // Generic HTTP timeout settings object for HTTP requests made with `got`. Note
 // that every time that this test suite fires off an HTTP request we should
 // timeout-control the individual request phases (by default `got` waits
-// indefinitely, in every phase of the request). For that, either use the
-// following generic settings or some more specific settings adjusted to the
-// test. Ref: https://www.npmjs.com/package/got/v/9.6.0#timeout
+// indefinitely, in every phase of the request). There is no one-size fits all
+// solution. This here is optimized for HTTP requests that _should_ be snappy,
+// i.e. where the request is _small_, and where the response generation is
+// expected to take O(1 s) or less. If a test triggers an HTTP
+// request where response generation is known to take a 'long' time then this
+// should be overridden test-locally.
 export const httpTimeoutSettings = {
   // If a TCP connect() takes longer then ~5 seconds then most certainly there
-  // is a networking issue, fail fast in that case.
-  connect: 10000,
-  request: 60000
+  // is a networking issue, fail fast in that case (whether or not to retry
+  // needs to be decided on a test-by-test basis, do not use the got-internal
+  // retrying here)
+  connect: 6000,
+  // After TCP-connect, this controls the time it takes for the TLS handshake
+  secureConnect: 5000,
+  // after (secure)connect, require request to be written to connection within
+  // ~10 seconds.
+  send: 6000,
+  // After having written the request, expect response _headers_ to arrive
+  // within that time (not the complete response).
+  response: 10000,
+  // global timeout, supposedly until final response byte arrived.
+  request: 15000
 };
 
+/**
+ * Return object (deserialized JSON response body) or throw an error
+ */
 export async function queryJSONAPI(url: string, queryParams: URLSearchParams) {
-  /* Notes, in no particular order:
-
-  - test deprecated /api/prom/query endpoint
-    https://github.com/grafana/loki/blob/master/docs/api.md#get-apipromquery
-    this resembles a query parameter set as constructed by the Grafana Explore
-    UI.
-
-  - Ideal would be: do not perform any kind of response body decoding within
-    got's HTTP client implementation, do this explicitly after retrieving the
-    response data as a byte sequence (into a Buffer), and then decode it
-    explicitly first to text using e.g. response.body.toString("utf-8") and
-    then as JSON doc. In the future use got 10 (currently 10.0.0-beta2, so a
-    little early) because of the buffer goodness:
-    https://github.com/sindresorhus/got/issues/949
-
-  - Do not magically throw an error upon receiving a non-2xx response. Leave
-    this to the test business logic.
-
-  - Note that Loki seems to set `'Content-Type': 'text/plain; charset=utf-8'`
-    even when it sends a JSON document in the response body. Submit a bug
-    report, and at some point test that this is not the case anymore here.
-  */
-
-  // Automagically enrich with Authorization header, if applicable.
   const headers = enrichHeadersWithAuthToken(url, {});
 
   const options = {
     throwHttpErrors: false,
+    retry: 0,
     searchParams: queryParams,
     timeout: httpTimeoutSettings,
     headers: headers,
@@ -886,7 +880,7 @@ export async function waitForQueryResult<T>(
   queryFunc: { (): Promise<T> },
   // Callback for checking the result for an expected value, returning null if the query should retry
   testFunc: { (queryResponse: T): any | null },
-  maxWaitSeconds = 30,
+  maxWaitSeconds = 120,
   logQueryResponse = false
 ) {
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
@@ -897,7 +891,7 @@ export async function waitForQueryResult<T>(
 
   while (true) {
     if (mtime() > deadline) {
-      log.error("Reached %ss deadline, giving up", maxWaitSeconds);
+      log.error("Reached %s s deadline, giving up", maxWaitSeconds);
       break;
     }
 
@@ -926,7 +920,15 @@ export async function waitForQueryResult<T>(
       return testResult;
     }
 
-    await sleep(5.0);
+    // trade-off: snappiness and log volume. info-log every failed attempt,
+    // this has turned out real important for being able to understand and
+    // debug a test run's output.
+    const delayseconds = 8.0;
+    log.info(
+      "query response data not yet as expected, retry query in %s s",
+      delayseconds
+    );
+    await sleep(delayseconds);
   }
   throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
 }
