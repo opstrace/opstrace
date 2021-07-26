@@ -27,7 +27,7 @@ export async function waitForCortexMetricResult(
   // What's our latency goal here? Upper pipeline latency limit? As of writing
   // this code I have seen this latency to vary between about 2 seconds and 12
   // seconds.
-  maxWaitSeconds = 30,
+  maxWaitSeconds = 90,
   logQueryResponse = false
 ) {
   const url = `${cortexBaseUrl}/api/v1/${queryUrlSuffix}`;

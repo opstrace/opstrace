@@ -821,14 +821,28 @@ export function logHTTPResponseLight(resp: GotResponse) {
 // Generic HTTP timeout settings object for HTTP requests made with `got`. Note
 // that every time that this test suite fires off an HTTP request we should
 // timeout-control the individual request phases (by default `got` waits
-// indefinitely, in every phase of the request).
+// indefinitely, in every phase of the request). There is no one-size fits all
+// solution. This here is optimized for HTTP requests that _should_ be snappy,
+// i.e. where the request is _small_, and where the response generation is
+// expected to take O(1 s) or less. If a test triggers an HTTP
+// request where response generation is known to take a 'long' time then this
+// should be overridden test-locally.
 export const httpTimeoutSettings = {
   // If a TCP connect() takes longer then ~5 seconds then most certainly there
   // is a networking issue, fail fast in that case (whether or not to retry
   // needs to be decided on a test-by-test basis, do not use the got-internal
   // retrying here)
-  connect: 8000,
-  request: 30000
+  connect: 6000,
+  // After TCP-connect, this controls the time it takes for the TLS handshake
+  secureConnect: 5000,
+  // after (secure)connect, require request to be written to connection within
+  // ~10 seconds.
+  send: 6000,
+  // After having written the request, expect response _headers_ to arrive
+  // within that time (not the complete response).
+  response: 10000,
+  // global timeout, supposedly until final response byte arrived.
+  request: 15000
 };
 
 /**
@@ -866,7 +880,7 @@ export async function waitForQueryResult<T>(
   queryFunc: { (): Promise<T> },
   // Callback for checking the result for an expected value, returning null if the query should retry
   testFunc: { (queryResponse: T): any | null },
-  maxWaitSeconds = 30,
+  maxWaitSeconds = 90,
   logQueryResponse = false
 ) {
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
