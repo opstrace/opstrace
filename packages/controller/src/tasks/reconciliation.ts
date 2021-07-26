@@ -52,6 +52,7 @@ import { TenantResources } from "../resources/tenants";
 
 import { getControllerConfig } from "../helpers";
 import { setToReady } from "./kubernetesReadinessProbe";
+import { CortexOperatorResources } from "../resources/cortex-operator";
 
 export function* reconciliationLoop(
   kubeConfig: KubeConfig
@@ -94,7 +95,6 @@ export function* reconciliationLoop(
     desired.add(LokiResources(state, kubeConfig, "loki"));
     desired.add(MonitoringResources(state, kubeConfig, "monitoring"));
     desired.add(APIResources(state, kubeConfig));
-    desired.add(MemcacheResources(state, kubeConfig, "cortex"));
     desired.add(CortexResources(state, kubeConfig, "cortex"));
     desired.add(IngressResources(state, kubeConfig, "ingress"));
     desired.add(
@@ -109,6 +109,9 @@ export function* reconciliationLoop(
     desired.add(RedisResources(state, kubeConfig, "application"));
     desired.add(TenantResources(state, kubeConfig, "ingress", "https-cert"));
     desired.add(IntegrationResources(state, kubeConfig));
+    desired.add(
+      CortexOperatorResources(state, kubeConfig, "cortex-operator-system")
+    );
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);
 

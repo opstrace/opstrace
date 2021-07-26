@@ -46,3 +46,5 @@ export * from "./v1beta1issuer";
 export * from "./v1alpha2order";
 export * from "./v1alpha3order";
 export * from "./v1beta1order";
+
+export * from "./v1alpha1cortex";

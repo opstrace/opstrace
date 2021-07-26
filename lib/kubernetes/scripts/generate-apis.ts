@@ -27,7 +27,8 @@ import {
   issuers,
   orders,
   probe,
-  thanosruler
+  thanosruler,
+  cortices
 } from "../src/crds";
 
 import { GenerateCodeForCRD } from "./apigen";
@@ -47,7 +48,8 @@ const outDir = `${__dirname}/../src/custom-resources`;
   prometheusrule,
   servicemonitor,
   probe,
-  thanosruler
+  thanosruler,
+  cortices
 ].map(async crd => {
   try {
     await GenerateCodeForCRD(crd, outDir);

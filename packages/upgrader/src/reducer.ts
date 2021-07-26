@@ -22,7 +22,9 @@ import {
   deploymentsReducer,
   daemonSetsReducer,
   configMapsReducer,
-  V1CertificateReducer
+  V1CertificateReducer,
+  servicesReducer,
+  serviceAccountsReducer
 } from "@opstrace/kubernetes";
 
 export const rootReducers = {
@@ -33,7 +35,9 @@ export const rootReducers = {
       DaemonSets: daemonSetsReducer,
       PersistentVolumes: persistentVolumesReducer,
       ConfigMaps: configMapsReducer,
-      Certificates: V1CertificateReducer
+      Certificates: V1CertificateReducer,
+      Services: servicesReducer,
+      ServiceAccounts: serviceAccountsReducer
     })
   })
 };
