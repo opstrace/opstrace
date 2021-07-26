@@ -12,7 +12,7 @@
   "author": "",
   "license": "",
   "devDependencies": {
-    "@playwright/test": "1.12.3",
+    "@playwright/test": "1.13.0",
     "@types/node": "^14.14.7",
     "@types/ramda": "^0.27.38",
     "ramda": "^0.27.1",
@@ -22,7 +22,7 @@
     "winston": "^3.3.3"
   },
   "scripts": {
-    "lint": "eslint . --ext .ts --quiet",
-    "pw:localhost": "OPSTRACE_INSTANCE_DNS_NAME=\"localhost:3000\" OPSTRACE_CLUSTER_INSECURE=true OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts"
+    "pw:localhost": "OPSTRACE_INSTANCE_DNS_NAME=\"localhost:3000\" OPSTRACE_CLUSTER_INSECURE=true OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
+    "lint": "eslint . --ext .ts --quiet"
   }
 }

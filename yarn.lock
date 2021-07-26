@@ -3198,10 +3198,10 @@
   resolved "https://registry.yarnpkg.com/@panva/asn1.js/-/asn1.js-1.0.0.tgz#dd55ae7b8129e02049f009408b97c61ccf9032f6"
   integrity sha512-UdkG3mLEqXgnlKsWanWcgb6dOjUzJ+XC5f+aWw30qrtjxeNUSfKX1cd5FBzOaXQumoe9nIqeZUvrRJS03HCCtw==
 
-"@playwright/test@1.12.3":
-  version "1.12.3"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.12.3.tgz#178e5d84e4c97c339dd315bd265ab1af39275ef0"
-  integrity sha512-e8i8rMqd1nhdyW2ELShOc5F2EiLIcZs+2LRglrCAy/nzftpLdAqfsk6gp29n8N5KExIlzpKdoQ5QBviqGzT9DA==
+"@playwright/test@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.13.0.tgz#d22fa9f02c17758f7cb6178be3e22462c4357582"
+  integrity sha512-pT9GTQ1eaxdxycnGg4ZANxGZsu4bzN6M8eRzcDxTprJUWZDBqZknGImOFKMRkHB+YhS8UJRuJ6YpPfZaNL2RLw==
   dependencies:
     "@babel/code-frame" "^7.12.13"
     "@babel/core" "^7.14.0"
