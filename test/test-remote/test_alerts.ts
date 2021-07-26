@@ -313,7 +313,14 @@ async function getE2EAlertCountMetric(cortexBaseUrl: string, uniqueScrapeJobName
   );
 
   const value = resultArray[0]["value"][1];
-  log.info(`Got alert count value: ${value}`, value);
+
+  // debug-log for 0 to reduce verbosity
+  if (value === 0) {
+    log.debug(`Got alert count value: ${value}`);
+  } else {
+    log.info(`Got alert count value: ${value}`);
+  }
+
   return value;
 }
 
@@ -378,13 +385,15 @@ async function testE2EAlertsForTenant(cortexBaseUrl: string, authTokenFilepath: 
   log.info(`Waiting for cortex E2E alerting metric for tenant=${tenant} job=${uniqueScrapeJobName} with nonzero value`);
   const deadline = mtimeDeadlineInSeconds(300);
   while (true) {
+    if (mtime() > deadline) {
+      throw new Error(
+        "Failed to get non-zero alerts metric value after 300s. Are alerts successfully reaching the e2ealerting pod?"
+      );
+    }
     const value = await getE2EAlertCountMetric(cortexBaseUrl, uniqueScrapeJobName);
     if (value !== "0") {
       log.info(`Got alerts metric value: ${value}`);
       break;
-    }
-    if (mtime() > deadline) {
-      throw new Error("Failed to get non-zero alerts metric value after 300s. Are alerts successfully reaching the e2ealerting pod?");
     }
 
     await sleep(15.0);
