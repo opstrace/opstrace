@@ -84,7 +84,9 @@ import {
   V1ChallengeResource,
   V1ClusterissuerResource,
   V1IssuerResource,
-  V1OrderResource
+  V1OrderResource,
+  isV1Alpha1CortexResource,
+  V1Alpha1CortexResource
 } from "../custom-resources";
 
 type ReduceCollectionType = {
@@ -117,6 +119,7 @@ type ReduceCollectionType = {
   ClusterIssuers: V1ClusterissuerResource[];
   Issuers: V1IssuerResource[];
   Orders: V1OrderResource[];
+  Cortices: V1Alpha1CortexResource[];
 };
 
 export const reduceCollection = (
@@ -150,7 +153,8 @@ export const reduceCollection = (
   Challenges: resources.filter(isV1ChallengeResource),
   ClusterIssuers: resources.filter(isV1ClusterissuerResource),
   Issuers: resources.filter(isV1IssuerResource),
-  Orders: resources.filter(isV1OrderResource)
+  Orders: resources.filter(isV1OrderResource),
+  Cortices: resources.filter(isV1Alpha1CortexResource)
 });
 
 type ResourceMap = ReturnType<typeof reduceCollection>;

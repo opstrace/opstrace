@@ -51,7 +51,9 @@ export function* runInformers(
       k8s.PersistentVolume.startInformer(kubeConfig, channel),
       k8s.StatefulSet.startInformer(kubeConfig, channel),
       k8s.StatefulSet.startInformer(kubeConfig, channel),
-      k8s.ConfigMap.startInformer(kubeConfig, channel)
+      k8s.ConfigMap.startInformer(kubeConfig, channel),
+      k8s.Service.startInformer(kubeConfig, channel),
+      k8s.ServiceAccount.startInformer(kubeConfig, channel)
     ];
 
     // return the unsubscribe function for eventChannel. This will be called when the channel
@@ -88,7 +90,9 @@ export function* blockUntilCacheHydrated(): Generator<
       Deployments,
       PersistentVolumes,
       StatefulSets,
-      ConfigMaps
+      ConfigMaps,
+      Services,
+      ServiceAccounts
     } = kubernetes.cluster;
 
     if (
@@ -96,12 +100,14 @@ export function* blockUntilCacheHydrated(): Generator<
       Deployments.loaded &&
       PersistentVolumes.loaded &&
       StatefulSets.loaded &&
-      ConfigMaps.loaded
+      ConfigMaps.loaded &&
+      Services.loaded &&
+      ServiceAccounts.loaded
     ) {
       log.info(`kubernetes cache is hydrated`);
       break;
     }
     log.info(`waiting for the kubernetes cache to hydrate...`);
-    yield delay(1 * SECOND);
+    yield delay(3 * SECOND);
   }
 }
