@@ -24,9 +24,10 @@ const testNoAuth = test;
 
 testWithAuth.describe("debugging", () => {
   testWithAuth.skip();
-  testWithAuth.beforeEach(restoreLogin);
+  // testWithAuth.beforeEach(restoreLogin);
 
-  testWithAuth("this should FAIL all the time", async ({ page }) => {
+  testWithAuth("this should FAIL all the time", async props => {
+    await restoreLogin(props);
     expect(false).toBeTruthy();
   });
 });
