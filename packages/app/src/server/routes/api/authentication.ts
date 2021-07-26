@@ -53,7 +53,7 @@ function createAuthHandler(): express.Router {
   // endpoint for creating a session so we don't have to
   // pass JWTs to every API request.
   auth.post("/session", checkJwt, async (req, res, next) => {
-    const { data: user } = await axios.get(
+    const { data: userinfo } = await axios.get(
       `https://${env.AUTH0_DOMAIN}/userinfo`,
       {
         headers: {
@@ -63,26 +63,28 @@ function createAuthHandler(): express.Router {
       }
     );
 
-    const email = user.email;
-    const avatar = user.picture || "";
+    const email = userinfo.email;
+    const avatar = userinfo.picture || "";
     const username = (
-      user.nickname ||
-      user.username ||
-      user.given_name ||
-      user.name ||
+      userinfo.nickname ||
+      userinfo.username ||
+      userinfo.given_name ||
+      userinfo.name ||
       ""
     ).toLowerCase();
 
     if (!email || !username || !avatar) {
       return next(new GeneralServerError(400, "incomplete payload"));
     }
-    // check if user exists in db
+
+    let user = undefined;
     try {
+      // check if user exists in db
       const response = await graphqlClient.GetActiveUserForAuth({
         email: email
       });
       let activeUserCount = response.data?.active_user_count?.aggregate?.count;
-      let user = response.data?.user[0];
+      user = response.data?.user[0];
 
       if (activeUserCount === 0) {
         // if there are no active users then the first in gets setup with a user record, all subsequent "users" from auth0 are blocked
