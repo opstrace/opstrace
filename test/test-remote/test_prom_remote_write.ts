@@ -123,12 +123,20 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
   });
 
   test("dummyseries short write, fetchAndValidate", async function () {
-    const now = ZonedDateTime.now(ZoneOffset.UTC).withNano(0);
+    // Start dummy time series 30 minutes in the past. Note that I have seen
+    // this to somehow not work properly, resulting in starttime being 'now',
+    // resulting in 'Delay fragment generation.', consuming 5 mins in this
+    // test suite needlessly -- enhance debuggability.
+    const starttime = ZonedDateTime.now(ZoneOffset.UTC)
+      .withNano(0)
+      .minusMinutes(30);
+
+    log.info("desired time series start time: %s", starttime);
     const uniquevalue = `test-remote-${rndstring(5)}`;
     const series = new MetricSeries({
       metricName: `test_metric_${rndstring(4)}`,
       n_entries_per_stream_fragment: 50,
-      starttime: now.minusMinutes(30),
+      starttime: starttime,
       //starttime: now,
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
