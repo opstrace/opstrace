@@ -49,53 +49,63 @@ function* getRunningReporterResources() {
   });
 }
 
+// Maximum number of active items where we will log their statuses.
+const activeNamesMax = 5;
+
 let activeDeployments = -1;
 let activeDaemonSets = -1;
 let activeStatefulSets = -1;
 let activeCertificates = -1;
 
+function resourceStatusLogMessage(
+  resourceType: string,
+  rolloutMessages: string[]
+): string {
+  if (
+    rolloutMessages.length <= activeNamesMax &&
+    rolloutMessages.length !== 0
+  ) {
+    // Each entry contains diagnostic info around e.g. waiting for a replicaset to roll out
+    // Log the status of the remaining items when there are only a few left
+    return `Waiting for ${rolloutMessages} active ${resourceType}s:\n- ${rolloutMessages.join(
+      "\n- "
+    )}`;
+  } else {
+    return `Waiting for ${rolloutMessages} active ${resourceType}s`;
+  }
+}
+
 function* handleRunningReporterChange(e: RunningReporterChangeEvent) {
   //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   return yield call(function () {
-    //const state: State = yield select();
-    //const { name } = getControllerConfig(state);
-
     if (
       activeDeployments === -1 ||
       activeDeployments !== e.activeDeployments.length
     ) {
-      log.info(`Waiting for ${e.activeDeployments.length} active Deployments`);
+      log.info(resourceStatusLogMessage("Deployment", e.activeDeployments));
       activeDeployments = e.activeDeployments.length;
     }
     if (
       activeDaemonSets === -1 ||
       activeDaemonSets !== e.activeDaemonSets.length
     ) {
-      log.info(`Waiting for ${e.activeDaemonSets.length} active DaemonSets`);
+      log.info(resourceStatusLogMessage("DaemonSet", e.activeDaemonSets));
       activeDaemonSets = e.activeDaemonSets.length;
     }
     if (
       activeStatefulSets === -1 ||
       activeStatefulSets !== e.activeStatefulSets.length
     ) {
-      log.info(
-        `Waiting for ${e.activeStatefulSets.length} active StatefulSets`
-      );
+      log.info(resourceStatusLogMessage("StatefulSet", e.activeStatefulSets));
       activeStatefulSets = e.activeStatefulSets.length;
     }
     if (
       activeCertificates === -1 ||
       activeCertificates !== e.activeCertificates.length
     ) {
-      log.info(
-        `Waiting for ${e.activeCertificates.length} active Certificates`
-      );
+      log.info(resourceStatusLogMessage("Certificate", e.activeCertificates));
       activeCertificates = e.activeCertificates.length;
     }
-    // yield call(patch, name, {
-    //   heartbeat: Date.now(),
-    //   controllerReady: e.ready
-    // });
   });
 }
 
@@ -120,9 +130,18 @@ function* handleDestroyingReporterChange(e: DestroyingReporterChangeEvent) {
     //const state: State = yield select();
     //const { name, controllerTerminated } = getControllerConfig(state);
 
-    log.info(
-      `Waiting for ${e.remainingPersistentVolumes.length} PersistentVolumes to be released`
-    );
+    if (
+      e.remainingPersistentVolumes.length <= activeNamesMax &&
+      e.remainingPersistentVolumes.length !== 0
+    ) {
+      log.info(
+        `Waiting for ${e.remainingPersistentVolumes.length} PersistentVolumes to be released`
+      );
+    } else {
+      log.info(
+        `Waiting for ${e.remainingPersistentVolumes.length} PersistentVolumes to be released`
+      );
+    }
     // Update status only if we haven't already terminated
     // This will ensure we don't write a patch unnecessarily (or in the worst case, when we've accidentally left
     // the controller running locally after we've run `make stack-destroy` and destroyed the stack already)
