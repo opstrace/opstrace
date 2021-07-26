@@ -41,7 +41,7 @@ export async function waitForCortexMetricResult(
     JSON.stringify(queryParams, Object.keys(queryParams).sort(), 2)
   );
   const qparms = new URLSearchParams(queryParams);
-  log.info("Cortex query parameters (query string):\n%s", qparms);
+  log.debug("Cortex query parameters (query string):\n%s", qparms);
 
   return waitForQueryResult(
     () => queryJSONAPI(url, qparms),
