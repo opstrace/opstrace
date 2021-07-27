@@ -23,7 +23,7 @@ const testWithAuth = useFixtures("auth");
 const testNoAuth = test;
 
 testWithAuth.describe("debugging", () => {
-  testWithAuth.skip();
+  testWithAuth.skip(true, "for debugging only");
   testWithAuth.beforeEach(restoreLogin);
 
   testWithAuth("this should FAIL all the time", async () => {
@@ -32,7 +32,7 @@ testWithAuth.describe("debugging", () => {
 });
 
 testNoAuth.describe("debugging - no auth", () => {
-  testNoAuth.skip();
+  testNoAuth.skip(true, "for debugging only");
   testNoAuth(
     "can I manually login this way?",
     async ({ page, cluster, user }) => {
