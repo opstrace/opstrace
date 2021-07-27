@@ -23,19 +23,19 @@ const testWithAuth = useFixtures("auth");
 const testNoAuth = test;
 
 testWithAuth.describe("debugging", () => {
-  testWithAuth.skip(true, "for debugging only");
   testWithAuth.beforeEach(restoreLogin);
 
   testWithAuth("this should FAIL all the time", async () => {
+    testWithAuth.skip(true, "for debugging only");
     expect(false).toBeTruthy();
   });
 });
 
 testNoAuth.describe("debugging - no auth", () => {
-  testNoAuth.skip(true, "for debugging only");
   testNoAuth(
     "can I manually login this way?",
     async ({ page, cluster, user }) => {
+      testNoAuth.skip(true, "for debugging only");
       await page.goto(cluster.baseUrl);
 
       // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
