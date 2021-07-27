@@ -308,8 +308,7 @@ async function getE2EAlertCountMetric(
   const resultArray = await waitForCortexMetricResult(
     cortexBaseUrl,
     queryParams,
-    "query",
-    30 // timeout
+    "query"
   );
 
   // Sanity check: label should match
