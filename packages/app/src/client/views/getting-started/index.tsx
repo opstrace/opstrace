@@ -40,6 +40,82 @@ const GettingStarted = () => {
         <Card>
           <CardHeader
             titleTypographyProps={{ variant: "h6" }}
+            title="Sending logs from an existing system"
+          />
+          <CardContent>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Typography color="textSecondary" variant="body2">
+                  Use this endpoint URL for sending logs to the{" "}
+                  <strong>{tenant.name}</strong> tenant.
+                  <small>
+                    <pre>
+                      https://loki.{tenant.name}.{window.location.host}
+                      /loki/api/v1/push
+                    </pre>
+                  </small>
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box display="flex" justifyContent="flex-end">
+                  <ExternalLink
+                    target="_blank"
+                    href="https://opstrace.com/docs/guides/user/sending-logs-with-fluentd"
+                  >
+                    Guide: Sending logs with FluentD →
+                  </ExternalLink>
+                </Box>
+                <Box display="flex" justifyContent="flex-end">
+                  <ExternalLink
+                    target="_blank"
+                    href="https://opstrace.com/docs/guides/user/sending-logs-with-promtail"
+                  >
+                    Guide: Sending logs with Promtail →
+                  </ExternalLink>
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <Card>
+          <CardHeader
+            titleTypographyProps={{ variant: "h6" }}
+            title="Sending metrics from an existing system"
+          />
+          <CardContent>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Typography color="textSecondary" variant="body2">
+                  Use this endpoint URL for sending metrics to the{" "}
+                  <strong>{tenant.name}</strong> tenant.
+                  <small>
+                    <pre>
+                      https://cortex.{tenant.name}.{window.location.host}
+                      .opstrace.io/api/v1/push
+                    </pre>
+                  </small>
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box display="flex" justifyContent="flex-end">
+                  <ExternalLink
+                    target="_blank"
+                    href="https://opstrace.com/docs/guides/user/sending-metrics-with-prometheus"
+                  >
+                    Guide: Sending metrics with Prometheus →
+                  </ExternalLink>
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <Card>
+          <CardHeader
+            titleTypographyProps={{ variant: "h6" }}
             title="Collect Logs from a Kubernetes cluster"
           />
           <CardContent>
