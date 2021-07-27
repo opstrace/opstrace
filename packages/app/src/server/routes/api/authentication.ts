@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// import axios from "axios";
+import axios from "axios";
 import express from "express";
 import jwt from "express-jwt";
 import jwksRsa from "jwks-rsa";
@@ -53,29 +53,10 @@ function createAuthHandler(): express.Router {
   // endpoint for creating a session so we don't have to
   // pass JWTs to every API request.
   auth.post("/session", checkJwt, async (req, res, next) => {
-    // const { data: userinfo } = await axios.get(
-    //   `https://${env.AUTH0_DOMAIN}/userinfo`,
-    //   {
-    //     headers: {
-    //       // @ts-ignore Object is possibly 'undefined'
-    //       Authorization: `Bearer ${req.headers.authorization.split(" ")[1]}`
-    //     }
-    //   }
-    // );
-
-    // const email = userinfo.email;
-    // const avatar = userinfo.picture || "";
-    // const username = (
-    //   userinfo.nickname ||
-    //   userinfo.username ||
-    //   userinfo.given_name ||
-    //   userinfo.name ||
-    //   ""
-    // ).toLowerCase();
-
-    const email = req.body.email;
-    const username = req.body.username;
-    const avatar = req.body.avatar;
+    const { email, username, avatar } = await loadUserInfo(
+      // @ts-ignore Object is possibly 'undefined'
+      req.headers.authorization.split(" ")[1]
+    );
 
     if (!email || !username || !avatar) {
       return next(new GeneralServerError(400, "incomplete payload"));
@@ -168,5 +149,23 @@ function createAuthHandler(): express.Router {
 
   return auth;
 }
+
+const loadUserInfo = async (accessToken: string) => {
+  const { data } = await axios.get(`https://${env.AUTH0_DOMAIN}/userinfo`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  const username = (
+    data.nickname ||
+    data.username ||
+    data.given_name ||
+    data.name ||
+    ""
+  ).toLowerCase();
+
+  return { email: data.email, avatar: data.picture || "", username };
+};
 
 export default createAuthHandler;

@@ -203,9 +203,8 @@ const CreateSession = ({
 }: {
   userLoadedSuccess: Function;
 }) => {
-  const { user, getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently } = useAuth0();
   const [errorResponse, setErrorResponse] = useState<{} | null>(null);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     (async () => {
@@ -215,35 +214,11 @@ const CreateSession = ({
           opstraceClusterName: CLUSTER_NAME
         });
 
-        // Login. Note(JP): the data in the body looks suspicious. I would
-        // expect the login credential (the access token) to be the only piece
-        // of communication to be transmitted here. The data in the body as it
-        // is sent here should not be trusted by the cluster. The cluster infer
-        // the user identity information from the /userinfo endpoint of the IdP
-        // using the access token (which it can cryptographically verify), or
-        // straight from the ID token which we may want to use here instead
-        // of the access token.
-        // Related issue: https://github.com/opstrace/opstrace/issues/1078
-        //
-        // Update(Terrcin): moving to using the /userinfo auth0 endpoint from
-        // the server has been implemented but was potentially causing rate
-        // limiting issues on CI so has been disabled while this was looked into.
         const response = await axios.request({
           method: "POST",
           url: "/_/auth/session",
           headers: {
             Authorization: `Bearer ${accessToken}`
-          },
-          data: {
-            email: user.email,
-            avatar: user.picture || "",
-            username: (
-              user.nickname ||
-              user.username ||
-              user.given_name ||
-              user.name ||
-              ""
-            ).toLowerCase()
           }
         });
 
@@ -253,13 +228,7 @@ const CreateSession = ({
         setErrorResponse(pick(["data", "status", "statusText"])(e.response));
       }
     })();
-  }, [
-    user,
-    getAccessTokenSilently,
-    dispatch,
-    userLoadedSuccess,
-    setErrorResponse
-  ]);
+  }, [getAccessTokenSilently, userLoadedSuccess, setErrorResponse]);
 
   if (errorResponse) return <AccessDeniedPage data={errorResponse} />;
   else return <LoadingPage stage="create-session" />;
