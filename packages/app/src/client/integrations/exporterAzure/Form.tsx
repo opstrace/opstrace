@@ -57,7 +57,21 @@ const defaultValues: Values = {
 };
 
 type Props = {
-  handleCreate: Function;
+  handleCreate: (
+    data: {
+      name: string;
+      data: {
+        credentials: {
+          AZURE_SUBSCRIPTION_ID: string;
+          AZURE_TENANT_ID: string;
+          AZURE_CLIENT_ID: string;
+          AZURE_CLIENT_SECRET: string;
+        };
+        config: string;
+      };
+    },
+    options: { createGrafanaFolder: false }
+  ) => void;
 };
 
 export const ExporterAzureForm = ({ handleCreate }: Props) => {

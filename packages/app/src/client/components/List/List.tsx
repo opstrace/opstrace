@@ -15,31 +15,37 @@
  */
 
 import React from "react";
-import { VariableSizeList, areEqual } from "react-window";
+import {
+  VariableSizeList,
+  areEqual,
+  ListChildComponentProps
+} from "react-window";
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import { Scrollable } from "../Scrollable";
 
-export type VirtualListRenderItemProps = {
-  data: any;
+export type VirtualListRenderItemProps<Item> = {
+  data: Item;
   index: number;
 };
-export type ItemRenderer = (props: VirtualListRenderItemProps) => JSX.Element;
-export type VirtualListProps = {
+export type ItemRenderer<Item> = (
+  props: VirtualListRenderItemProps<Item>
+) => JSX.Element;
+export type VirtualListProps<Item> = {
   height?: number;
   width?: number;
-  items: any[];
+  items: Item[];
   itemSize: (index: number) => number;
-  renderItem: ItemRenderer;
+  renderItem: ItemRenderer<Item>;
 };
 
 const ScrollableWithRef = React.forwardRef((props, ref) => (
   <Scrollable forwardedRef={ref} {...props} />
 ));
 
-const Render = (
-  renderItem: (props: VirtualListRenderItemProps) => JSX.Element
+const Render = <Item,>(
+  renderItem: (props: VirtualListRenderItemProps<Item>) => JSX.Element
 ) =>
-  React.memo((props: any) => {
+  React.memo((props: ListChildComponentProps) => {
     return (
       <div style={props.style} key={`vl-${props.index}`}>
         {renderItem({ index: props.index, data: props.data[props.index] })}
@@ -47,12 +53,12 @@ const Render = (
     );
   }, areEqual);
 
-function VirtualList({
+function VirtualList<Item>({
   items,
   itemSize,
   renderItem,
   ...props
-}: VirtualListProps) {
+}: VirtualListProps<Item>) {
   const listRef = React.createRef();
   const outerRef = React.createRef();
   const renderer = Render(renderItem);
@@ -84,9 +90,6 @@ function VirtualList({
   );
 }
 
-const List = React.memo(VirtualList);
+const MemoList = React.memo(VirtualList) as typeof VirtualList;
 
-function MemoList(props: VirtualListProps) {
-  return <List {...props} />;
-}
 export default MemoList;

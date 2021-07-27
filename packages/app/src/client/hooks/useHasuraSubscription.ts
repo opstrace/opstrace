@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import useSWR, { mutate, SWRResponse } from "swr";
+import useSWR, { Key, mutate, SWRResponse } from "swr";
 
 import useDeepMemo from "client/hooks/useDeepMemo";
 
@@ -33,7 +33,7 @@ const useHasuraSubscription = (
   return useSWR(token, fetcher(token, query, variables));
 };
 
-const fetcher = (token: any, query: string, variables: {} = {}) => {
+const fetcher = (token: Key, query: string, variables: {} = {}) => {
   let latestData = null;
 
   const subscribe = async (query: string, variables: {} = {}) => {

@@ -15,7 +15,7 @@
  */
 
 import React from "react";
-import { Controller } from "react-hook-form";
+import { Control, Controller, Path } from "react-hook-form";
 import { HelpCircle } from "react-feather";
 
 import {
@@ -29,12 +29,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "client/components/Typography";
 import { Box } from "client/components/Box";
 
-type ControlledInputProps = {
-  name: `${string}` | `${string}.${string}` | `${string}.${number}`;
+type ControlledInputProps<ControlValues> = {
+  name: Path<ControlValues>;
   label?: string;
   helperText?: string | React.ReactNode | (() => React.ReactNode);
   inputProps?: TextFieldProps;
-  control: any;
+  control: Control<ControlValues>;
   labelClass?: string;
   controlClass?: string;
 };
@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const ControlledInput = ({
+export const ControlledInput = <ControlValues,>({
   name,
   label,
   inputProps = {},
@@ -58,7 +58,7 @@ export const ControlledInput = ({
   control,
   labelClass,
   controlClass
-}: ControlledInputProps) => {
+}: ControlledInputProps<ControlValues>) => {
   const classes = useStyles();
 
   return (
