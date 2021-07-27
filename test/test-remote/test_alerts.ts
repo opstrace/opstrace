@@ -213,7 +213,10 @@ function getE2EAlertingResources(
   return resources;
 }
 
-async function storeE2EAlertsConfig(authTokenFilepath: string | undefined, tenant: string) {
+async function storeE2EAlertsConfig(
+  authTokenFilepath: string | undefined,
+  tenant: string
+) {
   // Configure tenant alertmanager to send alerts to e2ealerting service
   // Using cortex API proxied via config-api: https://cortexmetrics.io/docs/api/#set-alertmanager-configuration
   const alertmanagerConfigUrl = `${CLUSTER_BASE_URL}/api/v1/alerts`;
@@ -424,8 +427,14 @@ suite("End-to-end alert tests", function () {
     // Give a random token to include for the 'job' label in metrics.
     // This is just in case e.g. tests are re-run against the same cluster.
     // Include '-job' at the end just to avoid punctuation at the end of the label which K8s disallows
-    const defaultUniqueScrapeJobName = `testalerts-default-${rndstring().slice(0, 5)}-job`;
-    const systemUniqueScrapeJobName = `testalerts-system-${rndstring().slice(0, 5)}-job`;
+    const defaultUniqueScrapeJobName = `testalerts-default-${rndstring().slice(
+      0,
+      5
+    )}-job`;
+    const systemUniqueScrapeJobName = `testalerts-system-${rndstring().slice(
+      0,
+      5
+    )}-job`;
 
     // To save time, we set up the default and system tenant E2E environments in parallel
     const defaultTestResources = await setupE2EAlertsForTenant(
@@ -457,10 +466,12 @@ suite("End-to-end alert tests", function () {
     await deleteE2EAlertsConfig(TENANT_DEFAULT_API_TOKEN_FILEPATH);
     await deleteE2EAlertsConfig(TENANT_SYSTEM_API_TOKEN_FILEPATH);
 
-    log.info("Deleting E2E alerting resources")
+    log.info("Deleting E2E alerting resources");
     for (const r of testResources) {
       try {
-        log.info(`Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`);
+        log.info(
+          `Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`
+        );
         await r.delete();
       } catch (e) {
         const err = kubernetesError(e);
