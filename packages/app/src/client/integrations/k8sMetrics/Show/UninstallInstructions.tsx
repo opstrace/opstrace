@@ -79,15 +79,6 @@ export const UninstallInstructions = ({
     saveAs(configBlob, configFilename);
   };
 
-  const uninstallIntegrationHandler = async () => {
-    try {
-      // Dashboard folder might not exist
-      await grafana.deleteFolder({ integration, tenant });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   return (
     <Box width="100%" height="100%" p={1}>
       <Card>
@@ -156,7 +147,6 @@ export const UninstallInstructions = ({
                     integration={integration}
                     tenant={tenant}
                     disabled={false}
-                    uninstallCallback={uninstallIntegrationHandler}
                   />
                 </Box>
               </TimelineContent>
