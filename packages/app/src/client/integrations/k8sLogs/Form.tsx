@@ -43,7 +43,10 @@ const defaultValues: Values = {
 };
 
 type Props = {
-  handleCreate: Function;
+  handleCreate: (data: {
+    name: string,
+    data: { deployNamespace: string }
+  }) => void;
 };
 
 export const K8sLogsForm = ({ handleCreate }: Props) => {

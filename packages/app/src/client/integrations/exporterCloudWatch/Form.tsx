@@ -52,7 +52,19 @@ const defaultValues: Values = {
 };
 
 type Props = {
-  handleCreate: Function;
+  handleCreate: (
+    data: {
+      name: string;
+      data: {
+        credentials: {
+          AWS_ACCESS_KEY_ID: string;
+          AWS_SECRET_ACCESS_KEY: string;
+        };
+        config: string;
+      };
+    },
+    options: { createGrafanaFolder: false }
+  ) => void;
 };
 
 export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {

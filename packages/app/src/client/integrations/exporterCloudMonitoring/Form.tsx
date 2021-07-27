@@ -60,7 +60,21 @@ const defaultValues: Values = {
 };
 
 type Props = {
-  handleCreate: Function;
+  handleCreate: (
+    data: {
+      name: string;
+      data: {
+        credentials: string,
+        config: {
+          "google.project-id": Array<string>,
+          "monitoring.metrics-type-prefixes": Array<string>,
+          "monitoring.metrics-interval": string,
+          "monitoring.metrics-offset": string
+        }
+      };
+    },
+    options: { createGrafanaFolder: false }
+  ) => void;
 };
 
 export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {

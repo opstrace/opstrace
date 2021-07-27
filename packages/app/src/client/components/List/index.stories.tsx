@@ -27,7 +27,7 @@ export default {
 } as Meta;
 
 export const Default = (): JSX.Element => {
-  const renderItem = ({ index }: VirtualListRenderItemProps) => {
+  const renderItem = ({ index }: VirtualListRenderItemProps<boolean>) => {
     return (
       <ButtonListItem>
         <ListItemText id={`${index}`} primary={`item ${index + 1}`} />

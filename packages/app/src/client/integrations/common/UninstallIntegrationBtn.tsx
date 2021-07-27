@@ -40,7 +40,7 @@ export const UninstallBtn = ({
   integration: Integration;
   tenant: Tenant;
   disabled: boolean;
-  uninstallCallback?: Function;
+  uninstallCallback?: () => Promise<void> | void;
 }) => {
   const dispatch = useDispatch();
   const history = useHistory();
