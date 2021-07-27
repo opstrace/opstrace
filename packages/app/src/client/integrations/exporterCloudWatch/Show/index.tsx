@@ -25,8 +25,6 @@ import { grafanaUrl } from "client/utils/grafana";
 import Status from "client/integrations/exporterCloudWatch/Status";
 import { Actions } from "./Actions";
 
-import { CondRender } from "client/utils/rendering";
-
 import { ExternalLink } from "client/components/Link";
 import { ArrowLeft } from "react-feather";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
@@ -117,7 +115,7 @@ export const ExporterCloudWatchShow = () => {
                 </Attribute.Value>
               </Box>
               <Box display="flex" flexDirection="column">
-                <CondRender when={!!integration?.grafana?.folder?.id}>
+                {!!integration?.grafana?.folder?.id && (
                   <Attribute.Key>
                     <ExternalLink
                       target="_blank"
@@ -130,7 +128,7 @@ export const ExporterCloudWatchShow = () => {
                       </Button>
                     </ExternalLink>
                   </Attribute.Key>
-                </CondRender>
+                )}
                 <Attribute.Key>
                   <ExternalLink target="_blank" href={metricsUrl}>
                     <Button state="primary" variant="outlined" size="medium">
