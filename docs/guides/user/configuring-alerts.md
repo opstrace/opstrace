@@ -1,11 +1,8 @@
 # Configuring Alertmanager
 
-BEFORE YOU START: *If you haven't used Prometheus Alertmanager before, we recommend checking out [their documentation](https://prometheus.io/docs/alerting/latest/alertmanager).*
-*Opstrace uses [Cortex](https://cortexmetrics.io) which adds support for scaling and multiple tenants on top of Prometheus.*
-
-Opstrace supports configuring Alertmanager rules and alert outputs on a per-tenant basis.
+Opstrace supports configuring Alertmanager rules and alert outputs on a [per-tenant](../../references/concepts.md#tenants) basis.
 For example, you might have an alerting rule that metric `X` must be less than `5`, and an Alertmanager configuration to send a Slack message when the rule is failing.
-This can all be visualized and edited with the new unified alerting in Grafana 8.
+This can all be visualized and edited with the new unified alerting in [Grafana 8](https://grafana.com/blog/2021/06/14/the-new-unified-alerting-system-for-grafana-everything-you-need-to-know/).
 
 The ability to configure additional datasources for alerts is the other dramatic change in Grafana 8, allowing other providers to leverage the Grafana UI for alerts.
 (The original Grafana alerts—now called "legacy alerts"—is still the default.)
@@ -13,7 +10,7 @@ Opstrace comes configured with Cortex and Loki as Grafana alert datasources.
 This guide will focus on the UI because it is the most visual and self-explanatory.
 The APIs are of course still available for anyone who would like to post changes directly there.
 
-To begin, from the Opstrace UI, first select your tenant and then click "Alerting" in the sidebar:
+To begin configuring alerts, from the Opstrace UI, first select your tenant and then click "Alerting" in the sidebar:
 
 ![alerting page overview](../../assets/alerts-overview.gif)
 
@@ -58,10 +55,12 @@ See the whole thing in action:
 
 ![adding alert animation](../../assets/alerts-overview.gif)
 
+Next, you will need to configure a *contact type* to deliver the notification.
+
 ## Configure a Contact Point
 
 *Contact points* define where to send notifications about alerts that match a particular notification policy.
-A contact point can contain one or more contact point types, eg email, slack, webhook and so on.
+A contact point can contain one or more contact point types, e.g. email, Slack, webhook and so on.
 A notification will dispatched to all contact point types defined on a contact point.
 
 To configure a contact point for the Opstrace external Alertmanager, first select it from the drop down:
@@ -148,10 +147,6 @@ You can inspect your created silences on the same tab:
 ![inspect existing alerts](../../assets/alerts-silences-inspect.png)
 
 Note:  Silences cannot be deleted manually; expired silences are automatically deleted after 5 days.
-
-## Attribution
-
-Some content was borrowed from [Grafana Labs' documentation](https://github.com/grafana/grafana/blob/32b74e75a30a253602c630728d46ef2ae141d2c3/docs/sources/alerting/unified-alerting/).
 
 ## References
 
