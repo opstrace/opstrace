@@ -213,11 +213,7 @@ function getE2EAlertingResources(
   return resources;
 }
 
-async function storeE2EAlertsConfig(
-  authTokenFilepath: string | undefined,
-  tenant: string,
-  ruleNamespace: string
-) {
+async function storeE2EAlertsConfig(authTokenFilepath: string | undefined, tenant: string) {
   // Configure tenant alertmanager to send alerts to e2ealerting service
   // Using cortex API proxied via config-api: https://cortexmetrics.io/docs/api/#set-alertmanager-configuration
   const alertmanagerConfigUrl = `${CLUSTER_BASE_URL}/api/v1/alerts`;
@@ -246,7 +242,7 @@ async function storeE2EAlertsConfig(
 
   // Configure tenant ruler to fire alert against metric scraped from e2ealerting pod
   // Using cortex API proxied via config-api: https://cortexmetrics.io/docs/api/#set-rule-group
-  const ruleGroupConfigUrl = `${CLUSTER_BASE_URL}/api/v1/rules/${ruleNamespace}`;
+  const ruleGroupConfigUrl = `${CLUSTER_BASE_URL}/api/v1/rules/testremote`;
   const ruleGroupPostResponse = await got.post(ruleGroupConfigUrl, {
     body: `name: e2ealerting
 rules:
@@ -254,7 +250,7 @@ rules:
     annotations:
         time: '{{ $value }}'
     expr: e2ealerting_now_in_seconds > 0
-    for: 10s
+    for: 5s
 `,
     throwHttpErrors: false,
     timeout: httpTimeoutSettings,
@@ -268,11 +264,8 @@ rules:
   );
 }
 
-async function deleteE2EAlertsConfig(
-  authTokenFilepath: string | undefined,
-  ruleNamespace: string
-) {
-  // Delete alertmanager config created earlier
+async function deleteE2EAlertsConfig(authTokenFilepath: string | undefined) {
+  // Delete any alertmanager config created for tenant earlier
   // Using cortex API proxied via config-api: https://cortexmetrics.io/docs/api/#delete-alertmanager-configuration
   const alertmanagerConfigUrl = `${CLUSTER_BASE_URL}/api/v1/alerts`;
   const alertmanagerDeleteResponse = await got.delete(alertmanagerConfigUrl, {
@@ -287,9 +280,9 @@ async function deleteE2EAlertsConfig(
       alertmanagerDeleteResponse.statusCode == 200
   );
 
-  // Delete rule namespace created earlier
+  // Delete any 'testremote' rule namespace created for tenant earlier
   // Using cortex API proxied via config-api: https://cortexmetrics.io/docs/api/#delete-namespace
-  const ruleGroupConfigUrl = `${CLUSTER_BASE_URL}/api/v1/rules/${ruleNamespace}`;
+  const ruleGroupConfigUrl = `${CLUSTER_BASE_URL}/api/v1/rules/testremote`;
   const ruleGroupDeleteResponse = await got.delete(ruleGroupConfigUrl, {
     throwHttpErrors: false,
     timeout: httpTimeoutSettings,
@@ -338,23 +331,19 @@ async function getE2EAlertCountMetric(
   return value;
 }
 
-async function testE2EAlertsForTenant(
-  cortexBaseUrl: string,
+async function setupE2EAlertsForTenant(
   authTokenFilepath: string | undefined,
-  tenant: string
-) {
-  const ruleNamespace = "testremote";
-
+  tenant: string,
+  uniqueScrapeJobName: string
+): Promise<Array<K8sResource>> {
   // Before deploying anything, delete any existing alertmanager/rulegroup configuration.
   // This avoids an old alert config writing to the newly deployed webhook, making its hit count 1 when we expect 0
   // This should only be a problem when running the same test repeatedly against a cluster.
   log.info("Deleting any preexisting E2E alerts webhook");
-  await deleteE2EAlertsConfig(authTokenFilepath, ruleNamespace);
+  await deleteE2EAlertsConfig(authTokenFilepath);
 
-  // Give a random token to include for the 'job' label in metrics.
-  // This is just in case e.g. tests are re-run against the same cluster.
-  // Include '-job' at the end just to avoid punctuation at the end of the label which K8s disallows
-  const uniqueScrapeJobName = `testalerts-${rndstring().slice(0, 5)}-job`;
+  log.info("Setting up E2E alerts webhook");
+  await storeE2EAlertsConfig(authTokenFilepath, tenant);
 
   log.info(`Deploying E2E alerting resources into ${tenant}-tenant namespace`);
   const resources = getE2EAlertingResources(tenant, uniqueScrapeJobName);
@@ -381,31 +370,22 @@ async function testE2EAlertsForTenant(
     }
   }
 
+  return resources;
+}
+
+async function waitForE2EAlertFiring(
+  cortexBaseUrl: string,
+  tenant: string,
+  uniqueScrapeJobName: string
+) {
   // Wait for the E2E pod to appear in prometheus scrape targets
+  // This separate check shouldn't contribute to the time spent on the test, and can help with tracing a test failure.
   log.info(
     `Waiting for E2E scrape target to appear in tenant prometheus for tenant=${tenant} job=${uniqueScrapeJobName}`
   );
   await waitForPrometheusTarget(tenant, uniqueScrapeJobName);
 
-  // Wait for the metric to appear in cortex with the matching random 'job' tag
-  log.info(
-    `Waiting for cortex E2E alerting metric for tenant=${tenant} job=${uniqueScrapeJobName} with zero value`
-  );
-  const value = await getE2EAlertCountMetric(
-    cortexBaseUrl,
-    uniqueScrapeJobName
-  );
-  // Value should be zero since we haven't set up alerts
-  assert.strictEqual(
-    value,
-    "0",
-    `Expected to get zero value for e2ealerting webhook metric: ${value}`
-  );
-
-  log.info("Setting up E2E alerts webhook");
-  await storeE2EAlertsConfig(authTokenFilepath, tenant, ruleNamespace);
-
-  // Now that we've set up the alert outputs, wait for the e2ealerting webhook to be queried
+  // With the alert outputs configured earlier, wait for the e2ealerting webhook to be queried
   // and the count of evaluations to be incremented at least once.
   log.info(
     `Waiting for cortex E2E alerting metric for tenant=${tenant} job=${uniqueScrapeJobName} with nonzero value`
@@ -423,29 +403,11 @@ async function testE2EAlertsForTenant(
       uniqueScrapeJobName
     );
     if (value !== "0") {
-      log.info(`Got alerts metric value: ${value}`);
+      log.info(`Got alerts metric value for tenant ${tenant}: ${value}`);
       break;
     }
 
     await sleep(15.0);
-  }
-
-  log.info("Deleting E2E alerts webhook");
-  await deleteE2EAlertsConfig(authTokenFilepath, ruleNamespace);
-
-  log.info(`Deleting E2E alerting resources from ${tenant}-tenant namespace`);
-  for (const r of resources) {
-    try {
-      log.info(`Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`);
-      await r.delete();
-    } catch (e) {
-      const err = kubernetesError(e);
-      if (err.statusCode === 404) {
-        log.info("already doesn't exist");
-      } else {
-        throw e;
-      }
-    }
   }
 }
 
@@ -459,19 +421,56 @@ suite("End-to-end alert tests", function () {
     log.info("suite teardown");
   });
 
-  test("End-to-end alerts for default tenant", async function () {
-    await testE2EAlertsForTenant(
-      TENANT_DEFAULT_CORTEX_API_BASE_URL,
-      TENANT_DEFAULT_API_TOKEN_FILEPATH,
-      "default"
-    );
-  });
+  test("End-to-end alerts for default and system tenants", async function () {
+    // Give a random token to include for the 'job' label in metrics.
+    // This is just in case e.g. tests are re-run against the same cluster.
+    // Include '-job' at the end just to avoid punctuation at the end of the label which K8s disallows
+    const defaultUniqueScrapeJobName = `testalerts-default-${rndstring().slice(0, 5)}-job`;
+    const systemUniqueScrapeJobName = `testalerts-system-${rndstring().slice(0, 5)}-job`;
 
-  test("End-to-end alerts for system tenant", async function () {
-    await testE2EAlertsForTenant(
-      TENANT_SYSTEM_CORTEX_API_BASE_URL,
-      TENANT_SYSTEM_API_TOKEN_FILEPATH,
-      "system"
+    // To save time, we set up the default and system tenant E2E environments in parallel
+    const defaultTestResources = await setupE2EAlertsForTenant(
+      TENANT_DEFAULT_API_TOKEN_FILEPATH,
+      "default",
+      defaultUniqueScrapeJobName
     );
+    const systemTestResources = await setupE2EAlertsForTenant(
+      TENANT_SYSTEM_API_TOKEN_FILEPATH,
+      "system",
+      systemUniqueScrapeJobName
+    );
+    const testResources = defaultTestResources.concat(systemTestResources);
+
+    // With everything deployed, wait for each of the tenants' alerts to start firing
+    await waitForE2EAlertFiring(
+      TENANT_DEFAULT_CORTEX_API_BASE_URL,
+      "default",
+      defaultUniqueScrapeJobName
+    );
+    await waitForE2EAlertFiring(
+      TENANT_SYSTEM_CORTEX_API_BASE_URL,
+      "system",
+      systemUniqueScrapeJobName
+    );
+
+    // Clean up both tenants
+    log.info("Deleting E2E alerts webhooks");
+    await deleteE2EAlertsConfig(TENANT_DEFAULT_API_TOKEN_FILEPATH);
+    await deleteE2EAlertsConfig(TENANT_SYSTEM_API_TOKEN_FILEPATH);
+
+    log.info("Deleting E2E alerting resources")
+    for (const r of testResources) {
+      try {
+        log.info(`Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`);
+        await r.delete();
+      } catch (e) {
+        const err = kubernetesError(e);
+        if (err.statusCode === 404) {
+          log.info("already doesn't exist");
+        } else {
+          throw e;
+        }
+      }
+    }
   });
 });
