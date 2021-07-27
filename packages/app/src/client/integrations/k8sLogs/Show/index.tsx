@@ -29,8 +29,6 @@ import { promtailYaml, PromtailLogFormat } from "./templates/config";
 
 import Status from "client/integrations/k8sLogs/Status";
 
-import { CondRender } from "client/utils/rendering";
-
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
 import { integrationDefRecords } from "client/integrations";
@@ -115,9 +113,7 @@ export const K8sLogsShow = () => {
               <Box display="flex" flexDirection="column">
                 <Attribute.Key>Integration:</Attribute.Key>
                 <Attribute.Key>Created:</Attribute.Key>
-                <CondRender when={isDashboardInstalled}>
-                  <Attribute.Key> </Attribute.Key>
-                </CondRender>
+                {isDashboardInstalled && <Attribute.Key> </Attribute.Key>}
               </Box>
               <Box display="flex" flexDirection="column" flexGrow={1}>
                 <Attribute.Value>{integrationDef.label}</Attribute.Value>
@@ -125,7 +121,7 @@ export const K8sLogsShow = () => {
                   {format(parseISO(integration.created_at), "Pppp")}
                 </Attribute.Value>
               </Box>
-              <CondRender when={isDashboardInstalled}>
+              {isDashboardInstalled && (
                 <Attribute.Key>
                   <ExternalLink
                     target="_blank"
@@ -138,7 +134,7 @@ export const K8sLogsShow = () => {
                     </Button>
                   </ExternalLink>
                 </Attribute.Key>
-              </CondRender>
+              )}
             </Box>
           </CardContent>
         </Card>

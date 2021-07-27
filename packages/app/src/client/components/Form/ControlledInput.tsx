@@ -27,7 +27,6 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 
 import { Typography } from "client/components/Typography";
-import { CondRender } from "client/utils/rendering";
 import { Box } from "client/components/Box";
 
 type ControlledInputProps = {
@@ -66,7 +65,7 @@ export const ControlledInput = ({
     <Controller
       render={({ field }) => (
         <Box>
-          <CondRender unless={label === undefined}>
+          {label !== undefined && (
             <div className={labelClass}>
               <FormLabel>
                 <Typography variant="h6" color="textSecondary">
@@ -74,24 +73,21 @@ export const ControlledInput = ({
                 </Typography>
               </FormLabel>
             </div>
-          </CondRender>
+          )}
           <div className={controlClass}>
             <TextField {...field} {...inputProps} variant="outlined" />
-            <CondRender
-              unless={helperText === undefined}
-              render={() => (
-                <FormHelperText>
-                  <Typography variant="caption" className={classes.helperText}>
-                    <HelpCircle
-                      width={12}
-                      height={12}
-                      className={classes.helperIcon}
-                    />
-                    <span>{helperText}</span>
-                  </Typography>
-                </FormHelperText>
-              )}
-            />
+            {helperText !== undefined && (
+              <FormHelperText>
+                <Typography variant="caption" className={classes.helperText}>
+                  <HelpCircle
+                    width={12}
+                    height={12}
+                    className={classes.helperIcon}
+                  />
+                  <span>{helperText}</span>
+                </Typography>
+              </FormHelperText>
+            )}
           </div>
         </Box>
       )}
