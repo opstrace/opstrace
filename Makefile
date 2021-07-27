@@ -687,7 +687,7 @@ test-browser:
 		-e OPSTRACE_CLOUD_PROVIDER \
 		-e OPSTRACE_INSTANCE_DNS_NAME \
 		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
- 			yarn playwright test --workers 1 --forbid-only --retries 1
+ 			yarn playwright test --workers 3 --forbid-only --retries 3
 
 
 # Used by CI:
