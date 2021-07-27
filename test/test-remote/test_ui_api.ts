@@ -51,7 +51,7 @@ import {
 // this does not work, too late probably. set via Makefile entrypoint
 // process.env.DEBUG = "pw:api";
 
-import type { ChromiumBrowser, Browser, Cookie } from "playwright";
+import type { ChromiumBrowser, Cookie, BrowserContext, Page } from "playwright";
 import { chromium } from "playwright";
 import { sleep } from "@opstrace/utils";
 
@@ -80,14 +80,9 @@ function artipath(filename: string) {
 // ]
 let COOKIES_AFTER_LOGIN: Cookie[] | undefined;
 
-async function performLoginFlow(br: Browser) {
-  log.info("browser.newContext()");
-  const context = await br.newContext({ ignoreHTTPSErrors: true });
-  log.info("context.newPage()");
-  const page = await context.newPage();
-
-  // debugging: doubling the timeout here to see if that helps with upgrade ci tests failing
-  // issue: https://github.com/opstrace/opstrace/issues/1003
+async function performLoginFlowCore(page: Page) {
+  // Auth0-based login flow can be slow, increase timeout. Goal:
+  // Make login flow faster, reduce timeout again here.
   page.setDefaultNavigationTimeout(60_000);
   page.setDefaultTimeout(60_000);
 
@@ -95,25 +90,13 @@ async function performLoginFlow(br: Browser) {
   await page.goto(CLUSTER_BASE_URL);
   log.info("`load` event");
 
+  // This is supposed to wait for the "log in" button. Specifically, this:
   // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
   // <span class="MuiButton-label">Log in</span>
-  try {
-    log.info('page.waitForSelector("css=button")');
-    await page.waitForSelector("css=button");
-  } catch (err) {
-    log.info("page.screenshot() because of err %s", err);
-    try {
-      await page.screenshot({
-        path: artipath("uishot-lasterr.png")
-      });
-    } catch (innerErr) {
-      log.warning("ignoring error in error handler: %s", innerErr);
-    }
-    log.info("rethrow error");
-    throw err;
-  }
+  log.info('page.waitForSelector("css=button")');
+  await page.waitForSelector("css=button");
 
-  log.info("page.screenshot()");
+  log.info("page.screenshot(), with login button");
   await page.screenshot({
     path: artipath("uishot-rootpage.png")
   });
@@ -140,12 +123,6 @@ async function performLoginFlow(br: Browser) {
   await page.screenshot({
     path: artipath("uishot-after-auth0-login.png")
   });
-
-  const cookies = await context.cookies(CLUSTER_BASE_URL);
-  log.info("cookies:\n%s", JSON.stringify(cookies, null, 2));
-
-  // expose globally
-  COOKIES_AFTER_LOGIN = cookies;
 }
 
 function httpClientOptsWithCookie(cookie_header_value: string) {
@@ -203,6 +180,72 @@ async function waitForResp(
   }
 }
 
+async function performLoginFlowWithRetry(browsercontext: BrowserContext) {
+  log.info("context.newPage()");
+  // Assume that newPage() call 'never' fails as of transient issues (don't put
+  // into retry logic)
+  const page = await browsercontext.newPage();
+
+  const maxWaitSeconds = 300;
+  const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
+  log.info(`Trying to log in with retries, for at most ${maxWaitSeconds} s`);
+
+  let attempt = 0;
+  while (true) {
+    attempt += 1;
+
+    if (mtime() > deadline) {
+      throw new Error(`Login did not succeed within ${maxWaitSeconds} s`);
+    }
+
+    // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
+    // <span class="MuiButton-label">Log in</span>
+    log.info(`login attempt ${attempt}`);
+    try {
+      await performLoginFlowCore(page);
+      break;
+    } catch (err) {
+      // It's difficult to find the 'right' way to catch "all" errors emitted
+      // by Playwright. There is playwright.errors but it only knows
+      // TimeoutError. What all errors seem to have in common that I have seen
+      // so far is that they show the method name of the method that threw the
+      // errors. In the function being called above this is always `page....`,
+      // .e.g `page.waitForSelector: Timeout 60000ms exceeded.` or `page.goto:
+      // net::ERR_NETWORK_CHANGED at...`.  Filter for that.
+      if (!err.message.includes("page.")) {
+        // This does not seem to be thrown by playwright, might be a
+        // programming error. Don't consider retryable, re-throw.
+        log.info("re-throw what appears to be a non-playwright error");
+        throw err;
+      }
+
+      log.info(
+        `page.screenshot() because of what seems to be a playwright err: ${err}`
+      );
+
+      const p = artipath(`uishot-login-err-attempt-${attempt}.png`);
+      try {
+        await page.screenshot({ path: p });
+      } catch (innerErr) {
+        log.warning(`ignoring error in error handler: ${innerErr}`);
+      }
+      log.info(`wrote screenshot to ${p}`);
+    }
+
+    log.info("try again in 10 s");
+    await sleep(10);
+  }
+
+  log.info(
+    "seems like the login flow succeeded -- look up cookies to retain authentication state"
+  );
+  const cookies = await browsercontext.cookies(CLUSTER_BASE_URL);
+  log.info("cookies:\n%s", JSON.stringify(cookies, null, 2));
+
+  // expose globally
+  COOKIES_AFTER_LOGIN = cookies;
+}
+
 suite("test_ui_api", function () {
   suiteSetup(async function () {
     log.info("suite setup");
@@ -219,7 +262,10 @@ suite("test_ui_api", function () {
       ]
     });
 
-    await performLoginFlow(BROWSER);
+    log.info("browser.newContext()");
+    await performLoginFlowWithRetry(
+      await BROWSER.newContext({ ignoreHTTPSErrors: true })
+    );
 
     // Perform login flow in setup, so that the authentications state (namely,
     // cookies), can be re-used in individual tests.
