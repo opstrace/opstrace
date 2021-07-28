@@ -22,6 +22,7 @@ import * as yup from "yup";
 import { k8sLogsIntegration as integrationDef } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
+import { SelectInput } from "client/components/Form/SelectInput";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
@@ -30,16 +31,19 @@ import { Button } from "client/components/Button";
 type Values = {
   name: string;
   deployNamespace: string;
+  format: string;
 };
 
 const Schema = yup.object().shape({
   name: yup.string().required(),
-  deployNamespace: yup.string().required()
+  deployNamespace: yup.string().required(),
+  format: yup.string().required()
 });
 
 const defaultValues: Values = {
   name: "",
-  deployNamespace: "opstrace"
+  deployNamespace: "opstrace",
+  format: ""
 };
 
 type Props = {
@@ -61,7 +65,7 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
   const onSubmit = (data: Values) => {
     handleCreate({
       name: data.name,
-      data: { deployNamespace: data.deployNamespace }
+      data: { deployNamespace: data.deployNamespace, format: data.format }
     });
   };
 
@@ -90,6 +94,16 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
                   inputProps={{ fullWidth: true, autoFocus: true }}
                   label="Integration Name"
                   helperText="An identifier for this integration"
+                />
+              </Box>
+              <Box mb={3}>
+                <SelectInput
+                  name="format"
+                  control={control}
+                  inputProps={{ defaultValue: "foo" }}
+                  optionsProps={[{id:"foo", name:"Foo", checked:true}, {id:"bar", name:"Bar"}]}
+                  label="Cluster Runtime"
+                  helperText="Runtime used by the cluster, can check by running <code>kubectl get nodes -o jsonpath='{.items[].status.nodeInfo.containerRuntimeVersion}'</code>"
                 />
               </Box>
               <Box mb={3}>
