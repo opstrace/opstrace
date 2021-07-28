@@ -2,15 +2,15 @@
 
 ## Kubernetes-based debugging
 
-When the Opstrace cluster or parts of it appear to not be healthy then debugging should start with getting insights about the underlying Kubernetes (k8s) cluster and its deployments.
+When the Opstrace instance or parts of it appear to not be healthy then debugging should start with getting insights about the underlying Kubernetes (k8s) cluster and its deployments.
 
-### Connect `kubectl` to your Opstrace cluster
+### Connect `kubectl` to your Opstrace Instance
 
 
 <!--tabs-->
 #### AWS
 
-Make sure use the same `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` that were used for creating the Opstrace cluster.
+Make sure use the same `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` that were used for creating the Opstrace instance.
 Then run
 
 ```text
@@ -25,7 +25,7 @@ aws eks update-kubeconfig --name testcluster --region us-west-2
 
 #### GCP
 
-Make sure `gcloud` is configured for the GCP project under which the Opstrace cluster was created.
+Make sure `gcloud` is configured for the GCP project under which the Opstrace instance was created.
 Then run
 
 ```text
@@ -42,7 +42,7 @@ gcloud container clusters get-credentials testcluster --zone us-west2-a --projec
 
 ### Get an overview over all container states
 
-When the Opstrace cluster or parts of it appear to not be healthy then debugging should start with getting an overview over all k8s deployments and individual container states.
+When the Opstrace instance or parts of it appear to not be healthy then debugging should start with getting an overview over all k8s deployments and individual container states.
 This can be obtained with the following command:
 
 ```text
@@ -53,7 +53,7 @@ This will reveal when a certain container is for example in a crash loop, or whe
 
 ### Fetch Opstrace controller logs
 
-When the Opstrace controller (a deployment running in the Opstrace cluster) is suspected to have run into a problem then it is important to fetch and inspect its logs:
+When the Opstrace controller (a deployment running in the Opstrace instance) is suspected to have run into a problem then it is important to fetch and inspect its logs:
 
 ```text
 kubectl logs deployment/opstrace-controller \

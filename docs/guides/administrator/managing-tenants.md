@@ -2,7 +2,7 @@
 
 This guide will show you how to:
 
-* Add a new tenant to a running cluster
+* Add a new tenant to a running instance
 * Delete a tenant
 
 ## Introduction
@@ -10,7 +10,7 @@ This guide will show you how to:
 Opstrace supports multiple, secured tenants to logically isolate concerns on otherwise shared infrastructure.
 If you are not familiar with what a "tenant" is, see our [tenant key concepts](../../references/concepts.md#tenants) documentation.
 
-Tenants are presented in the Cluster Admin section of our UI:
+Tenants are presented in the Admin section of our UI:
 
 ![tenant overview page](../../assets/tenants-guide-overview-1.png)
 
@@ -23,7 +23,7 @@ If you’re coming from the [quick start](../../quickstart.md), and haven’t ye
 ## Create a Tenant API Token with the CLI
 
 Because Opstrace is secure by default we will first create a public/private keypair that will be used to authenticate clients that wish to access the tenant API.
-If you have created your cluster with [authentication disabled](../../references/configuration.md#data_api_authentication_disabled), option you can skip to the [add a new tenant with the UI](./managing-tenants.md#user-content-add-a-new-tenant-with-the-ui) section.
+If you have created your instance with [authentication disabled](../../references/configuration.md#data_api_authentication_disabled), option you can skip to the [add a new tenant with the UI](./managing-tenants.md#user-content-add-a-new-tenant-with-the-ui) section.
 
 ### 1) Create a new RSA Key Pair
 

@@ -1,5 +1,5 @@
 ---
-description: Operate the entire lifecycle of an Opstrace cluster.
+description: Operate the entire lifecycle of an Opstrace instance.
 ---
 
 # Administrator Guide

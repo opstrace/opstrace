@@ -4,7 +4,7 @@ Note: For a detailed walk-through showing how to set up a fresh GCP project for 
 
 ## Required services (APIs)
 
-Creating an Opstrace cluster in a GCP project requires the following APIs to be [enabled](https://cloud.google.com/service-usage/docs/enable-disable) in that project:
+Creating an Opstrace instance in a GCP project requires the following APIs to be [enabled](https://cloud.google.com/service-usage/docs/enable-disable) in that project:
 
 * Cloud DNS API
 * Compute Engine API
@@ -17,7 +17,7 @@ We try to keep this list up to date—if in doubt, please [reach out in our comm
 
 ## Required service account permissions
 
-Creating an Opstrace cluster in a GCP project requires a service account.
+Creating an Opstrace instance in a GCP project requires a service account.
 That service account must have certain security roles applied in the GCP project:
 
 * `roles/compute.networkAdmin`

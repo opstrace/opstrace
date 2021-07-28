@@ -1,10 +1,10 @@
 # Sending metrics with Prometheus
 
-In this guide we show how to configure a Prometheus instance to securely send metrics to your Opstrace cluster.
+In this guide we show how to configure a Prometheus instance to securely send metrics to your Opstrace instance.
 
 ## Prerequisites
 
-* An Opstrace cluster.
+* An Opstrace instance.
 * A decision: for which Opstrace tenant would you like to send data?
 * An Opstrace tenant authentication token file (for the tenant of your choice). Also see [concepts](../../references/concepts.md).
 
@@ -12,7 +12,7 @@ In this guide we show how to configure a Prometheus instance to securely send me
 
 A Prometheus instance can be instructed to replicate its state to a remote system by defining a [remote_write](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write) configuration block.
 
-What follows is the basic structure of this configuration block to make Prometheus send data to your Opstrace cluster:
+What follows is the basic structure of this configuration block to make Prometheus send data to your Opstrace instance:
 
 ```yaml
 remote_write:
@@ -24,23 +24,23 @@ remote_write:
 
 ## Choosing `url`
 
-This is the tenant-specific data API endpoint of an Opstrace cluster for ingesting metrics.
-The endpoint URL is constructed using the tenant name and the cluster name:
+This is the tenant-specific data API endpoint of an Opstrace instance for ingesting metrics.
+The endpoint URL is constructed using the tenant name and the instance name:
 
 ```yaml
-url: https://cortex.${TENANT_NAME}.${CLUSTER_NAME}.opstrace.io/api/v1/push
+url: https://cortex.${TENANT_NAME}.${INSTANCE_NAME}.opstrace.io/api/v1/push
 ```
 
 Example:
 
 ```yaml
-url: https://cortex.default.testcluster.opstrace.io/api/v1/push
+url: https://cortex.default.test.opstrace.io/api/v1/push
 ```
 
 ## Choosing `bearer_token_file`
 
-Your Opstrace cluster exposes the metrics ingestion API securely.
-For authenticating the client towards the Opstrace cluster, the client has to present a tenant-specific data API authentication token with every request.
+Your Opstrace instance exposes the metrics ingestion API securely.
+For authenticating the client towards the Opstrace instance, the client has to present a tenant-specific data API authentication token with every request.
 
 To achieve that, we use the `bearer_token_file` parameter:
 
@@ -52,9 +52,9 @@ bearer_token_file: /var/run/default-tenant/tenant-api-token-default
 
 ## Choosing `tls_config`
 
-TLS is used for establishing a secure, private transport between the Prometheus instance and the Opstrace cluster.
-By default, the Prometheus instance attempts to verify the certificate exposed by the Opstrace cluster against its trust store, for establishing authenticity of the Opstrace cluster towards Prometheus.
-Depending on the `cert_issuer` cluster configuration option (see [cluster configuration](../../references/configuration.md)) you may want to disable server certificate verification for testing purposes.
+TLS is used for establishing a secure, private transport between the Prometheus instance and the Opstrace instance.
+By default, the Prometheus instance attempts to verify the certificate exposed by the Opstrace instance against its trust store, for establishing authenticity of the Opstrace instance towards Prometheus.
+Depending on the `cert_issuer` instance configuration option (see [configuration](../../references/configuration.md)) you may want to disable server certificate verification for testing purposes.
 
 This can be achieved via
 

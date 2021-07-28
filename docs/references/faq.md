@@ -20,7 +20,7 @@ One great advantage is that you may be able to reduce the footprint of your Prom
 ## Can I run this on my own Kubernetes cluster?
 
 In order to provide a reliable experience for Opstrace, we control the entire infrastructure from end to end.
-Your Opstrace cluster is best kept separate from the infrastructure its meant to monitor.
+Your Opstrace instance is best kept separate from the infrastructure its meant to monitor.
 We do have a Cortex Operator that you can use to run Cortex on your own.
 Check it out on GitHub here: [https://github.com/opstrace/cortex-operator](https://github.com/opstrace/cortex-operator).
 
