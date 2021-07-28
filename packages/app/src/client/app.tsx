@@ -194,6 +194,10 @@ const AuthProtectedApplication = () => {
               {
                 title: "Cortex",
                 path: `/cluster/configuration/cortex`
+              },
+              {
+                title: "Opstrace",
+                path: `/cluster/configuration/opstrace`
               }
             ]
           }
@@ -303,6 +307,12 @@ const AuthProtectedApplication = () => {
               exact
               key="cluster-config-cortex"
               path="/cluster/configuration/cortex"
+              component={ClusterConfig}
+            />
+            <Route
+              exact
+              key="cluster-config-opstrace"
+              path="/cluster/configuration/opstrace"
               component={ClusterConfig}
             />
             <Route

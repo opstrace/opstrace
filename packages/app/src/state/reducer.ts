@@ -19,6 +19,7 @@ import { reducer as userReducer } from "./user/reducer";
 import { reducer as tenantReducer } from "./tenant/reducer";
 import { reducer as integrationReducer } from "./integration/reducer";
 import { reducer as cortexConfigReducer } from "./cortex-config/reducer";
+import { reducer as opstraceConfigReducer } from "./opstrace-config/reducer";
 import { reducer as formReducer } from "./form/reducer";
 
 export const mainReducers = {
@@ -26,7 +27,8 @@ export const mainReducers = {
   tenants: tenantReducer,
   integrations: integrationReducer,
   form: formReducer,
-  cortex: cortexConfigReducer
+  cortex: cortexConfigReducer,
+  opstrace: opstraceConfigReducer
 };
 
 export const mainReducer = combineReducers(mainReducers);

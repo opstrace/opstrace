@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-import env from "server/env";
-import { NextFunction, Request, Response } from "express";
+import { createReducer, ActionType } from "typesafe-actions";
 
-import { BUILD_INFO } from "@opstrace/utils";
+import { OpstraceConfig } from "./types";
+import * as actions from "./actions";
 
-export const AUTH0_CONFIG = {
-  auth0_client_id: env.AUTH0_CLIENT_ID,
-  auth0_domain: env.AUTH0_DOMAIN
+type OpstraceConfigActions = ActionType<typeof actions>;
+
+const OpstraceConfigInitialState: OpstraceConfig = {
+  buildInfo: undefined
 };
 
-export { BUILD_INFO };
-
-export function pubUiCfgHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  res.status(200).json(AUTH0_CONFIG);
-  return;
-}
-
-// require authentication?
-export function buildInfoHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  res.status(200).json(BUILD_INFO);
-  return;
-}
+export const reducer = createReducer<OpstraceConfig, OpstraceConfigActions>(
+  OpstraceConfigInitialState
+).handleAction(
+  actions.updateOpstraceBuildInfo,
+  (state, action): OpstraceConfig => ({
+    buildInfo: action.payload.buildInfo
+  })
+);

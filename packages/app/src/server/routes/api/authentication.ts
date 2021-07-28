@@ -26,7 +26,7 @@ import authRequired from "server/middleware/auth";
 
 import graphqlClient from "state/clients/graphqlClient";
 
-import { auth0Config } from "./uicfg";
+import { AUTH0_CONFIG, BUILD_INFO } from "./uicfg";
 
 // Authorization middleware. When used, the
 // Access Token must exist and be verified against
@@ -136,8 +136,15 @@ function createAuthHandler(): express.Router {
     res.status(200).json({
       currentUserId: req.session?.userId,
       auth0Config: {
-        domain: auth0Config.auth0_domain,
-        clientId: auth0Config.auth0_client_id
+        domain: AUTH0_CONFIG.auth0_domain,
+        clientId: AUTH0_CONFIG.auth0_client_id
+      },
+      buildInfo: {
+        branch: BUILD_INFO.BRANCH_NAME,
+        version: BUILD_INFO.VERSION_STRING,
+        commit: BUILD_INFO.COMMIT,
+        buildTime: BUILD_INFO.BUILD_TIME_RFC3339,
+        buildHostname: BUILD_INFO.BUILD_HOSTNAME
       }
     });
   });
