@@ -17,6 +17,7 @@
 // For each dashboard we want, we import it here and list it below
 import makeApiserverDashboard from "./apiserver.js";
 import makeKubeletDashboard from "./kubelet.js";
+import makeResourceDashboard from "./resource.js";
 
 type DashboardProps = {
   integrationId: String;
@@ -37,6 +38,12 @@ export function makePrometheusDashboardRequests({
     {
       uid: `kub-${integrationId}`,
       dashboard: makeKubeletDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `res-${integrationId}`,
+      dashboard: makeResourceDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     }
