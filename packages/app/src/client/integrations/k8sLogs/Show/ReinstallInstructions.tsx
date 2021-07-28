@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { useCallback } from "react";
 import { useDispatch } from "react-redux";
 
 import { Integration } from "state/integration/types";
 import { makePromtailDashboardRequests } from "./dashboards";
 
+import { useNotificationService } from "client/services/Notification";
 import * as grafana from "client/utils/grafana";
 
 import { updateGrafanaStateForIntegration } from "state/integration/actions";
@@ -62,6 +63,31 @@ export const ReinstallInstructions = ({
 }: ReinstallInstructionsProps) => {
   const dispatch = useDispatch();
 
+  const {
+    registerNotification,
+    unregisterNotification
+  } = useNotificationService();
+
+  const notifyError = useCallback(
+    (title: string, message: string) => {
+      const messageId = Math.floor(Math.random() * Math.floor(100000)).toString();
+      const newNotification = {
+        id: messageId,
+        state: "error" as const,
+        title,
+        information: message,
+        handleClose: () =>
+          unregisterNotification({
+            id: messageId,
+            title: "",
+            information: ""
+          })
+      };
+      registerNotification(newNotification);
+    },
+    [registerNotification, unregisterNotification]
+  );
+
   const dashboardHandler = async () => {
     // Delete existing folder, if any.
     try {
@@ -70,16 +96,39 @@ export const ReinstallInstructions = ({
       // Ignore 404 error - expected for initial dashboard install
       if (err.response.status !== 404) {
         console.log(err);
+        notifyError(
+          `Could not delete grafana integration dashboard folder ${integration}`,
+          err.response.statusText
+        );
+        return;
       }
     }
 
-    const folder = await grafana.createFolder({ integration, tenant });
+    let folder = null;
+    try {
+      folder = await grafana.createFolder({ integration, tenant });
+    } catch (err) {
+      console.log(err);
+      notifyError(
+        `Could not create grafana integration dashboard folder ${integration}`,
+        err.response.statusText
+      );
+      return;
+    }
 
     for (const d of makePromtailDashboardRequests({
       integrationId: integration.id,
       folderId: folder.id
     })) {
-      await grafana.createDashboard(tenant, d);
+      try {
+        await grafana.createDashboard(tenant, d);
+      } catch (err) {
+        console.log(err);
+        notifyError(
+          `Could not create grafana integration dashboard`,
+          err.response.statusText
+        );
+      }
     }
 
     dispatch(

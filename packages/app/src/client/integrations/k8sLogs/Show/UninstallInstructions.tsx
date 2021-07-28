@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { saveAs } from "file-saver";
 
 import { Integration } from "state/integration/types";
