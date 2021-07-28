@@ -2,7 +2,7 @@
 
 ## Kubernetes-based debugging
 
-When the Opstrace instance or parts of it appear to not be healthy then debugging should start with getting insights about the underlying Kubernetes (k8s) cluster and its deployments.
+When the Opstrace instance or parts of it appear to not be healthy then debugging should start with getting insights about the underlying Kubernetes cluster and its deployments.
 
 ### Connect `kubectl` to your Opstrace Instance
 
@@ -42,7 +42,7 @@ gcloud container clusters get-credentials testcluster --zone us-west2-a --projec
 
 ### Get an overview over all container states
 
-When the Opstrace instance or parts of it appear to not be healthy then debugging should start with getting an overview over all k8s deployments and individual container states.
+When the Opstrace instance or parts of it appear to not be healthy then debugging should start with getting an overview over all Kubernetes deployments and individual container states.
 This can be obtained with the following command:
 
 ```text

@@ -104,7 +104,7 @@ See [the `test-remote` suite of tests](https://github.com/opstrace/opstrace/tree
 For controller development it can be helpful to create an Opstrace instance and have the controller running on your local machine. This allows much faster turnaround when working on the controller locally, since you can avoid needing to build and upload the controller docker image with every change.
 
 1. Use the `--hold-controller` argument upon instance creation: `opstrace create ... [cluster-name] --hold-controller`
-2. `make kconfig-aws` or `make kconfig-gcp`: adjust the local kubeconfig to the newly created k8s cluster.
+2. `make kconfig-aws` or `make kconfig-gcp`: adjust the local kubeconfig to the newly created Kubernetes cluster.
 3. Run the controller locally, with the `--external` flag: `node ./packages/controller/build/cmd.js --external [cluster-name]`
 
 ## Linting code and docs
