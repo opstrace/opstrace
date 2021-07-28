@@ -1,11 +1,11 @@
 # Developer workflows
 
-## Create a cluster from latest `main`
+## Create an instance from latest `main`
 
 Our Continuous Integration (CI) setup performs periodic builds from the `main` branch.
 When a build passed all tests then its corresponding artifacts are exposed as "latest from main".
 
-Here is how to launch an Opstrace cluster based on such cutting edge build artifacts.
+Here is how to launch an Opstrace instance based on such cutting edge build artifacts.
 First, download and extract the CLI:
 
 <!--tabs-->
@@ -29,13 +29,13 @@ Verify version and build date:
 ./opstrace --version --log-level=debug
 ```
 
-Create the cluster (choose provider and cluster name and config at will):
+Create the instance (choose provider and instance name and config at will):
 
 ```bash
 ./opstrace create [aws-or-gcp[ [choose-cluster-name] -c ci/cluster-config.yaml
 ```
 
-## Local checkout: build artifacts, and create a cluster
+## Local checkout: build artifacts, and create a instance
 
 Confirm that the working directory is the root of the `opstrace/opstrace` repository checkout.
 It may contain local modifications (which is the point of this section).
@@ -47,7 +47,7 @@ make cli
 make build-and-push-controller-image
 ```
 
-Then create the cluster (choose provider and cluster name and config at will):
+Then create the instance (choose provider and instance name and config at will):
 
 ```bash
 ./build/bin/opstrace create [aws-or-gcp] [cluster-name] -c ci/cluster-config.yaml
@@ -65,10 +65,10 @@ You can run `yarn watch:cli` for automatic and iterative `tsc`-compilation of th
 In a separate terminal, you can then invoke the CLI via the `packages/cli/build/index.js` entry point. Example:
 
 ```text
-node packages/cli/build/index.js create aws testcluster -c cluster-config.yaml
+node packages/cli/build/index.js create aws test -c config.yaml
 ```
 
-In almost all of the cases, this cluster creation attempt is then expected to fail with:
+In almost all of the cases, this instance creation attempt is then expected to fail with:
 
 ```text
 ...
@@ -77,33 +77,33 @@ In almost all of the cases, this cluster creation attempt is then expected to fa
 error: docker image not present on docker hub: you might want to push that first
 ```
 
-Why is that? It is essential to appreciate that this CLI build (not built by CI) cannot have awareness of a sane corresponding default for the `controller_image` parameter in the cluster configuration. Therefore, it is pointing to an image that usually does not exist on Docker Hub.
+Why is that? It is essential to appreciate that this CLI build (not built by CI) cannot have awareness of a sane corresponding default for the `controller_image` parameter in the instance configuration. Therefore, it is pointing to an image that usually does not exist on Docker Hub.
 
-You might decide that all you need is to get a cluster running using the latest and greatest controller image built by CI, from `main`.
+You might decide that all you need is to get a instance running using the latest and greatest controller image built by CI, from `main`.
 For achieving that, you can use a moving target image tag: `opstrace/controller:latest-main`. For example:
 
 ```text
-$ cat cluster-config.yaml
+$ cat config.yaml
 controller_image: opstrace/controller:latest-main
 tenants:
   - dev
 ```
 
-When you use this `cluster-config.yaml` for your testing/iteration effort, you can stop worrying about the "controller image does not exist" error.
+When you use this `config.yaml` for your testing/iteration effort, you can stop worrying about the "controller image does not exist" error.
 
 Just note that _this_ controller image might not perfectly fit the CLI changes that you are testing: if your changes also affect the controller, you might have to go through the more time-consuming process involving `make build-and-push-controller-image` (see above) to achieve a sane outcome.
 But at this point, you have certainly entered the "I know what I am doing" stage and know best what is needed and what the trade-offs are.
 
 
-## Run the `test-remote` suite against a remote cluster
+## Run the `test-remote` suite against a remote instance
 
 See [the `test-remote` suite of tests](https://github.com/opstrace/opstrace/tree/main/test/test-remote), a document dedicated to this test suite.
 
-## Create a cluster, but run the controller locally
+## Create an instance, but run the controller locally
 
-For controller development it can be helpful to create an Opstrace cluster and have the controller running on your local machine. This allows much faster turnaround when working on the controller locally, since you can avoid needing to build and upload the controller docker image with every change.
+For controller development it can be helpful to create an Opstrace instance and have the controller running on your local machine. This allows much faster turnaround when working on the controller locally, since you can avoid needing to build and upload the controller docker image with every change.
 
-1. Use the `--hold-controller` argument upon cluster creation: `opstrace create ... [cluster-name] --hold-controller`
+1. Use the `--hold-controller` argument upon instance creation: `opstrace create ... [cluster-name] --hold-controller`
 2. `make kconfig-aws` or `make kconfig-gcp`: adjust the local kubeconfig to the newly created k8s cluster.
 3. Run the controller locally, with the `--external` flag: `node ./packages/controller/build/cmd.js --external [cluster-name]`
 

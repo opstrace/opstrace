@@ -1,32 +1,32 @@
 # The `test-remote` suite of tests
 
 Our so-called `test-remote` suite is located in `tests/test-remote`.
-It is the main test suite for checking the validity of an Opstrace cluster's health and functionality.
+It is the main test suite for checking the validity of an Opstrace instance's health and functionality.
 We run this test suite regularly as part of CI for each code commit.
 
-Architecturally, this test suite is designed to be executed locally on your machine for testing a remote Opstrace cluster through the Internet.
+Architecturally, this test suite is designed to be executed locally on your machine for testing a remote Opstrace instance through the Internet.
 
-Most of the individual tests in this suite inspect cluster properties through the data API endpoints, i.e., from the user's (and their tooling's) point of view.
+Most of the individual tests in this suite inspect instance properties through the data API endpoints, i.e., from the user's (and their tooling's) point of view.
 Other tests in this suite may inspect implementation details through private interfaces.
 
-**WARNING: that this test suite is invasive. That is, never run it against a production cluster.**
+**WARNING: that this test suite is invasive. That is, never run it against a production instance.**
 
 
-## How to run `test-remote` against a remote cluster
+## How to run `test-remote` against a remote instance
 
 The recommended way to run this test suite is via `make test-remote` executed at the root directory of the Opstrace repository.
 This starts the individual test runner components as Docker containers.
 
 Before invoking `make test-remote`, the environment in the current shell needs to be configured, as documented below.
 
-First, set cluster name and cloud provider of the to-be-tested cluster:
+First, set the name and cloud provider of the to-be-tested instance:
 
 ```bash
-export OPSTRACE_CLUSTER_NAME=<opstrace-cluster-name>
+export OPSTRACE_CLUSTER_NAME=<opstrace-instance-name>
 export OPSTRACE_CLOUD_PROVIDER=<aws or gcp>
 ```
 
-Next up, make your local `kubectl` configuration point to the running cluster:
+Next up, make your local `kubectl` configuration point to the running instance:
 
 ```bash
 make kconfig

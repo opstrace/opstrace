@@ -116,7 +116,7 @@ A policy will match an alert if the alert's labels match **all** of the *matchin
 
 1. First, create a basic contact point for your alerts (e.g., Slack).
 2. Edit the root policy and set it to have the contact point you just created.
-3. Edit the root policy grouping to group alerts by cluster, namespace and alertname so you get a notification per alert rule and specific Kubernetes cluster & namespace.
+3. Edit the root policy grouping to group alerts by source cluster, namespace and alertname so you get a notification per alert rule and specific Kubernetes cluster & namespace.
 
 #### Set up Specific Policies
 
