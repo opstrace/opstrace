@@ -21,6 +21,7 @@ import Typography from "client/components/Typography/Typography";
 import { Tabs } from "client/components/Tabs";
 
 import CortexConfig from "./cortex";
+import OpstraceConfig from "./opstrace";
 
 const ClusterConfig = () => {
   return (
@@ -34,6 +35,11 @@ const ClusterConfig = () => {
             path: `/cluster/configuration/cortex`,
             title: "Cortex",
             component: CortexConfig
+          },
+          {
+            path: `/cluster/configuration/opstrace`,
+            title: "Opstrace",
+            component: OpstraceConfig
           }
         ]}
       />

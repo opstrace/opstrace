@@ -69,6 +69,9 @@ import useAxios from "axios-hooks";
 
 import { setCurrentUser } from "state/user/actions";
 
+import { OpstraceBuildInfo } from "state/opstrace-config/types";
+import { updateOpstraceBuildInfo } from "state/opstrace-config/actions";
+
 import { loginUrl, makeUrl } from "client/components/withSession/paths";
 
 import { LoadingPage, LoginPage, LogoutPage, AccessDeniedPage } from "./pages";
@@ -86,12 +89,21 @@ type AppState = {
 // TODO: "WithSession" re-mounts after user logs into Auth0 and creates a new session causing a subsequent status check
 // TODO: look to switching to using a "context" for passing things to children components
 
+type StatusData = {
+  currentUserId?: string;
+  auth0Config: { domain: string; clientId: string };
+  buildInfo: OpstraceBuildInfo;
+};
+
 export const WithSession = ({ children }: { children: React.ReactNode }) => {
-  const [{ data, loading: loadingStatus, error: statusError }] = useAxios({
+  let [{ data, loading: loadingStatus, error: statusError }] = useAxios({
     url: "/_/auth/status",
     method: "GET",
     withCredentials: true
   });
+  // terrcin: ugh, don't know how to cast this in the above useAxios with typescript
+  data = data as StatusData;
+
   const appStateRef = useRef<AppState>({ returnTo: window.location.pathname });
   const dispatch = useDispatch();
 
@@ -119,6 +131,12 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
       handleUserLoadedSuccess(data.currentUserId);
     }
   }, [handleUserLoadedSuccess, data?.currentUserId]);
+
+  useEffect(() => {
+    if (data?.buildInfo) {
+      dispatch(updateOpstraceBuildInfo({ buildInfo: data.buildInfo }));
+    }
+  }, [data?.buildInfo, dispatch]);
 
   const reloadAppState = (appState: AppState = {}) => {
     appStateRef.current = appState;

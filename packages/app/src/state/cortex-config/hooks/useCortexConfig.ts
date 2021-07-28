@@ -42,7 +42,7 @@ export function useCortexConfigLoaded() {
  * on unmount.
  */
 export default function useCortexConfig() {
-  const currentUser = useSelector(getCortexConfig);
+  const cortexConfig = useSelector(getCortexConfig);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -53,5 +53,5 @@ export default function useCortexConfig() {
     };
   }, [dispatch]);
 
-  return currentUser;
+  return cortexConfig;
 }
