@@ -19,8 +19,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 import { loginUrl } from "client/components/withSession/paths";
 
-import { CondRender } from "client/utils/rendering";
-
 import { Page } from "client/components/Page";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
@@ -61,12 +59,12 @@ export const AccessDeniedPage = ({ data }: { data: {} }) => {
         </Box>
       </ErrorView>
 
-      <CondRender when={process.env.BUILDKITE === "true"}>
+      {process.env.BUILDKITE === "true" && (
         <ErrorView title="" subheader="" actions={null} maxWidth={800}>
           <Typography variant="h5">Error response</Typography>
           <pre>{JSON.stringify(data, null, 1)}</pre>
         </ErrorView>
-      </CondRender>
+      )}
     </Page>
   );
 };
