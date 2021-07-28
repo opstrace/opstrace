@@ -18,6 +18,8 @@ import fs from "fs";
 import { strict as assert } from "assert";
 
 import got, { Response as GotResponse, Options as GotOptions } from "got";
+import { ZonedDateTime, ZoneOffset, DateTimeFormatter } from "@js-joda/core";
+
 import { fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
 import createSagaMiddleware from "redux-saga";
@@ -184,7 +186,12 @@ function* createClusterCore() {
       allCLIVersions: [
         {
           version: BUILD_INFO.VERSION_STRING,
-          timestamp: new Date().toISOString()
+          // Current time in UTC using RFC3339 string representation (w/o
+          // fractional seconds, with Z tz specififer), e.g.
+          // '2021-07-28T15:43:07Z'
+          timestamp: ZonedDateTime.now(ZoneOffset.UTC).format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+          )
         }
       ]
     }

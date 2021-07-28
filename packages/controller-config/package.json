@@ -19,6 +19,6 @@
     "@opstrace/aws": "^0.0.0",
     "@opstrace/gcp": "^0.0.0",
     "@opstrace/kubernetes": "^0.0.0",
-    "date-fns": "^2.23.0"
+    "@js-joda/core": "^3.1.0"
   }
 }

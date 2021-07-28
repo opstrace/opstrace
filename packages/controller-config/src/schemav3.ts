@@ -15,7 +15,9 @@
  */
 
 import * as yup from "yup";
-import { parseISO } from "date-fns";
+
+import { LocalDateTime, DateTimeFormatter } from "@js-joda/core";
+
 import { GCPConfig } from "@opstrace/gcp";
 import { AWSConfig } from "@opstrace/aws";
 
@@ -31,14 +33,28 @@ import { AWSConfig } from "@opstrace/aws";
  */
 const timestampSchema = yup
   .string()
-  .test("isISO", "must be an ISO date string", (date: string): boolean => {
-    try {
-      const p = parseISO(date);
-      return !isNaN(p!.getTime());
-    } catch {
-      return false;
+  .test(
+    "isISO",
+    "must be RFC3339 w/o fractional seconds and UTC with Z tz specifier, e.g. 1990-12-31T23:59:59Z",
+    (s: string): boolean => {
+      // expect "1990-12-31T23:59:59Z", i.e. RFC 3339
+      // without the fractional second part
+      // with the Z specifier
+      try {
+        LocalDateTime.parse(
+          "1990-12-31T23:59:59Z",
+          DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+        );
+      } catch (err) {
+        // Don't import the complete winston-based logging machinery here, but
+        // also don't let down the dev who might change something and then run
+        // into a validation error: expose the actual validation error detail.
+        process.stdout.write(`\nvalidation error:\n${err}\n`);
+        return false;
+      }
+      return true;
     }
-  });
+  );
 
 export const ControllerConfigSchemaV3 = yup
   .object({
