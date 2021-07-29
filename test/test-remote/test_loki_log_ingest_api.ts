@@ -253,9 +253,7 @@ suite("Loki API test suite", function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
 
-    // `sampletsns` is for example: "1286705401123456789"
-    const sampleTimeRFC3339nano = "2010-10-10T10:10:01.123456789Z";
-    const ts = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const ts = ZonedDateTime.now().minusMinutes(10);
     const sampletsns = timestampToNanoSinceEpoch(ts);
     const samplemsg = "aaa\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
