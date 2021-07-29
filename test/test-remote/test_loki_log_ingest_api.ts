@@ -16,7 +16,7 @@
 
 import { strict as assert } from "assert";
 
-import { ZonedDateTime } from "@js-joda/core";
+import { ZonedDateTime, ZoneId } from "@js-joda/core";
 import got from "got";
 
 import {
@@ -34,7 +34,8 @@ import {
   OPSTRACE_INSTANCE_DNS_NAME,
   LOKI_API_TLS_VERIFY,
   globalTestSuiteSetupOnce,
-  enrichHeadersWithAuthToken
+  enrichHeadersWithAuthToken,
+  timestampToRFC3339Nano
 } from "./testutils";
 
 import { sendLogsWithFluentbitContainer } from "./testutils/fbit";
@@ -150,7 +151,7 @@ suite("Loki API test suite", function () {
   });
 
   test("insert w/ cntnrzd FluentD(loki plugin), then query", async function () {
-    const sampleTimeRFC3339nano = "2010-10-10T10:10:01.123456789Z";
+    const now = timestampToRFC3339Nano(ZonedDateTime.now(ZoneId.UTC));
 
     // Objects in this array are examples for what the Docker JSON file logging
     // writes. In particylar, the `log` key and the `time` key are what said
@@ -159,11 +160,11 @@ suite("Loki API test suite", function () {
     const logfileJsonDocs = [
       {
         log: "sample message 1with\nnewline loki output plugin",
-        time: sampleTimeRFC3339nano
+        time: now
       },
       {
         log: "sample message 2with\nnewline loki output plugin",
-        time: sampleTimeRFC3339nano
+        time: now
       }
     ];
 
@@ -181,7 +182,7 @@ suite("Loki API test suite", function () {
     );
 
     // Query for the log records that were just inserted.
-    const ts = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const ts = ZonedDateTime.now();
     const searchStart = ts.minusHours(1);
     const searchEnd = ts.plusHours(1);
     const queryParams = {
