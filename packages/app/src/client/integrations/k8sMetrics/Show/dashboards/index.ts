@@ -27,7 +27,7 @@ type DashboardProps = {
 export function makePrometheusDashboardRequests({
   integrationId,
   folderId
-}: DashboardProps): object[] {
+}: DashboardProps) {
   return [
     {
       uid: `as-${integrationId}`,
