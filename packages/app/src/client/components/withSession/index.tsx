@@ -31,7 +31,7 @@
  * == WithSession ==
  *
  * WithSession is a gatekeeper component and will only render props.children for users
- * with a valid Opstrace session. If they doesn't have one then WithSession will guide
+ * with a valid Opstrace session. If they don't have one then WithSession will guide
  * users to authenticate with Auth0, checking they are authorised and then creating a
  * valid session for them.
  *
@@ -55,7 +55,7 @@
  * In this case WithSession silently creates a valid Opstrace session for the user if
  * they are authorised to access the website.
  *
- * Note: users do no "signup" to Opstrace, the will need to have
+ * Note: users do not "signup" to Opstrace.
  *
  */
 
@@ -114,7 +114,7 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
         let returnTo = appStateRef.current?.returnTo || DEFAULT_PATHNAME;
         if (returnTo === "/login") {
           // This covers the case of the user clicking "logout", being redirected to the login page, and then immediately
-          // logging in again. The sysem will see them coming from "/login" so will think that's where they should be
+          // logging in again. The system will see them coming from "/login" so will think that's where they should be
           // redirected back there. This saves them a hop.
           returnTo = DEFAULT_PATHNAME;
         }
