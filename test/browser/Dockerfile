@@ -12,6 +12,8 @@ RUN yarn playwright test -h
 
 COPY . /build/test/browser
 
+COPY buildinfo.json /build/test/browser/buildinfo.json
+
 # add a random string to the begining of each spec filename so that they run in a random order each time
 # this doesn't change the order tests in each spec run
 WORKDIR /build/test/browser/tests
