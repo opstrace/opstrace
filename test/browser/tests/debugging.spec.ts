@@ -19,7 +19,7 @@ import { expect } from "@playwright/test";
 import useFixtures, { test } from "../fixtures";
 import { restoreLogin } from "../utils/authentication";
 
-const testWithAuth = useFixtures("auth");
+const testWithAuth = useFixtures(["auth"]);
 const testNoAuth = test;
 
 testWithAuth.describe("debugging", () => {
@@ -28,6 +28,11 @@ testWithAuth.describe("debugging", () => {
   testWithAuth("this should FAIL all the time", async () => {
     testWithAuth.skip(true, "for debugging only");
     expect(false).toBeTruthy();
+  });
+
+  testWithAuth("echo buildinfo", async ({ buildInfo }) => {
+    console.log("buildInfo: ", buildInfo);
+    expect(true).toBeTruthy();
   });
 });
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import fs from "fs";
 import { TestType } from "@playwright/test";
 
 import { log } from "../utils";
@@ -36,10 +37,19 @@ type UserFixture = {
   password: string;
 };
 
+type BuildInfoFixture = {
+  branch: string;
+  version: string;
+  commit: string;
+  buildTime: string;
+  buildHostname: string;
+};
+
 type ConfigFixture = {
   system: SystemFixture;
   cluster: ClusterFixture;
   user: UserFixture;
+  buildInfo: BuildInfoFixture;
 };
 
 export const addConfigFixture = (test: TestType) =>
@@ -101,6 +111,22 @@ export const addConfigFixture = (test: TestType) =>
           password: "This-is-not-a-secret!"
         };
         await use(user);
+      },
+      { scope: "worker" }
+    ],
+    buildInfo: [
+      async ({ browser }, use) => {
+        const data = JSON.parse(fs.readFileSync("buildinfo.json", "utf8"));
+
+        const buildInfo: BuildInfoFixture = {
+          branch: data.BRANCH_NAME,
+          version: data.VERSION_STRING,
+          commit: data.COMMIT,
+          buildTime: data.BUILD_TIME_RFC3339,
+          buildHostname: data.BUILD_HOSTNAME
+        };
+
+        await use(buildInfo);
       },
       { scope: "worker" }
     ]

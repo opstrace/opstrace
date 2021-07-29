@@ -32,6 +32,11 @@ test.describe("after auth0 authentication", () => {
     expect(await page.isVisible("[data-test='tenant/list']")).toBeTruthy();
   });
 
+  test("echo buildinfo", async ({ buildInfo }) => {
+    console.log("buildInfo: ", buildInfo);
+    expect(true).toBeTruthy();
+  });
+
   test("user can create a new Tenant", async ({ page, cluster, tenant }) => {
     const tenantName = makeTenantName();
     expect(
