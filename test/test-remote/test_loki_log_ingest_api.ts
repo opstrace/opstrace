@@ -424,7 +424,7 @@ suite("Loki API test suite", function () {
     }
 
     const searchcrit = rndstring(5);
-    const starttime = ZonedDateTime.parse("2015-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.now();
     const pushrequest = createDummyPushRequest(
       starttime,
       {
