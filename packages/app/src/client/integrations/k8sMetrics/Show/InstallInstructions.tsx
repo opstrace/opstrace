@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { saveAs } from "file-saver";
 
@@ -43,6 +43,7 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import styled from "styled-components";
 import { Tenant } from "state/tenant/types";
+import { useNotificationService } from "client/services/Notification";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -71,6 +72,33 @@ export const InstallInstructions = ({
 }: InstallInstructionsProps) => {
   const dispatch = useDispatch();
 
+  const {
+    registerNotification,
+    unregisterNotification
+  } = useNotificationService();
+
+  const notifyError = useCallback(
+    (title: string, message: string) => {
+      const messageId = Math.floor(
+        Math.random() * Math.floor(100000)
+      ).toString();
+      const newNotification = {
+        id: messageId,
+        state: "error" as const,
+        title,
+        information: message,
+        handleClose: () =>
+          unregisterNotification({
+            id: messageId,
+            title: "",
+            information: ""
+          })
+      };
+      registerNotification(newNotification);
+    },
+    [registerNotification, unregisterNotification]
+  );
+
   const configFilename = useMemo(
     () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
     [tenant.name, integration.kind]
@@ -89,13 +117,45 @@ export const InstallInstructions = ({
   };
 
   const dashboardHandler = async () => {
-    const folder = await grafana.createFolder({ integration, tenant });
+    let folder;
+    try {
+      folder = await grafana.createFolder({ integration, tenant });
+    } catch (error) {
+      notifyError(
+        `Could not create grafana integration dashboard folder ${integration.name}`,
+        error.response.data.message ?? error.message
+      );
+      return;
+    }
 
     for (const d of makePrometheusDashboardRequests({
       integrationId: integration.id,
       folderId: folder.id
     })) {
-      await grafana.createDashboard(tenant, d);
+      try {
+        await grafana.createDashboard(tenant, d);
+      } catch (error) {
+        /*
+          Errors are usually communicated as a JSON in a list. 
+          For example:
+          [
+            { "fieldNames": [ "Dashboard" ], "classification": "RequiredError", "message": "Required" }
+          ] 
+          There might be ways to derrive better, human readable error messages, but for now we're 
+          just showing the error JSON.
+         */
+        const errorMessageList = Array.isArray(error.response.data)
+          ? error.response.data.map((errObj: Object) => JSON.stringify(errObj))
+          : [error.message];
+
+        for (const message of errorMessageList) {
+          notifyError(
+            `Could not create grafana integration dashboard ${d.uid}`,
+            message
+          );
+        }
+        return;
+      }
     }
 
     dispatch(

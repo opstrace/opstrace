@@ -163,7 +163,6 @@ test("shows error messages if grafana request fails", async () => {
     rest.delete(
       `http://${tenant.name}.localhost/grafana/api/folders/i9n-${integration.id}`,
       (req, res, ctx) => {
-        ctx.status(500);
         return res(ctx.status(500), ctx.json({ message: errorMessage }));
       }
     )
