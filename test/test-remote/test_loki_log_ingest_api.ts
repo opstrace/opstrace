@@ -314,6 +314,7 @@ suite("Loki API test suite", function () {
   test("insert log records with equivalent timestamps", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
+    const now = timestampToNanoSinceEpoch(ZonedDateTime.now());
 
     const payload = {
       streams: [
@@ -323,8 +324,8 @@ suite("Loki API test suite", function () {
             uniq: rndstring().slice(0, 5)
           },
           values: [
-            ["1286705401123456789", "aaa"],
-            ["1286705401123456789", "aaa"]
+            [now, "aaa"],
+            [now, "aaa"]
           ]
         }
       ]
