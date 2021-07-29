@@ -470,7 +470,7 @@ suite("Loki API test suite", function () {
   test("log push load with pbuf, multi stream fragments", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
-    const starttime = ZonedDateTime.parse("2015-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.now();
 
     // N_streams determines the number of HTTP POST requests made. Each
     // insertion request has in its body a protobuf message containing a push
