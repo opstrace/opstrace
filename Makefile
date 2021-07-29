@@ -536,16 +536,21 @@ ci-%: checkenv-builddir
 	bash -c "cd /build && echo && pwd && ls -a && make $*"
 
 
+.PHONY: build-test-browser-image
+build-test-browser-image:
+	@echo "--- building test-browser container image"
+	cp buildinfo.json test/browser/
+	docker build ./test/browser --rm --force-rm \
+		-t opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
+		-f ./test/browser/Dockerfile
+
 
 .PHONY: rebuild-testrunner-container-images
-rebuild-testrunner-container-images:
+rebuild-testrunner-container-images: build-test-browser-image
 	@echo "--- building testrunner container image"
 	docker build . --rm --force-rm \
 		-t opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
 		-f ./test/test-remote/nodejs-testrunner.Dockerfile
-	docker build ./test/browser --rm --force-rm \
-		-t opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
-		-f ./test/browser/Dockerfile
 	docker pull opstrace/systemlog-fluentd:fe6d0d84-dev
 	docker pull prom/prometheus:v2.21.0
 	docker pull gcr.io/datadoghq/agent:7
