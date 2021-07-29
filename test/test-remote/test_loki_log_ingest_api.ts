@@ -354,8 +354,7 @@ suite("Loki API test suite", function () {
     const testname = testName(this);
 
     // Specify details of log record to be inserted.
-    const sampleTimeRFC3339nano = "2012-10-10T10:10:01.123456789Z";
-    const sampletimestamp = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const sampletimestamp = ZonedDateTime.now().minusMinutes(10);
     const samplemsg = "bbb\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
     const samplelabels = {
