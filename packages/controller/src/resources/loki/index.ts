@@ -30,7 +30,13 @@ import {
   ServiceAccount
 } from "@opstrace/kubernetes";
 import { State } from "../../reducer";
-import { roundDownToOdd, select, getBucketName } from "@opstrace/utils";
+import {
+  roundDownToOdd,
+  select,
+  getBucketName,
+  min,
+  roundDown
+} from "@opstrace/utils";
 import {
   deepMerge,
   getControllerConfig,
@@ -46,9 +52,14 @@ export function LokiResources(
   namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
-  const { infrastructureName, target, region, gcp } = getControllerConfig(
-    state
-  );
+  const {
+    infrastructureName,
+    target,
+    region,
+    gcp,
+    logRetentionDays
+  } = getControllerConfig(state);
+
   const dataBucketName = getBucketName({
     clusterName: infrastructureName,
     suffix: "loki"
@@ -167,16 +178,34 @@ export function LokiResources(
         }
       ])
     },
+    queryFrontend: {
+      // more than 2 is not beneficial (less advantage of queueing requests in
+      // front of queriers)
+      replicas: 2
+    },
+
+    memcachedResults: {
+      replicas: select(getNodeCount(state), [
+        { "<=": 4, choose: 2 },
+        { "<=": 9, choose: 3 },
+        {
+          "<=": Infinity,
+          choose: min(4, roundDown(getNodeCount(state) / 3))
+        }
+      ]),
+      resources: {}
+    },
     env: []
   };
 
   const memberlist_bind_port = 7947;
+  const grpc_server_max_msg_size = 41943040; // default (4 MB) * 10
 
   const lokiDefaultConfig = {
     server: {
       http_listen_port: 1080,
-      grpc_server_max_recv_msg_size: 41943040, // default (4 MB) * 10
-      grpc_server_max_send_msg_size: 41943040 // default (4 MB) * 10
+      grpc_server_max_recv_msg_size: grpc_server_max_msg_size,
+      grpc_server_max_send_msg_size: grpc_server_max_msg_size
     },
     auth_enabled: true,
     chunk_store_config: {
@@ -196,21 +225,55 @@ export function LokiResources(
       ingestion_rate_mb: 500,
       ingestion_burst_size_mb: 2000,
       // enforced in querier
-      max_entries_limit_per_query: 60000 // Per-tenant entry limit per query
+      max_entries_limit_per_query: 60000, // Per-tenant entry limit per query
+      // https://github.com/grafana/loki/blob/main/production/ksonnet/loki/config.libsonnet#L190-L198
+      reject_old_samples: true,
+      reject_old_samples_max_age: "168h",
+      max_query_length: `${(logRetentionDays + 1) * 24}h`,
+      max_query_parallelism: 16,
+      max_streams_per_user: 0, // Disabled in favor of the global limit
+      max_global_streams_per_user: 10000, // 10k
+      ingestion_rate_strategy: "global",
+      max_cache_freshness_per_query: "10m"
     },
-    //
-    // TODO: remove when opstrace-prelaunch/issues/1802 is done
-    //
+    frontend: {
+      compress_responses: true
+    },
     // The frontend_worker_config configures the worker - running within
     // the Loki querier - picking up and executing queries enqueued by
     // the query-frontend.
-    //
     frontend_worker: {
+      frontend_address: `query-frontend.${namespace}.svc.cluster.local:9095`,
       grpc_client_config: {
         // Fix opstrace-prelaunch/issues/1289
         // Enable backoff and retry when a rate limit is hit.
-        backoff_on_ratelimits: true
+        backoff_on_ratelimits: true,
+        // https://github.com/grafana/loki/blob/main/production/ksonnet/loki/config.libsonnet#L156
+        max_send_msg_size: grpc_server_max_msg_size
       }
+    },
+    // https://github.com/grafana/loki/blob/main/production/ksonnet/loki/config.libsonnet#L160-L175
+    query_range: {
+      split_queries_by_interval: "30m",
+      align_queries_with_step: true,
+      cache_results: true,
+      max_retries: 5,
+      results_cache: {
+        cache: {
+          memcached_client: {
+            timeout: "500ms",
+            consistent_hash: true,
+            service: "memcached-client",
+            host: `memcached-results.${namespace}.svc.cluster.local`,
+            update_interval: "1m",
+            max_idle_conns: 16
+          }
+        }
+      }
+    },
+    // https://github.com/grafana/loki/blob/main/production/ksonnet/loki/config.libsonnet#L179-L181
+    querier: {
+      query_ingesters_within: "4h" // twice the max-chunk age for safety buffer
     },
     ingester: {
       chunk_retain_period: "5m", // default: 15m. How long to keep in mem after flush.
@@ -1395,6 +1458,323 @@ export function LokiResources(
               }
             }
           ]
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Deployment(
+      {
+        apiVersion: "apps/v1",
+        kind: "Deployment",
+        metadata: {
+          name: "query-frontend",
+          namespace
+        },
+        spec: {
+          replicas: deploymentConfig.queryFrontend.replicas,
+          selector: {
+            matchLabels: {
+              name: "query-frontend"
+            }
+          },
+          template: {
+            metadata: {
+              labels: {
+                name: "query-frontend"
+              }
+            },
+            spec: {
+              affinity: withPodAntiAffinityRequired({
+                name: "query-frontend"
+              }),
+              containers: [
+                {
+                  name: "query-frontend",
+                  image: DockerImages.loki,
+                  imagePullPolicy: "IfNotPresent",
+                  args: [
+                    "-target=query-frontend",
+                    "-config.file=/etc/loki/config.yaml"
+                  ],
+                  env: deploymentConfig.env,
+                  ports: [
+                    {
+                      containerPort: 9095,
+                      name: "grpc"
+                    },
+                    {
+                      containerPort: 1080,
+                      name: "http"
+                    }
+                  ],
+                  volumeMounts: [
+                    {
+                      mountPath: "/etc/loki",
+                      name: "loki"
+                    }
+                  ]
+                }
+              ],
+              volumes: [
+                {
+                  configMap: {
+                    name: "loki"
+                  },
+                  name: "loki"
+                }
+              ]
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          labels: {
+            job: `${namespace}.query-frontend`,
+            name: "query-frontend"
+          },
+          name: "query-frontend",
+          namespace
+        },
+        spec: {
+          clusterIP: "None",
+          ports: [
+            {
+              port: 9095,
+              name: "grcp"
+            },
+            {
+              port: 1080,
+              name: "http"
+            }
+          ],
+          selector: {
+            name: "query-frontend"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new V1ServicemonitorResource(
+      {
+        apiVersion: "monitoring.coreos.com/v1",
+        kind: "ServiceMonitor",
+        metadata: {
+          labels: {
+            name: "query-frontend",
+            tenant: "system"
+          },
+          name: "query-frontend",
+          namespace
+        },
+        spec: {
+          endpoints: [
+            {
+              interval: "30s",
+              port: "http",
+              path: "/metrics"
+            }
+          ],
+          jobLabel: "job",
+          namespaceSelector: {
+            matchNames: [namespace]
+          },
+          selector: {
+            matchLabels: {
+              name: "query-frontend"
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new V1ServicemonitorResource(
+      {
+        apiVersion: "monitoring.coreos.com/v1",
+        kind: "ServiceMonitor",
+        metadata: {
+          labels: {
+            name: "memcached-results",
+            tenant: "system"
+          },
+          name: "memcached-results",
+          namespace
+        },
+        spec: {
+          endpoints: [
+            {
+              interval: "30s",
+              port: "exporter-http-metrics",
+              path: "/metrics"
+            }
+          ],
+          jobLabel: "name",
+          namespaceSelector: {
+            matchNames: [namespace]
+          },
+          selector: {
+            matchLabels: {
+              name: "memcached-results"
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new V1ServicemonitorResource(
+      {
+        apiVersion: "monitoring.coreos.com/v1",
+        kind: "ServiceMonitor",
+        metadata: {
+          labels: {
+            name: "memcached",
+            tenant: "system"
+          },
+          name: "memcached-index-writes",
+          namespace
+        },
+        spec: {
+          endpoints: [
+            {
+              interval: "30s",
+              port: "exporter-http-metrics",
+              path: "/metrics"
+            }
+          ],
+          jobLabel: "name",
+          namespaceSelector: {
+            matchNames: [namespace]
+          },
+          selector: {
+            matchLabels: {
+              name: "memcached-index-writes"
+            }
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new StatefulSet(
+      {
+        apiVersion: "apps/v1",
+        kind: "StatefulSet",
+        metadata: {
+          name: "memcached-results",
+          namespace
+        },
+        spec: {
+          replicas: deploymentConfig.memcachedResults.replicas,
+          serviceName: "memcached-results",
+          podManagementPolicy: "Parallel",
+          selector: {
+            matchLabels: {
+              name: "memcached-results"
+            }
+          },
+          template: {
+            metadata: {
+              labels: {
+                name: "memcached-results"
+              }
+            },
+            spec: {
+              affinity: withPodAntiAffinityRequired({
+                name: "memcached-results"
+              }),
+              containers: [
+                {
+                  args: ["-m 4096", "-I 2m", "-c 1024", "-v"],
+                  image: DockerImages.memcached,
+                  imagePullPolicy: "IfNotPresent",
+                  name: "memcached",
+                  ports: [
+                    {
+                      containerPort: 11211,
+                      name: "client"
+                    }
+                  ],
+                  resources: deploymentConfig.memcachedResults.resources
+                },
+                {
+                  args: [
+                    "--memcached.address=localhost:11211",
+                    "--web.listen-address=0.0.0.0:9150"
+                  ],
+                  image: DockerImages.memcachedExporter,
+                  imagePullPolicy: "IfNotPresent",
+                  name: "exporter",
+                  ports: [
+                    {
+                      containerPort: 9150,
+                      name: "http-metrics"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          updateStrategy: {
+            type: "RollingUpdate"
+          },
+          volumeClaimTemplates: []
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          labels: {
+            name: "memcached-results"
+          },
+          name: "memcached-results",
+          namespace
+        },
+        spec: {
+          clusterIP: "None",
+          ports: [
+            {
+              name: "memcached-client",
+              port: 11211,
+              targetPort: 11211 as any
+            },
+            {
+              name: "exporter-http-metrics",
+              port: 9150,
+              targetPort: 9150 as any
+            }
+          ],
+          selector: {
+            name: "memcached-results"
+          }
         }
       },
       kubeConfig
