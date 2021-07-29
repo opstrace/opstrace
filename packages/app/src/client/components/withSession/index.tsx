@@ -72,9 +72,14 @@ import { setCurrentUser } from "state/user/actions";
 import { OpstraceBuildInfo } from "state/opstrace-config/types";
 import { updateOpstraceBuildInfo } from "state/opstrace-config/actions";
 
-import { loginUrl, makeUrl } from "client/components/withSession/paths";
+import { loginUrl, makeUrl } from "./paths";
 
-import { LoadingPage, LoginPage, LogoutPage, AccessDeniedPage } from "./pages";
+import {
+  LoadingPage,
+  LoginPage,
+  LogoutPage,
+  AccessDeniedPage
+} from "client/views/session";
 
 const DEFAULT_PATHNAME = "/";
 const AUTH0_AUDIENCE = "https://user-cluster.opstrace.io/api";
@@ -96,6 +101,10 @@ type StatusData = {
 };
 
 export const WithSession = ({ children }: { children: React.ReactNode }) => {
+  // TODO: need to double check that the UseAxios response doesn't expire and this status check isn't re-run after a while.
+  // The reason for this is that "loadingStatus" would flip back to true and block the user for accessing the site while the
+  // check is occuring. We only want to interrupt the user if their session with Auth0 actually expires - if the session
+  // we create expires first it should silently be re-created without the user noticing
   let [{ data, loading: loadingStatus, error: statusError }] = useAxios({
     url: "/_/auth/status",
     method: "GET",
