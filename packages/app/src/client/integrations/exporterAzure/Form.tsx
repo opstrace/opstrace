@@ -29,16 +29,7 @@ import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
 
-type Values = {
-  name: string;
-  subscriptionId: string;
-  azureTenantId: string;
-  clientId: string;
-  clientSecret: string;
-  config: string;
-};
-
-const Schema = yup.object().shape({
+const Schema = yup.object({
   name: yup.string().required(),
   subscriptionId: yup.string().required(),
   azureTenantId: yup.string().required(),
@@ -46,6 +37,8 @@ const Schema = yup.object().shape({
   clientSecret: yup.string().required(),
   config: yup.string().required()
 });
+
+type Values = yup.Asserts<typeof Schema>;
 
 const defaultValues: Values = {
   name: "",

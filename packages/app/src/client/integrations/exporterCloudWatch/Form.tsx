@@ -28,21 +28,16 @@ import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { ExternalLink } from "client/components/Link";
 
-type Values = {
-  name: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  // raw yaml file content passthrough
-  // see examples: https://github.com/prometheus/cloudwatch_exporter#configuration
-  config: string;
-};
-
-const Schema = yup.object().shape({
+const Schema = yup.object({
   name: yup.string().required(),
   accessKeyId: yup.string().required(),
   secretAccessKey: yup.string().required(),
+  // raw yaml file content passthrough
+  // see examples: https://github.com/prometheus/cloudwatch_exporter#configuration
   config: yup.string().required()
 });
+
+type Values = yup.Asserts<typeof Schema>;
 
 const defaultValues: Values = {
   name: "",
