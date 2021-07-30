@@ -19,12 +19,11 @@ import { Controller } from "react-hook-form";
 import { HelpCircle } from "react-feather";
 
 import {
+  FormControlLabel,
   FormLabel,
   FormHelperText,
   Radio,
-  RadioProps,
   RadioGroup,
-  RadioGroupProps
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -32,12 +31,16 @@ import { Typography } from "client/components/Typography";
 import { CondRender } from "client/utils/rendering";
 import { Box } from "client/components/Box";
 
+type SelectInputOptionProps = {
+  label: string;
+  value: string;
+};
+
 type SelectInputProps = {
   name: `${string}` | `${string}.${string}` | `${string}.${number}`;
   label?: string;
   helperText?: string | React.ReactNode | (() => React.ReactNode);
-  inputProps?: RadioGroupProps;
-  optionsProps?: RadioProps[];
+  optionsProps?: SelectInputOptionProps[];
   control: any;
   labelClass?: string;
   controlClass?: string;
@@ -57,7 +60,6 @@ const useStyles = makeStyles(theme => ({
 export const SelectInput = ({
   name,
   label,
-  inputProps = {},
   optionsProps = [],
   helperText,
   control,
@@ -80,9 +82,9 @@ export const SelectInput = ({
             </div>
           </CondRender>
           <div className={controlClass}>
-            <RadioGroup {...field} {...inputProps}>
+          <RadioGroup {...field}>
             {optionsProps.map(optionProps => (
-              <Radio {...optionProps} />
+              <FormControlLabel control={<Radio />} {...optionProps} />
             ))}
             </RadioGroup>
             <CondRender

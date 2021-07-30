@@ -27,6 +27,7 @@ import { SelectInput } from "client/components/Form/SelectInput";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
+import { Typography } from "client/components/Typography";
 
 type Values = {
   name: string;
@@ -43,7 +44,7 @@ const Schema = yup.object().shape({
 const defaultValues: Values = {
   name: "",
   deployNamespace: "opstrace",
-  format: ""
+  format: "cri"
 };
 
 type Props = {
@@ -100,11 +101,16 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
                 <SelectInput
                   name="format"
                   control={control}
-                  inputProps={{ defaultValue: "foo" }}
-                  optionsProps={[{id:"foo", name:"Foo", checked:true}, {id:"bar", name:"Bar"}]}
-                  label="Cluster Runtime"
-                  helperText="Runtime used by the cluster, can check by running <code>kubectl get nodes -o jsonpath='{.items[].status.nodeInfo.containerRuntimeVersion}'</code>"
+                  optionsProps={[
+                    {label:"CRI/containerd", value:"cri"},
+                    {label:"dockerd", value:"docker"}
+                  ]}
+                  label="Container Runtime"
+                  helperText="The log format produced by the cluster depends on the runtime"
                 />
+                <Typography color="textSecondary" variant="subtitle1">Check the runtime using this command:</Typography>
+                <Typography color="textSecondary" variant="subtitle1">{"kubectl get nodes -o jsonpath='{.items[].status.nodeInfo.containerRuntimeVersion}'"}</Typography>
+      <Typography color="textSecondary" variant="subtitle1">The output should start with e.g. 'containerd://' (pick 'CRI/containerd') or 'docker://' (pick 'dockerd').</Typography>
               </Box>
               <Box mb={3}>
                 <ControlledInput
