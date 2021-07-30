@@ -1,0 +1,14 @@
+name: Preview Docs
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    name: Preview
+    steps:
+      - name: Trigger Preview Build
+        run: curl -X POST ${{ secrets.GCLOUD_WEBHOOK_URL }}:webhook\?key\=${{ secrets.GCLOUD_API_KEY }}\&secret\=${{ secrets.GCLOUD_WEBHOOK_SECRET }} -d '{"pr":"${{ github.event.pull_request.number }}","branch":"${{ github.event.pull_request.head.ref }}"}'

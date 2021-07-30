@@ -1,12 +1,9 @@
 name: Reading Time
 
 on:
-  push:
-    branches:
-      - '**'
-      - '!main'
+  pull_request:
     paths:
-      - 'docs/**'
+      - "docs/**"
 
 jobs:
   reading-time:

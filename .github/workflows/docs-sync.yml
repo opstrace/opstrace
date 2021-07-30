@@ -19,9 +19,3 @@ jobs:
           algoliaId: "QTVPN6XDU8"
           algoliaKey: ${{ secrets.ALGOLIA_KEY }}
           algoliaIndex: "opstrace-docs"
-  vercel:
-    runs-on: ubuntu-latest
-    name: Rebuild
-    steps:
-      - name: Trigger rebuild
-        run: curl -X POST https://api.vercel.com/v1/integrations/deploy/${{ secrets.VERCEL_DEPLOY_ID }}
