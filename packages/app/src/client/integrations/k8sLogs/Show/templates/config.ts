@@ -92,7 +92,7 @@ data:
       kubernetes_sd_configs:
       - role: pod
 
-      # Whether the data is cri (tsv) or dockerd (json) format
+      # Specify whether the data is cri (tsv) or dockerd (json) format
       pipeline_stages:
       - ${logFormat}:
 

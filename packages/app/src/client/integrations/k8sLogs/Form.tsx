@@ -106,11 +106,13 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
                     {label:"dockerd", value:"docker"}
                   ]}
                   label="Container Runtime"
-                  helperText="The log format produced by the cluster depends on the runtime"
+                  helperText="The cluster container runtime affects the log format."
                 />
-                <Typography color="textSecondary" variant="subtitle1">Check the runtime using this command:</Typography>
-                <Typography color="textSecondary" variant="subtitle1">{"kubectl get nodes -o jsonpath='{.items[].status.nodeInfo.containerRuntimeVersion}'"}</Typography>
-      <Typography color="textSecondary" variant="subtitle1">The output should start with e.g. 'containerd://' (pick 'CRI/containerd') or 'docker://' (pick 'dockerd').</Typography>
+                <Typography color="textSecondary" variant="caption">
+                  To find this, check for either <code>containerd://</code> or <code>docker://</code> from this command:<br />
+                  &nbsp; &nbsp;<code>$ kubectl get nodes \<br />
+                  &nbsp; &nbsp; -o jsonpath={"'{.items[].status.nodeInfo.containerRuntimeVersion}'"}</code>
+                </Typography>
               </Box>
               <Box mb={3}>
                 <ControlledInput
