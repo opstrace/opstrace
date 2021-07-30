@@ -27,15 +27,12 @@ import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 
-type Values = {
-  name: string;
-  deployNamespace: string;
-};
-
-const Schema = yup.object().shape({
+const Schema = yup.object({
   name: yup.string().required(),
   deployNamespace: yup.string().required()
 });
+
+type Values = yup.Asserts<typeof Schema>;
 
 const defaultValues: Values = {
   name: "",

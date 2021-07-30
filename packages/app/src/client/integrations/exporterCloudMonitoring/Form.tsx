@@ -29,26 +29,19 @@ import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
 
-type Values = {
-  name: string;
+const Schema = yup.object({
+  name: yup.string().required(),
   // GCP credentials are in a JSON file. We pass it through as-is.
-  credentials: string;
+  credentials: yup.string().required(),
   // See list of properties: https://github.com/prometheus-community/stackdriver_exporter#flags
   // "web.listen-address" and "web.telemetry-path" are assigned by the controller cannot be overridden here.
-  googleProjectId: string;
-  monitoringMetricsTypePrefixes: string; // TODO this must be non-empty (required option)
-  monitoringMetricsInterval: string;
-  monitoringMetricsOffset: string;
-};
-
-const Schema = yup.object().shape({
-  name: yup.string().required(),
-  credentials: yup.string().required(),
-  googleProjectId: yup.string().optional(),
+  googleProjectId: yup.string().required(),
   monitoringMetricsTypePrefixes: yup.string().required(),
   monitoringMetricsInterval: yup.string().required(),
   monitoringMetricsOffset: yup.string().required()
 });
+
+type Values = yup.Asserts<typeof Schema>;
 
 const defaultValues: Values = {
   name: "",
@@ -64,13 +57,13 @@ type Props = {
     data: {
       name: string;
       data: {
-        credentials: string,
+        credentials: string;
         config: {
-          "google.project-id": Array<string>,
-          "monitoring.metrics-type-prefixes": Array<string>,
-          "monitoring.metrics-interval": string,
-          "monitoring.metrics-offset": string
-        }
+          "google.project-id": Array<string>;
+          "monitoring.metrics-type-prefixes": Array<string>;
+          "monitoring.metrics-interval": string;
+          "monitoring.metrics-offset": string;
+        };
       };
     },
     options: { createGrafanaFolder: false }
