@@ -38,7 +38,7 @@ export type VirtualListProps<Item> = {
   renderItem: ItemRenderer<Item>;
 };
 
-const ScrollableWithRef = React.forwardRef((props, ref) => (
+const ScrollableWithRef = React.forwardRef<HTMLDivElement>((props, ref) => (
   <Scrollable forwardedRef={ref} {...props} />
 ));
 

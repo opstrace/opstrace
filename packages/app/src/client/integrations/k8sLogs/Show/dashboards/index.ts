@@ -18,7 +18,7 @@
 import makeSummaryDashboard from "./summary.js";
 
 type DashboardProps = {
-  integrationId: String;
+  integrationId: string;
   folderId: number;
 };
 
@@ -26,7 +26,7 @@ type DashboardProps = {
 export function makePromtailDashboardRequests({
   integrationId,
   folderId
-}: DashboardProps): object[] {
+}: DashboardProps) {
   return [
     {
       uid: `sum-${integrationId}`,
