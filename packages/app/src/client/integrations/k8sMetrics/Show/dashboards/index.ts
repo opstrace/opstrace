@@ -20,7 +20,7 @@ import makeKubeletDashboard from "./kubelet.js";
 import makeResourceDashboard from "./resource.js";
 
 type DashboardProps = {
-  integrationId: String;
+  integrationId: string;
   folderId: number;
 };
 // Returns an array of Prometheus/metrics dashboard creation request payloads for submitting to Grafana.

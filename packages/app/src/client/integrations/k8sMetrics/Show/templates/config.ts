@@ -16,13 +16,13 @@
 
 type PrometheusProps = {
   // The Opstrace cluster hostname (foo.opstrace.io) where metrics data should be sent
-  clusterHost: String;
+  clusterHost: string;
   // The Opstrace tenant where metrics data should be sent
-  tenantName: String;
+  tenantName: string;
   // The unique id that sent metrics should have as a label
-  integrationId: String;
+  integrationId: string;
   // Where the user would like Prometheus to be deployed in their cluster
-  deployNamespace: String;
+  deployNamespace: string;
 };
 
 // Returns a rendered prometheus deployment YAML for displaying to a user.

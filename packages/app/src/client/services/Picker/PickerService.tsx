@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useCallback, useMemo, useState } from "react";
+import React, { useEffect, useCallback, useMemo, useState, DependencyList } from "react";
 import InputBase from "@material-ui/core/InputBase";
 import List from "client/components/List/List";
 import { ButtonListItem } from "client/components/List/ListItem";
@@ -239,7 +239,7 @@ function PickerService({ children }: { children: React.ReactNode }) {
 
 export function usePickerService(
   provider?: PickerProvider,
-  dependencies?: any[]
+  dependencies?: DependencyList
 ) {
   const picker = React.useContext(pickerContext);
   if (!picker) {
