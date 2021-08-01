@@ -83,7 +83,12 @@ test.describe("after auth0 authentication", () => {
       await page.click(
         "[data-test='sidebar/clusterAdmin/Configuration/Cortex']"
       );
+
       await page.hover("[data-test='sidebar/clusterAdmin/Configuration']");
+      await page.click("[data-test='sidebar/clusterAdmin/Configuration']");
+      await page.click(
+        "[data-test='sidebar/clusterAdmin/Configuration/Opstrace']"
+      );
     }
   );
 });

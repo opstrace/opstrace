@@ -71,7 +71,7 @@ const OpstraceConfig = () => {
                     {field.label}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell data-test={`config/opstrace/${field.key}`}>
                     {field.formatter
                       ? //@ts-ignore No index signature with a parameter of type 'string' was found on type 'OpstraceBuildInfo'.
                         field.formatter(buildInfo[field.key])
