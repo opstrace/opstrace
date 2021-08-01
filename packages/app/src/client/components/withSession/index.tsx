@@ -242,8 +242,12 @@ const CreateSession = ({
 
         if (response.data?.currentUserId)
           userLoadedSuccess(response.data.currentUserId, true);
+        else setErrorResponse({ message: "Failed to create Opstrace Session" });
       } catch (e) {
-        setErrorResponse(pick(["data", "status", "statusText"])(e.response));
+        if (e.response)
+          setErrorResponse(pick(["data", "status", "statusText"])(e.response));
+        else
+          setErrorResponse({ message: e.message || "Unknown error occured" });
       }
     })();
   }, [getAccessTokenSilently, userLoadedSuccess, setErrorResponse]);
