@@ -32,7 +32,7 @@ import {
 import { Card } from "client/components/Card";
 import { formatDistanceToNow } from "date-fns";
 import SkeletonTableBody from "./SkeletonTableBody";
-import { useNotificationService } from "client/services/Notification";
+import { useSimpleNotification } from "client/services/Notification";
 import { Button } from "client/components/Button";
 import { Box } from "client/components/Box";
 import TokenDialog from "./TokenDialog";
@@ -68,17 +68,10 @@ type Props = {
   baseUrl: string;
 };
 
-function getRandomInt() {
-  return Math.floor(Math.random() * Math.floor(100000));
-}
-
 const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
   const history = useHistory();
 
-  const {
-    registerNotification,
-    unregisterNotification
-  } = useNotificationService();
+  const { registerNotification } = useSimpleNotification();
   const [keepPolling, setKeepPolling] = useState(true);
   const [shards, setShards] = useState<Array<Shard>>();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -86,22 +79,13 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
 
   const notifyError = useCallback(
     (title: string, message: string) => {
-      const messageId = `${getRandomInt()}`;
-      const newNotification = {
-        id: messageId,
+      registerNotification({
         state: "error" as const,
         title,
-        information: message,
-        handleClose: () =>
-          unregisterNotification({
-            id: messageId,
-            title: "",
-            information: ""
-          })
-      };
-      registerNotification(newNotification);
+        information: message
+      });
     },
-    [registerNotification, unregisterNotification]
+    [registerNotification]
   );
 
   const forgetShard = useCallback(

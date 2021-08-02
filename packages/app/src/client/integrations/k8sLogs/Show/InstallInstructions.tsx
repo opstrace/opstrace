@@ -23,7 +23,7 @@ import { Integration } from "state/integration/types";
 import * as commands from "./templates/commands";
 import { makePromtailDashboardRequests } from "./dashboards";
 
-import { useNotificationService } from "client/services/Notification";
+import { useSimpleNotification } from "client/services/Notification";
 import * as grafana from "client/utils/grafana";
 
 import { updateGrafanaStateForIntegration } from "state/integration/actions";
@@ -89,29 +89,17 @@ export const InstallInstructions = ({
     saveAs(configBlob, configFilename);
   };
 
-  const {
-    registerNotification,
-    unregisterNotification
-  } = useNotificationService();
+  const { registerNotification } = useSimpleNotification();
 
   const notifyError = useCallback(
     (title: string, message: string) => {
-      const messageId = Math.floor(Math.random() * Math.floor(100000)).toString();
-      const newNotification = {
-        id: messageId,
+      registerNotification({
         state: "error" as const,
         title,
-        information: message,
-        handleClose: () =>
-          unregisterNotification({
-            id: messageId,
-            title: "",
-            information: ""
-          })
-      };
-      registerNotification(newNotification);
+        information: message
+      });
     },
-    [registerNotification, unregisterNotification]
+    [registerNotification]
   );
 
   const dashboardHandler = async () => {
