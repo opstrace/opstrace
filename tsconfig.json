@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "resolveJsonModule": true,
     "outDir": "build",
     "target": "ES2020",
@@ -24,10 +24,7 @@
     "declarationMap": true,
     "composite": true,
     "inlineSourceMap": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
   "exclude": [
     "**/node_modules/*",
