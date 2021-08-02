@@ -11,7 +11,11 @@ This guide will focus on the UI because it is the most visual and self-explanato
 ❓ If you do not yet have an Opstrace instance, pause here and create one by following our [Quick Start](../../quickstart.md).
 It will take you about half an hour to spin one up in your own cloud account.
 
-To configure a useful alert you need 3 pieces:  an *alert rule* to define the condition that triggers the alert, a *contact point* that defines the mechanism of alerting, and a notification policy that routes firing alerts to the appropriate *contact point*.
+To configure a useful alert you need 3 pieces:
+
+1. an *[alert rule](#configure-an-alerting-rule)* to define the condition that triggers the alert,
+2. a *[contact point](#configure-a-contact-point)* that defines the mechanism of alerting,
+3. and a *[notification policy](#configure-a-notification-policy)* that routes firing alerts to the appropriate *contact point*.
 
 To get started from the Opstrace UI, first select the tenant where you would like to set the alert and then click *Alerting* in the sidebar:
 
