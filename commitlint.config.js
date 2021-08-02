@@ -36,7 +36,6 @@ module.exports = {
         "looker", // change to looker project
         "loki", // change to loki (config change for example)
         "makefile", // change in main Makefile
-        "perf", // user-facing performance tweak. Makes most sense in a semver world which we are not yet in.
         "revert", // specifically for a git revert commit
         "systemlogs", // change in opstrace system log arch/implementation
         "test-remote", // change in test-remote project
