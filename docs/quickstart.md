@@ -115,9 +115,12 @@ Let's get things going:
 **So you know:** The CLI is largely re-entrant. If it is interrupted while setting up cloud infrastructure you can re-invoke the same command and it will continue where it left off.
 For additional information understanding and troubleshooting the `create` command, see our [CLI reference section](./references/cli.md#create).
 
-When everything is done, you'll see the following log line:
+When everything is done, you'll see the following log lines:
 
-`info: cluster creation finished: $OPSTRACE_NAME (aws)`
+```text
+info: create operation finished: $OPSTRACE_NAME (aws)
+info: Log in here: https://$OPSTRACE_NAME.opstrace.io
+```
 
 In case of any **installation errors** search our [GitHub issues](https://github.com/opstrace/opstrace/issues).
 
@@ -331,10 +334,10 @@ Let us know what you thought of the quick start—feedback is a gift 🎁.
 <!-- markdownlint-enable MD044 -->
 
 A next great step is to set up alerts for your instance.
-Opstrace ships with default system alerts that [you can easily configure](./guides/user/configuring-alerts) to send messages to Slack, PagerDuty, or whatever else you'd like.
+Opstrace ships with default system alerts that [you can easily configure](./guides/user/configuring-alerts.md) to send messages to Slack, PagerDuty, or whatever else you'd like.
 
 After that, use our Kubernetes integrations to send metrics and logs into Opstrace from your existing Kubernetes clusters.
 
-If you'd like to hack on Opstrace, feel free to [fork our repository](https://github.com/opstrace/opstrace/network/members) and set up your [dev environment](./guides/contributor/setting-up-your-dev-env).
+If you'd like to hack on Opstrace, feel free to [fork our repository](https://github.com/opstrace/opstrace/network/members) and set up your [dev environment](./guides/contributor/setting-up-your-dev-env.md).
 
 Thank you. 🙏
