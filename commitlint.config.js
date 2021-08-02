@@ -22,7 +22,7 @@ module.exports = {
       2,
       "always",
       [
-        "ui", // any changes relating to the app (UI) package
+        "ui", // use `ui: ` for changes to client, and `ui: app:` for changes to server
         "bump", // third-party lib/component bump (can be big, including Cortex, ...)
         "chore", // small routine tasks, very localized refactors
         "ci", // change to automated CI pipeline
@@ -40,7 +40,6 @@ module.exports = {
         "systemlogs", // change in opstrace system log arch/implementation
         "test-browser", // any change for the test-browser test suite
         "test-remote", // change in test-remote project
-        "website", // change in the website code or content
         "wip" // work in progress, later to be edited/squashed ("i don't want to think about choosing the right prefix now!")
       ]
     ]
