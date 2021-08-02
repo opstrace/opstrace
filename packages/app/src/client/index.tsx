@@ -50,4 +50,6 @@ if (process.env.NODE_ENV !== "production") {
 // upgrade users can't login and must clear their caches to get the login working again. Current theory is that
 // this serviceWorker might be creating a bad cache situation, so disabling it to test that.
 // Also not really providing any benefit at the moment.
+// 2021.08.01 NTW: with the introduction of "withSession" this might not be the case anymore, needs further
+// investigation
 // serviceWorker.register();

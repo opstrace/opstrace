@@ -33,6 +33,7 @@ import {
 } from "react-feather";
 
 import { WithSession } from "client/components/withSession";
+import { WithSubscriptions } from "state/clients/graphqlClient/withSubscriptions";
 
 import ErrorBoundary from "client/components/Error/Boundary";
 import { Box } from "client/components/Box";
@@ -68,6 +69,29 @@ import UserDetail from "client/views/users/detail";
 import TenantExplore from "client/views/explore";
 import CortexRingHealth from "./views/ring-health/cortex";
 import LokiRingHealth from "./views/ring-health/loki";
+
+const App = () => (
+  <StoreProvider>
+    <Theme.ThemeSwitcher>
+      <ErrorBoundary>
+        <Services>
+          <WithSession>
+            <WithSubscriptions>
+              <Switch>
+                <Redirect exact key="/" from="/" to="/tenant/system" />
+                <Route key="*" path="*">
+                  <AuthProtectedApplication />
+                </Route>
+              </Switch>
+            </WithSubscriptions>
+          </WithSession>
+        </Services>
+      </ErrorBoundary>
+    </Theme.ThemeSwitcher>
+  </StoreProvider>
+);
+
+export default App;
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -342,24 +366,3 @@ const AuthProtectedApplication = () => {
     </Box>
   );
 };
-
-const App = () => (
-  <StoreProvider>
-    <Theme.ThemeSwitcher>
-      <ErrorBoundary>
-        <Services>
-          <WithSession>
-            <Switch>
-              <Redirect exact key="/" from="/" to="/tenant/system" />
-              <Route key="*" path="*">
-                <AuthProtectedApplication />
-              </Route>
-            </Switch>
-          </WithSession>
-        </Services>
-      </ErrorBoundary>
-    </Theme.ThemeSwitcher>
-  </StoreProvider>
-);
-
-export default App;
