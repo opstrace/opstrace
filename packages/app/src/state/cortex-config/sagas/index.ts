@@ -20,10 +20,10 @@ import { ServerError } from "server/errors";
 
 import * as actions from "../actions";
 
-import userListSubscriptionManager from "./cortexConfigSubscription";
+import cortexConfigSubscriptionManager from "./cortexConfigSubscription";
 
 export default function* userTaskManager() {
-  const sagas = [userListSubscriptionManager, saveRuntimeConfigListener];
+  const sagas = [cortexConfigSubscriptionManager, saveRuntimeConfigListener];
   // technique to keep the root alive and spawn sagas into their
   // own retry-on-failure loop.
   // https://redux-saga.js.org/docs/advanced/RootSaga.html
