@@ -27,7 +27,6 @@ module.exports = {
         "chore", // small routine tasks, very localized refactors
         "ci", // change to automated CI pipeline
         "cli", // change to the cluster management CLI (create, destroy, ..., )
-        "config", // change to config api project
         "cortex", // change to cortex (config change for example)
         "go", // change to golang modules/projects (unit test setup, makefile, etc)
         "ddapi", // change to dd api project
