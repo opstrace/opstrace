@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD036 -->
 
-The Opstrace Distribution provides a foundation that solves many [real pain points](https://opstrace.com/blog/introducing-the-open-source-distribution) that people have today.
+The Opstrace Distribution provides a foundation that solves many [real pain points](https://go.opstrace.com/blog/introducing-the-open-source-distribution) that people have today.
 But we know there is still a lot more to do to have a _complete_ observability distribution that is more than just private, secure and cost-effective.
 This high-level roadmap highlights features along our path toward that goal.
 
