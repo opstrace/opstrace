@@ -107,7 +107,7 @@ export function ControllerResources({
                   name: "opstrace-controller",
                   image: `${controllerImage}`,
                   imagePullPolicy: "IfNotPresent",
-                  command: ["node", "--prof", "./cmd.js"],
+                  command: ["node", "./cmd.js"],
                   args: controllerCmdlineArgs,
                   resources: {
                     limits: {
