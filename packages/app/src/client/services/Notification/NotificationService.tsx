@@ -24,6 +24,7 @@ import type {
 import { actions, notificationServiceReducer, initialState } from "./reducer";
 import { useTypesafeReducer } from "../../hooks/useTypesafeReducer";
 import NotificationsList from "../../components/NotificationsList/NotificationsList";
+import { random } from "lodash";
 
 const notificationServiceContext = React.createContext<NotificationServiceApi | null>(
   null
@@ -99,6 +100,36 @@ export function useNotificationService(
     unregisterNotification: notificationService.unregister,
     unregisterAllNotifications: notificationService.unregisterAll,
     changeNotificationVisibility: notificationService.changeVisibility
+  };
+}
+
+export function useSimpleNotification() {
+  const {
+    registerNotification,
+    unregisterNotification
+  } = useNotificationService();
+
+  return {
+    registerNotification: ({
+      title,
+      information,
+      state
+    }: Pick<Notification, "title" | "information" | "state">) => {
+      const messageId = random(0, 9999).toString();
+      const newNotification = {
+        id: messageId,
+        state,
+        title,
+        information,
+        handleClose: () =>
+          unregisterNotification({
+            id: messageId,
+            title: "",
+            information: ""
+          })
+      };
+      registerNotification(newNotification);
+    }
   };
 }
 
