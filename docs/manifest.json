@@ -19,9 +19,9 @@
           "path": "/docs/quickstart.md",
           "readingTime": {
             "text": "8 min",
-            "minutes": 7.085,
-            "time": 425100,
-            "words": 1417
+            "minutes": 7.325,
+            "time": 439500,
+            "words": 1465
           }
         },
         {
@@ -32,10 +32,10 @@
               "title": "Configuring Alertmanager",
               "path": "/docs/guides/user/configuring-alerts.md",
               "readingTime": {
-                "text": "6 min",
-                "minutes": 5.82,
-                "time": 349200,
-                "words": 1164
+                "text": "7 min",
+                "minutes": 6.275,
+                "time": 376500,
+                "words": 1255
               }
             },
             {
@@ -43,9 +43,9 @@
               "path": "/docs/guides/user/sending-metrics-with-prometheus.md",
               "readingTime": {
                 "text": "2 min",
-                "minutes": 1.615,
-                "time": 96900,
-                "words": 323
+                "minutes": 1.63,
+                "time": 97800,
+                "words": 326
               }
             },
             {
@@ -53,9 +53,9 @@
               "path": "/docs/guides/user/sending-logs-with-fluentd.md",
               "readingTime": {
                 "text": "3 min",
-                "minutes": 2.37,
-                "time": 142200,
-                "words": 474
+                "minutes": 2.365,
+                "time": 141900,
+                "words": 473
               }
             },
             {
@@ -89,9 +89,9 @@
               "path": "/docs/guides/administrator/managing-tenants.md",
               "readingTime": {
                 "text": "5 min",
-                "minutes": 4.745,
-                "time": 284700,
-                "words": 949
+                "minutes": 4.74,
+                "time": 284400,
+                "words": 948
               }
             },
             {
@@ -109,9 +109,9 @@
               "path": "/docs/guides/administrator/troubleshooting.md",
               "readingTime": {
                 "text": "2 min",
-                "minutes": 1.295,
-                "time": 77700,
-                "words": 259
+                "minutes": 1.29,
+                "time": 77400,
+                "words": 258
               }
             },
             {
@@ -192,10 +192,10 @@
           "title": "Frequently Asked Questions",
           "path": "/docs/references/faq.md",
           "readingTime": {
-            "text": "2 min",
-            "minutes": 1.68,
-            "time": 100800,
-            "words": 336
+            "text": "4 min",
+            "minutes": 3.075,
+            "time": 184500,
+            "words": 615
           }
         },
         {
@@ -203,9 +203,9 @@
           "path": "/docs/references/roadmap.md",
           "readingTime": {
             "text": "2 min",
-            "minutes": 1.35,
-            "time": 81000,
-            "words": 270
+            "minutes": 1.62,
+            "time": 97200,
+            "words": 324
           }
         },
         {
