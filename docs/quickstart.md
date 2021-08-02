@@ -331,6 +331,6 @@ Let us know what you thought of the quick start—feedback is a gift 🎁.
 <!-- markdownlint-enable MD044 -->
 
 To learn more about how to use Opstrace, check out our Administrator and User Guides.
-If you'd like to hack on Opstrace, feel free to [fork our repository](https://github.com/opstrace/opstrace/network/members) and set up your [dev environment](https://opstrace.com/docs/guides/contributor/setting-up-your-dev-env).
+If you'd like to hack on Opstrace, feel free to [fork our repository](https://github.com/opstrace/opstrace/network/members) and set up your [dev environment](./guides/contributor/setting-up-your-dev-env).
 
 Thank you. 🙏
