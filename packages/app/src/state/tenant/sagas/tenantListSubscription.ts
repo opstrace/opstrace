@@ -28,7 +28,7 @@ import {
   SubscribeToTenantListSubscription,
   SubscribeToTenantListDocument
 } from "state/clients/graphqlClient";
-import subscriptionClient from "state/clients/graphqlClient/subscriptionClient";
+import getSubscriptionClient from "state/clients/graphqlClient/subscriptionClient";
 import * as actions from "../actions";
 import { SubscriptionID } from "../types";
 
@@ -103,7 +103,7 @@ export default function* tenantListSubscriptionManager() {
  */
 export function tenantListSubscriptionEventChannel(): EventChannel<Actions> {
   return eventChannel(emitter => {
-    const subscription = subscriptionClient
+    const subscription = getSubscriptionClient()
       .subscribe<SubscribeToTenantListSubscription>({
         query: SubscribeToTenantListDocument
       })

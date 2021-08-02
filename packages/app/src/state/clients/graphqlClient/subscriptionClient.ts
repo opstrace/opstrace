@@ -16,7 +16,12 @@
 
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { onError } from "@apollo/client/link/error";
-import { ApolloClient, InMemoryCache, from } from "@apollo/client";
+import {
+  ApolloClient,
+  NormalizedCacheObject,
+  InMemoryCache,
+  from
+} from "@apollo/client";
 
 export * from "state/graphql-api-types";
 
@@ -50,25 +55,30 @@ const subscriptionErrorLink = onError(({ graphQLErrors, networkError }) => {
   }
 });
 
-const subscriptionClient = () => {
-  const wsLink = new WebSocketLink({
-    uri: endpoint,
-    options: {
-      reconnect: true,
-      lazy: false,
-      connectionParams: {
-        headers
-      }
-    }
-  });
+let subscriptionClient: ApolloClient<NormalizedCacheObject> | null = null;
 
-  return new ApolloClient({
-    cache: new InMemoryCache({
-      resultCaching: false
-    }),
-    link: from([subscriptionErrorLink, wsLink])
-  });
+const getSubscriptionClient = () => {
+  if (subscriptionClient === null) {
+    const wsLink = new WebSocketLink({
+      uri: endpoint,
+      options: {
+        reconnect: true,
+        lazy: false,
+        connectionParams: {
+          headers
+        }
+      }
+    });
+
+    subscriptionClient = new ApolloClient({
+      cache: new InMemoryCache({
+        resultCaching: false
+      }),
+      link: from([subscriptionErrorLink, wsLink])
+    });
+  }
+  return subscriptionClient;
 };
 
-export default subscriptionClient();
+export default getSubscriptionClient;
 export { endpoint, headers };

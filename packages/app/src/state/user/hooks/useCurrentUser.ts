@@ -50,16 +50,19 @@ export function useCurrentUserLoaded() {
  * on unmount.
  */
 export default function useCurrentUser() {
+  const currentUserId = useSelector(getCurrentUserId);
   const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    if (!currentUserId) return;
+
     const subId = getSubscriptionID();
     dispatch(subscribeToUserList(subId));
     return () => {
       dispatch(unsubscribeFromUserList(subId));
     };
-  }, [dispatch, currentUser?.id]);
+  }, [dispatch, currentUserId]);
 
   return currentUser;
 }
