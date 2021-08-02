@@ -15,6 +15,7 @@
     "@playwright/test": "1.13.1",
     "@types/node": "^16.0.1",
     "@types/ramda": "^0.27.38",
+    "date-fns": "^2.15.0",
     "ramda": "^0.27.1",
     "ramda-adjunct": "^2.31.1",
     "ts-node": "^9.1.1",
