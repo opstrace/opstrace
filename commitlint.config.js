@@ -38,6 +38,7 @@ module.exports = {
         "makefile", // change in main Makefile
         "revert", // specifically for a git revert commit
         "systemlogs", // change in opstrace system log arch/implementation
+        "test-browser", // any change for the test-browser test suite
         "test-remote", // change in test-remote project
         "test-upgrade", // change in test-remote project
         "website", // change in the website code or content
