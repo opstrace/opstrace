@@ -72,3 +72,4 @@ The following resources provide further assistance in understanding and configur
 * [Prometheus docs: remote_write reference](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write)
 * [Prometheus docs: remote_write best practices](https://prometheus.io/docs/practices/remote_write)
 * [Prometheus docs: remote storage integrations](https://prometheus.io/docs/prometheus/latest/storage/#remote-storage-integrations)
+* [Troubleshooting Prometheus remote_write](https://grafana.com/blog/2021/04/12/how-to-troubleshoot-remote-write-issues-in-prometheus/)
