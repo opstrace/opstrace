@@ -9,7 +9,7 @@ description: The answers to some of the most common questions we hear.
 We are different because we are not focused on building a new storage backend or building a proprietary SaaS.
 We’re trying to make open source observability easier, more accessible, and more effective by building an open source distribution that _you_ can run (in your own account) just as easily as a SaaS is to use.
 Basically, this is how we wanted to do open source observability when we were in your shoes.
-There are many benefits to this—not least of which is cost management—so [follow our blog](https://opstrace.com/blog) to keep up to date.
+There are many benefits to this—not least of which is cost management—so [follow our blog](https://go.opstrace.com/blog) to keep up to date.
 
 ## How does this work with—or replace—my existing Prometheus?
 
