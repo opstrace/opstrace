@@ -40,7 +40,6 @@ module.exports = {
         "systemlogs", // change in opstrace system log arch/implementation
         "test-browser", // any change for the test-browser test suite
         "test-remote", // change in test-remote project
-        "test-upgrade", // change in test-remote project
         "website", // change in the website code or content
         "wip" // work in progress, later to be edited/squashed ("i don't want to think about choosing the right prefix now!")
       ]
