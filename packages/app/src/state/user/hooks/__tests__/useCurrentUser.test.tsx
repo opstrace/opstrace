@@ -49,16 +49,19 @@ const mockAction = { type: "UNKNOWN_ACTION" } as any;
 
 test("useCurrentUser hook", () => {
   const user = {
-    currentUserId: "",
-    loading: true,
-    currentUserIdLoaded: false,
-    allUsers: {},
-    users: {}
+    email: "test1@test.com",
+    username: "test1",
+    role: "",
+    id: "test1",
+    created_at: "20202-11-11",
+    preference: { dark_mode: false }
   };
 
   const dispatchMock = jest.fn();
 
-  (useSelector as jest.Mock).mockReturnValueOnce(user);
+  (useSelector as jest.Mock)
+    .mockReturnValueOnce(user.id)
+    .mockReturnValueOnce(user);
   (useDispatch as jest.Mock).mockReturnValueOnce(dispatchMock);
   (getSubscriptionID as jest.Mock).mockReturnValueOnce(1);
 
@@ -68,6 +71,23 @@ test("useCurrentUser hook", () => {
 
   expect(dispatchMock).toHaveBeenCalledWith(subscribeToUserList(1));
   expect(result.current).toEqual(user);
+});
+
+test("useCurrentUser hook should NOT setup subscription if there is no currentUserId", () => {
+  const dispatchMock = jest.fn();
+
+  (useSelector as jest.Mock)
+    .mockReturnValueOnce(undefined)
+    .mockReturnValueOnce(undefined);
+  (useDispatch as jest.Mock).mockReturnValueOnce(dispatchMock);
+  (getSubscriptionID as jest.Mock).mockReturnValueOnce(1);
+
+  const { result } = renderHook(() => useCurrentUser(), {
+    wrapper: ({ children }: any) => <StoreProvider>{children}</StoreProvider>
+  });
+
+  expect(dispatchMock).toHaveBeenCalledTimes(0);
+  expect(result.current).toEqual(undefined);
 });
 
 test("getCurrentUser selector", () => {
