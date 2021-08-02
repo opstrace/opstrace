@@ -22,7 +22,6 @@ module.exports = {
       2,
       "always",
       [
-        "stdlib", // any changes to stdlib
         "ui", // any changes relating to the app (UI) package
         "bump", // third-party lib/component bump (can be big, including Cortex, ...)
         "chore", // small routine tasks, very localized refactors
