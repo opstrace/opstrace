@@ -183,6 +183,34 @@ test("handles request errors", async () => {
 
   const errorMessage = "Something bad happened"
 
+  nock("http://localhost").get(tab.endpoint).replyWithError({
+    message: errorMessage,
+    code: 'SOMETHING_VERY_BAD_HAPPENED',
+  })
+
+  const container = renderComponent(
+    <RingHealth title="some title" tabs={[tab]} />
+  );
+
+  jest.runOnlyPendingTimers();
+
+  expect(
+    await container.findByText("Could not load table")
+  ).toBeInTheDocument();
+  expect(
+    await container.findByText(errorMessage)
+  ).toBeInTheDocument();
+});
+
+test("handles response errors", async () => {
+  const tab = {
+    title: "Tab",
+    path: `/tab`,
+    endpoint: "/tab-endpoint"
+  };
+
+  const errorMessage = "Something bad happened"
+
   nock("http://localhost").get(tab.endpoint).reply(500, errorMessage);
 
   const container = renderComponent(

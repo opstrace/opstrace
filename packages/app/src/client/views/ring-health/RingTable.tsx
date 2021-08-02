@@ -140,7 +140,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
       const response = await axios.get<Payload>(ringEndpoint);
       setShards(response.data.shards);
     } catch (e) {
-      notifyError("Could not load table", e.response.data ?? e.message);
+      notifyError("Could not load table", e.response?.data ?? e.message);
       setKeepPolling(false);
     }
   };
