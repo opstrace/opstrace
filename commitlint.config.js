@@ -33,8 +33,6 @@ module.exports = {
         "controller", // change in the k8s controller CLI
         "dashboards", // change to Grafana dashboards
         "docs", // any documentation change
-        "feat", // user-facing feature addition. Makes most sense in a semver world which we are not yet in.
-        "fix", // fix for user-facing issue in the opstrace system (fix user-facing bug). Makes most sense in a semver world which we are not yet in.
         "looker", // change to looker project
         "loki", // change to loki (config change for example)
         "makefile", // change in main Makefile
