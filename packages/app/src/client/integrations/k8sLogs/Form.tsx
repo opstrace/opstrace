@@ -29,17 +29,13 @@ import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
 
-type Values = {
-  name: string;
-  deployNamespace: string;
-  format: string;
-};
-
-const Schema = yup.object().shape({
+const Schema = yup.object({
   name: yup.string().required(),
   deployNamespace: yup.string().required(),
   format: yup.string().required()
 });
+
+type Values = yup.Asserts<typeof Schema>;
 
 const defaultValues: Values = {
   name: "",

@@ -15,7 +15,7 @@
  */
 
 import React from "react";
-import { Controller } from "react-hook-form";
+import { Controller, Control, FieldPath } from "react-hook-form";
 import { HelpCircle } from "react-feather";
 
 import {
@@ -32,16 +32,16 @@ import { CondRender } from "client/utils/rendering";
 import { Box } from "client/components/Box";
 
 type SelectInputOptionProps = {
-  label: string;
+  label: React.ReactNode;
   value: string;
 };
 
-type SelectInputProps = {
-  name: `${string}` | `${string}.${string}` | `${string}.${number}`;
-  label?: string;
+type SelectInputProps<TFieldValues> = {
+  name: FieldPath<TFieldValues>;
+  label?: React.ReactNode;
   helperText?: string | React.ReactNode | (() => React.ReactNode);
   optionsProps?: SelectInputOptionProps[];
-  control: any;
+  control: Control<TFieldValues>;
   labelClass?: string;
   controlClass?: string;
 };
@@ -57,7 +57,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const SelectInput = ({
+export const SelectInput = <TFieldValues,>({
   name,
   label,
   optionsProps = [],
@@ -65,7 +65,7 @@ export const SelectInput = ({
   control,
   labelClass,
   controlClass
-}: SelectInputProps) => {
+}: SelectInputProps<TFieldValues>) => {
   const classes = useStyles();
 
   return (
