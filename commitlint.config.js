@@ -35,7 +35,6 @@ module.exports = {
         "docs", // any documentation change
         "feat", // user-facing feature addition. Makes most sense in a semver world which we are not yet in.
         "fix", // fix for user-facing issue in the opstrace system (fix user-facing bug). Makes most sense in a semver world which we are not yet in.
-        "installer", // change in installer (cluster creation)
         "looker", // change to looker project
         "loki", // change to loki (config change for example)
         "makefile", // change in main Makefile
@@ -44,7 +43,6 @@ module.exports = {
         "systemlogs", // change in opstrace system log arch/implementation
         "test-remote", // change in test-remote project
         "test-upgrade", // change in test-remote project
-        "uninstaller", // change in uninstaller (cluster destruction/teardown)
         "website", // change in the website code or content
         "wip" // work in progress, later to be edited/squashed ("i don't want to think about choosing the right prefix now!")
       ]
