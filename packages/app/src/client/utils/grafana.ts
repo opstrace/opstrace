@@ -22,6 +22,10 @@ import useDeepMemo from "client/hooks/useDeepMemo";
 
 import { Tenant } from "state/tenant/types";
 import { Integration } from "state/integration/types";
+import {Dashboard as SummaryDashboard} from "client/integrations/k8sLogs/Show/dashboards/summary";
+import {Dashboard as ApiServerDashboard} from "client/integrations/k8sMetrics/Show/dashboards/apiserver";
+import {Dashboard as KubeletDashboard} from "client/integrations/k8sMetrics/Show/dashboards/kubelet";
+import {Dashboard as ResourceDashboard} from "client/integrations/k8sMetrics/Show/dashboards/resource";
 
 const makeUuid = (integration: Integration) => `i9n-${integration.id}`;
 const makeUrl = (tenant: Tenant, path: string) =>
@@ -111,7 +115,7 @@ type dashboardInfo = {
 
 type Dashboard = {
   uid: string,
-  dashboard: object,
+  dashboard: SummaryDashboard | ApiServerDashboard | KubeletDashboard | ResourceDashboard,
   folderId: number,
   overwrite: boolean
 }

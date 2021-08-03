@@ -15,9 +15,9 @@
  */
 
 // For each dashboard we want, we import it here and list it below
-import makeApiserverDashboard from "./apiserver.js";
-import makeKubeletDashboard from "./kubelet.js";
-import makeResourceDashboard from "./resource.js";
+import makeApiserverDashboard from "./apiserver";
+import makeKubeletDashboard from "./kubelet";
+import makeResourceDashboard from "./resource";
 
 type DashboardProps = {
   integrationId: string;

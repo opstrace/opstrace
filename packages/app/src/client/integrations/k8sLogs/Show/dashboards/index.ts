@@ -15,7 +15,7 @@
  */
 
 // For each dashboard we want, we import it here and list it below
-import makeSummaryDashboard from "./summary.js";
+import makeSummaryDashboard from "./summary";
 
 type DashboardProps = {
   integrationId: string;

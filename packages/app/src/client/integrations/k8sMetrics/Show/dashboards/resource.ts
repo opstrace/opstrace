@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default function makeDashboard(integrationId) {
+export default function makeDashboard(integrationId: string) {
   return {
     __inputs: [],
     __requires: [],
@@ -1449,3 +1449,6 @@ export default function makeDashboard(integrationId) {
     version: 0
   };
 }
+
+
+export type Dashboard = ReturnType<typeof makeDashboard>
