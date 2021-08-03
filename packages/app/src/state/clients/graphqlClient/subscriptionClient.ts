@@ -57,28 +57,34 @@ const subscriptionErrorLink = onError(({ graphQLErrors, networkError }) => {
 
 let subscriptionClient: ApolloClient<NormalizedCacheObject> | null = null;
 
-const getSubscriptionClient = () => {
-  if (subscriptionClient === null) {
-    const wsLink = new WebSocketLink({
-      uri: endpoint,
-      options: {
-        reconnect: true,
-        lazy: false,
-        connectionParams: {
-          headers
-        }
+export const startSubscriptionClient = () => {
+  const wsLink = new WebSocketLink({
+    uri: endpoint,
+    options: {
+      reconnect: true,
+      lazy: false,
+      connectionParams: {
+        headers
       }
-    });
+    }
+  });
 
-    subscriptionClient = new ApolloClient({
-      cache: new InMemoryCache({
-        resultCaching: false
-      }),
-      link: from([subscriptionErrorLink, wsLink])
-    });
-  }
+  subscriptionClient = new ApolloClient({
+    cache: new InMemoryCache({
+      resultCaching: false
+    }),
+    link: from([subscriptionErrorLink, wsLink])
+  });
+
   return subscriptionClient;
 };
+
+export const stopSubscriptionClient = () => {
+  subscriptionClient = null;
+};
+
+const getSubscriptionClient: () => ApolloClient<NormalizedCacheObject> = () =>
+  subscriptionClient ?? startSubscriptionClient();
 
 export default getSubscriptionClient;
 export { endpoint, headers };

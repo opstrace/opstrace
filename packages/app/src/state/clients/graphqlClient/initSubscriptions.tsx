@@ -16,16 +16,20 @@
 
 import React, { useEffect } from "react";
 
-import getSubscriptionClient from "state/clients/graphqlClient/subscriptionClient";
+import {
+  startSubscriptionClient,
+  stopSubscriptionClient
+} from "state/clients/graphqlClient/subscriptionClient";
 
-export const WithSubscriptions = ({
+export const InitSubscriptions = ({
   children
 }: {
   children: React.ReactNode;
 }) => {
   useEffect(() => {
     // intentionally doing this once here to ensure that the WS Apollo connection is setup
-    getSubscriptionClient();
+    startSubscriptionClient();
+    return stopSubscriptionClient;
   }, []);
 
   return <>{children}</>;
