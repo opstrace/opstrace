@@ -21,6 +21,16 @@ import getSubscriptionID from "state/utils/getSubscriptionID";
 
 export const getCurrentUserId = (state: State) => state.users.currentUserId;
 
+// Important: state.users.currentUserId is set via the login process, so if it's not set then the user is not
+// logged in. "getCurrentUser" will initially be undefined after the user first logs in because state.users.allUsers
+// data has yet to be loaded, so that shouldn't be used to determine if the user is logged in or not.
+const getIsUserLoggedIn = createSelector(
+  getCurrentUserId,
+  currentUserId => !!currentUserId
+);
+
+export const useIsUserLoggedIn = () => useSelector(getIsUserLoggedIn);
+
 export const getUsers = (state: State) => state.users.users;
 
 export const getCurrentUserIdLoaded = (state: State) =>
@@ -50,19 +60,20 @@ export function useCurrentUserLoaded() {
  * on unmount.
  */
 export default function useCurrentUser() {
-  const currentUserId = useSelector(getCurrentUserId);
+  const loggedIn = useIsUserLoggedIn();
   const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!currentUserId) return;
+    // if the user is not logged in don't try to setup a sub as it will initially fail because the user is not logged in
+    if (!loggedIn) return;
 
     const subId = getSubscriptionID();
     dispatch(subscribeToUserList(subId));
     return () => {
       dispatch(unsubscribeFromUserList(subId));
     };
-  }, [dispatch, currentUserId]);
+  }, [dispatch, loggedIn]);
 
   return currentUser;
 }
