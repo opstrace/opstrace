@@ -11,10 +11,10 @@ Overview of requirements:
 * Go 1.16+
 * Docker
 * GCP and/or AWS CLIs (`gcloud`/`aws`)
-* `make`
 * `git`
 * `golangci-lint`
 * `markdownlint`
+* Build tooling essentials such as `make` and `g++` (among others, for building binary extensions to some npm packages like `snappy`)
 
 The sections below hopefully help with setting up some of these!
 
@@ -31,12 +31,15 @@ The sections below hopefully help with setting up some of these!
 Our recommendation is to use [NVM](https://github.com/nvm-sh/nvm) for managing NodeJS installations.
 At the time of writing we are using NodeJS 16.x:
 
-```bash
-nvm install 16
-nvm use 16
-```
+Recommended setup:
+
+1) Install [NVM](https://github.com/nvm-sh/nvm) and activate it (follow the instructions in the README).
+2) Use NVM to install and activate NodeJS 16.x via `nvm install 16 && nvm use 16`.
+3) Globally install `yarn` for that version of NodeJS via `npm install -g yarn`.
 
 ## Building locally
+
+In the `opstrace` repository you should now be able to `make cli`.
 
 To build locally, visit our [Developer Workflows](./workflows.md#local-checkout-build-artifacts-and-create-a-cluster) page.
 
