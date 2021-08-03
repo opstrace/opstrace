@@ -6,11 +6,23 @@
       "routes": [
         {
           "title": "Opstrace Introduction",
-          "path": "/docs/README.md"
+          "path": "/docs/README.md",
+          "readingTime": {
+            "text": "2 min",
+            "minutes": 1.945,
+            "time": 116700,
+            "words": 389
+          }
         },
         {
           "title": "Opstrace Quick Start",
-          "path": "/docs/quickstart.md"
+          "path": "/docs/quickstart.md",
+          "readingTime": {
+            "text": "8 min",
+            "minutes": 7.085,
+            "time": 425100,
+            "words": 1417
+          }
         },
         {
           "heading": true,
@@ -18,23 +30,53 @@
           "routes": [
             {
               "title": "Configuring Alertmanager",
-              "path": "/docs/guides/user/configuring-alerts.md"
+              "path": "/docs/guides/user/configuring-alerts.md",
+              "readingTime": {
+                "text": "6 min",
+                "minutes": 5.82,
+                "time": 349200,
+                "words": 1164
+              }
             },
             {
               "title": "Sending Metrics with Prometheus",
-              "path": "/docs/guides/user/sending-metrics-with-prometheus.md"
+              "path": "/docs/guides/user/sending-metrics-with-prometheus.md",
+              "readingTime": {
+                "text": "2 min",
+                "minutes": 1.615,
+                "time": 96900,
+                "words": 323
+              }
             },
             {
               "title": "Sending Logs with FluentD",
-              "path": "/docs/guides/user/sending-logs-with-fluentd.md"
+              "path": "/docs/guides/user/sending-logs-with-fluentd.md",
+              "readingTime": {
+                "text": "3 min",
+                "minutes": 2.37,
+                "time": 142200,
+                "words": 474
+              }
             },
             {
               "title": "Sending Logs with Promtail",
-              "path": "/docs/guides/user/sending-logs-with-promtail.md"
+              "path": "/docs/guides/user/sending-logs-with-promtail.md",
+              "readingTime": {
+                "text": "2 min",
+                "minutes": 1.385,
+                "time": 83100,
+                "words": 277
+              }
             },
             {
               "title": "Instrumenting a K8s Cluster",
-              "path": "/docs/guides/user/instrumenting-a-k8s-cluster.md"
+              "path": "/docs/guides/user/instrumenting-a-k8s-cluster.md",
+              "readingTime": {
+                "text": "6 min",
+                "minutes": 5.76,
+                "time": 345600,
+                "words": 1152
+              }
             }
           ]
         },
@@ -44,23 +86,53 @@
           "routes": [
             {
               "title": "Managing Tenants",
-              "path": "/docs/guides/administrator/managing-tenants.md"
+              "path": "/docs/guides/administrator/managing-tenants.md",
+              "readingTime": {
+                "text": "5 min",
+                "minutes": 4.745,
+                "time": 284700,
+                "words": 949
+              }
             },
             {
               "title": "Managing Users",
-              "path": "/docs/guides/administrator/managing-users.md"
+              "path": "/docs/guides/administrator/managing-users.md",
+              "readingTime": {
+                "text": "1 min",
+                "minutes": 0.515,
+                "time": 30900,
+                "words": 103
+              }
             },
             {
               "title": "Hands-on Troubleshooting",
-              "path": "/docs/guides/administrator/troubleshooting.md"
+              "path": "/docs/guides/administrator/troubleshooting.md",
+              "readingTime": {
+                "text": "2 min",
+                "minutes": 1.295,
+                "time": 77700,
+                "words": 259
+              }
             },
             {
               "title": "Upgrading",
-              "path": "/docs/guides/administrator/upgrading.md"
+              "path": "/docs/guides/administrator/upgrading.md",
+              "readingTime": {
+                "text": "2 min",
+                "minutes": 1.845,
+                "time": 110700,
+                "words": 369
+              }
             },
             {
               "title": "GCP project setup",
-              "path": "/docs/guides/administrator/gcp-setup.md"
+              "path": "/docs/guides/administrator/gcp-setup.md",
+              "readingTime": {
+                "text": "4 min",
+                "minutes": 3.855,
+                "time": 231300,
+                "words": 771
+              }
             }
           ]
         },
@@ -70,19 +142,43 @@
           "routes": [
             {
               "title": "Development Environment",
-              "path": "/docs/guides/contributor/setting-up-your-dev-env.md"
+              "path": "/docs/guides/contributor/setting-up-your-dev-env.md",
+              "readingTime": {
+                "text": "2 min",
+                "minutes": 1.69,
+                "time": 101400,
+                "words": 338
+              }
             },
             {
               "title": "Running and Writing Tests",
-              "path": "/docs/guides/contributor/test-remote.md"
+              "path": "/docs/guides/contributor/test-remote.md",
+              "readingTime": {
+                "text": "3 min",
+                "minutes": 2.745,
+                "time": 164700,
+                "words": 549
+              }
             },
             {
               "title": "Developer Workflows",
-              "path": "/docs/guides/contributor/workflows.md"
+              "path": "/docs/guides/contributor/workflows.md",
+              "readingTime": {
+                "text": "5 min",
+                "minutes": 4.16,
+                "time": 249600,
+                "words": 832
+              }
             },
             {
               "title": "Writing Docs",
-              "path": "/docs/guides/contributor/writing-docs.md"
+              "path": "/docs/guides/contributor/writing-docs.md",
+              "readingTime": {
+                "text": "5 min",
+                "minutes": 4.245,
+                "time": 254700,
+                "words": 849
+              }
             }
           ]
         }
@@ -94,31 +190,73 @@
       "routes": [
         {
           "title": "Frequently Asked Questions",
-          "path": "/docs/references/faq.md"
+          "path": "/docs/references/faq.md",
+          "readingTime": {
+            "text": "2 min",
+            "minutes": 1.68,
+            "time": 100800,
+            "words": 336
+          }
         },
         {
           "title": "Roadmap",
-          "path": "/docs/references/roadmap.md"
+          "path": "/docs/references/roadmap.md",
+          "readingTime": {
+            "text": "2 min",
+            "minutes": 1.35,
+            "time": 81000,
+            "words": 270
+          }
         },
         {
           "title": "Configuration",
-          "path": "/docs/references/configuration.md"
+          "path": "/docs/references/configuration.md",
+          "readingTime": {
+            "text": "6 min",
+            "minutes": 5.465,
+            "time": 327900,
+            "words": 1093
+          }
         },
         {
           "title": "Command Line Interface (CLI)",
-          "path": "/docs/references/cli.md"
+          "path": "/docs/references/cli.md",
+          "readingTime": {
+            "text": "8 min",
+            "minutes": 7.35,
+            "time": 441000,
+            "words": 1470
+          }
         },
         {
           "title": "Key Concepts",
-          "path": "/docs/references/concepts.md"
+          "path": "/docs/references/concepts.md",
+          "readingTime": {
+            "text": "3 min",
+            "minutes": 2.99,
+            "time": 179400,
+            "words": 598
+          }
         },
         {
           "title": "AWS configuration",
-          "path": "/docs/references/aws.md"
+          "path": "/docs/references/aws.md",
+          "readingTime": {
+            "text": "2 min",
+            "minutes": 1.015,
+            "time": 60900,
+            "words": 203
+          }
         },
         {
           "title": "GCP configuration",
-          "path": "/docs/references/gcp.md"
+          "path": "/docs/references/gcp.md",
+          "readingTime": {
+            "text": "1 min",
+            "minutes": 0.96,
+            "time": 57600,
+            "words": 192
+          }
         }
       ]
     }
