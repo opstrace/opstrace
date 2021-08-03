@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "resolveJsonModule": true,
     "outDir": "build",
     "target": "ES2020",
