@@ -15,8 +15,7 @@
  */
 
 import React from "react";
-
-import { useCommandService } from "client/services/Command";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import { Page } from "client/components/Page";
 import { Box } from "client/components/Box";
@@ -26,15 +25,7 @@ import { Typography } from "client/components/Typography";
 import TracyImg from "client/views/common/Tracy";
 
 export const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
-  useCommandService(
-    {
-      id: "login-on-enter",
-      description: "Login",
-      keybindings: ["enter"],
-      handler: onLogin
-    },
-    []
-  );
+  useHotkeys("enter", onLogin);
 
   return (
     <Page centered height="100vh" width="100vw">

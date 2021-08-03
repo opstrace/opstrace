@@ -33,7 +33,6 @@ import {
 } from "react-feather";
 
 import { WithSession } from "client/components/withSession";
-import { WithSubscriptions } from "state/clients/graphqlClient/withSubscriptions";
 
 import ErrorBoundary from "client/components/Error/Boundary";
 import { Box } from "client/components/Box";
@@ -74,18 +73,16 @@ const App = () => (
   <StoreProvider>
     <Theme.ThemeSwitcher>
       <ErrorBoundary>
-        <Services>
-          <WithSession>
-            <WithSubscriptions>
-              <Switch>
-                <Redirect exact key="/" from="/" to="/tenant/system" />
-                <Route key="*" path="*">
-                  <AuthProtectedApplication />
-                </Route>
-              </Switch>
-            </WithSubscriptions>
-          </WithSession>
-        </Services>
+        <WithSession>
+          <Services>
+            <Switch>
+              <Redirect exact key="/" from="/" to="/tenant/system" />
+              <Route key="*" path="*">
+                <AuthProtectedApplication />
+              </Route>
+            </Switch>
+          </Services>
+        </WithSession>
       </ErrorBoundary>
     </Theme.ThemeSwitcher>
   </StoreProvider>

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import React from "react";
+import { InitSubscriptions } from "state/clients/graphqlClient/initSubscriptions";
 import { CommandService } from "./Command";
 import { PickerService } from "./Picker";
 import { NotificationService } from "./Notification";
@@ -22,15 +23,17 @@ import { ThemeCommands } from "../themes/Provider";
 
 const Services = ({ children }: { children: React.ReactNode }) => {
   return (
-    <PickerService>
-      <CommandService>
-        <ThemeCommands>
-          <NotificationService>
-            <DisplayService>{children}</DisplayService>
-          </NotificationService>
-        </ThemeCommands>
-      </CommandService>
-    </PickerService>
+    <InitSubscriptions>
+      <PickerService>
+        <CommandService>
+          <ThemeCommands>
+            <NotificationService>
+              <DisplayService>{children}</DisplayService>
+            </NotificationService>
+          </ThemeCommands>
+        </CommandService>
+      </PickerService>
+    </InitSubscriptions>
   );
 };
 
