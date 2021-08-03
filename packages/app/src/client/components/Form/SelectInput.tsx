@@ -23,12 +23,11 @@ import {
   FormLabel,
   FormHelperText,
   Radio,
-  RadioGroup,
+  RadioGroup
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { Typography } from "client/components/Typography";
-import { CondRender } from "client/utils/rendering";
 import { Box } from "client/components/Box";
 
 type SelectInputOptionProps = {
@@ -72,7 +71,7 @@ export const SelectInput = <TFieldValues,>({
     <Controller
       render={({ field }) => (
         <Box>
-          <CondRender unless={label === undefined}>
+          {label && (
             <div className={labelClass}>
               <FormLabel>
                 <Typography variant="h6" color="textSecondary">
@@ -80,28 +79,25 @@ export const SelectInput = <TFieldValues,>({
                 </Typography>
               </FormLabel>
             </div>
-          </CondRender>
+          )}
           <div className={controlClass}>
-          <RadioGroup {...field}>
-            {optionsProps.map(optionProps => (
-              <FormControlLabel control={<Radio />} {...optionProps} />
-            ))}
+            <RadioGroup {...field}>
+              {optionsProps.map(optionProps => (
+                <FormControlLabel control={<Radio />} {...optionProps} />
+              ))}
             </RadioGroup>
-            <CondRender
-              unless={helperText === undefined}
-              render={() => (
-                <FormHelperText>
-                  <Typography variant="caption" className={classes.helperText}>
-                    <HelpCircle
-                      width={12}
-                      height={12}
-                      className={classes.helperIcon}
-                    />
-                    <span>{helperText}</span>
-                  </Typography>
-                </FormHelperText>
-              )}
-            />
+            {helperText && (
+              <FormHelperText>
+                <Typography variant="caption" className={classes.helperText}>
+                  <HelpCircle
+                    width={12}
+                    height={12}
+                    className={classes.helperIcon}
+                  />
+                  <span>{helperText}</span>
+                </Typography>
+              </FormHelperText>
+            )}
           </div>
         </Box>
       )}

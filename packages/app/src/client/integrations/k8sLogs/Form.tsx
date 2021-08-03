@@ -46,7 +46,7 @@ const defaultValues: Values = {
 type Props = {
   handleCreate: (data: {
     name: string;
-    data: { deployNamespace: string };
+    data: { deployNamespace: string; format: string };
   }) => void;
 };
 
@@ -101,16 +101,22 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
                   name="format"
                   control={control}
                   optionsProps={[
-                    {label:"CRI/containerd", value:"cri"},
-                    {label:"dockerd", value:"docker"}
+                    { label: "CRI/containerd", value: "cri" },
+                    { label: "dockerd", value: "docker" }
                   ]}
                   label="Container Runtime"
                   helperText="The cluster container runtime affects the log format."
                 />
                 <Typography color="textSecondary" variant="caption">
-                  To find this, check for either <code>containerd://</code> or <code>docker://</code> from this command:<br />
-                  &nbsp; &nbsp;<code>$ kubectl get nodes \<br />
-                  &nbsp; &nbsp; -o jsonpath={"'{.items[].status.nodeInfo.containerRuntimeVersion}'"}</code>
+                  To find this, check for either <code>containerd://</code> or{" "}
+                  <code>docker://</code> from this command:
+                  <br />
+                  &nbsp; &nbsp;
+                  <code>
+                    $ kubectl get nodes \<br />
+                    &nbsp; &nbsp; -o jsonpath=
+                    {"'{.items[].status.nodeInfo.containerRuntimeVersion}'"}
+                  </code>
                 </Typography>
               </Box>
               <Box mb={3}>
