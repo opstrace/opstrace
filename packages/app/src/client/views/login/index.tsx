@@ -228,7 +228,7 @@ const Login = (props: { state?: State }) => {
         emoji="💩"
         maxWidth={400}
       >
-        <Typography>Access denied for {user.email}.</Typography>
+        <Typography>Access denied for {user?.email}.</Typography>
         <br />
         <br />
         <Typography>
