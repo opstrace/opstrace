@@ -83,7 +83,6 @@ function getClientEnvironment(publicUrl) {
           process.env.NODE_ENV !== "development"
             ? undefined
             : process.env.EARLY_PREVIEW,
-        BUILDKITE: process.env.BUILDKITE,
         // Always set this to null in the client
         HASURA_GRAPHQL_ADMIN_SECRET: null,
         // Useful for determining whether we’re running in production mode.

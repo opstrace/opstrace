@@ -16,7 +16,17 @@
 
 import { expect, Page } from "@playwright/test";
 
-export const performLogin = async ({ page, cluster, user }) => {
+export const performLogin = async ({ page, context, cluster, user }) => {
+  await context.addCookies([
+    {
+      name: "opstrace-playwright",
+      value: "true",
+      domain: cluster.domain,
+      path: "/",
+      HttpOnly: false
+    }
+  ]);
+
   await page.goto(cluster.baseUrl);
 
   // <button class="MuiButtonBase-root Mui... MuiButton-sizeLarge" tabindex="0" type="button">
@@ -53,7 +63,7 @@ export const restoreLogin = async ({
     await page.goto(cluster.baseUrl);
     await page.waitForSelector("[data-test=getting-started]");
   } else {
-    await performLogin({ page, cluster, user });
+    await performLogin({ page, context, cluster, user });
   }
 };
 

@@ -30,7 +30,7 @@ export const addAuthFixture = (test: TestType) =>
           const context = await browser.newContext({ ignoreHTTPSErrors: true });
           const page = await context.newPage();
 
-          await performLogin({ page, cluster, user });
+          await performLogin({ page, context, cluster, user });
 
           const cookies = await page.context().cookies();
           await page.close();

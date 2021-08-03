@@ -16,6 +16,7 @@
 
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import Cookies from "js-cookie";
 
 import { loginUrl } from "client/components/withSession/paths";
 
@@ -32,6 +33,8 @@ export const AccessDeniedPage = ({ data }: { data: {} }) => {
   const message = user
     ? `Contact your administrator or log out and try again with a different account.`
     : "Contact your administrator or try again with a different account.";
+
+  const isPlaywright = Cookies.get("opstrace-playwright");
 
   return (
     <Page centered height="100vh" width="100vw">
@@ -62,7 +65,7 @@ export const AccessDeniedPage = ({ data }: { data: {} }) => {
         </Box>
       </ErrorView>
 
-      {process.env.BUILDKITE === "true" && (
+      {isPlaywright === "true" && (
         <ErrorView title="" subheader="" actions={null} maxWidth={800}>
           <Typography variant="h5">Error response</Typography>
           <pre>{JSON.stringify(data, null, 1)}</pre>

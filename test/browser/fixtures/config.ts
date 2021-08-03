@@ -27,6 +27,7 @@ type SystemFixture = {
 
 type ClusterFixture = {
   name: string | undefined;
+  domain: string;
   baseUrl: string;
   cloudProvider: Record<string, boolean>;
 };
@@ -59,11 +60,11 @@ export const addConfigFixture = (test: TestType) =>
         const clusterName = process.env.OPSTRACE_CLUSTER_NAME;
         const dnsName = process.env.OPSTRACE_INSTANCE_DNS_NAME;
 
-        let baseUrl = undefined;
+        let domain;
         if (dnsName) {
-          baseUrl = dnsName;
+          domain = dnsName;
         } else if (clusterName) {
-          baseUrl = `${clusterName}.opstrace.io`;
+          domain = `${clusterName}.opstrace.io`;
         } else {
           log.error(
             "env variables OPSTRACE_INSTANCE_DNS_NAME or OPSTRACE_CLUSTER_NAME must be set"
@@ -71,10 +72,12 @@ export const addConfigFixture = (test: TestType) =>
           process.exit(1);
         }
 
-        baseUrl =
+        console.log("domain", domain);
+
+        const baseUrl =
           process.env.OPSTRACE_CLUSTER_INSECURE === "true"
-            ? `http://${baseUrl}`
-            : `https://${baseUrl}`;
+            ? `http://${domain}`
+            : `https://${domain}`;
 
         const cloudProvider = process.env.OPSTRACE_CLOUD_PROVIDER;
         if (CLOUD_PROVIDER_DEFAULTS[cloudProvider] !== false) {
@@ -86,6 +89,7 @@ export const addConfigFixture = (test: TestType) =>
 
         const cluster: ClusterFixture = {
           name: clusterName,
+          domain: domain,
           baseUrl: baseUrl,
           cloudProvider: CLOUD_PROVIDER_DEFAULTS
         };
