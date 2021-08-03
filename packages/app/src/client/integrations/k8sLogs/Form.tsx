@@ -22,21 +22,25 @@ import * as yup from "yup";
 import { k8sLogsIntegration as integrationDef } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
+import { SelectInput } from "client/components/Form/SelectInput";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
+import { Typography } from "client/components/Typography";
 
 const Schema = yup.object({
   name: yup.string().required(),
-  deployNamespace: yup.string().required()
+  deployNamespace: yup.string().required(),
+  format: yup.string().required()
 });
 
 type Values = yup.Asserts<typeof Schema>;
 
 const defaultValues: Values = {
   name: "",
-  deployNamespace: "opstrace"
+  deployNamespace: "opstrace",
+  format: "cri"
 };
 
 type Props = {
@@ -61,7 +65,7 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
   const onSubmit = (data: Values) => {
     handleCreate({
       name: data.name,
-      data: { deployNamespace: data.deployNamespace }
+      data: { deployNamespace: data.deployNamespace, format: data.format }
     });
   };
 
@@ -91,6 +95,23 @@ export const K8sLogsForm = ({ handleCreate }: Props) => {
                   label="Integration Name"
                   helperText="An identifier for this integration"
                 />
+              </Box>
+              <Box mb={3}>
+                <SelectInput
+                  name="format"
+                  control={control}
+                  optionsProps={[
+                    {label:"CRI/containerd", value:"cri"},
+                    {label:"dockerd", value:"docker"}
+                  ]}
+                  label="Container Runtime"
+                  helperText="The cluster container runtime affects the log format."
+                />
+                <Typography color="textSecondary" variant="caption">
+                  To find this, check for either <code>containerd://</code> or <code>docker://</code> from this command:<br />
+                  &nbsp; &nbsp;<code>$ kubectl get nodes \<br />
+                  &nbsp; &nbsp; -o jsonpath={"'{.items[].status.nodeInfo.containerRuntimeVersion}'"}</code>
+                </Typography>
               </Box>
               <Box mb={3}>
                 <ControlledInput
