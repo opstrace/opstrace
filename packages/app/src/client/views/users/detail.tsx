@@ -85,7 +85,7 @@ const UserDetail = () => {
                     <Box p={1}>
                       <Button
                         variant="outlined"
-                        size="medium"
+                        size="small"
                         onClick={() => cmdService.executeCommand("logout")}
                       >
                         Logout
