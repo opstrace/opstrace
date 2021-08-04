@@ -10,14 +10,26 @@ yarn
 # This only has to be done once (and again when files change in linked packages)
 yarn tsc -b
 
+# While the linked packages are building setup your .env files
+# These files are in the .gitignore so there is no need to worry about accidently commiting any changes you make
+cp .env.client.development.example .env.client.development
+cp .env.server.development.example .env.server.development
+
 # Terminal 1) Start supporting services in containers with docker compose (you must have docker installed)
 yarn services:start
+
+# Then once the linked packages have finished building and all the docker based services have started it's time to create a default dataset
+yarn seeds:dev:tenants
 
 # Terminal 2) Start the web-server/api in watch mode. The server will reload on changes.
 yarn server:start
 
 # Terminal 3) Start the ui client (webpack dev server to serve the ui in watch mode)
 yarn client:start
+
+# The server and client can take a number of seconds to start up, once up you can login
+# Note: the first user to login has a User account created for the automatically, any subsequent Users will need to be setup in the Cluster Admin -> Users section
+http://localhost:3000/
 ```
 
 Services launched by `yarn services:start` via [the docker compose file](docker-compose.yml):
