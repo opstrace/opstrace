@@ -5,7 +5,9 @@
 
 # Path to opstrace cli binary. Defaults to the binary in the build directory.
 # Upgrade pipeline will override it to run the tests.
-OPSTRACE_BIN=${OPSTRACE_BIN:-./build/bin/opstrace}
+OPSTRACE_CLI_PATH=${OPSTRACE_CLI_PATH:-./build/bin/opstrace}
+
+echo "OPSTRACE_CLI_PATH: ${OPSTRACE_CLI_PATH}"
 
 # The tenant API authenticator keypair management capability is confirmed to
 # work -- now create a keypair, push the public key into the cluster and
@@ -16,11 +18,11 @@ OPSTRACE_BIN=${OPSTRACE_BIN:-./build/bin/opstrace}
 set -x
 set +e; RNDSTRING=$( tr -dc a-z < /dev/urandom | head -c 6 ); set -e
 TENANT_RND_NAME_FOR_TESTING_ADD_TENANT="testtenant${RNDSTRING}"
-${OPSTRACE_BIN} ta-create-keypair ./ta-custom-keypair.pem
-${OPSTRACE_BIN} ta-create-token "${OPSTRACE_CLUSTER_NAME}" \
+${OPSTRACE_CLI_PATH} ta-create-keypair ./ta-custom-keypair.pem
+${OPSTRACE_CLI_PATH} ta-create-token "${OPSTRACE_CLUSTER_NAME}" \
     "${TENANT_RND_NAME_FOR_TESTING_ADD_TENANT}" ta-custom-keypair.pem > tenant-rnd-auth-token-from-custom-keypair
 TENANT_RND_AUTHTOKEN="$(cat tenant-rnd-auth-token-from-custom-keypair)"
-${OPSTRACE_BIN} ta-pubkeys-add \
+${OPSTRACE_CLI_PATH} ta-pubkeys-add \
     "${OPSTRACE_CLOUD_PROVIDER}" "${OPSTRACE_CLUSTER_NAME}" ta-custom-keypair.pem
 set -x
 export TENANT_RND_AUTHTOKEN

@@ -50,6 +50,9 @@ export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 # TODO(sreis): remove this step when the OPSTRACE_CLI_VERSION_FROM is bumped
 make testupgrade-wait-for-loki-ring
 
+# Use the 'new CLI' (or this PR) to do interaction with the Opstrace instance
+# in test-core.sh
+export OPSTRACE_CLI_PATH="./to/opstrace"
 
 # This runs the bulk of the tests against the Opstrace instance, also invoked
 # from the upgrade test pipeline and therefore in its own file.
