@@ -41,12 +41,12 @@ EXITCODE_MAKE_TESTREMOTE=$?
 set -e
 echo "--- Exit status of make test-remote: ${EXITCODE_MAKE_TESTREMOTE}"
 
-echo "+++ test-remote-ui"
+echo "+++ test-remote-ui-api"
 set +e
-make test-remote-ui  #todo: think/rename: ui-api
-EXITCODE_MAKE_TESTREMOTE_UI=$?
+make test-remote-ui-api
+EXITCODE_MAKE_TESTREMOTE_UI_API=$?
 set -e
-echo "--- Exit status of make test-remote-ui: ${EXITCODE_MAKE_TESTREMOTE_UI}"
+echo "--- Exit status of make test-remote-ui-api: ${EXITCODE_MAKE_TESTREMOTE_UI_API}"
 
 # Rely on screenshots to be created with a certain file name prefix.
 cp test-remote-artifacts/uishot-*.png /build/bk-artifacts || true
@@ -77,8 +77,8 @@ if [ "${EXITCODE_MAKE_TESTREMOTE}" -ne 0 ]; then
     exit "${EXITCODE_MAKE_TESTREMOTE}"
 fi
 
-# Delayed exit if `make test-remote-ui` failed
-if [ "${EXITCODE_MAKE_TESTREMOTE_UI}" -ne 0 ]; then
-    echo "make test-remote-ui did exit with code ${EXITCODE_MAKE_TESTREMOTE_UI}. Exit now."
-    exit "${EXITCODE_MAKE_TESTREMOTE_UI}"
+# Delayed exit if `make test-remote-ui-api` failed
+if [ "${EXITCODE_MAKE_TESTREMOTE_UI_API}" -ne 0 ]; then
+    echo "make test-remote-ui-api did exit with code ${EXITCODE_MAKE_TESTREMOTE_UI_API}. Exit now."
+    exit "${EXITCODE_MAKE_TESTREMOTE_UI_API}"
 fi

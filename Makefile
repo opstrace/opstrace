@@ -627,7 +627,7 @@ test-remote: kubectl-cluster-info
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		yarn run mocha --grep test_ui --invert
+		yarn run mocha --grep test_ui_api --invert
 
 
 # Note(JP): dirty duplication. This is supposed to be the _exact_ same as the
@@ -639,9 +639,9 @@ test-remote: kubectl-cluster-info
 # -> `make test-remote` runs all tests except those that have `test_ui` in their
 #     suite/test name. `make test-remote-ui` runs all tests that match.
 #     Note: `--invert, -i  Inverts --grep and --fgrep matches`.
-.PHONY: test-remote-ui
-test-remote-ui:
-	echo "--- running test-remote-ui"
+.PHONY: test-remote-ui-api
+test-remote-ui-api:
+	echo "--- running test-remote-ui-api"
 	mkdir -p ${OPSTRACE_BUILD_DIR}/test-remote-artifacts
 	docker run --tty --interactive --rm \
 		--net=host \
@@ -671,7 +671,7 @@ test-remote-ui:
 		--dns $(shell ci/dns_cache.sh) \
 		--workdir /build/test/test-remote \
 		opstrace/test-remote:$(CHECKOUT_VERSION_STRING) \
-		yarn run mocha --grep test_ui
+		yarn run mocha --grep test_ui_api
 
 
 # This runs our set of browser based tests using the Playwright Test Runner
