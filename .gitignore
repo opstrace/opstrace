@@ -62,6 +62,7 @@ packages/buildinfo/src/buildinfo.ts
 # playwright output
 test/test-remote/uishot-*
 test/browser/test-results
+test/browser/contextState.json
 
 packages/app/.env
 packages/app/.env.client.development

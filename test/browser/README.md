@@ -4,13 +4,13 @@ We use [Playwrigtht](https://playwright.dev/docs/intro) for our browser testing,
 
 ## Prerequisites
 
-- You'll need an Opstrace cluster running in CI mode, for example using [this config](https://github.com/opstrace/opstrace/blob/main/ci/cluster-config.yaml) - it sets up the Authentication differently allowing username/password logins rather than using a thirdparty authentication provider.
+* You'll need an Opstrace cluster running in CI mode, for example using [this config](https://github.com/opstrace/opstrace/blob/main/ci/cluster-config.yaml) - it sets up the Authentication differently allowing username/password logins rather than using a thirdparty authentication provider.
 
-- Have followed the [Remote cluster development](https://github.com/opstrace/opstrace/blob/main/packages/app/README.md#remote-cluster-development) section of the App readme.
+* Have followed the [Remote cluster development](https://github.com/opstrace/opstrace/blob/main/packages/app/README.md#remote-cluster-development) section of the App readme.
 
-- Docker
+* Docker
 
-- NodeJS & Yarn
+* NodeJS & Yarn
 
 ## Install
 
@@ -74,6 +74,14 @@ If for some reason you're unable to use Telepresence then you can override the H
 
 `OPSTRACE_CLUSTER_BASE_URL="http://localhost:3000" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --project=Chromium --headed`
 
+For convience you can use the included scripts:
+
+```bash
+yarn pw:localhost --project=Chromium tests/tenant.spec --headed
+OPSTRACE_INSTANCE_DNS_NAME="<cluster name>.opstrace.io" yarn pw --project=Chromium tests/clusterHealth.spec --headed
+
+```
+
 ## How authentication works
 
 For authentication we take use of [Advanced Fixtures](https://playwright.dev/docs/test-fixtures) for Workers. Each Playwright Worker initially goes through the login process and saves the authentication cookies that are created. The browser is then closed. Then our tests have a `beforeEach` filter that injects those saved cookies into the `Page` object essentially logging the test user in for the following test.
@@ -97,3 +105,16 @@ test.describe("after auth0 authentication", () => {
   });
 });
 ```
+
+## Save state between test runs
+
+To speed up the development feedback loop the playwright context state can be reused between runs of Playwright, ie you can keep the CI user logged in and not have to re-login each time you run Playwright. If there is no save state already present the CI user will login as normal and then save the state reuse on subsequent runs.
+
+To manually set the following env var:
+
+```bash
+export OPSTRACE_PLAYWRIGHT_SAVE_STATE=true
+
+```
+
+This is enabled by default for the `yarn pw:local` and `yarn pw` scripts.

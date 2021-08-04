@@ -15,6 +15,7 @@
  */
 
 import { Cookie, TestType } from "@playwright/test";
+import fs from "fs";
 
 import { performLogin, log } from "../utils";
 
@@ -27,10 +28,22 @@ export const addAuthFixture = (test: TestType) =>
     authCookies: [
       async ({ browser, system, cluster, user }, use) => {
         if (system.workerAuth) {
-          const context = await browser.newContext({ ignoreHTTPSErrors: true });
+          const SAVE_STATE =
+            process.env.OPSTRACE_PLAYWRIGHT_SAVE_STATE === "true";
+          const STATE_FILENAME = "contextState.json";
+          const statePresent = SAVE_STATE && fs.existsSync(STATE_FILENAME);
+
+          const context = await browser.newContext({
+            ignoreHTTPSErrors: true,
+            storageState: statePresent ? STATE_FILENAME : undefined
+          });
           const page = await context.newPage();
 
-          await performLogin({ page, cluster, user });
+          if (!statePresent) {
+            await performLogin({ page, cluster, user });
+            if (SAVE_STATE)
+              await context.storageState({ path: "contextState.json" });
+          }
 
           const cookies = await page.context().cookies();
           await page.close();
