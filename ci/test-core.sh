@@ -26,6 +26,14 @@ set -x
 export TENANT_RND_AUTHTOKEN
 export TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
 
+# The controller config map mutation for managing the public keys (right above
+# here) leads to API-serving deployments to restart. That takes a while.
+# This might result in certain HTTP requests to fail with 502 Bad Gateway
+# right within `test-remote` if we don't wait for these re-deployments to
+# finish. Do this pragmatically. The time constant chosen is based on logs,
+# see issue 944.
+sleep 100
+
 echo "+++ run test-remote"
 set +e
 make test-remote
