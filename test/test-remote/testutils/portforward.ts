@@ -28,7 +28,7 @@ import {
 } from "./index";
 
 const PORT_FORWARD_LISTEN_PATTERN =
-  /^Forwarding from 127\.0\.0\.1:(\d+) -> \d+/g;
+  /Forwarding from 127\.0\.0\.1:(\d+) -> \d+/g;
 
 export class PortForward {
   /*
@@ -197,7 +197,7 @@ export class PortForward {
 
       // Wait for kubectl to print the ephemeral ipv4 port
       const kubectlOut = new TextDecoder("utf-8").decode(
-        await readFirstNBytes(this.outfilePath, 100)
+        await readFirstNBytes(this.outfilePath, 500)
       );
       const regexResult = PORT_FORWARD_LISTEN_PATTERN.exec(kubectlOut);
       if (regexResult != null && regexResult.length > 1) {
