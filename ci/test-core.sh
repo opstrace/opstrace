@@ -62,6 +62,17 @@ mkdir -p /build/bk-artifacts/browser-test-result || true
 mv browser-test-results /build/bk-artifacts/ || true
 
 echo "+++ run looker tests"
+
+# If OPSTRACE_BUILD_DIR is not set (currently for upgrade tests) then set it to
+# pwd
+export OPSTRACE_BUILD_DIR=${OPSTRACE_BUILD_DIR:-$(pwd)}
+
+# Rely on the fact that the current working directory is the one that contains
+# tenant API authentication token files. Absolute paths are required I think.
+export TENANT_DEFAULT_LOKI_API_BASE_URL="https://loki.default.${OPSTRACE_INSTANCE_DNS_NAME}"
+export TENANT_DEFAULT_CORTEX_API_BASE_URL="https://cortex.default.${OPSTRACE_INSTANCE_DNS_NAME}"
+export TENANT_DEFAULT_API_TOKEN_FILEPATH="$(pwd)/tenant-api-token-default"
+export TENANT_SYSTEM_API_TOKEN_FILEPATH="$(pwd)/tenant-api-token-system"
 source ci/invoke-looker.sh
 
 
