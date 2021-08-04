@@ -75,7 +75,7 @@ steps:
       GCLOUD_CLI_REGION: "us-west2"
       GCLOUD_CLI_ZONE: "us-west2-a"
     command:
-      - bash ci/check-if-docs-pr.sh || ci/test-upgrade/run.sh
+      - bash ci/check-if-docs-pr.sh || make ci-test-upgrade-run-sh
     artifact_paths:
       - "/tmp/opstrace-pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g/bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"

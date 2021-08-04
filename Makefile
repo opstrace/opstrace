@@ -716,7 +716,13 @@ website-build:
 deploy-testremote-teardown:
 	bash "ci/deploy-testremote-teardown.sh"
 
-#
+
+# used by pipeline as `make ci-test-upgrade-run-sh`, i.e. in the CI container
+.PHONY: test-upgrade-run-sh
+test-upgrade-run-sh:
+	bash "ci/test-upgrade/run.sh"
+
+
 # Target that runs a script in the ci/testupgrade/ directory. Check
 # .buildkite/test-upgrade-pipeline.yml to see how it can be used.
 #
