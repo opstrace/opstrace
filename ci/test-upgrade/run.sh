@@ -2,9 +2,9 @@
 
 set -eou pipefail
 
-make ci-fetch-secrets
+make fetch-secrets
 
-make ci-testupgrade-fetch-cli-artifacts
+make testupgrade-fetch-cli-artifacts
 
 echo "--- setting up dns-service credentials"
 # The `access.jwt` file is what the CLI is going to look for.
@@ -31,24 +31,25 @@ export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/.kube
 teardown() {
     LAST_EXIT_CODE=$?
 
-    make ci-testupgrade-create-cluster-artifacts
-    make ci-testupgrade-teardown && exit ${LAST_EXIT_CODE}
+    make testupgrade-create-cluster-artifacts
+    make testupgrade-teardown && exit ${LAST_EXIT_CODE}
 }
 trap "teardown" EXIT
 
 
-make ci-testupgrade-create-cluster
+make testupgrade-create-cluster
 
 # TODO(sreis): Add a new sanity check on the base cluster here before running
 # the upgrade. https://github.com/opstrace/opstrace/issues/591
-make ci-testupgrade-upgrade-cluster
+make testupgrade-upgrade-cluster
 
 # Define default for OPSTRACE_INSTANCE_DNS_NAME.
 export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
 
 # TODO(sreis): remove this step when the OPSTRACE_CLI_VERSION_FROM is bumped
-make ci-testupgrade-wait-for-loki-ring
+make testupgrade-wait-for-loki-ring
+
 
 # This runs the bulk of the tests against the Opstrace instance, also invoked
 # from the upgrade test pipeline and therefore in its own file.
