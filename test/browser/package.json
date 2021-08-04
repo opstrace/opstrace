@@ -22,7 +22,8 @@
     "winston": "^3.3.3"
   },
   "scripts": {
-    "pw:localhost": "OPSTRACE_INSTANCE_DNS_NAME=\"localhost:3000\" OPSTRACE_CLUSTER_INSECURE=true OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
+    "pw:localhost": "OPSTRACE_PLAYWRIGHT_SAVE_STATE=\"true\" OPSTRACE_INSTANCE_DNS_NAME=\"localhost:3000\" OPSTRACE_CLUSTER_INSECURE=true OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
+    "pw": "OPSTRACE_PLAYWRIGHT_SAVE_STATE=\"true\" OPSTRACE_CLUSTER_INSECURE=true OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
     "lint": "eslint . --ext .ts --quiet"
   }
 }
