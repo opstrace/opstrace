@@ -53,7 +53,16 @@ export function getGKEClusterConfig(
   return {
     network: ccfg.cluster_name,
     subnetwork: ccfg.cluster_name,
-    initialClusterVersion: "1.18", // "1.X": picks the highest valid patch+gke.N patch in the 1.X version
+    //
+    // NOTE: Ideally, and if possible, this version should track the default
+    // version in the Stable Release channel
+    // https://cloud.google.com/kubernetes-engine/docs/release-notes-stable.
+    //
+    // Let's try to bump it when the 1.X version is marked as 'unavailable for
+    // new clusters'.
+    // https://cloud.google.com/kubernetes-engine/docs/release-schedule
+    //
+    initialClusterVersion: "1.19", // "1.X": picks the highest valid patch+gke.N patch in the 1.X version
     releaseChannel: {
       channel: "STABLE"
     },
