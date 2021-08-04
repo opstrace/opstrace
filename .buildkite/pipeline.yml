@@ -1,5 +1,5 @@
 env:
-  OPSTRACE_PREBUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-prebuild"
+  OPSTRACE_PREBUILD_DIR: "/tmp/builddir-pr-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:7}-prebuild"
   CHECKOUT_VERSION_STRING: "${BUILDKITE_COMMIT:0:8}-ci"
   PKG_CACHE_PATH: "/tmp"
 steps:
@@ -38,26 +38,26 @@ steps:
       - "unit-tests"
     env:
       OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
-      OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_BUILD_DIR: "/tmp/builddir--${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
       OPSTRACE_CLOUD_PROVIDER: "gcp"
     command:
       - cd "${OPSTRACE_PREBUILD_DIR}"
       - bash ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
     artifact_paths:
-      - "/tmp/opstrace-bk-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g/bk-artifacts/**/*"
+      - "/tmp/builddir--${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g/bk-artifacts/**/*"
   - label: "🔨 main test (AWS)"
     key: "maintest-aws"
     depends_on:
       - "unit-tests"
     env:
       OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
-      OPSTRACE_BUILD_DIR: "/tmp/opstrace-bk-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
+      OPSTRACE_BUILD_DIR: "/tmp/builddir--${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
       OPSTRACE_CLOUD_PROVIDER: "aws"
     command:
       - cd "${OPSTRACE_PREBUILD_DIR}"
       - bash ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
     artifact_paths:
-      - "/tmp/opstrace-bk-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a/bk-artifacts/**/*"
+      - "/tmp/builddir--${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a/bk-artifacts/**/*"
   - label: "🔨 test upgrades (GCP)"
     key: "testupgrades-gcp"
     depends_on:
@@ -70,14 +70,14 @@ steps:
       # cluster.
       OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
       OPSTRACE_CLUSTER_NAME: "pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
-      OPSTRACE_BUILD_DIR: "/tmp/opstrace-pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_BUILD_DIR: "/tmp/builddir-pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
       OPSTRACE_CLOUD_PROVIDER: "gcp"
       GCLOUD_CLI_REGION: "us-west2"
       GCLOUD_CLI_ZONE: "us-west2-a"
     command:
       - bash ci/check-if-docs-pr.sh || make ci-test-upgrade-run-sh
     artifact_paths:
-      - "/tmp/opstrace-pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g/bk-artifacts/**/*"
+      - "/tmp/builddir-pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g/bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"
     key: "cleanup-tmp"
     depends_on:
