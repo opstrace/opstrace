@@ -285,32 +285,36 @@ else
     # Now add an NS record to the opstracegcp.com zone for the
     # <foo>.opstracegcp.com DNS name, pointing to the name servers that are
     # authoritative for the sub zone. Upon execution of the transaction we
-    # sometimes get a 412 preconditio not met. It refers to a deletion which is
-    # weird. See https://github.com/opstrace/opstrace/issues/1068 for context.
-    # In order to get to the bottom of that use a 'unique' transaction file
-    # name and also dump the transaction file contents before execution. Also
-    # as an attempt to see if it helps -- repeat the transaction if after a
-    # moment if it fails.
-    TRFNAME="gcloud_dns_transaction_${RANDOM}"
-    gcloud dns record-sets transaction start \
-        --zone=root-opstracegcp --transaction-file=${TRFNAME}
-    gcloud dns record-sets transaction add ${SUBZONE_NAMESERVERS} \
-        --transaction-file=${TRFNAME} \
-        --name=${OPSTRACE_INSTANCE_DNS_NAME}. \
-        --ttl=300 --type=NS --zone=root-opstracegcp
-    cat ${TRFNAME}
-    # temporarily lift errexit option
-    set +e
-    gcloud dns record-sets transaction execute --zone=root-opstracegcp --transaction-file=${TRFNAME}
-    EXITCODE_DNS_TRANS=$?
-    set -e
-
-    if [ "${EXITCODE_DNS_TRANS}" -ne 0 ]; then
-        echo "gcloud dns ... transaction execute failed.. retry in 10 s to see if that's permanent (see issue 1068)"
-        sleep 10
+    # sometimes get a 412 precondition not met, also see Context:
+    # https://github.com/opstrace/opstrace/issues/1068. Probably as of the SOA
+    # serial number update failing. Rebuild and retry transaction until
+    # success. TODO: maybe don't retry forever.
+    while true
+    do
+        TRFNAME="gcloud_dns_transaction_${RANDOM}"
+        gcloud dns record-sets transaction start \
+            --zone=root-opstracegcp --transaction-file=${TRFNAME}
+        gcloud dns record-sets transaction add ${SUBZONE_NAMESERVERS} \
+            --transaction-file=${TRFNAME} \
+            --name=${OPSTRACE_INSTANCE_DNS_NAME}. \
+            --ttl=300 --type=NS --zone=root-opstracegcp
+        echo "transaction file content:"
+        cat ${TRFNAME}
+        # temporarily lift errexit option, this is where the `412 precondition
+        # not met` err may be thrown.
+        set +e
         gcloud dns record-sets transaction execute --zone=root-opstracegcp --transaction-file=${TRFNAME}
-    fi
+        EXITCODE_DNS_TRANS=$?
+        set -e
 
+        if [ "${EXITCODE_DNS_TRANS}" -ne 0 ]; then
+            echo "gcloud dns ... transaction execute failed.. retry in 5 s "
+            sleep 10
+        else
+            echo "EXITCODE_DNS_TRANS is 0 -> transaction was accepted, leave loop"
+            break
+        fi
+    done
 
     # Revert gcloud CLI authentication state to GCP project CI shard.
     gcloud auth activate-service-account \
