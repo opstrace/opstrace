@@ -69,12 +69,12 @@ echo "+++ run looker tests"
 # pwd
 export OPSTRACE_BUILD_DIR=${OPSTRACE_BUILD_DIR:-$(pwd)}
 
-# Rely on the fact that the current working directory is the one that contains
-# tenant API authentication token files. Absolute paths are required I think.
+# The *API_TOKEN_FILEPATH must be absolute paths in the /tmp directory, i.e.
+# start with the OPSTRACE_BUILD_DIR so that the docker mounts actually work.
 export TENANT_DEFAULT_LOKI_API_BASE_URL="https://loki.default.${OPSTRACE_INSTANCE_DNS_NAME}"
 export TENANT_DEFAULT_CORTEX_API_BASE_URL="https://cortex.default.${OPSTRACE_INSTANCE_DNS_NAME}"
-export TENANT_DEFAULT_API_TOKEN_FILEPATH="$(pwd)/tenant-api-token-default"
-export TENANT_SYSTEM_API_TOKEN_FILEPATH="$(pwd)/tenant-api-token-system"
+export TENANT_DEFAULT_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
+export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
 source ci/invoke-looker.sh
 
 
