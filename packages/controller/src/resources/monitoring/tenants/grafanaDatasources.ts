@@ -270,7 +270,7 @@ http {
               ${generalProxyConfig}
 
               resolver ${dnsResolver};
-              set $backend http://querier.loki.svc.cluster.local:1080;
+              set $backend http://query-frontend.loki.svc.cluster.local:1080;
               proxy_pass $backend;
             }
 

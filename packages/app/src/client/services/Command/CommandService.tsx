@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useContext, useMemo } from "react";
+import React, { useCallback, useEffect, useContext, useMemo, DependencyList } from "react";
 import hotkeys from "hotkeys-js";
 
 import type {
@@ -93,7 +93,7 @@ function CommandContextProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useCommandService(command?: Command, dependencies?: any[]) {
+export function useCommandService(command?: Command, dependencies?: DependencyList) {
   const commandService = useContext(commandServiceContext);
   if (!commandService) {
     throw new Error("useCommandService must be used within a CommandService.");

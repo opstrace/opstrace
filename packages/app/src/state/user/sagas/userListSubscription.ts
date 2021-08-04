@@ -28,7 +28,7 @@ import {
   SubscribeToUserListSubscription,
   SubscribeToUserListDocument
 } from "state/clients/graphqlClient";
-import subscriptionClient from "state/clients/graphqlClient/subscriptionClient";
+import getSubscriptionClient from "state/clients/graphqlClient/subscriptionClient";
 import * as actions from "../actions";
 import { SubscriptionID } from "../types";
 
@@ -107,7 +107,7 @@ export default function* userListSubscriptionManager() {
  */
 export function userListSubscriptionEventChannel(): EventChannel<Actions> {
   return eventChannel(emitter => {
-    const subscription = subscriptionClient
+    const subscription = getSubscriptionClient()
       .subscribe<SubscribeToUserListSubscription>({
         query: SubscribeToUserListDocument
       })

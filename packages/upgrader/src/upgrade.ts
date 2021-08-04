@@ -15,6 +15,7 @@
  */
 
 import { all, select, call, Effect } from "redux-saga/effects";
+import { ZonedDateTime, ZoneOffset, DateTimeFormatter } from "@js-joda/core";
 import { KubeConfig } from "@kubernetes/client-node";
 
 import { getClusterConfig } from "@opstrace/config";
@@ -29,9 +30,8 @@ import {
   set as updateControllerConfig,
   upgradeControllerConfigMapToLatest
 } from "@opstrace/controller-config";
-
 import { Deployment, K8sResource, updateResource } from "@opstrace/kubernetes";
-
+import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
 import {
   EnsureInfraExistsResponse,
   ensureAWSInfraExists,
@@ -39,7 +39,6 @@ import {
 } from "@opstrace/installer";
 
 import { State } from "./reducer";
-import { getValidatedGCPAuthOptionsFromFile } from "@opstrace/gcp";
 import { waitForControllerDeployment } from "./readiness";
 
 const CONTROLLER_IMAGE_DEFAULT = `opstrace/controller:${BUILD_INFO.VERSION_STRING}`;
@@ -104,6 +103,15 @@ export function* upgradeControllerConfigMap(
   let cfg: LatestControllerConfigType;
   try {
     cfg = upgradeControllerConfigMapToLatest(cfgJSON);
+    cfg.cliMetadata.allCLIVersions.push({
+      version: BUILD_INFO.VERSION_STRING,
+      // Current time in UTC using RFC3339 string representation (w/o
+      // fractional seconds, with Z tz specififer), e.g.
+      // '2021-07-28T15:43:07Z'
+      timestamp: ZonedDateTime.now(ZoneOffset.UTC).format(
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+      )
+    });
   } catch (e) {
     die(`failed to upgrade controller configuration: ${e.message}`);
   }

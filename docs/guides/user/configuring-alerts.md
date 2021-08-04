@@ -105,7 +105,7 @@ Policies have a tree structure, where each policy can have one or more child pol
 
 ### How label matching works
 
-A policy will match an alert if alert's labels match **all** of the *matching mabels* specified on the policy.
+A policy will match an alert if alert's labels match **all** of the *matching labels* specified on the policy.
 
 * The *label* field is the name of the label to match. It must exactly match the label name.
 * The *value* field matches against the corresponding value for the specified Label name. How it matches depends on the *regex* and *equal* checkboxes.

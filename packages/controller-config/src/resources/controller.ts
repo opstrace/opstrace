@@ -26,6 +26,7 @@ import { generateSecretValue } from "../helpers";
 import { getImagePullSecrets, dockerHubCredsSecret } from "./dockerhub";
 
 export const CONTROLLER_NAME = "opstrace-controller";
+export const CONTROLLER_NAMESPACE = "kube-system";
 
 export function ControllerResources({
   controllerImage,
@@ -37,7 +38,7 @@ export function ControllerResources({
   kubeConfig: KubeConfig;
 }): ResourceCollection {
   const collection = new ResourceCollection();
-  const namespace = "kube-system";
+  const namespace = CONTROLLER_NAMESPACE;
   const name = CONTROLLER_NAME;
 
   const controllerCmdlineArgs = [`${opstraceClusterName}`];
@@ -107,7 +108,7 @@ export function ControllerResources({
                   name: "opstrace-controller",
                   image: `${controllerImage}`,
                   imagePullPolicy: "IfNotPresent",
-                  command: ["node", "--prof", "./cmd.js"],
+                  command: ["node", "./cmd.js"],
                   args: controllerCmdlineArgs,
                   resources: {
                     limits: {

@@ -27,6 +27,12 @@ import { ErrorView } from "client/components/Error";
 
 export const AccessDeniedPage = ({ data }: { data: {} }) => {
   const { user, logout } = useAuth0();
+
+  const title = user ? `Access denied for ${user.email}.` : "Access denied.";
+  const message = user
+    ? `Contact your administrator or log out and try again with a different account.`
+    : "Contact your administrator or try again with a different account.";
+
   return (
     <Page centered height="100vh" width="100vw">
       <ErrorView
@@ -36,13 +42,10 @@ export const AccessDeniedPage = ({ data }: { data: {} }) => {
         emoji="💩"
         maxWidth={400}
       >
-        <Typography>Access denied for {user.email}.</Typography>
+        <Typography>{title}</Typography>
         <br />
         <br />
-        <Typography>
-          Contact your administrator or log out and try again with a different
-          account.
-        </Typography>
+        <Typography>{message}</Typography>
         <Box mt={3} pb={0}>
           <Button
             variant="contained"

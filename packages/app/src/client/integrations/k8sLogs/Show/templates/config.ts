@@ -25,13 +25,13 @@ export enum PromtailLogFormat {
 
 type PromtailProps = {
   // The Opstrace cluster hostname (foo.opstrace.io) where logs should be sent
-  clusterHost: String;
+  clusterHost: string;
   // The Opstrace tenant where logs should be sent
-  tenantName: String;
+  tenantName: string;
   // The unique id that sent logs should have as a label
-  integrationId: String;
+  integrationId: string;
   // Where the user would like Promtail to be deployed in their cluster
-  deployNamespace: String;
+  deployNamespace: string;
   // Whether the user is running dockerd (docker) or containerd (cri) in their cluster
   logFormat: PromtailLogFormat;
 };
@@ -92,7 +92,7 @@ data:
       kubernetes_sd_configs:
       - role: pod
 
-      # Whether the data is cri (tsv) or dockerd (json) format
+      # Specify whether the data is cri (tsv) or dockerd (json) format
       pipeline_stages:
       - ${logFormat}:
 

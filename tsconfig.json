@@ -24,10 +24,7 @@
     "declarationMap": true,
     "composite": true,
     "inlineSourceMap": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
   "exclude": [
     "**/node_modules/*",

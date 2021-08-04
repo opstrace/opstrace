@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-export * from "./actions";
-export * from "./helpers";
-export * from "./reducer";
-export * from "./schema";
-export * from "./tasks";
-export * from "./errors";
-export * from "./docker-images";
-export * from "./aks";
-export * from "./resources/dockerhub";
+import React, { useEffect } from "react";
 
-export { CONTROLLER_NAME, CONTROLLER_NAMESPACE } from "./resources/controller";
-export {
-  CONFIGMAP_NAME,
-  STORAGE_KEY,
-  serializeControllerConfig
-} from "./utils";
+import {
+  startSubscriptionClient,
+  stopSubscriptionClient
+} from "state/clients/graphqlClient/subscriptionClient";
+
+export const InitSubscriptions = ({
+  children
+}: {
+  children: React.ReactNode;
+}) => {
+  useEffect(() => {
+    // intentionally doing this once here to ensure that the WS Apollo connection is setup
+    startSubscriptionClient();
+    return stopSubscriptionClient;
+  }, []);
+
+  return <>{children}</>;
+};

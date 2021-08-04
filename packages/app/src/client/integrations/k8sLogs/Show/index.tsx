@@ -35,6 +35,7 @@ import { integrationDefRecords } from "client/integrations";
 import { loadGrafanaStateForIntegration } from "state/integration/actions";
 
 import { InstallInstructions } from "./InstallInstructions";
+import { ReinstallInstructions } from "./ReinstallInstructions";
 import { UninstallInstructions } from "./UninstallInstructions";
 
 import { Box } from "client/components/Box";
@@ -62,17 +63,25 @@ export const K8sLogsShow = () => {
 
   const config = useMemo(() => {
     if (integration?.id) {
+      const data = integration?.data;
+      let logFormat;
+      if (data.format === "cri") {
+        logFormat = PromtailLogFormat.CRI;
+      } else if (data.format === "docker") {
+        logFormat = PromtailLogFormat.Docker;
+      } else {
+        throw new Error(`Unknown log format: ${data.format}`);
+      }
       return promtailYaml({
         clusterHost: window.location.host,
         tenantName: tenant.name,
         integrationId: integration?.id,
-        deployNamespace: integration?.data.deployNamespace,
-        // TODO: allow user to select dockerd or cri/containerd (different log formats)
-        logFormat: PromtailLogFormat.CRI
+        deployNamespace: data.deployNamespace,
+        logFormat,
       });
     }
     return "";
-  }, [tenant.name, integration?.id, integration?.data.deployNamespace]);
+  }, [tenant.name, integration?.id, integration?.data]);
 
   if (!integration) {
     // TODO: add loading or NotFound here
@@ -144,6 +153,11 @@ export const K8sLogsShow = () => {
         tenant={tenant}
         isDashboardInstalled={isDashboardInstalled}
         config={config}
+      />
+      <ReinstallInstructions
+        integration={integration}
+        tenant={tenant}
+        isDashboardInstalled={isDashboardInstalled}
       />
       <UninstallInstructions
         integration={integration}

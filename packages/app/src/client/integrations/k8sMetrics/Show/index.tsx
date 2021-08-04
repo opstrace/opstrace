@@ -32,6 +32,7 @@ import { integrationDefRecords } from "client/integrations";
 import { loadGrafanaStateForIntegration } from "state/integration/actions";
 
 import { InstallInstructions } from "./InstallInstructions";
+import { ReinstallInstructions } from "./ReinstallInstructions";
 import { UninstallInstructions } from "./UninstallInstructions";
 
 import { Box } from "client/components/Box";
@@ -139,6 +140,11 @@ export const K8sMetricsShow = () => {
         tenant={tenant}
         isDashboardInstalled={isDashboardInstalled}
         config={config}
+      />
+      <ReinstallInstructions
+        integration={integration}
+        tenant={tenant}
+        isDashboardInstalled={isDashboardInstalled}
       />
       <UninstallInstructions
         integration={integration}

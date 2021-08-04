@@ -16,7 +16,7 @@
 
 import { strict as assert } from "assert";
 
-import { ZonedDateTime } from "@js-joda/core";
+import { ZonedDateTime, ZoneId } from "@js-joda/core";
 import got from "got";
 
 import {
@@ -34,7 +34,8 @@ import {
   OPSTRACE_INSTANCE_DNS_NAME,
   LOKI_API_TLS_VERIFY,
   globalTestSuiteSetupOnce,
-  enrichHeadersWithAuthToken
+  enrichHeadersWithAuthToken,
+  timestampToRFC3339Nano
 } from "./testutils";
 
 import { sendLogsWithFluentbitContainer } from "./testutils/fbit";
@@ -150,7 +151,7 @@ suite("Loki API test suite", function () {
   });
 
   test("insert w/ cntnrzd FluentD(loki plugin), then query", async function () {
-    const sampleTimeRFC3339nano = "2010-10-10T10:10:01.123456789Z";
+    const now = timestampToRFC3339Nano(ZonedDateTime.now(ZoneId.UTC));
 
     // Objects in this array are examples for what the Docker JSON file logging
     // writes. In particylar, the `log` key and the `time` key are what said
@@ -159,11 +160,11 @@ suite("Loki API test suite", function () {
     const logfileJsonDocs = [
       {
         log: "sample message 1with\nnewline loki output plugin",
-        time: sampleTimeRFC3339nano
+        time: now
       },
       {
         log: "sample message 2with\nnewline loki output plugin",
-        time: sampleTimeRFC3339nano
+        time: now
       }
     ];
 
@@ -181,7 +182,7 @@ suite("Loki API test suite", function () {
     );
 
     // Query for the log records that were just inserted.
-    const ts = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const ts = ZonedDateTime.now();
     const searchStart = ts.minusHours(1);
     const searchEnd = ts.plusHours(1);
     const queryParams = {
@@ -252,9 +253,7 @@ suite("Loki API test suite", function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
 
-    // `sampletsns` is for example: "1286705401123456789"
-    const sampleTimeRFC3339nano = "2010-10-10T10:10:01.123456789Z";
-    const ts = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const ts = ZonedDateTime.now().minusMinutes(10);
     const sampletsns = timestampToNanoSinceEpoch(ts);
     const samplemsg = "aaa\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
@@ -313,6 +312,7 @@ suite("Loki API test suite", function () {
   test("insert log records with equivalent timestamps", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
+    const now = timestampToNanoSinceEpoch(ZonedDateTime.now());
 
     const payload = {
       streams: [
@@ -322,8 +322,8 @@ suite("Loki API test suite", function () {
             uniq: rndstring().slice(0, 5)
           },
           values: [
-            ["1286705401123456789", "aaa"],
-            ["1286705401123456789", "aaa"]
+            [now, "aaa"],
+            [now, "aaa"]
           ]
         }
       ]
@@ -352,8 +352,7 @@ suite("Loki API test suite", function () {
     const testname = testName(this);
 
     // Specify details of log record to be inserted.
-    const sampleTimeRFC3339nano = "2012-10-10T10:10:01.123456789Z";
-    const sampletimestamp = ZonedDateTime.parse(sampleTimeRFC3339nano);
+    const sampletimestamp = ZonedDateTime.now().minusMinutes(10);
     const samplemsg = "bbb\nwith newline";
     const searchcrit = rndstring().slice(0, 5);
     const samplelabels = {
@@ -423,7 +422,7 @@ suite("Loki API test suite", function () {
     }
 
     const searchcrit = rndstring(5);
-    const starttime = ZonedDateTime.parse("2015-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.now();
     const pushrequest = createDummyPushRequest(
       starttime,
       {
@@ -469,7 +468,7 @@ suite("Loki API test suite", function () {
   test("log push load with pbuf, multi stream fragments", async function () {
     // @ts-ignore: TS2532: Object is possibly 'undefined'.
     const testname = testName(this);
-    const starttime = ZonedDateTime.parse("2015-01-01T00:01:00.000000000Z");
+    const starttime = ZonedDateTime.now();
 
     // N_streams determines the number of HTTP POST requests made. Each
     // insertion request has in its body a protobuf message containing a push

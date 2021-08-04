@@ -74,8 +74,26 @@ test_tenant_authenticator_custom_keypair_flow() {
   # fail with a 401 response.
 }
 
+# test_info tests the "info" command.
+test_info() {
+  # Ensure info command returns exit code 0 and output has required keys.
+  local info_output=$(./build/bin/opstrace info ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME})
+  local exit_code=$?
+  if (( $exit_code )); then
+    echo "expected exit code 0, got $exit_code"
+    exit 1
+  fi
+  for key in "kubernetes_version" "controller_version" "installer_version"; do
+    if ! echo "$info_output" | grep -q "$key"; then
+      echo "key $key not found in info output"
+      exit 1
+    fi
+  done
+}
+
 test_list
 test_tenant_authenticator_custom_keypair_flow
+test_info
 
 # Confirm status command returns exit code 0
 ./build/bin/opstrace status ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} --instance-config ./ci/cluster-config.yaml

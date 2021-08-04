@@ -69,6 +69,27 @@ import TenantExplore from "client/views/explore";
 import CortexRingHealth from "./views/ring-health/cortex";
 import LokiRingHealth from "./views/ring-health/loki";
 
+const App = () => (
+  <StoreProvider>
+    <Theme.ThemeSwitcher>
+      <ErrorBoundary>
+        <WithSession>
+          <Services>
+            <Switch>
+              <Redirect exact key="/" from="/" to="/tenant/system" />
+              <Route key="*" path="*">
+                <AuthProtectedApplication />
+              </Route>
+            </Switch>
+          </Services>
+        </WithSession>
+      </ErrorBoundary>
+    </Theme.ThemeSwitcher>
+  </StoreProvider>
+);
+
+export default App;
+
 const useStyles = makeStyles(theme => ({
   content: {
     flexGrow: 1,
@@ -342,24 +363,3 @@ const AuthProtectedApplication = () => {
     </Box>
   );
 };
-
-const App = () => (
-  <StoreProvider>
-    <Theme.ThemeSwitcher>
-      <ErrorBoundary>
-        <Services>
-          <WithSession>
-            <Switch>
-              <Redirect exact key="/" from="/" to="/tenant/system" />
-              <Route key="*" path="*">
-                <AuthProtectedApplication />
-              </Route>
-            </Switch>
-          </WithSession>
-        </Services>
-      </ErrorBoundary>
-    </Theme.ThemeSwitcher>
-  </StoreProvider>
-);
-
-export default App;

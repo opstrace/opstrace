@@ -70,12 +70,12 @@ type ScrollableProps = {
   Wrapper?: React.ElementType;
   Scroller?: React.ElementType;
   children?: React.ReactNode;
-  onScroll?: (e: any) => void;
-  forwardedRef?: any;
+  onScroll?: (e: React.UIEvent) => void;
+  forwardedRef?: React.ForwardedRef<HTMLDivElement>;
   style?: React.CSSProperties;
 };
 
-export const Scrollable: React.FC<ScrollableProps> = ({
+export const Scrollable = ({
   TrackX = BaseTrackX,
   TrackY = BaseTrackY,
   ThumbX = BaseThumbX,
@@ -85,7 +85,7 @@ export const Scrollable: React.FC<ScrollableProps> = ({
   forwardedRef,
   onScroll,
   ...props
-}) => (
+}: ScrollableProps) => (
   <Container
     {...props}
     trackXProps={{
@@ -117,7 +117,7 @@ export const Scrollable: React.FC<ScrollableProps> = ({
       renderer: ({ elementRef, onScroll: rscOnScroll, ...itemProps }) => (
         <Scroller
           {...itemProps}
-          onScroll={(e: any) => {
+          onScroll={(e: React.UIEvent<HTMLDivElement, UIEvent>) => {
             if (onScroll) {
               onScroll(e);
             }
@@ -125,8 +125,11 @@ export const Scrollable: React.FC<ScrollableProps> = ({
               rscOnScroll(e);
             }
           }}
-          ref={(ref: any) => {
-            if (forwardedRef) {
+          ref={(ref: HTMLDivElement) => {
+            if (forwardedRef && typeof forwardedRef === "function") {
+              /* checking if forwardedRef is a functio for the unlikely case
+               * we're dealing with an Exotic component, which are not callable.
+               */
               forwardedRef(ref);
             }
             if (elementRef) {

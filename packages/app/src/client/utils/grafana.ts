@@ -106,13 +106,20 @@ export async function deleteFolder({
 
 type dashboardInfo = {
   // The '/grafana/...' path linking to the dashboard in Grafana.
-  path: String;
+  path: string;
 };
+
+type Dashboard = {
+  uid: string,
+  dashboard: object,
+  folderId: number,
+  overwrite: boolean
+}
 
 // see also: https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard
 export async function createDashboard(
   tenant: Tenant,
-  dashboard: object
+  dashboard: Dashboard
 ): Promise<dashboardInfo> {
   const responseData = await axios({
     method: "post",

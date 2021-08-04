@@ -28,7 +28,7 @@ import {
   SubscribeToIntegrationListSubscription,
   SubscribeToIntegrationListDocument
 } from "state/clients/graphqlClient";
-import subscriptionClient from "state/clients/graphqlClient/subscriptionClient";
+import getSubscriptionClient from "state/clients/graphqlClient/subscriptionClient";
 import * as actions from "../actions";
 import { SubscriptionID } from "../types";
 
@@ -116,7 +116,7 @@ export default function* integrationListSubscriptionManager() {
 export function integrationListSubscriptionEventChannel(tenantName: string) {
   return function (): EventChannel<Actions> {
     return eventChannel(emitter => {
-      const subscription = subscriptionClient
+      const subscription = getSubscriptionClient()
         .subscribe<SubscribeToIntegrationListSubscription>({
           query: SubscribeToIntegrationListDocument,
           variables: {

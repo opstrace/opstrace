@@ -151,7 +151,7 @@ func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Re
 	}
 
 	// Add the tenant in the request header and then forward the request to the backend.
-	r.Header.Add(trp.headerName, tenantName)
+	r.Header.Set(trp.headerName, tenantName)
 	trp.Revproxy.ServeHTTP(w, r)
 }
 

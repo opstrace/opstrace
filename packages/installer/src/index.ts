@@ -18,6 +18,8 @@ import fs from "fs";
 import { strict as assert } from "assert";
 
 import got, { Response as GotResponse, Options as GotOptions } from "got";
+import { ZonedDateTime, ZoneOffset, DateTimeFormatter } from "@js-joda/core";
+
 import { fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
 import createSagaMiddleware from "redux-saga";
@@ -26,6 +28,7 @@ import {
   log,
   sleep,
   SECOND,
+  BUILD_INFO,
   retryUponAnyError,
   Dict,
   checkIfDockerImageExistsOrErrorOut
@@ -178,7 +181,20 @@ function* createClusterCore() {
       ccfg.tenant_api_authenticator_pubkey_set_json,
     disable_data_api_authentication: ccfg.data_api_authentication_disabled,
     custom_dns_name: ccfg.custom_dns_name,
-    custom_auth0_client_id: ccfg.custom_auth0_client_id
+    custom_auth0_client_id: ccfg.custom_auth0_client_id,
+    cliMetadata: {
+      allCLIVersions: [
+        {
+          version: BUILD_INFO.VERSION_STRING,
+          // Current time in UTC using RFC3339 string representation (w/o
+          // fractional seconds, with Z tz specififer), e.g.
+          // '2021-07-28T15:43:07Z'
+          timestamp: ZonedDateTime.now(ZoneOffset.UTC).format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+          )
+        }
+      ]
+    }
   };
 
   // Fail fast if specified controller docker image cannot be found on docker

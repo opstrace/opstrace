@@ -45,6 +45,7 @@ import * as create from "./create";
 import * as destroy from "./destroy";
 import * as list from "./list";
 import * as status from "./status";
+import * as info from "./info";
 import * as upgrade from "./upgrade";
 import * as util from "./util";
 import * as ctoken from "./createTenantAuthToken";
@@ -84,58 +85,45 @@ async function main() {
   if (CLIARGS.instanceName !== undefined) {
     util.validateClusterNameOrDie(CLIARGS.instanceName);
   }
-
-  if (CLIARGS.command == "destroy") {
-    await destroy.destroy();
-    throw new ExitSuccess();
+  switch (CLIARGS.command) {
+    case "destroy":
+      await destroy.destroy();
+      break;
+    case "create":
+      await create.create();
+      break;
+    case "list":
+      await list.list();
+      break;
+    case "status":
+      await status.status();
+      break;
+    case "info":
+      await info.info();
+      break;
+    case "upgrade":
+      await upgrade.upgrade();
+      break;
+    case "ta-create-token":
+      await ctoken.create();
+      break;
+    case "ta-create-keypair":
+      await aks.createKeypair();
+      break;
+    case "ta-pubkeys-add":
+      await aks.addKeyToAuthenticatorConfig();
+      break;
+    case "ta-pubkeys-list":
+      await aks.listKeys();
+      break;
+    case "ta-pubkeys-remove":
+      await aks.removeKey();
+      break;
+    default:
+      throw Error("should never be here");
   }
 
-  if (CLIARGS.command == "create") {
-    await create.create();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "list") {
-    await list.list();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "status") {
-    await status.status();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "upgrade") {
-    await upgrade.upgrade();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "ta-create-token") {
-    await ctoken.create();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "ta-create-keypair") {
-    await aks.createKeypair();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "ta-pubkeys-add") {
-    await aks.addKeyToAuthenticatorConfig();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "ta-pubkeys-list") {
-    await aks.listKeys();
-    throw new ExitSuccess();
-  }
-
-  if (CLIARGS.command == "ta-pubkeys-remove") {
-    await aks.removeKey();
-    throw new ExitSuccess();
-  }
-
-  throw Error("should never be here");
+  throw new ExitSuccess();
 }
 
 /**
@@ -190,6 +178,10 @@ function parseCmdlineArgs() {
   const parserStatus = subparsers.add_parser("status", {
     help:
       "Check the status of an Opstrace instance (experimental, no promises)."
+  });
+  const parserInfo = subparsers.add_parser("info", {
+    help:
+      "Get infrastructure and Opstrace instance version information (experimental, no promises)."
   });
   const parserUpgrade = subparsers.add_parser("upgrade", {
     help: "Upgrade an existing Opstrace instance."
@@ -248,6 +240,7 @@ function parseCmdlineArgs() {
     parserDestroy,
     parserList,
     parserStatus,
+    parserInfo,
     parserUpgrade,
     mainParser
   ]) {
@@ -266,6 +259,7 @@ function parseCmdlineArgs() {
     parserDestroy,
     parserList,
     parserStatus,
+    parserInfo,
     parserUpgrade
   ]) {
     p.add_argument("cloudProvider", {
@@ -276,7 +270,13 @@ function parseCmdlineArgs() {
     });
   }
 
-  for (const p of [parserCreate, parserDestroy, parserStatus, parserUpgrade]) {
+  for (const p of [
+    parserCreate,
+    parserDestroy,
+    parserStatus,
+    parserInfo,
+    parserUpgrade
+  ]) {
     p.add_argument("instanceName", {
       help:
         "The Opstrace instance name ([a-z0-9-_], no more than 23 characters).",

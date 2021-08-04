@@ -140,7 +140,6 @@ export const UninstallInstructions = ({
                 <Box flexGrow={1} pb={2}>
                   Uninstall this Integration including Dashboards.
                   <br />
-                  <br />
                   <UninstallBtn
                     integration={integration}
                     tenant={tenant}
