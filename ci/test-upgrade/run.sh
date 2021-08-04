@@ -41,30 +41,16 @@ make ci-testupgrade-create-cluster
 
 # TODO(sreis): Add a new sanity check on the base cluster here before running
 # the upgrade. https://github.com/opstrace/opstrace/issues/591
-
 make ci-testupgrade-upgrade-cluster
 
 # Define default for OPSTRACE_INSTANCE_DNS_NAME.
 export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 
-# This step is required for the create_tenant_and_use_custom_authn_token in the
-# test-remote test suite. This step sets up the tenant keys in the opstrace
-# instance and exports the required env vars:
-# - TENANT_RND_NAME_FOR_TESTING_ADD_TENANT
-# - TENANT_RND_AUTHTOKEN
-#
-make ci-testupgrade-set-up-test-tenant
-export TENANT_RND_NAME_FOR_TESTING_ADD_TENANT=$(cat tenant-rnd-name)
-export TENANT_RND_AUTHTOKEN=$(cat tenant-rnd-auth-token-from-custom-keypair)
 
-#
 # TODO(sreis): remove this step when the OPSTRACE_CLI_VERSION_FROM is bumped
-#
 make ci-testupgrade-wait-for-loki-ring
 
-make test-remote
-make test-remote-ui
-make test-browser
+# This runs the bulk of the tests against the Opstrace instance, also invoked
+# from the upgrade test pipeline and therefore in its own file.
+source ci/test-core.sh
 
-export OPSTRACE_BUILD_DIR=$(pwd)
-source ci/invoke-looker.sh
