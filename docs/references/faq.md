@@ -22,20 +22,21 @@ One great advantage is that you may be able to reduce the footprint of your Prom
 
 Your Opstrace instance is best kept separate from the infrastructure its meant to monitor.
 Instead of requiring you provision a separate Kubernetes cluster just for Opstrace, we do that for you.
-However, we do have a Cortex Operator that you can use to run Cortex on your own Kubernetes cluster if you want to, but that will not incorporate any of the other Opstrace features.
-Check it out on GitHub here: [https://github.com/opstrace/cortex-operator](https://github.com/opstrace/cortex-operator).
-
-## Why do you have a non-standard deployment method?
-
-We are intentionally building a composed product that is operated in a uniform way, rather than relying on you to stitch together the individual components.
-Opstrace intends to replace the many in-house stacks that people at countless companies have already built.
-
-The way Opstrace works is that we talk directly to cloud provider APIs in order to install Opstrace in your account.
-Initially, we did look at Pulumi and Terraform, but the overhead of those general systems for such a purpose-built system such as Opstrace, did not seem like a good return on investment.
+The way Opstrace works is that it talk directly to cloud provider APIs in order to install Opstrace in your account.
+(Initially, we did look at Pulumi and Terraform, but at the time the overhead of those general systems for such a purpose-built system such as Opstrace did not seem like a good return on investment\*.)
+The three main points for why we do not currently support bringing your own Kubernetes cluster:
 
 1. Monitoring is special and needs to be isolated from your normally provisioned platform. You don't want to lose your monitoring when there is an outage of your other infrastructure components.
 2. We do not want to provide Helm charts, because even if you did create a dedicated Kubernetes cluster for Opstrace you then have to operate everything that is created.  We aim to provide a SaaS-like system that you do not have to operate by writing (open source) code of our own to manage the running system.
 3. Guarantees are hard to provide if we do not build and test the system end-to-end; by controlling the cloud resources directly ourselves we can minimize variables that may compromise this process.  In this way, we can provide high-confidence assertions about the behavior of our product.
+
+However, we do have a Cortex Operator that you can use to run Cortex on your own Kubernetes cluster if you want to, but that will not incorporate any of the other Opstrace features.
+Check it out on GitHub here: [https://github.com/opstrace/cortex-operator](https://github.com/opstrace/cortex-operator).
+
+We are intentionally building a composed product that is operated in a uniform way, rather than relying on you to stitch together the individual components.
+Opstrace intends to replace the many in-house stacks that people at countless companies have already built.
+
+\* *As with most decisions, we may reconsider this at some point in the future.*
 
 ## How do I use my own domain?
 
