@@ -559,7 +559,10 @@ rebuild-looker-container-image:
 
 #
 # Mounts the secrets in the container for gcloud to access the GCP credentials.
-#
+# Note that `OPSTRACE_KUBE_CONFIG_HOST` is not the global kubeconfig on the
+# host but more like the path to the kubeconfig directory specific to the CI
+# run on the host file system, i.e. in /tmp, and specifically in
+# OPSTRACE_BUILD_DIR.
 .PHONY: kubectl-cluster-info
 kubectl-cluster-info:
 	docker run --tty --interactive --rm \

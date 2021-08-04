@@ -25,8 +25,6 @@ case "${OPSTRACE_CLOUD_PROVIDER}" in
         ;;
 esac
 
-# Override the target kubeconfig directory to point to the checkout directory.
-export OPSTRACE_KUBE_CONFIG_HOST=$(pwd)/.kube
 
 teardown() {
     LAST_EXIT_CODE=$?
@@ -35,6 +33,10 @@ teardown() {
     make testupgrade-teardown && exit ${LAST_EXIT_CODE}
 }
 trap "teardown" EXIT
+
+# Makefile logic uses `OPSTRACE_KUBE_CONFIG_HOST` to mount kubectl config into
+# the test-remote container. This path is set on create-cluster.sh.
+export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
 
 
 make testupgrade-create-cluster
