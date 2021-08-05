@@ -44,9 +44,9 @@
       "GOPRIVATE": "github.com/opstrace"
     },
     "prettier.proseWrap": "never",
-    "typescript.tsdk": "opstrace/node_modules/typescript/lib",
+    "typescript.tsdk": "opstrace/node_modules/typescript/lib"
   },
- "launch": {
+  "launch": {
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
