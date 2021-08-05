@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-type Tab = {
+export type Tab = {
   title: string;
   path: string;
   endpoint: string;
@@ -70,6 +70,7 @@ const RingHealth = ({ tabs, title }: Props) => {
                   label={tab.title}
                   component={Link}
                   to={tab.path}
+                  data-test={`ringHealth/tab/${tab.title}`}
                 />
               ))}
             </MuiTabs>

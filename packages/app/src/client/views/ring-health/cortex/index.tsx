@@ -16,8 +16,9 @@
 
 import React from "react";
 import RingHealth from "../RingHealth";
+import { Tab } from "../RingHealth";
 
-export const TABS = [
+export const TABS: Tab[] = [
   {
     title: "Ingester",
     path: `/ingester`,

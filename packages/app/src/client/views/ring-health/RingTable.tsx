@@ -159,7 +159,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
             </TableRow>
           </TableHead>
           {shards && !isRefreshing ? (
-            <TableBody>
+            <TableBody data-test="ringTable/shards">
               {shards.map(shard => (
                 <RingShard
                   key={shard.id}
@@ -218,6 +218,7 @@ const RingShard = ({
       className={classNames({
         [classes.shardWarning]: shard.state !== "ACTIVE"
       })}
+      data-test={`ringTable/shards/row/${shard.state}`}
     >
       <TableCell component="th" scope="row">
         {shard.id}
