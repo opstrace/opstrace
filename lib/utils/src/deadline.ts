@@ -34,14 +34,16 @@ export function mtime(): bigint {
   // nanoseconds.
   return process.hrtime.bigint();
 }
-
+/**
+ * Number of seconds passed since reference point in time (in the past). `ref`
+ * must be a value previously obtained from `mtime()`. Number() converts a
+ * BigInt to a regular Number type, allowing for translating from nanoseconds
+ * to seconds with a simple division, retaining sub-second resolution. This
+ * assumes that the measured time duration does not grow beyond 104 days.
+ * @param ref: reference time
+ * @returns number of seconds passed since reference time.
+ */
 export function mtimeDiffSeconds(ref: bigint): number {
-  // number of seconds passed since reference point in time (in the past).
-  // `ref` must be a value previously obtained from `mtime()`. Number()
-  // converts a BigInt to a regular Number type, allowing for translating from
-  // nanoseconds to seconds with a simple division, retaining sub-second
-  // resolution. This assumes that the measured time duration does not grow
-  // beyond 104 days.
   return Number(process.hrtime.bigint() - ref) / 10 ** 9;
 }
 
