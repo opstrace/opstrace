@@ -1,4 +1,4 @@
-FROM fluent/fluentd:v1.12.0-debian-1.0
+FROM fluent/fluentd:v1.12.4-debian-1.0
 USER root
 
 # What follows is a combination of instructions for how to customize the
@@ -21,6 +21,7 @@ RUN buildDeps="sudo make gcc g++ libc-dev git" \
    && gem build fluent-plugin-grafana-loki.gemspec \
    && gem install --ignore-dependencies *gem \
    && gem install fluent-plugin-kubernetes_metadata_filter -v 2.6.0 \
+   && gem install fluent-plugin-parser-cri --no-document \
    && sudo gem sources --clear-all \
    && SUDO_FORCE_REMOVE=yes \
    apt-get purge -y --auto-remove \
