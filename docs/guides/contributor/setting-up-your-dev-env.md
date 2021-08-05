@@ -18,13 +18,40 @@ Overview of requirements:
 
 The sections below hopefully help with setting up some of these!
 
-## TypeScript editor: use VSCode with ESLint
+## TypeScript editor: use VSCode with ESLint and Prettier
 
 * Disable TSLint extension in VSCode.
-* Enable ESLint extension in VSCode.
-* Use the workspace settings as defined in the root of the repository.
-* For the ESLint extension, use the default settings, in particular `eslint.codeActionsOnSave.mode` set to `all`. That way, we align on formatting.
+* Use the workspace settings file `opstrace.code-workspace` at the root of the repository.
+* Install and enable these extensions in VSCode: ESLint and Prettier. These are also the 'recommended extensions' as part of our VSCode workspace configuration file.
 
+The Prettier extension output in VSCode should look like this (this is mainly about how it picks up its configuration):
+
+```text
+["INFO" - 11:19:26 AM] Extension Name: esbenp.prettier-vscode.
+["INFO" - 11:19:26 AM] Extension Version: 8.1.0.
+["INFO" - 11:19:48 AM] Formatting /home/jp/dev/opstrace/test/test-remote/test_alerts.ts
+["INFO" - 11:19:48 AM] Using config file at '/home/jp/dev/opstrace/.prettierrc'
+["INFO" - 11:19:48 AM] Using ignore file (if present) at /home/jp/dev/opstrace/.prettierignore
+["INFO" - 11:19:48 AM] File Info:
+{
+  "ignored": false,
+  "inferredParser": "typescript"
+}
+["INFO" - 11:19:48 AM] Detected local configuration (i.e. .prettierrc or .editorconfig), VS Code configuration will not be used
+["INFO" - 11:19:48 AM] Prettier Options:
+```
+
+The ESLint extension output in VSCode should look like this:
+
+```text
+[Info  - 11:19:26 AM] ESLint server is starting
+[Info  - 11:19:27 AM] ESLint server running in node v14.16.0
+[Info  - 11:19:27 AM] ESLint server is running.
+[Info  - 11:19:27 AM] ESLint library loaded from: /home/jp/dev/opstrace/node_modules/eslint/lib/api.js
+2021-08-05T09:19:28.078Z eslint:rules Loading rule 'constructor-super' (remaining=283)
+2021-08-05T09:19:28.079Z eslint:rules Loading rule 'for-direction' (remaining=282)
+...
+```
 
 ## Manage NodeJS with NVM
 
