@@ -563,16 +563,20 @@ rebuild-looker-container-image:
 # host but more like the path to the kubeconfig directory specific to the CI
 # run on the host file system, i.e. in /tmp, and specifically in
 # OPSTRACE_BUILD_DIR.
+# Mount build dir at /build and set this as HOME so that gcloud authentication
+# state is local to the build dir and is picked up in the container.
 .PHONY: kubectl-cluster-info
 kubectl-cluster-info:
 	docker run --tty --interactive --rm \
 		-v ${OPSTRACE_KUBECFG_FILEPATH_ONHOST}:/kubeconfig:ro \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets:ro \
+		-v ${OPSTRACE_BUILD_DIR}:/build:ro \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
 		-e KUBECONFIG=/kubeconfig \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
+		-e HOME=/build \
 		-e GCLOUD_CLI_REGION \
 		-e GCLOUD_CLI_ZONE \
 		-e GOOGLE_APPLICATION_CREDENTIALS \
