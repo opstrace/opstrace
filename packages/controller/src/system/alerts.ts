@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2020-2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -883,7 +883,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeMemUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr: '(\ninstance:node_memory_utilisation:ratio{job="node-exporter"}\n/ ignoring (instance) group_left\n count without (instance) (instance:node_memory_utilisation:ratio{job="node-exporter"})\n) > .5',
+        expr: '(\ninstance:node_memory_utilisation:ratio{job="node-exporter"}\n/ ignoring (instance) group_left\n count without (instance) (instance:node_memory_utilisation:ratio{job="node-exporter"})\n) > 0.65',
         for: "10m",
         labels: {
           severity: "warn"
@@ -943,6 +943,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
       }
     ]
   },
+
   {
     name: "cortex_alerts",
     rules: [
@@ -950,23 +951,9 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexIngesterUnhealthy",
         annotations: {
           message:
-            "{{ $labels.job }} reports more than one unhealthy ingester.",
-          runbook_url: runbookUrl + "/cortex.md#CortexIngesterUnhealthy"
+            'Cortex cluster {{ $labels.cluster }}/{{ $labels.namespace }} has {{ printf "%f" $value }} unhealthy ingester(s).'
         },
-        expr: 'min(cortex_ring_members{state="Unhealthy", job=~"[a-z].+distributor"}) by (namespace, job) > 0\n',
-        for: "15m",
-        labels: {
-          severity: "critical"
-        }
-      },
-      {
-        alert: "CortexFlushStuck",
-        annotations: {
-          message:
-            "{{ $labels.job }}/{{ $labels.instance }} is stuck flushing chunks.",
-          runbook_url: runbookUrl + "/cortex.md#CortexFlushStuck"
-        },
-        expr: "(cortex_ingester_memory_chunks / cortex_ingester_memory_series) > 1.3\n",
+        expr: 'min by (cluster, namespace) (cortex_ring_members{state="Unhealthy", name="ingester"}) > 0\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -976,23 +963,21 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexRequestErrors",
         annotations: {
           message:
-            '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexRequestErrors"
+            'The route {{ $labels.route }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% errors.\n'
         },
-        expr: '100 * sum(rate(cortex_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(cortex_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 1\n',
+        expr: '100 * sum by (cluster, namespace, job, route) (rate(cortex_request_duration_seconds_count{status_code=~"5..",route!~"ready"}[1m]))\n  /\nsum by (cluster, namespace, job, route) (rate(cortex_request_duration_seconds_count{route!~"ready"}[1m]))\n  > 1\n',
         for: "15m",
         labels: {
-          severity: "warning"
+          severity: "critical"
         }
       },
       {
         alert: "CortexRequestLatency",
         annotations: {
           message:
-            '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexRequestLatency"
+            '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.\n'
         },
-        expr: 'namespace_job_route:cortex_request_duration_seconds:99quantile{route!~"metrics|/frontend.Frontend/Process"}\n   >\n2.5\n',
+        expr: 'cluster_namespace_job_route:cortex_request_duration_seconds:99quantile{route!~"metrics|/frontend.Frontend/Process|ready|/schedulerpb.SchedulerForFrontend/FrontendLoop|/schedulerpb.SchedulerForQuerier/QuerierLoop"}\n   >\n2.5\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -1002,10 +987,9 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexTableSyncFailure",
         annotations: {
           message:
-            '{{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% errors syncing tables.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexTableSyncFailure"
+            '{{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% errors syncing tables.\n'
         },
-        expr: '100 * rate(cortex_dynamo_sync_tables_seconds_count{status_code!~"2.."}[15m])\n  /\nrate(cortex_dynamo_sync_tables_seconds_count[15m])\n  > 10\n',
+        expr: '100 * rate(cortex_table_manager_sync_duration_seconds_count{status_code!~"2.."}[15m])\n  /\nrate(cortex_table_manager_sync_duration_seconds_count[15m])\n  > 10\n',
         for: "30m",
         labels: {
           severity: "critical"
@@ -1015,22 +999,32 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexQueriesIncorrect",
         annotations: {
           message:
-            '{{ $labels.job }} is reporting incorrect results for {{ printf "%.2f" $value }}% of queries.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexQueriesIncorrect"
+            'The Cortex cluster {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% incorrect query results.\n'
         },
-        expr: '100 * sum by (job, namespace) (rate(test_exporter_test_case_result_total{result="fail"}[5m]))\n  /\nsum by (job, namespace) (rate(test_exporter_test_case_result_total[5m])) > 1\n',
+        expr: '100 * sum by (cluster, namespace) (rate(test_exporter_test_case_result_total{result="fail"}[5m]))\n  /\nsum by (cluster, namespace) (rate(test_exporter_test_case_result_total[5m])) > 1\n',
         for: "15m",
         labels: {
           severity: "warning"
         }
       },
       {
-        alert: "CortexQuerierCapacityFull",
+        alert: "CortexInconsistentRuntimeConfig",
         annotations: {
-          message: "{{ $labels.job }} is at capacity processing queries.\n",
-          runbook_url: runbookUrl + "/cortex.md#CortexQuerierCapacityFull"
+          message:
+            "An inconsistent runtime config file is used across cluster {{ $labels.cluster }}/{{ $labels.namespace }}.\n"
         },
-        expr: 'prometheus_engine_queries_concurrent_max{job=~".+.querier"} - prometheus_engine_queries{job=~".+.querier"} == 0\n',
+        expr: "count(count by(cluster, namespace, job, sha256) (cortex_runtime_config_hash)) without(sha256) > 1\n",
+        for: "1h",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexBadRuntimeConfig",
+        annotations: {
+          message: "{{ $labels.job }} failed to reload runtime config.\n"
+        },
+        expr: "# The metric value is reset to 0 on error while reloading the config at runtime.\ncortex_runtime_config_last_reload_successful == 0\n",
         for: "5m",
         labels: {
           severity: "critical"
@@ -1039,24 +1033,35 @@ export default (runbookUrl: string, grafanaUrl: string) => [
       {
         alert: "CortexFrontendQueriesStuck",
         annotations: {
-          message: "{{ $labels.job }} has {{ $value }} queued up queries.\n",
-          runbook_url: runbookUrl + "/cortex.md#CortexFrontendQueriesStuck"
+          message:
+            "There are {{ $value }} queued up queries in {{ $labels.cluster }}/{{ $labels.namespace }} query-frontend.\n"
         },
-        expr: 'sum by (namespace) (cortex_query_frontend_queue_length{job=~".+.query-frontend"}) > 1\n',
+        expr: "sum by (cluster, namespace) (cortex_query_frontend_queue_length) > 1\n",
         for: "5m",
         labels: {
           severity: "critical"
         }
       },
       {
-        alert: "CortexCacheRequestErrors",
+        alert: "CortexSchedulerQueriesStuck",
         annotations: {
           message:
-            '{{ $labels.job }} cache {{ $labels.method }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexCacheRequestErrors"
+            "There are {{ $value }} queued up queries in {{ $labels.cluster }}/{{ $labels.namespace }} query-scheduler.\n"
         },
-        expr: '100 * sum(rate(cortex_cache_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, method)\n  /\nsum(rate(cortex_cache_request_duration_seconds_count[1m])) by (namespace, job, method)\n  > 1\n',
-        for: "15m",
+        expr: "sum by (cluster, namespace) (cortex_query_scheduler_queue_length) > 1\n",
+        for: "5m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexMemcachedRequestErrors",
+        annotations: {
+          message:
+            'Memcached {{ $labels.name }} used by Cortex {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% errors for {{ $labels.operation }} operation.\n'
+        },
+        expr: "(\n  sum by(cluster, namespace, name, operation) (rate(thanos_memcached_operation_failures_total[1m])) /\n  sum by(cluster, namespace, name, operation) (rate(thanos_memcached_operations_total[1m]))\n) * 100 > 5\n",
+        for: "5m",
         labels: {
           severity: "warning"
         }
@@ -1064,19 +1069,18 @@ export default (runbookUrl: string, grafanaUrl: string) => [
       {
         alert: "CortexIngesterRestarts",
         annotations: {
-          message: "{{ $labels.namespace }}/{{ $labels.pod }} is restarting",
-          runbook_url: runbookUrl + "/cortex.md#CortexIngesterRestarts"
+          message:
+            '{{ $labels.job }}/{{ $labels.instance }} has restarted {{ printf "%.2f" $value }} times in the last 30 mins.'
         },
-        expr: 'rate(kube_pod_container_status_restarts_total{container="ingester"}[30m]) > 0\n',
+        expr: 'changes(process_start_time_seconds{job=~".+(cortex|ingester.*)"}[30m]) >= 2\n',
         labels: {
-          severity: "critical"
+          severity: "warning"
         }
       },
       {
         alert: "CortexTransferFailed",
         annotations: {
-          message: "{{ $labels.namespace }}/{{ $labels.pod }} transfer failed.",
-          runbook_url: runbookUrl + "/cortex.md#CortexTransferFailed"
+          message: "{{ $labels.job }}/{{ $labels.instance }} transfer failed."
         },
         expr: 'max_over_time(cortex_shutdown_duration_seconds_count{op="transfer",status!="success"}[15m])\n',
         for: "5m",
@@ -1088,292 +1092,134 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexOldChunkInMemory",
         annotations: {
           message:
-            "{{ $labels.namespace }}/{{ $labels.pod }} has very old unflushed chunk in memory.\n",
-          runbook_url: runbookUrl + "/cortex.md#CortexOldChunkInMemory"
+            "{{ $labels.job }}/{{ $labels.instance }} has very old unflushed chunk in memory.\n"
         },
-        // TODO opstrace-prelaunch/issues/355
-        expr: "(time() - cortex_oldest_unflushed_chunk_timestamp_seconds > 50400) and cortex_oldest_unflushed_chunk_timestamp_seconds > 0\n",
+        expr: "(time() - cortex_oldest_unflushed_chunk_timestamp_seconds > 36000)\n  and\n(cortex_oldest_unflushed_chunk_timestamp_seconds > 0)\n",
         for: "5m",
         labels: {
           severity: "warning"
         }
-      }
-    ]
-  },
-  {
-    name: "cortex_slo_alerts",
-    rules: [
+      },
       {
-        alert: "CortexWriteErrorBudgetBurn",
+        alert: "CortexMemoryMapAreasTooHigh",
         annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 1h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
+          message:
+            "{{ $labels.job }}/{{ $labels.instance }} has a number of mmap-ed areas close to the limit."
         },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1h\n  > 0.1 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate5m\n  > 0.1 * 14.400000\n  )\n)\n",
-        for: "2m",
+        expr: 'process_memory_map_areas{job=~".+(cortex|ingester.*|store-gateway)"} / process_memory_map_areas_limit{job=~".+(cortex|ingester.*|store-gateway)"} > 0.8\n',
+        for: "5m",
         labels: {
-          period: "1h",
           severity: "critical"
-        }
-      },
-      {
-        alert: "CortexWriteErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 6h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate30m\n  > 0.1 * 6.000000\n  )\n)\n",
-        for: "15m",
-        labels: {
-          period: "6h",
-          severity: "critical"
-        }
-      },
-      {
-        alert: "CortexWriteErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 1d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1d\n  > 0.1 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate2h\n  > 0.1 * 3.000000\n  )\n)\n",
-        for: "1h",
-        labels: {
-          period: "1d",
-          severity: "warning"
-        }
-      },
-      {
-        alert: "CortexWriteErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 3d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate3d\n  > 0.1 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 1.000000\n  )\n)\n",
-        for: "3h",
-        labels: {
-          period: "3d",
-          severity: "warning"
-        }
-      },
-      {
-        alert: "CortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 1h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1h\n  > 0.5 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate5m\n  > 0.5 * 14.400000\n  )\n)\n",
-        for: "2m",
-        labels: {
-          period: "1h",
-          severity: "critical"
-        }
-      },
-      {
-        alert: "CortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 6h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate30m\n  > 0.5 * 6.000000\n  )\n)\n",
-        for: "15m",
-        labels: {
-          period: "6h",
-          severity: "critical"
-        }
-      },
-      {
-        alert: "CortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 1d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1d\n  > 0.5 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate2h\n  > 0.5 * 3.000000\n  )\n)\n",
-        for: "1h",
-        labels: {
-          period: "1d",
-          severity: "warning"
-        }
-      },
-      {
-        alert: "CortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 3d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate3d\n  > 0.5 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 1.000000\n  )\n)\n",
-        for: "3h",
-        labels: {
-          period: "3d",
-          severity: "warning"
-        }
-      },
-      {
-        alert: "LegacyCortexWriteErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 1h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url:
-            runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1h\n  > 0.1 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate5m\n  > 0.1 * 14.400000\n  )\n)\n",
-        for: "2m",
-        labels: {
-          period: "1h",
-          severity: "critical"
-        }
-      },
-      {
-        alert: "LegacyCortexWriteErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 6h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url:
-            runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate30m\n  > 0.1 * 6.000000\n  )\n)\n",
-        for: "15m",
-        labels: {
-          period: "6h",
-          severity: "critical"
-        }
-      },
-      {
-        alert: "LegacyCortexWriteErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 1d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url:
-            runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1d\n  > 0.1 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate2h\n  > 0.1 * 3.000000\n  )\n)\n",
-        for: "1h",
-        labels: {
-          period: "1d",
-          severity: "warning"
-        }
-      },
-      {
-        alert: "LegacyCortexWriteErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s write requests in the last 3d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its write error budget too fast.",
-          runbook_url:
-            runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate3d\n  > 0.1 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 1.000000\n  )\n)\n",
-        for: "3h",
-        labels: {
-          period: "3d",
-          severity: "warning"
-        }
-      },
-      {
-        alert: "LegacyCortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 1h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1h\n  > 0.5 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate5m\n  > 0.5 * 14.400000\n  )\n)\n",
-        for: "2m",
-        labels: {
-          period: "1h",
-          severity: "critical"
-        }
-      },
-      {
-        alert: "LegacyCortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 6h are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate30m\n  > 0.5 * 6.000000\n  )\n)\n",
-        for: "15m",
-        labels: {
-          period: "6h",
-          severity: "critical"
-        }
-      },
-      {
-        alert: "LegacyCortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 1d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1d\n  > 0.5 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate2h\n  > 0.5 * 3.000000\n  )\n)\n",
-        for: "1h",
-        labels: {
-          period: "1d",
-          severity: "warning"
-        }
-      },
-      {
-        alert: "LegacyCortexReadErrorBudgetBurn",
-        annotations: {
-          description:
-            "{{ $value | printf `%.2f` }}% of {{ $labels.job }}'s read requests in the last 3d are failing or too slow to meet the SLO.",
-          summary: "Cortex burns its read error budget too fast.",
-          runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
-        },
-        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate3d\n  > 0.5 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 1.000000\n  )\n)\n",
-        for: "3h",
-        labels: {
-          period: "3d",
-          severity: "warning"
         }
       }
     ]
   },
   {
-    name: "cortex_gw_alerts",
+    name: "cortex_ingester_instance_alerts",
     rules: [
       {
-        alert: "CortexGWRequestErrors",
+        alert: "CortexIngesterReachingSeriesLimit",
         annotations: {
           message:
-            '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexGWRequestErrors"
+            "Ingester {{ $labels.job }}/{{ $labels.instance }} has reached {{ $value | humanizePercentage }} of its series limit.\n"
         },
-        expr: '100 * sum(rate(cortex_gw_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(cortex_gw_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 0.1\n',
-        for: "15m",
+        expr: '(\n    (cortex_ingester_memory_series / ignoring(limit) cortex_ingester_instance_limits{limit="max_series"})\n    and ignoring (limit)\n    (cortex_ingester_instance_limits{limit="max_series"} > 0)\n) > 0.7\n',
+        for: "3h",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "CortexIngesterReachingSeriesLimit",
+        annotations: {
+          message:
+            "Ingester {{ $labels.job }}/{{ $labels.instance }} has reached {{ $value | humanizePercentage }} of its series limit.\n"
+        },
+        expr: '(\n    (cortex_ingester_memory_series / ignoring(limit) cortex_ingester_instance_limits{limit="max_series"})\n    and ignoring (limit)\n    (cortex_ingester_instance_limits{limit="max_series"} > 0)\n) > 0.85\n',
+        for: "5m",
         labels: {
           severity: "critical"
         }
       },
       {
-        alert: "CortexGWRequestLatency",
+        alert: "CortexIngesterReachingTenantsLimit",
         annotations: {
           message:
-            '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexGWRequestLatency"
+            "Ingester {{ $labels.job }}/{{ $labels.instance }} has reached {{ $value | humanizePercentage }} of its tenant limit.\n"
         },
-        expr: 'namespace_job_route:cortex_gw_request_duration_seconds:99quantile{route!="metrics"}\n  >\n2.5\n',
-        for: "15m",
+        expr: '(\n    (cortex_ingester_memory_users / ignoring(limit) cortex_ingester_instance_limits{limit="max_tenants"})\n    and ignoring (limit)\n    (cortex_ingester_instance_limits{limit="max_tenants"} > 0)\n) > 0.7\n',
+        for: "5m",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "CortexIngesterReachingTenantsLimit",
+        annotations: {
+          message:
+            "Ingester {{ $labels.job }}/{{ $labels.instance }} has reached {{ $value | humanizePercentage }} of its tenant limit.\n"
+        },
+        expr: '(\n    (cortex_ingester_memory_users / ignoring(limit) cortex_ingester_instance_limits{limit="max_tenants"})\n    and ignoring (limit)\n    (cortex_ingester_instance_limits{limit="max_tenants"} > 0)\n) > 0.8\n',
+        for: "5m",
+        labels: {
+          severity: "critical"
+        }
+      }
+    ]
+  },
+  {
+    name: "cortex_wal_alerts",
+    rules: [
+      {
+        alert: "CortexWALCorruption",
+        annotations: {
+          message:
+            "{{ $labels.job }}/{{ $labels.instance }} has a corrupted WAL or checkpoint.\n"
+        },
+        expr: "increase(cortex_ingester_wal_corruptions_total[5m]) > 0\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexCheckpointCreationFailed",
+        annotations: {
+          message:
+            "{{ $labels.job }}/{{ $labels.instance }} failed to create checkpoint.\n"
+        },
+        expr: "increase(cortex_ingester_checkpoint_creations_failed_total[10m]) > 0\n",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "CortexCheckpointCreationFailed",
+        annotations: {
+          message:
+            "{{ $labels.job }}/{{ $labels.instance }} is failing to create checkpoint.\n"
+        },
+        expr: "increase(cortex_ingester_checkpoint_creations_failed_total[1h]) > 1\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexCheckpointDeletionFailed",
+        annotations: {
+          message:
+            "{{ $labels.job }}/{{ $labels.instance }} failed to delete checkpoint.\n"
+        },
+        expr: "increase(cortex_ingester_checkpoint_deletions_failed_total[10m]) > 0\n",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "CortexCheckpointDeletionFailed",
+        annotations: {
+          message: "{{ $labels.instance }} is failing to delete checkpoint.\n"
+        },
+        expr: "increase(cortex_ingester_checkpoint_deletions_failed_total[2h]) > 1\n",
         labels: {
           severity: "critical"
         }
@@ -1387,11 +1233,9 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexProvisioningMemcachedTooSmall",
         annotations: {
           message:
-            'Chunk memcached cluster for namespace {{ $labels.namespace }} are too small, should be at least {{ printf "%.2f" $value }}GB.\n',
-          runbook_url:
-            runbookUrl + "/cortex.md#CortexProvisioningMemcachedTooSmall"
+            'Chunk memcached cluster in {{ $labels.cluster }}/{{ $labels.namespace }} is too small, should be at least {{ printf "%.2f" $value }}GB.\n'
         },
-        expr: '(\n  4 *\n  sum by(namespace) (cortex_ingester_memory_series{job=~".+.ingester"} * cortex_ingester_chunk_size_bytes_sum{job=~".+.ingester"} / cortex_ingester_chunk_size_bytes_count{job=~".+.ingester"})\n   / 1e9\n)\n  >\n(\n  sum by (namespace) (memcached_limit_bytes{job=~".+.memcached"}) / 1e9\n)\n',
+        expr: '(\n  4 *\n  sum by (cluster, namespace) (cortex_ingester_memory_series * cortex_ingester_chunk_size_bytes_sum / cortex_ingester_chunk_size_bytes_count)\n   / 1e9\n)\n  >\n(\n  sum by (cluster, namespace) (memcached_limit_bytes{job=~".+/memcached"}) / 1e9\n)\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -1401,12 +1245,10 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexProvisioningTooManyActiveSeries",
         annotations: {
           message:
-            "Too many active series for ingesters in namespace {{ $labels.namespace }}, add more ingesters.\n",
-          runbook_url:
-            runbookUrl + "/cortex.md#CortexProvisioningTooManyActiveSeries"
+            "The number of in-memory series per ingester in {{ $labels.cluster }}/{{ $labels.namespace }} is too high.\n"
         },
-        expr: 'avg by (namespace) (cortex_ingester_memory_series{job=~".+.ingester"}) > 1.1e6\n  and\nsum by (namespace) (rate(cortex_ingester_received_chunks{job=~".+.ingester"}[1h])) == 0\n',
-        for: "1h",
+        expr: "avg by (cluster, namespace) (cortex_ingester_memory_series) > 1.6e6\n",
+        for: "2h",
         labels: {
           severity: "warning"
         }
@@ -1415,41 +1257,33 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexProvisioningTooManyWrites",
         annotations: {
           message:
-            "Too much write QPS for ingesters in namespace {{ $labels.namespace }}, add more ingesters.\n",
-          runbook_url: runbookUrl + "/cortex.md#CortexProvisioningTooManyWrites"
+            "Ingesters in {{ $labels.cluster }}/{{ $labels.namespace }} ingest too many samples per second.\n"
         },
-        expr: "avg by (namespace) (rate(cortex_ingester_ingested_samples_total[1m])) > 80e3\n",
+        expr: "avg by (cluster, namespace) (rate(cortex_ingester_ingested_samples_total[1m])) > 80e3\n",
         for: "15m",
         labels: {
           severity: "warning"
         }
       },
       {
-        alert: "CortexProvisioningTooMuchMemory",
+        alert: "CortexAllocatingTooMuchMemory",
         annotations: {
           message:
-            "Too much memory being used by ingesters in namespace {{ $labels.namespace }}, add more ingesters.\n",
-          runbook_url: runbookUrl + "/cortex.md#CortexProvisioningTooMuchMemory"
+            "Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.\n"
         },
-        expr: 'avg by (namespace) (container_memory_working_set_bytes{container_name="ingester"} / container_spec_memory_limit_bytes{container_name="ingester"}) > 0.7\n',
+        expr: '(\n  container_memory_working_set_bytes{container="ingester"}\n    /\n  container_spec_memory_limit_bytes{container="ingester"}\n) > .5\n',
         for: "15m",
         labels: {
-          severity: "critical"
+          severity: "warning"
         }
-      }
-    ]
-  },
-  {
-    name: "memcached",
-    rules: [
+      },
       {
-        alert: "MemcachedDown",
+        alert: "CortexAllocatingTooMuchMemory",
         annotations: {
           message:
-            "Memcached Instance {{ $labels.instance }} is down for more than 15mins.\n",
-          runbook_url: runbookUrl + "/cortex.md#MemcachedDown"
+            "Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.\n"
         },
-        expr: "memcached_up == 0\n",
+        expr: '(\n  container_memory_working_set_bytes{container="ingester"}\n    /\n  container_spec_memory_limit_bytes{container="ingester"}\n) > 0.8\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -1461,13 +1295,24 @@ export default (runbookUrl: string, grafanaUrl: string) => [
     name: "ruler_alerts",
     rules: [
       {
-        alert: "CortexRulerFailedEvaluations",
+        alert: "CortexRulerTooManyFailedPushes",
         annotations: {
           message:
-            '{{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexRulerFailedEvaluations"
+            'Cortex Ruler {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% write (push) errors.\n'
         },
-        expr: "sum(rate(cortex_prometheus_rule_evaluation_failures_total[1m])) by (namespace, job)\n  /\nsum(rate(cortex_prometheus_rule_evaluation_total[1m])) by (namespace, job)\n  > 0.01\n",
+        expr: "100 * (\nsum by (cluster, namespace, instance) (rate(cortex_ruler_write_requests_failed_total[1m]))\n  /\nsum by (cluster, namespace, instance) (rate(cortex_ruler_write_requests_total[1m]))\n) > 1\n",
+        for: "5m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexRulerTooManyFailedQueries",
+        annotations: {
+          message:
+            'Cortex Ruler {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% errors while evaluating rules.\n'
+        },
+        expr: "100 * (\nsum by (cluster, namespace, instance) (rate(cortex_ruler_queries_failed_total[1m]))\n  /\nsum by (cluster, namespace, instance) (rate(cortex_ruler_queries_total[1m]))\n) > 1\n",
         for: "5m",
         labels: {
           severity: "warning"
@@ -1477,10 +1322,38 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         alert: "CortexRulerMissedEvaluations",
         annotations: {
           message:
-            '{{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% missed iterations.\n',
-          runbook_url: runbookUrl + "/cortex.md#CortexRulerMissedEvaluations"
+            'Cortex Ruler {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% missed iterations for the rule group {{ $labels.rule_group }}.\n'
         },
-        expr: "sum(rate(cortex_prometheus_rule_group_missed_iterations_total[1m])) by (namespace, job)\n  /\nsum(rate(cortex_prometheus_rule_group_iterations_total[1m])) by (namespace, job)\n  > 0.01\n",
+        expr: "sum by (cluster, namespace, instance, rule_group) (rate(cortex_prometheus_rule_group_iterations_missed_total[1m]))\n  /\nsum by (cluster, namespace, instance, rule_group) (rate(cortex_prometheus_rule_group_iterations_total[1m]))\n  > 0.01\n",
+        for: "5m",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "CortexRulerFailedRingCheck",
+        annotations: {
+          message:
+            "Cortex Rulers in {{ $labels.cluster }}/{{ $labels.namespace }} are experiencing errors when checking the ring for rule group ownership.\n"
+        },
+        expr: "sum by (cluster, namespace, job) (rate(cortex_ruler_ring_check_errors_total[1m]))\n   > 0\n",
+        for: "5m",
+        labels: {
+          severity: "critical"
+        }
+      }
+    ]
+  },
+  {
+    name: "gossip_alerts",
+    rules: [
+      {
+        alert: "CortexGossipMembersMismatch",
+        annotations: {
+          message:
+            "Cortex instance {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} sees incorrect number of gossip members."
+        },
+        expr: 'memberlist_client_cluster_members_count\n  != on (cluster, namespace) group_left\nsum by (cluster, namespace) (up{job=~".+/(admin-api|compactor|store-gateway|distributor|ingester.*|querier|cortex|ruler)"})\n',
         for: "5m",
         labels: {
           severity: "warning"
@@ -1488,6 +1361,291 @@ export default (runbookUrl: string, grafanaUrl: string) => [
       }
     ]
   },
+  {
+    name: "etcd_alerts",
+    rules: [
+      {
+        alert: "EtcdAllocatingTooMuchMemory",
+        annotations: {
+          message:
+            "Too much memory being used by {{ $labels.namespace }}/{{ $labels.pod }} - bump memory limit.\n"
+        },
+        expr: '(\n  container_memory_working_set_bytes{container="etcd"}\n    /\n  container_spec_memory_limit_bytes{container="etcd"}\n) > 0.65\n',
+        for: "15m",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "EtcdAllocatingTooMuchMemory",
+        annotations: {
+          message:
+            "Too much memory being used by {{ $labels.namespace }}/{{ $labels.pod }} - bump memory limit.\n"
+        },
+        expr: '(\n  container_memory_working_set_bytes{container="etcd"}\n    /\n  container_spec_memory_limit_bytes{container="etcd"}\n) > 0.8\n',
+        for: "15m",
+        labels: {
+          severity: "critical"
+        }
+      }
+    ]
+  },
+  {
+    name: "cortex_blocks_alerts",
+    rules: [
+      {
+        alert: "CortexIngesterHasNotShippedBlocks",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not shipped any block in the last 4 hours."
+        },
+        expr: '(min by(cluster, namespace, instance) (time() - thanos_objstore_bucket_last_successful_upload_time{job=~".+/ingester.*"}) > 60 * 60 * 4)\nand\n(max by(cluster, namespace, instance) (thanos_objstore_bucket_last_successful_upload_time{job=~".+/ingester.*"}) > 0)\nand\n# Only if the ingester has ingested samples over the last 4h.\n(max by(cluster, namespace, instance) (rate(cortex_ingester_ingested_samples_total[4h])) > 0)\nand\n# Only if the ingester was ingesting samples 4h ago. This protects from the case the ingester instance\n# had ingested samples in the past, then no traffic was received for a long period and then it starts\n# receiving samples again. Without this check, the alert would fire as soon as it gets back receiving\n# samples, while the a block shipping is expected within the next 4h.\n(max by(cluster, namespace, instance) (rate(cortex_ingester_ingested_samples_total[1h] offset 4h)) > 0)\n',
+        for: "15m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterHasNotShippedBlocksSinceStart",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not shipped any block in the last 4 hours."
+        },
+        expr: '(max by(cluster, namespace, instance) (thanos_objstore_bucket_last_successful_upload_time{job=~".+/ingester.*"}) == 0)\nand\n(max by(cluster, namespace, instance) (rate(cortex_ingester_ingested_samples_total[4h])) > 0)\n',
+        for: "4h",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterHasUnshippedBlocks",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has compacted a block {{ $value | humanizeDuration }} ago but it hasn't been successfully uploaded to the storage yet."
+        },
+        expr: "(time() - cortex_ingester_oldest_unshipped_block_timestamp_seconds > 3600)\nand\n(cortex_ingester_oldest_unshipped_block_timestamp_seconds > 0)\n",
+        for: "15m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterTSDBHeadCompactionFailed",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to compact TSDB head."
+        },
+        expr: "rate(cortex_ingester_tsdb_compactions_failed_total[5m]) > 0\n",
+        for: "15m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterTSDBHeadTruncationFailed",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to truncate TSDB head."
+        },
+        expr: "rate(cortex_ingester_tsdb_head_truncations_failed_total[5m]) > 0\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterTSDBCheckpointCreationFailed",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to create TSDB checkpoint."
+        },
+        expr: "rate(cortex_ingester_tsdb_checkpoint_creations_failed_total[5m]) > 0\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterTSDBCheckpointDeletionFailed",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to delete TSDB checkpoint."
+        },
+        expr: "rate(cortex_ingester_tsdb_checkpoint_deletions_failed_total[5m]) > 0\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterTSDBWALTruncationFailed",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to truncate TSDB WAL."
+        },
+        expr: "rate(cortex_ingester_tsdb_wal_truncations_failed_total[5m]) > 0\n",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "CortexIngesterTSDBWALCorrupted",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} got a corrupted TSDB WAL."
+        },
+        expr: "rate(cortex_ingester_tsdb_wal_corruptions_total[5m]) > 0\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexIngesterTSDBWALWritesFailed",
+        annotations: {
+          message:
+            "Cortex Ingester {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to write to TSDB WAL."
+        },
+        expr: "rate(cortex_ingester_tsdb_wal_writes_failed_total[1m]) > 0\n",
+        for: "3m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexQuerierHasNotScanTheBucket",
+        annotations: {
+          message:
+            "Cortex Querier {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not successfully scanned the bucket since {{ $value | humanizeDuration }}."
+        },
+        expr: "(time() - cortex_querier_blocks_last_successful_scan_timestamp_seconds > 60 * 30)\nand\ncortex_querier_blocks_last_successful_scan_timestamp_seconds > 0\n",
+        for: "5m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexQuerierHighRefetchRate",
+        annotations: {
+          message:
+            'Cortex Queries in {{ $labels.cluster }}/{{ $labels.namespace }} are refetching series from different store-gateways (because of missing blocks) for the {{ printf "%.0f" $value }}% of queries.'
+        },
+        expr: '100 * (\n  (\n    sum by(cluster, namespace) (rate(cortex_querier_storegateway_refetches_per_query_count[5m]))\n    -\n    sum by(cluster, namespace) (rate(cortex_querier_storegateway_refetches_per_query_bucket{le="0.0"}[5m]))\n  )\n  /\n  sum by(cluster, namespace) (rate(cortex_querier_storegateway_refetches_per_query_count[5m]))\n)\n> 1\n',
+        for: "10m",
+        labels: {
+          severity: "warning"
+        }
+      },
+      {
+        alert: "CortexStoreGatewayHasNotSyncTheBucket",
+        annotations: {
+          message:
+            "Cortex Store Gateway {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not successfully synched the bucket since {{ $value | humanizeDuration }}."
+        },
+        expr: '(time() - cortex_bucket_stores_blocks_last_successful_sync_timestamp_seconds{component="store-gateway"} > 60 * 30)\nand\ncortex_bucket_stores_blocks_last_successful_sync_timestamp_seconds{component="store-gateway"} > 0\n',
+        for: "5m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexBucketIndexNotUpdated",
+        annotations: {
+          message:
+            "Cortex bucket index for tenant {{ $labels.user }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not been updated since {{ $value | humanizeDuration }}."
+        },
+        expr: "min by(cluster, namespace, user) (time() - cortex_bucket_index_last_successful_update_timestamp_seconds) > 7200\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexTenantHasPartialBlocks",
+        annotations: {
+          message:
+            "Cortex tenant {{ $labels.user }} in {{ $labels.cluster }}/{{ $labels.namespace }} has {{ $value }} partial blocks."
+        },
+        expr: "max by(cluster, namespace, user) (cortex_bucket_blocks_partials_count) > 0\n",
+        for: "6h",
+        labels: {
+          severity: "warning"
+        }
+      }
+    ]
+  },
+  {
+    name: "cortex_compactor_alerts",
+    rules: [
+      {
+        alert: "CortexCompactorHasNotSuccessfullyCleanedUpBlocks",
+        annotations: {
+          message:
+            "Cortex Compactor {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not successfully cleaned up blocks in the last 6 hours."
+        },
+        expr: "(time() - cortex_compactor_block_cleanup_last_successful_run_timestamp_seconds > 60 * 60 * 6)\n",
+        for: "1h",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexCompactorHasNotSuccessfullyRunCompaction",
+        annotations: {
+          message:
+            "Cortex Compactor {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not run compaction in the last 24 hours."
+        },
+        expr: "(time() - cortex_compactor_last_successful_run_timestamp_seconds > 60 * 60 * 24)\nand\n(cortex_compactor_last_successful_run_timestamp_seconds > 0)\n",
+        for: "1h",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexCompactorHasNotSuccessfullyRunCompaction",
+        annotations: {
+          message:
+            "Cortex Compactor {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not run compaction in the last 24 hours."
+        },
+        expr: "cortex_compactor_last_successful_run_timestamp_seconds == 0\n",
+        for: "24h",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexCompactorHasNotSuccessfullyRunCompaction",
+        annotations: {
+          message:
+            "Cortex Compactor {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} failed to run 2 consecutive compactions."
+        },
+        expr: "increase(cortex_compactor_runs_failed_total[2h]) >= 2\n",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexCompactorHasNotUploadedBlocks",
+        annotations: {
+          message:
+            "Cortex Compactor {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not uploaded any block in the last 24 hours."
+        },
+        expr: '(time() - thanos_objstore_bucket_last_successful_upload_time{job=~".+/compactor.*"} > 60 * 60 * 24)\nand\n(thanos_objstore_bucket_last_successful_upload_time{job=~".+/compactor.*"} > 0)\n',
+        for: "15m",
+        labels: {
+          severity: "critical"
+        }
+      },
+      {
+        alert: "CortexCompactorHasNotUploadedBlocks",
+        annotations: {
+          message:
+            "Cortex Compactor {{ $labels.instance }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not uploaded any block in the last 24 hours."
+        },
+        expr: 'thanos_objstore_bucket_last_successful_upload_time{job=~".+/compactor.*"} == 0\n',
+        for: "24h",
+        labels: {
+          severity: "critical"
+        }
+      }
+    ]
+  },
+
   {
     name: "loki_alerts",
     rules: [

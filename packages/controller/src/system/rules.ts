@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2020-2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,826 +274,398 @@ export default () => [
   },
 
   {
-    name: "cortex_rules",
+    name: "cortex_api",
     rules: [
       {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_request_duration_seconds:99quantile"
+        expr: "histogram_quantile(0.99, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_request_duration_seconds:99quantile"
       },
       {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_request_duration_seconds:50quantile"
+        expr: "histogram_quantile(0.50, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_request_duration_seconds:50quantile"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (job) / sum(rate(cortex_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_request_duration_seconds:avg"
+        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (cluster, job) / sum(rate(cortex_request_duration_seconds_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_request_duration_seconds:avg"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, job)",
-        record: "job:cortex_request_duration_seconds_bucket:sum_rate"
+        expr: "sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, job)",
+        record: "cluster_job:cortex_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (job)",
-        record: "job:cortex_request_duration_seconds_sum:sum_rate"
+        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_request_duration_seconds_sum:sum_rate"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_request_duration_seconds_count:sum_rate"
+        expr: "sum(rate(cortex_request_duration_seconds_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_request_duration_seconds_count:sum_rate"
       },
       {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, job, route))",
-        record: "job_route:cortex_request_duration_seconds:99quantile"
+        expr: "histogram_quantile(0.99, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, job, route))",
+        record: "cluster_job_route:cortex_request_duration_seconds:99quantile"
       },
       {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, job, route))",
-        record: "job_route:cortex_request_duration_seconds:50quantile"
+        expr: "histogram_quantile(0.50, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, job, route))",
+        record: "cluster_job_route:cortex_request_duration_seconds:50quantile"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (job, route) / sum(rate(cortex_request_duration_seconds_count[1m])) by (job, route)",
-        record: "job_route:cortex_request_duration_seconds:avg"
+        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (cluster, job, route) / sum(rate(cortex_request_duration_seconds_count[1m])) by (cluster, job, route)",
+        record: "cluster_job_route:cortex_request_duration_seconds:avg"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, job, route)",
-        record: "job_route:cortex_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (job, route)",
-        record: "job_route:cortex_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_request_duration_seconds_count[1m])) by (job, route)",
-        record: "job_route:cortex_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, namespace, job, route))",
-        record: "namespace_job_route:cortex_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, namespace, job, route))",
-        record: "namespace_job_route:cortex_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (namespace, job, route) / sum(rate(cortex_request_duration_seconds_count[1m])) by (namespace, job, route)",
-        record: "namespace_job_route:cortex_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, namespace, job, route)",
+        expr: "sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, job, route)",
         record:
-          "namespace_job_route:cortex_request_duration_seconds_bucket:sum_rate"
+          "cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (namespace, job, route)",
+        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (cluster, job, route)",
+        record: "cluster_job_route:cortex_request_duration_seconds_sum:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_request_duration_seconds_count[1m])) by (cluster, job, route)",
         record:
-          "namespace_job_route:cortex_request_duration_seconds_sum:sum_rate"
+          "cluster_job_route:cortex_request_duration_seconds_count:sum_rate"
       },
       {
-        expr: "sum(rate(cortex_request_duration_seconds_count[1m])) by (namespace, job, route)",
+        expr: "histogram_quantile(0.99, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, namespace, job, route))",
         record:
-          "namespace_job_route:cortex_request_duration_seconds_count:sum_rate"
+          "cluster_namespace_job_route:cortex_request_duration_seconds:99quantile"
       },
       {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_memcache_request_duration_seconds_bucket[1m])) by (le, job, method))",
-        record: "job_method:cortex_memcache_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_memcache_request_duration_seconds_bucket[1m])) by (le, job, method))",
-        record: "job_method:cortex_memcache_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_memcache_request_duration_seconds_sum[1m])) by (job, method) / sum(rate(cortex_memcache_request_duration_seconds_count[1m])) by (job, method)",
-        record: "job_method:cortex_memcache_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_memcache_request_duration_seconds_bucket[1m])) by (le, job, method)",
+        expr: "histogram_quantile(0.50, sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, namespace, job, route))",
         record:
-          "job_method:cortex_memcache_request_duration_seconds_bucket:sum_rate"
+          "cluster_namespace_job_route:cortex_request_duration_seconds:50quantile"
       },
       {
-        expr: "sum(rate(cortex_memcache_request_duration_seconds_sum[1m])) by (job, method)",
+        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (cluster, namespace, job, route) / sum(rate(cortex_request_duration_seconds_count[1m])) by (cluster, namespace, job, route)",
         record:
-          "job_method:cortex_memcache_request_duration_seconds_sum:sum_rate"
+          "cluster_namespace_job_route:cortex_request_duration_seconds:avg"
       },
       {
-        expr: "sum(rate(cortex_memcache_request_duration_seconds_count[1m])) by (job, method)",
+        expr: "sum(rate(cortex_request_duration_seconds_bucket[1m])) by (le, cluster, namespace, job, route)",
         record:
-          "job_method:cortex_memcache_request_duration_seconds_count:sum_rate"
+          "cluster_namespace_job_route:cortex_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_cache_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_cache_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (job) / sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_cache_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, job)",
-        record: "job:cortex_cache_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (job)",
-        record: "job:cortex_cache_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_cache_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, job, method))",
-        record: "job_method:cortex_cache_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, job, method))",
-        record: "job_method:cortex_cache_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (job, method) / sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (job, method)",
-        record: "job_method:cortex_cache_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, job, method)",
+        expr: "sum(rate(cortex_request_duration_seconds_sum[1m])) by (cluster, namespace, job, route)",
         record:
-          "job_method:cortex_cache_request_duration_seconds_bucket:sum_rate"
+          "cluster_namespace_job_route:cortex_request_duration_seconds_sum:sum_rate"
       },
       {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (job, method)",
-        record: "job_method:cortex_cache_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (job, method)",
+        expr: "sum(rate(cortex_request_duration_seconds_count[1m])) by (cluster, namespace, job, route)",
         record:
-          "job_method:cortex_cache_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_bigtable_request_duration_seconds_bucket[1m])) by (le, job, operation))",
-        record:
-          "job_operation:cortex_bigtable_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_bigtable_request_duration_seconds_bucket[1m])) by (le, job, operation))",
-        record:
-          "job_operation:cortex_bigtable_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_bigtable_request_duration_seconds_sum[1m])) by (job, operation) / sum(rate(cortex_bigtable_request_duration_seconds_count[1m])) by (job, operation)",
-        record: "job_operation:cortex_bigtable_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_bigtable_request_duration_seconds_bucket[1m])) by (le, job, operation)",
-        record:
-          "job_operation:cortex_bigtable_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_bigtable_request_duration_seconds_sum[1m])) by (job, operation)",
-        record:
-          "job_operation:cortex_bigtable_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_bigtable_request_duration_seconds_count[1m])) by (job, operation)",
-        record:
-          "job_operation:cortex_bigtable_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_dynamo_request_duration_seconds_bucket[1m])) by (le, job, operation))",
-        record:
-          "job_operation:cortex_dynamo_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_dynamo_request_duration_seconds_bucket[1m])) by (le, job, operation))",
-        record:
-          "job_operation:cortex_dynamo_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_dynamo_request_duration_seconds_sum[1m])) by (job, operation) / sum(rate(cortex_dynamo_request_duration_seconds_count[1m])) by (job, operation)",
-        record: "job_operation:cortex_dynamo_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_dynamo_request_duration_seconds_bucket[1m])) by (le, job, operation)",
-        record:
-          "job_operation:cortex_dynamo_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_dynamo_request_duration_seconds_sum[1m])) by (job, operation)",
-        record:
-          "job_operation:cortex_dynamo_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_dynamo_request_duration_seconds_count[1m])) by (job, operation)",
-        record:
-          "job_operation:cortex_dynamo_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_query_frontend_retries_bucket[1m])) by (le, job))",
-        record: "job:cortex_query_frontend_retries:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_query_frontend_retries_bucket[1m])) by (le, job))",
-        record: "job:cortex_query_frontend_retries:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_retries_sum[1m])) by (job) / sum(rate(cortex_query_frontend_retries_count[1m])) by (job)",
-        record: "job:cortex_query_frontend_retries:avg"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_retries_bucket[1m])) by (le, job)",
-        record: "job:cortex_query_frontend_retries_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_retries_sum[1m])) by (job)",
-        record: "job:cortex_query_frontend_retries_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_retries_count[1m])) by (job)",
-        record: "job:cortex_query_frontend_retries_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_query_frontend_queue_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_query_frontend_queue_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_query_frontend_queue_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_query_frontend_queue_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_sum[1m])) by (job) / sum(rate(cortex_query_frontend_queue_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_query_frontend_queue_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_bucket[1m])) by (le, job)",
-        record:
-          "job:cortex_query_frontend_queue_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_sum[1m])) by (job)",
-        record: "job:cortex_query_frontend_queue_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_count[1m])) by (job)",
-        record:
-          "job:cortex_query_frontend_queue_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_ingester_queried_series_bucket[1m])) by (le, job))",
-        record: "job:cortex_ingester_queried_series:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_ingester_queried_series_bucket[1m])) by (le, job))",
-        record: "job:cortex_ingester_queried_series:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_series_sum[1m])) by (job) / sum(rate(cortex_ingester_queried_series_count[1m])) by (job)",
-        record: "job:cortex_ingester_queried_series:avg"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_series_bucket[1m])) by (le, job)",
-        record: "job:cortex_ingester_queried_series_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_series_sum[1m])) by (job)",
-        record: "job:cortex_ingester_queried_series_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_series_count[1m])) by (job)",
-        record: "job:cortex_ingester_queried_series_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_ingester_queried_chunks_bucket[1m])) by (le, job))",
-        record: "job:cortex_ingester_queried_chunks:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_ingester_queried_chunks_bucket[1m])) by (le, job))",
-        record: "job:cortex_ingester_queried_chunks:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_chunks_sum[1m])) by (job) / sum(rate(cortex_ingester_queried_chunks_count[1m])) by (job)",
-        record: "job:cortex_ingester_queried_chunks:avg"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_chunks_bucket[1m])) by (le, job)",
-        record: "job:cortex_ingester_queried_chunks_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_chunks_sum[1m])) by (job)",
-        record: "job:cortex_ingester_queried_chunks_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_chunks_count[1m])) by (job)",
-        record: "job:cortex_ingester_queried_chunks_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_ingester_queried_samples_bucket[1m])) by (le, job))",
-        record: "job:cortex_ingester_queried_samples:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_ingester_queried_samples_bucket[1m])) by (le, job))",
-        record: "job:cortex_ingester_queried_samples:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_samples_sum[1m])) by (job) / sum(rate(cortex_ingester_queried_samples_count[1m])) by (job)",
-        record: "job:cortex_ingester_queried_samples:avg"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_samples_bucket[1m])) by (le, job)",
-        record: "job:cortex_ingester_queried_samples_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_samples_sum[1m])) by (job)",
-        record: "job:cortex_ingester_queried_samples_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_ingester_queried_samples_count[1m])) by (job)",
-        record: "job:cortex_ingester_queried_samples_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_chunk_store_index_lookups_per_query_bucket[1m])) by (le, job))",
-        record: "job:cortex_chunk_store_index_lookups_per_query:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_chunk_store_index_lookups_per_query_bucket[1m])) by (le, job))",
-        record: "job:cortex_chunk_store_index_lookups_per_query:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_index_lookups_per_query_sum[1m])) by (job) / sum(rate(cortex_chunk_store_index_lookups_per_query_count[1m])) by (job)",
-        record: "job:cortex_chunk_store_index_lookups_per_query:avg"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_index_lookups_per_query_bucket[1m])) by (le, job)",
-        record: "job:cortex_chunk_store_index_lookups_per_query_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_index_lookups_per_query_sum[1m])) by (job)",
-        record: "job:cortex_chunk_store_index_lookups_per_query_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_index_lookups_per_query_count[1m])) by (job)",
-        record: "job:cortex_chunk_store_index_lookups_per_query_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_chunk_store_series_pre_intersection_per_query_bucket[1m])) by (le, job))",
-        record:
-          "job:cortex_chunk_store_series_pre_intersection_per_query:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_chunk_store_series_pre_intersection_per_query_bucket[1m])) by (le, job))",
-        record:
-          "job:cortex_chunk_store_series_pre_intersection_per_query:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_pre_intersection_per_query_sum[1m])) by (job) / sum(rate(cortex_chunk_store_series_pre_intersection_per_query_count[1m])) by (job)",
-        record: "job:cortex_chunk_store_series_pre_intersection_per_query:avg"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_pre_intersection_per_query_bucket[1m])) by (le, job)",
-        record:
-          "job:cortex_chunk_store_series_pre_intersection_per_query_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_pre_intersection_per_query_sum[1m])) by (job)",
-        record:
-          "job:cortex_chunk_store_series_pre_intersection_per_query_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_pre_intersection_per_query_count[1m])) by (job)",
-        record:
-          "job:cortex_chunk_store_series_pre_intersection_per_query_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_chunk_store_series_post_intersection_per_query_bucket[1m])) by (le, job))",
-        record:
-          "job:cortex_chunk_store_series_post_intersection_per_query:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_chunk_store_series_post_intersection_per_query_bucket[1m])) by (le, job))",
-        record:
-          "job:cortex_chunk_store_series_post_intersection_per_query:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_post_intersection_per_query_sum[1m])) by (job) / sum(rate(cortex_chunk_store_series_post_intersection_per_query_count[1m])) by (job)",
-        record: "job:cortex_chunk_store_series_post_intersection_per_query:avg"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_post_intersection_per_query_bucket[1m])) by (le, job)",
-        record:
-          "job:cortex_chunk_store_series_post_intersection_per_query_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_post_intersection_per_query_sum[1m])) by (job)",
-        record:
-          "job:cortex_chunk_store_series_post_intersection_per_query_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_series_post_intersection_per_query_count[1m])) by (job)",
-        record:
-          "job:cortex_chunk_store_series_post_intersection_per_query_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_chunk_store_chunks_per_query_bucket[1m])) by (le, job))",
-        record: "job:cortex_chunk_store_chunks_per_query:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_chunk_store_chunks_per_query_bucket[1m])) by (le, job))",
-        record: "job:cortex_chunk_store_chunks_per_query:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_chunks_per_query_sum[1m])) by (job) / sum(rate(cortex_chunk_store_chunks_per_query_count[1m])) by (job)",
-        record: "job:cortex_chunk_store_chunks_per_query:avg"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_chunks_per_query_bucket[1m])) by (le, job)",
-        record: "job:cortex_chunk_store_chunks_per_query_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_chunks_per_query_sum[1m])) by (job)",
-        record: "job:cortex_chunk_store_chunks_per_query_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_chunk_store_chunks_per_query_count[1m])) by (job)",
-        record: "job:cortex_chunk_store_chunks_per_query_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_database_request_duration_seconds_bucket[1m])) by (le, job, method))",
-        record: "job_method:cortex_database_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_database_request_duration_seconds_bucket[1m])) by (le, job, method))",
-        record: "job_method:cortex_database_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_database_request_duration_seconds_sum[1m])) by (job, method) / sum(rate(cortex_database_request_duration_seconds_count[1m])) by (job, method)",
-        record: "job_method:cortex_database_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_database_request_duration_seconds_bucket[1m])) by (le, job, method)",
-        record:
-          "job_method:cortex_database_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_database_request_duration_seconds_sum[1m])) by (job, method)",
-        record:
-          "job_method:cortex_database_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_database_request_duration_seconds_count[1m])) by (job, method)",
-        record:
-          "job_method:cortex_database_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_gcs_request_duration_seconds_bucket[1m])) by (le, job, operation))",
-        record: "job_operation:cortex_gcs_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_gcs_request_duration_seconds_bucket[1m])) by (le, job, operation))",
-        record: "job_operation:cortex_gcs_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_gcs_request_duration_seconds_sum[1m])) by (job, operation) / sum(rate(cortex_gcs_request_duration_seconds_count[1m])) by (job, operation)",
-        record: "job_operation:cortex_gcs_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_gcs_request_duration_seconds_bucket[1m])) by (le, job, operation)",
-        record:
-          "job_operation:cortex_gcs_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_gcs_request_duration_seconds_sum[1m])) by (job, operation)",
-        record: "job_operation:cortex_gcs_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_gcs_request_duration_seconds_count[1m])) by (job, operation)",
-        record:
-          "job_operation:cortex_gcs_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_kv_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_kv_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_kv_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_kv_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_kv_request_duration_seconds_sum[1m])) by (job) / sum(rate(cortex_kv_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_kv_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_kv_request_duration_seconds_bucket[1m])) by (le, job)",
-        record: "job:cortex_kv_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_kv_request_duration_seconds_sum[1m])) by (job)",
-        record: "job:cortex_kv_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_kv_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_kv_request_duration_seconds_count:sum_rate"
+          "cluster_namespace_job_route:cortex_request_duration_seconds_count:sum_rate"
       }
     ]
   },
   {
-    name: "frontend_rules",
+    name: "cortex_querier_api",
     rules: [
       {
-        expr: "histogram_quantile(0.99, sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:tsdb_gw_request_duration_seconds:99quantile"
+        expr: "histogram_quantile(0.99, sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_querier_request_duration_seconds:99quantile"
       },
       {
-        expr: "histogram_quantile(0.50, sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:tsdb_gw_request_duration_seconds:50quantile"
+        expr: "histogram_quantile(0.50, sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_querier_request_duration_seconds:50quantile"
       },
       {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_sum[1m])) by (job) / sum(rate(tsdb_gw_request_duration_seconds_count[1m])) by (job)",
-        record: "job:tsdb_gw_request_duration_seconds:avg"
+        expr: "sum(rate(cortex_querier_request_duration_seconds_sum[1m])) by (cluster, job) / sum(rate(cortex_querier_request_duration_seconds_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_querier_request_duration_seconds:avg"
       },
       {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, job)",
-        record: "job:tsdb_gw_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_sum[1m])) by (job)",
-        record: "job:tsdb_gw_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_count[1m])) by (job)",
-        record: "job:tsdb_gw_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, job, route))",
-        record: "job_route:tsdb_gw_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, job, route))",
-        record: "job_route:tsdb_gw_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_sum[1m])) by (job, route) / sum(rate(tsdb_gw_request_duration_seconds_count[1m])) by (job, route)",
-        record: "job_route:tsdb_gw_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, job, route)",
-        record: "job_route:tsdb_gw_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_sum[1m])) by (job, route)",
-        record: "job_route:tsdb_gw_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_count[1m])) by (job, route)",
-        record: "job_route:tsdb_gw_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, namespace, job, route))",
+        expr: "sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, job)",
         record:
-          "namespace_job_route:tsdb_gw_request_duration_seconds:99quantile"
+          "cluster_job:cortex_querier_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: "histogram_quantile(0.50, sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, namespace, job, route))",
+        expr: "sum(rate(cortex_querier_request_duration_seconds_sum[1m])) by (cluster, job)",
         record:
-          "namespace_job_route:tsdb_gw_request_duration_seconds:50quantile"
+          "cluster_job:cortex_querier_request_duration_seconds_sum:sum_rate"
       },
       {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_sum[1m])) by (namespace, job, route) / sum(rate(tsdb_gw_request_duration_seconds_count[1m])) by (namespace, job, route)",
-        record: "namespace_job_route:tsdb_gw_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_bucket[1m])) by (le, namespace, job, route)",
+        expr: "sum(rate(cortex_querier_request_duration_seconds_count[1m])) by (cluster, job)",
         record:
-          "namespace_job_route:tsdb_gw_request_duration_seconds_bucket:sum_rate"
+          "cluster_job:cortex_querier_request_duration_seconds_count:sum_rate"
       },
       {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_sum[1m])) by (namespace, job, route)",
+        expr: "histogram_quantile(0.99, sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, job, route))",
         record:
-          "namespace_job_route:tsdb_gw_request_duration_seconds_sum:sum_rate"
+          "cluster_job_route:cortex_querier_request_duration_seconds:99quantile"
       },
       {
-        expr: "sum(rate(tsdb_gw_request_duration_seconds_count[1m])) by (namespace, job, route)",
+        expr: "histogram_quantile(0.50, sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, job, route))",
         record:
-          "namespace_job_route:tsdb_gw_request_duration_seconds_count:sum_rate"
+          "cluster_job_route:cortex_querier_request_duration_seconds:50quantile"
       },
       {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_gw_request_duration_seconds:99quantile"
+        expr: "sum(rate(cortex_querier_request_duration_seconds_sum[1m])) by (cluster, job, route) / sum(rate(cortex_querier_request_duration_seconds_count[1m])) by (cluster, job, route)",
+        record: "cluster_job_route:cortex_querier_request_duration_seconds:avg"
       },
       {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, job))",
-        record: "job:cortex_gw_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_sum[1m])) by (job) / sum(rate(cortex_gw_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_gw_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, job)",
-        record: "job:cortex_gw_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_sum[1m])) by (job)",
-        record: "job:cortex_gw_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_count[1m])) by (job)",
-        record: "job:cortex_gw_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, job, route))",
-        record: "job_route:cortex_gw_request_duration_seconds:99quantile"
-      },
-      {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, job, route))",
-        record: "job_route:cortex_gw_request_duration_seconds:50quantile"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_sum[1m])) by (job, route) / sum(rate(cortex_gw_request_duration_seconds_count[1m])) by (job, route)",
-        record: "job_route:cortex_gw_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, job, route)",
-        record: "job_route:cortex_gw_request_duration_seconds_bucket:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_sum[1m])) by (job, route)",
-        record: "job_route:cortex_gw_request_duration_seconds_sum:sum_rate"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_count[1m])) by (job, route)",
-        record: "job_route:cortex_gw_request_duration_seconds_count:sum_rate"
-      },
-      {
-        expr: "histogram_quantile(0.99, sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, namespace, job, route))",
+        expr: "sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, job, route)",
         record:
-          "namespace_job_route:cortex_gw_request_duration_seconds:99quantile"
+          "cluster_job_route:cortex_querier_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: "histogram_quantile(0.50, sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, namespace, job, route))",
+        expr: "sum(rate(cortex_querier_request_duration_seconds_sum[1m])) by (cluster, job, route)",
         record:
-          "namespace_job_route:cortex_gw_request_duration_seconds:50quantile"
+          "cluster_job_route:cortex_querier_request_duration_seconds_sum:sum_rate"
       },
       {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_sum[1m])) by (namespace, job, route) / sum(rate(cortex_gw_request_duration_seconds_count[1m])) by (namespace, job, route)",
-        record: "namespace_job_route:cortex_gw_request_duration_seconds:avg"
-      },
-      {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_bucket[1m])) by (le, namespace, job, route)",
+        expr: "sum(rate(cortex_querier_request_duration_seconds_count[1m])) by (cluster, job, route)",
         record:
-          "namespace_job_route:cortex_gw_request_duration_seconds_bucket:sum_rate"
+          "cluster_job_route:cortex_querier_request_duration_seconds_count:sum_rate"
       },
       {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_sum[1m])) by (namespace, job, route)",
+        expr: "histogram_quantile(0.99, sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, namespace, job, route))",
         record:
-          "namespace_job_route:cortex_gw_request_duration_seconds_sum:sum_rate"
+          "cluster_namespace_job_route:cortex_querier_request_duration_seconds:99quantile"
       },
       {
-        expr: "sum(rate(cortex_gw_request_duration_seconds_count[1m])) by (namespace, job, route)",
+        expr: "histogram_quantile(0.50, sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, namespace, job, route))",
         record:
-          "namespace_job_route:cortex_gw_request_duration_seconds_count:sum_rate"
+          "cluster_namespace_job_route:cortex_querier_request_duration_seconds:50quantile"
+      },
+      {
+        expr: "sum(rate(cortex_querier_request_duration_seconds_sum[1m])) by (cluster, namespace, job, route) / sum(rate(cortex_querier_request_duration_seconds_count[1m])) by (cluster, namespace, job, route)",
+        record:
+          "cluster_namespace_job_route:cortex_querier_request_duration_seconds:avg"
+      },
+      {
+        expr: "sum(rate(cortex_querier_request_duration_seconds_bucket[1m])) by (le, cluster, namespace, job, route)",
+        record:
+          "cluster_namespace_job_route:cortex_querier_request_duration_seconds_bucket:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_querier_request_duration_seconds_sum[1m])) by (cluster, namespace, job, route)",
+        record:
+          "cluster_namespace_job_route:cortex_querier_request_duration_seconds_sum:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_querier_request_duration_seconds_count[1m])) by (cluster, namespace, job, route)",
+        record:
+          "cluster_namespace_job_route:cortex_querier_request_duration_seconds_count:sum_rate"
       }
     ]
   },
   {
-    name: "cortex_slo_rules",
+    name: "cortex_cache",
     rules: [
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..", le="1", route="api_v1_push", job=~".*.cortex-api"}[5m]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route="api_v1_push", job=~".*.cortex-api"}[5m]))\n)\n',
+        expr: "histogram_quantile(0.99, sum(rate(cortex_memcache_request_duration_seconds_bucket[1m])) by (le, cluster, job, method))",
         record:
-          "namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate5m"
+          "cluster_job_method:cortex_memcache_request_duration_seconds:99quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..", le="1", route="api_v1_push", job=~".*.cortex-api"}[30m]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route="api_v1_push", job=~".*.cortex-api"}[30m]))\n)\n',
+        expr: "histogram_quantile(0.50, sum(rate(cortex_memcache_request_duration_seconds_bucket[1m])) by (le, cluster, job, method))",
         record:
-          "namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate30m"
+          "cluster_job_method:cortex_memcache_request_duration_seconds:50quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..", le="1", route="api_v1_push", job=~".*.cortex-api"}[1h]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route="api_v1_push", job=~".*.cortex-api"}[1h]))\n)\n',
+        expr: "sum(rate(cortex_memcache_request_duration_seconds_sum[1m])) by (cluster, job, method) / sum(rate(cortex_memcache_request_duration_seconds_count[1m])) by (cluster, job, method)",
         record:
-          "namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1h"
+          "cluster_job_method:cortex_memcache_request_duration_seconds:avg"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..", le="1", route="api_v1_push", job=~".*.cortex-api"}[2h]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route="api_v1_push", job=~".*.cortex-api"}[2h]))\n)\n',
+        expr: "sum(rate(cortex_memcache_request_duration_seconds_bucket[1m])) by (le, cluster, job, method)",
         record:
-          "namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate2h"
+          "cluster_job_method:cortex_memcache_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..", le="1", route="api_v1_push", job=~".*.cortex-api"}[6h]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route="api_v1_push", job=~".*.cortex-api"}[6h]))\n)\n',
+        expr: "sum(rate(cortex_memcache_request_duration_seconds_sum[1m])) by (cluster, job, method)",
         record:
-          "namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate6h"
+          "cluster_job_method:cortex_memcache_request_duration_seconds_sum:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..", le="1", route="api_v1_push", job=~".*.cortex-api"}[1d]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route="api_v1_push", job=~".*.cortex-api"}[1d]))\n)\n',
+        expr: "sum(rate(cortex_memcache_request_duration_seconds_count[1m])) by (cluster, job, method)",
         record:
-          "namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1d"
+          "cluster_job_method:cortex_memcache_request_duration_seconds_count:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..", le="1", route="api_v1_push", job=~".*.cortex-api"}[3d]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route="api_v1_push", job=~".*.cortex-api"}[3d]))\n)\n',
-        record:
-          "namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate3d"
+        expr: "histogram_quantile(0.99, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_cache_request_duration_seconds:99quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..",le="2.5",route=~"api_v1_query.*", job=~".*.cortex-api"}[5m]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route=~"api_v1_query.*", job=~".*.cortex-api"}[5m]))\n)\n',
-        record:
-          "namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate5m"
+        expr: "histogram_quantile(0.50, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_cache_request_duration_seconds:50quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..",le="2.5",route=~"api_v1_query.*", job=~".*.cortex-api"}[30m]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route=~"api_v1_query.*", job=~".*.cortex-api"}[30m]))\n)\n',
-        record:
-          "namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate30m"
+        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (cluster, job) / sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_cache_request_duration_seconds:avg"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..",le="2.5",route=~"api_v1_query.*", job=~".*.cortex-api"}[1h]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route=~"api_v1_query.*", job=~".*.cortex-api"}[1h]))\n)\n',
+        expr: "sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, cluster, job)",
         record:
-          "namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1h"
+          "cluster_job:cortex_cache_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..",le="2.5",route=~"api_v1_query.*", job=~".*.cortex-api"}[2h]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route=~"api_v1_query.*", job=~".*.cortex-api"}[2h]))\n)\n',
-        record:
-          "namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate2h"
+        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_cache_request_duration_seconds_sum:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..",le="2.5",route=~"api_v1_query.*", job=~".*.cortex-api"}[6h]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route=~"api_v1_query.*", job=~".*.cortex-api"}[6h]))\n)\n',
+        expr: "sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (cluster, job)",
         record:
-          "namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate6h"
+          "cluster_job:cortex_cache_request_duration_seconds_count:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..",le="2.5",route=~"api_v1_query.*", job=~".*.cortex-api"}[1d]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route=~"api_v1_query.*", job=~".*.cortex-api"}[1d]))\n)\n',
+        expr: "histogram_quantile(0.99, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, cluster, job, method))",
         record:
-          "namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1d"
+          "cluster_job_method:cortex_cache_request_duration_seconds:99quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_bucket{status_code!~"5..",le="2.5",route=~"api_v1_query.*", job=~".*.cortex-api"}[3d]))\n/\n  sum by (namespace, job) (rate(cortex_request_duration_seconds_count{route=~"api_v1_query.*", job=~".*.cortex-api"}[3d]))\n)\n',
+        expr: "histogram_quantile(0.50, sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, cluster, job, method))",
         record:
-          "namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate3d"
+          "cluster_job_method:cortex_cache_request_duration_seconds:50quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="1",route="cortex-write"}[5m]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-write"}[5m]))\n)\n',
-        record:
-          "namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate5m"
+        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (cluster, job, method) / sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (cluster, job, method)",
+        record: "cluster_job_method:cortex_cache_request_duration_seconds:avg"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="1",route="cortex-write"}[30m]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-write"}[30m]))\n)\n',
+        expr: "sum(rate(cortex_cache_request_duration_seconds_bucket[1m])) by (le, cluster, job, method)",
         record:
-          "namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate30m"
+          "cluster_job_method:cortex_cache_request_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="1",route="cortex-write"}[1h]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-write"}[1h]))\n)\n',
+        expr: "sum(rate(cortex_cache_request_duration_seconds_sum[1m])) by (cluster, job, method)",
         record:
-          "namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1h"
+          "cluster_job_method:cortex_cache_request_duration_seconds_sum:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="1",route="cortex-write"}[2h]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-write"}[2h]))\n)\n',
+        expr: "sum(rate(cortex_cache_request_duration_seconds_count[1m])) by (cluster, job, method)",
         record:
-          "namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate2h"
+          "cluster_job_method:cortex_cache_request_duration_seconds_count:sum_rate"
+      }
+    ]
+  },
+  {
+    name: "cortex_queries",
+    rules: [
+      {
+        expr: "histogram_quantile(0.99, sum(rate(cortex_query_frontend_retries_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_query_frontend_retries:99quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="1",route="cortex-write"}[6h]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-write"}[6h]))\n)\n',
-        record:
-          "namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate6h"
+        expr: "histogram_quantile(0.50, sum(rate(cortex_query_frontend_retries_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_query_frontend_retries:50quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="1",route="cortex-write"}[1d]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-write"}[1d]))\n)\n',
-        record:
-          "namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1d"
+        expr: "sum(rate(cortex_query_frontend_retries_sum[1m])) by (cluster, job) / sum(rate(cortex_query_frontend_retries_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_query_frontend_retries:avg"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="1",route="cortex-write"}[3d]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-write"}[3d]))\n)\n',
-        record:
-          "namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate3d"
+        expr: "sum(rate(cortex_query_frontend_retries_bucket[1m])) by (le, cluster, job)",
+        record: "cluster_job:cortex_query_frontend_retries_bucket:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="2.5",route="cortex-read"}[5m]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-read"}[5m]))\n)\n',
-        record:
-          "namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate5m"
+        expr: "sum(rate(cortex_query_frontend_retries_sum[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_query_frontend_retries_sum:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="2.5",route="cortex-read"}[30m]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-read"}[30m]))\n)\n',
-        record:
-          "namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate30m"
+        expr: "sum(rate(cortex_query_frontend_retries_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_query_frontend_retries_count:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="2.5",route="cortex-read"}[1h]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-read"}[1h]))\n)\n',
+        expr: "histogram_quantile(0.99, sum(rate(cortex_query_frontend_queue_duration_seconds_bucket[1m])) by (le, cluster, job))",
         record:
-          "namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1h"
+          "cluster_job:cortex_query_frontend_queue_duration_seconds:99quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="2.5",route="cortex-read"}[2h]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-read"}[2h]))\n)\n',
+        expr: "histogram_quantile(0.50, sum(rate(cortex_query_frontend_queue_duration_seconds_bucket[1m])) by (le, cluster, job))",
         record:
-          "namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate2h"
+          "cluster_job:cortex_query_frontend_queue_duration_seconds:50quantile"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="2.5",route="cortex-read"}[6h]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-read"}[6h]))\n)\n',
-        record:
-          "namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate6h"
+        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_sum[1m])) by (cluster, job) / sum(rate(cortex_query_frontend_queue_duration_seconds_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_query_frontend_queue_duration_seconds:avg"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="2.5",route="cortex-read"}[1d]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-read"}[1d]))\n)\n',
+        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_bucket[1m])) by (le, cluster, job)",
         record:
-          "namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1d"
+          "cluster_job:cortex_query_frontend_queue_duration_seconds_bucket:sum_rate"
       },
       {
-        expr: '1 -\n(\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_bucket{status_code!~"error|5..",le="2.5",route="cortex-read"}[3d]))\n/\n  sum by (namespace, job) (rate(cortex_gw_request_duration_seconds_count{route="cortex-read"}[3d]))\n)\n',
+        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_sum[1m])) by (cluster, job)",
         record:
-          "namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate3d"
+          "cluster_job:cortex_query_frontend_queue_duration_seconds_sum:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_query_frontend_queue_duration_seconds_count[1m])) by (cluster, job)",
+        record:
+          "cluster_job:cortex_query_frontend_queue_duration_seconds_count:sum_rate"
+      },
+      {
+        expr: "histogram_quantile(0.99, sum(rate(cortex_ingester_queried_series_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_ingester_queried_series:99quantile"
+      },
+      {
+        expr: "histogram_quantile(0.50, sum(rate(cortex_ingester_queried_series_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_ingester_queried_series:50quantile"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_series_sum[1m])) by (cluster, job) / sum(rate(cortex_ingester_queried_series_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_series:avg"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_series_bucket[1m])) by (le, cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_series_bucket:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_series_sum[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_series_sum:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_series_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_series_count:sum_rate"
+      },
+      {
+        expr: "histogram_quantile(0.99, sum(rate(cortex_ingester_queried_chunks_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_ingester_queried_chunks:99quantile"
+      },
+      {
+        expr: "histogram_quantile(0.50, sum(rate(cortex_ingester_queried_chunks_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_ingester_queried_chunks:50quantile"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_chunks_sum[1m])) by (cluster, job) / sum(rate(cortex_ingester_queried_chunks_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_chunks:avg"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_chunks_bucket[1m])) by (le, cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_chunks_bucket:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_chunks_sum[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_chunks_sum:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_chunks_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_chunks_count:sum_rate"
+      },
+      {
+        expr: "histogram_quantile(0.99, sum(rate(cortex_ingester_queried_samples_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_ingester_queried_samples:99quantile"
+      },
+      {
+        expr: "histogram_quantile(0.50, sum(rate(cortex_ingester_queried_samples_bucket[1m])) by (le, cluster, job))",
+        record: "cluster_job:cortex_ingester_queried_samples:50quantile"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_samples_sum[1m])) by (cluster, job) / sum(rate(cortex_ingester_queried_samples_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_samples:avg"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_samples_bucket[1m])) by (le, cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_samples_bucket:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_samples_sum[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_samples_sum:sum_rate"
+      },
+      {
+        expr: "sum(rate(cortex_ingester_queried_samples_count[1m])) by (cluster, job)",
+        record: "cluster_job:cortex_ingester_queried_samples_count:sum_rate"
       }
     ]
   },
@@ -1101,11 +673,111 @@ export default () => [
     name: "cortex_received_samples",
     rules: [
       {
-        expr: 'sum by (namespace) (rate(cortex_distributor_received_samples_total{job=~".*.distributor"}[5m]))\n',
-        record: "namespace:cortex_distributor_received_samples:rate5m"
+        expr: "sum by (cluster, namespace, job) (rate(cortex_distributor_received_samples_total[5m]))\n",
+        record:
+          "cluster_namespace_job:cortex_distributor_received_samples:rate5m"
       }
     ]
   },
+  {
+    name: "cortex_scaling_rules",
+    rules: [
+      {
+        expr: 'sum by (cluster, namespace, deployment) (\n  label_replace(\n    kube_deployment_spec_replicas,\n    \n    \n    "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n  )\n)\nor\nsum by (cluster, namespace, deployment) (\n  label_replace(kube_statefulset_replicas, "deployment", "$1", "statefulset", "(.*?)(?:-zone-[a-z])?")\n)\n',
+        record: "cluster_namespace_deployment:actual_replicas:count"
+      },
+      {
+        expr: "ceil(\n  quantile_over_time(0.99,\n    sum by (cluster, namespace) (\n      cluster_namespace_job:cortex_distributor_received_samples:rate5m\n    )[24h:]\n  )\n  / 240000\n)\n",
+        labels: {
+          deployment: "distributor",
+          reason: "sample_rate"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: 'ceil(\n  sum by (cluster, namespace) (cortex_overrides{limit_name="ingestion_rate"})\n  * 0.59999999999999998 / 240000\n)\n',
+        labels: {
+          deployment: "distributor",
+          reason: "sample_rate_limits"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: "ceil(\n  quantile_over_time(0.99,\n    sum by (cluster, namespace) (\n      cluster_namespace_job:cortex_distributor_received_samples:rate5m\n    )[24h:]\n  )\n  * 3 / 80000\n)\n",
+        labels: {
+          deployment: "ingester",
+          reason: "sample_rate"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: "ceil(\n  quantile_over_time(0.99,\n    sum by(cluster, namespace) (\n      cortex_ingester_memory_series\n    )[24h:]\n  )\n  / 1500000\n)\n",
+        labels: {
+          deployment: "ingester",
+          reason: "active_series"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: 'ceil(\n  sum by (cluster, namespace) (cortex_overrides{limit_name="max_global_series_per_user"})\n  * 3 * 0.59999999999999998 / 1500000\n)\n',
+        labels: {
+          deployment: "ingester",
+          reason: "active_series_limits"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: 'ceil(\n  sum by (cluster, namespace) (cortex_overrides{limit_name="ingestion_rate"})\n  * 0.59999999999999998 / 80000\n)\n',
+        labels: {
+          deployment: "ingester",
+          reason: "sample_rate_limits"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: 'ceil(\n  (sum by (cluster, namespace) (\n    cortex_ingester_tsdb_storage_blocks_bytes{job=~".+/ingester.*"}\n  ) / 4)\n    /\n  avg by (cluster, namespace) (\n    memcached_limit_bytes{job=~".+/memcached"}\n  )\n)\n',
+        labels: {
+          deployment: "memcached",
+          reason: "active_series"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: 'sum by (cluster, namespace, deployment) (\n  label_replace(\n    label_replace(\n      node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate,\n      "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n    ),\n    \n    \n    "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n  )\n)\n',
+        record:
+          "cluster_namespace_deployment:container_cpu_usage_seconds_total:sum_rate"
+      },
+      {
+        expr: '(cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests_cpu_cores,\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\nor\n\n\n(\n  sum by (cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests{resource="cpu"},\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\n',
+        record:
+          "cluster_namespace_deployment:kube_pod_container_resource_requests_cpu_cores:sum"
+      },
+      {
+        expr: "ceil(\n  cluster_namespace_deployment:actual_replicas:count\n    *\n  quantile_over_time(0.99, cluster_namespace_deployment:container_cpu_usage_seconds_total:sum_rate[24h])\n    /\n  cluster_namespace_deployment:kube_pod_container_resource_requests_cpu_cores:sum\n)\n",
+        labels: {
+          reason: "cpu_usage"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      },
+      {
+        expr: 'sum by (cluster, namespace, deployment) (\n  label_replace(\n    label_replace(\n      container_memory_usage_bytes,\n      "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n    ),\n    \n    \n    "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n  )\n)\n',
+        record: "cluster_namespace_deployment:container_memory_usage_bytes:sum"
+      },
+      {
+        expr: '(\n  sum by (cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests_memory_bytes,\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\nor\n\n\n(\n  sum by (cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests{resource="memory"},\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\n',
+        record:
+          "cluster_namespace_deployment:kube_pod_container_resource_requests_memory_bytes:sum"
+      },
+      {
+        expr: "ceil(\n  cluster_namespace_deployment:actual_replicas:count\n    *\n  quantile_over_time(0.99, cluster_namespace_deployment:container_memory_usage_bytes:sum[24h])\n    /\n  cluster_namespace_deployment:kube_pod_container_resource_requests_memory_bytes:sum\n)\n",
+        labels: {
+          reason: "memory_usage"
+        },
+        record: "cluster_namespace_deployment_reason:required_replicas:count"
+      }
+    ]
+  },
+
   {
     name: "loki_rules",
     rules: [
