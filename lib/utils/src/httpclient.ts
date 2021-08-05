@@ -41,7 +41,7 @@ const httpTimeoutSettings = {
   request: 30000
 };
 
-function retryfunc(ro: GotRetryObject): number {
+export function customGotRetryfunc(ro: GotRetryObject): number {
   // log.debug("retry object: %s", JSON.stringify(ro, null, 2));
 
   // Non-obvious pieces of information:
@@ -182,7 +182,7 @@ export const httpcl: Got = got.extend({
   // ETIMEDOUT ECONNRESET EADDRINUSE ECONNREFUSED EPIPE ENOTFOUND ENETUNREACH EAI_AGAIN
   retry: {
     limit: 10,
-    calculateDelay: retryfunc,
+    calculateDelay: customGotRetryfunc,
     // remove 429 for now, for https://github.com/opstrace/opstrace/issues/30
     statusCodes: [408, 413, 500, 502, 503, 504, 521, 522, 524],
     // do not retry for longer than 5 minutes
