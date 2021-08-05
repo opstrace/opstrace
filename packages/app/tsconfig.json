@@ -1,18 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES6",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
     "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
     "jsx": "react",
     "baseUrl": "src",
     "paths": {
@@ -24,5 +17,8 @@
   },
   "include": ["src/**/*", "src/**/*.json"],
   "exclude": ["**/node_modules/*"],
-  "references": [{ "path": "../../lib/utils" }, { "path": "../../lib/kubernetes" }]
+  "references": [
+    { "path": "../../lib/utils" },
+    { "path": "../../lib/kubernetes" }
+  ]
 }
