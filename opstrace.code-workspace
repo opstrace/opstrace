@@ -11,6 +11,9 @@
     "recommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
   },
   "settings": {
+    "editor.formatOnSave": true,
+    "prettier.configPath": ".prettierrc",
+    "files.trimTrailingWhitespace": true,
     "eslint.workingDirectories": [
       {
         "mode": "auto"
