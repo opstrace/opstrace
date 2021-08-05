@@ -40,6 +40,13 @@ async function peerVpcs({
   network: string;
 }) {
   try {
+    // Note(JP): the response represents a long-running operation. Also see
+    // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/operations#Operation
+    // "This resource represents a long-running operation that is the result of
+    // a network API call."" The right thing to do is to use that to follow
+    // progress.
+    // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services.connections/create
+    // "If successful, the response body contains a newly created instance of Operation."
     const res = await serviceNetworking.services.connections.create({
       parent: "services/servicenetworking.googleapis.com",
       requestBody: {
@@ -48,6 +55,10 @@ async function peerVpcs({
         service: "servicenetworking.googleapis.com"
       }
     });
+
+    // There should be a `metadata` key in here somewhere indicating the
+    // progress of the long-running operation.
+    log.debug("services.connections.create result Operation: %s", res);
 
     if (res.data.error) {
       log.error(
@@ -102,19 +113,26 @@ export function* ensureCloudSQLExists({
 
   log.info(`Peering cluster vpc with cloudSQL services vpc`);
   yield call(peerVpcs, { network, addressName });
-  // If we move too quickly with creating the instance after a peering request,
-  // we'll get an error. Usually the second retry will succeed.
-  // To save us some errors in our logs, just wait a bit here.
-  // Would be nice to find a clean way to wait for the peering to be complete
-  // but I couldn't find anything to help me with that.
+
+  // Note(JP): The creation API call may fail with `Invalid request: Incorrect
+  // Service Networking config for instance:
+  // ci-shard-ddd:pr-upgr-bk-5334-24e-g-1628080548325:NETWORK_NOT_PEERED.`
+  // Consider this retryable. Retrying for 2 minutes is sometimes not enough.
+  // Retry much longer. Also see
+  // https://github.com/opstrace/opstrace/issues/293 The network creation API
+  // call triggers a long-running operation (see above). That is, when the
+  // create API call succeeds this does not imply that the creation will indeed
+  // succeed. To make things robust, we need to follow the operation and wait
+  // for it to succeed or fail -- when it fails, the create needs to be
+  // retried.
   let attemptNumber = 0;
-  const sqlInstanceCreationDeadline = Date.now() + 2 * 60 * SECOND; // 2 mins.
+  const sqlInstanceCreationDeadline = Date.now() + 15 * 60 * SECOND;
 
   log.info(`Ensure SQLInstance exists`);
 
   while (sqlInstanceCreationDeadline > Date.now()) {
     log.info(`Attempt ${attemptNumber++} to create SQLInstance`);
-    yield delay(10 * SECOND);
+    yield delay(15 * SECOND);
 
     try {
       const existingInstance: sql_v1beta4.Schema$DatabaseInstance = yield call(
