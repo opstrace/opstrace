@@ -7,6 +7,9 @@
       "path": "go"
     }
   ],
+  "extensions": {
+    "recommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+  },
   "settings": {
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
