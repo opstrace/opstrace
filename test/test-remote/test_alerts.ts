@@ -72,6 +72,10 @@ import {
 } from "./testutils";
 
 import {
+  waitForAllReady
+} from "./testutils/deployment";
+
+import {
   waitForCortexMetricResult,
   waitForPrometheusTarget
 } from "./testutils/metrics";
@@ -341,10 +345,10 @@ async function setupE2EAlertsForTenant(
   // Before deploying anything, delete any existing alertmanager/rulegroup configuration.
   // This avoids an old alert config writing to the newly deployed webhook, making its hit count 1 when we expect 0
   // This should only be a problem when running the same test repeatedly against a cluster.
-  log.info("Deleting any preexisting E2E alerts webhook");
+  log.info("Deleting any preexisting E2E alerts webhook for tenant=${tenant}");
   await deleteE2EAlertsConfig(authTokenFilepath);
 
-  log.info("Setting up E2E alerts webhook");
+  log.info("Setting up E2E alerts webhook for tenant=${tenant}");
   await storeE2EAlertsConfig(authTokenFilepath, tenant);
 
   log.info(`Deploying E2E alerting resources into ${tenant}-tenant namespace`);
@@ -448,6 +452,10 @@ suite("End-to-end alert tests", function () {
       systemUniqueScrapeJobName
     );
     const testResources = defaultTestResources.concat(systemTestResources);
+
+    // Wait for deployments to be Running/Ready.
+    // This may take around 5 minutes if an image pull is flaking/timing out.
+    await waitForAllReady(testResources);
 
     // With everything deployed, wait for each of the tenants' alerts to start firing
     await waitForE2EAlertFiring(
