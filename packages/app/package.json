@@ -76,7 +76,7 @@
     "file-saver": "^2.0.5",
     "glamor": "^2.20.40",
     "glob": "^7.1.6",
-    "got": "11.1.4",
+    "got": "11.8.2",
     "graphql": "15.3.0",
     "graphql-request": "^3.0.0",
     "graphql-tag": "^2.10.3",
