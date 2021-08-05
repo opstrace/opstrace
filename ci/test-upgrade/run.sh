@@ -34,9 +34,9 @@ teardown() {
 }
 trap "teardown" EXIT
 
-# Makefile logic uses `OPSTRACE_KUBE_CONFIG_HOST` to mount kubectl config into
-# the test-remote container. This path is set on create-cluster.sh.
-export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
+# Makefile logic uses `OPSTRACE_KUBECFG_FILEPATH_ONHOST` to mount kubectl
+# config into the test-remote container. This path is set on create-cluster.sh.
+export OPSTRACE_KUBECFG_FILEPATH_ONHOST="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
 
 
 make testupgrade-create-cluster

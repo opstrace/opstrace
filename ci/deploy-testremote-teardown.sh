@@ -78,7 +78,7 @@ AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
 
 # `opstrace create ...` is going to write to this.
-KUBECONFIG_FILEPATH="kubeconfig_${OPSTRACE_CLUSTER_NAME}"
+OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH="kubeconfig_${OPSTRACE_CLUSTER_NAME}"
 
 echo "--- gcloud auth activate-service-account: ${GOOGLE_APPLICATION_CREDENTIALS}"
 # Log in to GCP with service account credentials. Note(JP): the authentication
@@ -91,7 +91,7 @@ gcloud auth activate-service-account \
 start_data_collection_deployment_loop() {
     # Run this as a child process in the background. Rely on it to
     # terminate by itself.
-    bash ci/data-collection-deployment-loop.sh "$KUBECONFIG_FILEPATH" &
+    bash ci/data-collection-deployment-loop.sh "$OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH" &
 }
 
 teardown() {
@@ -238,7 +238,7 @@ echo "--- create cluster "
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
     cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
         --log-level=debug --yes \
-        --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
+        --write-kubeconfig-file "${OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH}"
 
     # Context: issue opstrace-prelaunch/issues/1905.
     # Copy outfile to prebuild/preamble dir. Required by
@@ -324,15 +324,15 @@ else
     cat ci/cluster-config.yaml | \
         ./build/bin/opstrace create gcp ${OPSTRACE_CLUSTER_NAME} \
             --log-level=debug --yes \
-            --write-kubeconfig-file "${KUBECONFIG_FILEPATH}"
+            --write-kubeconfig-file "${OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH}"
 fi
 
 echo "--- connect kubectl to the CI cluster"
 configure_kubectl_aws_or_gcp
 
-# Makefile logic uses `OPSTRACE_KUBE_CONFIG_HOST` to mount kubectl config into
-# the test-remote container.
-export OPSTRACE_KUBE_CONFIG_HOST="${OPSTRACE_BUILD_DIR}/.kube"
+# Makefile logic uses `OPSTRACE_KUBECFG_FILEPATH_ONHOST` to mount kubectl config into
+# the test-remote container. Point to the file written by the Opstrace CLI.
+export OPSTRACE_KUBECFG_FILEPATH_ONHOST="${OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH}"
 
 # TODO: remove when we add cloud provider managed certificates and remove the
 # use of insecure_skip_verify in the tests
