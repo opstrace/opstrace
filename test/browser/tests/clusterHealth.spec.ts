@@ -37,7 +37,6 @@ test.describe("cluster health", () => {
       "Store-gateway",
       "Alertmanager"
     ]) {
-      console.log("tabName:", tabName);
       await page.click(`[data-test='ringHealth/tab/${tabName}']`);
       await page.waitForSelector(`[data-test='ringTable/shards']`);
       expect(
