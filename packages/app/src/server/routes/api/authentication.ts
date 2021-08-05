@@ -28,18 +28,22 @@ import graphqlClient from "state/clients/graphqlClient";
 
 import { AUTH0_CONFIG, BUILD_INFO } from "./uicfg";
 
-// Authorization middleware. When used, the
-// Access Token must exist and be verified against
-// the Auth0 JSON Web Key Set
-const checkJwt = jwt({
-  // Dynamically provide a signing key
-  // based on the kid in the header and
-  // the signing keys provided by the JWKS endpoint.
+import * as jwkshelpers from "./jwks";
+
+const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
+
+// Middleware for verification of the Auth0-emitted access token that is sent
+// as _login_ credential.+
+const checkAccessTokenForLogin = jwt({
   secret: jwksRsa.expressJwtSecret({
-    cache: true,
+    cache: false,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`
+    jwksUri: JWKS_URL,
+    // Override fetcher function, see
+    // https://github.com/auth0/node-jwks-rsa/blob/cd52aa297756bc097e45f59a8ee216c69a2e1704/src/wrappers/request.js#L7
+    //@ts-ignore: type not up to date
+    fetcher: jwkshelpers.fetcher
   }),
 
   // Validate the audience and the issuer.
@@ -52,7 +56,9 @@ function createAuthHandler(): express.Router {
   const auth = express.Router();
   // endpoint for creating a session so we don't have to
   // pass JWTs to every API request.
-  auth.post("/session", checkJwt, async (req, res, next) => {
+  auth.post("/session", checkAccessTokenForLogin, async (req, res, next) => {
+    log.info("HELLO FROM /SESSION");
+
     const { email, username, avatar } = await loadUserInfo(
       // @ts-ignore Object is possibly 'undefined'
       req.headers.authorization.split(" ")[1]
@@ -174,5 +180,12 @@ const loadUserInfo = async (accessToken: string) => {
 
   return { email: data.email, avatar: data.picture || "", username };
 };
+
+// during import time, trigger the JWKS prepopulation and swallow all errors.
+// try {
+//   await jwkshelpers.prepopulate(JWKS_URL);
+// } catch (err) {
+//   log.warning(`non-fatal: JWKS preopulation failed: ${err}`);
+// }
 
 export default createAuthHandler;
