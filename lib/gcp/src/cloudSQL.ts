@@ -59,6 +59,11 @@ async function peerVpcs({
     // There should be a `metadata` key in here somewhere indicating the
     // progress of the long-running operation.
     log.debug("services.connections.create result Operation: %s", res);
+    log.debug("res.data: %s", JSON.stringify(res.data, null, 2));
+    log.debug(
+      "res.data.metadata: %s",
+      JSON.stringify(res.data.metadata, null, 2)
+    );
 
     if (res.data.error) {
       log.error(
