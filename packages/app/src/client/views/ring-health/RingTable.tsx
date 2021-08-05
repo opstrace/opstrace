@@ -19,7 +19,6 @@ import { Eye } from "react-feather";
 
 import { makeStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
-import axios from "axios";
 import {
   TableContainer,
   Table,
@@ -40,6 +39,7 @@ import { useRouteMatch, useHistory } from "react-router-dom";
 import useInterval from "react-use/lib/useInterval";
 import useMountedState from "react-use/lib/useMountedState";
 import { usePickerService } from "client/services/Picker";
+import request from "client/utils/request";
 
 const useStyles = makeStyles(theme => ({
   shardWarning: {
@@ -94,7 +94,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
         const bodyFormData = new FormData();
         bodyFormData.append("forget", shardId);
         setIsRefreshing(true);
-        const response = await axios.post<Payload>(ringEndpoint, bodyFormData, {
+        const response = await request.post<Payload>(ringEndpoint, bodyFormData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         setShards(response.data.shards);
@@ -121,7 +121,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
          */
         return;
       }
-      const response = await axios.get<Payload>(ringEndpoint);
+      const response = await request.get<Payload>(ringEndpoint);
       setShards(response.data.shards);
     } catch (e) {
       notifyError("Could not load table", e.response?.data ?? e.message);
