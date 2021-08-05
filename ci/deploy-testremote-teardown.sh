@@ -78,7 +78,7 @@ AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
 
 # `opstrace create ...` is going to write to this.
-OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH="kubeconfig_${OPSTRACE_CLUSTER_NAME}"
+OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH="${OPSTRACE_BUILD_DIR}/kubeconfig_${OPSTRACE_CLUSTER_NAME}"
 
 echo "--- gcloud auth activate-service-account: ${GOOGLE_APPLICATION_CREDENTIALS}"
 # Log in to GCP with service account credentials. Note(JP): the authentication
