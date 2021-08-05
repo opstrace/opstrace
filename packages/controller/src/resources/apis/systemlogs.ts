@@ -25,7 +25,7 @@ import {
 import { State } from "../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { KubeConfig } from "@kubernetes/client-node";
-import { getTenantNamespace } from "../../helpers";
+import { getTenantNamespace, getControllerConfig } from "../../helpers";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function SystemLogAgentResources(
@@ -42,6 +42,17 @@ export function SystemLogAgentResources(
   const tenantNamespace = getTenantNamespace(tenant);
 
   const componentName = `systemlog`;
+
+  const { target } = getControllerConfig(state);
+
+  // We need to use the CRI parser on GKE 1.19+
+  let parser = "";
+  if (target === "gcp") {
+    parser = `  <parse>
+    @type cri
+    merge_cri_fields false
+  </parse>`;
+  }
 
   collection.add(
     new ConfigMap(
@@ -81,6 +92,8 @@ export function SystemLogAgentResources(
   # logs created during system bootstrap before fluentd came up.
   # See opstrace-prelaunch/issues/433
   read_from_head true
+
+  ${parser}
 </source>
 
 <filter kubernetes.**>
