@@ -107,9 +107,7 @@ export async function EKSgetOpstraceClustersAcrossManyRegions(): Promise<
     "us-east-1",
     "us-east-2",
     "us-west-1",
-    "us-west-2",
-    "cn-north-1",
-    "cn-northwest-1"
+    "us-west-2"
   ];
 
   // Fetch, for all regions concurrently.
