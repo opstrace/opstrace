@@ -16,11 +16,7 @@
 
 import { strict as assert } from "assert";
 
-import got, {
-  Got,
-  Response as GotResponse,
-  RetryObject as GotRetryObject
-} from "got";
+import got, { Got, RetryObject, Response as GotResponse } from "got";
 
 import { log } from "./log";
 //import { rndFloatFromInterval } from "./math";
@@ -41,13 +37,13 @@ const httpTimeoutSettings = {
   request: 30000
 };
 
-export function customGotRetryfunc(ro: GotRetryObject): number {
+export function customGotRetryfunc(ro: RetryObject): number {
   // log.debug("retry object: %s", JSON.stringify(ro, null, 2));
 
   // Non-obvious pieces of information:
   // (also see https://github.com/sindresorhus/got/issues/1143)
   //
-  // - The GotRetryObject contains the entire retry configuration, potentially
+  // - The Got RetryObject contains the entire retry configuration, potentially
   //   the _custom_ one if a custom one was set through the `retry` property on
   //   the got client object. See below for an example.
   //
