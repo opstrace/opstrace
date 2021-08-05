@@ -101,6 +101,18 @@ function createServer() {
   // all api routes will be prefixed with _/ which gets us around the service worker cache
   // we don't want these responses cached long term by the service worker
   app.use("/_", api());
+
+  //@ts-ignore: implicit any
+  // app.use(function (err, req, res: Response, next) {
+  //   if (err.name === "UnauthorizedError") {
+  //     log.info(
+  //       `${req.id}: seen UnauthorizedError, send opaque 401 resp. Err detail: ${err.message}`
+  //     );
+  //     res.status(401).send("no valid authentication token found");
+  //     return;
+  //   }
+  // });
+
   // apply post api middleware
   app.use(catchErrorsMiddleware);
   // return the app-shell for PWA
