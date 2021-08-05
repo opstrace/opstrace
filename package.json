@@ -33,7 +33,6 @@
     "eslint-plugin-flowtype": "5.x",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-jsx-a11y": "6.x",
-    "eslint-plugin-prettier": "^3.3.0",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "4.x",
     "husky": "^4.3.0",
