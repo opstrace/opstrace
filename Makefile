@@ -48,7 +48,7 @@ export CHECKOUT_VERSION_STRING ?= $(shell git rev-parse --short=9 HEAD)-dev
 DOCKER_GID_HOST ?= $(shell command -v getent > /dev/null 2>&1 && getent group docker | awk -F: '{print $$3}')
 
 # Allow this to be set via environment, default for local dev setup.
-export OPSTRACE_KUBE_CONFIG_HOST ?= ${HOME}/.kube
+export OPSTRACE_KUBECFG_FILEPATH_ONHOST ?= ${HOME}/.kube
 
 # For the local dev setup set the build dir to be the absolute path to cwd. For
 # example, that is required to make `make test-remote` work when started
@@ -96,7 +96,7 @@ $(info OPSTRACE_CLUSTER_NAME is $(OPSTRACE_CLUSTER_NAME))
 $(info OPSTRACE_BUILD_DIR is $(OPSTRACE_BUILD_DIR))
 $(info OPSTRACE_CLOUD_PROVIDER is $(OPSTRACE_CLOUD_PROVIDER))
 $(info DOCKER_GID_HOST is $(DOCKER_GID_HOST))
-$(info OPSTRACE_KUBE_CONFIG_HOST is $(OPSTRACE_KUBE_CONFIG_HOST))
+$(info OPSTRACE_KUBECFG_FILEPATH_ONHOST is $(OPSTRACE_KUBECFG_FILEPATH_ONHOST))
 $(info CHECKOUT_VERSION_STRING is $(CHECKOUT_VERSION_STRING))
 $(info KERNEL_NAME is $(KERNEL_NAME))
 $(info --------------------------------------------------------------)
@@ -559,18 +559,18 @@ rebuild-looker-container-image:
 
 #
 # Mounts the secrets in the container for gcloud to access the GCP credentials.
-# Note that `OPSTRACE_KUBE_CONFIG_HOST` is not the global kubeconfig on the
+# Note that `OPSTRACE_KUBECFG_FILEPATH_ONHOST` is not the global kubeconfig on the
 # host but more like the path to the kubeconfig directory specific to the CI
 # run on the host file system, i.e. in /tmp, and specifically in
 # OPSTRACE_BUILD_DIR.
 .PHONY: kubectl-cluster-info
 kubectl-cluster-info:
 	docker run --tty --interactive --rm \
-		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${OPSTRACE_KUBECFG_FILEPATH_ONHOST}:/kubeconfig:ro \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets:ro \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
-		-e KUBECONFIG=/kubeconfig/config \
+		-e KUBECONFIG=/kubeconfig \
 		-e AWS_ACCESS_KEY_ID \
 		-e AWS_SECRET_ACCESS_KEY \
 		-e GCLOUD_CLI_REGION \
@@ -608,7 +608,7 @@ test-remote: kubectl-cluster-info
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}/test-remote-artifacts:/test-remote-artifacts \
-		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${OPSTRACE_KUBECFG_FILEPATH_ONHOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-v /build/test/test-remote/node_modules \
@@ -616,7 +616,7 @@ test-remote: kubectl-cluster-info
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-e KUBECONFIG=/kubeconfig/config \
+		-e KUBECONFIG=/kubeconfig \
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
@@ -651,7 +651,7 @@ test-remote-ui-api:
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}/test-remote-artifacts:/test-remote-artifacts \
-		-v ${OPSTRACE_KUBE_CONFIG_HOST}:/kubeconfig:ro \
+		-v ${OPSTRACE_KUBECFG_FILEPATH_ONHOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
 		-v /build/test/test-remote/node_modules \
@@ -659,7 +659,7 @@ test-remote-ui-api:
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-e KUBECONFIG=/kubeconfig/config \
+		-e KUBECONFIG=/kubeconfig \
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
