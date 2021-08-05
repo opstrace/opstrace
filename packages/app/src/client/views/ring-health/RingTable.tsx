@@ -225,9 +225,13 @@ const RingShard = ({
       </TableCell>
       <TableCell>{shard.state}</TableCell>
       <TableCell>
-        {formatDistanceToNow(new Date(shard.timestamp), {
-          addSuffix: true
-        })}
+        {
+          // dirty hack: the timestamp is not in a format recgonised recogised by FireFox or Safari
+          // more info here: https://stackoverflow.com/questions/16616950/date-function-returning-invalid-date-in-safari-and-firefox
+          formatDistanceToNow(new Date(shard.timestamp.replace(/-/g, "/")), {
+            addSuffix: true
+          })
+        }
       </TableCell>
       <TableCell>{shard.zone || "-"}</TableCell>
       <TableCell>{shard.address}</TableCell>
