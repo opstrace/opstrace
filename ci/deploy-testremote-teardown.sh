@@ -308,7 +308,7 @@ else
         set -e
 
         if [ "${EXITCODE_DNS_TRANS}" -ne 0 ]; then
-            echo "gcloud dns ... transaction execute failed.. retry in 5 s "
+            echo "gcloud dns ... transaction execute failed.. retry in 10 s "
             sleep 10
         else
             echo "EXITCODE_DNS_TRANS is 0 -> transaction was accepted, leave loop"
