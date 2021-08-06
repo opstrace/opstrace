@@ -50,8 +50,15 @@ import {
   PutEffect,
   SelectEffect
 } from "redux-saga/effects";
+import createSagaMiddleware from "redux-saga";
 import { eventChannel } from "redux-saga";
-import { Action, CombinedState, combineReducers } from "redux";
+import {
+  Action,
+  CombinedState,
+  applyMiddleware,
+  combineReducers,
+  createStore
+} from "redux";
 
 import { log } from "./index";
 
@@ -105,7 +112,7 @@ export async function deleteAll(resources: K8sResource[]) {
 // Waits for all Deployments/DaemonSets/StatefulSets in the provided list to be Running/Ready.
 // This may be called after deployAll.
 // Note that the specified K8sResources will not be updated.
-export async function* waitForAllReady(
+export async function waitForAllReady(
   kubeConfig: KubeConfig,
   resources: K8sResource[],
   // If there is a flake with pulling a container image, the pull timeout is 5 minutes.
@@ -118,6 +125,26 @@ export async function* waitForAllReady(
   const deployments = resources.filter(r => isDeployment(r)).map(r => r as Deployment);
   const statefulSets = resources.filter(r => isStatefulSet(r)).map(r => r as StatefulSet);
 
+  const sm = createSagaMiddleware({ onError: function (e: Error, detail: any) {
+    log.error("error seen by saga middleware:\n%s", e.stack);
+    if (detail && detail.sagaStack !== undefined) {
+      log.error("saga stack: %s", detail.sagaStack);
+    }
+    throw Error("exiting after saga error");
+  }});
+  createStore(rootReducer, applyMiddleware(sm));
+  await sm.run(function* () {
+    yield waitForAllReadyImpl(kubeConfig, daemonSets, deployments, statefulSets, maxWaitSeconds);
+  }).toPromise();
+}
+
+async function* waitForAllReadyImpl(
+  kubeConfig: KubeConfig,
+  daemonSets: DaemonSet[],
+  deployments: Deployment[],
+  statefulSets: StatefulSet[],
+  maxWaitSeconds: number
+) {
   //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const informers = yield fork(runInformers, kubeConfig);
 

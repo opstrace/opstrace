@@ -336,7 +336,7 @@ async function setupE2EAlertsForTenant(
   // Before deploying anything, delete any existing alertmanager/rulegroup configuration.
   // This avoids an old alert config writing to the newly deployed webhook, making its hit count 1 when we expect 0
   // This should only be a problem when running the same test repeatedly against a cluster.
-  log.info("Deleting any preexisting E2E alerts webhook for tenant=${tenant}");
+  log.info(`Deleting any preexisting E2E alerts webhook for tenant=${tenant}`);
   await deleteE2EAlertsConfig(authTokenFilepath);
 
   log.info("Setting up E2E alerts webhook for tenant=${tenant}");
