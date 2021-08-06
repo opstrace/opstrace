@@ -34,6 +34,24 @@ const serviceNetworking = google.servicenetworking("v1");
 
 const cloudresourcemanager = google.cloudresourcemanager("v1");
 
+/**
+ * Set up VPC Network Peering connection between a service producer's VPC
+ * network and a service consumer's VPC network.
+ *
+ * The VPC peering creation is a long-running operation that is followed with
+ * individual API calls until it either has succeeded or failed. VPC peering
+ * creation is retried upon failure.
+ *
+ * The parameters are explained here:
+ * https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services.connections#Connection
+ *
+ * `network`: The name of service consumer's VPC network that's connected with
+ * service producer network, in the following format:
+ * projects/{project}/global/networks/{network}
+ *
+ * `addressName`: "The name of one IP address range for the service producer",
+ * "of type PEERING."
+ */
 async function peerVpcs({
   addressName,
   network
@@ -41,18 +59,8 @@ async function peerVpcs({
   addressName: string;
   network: string;
 }) {
-  const logpfx = "setup peering cloudSQL-clustervpc";
-
-  // Note(JP): the response represents a long-running operation. Also see
-  // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/operations#Operation
-  // "This resource represents a long-running operation that is the result of a
-  // network API call." The right thing to do is to use that to follow
-  // progress.
-  // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services.connections/create
-  // "If successful, the response body contains a newly created instance of
-  // Operation." Also see https://github.com/opstrace/opstrace/issues/293 for
-  // the importance of following the long-running operation, inspect and log
-  // its errors state etc.
+  const logpfx =
+    "set up peering between CloudSQL VPC and Opstrace instance VPC:";
 
   let operationName: string;
   let attempt = 0;
@@ -245,20 +253,9 @@ export function* ensureCloudSQLExists({
     ipCidrRange
   });
 
-  log.info(`Peering cluster vpc with cloudSQL services vpc`);
+  log.info(`Peering cluster VPC with CloudSQL services VPC`);
   yield call(peerVpcs, { network, addressName });
 
-  // Note(JP): The creation API call may fail with `Invalid request: Incorrect
-  // Service Networking config for instance:
-  // ci-shard-ddd:pr-upgr-bk-5334-24e-g-1628080548325:NETWORK_NOT_PEERED.`
-  // Consider this retryable. Retrying for 2 minutes is sometimes not enough.
-  // Retry much longer. Also see
-  // https://github.com/opstrace/opstrace/issues/293 The network creation API
-  // call triggers a long-running operation (see above). That is, when the
-  // create API call succeeds this does not imply that the creation will indeed
-  // succeed. To make things robust, we need to follow the operation and wait
-  // for it to succeed or fail -- when it fails, the create needs to be
-  // retried.
   let attemptNumber = 0;
   const sqlInstanceCreationDeadline = Date.now() + 15 * 60 * SECOND;
 
