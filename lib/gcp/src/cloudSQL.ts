@@ -210,9 +210,9 @@ async function waitForLongrunningOperationToSucceed(
     }
 
     log.info(
-      `${logpfx}: follow operations ${operationName}: attempt ${attempt} done, retry soon`
+      `${logpfx}: follow operation ${operationName}: attempt ${attempt} done, retry soon`
     );
-    await sleep(5);
+    await sleep(10);
   }
 }
 
