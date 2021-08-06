@@ -87,9 +87,12 @@ export async function EKSgetOpstraceClustersAcrossManyRegions(): Promise<
   // the `opstrace list` operation. Parallelize/batch http requests. Is a bit
   // costly but still fine (especially given the UX win).
 
-  // Enumerate only AWS global regions; omit not local zones and cn-* regions.
+  // Enumerate only AWS global regions; omit "local zones" and cn-* regions.
   //   https://aws.amazon.com/about-aws/global-infrastructure/localzones/
   //   https://www.amazonaws.cn/en/about-aws/regional-product-services/
+  //
+  // Discuss adding cn-* regions: https://github.com/opstrace/opstrace/issues/1202
+
   const regions = [
     "af-south-1",
     "ap-east-1",
