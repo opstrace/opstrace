@@ -226,7 +226,7 @@ const RingShard = ({
       <TableCell>{shard.state}</TableCell>
       <TableCell>
         {
-          // dirty hack: the timestamp is not in a format recgonised recogised by FireFox or Safari
+          // dirty hack: the timestamp is not in a format recgonised recogised by FireFox or Safari, eg: "2021-08-04 05:16:17 +0000 UTC"
           // more info here: https://stackoverflow.com/questions/16616950/date-function-returning-invalid-date-in-safari-and-firefox
           formatDistanceToNow(new Date(shard.timestamp.replace(/-/g, "/")), {
             addSuffix: true

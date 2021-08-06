@@ -20,7 +20,7 @@ import { Shard } from "./RingTable";
 export const createMockShard = (id: string): Required<Shard> => ({
   id: `shard-id-${id}`,
   state: `shard-state-${id}`,
-  timestamp: "2021-05-31T13:02:47+00:00",
+  timestamp: "2021-08-04 05:16:17 +0000 UTC",
   zone: `shard-zone-${id}`,
   address: `shard-address-${id}`,
   tokens: [],
