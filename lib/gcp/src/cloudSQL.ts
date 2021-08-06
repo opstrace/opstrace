@@ -94,7 +94,7 @@ async function peerVpcs({
         // Enter loop for following operation progress (as of the time of
         // writing this is not timeout-controlled, and waits forever until
         // operation either fails permanently or succeeds)
-        if (await waitForLongrunningOperationToSucceed(logpfx, operationName)) {
+        if (await waitForLongrunningOperationToSucceed(operationName, logpfx)) {
           log.info(`${logpfx}: operation completed, leave peerVpcs()`);
           return;
         } else {
