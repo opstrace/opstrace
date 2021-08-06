@@ -20,6 +20,8 @@ import { useParams, useHistory } from "react-router-dom";
 
 import {
   integrationDefRecords,
+  NewIntegration,
+  NewIntegrationOptions,
   showIntegrationPath
 } from "client/integrations";
 
@@ -27,21 +29,15 @@ import {
   addIntegration,
   loadGrafanaStateForIntegration
 } from "state/integration/actions";
-import graphqlClient from "state/clients/graphqlClient";
+import graphqlClient, {
+  isGraphQLClientError
+} from "state/clients/graphqlClient";
 
-import { createFolder } from "client/utils/grafana";
+import { createFolder, isGrafanaError } from "client/utils/grafana";
 
 import NotFound from "client/views/404/404";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
-
-export type NewIntegration = {
-  name: string;
-  data: {};
-};
-
-type NewIntegrationOptions = {
-  createGrafanaFolder?: boolean;
-};
+import { useSimpleNotification } from "client/services/Notification";
 
 export const InstallIntegration = () => {
   const { integrationKind: kind } = useParams<{
@@ -50,37 +46,60 @@ export const InstallIntegration = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
+  const { registerNotification } = useSimpleNotification();
 
   const integration = integrationDefRecords[kind];
   if (!integration) return <NotFound />;
 
-  const onCreate = (data: NewIntegration, options?: NewIntegrationOptions) => {
-    graphqlClient
-      .InsertIntegration({
+  const onCreate = async <IntegrationData,>(
+    data: NewIntegration<IntegrationData>,
+    options?: NewIntegrationOptions
+  ) => {
+    let response;
+    try {
+      response = await graphqlClient.InsertIntegration({
         name: data.name,
         kind: kind,
         data: data.data || {},
         tenant_id: tenant.id
-      })
-      .then(response => {
-        const integration = response?.data?.insert_integration_one;
-        if (integration) {
-          dispatch(addIntegration({ integration }));
-
-          if (options?.createGrafanaFolder) {
-            createFolder({ integration, tenant }).then(() =>
-              dispatch(loadGrafanaStateForIntegration({ id: integration.id }))
-            );
-          }
-
-          history.push(
-            showIntegrationPath({
-              tenant,
-              integration: integration
-            })
-          );
-        }
       });
+    } catch (error) {
+      registerNotification({
+        state: "error" as const,
+        title: "Could not install integration",
+        information: isGraphQLClientError(error)
+          ? error.response.errors![0].message
+          : error.message
+      });
+      return;
+    }
+    const integration = response.data?.insert_integration_one;
+    if (integration) {
+      dispatch(addIntegration({ integration }));
+
+      if (options?.createGrafanaFolder) {
+        try {
+          await createFolder({ integration, tenant });
+        } catch (error) {
+          registerNotification({
+            state: "error" as const,
+            title: "Could not create grafana folder",
+            information: isGrafanaError(error)
+              ? error.response.data.message
+              : error.message
+          });
+          return;
+        }
+        dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
+      }
+
+      history.push(
+        showIntegrationPath({
+          tenant,
+          integration: integration
+        })
+      );
+    }
   };
 
   return <integration.Form handleCreate={onCreate} />;

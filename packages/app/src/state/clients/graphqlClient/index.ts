@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { GraphQLClient } from "graphql-request";
+import { ClientError, GraphQLClient } from "graphql-request";
 import { getSdk } from "state/graphql-api-types";
 export * from "state/graphql-api-types";
 
@@ -42,6 +42,10 @@ export type PromiseReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type ClientResponse<T extends (args?: any) => {}> = PromiseReturnType<
   ReturnType<T>
 >;
+
+export const isGraphQLClientError = (error: Error): error is ClientError => {
+  return error instanceof ClientError;
+};
 
 export { gql } from "graphql-request";
 
