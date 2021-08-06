@@ -49,8 +49,7 @@ import {
   Deployment,
   K8sResource,
   Service,
-  V1ServicemonitorResource,
-  kubernetesError
+  V1ServicemonitorResource
 } from "@opstrace/kubernetes";
 
 import {
@@ -72,6 +71,8 @@ import {
 } from "./testutils";
 
 import {
+  deleteAll,
+  deployAll,
   waitForAllReady
 } from "./testutils/deployment";
 
@@ -81,21 +82,10 @@ import {
 } from "./testutils/metrics";
 
 function getE2EAlertingResources(
+  kubeConfig: KubeConfig,
   tenant: string,
   job: string
 ): Array<K8sResource> {
-  // The test environment should already have kubectl working, so we can use that.
-  const kubeConfig = new KubeConfig();
-  kubeConfig.loadFromDefault();
-  // loadFromDefault will fall back to e.g. localhost if it cant find something.
-  // So let's explicitly try to communicate with the cluster.
-  const kubeContext = kubeConfig.getCurrentContext();
-  if (kubeContext === null) {
-    throw new Error(
-      "Unable to communicate with kubernetes cluster. Is kubectl set up?"
-    );
-  }
-
   const name = "e2ealerting";
   const namespace = `${tenant}-tenant`;
   const matchLabels = {
@@ -338,6 +328,7 @@ async function getE2EAlertCountMetric(
 }
 
 async function setupE2EAlertsForTenant(
+  kubeConfig: KubeConfig,
   authTokenFilepath: string | undefined,
   tenant: string,
   uniqueScrapeJobName: string
@@ -352,30 +343,8 @@ async function setupE2EAlertsForTenant(
   await storeE2EAlertsConfig(authTokenFilepath, tenant);
 
   log.info(`Deploying E2E alerting resources into ${tenant}-tenant namespace`);
-  const resources = getE2EAlertingResources(tenant, uniqueScrapeJobName);
-  for (const r of resources) {
-    try {
-      log.info(`Try to create ${r.constructor.name}: ${r.namespace}/${r.name}`);
-      await r.create();
-    } catch (e) {
-      const err = kubernetesError(e);
-      if (err.statusCode === 409) {
-        // If we're re-running the test against a cluster, ensure things like job labels are updated.
-        log.info("Already exists, doing an update");
-        try {
-          await r.update();
-        } catch (e2) {
-          const err2 = kubernetesError(e2);
-          log.error(`update failed with error: ${err2.message}`);
-          throw e2;
-        }
-      } else {
-        log.error(`create failed with error: ${err.message}`);
-        throw e;
-      }
-    }
-  }
-
+  const resources = getE2EAlertingResources(kubeConfig, tenant, uniqueScrapeJobName);
+  await deployAll(resources);
   return resources;
 }
 
@@ -440,13 +409,27 @@ suite("End-to-end alert tests", function () {
       5
     )}-job`;
 
+    // The test environment should already have kubectl working, so we can use that.
+    const kubeConfig = new KubeConfig();
+    kubeConfig.loadFromDefault();
+    // loadFromDefault will fall back to e.g. localhost if it cant find something.
+    // So let's explicitly try to communicate with the cluster.
+    const kubeContext = kubeConfig.getCurrentContext();
+    if (kubeContext === null) {
+      throw new Error(
+        "Unable to communicate with kubernetes cluster. Is kubectl set up?"
+      );
+    }
+
     // To save time, we set up the default and system tenant E2E environments in parallel
     const defaultTestResources = await setupE2EAlertsForTenant(
+      kubeConfig,
       TENANT_DEFAULT_API_TOKEN_FILEPATH,
       "default",
       defaultUniqueScrapeJobName
     );
     const systemTestResources = await setupE2EAlertsForTenant(
+      kubeConfig,
       TENANT_SYSTEM_API_TOKEN_FILEPATH,
       "system",
       systemUniqueScrapeJobName
@@ -455,7 +438,7 @@ suite("End-to-end alert tests", function () {
 
     // Wait for deployments to be Running/Ready.
     // This may take around 5 minutes if an image pull is flaking/timing out.
-    await waitForAllReady(testResources);
+    await waitForAllReady(kubeConfig, testResources);
 
     // With everything deployed, wait for each of the tenants' alerts to start firing
     await waitForE2EAlertFiring(
@@ -475,20 +458,6 @@ suite("End-to-end alert tests", function () {
     await deleteE2EAlertsConfig(TENANT_SYSTEM_API_TOKEN_FILEPATH);
 
     log.info("Deleting E2E alerting resources");
-    for (const r of testResources) {
-      try {
-        log.info(
-          `Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`
-        );
-        await r.delete();
-      } catch (e) {
-        const err = kubernetesError(e);
-        if (err.statusCode === 404) {
-          log.info("already doesn't exist");
-        } else {
-          throw e;
-        }
-      }
-    }
+    await deleteAll(testResources);
   });
 });
