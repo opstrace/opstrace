@@ -23,8 +23,33 @@ const request = axios.create({
 });
 
 request.defaults.raxConfig = {
+  // For requests that return a transient error (5xx).
   retry: 3,
-  instance: request
+
+  // For transient errors on transport level (DNS resolution, TCP connect()
+  // timeout, recv() timeout)
+  noResponseRetries: 3,
+
+  // Constant delay between attempts.
+  backoffType: "static",
+  // Delay between attempts in ms
+  retryDelay: 4000,
+
+  // HTTP methods to automatically retry
+  httpMethodsToRetry: ["GET", "DELETE", "PUT"],
+
+  // The response status codes to retry. 2 tuple array: list of ranges.
+  statusCodesToRetry: [
+    [100, 199],
+    [429, 429],
+    [500, 599]
+  ],
+
+  onRetryAttempt: function (err) {
+    const cfg = rax.getConfig(err);
+    //@ts-ignore cfg possibly undefined
+    console.log(`Retry attempt #${cfg.currentRetryAttempt} -- error: ${err}`);
+  }
 };
 
 rax.attach(request);
