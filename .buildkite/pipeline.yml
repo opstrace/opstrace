@@ -64,8 +64,13 @@ steps:
       - "unit-tests"
     env:
       # Fetch the latest Opstrace CLI artifact and use that as the initial
-      # cluster version.
-      OPSTRACE_CLI_VERSION_FROM: https://go.otr.dev/cli-latest-release-linux
+      # cluster version. Note(JP): as of instability #293, temporarily use
+      # latest _main_ instead of latest _release_, so that creation of initial
+      # cluster version is more likely to succeed -- revert back to release
+      # once more CI instabilities are fixed, and once the GCP networking
+      # service got more stable again (assuming instabilities on their side
+      # are what's amplifying #293), hopefully in the coming days
+      OPSTRACE_CLI_VERSION_FROM: https://go.otr.dev/cli-latest-linux
       # Use the Opstrace CLI artifact built from the PR branch to upgrade the
       # cluster.
       OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
