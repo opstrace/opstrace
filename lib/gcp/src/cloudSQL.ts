@@ -30,9 +30,7 @@ import {
   ensureAddressExists
 } from "./globalAddress";
 
-const serviceNetworking = google.servicenetworking("v1");
-
-//const cloudresourcemanager = google.cloudresourcemanager("v1");
+const snclient = google.servicenetworking("v1");
 
 /**
  * Set up VPC Network Peering connection between a service producer's VPC
@@ -70,7 +68,7 @@ async function peerVpcs({
     // Trigger CREATE
     let result: any;
     try {
-      result = await serviceNetworking.services.connections.create({
+      result = await snclient.services.connections.create({
         parent: "services/servicenetworking.googleapis.com",
         requestBody: {
           network,
@@ -94,7 +92,13 @@ async function peerVpcs({
         // Enter loop for following operation progress (as of the time of
         // writing this is not timeout-controlled, and waits forever until
         // operation either fails permanently or succeeds)
-        if (await waitForLongrunningOperationToSucceed(operationName, logpfx)) {
+        if (
+          await waitForLongrunningOperationToSucceed(
+            snclient,
+            operationName,
+            logpfx
+          )
+        ) {
           log.info(`${logpfx}: operation completed, leave peerVpcs()`);
           return;
         } else {
@@ -113,17 +117,20 @@ async function peerVpcs({
 }
 
 /**
- * Following operation progress. Wait forever until operation either fails
+ * Follow operation progress. Wait forever until operation either fails
  * permanently or succeeds.
  *
  * https://cloud.google.com/resource-manager/reference/rest/v1/operations/get
  * https://cloud.google.com/build/docs/api/reference/rest/v1/operations
  *
- * @param operationName: a string of the shape operations/pssn.p24-948748128269-bfaca658-11c7-4a9c-821b-b1dafc37231f
- * @param logpfx: a log message prefix added to all log messages, for retaining context
+ * @param operationName: a string of the shape
+ * operations/pssn.p24-948748128269-bfaca658-11c7-4a9c-821b-b1dafc37231f
+ * @param logpfx: a log message prefix added to all log messages, for retaining
+ * context
  * @returns `true` upon success or `false` upon (permanent) failure.
  */
 async function waitForLongrunningOperationToSucceed(
+  apiclient: any,
   operationName: string,
   logpfx: string
 ): Promise<boolean> {
@@ -136,7 +143,7 @@ async function waitForLongrunningOperationToSucceed(
     // Get current operation status
     let result: any;
     try {
-      result = await serviceNetworking.operations.get({
+      result = await apiclient.operations.get({
         name: operationName
       });
     } catch (err) {
