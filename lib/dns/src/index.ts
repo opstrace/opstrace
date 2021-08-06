@@ -19,6 +19,7 @@ import { CreateZoneResponse, DNS } from "@google-cloud/dns";
 import { Route53 } from "aws-sdk";
 import { DNSZone, DNSRecord, Provider } from "./types";
 import { getSubdomain } from "./util";
+export { getSubdomain } from "./util";
 import { DNSClient } from "./opstrace";
 
 import * as GCP from "./gcp";
