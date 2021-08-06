@@ -30,6 +30,8 @@ import { destroyDNSZone } from "@opstrace/dns";
 import { log, getBucketName } from "@opstrace/utils";
 
 import { destroyConfig } from "./index";
+import { getDnsConfig } from "@opstrace/config";
+import { getSubdomain } from "@opstrace/dns";
 
 export function* destroyGCPInfra(): Generator<
   JoinEffect | CallEffect | ForkEffect | Generator<ForkEffect, Task[], Task>,
@@ -131,10 +133,14 @@ export function* destroyGCPInfra(): Generator<
     name: destroyConfig.clusterName
   });
 
-  log.info(
-    `attempt to destroy managed DNS zone for ${destroyConfig.clusterName}.opstrace.io`
-  );
-  yield call(destroyDNSZone, `${destroyConfig.clusterName}.opstrace.io`);
+  const dnsConfig = getDnsConfig("gcp");
+  const subZoneName = getSubdomain({
+    stackName: destroyConfig.clusterName,
+    dnsName: dnsConfig.dnsName
+  });
+
+  log.info(`attempt to destroy managed DNS zone for ${subZoneName}`);
+  yield call(destroyDNSZone, subZoneName);
 
   log.info(
     `Setting Bucket Lifecycle on ${lokiBucketName} to delete after 0 days`
