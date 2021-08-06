@@ -62,24 +62,34 @@ async function peerVpcs({
 
   let operationName: string;
   let attempt = 0;
+
+  const requestparams = {
+    parent: "services/servicenetworking.googleapis.com",
+    requestBody: {
+      network,
+      reservedPeeringRanges: [addressName],
+      service: "servicenetworking.googleapis.com"
+    }
+  };
+
   while (true) {
     attempt += 1;
 
     // Trigger CREATE
+    log.info(`${logpfx}: create with params: ${requestparams}`);
     let result: any;
     try {
-      result = await snclient.services.connections.create({
-        parent: "services/servicenetworking.googleapis.com",
-        requestBody: {
-          network,
-          reservedPeeringRanges: [addressName],
-          service: "servicenetworking.googleapis.com"
-        }
-      });
+      result = await snclient.services.connections.create(requestparams);
     } catch (err) {
       log.error(`${logpfx}: error during services.connections.create: ${err}`);
     }
-    log.debug(`${logpfx}: services.connections.create result: ${result}`);
+    log.debug(
+      `${logpfx}: services.connections.create result: ${JSON.stringify(
+        result,
+        null,
+        2
+      )}`
+    );
 
     // filter for success, exit loop in that case
     if (result !== undefined && result.data !== undefined) {
@@ -260,7 +270,13 @@ export function* ensureCloudSQLExists({
     ipCidrRange
   });
 
-  log.info(`Peering cluster VPC with CloudSQL services VPC`);
+  log.info(
+    `Peering cluster VPC with CloudSQL services VPC: ${JSON.stringify(
+      { network, addressName },
+      null,
+      2
+    )}`
+  );
   yield call(peerVpcs, { network, addressName });
 
   let attemptNumber = 0;
