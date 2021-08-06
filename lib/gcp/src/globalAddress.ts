@@ -107,6 +107,7 @@ export function* ensureAddressExists({
       address &&
       (address.status === "RESERVED" || address.status === "IN_USE")
     ) {
+      log.info(`${addressName} details: ${JSON.stringify(address, null, 2)}`);
       return address;
     }
 
