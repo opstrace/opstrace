@@ -32,7 +32,7 @@ import {
 
 const serviceNetworking = google.servicenetworking("v1");
 
-const cloudresourcemanager = google.cloudresourcemanager("v1");
+//const cloudresourcemanager = google.cloudresourcemanager("v1");
 
 /**
  * Set up VPC Network Peering connection between a service producer's VPC
@@ -60,7 +60,7 @@ async function peerVpcs({
   network: string;
 }) {
   const logpfx =
-    "set up peering between CloudSQL VPC and Opstrace instance VPC:";
+    "set up peering between CloudSQL VPC and Opstrace instance VPC";
 
   let operationName: string;
   let attempt = 0;
@@ -136,7 +136,7 @@ async function waitForLongrunningOperationToSucceed(
     // Get current operation status
     let result: any;
     try {
-      result = await cloudresourcemanager.operations.get({
+      result = await serviceNetworking.operations.get({
         name: operationName
       });
     } catch (err) {
