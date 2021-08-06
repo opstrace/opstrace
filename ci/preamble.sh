@@ -42,6 +42,9 @@ yarn --frozen-lockfile --ignore-optional
 echo "--- lint codebase: quick feedback"
 make lint-codebase
 
+# Enforce consistent code formatting, based on .prettierrc and .prettierignore
+yarn run prettier --check lib/**/*.ts
+
 # This is needed also by the app Docker image build
 make set-build-info-constants
 
