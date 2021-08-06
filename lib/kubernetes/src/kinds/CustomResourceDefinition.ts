@@ -58,7 +58,8 @@ export const crdActions = {
   )<CustomResourceDefinitionType>()
 };
 export type CustomResourceDefinitionActions = ActionType<typeof crdActions>;
-export type CustomResourceDefinitionState = ResourceCache<CustomResourceDefinitionType>;
+export type CustomResourceDefinitionState =
+  ResourceCache<CustomResourceDefinitionType>;
 
 const initialState: CustomResourceDefinitionState = {
   loaded: false,

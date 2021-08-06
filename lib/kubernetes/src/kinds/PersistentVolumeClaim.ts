@@ -61,7 +61,8 @@ export const persistentVolumeClaimActions = {
 export type PersistentVolumeClaimActions = ActionType<
   typeof persistentVolumeClaimActions
 >;
-export type PersistentVolumeClaimState = ResourceCache<PersistentVolumeClaimType>;
+export type PersistentVolumeClaimState =
+  ResourceCache<PersistentVolumeClaimType>;
 
 const initialState: PersistentVolumeClaimState = {
   loaded: false,

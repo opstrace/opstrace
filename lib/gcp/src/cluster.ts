@@ -181,10 +181,8 @@ export function* ensureGKEExists({
   const client = new gkeClient();
 
   while (true) {
-    const existingGKECluster: gkeProtos.google.container.v1.ICluster = yield call(
-      getGKECluster,
-      GKEClusterName
-    );
+    const existingGKECluster: gkeProtos.google.container.v1.ICluster =
+      yield call(getGKECluster, GKEClusterName);
 
     if (!existingGKECluster) {
       try {
@@ -231,10 +229,8 @@ export function* ensureGKEDoesNotExist(
   // current convention: gke cluster name matches OCN.
   const GKEClusterName = opstraceClusterName;
   while (true) {
-    const existingGKECluster: gkeProtos.google.container.v1.ICluster = yield call(
-      getGKECluster,
-      GKEClusterName
-    );
+    const existingGKECluster: gkeProtos.google.container.v1.ICluster =
+      yield call(getGKECluster, GKEClusterName);
 
     if (!existingGKECluster) {
       log.info("GKE teardown: desired state reached");

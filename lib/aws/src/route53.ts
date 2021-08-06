@@ -216,9 +216,10 @@ function isDefaultSOAorNSRecordset(
 export async function sendChangeRequest(
   request: Route53.ChangeResourceRecordSetsRequest
 ): Promise<Route53.ChangeInfo> {
-  const result: Route53.ChangeResourceRecordSetsResponse = await awsPromErrFilter(
-    r53Client().changeResourceRecordSets(request).promise()
-  );
+  const result: Route53.ChangeResourceRecordSetsResponse =
+    await awsPromErrFilter(
+      r53Client().changeResourceRecordSets(request).promise()
+    );
   return result.ChangeInfo;
 }
 

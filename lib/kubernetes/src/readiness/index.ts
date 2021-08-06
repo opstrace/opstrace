@@ -135,7 +135,8 @@ export interface DestroyingReporterResourceInputs {
   PersistentVolumes: PersistentVolumes;
 }
 
-export type GetDestroyingReporterResourceInputs = () => DestroyingReporterResourceInputs;
+export type GetDestroyingReporterResourceInputs =
+  () => DestroyingReporterResourceInputs;
 export interface DestroyingReporterChangeEvent {
   ready: boolean;
   remainingPersistentVolumes: string[];
@@ -188,7 +189,8 @@ export interface RunningReporterResourceInputs {
   Certificates: V1CertificateResource[];
 }
 
-export type GetRunningReporterResourceInputs = () => RunningReporterResourceInputs;
+export type GetRunningReporterResourceInputs =
+  () => RunningReporterResourceInputs;
 export interface RunningReporterChangeEvent {
   ready: boolean;
   activeDeployments: string[];
