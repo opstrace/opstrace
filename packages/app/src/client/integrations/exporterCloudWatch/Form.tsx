@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { ExternalLink } from "client/components/Link";
+import { FormProps } from "../types";
 
 const Schema = yup.object({
   name: yup.string().required(),
@@ -46,23 +47,17 @@ const defaultValues: Values = {
   config: ""
 };
 
-type Props = {
-  handleCreate: (
-    data: {
-      name: string;
-      data: {
-        credentials: {
-          AWS_ACCESS_KEY_ID: string;
-          AWS_SECRET_ACCESS_KEY: string;
-        };
-        config: string;
-      };
-    },
-    options: { createGrafanaFolder: false }
-  ) => void;
+type FormData = {
+  credentials: {
+    AWS_ACCESS_KEY_ID: string;
+    AWS_SECRET_ACCESS_KEY: string;
+  };
+  config: string;
 };
 
-export const ExporterCloudWatchForm = ({ handleCreate }: Props) => {
+export const ExporterCloudWatchForm = ({
+  handleCreate
+}: FormProps<FormData>) => {
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",

@@ -32,10 +32,5 @@ export const ShowIntegration = () => {
 
   if (!integrationDef) return <NotFound />;
 
-  return (
-    <integrationDef.Show
-      integration={integration}
-      integrationDef={integrationDef}
-    />
-  );
+  return <integrationDef.Show />
 };

@@ -28,6 +28,7 @@ import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
+import { FormProps } from "../types";
 
 const Schema = yup.object({
   name: yup.string().required(),
@@ -49,25 +50,17 @@ const defaultValues: Values = {
   config: ""
 };
 
-type Props = {
-  handleCreate: (
-    data: {
-      name: string;
-      data: {
-        credentials: {
-          AZURE_SUBSCRIPTION_ID: string;
-          AZURE_TENANT_ID: string;
-          AZURE_CLIENT_ID: string;
-          AZURE_CLIENT_SECRET: string;
-        };
-        config: string;
-      };
-    },
-    options: { createGrafanaFolder: false }
-  ) => void;
+type FormData = {
+  credentials: {
+    AZURE_SUBSCRIPTION_ID: string;
+    AZURE_TENANT_ID: string;
+    AZURE_CLIENT_ID: string;
+    AZURE_CLIENT_SECRET: string;
+  };
+  config: string;
 };
 
-export const ExporterAzureForm = ({ handleCreate }: Props) => {
+export const ExporterAzureForm = ({ handleCreate }: FormProps<FormData>) => {
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",

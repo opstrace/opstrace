@@ -16,15 +16,10 @@
 
 import React from "react";
 
-import { Integration } from "state/integration/types";
-import { Tenant } from "state/tenant/types";
-
 import ExporterStatus from "client/integrations/common/ExporterStatus";
+import { StatusProps } from "../types";
 
-export const ExporterAzureStatus = (props: {
-  integration: Integration;
-  tenant: Tenant;
-}) => (
+export const ExporterAzureStatus = (props: StatusProps) => (
   <ExporterStatus
     {...props}
     errorFilter={`!= "listening on port :9276"`}

@@ -26,13 +26,8 @@ import orange from "@material-ui/core/colors/orange";
 
 import { usePrometheus } from "client/hooks/useGrafana";
 
-import { Integration, INTEGRATION_STATUS } from "state/integration/types";
-import { Tenant } from "state/tenant/types";
-
-type Props = {
-  integration: Integration;
-  tenant: Tenant;
-};
+import { INTEGRATION_STATUS } from "state/integration/types";
+import { StatusProps } from "../types";
 
 const useStyles = makeStyles(theme => ({
   integrationRow: {
@@ -52,7 +47,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function K8sMetricsStatus({ integration, tenant }: Props) {
+export default function K8sMetricsStatus({ integration, tenant }: StatusProps) {
   const [status, setStatus] = useState("pending");
   const [queryTime, setQueryTime] = useState(new Date());
   const classes = useStyles();

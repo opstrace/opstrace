@@ -16,15 +16,10 @@
 
 import React from "react";
 
-import { Integration } from "state/integration/types";
-import { Tenant } from "state/tenant/types";
-
 import ExporterStatus from "client/integrations/common/ExporterStatus";
+import { StatusProps } from "../types";
 
-export const ExporterCloudMonitoringStatus = (props: {
-  integration: Integration;
-  tenant: Tenant;
-}) => (
+export const ExporterCloudMonitoringStatus = (props: StatusProps) => (
   <ExporterStatus
     {...props}
     errorFilter={`|= "level=error"`}
