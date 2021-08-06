@@ -1,1 +1,4 @@
 *.md
+lib/kubernetes/src/custom-resources/*.ts
+lib/kubernetes/src/crds/**/*.ts
+

@@ -168,12 +168,10 @@ export function* ensureLaunchConfigurationDoesNotExist({
     `Ensuring LaunchConfiguration ${LaunchConfigurationName} does not exist`
   );
   while (true) {
-    const existingLaunchConfiguration: AutoScaling.LaunchConfiguration = yield call(
-      getLaunchConfiguration,
-      {
+    const existingLaunchConfiguration: AutoScaling.LaunchConfiguration =
+      yield call(getLaunchConfiguration, {
         LaunchConfigurationName
-      }
-    );
+      });
 
     if (!existingLaunchConfiguration) {
       break;

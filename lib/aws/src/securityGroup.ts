@@ -256,11 +256,8 @@ export function* ensureSecurityGroupPermissionsDoNotExist({
       break;
     }
 
-    const {
-      IpPermissions,
-      IpPermissionsEgress,
-      GroupId
-    } = existingSecurityGroup;
+    const { IpPermissions, IpPermissionsEgress, GroupId } =
+      existingSecurityGroup;
 
     if (
       (!IpPermissions || IpPermissions.length === 0) &&

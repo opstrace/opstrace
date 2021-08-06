@@ -15,9 +15,9 @@
  */
 
 /**
- * A list of resources which is `undefined` is the equivalent of an empty list. 
+ * A list of resources which is `undefined` is the equivalent of an empty list.
  * To keep the code simple we therefor use `[]` as default parameters.
-*/
+ */
 export const isResourceListEqual = <Resource>(
   desiredList: Array<Resource> = [],
   existingList: Array<Resource> = [],

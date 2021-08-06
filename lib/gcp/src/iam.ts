@@ -156,12 +156,13 @@ async function ensurePolicyBindingExists({
   //
   // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
   //
-  const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
-    resource: sa.projectId ?? undefined,
-    requestBody: {
-      policy: policy
-    }
-  };
+  const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy =
+    {
+      resource: sa.projectId ?? undefined,
+      requestBody: {
+        policy: policy
+      }
+    };
   log.debug(`policy request: ${JSON.stringify(request, null, 2)}`);
 
   await resourcemanager.projects.setIamPolicy(request);
@@ -249,12 +250,13 @@ async function ensurePolicyBindingDoesNotExist({
   //
   // https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy
   //
-  const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy = {
-    resource: sa.projectId ?? undefined,
-    requestBody: {
-      policy: policy
-    }
-  };
+  const request: iam_v1.Params$Resource$Projects$Serviceaccounts$Setiampolicy =
+    {
+      resource: sa.projectId ?? undefined,
+      requestBody: {
+        policy: policy
+      }
+    };
   log.debug(`policy request: ${JSON.stringify(request, null, 2)}`);
 
   await resourcemanager.projects.setIamPolicy(request);

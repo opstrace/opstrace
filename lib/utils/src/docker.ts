@@ -1,30 +1,30 @@
 /**
-* Copyright 2021 Opstrace, Inc.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2021 Opstrace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
-* Check if docker image exists on docker hub. `imageName` is expected to
-* define both the repository and the image tag, separated with a colon.
-*
-* Exit process when image name does not satisfy that requirement or when image
-* does not exist.
-*
-* Note: this is just a pragmatic check trying to help with a workflow trap,
-* may want to allow for overriding this check. Also, upon umbiguous signal
-* (not one of 200 or 404 reponse) do not error out.
-*/
+ * Check if docker image exists on docker hub. `imageName` is expected to
+ * define both the repository and the image tag, separated with a colon.
+ *
+ * Exit process when image name does not satisfy that requirement or when image
+ * does not exist.
+ *
+ * Note: this is just a pragmatic check trying to help with a workflow trap,
+ * may want to allow for overriding this check. Also, upon umbiguous signal
+ * (not one of 200 or 404 reponse) do not error out.
+ */
 
 import got, { Response as GotResponse } from "got";
 
@@ -56,7 +56,9 @@ export async function checkIfDockerImageExistsOrErrorOut(imageName: string) {
     resp = await got(probeUrl, requestSettings);
   } catch (e) {
     if (e instanceof got.RequestError) {
-      log.info(`could not detect presence of docker image: ${e.message} -- ignored, proceed`);
+      log.info(
+        `could not detect presence of docker image: ${e.message} -- ignored, proceed`
+      );
       return;
     } else {
       throw e;
@@ -64,7 +66,9 @@ export async function checkIfDockerImageExistsOrErrorOut(imageName: string) {
   }
 
   if (resp && resp.statusCode == 404) {
-    die("docker image not present on docker hub: you might want to push that first");
+    die(
+      "docker image not present on docker hub: you might want to push that first"
+    );
   }
 
   if (resp && resp.statusCode == 200) {
@@ -90,7 +94,7 @@ export async function checkIfDockerImageExistsOrErrorOut(imageName: string) {
  * @param tag is an image tag.
  * @returns the content of tag following the first ":"
  */
- export function parseVersionFromImageTag(imageName: string): string {
+export function parseVersionFromImageTag(imageName: string): string {
   const splitName = imageName.split(":");
   return splitName.length > 1 ? splitName[1] : "latest";
 }
