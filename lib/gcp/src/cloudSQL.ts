@@ -16,7 +16,7 @@
 
 import { call, delay, CallEffect } from "redux-saga/effects";
 import { google, sql_v1beta4 } from "googleapis";
-import { log, SECOND } from "@opstrace/utils";
+import { log, SECOND, sleep } from "@opstrace/utils";
 import {
   ensureSQLInstanceDoesNotExist,
   ensureSQLInstanceExists
@@ -32,6 +32,8 @@ import {
 
 const serviceNetworking = google.servicenetworking("v1");
 
+const cloudresourcemanager = google.cloudresourcemanager("v1");
+
 async function peerVpcs({
   addressName,
   network
@@ -39,43 +41,170 @@ async function peerVpcs({
   addressName: string;
   network: string;
 }) {
-  try {
-    // Note(JP): the response represents a long-running operation. Also see
-    // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/operations#Operation
-    // "This resource represents a long-running operation that is the result of
-    // a network API call."" The right thing to do is to use that to follow
-    // progress.
-    // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services.connections/create
-    // "If successful, the response body contains a newly created instance of Operation."
-    const res = await serviceNetworking.services.connections.create({
-      parent: "services/servicenetworking.googleapis.com",
-      requestBody: {
-        network,
-        reservedPeeringRanges: [addressName],
-        service: "servicenetworking.googleapis.com"
-      }
-    });
+  const logpfx = "setup peering cloudSQL-clustervpc";
 
-    // There should be a `metadata` key in here somewhere indicating the
-    // progress of the long-running operation.
-    log.debug("services.connections.create result Operation: %s", res);
-    log.debug("res.data: %s", JSON.stringify(res.data, null, 2));
-    log.debug(
-      "res.data.metadata: %s",
-      JSON.stringify(res.data.metadata, null, 2)
-    );
+  // Note(JP): the response represents a long-running operation. Also see
+  // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/operations#Operation
+  // "This resource represents a long-running operation that is the result of a
+  // network API call." The right thing to do is to use that to follow
+  // progress.
+  // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services.connections/create
+  // "If successful, the response body contains a newly created instance of
+  // Operation." Also see https://github.com/opstrace/opstrace/issues/293 for
+  // the importance of following the long-running operation, inspect and log
+  // its errors state etc.
 
-    if (res.data.error) {
-      log.error(
-        "failed creating service peering for cloudSQL and cluster vpc: %",
-        res.data.error
-      );
+  let operationName: string;
+  let attempt = 0;
+  while (true) {
+    attempt += 1;
+
+    // Trigger CREATE
+    let result: any;
+    try {
+      result = await serviceNetworking.services.connections.create({
+        parent: "services/servicenetworking.googleapis.com",
+        requestBody: {
+          network,
+          reservedPeeringRanges: [addressName],
+          service: "servicenetworking.googleapis.com"
+        }
+      });
+    } catch (err) {
+      log.error(`${logpfx}: error during services.connections.create: ${err}`);
     }
-  } catch (e) {
-    log.error(
-      "failed creating service peering for cloudSQL and cluster vpc: %",
-      e
+    log.debug(`${logpfx}: services.connections.create result: ${result}`);
+
+    // filter for success, exit loop in that case
+    if (result !== undefined && result.data !== undefined) {
+      const response = result.data;
+      if (response.name !== undefined) {
+        log.info(`${logpfx}: started log-running operation: ${response.name}`);
+
+        // This is something like "operations/pssn.p24-948748128269-bfaca658-11c7-4a9c-821b-b1dafc37231f"
+        operationName = response.name;
+        // Enter loop for following operation progress (as of the time of
+        // writing this is not timeout-controlled, and waits forever until
+        // operation either fails permanently or succeeds)
+        if (await waitForLongrunningOperationToSucceed(logpfx, operationName)) {
+          log.info(`${logpfx}: operation completed, leave peerVpcs()`);
+          return;
+        } else {
+          log.info(
+            `${logpfx}: operation resulted in permanent error, retry creation from scratch`
+          );
+        }
+      }
+    }
+
+    log.info(
+      `${logpfx}: connections.create(): attempt ${attempt} failed, retry soon`
     );
+    await sleep(5);
+  }
+}
+
+/**
+ * Following operation progress. Wait forever until operation either fails
+ * permanently or succeeds.
+ *
+ * https://cloud.google.com/resource-manager/reference/rest/v1/operations/get
+ * https://cloud.google.com/build/docs/api/reference/rest/v1/operations
+ *
+ * @param operationName: a string of the shape operations/pssn.p24-948748128269-bfaca658-11c7-4a9c-821b-b1dafc37231f
+ * @param logpfx: a log message prefix added to all log messages, for retaining context
+ * @returns `true` upon success or `false` upon (permanent) failure.
+ */
+async function waitForLongrunningOperationToSucceed(
+  operationName: string,
+  logpfx: string
+): Promise<boolean> {
+  log.info(`${logpfx}: follow long-running operation ${operationName}`);
+
+  let attempt = 0;
+  while (true) {
+    attempt += 1;
+
+    // Get current operation status
+    let result: any;
+    try {
+      result = await cloudresourcemanager.operations.get({
+        name: operationName
+      });
+    } catch (err) {
+      log.error(`${logpfx}: error during operations.get: ${err}`);
+    }
+    log.debug(`${logpfx}: operations.get result: ${result}`);
+
+    // Filter for success, exit loop in that case.
+    if (result !== undefined && result.data !== undefined) {
+      // Anatomy of an Operations object:
+      // https://cloud.google.com/resource-manager/reference/rest/Shared.Types/Operation
+      // https://cloud.google.com/resource-manager/reference/rest/Shared.Types/Operation#Status
+      const operation = result.data;
+
+      // Docs about `operation.metadata`: "Service-specific metadata associated
+      // with the operation. It typically contains progress information and
+      // common metadata such as create time"
+      log.info(
+        `${logpfx}: current operation status: ${JSON.stringify(
+          operation,
+          null,
+          2
+        )}`
+      );
+
+      if (operation.error !== undefined) {
+        // Note(JP): As of docs this means that the error is permanent, i.e.
+        // there is no point in waiting for this operation to succeed anymore.
+        // Instead, we should retry creating that operation -- indicate that by
+        // returning `false`.
+        log.info(
+          `${logpfx}: operation failed: ${JSON.stringify(
+            operation.error,
+            null,
+            2
+          )}`
+        );
+
+        // Be sure to also log all error detail, documented with "A list of
+        // messages that carry the error details."
+        log.debug(
+          `${logpfx}: operation failed, err.details: ${JSON.stringify(
+            operation.error.details,
+            null,
+            2
+          )}`
+        );
+
+        return false;
+      }
+
+      if (operation.response !== undefined) {
+        // "The normal response of the operation in case of success"
+        log.info(
+          `${logpfx}: operation seems to have successfully completed. ` +
+            `Response: ${JSON.stringify(operation.response, null, 2)}`
+        );
+
+        if (!operation.done) {
+          // Docs says "if true, the operation is completed, and either error
+          // or response is available.". If that is not true then emit warning,
+          // but don't consider this failed.
+          log.warning(
+            `${logpfx}: operation has response, but 'done' is not true yet`
+          );
+        }
+
+        // Indicate operation success to caller.
+        return true;
+      }
+    }
+
+    log.info(
+      `${logpfx}: follow operations ${operationName}: attempt ${attempt} done, retry soon`
+    );
+    await sleep(5);
   }
 }
 
