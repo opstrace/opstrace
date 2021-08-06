@@ -138,7 +138,7 @@ export async function waitForAllReady(
   }).toPromise();
 }
 
-async function* waitForAllReadyImpl(
+function* waitForAllReadyImpl(
   kubeConfig: KubeConfig,
   daemonSets: DaemonSet[],
   deployments: Deployment[],
