@@ -26,6 +26,7 @@ import { ControlledInput } from "client/components/Form/ControlledInput";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
+import { FormProps } from "../types";
 
 const Schema = yup.object({
   name: yup.string().required(),
@@ -39,14 +40,9 @@ const defaultValues: Values = {
   deployNamespace: "opstrace"
 };
 
-type Props = {
-  handleCreate: (data: {
-    name: string;
-    data: { deployNamespace: string };
-  }) => void;
-};
+type FormData = { deployNamespace: string };
 
-export const K8sMetricsForm = ({ handleCreate }: Props) => {
+export const K8sMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",

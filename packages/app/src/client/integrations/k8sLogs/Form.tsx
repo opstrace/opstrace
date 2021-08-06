@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
+import { FormProps } from "../types";
 
 const Schema = yup.object({
   name: yup.string().required(),
@@ -43,14 +44,9 @@ const defaultValues: Values = {
   format: "cri"
 };
 
-type Props = {
-  handleCreate: (data: {
-    name: string;
-    data: { deployNamespace: string; format: string };
-  }) => void;
-};
+type FormData = { deployNamespace: string; format: string };
 
-export const K8sLogsForm = ({ handleCreate }: Props) => {
+export const K8sLogsForm = ({ handleCreate }: FormProps<FormData>) => {
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",

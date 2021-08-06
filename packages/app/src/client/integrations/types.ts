@@ -14,14 +14,34 @@
  * limitations under the License.
  */
 
-export type IntegrationDef = {
+import { Integration } from "state/integration/types";
+import { Tenant } from "state/tenant/types";
+
+export type FormProps<Data> = {
+  handleCreate: (
+    data: {
+      name: string;
+      data: Data;
+    },
+    options?: { createGrafanaFolder: boolean }
+  ) => void;
+};
+
+export type ShowProps = {};
+
+export type StatusProps = {
+  integration: Integration;
+  tenant: Tenant;
+};
+
+export type IntegrationDef<FormData = {}> = {
   kind: string;
   category: string;
   label: string;
-  desc: string | React.ReactType;
-  Form: React.ReactType;
-  Show: React.ReactType;
-  Status: React.ReactType;
+  desc: React.ReactNode;
+  Form: React.ComponentType<FormProps<FormData>>;
+  Show: React.ComponentType<ShowProps>;
+  Status: React.ComponentType<StatusProps>;
   enabled: boolean;
   Logo?: string;
 };

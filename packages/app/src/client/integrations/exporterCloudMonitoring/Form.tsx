@@ -28,6 +28,7 @@ import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
 import { ExternalLink } from "client/components/Link";
+import { FormProps } from "../types";
 
 const Schema = yup.object({
   name: yup.string().required(),
@@ -52,25 +53,19 @@ const defaultValues: Values = {
   monitoringMetricsOffset: "0s"
 };
 
-type Props = {
-  handleCreate: (
-    data: {
-      name: string;
-      data: {
-        credentials: string;
-        config: {
-          "google.project-id": Array<string>;
-          "monitoring.metrics-type-prefixes": Array<string>;
-          "monitoring.metrics-interval": string;
-          "monitoring.metrics-offset": string;
-        };
-      };
-    },
-    options: { createGrafanaFolder: false }
-  ) => void;
+type FormData = {
+  credentials: string;
+  config: {
+    "google.project-id": Array<string>;
+    "monitoring.metrics-type-prefixes": Array<string>;
+    "monitoring.metrics-interval": string;
+    "monitoring.metrics-offset": string;
+  };
 };
 
-export const ExporterCloudMonitoringForm = ({ handleCreate }: Props) => {
+export const ExporterCloudMonitoringForm = ({
+  handleCreate
+}: FormProps<FormData>) => {
   const { handleSubmit, control } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
