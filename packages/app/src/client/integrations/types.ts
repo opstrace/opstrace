@@ -17,13 +17,19 @@
 import { Integration } from "state/integration/types";
 import { Tenant } from "state/tenant/types";
 
+export type NewIntegration<Data> = {
+  name: string;
+  data: Data;
+};
+
+export type NewIntegrationOptions = {
+  createGrafanaFolder?: boolean;
+};
+
 export type FormProps<Data> = {
   handleCreate: (
-    data: {
-      name: string;
-      data: Data;
-    },
-    options?: { createGrafanaFolder: boolean }
+    data: NewIntegration<Data>,
+    options?: NewIntegrationOptions
   ) => void;
 };
 

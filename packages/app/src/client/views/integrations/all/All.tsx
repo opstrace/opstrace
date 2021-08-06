@@ -54,47 +54,44 @@ const IntegrationDefCards = ({ integrationDefs }: Props) => {
 
   return (
     <Grid container spacing={3}>
-      {integrationDefs.map(i9n => {
-        if (!i9n.enabled) {
-          return null;
-        }
-
-        return (
-          <Grid
-            key={i9n.kind}
-            item
-            xs={12}
-            sm={6}
-            data-test={`integrations/grid/${i9n.kind}`}
-          >
-            <Card>
-              <CardHeader
-                avatar={<img src={i9n.Logo} width={50} height={50} alt="" />}
-                titleTypographyProps={{ variant: "h6" }}
-                title={i9n.label}
-                action={
-                  <Box ml={3} display="flex" flexWrap="wrap">
-                    <Box p={1}>
-                      <Button
-                        variant="contained"
-                        state="primary"
-                        size="small"
-                        disabled={!i9n.enabled}
-                        onClick={() => onAdd(i9n)}
-                      >
-                        Install
-                      </Button>
+      {integrationDefs
+        .filter(i9n => i9n.enabled)
+        .map(i9n => {
+          return (
+            <Grid
+              key={i9n.kind}
+              item
+              xs={12}
+              sm={6}
+              data-test={`integrations/grid/${i9n.kind}`}
+            >
+              <Card>
+                <CardHeader
+                  avatar={<img src={i9n.Logo} width={50} height={50} alt="" />}
+                  titleTypographyProps={{ variant: "h6" }}
+                  title={i9n.label}
+                  action={
+                    <Box ml={3} display="flex" flexWrap="wrap">
+                      <Box p={1}>
+                        <Button
+                          variant="contained"
+                          state="primary"
+                          size="small"
+                          onClick={() => onAdd(i9n)}
+                        >
+                          Install
+                        </Button>
+                      </Box>
                     </Box>
-                  </Box>
-                }
-              />
-              <CardContent>
-                <Typography color="textSecondary">{i9n.desc}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        );
-      })}
+                  }
+                />
+                <CardContent>
+                  <Typography color="textSecondary">{i9n.desc}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
     </Grid>
   );
 };

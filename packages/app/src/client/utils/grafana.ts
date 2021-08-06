@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { isString } from "ramda-adjunct";
 import useSWR from "swr";
 
@@ -144,4 +144,16 @@ export async function createDashboard(
 export const grafanaUrl = ({ tenant }: { tenant: Tenant | string }) => {
   const tenantName = isString(tenant) ? tenant : tenant.name;
   return `${window.location.protocol}//${tenantName}.${window.location.host}`;
+};
+
+// Same as AxiosError<{ message: string }>, but with mandatory "response" field.
+export interface GrafanaError extends AxiosError<{ message: string }> {
+  response: NonNullable<AxiosError<{ message: string }>["response"]>;
+}
+
+export const isGrafanaError = (error: Error): error is GrafanaError => {
+  if (!axios.isAxiosError(error)) {
+    return false;
+  }
+  return !!error.response?.data?.message;
 };
