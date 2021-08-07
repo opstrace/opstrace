@@ -30,6 +30,7 @@ import {
   loadGrafanaStateForIntegration
 } from "state/integration/actions";
 import graphqlClient, {
+  getGraphQLClientErrorMessage,
   isGraphQLClientError
 } from "state/clients/graphqlClient";
 
@@ -68,7 +69,7 @@ export const InstallIntegration = () => {
         state: "error" as const,
         title: "Could not install integration",
         information: isGraphQLClientError(error)
-          ? error.response.errors![0].message
+          ? getGraphQLClientErrorMessage(error)
           : error.message
       });
       return;

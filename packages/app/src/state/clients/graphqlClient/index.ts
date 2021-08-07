@@ -47,6 +47,14 @@ export const isGraphQLClientError = (error: Error): error is ClientError => {
   return error instanceof ClientError;
 };
 
+export const getGraphQLClientErrorMessage = (error: ClientError): string => {
+  try {
+    return error.response.errors![0].message;
+  } catch (e) {
+    return `GraphQL Error (Code: ${error.response.status})`;
+  }
+};
+
 export { gql } from "graphql-request";
 
 export default getSdk(client);
