@@ -68,7 +68,11 @@ export function PrometheusResources(
 
   // For writes use direct cortex or authenticated proxy depending on the tenant
   // TODO: switch non-system tenants to use proxy once they have an auth token available?
-  let remoteWrite: { url: string; bearerTokenFile?: string, headers?: {[name: string] : string} };
+  let remoteWrite: {
+    url: string;
+    bearerTokenFile?: string;
+    headers?: { [name: string]: string };
+  };
 
   // Remote reads are only used by the system tenant
   // Technically this will not work on non-system tenants, but we do not use it.
@@ -89,12 +93,14 @@ export function PrometheusResources(
       )}.svc.cluster.local:8080/api/v1/push`,
       bearerTokenFile: promBearerTokenFile
     };
-    remoteReads = [{
-      url: `http://cortex-api.${getTenantNamespace(
-        tenant
-      )}.svc.cluster.local:8080/api/v1/read`,
-      bearerTokenFile: promBearerTokenFile,
-    }];
+    remoteReads = [
+      {
+        url: `http://cortex-api.${getTenantNamespace(
+          tenant
+        )}.svc.cluster.local:8080/api/v1/read`,
+        bearerTokenFile: promBearerTokenFile
+      }
+    ];
   } else {
     ruleNamespaceSelector = serviceMonitorNamespaceSelector = {
       matchLabels: {
@@ -107,11 +113,10 @@ export function PrometheusResources(
     // See also https://github.com/prometheus-operator/prometheus-operator/pull/3457
     remoteWrite = {
       url: "http://distributor.cortex.svc.cluster.local/api/v1/push",
-      headers: { "X-Scope-OrgID": tenant.name },
+      headers: { "X-Scope-OrgID": tenant.name }
     };
     remoteReads = [];
   }
-
 
   collection.add(
     new Service(

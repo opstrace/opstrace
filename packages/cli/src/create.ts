@@ -89,14 +89,13 @@ export async function create(): Promise<void> {
   // https://github.com/opstrace/opstrace/issues/20
 
   // `tenantApiTokens`: sensitive data, watch out.
-  const [
-    tenant_api_authenticator_pubkey_set_json,
-    tenantApiTokens
-  ] = genCryptoMaterialForAPIAuth(userClusterConfig);
+  const [tenant_api_authenticator_pubkey_set_json, tenantApiTokens] =
+    genCryptoMaterialForAPIAuth(userClusterConfig);
 
   //let gcpProjectID: string | undefined;
   if (cli.CLIARGS.cloudProvider == "gcp") {
-    const gcpopts: GCPAuthOptions = util.gcpValidateCredFileAndGetDetailOrError();
+    const gcpopts: GCPAuthOptions =
+      util.gcpValidateCredFileAndGetDetailOrError();
     log.info("GCP project ID: %s", gcpopts.projectId);
     log.info(
       "GCP service account email notation: %s",
@@ -113,7 +112,8 @@ export async function create(): Promise<void> {
       gcp: infraConfigGCP,
       cloud_provider: cli.CLIARGS.cloudProvider,
       cluster_name: cli.CLIARGS.instanceName,
-      tenant_api_authenticator_pubkey_set_json: tenant_api_authenticator_pubkey_set_json
+      tenant_api_authenticator_pubkey_set_json:
+        tenant_api_authenticator_pubkey_set_json
     }
   };
 

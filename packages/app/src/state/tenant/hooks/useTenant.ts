@@ -56,16 +56,15 @@ export function useSelectedTenantWithFallback(): Tenant {
 
 export function useSelectedTenant() {
   // Assumes we use the structure in our URL /tenant/<tenantId>/*
-  const tenantRouteMatch = useRouteMatch<{ tenantId: string }>(
-    "/tenant/:tenantId"
-  );
+  const tenantRouteMatch =
+    useRouteMatch<{ tenantId: string }>("/tenant/:tenantId");
   return useTenant(tenantRouteMatch?.params.tenantId || "");
 }
 
 export const useLastSelectedTenant = () => {
   /* The difference between `useSelectedTenant` and `useLastSelectedTenant`
    * is that the latter remembers the last, previous selected tenant in case
-   * none is selected right now. 
+   * none is selected right now.
    */
   const tenant = useSelectedTenant();
   const [lastSelectedTenant, setLastSelectedTenant] = useState(tenant);

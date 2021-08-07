@@ -58,9 +58,8 @@ export function CortexAPIResources(
     resources: {}
   };
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(
-    state
-  );
+  const controllerConfig: LatestControllerConfigType =
+    getControllerConfig(state);
 
   const namespace = getTenantNamespace(tenant);
 

@@ -17,13 +17,8 @@
 import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../../reducer";
 import { Tenant } from "@opstrace/tenants";
-import {
-  getTenantNamespace
-} from "../../../helpers";
-import {
-  ResourceCollection,
-  Service,
-} from "@opstrace/kubernetes";
+import { getTenantNamespace } from "../../../helpers";
+import { ResourceCollection, Service } from "@opstrace/kubernetes";
 
 export function AlertManagerResources(
   state: State,

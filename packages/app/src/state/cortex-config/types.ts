@@ -271,7 +271,8 @@ export const cortexLimitsSchema = yup.object({
 export type CortexLimits = yup.InferType<typeof cortexLimitsSchema>;
 export const CortexLimitsSchemaDescription = cortexLimitsSchema.fields;
 export type CortexLimitsKeys = keyof typeof CortexLimitsSchemaDescription;
-export type CortexLimitsValues = typeof CortexLimitsSchemaDescription[CortexLimitsKeys];
+export type CortexLimitsValues =
+  typeof CortexLimitsSchemaDescription[CortexLimitsKeys];
 
 export type RuntimeConfig = {
   overrides: {

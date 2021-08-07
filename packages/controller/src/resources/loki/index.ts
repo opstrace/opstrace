@@ -52,13 +52,8 @@ export function LokiResources(
   namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
-  const {
-    infrastructureName,
-    target,
-    region,
-    gcp,
-    logRetentionDays
-  } = getControllerConfig(state);
+  const { infrastructureName, target, region, gcp, logRetentionDays } =
+    getControllerConfig(state);
 
   const dataBucketName = getBucketName({
     clusterName: infrastructureName,

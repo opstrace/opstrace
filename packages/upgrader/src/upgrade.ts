@@ -138,12 +138,10 @@ export function* upgradeInfra(cloudProvider: string) {
       break;
     }
     case "gcp": {
-      const gcpCredFilePath: string = process.env[
-        "GOOGLE_APPLICATION_CREDENTIALS"
-      ]!;
-      const gcpAuthOptions = getValidatedGCPAuthOptionsFromFile(
-        gcpCredFilePath
-      );
+      const gcpCredFilePath: string =
+        process.env["GOOGLE_APPLICATION_CREDENTIALS"]!;
+      const gcpAuthOptions =
+        getValidatedGCPAuthOptionsFromFile(gcpCredFilePath);
 
       const res: EnsureInfraExistsResponse = yield call(
         ensureGCPInfraExists,

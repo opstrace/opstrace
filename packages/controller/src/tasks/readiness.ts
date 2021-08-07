@@ -31,12 +31,8 @@ function* getRunningReporterResources() {
   //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   return yield call(function* () {
     const state: State = yield select();
-    const {
-      DaemonSets,
-      Deployments,
-      StatefulSets,
-      Certificates
-    } = state.kubernetes.cluster;
+    const { DaemonSets, Deployments, StatefulSets, Certificates } =
+      state.kubernetes.cluster;
 
     const resources: RunningReporterResourceInputs = {
       DaemonSets: DaemonSets.resources,
@@ -67,9 +63,9 @@ function resourceStatusLogMessage(
   ) {
     // Each entry contains diagnostic info around e.g. waiting for a replicaset to roll out
     // Log the status of the remaining items when there are only a few left
-    return `Waiting for ${rolloutMessages.length} active ${resourceType}s:\n- ${rolloutMessages.join(
-      "\n- "
-    )}`;
+    return `Waiting for ${
+      rolloutMessages.length
+    } active ${resourceType}s:\n- ${rolloutMessages.join("\n- ")}`;
   } else {
     return `Waiting for ${rolloutMessages.length} active ${resourceType}s`;
   }

@@ -40,7 +40,6 @@ export const receiverSchema: yup.SchemaOf<Receiver> = yup
     wechat_configs: yup.array().of(wechatConfigSchema).notRequired()
   })
   .meta({
-    url:
-      "https://www.prometheus.io/docs/alerting/latest/configuration/#receiver"
+    url: "https://www.prometheus.io/docs/alerting/latest/configuration/#receiver"
   })
   .noUnknown();

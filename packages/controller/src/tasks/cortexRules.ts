@@ -35,7 +35,9 @@ export function* cortexSystemRulesReconciler(): Generator<
 > {
   return yield call(function* () {
     if (rulerEndpoint === "") {
-      log.info("disabled system alert rules reconciliation: ruler endpoint not configured");
+      log.info(
+        "disabled system alert rules reconciliation: ruler endpoint not configured"
+      );
       return;
     }
 

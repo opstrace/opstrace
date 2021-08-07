@@ -57,13 +57,8 @@ export function CertManagerResources(
   //@ts-ignore: some of the versions in the CRD don't align with the extenstions/v1 CustomResourceDefinition.
   collection.add(new CustomResourceDefinition(orders, kubeConfig));
 
-  const {
-    target,
-    region,
-    aws,
-    gcp,
-    tlsCertificateIssuer
-  } = getControllerConfig(state);
+  const { target, region, aws, gcp, tlsCertificateIssuer } =
+    getControllerConfig(state);
 
   let dns01 = {};
 

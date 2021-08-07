@@ -30,61 +30,49 @@ type FormState = Record<string, FormRecords>;
 const FormInitialState: FormState = {};
 
 export const reducer = createReducer<FormState, FormActions>(FormInitialState)
-  .handleAction(
-    actions.registerForm,
-    (state, action): FormState => {
-      const { id, status, data } = action.payload;
-      const { type, code } = expandFormId(id);
-      if (hasPath([type, code])(state)) return state;
-      else
-        return mergePath(
-          [type, code],
-          newForm(type, code, status, data || {}),
-          state
-        ) as FormState;
-    }
-  )
-  .handleAction(
-    actions.unregisterForm,
-    (state, action): FormState => {
-      const { type, code } = expandFormId(action.payload);
-      return dissocPath([type, code], state);
-    }
-  )
-  .handleAction(
-    actions.updateFormStatus,
-    (state, action): FormState => {
-      const { id, status } = action.payload;
-      const { type, code } = expandFormId(id);
-      if (hasPath([type, code])(state))
-        return mergePath([type, code], { status }, state) as FormState;
-      else return state;
-    }
-  )
-  .handleAction(
-    actions.updateForm,
-    (state, action): FormState => {
-      const { id, status, data, replaceData } = action.payload;
-      const { type, code } = expandFormId(id);
-      const form = path<Form>([type, code])(state);
-      if (form) {
-        if (replaceData === true) {
-          return mergePath([type, code], { status, data }, state) as FormState;
-          // return mergeDeepWithKey(
-          //   (k, l, r) => (k === "data" || k === "status" ? r : l),
-          //   state
-          // )({
-          //   [type]: { [code]: { status, data } }
-          // });
-        } else
-          return mergeDeepRight(state)({
-            [type]: {
-              [code]: {
-                status: status || form?.status,
-                data: data
-              }
+  .handleAction(actions.registerForm, (state, action): FormState => {
+    const { id, status, data } = action.payload;
+    const { type, code } = expandFormId(id);
+    if (hasPath([type, code])(state)) return state;
+    else
+      return mergePath(
+        [type, code],
+        newForm(type, code, status, data || {}),
+        state
+      ) as FormState;
+  })
+  .handleAction(actions.unregisterForm, (state, action): FormState => {
+    const { type, code } = expandFormId(action.payload);
+    return dissocPath([type, code], state);
+  })
+  .handleAction(actions.updateFormStatus, (state, action): FormState => {
+    const { id, status } = action.payload;
+    const { type, code } = expandFormId(id);
+    if (hasPath([type, code])(state))
+      return mergePath([type, code], { status }, state) as FormState;
+    else return state;
+  })
+  .handleAction(actions.updateForm, (state, action): FormState => {
+    const { id, status, data, replaceData } = action.payload;
+    const { type, code } = expandFormId(id);
+    const form = path<Form>([type, code])(state);
+    if (form) {
+      if (replaceData === true) {
+        return mergePath([type, code], { status, data }, state) as FormState;
+        // return mergeDeepWithKey(
+        //   (k, l, r) => (k === "data" || k === "status" ? r : l),
+        //   state
+        // )({
+        //   [type]: { [code]: { status, data } }
+        // });
+      } else
+        return mergeDeepRight(state)({
+          [type]: {
+            [code]: {
+              status: status || form?.status,
+              data: data
             }
-          });
-      } else return state;
-    }
-  );
+          }
+        });
+    } else return state;
+  });

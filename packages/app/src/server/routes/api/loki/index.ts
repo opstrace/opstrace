@@ -28,26 +28,24 @@ export const lokiProxy = httpProxy.createProxyServer({ ignorePath: true });
  */
 lokiProxy.on("proxyReq", onProxyReq);
 
-const proxyTo = (target: string) => (
-  req: express.Request,
-  res: express.Response
-) => {
-  return lokiProxy.web(
-    req,
-    res,
-    {
-      target,
-      headers: req.params.tenant
-        ? {
-            "X-Scope-OrgID": req.params.tenant
-          }
-        : {}
-    },
-    (err: Error) => {
-      log.warning("error in http loki proxy upstream (ignoring): %s", err);
-    }
-  );
-};
+const proxyTo =
+  (target: string) => (req: express.Request, res: express.Response) => {
+    return lokiProxy.web(
+      req,
+      res,
+      {
+        target,
+        headers: req.params.tenant
+          ? {
+              "X-Scope-OrgID": req.params.tenant
+            }
+          : {}
+      },
+      (err: Error) => {
+        log.warning("error in http loki proxy upstream (ignoring): %s", err);
+      }
+    );
+  };
 
 export default function createLokiHandler(): express.Router {
   const loki = express.Router();

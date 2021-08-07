@@ -279,10 +279,8 @@ export async function awsGetClusterRegionDynamic(
 ): Promise<list.EKSOpstraceClusterRegionRelation | undefined> {
   log.info("starting lookup of matching EKS cluster accross AWS regions");
 
-  const ocnRegionMap: Record<
-    string,
-    list.EKSOpstraceClusterRegionRelation
-  > = {};
+  const ocnRegionMap: Record<string, list.EKSOpstraceClusterRegionRelation> =
+    {};
   for (const c of await list.EKSgetOpstraceClustersAcrossManyRegions()) {
     ocnRegionMap[c.opstraceClusterName] = c;
   }

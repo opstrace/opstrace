@@ -58,59 +58,41 @@ export const initialState: PickerState = {
 };
 
 export const pickerReducer = createReducer<PickerState, Actions>(initialState)
-  .handleAction(
-    actions.register,
-    (state, action): PickerState => {
-      const providers = removeProvider(state.providers, action.payload).concat(
-        action.payload
-      );
-      const activeProviderIndex = findActiveProviderIndex(
-        state.text,
-        providers
-      );
-      return {
-        ...state,
-        providers,
-        activeProviderIndex
-      };
-    }
-  )
-  .handleAction(
-    actions.unregister,
-    (state, action): PickerState => {
-      const providers = removeProvider(state.providers, action.payload);
-      const activeProviderIndex = findActiveProviderIndex(
-        state.text,
-        providers
-      );
-      return {
-        ...state,
-        providers,
-        activeProviderIndex
-      };
-    }
-  )
-  .handleAction(
-    actions.close,
-    (state, _): PickerState => {
-      return {
-        ...state,
-        activeProviderIndex: -1,
-        text: null
-      };
-    }
-  )
-  .handleAction(
-    actions.setText,
-    (state, action): PickerState => {
-      const activeProviderIndex = findActiveProviderIndex(
-        action.payload,
-        state.providers
-      );
-      return {
-        ...state,
-        text: action.payload,
-        activeProviderIndex
-      };
-    }
-  );
+  .handleAction(actions.register, (state, action): PickerState => {
+    const providers = removeProvider(state.providers, action.payload).concat(
+      action.payload
+    );
+    const activeProviderIndex = findActiveProviderIndex(state.text, providers);
+    return {
+      ...state,
+      providers,
+      activeProviderIndex
+    };
+  })
+  .handleAction(actions.unregister, (state, action): PickerState => {
+    const providers = removeProvider(state.providers, action.payload);
+    const activeProviderIndex = findActiveProviderIndex(state.text, providers);
+    return {
+      ...state,
+      providers,
+      activeProviderIndex
+    };
+  })
+  .handleAction(actions.close, (state, _): PickerState => {
+    return {
+      ...state,
+      activeProviderIndex: -1,
+      text: null
+    };
+  })
+  .handleAction(actions.setText, (state, action): PickerState => {
+    const activeProviderIndex = findActiveProviderIndex(
+      action.payload,
+      state.providers
+    );
+    return {
+      ...state,
+      text: action.payload,
+      activeProviderIndex
+    };
+  });

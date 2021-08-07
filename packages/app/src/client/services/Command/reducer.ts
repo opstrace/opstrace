@@ -82,37 +82,31 @@ export const commandServiceReducer = createReducer<
   CommandServiceState,
   Actions
 >(initialState)
-  .handleAction(
-    actions.register,
-    (state, action): CommandServiceState => {
-      // add new commands to the front of the array so we execute
-      // commands in order of most recently registered
-      const commands = [action.payload].concat(
-        removeCommand(state.commands, action.payload)
-      );
-      const keyBindings = addKeyBindingsForCommand(
-        state.keyBindings,
-        action.payload
-      );
-      return {
-        ...state,
-        commands,
-        keyBindings
-      };
-    }
-  )
-  .handleAction(
-    actions.unregister,
-    (state, action): CommandServiceState => {
-      const commands = removeCommand(state.commands, action.payload);
-      const keyBindings = removeKeyBindingsForCommand(
-        state.keyBindings,
-        action.payload
-      );
-      return {
-        ...state,
-        commands,
-        keyBindings
-      };
-    }
-  );
+  .handleAction(actions.register, (state, action): CommandServiceState => {
+    // add new commands to the front of the array so we execute
+    // commands in order of most recently registered
+    const commands = [action.payload].concat(
+      removeCommand(state.commands, action.payload)
+    );
+    const keyBindings = addKeyBindingsForCommand(
+      state.keyBindings,
+      action.payload
+    );
+    return {
+      ...state,
+      commands,
+      keyBindings
+    };
+  })
+  .handleAction(actions.unregister, (state, action): CommandServiceState => {
+    const commands = removeCommand(state.commands, action.payload);
+    const keyBindings = removeKeyBindingsForCommand(
+      state.keyBindings,
+      action.payload
+    );
+    return {
+      ...state,
+      commands,
+      keyBindings
+    };
+  });

@@ -28,8 +28,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary:
             "Filesystem is predicted to run out of space within the next 24 hours."
         },
-        expr:
-          '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} < 0.4\nand\n  predict_linear(node_filesystem_avail_bytes{job="node-exporter",}[6h], 24*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} < 0.4\nand\n  predict_linear(node_filesystem_avail_bytes{job="node-exporter",}[6h], 24*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "warning"
@@ -45,8 +44,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary:
             "Filesystem is predicted to run out of space within the next 4 hours."
         },
-        expr:
-          '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} < 0.2\nand\n  predict_linear(node_filesystem_avail_bytes{job="node-exporter",}[6h], 4*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} < 0.2\nand\n  predict_linear(node_filesystem_avail_bytes{job="node-exporter",}[6h], 4*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "critical"
@@ -61,8 +59,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-nodefilesystemalmostoutofspace",
           summary: "Filesystem has less than 5% space left."
         },
-        expr:
-          '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} * 100 < 5\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} * 100 < 5\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "warning"
@@ -77,8 +74,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-nodefilesystemalmostoutofspace",
           summary: "Filesystem has less than 3% space left."
         },
-        expr:
-          '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} * 100 < 3\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_avail_bytes{job="node-exporter",} / node_filesystem_size_bytes{job="node-exporter",} * 100 < 3\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "critical"
@@ -94,8 +90,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary:
             "Filesystem is predicted to run out of inodes within the next 24 hours."
         },
-        expr:
-          '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} < 0.4\nand\n  predict_linear(node_filesystem_files_free{job="node-exporter",}[6h], 24*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} < 0.4\nand\n  predict_linear(node_filesystem_files_free{job="node-exporter",}[6h], 24*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "warning"
@@ -111,8 +106,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary:
             "Filesystem is predicted to run out of inodes within the next 4 hours."
         },
-        expr:
-          '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} < 0.2\nand\n  predict_linear(node_filesystem_files_free{job="node-exporter",}[6h], 4*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} < 0.2\nand\n  predict_linear(node_filesystem_files_free{job="node-exporter",}[6h], 4*60*60) < 0\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "critical"
@@ -127,8 +121,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-nodefilesystemalmostoutoffiles",
           summary: "Filesystem has less than 5% inodes left."
         },
-        expr:
-          '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} * 100 < 5\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} * 100 < 5\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "warning"
@@ -143,8 +136,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-nodefilesystemalmostoutoffiles",
           summary: "Filesystem has less than 3% inodes left."
         },
-        expr:
-          '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} * 100 < 3\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
+        expr: '(\n  node_filesystem_files_free{job="node-exporter",} / node_filesystem_files{job="node-exporter",} * 100 < 3\nand\n  node_filesystem_readonly{job="node-exporter",} == 0\n)\n',
         for: "1h",
         labels: {
           severity: "critical"
@@ -252,8 +244,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodcrashlooping"
         },
-        expr:
-          'rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[15m]) * 60 * 5 > 0\n',
+        expr: 'rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[15m]) * 60 * 5 > 0\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -267,8 +258,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodnotready"
         },
-        expr:
-          'sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown"}) > 0\n',
+        expr: 'sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown"}) > 0\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -282,8 +272,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedeploymentgenerationmismatch"
         },
-        expr:
-          'kube_deployment_status_observed_generation{job="kube-state-metrics"}\n  !=\nkube_deployment_metadata_generation{job="kube-state-metrics"}\n',
+        expr: 'kube_deployment_status_observed_generation{job="kube-state-metrics"}\n  !=\nkube_deployment_metadata_generation{job="kube-state-metrics"}\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -297,8 +286,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedeploymentreplicasmismatch"
         },
-        expr:
-          'kube_deployment_spec_replicas{job="kube-state-metrics"}\n  !=\nkube_deployment_status_replicas_available{job="kube-state-metrics"}\n',
+        expr: 'kube_deployment_spec_replicas{job="kube-state-metrics"}\n  !=\nkube_deployment_status_replicas_available{job="kube-state-metrics"}\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -312,8 +300,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubestatefulsetreplicasmismatch"
         },
-        expr:
-          'kube_statefulset_status_replicas_ready{job="kube-state-metrics"}\n  !=\nkube_statefulset_status_replicas{job="kube-state-metrics"}\n',
+        expr: 'kube_statefulset_status_replicas_ready{job="kube-state-metrics"}\n  !=\nkube_statefulset_status_replicas{job="kube-state-metrics"}\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -327,8 +314,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubestatefulsetgenerationmismatch"
         },
-        expr:
-          'kube_statefulset_status_observed_generation{job="kube-state-metrics"}\n  !=\nkube_statefulset_metadata_generation{job="kube-state-metrics"}\n',
+        expr: 'kube_statefulset_status_observed_generation{job="kube-state-metrics"}\n  !=\nkube_statefulset_metadata_generation{job="kube-state-metrics"}\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -342,8 +328,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubestatefulsetupdatenotrolledout"
         },
-        expr:
-          'max without (revision) (\n  kube_statefulset_status_current_revision{job="kube-state-metrics"}\n    unless\n  kube_statefulset_status_update_revision{job="kube-state-metrics"}\n)\n  *\n(\n  kube_statefulset_replicas{job="kube-state-metrics"}\n    !=\n  kube_statefulset_status_replicas_updated{job="kube-state-metrics"}\n)\n',
+        expr: 'max without (revision) (\n  kube_statefulset_status_current_revision{job="kube-state-metrics"}\n    unless\n  kube_statefulset_status_update_revision{job="kube-state-metrics"}\n)\n  *\n(\n  kube_statefulset_replicas{job="kube-state-metrics"}\n    !=\n  kube_statefulset_status_replicas_updated{job="kube-state-metrics"}\n)\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -357,8 +342,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedaemonsetrolloutstuck"
         },
-        expr:
-          'kube_daemonset_status_number_ready{job="kube-state-metrics"}\n  /\nkube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"} * 100 < 100\n',
+        expr: 'kube_daemonset_status_number_ready{job="kube-state-metrics"}\n  /\nkube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"} * 100 < 100\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -372,8 +356,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedaemonsetnotscheduled"
         },
-        expr:
-          'kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}\n  -\nkube_daemonset_status_current_number_scheduled{job="kube-state-metrics"} > 0\n',
+        expr: 'kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}\n  -\nkube_daemonset_status_current_number_scheduled{job="kube-state-metrics"} > 0\n',
         for: "10m",
         labels: {
           severity: "warning"
@@ -387,8 +370,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedaemonsetmisscheduled"
         },
-        expr:
-          'kube_daemonset_status_number_misscheduled{job="kube-state-metrics"} > 0\n',
+        expr: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics"} > 0\n',
         for: "10m",
         labels: {
           severity: "warning"
@@ -402,8 +384,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubecronjobrunning"
         },
-        expr:
-          'time() - kube_cronjob_next_schedule_time{job="kube-state-metrics"} > 3600\n',
+        expr: 'time() - kube_cronjob_next_schedule_time{job="kube-state-metrics"} > 3600\n',
         for: "1h",
         labels: {
           severity: "warning"
@@ -417,8 +398,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubejobcompletion"
         },
-        expr:
-          'kube_job_spec_completions{job="kube-state-metrics"} - kube_job_status_succeeded{job="kube-state-metrics"}  > 0\n',
+        expr: 'kube_job_spec_completions{job="kube-state-metrics"} - kube_job_status_succeeded{job="kube-state-metrics"}  > 0\n',
         for: "1h",
         labels: {
           severity: "warning"
@@ -451,8 +431,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubecpuovercommit"
         },
-        expr:
-          "sum(namespace:kube_pod_container_resource_requests_cpu_cores:sum)\n  /\nsum(kube_node_status_allocatable_cpu_cores)\n  >\n(count(kube_node_status_allocatable_cpu_cores)-1) / count(kube_node_status_allocatable_cpu_cores)\n",
+        expr: "sum(namespace:kube_pod_container_resource_requests_cpu_cores:sum)\n  /\nsum(kube_node_status_allocatable_cpu_cores)\n  >\n(count(kube_node_status_allocatable_cpu_cores)-1) / count(kube_node_status_allocatable_cpu_cores)\n",
         for: "5m",
         labels: {
           severity: "warning"
@@ -466,8 +445,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememovercommit"
         },
-        expr:
-          "sum(namespace:kube_pod_container_resource_requests_memory_bytes:sum)\n  /\nsum(kube_node_status_allocatable_memory_bytes)\n  >\n(count(kube_node_status_allocatable_memory_bytes)-1)\n  /\ncount(kube_node_status_allocatable_memory_bytes)\n",
+        expr: "sum(namespace:kube_pod_container_resource_requests_memory_bytes:sum)\n  /\nsum(kube_node_status_allocatable_memory_bytes)\n  >\n(count(kube_node_status_allocatable_memory_bytes)-1)\n  /\ncount(kube_node_status_allocatable_memory_bytes)\n",
         for: "5m",
         labels: {
           severity: "warning"
@@ -481,8 +459,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubecpuovercommit"
         },
-        expr:
-          'sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="cpu"})\n  /\nsum(kube_node_status_allocatable_cpu_cores)\n  > 1.5\n',
+        expr: 'sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="cpu"})\n  /\nsum(kube_node_status_allocatable_cpu_cores)\n  > 1.5\n',
         for: "5m",
         labels: {
           severity: "warning"
@@ -496,8 +473,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememovercommit"
         },
-        expr:
-          'sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="memory"})\n  /\nsum(kube_node_status_allocatable_memory_bytes{job="node-exporter"})\n  > 1.5\n',
+        expr: 'sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="memory"})\n  /\nsum(kube_node_status_allocatable_memory_bytes{job="node-exporter"})\n  > 1.5\n',
         for: "5m",
         labels: {
           severity: "warning"
@@ -511,8 +487,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubequotaexceeded"
         },
-        expr:
-          '100 * kube_resourcequota{job="kube-state-metrics", type="used"}\n  / ignoring(instance, job, type)\n(kube_resourcequota{job="kube-state-metrics", type="hard"} > 0)\n  > 90\n',
+        expr: '100 * kube_resourcequota{job="kube-state-metrics", type="used"}\n  / ignoring(instance, job, type)\n(kube_resourcequota{job="kube-state-metrics", type="hard"} > 0)\n  > 90\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -529,8 +504,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-cputhrottlinghigh"
         },
-        expr:
-          '100 * sum(increase(container_cpu_cfs_throttled_periods_total{namespace!="kube-system", container!~".*config-reloader"\n}[5m])) by (container, pod, namespace)\n  /\nsum(increase(container_cpu_cfs_periods_total{}[5m]))\nby (container, pod, namespace)\n  > 25 \n',
+        expr: '100 * sum(increase(container_cpu_cfs_throttled_periods_total{namespace!="kube-system", container!~".*config-reloader"\n}[5m])) by (container, pod, namespace)\n  /\nsum(increase(container_cpu_cfs_periods_total{}[5m]))\nby (container, pod, namespace)\n  > 25 \n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -549,8 +523,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumeusagecritical"
         },
-        expr:
-          '100 * kubelet_volume_stats_available_bytes{job="kubelet"}\n  /\nkubelet_volume_stats_capacity_bytes{job="kubelet"}\n  < 3\n',
+        expr: '100 * kubelet_volume_stats_available_bytes{job="kubelet"}\n  /\nkubelet_volume_stats_capacity_bytes{job="kubelet"}\n  < 3\n',
         for: "1m",
         labels: {
           severity: "critical"
@@ -564,8 +537,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumefullinfourdays"
         },
-        expr:
-          '100 * (\n  kubelet_volume_stats_available_bytes{job="kubelet"}\n    /\n  kubelet_volume_stats_capacity_bytes{job="kubelet"}\n) < 15\nand\npredict_linear(kubelet_volume_stats_available_bytes{job="kubelet"}[6h], 4 * 24 * 3600) < 0\n',
+        expr: '100 * (\n  kubelet_volume_stats_available_bytes{job="kubelet"}\n    /\n  kubelet_volume_stats_capacity_bytes{job="kubelet"}\n) < 15\nand\npredict_linear(kubelet_volume_stats_available_bytes{job="kubelet"}[6h], 4 * 24 * 3600) < 0\n',
         for: "5m",
         labels: {
           severity: "critical"
@@ -579,8 +551,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumeerrors"
         },
-        expr:
-          'kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics"} > 0\n',
+        expr: 'kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics"} > 0\n',
         for: "5m",
         labels: {
           severity: "critical"
@@ -598,8 +569,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubenodenotready"
         },
-        expr:
-          'kube_node_status_condition{job="kube-state-metrics",condition="Ready",status="true"} == 0\n',
+        expr: 'kube_node_status_condition{job="kube-state-metrics",condition="Ready",status="true"} == 0\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -613,8 +583,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeversionmismatch"
         },
-        expr:
-          'count(count by (gitVersion) (label_replace(kubernetes_build_info{job!~"kube-dns|coredns"},"gitVersion","$1","gitVersion","(v[0-9]*.[0-9]*.[0-9]*).*"))) > 1\n',
+        expr: 'count(count by (gitVersion) (label_replace(kubernetes_build_info{job!~"kube-dns|coredns"},"gitVersion","$1","gitVersion","(v[0-9]*.[0-9]*.[0-9]*).*"))) > 1\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -628,8 +597,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclienterrors"
         },
-        expr:
-          '(sum(rate(rest_client_requests_total{code=~"5.."}[5m])) by (instance, job)\n  /\nsum(rate(rest_client_requests_total[5m])) by (instance, job))\n* 100 > 1\n',
+        expr: '(sum(rate(rest_client_requests_total{code=~"5.."}[5m])) by (instance, job)\n  /\nsum(rate(rest_client_requests_total[5m])) by (instance, job))\n* 100 > 1\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -643,8 +611,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclienterrors"
         },
-        expr:
-          'sum(rate(ksm_scrape_error_total{job="kube-state-metrics"}[5m])) by (instance, job) > 0.1\n',
+        expr: 'sum(rate(ksm_scrape_error_total{job="kube-state-metrics"}[5m])) by (instance, job) > 0.1\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -672,8 +639,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapilatencyhigh"
         },
-        expr:
-          'cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1\n',
+        expr: 'cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1\n',
         for: "10m",
         labels: {
           severity: "warning"
@@ -687,8 +653,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapilatencyhigh"
         },
-        expr:
-          'cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4\n',
+        expr: 'cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4\n',
         for: "10m",
         labels: {
           severity: "critical"
@@ -702,8 +667,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorshigh"
         },
-        expr:
-          'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 3\n',
+        expr: 'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 3\n',
         for: "10m",
         labels: {
           severity: "critical"
@@ -717,8 +681,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorshigh"
         },
-        expr:
-          'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 1\n',
+        expr: 'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 1\n',
         for: "10m",
         labels: {
           severity: "warning"
@@ -732,8 +695,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorshigh"
         },
-        expr:
-          'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 10\n',
+        expr: 'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 10\n',
         for: "10m",
         labels: {
           severity: "critical"
@@ -747,8 +709,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorshigh"
         },
-        expr:
-          'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 5\n',
+        expr: 'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)\n  /\nsum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 5\n',
         for: "10m",
         labels: {
           severity: "warning"
@@ -762,8 +723,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclientcertificateexpiration"
         },
-        expr:
-          'apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 604800\n',
+        expr: 'apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 604800\n',
         labels: {
           severity: "warning"
         }
@@ -776,8 +736,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclientcertificateexpiration"
         },
-        expr:
-          'apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 86400\n',
+        expr: 'apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 86400\n',
         labels: {
           severity: "critical"
         }
@@ -880,8 +839,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           message:
             'Network interface "{{ $labels.device }}" changing it\'s up status\noften on node-exporter {{ $labels.namespace }}/{{ $labels.pod }}"'
         },
-        expr:
-          'changes(node_network_up{job="node-exporter",device!~"veth.+"}[2m]) > 2\n',
+        expr: 'changes(node_network_up{job="node-exporter",device!~"veth.+"}[2m]) > 2\n',
         for: "2m",
         labels: {
           severity: "warning"
@@ -899,8 +857,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeCPUUtilizationSevere",
           dashboard: grafanaUrl
         },
-        expr:
-          '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > .8\n)',
+        expr: '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > .8\n)',
         for: "10m",
         labels: {
           severity: "critical"
@@ -913,8 +870,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeCPUUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr:
-          '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > .5\n)',
+        expr: '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > .5\n)',
         for: "10m",
         labels: {
           severity: "low"
@@ -927,8 +883,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeMemUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr:
-          '(\ninstance:node_memory_utilisation:ratio{job="node-exporter"}\n/ ignoring (instance) group_left\n count without (instance) (instance:node_memory_utilisation:ratio{job="node-exporter"})\n) > .5',
+        expr: '(\ninstance:node_memory_utilisation:ratio{job="node-exporter"}\n/ ignoring (instance) group_left\n count without (instance) (instance:node_memory_utilisation:ratio{job="node-exporter"})\n) > .5',
         for: "10m",
         labels: {
           severity: "warn"
@@ -941,8 +896,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeNetworkUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr:
-          'instance:node_network_receive_bytes_excluding_lo:rate1m{job="node-exporter"} > 50000000',
+        expr: 'instance:node_network_receive_bytes_excluding_lo:rate1m{job="node-exporter"} > 50000000',
         for: "10m",
         labels: {
           severity: "warn"
@@ -955,8 +909,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeNetworkUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr:
-          'instance:node_network_transmit_bytes_excluding_lo:rate1m{job="node-exporter"} < -50000000',
+        expr: 'instance:node_network_transmit_bytes_excluding_lo:rate1m{job="node-exporter"} < -50000000',
         for: "10m",
         labels: {
           severity: "warn"
@@ -969,8 +922,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeDiskUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr:
-          '(\n sum without (device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", } - node_filesystem_avail_bytes{job="node-exporter", }\n)\n) \n / ignoring (instance) group_left\n sum without (instance, device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", }\n)\n)\n) > .5',
+        expr: '(\n sum without (device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", } - node_filesystem_avail_bytes{job="node-exporter", }\n)\n) \n / ignoring (instance) group_left\n sum without (instance, device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", }\n)\n)\n) > .5',
         for: "10m",
         labels: {
           severity: "warn"
@@ -983,8 +935,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeDiskUtilizationSevere",
           dashboard: grafanaUrl
         },
-        expr:
-          '(\n sum without (device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", } - node_filesystem_avail_bytes{job="node-exporter", }\n)\n) \n / ignoring (instance) group_left\n sum without (instance, device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", }\n)\n)\n) > .8',
+        expr: '(\n sum without (device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", } - node_filesystem_avail_bytes{job="node-exporter", }\n)\n) \n / ignoring (instance) group_left\n sum without (instance, device) (\n max without (fstype, mountpoint) (\n node_filesystem_size_bytes{job="node-exporter", }\n)\n)\n) > .8',
         for: "10m",
         labels: {
           severity: "critical"
@@ -1002,8 +953,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "{{ $labels.job }} reports more than one unhealthy ingester.",
           runbook_url: runbookUrl + "/cortex.md#CortexIngesterUnhealthy"
         },
-        expr:
-          'min(cortex_ring_members{state="Unhealthy", job=~"[a-z].+distributor"}) by (namespace, job) > 0\n',
+        expr: 'min(cortex_ring_members{state="Unhealthy", job=~"[a-z].+distributor"}) by (namespace, job) > 0\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -1016,8 +966,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "{{ $labels.job }}/{{ $labels.instance }} is stuck flushing chunks.",
           runbook_url: runbookUrl + "/cortex.md#CortexFlushStuck"
         },
-        expr:
-          "(cortex_ingester_memory_chunks / cortex_ingester_memory_series) > 1.3\n",
+        expr: "(cortex_ingester_memory_chunks / cortex_ingester_memory_series) > 1.3\n",
         for: "15m",
         labels: {
           severity: "critical"
@@ -1030,8 +979,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexRequestErrors"
         },
-        expr:
-          '100 * sum(rate(cortex_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(cortex_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 1\n',
+        expr: '100 * sum(rate(cortex_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(cortex_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 1\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -1044,8 +992,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexRequestLatency"
         },
-        expr:
-          'namespace_job_route:cortex_request_duration_seconds:99quantile{route!~"metrics|/frontend.Frontend/Process"}\n   >\n2.5\n',
+        expr: 'namespace_job_route:cortex_request_duration_seconds:99quantile{route!~"metrics|/frontend.Frontend/Process"}\n   >\n2.5\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -1058,8 +1005,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% errors syncing tables.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexTableSyncFailure"
         },
-        expr:
-          '100 * rate(cortex_dynamo_sync_tables_seconds_count{status_code!~"2.."}[15m])\n  /\nrate(cortex_dynamo_sync_tables_seconds_count[15m])\n  > 10\n',
+        expr: '100 * rate(cortex_dynamo_sync_tables_seconds_count{status_code!~"2.."}[15m])\n  /\nrate(cortex_dynamo_sync_tables_seconds_count[15m])\n  > 10\n',
         for: "30m",
         labels: {
           severity: "critical"
@@ -1072,8 +1018,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} is reporting incorrect results for {{ printf "%.2f" $value }}% of queries.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexQueriesIncorrect"
         },
-        expr:
-          '100 * sum by (job, namespace) (rate(test_exporter_test_case_result_total{result="fail"}[5m]))\n  /\nsum by (job, namespace) (rate(test_exporter_test_case_result_total[5m])) > 1\n',
+        expr: '100 * sum by (job, namespace) (rate(test_exporter_test_case_result_total{result="fail"}[5m]))\n  /\nsum by (job, namespace) (rate(test_exporter_test_case_result_total[5m])) > 1\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -1085,8 +1030,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           message: "{{ $labels.job }} is at capacity processing queries.\n",
           runbook_url: runbookUrl + "/cortex.md#CortexQuerierCapacityFull"
         },
-        expr:
-          'prometheus_engine_queries_concurrent_max{job=~".+.querier"} - prometheus_engine_queries{job=~".+.querier"} == 0\n',
+        expr: 'prometheus_engine_queries_concurrent_max{job=~".+.querier"} - prometheus_engine_queries{job=~".+.querier"} == 0\n',
         for: "5m",
         labels: {
           severity: "critical"
@@ -1098,8 +1042,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           message: "{{ $labels.job }} has {{ $value }} queued up queries.\n",
           runbook_url: runbookUrl + "/cortex.md#CortexFrontendQueriesStuck"
         },
-        expr:
-          'sum by (namespace) (cortex_query_frontend_queue_length{job=~".+.query-frontend"}) > 1\n',
+        expr: 'sum by (namespace) (cortex_query_frontend_queue_length{job=~".+.query-frontend"}) > 1\n',
         for: "5m",
         labels: {
           severity: "critical"
@@ -1112,8 +1055,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} cache {{ $labels.method }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexCacheRequestErrors"
         },
-        expr:
-          '100 * sum(rate(cortex_cache_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, method)\n  /\nsum(rate(cortex_cache_request_duration_seconds_count[1m])) by (namespace, job, method)\n  > 1\n',
+        expr: '100 * sum(rate(cortex_cache_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, method)\n  /\nsum(rate(cortex_cache_request_duration_seconds_count[1m])) by (namespace, job, method)\n  > 1\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -1125,8 +1067,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           message: "{{ $labels.namespace }}/{{ $labels.pod }} is restarting",
           runbook_url: runbookUrl + "/cortex.md#CortexIngesterRestarts"
         },
-        expr:
-          'rate(kube_pod_container_status_restarts_total{container="ingester"}[30m]) > 0\n',
+        expr: 'rate(kube_pod_container_status_restarts_total{container="ingester"}[30m]) > 0\n',
         labels: {
           severity: "critical"
         }
@@ -1137,8 +1078,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           message: "{{ $labels.namespace }}/{{ $labels.pod }} transfer failed.",
           runbook_url: runbookUrl + "/cortex.md#CortexTransferFailed"
         },
-        expr:
-          'max_over_time(cortex_shutdown_duration_seconds_count{op="transfer",status!="success"}[15m])\n',
+        expr: 'max_over_time(cortex_shutdown_duration_seconds_count{op="transfer",status!="success"}[15m])\n',
         for: "5m",
         labels: {
           severity: "critical"
@@ -1152,8 +1092,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/cortex.md#CortexOldChunkInMemory"
         },
         // TODO opstrace-prelaunch/issues/355
-        expr:
-          "(time() - cortex_oldest_unflushed_chunk_timestamp_seconds > 50400) and cortex_oldest_unflushed_chunk_timestamp_seconds > 0\n",
+        expr: "(time() - cortex_oldest_unflushed_chunk_timestamp_seconds > 50400) and cortex_oldest_unflushed_chunk_timestamp_seconds > 0\n",
         for: "5m",
         labels: {
           severity: "warning"
@@ -1172,8 +1111,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its write error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1h\n  > 0.1 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate5m\n  > 0.1 * 14.400000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1h\n  > 0.1 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate5m\n  > 0.1 * 14.400000\n  )\n)\n",
         for: "2m",
         labels: {
           period: "1h",
@@ -1188,8 +1126,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its write error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate30m\n  > 0.1 * 6.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate30m\n  > 0.1 * 6.000000\n  )\n)\n",
         for: "15m",
         labels: {
           period: "6h",
@@ -1204,8 +1141,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its write error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1d\n  > 0.1 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate2h\n  > 0.1 * 3.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate1d\n  > 0.1 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate2h\n  > 0.1 * 3.000000\n  )\n)\n",
         for: "1h",
         labels: {
           period: "1d",
@@ -1220,8 +1156,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its write error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate3d\n  > 0.1 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 1.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate3d\n  > 0.1 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 1.000000\n  )\n)\n",
         for: "3h",
         labels: {
           period: "3d",
@@ -1236,8 +1171,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1h\n  > 0.5 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate5m\n  > 0.5 * 14.400000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1h\n  > 0.5 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate5m\n  > 0.5 * 14.400000\n  )\n)\n",
         for: "2m",
         labels: {
           period: "1h",
@@ -1252,8 +1186,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate30m\n  > 0.5 * 6.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate30m\n  > 0.5 * 6.000000\n  )\n)\n",
         for: "15m",
         labels: {
           period: "6h",
@@ -1268,8 +1201,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1d\n  > 0.5 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate2h\n  > 0.5 * 3.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate1d\n  > 0.5 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate2h\n  > 0.5 * 3.000000\n  )\n)\n",
         for: "1h",
         labels: {
           period: "1d",
@@ -1284,8 +1216,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#CortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate3d\n  > 0.5 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 1.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate3d\n  > 0.5 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gateway_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 1.000000\n  )\n)\n",
         for: "3h",
         labels: {
           period: "3d",
@@ -1301,8 +1232,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1h\n  > 0.1 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate5m\n  > 0.1 * 14.400000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1h\n  > 0.1 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate5m\n  > 0.1 * 14.400000\n  )\n)\n",
         for: "2m",
         labels: {
           period: "1h",
@@ -1318,8 +1248,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate30m\n  > 0.1 * 6.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate30m\n  > 0.1 * 6.000000\n  )\n)\n",
         for: "15m",
         labels: {
           period: "6h",
@@ -1335,8 +1264,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1d\n  > 0.1 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate2h\n  > 0.1 * 3.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate1d\n  > 0.1 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate2h\n  > 0.1 * 3.000000\n  )\n)\n",
         for: "1h",
         labels: {
           period: "1d",
@@ -1352,8 +1280,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             runbookUrl + "/cortex.md#LegacyCortexWriteErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate3d\n  > 0.1 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 1.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate3d\n  > 0.1 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_write_slo_errors_per_request:ratio_rate6h\n  > 0.1 * 1.000000\n  )\n)\n",
         for: "3h",
         labels: {
           period: "3d",
@@ -1368,8 +1295,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1h\n  > 0.5 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate5m\n  > 0.5 * 14.400000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1h\n  > 0.5 * 14.400000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate5m\n  > 0.5 * 14.400000\n  )\n)\n",
         for: "2m",
         labels: {
           period: "1h",
@@ -1384,8 +1310,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate30m\n  > 0.5 * 6.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 6.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate30m\n  > 0.5 * 6.000000\n  )\n)\n",
         for: "15m",
         labels: {
           period: "6h",
@@ -1400,8 +1325,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1d\n  > 0.5 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate2h\n  > 0.5 * 3.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate1d\n  > 0.5 * 3.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate2h\n  > 0.5 * 3.000000\n  )\n)\n",
         for: "1h",
         labels: {
           period: "1d",
@@ -1416,8 +1340,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           summary: "Cortex burns its read error budget too fast.",
           runbook_url: runbookUrl + "/cortex.md#LegacyCortexReadErrorBudgetBurn"
         },
-        expr:
-          "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate3d\n  > 0.5 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 1.000000\n  )\n)\n",
+        expr: "(\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate3d\n  > 0.5 * 1.000000\n  )\nand\n  (\n  100 * namespace_job:cortex_gw_read_slo_errors_per_request:ratio_rate6h\n  > 0.5 * 1.000000\n  )\n)\n",
         for: "3h",
         labels: {
           period: "3d",
@@ -1436,8 +1359,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexGWRequestErrors"
         },
-        expr:
-          '100 * sum(rate(cortex_gw_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(cortex_gw_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 0.1\n',
+        expr: '100 * sum(rate(cortex_gw_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(cortex_gw_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 0.1\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -1450,8 +1372,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexGWRequestLatency"
         },
-        expr:
-          'namespace_job_route:cortex_gw_request_duration_seconds:99quantile{route!="metrics"}\n  >\n2.5\n',
+        expr: 'namespace_job_route:cortex_gw_request_duration_seconds:99quantile{route!="metrics"}\n  >\n2.5\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -1470,8 +1391,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             runbookUrl + "/cortex.md#CortexProvisioningMemcachedTooSmall"
         },
-        expr:
-          '(\n  4 *\n  sum by(namespace) (cortex_ingester_memory_series{job=~".+.ingester"} * cortex_ingester_chunk_size_bytes_sum{job=~".+.ingester"} / cortex_ingester_chunk_size_bytes_count{job=~".+.ingester"})\n   / 1e9\n)\n  >\n(\n  sum by (namespace) (memcached_limit_bytes{job=~".+.memcached"}) / 1e9\n)\n',
+        expr: '(\n  4 *\n  sum by(namespace) (cortex_ingester_memory_series{job=~".+.ingester"} * cortex_ingester_chunk_size_bytes_sum{job=~".+.ingester"} / cortex_ingester_chunk_size_bytes_count{job=~".+.ingester"})\n   / 1e9\n)\n  >\n(\n  sum by (namespace) (memcached_limit_bytes{job=~".+.memcached"}) / 1e9\n)\n',
         for: "15m",
         labels: {
           severity: "warning"
@@ -1485,8 +1405,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             runbookUrl + "/cortex.md#CortexProvisioningTooManyActiveSeries"
         },
-        expr:
-          'avg by (namespace) (cortex_ingester_memory_series{job=~".+.ingester"}) > 1.1e6\n  and\nsum by (namespace) (rate(cortex_ingester_received_chunks{job=~".+.ingester"}[1h])) == 0\n',
+        expr: 'avg by (namespace) (cortex_ingester_memory_series{job=~".+.ingester"}) > 1.1e6\n  and\nsum by (namespace) (rate(cortex_ingester_received_chunks{job=~".+.ingester"}[1h])) == 0\n',
         for: "1h",
         labels: {
           severity: "warning"
@@ -1499,8 +1418,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "Too much write QPS for ingesters in namespace {{ $labels.namespace }}, add more ingesters.\n",
           runbook_url: runbookUrl + "/cortex.md#CortexProvisioningTooManyWrites"
         },
-        expr:
-          "avg by (namespace) (rate(cortex_ingester_ingested_samples_total[1m])) > 80e3\n",
+        expr: "avg by (namespace) (rate(cortex_ingester_ingested_samples_total[1m])) > 80e3\n",
         for: "15m",
         labels: {
           severity: "warning"
@@ -1513,8 +1431,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             "Too much memory being used by ingesters in namespace {{ $labels.namespace }}, add more ingesters.\n",
           runbook_url: runbookUrl + "/cortex.md#CortexProvisioningTooMuchMemory"
         },
-        expr:
-          'avg by (namespace) (container_memory_working_set_bytes{container_name="ingester"} / container_spec_memory_limit_bytes{container_name="ingester"}) > 0.7\n',
+        expr: 'avg by (namespace) (container_memory_working_set_bytes{container_name="ingester"} / container_spec_memory_limit_bytes{container_name="ingester"}) > 0.7\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -1550,8 +1467,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% errors.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexRulerFailedEvaluations"
         },
-        expr:
-          "sum(rate(cortex_prometheus_rule_evaluation_failures_total[1m])) by (namespace, job)\n  /\nsum(rate(cortex_prometheus_rule_evaluation_total[1m])) by (namespace, job)\n  > 0.01\n",
+        expr: "sum(rate(cortex_prometheus_rule_evaluation_failures_total[1m])) by (namespace, job)\n  /\nsum(rate(cortex_prometheus_rule_evaluation_total[1m])) by (namespace, job)\n  > 0.01\n",
         for: "5m",
         labels: {
           severity: "warning"
@@ -1564,8 +1480,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% missed iterations.\n',
           runbook_url: runbookUrl + "/cortex.md#CortexRulerMissedEvaluations"
         },
-        expr:
-          "sum(rate(cortex_prometheus_rule_group_missed_iterations_total[1m])) by (namespace, job)\n  /\nsum(rate(cortex_prometheus_rule_group_iterations_total[1m])) by (namespace, job)\n  > 0.01\n",
+        expr: "sum(rate(cortex_prometheus_rule_group_missed_iterations_total[1m])) by (namespace, job)\n  /\nsum(rate(cortex_prometheus_rule_group_iterations_total[1m])) by (namespace, job)\n  > 0.01\n",
         for: "5m",
         labels: {
           severity: "warning"
@@ -1583,8 +1498,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
             '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.\n'
         },
         // TODO (clambert) return the threhold of this alert back to the original 18.
-        expr:
-          '100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 25\n',
+        expr: '100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)\n  /\nsum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route)\n  > 25\n',
         for: "15m",
         labels: {
           severity: "critical"
@@ -1596,8 +1510,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           message:
             '{{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.\n'
         },
-        expr:
-          'namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*"} > 2.5\n',
+        expr: 'namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*"} > 2.5\n',
         for: "15m",
         labels: {
           severity: "critical"

@@ -34,9 +34,8 @@ cortexProxy.on("proxyReq", onProxyReq);
 
 cortexProxy.on("proxyRes", (proxyRes, req, res) => {
   // if it is an HTML response, it is most likely an error message
-  const isHTMLErrorResponse = proxyRes.headers["content-type"]?.includes(
-    "text/html"
-  );
+  const isHTMLErrorResponse =
+    proxyRes.headers["content-type"]?.includes("text/html");
   if (isHTMLErrorResponse) {
   } else {
     res.writeHead(proxyRes.statusCode!, proxyRes.headers);
@@ -76,17 +75,22 @@ cortexProxy.on("proxyRes", (proxyRes, req, res) => {
         res.writeHead(500, {
           "content-type": "application/json"
         });
-        res.end(JSON.stringify({
-          errorMessage,
-        }));
+        res.end(
+          JSON.stringify({
+            errorMessage
+          })
+        );
       } catch (e) {
         res.writeHead(500, {
           "content-type": "application/json"
         });
-        res.end(JSON.stringify({
-          errorMessage: "There has been an error parsing a cortex HTML response.",
-          data: body.slice(0, 500)
-        }));
+        res.end(
+          JSON.stringify({
+            errorMessage:
+              "There has been an error parsing a cortex HTML response.",
+            data: body.slice(0, 500)
+          })
+        );
       }
     } else {
       /* if response is not HTML, the chunks have already been written
@@ -97,27 +101,25 @@ cortexProxy.on("proxyRes", (proxyRes, req, res) => {
   });
 });
 
-const proxyTo = (target: string) => (
-  req: express.Request,
-  res: express.Response
-) => {
-  return cortexProxy.web(
-    req,
-    res,
-    {
-      selfHandleResponse: true,
-      target,
-      headers: req.params.tenant
-        ? {
-          "X-Scope-OrgID": req.params.tenant
-        }
-        : {}
-    },
-    (err: Error) => {
-      log.warning("error in http cortex proxy upstream (ignoring): %s", err);
-    }
-  );
-};
+const proxyTo =
+  (target: string) => (req: express.Request, res: express.Response) => {
+    return cortexProxy.web(
+      req,
+      res,
+      {
+        selfHandleResponse: true,
+        target,
+        headers: req.params.tenant
+          ? {
+              "X-Scope-OrgID": req.params.tenant
+            }
+          : {}
+      },
+      (err: Error) => {
+        log.warning("error in http cortex proxy upstream (ignoring): %s", err);
+      }
+    );
+  };
 
 export default function createCortexHandler(): express.Router {
   const cortex = express.Router();

@@ -36,44 +36,32 @@ const TenantInitialState: TenantState = {
 export const reducer = createReducer<TenantState, TenantActions>(
   TenantInitialState
 )
-  .handleAction(
-    actions.setTenantList,
-    (state, action): TenantState => {
-      const tenantIds: string[] = pluck("name", action.payload);
-      const tenants: TenantRecords = zipObj(tenantIds, action.payload);
-      return mergeDeepRight(state, { loading: false, tenants: tenants });
-    }
-  )
-  .handleAction(
-    actions.deleteTenant,
-    (state, action): TenantState => {
-      return {
-        loading: state.loading,
-        tenants: omit([action.payload])(state.tenants)
-      };
-    }
-  )
-  .handleAction(
-    actions.alertmanagerLoaded,
-    (state, action): TenantState => {
-      return mergeDeepRight(state, {
-        tenants: {
-          [action.payload.tenantName]: {
-            alertmanager: pick(["config", "online"])(action.payload)
-          }
+  .handleAction(actions.setTenantList, (state, action): TenantState => {
+    const tenantIds: string[] = pluck("name", action.payload);
+    const tenants: TenantRecords = zipObj(tenantIds, action.payload);
+    return mergeDeepRight(state, { loading: false, tenants: tenants });
+  })
+  .handleAction(actions.deleteTenant, (state, action): TenantState => {
+    return {
+      loading: state.loading,
+      tenants: omit([action.payload])(state.tenants)
+    };
+  })
+  .handleAction(actions.alertmanagerLoaded, (state, action): TenantState => {
+    return mergeDeepRight(state, {
+      tenants: {
+        [action.payload.tenantName]: {
+          alertmanager: pick(["config", "online"])(action.payload)
         }
-      });
-    }
-  )
-  .handleAction(
-    actions.updateAlertmanager,
-    (state, action): TenantState => {
-      return mergeDeepRight(state, {
-        tenants: {
-          [action.payload.tenantName]: {
-            alertmanager: pick(["config"])(action.payload)
-          }
+      }
+    });
+  })
+  .handleAction(actions.updateAlertmanager, (state, action): TenantState => {
+    return mergeDeepRight(state, {
+      tenants: {
+        [action.payload.tenantName]: {
+          alertmanager: pick(["config"])(action.payload)
         }
-      });
-    }
-  );
+      }
+    });
+  });

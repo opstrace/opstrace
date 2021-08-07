@@ -28,7 +28,10 @@ import axios, { AxiosResponse } from "axios";
 // doesn't require a connection to the service.
 const alertmanagerEndpoint = process.env.ALERTMANAGER_ENDPOINT ?? "";
 
-function* setDefaultAlertmanagerConfigIfEmpty(endpoint: string, tenant: string) {
+function* setDefaultAlertmanagerConfigIfEmpty(
+  endpoint: string,
+  tenant: string
+) {
   try {
     const res: AxiosResponse<string> = yield axios({
       url: endpoint,
@@ -167,7 +170,11 @@ export function* syncTenants(
 
           if (alertmanagerEndpoint !== "") {
             for (const tenant of dbTenantsState) {
-              yield call(setDefaultAlertmanagerConfigIfEmpty, alertmanagerEndpoint, tenant.name);
+              yield call(
+                setDefaultAlertmanagerConfigIfEmpty,
+                alertmanagerEndpoint,
+                tenant.name
+              );
             }
           }
         }

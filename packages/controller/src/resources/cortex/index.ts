@@ -47,13 +47,8 @@ export function CortexResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const {
-    target,
-    gcp,
-    region,
-    infrastructureName,
-    metricRetentionDays
-  } = getControllerConfig(state);
+  const { target, gcp, region, infrastructureName, metricRetentionDays } =
+    getControllerConfig(state);
 
   const configsDBName = "cortex";
   const dbconfig = new URL(state.config.config?.postgreSQLEndpoint || "");
@@ -268,9 +263,10 @@ export function CortexResources(
   // the api directly instead of using this intermediary config map.
 
   // Read the config map with the user overrides.
-  const cortexUserRuntimeConfig = state.kubernetes.cluster.ConfigMaps.resources.find(
-    cm => cm.namespace === namespace && cm.name === "cortex-runtime-config"
-  );
+  const cortexUserRuntimeConfig =
+    state.kubernetes.cluster.ConfigMaps.resources.find(
+      cm => cm.namespace === namespace && cm.name === "cortex-runtime-config"
+    );
   // These are the Opstrace cortex runtime config defaults.
   const cortexDefaultRuntimeConfig = {
     ingester_limits: {

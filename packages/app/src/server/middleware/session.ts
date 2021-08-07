@@ -23,9 +23,8 @@ import env, { isDevEnvironment } from "server/env";
 const RedisStore = require("connect-redis")(expressSession);
 
 // Default to in-memory store - useful for dev
-let store:
-  | expressSession.MemoryStore
-  | typeof RedisStore = new expressSession.MemoryStore();
+let store: expressSession.MemoryStore | typeof RedisStore =
+  new expressSession.MemoryStore();
 // If we have Redis connection config, create a Redis store for the session backend
 if (env.REDIS_HOST) {
   store = new RedisStore({

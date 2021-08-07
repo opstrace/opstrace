@@ -30,8 +30,7 @@ import { State } from "./reducer";
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function* waitForControllerDeployment(config: {
   desiredReadyReplicas: number | undefined;
-}): Generator<Effect, void, State>  {
-
+}): Generator<Effect, void, State> {
   // Exit if controller deployment does not exist.
   const state: State = yield select();
   const { Deployments } = state.kubernetes.cluster;
@@ -154,12 +153,8 @@ export function* upgradeProgressReporter(): Generator<Effect, void, State> {
   while (true) {
     const state: State = yield select();
 
-    const {
-      DaemonSets,
-      Deployments,
-      StatefulSets,
-      Certificates
-    } = state.kubernetes.cluster;
+    const { DaemonSets, Deployments, StatefulSets, Certificates } =
+      state.kubernetes.cluster;
 
     // Check DaemonSets
     const activeDaemonSets = activeDaemonsets(DaemonSets.resources);

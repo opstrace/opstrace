@@ -28,12 +28,8 @@ export function* uninstallProgressReporter(): Generator<
   while (true) {
     const state: State = yield select();
 
-    const {
-      DaemonSets,
-      Deployments,
-      StatefulSets,
-      PersistentVolumes
-    } = state.kubernetes.cluster;
+    const { DaemonSets, Deployments, StatefulSets, PersistentVolumes } =
+      state.kubernetes.cluster;
 
     const unprotectedDeployments = Deployments.resources.filter(
       d => !d.isProtected()

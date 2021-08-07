@@ -49,21 +49,18 @@ export const notificationServiceReducer = createReducer<
   NotificationServiceState,
   Actions
 >(initialState)
-  .handleAction(
-    actions.register,
-    (state, action): NotificationServiceState => {
-      if (findNotification(state.notifications, action.payload)) {
-        return state;
-      }
-
-      const notifications = [action.payload].concat(state.notifications);
-      return {
-        ...state,
-        visibility: true,
-        notifications
-      };
+  .handleAction(actions.register, (state, action): NotificationServiceState => {
+    if (findNotification(state.notifications, action.payload)) {
+      return state;
     }
-  )
+
+    const notifications = [action.payload].concat(state.notifications);
+    return {
+      ...state,
+      visibility: true,
+      notifications
+    };
+  })
   .handleAction(
     actions.unregister,
     (state, action): NotificationServiceState => {

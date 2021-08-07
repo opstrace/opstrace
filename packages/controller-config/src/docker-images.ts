@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-import * as DockerImages from './docker-images.json';
+import * as DockerImages from "./docker-images.json";
 export { DockerImages };

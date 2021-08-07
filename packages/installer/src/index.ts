@@ -122,9 +122,8 @@ const CREATE_ATTEMPT_TIMEOUT_SECONDS = 60 * 40;
 function* createClusterCore() {
   const ccfg: LatestClusterConfigType = getClusterConfig();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const gcpCredFilePath: string = process.env[
-    "GOOGLE_APPLICATION_CREDENTIALS"
-  ]!;
+  const gcpCredFilePath: string =
+    process.env["GOOGLE_APPLICATION_CREDENTIALS"]!;
 
   const firewallConf = getFirewallConfig({
     api: ccfg.data_api_authorized_ip_ranges

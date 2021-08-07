@@ -47,43 +47,37 @@ export const reducer = createReducer<UserState, UserActions>(UserInitialState)
       currentUserIdLoaded: true
     })
   )
-  .handleAction(
-    actions.setDarkMode,
-    (state, action): UserState => {
-      if (!state.currentUserIdLoaded) return state;
+  .handleAction(actions.setDarkMode, (state, action): UserState => {
+    if (!state.currentUserIdLoaded) return state;
 
-      const newState = R.mergeDeepRight(state, {
-        users: {
-          [state.currentUserId]: { preference: { dark_mode: action.payload } }
-        },
-        allUsers: {
-          [state.currentUserId]: { preference: { dark_mode: action.payload } }
-        }
-      });
+    const newState = R.mergeDeepRight(state, {
+      users: {
+        [state.currentUserId]: { preference: { dark_mode: action.payload } }
+      },
+      allUsers: {
+        [state.currentUserId]: { preference: { dark_mode: action.payload } }
+      }
+    });
 
-      return newState;
-    }
-  )
-  .handleAction(
-    actions.setUserList,
-    (state, action): UserState => {
-      const userIds: string[] = R.pluck("id", action.payload);
-      const deletedUserIds: string[] = R.pipe(
-        R.keys,
-        R.without(userIds)
-      )(state.allUsers);
+    return newState;
+  })
+  .handleAction(actions.setUserList, (state, action): UserState => {
+    const userIds: string[] = R.pluck("id", action.payload);
+    const deletedUserIds: string[] = R.pipe(
+      R.keys,
+      R.without(userIds)
+    )(state.allUsers);
 
-      const users: UserRecords = R.zipObj(userIds, action.payload);
-      const allUsers: UserRecords = R.omit(
-        deletedUserIds,
-        R.mergeDeepLeft(users, state.allUsers)
-      );
+    const users: UserRecords = R.zipObj(userIds, action.payload);
+    const allUsers: UserRecords = R.omit(
+      deletedUserIds,
+      R.mergeDeepLeft(users, state.allUsers)
+    );
 
-      return {
-        ...R.pick(["currentUserId", "currentUserIdLoaded"], state),
-        loading: false,
-        allUsers: allUsers,
-        users: R.pickBy<UserRecords>(isActive)(allUsers)
-      };
-    }
-  );
+    return {
+      ...R.pick(["currentUserId", "currentUserIdLoaded"], state),
+      loading: false,
+      allUsers: allUsers,
+      users: R.pickBy<UserRecords>(isActive)(allUsers)
+    };
+  });

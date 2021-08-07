@@ -23,6 +23,5 @@ export const tenantToItem = (tenant: Tenant): PanelItem => {
   return { id: tenant.name, text: tenant.name, data: tenant };
 };
 
-export const tenantsToItems: (tenants: Tenants) => PanelItem[] = map(
-  tenantToItem
-);
+export const tenantsToItems: (tenants: Tenants) => PanelItem[] =
+  map(tenantToItem);
