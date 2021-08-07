@@ -35,7 +35,7 @@ import {
   sleep,
   TENANT_DEFAULT_API_TOKEN_FILEPATH,
   TENANT_DEFAULT_CORTEX_API_BASE_URL,
-  TENANT_DEFAULT_DD_API_BASE_URL,
+  TENANT_DEFAULT_DD_API_BASE_URL
 } from "./testutils";
 
 import { waitForCortexMetricResult } from "./testutils/metrics";

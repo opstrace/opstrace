@@ -177,11 +177,8 @@ export class LogSeriesFragmentPushRequest {
     //this.labels = LogSeriesFragment.labels;
     this.payloadByteCount = BigInt(0);
 
-    const [
-      data,
-      textmd5,
-      serializationTimeSeconds
-    ] = this.toPushrequestBuffer();
+    const [data, textmd5, serializationTimeSeconds] =
+      this.toPushrequestBuffer();
 
     this.textmd5 = textmd5;
     this.data = data;

@@ -19,7 +19,7 @@ import { ZonedDateTime } from "@js-joda/core";
 import {
   log,
   globalTestSuiteSetupOnce,
-  TENANT_SYSTEM_CORTEX_API_BASE_URL,
+  TENANT_SYSTEM_CORTEX_API_BASE_URL
 } from "./testutils";
 
 import { waitForCortexMetricResult } from "./testutils/metrics";

@@ -176,9 +176,9 @@ export class LogSeries extends TimeseriesBase {
     else {
       // build integer string, indicating the number of nanoseconds passed
       // since epoch, as is common in the Loki ecosystem.
-      const timestring = `${
-        this.currentSeconds
-      }${this.currentNanos.toString().padStart(9, "0")}`;
+      const timestring = `${this.currentSeconds}${this.currentNanos
+        .toString()
+        .padStart(9, "0")}`;
       // Note(JP): timestring is known to be 19 chars long. Also note that in
       // this case the "compressability" aspect changes, depending on the ratio
       // between the desired message length and the length of this timestring.

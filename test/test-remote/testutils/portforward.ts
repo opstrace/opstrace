@@ -27,7 +27,8 @@ import {
   readFirstNBytes
 } from "./index";
 
-const PORT_FORWARD_LISTEN_PATTERN = /^Forwarding from 127\.0\.0\.1:(\d+) -> \d+/g;
+const PORT_FORWARD_LISTEN_PATTERN =
+  /^Forwarding from 127\.0\.0\.1:(\d+) -> \d+/g;
 
 export class PortForward {
   /*
@@ -165,7 +166,9 @@ export class PortForward {
 
     const maxWaitSeconds = 30;
     const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
-    log.info(`${this}: waiting for port-forward to become ready, deadline in ${maxWaitSeconds}s`);
+    log.info(
+      `${this}: waiting for port-forward to become ready, deadline in ${maxWaitSeconds}s`
+    );
 
     while (true) {
       // `break`ing out the loop enters the error path, returning `true`
@@ -193,8 +196,10 @@ export class PortForward {
       }
 
       // Wait for kubectl to print the ephemeral ipv4 port
-      const kubectlOut = new TextDecoder("utf-8").decode(await readFirstNBytes(this.outfilePath, 100));
-      const regexResult = PORT_FORWARD_LISTEN_PATTERN.exec(kubectlOut)
+      const kubectlOut = new TextDecoder("utf-8").decode(
+        await readFirstNBytes(this.outfilePath, 100)
+      );
+      const regexResult = PORT_FORWARD_LISTEN_PATTERN.exec(kubectlOut);
       if (regexResult != null && regexResult.length > 1) {
         log.info(`${this}: port-forward listening on port ${regexResult[1]}`);
         return parseInt(regexResult[1], 10);

@@ -596,7 +596,8 @@ export async function sendMetricsWithPromContainer(
     maxWaitSeconds2
   );
   const t0 = mtime();
-  const rgx = /\sprometheus_remote_storage_succeeded_samples_total{.*} (?<count>[0-9]+)\s/;
+  const rgx =
+    /\sprometheus_remote_storage_succeeded_samples_total{.*} (?<count>[0-9]+)\s/;
   const metricsUrl = `http://127.0.0.1:${promListenPort}/metrics`;
 
   while (true) {

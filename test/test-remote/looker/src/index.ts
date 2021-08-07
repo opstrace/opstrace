@@ -119,8 +119,10 @@ async function main() {
       // always create initial streams regardless of update configuration
       log.info("cycle %s: create new dummystreams", cyclenum);
       dummystreams = await createNewSeries(invocationCycleId);
-    } else if (CFG.change_streams_every_n_cycles > 0 &&
-               (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0) {
+    } else if (
+      CFG.change_streams_every_n_cycles > 0 &&
+      (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0
+    ) {
       // update streams at the configured number of cycles
       log.info("cycle %s: update dummystreams", cyclenum);
       dummystreams = await createNewSeries(invocationCycleId);
@@ -176,16 +178,17 @@ async function createNewSeries(
     let stream: MetricSeries | LogSeries;
     if (CFG.metrics_mode) {
       // Calculate amount to subtract from start time, or avoid random() if subtraction is disabled
-      const subtractSecs = (CFG.metrics_past_start_range_max_seconds === 0)
-        ? 0
-        // By default this is a time between now-30min and now-20min - smear
-        // this out by plus/minus 5 minutes, because of the throttling
-        // mechanism otherwise hitting in for all series at the same time.
-        // Note that Math.random() returns [0,1) (not including 1).
-        : util.rndFloatFromInterval(
-            CFG.metrics_past_start_range_min_seconds,
-            CFG.metrics_past_start_range_max_seconds
-        );
+      const subtractSecs =
+        CFG.metrics_past_start_range_max_seconds === 0
+          ? 0
+          : // By default this is a time between now-30min and now-20min - smear
+            // this out by plus/minus 5 minutes, because of the throttling
+            // mechanism otherwise hitting in for all series at the same time.
+            // Note that Math.random() returns [0,1) (not including 1).
+            util.rndFloatFromInterval(
+              CFG.metrics_past_start_range_min_seconds,
+              CFG.metrics_past_start_range_max_seconds
+            );
       // TODO some sort of adjustable cardinality here, where the number of distinct label
       //      permutations across a series is configurable? (e.g. 10k distinct labels across a series)
       stream = new MetricSeries(
@@ -213,9 +216,7 @@ async function createNewSeries(
           // cycle) that we don't keep going back to using the program's
           // invocation time, as is done for logs (where Loki accepts incoming
           // data from far in the past),
-          starttime: ZonedDateTime.now()
-            .minusSeconds(subtractSecs)
-            .withNano(0),
+          starttime: ZonedDateTime.now().minusSeconds(subtractSecs).withNano(0),
           metrics_time_increment_ms: CFG.metrics_time_increment_ms,
           labelset: labelset
         },
@@ -346,9 +347,8 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
       CFG.n_concurrent_streams
     );
 
-    const streamsToValidate: Array<
-      LogSeries | MetricSeries
-    > = util.randomSampleFromArray(streams, CFG.read_n_streams_only);
+    const streamsToValidate: Array<LogSeries | MetricSeries> =
+      util.randomSampleFromArray(streams, CFG.read_n_streams_only);
 
     // For a small selection, show the names of the streams, for debuggability
     if (CFG.read_n_streams_only < 20) {

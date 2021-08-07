@@ -70,11 +70,7 @@ import {
   TENANT_SYSTEM_CORTEX_API_BASE_URL
 } from "./testutils";
 
-import {
-  deleteAll,
-  deployAll,
-  waitForAllReady
-} from "./testutils/deployment";
+import { deleteAll, deployAll, waitForAllReady } from "./testutils/deployment";
 
 import {
   waitForCortexMetricResult,
@@ -343,7 +339,11 @@ async function setupE2EAlertsForTenant(
   await storeE2EAlertsConfig(authTokenFilepath, tenant);
 
   log.info(`Deploying E2E alerting resources into ${tenant}-tenant namespace`);
-  const resources = getE2EAlertingResources(kubeConfig, tenant, uniqueScrapeJobName);
+  const resources = getE2EAlertingResources(
+    kubeConfig,
+    tenant,
+    uniqueScrapeJobName
+  );
   await deployAll(resources);
   return resources;
 }
