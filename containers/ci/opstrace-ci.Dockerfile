@@ -92,7 +92,9 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
     sh -s -- -b /usr/local/bin v1.41.1
 
 # Set up markdownlint in the container image so that we can lint right away! :)
-RUN npm install -g markdownlint-cli@0.27.1
+RUN npm install -g markdownlint-cli@0.28.1
+RUN npm install -g prettier@2.3.2
+
 
 # Set up `addlicense` so that we can use that right away. Install it to
 # /usr/local.
