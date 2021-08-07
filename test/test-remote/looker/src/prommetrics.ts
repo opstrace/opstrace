@@ -35,8 +35,7 @@ export const counter_fragments_pushed = new promclient.Counter({
 export const counter_serialized_fragments_bytes_pushed = new promclient.Counter(
   {
     name: "counter_serialized_fragments_bytes_pushed",
-    help:
-      "cumulative size of snappy-compressed protobuf messages (serialized log stream fragments) successfully POSTed to Loki API"
+    help: "cumulative size of snappy-compressed protobuf messages (serialized log stream fragments) successfully POSTed to Loki API"
     // note that this should be the ~amount of data written into HTTP request
     // bodies over the wire -- however, it's unclear if maybe some additional
     // gzip compression happens on top of this
@@ -106,8 +105,7 @@ export const counter_forward_leap = new promclient.Counter({
 
 export const gauge_last_http_request_body_size_bytes = new promclient.Gauge({
   name: "gauge_last_http_request_body_size_bytes",
-  help:
-    "size of last successfully POSTed HTTP request body (snappy-compressed protobuf message: a serialized log stream fragments)"
+  help: "size of last successfully POSTed HTTP request body (snappy-compressed protobuf message: a serialized log stream fragments)"
 });
 
 export const hist_duration_post_with_retry_seconds = new promclient.Histogram({

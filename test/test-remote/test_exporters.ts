@@ -38,36 +38,37 @@ import {
   TENANT_DEFAULT_CORTEX_API_BASE_URL,
   TENANT_SYSTEM_API_TOKEN_FILEPATH,
   TENANT_SYSTEM_CORTEX_API_BASE_URL,
-  TENANT_SYSTEM_LOKI_API_BASE_URL,
+  TENANT_SYSTEM_LOKI_API_BASE_URL
 } from "./testutils";
 
 import {
   waitForCortexMetricResult,
-  waitForPrometheusTarget,
+  waitForPrometheusTarget
 } from "./testutils/metrics";
 
-import {
-  waitForLokiQueryResult,
-  LokiQueryResult,
-} from "./testutils/logs";
+import { waitForLokiQueryResult, LokiQueryResult } from "./testutils/logs";
 
-async function listConfigNames(authTokenFilepath: string | undefined, urlSuffix: string): Promise<string[]> {
-  const getResponse = await got.get(
-    `${CLUSTER_BASE_URL}/api/v1/${urlSuffix}`,
-    {
-      throwHttpErrors: false,
-      timeout: httpTimeoutSettings,
-      headers: enrichHeadersWithAuthTokenFile(authTokenFilepath, {}),
-      https: { rejectUnauthorized: CORTEX_API_TLS_VERIFY }
-    }
-  );
+async function listConfigNames(
+  authTokenFilepath: string | undefined,
+  urlSuffix: string
+): Promise<string[]> {
+  const getResponse = await got.get(`${CLUSTER_BASE_URL}/api/v1/${urlSuffix}`, {
+    throwHttpErrors: false,
+    timeout: httpTimeoutSettings,
+    headers: enrichHeadersWithAuthTokenFile(authTokenFilepath, {}),
+    https: { rejectUnauthorized: CORTEX_API_TLS_VERIFY }
+  });
   logHTTPResponse(getResponse);
   assert(getResponse.statusCode == 200);
   const body: Record<string, string>[] = yamlParser.load(getResponse.body);
   return body.map(entry => entry["name"]);
 }
 
-async function storeConfig(authTokenFilepath: string | undefined, urlSuffix: string, config: string) {
+async function storeConfig(
+  authTokenFilepath: string | undefined,
+  urlSuffix: string,
+  config: string
+) {
   const postResponse = await got.post(
     `${CLUSTER_BASE_URL}/api/v1/${urlSuffix}`,
     {
@@ -85,13 +86,20 @@ async function storeConfig(authTokenFilepath: string | undefined, urlSuffix: str
   await listConfigNames(authTokenFilepath, urlSuffix);
 }
 
-async function deleteAllConfigs(authTokenFilepath: string | undefined, urlSuffix: string) {
+async function deleteAllConfigs(
+  authTokenFilepath: string | undefined,
+  urlSuffix: string
+) {
   for (const name of await listConfigNames(authTokenFilepath, urlSuffix)) {
     await deleteConfig(authTokenFilepath, urlSuffix, name);
   }
 }
 
-async function deleteConfig(authTokenFilepath: string | undefined, urlSuffix: string, name: string) {
+async function deleteConfig(
+  authTokenFilepath: string | undefined,
+  urlSuffix: string,
+  name: string
+) {
   const deleteResponse = await got.delete(
     `${CLUSTER_BASE_URL}/api/v1/${urlSuffix}/${name}`,
     {
@@ -108,7 +116,7 @@ async function deleteConfig(authTokenFilepath: string | undefined, urlSuffix: st
 async function setupExporter(
   authTokenFilepath: string | undefined,
   exporterConfig: string,
-  credentialContent: string | null,
+  credentialContent: string | null
 ) {
   if (credentialContent != null) {
     await storeConfig(authTokenFilepath, "credentials", credentialContent);
@@ -122,13 +130,16 @@ async function cleanExporter(authTokenFilepath: string | undefined) {
   await deleteAllConfigs(authTokenFilepath, "credentials");
 }
 
-async function getExporterMetric(cortexBaseUrl: string, query: string): Promise<string> {
+async function getExporterMetric(
+  cortexBaseUrl: string,
+  query: string
+): Promise<string> {
   log.info(`Waiting for exporter metric: ${query}`);
 
   // Instant query - get current value
   // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
   const queryParams = {
-    query,
+    query
   };
   const resultArray = await waitForCortexMetricResult(
     cortexBaseUrl,
@@ -142,7 +153,11 @@ async function getExporterMetric(cortexBaseUrl: string, query: string): Promise<
   return value;
 }
 
-async function getExporterLog(exporterNamespace: string, exporterName: string, logMessage: string): Promise<LokiQueryResult> {
+async function getExporterLog(
+  exporterNamespace: string,
+  exporterName: string,
+  logMessage: string
+): Promise<LokiQueryResult> {
   const query = `{k8s_namespace_name="${exporterNamespace}",k8s_container_name="exporter",k8s_pod_name=~"exporter-${exporterName}-.+"} |= "${logMessage}"`;
   log.info(`Waiting for exporter log: ${query}`);
 
@@ -207,7 +222,10 @@ function getExporterName(type: string) {
   // As such, the exporter name can only contain letters, numbers, and '-'.
   // rndstring() can return '_', so replace all '_'s with '0' just so that they fit.
   // (use regex with /g to ensure ALL instances are replaced)
-  return `testexporters-${rndstring().slice(0, 5).toLowerCase().replace(/_/g, '0')}-${type}`;
+  return `testexporters-${rndstring()
+    .slice(0, 5)
+    .toLowerCase()
+    .replace(/_/g, "0")}-${type}`;
 }
 
 // TODO(nick): rewrite these tests as integration UI tests
@@ -280,7 +298,6 @@ value:
     );
   });
 
-
   test("Stackdriver exporter", async function () {
     const exporterName = getExporterName("stackdriver");
     const exporterConfig = `
@@ -332,7 +349,6 @@ value: |-
       metricQuery
     );
   });
-
 
   test("Blackbox exporter", async function () {
     const exporterName = getExporterName("blackbox");

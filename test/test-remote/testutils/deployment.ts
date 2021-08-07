@@ -94,9 +94,7 @@ export async function deployAll(resources: K8sResource[]) {
 export async function deleteAll(resources: K8sResource[]) {
   for (const r of resources) {
     try {
-      log.info(
-        `Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`
-      );
+      log.info(`Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`);
       await r.delete();
     } catch (e) {
       const err = kubernetesError(e);
@@ -121,21 +119,37 @@ export async function waitForAllReady(
 ) {
   // The provided resources may contain ConfigMaps/etc.
   // Don't worry about those, just focus on the three types that involve deploying pods.
-  const daemonSets = resources.filter(r => isDaemonSet(r)).map(r => r as DaemonSet);
-  const deployments = resources.filter(r => isDeployment(r)).map(r => r as Deployment);
-  const statefulSets = resources.filter(r => isStatefulSet(r)).map(r => r as StatefulSet);
+  const daemonSets = resources
+    .filter(r => isDaemonSet(r))
+    .map(r => r as DaemonSet);
+  const deployments = resources
+    .filter(r => isDeployment(r))
+    .map(r => r as Deployment);
+  const statefulSets = resources
+    .filter(r => isStatefulSet(r))
+    .map(r => r as StatefulSet);
 
-  const sm = createSagaMiddleware({ onError: function (e: Error, detail: any) {
-    log.error("error seen by saga middleware:\n%s", e.stack);
-    if (detail && detail.sagaStack !== undefined) {
-      log.error("saga stack: %s", detail.sagaStack);
+  const sm = createSagaMiddleware({
+    onError: function (e: Error, detail: any) {
+      log.error("error seen by saga middleware:\n%s", e.stack);
+      if (detail && detail.sagaStack !== undefined) {
+        log.error("saga stack: %s", detail.sagaStack);
+      }
+      throw Error("exiting after saga error");
     }
-    throw Error("exiting after saga error");
-  }});
+  });
   createStore(rootReducer, applyMiddleware(sm));
-  await sm.run(function* () {
-    yield waitForAllReadyImpl(kubeConfig, daemonSets, deployments, statefulSets, maxWaitSeconds);
-  }).toPromise();
+  await sm
+    .run(function* () {
+      yield waitForAllReadyImpl(
+        kubeConfig,
+        daemonSets,
+        deployments,
+        statefulSets,
+        maxWaitSeconds
+      );
+    })
+    .toPromise();
 }
 
 function* waitForAllReadyImpl(
@@ -151,20 +165,19 @@ function* waitForAllReadyImpl(
   yield call(blockUntilCacheHydrated);
 
   const { timeout } = yield race({
-    upgrade: call(
-      waitForReady,
-      {
-        originalDaemonSets: daemonSets,
-        originalDeployments: deployments,
-        originalStatefulSets: statefulSets
-      }
-    ),
+    upgrade: call(waitForReady, {
+      originalDaemonSets: daemonSets,
+      originalDeployments: deployments,
+      originalStatefulSets: statefulSets
+    }),
     timeout: delay(maxWaitSeconds * 1000)
   });
 
   yield cancel(informers);
   if (timeout) {
-    throw Error(`Timed out waiting for resources to be ready after ${maxWaitSeconds}s`);
+    throw Error(
+      `Timed out waiting for resources to be ready after ${maxWaitSeconds}s`
+    );
   }
 }
 
@@ -226,17 +239,9 @@ function* blockUntilCacheHydrated(): Generator<
 > {
   while (true) {
     const { kubernetes }: State = yield select();
-    const {
-      DaemonSets,
-      Deployments,
-      StatefulSets
-    } = kubernetes.cluster;
+    const { DaemonSets, Deployments, StatefulSets } = kubernetes.cluster;
 
-    if (
-      DaemonSets.loaded &&
-      Deployments.loaded &&
-      StatefulSets.loaded
-    ) {
+    if (DaemonSets.loaded && Deployments.loaded && StatefulSets.loaded) {
       log.info(`kubernetes cache is hydrated`);
       break;
     }
@@ -247,16 +252,22 @@ function* blockUntilCacheHydrated(): Generator<
 
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function* waitForReady(config: {
-  originalDaemonSets: DaemonSet[],
-  originalDeployments: Deployment[],
+  originalDaemonSets: DaemonSet[];
+  originalDeployments: Deployment[];
   originalStatefulSets: StatefulSet[];
-}): Generator<Effect, void, State>  {
+}): Generator<Effect, void, State> {
   while (true) {
     const state: State = yield select();
     const { DaemonSets, Deployments, StatefulSets } = state.kubernetes.cluster;
-    const matchingDaemonSets = config.originalDaemonSets.map(o => getMatch(o, DaemonSets.resources));
-    const matchingDeployments = config.originalDeployments.map(o => getMatch(o, Deployments.resources));
-    const matchingStatefulSets = config.originalStatefulSets.map(o => getMatch(o, StatefulSets.resources));
+    const matchingDaemonSets = config.originalDaemonSets.map(o =>
+      getMatch(o, DaemonSets.resources)
+    );
+    const matchingDeployments = config.originalDeployments.map(o =>
+      getMatch(o, Deployments.resources)
+    );
+    const matchingStatefulSets = config.originalStatefulSets.map(o =>
+      getMatch(o, StatefulSets.resources)
+    );
 
     // Check if any of the items are "active" (still deploying), log the resulting messages if so
     const activeMessages = activeDaemonsets(matchingDaemonSets)
@@ -267,7 +278,11 @@ function* waitForReady(config: {
       break;
     }
 
-    log.info(`Waiting on ${activeMessages.length} active pod resources:\n- ${activeMessages.join("\n- ")}`);
+    log.info(
+      `Waiting on ${
+        activeMessages.length
+      } active pod resources:\n- ${activeMessages.join("\n- ")}`
+    );
     yield delay(7000);
   }
 }
@@ -279,5 +294,7 @@ function getMatch<T extends K8sResource>(needle: T, haystack: T[]): T {
     }
   }
   // Implies that the resource was deleted underneath us while we were waiting on it
-  throw Error(`Missing ${needle.kind} resource: ${needle.namespace}/${needle.name}`);
+  throw Error(
+    `Missing ${needle.kind} resource: ${needle.namespace}/${needle.name}`
+  );
 }

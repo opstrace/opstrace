@@ -102,8 +102,7 @@ export function parseCmdlineArgs(): void {
   });
 
   parser.add_argument("--n-entries-per-stream-fragment", {
-    help:
-      "number of log entries per log stream fragment (or number of metric samples per fragment)",
+    help: "number of log entries per log stream fragment (or number of metric samples per fragment)",
     type: "int",
     required: true
   });
@@ -160,8 +159,7 @@ export function parseCmdlineArgs(): void {
   });
 
   parser.add_argument("--metrics-time-increment-ms", {
-    help:
-      "time difference in milliseconds between adjacent samples in a time series",
+    help: "time difference in milliseconds between adjacent samples in a time series",
     type: "int",
     default: 1
   });
@@ -185,8 +183,7 @@ export function parseCmdlineArgs(): void {
   });
 
   readgroup.add_argument("--skip-read", {
-    help:
-      "skip the readout in the write/read cycle, proceed to the next cycle instead",
+    help: "skip the readout in the write/read cycle, proceed to the next cycle instead",
     action: "store_true",
     default: false
   });
@@ -219,8 +216,7 @@ export function parseCmdlineArgs(): void {
   });
 
   parser.add_argument("--n-cycles", {
-    help:
-      "number of write/read cycles to perform. Every cycle generates a report.",
+    help: "number of write/read cycles to perform. Every cycle generates a report.",
     type: "int",
     default: 1
   });
@@ -251,8 +247,7 @@ export function parseCmdlineArgs(): void {
   });
 
   parser.add_argument("--http-server-port", {
-    help:
-      "HTTP server listen port (serves /metrics Prometheus endpoint). Default: try 8900-8990.",
+    help: "HTTP server listen port (serves /metrics Prometheus endpoint). Default: try 8900-8990.",
     type: "int",
     default: 0
   });
@@ -275,8 +270,7 @@ export function parseCmdlineArgs(): void {
   });
 
   parser.add_argument("--stream-write-n-seconds-jitter", {
-    help:
-      "add random number of seconds from interval [-J,J] to --stream-write-n-seconds ",
+    help: "add random number of seconds from interval [-J,J] to --stream-write-n-seconds ",
     metavar: "J",
     type: "float",
     default: 0
@@ -367,7 +361,9 @@ export function parseCmdlineArgs(): void {
   }
 
   if (CFG.change_streams_every_n_cycles > CFG.n_cycles) {
-    log.error("--change-streams-every-n-cycles must not be larger than --n-cycles");
+    log.error(
+      "--change-streams-every-n-cycles must not be larger than --n-cycles"
+    );
     process.exit(1);
   }
   if (CFG.change_streams_every_n_cycles < 0) {
@@ -375,7 +371,10 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
-  if (CFG.metrics_past_start_range_min_seconds > CFG.metrics_past_start_range_max_seconds) {
+  if (
+    CFG.metrics_past_start_range_min_seconds >
+    CFG.metrics_past_start_range_max_seconds
+  ) {
     log.error(
       "--metrics-past-start-range-min-seconds must not be larger than --metrics-past-start-range-max-seconds"
     );
@@ -386,7 +385,7 @@ export function parseCmdlineArgs(): void {
     // see also https://cortexmetrics.io/docs/blocks-storage/
     log.warn(
       "--metrics-past-start-range-max-seconds is greater than two hours, " +
-      "which exceeds default Cortex block limits and may result in dropped data"
+        "which exceeds default Cortex block limits and may result in dropped data"
     );
   }
 

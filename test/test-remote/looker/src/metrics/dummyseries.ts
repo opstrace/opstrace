@@ -118,7 +118,8 @@ export class MetricSeries extends TimeseriesBase {
     // (opts.n_entries_per_stream_fragment-1) because this time width is
     // actually compared to the last sample in the previous fragment
     const maxTimeLeapComparedToPreviousFragmentSeconds =
-      (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) / 1000;
+      (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) /
+      1000;
     if (maxTimeLeapComparedToPreviousFragmentSeconds >= 10 * 60) {
       throw new Error(
         "a single fragment may cover 10 minutes worth of data. " +
@@ -131,7 +132,8 @@ export class MetricSeries extends TimeseriesBase {
     // say, there are 1000 samples per fragment and metrics_time_increment_ms is 1.
     // Then the actual fragment time width is 0.999 seconds.
     const fragmentWidthSeconds =
-      ((opts.n_entries_per_stream_fragment - 1) * opts.metrics_time_increment_ms) /
+      ((opts.n_entries_per_stream_fragment - 1) *
+        opts.metrics_time_increment_ms) /
       1000.0;
 
     // For metrics_time_increment_ms being integer multiple of 1000 this is the
@@ -165,7 +167,9 @@ export class MetricSeries extends TimeseriesBase {
 
     // Translate (integer number, public) opts.metrics_time_increment_ms into (actual
     // integer, private) this.metrics_time_increment_ms.
-    this.metrics_time_increment_ms = Long.fromInt(opts.metrics_time_increment_ms);
+    this.metrics_time_increment_ms = Long.fromInt(
+      opts.metrics_time_increment_ms
+    );
 
     // Initialize this.millisSinceEpochOfLastGeneratedSample with starttime -
     // metrics_time_increment_ms
@@ -246,9 +250,10 @@ export class MetricSeries extends TimeseriesBase {
   }
 
   protected nextSample(): MetricSample {
-    this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
-      this.metrics_time_increment_ms
-    );
+    this.millisSinceEpochOfLastGeneratedSample =
+      this.millisSinceEpochOfLastGeneratedSample.add(
+        this.metrics_time_increment_ms
+      );
 
     return new MetricSample(
       this.nextValue(),
@@ -307,9 +312,8 @@ export class MetricSeries extends TimeseriesBase {
    * _within_ an individual fragment.
    */
   private bringCloserToWalltimeIfFallenBehind(): number {
-    const lastSampleSecondsSinceEpoch = this.millisSinceEpochOfLastGeneratedSample
-      .divide(1000)
-      .toNumber();
+    const lastSampleSecondsSinceEpoch =
+      this.millisSinceEpochOfLastGeneratedSample.divide(1000).toNumber();
 
     const nowSecondsSinceEpoch = ZonedDateTime.now(
       ZoneOffset.UTC
@@ -350,9 +354,10 @@ export class MetricSeries extends TimeseriesBase {
 
     if (shiftIntoPastSeconds > maxLagMinutes * 60) {
       log.debug("%s: leaped forward by %s minutes", this, leapForwardMinutes);
-      this.millisSinceEpochOfLastGeneratedSample = this.millisSinceEpochOfLastGeneratedSample.add(
-        leapForwardMinutes * 60 * 1000
-      );
+      this.millisSinceEpochOfLastGeneratedSample =
+        this.millisSinceEpochOfLastGeneratedSample.add(
+          leapForwardMinutes * 60 * 1000
+        );
 
       // TODO: allow for injecting a counter (e.g., a Prometheus counter)
       // so that when this happens there is a way to do bookkeeping about it.
