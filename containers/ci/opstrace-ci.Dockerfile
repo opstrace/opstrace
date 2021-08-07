@@ -95,6 +95,8 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 RUN npm install -g markdownlint-cli@0.28.1
 RUN npm install -g prettier@2.3.2
 
+RUN markdownlint --version
+RUN prettier --version
 
 # Set up `addlicense` so that we can use that right away. Install it to
 # /usr/local.
