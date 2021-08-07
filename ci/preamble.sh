@@ -34,9 +34,9 @@ echo "check if this is a docs-only change, exit preamble early if so"
 bash ci/check-if-docs-pr.sh && exit 0
 
 # Enforce consistent code formatting, based on .prettierrc and .prettierignore
-yarn run prettier --check 'lib/**/*.ts'
-yarn run prettier --check 'packages/**/*.ts'
-yarn run prettier --check 'test/**/*.ts'
+prettier --check 'lib/**/*.ts'
+prettier --check 'packages/**/*.ts'
+prettier --check 'test/**/*.ts'
 
 echo "--- detect missing license headers"
 make check-license-headers
