@@ -172,16 +172,13 @@ function parseCmdlineArgs() {
     help: "Tear down an existing Opstrace instance."
   });
   const parserList = subparsers.add_parser("list", {
-    help:
-      "List existing Opstrace instances (visible with the configured cloud credentials)."
+    help: "List existing Opstrace instances (visible with the configured cloud credentials)."
   });
   const parserStatus = subparsers.add_parser("status", {
-    help:
-      "Check the status of an Opstrace instance (experimental, no promises)."
+    help: "Check the status of an Opstrace instance (experimental, no promises)."
   });
   const parserInfo = subparsers.add_parser("info", {
-    help:
-      "Get infrastructure and Opstrace instance version information (experimental, no promises)."
+    help: "Get infrastructure and Opstrace instance version information (experimental, no promises)."
   });
   const parserUpgrade = subparsers.add_parser("upgrade", {
     help: "Upgrade an existing Opstrace instance."
@@ -278,8 +275,7 @@ function parseCmdlineArgs() {
     parserUpgrade
   ]) {
     p.add_argument("instanceName", {
-      help:
-        "The Opstrace instance name ([a-z0-9-_], no more than 23 characters).",
+      help: "The Opstrace instance name ([a-z0-9-_], no more than 23 characters).",
       type: "str",
       metavar: "INSTANCE_NAME"
     });
@@ -287,8 +283,7 @@ function parseCmdlineArgs() {
 
   for (const p of [parserCreate, parserStatus, parserUpgrade]) {
     p.add_argument("-c", "--instance-config", {
-      help:
-        "File path to the config document (YAML). Read from stdin otherwise.",
+      help: "File path to the config document (YAML). Read from stdin otherwise.",
       metavar: "CONFIG_FILE_PATH",
       dest: "clusterConfigFilePath",
       type: "str",
@@ -312,8 +307,7 @@ function parseCmdlineArgs() {
   }
 
   parserCreate.add_argument("--hold-controller", {
-    help:
-      "Do not deploy controller into k8s cluster (for development purposes).",
+    help: "Do not deploy controller into k8s cluster (for development purposes).",
     action: "store_true",
     default: false,
     dest: "holdController"
@@ -454,8 +448,7 @@ function configureParserTAPubKeysAdd(parser: argparse.ArgumentParser) {
   });
 
   parser.add_argument("instanceName", {
-    help:
-      "The name of the Opstrace instance to change the authenticator configuration for.",
+    help: "The name of the Opstrace instance to change the authenticator configuration for.",
     type: "str",
     metavar: "INSTANCE_NAME"
   });
@@ -482,8 +475,7 @@ function configureParserTAPubKeysList(parser: argparse.ArgumentParser) {
   });
 
   parser.add_argument("instanceName", {
-    help:
-      "The name of the Opstrace instance to look up the authenticator configuration for.",
+    help: "The name of the Opstrace instance to look up the authenticator configuration for.",
     type: "str",
     metavar: "INSTANCE_NAME"
   });
@@ -499,8 +491,7 @@ function configureParserTAPubKeysRemove(parser: argparse.ArgumentParser) {
   });
 
   parser.add_argument("instanceName", {
-    help:
-      "The name of the instance to change the authenticator configuration in.",
+    help: "The name of the instance to change the authenticator configuration in.",
     type: "str",
     metavar: "INSTANCE_NAME"
   });

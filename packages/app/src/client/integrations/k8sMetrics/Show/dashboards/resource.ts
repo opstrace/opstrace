@@ -1450,5 +1450,4 @@ export default function makeDashboard(integrationId: string) {
   };
 }
 
-
-export type Dashboard = ReturnType<typeof makeDashboard>
+export type Dashboard = ReturnType<typeof makeDashboard>;

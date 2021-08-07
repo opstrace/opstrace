@@ -33,7 +33,9 @@ export const getCertSecretCopy = (
   );
 
   if (!certSecretSource) {
-    log.debug(`Source Cert Secret ${ingressNamespace}/${ingressCertSecretName} not yet created. Skipping copy to namespace ${targetNameSpace}`);
+    log.debug(
+      `Source Cert Secret ${ingressNamespace}/${ingressCertSecretName} not yet created. Skipping copy to namespace ${targetNameSpace}`
+    );
     return;
   }
 

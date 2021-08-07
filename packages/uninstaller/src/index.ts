@@ -190,9 +190,10 @@ function* triggerk8sTeardown(kubeConfig: KubeConfig) {
   yield call(blockUntilCacheHydrated);
 
   const state: State = yield select();
-  const controllerDeployment = state.kubernetes.cluster.Deployments.resources.find(
-    d => d.name === CONTROLLER_NAME
-  );
+  const controllerDeployment =
+    state.kubernetes.cluster.Deployments.resources.find(
+      d => d.name === CONTROLLER_NAME
+    );
 
   if (controllerDeployment !== undefined) {
     log.info(

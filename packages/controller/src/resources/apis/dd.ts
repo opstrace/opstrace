@@ -57,9 +57,8 @@ export function DDAPIResources(
     resources: {}
   };
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(
-    state
-  );
+  const controllerConfig: LatestControllerConfigType =
+    getControllerConfig(state);
 
   const namespace = getTenantNamespace(tenant);
   const apiName = "dd";

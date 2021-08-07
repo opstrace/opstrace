@@ -63,7 +63,6 @@ export const inhibitRuleSchema: yup.SchemaOf<InhibitRule> = yup
       .notRequired()
   })
   .meta({
-    url:
-      "https://www.prometheus.io/docs/alerting/latest/configuration/#inhibit_rule"
+    url: "https://www.prometheus.io/docs/alerting/latest/configuration/#inhibit_rule"
   })
   .noUnknown();

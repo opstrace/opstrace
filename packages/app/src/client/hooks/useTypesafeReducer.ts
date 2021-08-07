@@ -34,7 +34,7 @@ export function useTypesafeReducer<
     ) {
       return function (this: any) {
         return dispatcher(
-          actionCreator.apply(this as any, (arguments as unknown) as any[])
+          actionCreator.apply(this as any, arguments as unknown as any[])
         );
       };
     }

@@ -36,20 +36,22 @@ export async function storeSystemTenantApiAuthTokenAsSecret(
   // Use ResourceCollection to ensure that the created resources are annotated correctly
   const collection = new ResourceCollection();
 
-  collection.add(new Namespace(
-    {
-      apiVersion: "v1",
-      kind: "Namespace",
-      metadata: {
-        name: "system-tenant",
-        labels: {
-          tenant: "system-tenant",
-          "cert-manager.io/disable-validation": "true"
+  collection.add(
+    new Namespace(
+      {
+        apiVersion: "v1",
+        kind: "Namespace",
+        metadata: {
+          name: "system-tenant",
+          labels: {
+            tenant: "system-tenant",
+            "cert-manager.io/disable-validation": "true"
+          }
         }
-      }
-    },
-    kubeConfig
-  ));
+      },
+      kubeConfig
+    )
+  );
 
   // to be consumed by both, systemlog-fluentd as well as system
   // prometheus.

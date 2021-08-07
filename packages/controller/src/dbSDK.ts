@@ -2196,9 +2196,7 @@ export function getSdk(
   withWrapper: SdkFunctionWrapper = defaultWrapper
 ) {
   return {
-    DeleteIntegration(
-      variables: DeleteIntegrationMutationVariables
-    ): Promise<{
+    DeleteIntegration(variables: DeleteIntegrationMutationVariables): Promise<{
       data?: DeleteIntegrationMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2212,9 +2210,7 @@ export function getSdk(
         )
       );
     },
-    GetIntegrations(
-      variables: GetIntegrationsQueryVariables
-    ): Promise<{
+    GetIntegrations(variables: GetIntegrationsQueryVariables): Promise<{
       data?: GetIntegrationsQuery | undefined;
       extensions?: any;
       headers: Headers;
@@ -2244,9 +2240,7 @@ export function getSdk(
         )
       );
     },
-    InsertIntegration(
-      variables: InsertIntegrationMutationVariables
-    ): Promise<{
+    InsertIntegration(variables: InsertIntegrationMutationVariables): Promise<{
       data?: InsertIntegrationMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2308,9 +2302,7 @@ export function getSdk(
         )
       );
     },
-    CreateTenants(
-      variables: CreateTenantsMutationVariables
-    ): Promise<{
+    CreateTenants(variables: CreateTenantsMutationVariables): Promise<{
       data?: CreateTenantsMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2324,9 +2316,7 @@ export function getSdk(
         )
       );
     },
-    DeleteTenant(
-      variables: DeleteTenantMutationVariables
-    ): Promise<{
+    DeleteTenant(variables: DeleteTenantMutationVariables): Promise<{
       data?: DeleteTenantMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2340,9 +2330,7 @@ export function getSdk(
         )
       );
     },
-    GetAlertmanager(
-      variables: GetAlertmanagerQueryVariables
-    ): Promise<{
+    GetAlertmanager(variables: GetAlertmanagerQueryVariables): Promise<{
       data?: GetAlertmanagerQuery | undefined;
       extensions?: any;
       headers: Headers;
@@ -2356,9 +2344,7 @@ export function getSdk(
         )
       );
     },
-    GetTenants(
-      variables?: GetTenantsQueryVariables
-    ): Promise<{
+    GetTenants(variables?: GetTenantsQueryVariables): Promise<{
       data?: GetTenantsQuery | undefined;
       extensions?: any;
       headers: Headers;
@@ -2401,9 +2387,7 @@ export function getSdk(
         )
       );
     },
-    CreateUser(
-      variables: CreateUserMutationVariables
-    ): Promise<{
+    CreateUser(variables: CreateUserMutationVariables): Promise<{
       data?: CreateUserMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2417,9 +2401,7 @@ export function getSdk(
         )
       );
     },
-    DeactivateUser(
-      variables: DeactivateUserMutationVariables
-    ): Promise<{
+    DeactivateUser(variables: DeactivateUserMutationVariables): Promise<{
       data?: DeactivateUserMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2449,9 +2431,7 @@ export function getSdk(
         )
       );
     },
-    GetCurrentUser(
-      variables?: GetCurrentUserQueryVariables
-    ): Promise<{
+    GetCurrentUser(variables?: GetCurrentUserQueryVariables): Promise<{
       data?: GetCurrentUserQuery | undefined;
       extensions?: any;
       headers: Headers;
@@ -2465,9 +2445,7 @@ export function getSdk(
         )
       );
     },
-    GetUser(
-      variables: GetUserQueryVariables
-    ): Promise<{
+    GetUser(variables: GetUserQueryVariables): Promise<{
       data?: GetUserQuery | undefined;
       extensions?: any;
       headers: Headers;
@@ -2478,9 +2456,7 @@ export function getSdk(
         client.rawRequest<GetUserQuery>(print(GetUserDocument), variables)
       );
     },
-    ReactivateUser(
-      variables: ReactivateUserMutationVariables
-    ): Promise<{
+    ReactivateUser(variables: ReactivateUserMutationVariables): Promise<{
       data?: ReactivateUserMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2494,9 +2470,7 @@ export function getSdk(
         )
       );
     },
-    SetDarkMode(
-      variables: SetDarkModeMutationVariables
-    ): Promise<{
+    SetDarkMode(variables: SetDarkModeMutationVariables): Promise<{
       data?: SetDarkModeMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2526,9 +2500,7 @@ export function getSdk(
         )
       );
     },
-    UpdateUser(
-      variables: UpdateUserMutationVariables
-    ): Promise<{
+    UpdateUser(variables: UpdateUserMutationVariables): Promise<{
       data?: UpdateUserMutation | undefined;
       extensions?: any;
       headers: Headers;
@@ -2542,9 +2514,7 @@ export function getSdk(
         )
       );
     },
-    UpdateUserSession(
-      variables: UpdateUserSessionMutationVariables
-    ): Promise<{
+    UpdateUserSession(variables: UpdateUserSessionMutationVariables): Promise<{
       data?: UpdateUserSessionMutation | undefined;
       extensions?: any;
       headers: Headers;

@@ -24,14 +24,15 @@ import {
 } from "./types";
 import { httpConfigSchema } from "./common";
 
-const slackConfigActionConfirmSchema: yup.SchemaOf<SlackConfigActionConfirm> = yup
-  .object({
-    text: yup.string().defined(),
-    dismiss_text: yup.string().default(""),
-    ok_text: yup.string().default(""),
-    title: yup.string().default("")
-  })
-  .noUnknown();
+const slackConfigActionConfirmSchema: yup.SchemaOf<SlackConfigActionConfirm> =
+  yup
+    .object({
+      text: yup.string().defined(),
+      dismiss_text: yup.string().default(""),
+      ok_text: yup.string().default(""),
+      title: yup.string().default("")
+    })
+    .noUnknown();
 
 const slackConfigActionSchema: yup.SchemaOf<SlackConfigAction> = yup.object({
   text: yup.string().defined(),

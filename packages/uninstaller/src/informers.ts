@@ -81,12 +81,8 @@ export function* blockUntilCacheHydrated(): Generator<
 > {
   while (true) {
     const { kubernetes }: State = yield select();
-    const {
-      DaemonSets,
-      Deployments,
-      PersistentVolumes,
-      StatefulSets
-    } = kubernetes.cluster;
+    const { DaemonSets, Deployments, PersistentVolumes, StatefulSets } =
+      kubernetes.cluster;
 
     if (
       DaemonSets.loaded &&

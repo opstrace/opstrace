@@ -37,9 +37,8 @@ export function OpstraceAPIResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(
-    state
-  );
+  const controllerConfig: LatestControllerConfigType =
+    getControllerConfig(state);
 
   const name = `opstrace-api`;
 

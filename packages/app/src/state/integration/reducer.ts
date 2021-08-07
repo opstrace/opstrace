@@ -67,17 +67,14 @@ export const reducer = createReducer<IntegrationState, IntegrationActions>(
       });
     }
   )
-  .handleAction(
-    actions.addIntegration,
-    (state, action): IntegrationState => {
-      return {
-        loading: state.loading,
-        integrations: mergeDeepRight(state.integrations)({
-          [action.payload.integration.id]: action.payload.integration
-        })
-      };
-    }
-  )
+  .handleAction(actions.addIntegration, (state, action): IntegrationState => {
+    return {
+      loading: state.loading,
+      integrations: mergeDeepRight(state.integrations)({
+        [action.payload.integration.id]: action.payload.integration
+      })
+    };
+  })
   .handleAction(
     actions.deleteIntegration,
     (state, action): IntegrationState => {

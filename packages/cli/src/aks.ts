@@ -196,9 +196,8 @@ async function fetchControllerConfigWithCurrentKeySet(
   kubeconfig: KubeConfig
 ): Promise<controllerconfig.LatestControllerConfigType> {
   //@ts-ignore: this is a wtf moment
-  const controllerConfigObj: controllerconfig.LatestControllerConfigType = await controllerconfig.fetch(
-    kubeconfig
-  );
+  const controllerConfigObj: controllerconfig.LatestControllerConfigType =
+    await controllerconfig.fetch(kubeconfig);
 
   if (controllerConfigObj === undefined) {
     die("error: could not read current Opstrace controller config");

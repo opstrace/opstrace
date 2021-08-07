@@ -52,9 +52,8 @@ export function LokiAPIResources(
     resources: {}
   };
 
-  const controllerConfig: LatestControllerConfigType = getControllerConfig(
-    state
-  );
+  const controllerConfig: LatestControllerConfigType =
+    getControllerConfig(state);
 
   const namespace = getTenantNamespace(tenant);
   const api = "loki";

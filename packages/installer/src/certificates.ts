@@ -45,11 +45,13 @@ export function handleFailedCertificate(
   });
 
   if (cert === undefined) {
-    log.debug("no certificate in failed state")
-    return
+    log.debug("no certificate in failed state");
+    return;
   }
 
-  log.debug(`${cert.name} possibly in a failed state, deleting to retrigger request`)
+  log.debug(
+    `${cert.name} possibly in a failed state, deleting to retrigger request`
+  );
 
   const certRequest = certificateRequests.find(cert => {
     return cert.name.startsWith(cert.name);

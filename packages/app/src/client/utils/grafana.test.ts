@@ -47,7 +47,7 @@ describe("deleteFolder", () => {
     const integration = getMockIntegration();
     const tenant = getMockTenant();
     const folderId = 99;
-    
+
     nock(`http://${tenant.name}.localhost`)
       .delete(`/grafana/api/folders/i9n-${integration.id}`)
       .reply(200, { id: folderId });

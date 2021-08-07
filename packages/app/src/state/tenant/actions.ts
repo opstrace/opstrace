@@ -16,9 +16,9 @@
 import { createAction } from "typesafe-actions";
 import { SubscriptionID, Tenants } from "./types";
 
-export const subscribeToTenantList = createAction("SUBSCRIBE_TENANT_LIST")<
-  SubscriptionID
->();
+export const subscribeToTenantList = createAction(
+  "SUBSCRIBE_TENANT_LIST"
+)<SubscriptionID>();
 
 export const unsubscribeFromTenantList = createAction(
   "UNSUBSCRIBE_TENANT_LIST"

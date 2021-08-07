@@ -18,10 +18,7 @@ import fs from "fs";
 
 import yaml from "js-yaml";
 
-import {
-  LatestClusterConfigFileSchemaType,
-  upgradeToLatest
-} from "./schemas";
+import { LatestClusterConfigFileSchemaType, upgradeToLatest } from "./schemas";
 
 import {
   LatestAWSInfraConfigType,
@@ -67,7 +64,7 @@ export async function uccGetAndValidate(
     JSON.stringify(ucc, null, 2)
   );
 
-  return upgradeToLatest(ucc, cloudProvider).catch((err) => {
+  return upgradeToLatest(ucc, cloudProvider).catch(err => {
     die(`invalid cluster config document: ${err.message}`);
   });
 }

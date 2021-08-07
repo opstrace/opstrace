@@ -27,12 +27,13 @@ export const tenantSchema = yup.object({
     ),
 
   // Provided by the user
-  type: yup.mixed<"USER" | "SYSTEM">().oneOf(["SYSTEM", "USER"]).default("USER"),
+  type: yup
+    .mixed<"USER" | "SYSTEM">()
+    .oneOf(["SYSTEM", "USER"])
+    .default("USER"),
 
   // Generated when the tenant is written to GraphQL, and then synced back to here.
-  id: yup
-    .string()
-    .optional()
+  id: yup.string().optional()
 });
 
 export type Tenant = yup.InferType<typeof tenantSchema>;

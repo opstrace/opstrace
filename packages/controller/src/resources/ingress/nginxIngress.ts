@@ -42,11 +42,8 @@ export function NginxIngressResources(
 
   const domain = getDomain(state);
 
-  const {
-    target,
-    uiSourceIpFirewallRules,
-    apiSourceIpFirewallRules
-  } = getControllerConfig(state);
+  const { target, uiSourceIpFirewallRules, apiSourceIpFirewallRules } =
+    getControllerConfig(state);
   const ports: {
     ui: { public: boolean; http: number; https: number };
     api: { public: boolean; http: number; https: number };

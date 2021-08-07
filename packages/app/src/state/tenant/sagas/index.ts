@@ -98,11 +98,10 @@ function* getAlertmanagerListener() {
 
 function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
   try {
-    const response: AsyncReturnType<
-      typeof graphqlClient.GetAlertmanager
-    > = yield graphqlClient.GetAlertmanager({
-      tenant_id: action.payload
-    });
+    const response: AsyncReturnType<typeof graphqlClient.GetAlertmanager> =
+      yield graphqlClient.GetAlertmanager({
+        tenant_id: action.payload
+      });
 
     if (response.data?.getAlertmanager?.config) {
       const cortexConfig = yamlParser.load(
@@ -167,12 +166,11 @@ function* updateAlertmanager(
       }
     );
 
-    const response: AsyncReturnType<
-      typeof graphqlClient.UpdateAlertmanager
-    > = yield graphqlClient.UpdateAlertmanager({
-      tenant_id: action.payload.tenantName,
-      input: { config }
-    });
+    const response: AsyncReturnType<typeof graphqlClient.UpdateAlertmanager> =
+      yield graphqlClient.UpdateAlertmanager({
+        tenant_id: action.payload.tenantName,
+        input: { config }
+      });
 
     if (action.payload.formId) {
       yield put(
