@@ -33,6 +33,11 @@ make lint-docs
 echo "check if this is a docs-only change, exit preamble early if so"
 bash ci/check-if-docs-pr.sh && exit 0
 
+# Enforce consistent code formatting, based on .prettierrc and .prettierignore
+yarn run prettier --check 'lib/**/*.ts'
+yarn run prettier --check 'packages/**/*.ts'
+yarn run prettier --check 'test/**/*.ts'
+
 echo "--- detect missing license headers"
 make check-license-headers
 
@@ -41,10 +46,6 @@ yarn --frozen-lockfile --ignore-optional
 
 echo "--- lint codebase: quick feedback"
 make lint-codebase
-
-# Enforce consistent code formatting, based on .prettierrc and .prettierignore
-yarn run prettier --check 'lib/**/*.ts'
-yarn run prettier --check 'packages/**/*.ts'
 
 # This is needed also by the app Docker image build
 make set-build-info-constants
