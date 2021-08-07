@@ -25,9 +25,12 @@ import { Tenant } from "state/tenant/types";
 import { installedIntegrationsPath } from "../paths";
 
 import { deleteIntegration } from "state/integration/actions";
-import graphqlClient from "state/clients/graphqlClient";
+import graphqlClient, {
+  getGraphQLClientErrorMessage,
+  isGraphQLClientError
+} from "state/clients/graphqlClient";
 
-import { deleteFolder } from "client/utils/grafana";
+import { deleteFolder, isGrafanaError } from "client/utils/grafana";
 
 import { Button } from "client/components/Button";
 import { useSimpleNotification } from "client/services/Notification";
@@ -55,23 +58,31 @@ export const UninstallBtn = ({
         tenant_id: tenant.id,
         id: integration.id
       });
-      try {
-        await deleteFolder({ integration, tenant });
-      } catch (error) {
-        registerNotification({
-          state: "error" as const,
-          title: "Could not delete grafana folder",
-          information: error.response.data.message ?? error.message
-        });
-      }
+      await deleteFolder({ integration, tenant });
       dispatch(deleteIntegration({ tenantId: tenant.id, id: integration.id }));
       history.push(installedIntegrationsPath({ tenant }));
     } catch (error) {
-      registerNotification({
-        state: "error" as const,
-        title: "Could not uninstall integration",
-        information: error.response.errors?.[0].message ?? error.message
-      });
+      let notification: Parameters<typeof registerNotification>[0]
+      if (isGraphQLClientError(error)) {
+        notification = {
+          state: "error" as const,
+          title: "Could not uninstall integration",
+          information: getGraphQLClientErrorMessage(error)
+        }
+      } else if (isGrafanaError(error)) {
+        notification = {
+          state: "error" as const,
+          title: "Could not delete grafana folder",
+          information: error.response.data.message
+        }
+      } else {
+        notification = {
+          state: "error" as const,
+          title: "An unexpected error happened.",
+          information: (error as Error).message
+        }
+      }
+      registerNotification(notification);
     }
   };
 
