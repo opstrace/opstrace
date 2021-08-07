@@ -16,8 +16,7 @@
 
 import { GraphQLClient } from "graphql-request";
 import { print } from "graphql";
-import { GraphQLError } from "graphql-request/dist/types";
-import { Headers } from "graphql-request/dist/types.dom";
+import { GraphQLResponse } from "graphql-request/dist/types";
 import gql from "graphql-tag";
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -2196,13 +2195,9 @@ export function getSdk(
   withWrapper: SdkFunctionWrapper = defaultWrapper
 ) {
   return {
-    DeleteIntegration(variables: DeleteIntegrationMutationVariables): Promise<{
-      data?: DeleteIntegrationMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    DeleteIntegration(
+      variables: DeleteIntegrationMutationVariables
+    ): Promise<GraphQLResponse<DeleteIntegrationMutation>> {
       return withWrapper(() =>
         client.rawRequest<DeleteIntegrationMutation>(
           print(DeleteIntegrationDocument),
@@ -2210,13 +2205,9 @@ export function getSdk(
         )
       );
     },
-    GetIntegrations(variables: GetIntegrationsQueryVariables): Promise<{
-      data?: GetIntegrationsQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    GetIntegrations(
+      variables: GetIntegrationsQueryVariables
+    ): Promise<GraphQLResponse<GetIntegrationsQuery>> {
       return withWrapper(() =>
         client.rawRequest<GetIntegrationsQuery>(
           print(GetIntegrationsDocument),
@@ -2226,13 +2217,7 @@ export function getSdk(
     },
     GetIntegrationsDump(
       variables?: GetIntegrationsDumpQueryVariables
-    ): Promise<{
-      data?: GetIntegrationsDumpQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<GetIntegrationsDumpQuery>> {
       return withWrapper(() =>
         client.rawRequest<GetIntegrationsDumpQuery>(
           print(GetIntegrationsDumpDocument),
@@ -2240,13 +2225,9 @@ export function getSdk(
         )
       );
     },
-    InsertIntegration(variables: InsertIntegrationMutationVariables): Promise<{
-      data?: InsertIntegrationMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    InsertIntegration(
+      variables: InsertIntegrationMutationVariables
+    ): Promise<GraphQLResponse<InsertIntegrationMutation>> {
       return withWrapper(() =>
         client.rawRequest<InsertIntegrationMutation>(
           print(InsertIntegrationDocument),
@@ -2256,13 +2237,7 @@ export function getSdk(
     },
     SubscribeToIntegrationList(
       variables: SubscribeToIntegrationListSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToIntegrationListSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<SubscribeToIntegrationListSubscription>> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToIntegrationListSubscription>(
           print(SubscribeToIntegrationListDocument),
@@ -2272,13 +2247,7 @@ export function getSdk(
     },
     UpdateIntegrationData(
       variables: UpdateIntegrationDataMutationVariables
-    ): Promise<{
-      data?: UpdateIntegrationDataMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<UpdateIntegrationDataMutation>> {
       return withWrapper(() =>
         client.rawRequest<UpdateIntegrationDataMutation>(
           print(UpdateIntegrationDataDocument),
@@ -2288,13 +2257,7 @@ export function getSdk(
     },
     UpdateIntegrationName(
       variables: UpdateIntegrationNameMutationVariables
-    ): Promise<{
-      data?: UpdateIntegrationNameMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<UpdateIntegrationNameMutation>> {
       return withWrapper(() =>
         client.rawRequest<UpdateIntegrationNameMutation>(
           print(UpdateIntegrationNameDocument),
@@ -2302,13 +2265,9 @@ export function getSdk(
         )
       );
     },
-    CreateTenants(variables: CreateTenantsMutationVariables): Promise<{
-      data?: CreateTenantsMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    CreateTenants(
+      variables: CreateTenantsMutationVariables
+    ): Promise<GraphQLResponse<CreateTenantsMutation>> {
       return withWrapper(() =>
         client.rawRequest<CreateTenantsMutation>(
           print(CreateTenantsDocument),
@@ -2316,13 +2275,9 @@ export function getSdk(
         )
       );
     },
-    DeleteTenant(variables: DeleteTenantMutationVariables): Promise<{
-      data?: DeleteTenantMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    DeleteTenant(
+      variables: DeleteTenantMutationVariables
+    ): Promise<GraphQLResponse<DeleteTenantMutation>> {
       return withWrapper(() =>
         client.rawRequest<DeleteTenantMutation>(
           print(DeleteTenantDocument),
@@ -2330,13 +2285,9 @@ export function getSdk(
         )
       );
     },
-    GetAlertmanager(variables: GetAlertmanagerQueryVariables): Promise<{
-      data?: GetAlertmanagerQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    GetAlertmanager(
+      variables: GetAlertmanagerQueryVariables
+    ): Promise<GraphQLResponse<GetAlertmanagerQuery>> {
       return withWrapper(() =>
         client.rawRequest<GetAlertmanagerQuery>(
           print(GetAlertmanagerDocument),
@@ -2344,26 +2295,16 @@ export function getSdk(
         )
       );
     },
-    GetTenants(variables?: GetTenantsQueryVariables): Promise<{
-      data?: GetTenantsQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    GetTenants(
+      variables?: GetTenantsQueryVariables
+    ): Promise<GraphQLResponse<GetTenantsQuery>> {
       return withWrapper(() =>
         client.rawRequest<GetTenantsQuery>(print(GetTenantsDocument), variables)
       );
     },
     SubscribeToTenantList(
       variables?: SubscribeToTenantListSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToTenantListSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<SubscribeToTenantListSubscription>> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToTenantListSubscription>(
           print(SubscribeToTenantListDocument),
@@ -2373,13 +2314,7 @@ export function getSdk(
     },
     UpdateAlertmanager(
       variables: UpdateAlertmanagerMutationVariables
-    ): Promise<{
-      data?: UpdateAlertmanagerMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<UpdateAlertmanagerMutation>> {
       return withWrapper(() =>
         client.rawRequest<UpdateAlertmanagerMutation>(
           print(UpdateAlertmanagerDocument),
@@ -2387,13 +2322,9 @@ export function getSdk(
         )
       );
     },
-    CreateUser(variables: CreateUserMutationVariables): Promise<{
-      data?: CreateUserMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    CreateUser(
+      variables: CreateUserMutationVariables
+    ): Promise<GraphQLResponse<CreateUserMutation>> {
       return withWrapper(() =>
         client.rawRequest<CreateUserMutation>(
           print(CreateUserDocument),
@@ -2401,13 +2332,9 @@ export function getSdk(
         )
       );
     },
-    DeactivateUser(variables: DeactivateUserMutationVariables): Promise<{
-      data?: DeactivateUserMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    DeactivateUser(
+      variables: DeactivateUserMutationVariables
+    ): Promise<GraphQLResponse<DeactivateUserMutation>> {
       return withWrapper(() =>
         client.rawRequest<DeactivateUserMutation>(
           print(DeactivateUserDocument),
@@ -2417,13 +2344,7 @@ export function getSdk(
     },
     GetActiveUserForAuth(
       variables: GetActiveUserForAuthQueryVariables
-    ): Promise<{
-      data?: GetActiveUserForAuthQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<GetActiveUserForAuthQuery>> {
       return withWrapper(() =>
         client.rawRequest<GetActiveUserForAuthQuery>(
           print(GetActiveUserForAuthDocument),
@@ -2431,13 +2352,9 @@ export function getSdk(
         )
       );
     },
-    GetCurrentUser(variables?: GetCurrentUserQueryVariables): Promise<{
-      data?: GetCurrentUserQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    GetCurrentUser(
+      variables?: GetCurrentUserQueryVariables
+    ): Promise<GraphQLResponse<GetCurrentUserQuery>> {
       return withWrapper(() =>
         client.rawRequest<GetCurrentUserQuery>(
           print(GetCurrentUserDocument),
@@ -2445,24 +2362,16 @@ export function getSdk(
         )
       );
     },
-    GetUser(variables: GetUserQueryVariables): Promise<{
-      data?: GetUserQuery | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    GetUser(
+      variables: GetUserQueryVariables
+    ): Promise<GraphQLResponse<GetUserQuery>> {
       return withWrapper(() =>
         client.rawRequest<GetUserQuery>(print(GetUserDocument), variables)
       );
     },
-    ReactivateUser(variables: ReactivateUserMutationVariables): Promise<{
-      data?: ReactivateUserMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ReactivateUser(
+      variables: ReactivateUserMutationVariables
+    ): Promise<GraphQLResponse<ReactivateUserMutation>> {
       return withWrapper(() =>
         client.rawRequest<ReactivateUserMutation>(
           print(ReactivateUserDocument),
@@ -2470,13 +2379,9 @@ export function getSdk(
         )
       );
     },
-    SetDarkMode(variables: SetDarkModeMutationVariables): Promise<{
-      data?: SetDarkModeMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    SetDarkMode(
+      variables: SetDarkModeMutationVariables
+    ): Promise<GraphQLResponse<SetDarkModeMutation>> {
       return withWrapper(() =>
         client.rawRequest<SetDarkModeMutation>(
           print(SetDarkModeDocument),
@@ -2486,13 +2391,7 @@ export function getSdk(
     },
     SubscribeToUserList(
       variables?: SubscribeToUserListSubscriptionVariables
-    ): Promise<{
-      data?: SubscribeToUserListSubscription | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    ): Promise<GraphQLResponse<SubscribeToUserListSubscription>> {
       return withWrapper(() =>
         client.rawRequest<SubscribeToUserListSubscription>(
           print(SubscribeToUserListDocument),
@@ -2500,13 +2399,9 @@ export function getSdk(
         )
       );
     },
-    UpdateUser(variables: UpdateUserMutationVariables): Promise<{
-      data?: UpdateUserMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    UpdateUser(
+      variables: UpdateUserMutationVariables
+    ): Promise<GraphQLResponse<UpdateUserMutation>> {
       return withWrapper(() =>
         client.rawRequest<UpdateUserMutation>(
           print(UpdateUserDocument),
@@ -2514,13 +2409,9 @@ export function getSdk(
         )
       );
     },
-    UpdateUserSession(variables: UpdateUserSessionMutationVariables): Promise<{
-      data?: UpdateUserSessionMutation | undefined;
-      extensions?: any;
-      headers: Headers;
-      status: number;
-      errors?: GraphQLError[] | undefined;
-    }> {
+    UpdateUserSession(
+      variables: UpdateUserSessionMutationVariables
+    ): Promise<GraphQLResponse<UpdateUserSessionMutation>> {
       return withWrapper(() =>
         client.rawRequest<UpdateUserSessionMutation>(
           print(UpdateUserSessionDocument),
