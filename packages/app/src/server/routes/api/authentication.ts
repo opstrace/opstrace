@@ -36,7 +36,7 @@ const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
 // as _login_ credential.+
 const checkAccessTokenForLogin = jwt({
   secret: jwksRsa.expressJwtSecret({
-    cache: false,
+    cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
     jwksUri: JWKS_URL,
