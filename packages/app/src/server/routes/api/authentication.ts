@@ -30,8 +30,11 @@ import { AUTH0_CONFIG, BUILD_INFO } from "./uicfg";
 
 import * as jwkshelpers from "./jwks";
 
+// Use something like this for testing error handling.
+//const JWKS_URL = `http://httpbin.org/delay/10`;
+const JWKS_URL = `http://httpbin.org/status/504`;
+
 // const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
-const JWKS_URL = `http://httpbin.org/delay/10`;
 
 // Middleware for verification of the Auth0-emitted access token that is sent
 // as _login_ credential.
@@ -180,11 +183,6 @@ const loadUserInfo = async (accessToken: string) => {
   return { email: data.email, avatar: data.picture || "", username };
 };
 
-// during import time, trigger the JWKS prepopulation and swallow all errors.
-// try {
-//   await jwkshelpers.prepopulate(JWKS_URL);
-// } catch (err) {
-//   log.warning(`non-fatal: JWKS preopulation failed: ${err}`);
-// }
+jwkshelpers.prepopulateZombie(JWKS_URL);
 
 export default createAuthHandler;
