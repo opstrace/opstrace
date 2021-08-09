@@ -57,9 +57,12 @@ const checkAccessTokenForLogin = jwt({
 
 function createAuthHandler(): express.Router {
   const auth = express.Router();
-  // endpoint for creating a session so we don't have to
-  // pass JWTs to every API request.
+  // Note(JP): think of this as a _login_ endpoint, exchanging primary
+  // credential (here: Auth0-emitted access token) into a secondary credential
+  // (here: session identifier, wrapped in cookie)
   auth.post("/session", checkAccessTokenForLogin, async (req, res, next) => {
+    // Note(JP): TODO: clarify which errors this may throw, and for some of
+    // them maybe also emit a proper 401 response.
     const { email, username, avatar } = await loadUserInfo(
       // @ts-ignore Object is possibly 'undefined'
       req.headers.authorization.split(" ")[1]
