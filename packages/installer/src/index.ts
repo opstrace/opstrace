@@ -114,7 +114,7 @@ export function setCreateConfig(c: ClusterCreateConfigInterface): void {
 }
 
 // number of Opstrace cluster creation attempts
-const CREATE_ATTEMPTS = 3;
+const CREATE_ATTEMPTS = 2;
 
 // timeout per attempt
 const CREATE_ATTEMPT_TIMEOUT_SECONDS = 60 * 40;
