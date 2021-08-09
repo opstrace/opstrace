@@ -119,10 +119,14 @@ async function peerVpcs({
       }
     }
 
+    // Do not retry too quickly, otherwise we can expect a largish fraction of
+    // requests to be responded to with `Quota exceeded for quota metric
+    // 'Mutate requests'` https://github.com/opstrace/opstrace/issues/1213
+    const delaySeconds = 45;
     log.info(
-      `${logpfx}: connections.create(): attempt ${attempt} failed, retry soon`
+      `${logpfx}: connections.create(): attempt ${attempt} failed, retry in ${delaySeconds} s`
     );
-    await sleep(5);
+    await sleep(delaySeconds);
   }
 }
 
@@ -226,10 +230,11 @@ async function waitForLongrunningOperationToSucceed(
       }
     }
 
+    const delaySeconds = 10;
     log.info(
-      `${logpfx}: follow operation ${operationName}: attempt ${attempt} done, retry soon`
+      `${logpfx}: follow operation ${operationName}: attempt ${attempt} done, retry in ${delaySeconds} s`
     );
-    await sleep(10);
+    await sleep(delaySeconds);
   }
 }
 
