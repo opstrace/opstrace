@@ -110,16 +110,16 @@ export function ControllerResources({
                   imagePullPolicy: "IfNotPresent",
                   command: ["node", "./cmd.js"],
                   args: controllerCmdlineArgs,
-                  resources: {
-                    limits: {
-                      cpu: "1",
-                      memory: "1Gi"
-                    },
-                    requests: {
-                      cpu: "0.5",
-                      memory: "500Mi"
-                    }
-                  },
+                  // resources: {
+                  //   limits: {
+                  //     cpu: "1",
+                  //     memory: "1Gi"
+                  //   },
+                  //   requests: {
+                  //     cpu: "0.5",
+                  //     memory: "500Mi"
+                  //   }
+                  // },
                   env: [
                     {
                       name: "HASURA_GRAPHQL_ADMIN_SECRET",

@@ -163,16 +163,16 @@ export function NodeExporterResources(
                   ],
                   image: DockerImages.nodeExporter,
                   name: "node-exporter",
-                  resources: {
-                    limits: {
-                      cpu: "1700m",
-                      memory: "180Mi"
-                    },
-                    requests: {
-                      cpu: "50m",
-                      memory: "100Mi"
-                    }
-                  },
+                  // resources: {
+                  //   limits: {
+                  //     cpu: "1700m",
+                  //     memory: "180Mi"
+                  //   },
+                  //   requests: {
+                  //     cpu: "50m",
+                  //     memory: "100Mi"
+                  //   }
+                  // },
                   volumeMounts: [
                     {
                       mountPath: "/host/proc",
@@ -217,17 +217,17 @@ export function NodeExporterResources(
                       hostPort: 9100,
                       name: "https"
                     }
-                  ],
-                  resources: {
-                    limits: {
-                      cpu: "1000m",
-                      memory: "60Mi"
-                    },
-                    requests: {
-                      cpu: "50m",
-                      memory: "20Mi"
-                    }
-                  }
+                  ]
+                  //   resources: {
+                  //     limits: {
+                  //       cpu: "1000m",
+                  //       memory: "60Mi"
+                  //     },
+                  //     requests: {
+                  //       cpu: "50m",
+                  //       memory: "20Mi"
+                  //     }
+                  //   }
                 }
               ],
               hostNetwork: true,

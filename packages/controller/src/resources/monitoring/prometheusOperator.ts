@@ -185,16 +185,16 @@ export function PrometheusOperatorResources(
                       name: "http"
                     }
                   ],
-                  resources: {
-                    limits: {
-                      cpu: "200m",
-                      memory: "200Mi"
-                    },
-                    requests: {
-                      cpu: "100m",
-                      memory: "100Mi"
-                    }
-                  },
+                  // resources: {
+                  //   limits: {
+                  //     cpu: "200m",
+                  //     memory: "200Mi"
+                  //   },
+                  //   requests: {
+                  //     cpu: "100m",
+                  //     memory: "100Mi"
+                  //   }
+                  // },
                   securityContext: {
                     allowPrivilegeEscalation: false
                   }

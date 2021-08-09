@@ -267,14 +267,14 @@ export function MemcacheResources(
                       containerPort: 11211,
                       name: "client"
                     }
-                  ],
-                  resources: {
-                    requests: {
-                      // Add some headroom here compared to the `-m 1024`
-                      // above, saw mem alloc failures.
-                      memory: "1400Mi"
-                    }
-                  }
+                  ]
+                  // resources: {
+                  // requests: {
+                  //   // Add some headroom here compared to the `-m 1024`
+                  //   // above, saw mem alloc failures.
+                  //   memory: "1400Mi"
+                  // }
+                  // }
                 },
                 {
                   args: [
@@ -344,13 +344,13 @@ export function MemcacheResources(
                       containerPort: 11211,
                       name: "client"
                     }
-                  ],
-                  resources: {
-                    requests: {
-                      // Tune this to the `-m XX` above, add headroom
-                      memory: "1400Mi"
-                    }
-                  }
+                  ]
+                  // resources: {
+                  //   requests: {
+                  //     // Tune this to the `-m XX` above, add headroom
+                  //     memory: "1400Mi"
+                  //   }
+                  // }
                 },
                 {
                   args: [
@@ -420,13 +420,13 @@ export function MemcacheResources(
                       containerPort: 11211,
                       name: "client"
                     }
-                  ],
-                  resources: {
-                    requests: {
-                      // Tune this to the `-m XX` above, add headroom
-                      memory: "3200Mi"
-                    }
-                  }
+                  ]
+                  // resources: {
+                  //   requests: {
+                  //     // Tune this to the `-m XX` above, add headroom
+                  //     memory: "3200Mi"
+                  //   }
+                  // }
                 },
                 {
                   args: [

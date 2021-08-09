@@ -538,16 +538,16 @@ leaderElection:
                     successThreshold: 1,
                     timeoutSeconds: 1
                   },
-                  resources: {
-                    limits: {
-                      cpu: "100m",
-                      memory: "120Mi"
-                    },
-                    requests: {
-                      cpu: "100m",
-                      memory: "20Mi"
-                    }
-                  },
+                  // resources: {
+                  // limits: {
+                  //   cpu: "100m",
+                  //   memory: "120Mi"
+                  // },
+                  // requests: {
+                  //   cpu: "100m",
+                  //   memory: "20Mi"
+                  // }
+                  // },
                   securityContext: {
                     allowPrivilegeEscalation: false
                   },

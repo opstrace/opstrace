@@ -179,17 +179,17 @@ export function KubeStateMetricsResources(
                       containerPort: 8443,
                       name: "https-main"
                     }
-                  ],
-                  resources: {
-                    limits: {
-                      cpu: "1000m",
-                      memory: "40Mi"
-                    },
-                    requests: {
-                      cpu: "50m",
-                      memory: "20Mi"
-                    }
-                  }
+                  ]
+                  // resources: {
+                  //   limits: {
+                  //     cpu: "1000m",
+                  //     memory: "40Mi"
+                  //   },
+                  //   requests: {
+                  //     cpu: "50m",
+                  //     memory: "20Mi"
+                  //   }
+                  // }
                 },
                 {
                   args: [
@@ -205,17 +205,17 @@ export function KubeStateMetricsResources(
                       containerPort: 9443,
                       name: "https-self"
                     }
-                  ],
-                  resources: {
-                    limits: {
-                      cpu: "500m",
-                      memory: "40Mi"
-                    },
-                    requests: {
-                      cpu: "50m",
-                      memory: "20Mi"
-                    }
-                  }
+                  ]
+                  // resources: {
+                  //   limits: {
+                  //     cpu: "500m",
+                  //     memory: "40Mi"
+                  //   },
+                  //   requests: {
+                  //     cpu: "50m",
+                  //     memory: "20Mi"
+                  //   }
+                  // }
                 },
                 {
                   args: [
@@ -225,17 +225,17 @@ export function KubeStateMetricsResources(
                     "--telemetry-port=8082"
                   ],
                   image: DockerImages.kubeStateMetrics,
-                  name: "kube-state-metrics",
-                  resources: {
-                    limits: {
-                      cpu: "200m",
-                      memory: "150Mi"
-                    },
-                    requests: {
-                      cpu: "50m",
-                      memory: "100Mi"
-                    }
-                  }
+                  name: "kube-state-metrics"
+                  // resources: {
+                  //   limits: {
+                  //     cpu: "200m",
+                  //     memory: "150Mi"
+                  //   },
+                  //   requests: {
+                  //     cpu: "50m",
+                  //     memory: "100Mi"
+                  //   }
+                  // }
                 },
                 {
                   command: [
@@ -269,17 +269,17 @@ export function KubeStateMetricsResources(
                     }
                   ],
                   image: DockerImages.addonResizer,
-                  name: "addon-resizer",
-                  resources: {
-                    limits: {
-                      cpu: "250m",
-                      memory: "30Mi"
-                    },
-                    requests: {
-                      cpu: "50m",
-                      memory: "30Mi"
-                    }
-                  }
+                  name: "addon-resizer"
+                  // resources: {
+                  //   limits: {
+                  //     cpu: "250m",
+                  //     memory: "30Mi"
+                  //   },
+                  //   requests: {
+                  //     cpu: "50m",
+                  //     memory: "30Mi"
+                  //   }
+                  // }
                 }
               ],
               nodeSelector: {

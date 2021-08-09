@@ -151,12 +151,12 @@ export function RedisResources(
                 {
                   name: "master",
                   image: DockerImages.redis,
-                  resources: {
-                    requests: {
-                      cpu: "100m",
-                      memory: "100Mi"
-                    }
-                  },
+                  // resources: {
+                  //   requests: {
+                  //     cpu: "100m",
+                  //     memory: "100Mi"
+                  //   }
+                  // },
                   env: [
                     {
                       name: "REDIS_REPLICATION_MODE",
