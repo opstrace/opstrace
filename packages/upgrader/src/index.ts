@@ -44,6 +44,7 @@ import {
 } from "./readiness";
 import {
   cortexOperatorPreamble,
+  opstraceInstanceRequiresUpgrade,
   upgradeControllerConfigMap,
   upgradeControllerDeployment,
   upgradeInfra
@@ -162,63 +163,28 @@ function* triggerInfraUpgrade() {
 
 // Upgrade controller deployment and wait for it to finish updating Kubernetes
 // resources.
-function* triggerControllerDeploymentUpgrade() {
-  if (upgradeConfig === undefined) {
-    throw new Error("call setUpgradeConfig() first");
-  }
-
-  const kubeConfig: KubeConfig | undefined = yield call(
-    getKubecfgIfk8sClusterExists,
-    upgradeConfig
-  );
-
-  if (kubeConfig === undefined) {
-    throw new Error("could not fetch cluster kubeconfig");
-  }
-
-  const ucc: LatestClusterConfigType = getClusterConfig();
-
-  yield call(checkIfDockerImageExistsOrErrorOut, ucc.controller_image);
-
-  // Explicitly test the availability of the k8s api and exit if interaction
-  // fails.
-  yield call(k8sListNamespacesOrError, kubeConfig);
-
-  log.info("k8s cluster seems to exist, trigger controller deployment upgrade");
-
-  log.info("starting kubernetes informers");
-  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
-  const informers = yield fork(runInformers, kubeConfig);
-
-  yield call(blockUntilCacheHydrated);
-
+function* triggerControllerDeploymentUpgrade(kubeConfig: KubeConfig) {
   if (!dryRun()) {
     yield call(upgradeControllerConfigMap, kubeConfig);
 
     // handle upgrades from clusters that are not running the cortex-operator
     yield call(cortexOperatorPreamble, kubeConfig);
 
-    const rolloutStarted: boolean = yield call(upgradeControllerDeployment, {
+    yield call(upgradeControllerDeployment, {
       opstraceClusterName: upgradeConfig.clusterName,
       kubeConfig: kubeConfig
     });
 
-    if (rolloutStarted) {
-      yield call(waitForControllerDeployment, { desiredReadyReplicas: 1 });
-      log.info(
-        'wait for upgrade to complete ("wait for deployments/..." phase)'
-      );
-      yield call(upgradeProgressReporter);
+    yield call(waitForControllerDeployment, { desiredReadyReplicas: 1 });
+    log.info('wait for upgrade to complete ("wait for deployments/..." phase)');
+    yield call(upgradeProgressReporter);
 
-      // Workaround for https://github.com/opstrace/opstrace/issues/1066
-      yield call(workaroundRestartLokiDistributors);
-    }
+    // Workaround for https://github.com/opstrace/opstrace/issues/1066
+    yield call(workaroundRestartLokiDistributors);
   }
 
-  // Cancel the forked informers so we can exit
-  yield cancel(informers);
-
   // ensure the data endpoint, datadog api endpoints and ui are reachable
+  const ucc: LatestClusterConfigType = getClusterConfig();
   yield call(waitUntilHTTPEndpointsAreReachable, ucc);
 }
 
@@ -264,10 +230,10 @@ function* upgradeClusterCoreAttemptWithTimeout() {
 /**
  * Timeout control around a single cluster Kubernetes resources upgrade attempt.
  */
-function* upgradeControllerDeploymentWithTimeout() {
+function* upgradeControllerDeploymentWithTimeout(kubeConfig: KubeConfig) {
   log.debug("upgradeControllerDeploymentWithTimeout");
   const { timeout } = yield race({
-    upgrade: call(triggerControllerDeploymentUpgrade),
+    upgrade: call(triggerControllerDeploymentUpgrade, kubeConfig),
     timeout: delay(UPGRADE_K8S_RESOURCES_ATTEMPT_TIMEOUT_SECONDS * SECOND)
   });
 
@@ -286,7 +252,44 @@ function* upgradeControllerDeploymentWithTimeout() {
   }
 }
 
-function* rootTaskUpgrade() {
+function* rootTaskUpgrade(): Generator<any, any, any> {
+  if (upgradeConfig === undefined) {
+    die("call setUpgradeConfig() first");
+  }
+
+  const kubeConfig: KubeConfig | undefined = yield call(
+    getKubecfgIfk8sClusterExists,
+    upgradeConfig
+  );
+
+  if (kubeConfig === undefined) {
+    die("could not fetch cluster kubeconfig");
+  }
+
+  const ucc: LatestClusterConfigType = getClusterConfig();
+
+  yield call(checkIfDockerImageExistsOrErrorOut, ucc.controller_image);
+
+  // Explicitly test the availability of the k8s api and exit if interaction
+  // fails.
+  yield call(k8sListNamespacesOrError, kubeConfig);
+
+  log.info("k8s cluster seems to exist, trigger instance upgrade");
+
+  log.info("starting kubernetes informers");
+  //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
+  const informers = yield fork(runInformers, kubeConfig);
+
+  yield call(blockUntilCacheHydrated);
+
+  const requiresUpgrade: boolean = yield call(opstraceInstanceRequiresUpgrade);
+  if (!requiresUpgrade) {
+    log.warning(
+      `Opstrace instance is already running the desired version, skipping upgrade`
+    );
+    return;
+  }
+
   // Note: a longish delay between attempts with the intention to give upgrade
   // attempts some time to take effect holistically (sometimes, that is our
   // impression, upgrade of an individual resource might be confirmed
@@ -301,7 +304,10 @@ function* rootTaskUpgrade() {
   });
 
   // Wait for controller to rollout the upgrade.
-  yield call(upgradeControllerDeploymentWithTimeout);
+  yield call(upgradeControllerDeploymentWithTimeout, kubeConfig);
+
+  // Cancel the forked informers so we can exit
+  yield cancel(informers);
 
   log.info(
     "upgrade operation finished for %s (%s)",

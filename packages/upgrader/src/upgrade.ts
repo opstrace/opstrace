@@ -43,31 +43,110 @@ import { waitForControllerDeployment } from "./readiness";
 
 const CONTROLLER_IMAGE_DEFAULT = `opstrace/controller:${BUILD_INFO.VERSION_STRING}`;
 
-//
-// Set the controller deployment image version to the one defined in buildinfo.
-// Returns boolean to indicate controller deployment rollout initiated or not.
-export function* upgradeControllerDeployment(config: {
-  opstraceClusterName: string;
-  kubeConfig: KubeConfig;
-}): Generator<Effect, boolean, State> {
-  // Exit if controller deployment does not exist.
+// Checks if the  cliMetadata.allCLIVersions image tag of the Opstrace
+// controller deployment matches the one defined in buildinfo. Older Opstrace
+// versions will have an empty cliMetadata field, for these, check the Opstrace
+// controller deployment image and check it matches buildinfo.
+export function* opstraceInstanceRequiresUpgrade(): Generator<
+  Effect,
+  boolean,
+  any
+> {
+  const opstraceControllerConfig: LatestControllerConfigType = yield call(
+    getOpstraceControllerConfigMap
+  );
+
+  const opstraceDeployment: Deployment = yield call(
+    getOpstraceControllerDeployment
+  );
+
+  const installedControllerVersion =
+    opstraceDeployment.spec.spec?.template.spec?.containers[0].image;
+
+  if (opstraceControllerConfig.cliMetadata.allCLIVersions.length > 1) {
+    // The latest version the instance was upgraded to was pushed to
+    // allCLIVersions in `upgradeControllerConfigMap` function.
+    const idx = opstraceControllerConfig.cliMetadata.allCLIVersions.length - 1;
+    const lastCLIVersion =
+      opstraceControllerConfig.cliMetadata.allCLIVersions[idx].version;
+
+    const installedControllerImageTag = installedControllerVersion
+      ?.split(":")
+      .pop();
+    if (lastCLIVersion !== installedControllerImageTag) {
+      die(
+        `found Opstrace version mismatch, CLI version ${lastCLIVersion} does not match installed controller version ${installedControllerImageTag}`
+      );
+    }
+
+    if (lastCLIVersion !== BUILD_INFO.VERSION_STRING) {
+      log.debug(`build info does not match, continue with upgrade`);
+      return true;
+    }
+  }
+
+  if (installedControllerVersion !== CONTROLLER_IMAGE_DEFAULT) {
+    log.debug(`controller image does not match, continue with upgrade`);
+    return true;
+  }
+
+  return false;
+}
+
+export function* getOpstraceControllerDeployment(): Generator<
+  Effect,
+  Deployment,
+  State
+> {
   const state: State = yield select();
   const { Deployments } = state.kubernetes.cluster;
   const cd = Deployments.resources.find(d => d.name === CONTROLLER_NAME);
 
+  // Exit if controller deployment does not exist.
   if (cd === undefined) {
-    throw new Error("controller deployment not found");
+    die("could not find Opstrace deployment");
   }
 
-  const installedVersion = cd.spec.spec!.template.spec!.containers[0].image;
+  return cd;
+}
 
-  if (installedVersion === CONTROLLER_IMAGE_DEFAULT) {
-    log.info(
-      `controller image is already at desired version: ${CONTROLLER_IMAGE_DEFAULT}`
-    );
-    return false;
+export function* getOpstraceControllerConfigMap(): Generator<
+  Effect,
+  LatestControllerConfigType,
+  State
+> {
+  const state: State = yield select();
+  const cm = state.kubernetes.cluster.ConfigMaps.resources.find(
+    cm => cm.name === CONFIGMAP_NAME
+  );
+  if (cm === undefined) {
+    die(`could not find Opstrace controller config map`);
   }
 
+  const cfgJSON = JSON.parse(cm.spec.data?.[STORAGE_KEY] ?? "");
+  if (cfgJSON === "") {
+    die(`invalid Opstrace controller config map`);
+  }
+
+  log.debug(`controller config: ${JSON.stringify(cfgJSON, null, 2)}`);
+
+  try {
+    return upgradeControllerConfigMapToLatest(cfgJSON);
+  } catch (e) {
+    die(`failed to fetch controller configuration: ${e.message}`);
+  }
+}
+
+// Set the controller deployment image version to the one defined in buildinfo.
+export function* upgradeControllerDeployment(config: {
+  opstraceClusterName: string;
+  kubeConfig: KubeConfig;
+}): Generator<Effect, void, any> {
+  const opstraceDeployment: Deployment = yield call(
+    getOpstraceControllerDeployment
+  );
+  const installedVersion =
+    opstraceDeployment.spec.spec?.template.spec?.containers[0].image;
   log.info(
     `upgrading controller image from ${installedVersion} to ${CONTROLLER_IMAGE_DEFAULT}`
   );
@@ -78,8 +157,6 @@ export function* upgradeControllerDeployment(config: {
     kubeConfig: config.kubeConfig,
     deploymentStrategy: ControllerResourcesDeploymentStrategy.Update
   });
-
-  return true;
 }
 
 export function* upgradeControllerConfigMap(
