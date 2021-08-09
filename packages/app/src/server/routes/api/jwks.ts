@@ -195,6 +195,11 @@ export async function fetch(url: string) {
     );
   }
 
+  // after retrying machinery we might still end up with e.g. a 504 response
+  // as last response, not yet explicitly treated by code although the
+  // JSON deser handler will catch that
+  // TODO if (resp.code !== 200) { ... getPotantiallyStaleJWKS() ... }
+
   let newKeySet: object | undefined;
   try {
     newKeySet = JSON.parse(resp.body);
