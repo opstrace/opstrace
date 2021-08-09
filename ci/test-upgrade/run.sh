@@ -18,7 +18,8 @@ case "${OPSTRACE_CLOUD_PROVIDER}" in
     gcp)
         # Shard across GCP CI projects.
         #export OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb ci-shard-ccc)
-        export OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-ddd ci-shard-eee ci-shard-fff)
+        # see issue 293
+        export OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb ci-shard-ccc ci-shard-eee)
         echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
         export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
         ;;
