@@ -94,15 +94,6 @@ const GOT_JWKS_OPTIONS = {
   throwHttpErrors: false
 };
 
-// function serveFromCacheIfFresh(): null | object {
-//     if (LAST_JWKS_SET_TIME !== undefined) {
-//         // trigger a refreh once per hour.
-//         if (mtimeDiffSeconds(LAST_JWKS_SET_TIME) <  ) {
-
-//         }
-//     }
-// }
-
 /**
  * Set newly fetched JWKS object. Rely on this being an atomic operation in the
  * runtime. Return the same object for convenience.
@@ -128,7 +119,31 @@ function getPotantiallyStaleJWKS() {
 
 export async function prepopulate(url: string) {
   FIRST_JWKS_FROM_PREPOPULATE_CALL = await fetch(url);
-  log.info("JWKS prepopulation: done (not as part of HTTP request)");
+  log.info("JWKS prepopulation: done");
+}
+
+/** Start prepopulate() execution. Also return promise, but build this function
+ * so that it is fine to not `await` this promise, i.e. to let this run as
+ * 'zombie'
+ *
+ * - is expected to not throw an error of any kind (see over-generalized err
+ *   handler)
+ *
+ * - is expected to do no harm: is expected to complete within an upper bound
+ *   of time, determined by timeout constants and retrying machinery
+ *
+ * - if it succeeds before the actual login request great, job done, the first
+ *   login request will likely use the cached JWKS key set.
+ *
+ * - if it fails before the actual login request: also OK, the JWKS is then
+ *   attempted to be fetched during login request processing.
+ */
+export async function prepopulateZombie(url: string) {
+  try {
+    await prepopulate(url);
+  } catch (err) {
+    log.warning(`non-fatal: JWKS preopulation failed: ${err}`);
+  }
 }
 
 export async function fetch(url: string) {
