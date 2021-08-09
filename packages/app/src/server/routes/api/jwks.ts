@@ -17,19 +17,27 @@
 import { strict as assert } from "assert";
 import got, { Response as GotResponse } from "got";
 
-import { customGotRetryfunc, mtime, mtimeDiffSeconds } from "@opstrace/utils";
+import {
+  customGotRetryfunc,
+  mtime,
+  mtimeDiffSeconds,
+  log
+} from "@opstrace/utils";
 
-import { log } from "@opstrace/utils/lib/log";
+// Use-stale-item-if-refresh-failed
+// Prepopulate-upon-app-start (minimize hot path impact)
+//
 
 // This bypasses the cache mechanism in jwks-rksa / adds to it using the
 // assumption that public keys are practically never rotated. I don't think
-// that the cache built into jwks-rksa has the following really important
-// functionality: if the cache is stale, instead of erroring out the operation
-// simply try to use the 'last known good key set', even if that's technically
-// 'outdated', based on the cache configuration. The probability for that
-// "stale" cache item to contain the correct public key is practically 100 %.
-// Another property that jwks-rsa does not provide is 'prepopulation' before
-// the first request, at least it's not clear how to do that.
+// that the cache built into jwks-rksa has the following important
+// functionality: if the cache is stale and fetching new data fails: instead of
+// erroring out the operation simply try to use the 'last known good key set',
+// even if that's technically 'outdated', based on the cache configuration. The
+// probability for that "stale" cache item to contain the correct public key is
+// practically 100 %. Another property that jwks-rsa does not provide is
+// 'prepopulation' before the first request, at least it's not clear how to do
+// that.
 let LAST_JWKS_POTENTIALLY_STALE: object;
 let LAST_JWKS_SET_TIME: bigint;
 let FIRST_JWKS_FROM_PREPOPULATE_CALL: object | undefined;
@@ -49,12 +57,12 @@ const GOT_JWKS_HTTP_TIMEOUT_SETTINGS = {
   secureConnect: 2000,
   // After TLS over TCP ist established, require the few request bytes to
   // (just a GET w/o body) to be written real quick.
-  send: 2000,
+  send: 1000,
   // After having written the request, expect response _headers_ to
   // arrive within that time (not the complete response).
-  response: 2000,
+  response: 2500,
   // global timeout, supposedly until final response byte arrived.
-  request: 10000
+  request: 8500
 };
 
 // From the jwks-rsa docs: "Even if caching is enabled the library will call
@@ -119,11 +127,11 @@ function getPotantiallyStaleJWKS() {
 }
 
 export async function prepopulate(url: string) {
-  FIRST_JWKS_FROM_PREPOPULATE_CALL = await fetcher(url);
+  FIRST_JWKS_FROM_PREPOPULATE_CALL = await fetch(url);
   log.info("JWKS prepopulation: done (not as part of HTTP request)");
 }
 
-export async function fetcher(url: string) {
+export async function fetch(url: string) {
   if (FIRST_JWKS_FROM_PREPOPULATE_CALL) {
     log.info(
       "JWKS fetcher: first call after prepopulate, return FIRST_JWKS_FROM_PREPOPULATE_CALL"
@@ -137,8 +145,9 @@ export async function fetcher(url: string) {
 
   // Perform HTTP request -- this uses retrying (and logging), see above for
   // the corresponding parameters.
-  log.info("JWKS fetcher: start GET machinery with retrying");
+  log.info(`JWKS fetcher: start GET machinery with retrying. url: ${url}`);
   let resp: GotResponse<string> | undefined;
+  const t0 = mtime();
   try {
     resp = await got(url, GOT_JWKS_OPTIONS);
   } catch (err) {
@@ -146,6 +155,8 @@ export async function fetcher(url: string) {
       `JWKS fetcher: giving up HTTP GET after retrying, last error: ${err}`
     );
   }
+  const dur = mtimeDiffSeconds(t0);
+  log.info(`JWKS fetcher: got() call duration: ${dur.toFixed(3)} s`);
 
   if (resp === undefined) {
     if (LAST_JWKS_POTENTIALLY_STALE !== undefined) {
