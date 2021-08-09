@@ -32,6 +32,8 @@
   "dependencies": {
     "@opstrace/config": "^0.0.0",
     "@opstrace/installer": "^0.0.0",
+    "@opstrace/kubernetes": "^0.0.0",
+    "@opstrace/utils": "^0.0.0",
     "@opstrace/uninstaller": "^0.0.0",
     "@opstrace/upgrader": "^0.0.0",
     "@opstrace/controller-config": "^0.0.0",
