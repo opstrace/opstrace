@@ -24,9 +24,21 @@ import {
   log
 } from "@opstrace/utils";
 
-// Use-stale-item-if-refresh-failed
-// Prepopulate-upon-app-start (minimize hot path impact)
+// High-level overview of what this module is adding on top of
+// jwt({
+//   secret: jwksRsa.expressJwtSecret({
+//     cache: true,
+//     rateLimit: true,
+//     jwksRequestsPerMinute: 5,
+//     jwksUri: JWKS_URL,
+//   }),
 //
+// - A custom JWKS HTTP endpoint fetch function using the got() HTTP client
+//   with carefully chosen retrying parameters and logging
+// - A use-stale-item-if-refresh-failed technique for making the cache more
+//   usefule and robust.
+// - A prepopulate-upon-app-start technique to make the first login more
+//   robust and fast  (minimize hot path impact)
 
 // This bypasses the cache mechanism in jwks-rksa / adds to it using the
 // assumption that public keys are practically never rotated. I don't think
@@ -69,17 +81,18 @@ const GOT_JWKS_HTTP_TIMEOUT_SETTINGS = {
 // the JWKS endpoint if the kid is not available in the cache, because a key
 // rotation could have taken place."
 
-// Also: ideally, never fetch this in the hot path. Trigger a refresh every now
-// and then in the hot path, but don't wait for the result. That however
-// requires an override for the case where `kid` is not in the current JWKS
-// in that case we have to get a fresh key set, to see if rotation just took
-// place.
+// Future: ideally, never fetch this in the hot path unless it is known that
+// the required key ID is not in the cache. Trigger a refresh every now and
+// then in the hot path, but don't wait for the result. That however requires
+// an override for the case where `kid` is not in the current JWKS in that case
+// we have to get a fresh key set, to see if rotation just took place.
 
-// Note(JP): this may be done as part of processing an incoming HTTP request,
-// i.e. we should not retry for longer than ~1 minute. Ideally less than 30
-// seconds or so. Also note that retries are done automatically for a range of
-// transient issues: ETIMEDOUT ECONNRESET EADDRINUSE ECONNREFUSED EPIPE
-// ENOTFOUND ENETUNREACH EAI_AGAIN
+// Choose high-level retrying parameters. Note(JP): remember that this retrying
+// machinery may be performed as part of processing an incoming HTTP request,
+// i.e. we should not retry for longer than a well-chosen upper bound. Maybe ~1
+// minute. Ideally less than 30 seconds or so. Also note that retries are done
+// automatically for a range of transient issues: ETIMEDOUT ECONNRESET
+// EADDRINUSE ECONNREFUSED EPIPE ENOTFOUND ENETUNREACH EAI_AGAIN
 const GOT_JWKS_RETRY_OBJECT = {
   limit: 3,
   calculateDelay: customGotRetryfunc,
