@@ -30,10 +30,11 @@ import { AUTH0_CONFIG, BUILD_INFO } from "./uicfg";
 
 import * as jwkshelpers from "./jwks";
 
-const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
+// const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
+const JWKS_URL = `http://httpbin.org/delay/10`;
 
 // Middleware for verification of the Auth0-emitted access token that is sent
-// as _login_ credential.+
+// as _login_ credential.
 const checkAccessTokenForLogin = jwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
@@ -43,7 +44,7 @@ const checkAccessTokenForLogin = jwt({
     // Override fetcher function, see
     // https://github.com/auth0/node-jwks-rsa/blob/cd52aa297756bc097e45f59a8ee216c69a2e1704/src/wrappers/request.js#L7
     //@ts-ignore: type not up to date
-    fetcher: jwkshelpers.fetcher
+    fetcher: jwkshelpers.fetch
   }),
 
   // Validate the audience and the issuer.
@@ -57,8 +58,6 @@ function createAuthHandler(): express.Router {
   // endpoint for creating a session so we don't have to
   // pass JWTs to every API request.
   auth.post("/session", checkAccessTokenForLogin, async (req, res, next) => {
-    log.info("HELLO FROM /SESSION");
-
     const { email, username, avatar } = await loadUserInfo(
       // @ts-ignore Object is possibly 'undefined'
       req.headers.authorization.split(" ")[1]
