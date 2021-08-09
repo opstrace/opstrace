@@ -570,7 +570,7 @@ kubectl-cluster-info:
 	docker run --tty --interactive --rm \
 		-v ${OPSTRACE_KUBECFG_FILEPATH_ONHOST}:/kubeconfig:ro \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets:ro \
-		-v ${OPSTRACE_BUILD_DIR}:/build:ro \
+		-v ${OPSTRACE_BUILD_DIR}:/build \
 		-u $(shell id -u):${DOCKER_GID_HOST} \
 		-v /etc/passwd:/etc/passwd \
 		-e KUBECONFIG=/kubeconfig \
