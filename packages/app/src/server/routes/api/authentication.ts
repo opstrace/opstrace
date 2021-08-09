@@ -32,9 +32,8 @@ import * as jwkshelpers from "./jwks";
 
 // Use something like this for testing error handling.
 //const JWKS_URL = `http://httpbin.org/delay/10`;
-const JWKS_URL = `http://httpbin.org/status/504`;
-
-// const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
+// const JWKS_URL = `http://httpbin.org/status/504`;
+const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
 
 // Middleware for verification of the Auth0-emitted access token that is sent
 // as _login_ credential.
