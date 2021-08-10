@@ -77,7 +77,8 @@ echo "--- make set-build-info-constants"
 make set-build-info-constants
 
 echo "--- start background process: make lint-codebase "
-make lint-codebase 2> make_lint_codebase.outerr < /dev/null &
+# start in sub shell because output redirection otherwise didn't work properly
+( make lint-codebase ) 2> make_lint_codebase.outerr < /dev/null &
 LINT_CODEBASE_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
