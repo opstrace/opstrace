@@ -39,6 +39,9 @@ trap "teardown" EXIT
 export OPSTRACE_KUBECFG_FILEPATH_ONHOST="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
 
 
+
+mkdir -p "${OPSTRACE_BUILD_DIR}/bk-artifacts"
+
 make testupgrade-create-cluster
 
 # TODO(sreis): Add a new sanity check on the base cluster here before running
