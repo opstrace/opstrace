@@ -287,6 +287,8 @@ function* rootTaskUpgrade(): Generator<any, any, any> {
     log.warning(
       `Opstrace instance is already running the desired version, skipping upgrade`
     );
+    // Cancel the forked informers so we can exit
+    yield cancel(informers);
     return;
   }
 
