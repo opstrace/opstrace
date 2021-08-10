@@ -401,7 +401,11 @@ rebuild-ci-container-image:
 	@# Dockerfile.) Note: this also makes the build step much faster compared
 	@# sending a O(100 MB) large build context.
 	@echo "--- building ci container image"
-	docker build -t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING) - < containers/ci/opstrace-ci.Dockerfile
+	#docker build -t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING) - < containers/ci/opstrace-ci.Dockerfile
+	#Note(JP): update: experiment with sending a small build context including
+	# yarn.lock and package.json and run a yarn install in the image build
+	#to populate the yarn cache in /usr in the image
+	docker build -t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING)  . -f containers/ci/opstrace-ci.Dockerfile
 
 
 
