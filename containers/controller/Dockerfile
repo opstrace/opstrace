@@ -23,8 +23,10 @@ COPY packages/controller /build/packages/controller/
 COPY packages/config /build/packages/config/
 COPY packages/tenants /build/packages/tenants/
 COPY packages/controller-config /build/packages/controller-config/
-WORKDIR /build/packages/controller
 
+# Bake node_modules into the image at /build/packages/controller/node_modules
+# Use `cd` instead of WORKDIR because WORKDIR might invalidate the layer cache.
+RUN cd /build/packages/controller && yarn --frozen-lockfile
 
 ENV NODE_OPTIONS "--max-old-space-size=1536"
 RUN yarn --frozen-lockfile
