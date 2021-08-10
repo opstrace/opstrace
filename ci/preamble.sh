@@ -48,7 +48,7 @@ echo "--- start yarn background process"
 mv packages/app/package.json packages/app/package.json.deactivated
 yarn config set cache-folder /yarncache # this is pre-baked into the ci container image
 yarn --frozen-lockfile --ignore-optional \
-    2> preamble_yarn_install.outerr < /dev/null &
+    &> preamble_yarn_install.outerr < /dev/null &
 YARN_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
@@ -64,7 +64,7 @@ echo "--- wait for yarn background process"
 set +e
 wait $YARN_PID
 YARN_EXIT_CODE="$?"
-echo "yarn process terminated with code $ YARN_EXIT_CODE. stdout/err:"
+echo "yarn process terminated with code $YARN_EXIT_CODE. stdout/err:"
 cat preamble_yarn_install.outerr
 if [[ $YARN_EXIT_CODE != "0" ]]; then
     echo "yarn failed, exit 1"
@@ -78,7 +78,7 @@ make set-build-info-constants
 
 echo "--- start background process: make lint-codebase "
 # start in sub shell because output redirection otherwise didn't work properly
-( make lint-codebase ) 2> make_lint_codebase.outerr < /dev/null &
+( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
 LINT_CODEBASE_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
@@ -91,7 +91,7 @@ make build-and-push-controller-image
 # tsc-compile the Opstrace cluster management
 echo "--- start in background: yarn build:cli"
 # do not use `make cli-tsc` because that would run the yarn installation again.
-yarn build:cli 2> tsc_cli.outerr < /dev/null &
+yarn build:cli &> tsc_cli.outerr < /dev/null &
 TSC_CLI_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
@@ -151,10 +151,12 @@ echo "warning: interleaved output of two commands"
 # about one minute, i.e. we want to save about one minute here (these are
 # executed on a beefy machine)
 make cli-pkg &
+_PID1="$!"
 sleep 5 && echo -e "\n\n" # so that the output is not worst-case interleaved
 make cli-pkg-macos &
+_PID2="$!"
 # wait for background processes to exit.
-wait
+wait $_PID1 $_PID2
 
 echo "--- CLI single-binary sanity check"
 # Quick sanity-check: confirm that CHECKOUT_VERSION_STRING is in stdout
@@ -179,17 +181,6 @@ set -x
 
 echo "--- make rebuild-testrunner-container-images"
 make rebuild-testrunner-container-images
-
-echo "--- build looker image"
-# looker: does image build? push it, too!
-# run `make image` in subshell so that cwd stays as-is
-# `make image` is supposed to inherit the env variable CHECKOUT_VERSION_STRING
-( cd test/test-remote/looker ; make image ; make publish )
-
-echo "--- build looker in non-isolated environment (for local dev)"
-# Note(JP): the looker build via Dockerfile is special. During local looker
-# dev, I am used to using a different build method. Which might break when it's
-( cd test/test-remote/looker; yarn run tsc --project tsconfig.json)
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
