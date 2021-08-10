@@ -688,7 +688,7 @@ test-browser:
 		-e OPSTRACE_INSTANCE_DNS_NAME \
 		-e OPSTRACE_PLAYWRIGHT_REUSE_STATE=true \
 		opstrace/test-browser:$(CHECKOUT_VERSION_STRING) \
- 			yarn pw:save-state-for-reuse && yarn playwright test --workers 3 --forbid-only --retries 3
+ 			./run_on_ci.sh
 
 
 # Used by CI:

@@ -25,6 +25,7 @@
     "pw:localhost": "OPSTRACE_PLAYWRIGHT_REUSE_STATE=\"true\" OPSTRACE_INSTANCE_DNS_NAME=\"localhost:3000\" OPSTRACE_CLUSTER_NAME=\"localhost\" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
     "pw": "OPSTRACE_PLAYWRIGHT_REUSE_STATE=\"true\" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
     "pw:save-state-for-reuse": "yarn playwright test --project=Chromium -g \"OPSTRACE_PLAYWRIGHT_REUSE_STATE\" --workers 1 --forbid-only --retries 1",
+    "pw:ci": "yarn playwright test --workers 3 --forbid-only --retries 3",
     "lint": "eslint . --ext .ts --quiet"
   }
 }
