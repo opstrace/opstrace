@@ -28,10 +28,14 @@ COPY packages/controller-config /build/packages/controller-config/
 # Use `cd` instead of WORKDIR because WORKDIR might invalidate the layer cache.
 RUN cd /build/packages/controller && yarn --frozen-lockfile
 
-
 # Use `cd` instead of WORKDIR because WORKDIR might invalidate the layer cache.
 # Call the build command because it contains more than just tsc -b
 RUN cd /build/packages/controller && yarn build
+
+# Note(JP): Unclear why, but this leaves behind
+# 57M	./lib/kubernetes/node_modules/typescript
+# which we do not want to copy over to prod-stage.
+RUN rm -rf /build/lib/kubernetes/node_modules
 
 # Second stage, lean image w/o build tooling and ideally w/o unnecessary deps.
 FROM node:16.6.1-buster-slim AS prod-stage
@@ -46,6 +50,18 @@ RUN cd /build && du -ha . | sort -r -h | head -n 50 || true
 
 RUN yarn --frozen-lockfile --production
 RUN cd /build && du -ha . | sort -r -h | head -n 50 || true
+
+# Note(JP): this leaves behind
+# 89M	./node_modules/googleapis/build/src
+RUN rm -rf /build/node_modules/googleapis/build/src
+
+# Note(JP): we run yarn in this layer and that creates a yarn cache
+# which dominates the size of this image.
+# 554M	./usr/local/share/.cache/yarn
+RUN rm -rf /usr/local/share/.cache/yarn
+
+RUN echo "biggest dirs"
+RUN cd / && du -ha . | sort -r -h | head -n 50 || true
 
 WORKDIR /build/packages/controller/build
 
