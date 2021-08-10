@@ -118,6 +118,12 @@ export type ReconcileResourceTypes = {
   Cortices: V1Alpha1CortexResources;
 };
 
+// Keep track of the last time we logged about missing 'opstrace' annotations.
+// This avoids flooding logs when something is being ignored by the controller,
+// while still ensuring that it's consistently reported and visible.
+const NOT_OURS_LOG_TTL_MILLIS = 5 * 60 * 1000; // 5 minutes
+let notOursLastLogMillis: number = 0;
+
 export function* reconcile(
   desired: ResourceCollection,
   actual: Partial<ReconcileResourceTypes>,
@@ -162,6 +168,7 @@ export function* reconcile(
     const createCollection: K8sResource[] = [];
     const deleteCollection: K8sResource[] = [];
     const updateCollection: K8sResource[] = [];
+    const notOursCollection: K8sResource[] = [];
 
     const desiredState = reduceCollection(desired.get());
 
@@ -182,7 +189,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -192,7 +200,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -202,7 +211,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -220,7 +230,8 @@ export function* reconcile(
         : null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -230,7 +241,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -240,7 +252,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -250,7 +263,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -260,7 +274,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -270,7 +285,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -280,7 +296,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -290,7 +307,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -300,7 +318,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -310,7 +329,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -320,7 +340,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -330,7 +351,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -340,7 +362,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -350,7 +373,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -360,7 +384,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -370,7 +395,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -380,7 +406,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -390,7 +417,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -400,7 +428,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -410,7 +439,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -420,7 +450,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -430,7 +461,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -440,7 +472,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -450,7 +483,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -460,7 +494,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -470,7 +505,8 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
 
     reconcileResourceType(
@@ -480,8 +516,22 @@ export function* reconcile(
       null,
       createCollection,
       deleteCollection,
-      updateCollection
+      updateCollection,
+      notOursCollection
     );
+
+    if (notOursCollection.length !== 0) {
+      const nowMillis = new Date().getTime();
+      if (nowMillis - notOursLastLogMillis >= NOT_OURS_LOG_TTL_MILLIS) {
+        // Could log on a single line, but in practice there should only be a few of these at any time
+        notOursCollection.forEach(r => {
+          log.notice(
+            `Leaving existing ${r.constructor.name} ${r.namespace}/${r.name} as-is (missing 'opstrace' annotation)`
+          );
+        });
+        notOursLastLogMillis = nowMillis;
+      }
+    }
 
     const toUpdate = addResourcesWithVolumeUpdates(
       reduceCollection(updateCollection),
@@ -513,7 +563,8 @@ function reconcileResourceType<T extends K8sResource>(
   customCanDelete: null | ((resource: T) => boolean),
   createCollection: K8sResource[],
   deleteCollection: K8sResource[],
-  updateCollection: K8sResource[]
+  updateCollection: K8sResource[],
+  notOursCollection: K8sResource[]
 ) {
   desiredResources.forEach(r => {
     const existing = find(r, actualResources);
@@ -533,9 +584,7 @@ function reconcileResourceType<T extends K8sResource>(
         if (existing.isOurs()) {
           updateCollection.push(r);
         } else {
-          log.notice(
-            `Leaving existing ${existing.constructor.name} ${existing.namespace}/${existing.name} as-is (missing 'opstrace' annotation)`
-          );
+          notOursCollection.push(existing);
         }
       }
     }
