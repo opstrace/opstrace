@@ -99,13 +99,16 @@ echo "--- Compile Typescript code base, trigger pkg single-binary builds"
 echo "--- make cli-tsc"
 make cli-tsc
 
-echo "--- make cli-pkg"
-make cli-pkg
-
-# pkg-build it for macos (used for publishing artifacts). Could be moved
-# to later to save a little bit of time.
-echo "--- make cli-pkg-macos"
-make cli-pkg-macos
+echo "--- make cli-pkg (for linux and mac)"
+echo "warning: interleaved output of two commands"
+# note(JP) start in background , then also start the macos build. Each takes
+# about one minute, i.e. we want to save about one minute here (these are
+# executed on a beefy machine)
+make cli-pkg &
+sleep 5 && echo -e "\n\n" # so that the output is not worst-case interleaved
+make cli-pkg-macos &
+# wait for background processes to exit.
+wait
 
 echo "--- CLI single-binary sanity check"
 # Quick sanity-check: confirm that CHECKOUT_VERSION_STRING is in stdout
