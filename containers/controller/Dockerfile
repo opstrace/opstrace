@@ -29,30 +29,9 @@ COPY packages/controller-config /build/packages/controller-config/
 RUN cd /build/packages/controller && yarn --frozen-lockfile
 
 
-
-# NTW: [2021.03.04] Yarn seems to have stopped recursively building our packages for some currently
-# unknown reason, doing this manually in this precise order is required for `yarn tsc -b` to work when
-# building the Controller
-
-WORKDIR /build/lib/utils
-RUN yarn build
-WORKDIR /build/lib/kubernetes
-RUN yarn build
-WORKDIR /build/packages/tenants
-RUN yarn build
-WORKDIR /build/lib/gcp
-RUN yarn build
-WORKDIR /build/packages/config
-RUN yarn build
-WORKDIR /build/lib/aws
-RUN yarn build
-WORKDIR /build/packages/controller-config
-RUN yarn build
-
-WORKDIR /build/packages/controller
-
+# Use `cd` instead of WORKDIR because WORKDIR might invalidate the layer cache.
 # Call the build command because it contains more than just tsc -b
-RUN yarn build
+RUN cd /build/packages/controller && yarn build
 
 # Second stage, lean image w/o build tooling and ideally w/o unnecessary deps.
 FROM node:16.4.2-buster-slim AS prod-stage
