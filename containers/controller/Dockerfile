@@ -28,9 +28,6 @@ COPY packages/controller-config /build/packages/controller-config/
 # Use `cd` instead of WORKDIR because WORKDIR might invalidate the layer cache.
 RUN cd /build/packages/controller && yarn --frozen-lockfile
 
-ENV NODE_OPTIONS "--max-old-space-size=1536"
-RUN yarn --frozen-lockfile
-
 
 
 # NTW: [2021.03.04] Yarn seems to have stopped recursively building our packages for some currently
