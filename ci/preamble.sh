@@ -28,6 +28,12 @@ make set-dockerhub-credentials
 # Start this now in the background, redirect output to file. Wait for and
 # handle error later, below.
 echo "--- start yarn background process"
+# The "UI APP" dependencies are not needed anywhere but in the container image
+# build for it. Deactivate this package here for a moment during running yarn.
+# This is expected to cut 1.5 minutes from the preamble which is more than 20 %
+# of the preamble runtime when nothing in packages/app changed (i.e. when the
+# container image is not rebuilt).
+mv packages/app/package.json packages/app/package.json.deactivated
 yarn --frozen-lockfile --ignore-optional \
     2> preamble_yarn_install.outerr < /dev/null &
 YARN_PID="$!"
@@ -81,6 +87,8 @@ make set-build-info-constants
 # - app
 # - graphql
 echo "--- Update docker-images.json"
+# Reactivate the NPM package at packages/app (see above).
+mv packages/app/package.json.deactivated packages/app/package.json
 set +x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ${DIR}/build-docker-images-update-controller-config.sh
