@@ -86,9 +86,11 @@ echo "--- make build-and-push-controller-image"
 make build-and-push-controller-image
 
 # tsc-compile the Opstrace cluster management
-echo "--- yarn build:cli"
+echo "--- start in background: yarn build:cli"
 # do not use `make cli-tsc` because that would run the yarn installation again.
-yarn build:cli
+yarn build:cli 2> tsc_cli.outerr < /dev/null &
+TSC_CLI_PID="$!"
+sleep 1 # so that the xtrace output is in this build log section
 
 # If there are any changes to go directory then build and publish the images to
 # docker hub. Update packages/controller-config/docker-images.json to use the
@@ -120,7 +122,19 @@ echo "--- build looker in non-isolated environment (for local dev)"
 ( cd test/test-remote/looker; yarn ; yarn run tsc --project tsconfig.json)
 
 
-echo "--- Compile Typescript code base, trigger pkg single-binary builds"
+echo "--- wait for background process: yarn build:cli"
+set +e
+wait $TSC_CLI_PID
+TSC_CLI_EXIT_CODE="$?"
+echo "yarn build:cli terminated with code $TSC_CLI_EXIT_CODE. stdout/err:"
+cat tsc_cli.outerr
+if [[ $TSC_CLI_EXIT_CODE != "0" ]]; then
+    echo "yarn build:cli, exit 1"
+    exit 1
+fi
+set -x
+
+echo "--- start pkg single-binary builds"
 
 # First, set yarn cache to be shared across all CI runs.
 # See opstrace-prelaunch/issues/1695
