@@ -72,13 +72,18 @@ if [[ $YARN_EXIT_CODE != "0" ]]; then
 fi
 set -x
 
-echo "--- lint codebase: quick feedback"
-make lint-codebase
-
 # This is needed also by the app Docker image build
 echo "--- make set-build-info-constants"
 make set-build-info-constants
 
+echo "--- lint codebase: quick feedback"
+make lint-codebase
+
+# Do this early when the checkout is fresh (no non-repo files within /packages
+# or /lib as of previous tsc invocations -- these could erroenously invalidate
+# the controller image cache layers).
+echo "--- make build-and-push-controller-image"
+make build-and-push-controller-image
 
 # tsc-compile the Opstrace cluster management
 echo "--- yarn build:cli"
@@ -114,11 +119,6 @@ echo "--- build looker in non-isolated environment (for local dev)"
 # not covered by CI.
 ( cd test/test-remote/looker; yarn ; yarn run tsc --project tsconfig.json)
 
-# Do this early when the checkout is fresh (no non-repo files within /packages
-# or /lib as of previous tsc invocations -- these could erroenously invalidate
-# the controller image cache layers).
-echo "--- make build-and-push-controller-image"
-make build-and-push-controller-image
 
 echo "--- Compile Typescript code base, trigger pkg single-binary builds"
 
