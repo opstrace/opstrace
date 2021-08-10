@@ -24,7 +24,7 @@
   "scripts": {
     "pw:localhost": "OPSTRACE_PLAYWRIGHT_REUSE_STATE=\"true\" OPSTRACE_INSTANCE_DNS_NAME=\"localhost:3000\" OPSTRACE_CLUSTER_NAME=\"localhost\" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
     "pw": "OPSTRACE_PLAYWRIGHT_REUSE_STATE=\"true\" OPSTRACE_CLOUD_PROVIDER=dev yarn playwright test --config playwright.dev.config.ts",
-    "pw:save-state-for-reuse": "yarn playwright test --project=Chromium tests/authentication.spec.ts -g \"user should see homepage\" --workers 1 --forbid-only --retries 1",
+    "pw:save-state-for-reuse": "yarn playwright test --project=Chromium -g \"OPSTRACE_PLAYWRIGHT_REUSE_STATE\" --workers 1 --forbid-only --retries 1",
     "lint": "eslint . --ext .ts --quiet"
   }
 }
