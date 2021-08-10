@@ -30,9 +30,11 @@ make lint-docs
 # If this is a docs-only change: skip the rest of the preamble, move on to the
 # next build step in the BK pipeline which allows for a
 # docs-only-change-fastpath-pipeline-exit.
-echo "check if this is a docs-only change, exit preamble early if so"
+echo "--- check if this is a docs-only change, exit preamble early if so"
 bash ci/check-if-docs-pr.sh && exit 0
 
+echo "--- detect missing license headers"
+make check-license-headers
 
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
@@ -55,8 +57,6 @@ prettier --check 'lib/**/*.ts'
 prettier --check 'packages/**/*.ts'
 prettier --check 'test/**/*.ts'
 
-echo "--- detect missing license headers"
-make check-license-headers
 
 echo "--- wait for yarn background process"
 # What follows requires the `yarn` dep installation above to have completed.
