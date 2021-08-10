@@ -50,8 +50,9 @@ EXITCODE_MAKE_TESTREMOTE_UI_API=$?
 set -e
 echo "--- Exit status of make test-remote-ui-api: ${EXITCODE_MAKE_TESTREMOTE_UI_API}"
 
-# Rely on screenshots to be created with a certain file name prefix.
-cp test-remote-artifacts/uishot-*.png /build/bk-artifacts || true
+# Copy entire `test-remote-artifacts` directory; this should include
+# uishot-*png screenshots fromn test-remote-ui-api
+cp -a "${OPSTRACE_BUILD_DIR}/test-remote-artifacts" /build/bk-artifacts || true
 
 echo "+++ run test-browser"
 set +e
