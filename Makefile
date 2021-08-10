@@ -585,8 +585,16 @@ kubectl-cluster-info:
 		kubectl cluster-info
 
 #
-# * Overrides `/build/test/test-remote/node_modules` with an empty volume to ensure
-#   `node_modules` from the host are not shared with the container.
+# * Note(nick): Overrides `/build/test/test-remote/node_modules` with an empty
+#   volume to ensure `node_modules` from the host are not shared with the
+#   container.
+#
+# * Note(JP): the `/build/test/test-remote` directory is built during image
+#   generation, contains the node_modules directory with the dependencies as
+#   defined by the test-remote npm package. /build is not as for other
+#   containers the OPSTRACE_BUILD_DIR. Mount that at /builddironhost and set
+#   HOME to it so that for example the gcloud authentication state (local to
+#   the build dir) is picked up in the container.
 #
 .PHONY: test-remote
 test-remote: kubectl-cluster-info
@@ -612,6 +620,7 @@ test-remote: kubectl-cluster-info
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}/test-remote-artifacts:/test-remote-artifacts \
+		-v ${OPSTRACE_BUILD_DIR}:/builddironhost \
 		-v ${OPSTRACE_KUBECFG_FILEPATH_ONHOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
@@ -621,6 +630,7 @@ test-remote: kubectl-cluster-info
 		-v /etc/passwd:/etc/passwd \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-e KUBECONFIG=/kubeconfig \
+		-e HOME=/builddironhost \
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
@@ -655,6 +665,7 @@ test-remote-ui-api:
 		-v ${OPSTRACE_BUILD_DIR}/test/test-remote:/build/test/test-remote \
 		-v ${OPSTRACE_BUILD_DIR}/secrets:/secrets \
 		-v ${OPSTRACE_BUILD_DIR}/test-remote-artifacts:/test-remote-artifacts \
+		-v ${OPSTRACE_BUILD_DIR}:/builddironhost \
 		-v ${OPSTRACE_KUBECFG_FILEPATH_ONHOST}:/kubeconfig:ro \
 		-v ${TENANT_DEFAULT_API_TOKEN_FILEPATH}:${TENANT_DEFAULT_API_TOKEN_FILEPATH} \
 		-v ${TENANT_SYSTEM_API_TOKEN_FILEPATH}:${TENANT_SYSTEM_API_TOKEN_FILEPATH} \
@@ -664,6 +675,7 @@ test-remote-ui-api:
 		-v /etc/passwd:/etc/passwd \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-e KUBECONFIG=/kubeconfig \
+		-e HOME=/builddironhost \
 		-e TEST_REMOTE_ARTIFACT_DIRECTORY=/test-remote-artifacts \
 		-e OPSTRACE_CLUSTER_NAME \
 		-e OPSTRACE_CLOUD_PROVIDER \
