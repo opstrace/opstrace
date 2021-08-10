@@ -13,13 +13,10 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "gcp" ]]; then
         --project ${OPSTRACE_GCP_PROJECT_ID}
 fi
 
-# Write this during `opstrace create ...`
-KUBECONFIG_FILEPATH="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
-
 echo "--- creating cluster"
 ./from/opstrace create ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
     --instance-config ci/test-upgrade/initial-cluster-config.yaml \
-    --write-kubeconfig-file "${KUBECONFIG_FILEPATH}" \
+    --write-kubeconfig-file "${OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH}" \
     --log-level=debug \
     --yes
 
