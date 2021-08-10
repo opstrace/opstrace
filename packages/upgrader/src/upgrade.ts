@@ -75,7 +75,7 @@ export function* opstraceInstanceRequiresUpgrade(): Generator<
       .pop();
     if (lastCLIVersion !== installedControllerImageTag) {
       die(
-        `found Opstrace version mismatch, CLI version ${lastCLIVersion} does not match installed controller version ${installedControllerImageTag}`
+        `found Opstrace version mismatch, last CLI version ${lastCLIVersion} in controller configuration does not match installed controller version ${installedControllerImageTag}`
       );
     }
 
