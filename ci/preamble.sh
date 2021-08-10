@@ -76,8 +76,10 @@ set -x
 echo "--- make set-build-info-constants"
 make set-build-info-constants
 
-echo "--- lint codebase: quick feedback"
-make lint-codebase
+echo "--- start background process: make lint-codebase "
+make lint-codebase 2> make_lint_codebase.outerr < /dev/null &
+LINT_CODEBASE_PID="$!"
+sleep 1 # so that the xtrace output is in this build log section
 
 # Do this early when the checkout is fresh (no non-repo files within /packages
 # or /lib as of previous tsc invocations -- these could erroenously invalidate
@@ -121,7 +123,7 @@ echo "--- build looker in non-isolated environment (for local dev)"
 # not covered by CI.
 ( cd test/test-remote/looker; yarn ; yarn run tsc --project tsconfig.json)
 
-
+# Need to wait for completion of this before moving on to make cli-pkg
 echo "--- wait for background process: yarn build:cli"
 set +e
 wait $TSC_CLI_PID
@@ -129,20 +131,18 @@ TSC_CLI_EXIT_CODE="$?"
 echo "yarn build:cli terminated with code $TSC_CLI_EXIT_CODE. stdout/err:"
 cat tsc_cli.outerr
 if [[ $TSC_CLI_EXIT_CODE != "0" ]]; then
-    echo "yarn build:cli, exit 1"
+    echo "yarn build:cli failed, exit 1"
     exit 1
 fi
 set -x
 
-echo "--- start pkg single-binary builds"
-
+# Note(JP): keep these ideas here for the moment.
 # First, set yarn cache to be shared across all CI runs.
 # See opstrace-prelaunch/issues/1695
 # and https://github.com/yarnpkg/yarn/issues/2181#issuecomment-559871605
 # edit: deactivated again, see
 # opstrace-prelaunch/issues/1757
 # mkdir -p /tmp/yarn-cache-opstrace && yarn config set cache-folder /tmp/yarn-cache-opstrace
-
 
 echo "--- make cli-pkg (for linux and mac)"
 echo "warning: interleaved output of two commands"
@@ -159,6 +159,22 @@ echo "--- CLI single-binary sanity check"
 # Quick sanity-check: confirm that CHECKOUT_VERSION_STRING is in stdout
 ./build/bin/opstrace --version
 ./build/bin/opstrace --version | grep "${CHECKOUT_VERSION_STRING}"
+
+
+# Don't have to wait for completion of this, but this is probably finished
+# by now and
+echo "--- wait for background process: make lint-codebase"
+set +e
+wait $LINT_CODEBASE_PID
+LINT_CODEBASE_PID="$?"
+echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
+cat make_lint_codebase.outerr
+if [[ $LINT_CODEBASE_PID != "0" ]]; then
+    echo "make lint-codebase failed, exit 1"
+    exit 1
+fi
+set -x
+
 
 echo "--- make rebuild-testrunner-container-images"
 make rebuild-testrunner-container-images
