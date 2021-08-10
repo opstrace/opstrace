@@ -108,6 +108,8 @@ RUN echo "biggest dirs"
 RUN cd / && du -ha . | sort -r -h | head -n 50 || true
 # show which cache dir is really configured
 RUN yarn cache dir
+# make it so that a non-root user can write to this cache dir.
+RUN chmod -R g+rwx,o+rwx /yarncache
 
 # Set up `addlicense` so that we can use that right away. Install it to
 # /usr/local.
