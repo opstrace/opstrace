@@ -10,6 +10,9 @@ echo "--- setting up dns-service credentials"
 # The `access.jwt` file is what the CLI is going to look for.
 cp secrets/dns-service-magic-id-token-for-ci access.jwt
 
+# Write this during `opstrace create ...`
+export OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
+
 case "${OPSTRACE_CLOUD_PROVIDER}" in
     aws)
         # Note: sourcing this file exports AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
