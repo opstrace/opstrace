@@ -27,9 +27,11 @@ make set-dockerhub-credentials
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
 # handle error later, below.
+echo "--- start yarn background process"
 yarn --frozen-lockfile --ignore-optional \
     2> preamble_yarn_install.outerr < /dev/null &
 YARN_PID="$!"
+sleep 1 # so that the xtrace output is in this build log section
 
 echo "--- lint docs: quick feedback"
 make lint-docs
@@ -49,10 +51,8 @@ prettier --check 'test/**/*.ts'
 echo "--- detect missing license headers"
 make check-license-headers
 
+echo "--- wait for yarn background process"
 # What follows requires the `yarn` dep installation above to have completed.
-# Wait for that background process now, and show output upon success.
-cat preamble_yarn_install.outerr
-
 set +e
 wait $YARN_PID
 YARN_EXIT_CODE="$?"
