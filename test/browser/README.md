@@ -106,14 +106,14 @@ test.describe("after auth0 authentication", () => {
 });
 ```
 
-## Save state between test runs
+## Reuse state between test runs
 
 To speed up the development feedback loop the playwright context state can be reused between runs of Playwright, ie you can keep the CI user logged in and not have to re-login each time you run Playwright. If there is no save state already present the CI user will login as normal and then save the state reuse on subsequent runs.
 
 To manually set the following env var:
 
 ```bash
-export OPSTRACE_PLAYWRIGHT_SAVE_STATE=true
+export OPSTRACE_PLAYWRIGHT_REUSE_STATE=true
 
 ```
 

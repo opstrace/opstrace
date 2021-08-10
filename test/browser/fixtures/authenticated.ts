@@ -28,11 +28,11 @@ export const addAuthFixture = (test: TestType) =>
     authCookies: [
       async ({ browser, system, cluster, user }, use) => {
         if (system.workerAuth) {
-          const SAVE_STATE =
-            process.env.OPSTRACE_PLAYWRIGHT_SAVE_STATE === "true";
+          const REUSE_STATE =
+            process.env.OPSTRACE_PLAYWRIGHT_REUSE_STATE === "true";
           const STATE_FILENAME = `contextState-${cluster.name}.json`;
 
-          const statePresent = SAVE_STATE && validStatePresent(STATE_FILENAME);
+          const statePresent = REUSE_STATE && validStatePresent(STATE_FILENAME);
 
           const context = await browser.newContext({
             ignoreHTTPSErrors: true,
@@ -42,7 +42,7 @@ export const addAuthFixture = (test: TestType) =>
 
           if (!statePresent) {
             await performLogin({ page, cluster, user });
-            if (SAVE_STATE)
+            if (REUSE_STATE)
               await context.storageState({ path: STATE_FILENAME });
           }
 
