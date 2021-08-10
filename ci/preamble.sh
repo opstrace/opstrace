@@ -79,6 +79,12 @@ make lint-codebase
 echo "--- make set-build-info-constants"
 make set-build-info-constants
 
+
+# tsc-compile the Opstrace cluster management
+echo "--- yarn build:cli"
+# do not use `make cli-tsc` because that would run the yarn installation again.
+yarn build:cli
+
 # If there are any changes to go directory then build and publish the images to
 # docker hub. Update packages/controller-config/docker-images.json to use the
 # newly built image tags in this test run.
@@ -123,10 +129,6 @@ echo "--- Compile Typescript code base, trigger pkg single-binary builds"
 # opstrace-prelaunch/issues/1757
 # mkdir -p /tmp/yarn-cache-opstrace && yarn config set cache-folder /tmp/yarn-cache-opstrace
 
-# tsc-build the Opstrace cluster management CLI (depends on installer and
-# uninstaller) and then also pkg-build it (for linux).
-echo "--- make cli-tsc"
-make cli-tsc
 
 echo "--- make cli-pkg (for linux and mac)"
 echo "warning: interleaved output of two commands"
