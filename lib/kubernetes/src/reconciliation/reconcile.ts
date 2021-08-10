@@ -122,7 +122,7 @@ export type ReconcileResourceTypes = {
 // This avoids flooding logs when something is being ignored by the controller,
 // while still ensuring that it's consistently reported and visible.
 const NOT_OURS_LOG_TTL_MILLIS = 5 * 60 * 1000; // 5 minutes
-let notOursLastLogMillis: number = 0;
+let notOursLastLogMillis = 0;
 
 export function* reconcile(
   desired: ResourceCollection,
