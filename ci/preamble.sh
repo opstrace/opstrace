@@ -140,14 +140,13 @@ set -x
 
 
 echo "--- wait for background process:  make build-and-push-controller-image"
-# What follows requires the `yarn` dep installation above to have completed.
 set +e
 wait $CONTROLLER_IMAGE_BUILD_PID
-YARN_EXIT_CODE="$?"
-echo "yarn process terminated with code $CONTROLLER_IMAGE_BUILD_PID. stdout/err:"
+CONTROLLER_IMAGE_BUILD_EXIT_CODE="$?"
+echo "make build-and-push-controller-image terminated with code $CONTROLLER_IMAGE_BUILD_EXIT_CODE. stdout/err:"
 cat build-and-push-controller-image.outerr
-if [[ $CONTROLLER_IMAGE_BUILD_PID != "0" ]]; then
-    echo "yarn failed, exit 1"
+if [[ $CONTROLLER_IMAGE_BUILD_EXIT_CODE != "0" ]]; then
+    echo "make build-and-push-controller-image failed, exit 1"
     exit 1
 fi
 set -x
