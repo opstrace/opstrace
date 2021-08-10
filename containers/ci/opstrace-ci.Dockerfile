@@ -100,9 +100,14 @@ RUN prettier --version
 
 RUN mkdir /tmp/yarninstall
 COPY package.json yarn.lock /tmp/yarninstall/
-# this is really to populate the yarn cache at ./usr/local/share/.cache/yarn in
+# this is really to populate the yarn cache at in
 # the container image -- let's see if that brings a speedup downstream.
+RUN mkdir /yarncache && yarn config set cache-folder /yarncache
 RUN cd /tmp/yarninstall && yarn --frozen-lockfile
+RUN echo "biggest dirs"
+RUN cd / && du -ha . | sort -r -h | head -n 50 || true
+# show which cache dir is really configured
+RUN yarn cache dir
 
 # Set up `addlicense` so that we can use that right away. Install it to
 # /usr/local.
