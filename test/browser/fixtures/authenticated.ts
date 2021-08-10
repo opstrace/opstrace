@@ -30,8 +30,9 @@ export const addAuthFixture = (test: TestType) =>
         if (system.workerAuth) {
           const SAVE_STATE =
             process.env.OPSTRACE_PLAYWRIGHT_SAVE_STATE === "true";
-          const STATE_FILENAME = "contextState.json";
-          const statePresent = SAVE_STATE && fs.existsSync(STATE_FILENAME);
+          const STATE_FILENAME = `contextState-${cluster.name}.json`;
+
+          const statePresent = SAVE_STATE && validStatePresent(STATE_FILENAME);
 
           const context = await browser.newContext({
             ignoreHTTPSErrors: true,
@@ -42,7 +43,7 @@ export const addAuthFixture = (test: TestType) =>
           if (!statePresent) {
             await performLogin({ page, cluster, user });
             if (SAVE_STATE)
-              await context.storageState({ path: "contextState.json" });
+              await context.storageState({ path: STATE_FILENAME });
           }
 
           const cookies = await page.context().cookies();
@@ -54,3 +55,17 @@ export const addAuthFixture = (test: TestType) =>
       { scope: "worker", auto: true }
     ]
   });
+
+const ONE_HOUR = 60 * 60 * 1000;
+const ONE_DAY = ONE_HOUR * 24;
+
+const validStatePresent = (filename: string) => {
+  if (fs.existsSync(filename)) {
+    // is the file less than a day old?
+    return (
+      new Date(fs.statSync(filename).ctime.getTime() + ONE_DAY) > new Date()
+    );
+  }
+
+  return false;
+};
