@@ -30,7 +30,7 @@ import {
   Typography
 } from "@material-ui/core";
 import { Card } from "client/components/Card";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseJSON } from "date-fns";
 import SkeletonTableBody from "./SkeletonTableBody";
 import { useSimpleNotification } from "client/services/Notification";
 import { Button } from "client/components/Button";
@@ -134,8 +134,9 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
   const tokenShardIdToDisplay = useRouteMatch<{ shardId: string }>(
     `${baseUrl}/:shardId/token`
   )?.params.shardId;
-  const tokensToDisplay = shards?.find(s => s.id === tokenShardIdToDisplay)
-    ?.tokens;
+  const tokensToDisplay = shards?.find(
+    s => s.id === tokenShardIdToDisplay
+  )?.tokens;
 
   return (
     <>
@@ -225,13 +226,9 @@ const RingShard = ({
       </TableCell>
       <TableCell>{shard.state}</TableCell>
       <TableCell>
-        {
-          // dirty hack: the timestamp is not in a format recgonised recogised by FireFox or Safari, eg: "2021-08-04 05:16:17 +0000 UTC"
-          // more info here: https://stackoverflow.com/questions/16616950/date-function-returning-invalid-date-in-safari-and-firefox
-          formatDistanceToNow(new Date(shard.timestamp.replace(/-/g, "/")), {
-            addSuffix: true
-          })
-        }
+        {formatDistanceToNow(parseJSON(shard.timestamp), {
+          addSuffix: true
+        })}
       </TableCell>
       <TableCell>{shard.zone || "-"}</TableCell>
       <TableCell>{shard.address}</TableCell>
