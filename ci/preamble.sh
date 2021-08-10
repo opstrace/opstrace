@@ -24,6 +24,13 @@ aws --version
 make fetch-secrets
 make set-dockerhub-credentials
 
+# Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
+# Start this now in the background, redirect output to file. Wait for and
+# handle error later, below.
+yarn --frozen-lockfile --ignore-optional \
+    2> preamble_yarn_install.outerr < /dev/null &
+YARN_PID="$!"
+
 echo "--- lint docs: quick feedback"
 make lint-docs
 
@@ -42,8 +49,20 @@ prettier --check 'test/**/*.ts'
 echo "--- detect missing license headers"
 make check-license-headers
 
-echo "--- install yarn workspace dependencies"
-yarn --frozen-lockfile --ignore-optional
+# What follows requires the `yarn` dep installation above to have completed.
+# Wait for that background process now, and show output upon success.
+cat preamble_yarn_install.outerr
+
+set +e
+wait $YARN_PID
+YARN_EXIT_CODE="$?"
+echo "yarn process terminated with code $ YARN_EXIT_CODE. stdout/err:"
+cat preamble_yarn_install.outerr
+if [[ $YARN_EXIT_CODE != "0" ]]; then
+    echo "yarn failed, exit 1"
+    exit 1
+fi
+set -x
 
 echo "--- lint codebase: quick feedback"
 make lint-codebase
