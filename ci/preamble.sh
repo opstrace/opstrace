@@ -15,10 +15,8 @@ set -o xtrace
 
 # For debugging potential issues. `gcloud` is a moving target in our CI and
 # if something fails around the gcloud CLI it's good to know exactly which
-# version we ran.
+# version we ran. Same for the AWS CLI
 gcloud --version
-
-# Same story for the AWS CLI
 aws --version
 
 make fetch-secrets
@@ -35,6 +33,14 @@ bash ci/check-if-docs-pr.sh && exit 0
 
 echo "--- detect missing license headers"
 make check-license-headers
+
+# Do this early when the checkout is fresh (no non-repo files within /packages
+# or /lib as of previous tsc invocations -- these could erroenously invalidate
+# the controller image cache layers).
+echo "--- start in background: make build-and-push-controller-image"
+make build-and-push-controller-image &> build-and-push-controller-image.outerr < /dev/null &
+CONTROLLER_IMAGE_BUILD_PID="$!"
+sleep 1 # so that the xtrace output is in this build log section
 
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
@@ -82,11 +88,6 @@ echo "--- start background process: make lint-codebase "
 LINT_CODEBASE_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
-# Do this early when the checkout is fresh (no non-repo files within /packages
-# or /lib as of previous tsc invocations -- these could erroenously invalidate
-# the controller image cache layers).
-echo "--- make build-and-push-controller-image"
-make build-and-push-controller-image
 
 # tsc-compile the Opstrace cluster management
 echo "--- start in background: yarn build:cli"
@@ -137,6 +138,21 @@ if [[ $TSC_CLI_EXIT_CODE != "0" ]]; then
 fi
 set -x
 
+
+echo "--- wait for background process:  make build-and-push-controller-image"
+# What follows requires the `yarn` dep installation above to have completed.
+set +e
+wait $CONTROLLER_IMAGE_BUILD_PID
+YARN_EXIT_CODE="$?"
+echo "yarn process terminated with code $CONTROLLER_IMAGE_BUILD_PID. stdout/err:"
+cat build-and-push-controller-image.outerr
+if [[ $CONTROLLER_IMAGE_BUILD_PID != "0" ]]; then
+    echo "yarn failed, exit 1"
+    exit 1
+fi
+set -x
+
+
 # Note(JP): keep these ideas here for the moment.
 # First, set yarn cache to be shared across all CI runs.
 # See opstrace-prelaunch/issues/1695
@@ -177,7 +193,6 @@ if [[ $LINT_CODEBASE_PID != "0" ]]; then
     exit 1
 fi
 set -x
-
 
 echo "--- make rebuild-testrunner-container-images"
 make rebuild-testrunner-container-images
