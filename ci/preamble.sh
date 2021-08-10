@@ -33,6 +33,7 @@ make lint-docs
 echo "check if this is a docs-only change, exit preamble early if so"
 bash ci/check-if-docs-pr.sh && exit 0
 
+echo "--- prettier --check on typescript files"
 # Enforce consistent code formatting, based on .prettierrc and .prettierignore
 prettier --check 'lib/**/*.ts'
 prettier --check 'packages/**/*.ts'
@@ -48,6 +49,7 @@ echo "--- lint codebase: quick feedback"
 make lint-codebase
 
 # This is needed also by the app Docker image build
+echo "--- make set-build-info-constants"
 make set-build-info-constants
 
 # If there are any changes to go directory then build and publish the images to
@@ -60,9 +62,10 @@ make set-build-info-constants
 # - app
 # - graphql
 echo "--- Update docker-images.json"
+set +x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ${DIR}/build-docker-images-update-controller-config.sh
-
+set -x
 
 echo "--- build looker image"
 # looker: does image build? push it, too!
