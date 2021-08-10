@@ -24,7 +24,10 @@ const test = useFixtures("auth");
 test.describe("after auth0 authentication", () => {
   test.beforeEach(restoreLogin);
 
-  test("user should see homepage", async ({ page, cluster }) => {
+  test("user should see homepage, also OPSTRACE_PLAYWRIGHT_REUSE_STATE", async ({
+    page,
+    cluster
+  }) => {
     expect(await page.isVisible("[data-test=getting-started]")).toBeTruthy();
   });
 
