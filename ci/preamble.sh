@@ -24,6 +24,16 @@ aws --version
 make fetch-secrets
 make set-dockerhub-credentials
 
+echo "--- lint docs: quick feedback"
+make lint-docs
+
+# If this is a docs-only change: skip the rest of the preamble, move on to the
+# next build step in the BK pipeline which allows for a
+# docs-only-change-fastpath-pipeline-exit.
+echo "check if this is a docs-only change, exit preamble early if so"
+bash ci/check-if-docs-pr.sh && exit 0
+
+
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
 # handle error later, below.
@@ -38,15 +48,6 @@ yarn --frozen-lockfile --ignore-optional \
     2> preamble_yarn_install.outerr < /dev/null &
 YARN_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
-
-echo "--- lint docs: quick feedback"
-make lint-docs
-
-# If this is a docs-only change: skip the rest of the preamble, move on to the
-# next build step in the BK pipeline which allows for a
-# docs-only-change-fastpath-pipeline-exit.
-echo "check if this is a docs-only change, exit preamble early if so"
-bash ci/check-if-docs-pr.sh && exit 0
 
 echo "--- prettier --check on typescript files"
 # Enforce consistent code formatting, based on .prettierrc and .prettierignore
