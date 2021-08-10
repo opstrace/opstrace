@@ -26,6 +26,12 @@ case "${OPSTRACE_CLOUD_PROVIDER}" in
 esac
 
 
+start_data_collection_deployment_loop() {
+    # Run this as a child process in the background. Rely on it to
+    # terminate by itself.
+    bash ci/data-collection-deployment-loop.sh "$OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH" &
+}
+
 teardown() {
     LAST_EXIT_CODE=$?
 
@@ -39,8 +45,22 @@ trap "teardown" EXIT
 export OPSTRACE_KUBECFG_FILEPATH_ONHOST="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
 
 
+# For debugging potential issues. `gcloud` is a moving target in our CI and
+# if something fails around the gcloud CLI it's good to know exactly which
+# version we ran.
+gcloud --version
 
 mkdir -p "${OPSTRACE_BUILD_DIR}/bk-artifacts"
+
+if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
+    echo "--- setup: start_data_collection_deployment_loop"
+    start_data_collection_deployment_loop &
+    # Take a quick, short break before generating more log output, so that
+    # the output from the first loop iteration goes into the "proper" section
+    # in the build log.
+    sleep 5
+fi
+
 
 make testupgrade-create-cluster
 
@@ -63,3 +83,7 @@ export OPSTRACE_CLI_PATH="./to/opstrace"
 # from the upgrade test pipeline and therefore in its own file.
 source ci/test-core.sh
 
+# One child process was spawned (see start_data_collection_deployment_loop()).
+# Be a good citizen and join that explicitly (expect that to have terminated by
+# now, long ago).
+wait
