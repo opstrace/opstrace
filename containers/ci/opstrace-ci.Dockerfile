@@ -98,6 +98,12 @@ RUN npm install -g prettier@2.3.2
 RUN markdownlint --version
 RUN prettier --version
 
+RUN mkdir /tmp/yarninstall
+COPY package.json yarn.lock /tmp/yarninstall/
+# this is really to populate the yarn cache at ./usr/local/share/.cache/yarn in
+# the container image -- let's see if that brings a speedup downstream.
+RUN cd /tmp/yarninstall && yarn --frozen-lockfile
+
 # Set up `addlicense` so that we can use that right away. Install it to
 # /usr/local.
 RUN (cd /tmp && GOPATH=/usr/local/ go get github.com/google/addlicense)
