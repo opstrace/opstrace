@@ -46,6 +46,7 @@ echo "--- start yarn background process"
 # of the preamble runtime when nothing in packages/app changed (i.e. when the
 # container image is not rebuilt).
 mv packages/app/package.json packages/app/package.json.deactivated
+yarn config set cache-folder /yarncache # this is pre-baked into the ci container image
 yarn --frozen-lockfile --ignore-optional \
     2> preamble_yarn_install.outerr < /dev/null &
 YARN_PID="$!"
