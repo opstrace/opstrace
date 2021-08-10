@@ -23,4 +23,4 @@ set -o pipefail
 
 yarn pw:save-state-for-reuse
 
-yarn playwright test --workers 3 --forbid-only --retries 3
+yarn playwright test --workers 6 --forbid-only --retries 3
