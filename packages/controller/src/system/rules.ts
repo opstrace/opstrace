@@ -748,7 +748,7 @@ export default () => [
           "cluster_namespace_deployment:container_cpu_usage_seconds_total:sum_rate"
       },
       {
-        expr: '(cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests_cpu_cores,\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\nor\n\n\n(\n  sum by (cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests{resource="cpu"},\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\n',
+        expr: '(sum by (cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests_cpu_cores,\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\nor\n\n\n(\n  sum by (cluster, namespace, deployment) (\n    label_replace(\n      label_replace(\n        kube_pod_container_resource_requests{resource="cpu"},\n        "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"\n      ),\n      \n      \n      "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"\n    )\n  )\n)\n',
         record:
           "cluster_namespace_deployment:kube_pod_container_resource_requests_cpu_cores:sum"
       },
