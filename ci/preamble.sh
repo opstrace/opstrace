@@ -123,7 +123,8 @@ echo "--- start yarn background process"
 # This is expected to cut 1.5 minutes from the preamble which is more than 20 %
 # of the preamble runtime when nothing in packages/app changed (i.e. when the
 # container image is not rebuilt).
-mv packages/app/package.json packages/app/package.json.deactivated
+#mv packages/app/package.json packages/app/package.json.deactivated
+rm -rf packages/app
 yarn config set cache-folder /yarncache # this is pre-baked into the ci container image
 yarn --frozen-lockfile --ignore-optional \
     &> preamble_yarn_install.outerr < /dev/null &
@@ -188,7 +189,7 @@ if [[ $TSC_CLI_EXIT_CODE != "0" ]]; then
     echo "yarn build:cli failed, exit 1"
     exit 1
 fi
-set -x
+set -e
 
 
 echo "--- wait for background process:  make build-and-push-controller-image"
