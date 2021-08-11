@@ -20,13 +20,15 @@ import { BrowserRouter } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 // import * as serviceWorker from "./serviceWorker";
+import { isLocalhost } from "./serviceWorker";
 import App from "./app";
 
-Sentry.init({
-  dsn:
-    "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
-  integrations: [new Integrations.BrowserTracing()]
-});
+if (!isLocalhost) {
+  Sentry.init({
+    dsn: "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
+    integrations: [new Integrations.BrowserTracing()]
+  });
+}
 
 const root = document.getElementById("root");
 
