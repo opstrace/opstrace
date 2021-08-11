@@ -1,6 +1,9 @@
 # Use current NodeJS LTS release. Derive from Debian Buster.
 FROM --platform=linux/amd64 node:16-buster
 
+# switching this may invalidate a lyer
+WORKDIR /build/test/test-remote
+
 # Set up dependencies for playwright/chromium
 # See https://github.com/opstrace/opstrace/pull/182#issuecomment-747426156
 RUN apt-get update && apt-get install -y -q --no-install-recommends \
@@ -42,8 +45,6 @@ COPY yarn.lock test/test-remote/package.json test/test-remote/tsconfig.json /bui
 COPY lib/kubernetes/ /build/lib/kubernetes/
 # opstrace/utils: used by opstrace/kubernetes
 COPY lib/utils/ /build/lib/utils/
-
-WORKDIR /build/test/test-remote
 
 RUN cat package.json tsconfig.json && echo /build: && ls -al /build/*
 RUN yarn install --frozen-lockfile
