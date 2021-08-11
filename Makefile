@@ -405,7 +405,10 @@ rebuild-ci-container-image:
 	#Note(JP): update: experiment with sending a small build context including
 	# yarn.lock and package.json and run a yarn install in the image build
 	#to populate the yarn cache in /usr in the image
-	docker build -t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING)  . -f containers/ci/opstrace-ci.Dockerfile
+	# inject current user uid/gid to write some directories as this
+	# identity, also see https://stackoverflow.com/a/44683248/145400
+	docker build --build-arg CIUID=$(shell id -u) --build-arg CIGID=$(shell id -g) \
+		-t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING)  . -f containers/ci/opstrace-ci.Dockerfile
 
 
 
