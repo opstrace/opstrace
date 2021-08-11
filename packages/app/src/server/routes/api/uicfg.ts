@@ -24,8 +24,6 @@ export const AUTH0_CONFIG = {
   auth0_domain: env.AUTH0_DOMAIN
 };
 
-export { BUILD_INFO };
-
 export function pubUiCfgHandler(
   req: Request,
   res: Response,

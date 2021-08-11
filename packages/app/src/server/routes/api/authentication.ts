@@ -26,7 +26,8 @@ import authRequired from "server/middleware/auth";
 
 import graphqlClient from "state/clients/graphqlClient";
 
-import { AUTH0_CONFIG, BUILD_INFO } from "./uicfg";
+import { AUTH0_CONFIG } from "./uicfg";
+import { BUILD_INFO } from "@opstrace/utils";
 
 import * as jwkshelpers from "./jwks";
 

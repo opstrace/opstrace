@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as Sentry from "@sentry/react";
+
 import { createReducer, ActionType } from "typesafe-actions";
 
 import { OpstraceConfig } from "./types";
@@ -29,7 +31,17 @@ export const reducer = createReducer<OpstraceConfig, OpstraceConfigActions>(
   OpstraceConfigInitialState
 ).handleAction(
   actions.updateOpstraceBuildInfo,
-  (state, action): OpstraceConfig => ({
-    buildInfo: action.payload.buildInfo
-  })
+  (state, action): OpstraceConfig => {
+    const { buildInfo } = action.payload;
+
+    Sentry.setTag("opstrace.branch", buildInfo.branch);
+    Sentry.setTag("opstrace.version", buildInfo.version);
+    Sentry.setTag("opstrace.commit", buildInfo.commit);
+    Sentry.setTag("opstrace.build-time", buildInfo.buildTime);
+    Sentry.setTag("opstrace.build-hostname", buildInfo.buildHostname);
+
+    return {
+      buildInfo
+    };
+  }
 );
