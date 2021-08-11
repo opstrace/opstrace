@@ -175,6 +175,10 @@ echo "--- build looker in non-isolated environment (for local dev)"
 # not covered by CI.
 ( cd test/test-remote/looker; yarn ; yarn run tsc --project tsconfig.json)
 
+echo "--- make rebuild-testrunner-container-images"
+make rebuild-testrunner-container-images
+
+
 # Need to wait for completion of this before moving on to make cli-pkg
 echo "--- wait for background process: yarn build:cli"
 set +e
@@ -214,10 +218,6 @@ echo "--- CLI single-binary sanity check"
 # Quick sanity-check: confirm that CHECKOUT_VERSION_STRING is in stdout
 ./build/bin/opstrace --version
 ./build/bin/opstrace --version | grep "${CHECKOUT_VERSION_STRING}"
-
-
-echo "--- make rebuild-testrunner-container-images"
-make rebuild-testrunner-container-images
 
 
 echo "--- wait for background process:  make build-and-push-controller-image"
