@@ -23,7 +23,7 @@ import { Integrations } from "@sentry/tracing";
 import { isLocalhost } from "./serviceWorker";
 import App from "./app";
 
-if (!isLocalhost) {
+if (!isLocalhost || process.env.OPSTRACE_OVERRIDE_ENABLE_SENTRY === "true") {
   Sentry.init({
     dsn: "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
     integrations: [new Integrations.BrowserTracing()]
