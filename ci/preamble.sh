@@ -25,6 +25,7 @@ make set-dockerhub-credentials
 echo "--- lint docs: quick feedback"
 make lint-docs
 
+
 # If this is a docs-only change: skip the rest of the preamble, move on to the
 # next build step in the BK pipeline which allows for a
 # docs-only-change-fastpath-pipeline-exit.
@@ -114,6 +115,7 @@ if [[ $LINT_CODEBASE_PID != "0" ]]; then
 fi
 set -e
 
+
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
 # handle error later, below.
@@ -131,11 +133,13 @@ yarn --frozen-lockfile --ignore-optional \
 YARN_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
+
 echo "--- prettier --check on typescript files"
 # Enforce consistent code formatting, based on .prettierrc and .prettierignore
 prettier --check 'lib/**/*.ts'
 prettier --check 'packages/**/*.ts'
 prettier --check 'test/**/*.ts'
+
 
 
 echo "--- wait for yarn background process"
@@ -151,14 +155,7 @@ if [[ $YARN_EXIT_CODE != "0" ]]; then
 fi
 set -e
 
-echo "--- start background process: make lint-codebase "
-# start in sub shell because output redirection otherwise didn't work properly
-( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
-LINT_CODEBASE_PID="$!"
-sleep 1 # so that the xtrace output is in this build log section
-
-
-# tsc-compile the Opstrace cluster management
+# tsc-compile the CLI. This requires the yarn dep setup to have completed.
 echo "--- start in background: yarn build:cli"
 # do not use `make cli-tsc` because that would run the yarn installation again.
 yarn build:cli &> tsc_cli.outerr < /dev/null &
@@ -190,29 +187,6 @@ if [[ $TSC_CLI_EXIT_CODE != "0" ]]; then
     exit 1
 fi
 set -e
-
-
-echo "--- wait for background process:  make build-and-push-controller-image"
-set +e
-wait $CONTROLLER_IMAGE_BUILD_PID
-CONTROLLER_IMAGE_BUILD_EXIT_CODE="$?"
-echo "make build-and-push-controller-image terminated with code $CONTROLLER_IMAGE_BUILD_EXIT_CODE. stdout/err:"
-cat build-and-push-controller-image.outerr
-if [[ $CONTROLLER_IMAGE_BUILD_EXIT_CODE != "0" ]]; then
-    echo "make build-and-push-controller-image failed, exit 1"
-    exit 1
-fi
-set -x
-
-
-# Note(JP): keep these ideas here for the moment.
-# First, set yarn cache to be shared across all CI runs.
-# See opstrace-prelaunch/issues/1695
-# and https://github.com/yarnpkg/yarn/issues/2181#issuecomment-559871605
-# edit: deactivated again, see
-# opstrace-prelaunch/issues/1757
-# mkdir -p /tmp/yarn-cache-opstrace && yarn config set cache-folder /tmp/yarn-cache-opstrace
-
 echo "--- make cli-pkg (for linux and mac)"
 echo "warning: interleaved output of two commands"
 # note(JP) start in background , then also start the macos build. Each takes
@@ -223,8 +197,18 @@ _PID1="$!"
 sleep 5 && echo -e "\n\n" # so that the output is not worst-case interleaved
 make cli-pkg-macos &
 _PID2="$!"
-# wait for background processes to exit.
+# wait for these two background processes to exit.
 wait $_PID1 $_PID2
+
+
+# Note(JP): keep these ideas here for the moment.
+# First, set yarn cache to be shared across all CI runs.
+# See opstrace-prelaunch/issues/1695
+# and https://github.com/yarnpkg/yarn/issues/2181#issuecomment-559871605
+# edit: deactivated again, see
+# opstrace-prelaunch/issues/1757
+# mkdir -p /tmp/yarn-cache-opstrace && yarn config set cache-folder /tmp/yarn-cache-opstrace
+
 
 echo "--- CLI single-binary sanity check"
 # Quick sanity-check: confirm that CHECKOUT_VERSION_STRING is in stdout
