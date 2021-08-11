@@ -41,6 +41,44 @@ make check-license-headers
 echo "--- make set-build-info-constants"
 make set-build-info-constants
 
+
+
+# Soft-link the node_modules dir in the container image to here where the main
+# `package.json` is. Alternative is maybe to create a .yarnrc containing
+# --modules-folder /node_modules. The challenge is that /build is _mounted_
+# into the container, while /node_modules is already there.
+ln -s /node_modules ./node_modules
+
+# The depenencies for this linting effort should all be in the CI
+# container image, i.e. this should not rely on `yarn --frozen-lockfile`
+echo "--- start background process: make lint-codebase "
+# start in sub shell because output redirection otherwise didn't work properly
+( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
+LINT_CODEBASE_PID="$!"
+sleep 1 # so that the xtrace output is in this build log section
+
+
+# TMP STATE: see if this works -- if it does, push to below.
+# Don't have to wait for completion of this, but this is probably finished by
+# now and that feedback is interesting.
+echo "--- wait for background process: make lint-codebase"
+set +e
+wait $LINT_CODEBASE_PID
+LINT_CODEBASE_PID="$?"
+echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
+cat make_lint_codebase.outerr
+if [[ $LINT_CODEBASE_PID != "0" ]]; then
+    echo "make lint-codebase failed, exit 1"
+    exit 1
+fi
+set -e
+
+
+
+
+
+
+
 # Update ../packages/controller-config/docker-images.json to use image tags
 # derived from this current checkout. If images are not yet on docker hub then
 # build and push these images. Rely on the idea that
@@ -92,29 +130,6 @@ cp -a . $CONTROLLER_BUILD_DIR/opstrace
 CONTROLLER_IMAGE_BUILD_PID="$!"
 sleep 3 # so that the xtrace output is in this build log section
 
-# The depenencies for this linting effort should all be in the CI
-# container image, i.e. this should not rely on `yarn --frozen-lockfile`
-echo "--- start background process: make lint-codebase "
-# start in sub shell because output redirection otherwise didn't work properly
-( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
-LINT_CODEBASE_PID="$!"
-sleep 1 # so that the xtrace output is in this build log section
-
-
-# TMP STATE: see if this works -- if it does, push to below.
-# Don't have to wait for completion of this, but this is probably finished by
-# now and that feedback is interesting.
-echo "--- wait for background process: make lint-codebase"
-set +e
-wait $LINT_CODEBASE_PID
-LINT_CODEBASE_PID="$?"
-echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
-cat make_lint_codebase.outerr
-if [[ $LINT_CODEBASE_PID != "0" ]]; then
-    echo "make lint-codebase failed, exit 1"
-    exit 1
-fi
-set -e
 
 
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
