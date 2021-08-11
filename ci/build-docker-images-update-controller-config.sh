@@ -8,6 +8,11 @@ set -oux pipefail
 echo "DIR: ${DIR}"
 echo "pwd: $(pwd)"
 
+# Require this to be set, so that a separate entity can make sure that a new
+# docker-images.json file was written. This must be an absolute path on the
+# host.
+echo "WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH: ${WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH}"
+
 # edit JSON file in place
 jqi() {
   cat <<< "$(jq "$1" < "$2")" > "$2"
@@ -37,11 +42,11 @@ jqi '.graphqlEngine = "'${OPSTRACE_GRAPHQL_IMAGE}'"' "${DIJSON_PATH}"
 echo "Updated docker images, this is the diff:"
 git --no-pager diff "${DIJSON_PATH}"
 
-# signal to the other racers that docker-images.json got updated. Note(JP):
+# Signal to the other racers that docker-images.json got updated. Note(JP):
 # it's probably better to make the docker-images.json in the repo to be
 # obviously 'wrong', maybe filled with template variables. Maybe merge this
 # with the set-build-info-constants main makefile target.
-touch ${DIR}/docker_images_json_regenerated
+cp "${DIJSON_PATH}" "${WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH}"
 
 echo "Check if Go-based / API docker images exist"
 docker pull ${CORTEX_API_PROXY_IMAGE} && docker pull ${LOKI_API_PROXY_IMAGE} && docker pull ${DD_API_PROXY_IMAGE} && docker pull ${CONFIG_API_PROXY_IMAGE}
