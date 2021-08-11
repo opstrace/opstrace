@@ -53,11 +53,10 @@ cp -a /node_modules ./node_modules
 
 # The depenencies for this linting effort should all be in the CI
 # container image, i.e. this should not rely on `yarn --frozen-lockfile`
-echo "--- start background process: make lint-codebase "
+echo "--- start in background: make lint-codebase "
 # start in sub shell because output redirection otherwise didn't work properly
 ( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
 LINT_CODEBASE_PID="$!"
-sleep 1 # so that the xtrace output is in this build log section
 
 # Update ../packages/controller-config/docker-images.json to use image tags
 # derived from this current checkout. If images are not yet on docker hub then
@@ -74,7 +73,6 @@ export WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH="$(pwd)/new-docker-images.
 ( cd "$DOCKER_IMAGES_BUILD_DIR/opstrace/ci" &&  bash build-docker-images-update-controller-config.sh ) \
     &> build-docker-images-update-controller-config.outerr < /dev/null &
 DOCKER_IMAGES_BUILD_PID="$!"
-sleep 1 # so that the xtrace output is in this build log section
 
 # Before moving on to starting the controller image build, wait for the new
 # docker-images.json to have been generated.
@@ -92,7 +90,7 @@ do
     else
         echo "new docker-images.json not yet written, wait"
     fi
-    sleep 2
+    sleep 1
 done
 set -x
 
@@ -108,8 +106,6 @@ cp -a . $CONTROLLER_BUILD_DIR/opstrace
 ( cd $CONTROLLER_BUILD_DIR/opstrace && make build-and-push-controller-image ) \
     &> build-and-push-controller-image.outerr < /dev/null &
 CONTROLLER_IMAGE_BUILD_PID="$!"
-sleep 3 # so that the xtrace output is in this build log section
-
 
 
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
@@ -129,14 +125,6 @@ yarn --frozen-lockfile --ignore-optional \
 YARN_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
-
-echo "--- prettier --check on typescript files"
-# Enforce consistent code formatting, based on .prettierrc and .prettierignore
-prettier --check 'lib/**/*.ts'
-prettier --check 'packages/**/*.ts'
-prettier --check 'test/**/*.ts'
-
-
 # Don't have to wait for completion of this, but this is probably finished by
 # now and that feedback is interesting.
 echo "--- wait for background process: make lint-codebase"
@@ -148,8 +136,7 @@ cat make_lint_codebase.outerr
 # if this failed: exit 1, but do this only further below.
 set -e
 
-
-echo "--- wait for yarn background process"
+echo "--- wait for background process: yarn"
 # What follows requires the `yarn` dep installation above to have completed.
 set +e
 wait $YARN_PID
@@ -169,6 +156,12 @@ yarn build:cli &> tsc_cli.outerr < /dev/null &
 TSC_CLI_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
+
+echo "--- prettier --check on typescript files"
+# Enforce consistent code formatting, based on .prettierrc and .prettierignore
+prettier --check 'lib/**/*.ts'
+prettier --check 'packages/**/*.ts'
+prettier --check 'test/**/*.ts'
 
 echo "--- build looker image"
 # looker: does image build? push it, too!
