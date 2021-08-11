@@ -47,7 +47,9 @@ make set-build-info-constants
 # into the container, while /node_modules is already there.
 #ln -s /node_modules ./node_modules
 # update: https://github.com/yarnpkg/yarn/issues/8079#issuecomment-622817604 -- huh
+echo "--- cp -a /node_modules ./node_modules"
 cp -a /node_modules ./node_modules
+
 
 # The depenencies for this linting effort should all be in the CI
 # container image, i.e. this should not rely on `yarn --frozen-lockfile`
@@ -113,7 +115,7 @@ sleep 3 # so that the xtrace output is in this build log section
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
 # handle error later, below.
-echo "--- start yarn background process"
+echo "--- start in background: yarn --frozen-lockfile"
 # The "UI APP" dependencies are not needed anywhere but in the container image
 # build for it. Deactivate this package here for a moment during running yarn.
 # This is expected to cut 1.5 minutes from the preamble which is more than 20 %
