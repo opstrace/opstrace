@@ -34,6 +34,10 @@ bash ci/check-if-docs-pr.sh && exit 0
 echo "--- detect missing license headers"
 make check-license-headers
 
+# This is needed also by the controller image build, by the CLI build,
+# and various other artifact builds.
+echo "--- make set-build-info-constants"
+make set-build-info-constants
 # Do this early when the checkout is fresh (no non-repo files within /packages
 # or /lib as of previous tsc invocations -- these could erroenously invalidate
 # the controller image cache layers).
@@ -77,10 +81,6 @@ if [[ $YARN_EXIT_CODE != "0" ]]; then
     exit 1
 fi
 set -x
-
-# This is needed also by the app Docker image build
-echo "--- make set-build-info-constants"
-make set-build-info-constants
 
 echo "--- start background process: make lint-codebase "
 # start in sub shell because output redirection otherwise didn't work properly
