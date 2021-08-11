@@ -38,13 +38,81 @@ make check-license-headers
 # and various other artifact builds.
 echo "--- make set-build-info-constants"
 make set-build-info-constants
-# Do this early when the checkout is fresh (no non-repo files within /packages
-# or /lib as of previous tsc invocations -- these could erroenously invalidate
-# the controller image cache layers).
-echo "--- start in background: make build-and-push-controller-image"
-make build-and-push-controller-image &> build-and-push-controller-image.outerr < /dev/null &
-CONTROLLER_IMAGE_BUILD_PID="$!"
+
+# Update ../packages/controller-config/docker-images.json to use image tags
+# derived from this current checkout. If images are not yet on docker hub then
+# build and push these images. Rely on the idea that
+# `build-docker-images-update-controller-config.sh` writes the new
+# docker-images.json as early as it can. Copy the current opstrace repo
+# checkout to a tmp dir for all of what
+# `build-docker-images-update-controller-config.sh` is doing so that we can
+# start other operations in this "actual" checkout dir, concurrently.
+echo "--- start in background: regenerate docker-images.json, then build go / app docker images"
+DOCKER_IMAGES_BUILD_DIR=$(mktemp -d -t docker-images-build-dir)
+cp -a .. "$DOCKER_IMAGES_BUILD_DIR/opstrace"
+export WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH="$(pwd)/new-docker-images.json"
+( cd "$DOCKER_IMAGES_BUILD_DIR/opstrace/ci" &&  bash build-docker-images-update-controller-config.sh ) \
+    &> build-docker-images-update-controller-config.outerr < /dev/null &
+DOCKER_IMAGES_BUILD_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
+
+# Before moving on to starting the controller image build, wait for the new
+# docker-images.json to have been generated.
+DIJSON_PATH="../packages/controller-config/src/docker-images.json"
+set +x
+while true
+do
+    if test -f "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH"; then
+        echo "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH exists. Overwrite the 'old' one."
+        mv -f "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH" ."${DIJSON_PATH}"
+        echo "git --no-pager diff ${DIJSON_PATH}"
+        git --no-pager diff "${DIJSON_PATH}"
+        echo "leave loop"
+        break
+    else
+        echo "new docker-images.json not yet written, wait"
+    fi
+    sleep 2
+done
+set -x
+
+# The controller image build requires (only) the newly generated
+# docker-images.json and the side effect of `make set-build-info-constants`.
+# Use separate directory with this more-or-less fresh checkout for the
+# container image build: /lib and /packages etc might get polluted by
+# concurrent tsc / lint tooling, -- these changnes erroenously invalidate the
+# controller image cache layers).
+echo "--- start in background: make build-and-push-controller-image"
+CONTROLLER_BUILD_DIR=$(mktemp -d -t controller-build-dir)
+cp -a .. $CONTROLLER_BUILD_DIR/opstrace
+( cd $CONTROLLER_BUILD_DIR/opstrace && make build-and-push-controller-image ) \
+    &> build-and-push-controller-image.outerr < /dev/null &
+CONTROLLER_IMAGE_BUILD_PID="$!"
+sleep 3 # so that the xtrace output is in this build log section
+
+# The depenencies for this linting effort should all be in the CI
+# container image, i.e. this should not rely on `yarn --frozen-lockfile`
+echo "--- start background process: make lint-codebase "
+# start in sub shell because output redirection otherwise didn't work properly
+( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
+LINT_CODEBASE_PID="$!"
+sleep 1 # so that the xtrace output is in this build log section
+
+
+# TMP STATE: see if this works -- if it does, push to below.
+# Don't have to wait for completion of this, but this is probably finished by
+# now and that feedback is interesting.
+echo "--- wait for background process: make lint-codebase"
+set +e
+wait $LINT_CODEBASE_PID
+LINT_CODEBASE_PID="$?"
+echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
+cat make_lint_codebase.outerr
+if [[ $LINT_CODEBASE_PID != "0" ]]; then
+    echo "make lint-codebase failed, exit 1"
+    exit 1
+fi
+set -e
 
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
@@ -80,7 +148,7 @@ if [[ $YARN_EXIT_CODE != "0" ]]; then
     echo "yarn failed, exit 1"
     exit 1
 fi
-set -x
+set -e
 
 echo "--- start background process: make lint-codebase "
 # start in sub shell because output redirection otherwise didn't work properly
@@ -96,22 +164,6 @@ yarn build:cli &> tsc_cli.outerr < /dev/null &
 TSC_CLI_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
-# If there are any changes to go directory then build and publish the images to
-# docker hub. Update packages/controller-config/docker-images.json to use the
-# newly built image tags in this test run.
-# This step will check various packages and determine if docker images should be
-# rebuilt and pushed.
-# - cortex-proxy-api
-# - loki-proxy-api
-# - app
-# - graphql
-echo "--- Update docker-images.json"
-# Reactivate the NPM package at packages/app (see above).
-mv packages/app/package.json.deactivated packages/app/package.json
-set +x
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-${DIR}/build-docker-images-update-controller-config.sh
-set -x
 
 echo "--- build looker image"
 # looker: does image build? push it, too!
@@ -179,22 +231,35 @@ echo "--- CLI single-binary sanity check"
 ./build/bin/opstrace --version | grep "${CHECKOUT_VERSION_STRING}"
 
 
-# Don't have to wait for completion of this, but this is probably finished
-# by now and
-echo "--- wait for background process: make lint-codebase"
-set +e
-wait $LINT_CODEBASE_PID
-LINT_CODEBASE_PID="$?"
-echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
-cat make_lint_codebase.outerr
-if [[ $LINT_CODEBASE_PID != "0" ]]; then
-    echo "make lint-codebase failed, exit 1"
-    exit 1
-fi
-set -x
-
 echo "--- make rebuild-testrunner-container-images"
 make rebuild-testrunner-container-images
+
+
+echo "--- wait for background process:  make build-and-push-controller-image"
+set +e
+wait $CONTROLLER_IMAGE_BUILD_PID
+CONTROLLER_IMAGE_BUILD_EXIT_CODE="$?"
+echo "make build-and-push-controller-image terminated with code $CONTROLLER_IMAGE_BUILD_EXIT_CODE. stdout/err:"
+cat build-and-push-controller-image.outerr
+if [[ $CONTROLLER_IMAGE_BUILD_EXIT_CODE != "0" ]]; then
+    echo "make build-and-push-controller-image failed, exit 1"
+    exit 1
+fi
+set -e
+
+
+echo "--- wait for background process: build-docker-images-update-controller-config.sh"
+set +e
+wait $DOCKER_IMAGES_BUILD_PID
+DOCKER_IMAGES_BUILD_PID_EXIT_CODE="$?"
+echo "build-docker-images-update-controller-config.sh terminated with code $DOCKER_IMAGES_BUILD_PID_EXIT_CODE. stdout/err:"
+cat build-docker-images-update-controller-config.outerr
+if [[ $DOCKER_IMAGES_BUILD_PID_EXIT_CODE != "0" ]]; then
+    echo "build-docker-images-update-controller-config.sh failed, exit 1"
+    exit 1
+fi
+set -e
+
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
