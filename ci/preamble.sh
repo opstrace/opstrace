@@ -129,17 +129,6 @@ yarn --frozen-lockfile --ignore-optional \
 YARN_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
-# Don't have to wait for completion of this, but this is probably finished by
-# now and that feedback is interesting.
-echo "--- wait for background process: make lint-codebase"
-set +e
-wait $LINT_CODEBASE_PID
-LINT_CODEBASE_PID="$?"
-echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
-cat make_lint_codebase.outerr
-# if this failed: exit 1, but do this only further below.
-set -e
-
 echo "--- wait for background process: yarn"
 # What follows requires the `yarn` dep installation above to have completed.
 set +e
@@ -195,6 +184,23 @@ if [[ $TSC_CLI_EXIT_CODE != "0" ]]; then
     exit 1
 fi
 set -e
+
+
+
+echo "--- wait for background process: make lint-codebase"
+set +e
+wait $LINT_CODEBASE_PID
+LINT_CODEBASE_PID="$?"
+echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
+cat make_lint_codebase.outerr
+set -e
+if [[ $LINT_CODEBASE_PID != "0" ]]; then
+    echo "make lint-codebase failed, exit 1"
+    exit 1
+fi
+
+
+
 echo "--- make cli-pkg (for linux and mac)"
 echo "warning: interleaved output of two commands"
 # note(JP) start in background , then also start the macos build. Each takes
@@ -248,11 +254,6 @@ if [[ $DOCKER_IMAGES_BUILD_PID_EXIT_CODE != "0" ]]; then
 fi
 set -e
 
-# lint output is logged further above, this is here to make sure we exit non-zero
-if [[ $LINT_CODEBASE_PID != "0" ]]; then
-    echo "make lint-codebase failed, exit 1"
-    exit 1
-fi
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
