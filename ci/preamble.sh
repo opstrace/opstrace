@@ -18,6 +18,7 @@ set -o xtrace
 # version we ran. Same for the AWS CLI
 gcloud --version
 aws --version
+echo "--- current working directory: $(pwd)"
 
 make fetch-secrets
 make set-dockerhub-credentials
@@ -49,8 +50,8 @@ make set-build-info-constants
 # `build-docker-images-update-controller-config.sh` is doing so that we can
 # start other operations in this "actual" checkout dir, concurrently.
 echo "--- start in background: regenerate docker-images.json, then build go / app docker images"
-DOCKER_IMAGES_BUILD_DIR=$(mktemp -d -t docker-images-build-dir)
-cp -a .. "$DOCKER_IMAGES_BUILD_DIR/opstrace"
+DOCKER_IMAGES_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-docker-images-XXXX)
+cp -a . "$DOCKER_IMAGES_BUILD_DIR/opstrace"
 export WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH="$(pwd)/new-docker-images.json"
 ( cd "$DOCKER_IMAGES_BUILD_DIR/opstrace/ci" &&  bash build-docker-images-update-controller-config.sh ) \
     &> build-docker-images-update-controller-config.outerr < /dev/null &
@@ -59,13 +60,13 @@ sleep 1 # so that the xtrace output is in this build log section
 
 # Before moving on to starting the controller image build, wait for the new
 # docker-images.json to have been generated.
-DIJSON_PATH="../packages/controller-config/src/docker-images.json"
+DIJSON_PATH="packages/controller-config/src/docker-images.json"
 set +x
 while true
 do
     if test -f "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH"; then
         echo "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH exists. Overwrite the 'old' one."
-        mv -f "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH" ."${DIJSON_PATH}"
+        mv -f "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH" "${DIJSON_PATH}"
         echo "git --no-pager diff ${DIJSON_PATH}"
         git --no-pager diff "${DIJSON_PATH}"
         echo "leave loop"
@@ -84,8 +85,8 @@ set -x
 # concurrent tsc / lint tooling, -- these changnes erroenously invalidate the
 # controller image cache layers).
 echo "--- start in background: make build-and-push-controller-image"
-CONTROLLER_BUILD_DIR=$(mktemp -d -t controller-build-dir)
-cp -a .. $CONTROLLER_BUILD_DIR/opstrace
+CONTROLLER_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-controller-XXXX)
+cp -a . $CONTROLLER_BUILD_DIR/opstrace
 ( cd $CONTROLLER_BUILD_DIR/opstrace && make build-and-push-controller-image ) \
     &> build-and-push-controller-image.outerr < /dev/null &
 CONTROLLER_IMAGE_BUILD_PID="$!"
