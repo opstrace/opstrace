@@ -58,7 +58,7 @@ echo "--- start in background: make lint-codebase "
 # happe: Error: ENOENT: no such file or directory, open '/build/packages/app/src/client/flags.ts'
 LINT_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-lint-XXXX)
 cp -a . "$LINT_BUILD_DIR/opstrace"
-( cd "$LINT_BUILD_DIR/opstrace/ci" &&  make lint-codebase ) \
+( cd "$LINT_BUILD_DIR/opstrace" &&  make lint-codebase ) \
     &> make_lint_codebase.outerr < /dev/null &
 LINT_CODEBASE_PID="$!"
 
