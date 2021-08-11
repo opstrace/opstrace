@@ -41,8 +41,6 @@ make check-license-headers
 echo "--- make set-build-info-constants"
 make set-build-info-constants
 
-
-
 # Soft-link the node_modules dir in the container image to here where the main
 # `package.json` is. Alternative is maybe to create a .yarnrc containing
 # --modules-folder /node_modules. The challenge is that /build is _mounted_
@@ -58,28 +56,6 @@ echo "--- start background process: make lint-codebase "
 ( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
 LINT_CODEBASE_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
-
-
-# TMP STATE: see if this works -- if it does, push to below.
-# Don't have to wait for completion of this, but this is probably finished by
-# now and that feedback is interesting.
-echo "--- wait for background process: make lint-codebase"
-set +e
-wait $LINT_CODEBASE_PID
-LINT_CODEBASE_PID="$?"
-echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
-cat make_lint_codebase.outerr
-if [[ $LINT_CODEBASE_PID != "0" ]]; then
-    echo "make lint-codebase failed, exit 1"
-    exit 1
-fi
-set -e
-
-
-
-
-
-
 
 # Update ../packages/controller-config/docker-images.json to use image tags
 # derived from this current checkout. If images are not yet on docker hub then
@@ -158,6 +134,17 @@ prettier --check 'lib/**/*.ts'
 prettier --check 'packages/**/*.ts'
 prettier --check 'test/**/*.ts'
 
+
+# Don't have to wait for completion of this, but this is probably finished by
+# now and that feedback is interesting.
+echo "--- wait for background process: make lint-codebase"
+set +e
+wait $LINT_CODEBASE_PID
+LINT_CODEBASE_PID="$?"
+echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
+cat make_lint_codebase.outerr
+# if this failed: exit 1, but do this only further below.
+set -e
 
 
 echo "--- wait for yarn background process"
@@ -263,6 +250,11 @@ if [[ $DOCKER_IMAGES_BUILD_PID_EXIT_CODE != "0" ]]; then
 fi
 set -e
 
+# lint output is logged further above, this is here to make sure we exit non-zero
+if [[ $LINT_CODEBASE_PID != "0" ]]; then
+    echo "make lint-codebase failed, exit 1"
+    exit 1
+fi
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
