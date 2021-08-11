@@ -15,7 +15,7 @@ fi
 
 echo "--- creating cluster"
 ./from/opstrace create ${OPSTRACE_CLOUD_PROVIDER} ${OPSTRACE_CLUSTER_NAME} \
-    --instance-config ci/test-upgrade/initial-cluster-config.yaml \
+    --instance-config ${INSTANCE_CONFIG} \
     --write-kubeconfig-file "${OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH}" \
     --log-level=debug \
     --yes

@@ -234,8 +234,14 @@ export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 # Run opstrace installer locally. The installer will deploy the controller into
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
+
+INSTANCE_CONFIG=ci/cluster-config.yaml
+if [ "${BUILDKITE_BRANCH}" != "main" ]; then
+    INSTANCE_CONFIG=ci/cluster-config-prs.yaml
+fi
+
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-    cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
+    cat ${INSTANCE_CONFIG} | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
         --log-level=debug --yes \
         --write-kubeconfig-file "${OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH}"
 

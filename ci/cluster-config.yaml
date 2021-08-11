@@ -1,3 +1,4 @@
+# This configuration is used in the 'Scheduled main builds' Buildkite pipeline.
 tenants:
   - default
 env_label: opstrace-ci

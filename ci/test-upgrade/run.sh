@@ -75,6 +75,10 @@ set -o xtrace
 # config into the test-remote container. This path is set on create-cluster.sh.
 export OPSTRACE_KUBECFG_FILEPATH_ONHOST="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
 
+export INSTANCE_CONFIG=ci/cluster-config.yaml
+if [ "${BUILDKITE_BRANCH}" != "main" ]; then
+    export INSTANCE_CONFIG=ci/cluster-config-prs.yaml
+fi
 
 # For debugging potential issues. `gcloud` is a moving target in our CI and
 # if something fails around the gcloud CLI it's good to know exactly which
