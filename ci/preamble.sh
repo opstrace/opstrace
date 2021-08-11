@@ -47,7 +47,9 @@ make set-build-info-constants
 # `package.json` is. Alternative is maybe to create a .yarnrc containing
 # --modules-folder /node_modules. The challenge is that /build is _mounted_
 # into the container, while /node_modules is already there.
-ln -s /node_modules ./node_modules
+#ln -s /node_modules ./node_modules
+# update: https://github.com/yarnpkg/yarn/issues/8079#issuecomment-622817604 -- huh
+cp -a /node_modules ./node_modules
 
 # The depenencies for this linting effort should all be in the CI
 # container image, i.e. this should not rely on `yarn --frozen-lockfile`
