@@ -98,12 +98,16 @@ RUN npm install -g prettier@2.3.2
 RUN markdownlint --version
 RUN prettier --version
 
-RUN mkdir /tmp/yarninstall
-COPY package.json yarn.lock /tmp/yarninstall/
-# this is really to populate the yarn cache at in
-# the container image -- let's see if that brings a speedup downstream.
+#RUN mkdir /tmp/yarninstall
+COPY package.json yarn.lock /
+
+# This is to populate the yarn cache at /yarncache in the container image and
+# to create a /node_modules dir -- let's see if that brings a speedup
+# downstream.
 RUN mkdir /yarncache && yarn config set cache-folder /yarncache
-RUN cd /tmp/yarninstall && yarn --frozen-lockfile
+RUN cd / && yarn --frozen-lockfile
+
+
 RUN echo "biggest dirs"
 RUN cd / && du -ha . | sort -r -h | head -n 50 || true
 # show which cache dir is really configured
