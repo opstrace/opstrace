@@ -86,7 +86,7 @@ while true
 do
     if test -f "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH"; then
         echo "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH exists. Overwrite the 'old' one."
-        mv -f "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH" "${DIJSON_PATH}"
+        /bin/cp "$WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH" "${DIJSON_PATH}" # overwrite desired
         echo "git --no-pager diff ${DIJSON_PATH}"
         git --no-pager diff "${DIJSON_PATH}"
         echo "leave loop"
