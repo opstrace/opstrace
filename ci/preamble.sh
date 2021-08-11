@@ -111,6 +111,12 @@ cp -a . $CONTROLLER_BUILD_DIR/opstrace
     &> build-and-push-controller-image.outerr < /dev/null &
 CONTROLLER_IMAGE_BUILD_PID="$!"
 
+echo "--- start in background: make rebuild-testrunner-container-images"
+TESTRUNNER_IMG_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-testrunner-XXXX)
+cp -a . $TESTRUNNER_IMG_BUILD_DIR/opstrace
+( cd $TESTRUNNER_IMG_BUILD_DIR/opstrace && make rebuild-testrunner-container-images ) \
+    &> rebuild-testrunner-container-images.outerr < /dev/null &
+TESTRUNNER_IMG_IMAGE_BUILD_PID="$!"
 
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
 # Start this now in the background, redirect output to file. Wait for and
@@ -167,9 +173,6 @@ echo "--- build looker in non-isolated environment (for local dev)"
 # dev, I am used to using a different build method. Which might break when it's
 # not covered by CI.
 ( cd test/test-remote/looker; yarn ; yarn run tsc --project tsconfig.json)
-
-echo "--- make rebuild-testrunner-container-images"
-make rebuild-testrunner-container-images
 
 
 # Need to wait for completion of this before moving on to make cli-pkg
@@ -253,6 +256,20 @@ if [[ $DOCKER_IMAGES_BUILD_PID_EXIT_CODE != "0" ]]; then
     exit 1
 fi
 set -e
+
+
+echo "--- wait for background process: make rebuild-testrunner-container-images"
+set +e
+wait $TESTRUNNER_IMG_IMAGE_BUILD_PID
+TESTRUNNER_IMG_IMAGE_BUILD_EXIT_CODE="$?"
+echo "make rebuild-testrunner-container-images terminated with code $TESTRUNNER_IMG_IMAGE_BUILD_EXIT_CODE. stdout/err:"
+cat rebuild-testrunner-container-images.outerr
+if [[ $TESTRUNNER_IMG_IMAGE_BUILD_EXIT_CODE != "0" ]]; then
+    echo "make rebuild-testrunner-container-images failed, exit 1"
+    exit 1
+fi
+set -e
+
 
 
 # subsequent build steps are supposed to depend on actual build artifacts like
