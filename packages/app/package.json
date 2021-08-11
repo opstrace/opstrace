@@ -22,6 +22,7 @@
     "@schemastore/package": "^0.0.6",
     "@sentry/react": "^6.2.5",
     "@sentry/tracing": "^6.2.5",
+    "@sentry/node": "^6.2.5",
     "@types/axios": "^0.14.0",
     "@types/compression": "^1.7.0",
     "@types/cookie-parser": "^1.4.2",

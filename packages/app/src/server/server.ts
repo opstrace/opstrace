@@ -25,6 +25,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import expressWinston from "express-winston";
 import winston from "winston";
+import * as Sentry from "@sentry/node";
+import { BUILD_INFO } from "@opstrace/utils";
 import helmet from "helmet";
 import compression from "compression";
 import { createLightship } from "lightship";
@@ -64,7 +66,30 @@ const shutdownDelay: number = isDevEnvironment ? 0 : 30000;
 function createServer() {
   const app = express();
 
+  if (
+    !isDevEnvironment ||
+    process.env.OPSTRACE_OVERRIDE_ENABLE_SENTRY === "true"
+  ) {
+    Sentry.init({
+      // todo: this should be passed in as an env var, also considere being a different project/dsn to the react client
+      dsn: "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
+      initialScope: {
+        tags: {
+          "opstrace.branch": BUILD_INFO.BRANCH_NAME,
+          "opstrace.version": BUILD_INFO.VERSION_STRING,
+          "opstrace.commit": BUILD_INFO.COMMIT,
+          "opstrace.build-time": BUILD_INFO.BUILD_TIME_RFC3339,
+          "opstrace.build-hostname": BUILD_INFO.BUILD_HOSTNAME
+        }
+      }
+    });
+
+    // The request handler must be the first middleware on the app
+    app.use(Sentry.Handlers.requestHandler());
+  }
+
   app.use(helmet());
+
   app.use(compression());
   app.use(
     // Everything will be cached clientside for maxAge.
