@@ -80,6 +80,12 @@ GCLOUD_CLI_ZONE="us-west2-a"
 # `opstrace create ...` is going to write to this.
 OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH="${OPSTRACE_BUILD_DIR}/kubeconfig_${OPSTRACE_CLUSTER_NAME}"
 
+# The preamble step generates ${OPSTRACE_PREBUILD_DIR}/new-docker-images.json
+# which is the 'correct' config. The checkout here has the possibly incorrect
+# packages/controller-config/src/docker-images.json. Overwrite with preamble
+# result. Also, consoldiate all this soon!
+cp "${OPSTRACE_PREBUILD_DIR}/new-docker-images.json" packages/controller-config/src/docker-images.json
+
 echo "--- gcloud auth activate-service-account: ${GOOGLE_APPLICATION_CREDENTIALS}"
 # Log in to GCP with service account credentials. Note(JP): the authentication
 # state is I think stored in a well-known location in the home dir.
@@ -343,15 +349,6 @@ retry_check_certificate cortex.system.${OPSTRACE_INSTANCE_DNS_NAME}:443
 retry_check_certificate system.${OPSTRACE_INSTANCE_DNS_NAME}:443
 
 echo "--- check if deployed docker images match docker-images.json"
-#
-# The Buildkite pipeline before starting a step runs a git checkout. The
-# preamble step that sets up docker-images.json runs before the step that call
-# this script. Reconfigure docker-images.json in order to check if the correct
-# docker image tags were deployed.
-#
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-${DIR}/build-docker-images-update-controller-config.sh
-
 source ci/check-deployed-docker-images.sh
 
 # Run the CLI tests before invoking test-remote. This excercises the basic
