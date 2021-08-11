@@ -54,8 +54,12 @@ cp -a /node_modules ./node_modules
 # The depenencies for this linting effort should all be in the CI
 # container image, i.e. this should not rely on `yarn --frozen-lockfile`
 echo "--- start in background: make lint-codebase "
-# start in sub shell because output redirection otherwise didn't work properly
-( make lint-codebase ) &> make_lint_codebase.outerr < /dev/null &
+# Unique directory, because when this overlaps with prettier then this may
+# happe: Error: ENOENT: no such file or directory, open '/build/packages/app/src/client/flags.ts'
+LINT_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-lint-XXXX)
+cp -a . "$LINT_BUILD_DIR/opstrace"
+( cd "$LINT_BUILD_DIR/opstrace/ci" &&  make lint-codebase ) \
+    &> make_lint_codebase.outerr < /dev/null &
 LINT_CODEBASE_PID="$!"
 
 # Update ../packages/controller-config/docker-images.json to use image tags
@@ -203,7 +207,6 @@ make cli-pkg-macos &
 _PID2="$!"
 # wait for these two background processes to exit.
 wait $_PID1 $_PID2
-
 
 # Note(JP): keep these ideas here for the moment.
 # First, set yarn cache to be shared across all CI runs.
