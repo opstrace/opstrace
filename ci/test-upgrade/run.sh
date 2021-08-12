@@ -6,6 +6,8 @@ make fetch-secrets
 
 make testupgrade-fetch-cli-artifacts
 
+source ci/utils.sh
+
 echo "--- setting up dns-service credentials"
 # The `access.jwt` file is what the CLI is going to look for.
 cp secrets/dns-service-magic-id-token-for-ci access.jwt
@@ -47,11 +49,11 @@ teardown() {
     # Revoke script-global errexit option.
     set +e
 
-    # TODO: When cluster creation failed then maybe the k8s cluster was set up
+    # When cluster creation failed then maybe the k8s cluster was set up
     # correctly, but the deployment phase failed. In that case the command
     # `opstrace create` below fails, beaming us to right here, w/o kubectl
     # having been configured against said k8s cluster ..
-    #configure_kubectl_aws_or_gcp
+    configure_kubectl_aws_or_gcp
 
     echo "--- create cluster artifacts"
     # rely on +e before.
