@@ -60,6 +60,12 @@ const REDIS_PASSWORD = isDevEnvironment
   ? parseEnv("REDIS_PASSWORD", String, undefined)
   : parseRequiredEnv("REDIS_PASSWORD", String);
 
+const ENABLE_SENTRY_FOR_LOCALHOST = parseEnv(
+  "ENABLE_SENTRY_FOR_LOCALHOST",
+  String,
+  "false"
+);
+
 const envars = {
   PORT,
   REDIS_HOST,
@@ -71,7 +77,8 @@ const envars = {
   COOKIE_SECRET,
   GRAPHQL_ENDPOINT_HOST,
   GRAPHQL_ENDPOINT_PORT,
-  HASURA_GRAPHQL_ADMIN_SECRET
+  HASURA_GRAPHQL_ADMIN_SECRET,
+  ENABLE_SENTRY_FOR_LOCALHOST
 };
 
 export default envars;

@@ -66,10 +66,7 @@ const shutdownDelay: number = isDevEnvironment ? 0 : 30000;
 function createServer() {
   const app = express();
 
-  if (
-    !isDevEnvironment ||
-    process.env.OPSTRACE_OVERRIDE_ENABLE_SENTRY === "true"
-  ) {
+  if (!isDevEnvironment || env.ENABLE_SENTRY_FOR_LOCALHOST === "true") {
     Sentry.init({
       // todo: this should be passed in as an env var, also considere being a different project/dsn to the react client
       dsn: "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
@@ -86,6 +83,8 @@ function createServer() {
 
     // The request handler must be the first middleware on the app
     app.use(Sentry.Handlers.requestHandler());
+  } else {
+    log.info("Sentry not enabled as running on Localhost");
   }
 
   app.use(helmet());
@@ -137,6 +136,9 @@ function createServer() {
   //     return;
   //   }
   // });
+
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
 
   // apply post api middleware
   app.use(catchErrorsMiddleware);

@@ -84,6 +84,7 @@ function getClientEnvironment(publicUrl) {
             ? undefined
             : process.env.EARLY_PREVIEW,
         BUILDKITE: process.env.BUILDKITE,
+        ENABLE_SENTRY_FOR_LOCALHOST: process.env.ENABLE_SENTRY_FOR_LOCALHOST,
         // Always set this to null in the client
         HASURA_GRAPHQL_ADMIN_SECRET: null,
         // Useful for determining whether we’re running in production mode.
