@@ -27,6 +27,72 @@ import { Tenant } from "@opstrace/tenants";
 import { KubeConfig } from "@kubernetes/client-node";
 import { getTenantNamespace, getControllerConfig } from "../../helpers";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
+import axios, { AxiosResponse } from "axios";
+import { log } from "@opstrace/utils";
+
+// Variable to store the cached GKE version to avoid spamming the Kubernetes API
+// server.
+let cachedGKEVersion: {
+  major: string | undefined;
+  minor: string | undefined;
+} = {
+  major: undefined,
+  minor: undefined
+};
+
+// Checks if the API server version matches the given major and minor version.
+function* isGKEVersion(
+  kubeConfig: KubeConfig,
+  major: string,
+  minor: string
+): Generator<unknown, boolean, AxiosResponse> {
+  // Fetch GKE version and cache it.
+  if (
+    cachedGKEVersion.major === undefined ||
+    cachedGKEVersion.minor === undefined
+  ) {
+    if (kubeConfig.getCurrentCluster() === null) {
+      throw new Error(
+        `kubeconfig not configured properly, it is missing a cluster definition`
+      );
+    }
+    const server = kubeConfig.getCurrentCluster()?.server;
+    const endpoint = `${server}/version`;
+
+    const res: AxiosResponse<string> = yield axios.get(endpoint, {
+      timeout: 10000
+    });
+
+    if (res.status !== 200) {
+      throw new Error(
+        `failed to fetch Kubernetes API server version: ${JSON.stringify(res)}`
+      );
+    }
+
+    cachedGKEVersion = JSON.parse(res.data);
+    log.info(
+      `got Kubernetes API server version: ${JSON.stringify(cachedGKEVersion)}`
+    );
+  }
+
+  if (cachedGKEVersion.major === undefined) {
+    throw new Error(
+      `invalid GKE version, missing 'major' field: ${JSON.stringify(
+        cachedGKEVersion
+      )}`
+    );
+  }
+
+  if (cachedGKEVersion.minor === undefined) {
+    throw new Error(
+      `invalid GKE version, missing 'minor' field: ${JSON.stringify(
+        cachedGKEVersion
+      )}`
+    );
+  }
+
+  return cachedGKEVersion.major === major && cachedGKEVersion.minor === minor;
+}
 
 export function SystemLogAgentResources(
   state: State,
@@ -47,7 +113,7 @@ export function SystemLogAgentResources(
 
   // We need to use the CRI parser on GKE 1.19+
   let parser = "";
-  if (target === "gcp") {
+  if (target === "gcp" && !isGKEVersion(kubeConfig, "1", "18+")) {
     parser = `  <parse>
     @type cri
     merge_cri_fields false
