@@ -77,7 +77,13 @@ export TENANT_DEFAULT_CORTEX_API_BASE_URL="https://cortex.default.${OPSTRACE_INS
 export TENANT_DEFAULT_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
 export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
 source ci/invoke-looker.sh
+cat /build/looker*report.json
+mkdir -p /build/bk-artifacts/looker
+cp -av looker*log /build/bk-artifacts/looker || true
+cp -av /build/looker*report.json /build/bk-artifacts/looker || true
 
+echo -e "\n\n Current set of artifacts:"
+tree /build/bk-artifacts
 
 # Delayed exit if `make test-browser` failed
 if [ "${EXITCODE_MAKE_TEST_BROWSER}" -ne 0 ]; then
