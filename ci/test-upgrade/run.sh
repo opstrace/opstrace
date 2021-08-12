@@ -39,7 +39,13 @@ teardown() {
     LAST_EXIT_CODE=$?
 
     make testupgrade-create-cluster-artifacts
-    make testupgrade-teardown && exit ${LAST_EXIT_CODE}
+    make testupgrade-teardown
+
+    # Copy CLI log files "again" to artifact collection dir (for `destroy` log).
+    # do not exit when this fails (rely on +e before).
+    cp -vn opstrace_cli_*log /build/bk-artifacts || true
+
+    exit ${LAST_EXIT_CODE}
 }
 trap "teardown" EXIT
 
