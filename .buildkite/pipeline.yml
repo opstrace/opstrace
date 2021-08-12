@@ -69,15 +69,15 @@ steps:
       # Use the Opstrace CLI artifact built from the PR branch to upgrade the
       # cluster.
       OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
-      OPSTRACE_CLUSTER_NAME: "prs-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
-      OPSTRACE_BUILD_DIR: "/tmp/builddir-pr-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-upgr-g"
+      OPSTRACE_BUILD_DIR: "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-upgr-g"
       OPSTRACE_CLOUD_PROVIDER: "gcp"
       GCLOUD_CLI_REGION: "us-west2"
       GCLOUD_CLI_ZONE: "us-west2-a"
     command:
       - bash ci/check-if-docs-pr.sh || make ci-test-upgrade-run-sh
     artifact_paths:
-      - "/tmp/builddir-prs-upgr-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g/bk-artifacts/**/*"
+      - "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-upgr-g/bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"
     key: "cleanup-tmp"
     depends_on:
