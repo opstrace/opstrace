@@ -46,6 +46,9 @@ function* isGKEVersion(
   major: string,
   minor: string
 ): Generator<unknown, boolean, AxiosResponse> {
+  log.info(
+    `checking if GKE version is major=${major} minor=${minor} cachedVersion=${cachedGKEVersion}`
+  );
   // Fetch GKE version and cache it.
   if (
     cachedGKEVersion.major === undefined ||
@@ -119,6 +122,7 @@ export function SystemLogAgentResources(
     merge_cri_fields false
   </parse>`;
   }
+  log.info(`fluentd parser: ${parser}`);
 
   collection.add(
     new ConfigMap(
