@@ -52,7 +52,8 @@ echo "--- Exit status of make test-remote-ui-api: ${EXITCODE_MAKE_TESTREMOTE_UI_
 
 # Copy entire `test-remote-artifacts` directory; this should include
 # uishot-*png screenshots fromn test-remote-ui-api
-cp -a "${OPSTRACE_BUILD_DIR}/test-remote-artifacts" /build/bk-artifacts || true
+cp -a --verbose "${OPSTRACE_BUILD_DIR}/test-remote-artifacts" /build/bk-artifacts || true
+
 
 echo "+++ run test-browser"
 set +e
@@ -61,8 +62,11 @@ EXITCODE_MAKE_TEST_BROWSER=$?
 set -e
 echo "--- Exit status of make test-browser: ${EXITCODE_MAKE_TEST_BROWSER}"
 
-mkdir -p /build/bk-artifacts/browser-test-result || true
-mv browser-test-results /build/bk-artifacts/ || true
+
+# Copy entire `browser-test-results` directory
+cp -a --verbose "${OPSTRACE_BUILD_DIR}/browser-test-results" /build/bk-artifacts || true
+
+mv browser-test-results /build/bk-artifacts || true
 
 echo "+++ run looker tests"
 
