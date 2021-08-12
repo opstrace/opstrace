@@ -36,18 +36,38 @@ start_data_collection_deployment_loop() {
 }
 
 teardown() {
-    LAST_EXIT_CODE=$?
+    # Store exit code of the last failed command (could be of `test-remote` or
+    # anything before that), or 0 if everything before teardown succeeded.
+    LAST_EXITCODE_BEFORE_TEARDOWN=$?
 
-    make testupgrade-create-cluster-artifacts
+    echo "+++ Exit status before entering teardown(): $LAST_EXITCODE_BEFORE_TEARDOWN"
+
+    echo "--- initiate teardown"
+
+    # Revoke script-global errexit option.
+    set +e
+
+    # TODO: When cluster creation failed then maybe the k8s cluster was set up
+    # correctly, but the deployment phase failed. In that case the command
+    # `opstrace create` below fails, beaming us to right here, w/o kubectl
+    # having been configured against said k8s cluster ..
+    #configure_kubectl_aws_or_gcp
+
+    echo "--- create cluster artifacts"
+    # rely on +e before.
+    source ci/create-cluster-artifacts.sh
+
     make testupgrade-teardown
 
     # Copy CLI log files "again" to artifact collection dir (for `destroy` log).
     # do not exit when this fails (rely on +e before).
     cp -vn opstrace_cli_*log ${OPSTRACE_ARTIFACT_DIR} || true
 
-    exit ${LAST_EXIT_CODE}
+    exit ${LAST_EXITCODE_BEFORE_TEARDOWN}
 }
 trap "teardown" EXIT
+
+set -o xtrace
 
 # Makefile logic uses `OPSTRACE_KUBECFG_FILEPATH_ONHOST` to mount kubectl
 # config into the test-remote container. This path is set on create-cluster.sh.
