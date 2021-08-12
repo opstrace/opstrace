@@ -1,4 +1,6 @@
 # to be `source`d as part of teardown
+# assume that current working directory is OPSTRACE_BUILD_DIR, i.e.
+# the directory where the opstrace CLI is executed.
 
 docker logs --since "2h" unbound 2> ${OPSTRACE_ARTIFACT_DIR}/unbound.log
 
