@@ -7,12 +7,15 @@ steps:
     key: "preamble"
     env:
       OPSTRACE_BUILD_DIR: "${OPSTRACE_PREBUILD_DIR}"
+      OPSTRACE_ARTIFACT_DIR: "${OPSTRACE_PREBUILD_DIR}/bk-artifacts"
     command:
       - docker ps
       - bash ci/fetch-main.sh
       - echo "--- make rebuild-ci-container-image"
       - make rebuild-ci-container-image
       - make ci-preamble
+    artifact_paths:
+      - "${OPSTRACE_PREBUILD_DIR}/bk-artifacts/**/*"
   - label: "🔨 check docs"
     key: "check-docs"
     depends_on:
