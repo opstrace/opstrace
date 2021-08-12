@@ -112,12 +112,6 @@ teardown() {
     # Revoke script-global errexit option.
     set +e
 
-    # make sure that looker-related artifacts are collected, but don't fail
-    # when these files do not exist (rely on +e before)
-    cat /build/looker*report.json
-    cp looker*log /build/bk-artifacts
-    cp /build/looker*report.json /build/bk-artifacts
-
     # When cluster creation failed then maybe the k8s cluster was set up
     # correctly, but the deployment phase failed. In that case the command
     # `opstrace create` below fails, beaming us to right here, w/o kubectl
