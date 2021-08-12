@@ -1,6 +1,6 @@
-# to be `source`d as part of teardown after test-remote
+# to be `source`d as part of teardown
 
-docker logs --since "2h" unbound 2> /build/bk-artifacts/unbound.log
+docker logs --since "2h" unbound 2> ${OPSTRACE_ARTIFACT_DIR}/unbound.log
 
 kubectl describe all --all-namespaces 2> kubectl_describe_all.stderr > kubectl_describe_all-${OPSTRACE_CLUSTER_NAME}.log
 
@@ -53,6 +53,6 @@ do
     kubectl --namespace=ingress describe ${RESOURCE} > clusterlogs_${RESOURCE}-${OPSTRACE_CLUSTER_NAME}-ingress.log
 done
 
-cp opstrace_cli_*log /build/bk-artifacts
-cp kubectl_* /build/bk-artifacts
-cp clusterlogs_* /build/bk-artifacts
+cp opstrace_cli_*log ${OPSTRACE_ARTIFACT_DIR}
+cp kubectl_* ${OPSTRACE_ARTIFACT_DIR}
+cp clusterlogs_* ${OPSTRACE_ARTIFACT_DIR}

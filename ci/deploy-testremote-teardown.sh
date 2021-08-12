@@ -170,7 +170,7 @@ teardown() {
 
     # Copy CLI log files "again" to artifact collection dir (for `destroy` log).
     # do not exit when this fails (rely on +e before).
-    cp -n opstrace_cli_*log /build/bk-artifacts
+    cp -n opstrace_cli_*log ${OPSTRACE_ARTIFACT_DIR}
 
     # See opstrace-prelaunch/issues/323
     # and opstrace-prelaunch/issues/1077
@@ -206,7 +206,6 @@ set -o xtrace
 # version we ran.
 gcloud --version
 
-mkdir -p "${OPSTRACE_BUILD_DIR}/bk-artifacts"
 
 echo "--- file system usage after entering CI container"
 df -h
@@ -245,7 +244,7 @@ if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
     # `make cli-publish-to-s3`.
     FNAME="cli-aws-mutating-api-calls-${CHECKOUT_VERSION_STRING}.txt" && \
         bash ci/gen-cli-aws-mutating-api-calls-list.sh "${FNAME}" && \
-        cp "${FNAME}" /build/bk-artifacts && \
+        cp "${FNAME}" ${OPSTRACE_ARTIFACT_DIR} && \
         cp "${FNAME}" ${OPSTRACE_PREBUILD_DIR}
 else
     # Create Opstrace instance in GCP. Use custom_dns_name and

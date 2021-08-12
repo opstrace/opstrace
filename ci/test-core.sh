@@ -52,7 +52,7 @@ echo "--- Exit status of make test-remote-ui-api: ${EXITCODE_MAKE_TESTREMOTE_UI_
 
 # Copy entire `test-remote-artifacts` directory; this should include
 # uishot-*png screenshots fromn test-remote-ui-api
-cp -a --verbose "${OPSTRACE_BUILD_DIR}/test-remote-artifacts" /build/bk-artifacts || true
+cp -a --verbose "${OPSTRACE_BUILD_DIR}/test-remote-artifacts" ${OPSTRACE_ARTIFACT_DIR} || true
 
 
 echo "+++ run test-browser"
@@ -64,9 +64,9 @@ echo "--- Exit status of make test-browser: ${EXITCODE_MAKE_TEST_BROWSER}"
 
 
 # Copy entire `browser-test-results` directory
-cp -a --verbose "${OPSTRACE_BUILD_DIR}/browser-test-results" /build/bk-artifacts || true
+cp -a --verbose "${OPSTRACE_BUILD_DIR}/browser-test-results" ${OPSTRACE_ARTIFACT_DIR} || true
 
-mv browser-test-results /build/bk-artifacts || true
+mv browser-test-results ${OPSTRACE_ARTIFACT_DIR} || true
 
 echo "+++ run looker tests"
 
@@ -82,12 +82,12 @@ export TENANT_DEFAULT_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token
 export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
 source ci/invoke-looker.sh
 cat /build/looker*report.json
-mkdir -p /build/bk-artifacts/looker
-cp -av looker*log /build/bk-artifacts/looker || true
-cp -av /build/looker*report.json /build/bk-artifacts/looker || true
+mkdir -p ${OPSTRACE_ARTIFACT_DIR}/looker
+cp -av looker*log ${OPSTRACE_ARTIFACT_DIR}/looker || true
+cp -av /build/looker*report.json ${OPSTRACE_ARTIFACT_DIR}/looker || true
 
 echo -e "\n\n Current set of artifacts:"
-tree /build/bk-artifacts
+tree ${OPSTRACE_ARTIFACT_DIR}
 
 # Delayed exit if `make test-browser` failed
 if [ "${EXITCODE_MAKE_TEST_BROWSER}" -ne 0 ]; then
