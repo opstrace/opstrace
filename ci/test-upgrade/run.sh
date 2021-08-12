@@ -43,7 +43,7 @@ teardown() {
 
     # Copy CLI log files "again" to artifact collection dir (for `destroy` log).
     # do not exit when this fails (rely on +e before).
-    cp -vn opstrace_cli_*log /build/bk-artifacts || true
+    cp -vn opstrace_cli_*log ${OPSTRACE_ARTIFACT_DIR} || true
 
     exit ${LAST_EXIT_CODE}
 }
@@ -59,7 +59,6 @@ export OPSTRACE_KUBECFG_FILEPATH_ONHOST="${OPSTRACE_BUILD_DIR}/kubeconfig.cfg"
 # version we ran.
 gcloud --version
 
-mkdir -p "${OPSTRACE_BUILD_DIR}/bk-artifacts"
 
 if [[ "${CI_DATA_COLLECTION}" == "enabled" ]]; then
     echo "--- setup: start_data_collection_deployment_loop"

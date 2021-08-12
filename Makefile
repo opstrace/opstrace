@@ -495,6 +495,7 @@ ci-%: checkenv-builddir
 		echo "warning: build dir ${OPSTRACE_BUILD_DIR} already exists"; \
 	fi
 	mkdir -p "${GOLANG_BUILD_CACHE}"
+	mkdir -p "${OPSTRACE_ARTIFACT_DIR}"
 	mkdir -p "${OPSTRACE_BUILD_DIR}" && \
 	./ci/rsync.sh -avr \
 		--exclude='*node_modules*' \
