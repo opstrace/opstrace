@@ -244,6 +244,17 @@ export function* cortexOperatorPreamble(
     die(`could not find Opstrace controller deployment`);
   }
 
+  const cortexOperator = state.kubernetes.cluster.Deployments.resources.find(
+    d =>
+      d.namespace === "cortex-operator-system" &&
+      d.name === "cortex-operator-controller-mananager"
+  );
+
+  if (cortexOperator !== undefined) {
+    log.debug(`cortex-operator already deployed, skip ownership transfer`);
+    return;
+  }
+
   // disable opstrace controller to be able to transfer ownership of cortex
   // deployment to the cortex-operator; it will be enabled later when the
   // upgrade command deploys the new controller image.
