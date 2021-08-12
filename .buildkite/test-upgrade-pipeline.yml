@@ -1,4 +1,5 @@
 env:
+  OPSTRACE_BUILD_STRING: "upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}"
   CHECKOUT_VERSION_STRING: "${BUILDKITE_COMMIT:0:8}-ci"
 steps:
   - label: "🔨 preamble"
@@ -10,8 +11,9 @@ steps:
   - label: "🔨 main upgrade test (AWS)"
     key: "maintest-upgrade-aws"
     env:
-      OPSTRACE_CLUSTER_NAME: "upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
-      OPSTRACE_BUILD_DIR: "/tmp/builddir-upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
+      OPSTRACE_CLUSTER_NAME: "${OPSTRACE_BUILD_STRING}-a"
+      OPSTRACE_BUILD_DIR: "/tmp/builddir-${OPSTRACE_BUILD_STRING}-a"
+      OPSTRACE_ARTIFACT_DIR: "/tmp/builddir-${OPSTRACE_BUILD_STRING}-a/bk-artifacts"
       OPSTRACE_CLOUD_PROVIDER: "aws"
       AWS_CLI_REGION: "us-west-2"
     depends_on:
@@ -19,12 +21,13 @@ steps:
     command:
       - make ci-test-upgrade-run-sh
     artifact_paths:
-      - "/tmp/builddir-upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a/bk-artifacts/**/*"
+      - "/tmp/builddir-${OPSTRACE_BUILD_STRING}-a/bk-artifacts/**/*"
   - label: "🔨 main upgrade test (GCP)"
     key: "maintest-upgrade-gcp"
     env:
-      OPSTRACE_CLUSTER_NAME: "upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
-      OPSTRACE_BUILD_DIR: "/tmp/builddir-upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g"
+      OPSTRACE_CLUSTER_NAME: "${OPSTRACE_BUILD_STRING}-g"
+      OPSTRACE_BUILD_DIR: "/tmp/builddir-${OPSTRACE_BUILD_STRING}-g"
+      OPSTRACE_ARTIFACT_DIR: "/tmp/builddir-${OPSTRACE_BUILD_STRING}-g/bk-artifacts"
       OPSTRACE_CLOUD_PROVIDER: "gcp"
       GCLOUD_CLI_REGION: "us-west2"
       GCLOUD_CLI_ZONE: "us-west2-a"
@@ -33,4 +36,4 @@ steps:
     command:
       - make ci-test-upgrade-run-sh
     artifact_paths:
-      - "/tmp/builddir-upgrade-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-g/bk-artifacts/**/*"
+      - "/tmp/builddir-${OPSTRACE_BUILD_STRING}-g/bk-artifacts/**/*"
