@@ -270,8 +270,7 @@ fi
 set -e
 
 # Collect the stdout/err files of the individual processes as buildkite artifacts
-cp -av ./*.outerr ${OPSTRACE_ARTIFACT_DIR}/looker || true
-
+cp -av ./*.outerr ${OPSTRACE_ARTIFACT_DIR} || true
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
