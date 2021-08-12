@@ -14,9 +14,10 @@ FROM debian:buster-slim
 # - gettext-base for envsubst
 # - uuid-runtime for uuidgen used by ci_events
 # - netcat for debugging
+# - tree, because we love nature
 RUN apt-get update && apt-get install -y -q --no-install-recommends \
     uuid-runtime rsync curl gnupg2 git make jq moreutils netcat-openbsd \
-    build-essential gettext-base ca-certificates unzip less
+    build-essential gettext-base ca-certificates unzip less tree
 
 RUN apt-get install hub -y
 # gcloud CLI, for managing GCP
