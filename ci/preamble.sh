@@ -269,6 +269,8 @@ if [[ $TESTRUNNER_IMG_IMAGE_BUILD_EXIT_CODE != "0" ]]; then
 fi
 set -e
 
+
+echo "--- copy files to artifact directory"
 # Collect the stdout/err files of the individual processes as buildkite artifacts
 cp -av ./*.outerr ${OPSTRACE_ARTIFACT_DIR} || true
 
