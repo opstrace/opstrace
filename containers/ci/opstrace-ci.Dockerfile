@@ -112,18 +112,13 @@ ARG CIUID=1000
 ARG CIGID=1000
 
 # Switch user to the same user that is used when running the image.
-# This is so that /yarncache and /node_modules contents are writable.
-RUN mkdir /yarncache && chmod 777 /yarncache
+# This is so that /node_modules is writable.
 RUN mkdir /node_modules && chmod 777 /node_modules
 RUN echo "set up user $CIUNAME / $CIUID in group $CIGID"
 RUN groupadd -g $CIGID -o $CIUNAME
 RUN useradd -m -u $CIUID -g $CIGID -o -s /bin/bash $CIUNAME
 USER $CIUNAME
 
-# This is to populate the yarn cache at /yarncache in the container image and
-# to create a /node_modules dir -- let's see if that brings a speedup
-# downstream.
-RUN yarn config set cache-folder /yarncache
 RUN cd / && yarn --frozen-lockfile
 # check if this command works
 RUN yarn wsrun -c lint
@@ -132,7 +127,3 @@ RUN echo "biggest dirs"
 RUN cd / && du -ha . | sort -r -h | head -n 50 || true
 # show which cache dir is really configured
 RUN yarn cache dir
-
-# Allow for a non-root user to write to cache dir as well as to node_modules
-#RUN chmod -R g+rwx,o+rwx /yarncache
-#RUN chmod -R g+rwx,o+rwx /node_modules

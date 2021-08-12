@@ -129,7 +129,6 @@ echo "--- start in background: yarn --frozen-lockfile"
 # container image is not rebuilt).
 #mv packages/app/package.json packages/app/package.json.deactivated
 rm -rf packages/app
-yarn config set cache-folder /yarncache # this is pre-baked into the ci container image
 yarn --frozen-lockfile --ignore-optional \
     &> preamble_yarn_install.outerr < /dev/null &
 YARN_PID="$!"
