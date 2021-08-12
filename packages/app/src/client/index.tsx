@@ -23,12 +23,14 @@ import { Integrations } from "@sentry/tracing";
 import { isLocalhost } from "./serviceWorker";
 import App from "./app";
 
-if (!isLocalhost || process.env.OPSTRACE_OVERRIDE_ENABLE_SENTRY === "true") {
+if (!isLocalhost || process.env.ENABLE_SENTRY_FOR_LOCALHOST === "true") {
   Sentry.init({
     // todo: this should be passed in as an ENV VAR
     dsn: "https://28a6d713adde403aaaab7c7cc36f0383@o476375.ingest.sentry.io/5529515",
     integrations: [new Integrations.BrowserTracing()]
   });
+} else {
+  console.log("Sentry not enabled as running on Localhost");
 }
 
 const root = document.getElementById("root");
