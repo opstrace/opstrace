@@ -25,7 +25,7 @@ import { Button } from "client/components/Button";
 import { Typography } from "client/components/Typography";
 import { ErrorView } from "client/components/Error";
 
-export const AccessDeniedPage = ({ data }: { data: {} }) => {
+export const AccessDeniedPage = () => {
   const { user, logout } = useAuth0();
 
   const title = user ? `Access denied for ${user.email}.` : "Access denied.";
@@ -61,13 +61,6 @@ export const AccessDeniedPage = ({ data }: { data: {} }) => {
           </Button>
         </Box>
       </ErrorView>
-
-      {process.env.BUILDKITE === "true" && (
-        <ErrorView title="" subheader="" actions={null} maxWidth={800}>
-          <Typography variant="h5">Error response</Typography>
-          <pre>{JSON.stringify(data, null, 1)}</pre>
-        </ErrorView>
-      )}
     </Page>
   );
 };
