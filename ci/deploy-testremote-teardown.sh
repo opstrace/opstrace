@@ -177,11 +177,11 @@ teardown() {
     # do not exit when this fails (rely on +e before).
     echo "--- invoke bucket deletion"
     if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
-        bash ci/delete-empty-ci-buckets-aws.sh
+        python3 ci/delete-empty-ci-buckets-aws.py
     else
         bash ci/delete-empty-ci-buckets.sh
     fi
-    echo "* exit code of delete-empty-ci-buckets-*.sh: $?"
+    echo "* exit code of delete-empty-ci-buckets: $?"
 
     if [ "${EXITCODE_DESTROY}" -ne 0 ]; then
         echo "teardown() not yet finished, destroy failed. Exit with exitcode of destroy"
