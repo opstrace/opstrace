@@ -104,7 +104,16 @@ function createAuthHandler(): express.Router {
 
         user = createResponse.data?.insert_user_preference_one?.user as any;
       } else if (!user) {
-        return next(new GeneralServerError(401, "Unauthorized"));
+        // Note(JP): this means that there is already at least one user in the
+        // instance-local user database, and the user that tries to currently
+        // log in is not among them. Return a 403 response (which means:
+        // unauthorized, forbidden).
+        log.info(
+          `login: user ${email} unknown, already got ${activeUserCount} users, access denied`
+        );
+        return next(
+          new GeneralServerError(403, "access denied: not yet white-listed")
+        );
       } else {
         await graphqlClient.UpdateUserSession({
           id: user.id,
