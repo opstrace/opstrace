@@ -60,11 +60,10 @@
  */
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { pick } from "ramda";
 import { useDispatch } from "react-redux";
 import { Switch, Route, Redirect } from "react-router";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import useAxios from "axios-hooks";
 
 import { setCurrentUser } from "state/user/actions";
@@ -78,7 +77,8 @@ import {
   LoadingPage,
   LoginPage,
   LogoutPage,
-  AccessDeniedPage
+  AccessDeniedPage,
+  LoginFailedPage
 } from "client/views/session";
 
 const DEFAULT_PATHNAME = "/";
@@ -231,36 +231,102 @@ const CreateSession = ({
   userLoadedSuccess: Function;
 }) => {
   const { getAccessTokenSilently } = useAuth0();
-  const [errorResponse, setErrorResponse] = useState<{} | null>(null);
+  const [loginErrorString, setLoginErrorString] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState<boolean | null>(null);
 
   useEffect(() => {
     (async () => {
+      let at: string;
       try {
-        const accessToken = await getAccessTokenSilently({
+        // Note(JP): `getAccessTokenSilently()` must have its own local error
+        // handler. It involves a number of HTTP requests behind the scenes.
+        // When this fails the login sequence failed and we should show a
+        // "login failed" error, exposing the detail, offering a button "Try
+        // again"
+        at = await getAccessTokenSilently({
           audience: AUTH0_AUDIENCE,
           opstraceClusterName: CLUSTER_NAME
         });
+      } catch (err) {
+        setLoginErrorString(`could not get access token: ${err.message}`);
+        return;
+      }
 
-        const response = await axios.request({
+      let resp: AxiosResponse<any>;
+      try {
+        // Note(JP): this request here must have its own local error handler.
+        // An actual "access denied" error is just one of many expected
+        // outcomes: when a 403 response comes in.
+        resp = await axios.request({
           method: "POST",
           url: "/_/auth/session",
           headers: {
-            Authorization: `Bearer ${accessToken}`
+            Authorization: `Bearer ${at}`
           }
         });
+      } catch (err) {
+        if (!axios.isAxiosError(err)) {
+          // re-throw programming errors
+          throw err;
+        }
 
-        if (response.data?.currentUserId)
-          userLoadedSuccess(response.data.currentUserId, true);
-        else setErrorResponse({ message: "Failed to create Opstrace Session" });
-      } catch (e) {
-        if (e.response)
-          setErrorResponse(pick(["data", "status", "statusText"])(e.response));
-        else
-          setErrorResponse({ message: e.message || "Unknown error occured" });
+        if (err.response) {
+          // non-2xx responses
+          const r = err.response;
+          if (r.status === 403) {
+            // Display the rather specific 'access denied' error page only when
+            // we get the unambiguous signal; which is a 403 response. note:
+            // the response body may contain a reason -- log this?
+            setAccessDenied(true);
+            return;
+          }
+
+          // TODO: expose parts of the response body if structured err info is
+          // present, in expected format.
+          setLoginErrorString(
+            `POST to /_/auth/session got an unexpected response with status ${r.status}`
+          );
+          return;
+        }
+
+        // timeout errors, transient errors etc
+        // maybe even body deserialization errors when resp headers and body
+        // mismatch
+        setLoginErrorString(`POST to /_/auth/session failed: ${err.message}`);
+        return;
       }
-    })();
-  }, [getAccessTokenSilently, userLoadedSuccess, setErrorResponse]);
 
-  if (errorResponse) return <AccessDeniedPage data={errorResponse} />;
-  else return <LoadingPage stage="create-session" />;
+      // When we are here, `resp` should not be `undefined` (rely on axios
+      // error handling to ensure that. Filter for expected response body
+      // structure Axios does the JSON deserialization for us.
+      if (resp.data && resp.data.currentUserId) {
+        userLoadedSuccess(resp.data.currentUserId, true);
+        return;
+      }
+
+      // The response body did not have the expected structure.
+      setLoginErrorString(
+        `POST to /_/auth/session got 2xx response with unexpected body: ${JSON.stringify(
+          resp.data,
+          null,
+          2
+        ).slice(0, 500)}`
+      );
+    })();
+  }, [
+    getAccessTokenSilently,
+    userLoadedSuccess,
+    setLoginErrorString,
+    setAccessDenied
+  ]);
+
+  if (loginErrorString) {
+    return <LoginFailedPage errorString={loginErrorString} />;
+  }
+
+  if (accessDenied) {
+    return <AccessDeniedPage />;
+  }
+
+  return <LoadingPage stage="create-session" />;
 };

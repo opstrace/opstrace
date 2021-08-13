@@ -18,3 +18,4 @@ export { LoadingPage } from "./Loading";
 export { LoginPage } from "./Login";
 export { LogoutPage } from "./Logout";
 export { AccessDeniedPage } from "./AccessDenied";
+export { LoginFailedPage } from "./LoginFailed";
