@@ -101,7 +101,6 @@ function createAuthHandler(): express.Router {
           username,
           avatar
         });
-
         user = createResponse.data?.insert_user_preference_one?.user as any;
       } else if (!user) {
         // Note(JP): this means that there is already at least one user in the
@@ -115,15 +114,28 @@ function createAuthHandler(): express.Router {
           new GeneralServerError(403, "access denied: not yet white-listed")
         );
       } else {
+        log.info(`login: user ${email} known, update session`);
         await graphqlClient.UpdateUserSession({
           id: user.id,
           timestamp: new Date().toISOString()
         });
       }
 
-      // block login attempt if we somehow got to here without a valid active user
-      if (!user || !user.active)
-        return next(new GeneralServerError(401, "Unauthorized"));
+      if (!user.active)
+        return next(
+          new GeneralServerError(403, "access denied: user not active")
+        );
+
+      // Note(JP): this is legacy code with "block login attempt if we somehow
+      // got to here without a valid active user" -- this should however not be
+      // responded to with a definite 401 (which means: invalid credentials),
+      // but this is like a code assertion and should be treated as internal
+      // server error. We probably want to review and remove this code path,
+      // though
+      if (!user)
+        return next(
+          new GeneralServerError(500, "forbidden state in login routine")
+        );
 
       req.session.userId = user.id;
       req.session.email = email;
