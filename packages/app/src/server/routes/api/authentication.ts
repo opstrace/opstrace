@@ -69,15 +69,20 @@ function createAuthHandler(): express.Router {
   auth.post("/session", checkAccessTokenForLogin, async (req, res, next) => {
     // Note(JP): TODO: clarify which errors this may throw, and for some of
     // them maybe also emit a proper 401 response.
+    // Internally, this should retry upon e.g. getting 429 responses
     const { email, username, avatar } = await loadUserInfo(
       // @ts-ignore Object is possibly 'undefined'
       req.headers.authorization.split(" ")[1]
     );
 
+    log.info(`login: access token exchanged into user info. email: ${email}`);
+
     if (!email || !username || !avatar) {
       return next(new GeneralServerError(400, "incomplete payload"));
     }
 
+    // Note(JP): implement concept "SSO: Opstrace login through Auth0, user
+    // whitelist (first user: all privileges, other logins: deny by default)"
     let user = undefined;
     try {
       // check if user exists in db
@@ -88,7 +93,9 @@ function createAuthHandler(): express.Router {
       user = response.data?.user[0];
 
       if (activeUserCount === 0) {
-        // if there are no active users then the first in gets setup with a user record, all subsequent "users" from auth0 are blocked
+        log.info(
+          `login: first login since inception. create user. email: ${email}`
+        );
         const createResponse = await graphqlClient.CreateUser({
           email,
           username,
