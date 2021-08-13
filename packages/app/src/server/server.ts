@@ -104,6 +104,12 @@ function createServer() {
   app.use(bodyParser.text({ type: "text/plain", defaultCharset: "utf-8" }));
 
   app.use(bodyParser.urlencoded({ extended: false }));
+
+  // What is this doing really? I think this might be responsible for a log line like this:
+  // 2021-08-13T07:48:06.412Z error: UNAUTHORIZED: JwksError: UNAUTHORIZED
+  // Note that this is like log.error(error) -- the point is, there is no
+  // string prefix. We do not have such a line of code in our code base here
+  // right now.
   app.use(
     expressWinston.logger({
       transports: [new winston.transports.Console()]
@@ -142,7 +148,13 @@ function createServer() {
 
   // apply post api middleware
   app.use(catchErrorsMiddleware);
-  // return the app-shell for PWA
+
+  // return the app-shell for PWA Note(JP): this is 'catch-all' for e.g. /
+  // (which serves the UI assets) and e.g. /login is on the one hand handled by
+  // this web application here (requests to /login will show up in the access
+  // log, but the interesting business logic for /login which is to terminate
+  // an OIDC authorization code flowhappens client-side, in the corresponding
+  // react view).
   app.use("*", serverRender);
 
   log.info("about to start HTTP server");
