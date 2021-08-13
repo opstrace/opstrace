@@ -44,6 +44,7 @@ import {
   cortexSystemRulesReconciler
 } from "./tasks";
 import { rootReducer } from "./reducer";
+import { fetchGKEVersion } from "./tasks/gke";
 
 function* core() {
   const parser = new argparse.ArgumentParser({
@@ -98,6 +99,8 @@ function* core() {
 
   log.info(`starting system rules reconciler`);
   yield fork(cortexSystemRulesReconciler);
+
+  yield fork(fetchGKEVersion, kubeConfig);
 
   log.info(`starting reconciliation`);
   yield fork(reconciliationLoop, kubeConfig);
