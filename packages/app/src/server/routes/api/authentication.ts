@@ -33,7 +33,8 @@ import * as jwkshelpers from "./jwks";
 
 // Use something like this for testing error handling.
 //const JWKS_URL = `http://httpbin.org/delay/10`;
-// const JWKS_URL = `http://httpbin.org/status/504`;
+//const JWKS_URL = `http://httpbin.org/status/504`;
+//const JWKS_URL = `http://httpbin.org/status/408,413,429,500,502,503,504,521,522,524`;
 const JWKS_URL = `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`;
 
 // Middleware for verification of the Auth0-emitted access token that is sent
@@ -44,10 +45,14 @@ const checkAccessTokenForLogin = jwt({
     rateLimit: true,
     jwksRequestsPerMinute: 5,
     jwksUri: JWKS_URL,
+    // use a rather short item lifetime for now, as of
+    // https://github.com/auth0/node-jwks-rsa/issues/257
+    cacheMaxAge: 60000,
     // Override fetcher function, see
     // https://github.com/auth0/node-jwks-rsa/blob/cd52aa297756bc097e45f59a8ee216c69a2e1704/src/wrappers/request.js#L7
     //@ts-ignore: type not up to date
     fetcher: jwkshelpers.fetch
+    //handleSigningKeyError: errhandler
   }),
 
   // Validate the audience and the issuer.
