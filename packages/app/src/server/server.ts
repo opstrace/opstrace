@@ -54,6 +54,8 @@ const oneYear = 1000 * 60 * 60 * 24 * 365;
 // cache everything for one year by default
 const maxAge = isDevEnvironment ? 0 : oneYear;
 
+log.info(`Starting UI web application. Build information: ${BUILD_INFO}`);
+
 // https://github.com/gajus/lightship
 const lightship = createLightship({
   signals: ["SIGINT", "SIGTERM"],
