@@ -49,11 +49,9 @@ export function OpstraceApplicationResources(
   // issue? Well, have a read. And maybe keep this
   // comment here :-).
 
+  // This is the Auth0 client ID corresponding to opstrace-dev.us.auth0.com,
+  // preconfigured for the Opstrace DNS infrastructure behind *.opstrace.io.
   let auth0_client_id = "vs6bgTunbVK4dvdLRj02DptWjOmAVWVM";
-  // if (envLabel === "opstrace-ci") {
-  //   auth0_client_id = "5MoCYfPXPuEzceBLRUr6T6SAklT2GDys";
-  // }
-
   if (custom_auth0_client_id !== undefined) {
     auth0_client_id = custom_auth0_client_id;
   }
