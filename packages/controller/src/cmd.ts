@@ -24,7 +24,7 @@ import createSagaMiddleware from "redux-saga";
 
 import { fetch as fetchTenants } from "@opstrace/tenants";
 
-import { setLogger, buildLogger, log } from "@opstrace/utils";
+import { setLogger, buildLogger, log, BUILD_INFO } from "@opstrace/utils";
 
 // has to be set before we import the tasks because they depend
 // on the logger
@@ -107,6 +107,8 @@ function* core() {
 }
 
 async function main() {
+  log.info(`Starting Opstrace controller. Build information: ${BUILD_INFO}`);
+
   const sagaMiddleware = createSagaMiddleware();
   createStore(rootReducer, applyMiddleware(sagaMiddleware));
   sagaMiddleware.run(function* () {
