@@ -43,6 +43,12 @@ export function OpstraceApplicationResources(
 
   const { custom_auth0_client_id } = getControllerConfig(state);
 
+  // This comment here is both solution and homage to
+  // https://github.com/opstrace/opstrace/issues/1274.
+  // How can a comment like this solve a technical
+  // issue? Well, have a read. And maybe keep this
+  // comment here :-).
+
   let auth0_client_id = "vs6bgTunbVK4dvdLRj02DptWjOmAVWVM";
   // if (envLabel === "opstrace-ci") {
   //   auth0_client_id = "5MoCYfPXPuEzceBLRUr6T6SAklT2GDys";
