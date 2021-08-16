@@ -250,6 +250,11 @@ async function performLoginFlowWithRetry(browsercontext: BrowserContext) {
       log.info(`wrote browser console content to to ${fp}`);
     }
 
+    const consoleText = consoleLines.join("\n");
+    const fp = artipath(`browser-console-after-login-success.log`);
+    fs.writeFileSync(fp, consoleText, { encoding: "utf-8" });
+    log.info(`wrote browser console content to to ${fp}`);
+
     log.info("try again in 10 s");
     await sleep(20);
   }
