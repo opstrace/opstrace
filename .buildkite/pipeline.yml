@@ -12,7 +12,7 @@ steps:
       - docker ps
       - bash ci/fetch-main.sh
       - echo "--- make rebuild-ci-container-image"
-      - make fetch-secrets && set-dockerhub-credentials && rebuild-ci-container-image && make push-ci-container-image
+      - make fetch-secrets && make set-dockerhub-credentials && rebuild-ci-container-image && make push-ci-container-image
       - make ci-preamble
     artifact_paths:
       - "${OPSTRACE_PREBUILD_DIR}/bk-artifacts/preamble/**/*"
