@@ -164,7 +164,18 @@ function createAuthHandler(): express.Router {
     let uid: string | null;
     uid = null;
     if (req.session !== undefined) {
-      uid = req.session.userId;
+      // may look like this:
+      // session: {
+      //   "cookie": {
+      //     "originalMaxAge": null,
+      //     "expires": null,
+      //     "httpOnly": true,
+      //     "path": "/"
+      //   }
+      // }
+      if (req.session.userId !== undefined) {
+        uid = req.session.userId;
+      }
     }
 
     res.status(200).json({
