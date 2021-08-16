@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.13.0-focal
+FROM mcr.microsoft.com/playwright:v1.13.1-focal
 
 RUN mkdir -p /build/test/browser/test-results
 WORKDIR /build/test/browser
