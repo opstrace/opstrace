@@ -59,7 +59,7 @@ echo "--- start in background: make lint-codebase "
 LINT_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-lint-XXXX)
 cp -a . "$LINT_BUILD_DIR/opstrace"
 ( cd "$LINT_BUILD_DIR/opstrace" &&  make lint-codebase ) \
-    &> make_lint_codebase.outerr < /dev/null &
+    &> make_lint_codebase.outerr.log < /dev/null &
 LINT_CODEBASE_PID="$!"
 
 # Update ../packages/controller-config/docker-images.json to use image tags
@@ -75,7 +75,7 @@ DOCKER_IMAGES_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-docker-images-XXXX)
 cp -a . "$DOCKER_IMAGES_BUILD_DIR/opstrace"
 export WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH="$(pwd)/new-docker-images.json"
 ( cd "$DOCKER_IMAGES_BUILD_DIR/opstrace/ci" &&  bash build-docker-images-update-controller-config.sh ) \
-    &> build-docker-images-update-controller-config.outerr < /dev/null &
+    &> build-docker-images-update-controller-config.outerr.log < /dev/null &
 DOCKER_IMAGES_BUILD_PID="$!"
 
 # Before moving on to starting the controller image build, wait for the new
@@ -108,14 +108,14 @@ echo "--- start in background: make build-and-push-controller-image"
 CONTROLLER_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-controller-XXXX)
 cp -a . $CONTROLLER_BUILD_DIR/opstrace
 ( cd $CONTROLLER_BUILD_DIR/opstrace && make build-and-push-controller-image ) \
-    &> build-and-push-controller-image.outerr < /dev/null &
+    &> build-and-push-controller-image.outerr.log < /dev/null &
 CONTROLLER_IMAGE_BUILD_PID="$!"
 
 echo "--- start in background: make rebuild-testrunner-container-images"
 TESTRUNNER_IMG_BUILD_DIR=$(mktemp -d --tmpdir=/tmp build-dir-testrunner-XXXX)
 cp -a . $TESTRUNNER_IMG_BUILD_DIR/opstrace
 ( cd $TESTRUNNER_IMG_BUILD_DIR/opstrace && make rebuild-testrunner-container-images ) \
-    &> rebuild-testrunner-container-images.outerr < /dev/null &
+    &> rebuild-testrunner-container-images.outerr.log < /dev/null &
 TESTRUNNER_IMG_IMAGE_BUILD_PID="$!"
 
 # Note(JP): this command is expected to take a minute or so (e.g., 70.35 s).
@@ -130,7 +130,7 @@ echo "--- start in background: yarn --frozen-lockfile"
 #mv packages/app/package.json packages/app/package.json.deactivated
 rm -rf packages/app
 yarn --frozen-lockfile --ignore-optional \
-    &> preamble_yarn_install.outerr < /dev/null &
+    &> preamble_yarn_install.outerr.log < /dev/null &
 YARN_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
@@ -140,7 +140,7 @@ set +e
 wait $YARN_PID
 YARN_EXIT_CODE="$?"
 echo "yarn process terminated with code $YARN_EXIT_CODE. stdout/err:"
-cat preamble_yarn_install.outerr
+cat preamble_yarn_install.outerr.log
 if [[ $YARN_EXIT_CODE != "0" ]]; then
     echo "yarn failed, exit 1"
     exit 1
@@ -150,7 +150,7 @@ set -e
 # tsc-compile the CLI. This requires the yarn dep setup to have completed.
 echo "--- start in background: yarn build:cli"
 # do not use `make cli-tsc` because that would run the yarn installation again.
-yarn build:cli &> tsc_cli.outerr < /dev/null &
+yarn build:cli &> tsc_cli.outerr.log < /dev/null &
 TSC_CLI_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
@@ -180,7 +180,7 @@ set +e
 wait $TSC_CLI_PID
 TSC_CLI_EXIT_CODE="$?"
 echo "yarn build:cli terminated with code $TSC_CLI_EXIT_CODE. stdout/err:"
-cat tsc_cli.outerr
+cat tsc_cli.outerr.log
 if [[ $TSC_CLI_EXIT_CODE != "0" ]]; then
     echo "yarn build:cli failed, exit 1"
     exit 1
@@ -194,7 +194,7 @@ set +e
 wait $LINT_CODEBASE_PID
 LINT_CODEBASE_PID="$?"
 echo "make lint-codebase terminated with code $LINT_CODEBASE_PID. stdout/err:"
-cat make_lint_codebase.outerr
+cat make_lint_codebase.outerr.log
 set -e
 if [[ $LINT_CODEBASE_PID != "0" ]]; then
     echo "make lint-codebase failed, exit 1"
@@ -236,7 +236,7 @@ set +e
 wait $CONTROLLER_IMAGE_BUILD_PID
 CONTROLLER_IMAGE_BUILD_EXIT_CODE="$?"
 echo "make build-and-push-controller-image terminated with code $CONTROLLER_IMAGE_BUILD_EXIT_CODE. stdout/err:"
-cat build-and-push-controller-image.outerr
+cat build-and-push-controller-image.outerr.log
 if [[ $CONTROLLER_IMAGE_BUILD_EXIT_CODE != "0" ]]; then
     echo "make build-and-push-controller-image failed, exit 1"
     exit 1
@@ -249,7 +249,7 @@ set +e
 wait $DOCKER_IMAGES_BUILD_PID
 DOCKER_IMAGES_BUILD_PID_EXIT_CODE="$?"
 echo "build-docker-images-update-controller-config.sh terminated with code $DOCKER_IMAGES_BUILD_PID_EXIT_CODE. stdout/err:"
-cat build-docker-images-update-controller-config.outerr
+cat build-docker-images-update-controller-config.outerr.log
 if [[ $DOCKER_IMAGES_BUILD_PID_EXIT_CODE != "0" ]]; then
     echo "build-docker-images-update-controller-config.sh failed, exit 1"
     exit 1
@@ -262,7 +262,7 @@ set +e
 wait $TESTRUNNER_IMG_IMAGE_BUILD_PID
 TESTRUNNER_IMG_IMAGE_BUILD_EXIT_CODE="$?"
 echo "make rebuild-testrunner-container-images terminated with code $TESTRUNNER_IMG_IMAGE_BUILD_EXIT_CODE. stdout/err:"
-cat rebuild-testrunner-container-images.outerr
+cat rebuild-testrunner-container-images.outerr.log
 if [[ $TESTRUNNER_IMG_IMAGE_BUILD_EXIT_CODE != "0" ]]; then
     echo "make rebuild-testrunner-container-images failed, exit 1"
     exit 1
@@ -272,7 +272,7 @@ set -e
 
 echo "--- copy files to artifact directory"
 # Collect the stdout/err files of the individual processes as buildkite artifacts
-cp -av ./*.outerr ${OPSTRACE_ARTIFACT_DIR} || true
+cp -av ./*.outerr.log ${OPSTRACE_ARTIFACT_DIR} || true
 
 # subsequent build steps are supposed to depend on actual build artifacts like
 # the pkg-based single binary CLI or Docker images. The node_modules dir
