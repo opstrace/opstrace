@@ -59,11 +59,14 @@
  *
  */
 
+import * as rax from "retry-axios";
+import axios, { AxiosResponse } from "axios";
+
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Switch, Route, Redirect } from "react-router";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
-import axios, { AxiosResponse } from "axios";
+
 import useAxios from "axios-hooks";
 
 import { setCurrentUser } from "state/user/actions";
@@ -113,6 +116,9 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
   // terrcin: ugh, don't know how to cast this in the above useAxios with typescript
   data = data as StatusData;
 
+  // Note(JP): `data` may be undefined, e.g. when receiving a 504 response.
+  // That's not considered by the code below.
+
   const appStateRef = useRef<AppState>({ returnTo: window.location.pathname });
   const dispatch = useDispatch();
 
@@ -151,8 +157,15 @@ export const WithSession = ({ children }: { children: React.ReactNode }) => {
     appStateRef.current = appState;
   };
 
+  // Note(JP): when `statusError` is truthy then the idea of the axios-hooks
+  // authors is to respond to that error in the UI, not just log to console.
   if (statusError) console.log("WithSession#statusError:", statusError);
 
+  // Note(JP): when `loadingStatus` is truthy then it means that the UI should
+  // show that things are currently loading. It does not mean that the request
+  // succeeded. In fact, when the request fails with a 504 response then
+  // `data.auth0Config` is `undefined` and the Auth0 initializtion below blows
+  // up.
   if (loadingStatus) {
     return <LoadingPage stage="status-check" />;
   } else if (data?.currentUserId) {
