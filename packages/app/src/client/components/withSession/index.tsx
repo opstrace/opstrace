@@ -252,18 +252,12 @@ const CreateSession = ({
         return;
       }
 
+      // Note(JP): this request exchanges the Auth0 access token into a session
+      // secret. The request must have its own local error handler. Show an
+      // "access denied" error (only!) when a 403 response comes in.
       let resp: AxiosResponse<any>;
       try {
-        // Note(JP): this request here must have its own local error handler.
-        // An actual "access denied" error is just one of many expected
-        // outcomes: when a 403 response comes in.
-        resp = await axios.request({
-          method: "POST",
-          url: "/_/auth/session",
-          headers: {
-            Authorization: `Bearer ${at}`
-          }
-        });
+        resp = await loginRequestWithRetry(at);
       } catch (err) {
         if (!axios.isAxiosError(err)) {
           // re-throw programming errors
@@ -330,3 +324,58 @@ const CreateSession = ({
 
   return <LoadingPage stage="create-session" />;
 };
+
+async function loginRequestWithRetry(
+  auth0AccessToken: string
+): Promise<AxiosResponse<any>> {
+  // Use a custom retrying config. Do that by creating a local Axios instance
+  // and  then attach the rax logic to it. The outcome is that axios is _not_
+  // affected globally.
+  //
+  // `timeout`: in Axios, `timeout` controls the entire HTTP request (no more
+  // fine-grained control available). Expect the HTTP request handler in web
+  // app to be reasonably fast; it may however need a tiny bit of time for JWKS
+  // (re)fetching. After ~10 seconds we can and should retry.
+  //
+  //`retry`: retry count for requests that return a response.
+  // `noResponseRetries` is for scenarios where request not sent, response not
+  // received.
+  //
+  // Use default for `statusCodesToRetry`: 100-199, 429, 500-599
+  // Retry for POST, which is the only method used here.
+  //
+  // Set constant delay between attempts. `retryDelay` (in ms) applies only for
+  // the `static` strategy. Wait about one second between attempts. Goal is to
+  // quickly heal short network hiccups / reconnects, but not try forever. log
+  // detail about those scenarios that leads to retrying.
+  const httpclient = axios.create({
+    timeout: 10000
+  });
+  httpclient.defaults.raxConfig = {
+    instance: httpclient,
+    retry: 3,
+    noResponseRetries: 3,
+    backoffType: "static",
+    retryDelay: 1000,
+    httpMethodsToRetry: ["POST"],
+    onRetryAttempt: err => {
+      const cfg = rax.getConfig(err);
+      console.log(
+        `POST to /_/auth/session: retry attempt #${
+          cfg!.currentRetryAttempt
+        } after: ${err.message}`
+      );
+    }
+  };
+  rax.attach(httpclient);
+
+  const resp: AxiosResponse<any> = await httpclient.request({
+    method: "POST",
+    url: "/_/auth/session",
+    headers: {
+      Authorization: `Bearer ${auth0AccessToken}`
+    }
+  });
+
+  return resp;
+}
