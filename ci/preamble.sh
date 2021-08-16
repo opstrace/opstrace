@@ -136,7 +136,7 @@ mv packages/app/package.json packages/app/package.json.deactivated
 mv test/test-remote/package.json test/test-remote/package.json.deactivated
 #mv test/test-remote/looker/package.json test/test-remote/looker/package.json.deactivated
 mv test/browser/package.json test/browser/package.json.deactivated
-mv packages/controller/package.json packages/controller/package.json.deactivated
+#mv packages/controller/package.json packages/controller/package.json.deactivated
 
 yarn --frozen-lockfile --ignore-optional &> preamble_yarn_install.outerr.log < /dev/null &
 YARN_PID="$!"
