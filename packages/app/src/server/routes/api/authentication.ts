@@ -158,6 +158,7 @@ function createAuthHandler(): express.Router {
   });
 
   auth.get("/status", (req, res) => {
+    // Note(JP): auth0 config and build info should not really be here.
     res.status(200).json({
       currentUserId: req.session?.userId,
       auth0Config: {
@@ -202,6 +203,8 @@ function createAuthHandler(): express.Router {
 }
 
 const loadUserInfo = async (accessToken: string) => {
+  // Note(JP): perform retrying. This is expected to return a 429 response,
+  // so ideally perform retrying while respecting the retry-after header.
   const { data } = await axios.get(`https://${env.AUTH0_DOMAIN}/userinfo`, {
     headers: {
       Authorization: `Bearer ${accessToken}`
