@@ -23,6 +23,7 @@ echo "--- current working directory: $(pwd)"
 make fetch-secrets
 make set-dockerhub-credentials
 
+echo "--- make push-ci-container-image"
 # Note(JP): I wanted to do this before entering the CI container but
 # struggled with setting up Docker credentials.
 # See https://github.com/opstrace/opstrace/pull/1285#issuecomment-899727121
@@ -30,7 +31,6 @@ make push-ci-container-image
 
 echo "--- lint docs: quick feedback"
 make lint-docs
-
 
 # If this is a docs-only change: skip the rest of the preamble, move on to the
 # next build step in the BK pipeline which allows for a
@@ -132,10 +132,13 @@ echo "--- start in background: yarn --frozen-lockfile"
 # This is expected to cut 1.5 minutes from the preamble which is more than 20 %
 # of the preamble runtime when nothing in packages/app changed (i.e. when the
 # container image is not rebuilt).
-#mv packages/app/package.json packages/app/package.json.deactivated
-rm -rf packages/app
-yarn --frozen-lockfile --ignore-optional \
-    &> preamble_yarn_install.outerr.log < /dev/null &
+mv packages/app/package.json packages/app/package.json.deactivated
+mv test/test-remote/package.json test/test-remote/package.json.deactivated
+mv test/test-remote/looker/package.json test/test-remote/looker/package.json.deactivated
+mv test/browser/package.json test/browser/package.json.deactivated
+mv packages/controller/package.json packages/controller/package.json.deactivated
+
+yarn --frozen-lockfile --ignore-optional &> preamble_yarn_install.outerr.log < /dev/null &
 YARN_PID="$!"
 sleep 1 # so that the xtrace output is in this build log section
 
@@ -193,7 +196,6 @@ fi
 set -e
 
 
-
 echo "--- wait for background process: make lint-codebase"
 set +e
 wait $LINT_CODEBASE_PID
@@ -205,7 +207,6 @@ if [[ $LINT_CODEBASE_PID != "0" ]]; then
     echo "make lint-codebase failed, exit 1"
     exit 1
 fi
-
 
 
 echo "--- make cli-pkg (for linux and mac)"
