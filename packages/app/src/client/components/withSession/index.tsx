@@ -98,7 +98,7 @@ type AppState = {
 // TODO: look to switching to using a "context" for passing things to children components
 
 type StatusData = {
-  currentUserId?: string;
+  currentUserId: string | null;
   auth0Config: { domain: string; clientId: string };
   buildInfo: OpstraceBuildInfo;
 };
