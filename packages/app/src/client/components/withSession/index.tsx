@@ -279,7 +279,6 @@ const CreateSession = ({
           // re-throw programming errors
           throw err;
         }
-
         if (err.response) {
           // non-2xx responses
           const r = err.response;
@@ -294,7 +293,7 @@ const CreateSession = ({
           // TODO: expose parts of the response body if structured err info is
           // present, in expected format.
           setLoginErrorString(
-            `POST to /_/auth/session got an unexpected response with status ${r.status}`
+            `POST to /_/auth/session got an unexpected response with status code ${r.status}`
           );
           return;
         }
