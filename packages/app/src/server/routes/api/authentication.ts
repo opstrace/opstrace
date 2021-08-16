@@ -158,9 +158,18 @@ function createAuthHandler(): express.Router {
   });
 
   auth.get("/status", (req, res) => {
-    // Note(JP): auth0 config and build info should not really be here.
+    // currentUserId being `null` is the contract for the client to know that
+    // there is no valid authentication state.
+
+    let uid: string | null;
+    uid = null;
+    if (req.session !== undefined) {
+      uid = req.session.userId;
+    }
+
     res.status(200).json({
-      currentUserId: req.session?.userId,
+      currentUserId: uid,
+      // Note(JP): auth0 config and build info should not really be here, hmm...
       auth0Config: {
         domain: AUTH0_CONFIG.auth0_domain,
         clientId: AUTH0_CONFIG.auth0_client_id
