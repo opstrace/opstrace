@@ -397,20 +397,19 @@ endif
 
 .PHONY: rebuild-ci-container-image
 rebuild-ci-container-image:
-	@# Don't set a build context. At this stage nothing from the repo should
-	@# leak into the container image (image should be fully defined by the
-	@# Dockerfile.) Note: this also makes the build step much faster compared
-	@# sending a O(100 MB) large build context.
-	@echo "--- building ci container image"
-	#docker build -t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING) - < containers/ci/opstrace-ci.Dockerfile
-	#Note(JP): update: experiment with sending a small build context including
-	# yarn.lock and package.json and run a yarn install in the image build
-	#to populate the yarn cache in /usr in the image
-	# inject current user uid/gid to write some directories as this
-	# identity, also see https://stackoverflow.com/a/44683248/145400
-	docker build --build-arg CIUID=$(shell id -u) --build-arg CIGID=$(shell id -g) \
-		-t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING)  . -f containers/ci/opstrace-ci.Dockerfile
+	@# In CI the build context is already rather big (complete checkout of repo)
+	@# and locally the build context may become real big.
+	@# Inject current user uid/gid to write some directories as this
+	@# identity, also see https://stackoverflow.com/a/44683248/145400
+	docker pull opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING) || \
+		docker build --build-arg CIUID=$(shell id -u) --build-arg CIGID=$(shell id -g) \
+			-t opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING)  \
+				. -f containers/ci/opstrace-ci.Dockerfile
 
+
+.PHONY: push-ci-container-image
+push-ci-container-image:
+	docker push opstrace/opstrace-ci:$(CHECKOUT_VERSION_STRING)
 
 
 # Run any make target in the CI docker container (image is defined by
