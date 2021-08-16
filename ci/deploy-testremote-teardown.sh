@@ -179,7 +179,7 @@ teardown() {
     if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
         python3 ci/delete-empty-ci-buckets-aws.py
     else
-        bash ci/delete-empty-ci-buckets.sh
+        python3 ci/delete-empty-ci-buckets-gcp.py
     fi
     echo "* exit code of delete-empty-ci-buckets: $?"
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Regular invocation of this program ensures deletion of orphaned, empty S3
+# Regular invocation of this program ensures deletion of orphaned, empty GS
 # buckets created by previous CI runs. Avoids deleting recently created
 # buckets to avoid breaking currently running tests.
 
@@ -13,10 +13,16 @@ import time
 BUCKET_MINIMUM_AGE_SECS = 6 * 60 * 60
 
 # expected targets like this:
-#   prs-bk-5501-743-a-cortex-config
-#   schedul-bk-2845-f10-a-loki
-#   upgrade-bk-1186-a20-a-cortex
-BUCKET_NAME_PATTERN = re.compile("[a-z]+-bk-[0-9]+-.*")
+#   "gs://upgrade-bk-1187-a20-g-loki-config/ :"
+#   "gs://schedul-bk-2849-a20-g-cortex-config/ :"
+#   "gs://prs-bk-5530-8bf-upgr-g-cortex/ :"
+BUCKET_NAME_PATTERN = re.compile("^gs://([a-z]+-bk-[0-9]+-.*)/ :$")
+
+# expected targets like this:
+#   "	Time created:			Wed, 16 Dec 2020 20:25:14 GMT"
+#   "	Time created:			Thu, 12 Aug 2021 23:49:26 GMT"
+#   "	Time created:			Fri, 13 Aug 2021 05:02:14 GMT"
+TIME_CREATED_PATTERN = re.compile("^\s+Time created:\s+[a-zA-Z]+, (.*) GMT$")
 
 
 def timestamp(epoch_secs):
@@ -24,15 +30,17 @@ def timestamp(epoch_secs):
 
 
 # expected list-buckets output is like this (separated by tabs):
-#   BUCKETS 2021-06-28T20:49:25+00:00       sample-cortex
-#   BUCKETS 2021-06-28T20:49:25+00:00       sample-cortex-config
-#   BUCKETS 2021-06-28T20:49:25+00:00       sample-loki
-#   BUCKETS 2021-06-28T20:49:27+00:00       sample-loki-config
-#   [...]
-#   OWNER   sample     abcd1234
+# gs://sample-loki/ :
+#         [...]
+#         Time created:			Thu, 12 Aug 2021 11:37:36 GMT
+#         [...]
+# gs://sample-loki-config/ :
+#         [...]
+#         Time created:			Thu, 12 Aug 2021 11:37:42 GMT
+#         [...]
 def list_buckets():
     result = subprocess.run(
-        "aws s3api list-buckets --output text --no-cli-pager",
+        "gsutil ls -L",
         shell=True,
         check=True,
         capture_output=True,
@@ -41,21 +49,34 @@ def list_buckets():
 
 
 def clean_buckets(now_secs, list_buckets_output):
+    # For each bucket, should get:
+    # 1. a line containing the bucket name
+    # 2. a line containing the creation timestamp
+    this_bucket_name = ""
     for line in list_buckets_output.split("\n"):
-        words = line.split("\t")
-        if len(words) != 3:
-            continue
-        (keyword, timestamp_str, name) = words
-
-        if keyword != "BUCKETS":
-            continue
-
-        if not BUCKET_NAME_PATTERN.match(name):
+        # first, search for matching CI bucket name
+        if not this_bucket_name:
+            name_match = BUCKET_NAME_PATTERN.match(line)
+            if name_match:
+                this_bucket_name = name_match.group(1)
+            # either continue looking for the bucket name,
+            # or start searching for the created timestamp
             continue
 
-        # timestamp should be UTC ISO8601 format
+        # after CI bucket name is found, search for created timestamp
+        created_match = TIME_CREATED_PATTERN.match(line)
+        if not created_match:
+            continue
+
+        # CI bucket name and timestamp were found
+        name = this_bucket_name
+        this_bucket_name = ""
+
+        # 16 Dec 2020 20:25:14
+        created_str = created_match.group(1)
+
         try:
-            timestruct = time.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S%z")
+            timestruct = time.strptime(created_str, "%d %b %Y %H:%M:%S")
         except e:
             print("Failed to parse timestamp in line: '{}'".format(line))
             continue
@@ -73,10 +94,11 @@ def clean_buckets(now_secs, list_buckets_output):
         print("Trying to delete bucket created at {}: {}".format(created_str, name))
         # expected to fail when the bucket is not empty
         result = subprocess.run(
-            "aws s3api delete-bucket --bucket {}".format(name),
+            "gsutil rb 'gs://{}/'".format(name),
             shell=True,
             capture_output=True,
         )
+        print(result)
         if result.returncode == 0:
             print("*** Bucket was deleted successfully: {}".format(name))
         else:
@@ -93,6 +115,7 @@ def clean_buckets(now_secs, list_buckets_output):
                         name, result
                     )
                 )
+        break
 
 
 if __name__ == "__main__":
