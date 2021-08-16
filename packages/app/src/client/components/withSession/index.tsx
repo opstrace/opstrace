@@ -262,7 +262,10 @@ const CreateSession = ({
         });
       } catch (err) {
         setLoginErrorString(`could not get access token: ${err.message}`);
-        return;
+        // This like is retryable, and the user is supposed to trigger that via
+        // the LoginError view. Let this blow up to show relevant detail in
+        // console and in Sentry.
+        throw err;
       }
 
       // Note(JP): this request exchanges the Auth0 access token into a session
