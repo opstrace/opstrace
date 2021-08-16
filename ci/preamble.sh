@@ -23,6 +23,11 @@ echo "--- current working directory: $(pwd)"
 make fetch-secrets
 make set-dockerhub-credentials
 
+# Note(JP): I wanted to do this before entering the CI container but
+# struggled with setting up Docker credentials.
+# See https://github.com/opstrace/opstrace/pull/1285#issuecomment-899727121
+make push-ci-container-image
+
 echo "--- lint docs: quick feedback"
 make lint-docs
 
