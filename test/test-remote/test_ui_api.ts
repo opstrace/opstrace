@@ -19,6 +19,7 @@
 
 import { strict as assert } from "assert";
 
+import fs from "fs";
 import path from "path";
 
 import { ZonedDateTime } from "@js-joda/core";
@@ -51,7 +52,13 @@ import {
 // this does not work, too late probably. set via Makefile entrypoint
 // process.env.DEBUG = "pw:api";
 
-import type { ChromiumBrowser, Cookie, BrowserContext, Page } from "playwright";
+import type {
+  ChromiumBrowser,
+  Cookie,
+  BrowserContext,
+  Page,
+  ConsoleMessage
+} from "playwright";
 import { chromium } from "playwright";
 import { sleep } from "@opstrace/utils";
 
@@ -186,7 +193,13 @@ async function performLoginFlowWithRetry(browsercontext: BrowserContext) {
   // into retry logic)
   const page = await browsercontext.newPage();
 
-  const maxWaitSeconds = 300;
+  const consoleLines: string[] = [];
+
+  page.on("console", (message: ConsoleMessage) => {
+    consoleLines.push(message.text());
+  });
+
+  const maxWaitSeconds = 200;
   const deadline = mtimeDeadlineInSeconds(maxWaitSeconds);
   log.info(`Trying to log in with retries, for at most ${maxWaitSeconds} s`);
 
@@ -230,10 +243,15 @@ async function performLoginFlowWithRetry(browsercontext: BrowserContext) {
         log.warning(`ignoring error in error handler: ${innerErr}`);
       }
       log.info(`wrote screenshot to ${p}`);
+
+      const consoleText = consoleLines.join("\n");
+      const fp = artipath(`browser-console-login-err-attempt-${attempt}.log`);
+      fs.writeFileSync(fp, consoleText, { encoding: "utf-8" });
+      log.info(`wrote browser console content to to ${fp}`);
     }
 
     log.info("try again in 10 s");
-    await sleep(10);
+    await sleep(20);
   }
 
   log.info(
