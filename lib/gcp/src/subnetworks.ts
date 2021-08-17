@@ -219,6 +219,8 @@ export function* ensureSubNetworkDoesNotExist(
       if (!e.code || (e.code && e.code !== 404)) {
         throw e;
       }
+
+      log.debug("error during subnetwork deletion: %s", e);
     }
 
     yield delay(1 * SECOND);
