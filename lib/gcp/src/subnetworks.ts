@@ -20,7 +20,7 @@ import { ApiError as GCPApiError } from "@google-cloud/common";
 
 //@ts-ignore: don't know the reason but have to add one now for ESLint :-).
 import Compute from "@google-cloud/compute";
-import { log, SECOND } from "@opstrace/utils";
+import { die, log, SECOND } from "@opstrace/utils";
 
 // Currently as @google-cloud/compute does not provide typings - it doesn't
 // make much sense to fix all lint errors for any
@@ -70,6 +70,7 @@ const deleteSubNetwork = (
   region: string,
   name: string
 ): Promise<unknown> => {
+  log.debug("emit DELETE api call for subnetwork %s", name);
   return new Promise((resolve, reject) => {
     client
       .region(region)
@@ -166,13 +167,18 @@ export function* ensureSubNetworkDoesNotExist(
   const region = gcpRegion;
 
   while (true) {
+    log.debug("check if subnetwork exists");
     const existingSubNetwork: any = yield call(doesSubNetworkExist, client, {
       name: snetname
     });
 
     if (!existingSubNetwork) {
+      log.info("subnetwork does not exist, leave");
       return;
     }
+
+    log.debug("existingSubNetwork: %s", existingSubNetwork);
+
     if (existingSubNetwork.region.name !== gcpRegion) {
       // the gcpRegion passed to this function is "the region to destroy in"
       // if the detected subnetwork region does not match that it really means
@@ -188,19 +194,23 @@ export function* ensureSubNetworkDoesNotExist(
       throw error;
     }
     if (operation) {
-      yield delay(1 * SECOND);
+      log.info(
+        "subnetwork deletion operation was initiated, wait for subnetwork to disappear"
+      );
+      yield delay(10 * SECOND);
 
       continue;
     }
 
     try {
       operation = yield call(deleteSubNetwork, client, region, snetname);
+      log.debug("subnetwork deletion: operation: %s", operation);
       operation.on("complete", (metadata: any) => {
         // The operation is complete.
         operation.removeAllListeners();
         operation = null;
         log.info(
-          `Subnet deletion is: ${metadata.status} with ${metadata.progress} progress`
+          `Subnet deletion is: ${metadata.status} with ${metadata.progress} % progress`
         );
       });
       //-
@@ -234,6 +244,6 @@ export function* ensureSubNetworkDoesNotExist(
       log.debug("error during subnetwork deletion: %s", e);
     }
 
-    yield delay(1 * SECOND);
+    yield delay(5 * SECOND);
   }
 }
