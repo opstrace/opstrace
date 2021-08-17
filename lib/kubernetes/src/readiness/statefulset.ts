@@ -47,12 +47,8 @@ export function getStatefulSetRolloutMessage(s: StatefulSetType): string {
       replicas - readyReplicas
     } pods to be ready for StatefulSet ${s.namespace}/${s.name}`;
   }
-  if (
-    spec.updateStrategy &&
-    spec.updateStrategy.type !== "RollingUpdate" &&
-    spec.updateStrategy.rollingUpdate
-  ) {
-    if (replicas && spec.updateStrategy.rollingUpdate.partition) {
+  if (spec.updateStrategy && spec.updateStrategy.rollingUpdate) {
+    if (replicas && spec.updateStrategy.rollingUpdate.partition !== undefined) {
       if (
         updatedReplicas <
         replicas - spec.updateStrategy.rollingUpdate.partition
