@@ -349,7 +349,7 @@ async function getE2EAlertCountMetric(
   const value = resultArray[0]["value"][1];
 
   // debug-log for 0 to reduce verbosity
-  if (value === 0) {
+  if (value == 0) {
     log.debug(`Got alert count value: ${value}`);
   } else {
     log.info(`Got alert count value: ${value}`);
@@ -453,7 +453,7 @@ suite("End-to-end alert tests", function () {
     // Before deploying anything, delete any existing alertmanager/rulegroup configuration.
     // This avoids an old alert config writing to the newly deployed webhook, making its hit count 1 when we expect 0
     // This should only be a problem when running the same test repeatedly against a cluster.
-    log.info(`Deleting any preexisting E2E alerts webhooks`);
+    log.info("Deleting any preexisting E2E alerts webhooks");
     const deletedDefault = await deleteE2EAlertsConfig(
       TENANT_DEFAULT_API_TOKEN_FILEPATH,
       "default"
@@ -467,7 +467,7 @@ suite("End-to-end alert tests", function () {
     // See also: https://github.com/opstrace/opstrace/issues/1130
     if (deletedDefault || deletedSystem) {
       log.info("Waiting 15s after configs were deleted");
-      sleep(15.0);
+      await sleep(15.0);
     } else {
       log.info("Continuing immediately after no configs needed to be deleted");
     }
