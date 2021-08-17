@@ -36,6 +36,7 @@ import { Dashboard as K8sLogsSummaryDashboard } from "client/integrations/k8sLog
 import { Dashboard as K8sMetricsApiServerDashboard } from "client/integrations/k8sMetrics/Show/dashboards/apiserver";
 import { Dashboard as K8sMetricsKubeletDashboard } from "client/integrations/k8sMetrics/Show/dashboards/kubelet";
 import { Dashboard as K8sMetricsResourceDashboard } from "client/integrations/k8sMetrics/Show/dashboards/resource";
+import request from "./request";
 
 const makeUuid = (integration: Integration) => `i9n-${integration.id}`;
 const makeUrl = (tenant: Tenant, path: string) =>
@@ -56,7 +57,7 @@ export async function createFolder({
   integration,
   tenant
 }: FolderProps): Promise<FolderInfo> {
-  const responseData = await axios({
+  const responseData = await request({
     method: "post",
     url: makeUrl(tenant, "folders"),
     data: {
@@ -107,7 +108,7 @@ export async function deleteFolder({
 }: FolderProps): Promise<{
   id: number;
 }> {
-  const responseData = await axios({
+  const responseData = await request({
     method: "delete",
     url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
     withCredentials: true
