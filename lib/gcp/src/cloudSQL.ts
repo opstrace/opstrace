@@ -43,9 +43,15 @@ async function listServiceConnections(network: string): Promise<void> {
     log.warning(`error during services.connections.list: ${err} -- ignore`);
     return;
   }
-  log.info(
+  const pfx =
     `services.connections.list for services/servicenetworking.googleapis.com ` +
-      `and network ${network}:\n${JSON.stringify(result, null, 2)} `
+    `and network ${network}:`;
+  if (result.data !== undefined) {
+    log.info(`${pfx}\nt${JSON.stringify(result.data, null, 2)}`);
+    return;
+  }
+  log.warning(
+    `${pfx}: unexpected result obj: ${JSON.stringify(result, null, 2)}`
   );
 }
 
