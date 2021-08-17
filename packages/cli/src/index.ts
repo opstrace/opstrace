@@ -65,7 +65,7 @@ interface CliOptsInterface {
   logLevel: "debug" | "info" | "warning" | "error";
   holdController: boolean;
   showVersion: boolean;
-  region: string;
+  region: string; // empty means: not set
   assumeYes: boolean;
   kubeconfigFilePath: string; // empty means: not set
   tenantApiAuthenticatorKeyFilePath: string; // empty means: not set

@@ -84,6 +84,8 @@ export function setDestroyConfig(c: DestroyConfigInterface): void {
     );
     setAWSRegion(c.awsRegion);
   }
+
+  log.debug(`setDestroyConfig: ${JSON.stringify(c)}`);
 }
 
 export { destroyConfig };
