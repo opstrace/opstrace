@@ -24,10 +24,28 @@ import * as util from "./util";
 export async function destroy(): Promise<void> {
   let gcpProjectID: string | undefined;
   let gcpRegion: string | undefined;
+
   if (cli.CLIARGS.cloudProvider == "gcp") {
     const gcpopts = util.gcpValidateCredFileAndGetDetailOrError();
     gcpProjectID = gcpopts.projectId;
     gcpRegion = util.gcpGetClusterRegion();
+
+    // util.gcpGetClusterRegion() is ignorant so far. deal with that.
+    if (gcpRegion == "us-west2") {
+      if (cli.CLIARGS.region !== "") {
+        log.debug(
+          `use GCP region to destroy in from cmdline args: ${cli.CLIARGS.region}`
+        );
+        gcpRegion = cli.CLIARGS.region;
+      } else {
+        // when we are here, us-west2 might be pretty wrong, at least emit a
+        // warning.
+        log.warning(
+          "GCP region detection not yet built. See issue 1290. If us-west2 " +
+            "is not the GCP region you want to destroy in then set --region <region>"
+        );
+      }
+    }
   }
 
   let awsRegion: string | undefined;
