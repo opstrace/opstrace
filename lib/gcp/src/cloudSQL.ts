@@ -32,6 +32,23 @@ import {
 
 const snclient = google.servicenetworking("v1");
 
+async function listServiceConnections(network: string): Promise<void> {
+  let result: any;
+  try {
+    result = await snclient.services.connections.list({
+      parent: "services/servicenetworking.googleapis.com",
+      network: network
+    });
+  } catch (err) {
+    log.warning(`error during services.connections.list: ${err} -- ignore`);
+    return;
+  }
+  log.info(
+    `services.connections.list for services/servicenetworking.googleapis.com ` +
+      `and network ${network}:\n${JSON.stringify(result, null, 2)} `
+  );
+}
+
 /**
  * Set up VPC Network Peering connection between a service producer's VPC
  * network and a service consumer's VPC network.
@@ -74,6 +91,9 @@ async function createServiceConnection({
 
   while (true) {
     attempt += 1;
+
+    // log currently known service connections
+    await listServiceConnections(network);
 
     // Trigger CREATE
     log.info(`${logpfx}: create with params: ${requestparams}`);
@@ -284,6 +304,9 @@ export function* ensureCloudSQLExists({
   );
 
   yield call(createServiceConnection, { network, addressName });
+
+  // for better insight and debugging, on the hunt for dangling resources.
+  yield call(listServiceConnections, network);
 
   let attemptNumber = 0;
   const sqlInstanceCreationDeadline = Date.now() + 15 * 60 * SECOND;
