@@ -288,7 +288,7 @@ async function deleteE2EAlertsConfig(
     logHTTPResponse(alertmanagerDeleteResponse);
     assert(
       alertmanagerDeleteResponse.statusCode == 202 ||
-      alertmanagerDeleteResponse.statusCode == 200
+        alertmanagerDeleteResponse.statusCode == 200
     );
     deletesOccurred = true;
   }
@@ -505,14 +505,8 @@ suite("End-to-end alert tests", function () {
 
     // Clean up both tenants
     log.info("Deleting E2E alerts webhooks");
-    await deleteE2EAlertsConfig(
-      TENANT_DEFAULT_API_TOKEN_FILEPATH,
-      "default"
-    );
-    await deleteE2EAlertsConfig(
-      TENANT_SYSTEM_API_TOKEN_FILEPATH,
-      "system"
-    );
+    await deleteE2EAlertsConfig(TENANT_DEFAULT_API_TOKEN_FILEPATH, "default");
+    await deleteE2EAlertsConfig(TENANT_SYSTEM_API_TOKEN_FILEPATH, "system");
     // Don't worry about sleep()ing here since we aren't going to set a new config right away.
 
     log.info("Deleting E2E alerting resources");
