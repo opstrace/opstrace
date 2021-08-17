@@ -19,7 +19,6 @@ import { useHistory } from "react-router-dom";
 
 import { integrationsDefs } from "client/integrations";
 import {
-  IntegrationDefs,
   IntegrationDef,
   addIntegrationPath
 } from "client/integrations";
@@ -31,67 +30,74 @@ import Typography from "client/components/Typography/Typography";
 import { Button } from "client/components/Button";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 
-export const AllIntegrations = () => (
-  <Box mt={3}>
-    <IntegrationDefCards integrationDefs={integrationsDefs} />
-  </Box>
-);
-
-type Props = { integrationDefs: IntegrationDefs };
-
-const IntegrationDefCards = ({ integrationDefs }: Props) => {
+const Integration = (props: { integrationDef: IntegrationDef }) => {
   const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
 
-  const onAdd = (i9n: IntegrationDef) => {
+  const onAdd = () => {
     history.push(
       addIntegrationPath({
         tenant: tenant,
-        integrationDef: i9n
+        integrationDef: props.integrationDef
       })
     );
   };
-
+  
   return (
-    <Grid container spacing={3}>
-      {integrationDefs
-        .filter(i9n => i9n.enabled)
-        .map(i9n => {
-          return (
-            <Grid
-              key={i9n.kind}
-              item
-              xs={12}
-              sm={6}
-              data-test={`integrations/grid/${i9n.kind}`}
-            >
-              <Card>
-                <CardHeader
-                  avatar={<img src={i9n.Logo} width={50} height={50} alt="" />}
-                  titleTypographyProps={{ variant: "h6" }}
-                  title={i9n.label}
-                  action={
-                    <Box ml={3} display="flex" flexWrap="wrap">
-                      <Box p={1}>
-                        <Button
-                          variant="contained"
-                          state="primary"
-                          size="small"
-                          onClick={() => onAdd(i9n)}
-                        >
-                          Install
-                        </Button>
-                      </Box>
-                    </Box>
-                  }
-                />
-                <CardContent>
-                  <Typography color="textSecondary">{i9n.desc}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
+    <Grid
+      key={props.integrationDef.kind}
+      item
+      xs={12}
+      sm={6}
+      data-test={`integrations/grid/${props.integrationDef.kind}`}
+    >
+      <Card>
+        <CardHeader
+          avatar={
+            <img
+              src={props.integrationDef.Logo}
+              width={50}
+              height={50}
+              alt=""
+            />
+          }
+          titleTypographyProps={{ variant: "h6" }}
+          title={props.integrationDef.label}
+          action={
+            <Box ml={3} display="flex" flexWrap="wrap">
+              <Box p={1}>
+                <Button
+                  variant="contained"
+                  state="primary"
+                  size="small"
+                  onClick={() => onAdd()}
+                >
+                  Install
+                </Button>
+              </Box>
+            </Box>
+          }
+        />
+        <CardContent>
+          <Typography color="textSecondary">
+            {props.integrationDef.desc}
+          </Typography>
+        </CardContent>
+      </Card>
     </Grid>
+  );
+};
+
+export const AllIntegrations = () => {
+  return (
+    <Box mt={3}>
+      <Grid container spacing={3}>
+        {integrationsDefs
+          .filter(i9n => i9n.enabled)
+          .map(i9n => (
+            <Integration key={i9n.kind} integrationDef={i9n} />
+          ))}
+      </Grid>
+    </Box>
   );
 };
