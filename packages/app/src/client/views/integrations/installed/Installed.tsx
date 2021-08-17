@@ -35,6 +35,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import { Integration } from "state/integration/types";
 
 const useStyles = makeStyles(theme => ({
   integrationRow: {
@@ -50,10 +51,44 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const InstalledIntegrations = () => {
+const IntegrationRow = (props: { integration: Integration }) => {
   const history = useHistory();
   const classes = useStyles();
   const tenant = useSelectedTenantWithFallback();
+
+  const i9nDef = integrationDefRecords[props.integration.kind];
+
+  return (
+    <TableRow
+      hover
+      className={classes.integrationRow}
+      key={props.integration.id}
+      onClick={() =>
+        history.push(
+          showIntegrationPath({ tenant, integration: props.integration })
+        )
+      }
+    >
+      <TableCell component="th" scope="row">
+        {props.integration.name}
+      </TableCell>
+      <TableCell>
+        <div className={classes.logoCell}>
+          <img src={i9nDef.Logo} width={15} height={15} alt="" />
+          <span className={classes.logoText}> {i9nDef.label}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <i9nDef.Status integration={props.integration} tenant={tenant} />
+      </TableCell>
+      <TableCell>
+        {format(parseISO(props.integration.created_at), "Pppp")}
+      </TableCell>
+    </TableRow>
+  );
+};
+
+export const InstalledIntegrations = () => {
   const integrations = useIntegrationList();
 
   return (
@@ -69,37 +104,9 @@ export const InstalledIntegrations = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {integrations.map(i9n => {
-              const i9nDef = integrationDefRecords[i9n.kind];
-              return (
-                <TableRow
-                  hover={true}
-                  className={classes.integrationRow}
-                  key={i9n.id}
-                  onClick={() =>
-                    history.push(
-                      showIntegrationPath({ tenant, integration: i9n })
-                    )
-                  }
-                >
-                  <TableCell component="th" scope="row">
-                    {i9n.name}
-                  </TableCell>
-                  <TableCell>
-                    <div className={classes.logoCell}>
-                      <img src={i9nDef.Logo} width={15} height={15} alt="" />
-                      <span className={classes.logoText}> {i9nDef.label}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <i9nDef.Status integration={i9n} tenant={tenant} />
-                  </TableCell>
-                  <TableCell>
-                    {format(parseISO(i9n.created_at), "Pppp")}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {integrations.map(i9n => (
+              <IntegrationRow key={i9n.id} integration={i9n} />
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
