@@ -19,7 +19,7 @@ import * as rax from "retry-axios";
 
 const request = axios.create({
   // For config options see https://github.com/axios/axios#request-config
-  timeout: 5000
+  timeout: 10000
 });
 
 request.defaults.raxConfig = {
