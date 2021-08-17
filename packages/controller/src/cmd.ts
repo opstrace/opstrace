@@ -107,7 +107,13 @@ function* core() {
 }
 
 async function main() {
-  log.info(`Starting Opstrace controller. Build information: ${BUILD_INFO}`);
+  log.info(
+    `Starting Opstrace controller. Build information: ${JSON.stringify(
+      BUILD_INFO,
+      null,
+      2
+    )}`
+  );
 
   const sagaMiddleware = createSagaMiddleware();
   createStore(rootReducer, applyMiddleware(sagaMiddleware));
