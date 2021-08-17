@@ -173,6 +173,17 @@ export function* ensureSubNetworkDoesNotExist(
     if (!existingSubNetwork) {
       return;
     }
+    if (existingSubNetwork.region.name !== gcpRegion) {
+      // the gcpRegion passed to this function is "the region to destroy in"
+      // if the detected subnetwork region does not match that it really means
+      // that we have violated an invariant and need to think things through.
+      // Don't just go ahead and delete this sub network.
+      die(
+        `existingSubNetwork.region.name: ${existingSubNetwork.region.name} ` +
+          `vs. region to destroy in: ${gcpRegion}`
+      );
+    }
+
     if (error) {
       throw error;
     }
