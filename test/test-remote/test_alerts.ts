@@ -257,36 +257,71 @@ rules:
   );
 }
 
-async function deleteE2EAlertsConfig(authTokenFilepath: string | undefined) {
+// Returns true if any deletes were performed.
+async function deleteE2EAlertsConfig(
+  authTokenFilepath: string | undefined,
+  tenant: string
+): Promise<boolean> {
+  log.info(`Deleting any alerts configs that exist for tenant=${tenant}`);
+  let deletesOccurred = false;
+
   // Delete any alertmanager config created for tenant earlier
   // Using cortex API proxied via config-api: https://cortexmetrics.io/docs/api/#delete-alertmanager-configuration
   const alertmanagerConfigUrl = `${CLUSTER_BASE_URL}/api/v1/alerts`;
-  const alertmanagerDeleteResponse = await got.delete(alertmanagerConfigUrl, {
+  const alertmanagerGetResponse = await got.get(alertmanagerConfigUrl, {
     throwHttpErrors: false,
     timeout: httpTimeoutSettings,
     headers: enrichHeadersWithAuthTokenFile(authTokenFilepath, {}),
     https: { rejectUnauthorized: CORTEX_API_TLS_VERIFY }
   });
-  logHTTPResponse(alertmanagerDeleteResponse);
-  assert(
-    alertmanagerDeleteResponse.statusCode == 202 ||
+  logHTTPResponse(alertmanagerGetResponse);
+
+  // Only delete if the config currently exists (non-404).
+  // This reduces the possibility of a rapid delete+set causing a race condition
+  if (alertmanagerGetResponse.statusCode !== 404) {
+    const alertmanagerDeleteResponse = await got.delete(alertmanagerConfigUrl, {
+      throwHttpErrors: false,
+      timeout: httpTimeoutSettings,
+      headers: enrichHeadersWithAuthTokenFile(authTokenFilepath, {}),
+      https: { rejectUnauthorized: CORTEX_API_TLS_VERIFY }
+    });
+    logHTTPResponse(alertmanagerDeleteResponse);
+    assert(
+      alertmanagerDeleteResponse.statusCode == 202 ||
       alertmanagerDeleteResponse.statusCode == 200
-  );
+    );
+    deletesOccurred = true;
+  }
 
   // Delete any 'testremote' rule namespace created for tenant earlier
   // Using cortex API proxied via config-api: https://cortexmetrics.io/docs/api/#delete-namespace
   const ruleGroupConfigUrl = `${CLUSTER_BASE_URL}/api/v1/rules/testremote`;
-  const ruleGroupDeleteResponse = await got.delete(ruleGroupConfigUrl, {
+  const ruleGroupGetResponse = await got.get(ruleGroupConfigUrl, {
     throwHttpErrors: false,
     timeout: httpTimeoutSettings,
     headers: enrichHeadersWithAuthTokenFile(authTokenFilepath, {}),
     https: { rejectUnauthorized: CORTEX_API_TLS_VERIFY }
   });
-  logHTTPResponse(ruleGroupDeleteResponse);
-  assert(
-    ruleGroupDeleteResponse.statusCode == 202 ||
-      ruleGroupDeleteResponse.statusCode == 404
-  );
+  logHTTPResponse(ruleGroupGetResponse);
+
+  // Only delete if the config currently exists (non-404).
+  // This reduces the possibility of a rapid delete+set causing a race condition
+  if (ruleGroupGetResponse.statusCode !== 404) {
+    const ruleGroupDeleteResponse = await got.delete(ruleGroupConfigUrl, {
+      throwHttpErrors: false,
+      timeout: httpTimeoutSettings,
+      headers: enrichHeadersWithAuthTokenFile(authTokenFilepath, {}),
+      https: { rejectUnauthorized: CORTEX_API_TLS_VERIFY }
+    });
+    logHTTPResponse(ruleGroupDeleteResponse);
+    assert(
+      ruleGroupDeleteResponse.statusCode == 202 ||
+        ruleGroupDeleteResponse.statusCode == 404
+    );
+    deletesOccurred = true;
+  }
+
+  return deletesOccurred;
 }
 
 async function getE2EAlertCountMetric(
@@ -329,13 +364,7 @@ async function setupE2EAlertsForTenant(
   tenant: string,
   uniqueScrapeJobName: string
 ): Promise<Array<K8sResource>> {
-  // Before deploying anything, delete any existing alertmanager/rulegroup configuration.
-  // This avoids an old alert config writing to the newly deployed webhook, making its hit count 1 when we expect 0
-  // This should only be a problem when running the same test repeatedly against a cluster.
-  log.info(`Deleting any preexisting E2E alerts webhook for tenant=${tenant}`);
-  await deleteE2EAlertsConfig(authTokenFilepath);
-
-  log.info("Setting up E2E alerts webhook for tenant=${tenant}");
+  log.info(`Setting up E2E alerts webhook for tenant=${tenant}`);
   await storeE2EAlertsConfig(authTokenFilepath, tenant);
 
   log.info(`Deploying E2E alerting resources into ${tenant}-tenant namespace`);
@@ -421,6 +450,28 @@ suite("End-to-end alert tests", function () {
       );
     }
 
+    // Before deploying anything, delete any existing alertmanager/rulegroup configuration.
+    // This avoids an old alert config writing to the newly deployed webhook, making its hit count 1 when we expect 0
+    // This should only be a problem when running the same test repeatedly against a cluster.
+    log.info(`Deleting any preexisting E2E alerts webhooks`);
+    const deletedDefault = await deleteE2EAlertsConfig(
+      TENANT_DEFAULT_API_TOKEN_FILEPATH,
+      "default"
+    );
+    const deletedSystem = await deleteE2EAlertsConfig(
+      TENANT_SYSTEM_API_TOKEN_FILEPATH,
+      "system"
+    );
+    // If any deletes were requested, do a quick sleep() to reduce the likelihood of a
+    // race condition between configs being deleted and then assigned.
+    // See also: https://github.com/opstrace/opstrace/issues/1130
+    if (deletedDefault || deletedSystem) {
+      log.info("Waiting 15s after configs were deleted");
+      sleep(15.0);
+    } else {
+      log.info("Continuing immediately after no configs needed to be deleted");
+    }
+
     // To save time, we set up the default and system tenant E2E environments in parallel
     const defaultTestResources = await setupE2EAlertsForTenant(
       kubeConfig,
@@ -454,8 +505,15 @@ suite("End-to-end alert tests", function () {
 
     // Clean up both tenants
     log.info("Deleting E2E alerts webhooks");
-    await deleteE2EAlertsConfig(TENANT_DEFAULT_API_TOKEN_FILEPATH);
-    await deleteE2EAlertsConfig(TENANT_SYSTEM_API_TOKEN_FILEPATH);
+    await deleteE2EAlertsConfig(
+      TENANT_DEFAULT_API_TOKEN_FILEPATH,
+      "default"
+    );
+    await deleteE2EAlertsConfig(
+      TENANT_SYSTEM_API_TOKEN_FILEPATH,
+      "system"
+    );
+    // Don't worry about sleep()ing here since we aren't going to set a new config right away.
 
     log.info("Deleting E2E alerting resources");
     await deleteAll(testResources);
