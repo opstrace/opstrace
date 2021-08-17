@@ -50,7 +50,7 @@ const snclient = google.servicenetworking("v1");
  * `addressName`: "The name of one IP address range for the service producer",
  * "of type PEERING."
  */
-async function peerVpcs({
+async function createServiceConnection({
   addressName,
   network
 }: {
@@ -282,7 +282,8 @@ export function* ensureCloudSQLExists({
       2
     )}`
   );
-  yield call(peerVpcs, { network, addressName });
+
+  yield call(createServiceConnection, { network, addressName });
 
   let attemptNumber = 0;
   const sqlInstanceCreationDeadline = Date.now() + 15 * 60 * SECOND;
