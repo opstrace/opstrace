@@ -15,13 +15,10 @@
  */
 
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { integrationsDefs } from "client/integrations";
-import {
-  IntegrationDef,
-  addIntegrationPath
-} from "client/integrations";
+import { IntegrationDef, addIntegrationPath } from "client/integrations";
 
 import { Box } from "client/components/Box";
 import Grid from "@material-ui/core/Grid";
@@ -31,18 +28,8 @@ import { Button } from "client/components/Button";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 
 const Integration = (props: { integrationDef: IntegrationDef }) => {
-  const history = useHistory();
   const tenant = useSelectedTenantWithFallback();
 
-  const onAdd = () => {
-    history.push(
-      addIntegrationPath({
-        tenant: tenant,
-        integrationDef: props.integrationDef
-      })
-    );
-  };
-  
   return (
     <Grid
       key={props.integrationDef.kind}
@@ -51,7 +38,7 @@ const Integration = (props: { integrationDef: IntegrationDef }) => {
       sm={6}
       data-test={`integrations/grid/${props.integrationDef.kind}`}
     >
-      <Card>
+      <Card data-testid={`${props.integrationDef.kind}-card`}>
         <CardHeader
           avatar={
             <img
@@ -66,14 +53,17 @@ const Integration = (props: { integrationDef: IntegrationDef }) => {
           action={
             <Box ml={3} display="flex" flexWrap="wrap">
               <Box p={1}>
-                <Button
-                  variant="contained"
-                  state="primary"
-                  size="small"
-                  onClick={() => onAdd()}
+                <Link
+                  style={{ textDecoration: "none" }}
+                  to={addIntegrationPath({
+                    tenant: tenant,
+                    integrationDef: props.integrationDef
+                  })}
                 >
-                  Install
-                </Button>
+                  <Button variant="contained" state="primary" size="small">
+                    Install
+                  </Button>
+                </Link>
               </Box>
             </Box>
           }
