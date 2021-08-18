@@ -1264,31 +1264,37 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         labels: {
           severity: "warning"
         }
-      },
-      {
-        alert: "CortexAllocatingTooMuchMemory",
-        annotations: {
-          message:
-            "Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.\n"
-        },
-        expr: '(\n  container_memory_working_set_bytes{container="ingester"}\n    /\n  container_spec_memory_limit_bytes{container="ingester"}\n) > .5\n',
-        for: "15m",
-        labels: {
-          severity: "warning"
-        }
-      },
-      {
-        alert: "CortexAllocatingTooMuchMemory",
-        annotations: {
-          message:
-            "Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.\n"
-        },
-        expr: '(\n  container_memory_working_set_bytes{container="ingester"}\n    /\n  container_spec_memory_limit_bytes{container="ingester"}\n) > 0.8\n',
-        for: "15m",
-        labels: {
-          severity: "critical"
-        }
       }
+      // Disable this alert until we enable container memory limits for the ingesters.  (Without
+      // limits the denominator resolves to 0.)
+      //
+      // TODO: when reenabling this alert, it would be nice to group by `severity`, so we don't
+      //       get 2 alerts—one for warning and one for critical.
+      //
+      // {
+      //   alert: "CortexAllocatingTooMuchMemory",
+      //   annotations: {
+      //     message:
+      //       "Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.\n"
+      //   },
+      //   expr: '(\n  container_memory_working_set_bytes{container="ingester"}\n    /\n  container_spec_memory_limit_bytes{container="ingester"}\n) > .5\n',
+      //   for: "15m",
+      //   labels: {
+      //     severity: "warning"
+      //   }
+      // },
+      // {
+      //   alert: "CortexAllocatingTooMuchMemory",
+      //   annotations: {
+      //     message:
+      //       "Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.\n"
+      //   },
+      //   expr: '(\n  container_memory_working_set_bytes{container="ingester"}\n    /\n  container_spec_memory_limit_bytes{container="ingester"}\n) > 0.8\n',
+      //   for: "15m",
+      //   labels: {
+      //     severity: "critical"
+      //   }
+      // }
     ]
   },
   {
