@@ -21,9 +21,9 @@
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@redux-saga/types": "^1.1.0",
+    "@types/js-yaml": "^3.12.5",
     "@types/node": "^16.6.1",
     "@types/source-map-support": "^0.5.4",
-    "@types/js-yaml": "^3.12.5",
     "@types/yup": "^0.28.3",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
@@ -50,6 +50,8 @@
     "wsrun": "^5.2.4"
   },
   "dependencies": {
+    "@types/js-yaml": "^3.12.5",
+    "github-label-sync": "^2.0.2",
     "typesafe-actions": "^5.1.0"
   },
   "resolutions": {
