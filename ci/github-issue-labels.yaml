@@ -133,16 +133,17 @@
   aliases: []
   description: "a specific question (from inside or outside)"
 
-# grey for state dddddd
-# Will need to see how/if we manage state in this repo (with codetree?)
+# grey for state/status (dddddd)
+# Includes labels 'backlog', 'in progress' and 'codetree-epic' 
+# for use by Codetree.
 
 - name: "backlog"
   color: "dddddd"
-  aliases: ["state: backlog"]
+  aliases: []
   description: "state (used by codetree)"
 - name: "in progress"
   color: "dddddd"
-  aliases: ["state: in-progress"]
+  aliases: []
   description: "state (used by codetree)"
 - name: "codetree-epic"
   color: "dddddd"
