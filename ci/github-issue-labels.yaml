@@ -144,7 +144,10 @@
   color: "dddddd"
   aliases: ["state: in-progress"]
   description: "state (used by codetree)"
-
+- name: "codetree-epic"
+  color: "dddddd"
+  aliases: []
+  description: ""
 - name: "state: wontdo"
   color: "dddddd"
   aliases: []
