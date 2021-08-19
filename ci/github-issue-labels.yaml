@@ -73,6 +73,11 @@
   aliases: ["area: ui"]
   description: ""
 
+- name: "area: system-monitoring"
+  color: "d4c5f9"
+  aliases: []
+  description: "task/issue related to system monitoring including alerts and dashboards"
+
 - name: "area: cli"
   color: "d4c5f9"
   aliases: []
