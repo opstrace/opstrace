@@ -72,34 +72,42 @@
   color: "d4c5f9"
   aliases: ["area: ui"]
   description: ""
+
 - name: "area: cli"
   color: "d4c5f9"
   aliases: []
   description: ""
-- name: "area: test-remote"
+
+- name: "area: test suites"
   color: "d4c5f9"
-  aliases: []
-  description: ""
+  aliases: ["area: test-remote", "area: test-browser"]
+  description: "test-remote, test-browser, looker, etc"
+
 - name: "area: installer"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: uninstaller"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: controller"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: dns-service"
   color: "d4c5f9"
   aliases: []
   description: "task/issue related to our DNS service, but also DNS service client in CLI"
+
 - name: "area: ci"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: docs"
   color: "d4c5f9"
   aliases: []
