@@ -16,7 +16,7 @@
 
 import { strict as assert } from "assert";
 
-import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
+import { ZonedDateTime } from "@js-joda/core";
 import got, { Response as GotResponse } from "got";
 import Long from "long";
 
@@ -49,6 +49,8 @@ export interface MetricSeriesOpts {
   sample_time_increment_ns: number;
   n_samples_per_series_fragment: number;
   wtopts?: WalltimeCouplingOptions;
+  // Supposed to contain a prometheus counter object, providing an inc() method.
+  counterForwardLeap?: any;
 }
 
 export interface MetricSeriesFetchAndValidateOpts {
@@ -67,8 +69,6 @@ export class MetricSeries extends TimeseriesBase {
   private metrics_time_increment_ms: Long;
   private fragmentWidthSecondsForQuery: BigInt;
   private lastValue: number;
-  //Supposed to contain a prometheus counter object, providing an inc() method.
-  private counterForwardLeap: any | undefined;
 
   //private logLagBehindWalltimeEveryNseconds: private;
 
@@ -303,6 +303,20 @@ export class MetricSeries extends TimeseriesBase {
     //  genduration.toFixed(3)
     //);
     return [shiftIntoPastSeconds, fragment];
+  }
+
+  protected lastSampleSecondsSinceEpoch(): number {
+    return this.millisSinceEpochOfLastGeneratedSample.divide(1000).toNumber();
+  }
+
+  protected leapForward(): void {
+    // invariant: this must not be called when `this.walltimeCouplingOptions`
+    // is undefined.
+    assert(this.walltimeCouplingOptions);
+    this.millisSinceEpochOfLastGeneratedSample =
+      this.millisSinceEpochOfLastGeneratedSample.add(
+        Number(this.walltimeCouplingOptions.leapForwardNSeconds) * 1000
+      );
   }
 
   public generateAndGetNextFragment(): [
