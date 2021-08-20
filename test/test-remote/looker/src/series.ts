@@ -212,6 +212,26 @@ export abstract class TimeseriesBase {
     if (!Number.isInteger(opts.sample_time_increment_ns)) {
       throw new Error("metrics_time_increment_ms must be an integer value");
     }
+
+    if (opts.wtopts !== undefined) {
+      // Calculate how much later the last sample of the next fragment would be
+      // compare to the last sample of the previous fragment. Do not do
+      // (opts.n_samples_per_series_fragment-1) because this time width is
+      // actually compared to the last sample in the previous fragment
+      // think: "maxTimeLeapComparedToPreviousFragmentSeconds"
+      const mtls =
+        opts.n_samples_per_series_fragment *
+        (opts.sample_time_increment_ns / 10 ** 6);
+      if (mtls >= opts.wtopts.minLagSeconds) {
+        throw new Error(
+          "a single series fragment may cover " +
+            (mtls / 60.0).toFixed(2) +
+            "minute(s) worth of data. That may put us too far into the " +
+            "future. Reduce sample count per fragment or reduce " +
+            "time between samples."
+        );
+      }
+    }
   }
 
   protected abstract buildLabelSetFromOpts(

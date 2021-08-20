@@ -28,7 +28,7 @@ import { logHTTPResponse, httpTimeoutSettings } from "../util";
 
 import * as mathjs from "mathjs";
 
-import { TimeseriesBase, LabelSet } from "../series";
+import { TimeseriesBase, LabelSet, WalltimeCouplingOptions } from "../series";
 
 import {
   MetricSample,
@@ -48,6 +48,7 @@ export interface MetricSeriesOpts {
   // next_timestamp = previous_timestamp + increment
   sample_time_increment_ns: number;
   n_samples_per_series_fragment: number;
+  wtopts?: WalltimeCouplingOptions;
 }
 
 export interface MetricSeriesFetchAndValidateOpts {
@@ -61,8 +62,6 @@ export interface MetricSeriesFetchAndValidateOpts {
   ) => Promise<GotResponse<string>>;
 }
 
-// Maybe rename to DummySeriesMetrics
-// or LookerSeriesMetrics or ...MetricSeries
 export class MetricSeries extends TimeseriesBase {
   private millisSinceEpochOfLastGeneratedSample: Long;
   private metrics_time_increment_ms: Long;
@@ -126,21 +125,6 @@ export class MetricSeries extends TimeseriesBase {
             "multiple of one second if it is larger than one second"
         );
       }
-    }
-
-    // Calculate how much later the last sample of the next fragment would be
-    // compare to the last sample of the previous fragment. Do not do
-    // (opts.n_entries_per_stream_fragment-1) because this time width is
-    // actually compared to the last sample in the previous fragment
-    const maxTimeLeapComparedToPreviousFragmentSeconds =
-      (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) /
-      1000;
-    if (maxTimeLeapComparedToPreviousFragmentSeconds >= 10 * 60) {
-      throw new Error(
-        "a single fragment may cover 10 minutes worth of data. " +
-          "That may put us too far into the future. Reduce sample count in a " +
-          "fragment or reduce time between samples."
-      );
     }
 
     // The actual time width of a fragment in seconds, may be a float.

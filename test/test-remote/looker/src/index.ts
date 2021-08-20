@@ -222,7 +222,11 @@ async function createNewSeries(
           // to be for the expected regime that users choose
           // `CFG.metrics_time_increment_ms` from.
           sample_time_increment_ns: CFG.metrics_time_increment_ms * 1000,
-          labelset: labelset
+          labelset: labelset,
+          wtopts: {
+            maxLagSeconds: 30 * 60,
+            minLagSeconds: 5 * 60
+          }
         },
         pm.counter_forward_leap
       );
@@ -235,7 +239,8 @@ async function createNewSeries(
         sample_time_increment_ns: CFG.log_time_increment_ns,
         includeTimeInMsg: true,
         labelset: labelset,
-        compressability: CFG.compressability
+        compressability: CFG.compressability,
+        wtopts: undefined // explititly disable for now during dev
       });
     }
 
