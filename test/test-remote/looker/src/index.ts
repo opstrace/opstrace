@@ -191,46 +191,44 @@ async function createNewSeries(
             );
       // TODO some sort of adjustable cardinality here, where the number of distinct label
       //      permutations across a series is configurable? (e.g. 10k distinct labels across a series)
-      stream = new MetricSeries(
-        {
-          // kept distinct across concurrent streams, see above TODO about sharing metric names
-          // ensure any dashes in metric name are switched to underscores: required by prometheus
-          // see also: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
-          metricName: streamname.replace(/-/g, "_"),
-          // must not collide among concurrent streams
-          uniqueName: streamname,
-          n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
+      stream = new MetricSeries({
+        // kept distinct across concurrent streams, see above TODO about sharing metric names
+        // ensure any dashes in metric name are switched to underscores: required by prometheus
+        // see also: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
+        metricName: streamname.replace(/-/g, "_"),
+        // must not collide among concurrent streams
+        uniqueName: streamname,
+        n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
 
-          // With Cortex' Blocks Storage system, we cannot go into the future
-          // compared to "now" (from Cortex' system time point of view), but we
-          // also cannot fall behind for more than 60 minutes, see
-          // https://github.com/cortexproject/cortex/issues/2366. That means that
-          // the wall time passed after MetricSeries initialization matters.
-          // How exactly it matters depends on the synthetically created time
-          // difference between adjacent metric samples and the push rate. Use
-          // the one hour leeway that we have here in a 'smart' way; let each
-          // MetricSeries start in the _center_ of the timewindow, i.e 30
-          // minutes in the past compared to "now", where "now" really is
-          // MetricSeries() initialization: use wall time as start time, so
-          // that when generating new streams during runtime (from cycle to
-          // cycle) that we don't keep going back to using the program's
-          // invocation time, as is done for logs (where Loki accepts incoming
-          // data from far in the past),
-          starttime: ZonedDateTime.now().minusSeconds(subtractSecs).withNano(0),
-          // any check needed before doing this multiplication? would love to
-          // have guarantee that the result is the sane integer that it needs
-          // to be for the expected regime that users choose
-          // `CFG.metrics_time_increment_ms` from.
-          sample_time_increment_ns: CFG.metrics_time_increment_ms * 1000,
-          labelset: labelset,
-          wtopts: {
-            maxLagSeconds: 30 * 60,
-            minLagSeconds: 5 * 60,
-            leapForwardNSeconds: BigInt(5 * 60)
-          }
+        // With Cortex' Blocks Storage system, we cannot go into the future
+        // compared to "now" (from Cortex' system time point of view), but we
+        // also cannot fall behind for more than 60 minutes, see
+        // https://github.com/cortexproject/cortex/issues/2366. That means that
+        // the wall time passed after MetricSeries initialization matters.
+        // How exactly it matters depends on the synthetically created time
+        // difference between adjacent metric samples and the push rate. Use
+        // the one hour leeway that we have here in a 'smart' way; let each
+        // MetricSeries start in the _center_ of the timewindow, i.e 30
+        // minutes in the past compared to "now", where "now" really is
+        // MetricSeries() initialization: use wall time as start time, so
+        // that when generating new streams during runtime (from cycle to
+        // cycle) that we don't keep going back to using the program's
+        // invocation time, as is done for logs (where Loki accepts incoming
+        // data from far in the past),
+        starttime: ZonedDateTime.now().minusSeconds(subtractSecs).withNano(0),
+        // any check needed before doing this multiplication? would love to
+        // have guarantee that the result is the sane integer that it needs
+        // to be for the expected regime that users choose
+        // `CFG.metrics_time_increment_ms` from.
+        sample_time_increment_ns: CFG.metrics_time_increment_ms * 1000,
+        labelset: labelset,
+        wtopts: {
+          maxLagSeconds: 30 * 60,
+          minLagSeconds: 5 * 60,
+          leapForwardNSeconds: 5 * 60
         },
-        pm.counter_forward_leap
-      );
+        counterForwardLeap: pm.counter_forward_leap
+      });
     } else {
       stream = new LogSeries({
         n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
