@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { ZonedDateTime } from "@js-joda/core";
+import { strict as assert } from "assert";
+
+import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
 
 import {
   LogSeriesOpts,
@@ -31,6 +33,8 @@ import {
   MetricSeriesFetchAndValidateOpts,
   MetricSeriesFragmentStats
 } from "./metrics";
+
+import { log } from "./log";
 
 export interface LabelSet {
   [key: string]: string;
@@ -194,6 +198,9 @@ export abstract class TimeseriesBase {
    */
   protected walltimeCouplingOptions: WalltimeCouplingOptions | undefined;
 
+  // Supposed to contain a prometheus counter object, providing an inc() method.
+  protected counterForwardLeap: any | undefined;
+
   n_samples_per_series_fragment: number;
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
@@ -233,6 +240,15 @@ export abstract class TimeseriesBase {
         );
       }
     }
+
+    if (opts.counterForwardLeap !== undefined) {
+      this.counterForwardLeap = opts.counterForwardLeap;
+      if (opts.counterForwardLeap.inc === undefined) {
+        throw new Error(
+          "the counterForwardLeap obj needs to have an `inc()` method"
+        );
+      }
+    }
   }
 
   protected abstract buildLabelSetFromOpts(
@@ -258,6 +274,22 @@ export abstract class TimeseriesBase {
   protected abstract generateNextFragment():
     | [number, MetricSeriesFragment | undefined]
     | LogSeriesFragment;
+
+  /**
+   * Return floating point number representing the timestamp of the last sample
+   * in "seconds since epoch". It is OK to potentially have less absolute
+   * precision as compared to the internal time-keeping variables (can't fit
+   * nanosecond resolution for a wide date range into double precision float,
+   * which is why for log series the prometheus ecosystem tracks seconds and
+   * the fractional part in nanoseconds in two separate variables).
+   */
+  protected abstract lastSampleSecondsSinceEpoch(): number;
+
+  /**
+   * Leap forward by N seconds, according to walltimeCouplingOptions. Must only
+   * be called after just having completed a fragment (right?).
+   */
+  protected abstract leapForward(): void;
 
   abstract fetchAndValidate(
     opts: MetricSeriesFetchAndValidateOpts | LogSeriesFetchAndValidateOpts
