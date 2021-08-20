@@ -62,6 +62,9 @@ export interface LogSeriesOpts {
 
   // if undefined: do not couple to wall time
   wtopts?: WalltimeCouplingOptions;
+
+  // Supposed to contain a prometheus counter object, providing an inc() method.
+  counterForwardLeap?: any;
 }
 
 type TypeHttpHeaderDict = Record<string, string>;
@@ -281,6 +284,16 @@ export class LogSeries extends TimeseriesBase {
       }
       await pushrequest.postWithRetryOrError(lokiBaseUrl, 3, additionalHeaders);
     }
+  }
+
+  protected leapForward(): void {
+    // invariant: this must not be called when `this.walltimeCouplingOptions`
+    // is undefined.
+    assert(this.walltimeCouplingOptions);
+
+    this.currentSeconds += Number(
+      this.walltimeCouplingOptions.leapForwardNSeconds
+    );
   }
 
   public currentTime(): ZonedDateTime {
