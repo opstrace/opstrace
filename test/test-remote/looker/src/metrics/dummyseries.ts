@@ -79,22 +79,12 @@ export class MetricSeries extends TimeseriesBase {
   // that we ideally save memory
   postedFragmentsSinceLastValidate: Array<MetricSeriesFragment> | undefined;
 
-  constructor(opts: MetricSeriesOpts, counterForwardLeap?: any) {
+  constructor(opts: MetricSeriesOpts) {
     super(opts);
 
     this.postedFragmentsSinceLastValidate = undefined;
 
     this.metricName = opts.metricName;
-
-    this.counterForwardLeap = undefined;
-    if (counterForwardLeap !== undefined) {
-      this.counterForwardLeap = counterForwardLeap;
-      if (counterForwardLeap.inc === undefined) {
-        throw new Error(
-          "the counterForwardLeap arg needs to have an `inc()` method"
-        );
-      }
-    }
 
     if (opts.starttime.nano() != 0) {
       throw new Error("start time must not have fraction of seconds");
