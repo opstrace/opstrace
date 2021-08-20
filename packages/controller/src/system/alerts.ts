@@ -857,7 +857,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeCPUUtilizationSevere",
           dashboard: grafanaUrl
         },
-        expr: '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > .8\n)',
+        expr: '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > 0.8\n)',
         for: "10m",
         labels: {
           severity: "critical"
@@ -870,7 +870,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeCPUUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr: '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > .5\n)',
+        expr: '(\ninstance:node_cpu_utilisation:rate1m{job="node-exporter"}\n *\n instance:node_num_cpu:sum{job="node-exporter"}\n / ignoring (instance) group_left\n sum without (instance) (instance:node_num_cpu:sum{job="node-exporter"}) > 0.7\n)',
         for: "10m",
         labels: {
           severity: "low"
@@ -896,7 +896,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeNetworkUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr: 'instance:node_network_receive_bytes_excluding_lo:rate1m{job="node-exporter"} > 50000000',
+        expr: 'instance:node_network_receive_bytes_excluding_lo:rate1m{job="node-exporter"} > 100000000',
         for: "10m",
         labels: {
           severity: "warn"
@@ -909,7 +909,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url: runbookUrl + "/system.md#NodeNetworkUtilizationElevated",
           dashboard: grafanaUrl
         },
-        expr: 'instance:node_network_transmit_bytes_excluding_lo:rate1m{job="node-exporter"} < -50000000',
+        expr: 'instance:node_network_transmit_bytes_excluding_lo:rate1m{job="node-exporter"} < -100000000',
         for: "10m",
         labels: {
           severity: "warn"
