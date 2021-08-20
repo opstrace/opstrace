@@ -225,7 +225,8 @@ async function createNewSeries(
           labelset: labelset,
           wtopts: {
             maxLagSeconds: 30 * 60,
-            minLagSeconds: 5 * 60
+            minLagSeconds: 5 * 60,
+            leapForwardNSeconds: BigInt(5 * 60)
           }
         },
         pm.counter_forward_leap
