@@ -36,6 +36,11 @@ export interface LabelSet {
   [key: string]: string;
 }
 
+export interface WalltimeCouplingOptions {
+  maxLagSeconds: number;
+  minLagSeconds: number;
+}
+
 export interface FragmentStatsBase {
   // Use BigInt to stress that this is never fractional -- worry about perf
   // later.
@@ -175,6 +180,18 @@ export abstract class TimeseriesBase {
   /** For keeing track of how many entries were validated (from the start of the
    *stream). Used by fetchAndValidate(). */
   protected nSamplesValidatedSoFar: bigint;
+
+  /**
+   * Configure 'walltime couplling' where the synthetic time source is loosely
+   * coupled to the wall time.
+   *
+   * `undefined`: disable this mechanism. can fall back into the past
+   * arbitrarily far, and go into the future arbitrarily far. Not expected to
+   * work for metrics (cortex, blocks storage) -- may work for logs (loki, also
+   * see reject_old_samples option and discussion in
+   * https://github.com/opstrace/opstrace/pull/1140#discussion_r679837228)
+   */
+  protected walltimeCouplingOptions: WalltimeCouplingOptions | undefined;
 
   n_samples_per_series_fragment: number;
   uniqueName: string;
