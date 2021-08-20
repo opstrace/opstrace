@@ -217,7 +217,11 @@ async function createNewSeries(
           // invocation time, as is done for logs (where Loki accepts incoming
           // data from far in the past),
           starttime: ZonedDateTime.now().minusSeconds(subtractSecs).withNano(0),
-          metrics_time_increment_ms: CFG.metrics_time_increment_ms,
+          // any check needed before doing this multiplication? would love to
+          // have guarantee that the result is the sane integer that it needs
+          // to be for the expected regime that users choose
+          // `CFG.metrics_time_increment_ms` from.
+          sample_time_increment_ns: CFG.metrics_time_increment_ms * 1000,
           labelset: labelset
         },
         pm.counter_forward_leap
@@ -228,7 +232,7 @@ async function createNewSeries(
         n_chars_per_msg: CFG.n_chars_per_msg,
         starttime: ZonedDateTime.parse(CFG.log_start_time),
         uniqueName: streamname,
-        timediffNanoseconds: CFG.log_time_increment_ns,
+        sample_time_increment_ns: CFG.log_time_increment_ns,
         includeTimeInMsg: true,
         labelset: labelset,
         compressability: CFG.compressability

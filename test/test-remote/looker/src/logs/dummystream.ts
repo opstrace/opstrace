@@ -51,7 +51,10 @@ export interface LogSeriesOpts {
   n_samples_per_series_fragment: number;
   n_chars_per_msg: number;
   starttime: ZonedDateTime;
-  timediffNanoseconds: number;
+  // The time difference between adjacent log samples in a series fragment, in
+  // nanoseconds. Expected to be an integer. Defined via the substraction of
+  // timestamps: T_(i+1) - T_i
+  sample_time_increment_ns: number;
   includeTimeInMsg: boolean;
   uniqueName: string;
   labelset: LabelSet | undefined;
@@ -100,7 +103,7 @@ export class LogSeries extends TimeseriesBase {
     this.firstEntryGenerated = false;
 
     this.n_chars_per_msg = opts.n_chars_per_msg;
-    this.timediffNanoseconds = opts.timediffNanoseconds;
+    this.timediffNanoseconds = opts.sample_time_increment_ns;
     this.nFragmentsConsumed = 0;
     this.includeTimeInMsg = opts.includeTimeInMsg;
 
