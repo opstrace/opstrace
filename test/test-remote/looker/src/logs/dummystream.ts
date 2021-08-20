@@ -196,6 +196,13 @@ export class LogSeries extends TimeseriesBase {
     return text;
   }
 
+  // Note(JP): this is OK to lose precision compared to the internal two
+  // var-based representation (though I don't understand enough of JavaScripts
+  // number type to know if this actually may lose precision.
+  protected lastSampleSecondsSinceEpoch(): number {
+    return this.currentSeconds + this.currentNanos / 10 ** 9;
+  }
+
   protected nextSample(): LogSample {
     // don't bump time before first entry was generated.
     if (this.firstEntryGenerated) {
