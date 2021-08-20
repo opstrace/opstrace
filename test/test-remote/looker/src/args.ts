@@ -101,8 +101,8 @@ export function parseCmdlineArgs(): void {
     required: true
   });
 
-  parser.add_argument("--n-entries-per-stream-fragment", {
-    help: "number of log entries per log stream fragment (or number of metric samples per fragment)",
+  parser.add_argument("--n-samples-per-series-fragment", {
+    help: "number of log entries or number of metric samples per time series fragment",
     type: "int",
     required: true
   });
