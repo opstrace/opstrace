@@ -161,7 +161,7 @@ export class LogSeries extends TimeseriesBase {
   //   this.n_fragments_total += n;
   // }
 
-  protected buildLabelSetFromOpts(opts: LogSeriesOpts) {
+  protected buildLabelSetFromOpts(opts: LogSeriesOpts): LabelSet {
     let ls: LabelSet;
     if (opts.labelset !== undefined) {
       ls = opts.labelset;
