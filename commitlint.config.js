@@ -22,25 +22,25 @@ module.exports = {
       2,
       "always",
       [
-        "ui", // use `ui: ` for changes to client, and `ui: app:` for changes to server
         "alerts", // use `alerts: ` for changes to alert rules, definitions, thresholds, etc.
         "bump", // third-party lib/component bump (can be big, including Cortex, ...)
         "chore", // small routine tasks, very localized refactors
         "ci", // change to automated CI pipeline
         "cli", // change to the cluster management CLI (create, destroy, ..., )
-        "cortex", // change to cortex (config change for example)
-        "go", // change to golang modules/projects (unit test setup, makefile, etc)
-        "ddapi", // change to dd api project
         "controller", // change in the k8s controller CLI
+        "cortex", // change to cortex (config change for example)
         "dashboards", // change to Grafana dashboards
+        "ddapi", // change to dd api project
         "docs", // any documentation change
-        "looker", // change to looker project
+        "go", // change to golang modules/projects (unit test setup, makefile, etc)
         "loki", // change to loki (config change for example)
+        "looker", // change to looker project
         "makefile", // change in main Makefile
         "revert", // specifically for a git revert commit
         "systemlogs", // change in opstrace system log arch/implementation
         "test-browser", // any change for the test-browser test suite
         "test-remote", // change in test-remote project
+        "ui", // use `ui: ` for changes to client, and `ui: app:` for changes to server
         "wip" // work in progress, later to be edited/squashed ("i don't want to think about choosing the right prefix now!")
       ]
     ]
