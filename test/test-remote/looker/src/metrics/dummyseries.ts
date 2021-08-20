@@ -42,7 +42,11 @@ export interface MetricSeriesOpts {
   starttime: ZonedDateTime;
   uniqueName: string;
   labelset: LabelSet | undefined;
-  metrics_time_increment_ms: number;
+  // The time difference between adjacent metric samples in a series fragment,
+  // in milliseconds. Expected to be an integer. Defined via the substraction
+  // of timestamps: T_(i+1) - T_i  or via addition:
+  // next_timestamp = previous_timestamp + increment
+  sample_time_increment_ns: number;
   n_samples_per_series_fragment: number;
 }
 
@@ -97,18 +101,29 @@ export class MetricSeries extends TimeseriesBase {
       throw new Error("start time must not have fraction of seconds");
     }
 
-    if (!Number.isInteger(opts.metrics_time_increment_ms)) {
-      throw new Error("metrics_time_increment_ms must be an integer value");
+    // Sample timestamps must not have fractions of milliseconds (that's a
+    // choice of the prometheus ecosystem).
+    if (opts.sample_time_increment_ns % 1000 !== 0) {
+      throw new Error(
+        "for metrics, sample_time_increment_ns must be integer multiple of 1000"
+      );
     }
+
+    // Translate nanoseconds to milliseconds for better readability of
+    // subsequent code.
+    const sampleTimeIncrementMs = opts.sample_time_increment_ns / 1000;
 
     // The instant-query-range-vector-selector-validation-method has
     // interesting boundary conditions. To not make things too complicated
-    // require integer multiples of 1000 for metrics_time_increment_ms when this is
-    // larger than 1000.
-    if (opts.metrics_time_increment_ms > 1000) {
-      if (opts.metrics_time_increment_ms % 1000 !== 0) {
+    // require integer multiples of 1000 for sampleTimeIncrementMs when this is
+    // larger than 1000. That is, if the user chooses that the spacing between
+    // adjacent metric samples should be later than one second, require integer
+    // multiples of one second -- disallow fractions of seconds.
+    if (sampleTimeIncrementMs > 1000) {
+      if (sampleTimeIncrementMs % 1000 !== 0) {
         throw new Error(
-          "metrics_time_increment_ms must be integer multiple of 1000 if larger than 1000"
+          "the time increment between metric samples must be an integer  " +
+            "multiple of one second if it is larger than one second"
         );
       }
     }
@@ -132,8 +147,7 @@ export class MetricSeries extends TimeseriesBase {
     // say, there are 1000 samples per fragment and metrics_time_increment_ms is 1.
     // Then the actual fragment time width is 0.999 seconds.
     const fragmentWidthSeconds =
-      ((opts.n_samples_per_series_fragment - 1) *
-        opts.metrics_time_increment_ms) /
+      ((opts.n_samples_per_series_fragment - 1) * sampleTimeIncrementMs) /
       1000.0;
 
     // For metrics_time_increment_ms being integer multiple of 1000 this is the
@@ -145,15 +159,16 @@ export class MetricSeries extends TimeseriesBase {
     this.fragmentWidthSecondsForQuery = BigInt(Math.ceil(fragmentWidthSeconds));
 
     // Distinguish two special cases, also see ch1767;
-    if (opts.metrics_time_increment_ms < 1000) {
+    if (sampleTimeIncrementMs < 1000) {
       // Does adding one delta_t result in a fragment time width of n * 1 s?
       if (
-        (opts.n_samples_per_series_fragment * opts.metrics_time_increment_ms) %
-          1000 !==
+        (opts.n_samples_per_series_fragment * sampleTimeIncrementMs) % 1000 !==
         0
       ) {
         throw new Error(
-          "with metrics_time_increment_ms < 1000 choose sample count S so that n_samples_per_series_fragment * metrics_time_increment_ms = multiple of 1000"
+          "with metrics_time_increment_ms < 1000 choose " +
+            "n_samples_per_series_fragment so that " +
+            "n_samples_per_series_fragment * metrics_time_increment_ms = multiple of 1000"
         );
       }
     }
@@ -167,9 +182,7 @@ export class MetricSeries extends TimeseriesBase {
 
     // Translate (integer number, public) opts.metrics_time_increment_ms into (actual
     // integer, private) this.metrics_time_increment_ms.
-    this.metrics_time_increment_ms = Long.fromInt(
-      opts.metrics_time_increment_ms
-    );
+    this.metrics_time_increment_ms = Long.fromInt(sampleTimeIncrementMs);
 
     // Initialize this.millisSinceEpochOfLastGeneratedSample with starttime -
     // metrics_time_increment_ms

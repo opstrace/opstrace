@@ -208,6 +208,10 @@ export abstract class TimeseriesBase {
     this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
     this.nSamplesValidatedSoFar = BigInt(0);
     this.walltimeCouplingOptions = opts.wtopts;
+
+    if (!Number.isInteger(opts.sample_time_increment_ns)) {
+      throw new Error("metrics_time_increment_ms must be an integer value");
+    }
   }
 
   protected abstract buildLabelSetFromOpts(
