@@ -218,7 +218,7 @@ export abstract class TimeseriesBase {
     this.walltimeCouplingOptions = opts.wtopts;
 
     if (!Number.isInteger(opts.sample_time_increment_ns)) {
-      throw new Error("metrics_time_increment_ms must be an integer value");
+      throw new Error("sample_time_increment_ns must be an integer value");
     }
 
     if (opts.wtopts !== undefined) {
