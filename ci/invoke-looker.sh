@@ -30,7 +30,7 @@ docker run ${COMMON_ARGS} looker \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --metrics-mode \
     --n-concurrent-streams 3 \
-    --n-entries-per-stream-fragment 25000 \
+    --n-samples-per-series-fragment 25000 \
     --stream-write-n-fragments 2 \
     --n-cycles 2 \
     > looker-metrics-${TSTRING}.log 2>&1
@@ -41,7 +41,7 @@ docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --n-concurrent-streams 3 \
-    --n-entries-per-stream-fragment 10000 \
+    --n-samples-per-series-fragment 10000 \
     --n-chars-per-msg 100 \
     --stream-write-n-fragments 15 \
     --n-cycles 3 \
@@ -55,7 +55,7 @@ docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --n-concurrent-streams 3 \
-    --n-entries-per-stream-fragment 1000 \
+    --n-samples-per-series-fragment 1000 \
     --n-chars-per-msg 100 \
     --stream-write-n-seconds 10 \
     --n-cycles 5 \
@@ -70,7 +70,7 @@ docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --n-concurrent-streams 10 \
-    --n-entries-per-stream-fragment 1000 \
+    --n-samples-per-series-fragment 1000 \
     --n-chars-per-msg 100 \
     --stream-write-n-fragments 10 \
     --max-concurrent-writes 2  \
@@ -84,7 +84,7 @@ docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --n-concurrent-streams 5 \
-    --n-entries-per-stream-fragment 5000 \
+    --n-samples-per-series-fragment 5000 \
     --n-chars-per-msg 100 \
     --stream-write-n-seconds 10 \
     --stream-write-n-seconds-jitter 5 \
@@ -99,7 +99,7 @@ docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --n-concurrent-streams 5 \
-    --n-entries-per-stream-fragment 1000 \
+    --n-samples-per-series-fragment 1000 \
     --n-fragments-per-push-message 2 \
     --n-chars-per-msg 100 \
     --max-concurrent-reads 2 \
@@ -122,7 +122,7 @@ docker run ${COMMON_ARGS} looker \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --metrics-mode \
     --n-concurrent-streams 100000 \
-    --n-entries-per-stream-fragment 5 \
+    --n-samples-per-series-fragment 5 \
     --n-fragments-per-push-message 15000 \
     --stream-write-n-fragments 2 \
     --metrics-time-increment-ms 2000 \
@@ -138,7 +138,7 @@ docker run ${COMMON_ARGS} looker \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --metrics-mode \
     --n-concurrent-streams 100000 \
-    --n-entries-per-stream-fragment 5 \
+    --n-samples-per-series-fragment 5 \
     --n-fragments-per-push-message 15000 \
     --stream-write-n-fragments 10 \
     --metrics-time-increment-ms 2000 \
@@ -163,7 +163,7 @@ docker run ${COMMON_ARGS} looker \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --metrics-mode \
     --n-concurrent-streams 1 \
-    --n-entries-per-stream-fragment 10 \
+    --n-samples-per-series-fragment 10 \
     --metrics-time-increment-ms 10000 \
     --stream-write-n-seconds 20 \
     --log-level=debug \
