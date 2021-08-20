@@ -39,6 +39,7 @@ export interface LabelSet {
 export interface WalltimeCouplingOptions {
   maxLagSeconds: number;
   minLagSeconds: number;
+  leapForwardNSeconds: bigint;
 }
 
 export interface FragmentStatsBase {
