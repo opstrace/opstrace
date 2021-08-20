@@ -1,4 +1,11 @@
-# to be `source`d
+#!/usr/bin/env bash
+set -o errexit
+set -o errtrace
+set -o nounset
+set -o pipefail
+
+# fail this script upon first looker failure -- i.e. it's OK for now to not run
+# the other looker-based tests (as a sane test runner should do).
 
 # Require env variable CHECKOUT_VERSION_STRING to be set.
 export LOOKER_IMAGE_NAME="opstrace/looker:${CHECKOUT_VERSION_STRING}"

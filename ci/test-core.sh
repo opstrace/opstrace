@@ -63,19 +63,26 @@ echo "--- Exit status of make test-browser: ${EXITCODE_MAKE_TEST_BROWSER}"
 # Copy entire `browser-test-results` directory
 cp -a --verbose "${OPSTRACE_BUILD_DIR}/browser-test-results" ${OPSTRACE_ARTIFACT_DIR} || true
 
-echo "+++ run looker tests"
+
 
 # If OPSTRACE_BUILD_DIR is not set (currently for upgrade tests) then set it to
 # pwd
 export OPSTRACE_BUILD_DIR=${OPSTRACE_BUILD_DIR:-$(pwd)}
-
 # The *API_TOKEN_FILEPATH must be absolute paths in the /tmp directory, i.e.
 # start with the OPSTRACE_BUILD_DIR so that the docker mounts actually work.
 export TENANT_DEFAULT_LOKI_API_BASE_URL="https://loki.default.${OPSTRACE_INSTANCE_DNS_NAME}"
 export TENANT_DEFAULT_CORTEX_API_BASE_URL="https://cortex.default.${OPSTRACE_INSTANCE_DNS_NAME}"
 export TENANT_DEFAULT_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-default"
 export TENANT_SYSTEM_API_TOKEN_FILEPATH="${OPSTRACE_BUILD_DIR}/tenant-api-token-system"
-source ci/invoke-looker.sh
+
+echo "+++ run looker-based test (exit early for first failure)"
+set +e
+bash ci/invoke-looker.sh
+EXITCODE_LOOKER_TESTS=$?
+set -e
+echo "--- Exit status of invoke-looker.sh: ${EXITCODE_LOOKER_TESTS}"
+
+
 cat /build/looker*report.json
 mkdir -p ${OPSTRACE_ARTIFACT_DIR}/looker
 cp -av looker*log ${OPSTRACE_ARTIFACT_DIR}/looker || true
@@ -100,4 +107,11 @@ fi
 if [ "${EXITCODE_MAKE_TESTREMOTE_UI_API}" -ne 0 ]; then
     echo "make test-remote-ui-api did exit with code ${EXITCODE_MAKE_TESTREMOTE_UI_API}. Exit now."
     exit "${EXITCODE_MAKE_TESTREMOTE_UI_API}"
+fi
+
+
+# Delayed exit if `make test-remote-ui-api` failed
+if [ "${EXITCODE_LOOKER_TESTS}" -ne 0 ]; then
+    echo "bash ci/invoke-looker.sh did exit with code ${EXITCODE_LOOKER_TESTS}. Exit now."
+    exit "${EXITCODE_LOOKER_TESTS}"
 fi
