@@ -48,7 +48,7 @@ import { TimeseriesBase, LabelSet } from "../series";
 // Note: maybe expose raw labels later on again.
 export interface LogSeriesOpts {
   // think: n log entries per stream/series fragment
-  n_entries_per_stream_fragment: number;
+  n_samples_per_series_fragment: number;
   n_chars_per_msg: number;
   starttime: ZonedDateTime;
   timediffNanoseconds: number;
@@ -218,7 +218,7 @@ export class LogSeries extends TimeseriesBase {
       this.nFragmentsConsumed + 1,
       this
     );
-    for (let i = 0; i < this.n_entries_per_stream_fragment; i++) {
+    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
       lsf.addSample(this.nextSample());
     }
     return lsf;
@@ -388,7 +388,7 @@ export class LogSeries extends TimeseriesBase {
     // chunkSize: think of it as "fetch at most those many entries per query"
     const expectedSampleCount =
       this.nFragmentsSuccessfullySentSinceLastValidate *
-      this.n_entries_per_stream_fragment;
+      this.n_samples_per_series_fragment;
 
     const vt0 = mtime();
     log.debug(

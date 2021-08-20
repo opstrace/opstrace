@@ -237,7 +237,7 @@ docker run --net=host -v $(pwd)/local-prom.yaml:/etc/prometheus/prometheus.yml p
 import { DummyStream } from "./looker/logs";
 
 const stream = new DummyStream({
-  n_entries_per_stream_fragment: 10 ** 4,
+  n_samples_per_series_fragment: 10 ** 4,
   n_chars_per_message: 90,
   starttime: ZonedDateTime.now(),
   uniqueName: "example-dummystream",
