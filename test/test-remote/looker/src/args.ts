@@ -29,7 +29,7 @@ import { DEFAULT_LOG_LEVEL_STDERR, START_TIME_JODA } from "./index";
 interface CfgInterface {
   n_concurrent_streams: number;
   n_chars_per_msg: number;
-  n_entries_per_stream_fragment: number;
+  n_samples_per_series_fragment: number;
   n_cycles: number;
   n_fragments_per_push_message: number;
   stream_write_n_fragments: number;

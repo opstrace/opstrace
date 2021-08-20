@@ -199,7 +199,7 @@ async function createNewSeries(
           metricName: streamname.replace(/-/g, "_"),
           // must not collide among concurrent streams
           uniqueName: streamname,
-          n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
+          n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
 
           // With Cortex' Blocks Storage system, we cannot go into the future
           // compared to "now" (from Cortex' system time point of view), but we
@@ -224,7 +224,7 @@ async function createNewSeries(
       );
     } else {
       stream = new LogSeries({
-        n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
+        n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
         n_chars_per_msg: CFG.n_chars_per_msg,
         starttime: ZonedDateTime.parse(CFG.log_start_time),
         uniqueName: streamname,
@@ -387,7 +387,7 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
   }
 
   log.info("fragments POSTed in write phase: %s", nStreamFragmentsSent);
-  const nEntriesSent = nStreamFragmentsSent * CFG.n_entries_per_stream_fragment;
+  const nEntriesSent = nStreamFragmentsSent * CFG.n_samples_per_series_fragment;
   let nPayloadBytesSent = nEntriesSent * CFG.n_chars_per_msg;
 
   if (CFG.metrics_mode) {
@@ -760,7 +760,7 @@ async function _produceAndPOSTpushrequest(
     pm.counter_fragments_pushed.inc(CFG.n_fragments_per_push_message);
 
     pm.counter_log_entries_pushed.inc(
-      CFG.n_entries_per_stream_fragment * CFG.n_fragments_per_push_message
+      CFG.n_samples_per_series_fragment * CFG.n_fragments_per_push_message
     );
 
     // NOTE: payloadByteCount() includes timestamps. For logs, the timestamp

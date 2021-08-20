@@ -43,7 +43,7 @@ export interface MetricSeriesOpts {
   uniqueName: string;
   labelset: LabelSet | undefined;
   metrics_time_increment_ms: number;
-  n_entries_per_stream_fragment: number;
+  n_samples_per_series_fragment: number;
 }
 
 export interface MetricSeriesFetchAndValidateOpts {
@@ -132,7 +132,7 @@ export class MetricSeries extends TimeseriesBase {
     // say, there are 1000 samples per fragment and metrics_time_increment_ms is 1.
     // Then the actual fragment time width is 0.999 seconds.
     const fragmentWidthSeconds =
-      ((opts.n_entries_per_stream_fragment - 1) *
+      ((opts.n_samples_per_series_fragment - 1) *
         opts.metrics_time_increment_ms) /
       1000.0;
 
@@ -148,12 +148,12 @@ export class MetricSeries extends TimeseriesBase {
     if (opts.metrics_time_increment_ms < 1000) {
       // Does adding one delta_t result in a fragment time width of n * 1 s?
       if (
-        (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) %
+        (opts.n_samples_per_series_fragment * opts.metrics_time_increment_ms) %
           1000 !==
         0
       ) {
         throw new Error(
-          "with metrics_time_increment_ms < 1000 choose sample count S so that n_entries_per_stream_fragment * metrics_time_increment_ms = multiple of 1000"
+          "with metrics_time_increment_ms < 1000 choose sample count S so that n_samples_per_series_fragment * metrics_time_increment_ms = multiple of 1000"
         );
       }
     }
@@ -414,7 +414,7 @@ export class MetricSeries extends TimeseriesBase {
       this
     );
 
-    for (let i = 0; i < this.n_entries_per_stream_fragment; i++) {
+    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
       fragment.addSample(this.nextSample());
     }
 
@@ -674,7 +674,7 @@ export class MetricSeries extends TimeseriesBase {
       // a non-integer value, and (if this is not the last fragment pushed
       // from a dummy series) the query is expected to return the first sample
       // of the subsequent fragment.
-      if (values.length === this.n_entries_per_stream_fragment + 1) {
+      if (values.length === this.n_samples_per_series_fragment + 1) {
         log.debug(
           "last sample in query result belongs to next fragment, ignore"
         );
