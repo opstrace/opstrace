@@ -43,7 +43,7 @@ import {
   logqlLabelString
 } from "./index";
 
-import { TimeseriesBase, LabelSet } from "../series";
+import { TimeseriesBase, LabelSet, WalltimeCouplingOptions } from "../series";
 
 // Note: maybe expose raw labels later on again.
 export interface LogSeriesOpts {
@@ -59,6 +59,9 @@ export interface LogSeriesOpts {
   uniqueName: string;
   labelset: LabelSet | undefined;
   compressability: string;
+
+  // if undefined: do not couple to wall time
+  wtopts?: WalltimeCouplingOptions;
 }
 
 type TypeHttpHeaderDict = Record<string, string>;
