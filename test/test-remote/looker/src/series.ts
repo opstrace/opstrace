@@ -43,7 +43,7 @@ export interface LabelSet {
 export interface WalltimeCouplingOptions {
   maxLagSeconds: number;
   minLagSeconds: number;
-  leapForwardNSeconds: bigint;
+  leapForwardNSeconds: number;
 }
 
 export interface FragmentStatsBase {
@@ -222,6 +222,13 @@ export abstract class TimeseriesBase {
     }
 
     if (opts.wtopts !== undefined) {
+      // I was unable to do this with a for loop based on a static set of
+      // strings or using `for (const key in obj)` -- always a type error.
+      // Huh.
+      assert(Number.isInteger(opts.wtopts["leapForwardNSeconds"]));
+      assert(Number.isInteger(opts.wtopts["minLagSeconds"]));
+      assert(Number.isInteger(opts.wtopts["maxLagSeconds"]));
+
       // Calculate how much later the last sample of the next fragment would be
       // compare to the last sample of the previous fragment. Do not do
       // (opts.n_samples_per_series_fragment-1) because this time width is
