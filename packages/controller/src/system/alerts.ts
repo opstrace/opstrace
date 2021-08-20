@@ -258,7 +258,7 @@ export default (runbookUrl: string, grafanaUrl: string) => [
           runbook_url:
             "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodnotready"
         },
-        expr: 'sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown"}) > 0\n',
+        expr: 'sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown"}, pod!="opstrace-controller-*") > 0\n',
         for: "15m",
         labels: {
           severity: "critical"
