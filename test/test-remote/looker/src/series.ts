@@ -394,6 +394,9 @@ export abstract class TimeseriesBase {
       const lfm = Number(this.walltimeCouplingOptions.leapForwardNSeconds) / 60;
       log.debug(`${this}: leap forward by ${lfm.toFixed(2)} minutes`);
 
+      // rely on the implementation here to actually leap by the amount that
+      // we just logged, and that we're going to use to build the return
+      // value below
       this.leapForward();
 
       // TODO: allow for injecting a counter (e.g., a Prometheus counter)
@@ -404,7 +407,7 @@ export abstract class TimeseriesBase {
       }
 
       // Return the _updated_ shift-into-past.
-      return shiftIntoPastSeconds - leapForwardMinutes * 60;
+      return shiftIntoPastSeconds - lfm * 60;
     } else {
       if (
         this.nFragmentsConsumed > 0 &&
