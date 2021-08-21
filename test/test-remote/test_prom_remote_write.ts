@@ -92,7 +92,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       starttime: starttime,
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      metrics_time_increment_ms: 1000,
+      sample_time_increment_ns: 1000000,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
@@ -140,7 +140,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       //starttime: now,
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      metrics_time_increment_ms: 1000,
+      sample_time_increment_ns: 1000000,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
@@ -164,7 +164,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       starttime: now.minusMinutes(45), // api does not accept samples from future
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      metrics_time_increment_ms: 1,
+      sample_time_increment_ns: 1000,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
@@ -188,7 +188,7 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       starttime: now.minusMinutes(50), // api does not accept samples from future
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
-      metrics_time_increment_ms: 1,
+      sample_time_increment_ns: 1000,
       labelset: undefined
     });
     log.info("Dummy timeseries: %s", series);
