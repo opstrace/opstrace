@@ -577,7 +577,7 @@ suite("Loki API test suite", function () {
       starttime: ZonedDateTime.now(),
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: `test-remote-${rndstring(5)}`,
-      timediffNanoseconds: 1,
+      sample_time_increment_ns: 1,
       includeTimeInMsg: true,
       labelset: undefined,
       compressability: "min"
@@ -613,7 +613,7 @@ suite("Loki API test suite", function () {
         n_chars_per_msg: 90,
         starttime: ZonedDateTime.now(),
         uniqueName: streamname,
-        timediffNanoseconds: 100,
+        sample_time_increment_ns: 100,
         includeTimeInMsg: true,
         labelset: undefined,
         compressability: "min"
