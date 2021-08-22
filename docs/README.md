@@ -5,6 +5,14 @@
 
 The Opstrace Distribution is a secure, horizontally-scalable, open source observability platform that you can install in your cloud account.
 
+```text
+HI THIS IS A TEST
+```
+
+## Why do we need a test?
+
+Because we have a new preview feature:  <https://github.com/opstrace/next-website/issues/181#issuecomment-900913387>
+
 ## What Does it Do?
 
 Opstrace automates the creation and management of a secure, horizontally-scalable metrics and logs platform.
