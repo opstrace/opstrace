@@ -28,14 +28,15 @@
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-flowtype": "^5.9.0",
     "eslint-plugin-import": "^2.24.0",
     "eslint-plugin-jsx-a11y": "6.x",
-    "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "4.x",
+    "eslint-plugin-react": "^7.24.0",
+    "eslint": "^7.32.0",
+    "github-label-sync": "^2.0.2",
     "husky": "^4.3.0",
     "istanbul-reports": "^3.0.2",
     "lint-staged": "^10.5.3",
@@ -50,8 +51,6 @@
     "wsrun": "^5.2.4"
   },
   "dependencies": {
-    "@types/js-yaml": "^3.12.5",
-    "github-label-sync": "^2.0.2",
     "typesafe-actions": "^5.1.0"
   },
   "resolutions": {
