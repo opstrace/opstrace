@@ -289,14 +289,11 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     }
   }
 
-  protected leapForward(): void {
+  protected leapForward(n: number): void {
     // invariant: this must not be called when `this.walltimeCouplingOptions`
     // is undefined.
     assert(this.walltimeCouplingOptions);
-
-    this.currentSeconds += Number(
-      this.walltimeCouplingOptions.leapForwardNSeconds
-    );
+    this.currentSeconds += n;
   }
 
   public currentTime(): ZonedDateTime {
