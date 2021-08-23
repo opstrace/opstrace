@@ -178,8 +178,8 @@ export function parseCmdlineArgs(): void {
       "log streams. Does not apply in metrics mode. Is useful when " +
       "writing to Loki that is configured to allow ingesting log samples " +
       "far from the past or future. Must be provided in " +
-      "ISO 8601 / RFC3339Nano (tz-aware) notation, example: " +
-      "2020-02-20T17:46:37.27000000Z. Note that across cycles the same " +
+      "RFC3339 notation. Use for example " +
+      'date -u +"%Y-%m-%dT%H:%M:%SZ". Note that across cycles the same ' +
       "start time is used",
     type: "str",
     default: ""
