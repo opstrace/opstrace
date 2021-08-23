@@ -216,14 +216,16 @@ async function createNewSeries(
         counterForwardLeap: pm.counter_forward_leap
       });
     } else {
+      // disable wall time coupling when --log-start-time has been set.
       let wtopts: WalltimeCouplingOptions | undefined =
         WALLTIME_COUPLING_PARAMS;
       let logstarttime: ZonedDateTime | undefined = starttime;
-      if (CFG.log_start_time) {
+      if (CFG.log_start_time !== "") {
         log.info("wall time coupling disabled as of --log-start-time");
         wtopts = undefined;
         logstarttime = ZonedDateTime.parse(CFG.log_start_time);
       }
+
       stream = new LogSeries({
         n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
         n_chars_per_msg: CFG.n_chars_per_msg,

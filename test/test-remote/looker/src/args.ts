@@ -20,15 +20,11 @@ import { strict as assert } from "assert";
 import { ArgumentParser } from "argparse";
 import { ZonedDateTime } from "@js-joda/core";
 
-import { rndstring, timestampToRFC3339Nano } from "./util";
+import { rndstring } from "./util";
 
 import { log, buildLogger, setLogger } from "./log";
 
-import {
-  DEFAULT_LOG_LEVEL_STDERR,
-  START_TIME_JODA
-  //WALLTIME_COUPLING_PARAMS
-} from "./index";
+import { DEFAULT_LOG_LEVEL_STDERR } from "./index";
 
 interface CfgInterface {
   n_concurrent_streams: number;
@@ -185,7 +181,8 @@ export function parseCmdlineArgs(): void {
       "ISO 8601 / RFC3339Nano (tz-aware) notation, example: " +
       "2020-02-20T17:46:37.27000000Z. Note that across cycles the same " +
       "start time is used",
-    type: "str"
+    type: "str",
+    default: ""
   });
 
   parser.add_argument("--log-time-increment-ns", {
@@ -393,16 +390,11 @@ export function parseCmdlineArgs(): void {
     CFG.invocation_id = uniqueInvocationId;
   }
 
-  if (CFG.log_start_time) {
+  if (CFG.log_start_time !== "") {
     // validate input, let this blow up for now if input is invalid
     ZonedDateTime.parse(CFG.log_start_time);
     // In metrics mode, don't support this feature
     assert(!CFG.metrics_mode);
-  } else {
-    // Set default for log stream starttime: program invocation time.
-    // Note: in metrics mode, this is never used; alway use the current
-    // wall time upon DummyStream object initialization.
-    CFG.log_start_time = timestampToRFC3339Nano(START_TIME_JODA);
   }
 
   if (CFG.stream_write_n_seconds !== 0) {
