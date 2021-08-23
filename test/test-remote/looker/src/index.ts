@@ -111,30 +111,28 @@ async function main() {
 
   let dummystreams: Array<LogSeries | MetricSeries>;
 
-  for (let cyclenum = 1; cyclenum < CFG.n_cycles + 1; cyclenum++) {
+  for (let cyclenum = 1; cyclenum <= CFG.n_cycles + 1; cyclenum++) {
     setUptimeGauge();
 
-    // invocation_id contains 10 characters of random data by default
+    // The idea is that `CFG.invocation_id` is unique among those looker
+    // instances that interact with the same data ingest system.
     const invocationCycleId = `${CFG.invocation_id}-${cyclenum}`;
 
     log.info("enter write/read cycle  %s", cyclenum);
 
     if (cyclenum === 1) {
-      // we know better than:
-      //  error TS2454: Variable 'dummystreams' is used before being assigned.
-      // always create initial streams regardless of update configuration
-      log.info("cycle %s: create new dummystreams", cyclenum);
+      log.info("cycle %s: create a fresh set of time series", cyclenum);
       dummystreams = await createNewSeries(invocationCycleId);
     } else if (
       CFG.change_streams_every_n_cycles > 0 &&
       (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0
     ) {
       // update streams at the configured number of cycles
-      log.info("cycle %s: update dummystreams", cyclenum);
+      log.info("cycle %s: create new time series", cyclenum);
       dummystreams = await createNewSeries(invocationCycleId);
     } else {
       log.info(
-        "cycle %s: continue to use dummystreams of previous cycle",
+        "cycle %s: continue to use time series of previous cycle",
         cyclenum
       );
     }
@@ -162,12 +160,12 @@ async function main() {
 async function createNewSeries(
   invocationCycleId: string
 ): Promise<Array<LogSeries | MetricSeries>> {
-  const streams = [];
+  const series = [];
 
   const now = ZonedDateTime.now();
 
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
-    const streamname = `${invocationCycleId}-${i.toString()}`;
+    const seriesname = `${invocationCycleId}-${i.toString()}`;
     const labelset: LabelSet = {};
 
     // add more labels (key/value pairs) as given by command line
@@ -182,7 +180,7 @@ async function createNewSeries(
       }
     }
 
-    let stream: MetricSeries | LogSeries;
+    let s: MetricSeries | LogSeries;
 
     // Smear out the synthetic start time across individual time series, within
     // the interval [now-wcp.maxLagSeconds, now-wcp.minLagSeconds).
@@ -196,13 +194,13 @@ async function createNewSeries(
       // TODO some sort of adjustable cardinality here, where the number of
       // distinct label permutations across a series is configurable? (e.g. 10k
       // distinct labels across a series)
-      stream = new MetricSeries({
+      s = new MetricSeries({
         // kept distinct across concurrent streams, see above TODO about sharing metric names
         // ensure any dashes in metric name are switched to underscores: required by prometheus
         // see also: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
-        metricName: streamname.replace(/-/g, "_"),
+        metricName: seriesname.replace(/-/g, "_"),
         // must not collide among concurrent streams
-        uniqueName: streamname,
+        uniqueName: seriesname,
         n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
         starttime: starttime,
         // any check needed before doing this multiplication? would love to
@@ -225,11 +223,11 @@ async function createNewSeries(
         logstarttime = ZonedDateTime.parse(CFG.log_start_time);
       }
 
-      stream = new LogSeries({
+      s = new LogSeries({
         n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
         n_chars_per_msg: CFG.n_chars_per_msg,
         starttime: logstarttime,
-        uniqueName: streamname,
+        uniqueName: seriesname,
         sample_time_increment_ns: CFG.log_time_increment_ns,
         includeTimeInMsg: true,
         labelset: labelset,
@@ -238,7 +236,7 @@ async function createNewSeries(
       });
     }
 
-    const msg = `Initialized series: ${stream}. Time of first sample: ${stream.currentTimeRFC3339Nano()}`;
+    const msg = `Initialized series: ${s}. Time of first sample: ${s.currentTimeRFC3339Nano()}`;
 
     const logEveryN = util.logEveryNcalc(CFG.n_concurrent_streams);
     if (i % logEveryN == 0) {
@@ -248,11 +246,11 @@ async function createNewSeries(
     } else {
       log.debug(msg);
     }
-    streams.push(stream);
+    series.push(s);
   }
 
-  log.info("stream initialization finished");
-  return streams;
+  log.info("time series initialization finished");
+  return series;
 }
 
 async function performWriteReadCycle(
