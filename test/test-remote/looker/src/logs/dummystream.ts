@@ -237,14 +237,10 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
       f.addSample(this.nextSample());
     }
+
+    this.nFragmentsConsumed += 1;
     return f;
   }
-
-  // public generateAndGetNextFragment(): LogSeriesFragment {
-  //   const lsf = this.generateNextFragment();
-  //   this.nFragmentsConsumed += 1;
-  //   return lsf;
-  // }
 
   /**
    * Unbuffered POST to Loki (generate/post/generate/post sequentially in that
@@ -259,7 +255,22 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
   ) {
     // For now: one HTTP request per fragment
     for (let i = 1; i <= nFragments; i++) {
-      const fragment = this.generateAndGetNextFragment();
+      let fragment: LogSeriesFragment;
+      while (true) {
+        const [shiftIntoPastSeconds, f] = this.generateNextFragmentOrSkip();
+        if (f !== undefined) {
+          fragment = f;
+          break;
+        }
+
+        log.debug(
+          `${this}: current lag compared to wall time ` +
+            `(${shiftIntoPastSeconds.toFixed(1)} s)` +
+            "is too small. Delay fragment generation."
+        );
+        await sleep(5);
+      }
+
       const t0 = mtime();
       const pushrequest = fragment.serialize();
       const genduration = mtimeDiffSeconds(t0);
