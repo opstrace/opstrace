@@ -43,7 +43,6 @@ export interface LabelSet {
 export interface WalltimeCouplingOptions {
   maxLagSeconds: number;
   minLagSeconds: number;
-  leapForwardNSeconds: number;
 }
 
 export interface FragmentStatsBase {
@@ -316,7 +315,6 @@ export abstract class TimeseriesBase<FragmentType> {
     // I was unable to do this with a for loop based on a static set of
     // strings or using `for (const key in obj)` -- always a type error.
     // Huh.
-    assert(Number.isInteger(o["leapForwardNSeconds"]));
     assert(Number.isInteger(o["minLagSeconds"]));
     assert(Number.isInteger(o["maxLagSeconds"]));
 
