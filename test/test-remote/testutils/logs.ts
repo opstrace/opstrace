@@ -60,9 +60,9 @@ async function queryLoki(
     ...additionalHeaders
   };
 
-  // Expect to be wrapped by polling loop.
-  // expect 'snappy' response generation.
+  // Expect to be wrapped by polling loop. Expect 'snappy' response generation.
   const options = {
+    retry: 0,
     throwHttpErrors: false,
     searchParams: queryParams,
     timeout: {
