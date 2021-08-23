@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-type CockroachAgentProps = {
+type CockroachBaremetalAgentProps = {
   // The Opstrace cluster hostname (foo.opstrace.io) where metrics data should be sent
   clusterHost: string;
   // The Opstrace tenant where metrics data should be sent
@@ -25,12 +25,12 @@ type CockroachAgentProps = {
   nodeEndpoints: string[];
 };
 
-export function agentYaml({
+export function baremetalAgentYaml({
   clusterHost,
   tenantName,
   integrationId,
   nodeEndpoints
-}: CockroachAgentProps): string {
+}: CockroachBaremetalAgentProps): string {
   return `server:
   http_listen_port: 8080
 refresh_interval: 60s
@@ -69,11 +69,11 @@ type CockroachK8sProps = {
   // Where the user would like the agent to be deployed in their cluster
   deployNamespace: string;
   // Where the service to be scraped is running
-  selectNamespace: string;
+  targetNamespace: string;
   // The name of a label used to identify pods for the service (e.g. 'app')
-  selectLabelName: string;
+  targetLabelName: string;
   // The value of a label used to identify pods for the service (e.g. 'cockroachdb')
-  selectLabelValue: string;
+  targetLabelValue: string;
 };
 
 // Returns a rendered prometheus deployment YAML for displaying to a user.
@@ -83,9 +83,9 @@ export function k8sYaml({
   tenantName,
   integrationId,
   deployNamespace,
-  selectNamespace,
-  selectLabelName,
-  selectLabelValue
+  targetNamespace,
+  targetLabelName,
+  targetLabelValue
 }: CockroachK8sProps): string {
   return `apiVersion: v1
 kind: Namespace
@@ -126,10 +126,10 @@ data:
 
           namespaces:
             names:
-            - '${selectNamespace}'
+            - '${targetNamespace}'
           selectors:
           - role: pod
-            label: '${selectLabelName}:${selectLabelValue}'
+            label: '${targetLabelName}:${targetLabelValue}'
 
           metrics_path: /_status/vars
 

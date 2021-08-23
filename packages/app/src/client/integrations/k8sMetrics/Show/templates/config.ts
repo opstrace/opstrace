@@ -64,6 +64,7 @@ data:
       kubernetes_sd_configs:
       - role: pod
 
+      # TODO should this one be removed? if so then the 'not querying the pods themselves' comment is wrong
       # TLS config for getting pod info, not querying pods themselves
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
@@ -308,7 +309,7 @@ spec:
       serviceAccountName: opstrace-prometheus
       containers:
       - name: prometheus
-        image: prom/prometheus:v2.26.0
+        image: prom/prometheus:v2.26.0 # TODO replace with grafana-agent
         imagePullPolicy: IfNotPresent
         args:
         - --config.file=/etc/prometheus/prometheus.yml
