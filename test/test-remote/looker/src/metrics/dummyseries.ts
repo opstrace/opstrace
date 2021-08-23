@@ -82,6 +82,24 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
   constructor(opts: MetricSeriesOpts) {
     super(opts);
 
+    if (this.walltimeCouplingOptions === undefined) {
+      // This is not covered in the base class because not required for both,
+      // LogSeries and MetricSeries.
+      log.info(
+        "MetricSeries requires walltimeCouplingOptions to be defined. " +
+          "Fall back to using default parameters."
+      );
+      this.walltimeCouplingOptions = {
+        maxLagSeconds: 30 * 60,
+        minLagSeconds: 2 * 60,
+        leapForwardNSeconds: 3 * 60
+      };
+
+      // Use validation logic in base class to confirm that these parameters
+      // comply.
+      this.validateWtOpts(this.walltimeCouplingOptions);
+    }
+
     this.postedFragmentsSinceLastValidate = undefined;
 
     this.metricName = opts.metricName;
