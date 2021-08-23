@@ -271,6 +271,8 @@ export abstract class TimeseriesBase<FragmentType> {
 
   abstract currentTimeRFC3339Nano(): string;
 
+  abstract promQueryString(): string;
+
   protected abstract nextSample(): LogSample | MetricSample;
 
   protected abstract generateNextFragment(): FragmentType;
@@ -300,7 +302,9 @@ export abstract class TimeseriesBase<FragmentType> {
   public toString(): string {
     // does this use the name of the extension class, instead of the name
     // of the base class? that's the goal here, let's see.
-    return `${this.constructor.name}(opts=${this.optionstring})`;
+    // Optionsstring might be a little too long.
+    //return `${this.constructor.name}(opts=${this.optionstring})`;
+    return `${this.constructor.name}(${this.promQueryString()})`;
   }
 
   protected validateWtOpts(o: WalltimeCouplingOptions | undefined): void {
