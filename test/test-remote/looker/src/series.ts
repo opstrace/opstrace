@@ -201,6 +201,7 @@ export abstract class TimeseriesBase {
   // Supposed to contain a prometheus counter object, providing an inc() method.
   protected counterForwardLeap: any | undefined;
 
+  sample_time_increment_ns: number;
   n_samples_per_series_fragment: number;
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
@@ -214,6 +215,7 @@ export abstract class TimeseriesBase {
     this.optionstring = `${JSON.stringify(opts)}`;
     this.labels = this.buildLabelSetFromOpts(opts);
     this.n_samples_per_series_fragment = opts.n_samples_per_series_fragment;
+    this.sample_time_increment_ns = opts.sample_time_increment_ns;
     this.nSamplesValidatedSoFar = BigInt(0);
     this.walltimeCouplingOptions = opts.wtopts;
 
@@ -221,32 +223,7 @@ export abstract class TimeseriesBase {
       throw new Error("sample_time_increment_ns must be an integer value");
     }
 
-    if (opts.wtopts !== undefined) {
-      // I was unable to do this with a for loop based on a static set of
-      // strings or using `for (const key in obj)` -- always a type error.
-      // Huh.
-      assert(Number.isInteger(opts.wtopts["leapForwardNSeconds"]));
-      assert(Number.isInteger(opts.wtopts["minLagSeconds"]));
-      assert(Number.isInteger(opts.wtopts["maxLagSeconds"]));
-
-      // Calculate how much later the last sample of the next fragment would be
-      // compare to the last sample of the previous fragment. Do not do
-      // (opts.n_samples_per_series_fragment-1) because this time width is
-      // actually compared to the last sample in the previous fragment
-      // think: "maxTimeLeapComparedToPreviousFragmentSeconds"
-      const mtls =
-        opts.n_samples_per_series_fragment *
-        (opts.sample_time_increment_ns / 10 ** 6);
-      if (mtls >= opts.wtopts.minLagSeconds) {
-        throw new Error(
-          "a single series fragment may cover " +
-            (mtls / 60.0).toFixed(2) +
-            "minute(s) worth of data. That may put us too far into the " +
-            "future. Reduce sample count per fragment or reduce " +
-            "time between samples."
-        );
-      }
-    }
+    this.validateWtOpts(opts.wtopts);
 
     if (opts.counterForwardLeap !== undefined) {
       this.counterForwardLeap = opts.counterForwardLeap;
@@ -306,6 +283,37 @@ export abstract class TimeseriesBase {
     // does this use the name of the extension class, instead of the name
     // of the base class? that's the goal here, let's see.
     return `${this.constructor.name}(opts=${this.optionstring})`;
+  }
+
+  protected validateWtOpts(o: WalltimeCouplingOptions | undefined): void {
+    if (o === undefined) {
+      return;
+    }
+
+    // I was unable to do this with a for loop based on a static set of
+    // strings or using `for (const key in obj)` -- always a type error.
+    // Huh.
+    assert(Number.isInteger(o["leapForwardNSeconds"]));
+    assert(Number.isInteger(o["minLagSeconds"]));
+    assert(Number.isInteger(o["maxLagSeconds"]));
+
+    // Calculate how much later the last sample of the next fragment would be
+    // compare to the last sample of the previous fragment. Do not do
+    // (opts.n_samples_per_series_fragment-1) because this time width is
+    // actually compared to the last sample in the previous fragment
+    // think: "maxTimeLeapComparedToPreviousFragmentSeconds"
+    const mtls =
+      this.n_samples_per_series_fragment *
+      (this.sample_time_increment_ns / 10 ** 6);
+    if (mtls >= o["minLagSeconds"]) {
+      throw new Error(
+        "a single series fragment may cover " +
+          (mtls / 60.0).toFixed(2) +
+          "minute(s) worth of data. That may put us too far into the " +
+          "future. Reduce sample count per fragment or reduce " +
+          "time between samples."
+      );
+    }
   }
 
   /**
