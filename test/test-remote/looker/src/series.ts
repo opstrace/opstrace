@@ -478,7 +478,13 @@ export abstract class TimeseriesBase<FragmentType> {
       shiftIntoPastSeconds - this.fragmentTimeLeapSeconds >
       this.walltimeCouplingOptions.minLagSeconds
     ) {
-      return [shiftIntoPastSeconds, this.generateNextFragment()];
+      // When generating a new fragment then the current shift into the past
+      // (the 'lag') is not the value we just got, but we've advanced by a
+      // known amount: the fragmentTimeLeapSeconds -- add that.
+      return [
+        shiftIntoPastSeconds + this.fragmentTimeLeapSeconds,
+        this.generateNextFragment()
+      ];
     }
 
     // Behind wall time, but too close to wall time. Do not generate a new
