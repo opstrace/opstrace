@@ -6,7 +6,7 @@
   "author": "Dr. Jan-Philip Gehrcke / Opstrace Inc",
   "license": "",
   "devDependencies": {
-    "@types/argparse": "^2.0.5",
+    "@types/argparse": "^2.0.10",
     "@types/express": "^4.17.6",
     "@types/http-terminator": "^2.0.0",
     "@types/jsonwebtoken": "^8.5.0",
