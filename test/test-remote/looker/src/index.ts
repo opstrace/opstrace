@@ -79,6 +79,13 @@ interface ReadStats {
 
 export const DEFAULT_LOG_LEVEL_STDERR = "info";
 
+// only expose via CLI args if a good use case arises.
+export const WALLTIME_COUPLING_PARAMS = {
+  maxLagSeconds: 15 * 60,
+  minLagSeconds: 2 * 60,
+  leapForwardNSeconds: 2 * 60
+};
+
 // let STATS_WRITE: WriteStats;
 // let STATS_READ: ReadStats;
 
@@ -176,19 +183,20 @@ async function createNewSeries(
     }
 
     let stream: MetricSeries | LogSeries;
+
+    // Smear out the synthetic start time across individual time series, within
+    // the interval [now-wcp.maxLagSeconds, now-wcp.minLagSeconds).
+
+    const now = ZonedDateTime.now();
+    const startTimeOffsetIntoPast = util.rndFloatFromInterval(
+      WALLTIME_COUPLING_PARAMS.minLagSeconds,
+      WALLTIME_COUPLING_PARAMS.maxLagSeconds
+    );
+    const starttime = now.minusSeconds(startTimeOffsetIntoPast).withNano(0);
+
     if (CFG.metrics_mode) {
       // Calculate amount to subtract from start time, or avoid random() if subtraction is disabled
-      const subtractSecs =
-        CFG.metrics_past_start_range_max_seconds === 0
-          ? 0
-          : // By default this is a time between now-30min and now-20min - smear
-            // this out by plus/minus 5 minutes, because of the throttling
-            // mechanism otherwise hitting in for all series at the same time.
-            // Note that Math.random() returns [0,1) (not including 1).
-            util.rndFloatFromInterval(
-              CFG.metrics_past_start_range_min_seconds,
-              CFG.metrics_past_start_range_max_seconds
-            );
+
       // TODO some sort of adjustable cardinality here, where the number of distinct label
       //      permutations across a series is configurable? (e.g. 10k distinct labels across a series)
       stream = new MetricSeries({
@@ -215,18 +223,14 @@ async function createNewSeries(
         // cycle) that we don't keep going back to using the program's
         // invocation time, as is done for logs (where Loki accepts incoming
         // data from far in the past),
-        starttime: ZonedDateTime.now().minusSeconds(subtractSecs).withNano(0),
+        starttime: starttime,
         // any check needed before doing this multiplication? would love to
         // have guarantee that the result is the sane integer that it needs
         // to be for the expected regime that users choose
         // `CFG.metrics_time_increment_ms` from.
         sample_time_increment_ns: CFG.metrics_time_increment_ms * 1000,
         labelset: labelset,
-        wtopts: {
-          maxLagSeconds: 30 * 60,
-          minLagSeconds: 5 * 60,
-          leapForwardNSeconds: 5 * 60
-        },
+        wtopts: WALLTIME_COUPLING_PARAMS,
         counterForwardLeap: pm.counter_forward_leap
       });
     } else {

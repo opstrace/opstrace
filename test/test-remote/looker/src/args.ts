@@ -24,7 +24,11 @@ import { rndstring, timestampToRFC3339Nano } from "./util";
 
 import { log, buildLogger, setLogger } from "./log";
 
-import { DEFAULT_LOG_LEVEL_STDERR, START_TIME_JODA } from "./index";
+import {
+  DEFAULT_LOG_LEVEL_STDERR,
+  START_TIME_JODA
+  //WALLTIME_COUPLING_PARAMS
+} from "./index";
 
 interface CfgInterface {
   n_concurrent_streams: number;
@@ -48,8 +52,7 @@ interface CfgInterface {
   stream_write_n_seconds_jitter: number;
   fetch_n_entries_per_query: number;
   metrics_mode: boolean;
-  metrics_past_start_range_min_seconds: number;
-  metrics_past_start_range_max_seconds: number;
+  // max_start_time_offset_minutes: number;
   metrics_time_increment_ms: number;
   bearer_token_file: string;
   retry_post_deadline_seconds: number;
@@ -122,6 +125,8 @@ export function parseCmdlineArgs(): void {
   });
 
   // note: looking for a more expressive name
+  // consider removing this options now that we're aligning log and metrics
+  // mode w.r.t. walltime coupling.
   parser.add_argument("--log-start-time", {
     help:
       "Timestamp of the first sample for all synthetic " +
@@ -140,23 +145,18 @@ export function parseCmdlineArgs(): void {
     default: 1
   });
 
-  parser.add_argument("--metrics-past-start-range-max-seconds", {
-    help:
-      "Metrics time series start in the past compared to the initialization wall time. " +
-      "The exact time is picked randomly from an interval in the recent past, where this is the lower bound. " +
-      "Must be greater or equal to --metrics-past-start-range-min-seconds",
-    type: "int",
-    default: 30 * 60
-  });
-
-  parser.add_argument("--metrics-past-start-range-min-seconds", {
-    help:
-      "Metrics time series start in the past compared to the initialization wall time. " +
-      "The exact time is picked randomly from an interval in the recent past, where this is the upper bound. " +
-      "Must be less or equal to --metrics-past-start-range-max-seconds",
-    type: "int",
-    default: 20 * 60
-  });
+  // parser.add_argument("--max-start-time-offset-minutes", {
+  //   help:
+  //     "The syntheic time series start time is chosen randomly from the interval " +
+  //     "between the initialization wall time ('now', during runtime) and a " +
+  //     "point in time in the past (unless --log-start-time is provided). " +
+  //     "This parameter defines the lower bound of said interval, i.e. how far " +
+  //     "at most to go into the past compared to the " +
+  //     "the initialization wall time. Defaults to 10 minutes." +
+  //     "other time constants).",
+  //   type: "int",
+  //   default: 10 * 60
+  // });
 
   parser.add_argument("--metrics-time-increment-ms", {
     help: "time difference in milliseconds between adjacent samples in a time series",
@@ -371,23 +371,16 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
-  if (
-    CFG.metrics_past_start_range_min_seconds >
-    CFG.metrics_past_start_range_max_seconds
-  ) {
-    log.error(
-      "--metrics-past-start-range-min-seconds must not be larger than --metrics-past-start-range-max-seconds"
-    );
-    process.exit(1);
-  }
-  if (CFG.metrics_past_start_range_max_seconds > 2 * 60 * 60) {
-    // give a friendly warning if the specified time range exceeds the default Cortex 2h block limit
-    // see also https://cortexmetrics.io/docs/blocks-storage/
-    log.warn(
-      "--metrics-past-start-range-max-seconds is greater than two hours, " +
-        "which exceeds default Cortex block limits and may result in dropped data"
-    );
-  }
+  // if (
+  //   CFG.max_start_time_offset_minutes * 60 <
+  //   WALLTIME_COUPLING_PARAMS.minLagSeconds
+  // ) {
+  //   log.error(
+  //     "--max-start-time-offset-minutes must not be smaller than " +
+  //       `WALLTIME_COUPLING_PARAMS.minLagSeconds (${WALLTIME_COUPLING_PARAMS.minLagSeconds})`
+  //   );
+  //   process.exit(1);
+  // }
 
   if (CFG.max_concurrent_writes > CFG.n_concurrent_streams) {
     log.error(
