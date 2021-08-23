@@ -13,7 +13,7 @@ jobs:
     name: Algolia Sync
     steps:
       - uses: actions/checkout@v2
-      - uses: opstrace/algolia-docs-sync@v1.0.2
+      - uses: opstrace/algolia-docs-sync@v1.1.0
         with:
           algoliaId: "QTVPN6XDU8"
           algoliaKey: ${{ secrets.ALGOLIA_KEY }}
