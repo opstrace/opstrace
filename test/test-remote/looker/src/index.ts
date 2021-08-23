@@ -672,8 +672,10 @@ async function _produceAndPOSTpushrequest(
           `${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
             1
           )} minutes. Sample generation is too fast. Delay generating ` +
-            "and pushing the next fragment. This may take up to 10 minutes."
+            "and pushing the next fragment. This may take up to " +
+            `${(s.fragmentTimeLeapSeconds / 60.0).toFixed(1)} minutes.`
         );
+
         // We want to monitor the artificial throttling
         pm.counter_fragment_generation_delayed.inc(1);
         await sleep(10);

@@ -201,6 +201,12 @@ export abstract class TimeseriesBase<FragmentType> {
   // Supposed to contain a prometheus counter object, providing an inc() method.
   protected counterForwardLeap: any | undefined;
 
+  /**
+   * Fragment time leap, defined as the time difference between the last sample
+   *  of a fragment and the last sample of the previous fragment.
+   */
+  fragmentTimeLeapSeconds: number;
+
   sample_time_increment_ns: number;
   n_samples_per_series_fragment: number;
   uniqueName: string;
@@ -223,6 +229,21 @@ export abstract class TimeseriesBase<FragmentType> {
     if (!Number.isInteger(opts.sample_time_increment_ns)) {
       throw new Error("sample_time_increment_ns must be an integer value");
     }
+
+    // Calculate fragment time leap (think: by how much the internal time is
+    // forward-leaped by the next call to generateNextFragment()).
+    //
+    // Important distinction:
+    // - fragment time width, defined as the time difference between the first
+    //   and last sample in the fragment, and equal to
+    //   (n_samples_per_series_fragment - 1) * delta_t
+    // - fragment time leap, defined as the time difference between the last
+    //   sample of a fragment and the last sample of the previous fragment,
+    //   equal to (n_samples_per_series_fragment) * delta_t
+
+    this.fragmentTimeLeapSeconds =
+      this.n_samples_per_series_fragment *
+      (this.sample_time_increment_ns / 10 ** 6);
 
     this.validateWtOpts(opts.wtopts);
 
@@ -294,23 +315,15 @@ export abstract class TimeseriesBase<FragmentType> {
     assert(Number.isInteger(o["minLagSeconds"]));
     assert(Number.isInteger(o["maxLagSeconds"]));
 
-    // Calculate how much later the last sample of the next fragment would be
-    // compare to the last sample of the previous fragment. Do not do
-    // (opts.n_samples_per_series_fragment-1) because this time width is
-    // actually compared to the last sample in the previous fragment
-    // think: "maxTimeLeapComparedToPreviousFragmentSeconds"
-    const mtls =
-      this.n_samples_per_series_fragment *
-      (this.sample_time_increment_ns / 10 ** 6);
-    if (mtls >= o["minLagSeconds"]) {
-      throw new Error(
-        "a single series fragment may cover " +
-          (mtls / 60.0).toFixed(2) +
-          "minute(s) worth of data. That may put us too far into the " +
-          "future. Reduce sample count per fragment or reduce " +
-          "time between samples."
-      );
-    }
+    // if (mtls >= o["minLagSeconds"]) {
+    //   throw new Error(
+    //     "a single series fragment may cover " +
+    //       (mtls / 60.0).toFixed(2) +
+    //       "minute(s) worth of data. That may put us too far into the " +
+    //       "future. Reduce sample count per fragment or reduce " +
+    //       "time between samples."
+    //   );
+    // }
   }
 
   /**
@@ -435,27 +448,35 @@ export abstract class TimeseriesBase<FragmentType> {
   }
 
   public generateNextFragmentOrSkip(): [number, FragmentType | undefined] {
+    if (this.walltimeCouplingOptions === undefined) {
+      // walltime coupling disabled, return meaningless -1 to comply with
+      // interface
+      return [-1, this.generateNextFragment()];
+    }
+
     // TODO: this might get expensive, maybe use a monotonic time source
     // to make sure that we call this only once per minute or so.
     const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();
 
-    // Start building a criterion that allows artificial throttling, and that
-    // prevents this time series to get dangerously close to 'now', which also
-    // prevents it from going into the future (at least, when the time width
-    // between the oldest and newest sample in a single fragment is not lager
-    // than this interval -- assuming that this check is only ever done between
-    // generating two fragments. This should not happen as of the
-    // maxTimeLeapComparedToPreviousFragmentSeconds check above
-    // TODO: use this.walltimeC...opts
-    const minLagMinutes = 10;
+    // A pragmatic criterion allowing for artificial throttling. Only generate
+    // the next fragment if after fragment generation the internal time source
+    // is still in the past compared to current walltime, with a _guaranteed_
+    // leeway of `minLagSeconds` as given by the `walltimeCouplingOptions`.
+    // This mechanism prevents this time series to get dangerously close to
+    // 'now'; which implies that it also does not go into the future. This is
+    // useful when the remote system that receives samples from this source
+    // (which has its own perspective on wall time) must not receive samples
+    // from the future.
+    if (
+      shiftIntoPastSeconds - this.fragmentTimeLeapSeconds >
+      this.walltimeCouplingOptions.minLagSeconds
+    ) {
+      return [shiftIntoPastSeconds, this.generateNextFragment()];
+    }
 
     // Behind wall time, but too close to wall time. Do not actually generate a
     // new fragment. Work with the guarantee/assumption that
     // `shiftIntoPastSeconds >= 0`.
-    if (shiftIntoPastSeconds < minLagMinutes * 60) {
-      return [shiftIntoPastSeconds, undefined];
-    }
-
-    return [shiftIntoPastSeconds, this.generateNextFragment()];
+    return [shiftIntoPastSeconds, undefined];
   }
 }
