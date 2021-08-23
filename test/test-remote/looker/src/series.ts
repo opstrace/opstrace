@@ -165,7 +165,7 @@ export abstract class FragmentBase<SampleType, ParentType> {
   protected abstract addSampleHook(s: SampleType): void;
 }
 
-export abstract class TimeseriesBase {
+export abstract class TimeseriesBase<FragmentType> {
   /** The label set (set of key/value pairs) which uniquely defines this time
    * series*/
   protected labels: LabelSet;
@@ -206,7 +206,8 @@ export abstract class TimeseriesBase {
   uniqueName: string;
   // To make things absolutely unambiguous allow for the consumer to set the
   // last fragment consumed via this method.
-  lastFragmentConsumed: MetricSeriesFragment | LogSeriesFragment | undefined;
+  // lastFragmentConsumed: FragmentType | undefined;
+  lastFragmentConsumed: LogSeriesFragment | MetricSeriesFragment | undefined;
 
   constructor(opts: LogSeriesOpts | MetricSeriesOpts) {
     this.nFragmentsConsumed = 0;
@@ -249,15 +250,11 @@ export abstract class TimeseriesBase {
 
   abstract currentTimeRFC3339Nano(): string;
 
-  abstract generateAndGetNextFragment():
-    | [number, MetricSeriesFragment | undefined]
-    | LogSeriesFragment;
-
   protected abstract nextSample(): LogSample | MetricSample;
 
-  protected abstract generateNextFragment():
-    | [number, MetricSeriesFragment | undefined]
-    | LogSeriesFragment;
+  protected abstract generateNextFragment(): FragmentType;
+  // | LogSeriesFragment
+  // | MetricSeriesFragment;
 
   /**
    * Return floating point number representing the timestamp of the last sample
@@ -414,28 +411,61 @@ export abstract class TimeseriesBase {
       // value below
       this.leapForward();
 
-      // TODO: allow for injecting a counter (e.g., a Prometheus counter)
-      // so that when this happens there is a way to do bookkeeping about it.
-      //return -leapForwardMinutes;
+      // Increment Prometheus metric counter if that was provided.
       if (this.counterForwardLeap !== undefined) {
         this.counterForwardLeap.inc();
       }
 
       // Return the _updated_ shift-into-past.
       return shiftIntoPastSeconds - lfm * 60;
-    } else {
-      if (
-        this.nFragmentsConsumed > 0 &&
-        this.nFragmentsConsumed % 10000 === 0
-      ) {
-        const m = shiftIntoPastSeconds / 60.0;
-        // too noisy for large stream count.
-        log.debug("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
-      }
+    }
+
+    // The current lag is within expected bounds.
+    if (this.nFragmentsConsumed > 0 && this.nFragmentsConsumed % 10000 === 0) {
+      // Log current lag (sometimes -- but this is not a great, useful
+      // solution)
+      const m = shiftIntoPastSeconds / 60.0;
+      // too noisy for large stream count.
+      log.debug("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
     }
 
     // return 0 or positive number: this is the current lag in seconds compared
     // to walltime, specifically _behind_ walltime.
     return shiftIntoPastSeconds;
+  }
+
+  // no stop criterion: dummyseries is an infinite concept (definite start, it
+  // indefinite end) -- the caller decides how many fragments to generate.
+  protected generateNextFragmentOrSkip(): [number, FragmentType | undefined] {
+    // TODO: this might get expensive, maybe use a monotonic time source
+    // to make sure that we call this only once per minute or so.
+    const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();
+
+    // Start building a criterion that allows artificial throttling, and that
+    // prevents this time series to get dangerously close to 'now', which also
+    // prevents it from going into the future (at least, when the time width
+    // between the oldest and newest sample in a single fragment is not lager
+    // than this interval -- assuming that this check is only ever done between
+    // generating two fragments. This should not happen as of the
+    // maxTimeLeapComparedToPreviousFragmentSeconds check above
+    const minLagMinutes = 10;
+
+    // Behind wall time, but too close to wall time. Do not actually generate a
+    // new fragment. Work with the guarantee/assumption that
+    // `shiftIntoPastSeconds >= 0`.
+    if (shiftIntoPastSeconds < minLagMinutes * 60) {
+      return [shiftIntoPastSeconds, undefined];
+    }
+
+    return [shiftIntoPastSeconds, this.generateNextFragment()];
+  }
+
+  public generateAndGetNextFragment(): [number, FragmentType | undefined] {
+    const [shiftIntoPastSeconds, seriesFragment] =
+      this.generateNextFragmentOrSkip();
+    if (seriesFragment !== undefined) {
+      this.nFragmentsConsumed += 1;
+    }
+    return [shiftIntoPastSeconds, seriesFragment];
   }
 }
