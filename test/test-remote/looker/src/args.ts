@@ -129,11 +129,14 @@ export function parseCmdlineArgs(): void {
   // mode w.r.t. walltime coupling.
   parser.add_argument("--log-start-time", {
     help:
-      "Timestamp of the first sample for all synthetic " +
-      "log streams." +
-      "ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. " +
-      "Default: invocation time. Does not apply in metrics mode " +
-      "(which is always guided by the current wall time)",
+      "This disables the loose coupling of synthetic time to wall time " +
+      "and defines the timestamp of the first sample for all synthetic " +
+      "log streams. Does not apply in metrics mode. Is useful when " +
+      "writing to Loki that is configured to allow ingesting log samples " +
+      "far from the past or future. Must be provided in " +
+      "ISO 8601 / RFC3339Nano (tz-aware) notation, example: " +
+      "2020-02-20T17:46:37.27000000Z. Note that across cycles the same " +
+      "start time is used",
     type: "str"
   });
 
