@@ -25,7 +25,6 @@ import {
   mtime,
   sleep,
   logHTTPResponse,
-  httpTimeoutSettings,
   LOKI_API_TLS_VERIFY,
   enrichHeadersWithAuthToken
 } from "./index";
@@ -68,7 +67,7 @@ async function queryLoki(
     searchParams: queryParams,
     timeout: {
       connect: 4000,
-      request: 12000
+      request: 10000
     },
     headers: headers,
     https: { rejectUnauthorized: LOKI_API_TLS_VERIFY } // https://github.com/sindresorhus/got/issues/1191
