@@ -96,7 +96,7 @@ export class LogSeries extends TimeseriesBase {
   private shouldBeValidatedflag: boolean;
 
   n_chars_per_msg: number;
-  timediffNanoseconds: number;
+
   nFragmentsSuccessfullySentSinceLastValidate: number;
 
   constructor(opts: LogSeriesOpts) {
@@ -109,7 +109,6 @@ export class LogSeries extends TimeseriesBase {
     this.firstEntryGenerated = false;
 
     this.n_chars_per_msg = opts.n_chars_per_msg;
-    this.timediffNanoseconds = opts.sample_time_increment_ns;
     this.nFragmentsConsumed = 0;
     this.includeTimeInMsg = opts.includeTimeInMsg;
 
@@ -118,8 +117,8 @@ export class LogSeries extends TimeseriesBase {
     // successfully sent. This is public because of external push func.
     this.nFragmentsSuccessfullySentSinceLastValidate = 0;
 
-    if (this.timediffNanoseconds > 999999999)
-      throw Error("timediffNanoseconds must be smaller than 1 s");
+    if (this.sample_time_increment_ns > 999999999)
+      throw Error("sample_time_increment_ns must be smaller than 1 s");
 
     if (this.includeTimeInMsg && this.n_chars_per_msg < 19) {
       throw Error("timestamp consumes 18+1 characters");
@@ -209,7 +208,7 @@ export class LogSeries extends TimeseriesBase {
   protected nextSample(): LogSample {
     // don't bump time before first entry was generated.
     if (this.firstEntryGenerated) {
-      this.currentNanos += this.timediffNanoseconds;
+      this.currentNanos += this.sample_time_increment_ns;
       if (this.currentNanos > 999999999) {
         this.currentNanos = this.currentNanos - 10 ** 9;
         this.currentSeconds += 1;
@@ -349,7 +348,7 @@ export class LogSeries extends TimeseriesBase {
 
     // Entry 1: return start time.
     const timeOfEntry =
-      start + (N - BigInt(1)) * BigInt(this.timediffNanoseconds);
+      start + (N - BigInt(1)) * BigInt(this.sample_time_increment_ns);
 
     // Return string indicating nanoseconds since epoch.
     return timeOfEntry;
