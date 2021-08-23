@@ -243,7 +243,7 @@ async function createNewSeries(
         includeTimeInMsg: true,
         labelset: labelset,
         compressability: CFG.compressability,
-        wtopts: undefined // explititly disable for now during dev
+        wtopts: WALLTIME_COUPLING_PARAMS
       });
     }
 
