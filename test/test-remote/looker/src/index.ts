@@ -669,7 +669,8 @@ async function _produceAndPOSTpushrequest(
             1
           )} minutes. Sample generation is too fast. Delay generating ` +
             "and pushing the next fragment. This may take up to " +
-            `${(s.fragmentTimeLeapSeconds / 60.0).toFixed(1)} minutes.`
+            `${(s.fragmentTimeLeapSeconds / 60.0).toFixed(1)} minutes ` +
+            "(the time width of a stream fragment)."
         );
 
         // We want to monitor the artificial throttling
