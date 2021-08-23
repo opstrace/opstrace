@@ -650,46 +650,37 @@ async function _produceAndPOSTpushrequest(
     // or the number of fragments already consumed for this stream.
     const fragments: Array<LogSeriesFragment | MetricSeriesFragment> = [];
 
-    //
-    if (!CFG.metrics_mode)
-      for (const s of streams as LogSeries[]) {
-        const f = s.generateAndGetNextFragment();
-        fragments.push(f);
-        s.lastFragmentConsumed = f;
-      }
-    else {
-      for (const s of streams as MetricSeries[]) {
-        let fragment: MetricSeriesFragment;
+    for (const s of streams) {
+      let fragment: MetricSeriesFragment | LogSeriesFragment;
 
-        // This while loop is effectively a throttling mechanism, only
-        // built for metrics mode.
-        while (true) {
-          const [shiftIntoPastSeconds, f] = s.generateAndGetNextFragment();
-          if (f !== undefined) {
-            // TODO: the current time shift compared to wall time should
-            // be monitored, maybe via a histogram? Does not make sense
-            // to update a gauge with it because the shift is a distribution
-            // over _all_ streams in this looker session, might might be
-            // O(10^6).
-            fragment = f;
-            break;
-          }
-
-          const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
-          log.debug(
-            `${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
-              1
-            )} minutes. Sample generation is too fast. Delay generating ` +
-              "and pushing the next fragment. This may take up to 10 minutes."
-          );
-          // We want to monitor the artificial throttling
-          pm.counter_fragment_generation_delayed.inc(1);
-          await sleep(10);
+      // This while loop is effectively a throttling mechanism, only
+      // built for metrics mode.
+      while (true) {
+        const [shiftIntoPastSeconds, f] = s.generateNextFragmentOrSkip();
+        if (f !== undefined) {
+          // TODO: the current time shift compared to wall time should
+          // be monitored, maybe via a histogram? Does not make sense
+          // to update a gauge with it because the shift is a distribution
+          // over _all_ streams in this looker session, might might be
+          // O(10^6).
+          fragment = f;
+          break;
         }
 
-        fragments.push(fragment);
-        s.lastFragmentConsumed = fragment;
+        const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
+        log.debug(
+          `${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
+            1
+          )} minutes. Sample generation is too fast. Delay generating ` +
+            "and pushing the next fragment. This may take up to 10 minutes."
+        );
+        // We want to monitor the artificial throttling
+        pm.counter_fragment_generation_delayed.inc(1);
+        await sleep(10);
       }
+
+      fragments.push(fragment);
+      s.lastFragmentConsumed = fragment;
     }
 
     // NOTE(JP): here we can calculate the lag between the first or last sample
