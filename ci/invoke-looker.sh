@@ -45,6 +45,7 @@ docker run ${COMMON_ARGS} looker \
     --n-chars-per-msg 100 \
     --stream-write-n-fragments 15 \
     --n-cycles 3 \
+    --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10
 
@@ -60,6 +61,7 @@ docker run ${COMMON_ARGS} looker \
     --stream-write-n-seconds 10 \
     --n-cycles 5 \
     --change-streams-every-n-cycles 3 \
+    --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10
 
@@ -74,6 +76,7 @@ docker run ${COMMON_ARGS} looker \
     --n-chars-per-msg 100 \
     --stream-write-n-fragments 10 \
     --max-concurrent-writes 2  \
+    --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10
 
@@ -88,6 +91,7 @@ docker run ${COMMON_ARGS} looker \
     --n-chars-per-msg 100 \
     --stream-write-n-seconds 10 \
     --stream-write-n-seconds-jitter 5 \
+    --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10
 
@@ -103,6 +107,7 @@ docker run ${COMMON_ARGS} looker \
     --n-fragments-per-push-message 2 \
     --n-chars-per-msg 100 \
     --max-concurrent-reads 2 \
+    --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     --stream-write-n-seconds 10 \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10
