@@ -91,8 +91,7 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
       );
       this.walltimeCouplingOptions = {
         maxLagSeconds: 30 * 60,
-        minLagSeconds: 2 * 60,
-        leapForwardNSeconds: 3 * 60
+        minLagSeconds: 2 * 60
       };
 
       // Use validation logic in base class to confirm that these parameters
