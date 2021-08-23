@@ -290,10 +290,11 @@ export abstract class TimeseriesBase<FragmentType> {
   protected abstract lastSampleSecondsSinceEpoch(): number;
 
   /**
-   * Leap forward by N seconds, according to walltimeCouplingOptions. Must only
-   * be called after just having completed a fragment (right?).
+   * Leap forward by N seconds.
+   *
+   * Must only be called after just having completed a fragment (right?).
    */
-  protected abstract leapForward(): void;
+  protected abstract leapForward(n: number): void;
 
   abstract fetchAndValidate(
     opts: MetricSeriesFetchAndValidateOpts | LogSeriesFetchAndValidateOpts
