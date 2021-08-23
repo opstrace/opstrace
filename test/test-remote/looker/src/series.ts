@@ -187,7 +187,7 @@ export abstract class TimeseriesBase<FragmentType> {
   protected nSamplesValidatedSoFar: bigint;
 
   /**
-   * Configure 'walltime couplling' where the synthetic time source is loosely
+   * Configure 'walltime coupling' where the synthetic time source is loosely
    * coupled to the wall time.
    *
    * `undefined`: disable this mechanism. can fall back into the past
@@ -389,12 +389,16 @@ export abstract class TimeseriesBase<FragmentType> {
 
     // How much is the timestamp of the last generated sample lagging behind
     // "now"? This is a positive number, and the larger it is the larger is the
-    // gap.
+    // gap. Define this as "lag" (unit: seconds) -- TODO: rename vars
+    // accordingly
     const shiftIntoPastSeconds =
       nowSecondsSinceEpoch - lastSampleSecondsSinceEpoch;
 
-    // Can of course also be negative, meaning `lastSampleSecondsSinceEpoch` is
-    // in the future compared to wall time. This state is not allowed.
+    // Can theoretically also be negative, meaning
+    // `lastSampleSecondsSinceEpoch` is in the future compared to wall time.
+    // This state is not allowed. In remaining parts of the program the
+    // `shiftIntoPastSeconds >= 0` is treated as an invariant (a guarantee
+    // being relied upon).
     if (shiftIntoPastSeconds < 0) {
       // The last sample of the last fragment generated is in the future
       // compared to current wall time. We should never get here, this is the
@@ -410,24 +414,24 @@ export abstract class TimeseriesBase<FragmentType> {
       );
     }
 
-    // If we've fallen behind by more than e.g. 40 minutes, forward by e.g. 20
-    // minutes (note that as of time of writing this comment, a MetricSeries
-    // starts ~30 minutes behind wall time). These numbers are adjusted to the
-    // 1-hour ingest window provided by Cortex with the blocks storage engine.
-    // TODO: expose these parameters to users via CLI -- might also be nice to
-    // set them rather tight, i.e. to leap forward by just a little bit when
-    // falled behind just a little bit.
-    const maxLagMinutes = 40;
-    //const leapForwardMinutes = 5;
+    // If we've fallen behind by more than
+    // `walltimeCouplingOptions.maxLagSeconds` then leap forward to _almost_
+    // the the right end of the interval [now-wcp.maxLagSeconds,
+    // now-wcp.minLagSeconds]. TODO: maybe expose these parameters to users via
+    // CLI -- maybe also set the defaults 'rather tight', i.e. leap forward by
+    // just a little bit when fallen  behind just a little bit.
 
-    if (shiftIntoPastSeconds > maxLagMinutes * 60) {
-      const lfm = Number(this.walltimeCouplingOptions.leapForwardNSeconds) / 60;
+    if (shiftIntoPastSeconds > this.walltimeCouplingOptions.maxLagSeconds) {
+      const secondsToLeapForward =
+        shiftIntoPastSeconds - this.walltimeCouplingOptions.minLagSeconds - 5;
+
+      const lfm = secondsToLeapForward / 60;
       log.debug(`${this}: leap forward by ${lfm.toFixed(2)} minutes`);
 
       // rely on the implementation here to actually leap by the amount that
       // we just logged, and that we're going to use to build the return
       // value below
-      this.leapForward();
+      this.leapForward(secondsToLeapForward);
 
       // Increment Prometheus metric counter if that was provided.
       if (this.counterForwardLeap !== undefined) {
@@ -479,9 +483,8 @@ export abstract class TimeseriesBase<FragmentType> {
       return [shiftIntoPastSeconds, this.generateNextFragment()];
     }
 
-    // Behind wall time, but too close to wall time. Do not actually generate a
-    // new fragment. Work with the guarantee/assumption that
-    // `shiftIntoPastSeconds >= 0`.
+    // Behind wall time, but too close to wall time. Do not generate a new
+    // fragment.
     return [shiftIntoPastSeconds, undefined];
   }
 }
