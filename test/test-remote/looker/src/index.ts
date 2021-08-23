@@ -646,10 +646,23 @@ async function _produceAndPOSTpushrequest(
     for (const s of streams) {
       let fragment: MetricSeriesFragment | LogSeriesFragment;
 
-      // This while loop is effectively a throttling mechanism, only
-      // built for metrics mode.
+      // This while loop is effectively implementing the throttling mechanism
+      // when synthetic time moves too fast.
+      let observed = false;
       while (true) {
         const [shiftIntoPastSeconds, f] = s.generateNextFragmentOrSkip();
+
+        // If `f` was freshly generated (no throttling) then rely on
+        // `shiftIntoPastSeconds` to represent the last sample of that fresh
+        // fragment. If `f` is `undefined` then rely on this valut to represent
+        // the last sample of the last generated fragment. Only observe this
+        // once per stream, to not skew the histogram. (maybe it's better to
+        // decouple that and do this elsewhere).
+        if (!observed) {
+          pm.hist_lag_compared_to_wall_time.observe(shiftIntoPastSeconds);
+          observed = true;
+        }
+
         if (f !== undefined) {
           // TODO: the current time shift compared to wall time should
           // be monitored, maybe via a histogram? Does not make sense
