@@ -304,6 +304,7 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
     //  genduration.toFixed(3)
     //);
 
+    this.nFragmentsConsumed += 1;
     return f;
   }
 
@@ -321,7 +322,7 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
     for (let i = 1; i <= nFragments; i++) {
       let fragment: MetricSeriesFragment;
       while (true) {
-        const [shiftIntoPastSeconds, f] = this.generateAndGetNextFragment();
+        const [shiftIntoPastSeconds, f] = this.generateNextFragmentOrSkip();
         if (f !== undefined) {
           fragment = f;
           break;

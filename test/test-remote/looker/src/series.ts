@@ -434,9 +434,7 @@ export abstract class TimeseriesBase<FragmentType> {
     return shiftIntoPastSeconds;
   }
 
-  // no stop criterion: dummyseries is an infinite concept (definite start, it
-  // indefinite end) -- the caller decides how many fragments to generate.
-  protected generateNextFragmentOrSkip(): [number, FragmentType | undefined] {
+  public generateNextFragmentOrSkip(): [number, FragmentType | undefined] {
     // TODO: this might get expensive, maybe use a monotonic time source
     // to make sure that we call this only once per minute or so.
     const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();
@@ -448,6 +446,7 @@ export abstract class TimeseriesBase<FragmentType> {
     // than this interval -- assuming that this check is only ever done between
     // generating two fragments. This should not happen as of the
     // maxTimeLeapComparedToPreviousFragmentSeconds check above
+    // TODO: use this.walltimeC...opts
     const minLagMinutes = 10;
 
     // Behind wall time, but too close to wall time. Do not actually generate a
@@ -458,14 +457,5 @@ export abstract class TimeseriesBase<FragmentType> {
     }
 
     return [shiftIntoPastSeconds, this.generateNextFragment()];
-  }
-
-  public generateAndGetNextFragment(): [number, FragmentType | undefined] {
-    const [shiftIntoPastSeconds, seriesFragment] =
-      this.generateNextFragmentOrSkip();
-    if (seriesFragment !== undefined) {
-      this.nFragmentsConsumed += 1;
-    }
-    return [shiftIntoPastSeconds, seriesFragment];
   }
 }
