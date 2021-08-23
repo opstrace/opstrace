@@ -40,7 +40,7 @@ import {
   MetricSeriesFetchAndValidateOpts
 } from "./metrics";
 
-import { LabelSet } from "./series";
+import { LabelSet, WalltimeCouplingOptions } from "./series";
 
 import {
   sleep,
@@ -165,9 +165,10 @@ async function createNewSeries(
 ): Promise<Array<LogSeries | MetricSeries>> {
   const streams = [];
 
+  const now = ZonedDateTime.now();
+
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
     const streamname = `${invocationCycleId}-${i.toString()}`;
-
     const labelset: LabelSet = {};
 
     // add more labels (key/value pairs) as given by command line
@@ -186,8 +187,6 @@ async function createNewSeries(
 
     // Smear out the synthetic start time across individual time series, within
     // the interval [now-wcp.maxLagSeconds, now-wcp.minLagSeconds).
-
-    const now = ZonedDateTime.now();
     const startTimeOffsetIntoPast = util.rndFloatFromInterval(
       WALLTIME_COUPLING_PARAMS.minLagSeconds,
       WALLTIME_COUPLING_PARAMS.maxLagSeconds
@@ -195,10 +194,9 @@ async function createNewSeries(
     const starttime = now.minusSeconds(startTimeOffsetIntoPast).withNano(0);
 
     if (CFG.metrics_mode) {
-      // Calculate amount to subtract from start time, or avoid random() if subtraction is disabled
-
-      // TODO some sort of adjustable cardinality here, where the number of distinct label
-      //      permutations across a series is configurable? (e.g. 10k distinct labels across a series)
+      // TODO some sort of adjustable cardinality here, where the number of
+      // distinct label permutations across a series is configurable? (e.g. 10k
+      // distinct labels across a series)
       stream = new MetricSeries({
         // kept distinct across concurrent streams, see above TODO about sharing metric names
         // ensure any dashes in metric name are switched to underscores: required by prometheus
@@ -207,22 +205,6 @@ async function createNewSeries(
         // must not collide among concurrent streams
         uniqueName: streamname,
         n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
-
-        // With Cortex' Blocks Storage system, we cannot go into the future
-        // compared to "now" (from Cortex' system time point of view), but we
-        // also cannot fall behind for more than 60 minutes, see
-        // https://github.com/cortexproject/cortex/issues/2366. That means that
-        // the wall time passed after MetricSeries initialization matters.
-        // How exactly it matters depends on the synthetically created time
-        // difference between adjacent metric samples and the push rate. Use
-        // the one hour leeway that we have here in a 'smart' way; let each
-        // MetricSeries start in the _center_ of the timewindow, i.e 30
-        // minutes in the past compared to "now", where "now" really is
-        // MetricSeries() initialization: use wall time as start time, so
-        // that when generating new streams during runtime (from cycle to
-        // cycle) that we don't keep going back to using the program's
-        // invocation time, as is done for logs (where Loki accepts incoming
-        // data from far in the past),
         starttime: starttime,
         // any check needed before doing this multiplication? would love to
         // have guarantee that the result is the sane integer that it needs
@@ -234,16 +216,24 @@ async function createNewSeries(
         counterForwardLeap: pm.counter_forward_leap
       });
     } else {
+      let wtopts: WalltimeCouplingOptions | undefined =
+        WALLTIME_COUPLING_PARAMS;
+      let logstarttime: ZonedDateTime | undefined = starttime;
+      if (CFG.log_start_time) {
+        log.info("wall time coupling disabled as of --log-start-time");
+        wtopts = undefined;
+        logstarttime = ZonedDateTime.parse(CFG.log_start_time);
+      }
       stream = new LogSeries({
         n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
         n_chars_per_msg: CFG.n_chars_per_msg,
-        starttime: ZonedDateTime.parse(CFG.log_start_time),
+        starttime: logstarttime,
         uniqueName: streamname,
         sample_time_increment_ns: CFG.log_time_increment_ns,
         includeTimeInMsg: true,
         labelset: labelset,
         compressability: CFG.compressability,
-        wtopts: WALLTIME_COUPLING_PARAMS
+        wtopts: wtopts
       });
     }
 
