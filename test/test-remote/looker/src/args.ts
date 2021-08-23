@@ -383,9 +383,8 @@ export function parseCmdlineArgs(): void {
   );
 
   if (CFG.invocation_id === "") {
-    // common case: the id was not specified manually, so generate one
-    // ensure it has a good amount of randomness to ensure reads are unique (if enabled)
-    // const uniqueInvocationId = `looker-${START_TIME_EPOCH}-${rndstring(10)}`;
+    // Generate invocation ID. For long-running test scenarios where individual
+    // lookers are started at high rate this should not create collisions.
     const uniqueInvocationId = `looker-${rndstring(10)}`;
     CFG.invocation_id = uniqueInvocationId;
   }
