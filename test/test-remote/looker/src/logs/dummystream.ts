@@ -87,7 +87,8 @@ export interface LogSeriesFetchAndValidateOpts {
   additionalHeaders?: Record<string, string>;
 }
 
-export class LogSeries extends TimeseriesBase {
+//export class LogSeries extends TimeseriesBase {
+export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
   private currentSeconds: number;
   private currentNanos: number;
   private includeTimeInMsg: boolean;
@@ -228,30 +229,22 @@ export class LogSeries extends TimeseriesBase {
 
   // no stop criterion
   protected generateNextFragment(): LogSeriesFragment {
-    const lsf = new LogSeriesFragment(
+    const f = new LogSeriesFragment(
       this.labels,
       this.nFragmentsConsumed + 1,
       this
     );
     for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
-      lsf.addSample(this.nextSample());
+      f.addSample(this.nextSample());
     }
-    return lsf;
+    return f;
   }
 
-  /**
-   * Explicitly generate next fragment and return. This is for an external
-   * entity to control when exactly a fragment is generated and when not,
-   * as the generator above executes eagerly.
-   * quick note: keep using generator for test-remote for now, but in looker
-   * use this explicit method.
-   * no stop criterion
-   */
-  public generateAndGetNextFragment(): LogSeriesFragment {
-    const lsf = this.generateNextFragment();
-    this.nFragmentsConsumed += 1;
-    return lsf;
-  }
+  // public generateAndGetNextFragment(): LogSeriesFragment {
+  //   const lsf = this.generateNextFragment();
+  //   this.nFragmentsConsumed += 1;
+  //   return lsf;
+  // }
 
   /**
    * Unbuffered POST to Loki (generate/post/generate/post sequentially in that

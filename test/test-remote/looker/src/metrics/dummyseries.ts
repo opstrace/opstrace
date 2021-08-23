@@ -64,7 +64,7 @@ export interface MetricSeriesFetchAndValidateOpts {
   ) => Promise<GotResponse<string>>;
 }
 
-export class MetricSeries extends TimeseriesBase {
+export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
   private millisSinceEpochOfLastGeneratedSample: Long;
   private metrics_time_increment_ms: Long;
   private fragmentWidthSecondsForQuery: BigInt;
@@ -253,48 +253,6 @@ export class MetricSeries extends TimeseriesBase {
     return this.millisSinceEpochOfLastGeneratedSample.toString(); // todo: ..
   }
 
-  // no stop criterion: dummyseries is an infinite concept (definite start, it
-  // indefinite end) -- the caller decides how many fragments to generate.
-  protected generateNextFragment(): [number, MetricSeriesFragment | undefined] {
-    // TODO: this might get expensive, maybe use a monotonic time source
-    // to make sure that we call this only once per minute or so.
-    const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();
-
-    // Start building a criterion that allows artificial throttling, and that
-    // prevents this time series to get dangerously close to 'now', which also
-    // prevents it from going into the future (at least, when the time width
-    // between the oldest and newest sample in a single fragment is not lager
-    // than this interval -- assuming that this check is only ever done between
-    // generating two fragments. This should not happen as of the
-    // maxTimeLeapComparedToPreviousFragmentSeconds check above
-    const minLagMinutes = 10;
-
-    // Behind wall time, but too close to wall time. Do not actually generate a
-    // new fragment. Work with the guarantee/assumption that
-    // `shiftIntoPastSeconds >= 0`.
-    if (shiftIntoPastSeconds < minLagMinutes * 60) {
-      return [shiftIntoPastSeconds, undefined];
-    }
-
-    //const t0 = mtime();
-    const fragment = new MetricSeriesFragment(
-      this.labels,
-      this.nFragmentsConsumed + 1,
-      this
-    );
-
-    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
-      fragment.addSample(this.nextSample());
-    }
-
-    //const genduration = mtimeDiffSeconds(t0);
-    //log.debug(
-    //  "MetricSeriesFragment addSample loop took: %s s",
-    //  genduration.toFixed(3)
-    //);
-    return [shiftIntoPastSeconds, fragment];
-  }
-
   protected lastSampleSecondsSinceEpoch(): number {
     return this.millisSinceEpochOfLastGeneratedSample.divide(1000).toNumber();
   }
@@ -309,15 +267,26 @@ export class MetricSeries extends TimeseriesBase {
       );
   }
 
-  public generateAndGetNextFragment(): [
-    number,
-    MetricSeriesFragment | undefined
-  ] {
-    const [shiftIntoPastSeconds, seriesFragment] = this.generateNextFragment();
-    if (seriesFragment !== undefined) {
-      this.nFragmentsConsumed += 1;
+  protected generateNextFragment(): MetricSeriesFragment {
+    //const t0 = mtime();
+
+    const f = new MetricSeriesFragment(
+      this.labels,
+      this.nFragmentsConsumed + 1,
+      this
+    );
+
+    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
+      f.addSample(this.nextSample());
     }
-    return [shiftIntoPastSeconds, seriesFragment];
+
+    //const genduration = mtimeDiffSeconds(t0);
+    //log.debug(
+    //  "MetricSeriesFragment addSample loop took: %s s",
+    //  genduration.toFixed(3)
+    //);
+
+    return f;
   }
 
   /**
