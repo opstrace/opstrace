@@ -81,7 +81,7 @@ export const DEFAULT_LOG_LEVEL_STDERR = "info";
 
 // only expose via CLI args if a good use case arises.
 export const WALLTIME_COUPLING_PARAMS: WalltimeCouplingOptions = {
-  maxLagSeconds: 15 * 60,
+  maxLagSeconds: 10 * 60,
   minLagSeconds: 1 * 60
 };
 
