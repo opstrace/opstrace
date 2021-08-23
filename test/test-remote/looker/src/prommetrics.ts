@@ -103,6 +103,12 @@ export const counter_forward_leap = new promclient.Counter({
     "to not fall behind walltime too much"
 });
 
+export const hist_lag_compared_to_wall_time = new promclient.Histogram({
+  name: "hist_lag_compared_to_wall_time",
+  help: "Current lag of individual time series compared to wall time, in seconds",
+  buckets: [5, 60, 180, 300, 420, 540, 660, 1000, 1500, 10000]
+});
+
 export const gauge_last_http_request_body_size_bytes = new promclient.Gauge({
   name: "gauge_last_http_request_body_size_bytes",
   help: "size of last successfully POSTed HTTP request body (snappy-compressed protobuf message: a serialized log stream fragments)"
