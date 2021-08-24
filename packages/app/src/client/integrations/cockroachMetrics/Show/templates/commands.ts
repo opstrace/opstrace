@@ -16,7 +16,10 @@
 
 // Returns the command for a user to locally deploy Kubernetes yaml content.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
-export function deployK8sYaml(yamlFilename: string, tenantName: string): string {
+export function deployK8sYaml(
+  yamlFilename: string,
+  tenantName: string
+): string {
   return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | kubectl apply -f -`;
 }
 
@@ -29,7 +32,10 @@ export function deleteK8sYaml(yamlFilename: string): string {
 
 // Returns the command for a user to update the baremetal metrics agent config.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
-export function renderBaremetalYaml(yamlFilename: string, tenantName: string): string {
+export function renderBaremetalYaml(
+  yamlFilename: string,
+  tenantName: string
+): string {
   // TODO need to retest this - does this exact output work in the yaml?
   return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | sed "s/__NODE_ADDRESSES__/$(cockroach node status --format tsv --insecure | awk '{print $2}' | tail -n +2)/g"`;
 }
