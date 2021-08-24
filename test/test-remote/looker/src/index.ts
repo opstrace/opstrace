@@ -80,10 +80,7 @@ interface ReadStats {
 export const DEFAULT_LOG_LEVEL_STDERR = "info";
 
 // only expose via CLI args if a good use case arises.
-export const WALLTIME_COUPLING_PARAMS: WalltimeCouplingOptions = {
-  maxLagSeconds: 10 * 60,
-  minLagSeconds: 1 * 60
-};
+export let WALLTIME_COUPLING_PARAMS: WalltimeCouplingOptions;
 
 // let STATS_WRITE: WriteStats;
 // let STATS_READ: ReadStats;
@@ -110,6 +107,8 @@ async function main() {
   const httpServerTerminator = pm.setupPromExporter();
 
   let dummystreams: Array<LogSeries | MetricSeries>;
+
+  WALLTIME_COUPLING_PARAMS = calcWalltimeCouplingOptions();
 
   for (let cyclenum = 1; cyclenum <= CFG.n_cycles + 1; cyclenum++) {
     setUptimeGauge();
@@ -155,6 +154,55 @@ async function main() {
 
   log.info("shutting down http server");
   httpServerTerminator.terminate();
+}
+
+function calcFragmentTimeLeapSeconds(): number {
+  let sample_time_increment_ns: number;
+  if (CFG.metrics_mode) {
+    sample_time_increment_ns = CFG.metrics_time_increment_ms * 1000;
+  } else {
+    sample_time_increment_ns = CFG.log_time_increment_ns;
+  }
+
+  // Fragment time leap, defined as the time difference between the last sample
+  // of a fragment and the last sample of the previous fragment, equal to
+  // (n_samples_per_series_fragment) * delta_t.
+  const fragmentTimeLeapSeconds =
+    CFG.n_samples_per_series_fragment * (sample_time_increment_ns / 10 ** 6);
+
+  return fragmentTimeLeapSeconds;
+}
+
+function calcWalltimeCouplingOptions(): WalltimeCouplingOptions {
+  const fragmentTimeLeapSeconds = calcFragmentTimeLeapSeconds();
+
+  log.info(`fragmentTimeLeapSeconds: ${fragmentTimeLeapSeconds.toFixed(2)} s`);
+
+  // Why must maxLagSeconds depend on fragmentTimeLeapSconds? See
+  // `TimeseriesBase.validateWtOpts()`.
+  const minimalMaxLagSeconds = 5 * 60;
+  const dynamicMaxLagSeconds = Math.ceil(fragmentTimeLeapSeconds * 5);
+  let actualMaxLagSeconds;
+
+  if (dynamicMaxLagSeconds < minimalMaxLagSeconds) {
+    log.info(
+      `walltime coupling: use minimal maxLagSeconds: ${minimalMaxLagSeconds}`
+    );
+    actualMaxLagSeconds = minimalMaxLagSeconds;
+  } else {
+    log.info(
+      `walltime coupling: use dynamic maxLagSeconds: ${minimalMaxLagSeconds} ` +
+        `(based on fragmentTimeLeapSeconds: ${fragmentTimeLeapSeconds.toFixed(
+          2
+        )} s)`
+    );
+    actualMaxLagSeconds = dynamicMaxLagSeconds;
+  }
+
+  return {
+    maxLagSeconds: actualMaxLagSeconds,
+    minLagSeconds: 1 * 60
+  };
 }
 
 async function createNewSeries(
