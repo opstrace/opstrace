@@ -318,6 +318,20 @@ export abstract class TimeseriesBase<FragmentType> {
     assert(Number.isInteger(o["minLagSeconds"]));
     assert(Number.isInteger(o["maxLagSeconds"]));
 
+    // The walltime coupling mechanism wants to make sure that all samples in a
+    // fragment have timestamps from the 'green zone', a time interval that is
+    // "allowed", by definition. The lower and upper bound of that interval are
+    // defined by wall time and the max/minLagSeconds. When the time width of a
+    // fragment is larger than this interval then the walltime coupling
+    // mechanism would oscillate between leaping forward and throttling, and
+    // never send data. That's effectively a deadlock :). I got here by using
+    // static min/maxLagSeconds settings. Next up: calculate maxLagSeconds
+    // dynamically based on the fragment time width / fragmentTimeLeapSeconds
+    // (difference does not matter much when using leeway).
+    if (o.maxLagSeconds <= this.fragmentTimeLeapSeconds) {
+      throw new Error("maxLagSeconds <= fragmentTimeLeapSeconds");
+    }
+
     // if (mtls >= o["minLagSeconds"]) {
     //   throw new Error(
     //     "a single series fragment may cover " +
