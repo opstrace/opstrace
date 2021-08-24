@@ -93,7 +93,12 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
       sample_time_increment_ns: 1000000,
-      labelset: undefined
+      labelset: undefined,
+      wtopts: {
+        // our current cortex config does not allow for data older than 60 mins
+        maxLagSeconds: 55 * 60,
+        minLagSeconds: 1 * 60
+      }
     });
     log.info("Dummy timeseries: %s", series);
     const burl = TENANT_DEFAULT_CORTEX_API_BASE_URL;
@@ -141,7 +146,12 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
       sample_time_increment_ns: 1000000,
-      labelset: undefined
+      labelset: undefined,
+      wtopts: {
+        // our current cortex config does not allow for data older than 60 mins
+        maxLagSeconds: 55 * 60,
+        minLagSeconds: 1 * 60
+      }
     });
     log.info("Dummy timeseries: %s", series);
     const burl = TENANT_DEFAULT_CORTEX_API_BASE_URL;
@@ -165,7 +175,12 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
       sample_time_increment_ns: 1000,
-      labelset: undefined
+      labelset: undefined,
+      wtopts: {
+        // our current cortex config does not allow for data older than 60 mins
+        maxLagSeconds: 55 * 60,
+        minLagSeconds: 1 * 60
+      }
     });
     log.info("Dummy timeseries: %s", series);
     const burl = TENANT_DEFAULT_CORTEX_API_BASE_URL;
@@ -189,7 +204,12 @@ suite("Prometheus remote_write (push to opstrace cluster) tests", function () {
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: uniquevalue,
       sample_time_increment_ns: 1000,
-      labelset: undefined
+      labelset: undefined,
+      wtopts: {
+        // our current cortex config does not allow for data older than 60 mins
+        maxLagSeconds: 55 * 60,
+        minLagSeconds: 1 * 60
+      }
     });
     log.info("Dummy timeseries: %s", series);
     const burl = TENANT_DEFAULT_CORTEX_API_BASE_URL;
