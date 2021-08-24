@@ -134,6 +134,8 @@ export function* ensureAddressDoesNotExist({
 }: {
   addressName: string;
 }): Generator<CallEffect, void, compute_v1.Schema$Address> {
+  let deleteIssued = false;
+
   while (true) {
     const address: compute_v1.Schema$Address = yield call(getAddress, {
       name: addressName
@@ -147,9 +149,16 @@ export function* ensureAddressDoesNotExist({
     log.info(`Global Address is ${address.status}`);
 
     try {
-      yield call(deleteAddress, {
-        name: addressName
-      });
+      // Workaround for https://github.com/opstrace/opstrace/issues/976.
+      // Avoid issuing a second delete request for this resource otherwise we'll
+      // get a 400 back.
+      if (!deleteIssued) {
+        log.info(`Deleting Global Address`);
+        yield call(deleteAddress, {
+          name: addressName
+        });
+        deleteIssued = true;
+      }
     } catch (e) {
       if (!e.code || (e.code && e.code !== 409)) {
         throw e;
