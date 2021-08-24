@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-// Returns the command for a user to locally deploy either prometheusYaml() or promtailYaml() content.
+// Returns the command for a user to locally deploy Kubernetes yaml content.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
-export function deployYaml(yamlFilename: string, tenantName: string): string {
+export function deployK8sYaml(yamlFilename: string, tenantName: string): string {
   return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | kubectl apply -f -`;
 }
 
-// Returns the command for a user to locally delete either prometheusYaml() or promtailYaml() content.
+// Returns the command for a user to locally delete k8sYaml() content.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
 // This does not include deletion of the namespace, in case the user also has other things there.
-export function deleteYaml(yamlFilename: string): string {
+export function deleteK8sYaml(yamlFilename: string): string {
   return `kubectl delete -f ${yamlFilename}`;
 }
 
-// Returns the command for a user to get a list of nodes when running cockroachdb on bare servers.
-export function getNodes(): string {
-  return "cockroach node status --format tsv --certs-dir ./certs/ | awk '{print $2}' | tail -n +2";
+// Returns the command for a user to update the baremetal metrics agent config.
+// This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
+export function renderBaremetalYaml(yamlFilename: string, tenantName: string): string {
+  // TODO need to retest this - does this exact output work in the yaml?
+  return `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenantName})/g" ${yamlFilename} | sed "s/__NODE_ADDRESSES__/$(cockroach node status --format tsv --insecure | awk '{print $2}' | tail -n +2)/g"`;
 }

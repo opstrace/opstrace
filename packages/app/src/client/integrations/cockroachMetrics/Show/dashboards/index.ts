@@ -15,9 +15,16 @@
  */
 
 // For each dashboard we want, we import it here and list it below
-import makeApiserverDashboard from "./apiserver";
-import makeKubeletDashboard from "./kubelet";
-import makeResourceDashboard from "./resource";
+import makeChangefeedsDashboard from "./changefeeds";
+import makeDistributedDashboard from "./distributed";
+import makeHardwareDashboard from "./hardware";
+import makeOverviewDashboard from "./overview";
+import makeQueuesDashboard from "./queues";
+import makeReplicationDashboard from "./replication";
+import makeRuntimeDashboard from "./runtime";
+import makeSlowRequestDashboard from "./slow_request";
+import makeSqlDashboard from "./sql";
+import makeStorageDashboard from "./storage";
 
 type DashboardProps = {
   integrationId: string;
@@ -30,20 +37,62 @@ export function makePrometheusDashboardRequests({
 }: DashboardProps) {
   return [
     {
-      uid: `as-${integrationId}`,
-      dashboard: makeApiserverDashboard(integrationId),
+      uid: `cf-${integrationId}`,
+      dashboard: makeChangefeedsDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
-      uid: `kub-${integrationId}`,
-      dashboard: makeKubeletDashboard(integrationId),
+      uid: `dist-${integrationId}`,
+      dashboard: makeDistributedDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
-      uid: `res-${integrationId}`,
-      dashboard: makeResourceDashboard(integrationId),
+      uid: `hw-${integrationId}`,
+      dashboard: makeHardwareDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `overview-${integrationId}`,
+      dashboard: makeOverviewDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `queue-${integrationId}`,
+      dashboard: makeQueuesDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `repl-${integrationId}`,
+      dashboard: makeReplicationDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `run-${integrationId}`,
+      dashboard: makeRuntimeDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `sr-${integrationId}`,
+      dashboard: makeSlowRequestDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `sql-${integrationId}`,
+      dashboard: makeSqlDashboard(integrationId),
+      folderId: folderId,
+      overwrite: true
+    },
+    {
+      uid: `stor-${integrationId}`,
+      dashboard: makeStorageDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     }

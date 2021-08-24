@@ -66,7 +66,8 @@ export const UninstallInstructions = ({
     [tenant.name, integration.kind]
   );
 
-  const deleteYamlCommand = useMemo(() => commands.deleteYaml(configFilename), [
+  // TODO for baremetal support, only show these k8s yaml instructions when mode=k8s
+  const deleteYamlCommand = useMemo(() => commands.deleteK8sYaml(configFilename), [
     configFilename
   ]);
 

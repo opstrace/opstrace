@@ -24,9 +24,9 @@ import { IntegrationDef } from "client/integrations/types";
 export const cockroachMetricsIntegration: IntegrationDef = {
   kind: "cockroach-metrics",
   category: "infrastructure",
-  label: "Kubernetes Metrics",
+  label: "CockroachDB Metrics",
   desc:
-    "Generate all the yaml required to send metrics from your Kubernetes cluster to this tenant. We'll install bundled dashboards for monitoring Kubernetes with this integration.",
+    "Run a grafana-agent metrics exporter to send metrics from your CockroachDB cluster to this tenant. We'll install bundled dashboards for monitoring CockroachDB with this integration.",
   Form: CockroachMetricsForm,
   Show: CockroachMetricsShow,
   Status: CockroachMetricsStatus,

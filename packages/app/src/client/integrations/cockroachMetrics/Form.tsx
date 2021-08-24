@@ -22,23 +22,22 @@ import * as yup from "yup";
 import { cockroachMetricsIntegration as integrationDef } from "./index";
 
 import { ControlledInput } from "client/components/Form/ControlledInput";
-import { SelectInput } from "client/components/Form/SelectInput";
 
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
 import { FormProps } from "../types";
 
+// Define separate sections depending on deployment mode.
 const Schema = yup.object({
   name: yup.string().required(),
+  // TODO show a radio for selecting baremetal/k8s modes. for now we just support k8s
+  mode: yup.string().required(),
   k8s: yup.object().shape({
     deployNamespace: yup.string().required(),
     targetNamespace: yup.string().required(),
     targetLabelName: yup.string().required(),
     targetLabelValue: yup.string().required()
-  }).nullable().optional(),
-  baremetal: yup.object().shape({
-    nodeEndpoints: yup.array().of(yup.string()).required()
   }).nullable().optional()
 });
 
@@ -46,19 +45,22 @@ type Values = yup.Asserts<typeof Schema>;
 
 const defaultValues: Values = {
   name: "",
-  k8s: null,
-  baremetal: null
+  mode: "k8s",
+  k8s: {
+    deployNamespace: "opstrace",
+    targetNamespace: "default",
+    targetLabelName: "app",
+    targetLabelValue: "cockroachdb"
+  }
 };
 
 type FormData = {
+  mode: string,
   k8s: {
     deployNamespace: string,
     targetNamespace: string,
     targetLabelName: string,
     targetLabelValue: string
-  } | null,
-  baremetal: {
-    nodeEndpoints: string[]
   } | null
 };
 
@@ -78,8 +80,8 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
     handleCreate({
       name: data.name,
       data: {
-        k8s: data.k8s,
-        baremetal: data.baremetal
+        mode: data.mode,
+        k8s: data.k8s
       }
     });
   };
@@ -112,26 +114,39 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
                 />
               </Box>
               <Box mb={3}>
-      // TODO onChange: display k8s or baremetal options
-                <SelectInput
-                  name="deployType"
-                  control={control}
-                  optionsProps={[
-                    { label: "Kubernetes", value: "k8s" },
-                    { label: "Bare Metal", value: "baremetal" }
-                  ]}
-                  label="Deployment type"
-                  helperText="Whether CockroachDB is running on Kubernetes or on bare metal."
-                />
-              </Box>
-              <Box mb={3}>
-      // TODO onChange: only display when k8s is selected above
                 <ControlledInput
-                  name="deployNamespace"
+                  name="k8s.deployNamespace"
                   control={control}
                   inputProps={{ fullWidth: true }}
                   label="Deployment Namespace"
-                  helperText="Namespace to deploy to in your Kubernetes cluster"
+                  helperText="Namespace to deploy the metrics agent in your Kubernetes cluster"
+                />
+              </Box>
+              <Box mb={3}>
+                <ControlledInput
+                  name="k8s.targetNamespace"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="CockroachDB Namespace"
+                  helperText="Namespace where CockroachDB is running in your Kubernetes cluster"
+                />
+              </Box>
+              <Box mb={3}>
+                <ControlledInput
+                  name="k8s.targetLabelName"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="CockroachDB Label Name"
+                  helperText="Name of a Kubernetes label used for selecting pods in your CockroachDB instance"
+                />
+              </Box>
+              <Box mb={3}>
+                <ControlledInput
+                  name="k8s.targetLabelValue"
+                  control={control}
+                  inputProps={{ fullWidth: true }}
+                  label="CockroachDB Label Value"
+                  helperText="Value of the Kubernetes label used for selecting pods in your CockroachDB instance"
                 />
               </Box>
               <Button

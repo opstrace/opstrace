@@ -22,10 +22,20 @@ import useDeepMemo from "client/hooks/useDeepMemo";
 
 import { Tenant } from "state/tenant/types";
 import { Integration } from "state/integration/types";
-import { Dashboard as SummaryDashboard } from "client/integrations/k8sLogs/Show/dashboards/summary";
-import { Dashboard as ApiServerDashboard } from "client/integrations/k8sMetrics/Show/dashboards/apiserver";
-import { Dashboard as KubeletDashboard } from "client/integrations/k8sMetrics/Show/dashboards/kubelet";
-import { Dashboard as ResourceDashboard } from "client/integrations/k8sMetrics/Show/dashboards/resource";
+import { Dashboard as CDBChangefeedsDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/changefeeds";
+import { Dashboard as CDBDistributedDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/distributed";
+import { Dashboard as CDBHardwareDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/hardware";
+import { Dashboard as CDBOverviewDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/overview";
+import { Dashboard as CDBQueuesDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/queues";
+import { Dashboard as CDBReplicationDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/replication";
+import { Dashboard as CDBRuntimeDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/runtime";
+import { Dashboard as CDBSlowRequestDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/slow_request";
+import { Dashboard as CDBSqlDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/sql";
+import { Dashboard as CDBStorageDashboard } from "client/integrations/cockroachMetrics/Show/dashboards/storage";
+import { Dashboard as K8sLogsSummaryDashboard } from "client/integrations/k8sLogs/Show/dashboards/summary";
+import { Dashboard as K8sMetricsApiServerDashboard } from "client/integrations/k8sMetrics/Show/dashboards/apiserver";
+import { Dashboard as K8sMetricsKubeletDashboard } from "client/integrations/k8sMetrics/Show/dashboards/kubelet";
+import { Dashboard as K8sMetricsResourceDashboard } from "client/integrations/k8sMetrics/Show/dashboards/resource";
 
 const makeUuid = (integration: Integration) => `i9n-${integration.id}`;
 const makeUrl = (tenant: Tenant, path: string) =>
@@ -116,10 +126,20 @@ type dashboardInfo = {
 type Dashboard = {
   uid: string;
   dashboard:
-    | SummaryDashboard
-    | ApiServerDashboard
-    | KubeletDashboard
-    | ResourceDashboard;
+    | CDBChangefeedsDashboard
+    | CDBDistributedDashboard
+    | CDBHardwareDashboard
+    | CDBOverviewDashboard
+    | CDBQueuesDashboard
+    | CDBReplicationDashboard
+    | CDBRuntimeDashboard
+    | CDBSlowRequestDashboard
+    | CDBSqlDashboard
+    | CDBStorageDashboard
+    | K8sLogsSummaryDashboard
+    | K8sMetricsApiServerDashboard
+    | K8sMetricsKubeletDashboard
+    | K8sMetricsResourceDashboard;
   folderId: number;
   overwrite: boolean;
 };

@@ -28,8 +28,7 @@ type CockroachBaremetalAgentProps = {
 export function baremetalAgentYaml({
   clusterHost,
   tenantName,
-  integrationId,
-  nodeEndpoints
+  integrationId
 }: CockroachBaremetalAgentProps): string {
   return `server:
   http_listen_port: 8080
@@ -41,7 +40,7 @@ prometheus:
     remote_write:
     - url: https://cortex.${tenantName}.${clusterHost}/api/v1/push
       authorization:
-        credentials_file: /home/nick/cdb/tenant-api-token-default
+        credentials: __AUTH_TOKEN__
     scrape_configs:
     - job_name: cockroachdb
       metrics_path: /_status/vars
@@ -54,8 +53,8 @@ prometheus:
       - labels:
           integration_id: '${integrationId}'
         # Cockroach node endpoints, can get with:
-        #  cockroach node status --format tsv --certs-dir ./certs/ | awk '{print $2}' | tail -n +2
-        targets: ${nodeEndpoints}
+        #  cockroach node status --format tsv --insecure | awk '{print $2}' | tail -n +2
+        targets: __NODE_ADDRESSES__
 `;
 }
 
@@ -120,7 +119,7 @@ data:
             credentials_file: /var/run/tenant-auth/token
         scrape_configs:
 
-        - job_name: 'cockroachdb-pods'
+        - job_name: 'cockroachdb'
           kubernetes_sd_configs:
           - role: pod
 

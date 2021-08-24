@@ -104,8 +104,9 @@ export const InstallInstructions = ({
     [tenant.name, integration.kind]
   );
 
+  // TODO for baremetal support, only show these k8s yaml instructions when mode=k8s
   const deployYamlCommand = useMemo(
-    () => commands.deployYaml(configFilename, tenant.name),
+    () => commands.deployK8sYaml(configFilename, tenant.name),
     [tenant.name, configFilename]
   );
 
@@ -213,7 +214,7 @@ export const InstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {`Run this command to install Grafana Agent`}
+                  {`Run this command to install the metrics agent`}
                   <br />
                   <code>{deployYamlCommand}</code>
                   <CopyToClipboardIcon text={deployYamlCommand} />

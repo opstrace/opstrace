@@ -66,8 +66,7 @@ export default function CockroachMetricsStatus({ integration, tenant }: StatusPr
   });
 
   const statusCheckUri = useMemo(() => {
-    // TODO pick a default metric produced by the nodes
-    const promQl = `process_cpu_seconds_total{integration_id="${integration.id}"}`;
+    const promQl = `sys_uptime{integration_id="${integration.id}"}`;
     const start = subHours(queryTime, 1);
 
     return encodeURI(
