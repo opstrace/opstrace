@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import argparse from "argparse";
+import * as pm from "./prommetrics";
 
 import { KubeConfig } from "@kubernetes/client-node";
 
@@ -63,8 +64,20 @@ function* core() {
     defaultValue: false
   });
 
+  parser.addArgument("--metrics-port", {
+    help: "port for controller metrics, or 0 to disable",
+    type: "int",
+    defaultValue: 8900
+  });
+
   log.debug("Parsing command line arguments");
   const args = parser.parseArgs();
+
+  if (args.metrics_port === 0) {
+    log.info("metrics server disabled: --metrics-port=0");
+  } else {
+    pm.setupPromExporter(args.metrics_port);
+  }
 
   const kubeConfig = new KubeConfig();
   if (args.external) {
@@ -126,7 +139,7 @@ async function main() {
 
 if (require.main === module) {
   process.on("SIGINT", function () {
-    log.debug("Received SIGINT, exiting");
+    log.info("Received SIGINT, exiting");
     process.exit(1);
   });
 
