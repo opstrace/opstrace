@@ -881,7 +881,7 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
     for (const f of fragments) {
       const s = f.parent!;
       if (
-        PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] <=
+        PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] <
         CFG.stream_write_n_fragments
       ) {
         // Put back into work pool (left-hand side). All other actors might
