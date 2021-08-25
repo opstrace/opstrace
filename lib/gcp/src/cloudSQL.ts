@@ -15,7 +15,7 @@
  */
 
 import { call, delay, CallEffect } from "redux-saga/effects";
-import { google, sql_v1beta4 } from "googleapis";
+import { google, sql_v1beta4, servicenetworking_v1 } from "googleapis";
 import { log, SECOND, sleep } from "@opstrace/utils";
 import {
   ensureSQLInstanceDoesNotExist,
@@ -33,6 +33,9 @@ import {
 const snclient = google.servicenetworking("v1");
 
 async function listServiceConnections(network: string): Promise<void> {
+async function listServiceConnections(
+  network: string
+): Promise<servicenetworking_v1.Schema$Connection[] | undefined> {
   let result: any;
   try {
     result = await snclient.services.connections.list({
@@ -40,19 +43,28 @@ async function listServiceConnections(network: string): Promise<void> {
       network: network
     });
   } catch (err) {
-    log.warning(`error during services.connections.list: ${err} -- ignore`);
+    log.warning(`error during services.connections.list: ${err}`);
     return;
   }
+
   const pfx =
     `services.connections.list for services/servicenetworking.googleapis.com ` +
     `and network ${network}:`;
+
   if (result.data !== undefined) {
-    log.info(`${pfx}\nt${JSON.stringify(result.data, null, 2)}`);
-    return;
+    log.info(`${pfx}\n${JSON.stringify(result.data, null, 2)}`);
+
+    if (result.data.connections !== undefined) {
+      return result.data
+        .connections as servicenetworking_v1.Schema$Connection[];
+    }
   }
+
   log.warning(
     `${pfx}: unexpected result obj: ${JSON.stringify(result, null, 2)}`
   );
+
+  return undefined;
 }
 
 /**
