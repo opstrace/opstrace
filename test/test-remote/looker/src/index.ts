@@ -707,7 +707,7 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
       log.info(
         `actor ${actorIndex}: series pool is empty. got ${fragments.length} (desired: ${nfppm})`
       );
-      break;
+      return;
     }
 
     let fragment: MetricSeriesFragment | LogSeriesFragment | undefined =
