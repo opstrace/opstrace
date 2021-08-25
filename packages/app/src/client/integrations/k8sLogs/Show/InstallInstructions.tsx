@@ -16,7 +16,6 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { saveAs } from "file-saver";
 
 import { Integration } from "state/integration/types";
 
@@ -44,6 +43,8 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import styled from "styled-components";
 import { Tenant } from "state/tenant/types";
+import { getConfigFileName } from "client/integrations/configUtils";
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -71,23 +72,12 @@ export const InstallInstructions = ({
   config
 }: InstallInstructionsProps) => {
   const dispatch = useDispatch();
-
-  const configFilename = useMemo(
-    () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
-    [tenant.name, integration.kind]
-  );
+  const configFilename = getConfigFileName(tenant, integration);
 
   const deployYamlCommand = useMemo(
     () => commands.deployYaml(configFilename, tenant.name),
     [tenant.name, configFilename]
   );
-
-  const downloadHandler = () => {
-    var configBlob = new Blob([config], {
-      type: "application/x-yaml;charset=utf-8"
-    });
-    saveAs(configBlob, configFilename);
-  };
 
   const { registerNotification } = useSimpleNotification();
 
@@ -159,15 +149,12 @@ export const InstallInstructions = ({
                   {`Download the generated config YAML and save to the same
                     location as the api key for Tenant "${tenant.name}", it should be called "tenant-api-token-${tenant.name}".`}
                   <Box pt={1}>
-                    <Button
-                      style={{ marginRight: 20 }}
-                      variant="contained"
-                      size="small"
-                      state="primary"
-                      onClick={downloadHandler}
+                    <DownloadConfigButton
+                      filename={configFilename}
+                      config={config}
                     >
                       Download YAML
-                    </Button>
+                    </DownloadConfigButton>
                     <ViewConfigDialogBtn
                       filename={configFilename}
                       config={config}
