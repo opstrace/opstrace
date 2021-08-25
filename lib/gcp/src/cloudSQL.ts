@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import { call, delay, CallEffect } from "redux-saga/effects";
 import { google, sql_v1beta4, servicenetworking_v1 } from "googleapis";
 import { log, SECOND, sleep } from "@opstrace/utils";
@@ -32,7 +34,123 @@ import {
 
 const snclient = google.servicenetworking("v1");
 
-async function listServiceConnections(network: string): Promise<void> {
+async function deleteServiceConnectionsForNetwork(
+  network: string
+): Promise<void> {
+  log.info(`delete all service connections for network ${network}`);
+
+  const connections = await listServiceConnections(network);
+
+  if (connections !== undefined && connections.length > 0) {
+    for (const c of connections) {
+      await deleteServiceConnection(c);
+    }
+  }
+}
+
+/**
+ * Enter infinite loop waiting for definite DELETE conformation for the specifc
+ * service connection provided as `c`.
+ */
+async function deleteServiceConnection(
+  c: servicenetworking_v1.Schema$Connection
+) {
+  // https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services.connections/deleteConnection
+
+  // `connection` is of this shape:
+  // {
+  //   "network": "projects/934304004580/global/networks/prs-bk-5621-452-g",
+  //   "reservedPeeringRanges": [
+  //     "google-managed-services-prs-bk-5621-452-g"
+  //   ],
+  //   "peering": "servicenetworking-googleapis-com",
+  //   "service": "services/servicenetworking.googleapis.com"
+  // }
+
+  // The `Schema$Connection` type allows for this to not be set. Confirm it is.
+  assert(c.network);
+
+  const logpfx = `delete service connection ${c.service} / ${c.peering} / ${c.network}`;
+
+  let operationName: string;
+  let attempt = 0;
+
+  const requestparams = {
+    name: `${c.service}/connections/${c.peering}`,
+    requestBody: {
+      // "Must be in the form of projects/{project}/global/networks/{network}"
+      // example in our case:
+      // projects/934304004580/global/networks/prs-bk-5621-452-g
+      // expect `network` arg to be that string.
+      consumerNetwork: c.network
+    }
+  };
+
+  while (true) {
+    attempt += 1;
+
+    // log currently known service connections for this network (VPC)
+    await listServiceConnections(c.network);
+
+    // Trigger DELETE
+    log.info(`${logpfx}: delete with params: ${requestparams}`);
+    let result: any;
+    try {
+      result = await snclient.services.connections.deleteConnection(
+        requestparams
+      );
+    } catch (err) {
+      log.error(
+        `${logpfx}: error during services.connections.deleteConnection: ${err}`
+      );
+    }
+    log.debug(
+      `${logpfx}: services.connections.deleteConnection result: ${JSON.stringify(
+        result,
+        null,
+        2
+      )}`
+    );
+
+    // filter for success, exit loop in that case
+    if (result !== undefined && result.data !== undefined) {
+      const response = result.data;
+      if (response.name !== undefined) {
+        log.info(`${logpfx}: started log-running operation: ${response.name}`);
+
+        // This is something like "operations/pssn.p24-948748128269-bfaca658-11c7-4a9c-821b-b1dafc37231f"
+        operationName = response.name;
+        // Enter loop for following operation progress (as of the time of
+        // writing this is not timeout-controlled, and waits forever until
+        // operation either fails permanently or succeeds)
+        if (
+          await waitForLongrunningOperationToSucceed(
+            snclient,
+            operationName,
+            logpfx
+          )
+        ) {
+          log.info(`${logpfx}: operation completed, leave peerVpcs()`);
+          return;
+        } else {
+          log.info(
+            `${logpfx}: operation resulted in permanent error, retry deletion from scratch`
+          );
+        }
+      }
+    }
+
+    // Do not retry too quickly, otherwise we can expect a largish fraction of
+    // requests to be responded to with `Quota exceeded for quota metric
+    // 'Mutate requests'` https://github.com/opstrace/opstrace/issues/1213
+    const delaySeconds = 45;
+    log.info(
+      `${logpfx}: connections.deleteConnection(): attempt ${attempt} failed, retry in ${delaySeconds} s`
+    );
+    await sleep(delaySeconds);
+  }
+}
+
 async function listServiceConnections(
   network: string
 ): Promise<servicenetworking_v1.Schema$Connection[] | undefined> {
