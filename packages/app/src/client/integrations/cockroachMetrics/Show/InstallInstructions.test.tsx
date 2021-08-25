@@ -230,10 +230,10 @@ describe("Install Dashboards", () => {
     userEvent.click(
       container.getByRole("button", { name: "Install Dashboards" })
     );
-    console.log(`as-${integration.id}`)
+    console.log(`cf-${integration.id}`)
     expect(
       await container.findByText(
-        `Could not create grafana integration dashboard as-${integration.id}`
+        `Could not create grafana integration dashboard cf-${integration.id}`
       )
     ).toBeInTheDocument();
     expect(await container.findByText(JSON.stringify(error[0]))).toBeInTheDocument();
