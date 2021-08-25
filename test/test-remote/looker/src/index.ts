@@ -841,52 +841,62 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
   actorCount: number,
   actorIndex: number
 ) {
-  const fragments = await tryToGetNFragmentsFromSeriesPool(
-    seriespool,
-    nfppm,
-    actorCount,
-    actorIndex
-  );
-
-  if (fragments.length === 0) {
-    log.info(
-      `actor ${actorIndex}: candidate-popping loop terminated, no fragment acquired: all work done, exit actor.`
+  // Repetitively call into tryToGetNFragmentsFromSeriesPool() precisely until
+  // no fragments are returned anymore.
+  while (true) {
+    const fragments = await tryToGetNFragmentsFromSeriesPool(
+      seriespool,
+      nfppm,
+      actorCount,
+      actorIndex
     );
-    return;
-  }
 
-  await _postFragments(fragments, actorIndex);
-
-  // implement intra-cycle stop criteria
-  if (CYCLE_STOP_WRITE_AFTER_SECONDS !== 0) {
-    const secondsSinceCycleStart = mtimeDiffSeconds(CYCLE_START_TIME_MONOTONIC);
-    if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
-      log.debug(
-        `actor ${actorIndex}: ${secondsSinceCycleStart.toFixed(
-          2
-        )} seconds passed: stop producer`
+    if (fragments.length === 0) {
+      log.info(
+        `actor ${actorIndex}: candidate-popping loop terminated, no fragment acquired: all work done, exit actor.`
       );
       return;
     }
-  }
 
-  // For each of the fragments pushed there is a corresponding series object
-  // that maybe needs to be put back onto the work pool (it's important to
-  // only do that now after the push message has been sent out)
-  for (const f of fragments) {
-    const s = f.parent!;
-    if (
-      PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] <=
-      CFG.stream_write_n_fragments
-    ) {
-      // put back into work pool (left-hand side)
-      seriespool.unshift(s);
-      log.debug(`put ${s.uniqueName} back into work queue`);
-    } else {
-      log.debug(
-        `actor ${actorIndex}:  CFG.stream_write_n_fragments (${CFG.stream_write_n_fragments}) ` +
-          `pushed for ${s.uniqueName}`
+    await _postFragments(fragments, actorIndex);
+
+    // implement intra-cycle stop criteria
+    if (CYCLE_STOP_WRITE_AFTER_SECONDS !== 0) {
+      const secondsSinceCycleStart = mtimeDiffSeconds(
+        CYCLE_START_TIME_MONOTONIC
       );
+      if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
+        log.debug(
+          `actor ${actorIndex}: ${secondsSinceCycleStart.toFixed(
+            2
+          )} seconds passed: stop producer`
+        );
+        return;
+      }
+    }
+
+    // For each of the fragments pushed there is a corresponding series object
+    // that maybe needs to be put back onto the work pool (it's important to
+    // only do that now after the push message has been sent out)
+    for (const f of fragments) {
+      const s = f.parent!;
+      if (
+        PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] <=
+        CFG.stream_write_n_fragments
+      ) {
+        // Put back into work pool (left-hand side). All other actors might
+        // have terminated by now because maybe temporarily the pool size
+        // appeared as 0 (and in fact, was). Now that _this actor here_ is
+        // adding back items onto the pool, we also have to make sure that this
+        // actor here performs one more outer loop interation.
+        seriespool.unshift(s);
+        log.debug(`put ${s.uniqueName} back into work queue`);
+      } else {
+        log.debug(
+          `actor ${actorIndex}:  CFG.stream_write_n_fragments (${CFG.stream_write_n_fragments}) ` +
+            `pushed for ${s.uniqueName}`
+        );
+      }
     }
   }
 }
