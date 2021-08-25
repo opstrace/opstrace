@@ -309,7 +309,7 @@ async function createNewSeries(
 
     const logEveryN = util.logEveryNcalc(CFG.n_concurrent_streams);
     if (i % logEveryN == 0) {
-      log.info(msg + ` (${logEveryN - 1} msgs like this hidden)`);
+      log.info(msg + ` (${logEveryN - 1} msgs like this are/will be hidden)`);
       // Allow for more or less snappy SIGINTing this initialization step.
       await sleep(0.0001);
     } else {
@@ -673,7 +673,7 @@ export async function generateAndPostFragments(
   const seriespool = new Denque([...series]);
   //const seriespool = new Denque(series);
 
-  log.info(`seriespool.length: ${seriespool.length}`);
+  log.debug(`seriespool.length: ${seriespool.length}`);
 
   const actorCount = CFG.max_concurrent_writes;
   for (let i = 1; i <= actorCount; i++) {
@@ -738,7 +738,7 @@ async function tryToGetNFragmentsFromSeriesPool(
 
     if (s === undefined) {
       log.info(
-        `actor ${actorIndex}: series pool is empty. got ${fragments.length} (desired: ${nf})`
+        `actor ${actorIndex}: series pool is empty. generated ${fragments.length} fragments (desired: ${nf})`
       );
       // Break from the loop. At this point, the `fragments` array may
       // be of length between 0 or nf-1.
@@ -828,8 +828,8 @@ async function tryToGetNFragmentsFromSeriesPool(
     PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] += 1;
 
     if (fragments.length === nf) {
-      log.info(`seriespool.length: ${seriespool.length}`);
-      log.info(`actor ${actorIndex}: collected ${nf} fragments`);
+      log.debug(`seriespool.length: ${seriespool.length}`);
+      log.debug(`actor ${actorIndex}: collected ${nf} fragments`);
       return fragments;
     }
   }
