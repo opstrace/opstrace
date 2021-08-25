@@ -23,6 +23,7 @@ import {
   PutEffect,
   CancelledEffect
 } from "redux-saga/effects";
+import * as promclient from "prom-client";
 import * as k8s from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { log, debugLogErrorDetail } from "@opstrace/utils";
@@ -79,6 +80,12 @@ export function* runInformers(
     };
   });
 
+  const counter = new promclient.Counter({
+    name: 'informer_events',
+    help: 'Incremented when a new k8s/graphql event is received',
+    labelNames: ['type']
+  });
+
   while (true) {
     let event;
     try {
@@ -90,8 +97,8 @@ export function* runInformers(
     if (event !== undefined) {
       // when the controller is running slow, it can be because of too many events
       // this helps to see them.
-      // TODO METRIC: add metric for keeping track of this
       log.debug(event.type);
+      counter.inc({ type: event.type }, 1);
 
       try {
         yield put(event);

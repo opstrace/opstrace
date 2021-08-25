@@ -120,6 +120,16 @@ export function ControllerResources({
                       memory: "500Mi"
                     }
                   },
+                  ports: [
+                    {
+                      name: "metrics",
+                      containerPort: 8900
+                    },
+                    {
+                      name: "readiness",
+                      containerPort: 9000
+                    }
+                  ],
                   env: [
                     {
                       name: "HASURA_GRAPHQL_ADMIN_SECRET",
@@ -150,7 +160,7 @@ export function ControllerResources({
                     httpGet: {
                       path: "/ready",
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      port: 9000 as any,
+                      port: "readiness" as any,
                       scheme: "HTTP"
                     }
                   }
