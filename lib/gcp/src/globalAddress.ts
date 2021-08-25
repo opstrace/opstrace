@@ -134,6 +134,8 @@ export function* ensureAddressDoesNotExist({
 }: {
   addressName: string;
 }): Generator<CallEffect, void, compute_v1.Schema$Address> {
+  log.info("global address teardown: start");
+
   let deleteIssued = false;
 
   while (true) {
@@ -142,18 +144,18 @@ export function* ensureAddressDoesNotExist({
     });
 
     if (!address) {
-      log.info("Global Address teardown: desired state reached");
+      log.info("global address teardown: desired state reached");
       return;
     }
 
-    log.info(`Global Address is ${address.status}`);
+    log.info(`global address status: ${address.status}`);
 
     try {
       // Workaround for https://github.com/opstrace/opstrace/issues/976.
       // Avoid issuing a second delete request for this resource otherwise we'll
       // get a 400 back.
       if (!deleteIssued) {
-        log.info(`Deleting Global Address`);
+        log.info("global address teardown: issue DELETE API call");
         yield call(deleteAddress, {
           name: addressName
         });
@@ -164,6 +166,6 @@ export function* ensureAddressDoesNotExist({
         throw e;
       }
     }
-    yield delay(2 * SECOND);
+    yield delay(5 * SECOND);
   }
 }

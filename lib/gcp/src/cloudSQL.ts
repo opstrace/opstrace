@@ -348,9 +348,13 @@ export function* ensureCloudSQLExists({
 
 export function* ensureCloudSQLDoesNotExist({
   opstraceClusterName,
+  networkName,
   addressName
 }: {
   opstraceClusterName: string;
+  // this is expected to be of the following shape:
+  // `projects/<gcpProjectID>/global/networks/<networkname >`
+  networkName: string;
   addressName: string;
 }): Generator<CallEffect, void, unknown> {
   const auth = new google.auth.GoogleAuth({
@@ -364,10 +368,8 @@ export function* ensureCloudSQLDoesNotExist({
   });
 
   google.options({ auth });
-  log.info(`Ensure SQLDatabase deletion`);
   yield call(ensureSQLDatabaseDoesNotExist, opstraceClusterName);
-  log.info(`Ensure SQLInstance deletion`);
   yield call(ensureSQLInstanceDoesNotExist, opstraceClusterName);
-  log.info(`Ensure Address deletion`);
+  yield call(deleteServiceConnectionsForNetwork, networkName);
   yield call(ensureAddressDoesNotExist, { addressName });
 }

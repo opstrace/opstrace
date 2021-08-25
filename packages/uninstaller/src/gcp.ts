@@ -108,9 +108,10 @@ export function* destroyGCPInfra(): Generator<
   log.info(`Ensure GKE deletion`);
   yield call(ensureGKEDoesNotExist, destroyConfig.clusterName);
 
-  log.info("Ensure CloudSQL deletion");
+  log.info("Delete CloudSQL stack");
   yield call(ensureCloudSQLDoesNotExist, {
     opstraceClusterName: destroyConfig.clusterName,
+    networkName: `projects/${destroyConfig.gcpProjectID}/global/networks/${destroyConfig.clusterName}`,
     addressName: `google-managed-services-${destroyConfig.clusterName}`
   });
 
