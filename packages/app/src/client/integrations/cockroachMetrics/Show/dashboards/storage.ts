@@ -257,7 +257,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 99th %ile latency for commits to the Raft Log. This measures essentially an fdatasync to the storage engine's write-ahead log.",
         fieldConfig: {
@@ -355,7 +355,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 50th %ile latency for commits to the Raft Log. This measures essentially an fdatasync to the storage engine's write-ahead log.",
         fieldConfig: {
@@ -453,7 +453,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 99th %ile latency for commits of Raft commands. This measures applying a batch to the storage engine (including writes to the write-ahead log), but no fsync.",
         fieldConfig: {
@@ -1281,7 +1281,7 @@ export default function makeDashboard(integrationId: string) {
             text: "All",
             value: "$__all"
           },
-          datasource: "${DS_PROMETHEUS}",
+          datasource: "$DS_PROMETHEUS",
           definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
           description: null,
           error: null,

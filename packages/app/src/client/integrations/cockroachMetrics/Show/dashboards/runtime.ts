@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description: "The number of live nodes in the cluster.",
         fieldConfig: {
           defaults: {},
@@ -138,7 +138,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "Memory in use across all nodes:\nRSS  \nTotal memory in use by CockroachDB\n\nGo Allocated  \nMemory allocated by the Go layer\n\nGo Total  \nTotal memory managed by the Go layer\n\nC Allocated  \nMemory allocated by the C layer\n\nC Total  \nTotal memory managed by the C layer",
         fieldConfig: {
@@ -265,7 +265,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The number of Goroutines across all nodes. This count should rise and fall based on load.",
         fieldConfig: {
@@ -660,7 +660,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -767,7 +767,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "Mean clock offset of each node against the rest of the cluster.",
         fieldConfig: {
@@ -894,7 +894,7 @@ export default function makeDashboard(integrationId: string) {
             text: "All",
             value: "$__all"
           },
-          datasource: "${DS_PROMETHEUS}",
+          datasource: "$DS_PROMETHEUS",
           definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
           description: null,
           error: null,

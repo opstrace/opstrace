@@ -234,7 +234,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description: "The total number of SQL statements currently running.",
         fieldConfig: {
           defaults: {},
@@ -332,7 +332,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The total amount of SQL client network traffic in bytes per second.",
         fieldConfig: {
@@ -563,7 +563,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The number of statements which returned a planning or runtime error.",
         fieldConfig: {
@@ -760,7 +760,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The number of flows on each node contributing to currently running distributed SQL statements.",
         fieldConfig: {
@@ -1666,7 +1666,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description: "The total number of DDL statements per second",
         fieldConfig: {
           defaults: {},
@@ -1889,7 +1889,7 @@ export default function makeDashboard(integrationId: string) {
             text: "All",
             value: "$__all"
           },
-          datasource: "${DS_PROMETHEUS}",
+          datasource: "$DS_PROMETHEUS",
           definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
           description: null,
           error: null,

@@ -248,7 +248,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -619,7 +619,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 99th percentile of transaction durations over a 1 minute period.",
         fieldConfig: {
@@ -1041,7 +1041,7 @@ export default function makeDashboard(integrationId: string) {
             text: "All",
             value: "$__all"
           },
-          datasource: "${DS_PROMETHEUS}",
+          datasource: "$DS_PROMETHEUS",
           definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
           description: null,
           error: null,

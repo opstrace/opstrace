@@ -257,7 +257,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "The number of range replicas stored on this node. Ranges are subsets of your data, which are replicated to ensure survivability.",
         fieldConfig: {
@@ -356,7 +356,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "${DS_PROMETHEUS}",
+        datasource: "$DS_PROMETHEUS",
         description:
           "Usage of disk space\n\n**Capacity**: Maximum store size across all nodes. This value may be explicitly set per node using [--store](https://www.cockroachlabs.com/docs/v21.1/cockroach-start.html#store). If a store size has not been set, this metric displays the actual disk capacity.\n\n**Available**: Free disk space available to CockroachDB data across all nodes.\n\n**Used**: Disk space in use by CockroachDB data across all nodes. This excludes the Cockroach binary, operating system, and other system files.\n\n[How are these metrics calculated?](https://www.cockroachlabs.com/docs/v21.1/ui-storage-dashboard.html#capacity-metrics)",
         fieldConfig: {
@@ -499,7 +499,7 @@ export default function makeDashboard(integrationId: string) {
             text: "All",
             value: "$__all"
           },
-          datasource: "${DS_PROMETHEUS}",
+          datasource: "$DS_PROMETHEUS",
           definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
           description: null,
           error: null,
