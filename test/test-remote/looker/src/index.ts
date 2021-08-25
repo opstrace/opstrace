@@ -115,7 +115,7 @@ async function main() {
 
   WALLTIME_COUPLING_PARAMS = calcWalltimeCouplingOptions();
 
-  for (let cyclenum = 1; cyclenum <= CFG.n_cycles + 1; cyclenum++) {
+  for (let cyclenum = 1; cyclenum <= CFG.n_cycles; cyclenum++) {
     setUptimeGauge();
 
     // The idea is that `CFG.invocation_id` is unique among those looker
