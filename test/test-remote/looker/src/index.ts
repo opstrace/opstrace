@@ -921,12 +921,12 @@ async function _postFragments(
   // it's confirmed (above) that this array is not empty.
   const firstseries = fragments[0].parent as LogSeries | MetricSeries;
 
-  if (fragments.length === 1) {
+  const fcount = fragments.length;
+
+  if (fcount === 1) {
     name = `actor ${actorIndex}: prProducerPOSTer(${firstseries.promQueryString()})`;
   } else {
-    name = `actor ${actorIndex}: prProducerPOSTer(nstreams=${
-      fragments.length
-    }, first=${firstseries.promQueryString()})`;
+    name = `actor ${actorIndex}: prProducerPOSTer(nstreams=${fcount}, first=${firstseries.promQueryString()})`;
   }
 
   if (
@@ -939,7 +939,7 @@ async function _postFragments(
       `${name}: generated pushrequest msg in ${genduration.toFixed(
         2
       )} s with ` +
-        `${pr.fragments.length} series ` +
+        `${fcount} series ` +
         `(first: ${
           firstFragment.parent?.uniqueName
         }, index ${firstFragment.indexString(3)} -- ` +
@@ -967,13 +967,11 @@ async function _postFragments(
   pm.hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
 
   COUNTER_STREAM_FRAGMENTS_PUSHED =
-    COUNTER_STREAM_FRAGMENTS_PUSHED + BigInt(CFG.n_fragments_per_push_message);
+    COUNTER_STREAM_FRAGMENTS_PUSHED + BigInt(fcount);
 
-  pm.counter_fragments_pushed.inc(CFG.n_fragments_per_push_message);
+  pm.counter_fragments_pushed.inc(fcount);
 
-  pm.counter_log_entries_pushed.inc(
-    CFG.n_samples_per_series_fragment * CFG.n_fragments_per_push_message
-  );
+  pm.counter_log_entries_pushed.inc(CFG.n_samples_per_series_fragment * fcount);
 
   // NOTE: payloadByteCount() includes timestamps. For logs, the timestamp
   // payload data (12 bytes per entry) might be small compared to the log
