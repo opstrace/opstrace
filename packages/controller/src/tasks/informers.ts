@@ -81,9 +81,9 @@ export function* runInformers(
   });
 
   const counter = new promclient.Counter({
-    name: 'informer_events',
-    help: 'Incremented when a new k8s/graphql event is received',
-    labelNames: ['type']
+    name: "informer_events",
+    help: "Incremented when a new k8s/graphql event is received",
+    labelNames: ["type"]
   });
 
   while (true) {
