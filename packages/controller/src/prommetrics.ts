@@ -30,7 +30,7 @@ export function setupPromExporter(port: number) {
     "/metrics",
     async function (req: express.Request, res: express.Response) {
       log.debug("handling request to /metrics");
-      res.set('Content-Type', promclient.register.contentType);
+      res.set("Content-Type", promclient.register.contentType);
       const metrics = await promclient.register.metrics();
       res.send(metrics);
     }
