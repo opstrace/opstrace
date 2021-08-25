@@ -15,7 +15,6 @@
  */
 
 import React, { useMemo } from "react";
-import { saveAs } from "file-saver";
 
 import * as commands from "./templates/commands";
 
@@ -25,7 +24,6 @@ import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn
 
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
-import { Button } from "client/components/Button";
 
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -37,6 +35,8 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 import styled from "styled-components";
 import { Integration } from "state/integration/types";
 import { Tenant } from "state/tenant/types";
+import { getConfigFileName } from "client/integrations/configUtils";
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -61,21 +61,12 @@ export const UninstallInstructions = ({
   tenant,
   config
 }: UnInstallInstructionsProps) => {
-  const configFilename = useMemo(
-    () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
-    [tenant.name, integration.kind]
+  const configFilename = getConfigFileName(tenant, integration);
+
+  const deleteYamlCommand = useMemo(
+    () => commands.deleteYaml(configFilename),
+    [configFilename]
   );
-
-  const deleteYamlCommand = useMemo(() => commands.deleteYaml(configFilename), [
-    configFilename
-  ]);
-
-  const downloadHandler = () => {
-    var configBlob = new Blob([config], {
-      type: "application/x-yaml;charset=utf-8"
-    });
-    saveAs(configBlob, configFilename);
-  };
 
   return (
     <Box width="100%" height="100%" p={1}>
@@ -97,15 +88,12 @@ export const UninstallInstructions = ({
                 <Box flexGrow={1} pb={2}>
                   {`Use the previously downloaded config YAML or download it again.`}
                   <Box pt={1}>
-                    <Button
-                      style={{ marginRight: 20 }}
-                      variant="contained"
-                      size="small"
-                      state="primary"
-                      onClick={downloadHandler}
+                    <DownloadConfigButton
+                      filename={configFilename}
+                      config={config}
                     >
                       Download YAML
-                    </Button>
+                    </DownloadConfigButton>
                     <ViewConfigDialogBtn
                       filename={configFilename}
                       config={config}
