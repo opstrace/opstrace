@@ -235,7 +235,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -331,7 +331,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -426,7 +426,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -523,7 +523,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -619,7 +619,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -715,7 +715,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "Free disk space available to CockroachDB data.\n\n[How is this metric calculated?](https://www.cockroachlabs.com/docs/v21.1/ui-storage-dashboard.html#capacity-metrics)",
         fieldConfig: {
@@ -814,7 +814,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -909,7 +909,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -1009,22 +1009,16 @@ export default function makeDashboard(integrationId: string) {
       list: [
         {
           current: {
-            selected: false,
             text: "Prometheus",
             value: "Prometheus"
           },
-          description: null,
-          error: null,
           hide: 0,
-          includeAll: false,
-          label: "datasource",
-          multi: false,
+          label: null,
           name: "DS_PROMETHEUS",
           options: [],
           query: "prometheus",
           refresh: 1,
           regex: "",
-          skipUrlSync: false,
           type: "datasource"
         },
         {

@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "A ten-second moving average of the # of SELECT, INSERT, UPDATE, and DELETE statements successfully executed per second across all nodes.",
         fieldConfig: {
@@ -159,7 +159,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "Over the last minute, this node executed 99% of queries within this time. This time does not include network latency between the node and client.",
         fieldConfig: {
@@ -474,22 +474,16 @@ export default function makeDashboard(integrationId: string) {
       list: [
         {
           current: {
-            selected: false,
             text: "Prometheus",
             value: "Prometheus"
           },
-          description: null,
-          error: null,
           hide: 0,
-          includeAll: false,
-          label: "datasource",
-          multi: false,
+          label: null,
           name: "DS_PROMETHEUS",
           options: [],
           query: "prometheus",
           refresh: 1,
           regex: "",
-          skipUrlSync: false,
           type: "datasource"
         },
         {

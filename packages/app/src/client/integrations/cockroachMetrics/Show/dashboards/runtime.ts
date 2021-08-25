@@ -364,7 +364,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The number of Goroutines waiting for CPU. This count should rise and fall based on load.",
         fieldConfig: {
@@ -463,7 +463,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The number of times that Go’s garbage collector was invoked per second across all nodes.",
         fieldConfig: {
@@ -561,7 +561,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The amount of processor time used by Go’s garbage collector per second across all nodes. During garbage collection, application code execution is paused.",
         fieldConfig: {
@@ -869,22 +869,16 @@ export default function makeDashboard(integrationId: string) {
       list: [
         {
           current: {
-            selected: false,
             text: "Prometheus",
             value: "Prometheus"
           },
-          description: null,
-          error: null,
           hide: 0,
-          includeAll: false,
-          label: "datasource",
-          multi: false,
+          label: null,
           name: "DS_PROMETHEUS",
           options: [],
           query: "prometheus",
           refresh: 1,
           regex: "",
-          skipUrlSync: false,
           type: "datasource"
         },
         {

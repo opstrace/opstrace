@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description: "The total number of open SQL Sessions.",
         fieldConfig: {
           defaults: {},
@@ -137,7 +137,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description: "The total number of SQL transactions currently open.",
         fieldConfig: {
           defaults: {},
@@ -440,7 +440,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "A moving average of the # of SELECT, INSERT, UPDATE, and DELETE statements successfully executed per second.",
         fieldConfig: {
@@ -662,7 +662,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The total number of SQL statements that experienced contention.",
         fieldConfig: {
@@ -859,7 +859,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "Over the last minute, this node executed 99% of queries within this time. This time does not include network latency between the node and client.",
         fieldConfig: {
@@ -957,7 +957,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "Over the last minute, this node executed 90% of queries within this time. This time does not include network latency between the node and client.",
         fieldConfig: {
@@ -1054,7 +1054,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 99th percentile of latency between query requests and responses over a 1 minute period. Values are displayed individually for each node.",
         fieldConfig: {
@@ -1152,7 +1152,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 90th percentile of latency between query requests and responses over a 1 minute period. Values are displayed individually for each node.",
         fieldConfig: {
@@ -1249,7 +1249,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The total number of transactions initiated, committed, rolled back, or aborted per second.",
         fieldConfig: {
@@ -1371,7 +1371,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 99th percentile of total transaction time over a 1 minute period. Values are displayed individually for each node.",
         fieldConfig: {
@@ -1469,7 +1469,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 90th percentile of total transaction time over a 1 minute period. Values are displayed individually for each node.",
         fieldConfig: {
@@ -1568,7 +1568,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The current amount of allocated SQL memory. This amount is what is compared against the node's --max-sql-memory flag.",
         fieldConfig: {
@@ -1764,7 +1764,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The total number of statements denied per second due to a [cluster setting](https://www.cockroachlabs.com/docs/v21.1/cluster-settings.html) in the format feature.statement_type.enabled = FALSE.",
         fieldConfig: {
@@ -1864,22 +1864,16 @@ export default function makeDashboard(integrationId: string) {
       list: [
         {
           current: {
-            selected: false,
             text: "Prometheus",
             value: "Prometheus"
           },
-          description: null,
-          error: null,
           hide: 0,
-          includeAll: false,
-          label: "datasource",
-          multi: false,
+          label: null,
           name: "DS_PROMETHEUS",
           options: [],
           query: "prometheus",
           refresh: 1,
           regex: "",
-          skipUrlSync: false,
           type: "datasource"
         },
         {

@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description: "",
         fieldConfig: {
           defaults: {},
@@ -144,7 +144,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -354,7 +354,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -467,7 +467,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -717,7 +717,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 90th percentile of transaction durations over a 1 minute period.",
         fieldConfig: {
@@ -815,7 +815,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 99th percentile of latency to heartbeat a node's internal liveness record over a 1 minute period.",
         fieldConfig: {
@@ -914,7 +914,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: null,
+        datasource: "$DS_PROMETHEUS",
         description:
           "The 90th percentile of latency to heartbeat a node's internal liveness record over a 1 minute period.",
         fieldConfig: {
@@ -1016,22 +1016,16 @@ export default function makeDashboard(integrationId: string) {
       list: [
         {
           current: {
-            selected: false,
             text: "Prometheus",
             value: "Prometheus"
           },
-          description: null,
-          error: null,
           hide: 0,
-          includeAll: false,
-          label: "datasource",
-          multi: false,
+          label: null,
           name: "DS_PROMETHEUS",
           options: [],
           query: "prometheus",
           refresh: 1,
           regex: "",
-          skipUrlSync: false,
           type: "datasource"
         },
         {
