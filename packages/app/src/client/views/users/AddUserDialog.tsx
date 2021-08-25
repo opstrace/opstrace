@@ -20,14 +20,17 @@ import { useDispatch } from "react-redux";
 import { usePickerService } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
 import { addUser } from "state/user/actions";
+import { useSimpleNotification } from "client/services/Notification";
 
 // eslint-disable-next-line no-useless-escape
-const emailValidator = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+const emailValidator =
+  /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
 export const addUserCommandId = "add-user-picker";
 
 const AddUserPicker = () => {
   const dispatch = useDispatch();
+  const { registerNotification } = useSimpleNotification();
 
   const { activatePickerWithText } = usePickerService(
     {
@@ -45,7 +48,21 @@ const AddUserPicker = () => {
         }
       ],
       onSelected: (option, email) => {
-        if (option.id === "yes" && email && emailValidator.test(email)) {
+        if (!email) {
+          return registerNotification({
+            state: "error" as const,
+            title: "Could not add user",
+            information: `Please enter a valid email address`
+          });
+        }
+        if (!emailValidator.test(email)) {
+          return registerNotification({
+            state: "error" as const,
+            title: "Could not add user",
+            information: `${email} is not a valid email address`
+          });
+        }
+        if (option.id === "yes") {
           dispatch(addUser(email));
         }
       }
