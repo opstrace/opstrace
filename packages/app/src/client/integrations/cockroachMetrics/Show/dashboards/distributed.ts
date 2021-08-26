@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description: "",
         fieldConfig: {
           defaults: {},
@@ -83,14 +83,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(distsender_batches{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(distsender_batches{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Batch",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(distsender_batches_partial{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(distsender_batches_partial{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Partial Batches",
             refId: "B"
@@ -144,7 +144,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -186,7 +186,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(distsender_rpc_sent{integration_id="${integrationId}",job="cockroachdb"}[$__rate_interval]))`,
+            expr: `sum(rate(distsender_rpc_sent{integration_id="${integrationId}"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "RPCs Sent",
@@ -194,7 +194,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(distsender_rpc_sent_local{integration_id="${integrationId}",job="cockroachdb"}[$__rate_interval]))`,
+            expr: `sum(rate(distsender_rpc_sent_local{integration_id="${integrationId}"}[5m]))`,
             interval: "",
             legendFormat: "Local Fast-path",
             refId: "B"
@@ -248,7 +248,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -290,7 +290,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(distsender_rpc_sent_nextreplicaerror{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(distsender_rpc_sent_nextreplicaerror{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             intervalFactor: 1,
@@ -299,7 +299,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(distsender_errors_notleaseholder{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(distsender_errors_notleaseholder{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 1,
             legendFormat: "Not Lease Holder Errors",
@@ -354,7 +354,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -396,7 +396,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(txn_commits{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_commits{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 1,
             legendFormat: "Commited",
@@ -404,7 +404,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_commits1PC{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_commits1PC{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             intervalFactor: 1,
@@ -413,7 +413,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_aborts{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_aborts{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Aborted",
             refId: "B"
@@ -467,7 +467,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -509,14 +509,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_writetooold{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_writetooold{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Write Too Old",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_writetoooldmulti{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_writetoooldmulti{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Write Too Old (multiple)",
@@ -524,7 +524,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_serializable{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_serializable{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Forwarded Timestamp (iso=serializable)",
@@ -532,7 +532,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_asyncwritefailure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_asyncwritefailure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Async Consensus Failure",
@@ -540,7 +540,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_readwithinuncertainty{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_readwithinuncertainty{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Read Within Uncertainty Interval",
@@ -548,7 +548,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_txnaborted{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_txnaborted{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Aborted",
@@ -556,7 +556,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_txnpush{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_txnpush{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Push Failure",
@@ -564,7 +564,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(txn_restarts_unknown{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(txn_restarts_unknown{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Unknown",
@@ -619,7 +619,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 99th percentile of transaction durations over a 1 minute period.",
         fieldConfig: {
@@ -663,7 +663,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `histogram_quantile(0.99,rate(txn_durations_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[1m]))`,
+            expr: `histogram_quantile(0.99,rate(txn_durations_bucket{integration_id="${integrationId}",instance=~"$node"}[1m]))`,
             interval: "",
             legendFormat: "{{instance}}",
             refId: "B"
@@ -717,7 +717,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 90th percentile of transaction durations over a 1 minute period.",
         fieldConfig: {
@@ -761,7 +761,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `histogram_quantile(0.90,rate(txn_durations_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[1m]))`,
+            expr: `histogram_quantile(0.90,rate(txn_durations_bucket{integration_id="${integrationId}",instance=~"$node"}[1m]))`,
             interval: "",
             legendFormat: "{{instance}}",
             refId: "A"
@@ -815,7 +815,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 99th percentile of latency to heartbeat a node's internal liveness record over a 1 minute period.",
         fieldConfig: {
@@ -859,7 +859,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `histogram_quantile(0.99,rate(liveness_heartbeatlatency_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[1m]))`,
+            expr: `histogram_quantile(0.99,rate(liveness_heartbeatlatency_bucket{integration_id="${integrationId}",instance=~"$node"}[1m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -914,7 +914,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 90th percentile of latency to heartbeat a node's internal liveness record over a 1 minute period.",
         fieldConfig: {
@@ -958,7 +958,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `histogram_quantile(0.90,rate(liveness_heartbeatlatency_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[1m]))`,
+            expr: `histogram_quantile(0.90,rate(liveness_heartbeatlatency_bucket{integration_id="${integrationId}",instance=~"$node"}[1m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -1015,28 +1015,14 @@ export default function makeDashboard(integrationId: string) {
     templating: {
       list: [
         {
-          current: {
-            text: "Prometheus",
-            value: "Prometheus"
-          },
-          hide: 0,
-          label: null,
-          name: "DS_PROMETHEUS",
-          options: [],
-          query: "prometheus",
-          refresh: 1,
-          regex: "",
-          type: "datasource"
-        },
-        {
           allValue: "",
           current: {
             selected: false,
             text: "All",
             value: "$__all"
           },
-          datasource: "$DS_PROMETHEUS",
-          definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+          datasource: "metrics",
+          definition: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
           description: null,
           error: null,
           hide: 0,
@@ -1046,7 +1032,7 @@ export default function makeDashboard(integrationId: string) {
           name: "node",
           options: [],
           query: {
-            query: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+            query: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
             refId: "Prometheus-node-Variable-Query"
           },
           refresh: 1,
@@ -1058,73 +1044,6 @@ export default function makeDashboard(integrationId: string) {
           tagsQuery: "",
           type: "query",
           useTags: false
-        },
-        {
-          auto: false,
-          auto_count: 30,
-          auto_min: "10s",
-          current: {
-            selected: false,
-            text: "1m",
-            value: "1m"
-          },
-          description: null,
-          error: null,
-          hide: 0,
-          label: "Rate Interval",
-          name: "rate_interval",
-          options: [
-            {
-              selected: false,
-              text: "30s",
-              value: "30s"
-            },
-            {
-              selected: true,
-              text: "1m",
-              value: "1m"
-            },
-            {
-              selected: false,
-              text: "5m",
-              value: "5m"
-            },
-            {
-              selected: false,
-              text: "10m",
-              value: "10m"
-            },
-            {
-              selected: false,
-              text: "30m",
-              value: "30m"
-            },
-            {
-              selected: false,
-              text: "1h",
-              value: "1h"
-            },
-            {
-              selected: false,
-              text: "6h",
-              value: "6h"
-            },
-            {
-              selected: false,
-              text: "12h",
-              value: "12h"
-            },
-            {
-              selected: false,
-              text: "1d",
-              value: "1d"
-            }
-          ],
-          query: "30s,1m,5m,10m,30m,1h,6h,12h,1d",
-          queryValue: "",
-          refresh: 2,
-          skipUrlSync: false,
-          type: "interval"
         }
       ]
     },

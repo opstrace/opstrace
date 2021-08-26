@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -82,7 +82,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_gc_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_gc_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "GC",
@@ -90,7 +90,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicagc_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicagc_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Replica GC",
@@ -98,7 +98,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Replication",
@@ -106,7 +106,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_split_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_split_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Split",
@@ -114,7 +114,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_consistency_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_consistency_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Consistency",
@@ -122,7 +122,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftlog_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftlog_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Raft Log",
@@ -130,7 +130,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftsnapshot_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftsnapshot_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Raft Snapshot",
@@ -138,7 +138,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_tsmaintenance_process_failure{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_tsmaintenance_process_failure{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Time Series Maintenance",
@@ -193,7 +193,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -235,56 +235,56 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_gc_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_gc_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "GC",
             refId: "G"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicagc_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicagc_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Replica GC",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Replication",
             refId: "C"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_split_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_split_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Split",
             refId: "B"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_consistency_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_consistency_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Consistency",
             refId: "D"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftlog_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftlog_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Raft Log",
             refId: "E"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftsnapshot_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftsnapshot_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Raft Snapshot",
             refId: "F"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_tsmaintenance_processingnanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_tsmaintenance_processingnanos{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Time Series Maintenance",
             refId: "H"
@@ -338,7 +338,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -380,7 +380,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_gc_info_transactionspangccommitted{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_gc_info_transactionspangccommitted{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Successful Actions / sec",
@@ -388,7 +388,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_gc_info_transactionspangcpending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_gc_info_transactionspangcpending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Pending Actions",
@@ -396,7 +396,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_removedeadreplica{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_removedeadreplica{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Replicas Removed / sec",
             refId: "C"
@@ -450,7 +450,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -492,14 +492,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_process_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_process_success{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_pending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Pending Actions",
@@ -507,7 +507,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_addreplica{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_addreplica{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Replicas Added / sec",
@@ -515,7 +515,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_removereplica{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_removereplica{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Replicas Removed / sec",
@@ -523,7 +523,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_removedeadreplica{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_removedeadreplica{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Dead Replicas Removed / sec",
@@ -531,7 +531,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_removelearnerreplica{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_removelearnerreplica{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Learner Replicas Removed / sec",
@@ -539,7 +539,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_rebalancereplica{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_rebalancereplica{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Replicas Rebalanced / sec",
@@ -547,7 +547,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_transferlease{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_transferlease{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Leases Transferred / sec",
@@ -555,7 +555,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_replicate_purgatory{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_replicate_purgatory{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             legendFormat: "Replicas in Purgatory",
@@ -610,7 +610,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -652,14 +652,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_split_process_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_split_process_success{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_split_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_split_pending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Pending Actions",
             refId: "B"
@@ -713,7 +713,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -755,14 +755,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_merge_process_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_merge_process_success{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_merge_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_merge_pending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Pending Actions",
             refId: "B"
@@ -816,7 +816,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -858,14 +858,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_gc_process_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_gc_process_success{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_gc_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_gc_pending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Pending Actions",
             refId: "B"
@@ -919,7 +919,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -961,14 +961,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftlog_process_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftlog_process_success{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "B"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftlog_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftlog_pending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Pending Actions",
             refId: "A"
@@ -1022,7 +1022,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -1064,14 +1064,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftsnapshot_process_success{integration_id="${integrationId}",job="cockroachdb"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftsnapshot_process_success{integration_id="${integrationId}"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_raftsnapshot_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_raftsnapshot_pending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Pending Actions",
             refId: "B"
@@ -1125,7 +1125,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -1167,14 +1167,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_consistency_process_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_consistency_process_success{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(queue_consistency_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(queue_consistency_pending{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             legendFormat: "Pending Actions",
             refId: "B"
@@ -1228,7 +1228,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -1270,14 +1270,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(queue_tsmaintenance_process_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_tsmaintenance_process_success{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Successful Actions / sec",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(queue_tsmaintenance_pending{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(queue_tsmaintenance_pending{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Pending Actions",
             refId: "B"
@@ -1334,28 +1334,14 @@ export default function makeDashboard(integrationId: string) {
     templating: {
       list: [
         {
-          current: {
-            text: "Prometheus",
-            value: "Prometheus"
-          },
-          hide: 0,
-          label: null,
-          name: "DS_PROMETHEUS",
-          options: [],
-          query: "prometheus",
-          refresh: 1,
-          regex: "",
-          type: "datasource"
-        },
-        {
           allValue: "",
           current: {
             selected: false,
             text: "All",
             value: "$__all"
           },
-          datasource: "$DS_PROMETHEUS",
-          definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+          datasource: "metrics",
+          definition: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
           description: null,
           error: null,
           hide: 0,
@@ -1365,7 +1351,7 @@ export default function makeDashboard(integrationId: string) {
           name: "node",
           options: [],
           query: {
-            query: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+            query: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
             refId: "Prometheus-node-Variable-Query"
           },
           refresh: 1,
@@ -1377,73 +1363,6 @@ export default function makeDashboard(integrationId: string) {
           tagsQuery: "",
           type: "query",
           useTags: false
-        },
-        {
-          auto: false,
-          auto_count: 30,
-          auto_min: "10s",
-          current: {
-            selected: false,
-            text: "30s",
-            value: "30s"
-          },
-          description: null,
-          error: null,
-          hide: 0,
-          label: "Rate Interval",
-          name: "rate_interval",
-          options: [
-            {
-              selected: true,
-              text: "30s",
-              value: "30s"
-            },
-            {
-              selected: false,
-              text: "1m",
-              value: "1m"
-            },
-            {
-              selected: false,
-              text: "5m",
-              value: "5m"
-            },
-            {
-              selected: false,
-              text: "10m",
-              value: "10m"
-            },
-            {
-              selected: false,
-              text: "30m",
-              value: "30m"
-            },
-            {
-              selected: false,
-              text: "1h",
-              value: "1h"
-            },
-            {
-              selected: false,
-              text: "6h",
-              value: "6h"
-            },
-            {
-              selected: false,
-              text: "12h",
-              value: "12h"
-            },
-            {
-              selected: false,
-              text: "1d",
-              value: "1d"
-            }
-          ],
-          query: "30s,1m,5m,10m,30m,1h,6h,12h,1d",
-          queryValue: "",
-          refresh: 2,
-          skipUrlSync: false,
-          type: "interval"
         }
       ]
     },

@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -82,7 +82,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(requests_slow_raft{integration_id="${integrationId}",job="cockroachdb"})`,
+            expr: `sum(requests_slow_raft{integration_id="${integrationId}"})`,
             interval: "",
             legendFormat: "Slow Raft Proposals",
             refId: "A"
@@ -136,7 +136,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -178,7 +178,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(requests_slow_distsender{integration_id="${integrationId}",job="cockroachdb"})`,
+            expr: `sum(requests_slow_distsender{integration_id="${integrationId}"})`,
             interval: "",
             legendFormat: "Slow DistSender RPCs",
             queryType: "randomWalk",
@@ -233,7 +233,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -275,7 +275,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(requests_slow_lease{integration_id="${integrationId}",job="cockroachdb"})`,
+            expr: `sum(requests_slow_lease{integration_id="${integrationId}"})`,
             interval: "",
             legendFormat: "Slow Lease Acquisitions",
             refId: "A"
@@ -329,7 +329,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -371,7 +371,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(requests_slow_latch{integration_id="${integrationId}",job="cockroachdb"})`,
+            expr: `sum(requests_slow_latch{integration_id="${integrationId}"})`,
             interval: "",
             legendFormat: "Slow Latch Acquisitions",
             refId: "A"
@@ -427,28 +427,14 @@ export default function makeDashboard(integrationId: string) {
     templating: {
       list: [
         {
-          current: {
-            text: "Prometheus",
-            value: "Prometheus"
-          },
-          hide: 0,
-          label: null,
-          name: "DS_PROMETHEUS",
-          options: [],
-          query: "prometheus",
-          refresh: 1,
-          regex: "",
-          type: "datasource"
-        },
-        {
           allValue: ".*",
           current: {
             selected: false,
             text: "All",
             value: "$__all"
           },
-          datasource: "$DS_PROMETHEUS",
-          definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+          datasource: "metrics",
+          definition: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
           description: null,
           error: null,
           hide: 0,
@@ -458,7 +444,7 @@ export default function makeDashboard(integrationId: string) {
           name: "node",
           options: [],
           query: {
-            query: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+            query: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
             refId: "Prometheus-node-Variable-Query"
           },
           refresh: 1,
@@ -470,72 +456,6 @@ export default function makeDashboard(integrationId: string) {
           tagsQuery: "",
           type: "query",
           useTags: false
-        },
-        {
-          auto: false,
-          auto_count: 30,
-          auto_min: "10s",
-          current: {
-            selected: false,
-            text: "30s",
-            value: "30s"
-          },
-          description: null,
-          error: null,
-          hide: 0,
-          label: "Rate Interval",
-          name: "rate_interval",
-          options: [
-            {
-              selected: true,
-              text: "30s",
-              value: "30s"
-            },
-            {
-              selected: false,
-              text: "1m",
-              value: "1m"
-            },
-            {
-              selected: false,
-              text: "5m",
-              value: "5m"
-            },
-            {
-              selected: false,
-              text: "10m",
-              value: "10m"
-            },
-            {
-              selected: false,
-              text: "30m",
-              value: "30m"
-            },
-            {
-              selected: false,
-              text: "1h",
-              value: "1h"
-            },
-            {
-              selected: false,
-              text: "6h",
-              value: "6h"
-            },
-            {
-              selected: false,
-              text: "12h",
-              value: "12h"
-            },
-            {
-              selected: false,
-              text: "1d",
-              value: "1d"
-            }
-          ],
-          query: "30s,1m,5m,10m,30m,1h,6h,12h,1d",
-          refresh: 2,
-          skipUrlSync: false,
-          type: "interval"
         }
       ]
     },

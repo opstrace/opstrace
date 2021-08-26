@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "A ten-second moving average of the # of SELECT, INSERT, UPDATE, and DELETE statements successfully executed per second across all nodes.",
         fieldConfig: {
@@ -84,28 +84,28 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(sql_select_count{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(sql_select_count{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Selects",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(sql_update_count{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(sql_update_count{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Updates",
             refId: "B"
           },
           {
             exemplar: true,
-            expr: `sum(rate(sql_insert_count{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(sql_insert_count{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Inserts",
             refId: "C"
           },
           {
             exemplar: true,
-            expr: `sum(rate(sql_delete_count{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(sql_delete_count{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Deletes",
             refId: "D"
@@ -159,7 +159,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Over the last minute, this node executed 99% of queries within this time. This time does not include network latency between the node and client.",
         fieldConfig: {
@@ -203,7 +203,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `histogram_quantile(0.99, rate(sql_service_latency_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `histogram_quantile(0.99, rate(sql_service_latency_bucket{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "{{instance}}",
             refId: "A"
@@ -257,7 +257,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of range replicas stored on this node. Ranges are subsets of your data, which are replicated to ensure survivability.",
         fieldConfig: {
@@ -301,7 +301,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `replicas{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}`,
+            expr: `replicas{integration_id="${integrationId}",instance=~"$node"}`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -356,7 +356,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Usage of disk space\n\n**Capacity**: Maximum store size across all nodes. This value may be explicitly set per node using [--store](https://www.cockroachlabs.com/docs/v21.1/cockroach-start.html#store). If a store size has not been set, this metric displays the actual disk capacity.\n\n**Available**: Free disk space available to CockroachDB data across all nodes.\n\n**Used**: Disk space in use by CockroachDB data across all nodes. This excludes the Cockroach binary, operating system, and other system files.\n\n[How are these metrics calculated?](https://www.cockroachlabs.com/docs/v21.1/ui-storage-dashboard.html#capacity-metrics)",
         fieldConfig: {
@@ -400,7 +400,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(sum(capacity{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (cluster))`,
+            expr: `sum(sum(capacity{integration_id="${integrationId}",instance=~"$node"}) by (cluster))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Max",
@@ -408,14 +408,14 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(sum(capacity_available{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (cluster))`,
+            expr: `sum(sum(capacity_available{integration_id="${integrationId}",instance=~"$node"}) by (cluster))`,
             interval: "",
             legendFormat: "Available",
             refId: "C"
           },
           {
             exemplar: true,
-            expr: `sum(sum(capacity_used{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(capacity_used{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Used",
@@ -473,28 +473,14 @@ export default function makeDashboard(integrationId: string) {
     templating: {
       list: [
         {
-          current: {
-            text: "Prometheus",
-            value: "Prometheus"
-          },
-          hide: 0,
-          label: null,
-          name: "DS_PROMETHEUS",
-          options: [],
-          query: "prometheus",
-          refresh: 1,
-          regex: "",
-          type: "datasource"
-        },
-        {
           allValue: "",
           current: {
             selected: false,
             text: "All",
             value: "$__all"
           },
-          datasource: "$DS_PROMETHEUS",
-          definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+          datasource: "metrics",
+          definition: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
           description: null,
           error: null,
           hide: 0,
@@ -504,7 +490,7 @@ export default function makeDashboard(integrationId: string) {
           name: "node",
           options: [],
           query: {
-            query: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+            query: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
             refId: "Prometheus-node-Variable-Query"
           },
           refresh: 1,
@@ -516,73 +502,6 @@ export default function makeDashboard(integrationId: string) {
           tagsQuery: "",
           type: "query",
           useTags: false
-        },
-        {
-          auto: false,
-          auto_count: 30,
-          auto_min: "10s",
-          current: {
-            selected: true,
-            text: "30s",
-            value: "30s"
-          },
-          description: null,
-          error: null,
-          hide: 0,
-          label: "Rate Interval",
-          name: "rate_interval",
-          options: [
-            {
-              selected: true,
-              text: "30s",
-              value: "30s"
-            },
-            {
-              selected: false,
-              text: "1m",
-              value: "1m"
-            },
-            {
-              selected: false,
-              text: "5m",
-              value: "5m"
-            },
-            {
-              selected: false,
-              text: "10m",
-              value: "10m"
-            },
-            {
-              selected: false,
-              text: "30m",
-              value: "30m"
-            },
-            {
-              selected: false,
-              text: "1h",
-              value: "1h"
-            },
-            {
-              selected: false,
-              text: "6h",
-              value: "6h"
-            },
-            {
-              selected: false,
-              text: "12h",
-              value: "12h"
-            },
-            {
-              selected: false,
-              text: "1d",
-              value: "1d"
-            }
-          ],
-          query: "30s,1m,5m,10m,30m,1h,6h,12h,1d",
-          queryValue: "",
-          refresh: 2,
-          skipUrlSync: false,
-          type: "interval"
         }
       ]
     },

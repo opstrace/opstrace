@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description: "The number of live nodes in the cluster.",
         fieldConfig: {
           defaults: {},
@@ -83,7 +83,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `min(liveness_livenodes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `min(liveness_livenodes{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Live Nodes",
@@ -138,7 +138,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Memory in use across all nodes:\nRSS  \nTotal memory in use by CockroachDB\n\nGo Allocated  \nMemory allocated by the Go layer\n\nGo Total  \nTotal memory managed by the Go layer\n\nC Allocated  \nMemory allocated by the C layer\n\nC Total  \nTotal memory managed by the C layer",
         fieldConfig: {
@@ -182,35 +182,35 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(sys_rss{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(sys_rss{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Total memory (RSS)",
             refId: "A"
           },
           {
-            expr: `sum(sys_cgo_allocbytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(sys_cgo_allocbytes{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Go Allocated",
             refId: "B"
           },
           {
-            expr: `sum(sys_go_totalbytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(sys_go_totalbytes{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Go Total",
             refId: "D"
           },
           {
-            expr: `sum(sys_go_allocbytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(sys_go_allocbytes{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "CGo Allocated",
             refId: "C"
           },
           {
-            expr: `sum(sys_cgo_totalbytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(sys_cgo_totalbytes{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "CGo Total",
@@ -265,7 +265,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of Goroutines across all nodes. This count should rise and fall based on load.",
         fieldConfig: {
@@ -309,7 +309,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(sys_goroutines{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(sys_goroutines{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Goroutine Count",
@@ -364,7 +364,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of Goroutines waiting for CPU. This count should rise and fall based on load.",
         fieldConfig: {
@@ -408,7 +408,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sys_runnable_goroutines_per_cpu{integration_id="${integrationId}",job="cockroachdb",cluster=~"$cluster",instance=~"$node"}`,
+            expr: `sys_runnable_goroutines_per_cpu{integration_id="${integrationId}",cluster=~"$cluster",instance=~"$node"}`,
             interval: "",
             intervalFactor: 1,
             legendFormat: "{{instance}}",
@@ -463,7 +463,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of times that Go’s garbage collector was invoked per second across all nodes.",
         fieldConfig: {
@@ -506,7 +506,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(rate(sys_gc_count{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval]))`,
+            expr: `sum(rate(sys_gc_count{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "GC Runs",
@@ -561,7 +561,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The amount of processor time used by Go’s garbage collector per second across all nodes. During garbage collection, application code execution is paused.",
         fieldConfig: {
@@ -605,7 +605,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(sys_gc_pause_ns{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval]))`,
+            expr: `sum(rate(sys_gc_pause_ns{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "GC Pause Time",
@@ -660,7 +660,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -702,7 +702,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(sys_cpu_user_ns{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(sys_cpu_user_ns{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             instant: false,
             interval: "",
             intervalFactor: 2,
@@ -711,7 +711,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(sys_cpu_sys_ns{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(sys_cpu_sys_ns{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             instant: false,
             interval: "",
             intervalFactor: 2,
@@ -767,7 +767,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Mean clock offset of each node against the rest of the cluster.",
         fieldConfig: {
@@ -811,7 +811,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `clock_offset_meannanos{integration_id="${integrationId}",job="cockroachdb",instance=~"$node",cluster=~"$cluster"}`,
+            expr: `clock_offset_meannanos{integration_id="${integrationId}",instance=~"$node",cluster=~"$cluster"}`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -868,28 +868,14 @@ export default function makeDashboard(integrationId: string) {
     templating: {
       list: [
         {
-          current: {
-            text: "Prometheus",
-            value: "Prometheus"
-          },
-          hide: 0,
-          label: null,
-          name: "DS_PROMETHEUS",
-          options: [],
-          query: "prometheus",
-          refresh: 1,
-          regex: "",
-          type: "datasource"
-        },
-        {
           allValue: "",
           current: {
             selected: false,
             text: "All",
             value: "$__all"
           },
-          datasource: "$DS_PROMETHEUS",
-          definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+          datasource: "metrics",
+          definition: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
           description: null,
           error: null,
           hide: 0,
@@ -899,7 +885,7 @@ export default function makeDashboard(integrationId: string) {
           name: "node",
           options: [],
           query: {
-            query: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+            query: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
             refId: "Prometheus-node-Variable-Query"
           },
           refresh: 1,
@@ -911,73 +897,6 @@ export default function makeDashboard(integrationId: string) {
           tagsQuery: "",
           type: "query",
           useTags: false
-        },
-        {
-          auto: false,
-          auto_count: 30,
-          auto_min: "10s",
-          current: {
-            selected: false,
-            text: "30s",
-            value: "30s"
-          },
-          description: null,
-          error: null,
-          hide: 0,
-          label: "Rate Interval",
-          name: "rate_interval",
-          options: [
-            {
-              selected: true,
-              text: "30s",
-              value: "30s"
-            },
-            {
-              selected: false,
-              text: "1m",
-              value: "1m"
-            },
-            {
-              selected: false,
-              text: "5m",
-              value: "5m"
-            },
-            {
-              selected: false,
-              text: "10m",
-              value: "10m"
-            },
-            {
-              selected: false,
-              text: "30m",
-              value: "30m"
-            },
-            {
-              selected: false,
-              text: "1h",
-              value: "1h"
-            },
-            {
-              selected: false,
-              text: "6h",
-              value: "6h"
-            },
-            {
-              selected: false,
-              text: "12h",
-              value: "12h"
-            },
-            {
-              selected: false,
-              text: "1d",
-              value: "1d"
-            }
-          ],
-          query: "30s,1m,5m,10m,30m,1h,6h,12h,1d",
-          queryValue: "",
-          refresh: 2,
-          skipUrlSync: false,
-          type: "interval"
         }
       ]
     },

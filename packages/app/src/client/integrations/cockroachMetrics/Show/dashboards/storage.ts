@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Usage of disk space across all nodes\n\n**Capacity**: Maximum store size across all nodes. This value may be explicitly set per node using [--store](https://www.cockroachlabs.com/docs/v21.1/cockroach-start.html#store). If a store size has not been set, this metric displays the actual disk capacity.\n\n**Available**: Free disk space available to CockroachDB data across all nodes.\n\n**Used**: Disk space in use by CockroachDB data across all nodes. This excludes the Cockroach binary, operating system, and other system files.\n\n[How are these metrics calculated?](https://www.cockroachlabs.com/docs/v21.1/ui-storage-dashboard.html#capacity-metrics)",
         fieldConfig: {
@@ -84,20 +84,20 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(sum(capacity{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(capacity{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Max",
             refId: "B"
           },
           {
-            expr: `sum(sum(capacity_available{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(capacity_available{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             legendFormat: "Available",
             refId: "C"
           },
           {
-            expr: `sum(sum(capacity{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance)) - sum(sum(capacity_available{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(capacity{integration_id="${integrationId}",instance=~"$node"}) by (instance)) - sum(sum(capacity_available{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Used",
@@ -152,7 +152,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Amount of data that can be read by applications and CockroachDB.\n\n**Live**: Number of logical bytes stored in live [key-value pairs](https://www.cockroachlabs.com/docs/v21.1/architecture/distribution-layer.html#table-data) across all nodes. Live data excludes historical and deleted data.\n\n**System**: Number of physical bytes stored in [system key-value pairs](https://www.cockroachlabs.com/docs/v21.1/architecture/distribution-layer.html#table-data).",
         fieldConfig: {
@@ -195,14 +195,14 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(sum(livebytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(livebytes{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Live",
             refId: "A"
           },
           {
-            expr: `sum(sum(sysbytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(sysbytes{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "System",
@@ -257,7 +257,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 99th %ile latency for commits to the Raft Log. This measures essentially an fdatasync to the storage engine's write-ahead log.",
         fieldConfig: {
@@ -300,7 +300,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `histogram_quantile(0.99,rate(raft_process_logcommit_latency_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `histogram_quantile(0.99,rate(raft_process_logcommit_latency_bucket{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -355,7 +355,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 50th %ile latency for commits to the Raft Log. This measures essentially an fdatasync to the storage engine's write-ahead log.",
         fieldConfig: {
@@ -398,7 +398,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `histogram_quantile(0.50,rate(raft_process_logcommit_latency_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `histogram_quantile(0.50,rate(raft_process_logcommit_latency_bucket{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -453,7 +453,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 99th %ile latency for commits of Raft commands. This measures applying a batch to the storage engine (including writes to the write-ahead log), but no fsync.",
         fieldConfig: {
@@ -496,7 +496,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `histogram_quantile(0.99,rate(raft_process_commandcommit_latency_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `histogram_quantile(0.99,rate(raft_process_commandcommit_latency_bucket{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -551,7 +551,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The 50th %ile latency for commits of Raft commands. This measures applying a batch to the storage engine (including writes to the write-ahead log), but no fsync.",
         fieldConfig: {
@@ -594,7 +594,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `histogram_quantile(0.50,rate(raft_process_commandcommit_latency_bucket{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `histogram_quantile(0.50,rate(raft_process_commandcommit_latency_bucket{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "{{instance}}",
             refId: "A"
@@ -648,7 +648,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The average number of real read operations executed per logical read operation.",
         fieldConfig: {
@@ -691,7 +691,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `avg(avg(rocksdb_read_amplification{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `avg(avg(rocksdb_read_amplification{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             legendFormat: "Read Amplification",
             refId: "A"
@@ -745,7 +745,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description: "The number of SSTables in use.",
         fieldConfig: {
           defaults: {},
@@ -788,7 +788,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rocksdb_num_sstables{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})`,
+            expr: `sum(rocksdb_num_sstables{integration_id="${integrationId}",instance=~"$node"})`,
             interval: "",
             legendFormat: "SSTables",
             refId: "A"
@@ -842,7 +842,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of open file descriptors, compared with the file descriptor limit.",
         fieldConfig: {
@@ -885,14 +885,14 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(sum(sys_fd_open{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(sys_fd_open{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Open",
             refId: "A"
           },
           {
-            expr: `sum(sum(sys_fd_softlimit{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(sys_fd_softlimit{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Limit",
@@ -947,7 +947,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of compactions and memtable flushes per second.",
         fieldConfig: {
@@ -990,13 +990,13 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(rate(rocksdb_compactions{integration_id="${integrationId}",job="cockroachdb"}[$__rate_interval]))`,
+            expr: `sum(rate(rocksdb_compactions{integration_id="${integrationId}"}[5m]))`,
             interval: "",
             legendFormat: "Compactions",
             refId: "A"
           },
           {
-            expr: `sum(rate(rocksdb_flushes{integration_id="${integrationId}",job="cockroachdb"}[$__rate_interval]))`,
+            expr: `sum(rate(rocksdb_flushes{integration_id="${integrationId}"}[5m]))`,
             interval: "",
             legendFormat: "Flushes",
             refId: "B"
@@ -1050,7 +1050,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of successfully written time series samples, and number of errors attempting to write time series, per second.",
         fieldConfig: {
@@ -1094,14 +1094,14 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(timeseries_write_samples{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(timeseries_write_samples{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Samples Written",
             refId: "A"
           },
           {
             exemplar: true,
-            expr: `sum(rate(timeseries_write_errors{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(timeseries_write_errors{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Errors",
             refId: "B"
@@ -1155,7 +1155,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           'The number of bytes written by the time series system per second.  \nNote that this does not reflect the rate at which disk space is consumed by time series; the data is highly compressed on disk. This rate is instead intended to indicate the amount of network traffic and disk activity generated by time series writes.\nSee the "databases" tab to find the current disk usage for time series data.',
         fieldConfig: {
@@ -1199,7 +1199,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(rate(timeseries_write_bytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(timeseries_write_bytes{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             legendFormat: "Bytes Written",
             refId: "A"
@@ -1255,28 +1255,14 @@ export default function makeDashboard(integrationId: string) {
     templating: {
       list: [
         {
-          current: {
-            text: "Prometheus",
-            value: "Prometheus"
-          },
-          hide: 0,
-          label: null,
-          name: "DS_PROMETHEUS",
-          options: [],
-          query: "prometheus",
-          refresh: 1,
-          regex: "",
-          type: "datasource"
-        },
-        {
           allValue: "",
           current: {
             selected: false,
             text: "All",
             value: "$__all"
           },
-          datasource: "$DS_PROMETHEUS",
-          definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+          datasource: "metrics",
+          definition: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
           description: null,
           error: null,
           hide: 0,
@@ -1286,7 +1272,7 @@ export default function makeDashboard(integrationId: string) {
           name: "node",
           options: [],
           query: {
-            query: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+            query: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
             refId: "Prometheus-node-Variable-Query"
           },
           refresh: 1,
@@ -1298,73 +1284,6 @@ export default function makeDashboard(integrationId: string) {
           tagsQuery: "",
           type: "query",
           useTags: false
-        },
-        {
-          auto: false,
-          auto_count: 30,
-          auto_min: "10s",
-          current: {
-            selected: false,
-            text: "30s",
-            value: "30s"
-          },
-          description: null,
-          error: null,
-          hide: 0,
-          label: "Rate Interval",
-          name: "rate_interval",
-          options: [
-            {
-              selected: true,
-              text: "30s",
-              value: "30s"
-            },
-            {
-              selected: false,
-              text: "1m",
-              value: "1m"
-            },
-            {
-              selected: false,
-              text: "5m",
-              value: "5m"
-            },
-            {
-              selected: false,
-              text: "10m",
-              value: "10m"
-            },
-            {
-              selected: false,
-              text: "30m",
-              value: "30m"
-            },
-            {
-              selected: false,
-              text: "1h",
-              value: "1h"
-            },
-            {
-              selected: false,
-              text: "6h",
-              value: "6h"
-            },
-            {
-              selected: false,
-              text: "12h",
-              value: "12h"
-            },
-            {
-              selected: false,
-              text: "1d",
-              value: "1d"
-            }
-          ],
-          query: "30s,1m,5m,10m,30m,1h,6h,12h,1d",
-          queryValue: "",
-          refresh: 2,
-          skipUrlSync: false,
-          type: "interval"
         }
       ]
     },

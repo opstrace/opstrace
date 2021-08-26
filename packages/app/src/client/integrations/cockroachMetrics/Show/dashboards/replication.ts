@@ -40,7 +40,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -82,7 +82,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `sum(sum(ranges{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"})) by (instance)`,
+            expr: `sum(sum(ranges{integration_id="${integrationId}",instance=~"$node"})) by (instance)`,
             hide: false,
             interval: "",
             intervalFactor: 2,
@@ -90,28 +90,28 @@ export default function makeDashboard(integrationId: string) {
             refId: "A"
           },
           {
-            expr: `sum(sum(replicas_leaders{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(replicas_leaders{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Leaders",
             refId: "B"
           },
           {
-            expr: `sum(sum(replicas_leaseholders{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(replicas_leaseholders{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             legendFormat: "Lease Holders",
             refId: "G"
           },
           {
             exemplar: true,
-            expr: `sum(sum(replicas_leaders_not_leaseholders{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(replicas_leaders_not_leaseholders{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Leaders w/o Lease",
             refId: "C"
           },
           {
-            expr: `sum(sum(ranges_unavailable{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(ranges_unavailable{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Unavailable",
@@ -119,14 +119,14 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(sum(ranges_underreplicated{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(ranges_underreplicated{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Under-replicated",
             refId: "E"
           },
           {
-            expr: `sum(sum(ranges_overreplicated{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(ranges_overreplicated{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Over-replicated",
@@ -181,7 +181,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description: "The number of replicas on each store.",
         fieldConfig: {
           defaults: {},
@@ -223,7 +223,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(replicas{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance)`,
+            expr: `sum(replicas{integration_id="${integrationId}",instance=~"$node"}) by (instance)`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -278,7 +278,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "The number of leaseholder replicas on each store. A leaseholder replica is the one that receives and coordinates all read and write requests for its range.",
         fieldConfig: {
@@ -321,7 +321,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(replicas_leaseholders{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance)`,
+            expr: `sum(replicas_leaseholders{integration_id="${integrationId}",instance=~"$node"}) by (instance)`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "{{instance}}",
@@ -376,7 +376,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Exponentially weighted moving average of the number of KV batch requests processed by leaseholder replicas on each store per second. Tracks roughly the last 30 minutes of requests. Used for load-based rebalancing decisions.",
         fieldConfig: {
@@ -420,7 +420,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `rebalancing_queriespersecond{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}`,
+            expr: `rebalancing_queriespersecond{integration_id="${integrationId}",instance=~"$node"}`,
             interval: "",
             legendFormat: "{{instance}}",
             refId: "A"
@@ -474,7 +474,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description:
           "Number of logical bytes stored in [key-value pairs](https://www.cockroachlabs.com/docs/v21.1/architecture/distribution-layer.html#table-data) on each node.\n\nThis includes historical and deleted data.",
         fieldConfig: {
@@ -518,7 +518,7 @@ export default function makeDashboard(integrationId: string) {
         targets: [
           {
             exemplar: true,
-            expr: `totalbytes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}`,
+            expr: `totalbytes{integration_id="${integrationId}",instance=~"$node"}`,
             interval: "",
             legendFormat: "{{instance}}",
             refId: "A"
@@ -572,7 +572,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         description: "",
         fieldConfig: {
           defaults: {},
@@ -614,14 +614,14 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(sum(replicas{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(replicas{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Replicas",
             refId: "A"
           },
           {
-            expr: `sum(sum(replicas_quiescent{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}) by (instance))`,
+            expr: `sum(sum(replicas_quiescent{integration_id="${integrationId}",instance=~"$node"}) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Quiescent",
@@ -676,7 +676,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -717,28 +717,28 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(sum(rate(range_splits{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval])) by (instance))`,
+            expr: `sum(sum(rate(range_splits{integration_id="${integrationId}",instance=~"$node"}[5m])) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Splits",
             refId: "A"
           },
           {
-            expr: `sum(sum(rate(range_merges{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval])) by (instance))`,
+            expr: `sum(sum(rate(range_merges{integration_id="${integrationId}",instance=~"$node"}[5m])) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Merges",
             refId: "C"
           },
           {
-            expr: `sum(sum(rate(range_adds{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval])) by (instance))`,
+            expr: `sum(sum(rate(range_adds{integration_id="${integrationId}",instance=~"$node"}[5m])) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Adds",
             refId: "B"
           },
           {
-            expr: `sum(sum(rate(range_removes{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval])) by (instance))`,
+            expr: `sum(sum(rate(range_removes{integration_id="${integrationId}",instance=~"$node"}[5m])) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Removes",
@@ -746,7 +746,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(sum(rate(leases_transfers_success{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval])) by (instance))`,
+            expr: `sum(sum(rate(leases_transfers_success{integration_id="${integrationId}",instance=~"$node"}[5m])) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Lease Transfers",
@@ -754,7 +754,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(sum(rate(rebalancing_lease_transfers{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval])) by (instance))`,
+            expr: `sum(sum(rate(rebalancing_lease_transfers{integration_id="${integrationId}",instance=~"$node"}[5m])) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Load-based Lease Transfers",
@@ -762,7 +762,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(sum(rate(rebalancing_range_rebalances{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval])) by (instance))`,
+            expr: `sum(sum(rate(rebalancing_range_rebalances{integration_id="${integrationId}",instance=~"$node"}[5m])) by (instance))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Load-based Range Rebalances",
@@ -817,7 +817,7 @@ export default function makeDashboard(integrationId: string) {
         bars: false,
         dashLength: 10,
         dashes: false,
-        datasource: "$DS_PROMETHEUS",
+        datasource: "metrics",
         fieldConfig: {
           defaults: {},
           overrides: []
@@ -858,7 +858,7 @@ export default function makeDashboard(integrationId: string) {
         steppedLine: false,
         targets: [
           {
-            expr: `sum(rate(range_snapshots_generated{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval]))`,
+            expr: `sum(rate(range_snapshots_generated{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Generated",
@@ -866,7 +866,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(range_snapshots_applied_voter{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval]))`,
+            expr: `sum(rate(range_snapshots_applied_voter{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Applied (Voters)",
@@ -874,7 +874,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(range_snapshots_applied_initial{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval]))`,
+            expr: `sum(rate(range_snapshots_applied_initial{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Applied (Initial Upreplication)",
@@ -882,7 +882,7 @@ export default function makeDashboard(integrationId: string) {
           },
           {
             exemplar: true,
-            expr: `sum(rate(range_snapshots_applied_initial{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$rate_interval]))`,
+            expr: `sum(rate(range_snapshots_applied_initial{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             hide: false,
             interval: "",
             intervalFactor: 2,
@@ -890,7 +890,7 @@ export default function makeDashboard(integrationId: string) {
             refId: "D"
           },
           {
-            expr: `sum(rate(replicas_reserved{integration_id="${integrationId}",job="cockroachdb",instance=~"$node"}[$__rate_interval]))`,
+            expr: `sum(rate(replicas_reserved{integration_id="${integrationId}",instance=~"$node"}[5m]))`,
             interval: "",
             intervalFactor: 2,
             legendFormat: "Reserved Replicas",
@@ -948,28 +948,14 @@ export default function makeDashboard(integrationId: string) {
     templating: {
       list: [
         {
-          current: {
-            text: "Prometheus",
-            value: "Prometheus"
-          },
-          hide: 0,
-          label: null,
-          name: "DS_PROMETHEUS",
-          options: [],
-          query: "prometheus",
-          refresh: 1,
-          regex: "",
-          type: "datasource"
-        },
-        {
           allValue: "",
           current: {
             selected: false,
             text: "All",
             value: "$__all"
           },
-          datasource: "$DS_PROMETHEUS",
-          definition: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+          datasource: "metrics",
+          definition: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
           description: null,
           error: null,
           hide: 0,
@@ -979,7 +965,7 @@ export default function makeDashboard(integrationId: string) {
           name: "node",
           options: [],
           query: {
-            query: `label_values(sys_uptime{integration_id="${integrationId}",job="cockroachdb"},instance)`,
+            query: `label_values(sys_uptime{integration_id="${integrationId}"},instance)`,
             refId: "Prometheus-node-Variable-Query"
           },
           refresh: 1,
@@ -991,67 +977,6 @@ export default function makeDashboard(integrationId: string) {
           tagsQuery: "",
           type: "query",
           useTags: false
-        },
-        {
-          auto: false,
-          auto_count: 30,
-          auto_min: "10s",
-          current: {
-            selected: false,
-            text: "30s",
-            value: "30s"
-          },
-          description: null,
-          error: null,
-          hide: 0,
-          label: "Rate Interval",
-          name: "rate_interval",
-          options: [
-            {
-              selected: true,
-              text: "30s",
-              value: "30s"
-            },
-            {
-              selected: false,
-              text: "1m",
-              value: "1m"
-            },
-            {
-              selected: false,
-              text: "5m",
-              value: "5m"
-            },
-            {
-              selected: false,
-              text: "15m",
-              value: "15m"
-            },
-            {
-              selected: false,
-              text: "30m",
-              value: "30m"
-            },
-            {
-              selected: false,
-              text: "1h",
-              value: "1h"
-            },
-            {
-              selected: false,
-              text: "2h",
-              value: "2h"
-            },
-            {
-              selected: false,
-              text: "1d",
-              value: "1d"
-            }
-          ],
-          query: "30s,1m,5m,15m,30m,1h,2h,1d",
-          refresh: 2,
-          skipUrlSync: false,
-          type: "interval"
         }
       ]
     },
