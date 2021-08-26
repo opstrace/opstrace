@@ -232,7 +232,8 @@ export function LokiResources(
       max_cache_freshness_per_query: "10m"
     },
     frontend: {
-      compress_responses: true
+      compress_responses: true,
+      tail_proxy_url: `http://querier.${namespace}.svc.cluster.local:1080`
     },
     // The frontend_worker_config configures the worker - running within
     // the Loki querier - picking up and executing queries enqueued by
