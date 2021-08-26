@@ -67,9 +67,10 @@ export const UninstallInstructions = ({
   );
 
   // TODO for baremetal support, only show these k8s yaml instructions when mode=k8s
-  const deleteYamlCommand = useMemo(() => commands.deleteK8sYaml(configFilename), [
-    configFilename
-  ]);
+  const deleteYamlCommand = useMemo(
+    () => commands.deleteK8sYaml(configFilename),
+    [configFilename]
+  );
 
   const downloadHandler = () => {
     var configBlob = new Blob([config], {
@@ -124,7 +125,7 @@ export const UninstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {`Run this command to remove Prometheus`}
+                  {`Run this command to remove the metrics agent`}
                   <br />
                   <code>{deleteYamlCommand}</code>
                   <CopyToClipboardIcon text={deleteYamlCommand} />

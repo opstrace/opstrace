@@ -130,7 +130,7 @@ test("shows error messages if hasura request fails", async () => {
       return res(
         ctx.errors([
           {
-            message: "Something went super wrong here!",
+            message: "Something went super wrong here!"
           }
         ])
       );
@@ -144,13 +144,13 @@ test("shows error messages if hasura request fails", async () => {
   );
 
   userEvent.click(container.getByRole("button"));
-  expect(await container.findByText("Could not uninstall integration")).toBeInTheDocument();
   expect(
-    await container.findByText(errorMessage)
+    await container.findByText("Could not uninstall integration")
   ).toBeInTheDocument();
+  expect(await container.findByText(errorMessage)).toBeInTheDocument();
 });
 
-test("shows error messages if grafana request fails", async () => {
+test("doesn't show error messages if grafana request fails", async () => {
   const history = createMemoryHistory();
 
   const integration = getMockIntegration();
@@ -174,10 +174,7 @@ test("shows error messages if grafana request fails", async () => {
   );
 
   userEvent.click(container.getByRole("button"));
-  expect(
-    await container.findByText("Could not delete grafana folder")
-  ).toBeInTheDocument();
-  expect(await container.findByText(errorMessage)).toBeInTheDocument();
+  expect(await container.findByText(errorMessage)).not.toBeInTheDocument();
 });
 
 const renderComponent = (

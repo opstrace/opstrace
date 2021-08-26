@@ -67,6 +67,7 @@ export const CockroachMetricsShow = () => {
           clusterHost: window.location.host,
           tenantName: tenant.name,
           integrationId: integration.id,
+          insecure: integration.data.insecure,
 
           deployNamespace: k8s.deployNamespace,
           targetNamespace: k8s.targetNamespace,
@@ -79,8 +80,7 @@ export const CockroachMetricsShow = () => {
           clusterHost: window.location.host,
           tenantName: tenant.name,
           integrationId: integration.id,
-
-          nodeEndpoints: integration.data.baremetal.nodeEndpoints
+          insecure: integration.data.insecure
         });
       }
     }

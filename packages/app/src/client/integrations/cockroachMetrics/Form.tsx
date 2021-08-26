@@ -15,30 +15,55 @@
  */
 
 import React from "react";
-import { useForm, useFormState } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { HelpCircle } from "react-feather";
 import * as yup from "yup";
 
 import { cockroachMetricsIntegration as integrationDef } from "./index";
 
-import { ControlledInput } from "client/components/Form/ControlledInput";
+import {
+  Checkbox,
+  FormControlLabel,
+  FormLabel,
+  FormHelperText,
+  Radio,
+  RadioGroup,
+  TextField
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
-import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
+import { Card, CardContent, CardHeader } from "client/components/Card";
+import { Typography } from "client/components/Typography";
 import { FormProps } from "../types";
+
+const useStyles = makeStyles(theme => ({
+  helperText: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap"
+  },
+  helperIcon: {
+    marginRight: 5
+  }
+}));
 
 // Define separate sections depending on deployment mode.
 const Schema = yup.object({
   name: yup.string().required(),
   // TODO show a radio for selecting baremetal/k8s modes. for now we just support k8s
   mode: yup.string().required(),
-  k8s: yup.object().shape({
-    deployNamespace: yup.string().required(),
-    targetNamespace: yup.string().required(),
-    targetLabelName: yup.string().required(),
-    targetLabelValue: yup.string().required()
-  }).nullable().optional()
+  insecure: yup.bool().required(),
+  k8s: yup
+    .object()
+    .shape({
+      deployNamespace: yup.string().required(),
+      targetNamespace: yup.string().required(),
+      targetLabelName: yup.string().required(),
+      targetLabelValue: yup.string().required()
+    })
+    .nullable()
+    .optional()
 });
 
 type Values = yup.Asserts<typeof Schema>;
@@ -46,6 +71,7 @@ type Values = yup.Asserts<typeof Schema>;
 const defaultValues: Values = {
   name: "",
   mode: "k8s",
+  insecure: false,
   k8s: {
     deployNamespace: "opstrace",
     targetNamespace: "default",
@@ -55,37 +81,98 @@ const defaultValues: Values = {
 };
 
 type FormData = {
-  mode: string,
+  mode: string;
+  insecure: boolean;
   k8s: {
-    deployNamespace: string,
-    targetNamespace: string,
-    targetLabelName: string,
-    targetLabelValue: string
-  } | null
+    deployNamespace: string;
+    targetNamespace: string;
+    targetLabelName: string;
+    targetLabelValue: string;
+  } | null;
+};
+
+type CockroachHelperTextProps = {
+  helperText: string;
+};
+
+const CockroachHelperText = ({ helperText }: CockroachHelperTextProps) => {
+  const classes = useStyles();
+  return (
+    <FormHelperText>
+      <Typography variant="caption" className={classes.helperText}>
+        <HelpCircle width={12} height={12} className={classes.helperIcon} />
+        <span>{helperText}</span>
+      </Typography>
+    </FormHelperText>
+  );
+};
+
+type CockroachTextBoxProps = {
+  label: string;
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  helperText: string;
+  disabled?: boolean;
+  autoFocus?: boolean;
+};
+
+const CockroachTextBox = ({
+  label,
+  value,
+  onChange,
+  helperText,
+  disabled,
+  autoFocus
+}: CockroachTextBoxProps) => {
+  return (
+    <Box>
+      <FormLabel>
+        <Typography variant="h6" color="textSecondary">
+          {label}
+        </Typography>
+      </FormLabel>
+      <TextField
+        inputProps={{
+          fullwidth: "true",
+          autoFocus: autoFocus,
+          disabled: disabled
+        }}
+        value={value}
+        onChange={onChange}
+        variant="outlined"
+      />
+      <CockroachHelperText helperText={helperText} />
+    </Box>
+  );
 };
 
 export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
-  const { handleSubmit, control } = useForm({
-    mode: "onChange",
-    reValidateMode: "onChange",
-    defaultValues: defaultValues,
-    resolver: yupResolver(Schema)
+  const [state, setState] = React.useState({
+    isValid: false,
+    v: defaultValues
   });
 
-  const { isValid } = useFormState({
-    control
-  });
+  const onChange = (values: Values) => {
+    setState({
+      isValid: Schema.isValidSync(values),
+      v: values
+    });
+  };
 
-  const onSubmit = (data: Values) => {
+  // TODO submit refreshes the page before it gets to making the graphql call
+  const handleSubmit = () => {
     handleCreate({
-      name: data.name,
+      name: state.v.name,
       data: {
-        mode: data.mode,
-        k8s: data.k8s
+        mode: state.v.mode,
+        insecure: state.v.insecure,
+        k8s: state.v.mode === "k8s" ? state.v.k8s : null
       }
     });
   };
 
+  // TODO toggling the radio does enable/disable k8s fields as expected, but their appearance doesn't change
+  //      maybe just hide the fields entirely when Bare Metal is selected...
   return (
     <Box
       width="100%"
@@ -103,50 +190,137 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
             title={`Install ${integrationDef.label} Integration`}
           />
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit}>
               <Box mb={3} mt={2}>
-                <ControlledInput
-                  name="name"
-                  control={control}
-                  inputProps={{ fullWidth: true, autoFocus: true }}
-                  label="Integration Name"
-                  helperText="An identifier for this integration"
+                <CockroachTextBox
+                  label={"Integration Name"}
+                  helperText={"An identifier for this integration"}
+                  value={state.v.name}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange({ ...state.v, name: event.target.value })
+                  }
+                  autoFocus={true}
                 />
               </Box>
               <Box mb={3}>
-                <ControlledInput
-                  name="k8s.deployNamespace"
-                  control={control}
-                  inputProps={{ fullWidth: true }}
-                  label="Deployment Namespace"
-                  helperText="Namespace to deploy the metrics agent in your Kubernetes cluster"
+                <FormLabel>
+                  <Typography variant="h6" color="textSecondary">
+                    Insecure Nodes
+                  </Typography>
+                </FormLabel>
+                <Checkbox
+                  checked={state.v.insecure}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange({ ...state.v, insecure: event.target.checked })
+                  }
+                />
+                <CockroachHelperText
+                  helperText={
+                    "Whether the Cockroach nodes are running in '--insecure' mode"
+                  }
                 />
               </Box>
               <Box mb={3}>
-                <ControlledInput
-                  name="k8s.targetNamespace"
-                  control={control}
-                  inputProps={{ fullWidth: true }}
-                  label="CockroachDB Namespace"
-                  helperText="Namespace where CockroachDB is running in your Kubernetes cluster"
+                <FormLabel>
+                  <Typography variant="h6" color="textSecondary">
+                    Run mode
+                  </Typography>
+                </FormLabel>
+                <RadioGroup
+                  defaultValue="k8s"
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange({ ...state.v, mode: event.target.value })
+                  }
+                >
+                  <FormControlLabel
+                    control={<Radio />}
+                    label="Kubernetes"
+                    value="k8s"
+                  />
+                  <FormControlLabel
+                    control={<Radio />}
+                    label="Bare Metal"
+                    value="baremetal"
+                  />
+                </RadioGroup>
+                <CockroachHelperText
+                  helperText={"The environment where you are running Cockroach"}
                 />
               </Box>
               <Box mb={3}>
-                <ControlledInput
-                  name="k8s.targetLabelName"
-                  control={control}
-                  inputProps={{ fullWidth: true }}
-                  label="CockroachDB Label Name"
-                  helperText="Name of a Kubernetes label used for selecting pods in your CockroachDB instance"
+                <CockroachTextBox
+                  label={"Agent Kubernetes Namespace"}
+                  helperText={
+                    "Namespace to deploy the metrics agent in your Kubernetes cluster"
+                  }
+                  value={state.v.k8s.deployNamespace}
+                  disabled={state.v.mode !== "k8s"}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange({
+                      ...state.v,
+                      k8s: {
+                        ...state.v.k8s,
+                        deployNamespace: event.target.value
+                      }
+                    })
+                  }
                 />
               </Box>
               <Box mb={3}>
-                <ControlledInput
-                  name="k8s.targetLabelValue"
-                  control={control}
-                  inputProps={{ fullWidth: true }}
-                  label="CockroachDB Label Value"
-                  helperText="Value of the Kubernetes label used for selecting pods in your CockroachDB instance"
+                <CockroachTextBox
+                  label={"Cockroach Kubernetes Namespace"}
+                  helperText={
+                    "Namespace where Cockroach is running in your Kubernetes cluster"
+                  }
+                  value={state.v.k8s.targetNamespace}
+                  disabled={state.v.mode !== "k8s"}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange({
+                      ...state.v,
+                      k8s: {
+                        ...state.v.k8s,
+                        targetNamespace: event.target.value
+                      }
+                    })
+                  }
+                />
+              </Box>
+              <Box mb={3}>
+                <CockroachTextBox
+                  label={"Kubernetes Label Name"}
+                  helperText={
+                    "Name of a Kubernetes label for selecting your Cockroach pods"
+                  }
+                  value={state.v.k8s.targetLabelName}
+                  disabled={state.v.mode !== "k8s"}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange({
+                      ...state.v,
+                      k8s: {
+                        ...state.v.k8s,
+                        targetLabelName: event.target.value
+                      }
+                    })
+                  }
+                />
+              </Box>
+              <Box mb={3}>
+                <CockroachTextBox
+                  label={"Kubernetes Label Value"}
+                  helperText={
+                    "Value of a Kubernetes label for selecting your Cockroach pods"
+                  }
+                  value={state.v.k8s.targetLabelValue}
+                  disabled={state.v.mode !== "k8s"}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange({
+                      ...state.v,
+                      k8s: {
+                        ...state.v.k8s,
+                        targetLabelValue: event.target.value
+                      }
+                    })
+                  }
                 />
               </Box>
               <Button
@@ -154,7 +328,7 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
                 variant="contained"
                 state="primary"
                 size="large"
-                disabled={!isValid}
+                disabled={!state.isValid}
               >
                 Install
               </Button>

@@ -21,30 +21,36 @@ type CockroachBaremetalAgentProps = {
   tenantName: string;
   // The unique id that sent metrics should have as a label
   integrationId: string;
-  // The host:port endpoints for the cockroach nodes
-  nodeEndpoints: string[];
+  // Whether cockroach is running in insecure mode.
+  // When insecure mode is enabled, we scrape metrics over http, rather than default https
+  insecure: boolean;
 };
 
 export function baremetalAgentYaml({
   clusterHost,
   tenantName,
-  integrationId
+  integrationId,
+  insecure
 }: CockroachBaremetalAgentProps): string {
+  const scrapeScheme = insecure ? "http" : "https";
   return `server:
+  # Metrics for the agent itself are available at :8080/metrics
   http_listen_port: 8080
-refresh_interval: 60s
 prometheus:
   wal_directory: /tmp/grafana-agent-wal
   configs:
   - name: integrations
+    # Write metrics to the Opstrace cluster using the tenant auth token
     remote_write:
     - url: https://cortex.${tenantName}.${clusterHost}/api/v1/push
       authorization:
         credentials: __AUTH_TOKEN__
     scrape_configs:
     - job_name: cockroachdb
+      # Normally https, or http when running in --insecure mode.
+      scheme: ${scrapeScheme}
+      # Cockroach DB exposes metrics at this path
       metrics_path: /_status/vars
-      scheme: https
       tls_config:
         # To enable TLS validation, provide the path to the CA certificate used by cockroachdb
         #ca_file: '/var/run/certs/ca.crt'
@@ -65,6 +71,9 @@ type CockroachK8sProps = {
   tenantName: string;
   // The unique id that sent metrics should have as a label
   integrationId: string;
+  // Whether cockroach is running in insecure mode.
+  // When insecure mode is enabled, we scrape metrics over http, rather than default https
+  insecure: boolean;
   // Where the user would like the agent to be deployed in their cluster
   deployNamespace: string;
   // Where the service to be scraped is running
@@ -81,11 +90,13 @@ export function k8sYaml({
   clusterHost,
   tenantName,
   integrationId,
+  insecure,
   deployNamespace,
   targetNamespace,
   targetLabelName,
   targetLabelValue
 }: CockroachK8sProps): string {
+  const scrapeScheme = insecure ? "http" : "https";
   return `apiVersion: v1
 kind: Namespace
 metadata:
@@ -107,32 +118,35 @@ metadata:
 data:
   agent.yml: |-
     server:
+      # Metrics for the agent itself are available at :8080/metrics
       http_listen_port: 8080
-    refresh_interval: 60s
     prometheus:
       wal_directory: /tmp/grafana-agent-wal
       configs:
       - name: integrations
+        # Write metrics to the Opstrace cluster using the tenant auth token
         remote_write:
         - url: https://cortex.${tenantName}.${clusterHost}/api/v1/push
           authorization:
             credentials_file: /var/run/tenant-auth/token
+
+        # Search for pods in the '${targetNamespace}' namespace matching a '${targetLabelName}=${targetLabelValue}' label selector
         scrape_configs:
 
         - job_name: 'cockroachdb'
+          # Normally https, or http when running in --insecure mode.
+          scheme: ${scrapeScheme}
           kubernetes_sd_configs:
           - role: pod
+            namespaces:
+              names:
+              - '${targetNamespace}'
+            selectors:
+            - role: pod
+              label: '${targetLabelName}=${targetLabelValue}'
 
-          namespaces:
-            names:
-            - '${targetNamespace}'
-          selectors:
-          - role: pod
-            label: '${targetLabelName}:${targetLabelValue}'
-
+          # Cockroach DB exposes metrics at this path
           metrics_path: /_status/vars
-
-          scheme: https
           tls_config:
             # To enable TLS validation, provide the CA certificate used by cockroachdb to the agent pod
             #ca_file: '/var/run/certs/ca.crt'
@@ -241,7 +255,7 @@ spec:
         volumeMounts:
         # Agent configmap
         - name: config
-          mountPath: /etc/prometheus
+          mountPath: /etc/agent
         # Opstrace tenant auth secret
         - name: tenant-auth
           mountPath: /var/run/tenant-auth
