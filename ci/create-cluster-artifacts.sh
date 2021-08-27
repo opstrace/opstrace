@@ -2,8 +2,6 @@
 # assume that current working directory is OPSTRACE_BUILD_DIR, i.e.
 # the directory where the opstrace CLI is executed.
 
-docker logs --since "2h" unbound 2> ${OPSTRACE_ARTIFACT_DIR}/unbound.log
-
 kubectl describe all --all-namespaces 2> kubectl_describe_all.stderr > kubectl_describe_all-${OPSTRACE_CLUSTER_NAME}.log
 
 # Filter out a specific warning that may appear thousands of times on AWS:
