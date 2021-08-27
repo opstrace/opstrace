@@ -22,7 +22,7 @@ export function deployYaml(yamlFilename: string, tenantName: string): string {
 
 // Returns the command for a user to locally delete either prometheusYaml() or promtailYaml() content.
 // This assumes the user has downloaded the file locally to a file named 'yamlFilename'.
-// This does not include deletion of the namespace, in case the user also has other things there.
+// This includes deleting the namespace, so you should warn the user in case they have other things there.
 export function deleteYaml(yamlFilename: string): string {
   return `kubectl delete -f ${yamlFilename}`;
 }

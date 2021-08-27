@@ -72,10 +72,8 @@ export const InstallInstructions = ({
 }: InstallInstructionsProps) => {
   const dispatch = useDispatch();
 
-  const {
-    registerNotification,
-    unregisterNotification
-  } = useNotificationService();
+  const { registerNotification, unregisterNotification } =
+    useNotificationService();
 
   const notifyError = useCallback(
     (title: string, message: string) => {
@@ -104,7 +102,7 @@ export const InstallInstructions = ({
     [tenant.name, integration.kind]
   );
 
-  const deployYamlCommand = useMemo(
+  const deployCommand = useMemo(
     () => commands.deployYaml(configFilename, tenant.name),
     [tenant.name, configFilename]
   );
@@ -214,9 +212,10 @@ export const InstallInstructions = ({
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
                   {`Run this command to install Prometheus`}
-                  <br />
-                  <code>{deployYamlCommand}</code>
-                  <CopyToClipboardIcon text={deployYamlCommand} />
+                  <Box pl={2}>
+                    <code>{deployCommand}</code>
+                    <CopyToClipboardIcon text={deployCommand} />
+                  </Box>
                 </Box>
               </TimelineContent>
             </TimelineItem>

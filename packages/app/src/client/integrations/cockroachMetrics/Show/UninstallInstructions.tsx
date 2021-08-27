@@ -17,15 +17,14 @@
 import React, { useMemo } from "react";
 import { saveAs } from "file-saver";
 
-import * as commands from "./templates/commands";
-
-import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
 import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
 import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
 
 import { Box } from "client/components/Box";
-import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
+import { Card, CardContent, CardHeader } from "client/components/Card";
+import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
+import { Typography } from "client/components/Typography";
 
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -66,10 +65,23 @@ export const UninstallInstructions = ({
     [tenant.name, integration.kind]
   );
 
-  // TODO for baremetal support, only show these k8s yaml instructions when mode=k8s
-  const deleteYamlCommand = useMemo(
-    () => commands.deleteK8sYaml(configFilename),
-    [configFilename]
+  const [downloadInstructions, deleteInstructions, deleteCommand] = useMemo(
+    () =>
+      integration.data.mode === "k8s"
+        ? [
+            "Use the previously downloaded config YAML or download it again.",
+            `Run this command to delete the metrics agent and ${integration.data.k8s.deployNamespace} namespace from your cluster`,
+            `kubectl delete -f ${configFilename}`
+          ]
+        : [
+            null,
+            <Typography>
+              Stop the <code>grafana-agent</code> process and then delete the
+              configuration file
+            </Typography>,
+            `rm -v ${configFilename} ${configFilename}.tmpl`
+          ],
+    [integration.data, configFilename]
   );
 
   const downloadHandler = () => {
@@ -88,30 +100,49 @@ export const UninstallInstructions = ({
         />
         <CardContent>
           <TimelineWrapper>
+            {downloadInstructions && (
+              <TimelineItem>
+                <TimelineSeparator>
+                  <TimelineDotWrapper variant="outlined" color="primary">
+                    1
+                  </TimelineDotWrapper>
+                  <TimelineConnector />
+                </TimelineSeparator>
+                <TimelineContent>
+                  <Box flexGrow={1} pb={2}>
+                    {downloadInstructions}
+                    <Box pt={1}>
+                      <Button
+                        style={{ marginRight: 20 }}
+                        variant="contained"
+                        size="small"
+                        state="primary"
+                        onClick={downloadHandler}
+                      >
+                        Download YAML
+                      </Button>
+                      <ViewConfigDialogBtn
+                        filename={configFilename}
+                        config={config}
+                      />
+                    </Box>
+                  </Box>
+                </TimelineContent>
+              </TimelineItem>
+            )}
             <TimelineItem>
               <TimelineSeparator>
                 <TimelineDotWrapper variant="outlined" color="primary">
-                  1
+                  {(downloadInstructions && 2) || 1}
                 </TimelineDotWrapper>
                 <TimelineConnector />
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {`Use the previously downloaded config YAML or download it again.`}
-                  <Box pt={1}>
-                    <Button
-                      style={{ marginRight: 20 }}
-                      variant="contained"
-                      size="small"
-                      state="primary"
-                      onClick={downloadHandler}
-                    >
-                      Download YAML
-                    </Button>
-                    <ViewConfigDialogBtn
-                      filename={configFilename}
-                      config={config}
-                    />
+                  {deleteInstructions}
+                  <Box pl={2}>
+                    <code>{deleteCommand}</code>
+                    <CopyToClipboardIcon text={deleteCommand} />
                   </Box>
                 </Box>
               </TimelineContent>
@@ -119,23 +150,7 @@ export const UninstallInstructions = ({
             <TimelineItem>
               <TimelineSeparator>
                 <TimelineDotWrapper variant="outlined" color="primary">
-                  2
-                </TimelineDotWrapper>
-                <TimelineConnector />
-              </TimelineSeparator>
-              <TimelineContent>
-                <Box flexGrow={1} pb={2}>
-                  {`Run this command to remove the metrics agent`}
-                  <br />
-                  <code>{deleteYamlCommand}</code>
-                  <CopyToClipboardIcon text={deleteYamlCommand} />
-                </Box>
-              </TimelineContent>
-            </TimelineItem>
-            <TimelineItem>
-              <TimelineSeparator>
-                <TimelineDotWrapper variant="outlined" color="primary">
-                  3
+                  {(downloadInstructions && 3) || 2}
                 </TimelineDotWrapper>
               </TimelineSeparator>
               <TimelineContent>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo, useEffect } from "react";
+import React, { useCallback, useMemo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { format, parseISO } from "date-fns";
@@ -26,6 +26,7 @@ import { baremetalAgentYaml, k8sYaml } from "./templates/config";
 
 import Status from "client/integrations/cockroachMetrics/Status";
 
+import { useNotificationService } from "client/services/Notification";
 import { useSelectedTenantWithFallback } from "state/tenant/hooks/useTenant";
 import { useSelectedIntegration } from "state/integration/hooks";
 import { integrationDefRecords } from "client/integrations";
@@ -48,6 +49,31 @@ export const CockroachMetricsShow = () => {
   const tenant = useSelectedTenantWithFallback();
   const integration = useSelectedIntegration();
 
+  const { registerNotification, unregisterNotification } =
+    useNotificationService();
+
+  const notifyError = useCallback(
+    (title: string, message: string) => {
+      const messageId = Math.floor(
+        Math.random() * Math.floor(100000)
+      ).toString();
+      const newNotification = {
+        id: messageId,
+        state: "error" as const,
+        title,
+        information: message,
+        handleClose: () =>
+          unregisterNotification({
+            id: messageId,
+            title: "",
+            information: ""
+          })
+      };
+      registerNotification(newNotification);
+    },
+    [registerNotification, unregisterNotification]
+  );
+
   useEffect(() => {
     if (integration?.id)
       dispatch(loadGrafanaStateForIntegration({ id: integration.id }));
@@ -60,7 +86,7 @@ export const CockroachMetricsShow = () => {
 
   const config = useMemo(() => {
     if (integration?.id) {
-      if (integration.data.k8s != null) {
+      if (integration.data.mode === "k8s") {
         // K8s agent deployment
         const k8s = integration.data.k8s;
         return k8sYaml({
@@ -74,7 +100,7 @@ export const CockroachMetricsShow = () => {
           targetLabelName: k8s.targetLabelName,
           targetLabelValue: k8s.targetLabelValue
         });
-      } else if (integration.data.baremetal != null) {
+      } else if (integration.data.mode === "baremetal") {
         // Baremetal agent deployment
         return baremetalAgentYaml({
           clusterHost: window.location.host,
@@ -82,10 +108,15 @@ export const CockroachMetricsShow = () => {
           integrationId: integration.id,
           insecure: integration.data.insecure
         });
+      } else {
+        notifyError(
+          "Unsupported mode",
+          `Integration ${integration.name} has unsupported mode '${integration.data.mode}'`
+        );
       }
     }
     return "";
-  }, [tenant.name, integration?.id, integration?.data]);
+  }, [tenant.name, integration, notifyError]);
 
   if (!integration) {
     // TODO: add loading or NotFound here

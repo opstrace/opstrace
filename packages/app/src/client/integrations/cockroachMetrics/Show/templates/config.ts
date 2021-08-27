@@ -59,8 +59,8 @@ prometheus:
       - labels:
           integration_id: '${integrationId}'
         # Cockroach node endpoints, can get with:
-        #  cockroach node status --format tsv --insecure | awk '{print $2}' | tail -n +2
-        targets: __NODE_ADDRESSES__
+        #  cockroach node status --format tsv --insecure
+        targets: [__NODE_ADDRESSES__]
 `;
 }
 

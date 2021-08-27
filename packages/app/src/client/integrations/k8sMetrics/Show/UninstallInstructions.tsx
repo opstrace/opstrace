@@ -66,9 +66,13 @@ export const UninstallInstructions = ({
     [tenant.name, integration.kind]
   );
 
-  const deleteYamlCommand = useMemo(() => commands.deleteYaml(configFilename), [
-    configFilename
-  ]);
+  const [deleteInstructions, deleteCommand] = useMemo(
+    () => [
+      `Run this command to delete Prometheus and the ${integration.data.deployNamespace} namespace from your cluster`,
+      commands.deleteYaml(configFilename)
+    ],
+    [integration.data, configFilename]
+  );
 
   const downloadHandler = () => {
     var configBlob = new Blob([config], {
@@ -123,10 +127,11 @@ export const UninstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {`Run this command to remove Prometheus`}
-                  <br />
-                  <code>{deleteYamlCommand}</code>
-                  <CopyToClipboardIcon text={deleteYamlCommand} />
+                  {deleteInstructions}
+                  <Box pl={2}>
+                    <code>{deleteCommand}</code>
+                    <CopyToClipboardIcon text={deleteCommand} />
+                  </Box>
                 </Box>
               </TimelineContent>
             </TimelineItem>

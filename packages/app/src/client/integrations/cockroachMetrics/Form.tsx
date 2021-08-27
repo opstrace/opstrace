@@ -214,7 +214,7 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
                 />
                 <CockroachHelperText
                   helperText={
-                    "Whether Cockroach nodes are running in '--insecure' mode"
+                    "Whether Cockroach is running in '--insecure' mode"
                   }
                 />
               </Box>
@@ -232,13 +232,13 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
                 >
                   <FormControlLabel
                     control={<Radio />}
-                    label="Kubernetes"
-                    value="k8s"
+                    label="Bare Metal"
+                    value="baremetal"
                   />
                   <FormControlLabel
                     control={<Radio />}
-                    label="Bare Metal"
-                    value="baremetal"
+                    label="Kubernetes"
+                    value="k8s"
                   />
                 </RadioGroup>
                 <CockroachHelperText
