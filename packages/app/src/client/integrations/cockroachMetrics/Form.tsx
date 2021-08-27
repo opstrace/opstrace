@@ -51,9 +51,9 @@ const useStyles = makeStyles(theme => ({
 // Define separate sections depending on deployment mode.
 const Schema = yup.object({
   name: yup.string().required(),
-  // TODO show a radio for selecting baremetal/k8s modes. for now we just support k8s
   mode: yup.string().required(),
   insecure: yup.bool().required(),
+  // Non-null when mode=k8s
   k8s: yup
     .object()
     .shape({
@@ -159,8 +159,8 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
     });
   };
 
-  // TODO submit refreshes the page before it gets to making the graphql call
-  const handleSubmit = () => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     handleCreate({
       name: state.v.name,
       data: {
@@ -171,8 +171,6 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
     });
   };
 
-  // TODO toggling the radio does enable/disable k8s fields as expected, but their appearance doesn't change
-  //      maybe just hide the fields entirely when Bare Metal is selected...
   return (
     <Box
       width="100%"
@@ -216,14 +214,14 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
                 />
                 <CockroachHelperText
                   helperText={
-                    "Whether the Cockroach nodes are running in '--insecure' mode"
+                    "Whether Cockroach nodes are running in '--insecure' mode"
                   }
                 />
               </Box>
               <Box mb={3}>
                 <FormLabel>
                   <Typography variant="h6" color="textSecondary">
-                    Run mode
+                    Environment
                   </Typography>
                 </FormLabel>
                 <RadioGroup
@@ -244,85 +242,85 @@ export const CockroachMetricsForm = ({ handleCreate }: FormProps<FormData>) => {
                   />
                 </RadioGroup>
                 <CockroachHelperText
-                  helperText={"The environment where you are running Cockroach"}
+                  helperText={"Where Cockroach is running"}
                 />
               </Box>
-              <Box mb={3}>
-                <CockroachTextBox
-                  label={"Agent Kubernetes Namespace"}
-                  helperText={
-                    "Namespace to deploy the metrics agent in your Kubernetes cluster"
-                  }
-                  value={state.v.k8s.deployNamespace}
-                  disabled={state.v.mode !== "k8s"}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    onChange({
-                      ...state.v,
-                      k8s: {
-                        ...state.v.k8s,
-                        deployNamespace: event.target.value
+              {state.v.mode === "k8s" && (
+                <Box>
+                  <Box mb={3}>
+                    <CockroachTextBox
+                      label={"Agent Kubernetes Namespace"}
+                      helperText={
+                        "Namespace to deploy the metrics agent in your Kubernetes cluster"
                       }
-                    })
-                  }
-                />
-              </Box>
-              <Box mb={3}>
-                <CockroachTextBox
-                  label={"Cockroach Kubernetes Namespace"}
-                  helperText={
-                    "Namespace where Cockroach is running in your Kubernetes cluster"
-                  }
-                  value={state.v.k8s.targetNamespace}
-                  disabled={state.v.mode !== "k8s"}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    onChange({
-                      ...state.v,
-                      k8s: {
-                        ...state.v.k8s,
-                        targetNamespace: event.target.value
+                      value={state.v.k8s.deployNamespace}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        onChange({
+                          ...state.v,
+                          k8s: {
+                            ...state.v.k8s,
+                            deployNamespace: event.target.value
+                          }
+                        })
                       }
-                    })
-                  }
-                />
-              </Box>
-              <Box mb={3}>
-                <CockroachTextBox
-                  label={"Kubernetes Label Name"}
-                  helperText={
-                    "Name of a Kubernetes label for selecting your Cockroach pods"
-                  }
-                  value={state.v.k8s.targetLabelName}
-                  disabled={state.v.mode !== "k8s"}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    onChange({
-                      ...state.v,
-                      k8s: {
-                        ...state.v.k8s,
-                        targetLabelName: event.target.value
+                    />
+                  </Box>
+                  <Box mb={3}>
+                    <CockroachTextBox
+                      label={"Cockroach Kubernetes Namespace"}
+                      helperText={
+                        "Namespace where Cockroach is running in your Kubernetes cluster"
                       }
-                    })
-                  }
-                />
-              </Box>
-              <Box mb={3}>
-                <CockroachTextBox
-                  label={"Kubernetes Label Value"}
-                  helperText={
-                    "Value of a Kubernetes label for selecting your Cockroach pods"
-                  }
-                  value={state.v.k8s.targetLabelValue}
-                  disabled={state.v.mode !== "k8s"}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    onChange({
-                      ...state.v,
-                      k8s: {
-                        ...state.v.k8s,
-                        targetLabelValue: event.target.value
+                      value={state.v.k8s.targetNamespace}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        onChange({
+                          ...state.v,
+                          k8s: {
+                            ...state.v.k8s,
+                            targetNamespace: event.target.value
+                          }
+                        })
                       }
-                    })
-                  }
-                />
-              </Box>
+                    />
+                  </Box>
+                  <Box mb={3}>
+                    <CockroachTextBox
+                      label={"Kubernetes Label Name"}
+                      helperText={
+                        "Name of a Kubernetes label for selecting your Cockroach pods"
+                      }
+                      value={state.v.k8s.targetLabelName}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        onChange({
+                          ...state.v,
+                          k8s: {
+                            ...state.v.k8s,
+                            targetLabelName: event.target.value
+                          }
+                        })
+                      }
+                    />
+                  </Box>
+                  <Box mb={3}>
+                    <CockroachTextBox
+                      label={"Kubernetes Label Value"}
+                      helperText={
+                        "Value of a Kubernetes label for selecting your Cockroach pods"
+                      }
+                      value={state.v.k8s.targetLabelValue}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        onChange({
+                          ...state.v,
+                          k8s: {
+                            ...state.v.k8s,
+                            targetLabelValue: event.target.value
+                          }
+                        })
+                      }
+                    />
+                  </Box>
+                </Box>
+              )}
               <Button
                 type="submit"
                 variant="contained"
