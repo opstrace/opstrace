@@ -1047,7 +1047,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "utc",
     title: "CRDB Console: Hardware",
-    uid: "crdb-console-hardware",
+    uid: `har-${integrationId}`,
     version: 4
   };
 }

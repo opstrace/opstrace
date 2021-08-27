@@ -512,7 +512,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "",
     title: "CRDB Console: Overview",
-    uid: "crdb-console",
+    uid: `ove-${integrationId}`,
     version: 1
   };
 }

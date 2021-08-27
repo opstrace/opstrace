@@ -1124,7 +1124,7 @@ export default function makeDashboard(integrationId: string) {
     },
     timezone: "",
     title: "Kubernetes / API server metrics",
-    uid: "09ec8aa1e996d6ffcd6817bbaff4db1b",
+    uid: `api-${integrationId}`,
     version: 0
   };
 }

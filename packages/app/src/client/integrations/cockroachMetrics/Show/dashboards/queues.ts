@@ -1373,7 +1373,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "browser",
     title: "CRDB Console: Queues",
-    uid: "crdb-console-queues",
+    uid: `que-${integrationId}`,
     version: 2
   };
 }

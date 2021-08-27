@@ -907,7 +907,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "utc",
     title: "CRDB Console: Runtime",
-    uid: "crdb-console-runtime",
+    uid: `run-${integrationId}`,
     version: 3
   };
 }

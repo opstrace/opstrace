@@ -466,7 +466,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "utc",
     title: "CRDB Console: Slow Requests",
-    uid: "crdb-console-slow-request",
+    uid: `slo-${integrationId}`,
     version: 2
   };
 }

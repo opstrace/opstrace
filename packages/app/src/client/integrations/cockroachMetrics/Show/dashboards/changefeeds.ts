@@ -576,7 +576,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "browser",
     title: "CRDB Console: Changefeeds",
-    uid: "crdb-console-changefeeds",
+    uid: `cha-${integrationId}`,
     version: 3
   };
 }

@@ -37,37 +37,37 @@ export function makePrometheusDashboardRequests({
 }: DashboardProps) {
   return [
     {
-      uid: `cf-${integrationId}`,
+      uid: `cha-${integrationId}`,
       dashboard: makeChangefeedsDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
-      uid: `dist-${integrationId}`,
+      uid: `dis-${integrationId}`,
       dashboard: makeDistributedDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
-      uid: `hw-${integrationId}`,
+      uid: `har-${integrationId}`,
       dashboard: makeHardwareDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
-      uid: `overview-${integrationId}`,
+      uid: `ove-${integrationId}`,
       dashboard: makeOverviewDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
-      uid: `queue-${integrationId}`,
+      uid: `que-${integrationId}`,
       dashboard: makeQueuesDashboard(integrationId),
       folderId: folderId,
       overwrite: true
     },
     {
-      uid: `repl-${integrationId}`,
+      uid: `rep-${integrationId}`,
       dashboard: makeReplicationDashboard(integrationId),
       folderId: folderId,
       overwrite: true
@@ -79,7 +79,7 @@ export function makePrometheusDashboardRequests({
       overwrite: true
     },
     {
-      uid: `sr-${integrationId}`,
+      uid: `slo-${integrationId}`,
       dashboard: makeSlowRequestDashboard(integrationId),
       folderId: folderId,
       overwrite: true
@@ -91,7 +91,7 @@ export function makePrometheusDashboardRequests({
       overwrite: true
     },
     {
-      uid: `stor-${integrationId}`,
+      uid: `sto-${integrationId}`,
       dashboard: makeStorageDashboard(integrationId),
       folderId: folderId,
       overwrite: true

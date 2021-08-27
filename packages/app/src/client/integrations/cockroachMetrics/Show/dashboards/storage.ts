@@ -1294,7 +1294,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "utc",
     title: "CRDB Console: Storage",
-    uid: "crdb-console-storage",
+    uid: `sto-${integrationId}`,
     version: 6
   };
 }

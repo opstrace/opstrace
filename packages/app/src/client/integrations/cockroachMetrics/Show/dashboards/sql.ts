@@ -1902,7 +1902,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "utc",
     title: "CRDB Console: SQL",
-    uid: "crdb-console-sql",
+    uid: `sql-${integrationId}`,
     version: 2
   };
 }

@@ -987,7 +987,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "utc",
     title: "CRDB Console: Replication",
-    uid: "crdb-console-replications",
+    uid: `rep-${integrationId}`,
     version: 3
   };
 }

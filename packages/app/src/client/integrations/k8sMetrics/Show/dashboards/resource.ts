@@ -1445,7 +1445,7 @@ export default function makeDashboard(integrationId: string) {
     },
     timezone: "",
     title: "Kubernetes / Resource metrics",
-    uid: "Yr7z7VZnk",
+    uid: `res-${integrationId}`,
     version: 0
   };
 }

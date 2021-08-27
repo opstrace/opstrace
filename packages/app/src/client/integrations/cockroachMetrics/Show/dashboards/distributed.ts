@@ -1054,7 +1054,7 @@ export default function makeDashboard(integrationId: string) {
     timepicker: {},
     timezone: "browser",
     title: "CRDB Console: Distributed",
-    uid: "crdb-console-distributed",
+    uid: `dis-${integrationId}`,
     version: 3
   };
 }
