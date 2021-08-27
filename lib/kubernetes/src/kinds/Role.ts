@@ -135,7 +135,7 @@ export class Role extends K8sResource {
             resources: res.body.items.map(r => new Role(r, kubeConfig))
           })
         );
-      } catch (error) {
+      } catch (error: any) {
         channel(roleActions.fetch.failure({ error }));
         log.warning("starting informer failed (will retry):  %s", error);
         return setTimeout(watch, 3000);

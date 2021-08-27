@@ -107,7 +107,7 @@ export class S3BucketRes extends AWSResource<true> {
           .promise()
       );
       return true;
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         if (e.statusCode == 404 || e.statusCode == 403) {
           log.debug(
@@ -148,7 +148,7 @@ export class S3BucketRes extends AWSResource<true> {
       return this.lifecycleRules.every(
         r => r.ID !== undefined && ids.includes(r.ID)
       );
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         if (e.statusCode == 404 || e.statusCode == 403) {
           log.debug(
@@ -184,7 +184,7 @@ export class S3BucketRes extends AWSResource<true> {
       // bucket was not created. Still not 100 % sure if aws-sdk-jk is doing
       // that or not, but let's see.
       await awsPromErrFilter(s3Client().createBucket(bucketSpec).promise());
-    } catch (e) {
+    } catch (e: any) {
       // fail on any error except if it's 409 BucketAlreadyOwnedByYou error
       if (!(e instanceof AWSApiError) || e.statusCode != 409) {
         throw e;

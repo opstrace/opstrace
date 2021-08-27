@@ -51,7 +51,7 @@ async function getServiceAccount({
     await authorize();
     const resp = await iam.projects.serviceAccounts.get({ name: resource });
     return resp.data;
-  } catch (e) {
+  } catch (e: any) {
     // a 404 is expected if the resource does not exist,
     // otherwise throw the error back
     if (e.code === undefined || e.code !== 404) {
@@ -92,7 +92,7 @@ async function getIAMPolicy({
       resource: sa.projectId ?? undefined
     });
     return resp.data;
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === undefined || e.code !== 404) {
       throw e;
     }
@@ -215,7 +215,7 @@ export function* ensureServiceAccountExists({
       yield call(ensurePolicyBindingExists, { sa, role });
       yield call(ensureGSAKSALinkExists, { kubernetesServiceAccount, sa });
       return sa.email;
-    } catch (e) {
+    } catch (e: any) {
       log.error(
         `caught error and will retry later: ${JSON.stringify(e, null, 2)}`
       );
@@ -288,7 +288,7 @@ export function* ensureServiceAccountDoesNotExist({
         yield call(deleteServiceAccount, { sa });
       }
       return;
-    } catch (e) {
+    } catch (e: any) {
       log.error(
         `caught error and will retry later: ${JSON.stringify(e, null, 2)}`
       );

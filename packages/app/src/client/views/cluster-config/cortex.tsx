@@ -287,7 +287,7 @@ const ConfigRow = ({
               })
             );
           }
-        } catch (err) {
+        } catch (err: any) {
           setError((err as ValidationError).message);
         }
       })();

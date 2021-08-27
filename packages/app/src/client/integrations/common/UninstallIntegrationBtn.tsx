@@ -58,7 +58,7 @@ export const UninstallBtn = ({
         tenant_id: tenant.id,
         id: integration.id
       });
-    } catch (error) {
+    } catch (error: any) {
       let notification: Parameters<typeof registerNotification>[0];
       if (isGraphQLClientError(error)) {
         notification = {
@@ -79,7 +79,7 @@ export const UninstallBtn = ({
     // Best-effort deletion of any grafana dashboards
     try {
       await deleteFolder({ integration, tenant });
-    } catch (error) {
+    } catch (error: any) {
       // If the folder was never created, this fails with 500/'Folder API error'. Ignore.
     }
 

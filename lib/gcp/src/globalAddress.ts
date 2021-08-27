@@ -34,7 +34,7 @@ async function getAddress({
     const res = await addresses.get({ address: name, project });
 
     return res.data ? res.data : false;
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === 404) {
       return false;
     }
@@ -119,7 +119,7 @@ export function* ensureAddressExists({
         region,
         ipCidrRange
       });
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 409)) {
         throw e;
       }
@@ -159,7 +159,7 @@ export function* ensureAddressDoesNotExist({
         });
         deleteIssued = true;
       }
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 409)) {
         throw e;
       }

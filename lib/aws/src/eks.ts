@@ -118,7 +118,7 @@ async function getCluster(
     if (result && result.cluster) {
       return result.cluster;
     }
-  } catch (e) {
+  } catch (e: any) {
     if (e instanceof AWSApiError) {
       // well-defined, explicit confirmation that cluster does not exist.
       if (e.name == "ResourceNotFoundException") {
@@ -237,7 +237,7 @@ export async function getEKSKubeconfig(
       loadFromCluster: false,
       kubeconfig: kstring
     });
-  } catch (e) {
+  } catch (e: any) {
     log.warning(
       "Failed to fetch kubeconfig for EKS cluster: %s. Proceeding with infraestructure cleanup.",
       e.message

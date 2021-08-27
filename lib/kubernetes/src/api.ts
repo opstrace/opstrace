@@ -33,7 +33,7 @@ export const createResource = async (resource: K8sResource): Promise<void> => {
   }
   try {
     await resource.create();
-  } catch (e) {
+  } catch (e: any) {
     const err = kubernetesError(e);
     if (err.statusCode !== 409) {
       log.info(
@@ -60,7 +60,7 @@ export const deleteResource = async (resource: K8sResource): Promise<void> => {
   }
   try {
     await resource.delete();
-  } catch (e) {
+  } catch (e: any) {
     const err = kubernetesError(e);
     if (err.statusCode !== 404) {
       log.info(
@@ -88,7 +88,7 @@ export const updateResource = async (resource: K8sResource): Promise<void> => {
   }
   try {
     await resource.update();
-  } catch (e) {
+  } catch (e: any) {
     const err = kubernetesError(e);
     log.info(
       "api err during updateResource for %s %s/%s: %s: %s",

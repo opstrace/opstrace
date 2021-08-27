@@ -132,7 +132,7 @@ export function* getOpstraceControllerConfigMap(): Generator<
 
   try {
     return upgradeControllerConfigMapToLatest(cfgJSON);
-  } catch (e) {
+  } catch (e: any) {
     die(`failed to fetch controller configuration: ${e.message}`);
   }
 }
@@ -189,7 +189,7 @@ export function* upgradeControllerConfigMap(
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
       )
     });
-  } catch (e) {
+  } catch (e: any) {
     die(`failed to upgrade controller configuration: ${e.message}`);
   }
 

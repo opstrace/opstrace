@@ -162,7 +162,7 @@ export class RouteRes extends AWSResource<true> {
     // before calling tryCreate()
     try {
       await awsPromErrFilter(ec2c().createRoute(this.cparams).promise());
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         // Well-defined, explicit confirmation that route already exists. Note
         // that this is thrown when the target is given by NatGatewayId.

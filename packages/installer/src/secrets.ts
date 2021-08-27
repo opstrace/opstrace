@@ -77,7 +77,7 @@ export async function storeSystemTenantApiAuthTokenAsSecret(
     try {
       log.info(`Try to create ${r.constructor.name}: ${r.namespace}/${r.name}`);
       await r.create();
-    } catch (e) {
+    } catch (e: any) {
       const err = kubernetesError(e);
       if (err.statusCode === 409) {
         log.info("already exists");

@@ -164,7 +164,7 @@ function* triggerk8sTeardown(kubeConfig: KubeConfig) {
   // method on for now.
   try {
     yield call(k8sListNamespacesOrError, kubeConfig);
-  } catch (e) {
+  } catch (e: any) {
     // Note(JP): this error handler needs to be changed to be more precise
     // instead of over-generalized: don't want to catch programming errors.
     log.info(
@@ -336,7 +336,7 @@ export async function doesOpstraceIoDNSNameExist(
       // built into NodeJS stdlib.
       // Also see https://nodejs.org/docs/latest-v16.x/api/dns.html#dns_error_codes
       records = await r.resolveNs(dn);
-    } catch (e) {
+    } catch (e: any) {
       // Use the syscall property to separate programming errors from errors
       // thrown _within_ resolveNs().
       if (e.syscall === "queryNs") {

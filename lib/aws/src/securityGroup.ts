@@ -221,7 +221,7 @@ export function* ensureSecurityGroupExists({
         if (!securityGroup) {
           throw Error(`SecurityGroup creation failed`);
         }
-      } catch (e) {
+      } catch (e: any) {
         if (!e.code || (e.code && e.code !== 409)) {
           throw e;
         }
@@ -278,7 +278,7 @@ export function* ensureSecurityGroupPermissionsDoNotExist({
           IpPermissions: IpPermissionsEgress
         });
       }
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 404)) {
         throw e;
       }
@@ -310,7 +310,7 @@ export function* ensureSecurityGroupDoesNotExist({
 
     try {
       yield call(deleteSecurityGroup, existingSecurityGroup);
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         // might get a 400 response with
         // DependencyViolation: resource sg-053d1422a4cdef521 has a dependent object

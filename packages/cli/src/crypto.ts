@@ -164,7 +164,7 @@ export function readRSAKeyPairfromPEMfile(fpath: string): RSAKeypair {
 
   try {
     pemstring = fs.readFileSync(fpath, "utf8");
-  } catch (err) {
+  } catch (err: any) {
     // This is an over-generalized error handler. Would have loved to
     // handle only SystemError (around file interaction) and decoding
     // errors, and re-raise every other error. How to do that cleanly?
@@ -192,13 +192,13 @@ export function readRSAKeyPairfromPEMfile(fpath: string): RSAKeypair {
 
   try {
     privkey = crypto.createPrivateKey({ key: pemstring, format: "pem" });
-  } catch (err) {
+  } catch (err: any) {
     return die(`could not deserialize RSA private key: ${err.message}`);
   }
 
   try {
     pubkey = crypto.createPublicKey({ key: pemstring, format: "pem" });
-  } catch (err) {
+  } catch (err: any) {
     return die(`could not deserialize RSA public key: ${err.message}`);
   }
 
@@ -228,7 +228,7 @@ export function readRSAPubKeyfromPEMfileAsPEMstring(fpath: string): string {
 
   try {
     pemstring = fs.readFileSync(fpath, "utf8");
-  } catch (err) {
+  } catch (err: any) {
     // This is an over-generalized error handler. Would have loved to
     // handle only SystemError (around file interaction) and decoding
     // errors, and re-raise every other error. How to do that cleanly?
@@ -241,7 +241,7 @@ export function readRSAPubKeyfromPEMfileAsPEMstring(fpath: string): string {
 
   try {
     pubkey = crypto.createPublicKey({ key: pemstring, format: "pem" });
-  } catch (err) {
+  } catch (err: any) {
     return die(`could not deserialize RSA public key: ${err.message}`);
   }
 

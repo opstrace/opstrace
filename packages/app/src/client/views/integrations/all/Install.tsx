@@ -64,7 +64,7 @@ export const InstallIntegration = () => {
         data: data.data || {},
         tenant_id: tenant.id
       });
-    } catch (error) {
+    } catch (error: any) {
       registerNotification({
         state: "error" as const,
         title: "Could not install integration",
@@ -81,7 +81,7 @@ export const InstallIntegration = () => {
       if (options?.createGrafanaFolder) {
         try {
           await createFolder({ integration, tenant });
-        } catch (error) {
+        } catch (error: any) {
           registerNotification({
             state: "error" as const,
             title: "Could not create grafana folder",

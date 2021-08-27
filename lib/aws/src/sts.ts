@@ -34,7 +34,7 @@ export class STSRegionCheck extends AWSResource<true> {
 
     try {
       result = await awsPromErrFilter(stsClient().getSessionToken().promise());
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         if (
           e.message.includes("STS is not activated in this region for account")

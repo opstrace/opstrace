@@ -50,7 +50,7 @@ export const isGraphQLClientError = (error: Error): error is ClientError => {
 export const getGraphQLClientErrorMessage = (error: ClientError): string => {
   try {
     return error.response.errors![0].message;
-  } catch (e) {
+  } catch (e: any) {
     return `GraphQL Error (Code: ${error.response.status})`;
   }
 };

@@ -265,7 +265,7 @@ function* createClusterCore() {
     log.info("try to write kubeconfig to file: %s", path);
     try {
       fs.writeFileSync(path, kubeconfigString, { encoding: "utf8" });
-    } catch (err) {
+    } catch (err: any) {
       // This is not critical for cluster creation, just convenience. Log
       // how/why writing failed, otherwise proceed
       log.warning(
@@ -280,7 +280,7 @@ function* createClusterCore() {
   // Try to interact with the k8s API (for debugging, kept from legacy code)
   try {
     yield call(k8sListNamespacesOrError, kubeConfig);
-  } catch (err) {
+  } catch (err: any) {
     log.warning(
       "problem when interacting with the k8s cluster (thrown by k8sListNamespacesOrError): %s",
       err
@@ -299,7 +299,7 @@ function* createClusterCore() {
       serializeControllerConfig(controllerConfig, kubeConfig),
       { forceCreate: true }
     );
-  } catch (e) {
+  } catch (e: any) {
     if (e.response && e.response.statusCode === 409) {
       log.warning(
         "controller config map already exists, do not overwrite (is this a continuation of a partial previous create?)"
@@ -547,7 +547,7 @@ async function waitForProbeURL(
     try {
       //@ts-ignore `got(probeUrl, rs)` returns `unknown` from tsc's point of view
       resp = await got(probeUrl, rs);
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof got.RequestError) {
         // Assume that for most of the 'waiting time' the probe fails in this
         // error handler.
@@ -582,7 +582,7 @@ async function waitForProbeURL(
       let data: any;
       try {
         data = JSON.parse(resp.body);
-      } catch (err) {
+      } catch (err: any) {
         log.debug(`${probeUrl}: JSON deserialization err: ${err.message}`);
       }
 

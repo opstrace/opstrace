@@ -46,7 +46,7 @@ export async function getSQLDatabase(
       database: "opstrace"
     });
     return res.data ? res.data : false;
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === 404) {
       return false;
     }
@@ -101,7 +101,7 @@ export function* ensureSQLDatabaseExists({
     if (!existingSQLDatabase) {
       try {
         yield call(createSQLDatabase, { opstraceClusterName });
-      } catch (e) {
+      } catch (e: any) {
         /**
          Google api returns a 400 (not the expected 409) if the database already exists...
 
@@ -160,7 +160,7 @@ export function* ensureSQLDatabaseDoesNotExist(
 
     try {
       yield call(destroySQLDatabase, existingSQLDatabase.instance);
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 404)) {
         throw e;
       }

@@ -64,7 +64,7 @@ export function* runInformers(
       const event = yield take(clusterChannel);
       yield put(event);
     }
-  } catch (e) {
+  } catch (e: any) {
     log.error(e);
   } finally {
     // If task cancelled, close the channel, unsubscribing the informers

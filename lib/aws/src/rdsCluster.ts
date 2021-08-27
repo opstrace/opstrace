@@ -117,7 +117,7 @@ async function getCluster(
     } else {
       return false;
     }
-  } catch (e) {
+  } catch (e: any) {
     if (e instanceof AWSApiError) {
       // well-defined, explicit confirmation that cluster does not exist.
       if (e.name == "DBClusterNotFoundFault") {

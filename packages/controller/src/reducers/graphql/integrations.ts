@@ -107,7 +107,7 @@ export function startInformer(channel: (input: unknown) => void): () => void {
       }
       // refresh in 3s
       return setTimeout(poll, 3000);
-    } catch (error) {
+    } catch (error: any) {
       channel(actions.fetch.failure({ error }));
       log.warning("polling integrations failed (retrying in 15s): %s", error);
       // seems like a good idea to wait a bit longer in the event of failure

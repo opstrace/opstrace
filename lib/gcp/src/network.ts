@@ -134,7 +134,7 @@ export function* ensureNetworkExists(
     if (!existingNetwork) {
       try {
         yield call(createNetwork, client, networkName);
-      } catch (e) {
+      } catch (e: any) {
         if (e.code === 400) {
           // parent network is not yet ready
           if (e.message && e.message.includes("is not ready")) {
@@ -252,7 +252,7 @@ export function* ensureNetworkDoesNotExist({
         operation = null;
         error = err;
       });
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 404)) {
         throw e;
       }

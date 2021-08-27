@@ -42,7 +42,7 @@ export class RDSSubnetGroupRes extends AWSResource<RDS.DBSubnetGroup, void> {
         return result.DBSubnetGroups[0];
       }
       return false;
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         // well-defined, explicit confirmation that instance does not exist.
         if (e.name == "DBSubnetGroupNotFoundFault") {

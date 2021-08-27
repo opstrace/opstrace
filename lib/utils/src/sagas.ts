@@ -124,7 +124,7 @@ export function* retryUponAnyError({
             "JSON representation of err: %s",
             JSON.stringify(err, null, 2)
           );
-        } catch (e) {
+        } catch (e: any) {
           log.debug("could not json-serialize error: %s", e);
         }
       }

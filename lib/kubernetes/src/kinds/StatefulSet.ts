@@ -138,7 +138,7 @@ export class StatefulSet extends K8sResource {
             resources: res.body.items.map(r => new StatefulSet(r, kubeConfig))
           })
         );
-      } catch (error) {
+      } catch (error: any) {
         channel(statefulSetActions.fetch.failure({ error }));
         log.warning("starting informer failed (will retry):  %s", error);
         return setTimeout(watch, 3000);

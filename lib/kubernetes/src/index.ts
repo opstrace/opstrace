@@ -98,7 +98,7 @@ export async function createOrUpdateConfigMapWithRetry(
       } else {
         await create(cycle);
       }
-    } catch (e) {
+    } catch (e: any) {
       if (e.response === undefined) {
         // Handle transient/retryable errors here, mainly TCP connect() timeout
         // For context, see opstrace-prelaunch/issues/1039 and

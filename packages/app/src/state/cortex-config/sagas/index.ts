@@ -34,7 +34,7 @@ export default function* userTaskManager() {
           try {
             yield call(saga);
             break;
-          } catch (e) {
+          } catch (e: any) {
             console.error(e);
           }
         }
@@ -59,7 +59,7 @@ function* saveRuntimeConfig(
       },
       data: yaml.dump(action.payload)
     });
-  } catch (err) {
+  } catch (err: any) {
     if (ServerError.isInstance(err.response.data)) {
       // Extract the specific error message
       yield put(

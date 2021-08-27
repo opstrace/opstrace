@@ -146,7 +146,7 @@ export function* ensureRoleExists({
         if (!role) {
           throw Error(`Role creation failed`);
         }
-      } catch (e) {
+      } catch (e: any) {
         if (!e.code || (e.code && e.code !== 409)) {
           throw e;
         }
@@ -180,7 +180,7 @@ export function* ensureRoleDoesNotExist({
 
     try {
       yield call(deleteRole, RoleName);
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         // 409 corresponds to 'DeleteConflict: Cannot delete entity, must
         // detach all policies first.'

@@ -37,7 +37,7 @@ const DownloadConfigButton = (props: Props) => {
   const handleClick = () => {
     try {
       downloadConfigYaml(props.filename, props.config);
-    } catch (error) {
+    } catch (error: any) {
       registerNotification({
         state: "error" as const,
         title: "Could not download YAML",

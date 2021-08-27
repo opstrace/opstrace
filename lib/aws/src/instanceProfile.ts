@@ -57,7 +57,7 @@ class InstanceProfileRes extends AWSResource<IAM.InstanceProfile> {
       throw new Error(
         `unexpected result obj: ${JSON.stringify(result, null, 2)}`
       );
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         // well-defined, explicit confirmation that IP does not exist.
         if (e.name == "NoSuchEntity") {

@@ -67,7 +67,7 @@ export const ReinstallInstructions = ({
     // Delete existing folder, if any.
     try {
       await grafana.deleteFolder({ integration, tenant });
-    } catch (err) {
+    } catch (err: any) {
       // Ignore 404 error - expected for initial dashboard install
       if (err.response.status !== 404) {
         console.log(err);

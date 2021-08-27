@@ -112,7 +112,7 @@ function* createSubnetWithTags(
       snet.State
     );
     return;
-  } catch (e) {
+  } catch (e: any) {
     // Paradigm: retry all `AWSApiError`s. Note that this includes the "not
     // found" kind of errors. This is fine because there is a definite exit
     // criterion for the subnet creation phase (which might never be reached,
@@ -229,7 +229,7 @@ export function* ensureSubnetsDoNotExist(
 
       try {
         yield call(deleteSubnet, snet.SubnetId);
-      } catch (e) {
+      } catch (e: any) {
         // Paradigm: retry all `AWSApiError`s. Note that this includes the
         // "not found" kind of errors. This is fine because there is a definite
         // exit criterion further above: the target count of listed subnets.

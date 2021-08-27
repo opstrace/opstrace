@@ -51,7 +51,7 @@ export default function* tenantTaskManager() {
           try {
             yield call(saga);
             break;
-          } catch (e) {
+          } catch (e: any) {
             console.error(e);
           }
         }
@@ -73,7 +73,7 @@ function* addTenant(action: ReturnType<typeof actions.addTenant>) {
         }
       ]
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
   }
 }
@@ -87,7 +87,7 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
     yield graphqlClient.DeleteTenant({
       name: action.payload
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
   }
 }
@@ -127,7 +127,7 @@ function* getAlertmanager(action: ReturnType<typeof actions.getAlertmanager>) {
         })
       );
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
   }
 }
@@ -181,7 +181,7 @@ function* updateAlertmanager(
         })
       );
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
   }
 }

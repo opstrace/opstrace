@@ -60,7 +60,7 @@ async function getClusterInfo() {
     const coreClient = kcfg.makeApiClient(CoreV1Api);
     cm = (await coreClient.readNamespacedConfigMap(CONFIGMAP_NAME, "default"))
       .body;
-  } catch (err) {
+  } catch (err: any) {
     die(
       `failed to read Opstrace controller config map: ${
         err.response ? err.response.body.message : err
@@ -95,7 +95,7 @@ async function getClusterInfo() {
         CONTROLLER_NAMESPACE
       )
     ).body;
-  } catch (err) {
+  } catch (err: any) {
     die(
       `failed to read Opstrace controller deployment: ${
         err.response ? err.response.body.message : err
@@ -111,7 +111,7 @@ async function getClusterInfo() {
   let k8sSrvInfo: VersionInfo;
   try {
     k8sSrvInfo = (await kcfg.makeApiClient(VersionApi).getCode()).body;
-  } catch (err) {
+  } catch (err: any) {
     die(`failed to read Kubernetes server info: ${err}`);
   }
 

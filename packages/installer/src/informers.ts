@@ -47,14 +47,14 @@ export function* runInformers(kubeConfig: KubeConfig) {
     try {
       //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
       event = yield take(clusterChannel);
-    } catch (err) {
+    } catch (err: any) {
       log.warning("error during `event = yield take(clusterChannel)`: %s", err);
       debugLogErrorDetail(err);
     }
     if (event !== undefined) {
       try {
         yield put(event);
-      } catch (err) {
+      } catch (err: any) {
         log.warning("error during `yield put(event)`: %s", err);
         debugLogErrorDetail(err);
       }

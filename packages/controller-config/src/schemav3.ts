@@ -45,7 +45,7 @@ const timestampSchema = yup
           "1990-12-31T23:59:59Z",
           DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
         );
-      } catch (err) {
+      } catch (err: any) {
         // Don't import the complete winston-based logging machinery here, but
         // also don't let down the dev who might change something and then run
         // into a validation error: expose the actual validation error detail.

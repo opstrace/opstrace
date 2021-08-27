@@ -70,7 +70,7 @@ function getControllerConfigOverrides(state: State, key: string): any {
 
   try {
     return yaml.load(cm?.spec.data?.[key] ?? "");
-  } catch (e) {
+  } catch (e: any) {
     log.warning(`failed to parse config overrides: ${e.message}`);
     return {};
   }

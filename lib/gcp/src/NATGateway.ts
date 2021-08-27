@@ -99,7 +99,7 @@ const doesGatewayExist = async (
         });
       });
       res(true);
-    } catch (e) {
+    } catch (e: any) {
       res(false);
     }
   });
@@ -175,7 +175,7 @@ export function* ensureGatewayExists({
           project: gcpProjectID,
           region
         });
-      } catch (e) {
+      } catch (e: any) {
         if (!e.code || (e.code && e.code !== 409)) {
           throw e;
         }
@@ -209,7 +209,7 @@ export function* ensureGatewayDoesNotExist(
         name: opstraceClusterName,
         region: gcpRegion
       });
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 404)) {
         throw e;
       }

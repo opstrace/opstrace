@@ -90,7 +90,7 @@ export function* runInformers(
     let event;
     try {
       event = yield take(clusterChannel);
-    } catch (err) {
+    } catch (err: any) {
       log.warning("error during `event = yield take(clusterChannel)`: %s", err);
       debugLogErrorDetail(err);
     }
@@ -102,7 +102,7 @@ export function* runInformers(
 
       try {
         yield put(event);
-      } catch (err) {
+      } catch (err: any) {
         log.warning("error during `yield put(event)`: %s", err);
         debugLogErrorDetail(err);
       }

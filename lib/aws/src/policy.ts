@@ -119,7 +119,7 @@ export function* ensurePolicyExists({
         if (!policy) {
           throw Error(`Policy creation failed`);
         }
-      } catch (e) {
+      } catch (e: any) {
         if (!e.code || (e.code && e.code !== 409)) {
           throw e;
         }
@@ -149,7 +149,7 @@ export function* ensurePolicyDoesNotExist({
       yield call(deletePolicy, {
         PolicyArn: existingPolicy.Arn
       });
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 404)) {
         throw e;
       }

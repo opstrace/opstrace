@@ -72,7 +72,7 @@ export function gcpValidateCredFileAndGetDetailOrError(): GCPAuthOptions {
   let opts: GCPAuthOptions;
   try {
     opts = getValidatedGCPAuthOptionsFromFile(fpath);
-  } catch (err) {
+  } catch (err: any) {
     die(
       `the environment variable GOOGLE_APPLICATION_CREDENTIALS does not appear to point to a valid file ('${fpath}'): ${err.message}`
     );
@@ -219,7 +219,7 @@ export async function awsGetClusterRegionWithCmdlineFallback(): Promise<string> 
 
   try {
     c = await awsGetClusterRegionDynamic(cli.CLIARGS.instanceName);
-  } catch (e) {
+  } catch (e: any) {
     if (e instanceof list.ListEksInRegionError) {
       // Assume (rely on) that error details were already logged, in a useful
       // way for the admin/user to understand what went wrong.
@@ -348,7 +348,7 @@ function genKubConfigObjForEKScluster(
   log.info("parse kubeconfig string for EKS cluster");
   try {
     kubeConfig.loadFromString(kstring);
-  } catch (err) {
+  } catch (err: any) {
     log.error("bad kconfig string:\n%s", kstring);
     die(`error loading kubeconfig from text: ${err.code}: ${err.message}`);
   }

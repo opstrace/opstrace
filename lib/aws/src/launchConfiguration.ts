@@ -148,7 +148,7 @@ set -o xtrace
 
     try {
       yield call(createLaunchConfiguration, launchConfigParams);
-    } catch (e) {
+    } catch (e: any) {
       if (!(e instanceof AWSApiError)) {
         throw e;
       }
@@ -181,7 +181,7 @@ export function* ensureLaunchConfigurationDoesNotExist({
 
     try {
       yield call(deleteLaunchConfiguration, LaunchConfigurationName);
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         // seen in the wild: `AWSApiError [ValidationError]: ValidationError:
         // Launch configuration name not found - Launch configuration

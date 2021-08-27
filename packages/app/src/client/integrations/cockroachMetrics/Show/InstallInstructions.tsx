@@ -161,7 +161,7 @@ export const InstallInstructions = ({
     let folder;
     try {
       folder = await grafana.createFolder({ integration, tenant });
-    } catch (error) {
+    } catch (error: any) {
       notifyError(
         `Could not create grafana dashboard folder for integration ${integration.name}`,
         error.response.data.message ?? error.message
@@ -175,7 +175,7 @@ export const InstallInstructions = ({
     })) {
       try {
         await grafana.createDashboard(tenant, d);
-      } catch (error) {
+      } catch (error: any) {
         /*
           Errors are usually communicated as a JSON in a list.
           For example:

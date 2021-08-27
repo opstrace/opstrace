@@ -96,7 +96,7 @@ export const InstallInstructions = ({
     let folder = null;
     try {
       folder = await grafana.createFolder({ integration, tenant });
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
       notifyError(
         `Could not create grafana integration dashboard folder ${integration}`,
@@ -111,7 +111,7 @@ export const InstallInstructions = ({
     })) {
       try {
         await grafana.createDashboard(tenant, d);
-      } catch (err) {
+      } catch (err: any) {
         console.log(err);
         notifyError(
           `Could not create grafana integration dashboard`,
