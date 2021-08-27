@@ -23,6 +23,8 @@ import { usePickerService, PickerOption } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
 import { userToPickerOption } from "./UserPicker";
 
+export const deleteUserCommand = "delete-user-picker";
+
 const DeleteUserPicker = () => {
   const users = useUserList();
   const [user, setSelectedUser] = useState<PickerOption | null>();
@@ -37,7 +39,7 @@ const DeleteUserPicker = () => {
       options: [
         {
           id: "yes",
-          text: `yes`
+          text: "yes"
         },
         {
           id: "no",
@@ -45,6 +47,7 @@ const DeleteUserPicker = () => {
         }
       ],
       onSelected: option => {
+        console.log("Bingo")
         if (option.id === "yes" && user) dispatch(deleteUser(user.id));
       }
     },
@@ -66,7 +69,7 @@ const DeleteUserPicker = () => {
 
   useCommandService(
     {
-      id: "delete-user-picker",
+      id: deleteUserCommand,
       description: "Delete User",
       disabled: users.length < 2,
       handler: e => {
