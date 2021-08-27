@@ -34,8 +34,8 @@ export function baremetalAgentYaml({
 }: CockroachBaremetalAgentProps): string {
   const scrapeScheme = insecure ? "http" : "https";
   return `server:
-  # Metrics for the agent itself are available at :8080/metrics
-  http_listen_port: 8080
+  # Metrics for the agent itself are available at :9000/metrics
+  http_listen_port: 9000
 prometheus:
   wal_directory: /tmp/grafana-agent-wal
   configs:
@@ -58,8 +58,9 @@ prometheus:
       static_configs:
       - labels:
           integration_id: '${integrationId}'
-        # Cockroach node endpoints, can get with:
-        #  cockroach node status --format tsv --insecure
+        # This lists the Cockroach node endpoints. Can get a list with:
+        #  cockroach node status [--insecure|--certs-dir MY_CRDB_CERTS_DIR] | grep sql_address
+        # NOTE: Set these to the HTTP port (default 8080), not the GRPC port printed by 'node status'
         targets: [__NODE_ADDRESSES__]
 `;
 }

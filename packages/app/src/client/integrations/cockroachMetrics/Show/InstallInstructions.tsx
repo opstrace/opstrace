@@ -105,32 +105,71 @@ export const InstallInstructions = ({
     [tenant.name, integration.data, integration.kind]
   );
 
-  // TODO for baremetal support, only show these k8s yaml instructions when mode=k8s
-  const [deployInstructions, deployCommand, downloadInstructions] = useMemo(
-    () =>
-      integration.data.mode === "k8s"
-        ? [
-            `Run this command to install the metrics agent to your cluster in the ${integration.data.k8s.deployNamespace} namespace`,
-            `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenant.name})/g" ${configFilename} | kubectl apply -f -`,
-            null
-          ]
-        : [
-            "Run this command to populate the <code>grafana-agent</code> config with your credentials and node endpoints",
-            `NODES="$(cockroach node status --format tsv --insecure | tail -n +2 | awk '{print $2}' | tr '\\n' ',')" \
-sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenant.name})/g" ${configFilename} | \
-sed "s/__NODE_ADDRESSES__/$NODES/g" > opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
-            <Typography>
-              <a href="https://github.com/grafana/agent/releases/">Download</a>{" "}
-              and{" "}
-              <a href="https://grafana.com/docs/grafana-cloud/agent/agent_as_service/">
-                run
-              </a>{" "}
-              <code>grafana-agent</code> with the populated config on a machine
-              that can reach Cockroach
-            </Typography>
-          ],
-    [tenant.name, integration.data, integration.kind, configFilename]
-  );
+  const [
+    step2Instructions,
+    step3Instructions,
+    step4Instructions,
+    dashboardStepIndex
+  ] = useMemo(() => {
+    if (integration.data.mode === "k8s") {
+      const deployCommand = `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenant.name})/g" ${configFilename} | kubectl apply -f -`;
+      return [
+        <Box flexGrow={1} pb={2}>
+          {`Run this command to install the metrics agent to your cluster in the ${integration.data.k8s.deployNamespace} namespace`}
+          <Box pl={2}>
+            <code>{deployCommand}</code>
+            <CopyToClipboardIcon text={deployCommand} />
+          </Box>
+        </Box>,
+        null,
+        null,
+        3
+      ];
+    } else {
+      const renderedConfigFilename = `opstrace-${tenant.name}-integration-${integration.kind}.yaml`;
+      const cockroachStatusCommand = integration.data.insecure
+        ? "cockroach node status --format records --insecure"
+        : "cockroach node status --format records --certs-dir MY_CRDB_CERT_DIR";
+      const nodesCommand = `NODES=$(${cockroachStatusCommand} | grep sql_address | awk '{print $3}' | sed 's/:.*/:8080/g' | tr '\\n' ','); echo $NODES`;
+      const renderCommand = `sed "s/__AUTH_TOKEN__/$(cat tenant-api-token-${tenant.name})/g" ${configFilename} | sed "s/__NODE_ADDRESSES__/$NODES/g" > ${renderedConfigFilename}`;
+      const agentCommand = `./agent-linux-amd64 -log.level=debug -config.file=${renderedConfigFilename}`;
+      return [
+        <Box flexGrow={1} pb={2}>
+          Run this command to determine where your nodes are running, editing
+          the command as necessary to point to the{" "}
+          {integration.data.insecure || "certificates directory and"} node HTTP
+          port (default <code>8080</code>)
+          <Box pl={2}>
+            <code>{nodesCommand}</code>
+            <CopyToClipboardIcon text={nodesCommand} />
+          </Box>
+        </Box>,
+        <Box flexGrow={1} pb={2}>
+          {`Run this command to populate the downloaded config file with the "${tenant.name}" Tenant api key and the node endpoints`}
+          <Box pl={2}>
+            <code>{renderCommand}</code>
+            <CopyToClipboardIcon text={renderCommand} />
+          </Box>
+        </Box>,
+        <Box flexGrow={1} pb={2}>
+          <Typography>
+            <a href="https://github.com/grafana/agent/releases/">Download</a>{" "}
+            and{" "}
+            <a href="https://grafana.com/docs/grafana-cloud/agent/agent_as_service/">
+              run
+            </a>{" "}
+            grafana-agent with the populated config on a machine that can reach
+            Cockroach
+          </Typography>
+          <Box pl={2}>
+            <code>{agentCommand}</code>
+            <CopyToClipboardIcon text={agentCommand} />
+          </Box>
+        </Box>,
+        5
+      ];
+    }
+  }, [tenant.name, integration.data, integration.kind, configFilename]);
 
   const downloadHandler = () => {
     var configBlob = new Blob([config], {
@@ -234,17 +273,9 @@ sed "s/__NODE_ADDRESSES__/$NODES/g" > opstrace-${tenant.name}-integration-${inte
                 </TimelineDotWrapper>
                 <TimelineConnector />
               </TimelineSeparator>
-              <TimelineContent>
-                <Box flexGrow={1} pb={2}>
-                  {deployInstructions}
-                  <Box pl={2}>
-                    <code>{deployCommand}</code>
-                    <CopyToClipboardIcon text={deployCommand} />
-                  </Box>
-                </Box>
-              </TimelineContent>
+              <TimelineContent>{step2Instructions}</TimelineContent>
             </TimelineItem>
-            {downloadInstructions && (
+            {step3Instructions && (
               <TimelineItem>
                 <TimelineSeparator>
                   <TimelineDotWrapper variant="outlined" color="primary">
@@ -254,7 +285,22 @@ sed "s/__NODE_ADDRESSES__/$NODES/g" > opstrace-${tenant.name}-integration-${inte
                 </TimelineSeparator>
                 <TimelineContent>
                   <Box flexGrow={1} pb={2}>
-                    {downloadInstructions}
+                    {step3Instructions}
+                  </Box>
+                </TimelineContent>
+              </TimelineItem>
+            )}
+            {step4Instructions && (
+              <TimelineItem>
+                <TimelineSeparator>
+                  <TimelineDotWrapper variant="outlined" color="primary">
+                    4
+                  </TimelineDotWrapper>
+                  <TimelineConnector />
+                </TimelineSeparator>
+                <TimelineContent>
+                  <Box flexGrow={1} pb={2}>
+                    {step4Instructions}
                   </Box>
                 </TimelineContent>
               </TimelineItem>
@@ -262,7 +308,7 @@ sed "s/__NODE_ADDRESSES__/$NODES/g" > opstrace-${tenant.name}-integration-${inte
             <TimelineItem>
               <TimelineSeparator>
                 <TimelineDotWrapper variant="outlined" color="primary">
-                  {(downloadInstructions && 4) || 3}
+                  {dashboardStepIndex}
                 </TimelineDotWrapper>
               </TimelineSeparator>
               <TimelineContent>
