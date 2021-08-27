@@ -64,6 +64,9 @@ suite("Loki tail API test suite", function () {
     );
 
     const test = new Promise((resolve, reject) => {
+      ws.on("connection", () => {
+        log.info("connected via websocket");
+      });
       ws.on("message", msg => {
         log.info(`got a message over websocket: ${msg.slice(0, 180)}`);
         resolve("test");
