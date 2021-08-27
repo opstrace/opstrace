@@ -61,7 +61,7 @@ export function* retryUponAnyError({
       yield call(task);
       log.debug("task `%s` succeeded (attempt %s)", actionName, attempt);
       return;
-    } catch (err) {
+    } catch (err: any) {
       // Cleanly shut down runtime when the inner call stack has thrown
       // ExitError (that's precisely the signal to _not_ retry). To that end,
       // simply let it bubble up (rely on ExitError to be handled further
