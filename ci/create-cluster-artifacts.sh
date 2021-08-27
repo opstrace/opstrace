@@ -34,6 +34,10 @@ kubectl get all --namespace=cortex 2>/dev/null | awk '{print $1}' | \
     tee /dev/stderr ; kubectl logs $PNAME --namespace=cortex --all-containers=true; done \
     > clusterlogs_cortex-${OPSTRACE_CLUSTER_NAME}.log
 
+# Fetch Cortex and Loki config
+kubectl get configmap --namespace=cortex cortex -o yaml 2>/dev/null > clusterlogs_cortex_configmap.log
+
+kubectl get configmap --namespace=loki loki -o yaml 2>/dev/null > clusterlogs_loki_configmap.log
 
 # See opstrace-prelaunch/issues/1319
 for LOKICORTEX in loki cortex dd
