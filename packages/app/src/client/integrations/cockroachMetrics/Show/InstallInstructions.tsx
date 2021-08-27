@@ -16,17 +16,19 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { saveAs } from "file-saver";
 
 import { Integration } from "state/integration/types";
 
 import { makePrometheusDashboardRequests } from "./dashboards";
 
+import { useSimpleNotification } from "client/services/Notification";
 import * as grafana from "client/utils/grafana";
 
 import { updateGrafanaStateForIntegration } from "state/integration/actions";
 
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
+import { getConfigFileName } from "client/integrations/configUtils";
 
 import { Box } from "client/components/Box";
 import { Button } from "client/components/Button";
@@ -43,7 +45,6 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import styled from "styled-components";
 import { Tenant } from "state/tenant/types";
-import { useNotificationService } from "client/services/Notification";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -72,38 +73,23 @@ export const InstallInstructions = ({
 }: InstallInstructionsProps) => {
   const dispatch = useDispatch();
 
-  const { registerNotification, unregisterNotification } =
-    useNotificationService();
+  const { registerNotification } = useSimpleNotification();
 
   const notifyError = useCallback(
     (title: string, message: string) => {
-      const messageId = Math.floor(
-        Math.random() * Math.floor(100000)
-      ).toString();
-      const newNotification = {
-        id: messageId,
+      registerNotification({
         state: "error" as const,
         title,
-        information: message,
-        handleClose: () =>
-          unregisterNotification({
-            id: messageId,
-            title: "",
-            information: ""
-          })
-      };
-      registerNotification(newNotification);
+        information: message
+      });
     },
-    [registerNotification, unregisterNotification]
+    [registerNotification]
   );
 
-  const configFilename = useMemo(
-    () =>
-      integration.data.mode === "k8s"
-        ? `opstrace-${tenant.name}-integration-${integration.kind}.yaml`
-        : `opstrace-${tenant.name}-integration-${integration.kind}.yaml.tmpl`,
-    [tenant.name, integration.data, integration.kind]
-  );
+  const configFilename =
+    integration.data.mode === "k8s"
+      ? getConfigFileName(tenant, integration)
+      : getConfigFileName(tenant, integration) + ".tmpl";
 
   const [
     step2Instructions,
@@ -170,13 +156,6 @@ export const InstallInstructions = ({
       ];
     }
   }, [tenant.name, integration.data, integration.kind, configFilename]);
-
-  const downloadHandler = () => {
-    var configBlob = new Blob([config], {
-      type: "application/x-yaml;charset=utf-8"
-    });
-    saveAs(configBlob, configFilename);
-  };
 
   const dashboardHandler = async () => {
     let folder;
@@ -249,15 +228,12 @@ export const InstallInstructions = ({
                   {`Download the generated config YAML and save to the same
                     location as the api key for Tenant "${tenant.name}", it should be called "tenant-api-token-${tenant.name}".`}
                   <Box pt={1}>
-                    <Button
-                      style={{ marginRight: 20 }}
-                      variant="contained"
-                      size="small"
-                      state="primary"
-                      onClick={downloadHandler}
+                    <DownloadConfigButton
+                      filename={configFilename}
+                      config={config}
                     >
                       Download YAML
-                    </Button>
+                    </DownloadConfigButton>
                     <ViewConfigDialogBtn
                       filename={configFilename}
                       config={config}

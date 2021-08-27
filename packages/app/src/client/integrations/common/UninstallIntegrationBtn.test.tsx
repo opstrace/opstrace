@@ -20,7 +20,6 @@ import Services from "client/services";
 import light from "client/themes/light";
 import ThemeProvider from "client/themes/Provider";
 import { StoreProvider } from "state/provider";
-import nock from "nock";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { render, waitFor } from "@testing-library/react";
@@ -71,7 +70,6 @@ const mockGrafanaEndpoint = (tenant: Tenant, integration: Integration) => {
 beforeAll(() => mockServer.listen());
 
 beforeEach(() => {
-  nock.cleanAll();
   mockServer.resetHandlers();
 });
 

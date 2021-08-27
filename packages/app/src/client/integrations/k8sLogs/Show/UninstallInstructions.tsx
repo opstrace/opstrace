@@ -15,20 +15,19 @@
  */
 
 import React, { useMemo } from "react";
-import { saveAs } from "file-saver";
 
 import { Integration } from "state/integration/types";
 
 import * as commands from "./templates/commands";
 
-import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
-
-import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
-import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
-
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
-import { Button } from "client/components/Button";
+import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
+
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
+import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
+import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
+import { getConfigFileName } from "client/integrations/configUtils";
 
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -64,25 +63,12 @@ export const UninstallInstructions = ({
   tenant,
   config
 }: UninstallInstructionsProps) => {
-  const configFilename = useMemo(
-    () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
-    [tenant.name, integration.kind]
-  );
+  const configFilename = getConfigFileName(tenant, integration);
 
-  const [deleteInstructions, deleteCommand] = useMemo(
-    () => [
-      `Run this command to delete Promtail and the ${integration.data.deployNamespace} namespace from your cluster`,
-      commands.deleteYaml(configFilename)
-    ],
-    [integration.data, configFilename]
+  const [deleteYamlCommand] = useMemo(
+    () => commands.deleteYaml(configFilename),
+    [configFilename]
   );
-
-  const downloadHandler = () => {
-    var configBlob = new Blob([config], {
-      type: "application/x-yaml;charset=utf-8"
-    });
-    saveAs(configBlob, configFilename);
-  };
 
   return (
     <Box width="100%" height="100%" p={1}>
@@ -104,15 +90,12 @@ export const UninstallInstructions = ({
                 <Box flexGrow={1} pb={2}>
                   {`Use the previously downloaded config YAML or download it again.`}
                   <Box pt={1}>
-                    <Button
-                      style={{ marginRight: 20 }}
-                      variant="contained"
-                      size="small"
-                      state="primary"
-                      onClick={downloadHandler}
+                    <DownloadConfigButton
+                      filename={configFilename}
+                      config={config}
                     >
                       Download YAML
-                    </Button>
+                    </DownloadConfigButton>
                     <ViewConfigDialogBtn
                       filename={configFilename}
                       config={config}
@@ -130,10 +113,10 @@ export const UninstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {deleteInstructions}
+                  {`Run this command to delete Promtail and the ${integration.data.deployNamespace} namespace from your cluster`}
                   <Box pl={2}>
-                    <code>{deleteCommand}</code>
-                    <CopyToClipboardIcon text={deleteCommand} />
+                    <code>{deleteYamlCommand}</code>
+                    <CopyToClipboardIcon text={deleteYamlCommand} />
                   </Box>
                 </Box>
               </TimelineContent>
@@ -147,7 +130,6 @@ export const UninstallInstructions = ({
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
                   Uninstall this Integration including Dashboards.
-                  <br />
                   <br />
                   <UninstallBtn
                     integration={integration}

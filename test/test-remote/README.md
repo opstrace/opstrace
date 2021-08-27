@@ -30,6 +30,8 @@ For example, a change to `test/test-remote/package.json` must be followed by reb
 
 This section explains how to run the (modified) test code directly on your machine within an uncontainerized NodeJS runtime (this is how I started building the test runner and this is how I make bigger changes to it).
 
+Note: prepare your shell environment via the `Environment setup` section below.
+
 Enter the `test-remote` NPM package directory:
 
 ```bash
@@ -45,7 +47,7 @@ yarn
 Make test code modifications if desired.
 While doing so you can have `tsc` watch your changes, and give you real-time compilation feedback. I do that via
 
-```
+```bash
 export NODE_OPTIONS=--max_old_space_size=5000 && yarn run tsc --watch
 ```
 
@@ -67,6 +69,40 @@ yarn run mocha --grep 'short'
 Also see [Mocha command line interface docs](https://mochajs.org/#command-line-usage).
 
 For 'proper' auto-formatting of code, use VSCode with the ESLint extension and use the default settings, in particular `eslint.codeActionsOnSave.mode` set to `all`.
+
+### Environment setup
+
+Enter Opstrace repo root dir, e.g.:
+
+
+```text
+cd ~/dev/opstrace
+```
+
+Then do
+
+```text
+make set-build-info-constants
+export OPSTRACE_BUILDINFO_PATH="$(pwd)/buildinfo.json"
+```
+
+Then set details of Opstrace instance to test against:
+
+```text
+export OPSTRACE_CLUSTER_NAME=<opstrace-instance-name>
+export OPSTRACE_CLOUD_PROVIDER=<aws or gcp>
+export TENANT_DEFAULT_API_TOKEN_FILEPATH=<p>
+export TENANT_SYSTEM_API_TOKEN_FILEPATH=<p>
+```
+
+Generate kubectl config:
+
+```text
+make kconfig
+```
+
+Now `cd test/test-remote` and follow the commands above.
+
 
 ## Notes
 

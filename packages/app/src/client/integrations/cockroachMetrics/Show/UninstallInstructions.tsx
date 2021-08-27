@@ -15,16 +15,16 @@
  */
 
 import React, { useMemo } from "react";
-import { saveAs } from "file-saver";
-
-import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
-import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
 
 import { Box } from "client/components/Box";
-import { Button } from "client/components/Button";
 import { Card, CardContent, CardHeader } from "client/components/Card";
 import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
 import { Typography } from "client/components/Typography";
+
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
+import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
+import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
+import { getConfigFileName } from "client/integrations/configUtils";
 
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -60,10 +60,7 @@ export const UninstallInstructions = ({
   tenant,
   config
 }: UnInstallInstructionsProps) => {
-  const configFilename = useMemo(
-    () => `opstrace-${tenant.name}-integration-${integration.kind}.yaml`,
-    [tenant.name, integration.kind]
-  );
+  const configFilename = getConfigFileName(tenant, integration);
 
   const [downloadInstructions, deleteInstructions, deleteCommand] = useMemo(
     () =>
@@ -77,19 +74,12 @@ export const UninstallInstructions = ({
             null,
             <Typography>
               Stop the <code>grafana-agent</code> process and then delete the
-              configuration file
+              configuration file(s)
             </Typography>,
             `rm -v ${configFilename} ${configFilename}.tmpl`
           ],
     [integration.data, configFilename]
   );
-
-  const downloadHandler = () => {
-    var configBlob = new Blob([config], {
-      type: "application/x-yaml;charset=utf-8"
-    });
-    saveAs(configBlob, configFilename);
-  };
 
   return (
     <Box width="100%" height="100%" p={1}>
@@ -112,15 +102,12 @@ export const UninstallInstructions = ({
                   <Box flexGrow={1} pb={2}>
                     {downloadInstructions}
                     <Box pt={1}>
-                      <Button
-                        style={{ marginRight: 20 }}
-                        variant="contained"
-                        size="small"
-                        state="primary"
-                        onClick={downloadHandler}
+                      <DownloadConfigButton
+                        filename={configFilename}
+                        config={config}
                       >
                         Download YAML
-                      </Button>
+                      </DownloadConfigButton>
                       <ViewConfigDialogBtn
                         filename={configFilename}
                         config={config}

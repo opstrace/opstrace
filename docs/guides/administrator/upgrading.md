@@ -16,8 +16,6 @@ There are many issues associated with doing upgrades well.
 There are a few scenarios that are not yet fully supported, but we plan to continue working on them into the future.
 If you'd like to contribute we'd love to have your help.
 
-We do not **yet** support upgrades on GCP.
-
 ## Step 1: Check your setup
 
 In the directory you originally installed Opstrace from, make note of the original Opstrace CLI version you have:

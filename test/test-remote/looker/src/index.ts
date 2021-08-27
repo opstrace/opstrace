@@ -25,6 +25,8 @@ import got, { Response as GotResponse } from "got";
 
 import { Semaphore } from "await-semaphore";
 
+import Denque from "denque";
+
 import {
   LogSeries,
   LogSeriesFragmentPushRequest,
@@ -40,7 +42,7 @@ import {
   MetricSeriesFetchAndValidateOpts
 } from "./metrics";
 
-import { LabelSet } from "./series";
+import { LabelSet, WalltimeCouplingOptions } from "./series";
 
 import {
   sleep,
@@ -79,6 +81,9 @@ interface ReadStats {
 
 export const DEFAULT_LOG_LEVEL_STDERR = "info";
 
+// only expose via CLI args if a good use case arises.
+export let WALLTIME_COUPLING_PARAMS: WalltimeCouplingOptions;
+
 // let STATS_WRITE: WriteStats;
 // let STATS_READ: ReadStats;
 
@@ -93,6 +98,9 @@ let COUNTER_STREAM_FRAGMENTS_PUSHED = BigInt(0);
 
 let COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE = 0;
 
+// Prepare a mapping between series unique name and a count
+let PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE: Record<string, number> = {};
+
 function setUptimeGauge() {
   // Set this in various places of the program visted regularly.
   const uptimeSeconds = mtimeDiffSeconds(START_TIME_MONOTONIC);
@@ -105,30 +113,30 @@ async function main() {
 
   let dummystreams: Array<LogSeries | MetricSeries>;
 
-  for (let cyclenum = 1; cyclenum < CFG.n_cycles + 1; cyclenum++) {
+  WALLTIME_COUPLING_PARAMS = calcWalltimeCouplingOptions();
+
+  for (let cyclenum = 1; cyclenum <= CFG.n_cycles; cyclenum++) {
     setUptimeGauge();
 
-    // invocation_id contains 10 characters of random data by default
+    // The idea is that `CFG.invocation_id` is unique among those looker
+    // instances that interact with the same data ingest system.
     const invocationCycleId = `${CFG.invocation_id}-${cyclenum}`;
 
     log.info("enter write/read cycle  %s", cyclenum);
 
     if (cyclenum === 1) {
-      // we know better than:
-      //  error TS2454: Variable 'dummystreams' is used before being assigned.
-      // always create initial streams regardless of update configuration
-      log.info("cycle %s: create new dummystreams", cyclenum);
+      log.info("cycle %s: create a fresh set of time series", cyclenum);
       dummystreams = await createNewSeries(invocationCycleId);
     } else if (
       CFG.change_streams_every_n_cycles > 0 &&
       (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0
     ) {
       // update streams at the configured number of cycles
-      log.info("cycle %s: update dummystreams", cyclenum);
+      log.info("cycle %s: create new time series", cyclenum);
       dummystreams = await createNewSeries(invocationCycleId);
     } else {
       log.info(
-        "cycle %s: continue to use dummystreams of previous cycle",
+        "cycle %s: continue to use time series of previous cycle",
         cyclenum
       );
     }
@@ -153,14 +161,64 @@ async function main() {
   httpServerTerminator.terminate();
 }
 
+function calcFragmentTimeLeapSeconds(): number {
+  let sample_time_increment_ns: number;
+  if (CFG.metrics_mode) {
+    sample_time_increment_ns = CFG.metrics_time_increment_ms * 1000;
+  } else {
+    sample_time_increment_ns = CFG.log_time_increment_ns;
+  }
+
+  // Fragment time leap, defined as the time difference between the last sample
+  // of a fragment and the last sample of the previous fragment, equal to
+  // (n_samples_per_series_fragment) * delta_t.
+  const fragmentTimeLeapSeconds =
+    CFG.n_samples_per_series_fragment * (sample_time_increment_ns / 10 ** 6);
+
+  return fragmentTimeLeapSeconds;
+}
+
+function calcWalltimeCouplingOptions(): WalltimeCouplingOptions {
+  const fragmentTimeLeapSeconds = calcFragmentTimeLeapSeconds();
+
+  log.info(`fragmentTimeLeapSeconds: ${fragmentTimeLeapSeconds.toFixed(2)} s`);
+
+  // Why must maxLagSeconds depend on fragmentTimeLeapSconds? See
+  // `TimeseriesBase.validateWtOpts()`.
+  const minimalMaxLagSeconds = 5 * 60;
+  const dynamicMaxLagSeconds = Math.ceil(fragmentTimeLeapSeconds * 5);
+  let actualMaxLagSeconds;
+
+  if (dynamicMaxLagSeconds < minimalMaxLagSeconds) {
+    log.info(
+      `walltime coupling: use minimal maxLagSeconds: ${minimalMaxLagSeconds}`
+    );
+    actualMaxLagSeconds = minimalMaxLagSeconds;
+  } else {
+    log.info(
+      `walltime coupling: use dynamic maxLagSeconds: ${minimalMaxLagSeconds} ` +
+        `(based on fragmentTimeLeapSeconds: ${fragmentTimeLeapSeconds.toFixed(
+          2
+        )} s)`
+    );
+    actualMaxLagSeconds = dynamicMaxLagSeconds;
+  }
+
+  return {
+    maxLagSeconds: actualMaxLagSeconds,
+    minLagSeconds: 1 * 60
+  };
+}
+
 async function createNewSeries(
   invocationCycleId: string
 ): Promise<Array<LogSeries | MetricSeries>> {
-  const streams = [];
+  const series = [];
+
+  const now = ZonedDateTime.now();
 
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
-    const streamname = `${invocationCycleId}-${i.toString()}`;
-
+    const seriesname = `${invocationCycleId}-${i.toString()}`;
     const labelset: LabelSet = {};
 
     // add more labels (key/value pairs) as given by command line
@@ -175,81 +233,93 @@ async function createNewSeries(
       }
     }
 
-    let stream: MetricSeries | LogSeries;
-    if (CFG.metrics_mode) {
-      // Calculate amount to subtract from start time, or avoid random() if subtraction is disabled
-      const subtractSecs =
-        CFG.metrics_past_start_range_max_seconds === 0
-          ? 0
-          : // By default this is a time between now-30min and now-20min - smear
-            // this out by plus/minus 5 minutes, because of the throttling
-            // mechanism otherwise hitting in for all series at the same time.
-            // Note that Math.random() returns [0,1) (not including 1).
-            util.rndFloatFromInterval(
-              CFG.metrics_past_start_range_min_seconds,
-              CFG.metrics_past_start_range_max_seconds
-            );
-      // TODO some sort of adjustable cardinality here, where the number of distinct label
-      //      permutations across a series is configurable? (e.g. 10k distinct labels across a series)
-      stream = new MetricSeries(
-        {
-          // kept distinct across concurrent streams, see above TODO about sharing metric names
-          // ensure any dashes in metric name are switched to underscores: required by prometheus
-          // see also: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
-          metricName: streamname.replace(/-/g, "_"),
-          // must not collide among concurrent streams
-          uniqueName: streamname,
-          n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
+    let s: MetricSeries | LogSeries;
 
-          // With Cortex' Blocks Storage system, we cannot go into the future
-          // compared to "now" (from Cortex' system time point of view), but we
-          // also cannot fall behind for more than 60 minutes, see
-          // https://github.com/cortexproject/cortex/issues/2366. That means that
-          // the wall time passed after MetricSeries initialization matters.
-          // How exactly it matters depends on the synthetically created time
-          // difference between adjacent metric samples and the push rate. Use
-          // the one hour leeway that we have here in a 'smart' way; let each
-          // MetricSeries start in the _center_ of the timewindow, i.e 30
-          // minutes in the past compared to "now", where "now" really is
-          // MetricSeries() initialization: use wall time as start time, so
-          // that when generating new streams during runtime (from cycle to
-          // cycle) that we don't keep going back to using the program's
-          // invocation time, as is done for logs (where Loki accepts incoming
-          // data from far in the past),
-          starttime: ZonedDateTime.now().minusSeconds(subtractSecs).withNano(0),
-          metrics_time_increment_ms: CFG.metrics_time_increment_ms,
-          labelset: labelset
-        },
-        pm.counter_forward_leap
-      );
+    // Smear out the synthetic start time across individual time series, within
+    // the 'green interval' [now-wcp.maxLagSeconds, now-wcp.minLagSeconds),
+    // which is the interval of allowed timestamp values. At the boundaries of
+    // that interval the walltime coupling correction mechanism hits in. As we
+    // don't want these mechanisms to hit in right away, add a bit of leeway to
+    // the left and right -- make the interval a little more narrow but cutting
+    // a slice whose thickness depends on the time width of the series
+    // fragments. Rely on the fact that the 'green interval' is at least 5
+    // times as wide as a single time series fragment (in time). If the total
+    // buffer is 3 times that then the regime to pick values from is as wide as
+    // 2 ...
+    // const startTimeOffsetIntoPast = util.rndFloatFromInterval(
+    //   WALLTIME_COUPLING_PARAMS.minLagSeconds +
+    //     1.5 * calcFragmentTimeLeapSeconds(),
+    //   WALLTIME_COUPLING_PARAMS.maxLagSeconds -
+    //     1.5 * calcFragmentTimeLeapSeconds()
+    // );
+    const startTimeOffsetIntoPast = util.rndFloatFromInterval(
+      WALLTIME_COUPLING_PARAMS.minLagSeconds + 5,
+      WALLTIME_COUPLING_PARAMS.maxLagSeconds - 5
+    );
+
+    const starttime = now.minusSeconds(startTimeOffsetIntoPast).withNano(0);
+
+    if (CFG.metrics_mode) {
+      // TODO some sort of adjustable cardinality here, where the number of
+      // distinct label permutations across a series is configurable? (e.g. 10k
+      // distinct labels across a series)
+      s = new MetricSeries({
+        // kept distinct across concurrent streams, see above TODO about sharing metric names
+        // ensure any dashes in metric name are switched to underscores: required by prometheus
+        // see also: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
+        metricName: seriesname.replace(/-/g, "_"),
+        // must not collide among concurrent streams
+        uniqueName: seriesname,
+        n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
+        starttime: starttime,
+        // any check needed before doing this multiplication? would love to
+        // have guarantee that the result is the sane integer that it needs
+        // to be for the expected regime that users choose
+        // `CFG.metrics_time_increment_ms` from.
+        sample_time_increment_ns: CFG.metrics_time_increment_ms * 1000,
+        labelset: labelset,
+        wtopts: WALLTIME_COUPLING_PARAMS,
+        counterForwardLeap: pm.counter_forward_leap
+      });
     } else {
-      stream = new LogSeries({
-        n_entries_per_stream_fragment: CFG.n_entries_per_stream_fragment,
+      // disable wall time coupling when --log-start-time has been set.
+      let wtopts: WalltimeCouplingOptions | undefined =
+        WALLTIME_COUPLING_PARAMS;
+      let logstarttime: ZonedDateTime | undefined = starttime;
+      if (CFG.log_start_time !== "") {
+        log.info("wall time coupling disabled as of --log-start-time");
+        wtopts = undefined;
+        logstarttime = ZonedDateTime.parse(CFG.log_start_time);
+      }
+
+      s = new LogSeries({
+        n_samples_per_series_fragment: CFG.n_samples_per_series_fragment,
         n_chars_per_msg: CFG.n_chars_per_msg,
-        starttime: ZonedDateTime.parse(CFG.log_start_time),
-        uniqueName: streamname,
-        timediffNanoseconds: CFG.log_time_increment_ns,
+        starttime: logstarttime,
+        uniqueName: seriesname,
+        sample_time_increment_ns: CFG.log_time_increment_ns,
         includeTimeInMsg: true,
         labelset: labelset,
-        compressability: CFG.compressability
+        compressability: CFG.compressability,
+        wtopts: wtopts
       });
     }
 
-    const msg = `Initialized series: ${stream}. Time of first sample: ${stream.currentTimeRFC3339Nano()}`;
+    const msg = `Initialized series: ${s}. Time of first sample: ${s.currentTimeRFC3339Nano()}`;
 
     const logEveryN = util.logEveryNcalc(CFG.n_concurrent_streams);
     if (i % logEveryN == 0) {
-      log.info(msg + ` (${logEveryN - 1} msgs like this hidden)`);
+      log.info(msg + ` (${logEveryN - 1} msgs like this are/will be hidden)`);
       // Allow for more or less snappy SIGINTing this initialization step.
       await sleep(0.0001);
     } else {
       log.debug(msg);
     }
-    streams.push(stream);
+    series.push(s);
   }
 
-  log.info("stream initialization finished");
-  return streams;
+  log.info("time series initialization finished");
+  return series;
 }
 
 async function performWriteReadCycle(
@@ -305,6 +375,12 @@ async function performWriteReadCycle(
 
 async function writePhase(streams: Array<LogSeries | MetricSeries>) {
   const fragmentsPushedBefore = COUNTER_STREAM_FRAGMENTS_PUSHED;
+
+  log.info("reset per-series fragment push counter");
+  PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE = {};
+  for (const s of streams) {
+    PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] = 0;
+  }
 
   const lt0 = mtime();
 
@@ -387,7 +463,7 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
   }
 
   log.info("fragments POSTed in write phase: %s", nStreamFragmentsSent);
-  const nEntriesSent = nStreamFragmentsSent * CFG.n_entries_per_stream_fragment;
+  const nEntriesSent = nStreamFragmentsSent * CFG.n_samples_per_series_fragment;
   let nPayloadBytesSent = nEntriesSent * CFG.n_chars_per_msg;
 
   if (CFG.metrics_mode) {
@@ -566,275 +642,346 @@ async function readPhase(streams: Array<LogSeries | MetricSeries>) {
 }
 
 /*
-For each stream, send all fragments (until stop criterion is hit).
+This function is the core of the write phase within a cycle.
 
-For each LogSeries, create one function that produces and POSTs pushrequests.
-A "pushrequest" is a Prometheus term for a (snappy-compressed) protobuf message
-carrying log/metric payload data.
+For each series, send all fragments (until intra-cycle stop criterion is hit).
+
+A "push request" or "push message" is a Prometheus term for a
+(snappy-compressed) protobuf message carrying log/metric payload data.
+
+If `CFG.n_fragments_per_push_message` is larger than 1 then this
+means that each push message is supposed to contain data from that many time
+series.
 */
 export async function generateAndPostFragments(
-  streams: Array<LogSeries | MetricSeries>
+  series: Array<LogSeries | MetricSeries>
 ): Promise<void> {
   const actors = [];
 
-  const writeConcurSemaphore = new Semaphore(CFG.max_concurrent_writes);
+  // `CFG.max_concurrent_writes` is at most `N_concurrent_streams`.
+  // N_concurrent_streams may be up to O(10**6).
+  //
+  // The main activity within an
+  // actor is to do this in a loop:
+  //
+  // - generate one or more time series fragments
+  // - serialize this/these fragment(s) into a binary push messages
+  // - send that message out via an HTTP POST request
 
-  // Create N_concurrent_streams (think: upper bound towards 10**5 or 10**6?)
-  // actors, but throttle their main activity (fragment generation and
-  // serialization) to N_concurrent_writes (think: upper bound between 10**2
-  // and 10**3).
-  log.info(
-    "create %s pushrequestProducerAndPOSTer()",
-    CFG.n_concurrent_streams
-  );
+  // We do not want to mutate the original `series` Array -- which of the
+  // following two techniques fulfills that? Both?
+  const seriespool = new Denque([...series]);
+  //const seriespool = new Denque(series);
 
-  //const N_STREAM_FRAGMENTS_PER_PUSH_REQUEST = 80;
-  const streamChunks = util.chunkify<LogSeries | MetricSeries>(
-    streams,
-    CFG.n_fragments_per_push_message
-  );
+  log.debug(`seriespool.length: ${seriespool.length}`);
 
-  for (const sc of streamChunks) {
-    // new concept: N streams per pushrequestproducernadPOSTer
-    actors.push(pushrequestProducerAndPOSTer(sc, writeConcurSemaphore));
+  const actorCount = CFG.max_concurrent_writes;
+  for (let i = 1; i <= actorCount; i++) {
+    actors.push(
+      produceAndPOSTpushrequestsUntilCycleStopCriterion(
+        seriespool,
+        CFG.n_fragments_per_push_message,
+        actorCount,
+        i
+      )
+    );
   }
 
   await Promise.all(actors);
 }
 
-// Part of the body of the while(true) {} main loop of
-// pushrequestProducerAndPOSTer().
-async function _produceAndPOSTpushrequest(
-  streams: Array<LogSeries | MetricSeries>,
-  semaphore: Semaphore
-) {
-  // TODO: THROTTLE
-  // TODO: metric for fragment generation duration
+/**
+ * Get at most N fragments from series pool.
+ *
+ * Invariant: get at most one fragment per series.
+ *
+ * If the series pool doesn't have N fragments ready to be consumed then the
+ * returned number may be 0 or any number less than N.
+ *
+ * This only returns less than N for boundary effects, towards 'end of work'.
+ *
+ * As of the way the concurrent actors operate on `seriespool` this might
+ * return a set of fragments with varying 'generation' across fragments, i.e.
+ * one fragment is the Mth one from a time series, and another fragment is the
+ * Pth one from another time series with M != P.
+ *
+ * (before this, looker once had a concurrency architecture that ensured that
+ * _all_ first-generation fragments get pushed before moving on to generating
+ * second-generation fragments, and so on.)
+ *
+ * The sorting order of time series objects on the series pool may vary and get
+ * more and more random over time when there is a lot of work to do, as of the
+ * unpredictable timing of HTTP requests -- that is why certain time series
+ * objects may after all be processed faster than others. Over time, this may
+ * create an interesting distribution of 'progress' for each time series.
+ *
+ * @param seriespool
+ * @param nf: desired number of fragments
+ * @param actorCount
+ * @param actorIndex
+ * @returns
+ */
+async function tryToGetNFragmentsFromSeriesPool(
+  seriespool: Denque<LogSeries | MetricSeries>,
+  nf: number,
+  actorCount: number, // total number of actors
+  actorIndex: number // representing the actor as part of which this func runs
+): Promise<Array<LogSeriesFragment | MetricSeriesFragment>> {
+  const fragments: Array<LogSeriesFragment | MetricSeriesFragment> = [];
 
-  // Throttle, not only the number of concurrent POST requests, but also the
-  // number of concurrent fragment generators. In an earlier version,
-  // fragment generators always ran for N_concurrent_streams, preparing the
-  // serialized fragments for a potentially much smaller number of
-  // N_concurrent_writes. For N_concurrent_streams being large (say, between
-  // 10**3 and 10**4), that imposed a scaling challenge: CPU and mem
-  // requirements were 'needlessly' intense. Pro was: once a pusher was ready
-  // to make a POST request, a corresponding stream fragment was already
-  // serealized (prepared in memory). Now, in this simpler architecture,
-  // N_concurrent_writes controls. When a pusher gets ready (acquires the
-  // sema), then it first has to generate and serialize a fragment. If that
-  // ever becomes a problem, it can certainly be changed/optimized again. Pro
-  // of this new approach: Memory consumption is dominated by holding
-  // N_concurrent_writes fragments in memory (which is O(10**2) in common
-  // cases), and N_concurrent_streams can go towards O(10**5) or even
-  // O(10**6).
-  const st0 = mtime();
-  const releaseWriteSemaphore = await semaphore.acquire();
-  log.debug(
-    "pushrequestProducerAndPOSTer held back by semaphore for %s s",
-    mtimeDiffSeconds(st0).toFixed(2)
-  );
+  // candidate-popping loop: try to acquire at most `nf` fragments (all from
+  // different series) from the pool (not every candidate might have one
+  // ready!)
+  while (true) {
+    // Look at a candidate: pop off item from the end of the queue.
+    const s = seriespool.pop();
 
-  // This function is just a way to make the block of code explicit that's
-  // protected by the semaphore.
-  async function _genAndPost() {
-    // Note: generateAndGetNextFragment() does not have a stop criterion
-    // itself, the stop criteria are defined above, based on wall time passed
-    // or the number of fragments already consumed for this stream.
-    const fragments: Array<LogSeriesFragment | MetricSeriesFragment> = [];
-
-    //
-    if (!CFG.metrics_mode)
-      for (const s of streams as LogSeries[]) {
-        const f = s.generateAndGetNextFragment();
-        fragments.push(f);
-        s.lastFragmentConsumed = f;
-      }
-    else {
-      for (const s of streams as MetricSeries[]) {
-        let fragment: MetricSeriesFragment;
-
-        // This while loop is effectively a throttling mechanism, only
-        // built for metrics mode.
-        while (true) {
-          const [shiftIntoPastSeconds, f] = s.generateAndGetNextFragment();
-          if (f !== undefined) {
-            // TODO: the current time shift compared to wall time should
-            // be monitored, maybe via a histogram? Does not make sense
-            // to update a gauge with it because the shift is a distribution
-            // over _all_ streams in this looker session, might might be
-            // O(10^6).
-            fragment = f;
-            break;
-          }
-
-          const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
-          log.debug(
-            `${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
-              1
-            )} minutes. Sample generation is too fast. Delay generating ` +
-              "and pushing the next fragment. This may take up to 10 minutes."
-          );
-          // We want to monitor the artificial throttling
-          pm.counter_fragment_generation_delayed.inc(1);
-          await sleep(10);
-        }
-
-        fragments.push(fragment);
-        s.lastFragmentConsumed = fragment;
-      }
-    }
-
-    // NOTE(JP): here we can calculate the lag between the first or last sample
-    // in the fragment and the actual wall time. Matters a lot for metrics
-    // mode! Can be used to log it for starters, to let a human decide to
-    // change parameters. Can also be used to auto-correct things (in a way
-    // that allows for read validation, i.e. allowing for calculation of sample
-    // timestamps w/o keeping all data that was written).
-
-    const t0 = mtime();
-
-    let pr: LogSeriesFragmentPushRequest | MetricSeriesFragmentPushMessage;
-
-    if (streams[0] instanceof MetricSeries) {
-      pr = new MetricSeriesFragmentPushMessage(
-        fragments as MetricSeriesFragment[]
-      );
-    } else {
-      pr = new LogSeriesFragmentPushRequest(fragments as LogSeriesFragment[]);
-    }
-
-    //const pushrequest = fragment.serialize(); //toPushrequest();
-    const genduration = mtimeDiffSeconds(t0);
-
-    //const pr = pushrequest;
-    let name: string;
-    if (streams.length === 1) {
-      name = `prProducerPOSTer(${streams[0].promQueryString()})`;
-    } else {
-      name = `prProducerPOSTer(nstreams=${
-        streams.length
-      }, first=${streams[0].promQueryString()})`;
-    }
-
-    if (
-      COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE < 1 ||
-      COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE % 200 == 0
-    ) {
-      const firstFragment = pr.fragments[0];
-      const lastFragment = pr.fragments.slice(-1)[0];
+    if (s === undefined) {
       log.info(
-        `${name}: generated pushrequest msg in ${genduration.toFixed(
-          2
-        )} s with ` +
-          `${pr.fragments.length} series ` +
-          `(first: ${
-            firstFragment.parent?.uniqueName
-          }, index ${firstFragment.indexString(3)} -- ` +
-          `last: ${
-            lastFragment.parent?.uniqueName
-          }, index ${lastFragment.indexString(3)}), ` +
-          `size: ${pr.dataLengthMiB.toFixed(4)} MiB). ` +
-          "POST it (not logged for every case)."
+        `actor ${actorIndex}: series pool is empty. generated ${fragments.length} fragments (desired: ${nf})`
       );
-    }
-    COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE++;
-
-    const postT0 = mtime();
-    try {
-      // Do not use pr.postWithRetryOrError() which is super simple,
-      // but use a custom function with CLI arg-controlled retrying
-      // parameters etc.
-      await customPostWithRetryOrError(pr, CFG.apibaseurl);
-    } catch (err) {
-      log.crit("consider critical: %s", err);
-      process.exit(1);
+      // Break from the loop. At this point, the `fragments` array may
+      // be of length between 0 or nf-1.
+      return fragments;
     }
 
-    const postDurationSeconds = mtimeDiffSeconds(postT0);
-    pm.hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
+    let fragment: MetricSeriesFragment | LogSeriesFragment | undefined =
+      undefined;
 
-    COUNTER_STREAM_FRAGMENTS_PUSHED =
-      COUNTER_STREAM_FRAGMENTS_PUSHED +
-      BigInt(CFG.n_fragments_per_push_message);
+    // This while loop is effectively implementing the throttling mechanism
+    // when synthetic time moves too fast.
+    let histobserved = false;
 
-    pm.counter_fragments_pushed.inc(CFG.n_fragments_per_push_message);
+    // lazy-throttling loop: once the pool is small, keep an eye on the
+    // individual candidate, periodically, via this loop. When there's still
+    // work on the pool never spend more than one iteration in here.
+    while (true) {
+      const [shiftIntoPastSeconds, f] = s.generateNextFragmentOrSkip();
 
-    pm.counter_log_entries_pushed.inc(
-      CFG.n_entries_per_stream_fragment * CFG.n_fragments_per_push_message
-    );
+      // If `f` was freshly generated (no throttling) then rely on
+      // `shiftIntoPastSeconds` to represent the last sample of that fresh
+      // fragment. If `f` is `undefined` then rely on this value to represent
+      // the last sample of the last generated fragment. Only observe this once
+      // in this current loop here to not skew the histogram. (maybe it's
+      // better to decouple that and do this elsewhere).
+      if (!histobserved) {
+        pm.hist_lag_compared_to_wall_time.observe(shiftIntoPastSeconds);
+        histobserved = true;
+      }
 
-    // NOTE: payloadByteCount() includes timestamps. For logs, the timestamp
-    // payload data (12 bytes per entry) might be small compared to the log
-    // entry data. For metrics, the timestamp data is _larger than_ the
-    // numerical sample data (8 bytes per sample).
+      if (f !== undefined) {
+        // A fragment was generated from `s`. Leave this lazy-throttling loop.
+        fragment = f;
+        break;
+      }
 
-    // Convert BigInt to Number and assume that the numbers are small enough
-    pm.counter_payload_bytes_pushed.inc(Number(pr.payloadByteCount));
-    pm.counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
-    pm.gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
+      // `s` was not ready.
+      const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
+      log.debug(
+        `actor ${actorIndex}: ${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
+          1
+        )} minutes. Sample generation is too fast. Delay generating ` +
+          "and pushing the next fragment. This may take up to " +
+          `${(s.fragmentTimeLeapSeconds / 60.0).toFixed(1)} minutes ` +
+          "(the time width of a stream fragment)."
+      );
+
+      pm.counter_fragment_generation_delayed.inc(1);
+
+      // If there's still a bunch of other candidates in the pool then put the
+      // current candidate back and pick another one. Else, start polling loop
+      // and watch the current candidate.
+      const ql = seriespool.length;
+      if (ql <= actorCount - 1) {
+        // There is as much work left in the pool as other actors are there
+        // or less work than that. Don't put the current candidate back into
+        // the pool. Observe it.
+        log.debug(
+          `actor ${actorIndex}: actors are running out of work ` +
+            `(queue lengths: ${ql}): idle-watch candidate`
+        );
+        await sleep(1);
+        continue;
+      }
+
+      // There's still work in the pool (candidates to look at before other
+      // actors will). Put this candidate back onto the queue (left-hand
+      // side). Since this is a double-ended queue implementation this
+      // operation is of constant time complexity (O(1)).
+      seriespool.unshift(s);
+
+      // Leave this lazy-throttling loop, meaning that `fragment` is
+      // `undefined`.
+      break;
+    }
+
+    if (fragment === undefined) {
+      // That means that the current candidate `s` did not have a fragment
+      // ready and that it has been put back into the pool. Get a new candidate
+      // from the pool.
+      continue;
+    }
+
+    fragments.push(fragment);
+    s.lastFragmentConsumed = fragment;
+    // Book-keeping for stop-criterion
+    PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] += 1;
+
+    if (fragments.length === nf) {
+      log.debug(`seriespool.length: ${seriespool.length}`);
+      log.debug(`actor ${actorIndex}: collected ${nf} fragments`);
+      return fragments;
+    }
   }
-
-  // Note(JP): any error in _genAndPost(), at the time of writing, should by
-  // design lead to program crash. That is, technically, there is no need to do
-  // rock-solid semaphore release upon error. But, as things may change in the
-  // future, structure the code towards proper cleanup, which is what this
-  // tight error handling block is supposed to do: catch any error, release
-  // semaphore, re-throw.
-  try {
-    await _genAndPost();
-  } catch (err) {
-    log.info("err in sem-protected, release, re-throw");
-    releaseWriteSemaphore();
-    throw err;
-  }
-  releaseWriteSemaphore();
 }
 
-async function pushrequestProducerAndPOSTer(
-  streams: Array<LogSeries | MetricSeries>,
-  semaphore: Semaphore
+async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
+  seriespool: Denque<LogSeries | MetricSeries>,
+  nfppm: number,
+  actorCount: number,
+  actorIndex: number
 ) {
-  let fragmentsPushed = 0;
-
-  let name: string;
-  if (streams.length === 1) {
-    name = streams[0].uniqueName;
-  } else {
-    name = `nstreams=${streams.length},first=${streams[0].uniqueName}`;
-  }
+  // Repetitively call into tryToGetNFragmentsFromSeriesPool() precisely until
+  // no fragments are returned anymore.
   while (true) {
+    const fragments = await tryToGetNFragmentsFromSeriesPool(
+      seriespool,
+      nfppm,
+      actorCount,
+      actorIndex
+    );
+
+    if (fragments.length === 0) {
+      log.info(
+        `actor ${actorIndex}: candidate-popping loop terminated, no fragment acquired: all work done, exit actor.`
+      );
+      return;
+    }
+
+    await _postFragments(fragments, actorIndex);
+
+    // implement intra-cycle stop criteria
     if (CYCLE_STOP_WRITE_AFTER_SECONDS !== 0) {
       const secondsSinceCycleStart = mtimeDiffSeconds(
         CYCLE_START_TIME_MONOTONIC
       );
       if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
         log.debug(
-          "prProducerPOSTer for %s: %s seconds passed: stop producer",
-          name,
-          secondsSinceCycleStart.toFixed(2)
+          `actor ${actorIndex}: ${secondsSinceCycleStart.toFixed(
+            2
+          )} seconds passed: stop producer`
         );
         return;
       }
     }
 
-    if (CFG.stream_write_n_fragments == fragmentsPushed) {
-      log.debug(
-        "prProducerPOSTer for %s: %s fragments created and pushed: stop producer",
-        name,
-        fragmentsPushed
-      );
-      return;
+    // For each of the fragments pushed there is a corresponding series object
+    // that maybe needs to be put back onto the work pool (it's important to
+    // only do that now after the push message has been sent out)
+    for (const f of fragments) {
+      const s = f.parent!;
+      if (
+        PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] <
+        CFG.stream_write_n_fragments
+      ) {
+        // Put back into work pool (left-hand side). All other actors might
+        // have terminated by now because maybe temporarily the pool size
+        // appeared as 0 (and in fact, was). Now that _this actor here_ is
+        // adding back items onto the pool, we also have to make sure that this
+        // actor here performs one more outer loop interation.
+        seriespool.unshift(s);
+        log.debug(`put ${s.uniqueName} back into work queue`);
+      } else {
+        log.debug(
+          `actor ${actorIndex}:  CFG.stream_write_n_fragments (${CFG.stream_write_n_fragments}) ` +
+            `pushed for ${s.uniqueName}`
+        );
+      }
     }
-
-    await _produceAndPOSTpushrequest(streams, semaphore);
-    // perspective: consumed from stream object, and also pushed out. if a
-    // fragment is consumed from a stream object and the push subsequently
-    // fails, then the program crashes. That is, by the _end of a write cycle_
-    // it is safe to inspect a stream object and ask it how many fragments were
-    // generated for it, and to then assume that the same number has actually
-    // been POSTed to the remote system.
-    fragmentsPushed += 1;
   }
+}
+
+async function _postFragments(
+  fragments: Array<LogSeriesFragment | MetricSeriesFragment>,
+  actorIndex: number
+) {
+  const t0 = mtime();
+  let pr: LogSeriesFragmentPushRequest | MetricSeriesFragmentPushMessage;
+  if (CFG.metrics_mode) {
+    pr = new MetricSeriesFragmentPushMessage(
+      fragments as MetricSeriesFragment[]
+    );
+  } else {
+    pr = new LogSeriesFragmentPushRequest(fragments as LogSeriesFragment[]);
+  }
+  const genduration = mtimeDiffSeconds(t0);
+
+  let name: string;
+  // the compiler thinks that this can be `undefined` as of the [0] -- but
+  // it's confirmed (above) that this array is not empty.
+  const firstseries = fragments[0].parent as LogSeries | MetricSeries;
+
+  const fcount = fragments.length;
+
+  if (fcount === 1) {
+    name = `actor ${actorIndex}: prProducerPOSTer(${firstseries.promQueryString()})`;
+  } else {
+    name = `actor ${actorIndex}: prProducerPOSTer(nstreams=${fcount}, first=${firstseries.promQueryString()})`;
+  }
+
+  if (
+    COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE < 1 ||
+    COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE % 200 == 0
+  ) {
+    const firstFragment = pr.fragments[0];
+    const lastFragment = pr.fragments.slice(-1)[0];
+    log.info(
+      `${name}: generated pushrequest msg in ${genduration.toFixed(
+        2
+      )} s with ` +
+        `${fcount} series ` +
+        `(first: ${
+          firstFragment.parent?.uniqueName
+        }, index ${firstFragment.indexString(3)} -- ` +
+        `last: ${
+          lastFragment.parent?.uniqueName
+        }, index ${lastFragment.indexString(3)}), ` +
+        `size: ${pr.dataLengthMiB.toFixed(4)} MiB). ` +
+        "POST it (not logged for every case)."
+    );
+  }
+  COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE++;
+
+  const postT0 = mtime();
+  try {
+    // Do not use pr.postWithRetryOrError() which is super simple,
+    // but use a custom function with CLI arg-controlled retrying
+    // parameters etc.
+    await customPostWithRetryOrError(pr, CFG.apibaseurl);
+  } catch (err) {
+    log.crit("consider critical: %s", err);
+    process.exit(1);
+  }
+
+  const postDurationSeconds = mtimeDiffSeconds(postT0);
+  pm.hist_duration_post_with_retry_seconds.observe(postDurationSeconds);
+
+  COUNTER_STREAM_FRAGMENTS_PUSHED =
+    COUNTER_STREAM_FRAGMENTS_PUSHED + BigInt(fcount);
+
+  pm.counter_fragments_pushed.inc(fcount);
+
+  pm.counter_log_entries_pushed.inc(CFG.n_samples_per_series_fragment * fcount);
+
+  // NOTE: payloadByteCount() includes timestamps. For logs, the timestamp
+  // payload data (12 bytes per entry) might be small compared to the log
+  // entry data. For metrics, the timestamp data is _larger than_ the
+  // numerical sample data (8 bytes per sample).
+
+  // Convert BigInt to Number and assume that the numbers are small enough
+  pm.counter_payload_bytes_pushed.inc(Number(pr.payloadByteCount));
+  pm.counter_serialized_fragments_bytes_pushed.inc(pr.dataLengthBytes);
+  pm.gauge_last_http_request_body_size_bytes.set(pr.dataLengthBytes);
 }
 
 /* Calculate delay in seconds _before_ performing the attempt `attempt`.

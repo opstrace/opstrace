@@ -37,8 +37,12 @@ export const httpTimeoutSettings = {
   request: 60000
 };
 
-export function rndFloatFromInterval(min: number, max: number) {
-  // half-closed: [min, max)
+/**
+ * Generate a floating point number from [min, max) with uniform distribution.
+ */
+export function rndFloatFromInterval(min: number, max: number): number {
+  // Note that Math.random() returns [0,1) (not including 1). So this picks
+  // from the half-closed interval [min, max), excluding max.
   return Math.random() * (max - min) + min;
 }
 

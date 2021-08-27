@@ -72,34 +72,47 @@
   color: "d4c5f9"
   aliases: ["area: ui"]
   description: ""
+
+- name: "area: system-monitoring"
+  color: "d4c5f9"
+  aliases: []
+  description: "task/issue related to system monitoring including alerts and dashboards"
+
 - name: "area: cli"
   color: "d4c5f9"
   aliases: []
   description: ""
-- name: "area: test-remote"
+
+- name: "area: test suites"
   color: "d4c5f9"
-  aliases: []
-  description: ""
+  aliases: ["area: test-remote", "area: test-browser"]
+  description: "test-remote, test-browser, looker, etc"
+
 - name: "area: installer"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: uninstaller"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: controller"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: dns-service"
   color: "d4c5f9"
   aliases: []
   description: "task/issue related to our DNS service, but also DNS service client in CLI"
+
 - name: "area: ci"
   color: "d4c5f9"
   aliases: []
   description: ""
+
 - name: "area: docs"
   color: "d4c5f9"
   aliases: []
@@ -120,18 +133,22 @@
   aliases: []
   description: "a specific question (from inside or outside)"
 
-# grey for state dddddd
-# Will need to see how/if we manage state in this repo (with codetree?)
+# grey for state/status (dddddd)
+# Includes labels 'backlog', 'in progress' and 'codetree-epic' 
+# for use by Codetree.
 
 - name: "backlog"
   color: "dddddd"
-  aliases: ["state: backlog"]
+  aliases: []
   description: "state (used by codetree)"
 - name: "in progress"
   color: "dddddd"
-  aliases: ["state: in-progress"]
+  aliases: []
   description: "state (used by codetree)"
-
+- name: "codetree-epic"
+  color: "dddddd"
+  aliases: []
+  description: ""
 - name: "state: wontdo"
   color: "dddddd"
   aliases: []

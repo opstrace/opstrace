@@ -572,12 +572,12 @@ suite("Loki API test suite", function () {
 
   test("short dummystream insert, validate via query", async function () {
     const stream = new LogSeries({
-      n_entries_per_stream_fragment: 10 ** 2,
+      n_samples_per_series_fragment: 10 ** 2,
       n_chars_per_msg: 90,
       starttime: ZonedDateTime.now(),
       //starttime: ZonedDateTime.parse("2020-02-20T17:40:40.000000000Z"),
       uniqueName: `test-remote-${rndstring(5)}`,
-      timediffNanoseconds: 1,
+      sample_time_increment_ns: 1,
       includeTimeInMsg: true,
       labelset: undefined,
       compressability: "min"
@@ -609,11 +609,11 @@ suite("Loki API test suite", function () {
       const streamname = `${nameprefix}-${i.toString().padStart(4, "0")}`;
 
       const stream = new LogSeries({
-        n_entries_per_stream_fragment: 4 * 10 ** 3,
+        n_samples_per_series_fragment: 4 * 10 ** 3,
         n_chars_per_msg: 90,
         starttime: ZonedDateTime.now(),
         uniqueName: streamname,
-        timediffNanoseconds: 100,
+        sample_time_increment_ns: 100,
         includeTimeInMsg: true,
         labelset: undefined,
         compressability: "min"
@@ -647,7 +647,7 @@ suite("Loki API test suite", function () {
     const NentriesSent =
       N_concurrent_streams *
       nFragmentsPerStream *
-      streams[0].n_entries_per_stream_fragment;
+      streams[0].n_samples_per_series_fragment;
     const NcharsSent = NentriesSent * streams[0].n_chars_per_msg;
     const MegacharsSent = NcharsSent / 10 ** 6; // int division ok?
     const MegacharsPerSec = MegacharsSent / durationSeconds;

@@ -25,7 +25,6 @@ import {
   mtime,
   sleep,
   logHTTPResponse,
-  httpTimeoutSettings,
   LOKI_API_TLS_VERIFY,
   enrichHeadersWithAuthToken
 } from "./index";
@@ -61,16 +60,14 @@ async function queryLoki(
     ...additionalHeaders
   };
 
+  // Expect to be wrapped by polling loop. Expect 'snappy' response generation.
   const options = {
-    // Allow up to two retries in the event of spurious timeouts or similar errors.
-    retry: 2,
+    retry: 0,
     throwHttpErrors: false,
     searchParams: queryParams,
-    // Use a 5s request timeout rather than the configured 60s default.
-    // We want the poll loop to retry quickly if there is a timeout.
     timeout: {
-      connect: httpTimeoutSettings.connect, // inherit default
-      request: 5000
+      connect: 4000,
+      request: 10000
     },
     headers: headers,
     https: { rejectUnauthorized: LOKI_API_TLS_VERIFY } // https://github.com/sindresorhus/got/issues/1191
@@ -119,12 +116,19 @@ Query parameters: ${JSON.stringify(
   // success.
   while (true) {
     if (mtime() > deadline) {
-      log.error("query deadline hit");
+      log.error("query deadline hit ()");
       break;
+    }
+
+    if (queryCount > 0) {
+      // short delay only. trade-off: log verbosity vs. overall test suite
+      // runtime.
+      await sleep(1.0);
     }
 
     queryCount += 1;
 
+    log.info(`waitForLokiQueryResult() loop: attempt query ${queryCount}`);
     let result: any;
     try {
       result = await queryLoki(lokiQuerierBaseUrl, qparms, additionalHeaders);
@@ -146,7 +150,6 @@ Query parameters: ${JSON.stringify(
         "no `status` property in response doc: %s",
         JSON.stringify(result)
       );
-      await sleep(1);
       continue;
     }
 
@@ -155,7 +158,6 @@ Query parameters: ${JSON.stringify(
         "status property is not `success`: %s",
         JSON.stringify(result.status)
       );
-      await sleep(1);
       continue;
     }
 
@@ -192,11 +194,10 @@ Query parameters: ${JSON.stringify(
     const streams = result.data.result;
 
     if (streams.length === 0) {
-      if (queryCount % 10 === 0) {
+      if (queryCount === 1 || queryCount % 5 === 0) {
         log.info("queried %s times, no log entries seen yet", queryCount);
         log.debug("last response: %s", JSON.stringify(result, null, 2));
       }
-      await sleep(1.0);
       continue;
     }
 
@@ -258,9 +259,9 @@ Query parameters: ${JSON.stringify(
 
     if (entrycount < expectedEntryCount) {
       log.info("not enough entries returned yet, waiting");
-      await sleep(1);
       continue;
     } else throw new Error("too many entries returned in query result");
   }
+
   throw new Error(`Expectation not fulfilled within ${maxWaitSeconds} s`);
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eou pipefail
+set -ou pipefail
 
 case ${OPSTRACE_CLOUD_PROVIDER} in
     aws)

@@ -16,7 +16,7 @@
 
 import { strict as assert } from "assert";
 
-import { ZonedDateTime, ZoneOffset } from "@js-joda/core";
+import { ZonedDateTime } from "@js-joda/core";
 import got, { Response as GotResponse } from "got";
 import Long from "long";
 
@@ -28,7 +28,7 @@ import { logHTTPResponse, httpTimeoutSettings } from "../util";
 
 import * as mathjs from "mathjs";
 
-import { TimeseriesBase, LabelSet } from "../series";
+import { TimeseriesBase, LabelSet, WalltimeCouplingOptions } from "../series";
 
 import {
   MetricSample,
@@ -42,8 +42,15 @@ export interface MetricSeriesOpts {
   starttime: ZonedDateTime;
   uniqueName: string;
   labelset: LabelSet | undefined;
-  metrics_time_increment_ms: number;
-  n_entries_per_stream_fragment: number;
+  // The time difference between adjacent metric samples in a series fragment,
+  // in milliseconds. Expected to be an integer. Defined via the substraction
+  // of timestamps: T_(i+1) - T_i  or via addition:
+  // next_timestamp = previous_timestamp + increment
+  sample_time_increment_ns: number;
+  n_samples_per_series_fragment: number;
+  wtopts?: WalltimeCouplingOptions;
+  // Supposed to contain a prometheus counter object, providing an inc() method.
+  counterForwardLeap?: any;
 }
 
 export interface MetricSeriesFetchAndValidateOpts {
@@ -57,15 +64,11 @@ export interface MetricSeriesFetchAndValidateOpts {
   ) => Promise<GotResponse<string>>;
 }
 
-// Maybe rename to DummySeriesMetrics
-// or LookerSeriesMetrics or ...MetricSeries
-export class MetricSeries extends TimeseriesBase {
+export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
   private millisSinceEpochOfLastGeneratedSample: Long;
   private metrics_time_increment_ms: Long;
   private fragmentWidthSecondsForQuery: BigInt;
   private lastValue: number;
-  //Supposed to contain a prometheus counter object, providing an inc() method.
-  private counterForwardLeap: any | undefined;
 
   //private logLagBehindWalltimeEveryNseconds: private;
 
@@ -76,64 +79,66 @@ export class MetricSeries extends TimeseriesBase {
   // that we ideally save memory
   postedFragmentsSinceLastValidate: Array<MetricSeriesFragment> | undefined;
 
-  constructor(opts: MetricSeriesOpts, counterForwardLeap?: any) {
+  constructor(opts: MetricSeriesOpts) {
     super(opts);
+
+    if (this.walltimeCouplingOptions === undefined) {
+      // This is not covered in the base class because not required for both,
+      // LogSeries and MetricSeries.
+      log.info(
+        "MetricSeries requires walltimeCouplingOptions to be defined. " +
+          "Fall back to using default parameters."
+      );
+      this.walltimeCouplingOptions = {
+        maxLagSeconds: 30 * 60,
+        minLagSeconds: 2 * 60
+      };
+
+      // Use validation logic in base class to confirm that these parameters
+      // comply.
+      this.validateWtOpts(this.walltimeCouplingOptions);
+    }
 
     this.postedFragmentsSinceLastValidate = undefined;
 
     this.metricName = opts.metricName;
 
-    this.counterForwardLeap = undefined;
-    if (counterForwardLeap !== undefined) {
-      this.counterForwardLeap = counterForwardLeap;
-      if (counterForwardLeap.inc === undefined) {
-        throw new Error(
-          "the counterForwardLeap arg needs to have an `inc()` method"
-        );
-      }
-    }
-
     if (opts.starttime.nano() != 0) {
       throw new Error("start time must not have fraction of seconds");
     }
 
-    if (!Number.isInteger(opts.metrics_time_increment_ms)) {
-      throw new Error("metrics_time_increment_ms must be an integer value");
+    // Sample timestamps must not have fractions of milliseconds (that's a
+    // choice of the prometheus ecosystem).
+    if (opts.sample_time_increment_ns % 1000 !== 0) {
+      throw new Error(
+        "for metrics, sample_time_increment_ns must be integer multiple of 1000"
+      );
     }
+
+    // Translate nanoseconds to milliseconds for better readability of
+    // subsequent code.
+    const sampleTimeIncrementMs = opts.sample_time_increment_ns / 1000;
 
     // The instant-query-range-vector-selector-validation-method has
     // interesting boundary conditions. To not make things too complicated
-    // require integer multiples of 1000 for metrics_time_increment_ms when this is
-    // larger than 1000.
-    if (opts.metrics_time_increment_ms > 1000) {
-      if (opts.metrics_time_increment_ms % 1000 !== 0) {
+    // require integer multiples of 1000 for sampleTimeIncrementMs when this is
+    // larger than 1000. That is, if the user chooses that the spacing between
+    // adjacent metric samples should be later than one second, require integer
+    // multiples of one second -- disallow fractions of seconds.
+    if (sampleTimeIncrementMs > 1000) {
+      if (sampleTimeIncrementMs % 1000 !== 0) {
         throw new Error(
-          "metrics_time_increment_ms must be integer multiple of 1000 if larger than 1000"
+          "the time increment between metric samples must be an integer  " +
+            "multiple of one second if it is larger than one second"
         );
       }
-    }
-
-    // Calculate how much later the last sample of the next fragment would be
-    // compare to the last sample of the previous fragment. Do not do
-    // (opts.n_entries_per_stream_fragment-1) because this time width is
-    // actually compared to the last sample in the previous fragment
-    const maxTimeLeapComparedToPreviousFragmentSeconds =
-      (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) /
-      1000;
-    if (maxTimeLeapComparedToPreviousFragmentSeconds >= 10 * 60) {
-      throw new Error(
-        "a single fragment may cover 10 minutes worth of data. " +
-          "That may put us too far into the future. Reduce sample count in a " +
-          "fragment or reduce time between samples."
-      );
     }
 
     // The actual time width of a fragment in seconds, may be a float.
     // say, there are 1000 samples per fragment and metrics_time_increment_ms is 1.
     // Then the actual fragment time width is 0.999 seconds.
     const fragmentWidthSeconds =
-      ((opts.n_entries_per_stream_fragment - 1) *
-        opts.metrics_time_increment_ms) /
+      ((opts.n_samples_per_series_fragment - 1) * sampleTimeIncrementMs) /
       1000.0;
 
     // For metrics_time_increment_ms being integer multiple of 1000 this is the
@@ -145,15 +150,16 @@ export class MetricSeries extends TimeseriesBase {
     this.fragmentWidthSecondsForQuery = BigInt(Math.ceil(fragmentWidthSeconds));
 
     // Distinguish two special cases, also see ch1767;
-    if (opts.metrics_time_increment_ms < 1000) {
+    if (sampleTimeIncrementMs < 1000) {
       // Does adding one delta_t result in a fragment time width of n * 1 s?
       if (
-        (opts.n_entries_per_stream_fragment * opts.metrics_time_increment_ms) %
-          1000 !==
+        (opts.n_samples_per_series_fragment * sampleTimeIncrementMs) % 1000 !==
         0
       ) {
         throw new Error(
-          "with metrics_time_increment_ms < 1000 choose sample count S so that n_entries_per_stream_fragment * metrics_time_increment_ms = multiple of 1000"
+          "with metrics_time_increment_ms < 1000 choose " +
+            "n_samples_per_series_fragment so that " +
+            "n_samples_per_series_fragment * metrics_time_increment_ms = multiple of 1000"
         );
       }
     }
@@ -167,9 +173,7 @@ export class MetricSeries extends TimeseriesBase {
 
     // Translate (integer number, public) opts.metrics_time_increment_ms into (actual
     // integer, private) this.metrics_time_increment_ms.
-    this.metrics_time_increment_ms = Long.fromInt(
-      opts.metrics_time_increment_ms
-    );
+    this.metrics_time_increment_ms = Long.fromInt(sampleTimeIncrementMs);
 
     // Initialize this.millisSinceEpochOfLastGeneratedSample with starttime -
     // metrics_time_increment_ms
@@ -266,156 +270,29 @@ export class MetricSeries extends TimeseriesBase {
     return this.millisSinceEpochOfLastGeneratedSample.toString(); // todo: ..
   }
 
-  /**
-   * When the time of the last sample in the last generated fragment has fallen
-   * behind too far compared to the current wall time, this method can be used
-   * to make the first sample of the next fragment to be generated be closer to
-   * the current wall time again.
-   *
-   * If this method ever needs to be called externally, it should be called
-   * between two calls to `generateAndGetNextFragment()`. For now it is a
-   * private method and is called at the beginning of the implementation of
-   * `generateNextFragment()`.
-   *
-   * ## Background
-   *
-   * With the Cortex Blocks Storage engine, we cannot push samples that go into
-   * the future (compared to wall time in the ingest system), and we also
-   * cannot push samples that are older than 1 hour compared to the wall time
-   * in the ingest system. In both cases, Cortex rejects these samples.
-   *
-   * Context: https://github.com/opstrace/opstrace-corp/issues/147 and
-   * https://github.com/cortexproject/cortex/issues/2366.
-   *
-   * The challenge: for deep read validation we need to _know_ the timestamps
-   * for individual metric samples that were written into the remote storage
-   * system. Keeping them all in memory is not an option towards validation,
-   * i.e. they need to follow a predictable pattern. That is, they can't be
-   * consumed from a clock source of this machine, but they need to be
-   * generated synthetically, following said pattern. The simple pattern being
-   * used here: adjacent timestamps in the synthetically generated samples have
-   * a fixed time distance between them (`this.metrics_time_increment_ms`).
-   *
-   * Now, during execution, this synthetic generation of timestamps, is either
-   * faster or slower than the evolution of the actual time. This depends on
-   * many factors, but certainly on the user-given choice of
-   * `this.metrics_time_increment_ms`.
-   *
-   * This method here provides a correction for one of both cases: when the
-   * synthetic clock source evolves _slower_ than wall time, i.e. when it
-   * slowly falls behind. When it has fallen behind by a specific amount, it
-   * leaps the synthetic time source forward by a particular correction amount.
-   *
-   * Also note: this strategy makes use of the fact that fragments are
-   * validated _individually_ based on their first and last sample's
-   * timestamps, i.e. the leap forward is done _between_ fragments, and not
-   * _within_ an individual fragment.
-   */
-  private bringCloserToWalltimeIfFallenBehind(): number {
-    const lastSampleSecondsSinceEpoch =
-      this.millisSinceEpochOfLastGeneratedSample.divide(1000).toNumber();
-
-    const nowSecondsSinceEpoch = ZonedDateTime.now(
-      ZoneOffset.UTC
-    ).toEpochSecond();
-
-    // How much is the timestamp of the last generated sample lagging behind
-    // "now"? This is a positive number, and the larger it is the larger is the
-    // gap.
-    const shiftIntoPastSeconds =
-      nowSecondsSinceEpoch - lastSampleSecondsSinceEpoch;
-
-    // Can of course also be negative, meaning `lastSampleSecondsSinceEpoch` is
-    // in the future compared to wall time. This state is not allowed.
-    if (shiftIntoPastSeconds < 0) {
-      // The last sample of the last fragment generated is in the future
-      // compared to current wall time. We should never get here, this is the
-      // whole point. This can happen as of a bug in looker or as of wall time
-      // changing unexpectedly around us. Either should be fatal (lead up to a
-      // crash).
-      throw new Error(
-        `${this}: shiftIntoPastSeconds < 0: ${shiftIntoPastSeconds.toFixed(
-          4
-        )} -- lastSampleSecondsSinceEpoch: ${lastSampleSecondsSinceEpoch.toFixed(
-          4
-        )} -- nowSecondsSinceEpoch: ${nowSecondsSinceEpoch.toFixed(4)}`
-      );
-    }
-
-    // If we've fallen behind by more than e.g. 40 minutes, forward by e.g. 20
-    // minutes (note that as of time of writing this comment, a MetricSeries
-    // starts ~30 minutes behind wall time). These numbers are adjusted to the
-    // 1-hour ingest window provided by Cortex with the blocks storage engine.
-    // TODO: expose these parameters to users via CLI -- might also be nice to
-    // set them rather tight, i.e. to leap forward by just a little bit when
-    // falled behind just a little bit.
-    const maxLagMinutes = 40;
-    const leapForwardMinutes = 5;
-
-    if (shiftIntoPastSeconds > maxLagMinutes * 60) {
-      log.debug("%s: leaped forward by %s minutes", this, leapForwardMinutes);
-      this.millisSinceEpochOfLastGeneratedSample =
-        this.millisSinceEpochOfLastGeneratedSample.add(
-          leapForwardMinutes * 60 * 1000
-        );
-
-      // TODO: allow for injecting a counter (e.g., a Prometheus counter)
-      // so that when this happens there is a way to do bookkeeping about it.
-      //return -leapForwardMinutes;
-      if (this.counterForwardLeap !== undefined) {
-        this.counterForwardLeap.inc();
-      }
-
-      // Return the _updated_ shift-into-past.
-      return shiftIntoPastSeconds - leapForwardMinutes * 60;
-    } else {
-      if (
-        this.nFragmentsConsumed > 0 &&
-        this.nFragmentsConsumed % 10000 === 0
-      ) {
-        const m = shiftIntoPastSeconds / 60.0;
-        // too noisy for large stream count.
-        log.debug("%s: lag behind walltime: %s minutes", this, m.toFixed(1));
-      }
-    }
-
-    // return 0 or positive number: this is the current lag in seconds compared
-    // to walltime, specifically _behind_ walltime.
-    return shiftIntoPastSeconds;
+  protected lastSampleSecondsSinceEpoch(): number {
+    return this.millisSinceEpochOfLastGeneratedSample.divide(1000).toNumber();
   }
 
-  // no stop criterion: dummyseries is an infinite concept (definite start, it
-  // indefinite end) -- the caller decides how many fragments to generate.
-  protected generateNextFragment(): [number, MetricSeriesFragment | undefined] {
-    // TODO: this might get expensive, maybe use a monotonic time source
-    // to make sure that we call this only once per minute or so.
-    const shiftIntoPastSeconds = this.bringCloserToWalltimeIfFallenBehind();
+  protected leapForward(n: number): void {
+    // invariant: this must not be called when `this.walltimeCouplingOptions`
+    // is undefined.
+    assert(this.walltimeCouplingOptions);
+    this.millisSinceEpochOfLastGeneratedSample =
+      this.millisSinceEpochOfLastGeneratedSample.add(n * 1000);
+  }
 
-    // Start building a criterion that allows artificial throttling, and that
-    // prevents this time series to get dangerously close to 'now', which also
-    // prevents it from going into the future (at least, when the time width
-    // between the oldest and newest sample in a single fragment is not lager
-    // than this interval -- assuming that this check is only ever done between
-    // generating two fragments. This should not happen as of the
-    // maxTimeLeapComparedToPreviousFragmentSeconds check above
-    const minLagMinutes = 10;
-
-    // Behind wall time, but too close to wall time. Do not actually generate a
-    // new fragment. Work with the guarantee/assumption that
-    // `shiftIntoPastSeconds >= 0`.
-    if (shiftIntoPastSeconds < minLagMinutes * 60) {
-      return [shiftIntoPastSeconds, undefined];
-    }
-
+  protected generateNextFragment(): MetricSeriesFragment {
     //const t0 = mtime();
-    const fragment = new MetricSeriesFragment(
+
+    const f = new MetricSeriesFragment(
       this.labels,
       this.nFragmentsConsumed + 1,
       this
     );
 
-    for (let i = 0; i < this.n_entries_per_stream_fragment; i++) {
-      fragment.addSample(this.nextSample());
+    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
+      f.addSample(this.nextSample());
     }
 
     //const genduration = mtimeDiffSeconds(t0);
@@ -423,18 +300,9 @@ export class MetricSeries extends TimeseriesBase {
     //  "MetricSeriesFragment addSample loop took: %s s",
     //  genduration.toFixed(3)
     //);
-    return [shiftIntoPastSeconds, fragment];
-  }
 
-  public generateAndGetNextFragment(): [
-    number,
-    MetricSeriesFragment | undefined
-  ] {
-    const [shiftIntoPastSeconds, seriesFragment] = this.generateNextFragment();
-    if (seriesFragment !== undefined) {
-      this.nFragmentsConsumed += 1;
-    }
-    return [shiftIntoPastSeconds, seriesFragment];
+    this.nFragmentsConsumed += 1;
+    return f;
   }
 
   /**
@@ -451,7 +319,7 @@ export class MetricSeries extends TimeseriesBase {
     for (let i = 1; i <= nFragments; i++) {
       let fragment: MetricSeriesFragment;
       while (true) {
-        const [shiftIntoPastSeconds, f] = this.generateAndGetNextFragment();
+        const [shiftIntoPastSeconds, f] = this.generateNextFragmentOrSkip();
         if (f !== undefined) {
           fragment = f;
           break;
@@ -674,7 +542,7 @@ export class MetricSeries extends TimeseriesBase {
       // a non-integer value, and (if this is not the last fragment pushed
       // from a dummy series) the query is expected to return the first sample
       // of the subsequent fragment.
-      if (values.length === this.n_entries_per_stream_fragment + 1) {
+      if (values.length === this.n_samples_per_series_fragment + 1) {
         log.debug(
           "last sample in query result belongs to next fragment, ignore"
         );

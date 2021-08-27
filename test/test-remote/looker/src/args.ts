@@ -17,19 +17,19 @@
 import fs from "fs";
 import { strict as assert } from "assert";
 
-import argparse from "argparse";
+import { ArgumentParser } from "argparse";
 import { ZonedDateTime } from "@js-joda/core";
 
-import { rndstring, timestampToRFC3339Nano } from "./util";
+import { rndstring } from "./util";
 
 import { log, buildLogger, setLogger } from "./log";
 
-import { DEFAULT_LOG_LEVEL_STDERR, START_TIME_JODA } from "./index";
+import { DEFAULT_LOG_LEVEL_STDERR } from "./index";
 
 interface CfgInterface {
   n_concurrent_streams: number;
   n_chars_per_msg: number;
-  n_entries_per_stream_fragment: number;
+  n_samples_per_series_fragment: number;
   n_cycles: number;
   n_fragments_per_push_message: number;
   stream_write_n_fragments: number;
@@ -48,8 +48,7 @@ interface CfgInterface {
   stream_write_n_seconds_jitter: number;
   fetch_n_entries_per_query: number;
   metrics_mode: boolean;
-  metrics_past_start_range_min_seconds: number;
-  metrics_past_start_range_max_seconds: number;
+  // max_start_time_offset_minutes: number;
   metrics_time_increment_ms: number;
   bearer_token_file: string;
   retry_post_deadline_seconds: number;
@@ -63,9 +62,57 @@ interface CfgInterface {
 export let CFG: CfgInterface;
 export let BEARER_TOKEN: undefined | string;
 
+// Formatter with support of `\n` in Help texts.
+// class HelpFormatter extends RawDescriptionHelpFormatter {
+//   // executes parent _split_lines for each line of the help, then flattens the result
+//   _split_lines(text: string, width: number) {
+//     return [].concat(
+//       ...text.split("\n").map(line => super._split_lines(line, width))
+//     );
+//   }
+// }
+
 export function parseCmdlineArgs(): void {
-  const parser = new argparse.ArgumentParser({
-    description: "Looker test runner"
+  const parser = new ArgumentParser({
+    //formatter_class: HelpFormatter,
+    description: `Looker is a Loki / Cortex testing and benchmarking tool.
+
+    Looker originated as a black-box storage testing program for Loki with
+    strict and deep read validation. Since then, it has evolved quite a bit.
+
+    Looker tries to be CPU-bound which also implies that it wants to
+    generate log/metric samples as quickly as it can.
+
+    The timestamps associated with log/metric samples are synthetically
+    generated (which allows for strict/deep read validation).
+
+    By default, synthetic time series start time is chosen randomly from an
+    interval in the past compared to current wall time. Specifically, from the
+    interval [now-maxLagSeconds, now-minLagSeconds). The meaning of
+    'maxLagSeconds' and 'minLagSeconds' is explained below.
+
+    By default, the synthetic time source used for time series generation is
+    guided by wall time through a loose coupling mechanism. When synthetic
+    time passes faster than wall time that mechanism
+    throttles sample generation when getting too close to 'now', as defined
+    by 'minLagSeconds'. That is, this mechanism guarantees that each
+    generated sample has a timestamp at least as old as now-minLagSeconds
+    (with 'now' approximately being the sample generation time).
+
+    When the synthetic time source passes slower than wall time then the
+    coupling mechanism compensates for that by a forward-leap method:
+    if the last generated sample is older than now-maxLagSeconds then the
+    next generated sample will have a timestamp very close to
+    now-minLagSeconds.
+
+    This loose coupling between wall time and synthetic time allows for
+    pushing data to an ingest system which does not accept data to
+    that is either too old or too new, compared to is own perspective on wall
+    time.
+    `
+    // .replace("\n\n", "FOO")
+    // .replace("\n", " ")
+    // .replace("FOO", "\n")
   });
 
   parser.add_argument("apibaseurl", {
@@ -101,8 +148,8 @@ export function parseCmdlineArgs(): void {
     required: true
   });
 
-  parser.add_argument("--n-entries-per-stream-fragment", {
-    help: "number of log entries per log stream fragment (or number of metric samples per fragment)",
+  parser.add_argument("--n-samples-per-series-fragment", {
+    help: "number of log entries or number of metric samples per time series fragment",
     type: "int",
     required: true
   });
@@ -122,14 +169,19 @@ export function parseCmdlineArgs(): void {
   });
 
   // note: looking for a more expressive name
+  // consider removing this options now that we're aligning log and metrics
+  // mode w.r.t. walltime coupling.
   parser.add_argument("--log-start-time", {
     help:
-      "Timestamp of the first sample for all synthetic " +
-      "log streams." +
-      "ISO 8601 / RFC3339Nano (tz-aware), example: 2020-02-20T17:46:37.27000000Z. " +
-      "Default: invocation time. Does not apply in metrics mode " +
-      "(which is always guided by the current wall time)",
-    type: "str"
+      "This disables the loose coupling of synthetic time to wall time " +
+      "and defines the timestamp of the first sample for all synthetic " +
+      "log streams. Does not apply in metrics mode. Is useful when " +
+      "writing to Loki that is configured to allow ingesting log samples " +
+      "far from the past or future. Must be provided in " +
+      "RFC3339 notation. Note that across cycles the same " +
+      "start time is used",
+    type: "str",
+    default: ""
   });
 
   parser.add_argument("--log-time-increment-ns", {
@@ -140,23 +192,18 @@ export function parseCmdlineArgs(): void {
     default: 1
   });
 
-  parser.add_argument("--metrics-past-start-range-max-seconds", {
-    help:
-      "Metrics time series start in the past compared to the initialization wall time. " +
-      "The exact time is picked randomly from an interval in the recent past, where this is the lower bound. " +
-      "Must be greater or equal to --metrics-past-start-range-min-seconds",
-    type: "int",
-    default: 30 * 60
-  });
-
-  parser.add_argument("--metrics-past-start-range-min-seconds", {
-    help:
-      "Metrics time series start in the past compared to the initialization wall time. " +
-      "The exact time is picked randomly from an interval in the recent past, where this is the upper bound. " +
-      "Must be less or equal to --metrics-past-start-range-max-seconds",
-    type: "int",
-    default: 20 * 60
-  });
+  // parser.add_argument("--max-start-time-offset-minutes", {
+  //   help:
+  //     "The syntheic time series start time is chosen randomly from the interval " +
+  //     "between the initialization wall time ('now', during runtime) and a " +
+  //     "point in time in the past (unless --log-start-time is provided). " +
+  //     "This parameter defines the lower bound of said interval, i.e. how far " +
+  //     "at most to go into the past compared to the " +
+  //     "the initialization wall time. Defaults to 10 minutes." +
+  //     "other time constants).",
+  //   type: "int",
+  //   default: 10 * 60
+  // });
 
   parser.add_argument("--metrics-time-increment-ms", {
     help: "time difference in milliseconds between adjacent samples in a time series",
@@ -335,23 +382,17 @@ export function parseCmdlineArgs(): void {
   );
 
   if (CFG.invocation_id === "") {
-    // common case: the id was not specified manually, so generate one
-    // ensure it has a good amount of randomness to ensure reads are unique (if enabled)
-    // const uniqueInvocationId = `looker-${START_TIME_EPOCH}-${rndstring(10)}`;
+    // Generate invocation ID. For long-running test scenarios where individual
+    // lookers are started at high rate this should not create collisions.
     const uniqueInvocationId = `looker-${rndstring(10)}`;
     CFG.invocation_id = uniqueInvocationId;
   }
 
-  if (CFG.log_start_time) {
+  if (CFG.log_start_time !== "") {
     // validate input, let this blow up for now if input is invalid
     ZonedDateTime.parse(CFG.log_start_time);
     // In metrics mode, don't support this feature
     assert(!CFG.metrics_mode);
-  } else {
-    // Set default for log stream starttime: program invocation time.
-    // Note: in metrics mode, this is never used; alway use the current
-    // wall time upon DummyStream object initialization.
-    CFG.log_start_time = timestampToRFC3339Nano(START_TIME_JODA);
   }
 
   if (CFG.stream_write_n_seconds !== 0) {
@@ -371,23 +412,16 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
-  if (
-    CFG.metrics_past_start_range_min_seconds >
-    CFG.metrics_past_start_range_max_seconds
-  ) {
-    log.error(
-      "--metrics-past-start-range-min-seconds must not be larger than --metrics-past-start-range-max-seconds"
-    );
-    process.exit(1);
-  }
-  if (CFG.metrics_past_start_range_max_seconds > 2 * 60 * 60) {
-    // give a friendly warning if the specified time range exceeds the default Cortex 2h block limit
-    // see also https://cortexmetrics.io/docs/blocks-storage/
-    log.warn(
-      "--metrics-past-start-range-max-seconds is greater than two hours, " +
-        "which exceeds default Cortex block limits and may result in dropped data"
-    );
-  }
+  // if (
+  //   CFG.max_start_time_offset_minutes * 60 <
+  //   WALLTIME_COUPLING_PARAMS.minLagSeconds
+  // ) {
+  //   log.error(
+  //     "--max-start-time-offset-minutes must not be smaller than " +
+  //       `WALLTIME_COUPLING_PARAMS.minLagSeconds (${WALLTIME_COUPLING_PARAMS.minLagSeconds})`
+  //   );
+  //   process.exit(1);
+  // }
 
   if (CFG.max_concurrent_writes > CFG.n_concurrent_streams) {
     log.error(

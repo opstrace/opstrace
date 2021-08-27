@@ -32,7 +32,7 @@ jest.mock("workers", () => {
   };
 });
 
-const testTimeout = 5 * 60 * 1000; // 5 mins
+const testTimeout = 30 * 1000; // 30s
 
 jest.setTimeout(testTimeout);
 configure({

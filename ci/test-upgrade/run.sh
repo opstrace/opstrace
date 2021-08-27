@@ -60,10 +60,16 @@ teardown() {
     source ci/create-cluster-artifacts.sh
 
     make testupgrade-teardown
+    EXITCODE_DESTROY=$?
 
     # Copy CLI log files "again" to artifact collection dir (for `destroy` log).
     # do not exit when this fails (rely on +e before).
     cp -vn opstrace_cli_*log ${OPSTRACE_ARTIFACT_DIR} || true
+
+    if [ "${EXITCODE_DESTROY}" -ne 0 ]; then
+        echo "teardown() not yet finished, destroy failed. Exit with exitcode of destroy"
+        exit "${EXITCODE_DESTROY}"
+    fi
 
     exit ${LAST_EXITCODE_BEFORE_TEARDOWN}
 }

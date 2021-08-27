@@ -43,19 +43,28 @@ import {
   logqlLabelString
 } from "./index";
 
-import { TimeseriesBase, LabelSet } from "../series";
+import { TimeseriesBase, LabelSet, WalltimeCouplingOptions } from "../series";
 
 // Note: maybe expose raw labels later on again.
 export interface LogSeriesOpts {
   // think: n log entries per stream/series fragment
-  n_entries_per_stream_fragment: number;
+  n_samples_per_series_fragment: number;
   n_chars_per_msg: number;
   starttime: ZonedDateTime;
-  timediffNanoseconds: number;
+  // The time difference between adjacent log samples in a series fragment, in
+  // nanoseconds. Expected to be an integer. Defined via the substraction of
+  // timestamps: T_(i+1) - T_i
+  sample_time_increment_ns: number;
   includeTimeInMsg: boolean;
   uniqueName: string;
   labelset: LabelSet | undefined;
   compressability: string;
+
+  // if undefined: do not couple to wall time
+  wtopts?: WalltimeCouplingOptions;
+
+  // Supposed to contain a prometheus counter object, providing an inc() method.
+  counterForwardLeap?: any;
 }
 
 type TypeHttpHeaderDict = Record<string, string>;
@@ -78,7 +87,8 @@ export interface LogSeriesFetchAndValidateOpts {
   additionalHeaders?: Record<string, string>;
 }
 
-export class LogSeries extends TimeseriesBase {
+//export class LogSeries extends TimeseriesBase {
+export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
   private currentSeconds: number;
   private currentNanos: number;
   private includeTimeInMsg: boolean;
@@ -87,7 +97,7 @@ export class LogSeries extends TimeseriesBase {
   private shouldBeValidatedflag: boolean;
 
   n_chars_per_msg: number;
-  timediffNanoseconds: number;
+
   nFragmentsSuccessfullySentSinceLastValidate: number;
 
   constructor(opts: LogSeriesOpts) {
@@ -100,7 +110,6 @@ export class LogSeries extends TimeseriesBase {
     this.firstEntryGenerated = false;
 
     this.n_chars_per_msg = opts.n_chars_per_msg;
-    this.timediffNanoseconds = opts.timediffNanoseconds;
     this.nFragmentsConsumed = 0;
     this.includeTimeInMsg = opts.includeTimeInMsg;
 
@@ -109,8 +118,8 @@ export class LogSeries extends TimeseriesBase {
     // successfully sent. This is public because of external push func.
     this.nFragmentsSuccessfullySentSinceLastValidate = 0;
 
-    if (this.timediffNanoseconds > 999999999)
-      throw Error("timediffNanoseconds must be smaller than 1 s");
+    if (this.sample_time_increment_ns > 999999999)
+      throw Error("sample_time_increment_ns must be smaller than 1 s");
 
     if (this.includeTimeInMsg && this.n_chars_per_msg < 19) {
       throw Error("timestamp consumes 18+1 characters");
@@ -155,7 +164,7 @@ export class LogSeries extends TimeseriesBase {
   //   this.n_fragments_total += n;
   // }
 
-  protected buildLabelSetFromOpts(opts: LogSeriesOpts) {
+  protected buildLabelSetFromOpts(opts: LogSeriesOpts): LabelSet {
     let ls: LabelSet;
     if (opts.labelset !== undefined) {
       ls = opts.labelset;
@@ -190,10 +199,17 @@ export class LogSeries extends TimeseriesBase {
     return text;
   }
 
+  // Note(JP): this is OK to lose precision compared to the internal two
+  // var-based representation (though I don't understand enough of JavaScripts
+  // number type to know if this actually may lose precision.
+  protected lastSampleSecondsSinceEpoch(): number {
+    return this.currentSeconds + this.currentNanos / 10 ** 9;
+  }
+
   protected nextSample(): LogSample {
     // don't bump time before first entry was generated.
     if (this.firstEntryGenerated) {
-      this.currentNanos += this.timediffNanoseconds;
+      this.currentNanos += this.sample_time_increment_ns;
       if (this.currentNanos > 999999999) {
         this.currentNanos = this.currentNanos - 10 ** 9;
         this.currentSeconds += 1;
@@ -213,29 +229,17 @@ export class LogSeries extends TimeseriesBase {
 
   // no stop criterion
   protected generateNextFragment(): LogSeriesFragment {
-    const lsf = new LogSeriesFragment(
+    const f = new LogSeriesFragment(
       this.labels,
       this.nFragmentsConsumed + 1,
       this
     );
-    for (let i = 0; i < this.n_entries_per_stream_fragment; i++) {
-      lsf.addSample(this.nextSample());
+    for (let i = 0; i < this.n_samples_per_series_fragment; i++) {
+      f.addSample(this.nextSample());
     }
-    return lsf;
-  }
 
-  /**
-   * Explicitly generate next fragment and return. This is for an external
-   * entity to control when exactly a fragment is generated and when not,
-   * as the generator above executes eagerly.
-   * quick note: keep using generator for test-remote for now, but in looker
-   * use this explicit method.
-   * no stop criterion
-   */
-  public generateAndGetNextFragment(): LogSeriesFragment {
-    const lsf = this.generateNextFragment();
     this.nFragmentsConsumed += 1;
-    return lsf;
+    return f;
   }
 
   /**
@@ -251,7 +255,22 @@ export class LogSeries extends TimeseriesBase {
   ) {
     // For now: one HTTP request per fragment
     for (let i = 1; i <= nFragments; i++) {
-      const fragment = this.generateAndGetNextFragment();
+      let fragment: LogSeriesFragment;
+      while (true) {
+        const [shiftIntoPastSeconds, f] = this.generateNextFragmentOrSkip();
+        if (f !== undefined) {
+          fragment = f;
+          break;
+        }
+
+        log.debug(
+          `${this}: current lag compared to wall time ` +
+            `(${shiftIntoPastSeconds.toFixed(1)} s)` +
+            "is too small. Delay fragment generation."
+        );
+        await sleep(5);
+      }
+
       const t0 = mtime();
       const pushrequest = fragment.serialize();
       const genduration = mtimeDiffSeconds(t0);
@@ -268,6 +287,13 @@ export class LogSeries extends TimeseriesBase {
       }
       await pushrequest.postWithRetryOrError(lokiBaseUrl, 3, additionalHeaders);
     }
+  }
+
+  protected leapForward(n: number): void {
+    // invariant: this must not be called when `this.walltimeCouplingOptions`
+    // is undefined.
+    assert(this.walltimeCouplingOptions);
+    this.currentSeconds += n;
   }
 
   public currentTime(): ZonedDateTime {
@@ -323,7 +349,7 @@ export class LogSeries extends TimeseriesBase {
 
     // Entry 1: return start time.
     const timeOfEntry =
-      start + (N - BigInt(1)) * BigInt(this.timediffNanoseconds);
+      start + (N - BigInt(1)) * BigInt(this.sample_time_increment_ns);
 
     // Return string indicating nanoseconds since epoch.
     return timeOfEntry;
@@ -388,7 +414,7 @@ export class LogSeries extends TimeseriesBase {
     // chunkSize: think of it as "fetch at most those many entries per query"
     const expectedSampleCount =
       this.nFragmentsSuccessfullySentSinceLastValidate *
-      this.n_entries_per_stream_fragment;
+      this.n_samples_per_series_fragment;
 
     const vt0 = mtime();
     log.debug(
