@@ -172,7 +172,7 @@ test("doesn't show error messages if grafana request fails", async () => {
   );
 
   userEvent.click(container.getByRole("button"));
-  expect(await container.findByText(errorMessage)).not.toBeInTheDocument();
+  expect(container.queryAllByText(errorMessage)).toHaveLength(0);
 });
 
 const renderComponent = (
