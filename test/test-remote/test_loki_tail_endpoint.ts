@@ -68,7 +68,7 @@ suite("Loki tail API test suite", function () {
         log.info(`got a message over websocket: ${msg.slice(0, 180)}`);
         resolve("test");
       });
-      ws.on("close", () => reject());
+      ws.on("close", () => reject("websocket closed"));
     });
 
     log.info(`waiting 30s for a websocket message...`);
