@@ -1114,7 +1114,7 @@ export class V1Alpha1CortexResource extends K8sResource {
             )
           })
         );
-      } catch (error) {
+      } catch (error: any) {
         channel(V1Alpha1CortexActions.fetch.failure({ error }));
         log.warning("starting informer failed (will retry):  %s", error);
         return setTimeout(watch, 3000);
