@@ -30,13 +30,18 @@ export const addUserCommandId = "add-user-picker";
 
 const AddUserPicker = () => {
   const dispatch = useDispatch();
-  const { registerNotification } = useSimpleNotification();
 
   const { activatePickerWithText } = usePickerService(
     {
       title: "Enter user's email",
       activationPrefix: "add user:",
       disableFilter: true,
+      textValidator: (email: string) => {
+        if (email.length < 1) return "Enter new user's email";
+        else if (!emailValidator.test(email))
+          return "It must be a valid email address";
+        else return true;
+      },
       options: [
         {
           id: "yes",
@@ -48,21 +53,7 @@ const AddUserPicker = () => {
         }
       ],
       onSelected: (option, email) => {
-        if (!email) {
-          return registerNotification({
-            state: "error" as const,
-            title: "Could not add user",
-            information: `Please enter a valid email address`
-          });
-        }
-        if (!emailValidator.test(email)) {
-          return registerNotification({
-            state: "error" as const,
-            title: "Could not add user",
-            information: `${email} is not a valid email address`
-          });
-        }
-        if (option.id === "yes") {
+        if (email && option.id === "yes") {
           dispatch(addUser(email));
         }
       }
