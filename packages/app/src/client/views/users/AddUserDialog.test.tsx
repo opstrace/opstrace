@@ -121,7 +121,7 @@ test("reactivates users", async () => {
   userEvent.type(input, mockUser.email + "{enter}");
 });
 
-test("handles when no name is entered", async () => {
+test("handles user creation error when no name is entered", async () => {
   const username = "";
   renderComponent(
     <CommandServiceTrigger>
@@ -132,10 +132,13 @@ test("handles when no name is entered", async () => {
   const input = screen.getByRole("textbox", { name: "picker filter" });
   userEvent.type(input, username + "{enter}");
 
-  expect(screen.getByText("Enter new user's email")).toBeInTheDocument();
+  expect(await screen.findByText("Could not add user")).toBeInTheDocument();
+  expect(
+    await screen.findByText("Please enter a valid email address")
+  ).toBeInTheDocument();
 });
 
-test("handles when name is no email", async () => {
+test("handles user creation error when name is no email", async () => {
   const username = "not an email";
   renderComponent(
     <CommandServiceTrigger>
@@ -146,7 +149,10 @@ test("handles when name is no email", async () => {
   const input = screen.getByRole("textbox", { name: "picker filter" });
   userEvent.type(input, username + "{enter}");
 
-  expect(screen.getByText("It must be a valid email address")).toBeInTheDocument();
+  expect(await screen.findByText("Could not add user")).toBeInTheDocument();
+  expect(
+    await screen.findByText(`${username} is not a valid email address`)
+  ).toBeInTheDocument();
 });
 
 test.todo("handles user creation error");
