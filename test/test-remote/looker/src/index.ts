@@ -1375,7 +1375,7 @@ async function queryLokiWithRetryOrError(
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await _queryAndCountEntries(lokiQuerierBaseUrl, queryParams);
-    } catch (err) {
+    } catch (err: any) {
       pm.counter_unexpected_query_results.inc();
       log.warning(
         `_queryAndCountEntries() failed with \`${err.message}\`, retry soon`
