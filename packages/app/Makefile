@@ -58,7 +58,7 @@ start-remote-dev:
 
 .PHONY: stop-remote-dev
 stop-remote-dev:
-	telepresence leave opstrace-application
+	telepresence leave opstrace-application || echo Telepresence intercept not running
 	telepresence quit
 	@echo ""
 	@echo "Adding annotation back on opstrace-application deployment for controller to resume its management"
