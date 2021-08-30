@@ -219,7 +219,7 @@ export class LogSeriesFragmentPushRequest {
           `${lokiBaseUrl}/loki/api/v1/push`,
           additionalHeaders
         );
-      } catch (e) {
+      } catch (e: any) {
         if (e instanceof got.RequestError) {
           // TCP conn errors/ timeout errors
           log.warning(

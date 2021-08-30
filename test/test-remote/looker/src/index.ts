@@ -151,7 +151,7 @@ async function main() {
       // this ensures the cycle report json has a distinct filename
       //@ts-expect-error: see comment above
       await performWriteReadCycle(cyclenum, dummystreams, invocationCycleId);
-    } catch (err) {
+    } catch (err: any) {
       log.crit("err during write/read cycle: %s", err);
       process.exit(1);
     }
@@ -520,7 +520,7 @@ async function throttledFetchAndValidate(
   );
   try {
     fetchresult = await unthrottledFetchAndValidate(stream);
-  } catch (err) {
+  } catch (err: any) {
     log.info("err in sem-protected, release, re-throw");
     release();
     throw err;
@@ -590,7 +590,7 @@ async function readPhase(streams: Array<LogSeries | MetricSeries>) {
     // each validator returns the number of entries read (and validated)
     // TODO: a little it of progress report here would be nice.
     nEntriesReadArr = await Promise.all(validators);
-  } catch (err) {
+  } catch (err: any) {
     log.crit("error during validation: %s", err);
     process.exit(1);
   }
@@ -958,7 +958,7 @@ async function _postFragments(
     // but use a custom function with CLI arg-controlled retrying
     // parameters etc.
     await customPostWithRetryOrError(pr, CFG.apibaseurl);
-  } catch (err) {
+  } catch (err: any) {
     log.crit("consider critical: %s", err);
     process.exit(1);
   }
@@ -1085,7 +1085,7 @@ async function customPostWithRetryOrError(
         pr.data,
         pr.postHeaders
       );
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof got.RequestError) {
         // Note(JP): this code block is meant to handle only transient errors
         // (TCP conn errors/ timeout errors). I do hope that `e instanceof
@@ -1244,7 +1244,7 @@ async function httpGETRetryUntil200OrError(
 
     try {
       response = await got(url, gotRequestOptions);
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof got.RequestError) {
         // Note(JP): this code block is meant to handle only transient errors
         // (TCP conn errors/ timeout errors). I do hope that `e instanceof

@@ -183,21 +183,21 @@ export async function startDDagentContainer() {
 
     try {
       await cont.kill({ signal: "SIGTERM" });
-    } catch (err) {
+    } catch (err: any) {
       log.warning("could not kill container: %s", err.message);
     }
 
     log.info("wait for container to stop");
     try {
       await cont.wait();
-    } catch (err) {
+    } catch (err: any) {
       log.warning("error waiting for container: %s", err.message);
     }
 
     log.info("force-remove container");
     try {
       await cont.remove({ force: true });
-    } catch (err) {
+    } catch (err: any) {
       log.warning("could not remove container: %s", err.message);
     }
     log.info(

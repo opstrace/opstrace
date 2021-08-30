@@ -176,7 +176,7 @@ export class MetricSeriesFragmentPushMessage {
           `${cortexBaseUrl}/api/v1/push`,
           additionalHeaders
         );
-      } catch (e) {
+      } catch (e: any) {
         if (e instanceof got.RequestError) {
           // TCP conn errors/ timeout errors
           log.warning(
