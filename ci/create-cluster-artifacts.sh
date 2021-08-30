@@ -8,6 +8,9 @@ kubectl describe all --all-namespaces 2> kubectl_describe_all.stderr > kubectl_d
 # See opstrace-prelaunch/issues/1029
 cat kubectl_describe_all.stderr | grep -v 'many client instances from the same exec auth config can cause performance problems'
 
+# Get a quick overview of all pod status.
+kubectl get pods -A -o wide > kubectl_get_pods.log
+
 kubectl logs --namespace=kube-system deployment.apps/opstrace-controller \
     > kubectl_controller-${OPSTRACE_CLUSTER_NAME}.log
 
@@ -38,6 +41,8 @@ kubectl get all --namespace=cortex 2>/dev/null | awk '{print $1}' | \
 kubectl get configmap --namespace=cortex cortex -o yaml 2>/dev/null > clusterlogs_cortex_configmap.log
 
 kubectl get configmap --namespace=loki loki -o yaml 2>/dev/null > clusterlogs_loki_configmap.log
+
+
 
 # See opstrace-prelaunch/issues/1319
 for LOKICORTEX in loki cortex dd
