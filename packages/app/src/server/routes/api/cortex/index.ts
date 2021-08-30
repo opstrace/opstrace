@@ -80,7 +80,7 @@ cortexProxy.on("proxyRes", (proxyRes, req, res) => {
             errorMessage
           })
         );
-      } catch (e) {
+      } catch (e: any) {
         res.writeHead(500, {
           "content-type": "application/json"
         });

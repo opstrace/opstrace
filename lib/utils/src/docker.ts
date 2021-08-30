@@ -54,7 +54,7 @@ export async function checkIfDockerImageExistsOrErrorOut(imageName: string) {
 
   try {
     resp = await got(probeUrl, requestSettings);
-  } catch (e) {
+  } catch (e: any) {
     if (e instanceof got.RequestError) {
       log.info(
         `could not detect presence of docker image: ${e.message} -- ignored, proceed`

@@ -157,7 +157,7 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
               emitter(actions.setCortexConfigError(err.toString()));
             }
           });
-      } catch (err) {
+      } catch (err: any) {
         emitter(actions.setCortexConfigError(err.toString()));
       }
     }

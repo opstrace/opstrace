@@ -145,7 +145,7 @@ function createAuthHandler(): express.Router {
       res.status(200).json({ currentUserId: user.id });
 
       log.info("updating session with: %s", req.body);
-    } catch (err) {
+    } catch (err: any) {
       return next(new UnexpectedServerError(err));
     }
   });

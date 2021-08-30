@@ -37,7 +37,7 @@ export default function* main() {
           try {
             yield call(saga);
             break;
-          } catch (e) {
+          } catch (e: any) {
             console.error(e);
           }
         }

@@ -155,7 +155,7 @@ export function setupPromExporter() {
         httpserver = httpapp.listen(tryport, () =>
           log.info("HTTP server listening on port %s", tryport)
         );
-      } catch (err) {
+      } catch (err: any) {
         if (err.message.includes("EADDRINUSE")) {
           log.debug("port %s is in use, try another one", tryport);
         } else {

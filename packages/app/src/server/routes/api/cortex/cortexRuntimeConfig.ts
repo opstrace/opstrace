@@ -35,7 +35,7 @@ try {
     // This will only work if running in cluster
     KUBECONFIG.loadFromCluster();
   }
-} catch (err) {
+} catch (err: any) {
   log.error(`graceful degradation, failed to load kubeconfig: ${err}`);
 }
 
@@ -114,7 +114,7 @@ export default async function setCortexRuntimeConfigHandler(
   try {
     // Make sure we're setting a valid runtime config. This will throw if validation fails
     await validateAndExtractRuntimeConfig(req.body);
-  } catch (err) {
+  } catch (err: any) {
     // Will structure the error for the client in a consistent struct and will log a consistent error log structure
     // with the message from failed validation
     return next(new GeneralServerError(400, `bad request: ${err.message}`));
@@ -130,7 +130,7 @@ export default async function setCortexRuntimeConfigHandler(
   const newcm = genCortexRuntimeConfigCM(KUBECONFIG, req.body);
   try {
     await createOrUpdateConfigMapWithRetry(newcm, { forceUpdate: true });
-  } catch (err) {
+  } catch (err: any) {
     // Expected error for invalid documents: response status
     // 422 Unprocessable Entity
     if (err.response !== undefined) {
@@ -198,7 +198,7 @@ export async function readCortexRuntimeConfigHandler(
     const data = await validateAndExtractRuntimeConfig(config);
 
     res.status(202).send(data);
-  } catch (err) {
+  } catch (err: any) {
     if (err.response !== undefined) {
       const kr = err.response;
       /**

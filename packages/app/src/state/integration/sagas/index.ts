@@ -53,7 +53,7 @@ export default function* integrationTaskManager() {
           try {
             yield call(saga);
             break;
-          } catch (e) {
+          } catch (e: any) {
             console.error(e);
           }
         }
@@ -96,7 +96,7 @@ function* loadGrafanaStateForIntegration(
         }
       })
     );
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
   }
 }

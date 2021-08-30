@@ -126,7 +126,7 @@ export function* ensureSubNetworkExists({
           ipCidrRange,
           snetname
         );
-      } catch (e) {
+      } catch (e: any) {
         if (e instanceof GCPApiError) {
           log.info(
             "test for JP: e instanceof GCPApiError: %s",
@@ -230,7 +230,7 @@ export function* ensureSubNetworkDoesNotExist(
         operation = null;
         error = err;
       });
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof GCPApiError) {
         log.info(
           "test for JP: e instanceof GCPApiError: %s",

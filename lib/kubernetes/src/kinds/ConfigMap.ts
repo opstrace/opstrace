@@ -142,7 +142,7 @@ export class ConfigMap extends K8sResource {
             resources: res.body.items.map(r => new ConfigMap(r, kubeConfig))
           })
         );
-      } catch (error) {
+      } catch (error: any) {
         channel(configMapActions.fetch.failure({ error }));
         log.warning("starting informer failed (will retry):  %s", error);
         return setTimeout(watch, 3000);

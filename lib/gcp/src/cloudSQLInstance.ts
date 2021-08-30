@@ -40,7 +40,7 @@ export async function getSQLInstance(
       return res.data.items[0];
     }
     return false;
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === 404) {
       return false;
     }
@@ -154,7 +154,7 @@ export function* ensureSQLInstanceDoesNotExist(
     }
     try {
       yield call(destroySQLInstance, existingSQLInstance.name);
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 404)) {
         throw e;
       }

@@ -154,7 +154,7 @@ export async function prepopulate(url: string) {
 export async function prepopulateZombie(url: string) {
   try {
     await prepopulate(url);
-  } catch (err) {
+  } catch (err: any) {
     log.warning(`non-fatal: JWKS preopulation failed: ${err}`);
   }
 }
@@ -178,7 +178,7 @@ export async function fetch(url: string) {
   const t0 = mtime();
   try {
     resp = await got(url, GOT_JWKS_OPTIONS);
-  } catch (err) {
+  } catch (err: any) {
     log.warning(
       `JWKS fetcher: giving up HTTP GET after retrying, last error: ${err}`
     );
@@ -219,7 +219,7 @@ export async function fetch(url: string) {
   let newKeySet: object | undefined;
   try {
     newKeySet = JSON.parse(resp.body);
-  } catch (err) {
+  } catch (err: any) {
     log.warning(`JWKS fetcher: JSON deserialization failed: ${err}`);
   }
 

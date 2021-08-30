@@ -30,7 +30,7 @@ import graphqlClient, {
   isGraphQLClientError
 } from "state/clients/graphqlClient";
 
-import { deleteFolder, isGrafanaError } from "client/utils/grafana";
+import { deleteFolder } from "client/utils/grafana";
 
 import { Button } from "client/components/Button";
 import { useSimpleNotification } from "client/services/Notification";
@@ -58,32 +58,33 @@ export const UninstallBtn = ({
         tenant_id: tenant.id,
         id: integration.id
       });
-      await deleteFolder({ integration, tenant });
-      dispatch(deleteIntegration({ tenantId: tenant.id, id: integration.id }));
-      history.push(installedIntegrationsPath({ tenant }));
-    } catch (error) {
-      let notification: Parameters<typeof registerNotification>[0]
+    } catch (error: any) {
+      let notification: Parameters<typeof registerNotification>[0];
       if (isGraphQLClientError(error)) {
         notification = {
           state: "error" as const,
           title: "Could not uninstall integration",
           information: getGraphQLClientErrorMessage(error)
-        }
-      } else if (isGrafanaError(error)) {
-        notification = {
-          state: "error" as const,
-          title: "Could not delete grafana folder",
-          information: error.response.data.message
-        }
+        };
       } else {
         notification = {
           state: "error" as const,
           title: "An unexpected error happened.",
           information: (error as Error).message
-        }
+        };
       }
       registerNotification(notification);
     }
+
+    // Best-effort deletion of any grafana dashboards
+    try {
+      await deleteFolder({ integration, tenant });
+    } catch (error: any) {
+      // If the folder was never created, this fails with 500/'Folder API error'. Ignore.
+    }
+
+    dispatch(deleteIntegration({ tenantId: tenant.id, id: integration.id }));
+    history.push(installedIntegrationsPath({ tenant }));
   };
 
   const { activatePickerWithText } = usePickerService(

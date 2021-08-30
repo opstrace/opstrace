@@ -61,7 +61,7 @@ export function* retryUponAnyError({
       yield call(task);
       log.debug("task `%s` succeeded (attempt %s)", actionName, attempt);
       return;
-    } catch (err) {
+    } catch (err: any) {
       // Cleanly shut down runtime when the inner call stack has thrown
       // ExitError (that's precisely the signal to _not_ retry). To that end,
       // simply let it bubble up (rely on ExitError to be handled further
@@ -124,7 +124,7 @@ export function* retryUponAnyError({
             "JSON representation of err: %s",
             JSON.stringify(err, null, 2)
           );
-        } catch (e) {
+        } catch (e: any) {
           log.debug("could not json-serialize error: %s", e);
         }
       }

@@ -41,7 +41,7 @@ export class ServiceLinkedRoleRes extends AWSResource<true> {
   protected async checkCreateSuccess(): Promise<boolean> {
     try {
       await this.tryCreate();
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         if (
           e.message.includes(

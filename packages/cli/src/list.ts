@@ -36,7 +36,7 @@ export async function list(): Promise<void> {
     let clusters: EKSOpstraceClusterRegionRelation[] = [];
     try {
       clusters = await EKSgetOpstraceClustersAcrossManyRegions();
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof ListEksInRegionError) {
         // Assume (rely on) that error details were already logged, in a useful
         // way for the admin/user to understand what went wrong.
@@ -161,7 +161,7 @@ async function EKSgetOpstraceClustersInRegion(
   let result: EKS.ListClustersResponse;
   try {
     result = await awsPromErrFilter(ekscl.listClusters().promise());
-  } catch (e) {
+  } catch (e: any) {
     if (e instanceof AWSApiError) {
       if (e.statusCode === 403) {
         // UnrecognizedClientException: The security token included in the
@@ -206,7 +206,7 @@ async function EKSgetOpstraceClustersInRegion(
       dcresp = await awsPromErrFilter(
         ekscl.describeCluster({ name: EKSclusterName }).promise()
       );
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError) {
         throw new ListEksInRegionError(
           `AWS API error during describeCluster(${EKSclusterName}) for region ${region}: ${e.message}`,

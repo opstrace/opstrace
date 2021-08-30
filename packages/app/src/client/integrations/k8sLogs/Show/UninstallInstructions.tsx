@@ -20,13 +20,14 @@ import { Integration } from "state/integration/types";
 
 import * as commands from "./templates/commands";
 
-import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
-
-import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
-import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
-
 import { Box } from "client/components/Box";
 import { Card, CardContent, CardHeader } from "client/components/Card";
+import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
+
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
+import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
+import { UninstallBtn } from "client/integrations/common/UninstallIntegrationBtn";
+import { getConfigFileName } from "client/integrations/configUtils";
 
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -37,8 +38,6 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import styled from "styled-components";
 import { Tenant } from "state/tenant/types";
-import { getConfigFileName } from "client/integrations/configUtils";
-import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -64,11 +63,12 @@ export const UninstallInstructions = ({
   tenant,
   config
 }: UninstallInstructionsProps) => {
-  const configFilename = getConfigFileName(tenant, integration)
+  const configFilename = getConfigFileName(tenant, integration);
 
-  const deleteYamlCommand = useMemo(() => commands.deleteYaml(configFilename), [
-    configFilename
-  ]);
+  const [deleteYamlCommand] = useMemo(
+    () => commands.deleteYaml(configFilename),
+    [configFilename]
+  );
 
   return (
     <Box width="100%" height="100%" p={1}>
@@ -113,10 +113,11 @@ export const UninstallInstructions = ({
               </TimelineSeparator>
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
-                  {`Run this command to remove Promtail`}
-                  <br />
-                  <code>{deleteYamlCommand}</code>
-                  <CopyToClipboardIcon text={deleteYamlCommand} />
+                  {`Run this command to delete Promtail and the ${integration.data.deployNamespace} namespace from your cluster`}
+                  <Box pl={2}>
+                    <code>{deleteYamlCommand}</code>
+                    <CopyToClipboardIcon text={deleteYamlCommand} />
+                  </Box>
                 </Box>
               </TimelineContent>
             </TimelineItem>
@@ -129,7 +130,6 @@ export const UninstallInstructions = ({
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
                   Uninstall this Integration including Dashboards.
-                  <br />
                   <br />
                   <UninstallBtn
                     integration={integration}

@@ -257,7 +257,7 @@ async function getELBsAssociatedWithVPC(
 
   try {
     data = await elbClient().describeLoadBalancers().promise();
-  } catch (e) {
+  } catch (e: any) {
     throwIfAWSAPIError(e);
     throw e;
   }

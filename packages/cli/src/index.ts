@@ -577,7 +577,7 @@ function logBuildInfo(): void {
 async function mainWrapper() {
   try {
     await main();
-  } catch (e) {
+  } catch (e: any) {
     if (e instanceof ExitSuccess) {
       util.runtimeShutdown(0);
     }

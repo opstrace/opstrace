@@ -167,7 +167,7 @@ async function waitForResp(
     let resp: GotResponse<string> | undefined;
     try {
       resp = await httpcl(url, httpopts);
-    } catch (err) {
+    } catch (err: any) {
       log.info(`request failed: ${err}`);
     }
 
@@ -217,7 +217,7 @@ async function performLoginFlowWithRetry(browsercontext: BrowserContext) {
     try {
       await performLoginFlowCore(page);
       break;
-    } catch (err) {
+    } catch (err: any) {
       // It's difficult to find the 'right' way to catch "all" errors emitted
       // by Playwright. There is playwright.errors but it only knows
       // TimeoutError. What all errors seem to have in common that I have seen
@@ -239,7 +239,7 @@ async function performLoginFlowWithRetry(browsercontext: BrowserContext) {
       const p = artipath(`uishot-login-err-attempt-${attempt}.png`);
       try {
         await page.screenshot({ path: p });
-      } catch (innerErr) {
+      } catch (innerErr: any) {
         log.warning(`ignoring error in error handler: ${innerErr}`);
       }
       log.info(`wrote screenshot to ${p}`);
@@ -502,7 +502,7 @@ suite("test_ui_api", function () {
           `https://cortex.${tenantName}.${OPSTRACE_INSTANCE_DNS_NAME}/api/v1/labels`,
           httpopts
         );
-      } catch (err) {
+      } catch (err: any) {
         log.info(`request failed: ${err}`);
       }
 
@@ -585,7 +585,7 @@ suite("test_ui_api", function () {
       let resp: GotResponse<string> | undefined;
       try {
         resp = await httpcl(cortexRuntimeCfgUrl, httpopts);
-      } catch (err) {
+      } catch (err: any) {
         log.info(`request failed: ${err}`);
       }
 

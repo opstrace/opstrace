@@ -142,7 +142,7 @@ export class StorageClass extends K8sResource {
             resources: res.body.items.map(r => new StorageClass(r, kubeConfig))
           })
         );
-      } catch (error) {
+      } catch (error: any) {
         channel(storageClassActions.fetch.failure({ error }));
         log.warning("starting informer failed (will retry):  %s", error);
         return setTimeout(watch, 3000);

@@ -84,7 +84,7 @@ async function loginPollRequest(
   let data: any;
   try {
     data = JSON.parse(resp.body);
-  } catch (err) {
+  } catch (err: any) {
     log.warning(
       "could not parse response body as JSON: %s: %s",
       err.code,
@@ -174,7 +174,7 @@ async function deviceCodeLogin(): Promise<DeviceCodeLoginResult> {
 
   try {
     open(verification_uri);
-  } catch (err) {
+  } catch (err: any) {
     log.info("failed to open browser: %s", err.message);
     log.info(
       "Please manually visit this URL in your browser: %s",
@@ -336,7 +336,7 @@ export class DNSClient {
 
         // Good response, no data in response.
         return undefined;
-      } catch (e) {
+      } catch (e: any) {
         if (e instanceof got.RequestError) {
           debugLogHTTPResponse(e.response);
 

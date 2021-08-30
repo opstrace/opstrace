@@ -298,7 +298,7 @@ const CreateSession = ({
           audience: AUTH0_AUDIENCE,
           opstraceClusterName: CLUSTER_NAME
         });
-      } catch (err) {
+      } catch (err: any) {
         setLoginErrorString(`could not get access token: ${err.message}`);
         // This like is retryable, and the user is supposed to trigger that via
         // the LoginError view. Let this blow up to show relevant detail in
@@ -312,7 +312,7 @@ const CreateSession = ({
       let resp: AxiosResponse<any>;
       try {
         resp = await loginRequestWithRetry(at);
-      } catch (err) {
+      } catch (err: any) {
         if (!axios.isAxiosError(err)) {
           // re-throw programming errors
           throw err;
@@ -437,7 +437,7 @@ async function authStatusRequestWithRetry(): Promise<
       // really required? is that a cross-site request? goal is to send cookies for current context
       withCredentials: true
     });
-  } catch (err) {
+  } catch (err: any) {
     if (!axios.isAxiosError(err)) {
       // re-throw programming errors
       throw err;

@@ -231,7 +231,7 @@ export async function awsPromErrFilter<D, E>(
 ): Promise<D> {
   try {
     return await prom;
-  } catch (e) {
+  } catch (e: any) {
     throwIfAWSAPIError(e);
     throw e;
   }

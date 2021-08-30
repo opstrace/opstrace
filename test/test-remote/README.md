@@ -47,7 +47,7 @@ yarn
 Make test code modifications if desired.
 While doing so you can have `tsc` watch your changes, and give you real-time compilation feedback. I do that via
 
-```
+```bash
 export NODE_OPTIONS=--max_old_space_size=5000 && yarn run tsc --watch
 ```
 

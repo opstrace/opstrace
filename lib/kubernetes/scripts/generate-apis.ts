@@ -54,7 +54,7 @@ const outDir = `${__dirname}/../src/custom-resources`;
   try {
     await GenerateCodeForCRD(crd, outDir);
     console.log(`Successfully generated Resource for: ${crd.spec.names.kind}`);
-  } catch (e) {
+  } catch (e: any) {
     console.error(
       `\nFailed to generate Resource for: ${crd.spec.names.kind}\n`
     );

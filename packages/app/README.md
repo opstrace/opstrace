@@ -45,11 +45,11 @@ In the project directory, you can run:
 
 ### `yarn storybook`
 
-Starts Storybook for our application development kit and serves the storybook UI at [localhost:9009](http://localhost:9009).
+Starts Storybook for our application development kit and serves the storybook UI at localhost:9009.
 
 ### `yarn console`
 
-Opens the Hasura console in a new browser window ([localhost:9009](http://localhost:9009)). We use [Hasura](https://hasura.io) for our GraphQL/Postgress backend.
+Opens the Hasura console in a new browser window (localhost:9009). We use [Hasura](https://hasura.io) for our GraphQL/Postgress backend.
 
 ### `yarn seeds:dev:tenants`
 
@@ -75,6 +75,8 @@ The build is minified and the filenames include the hashes.
 
 ## Remote cluster development
 
+### With Telepresence
+
 Some features rely on other Opstrace services running in an Opstrace cluster. To develop against an Opstrace cluster, we use Telepresence to connect your remote Opstrace application pod to your local machine, enabling you to make changes locally and the container in the remote cluster will automatically reload with compiled changes. Instead of the usual workflow running `services:start`, `server:start` and `client:start` the needed steps are slightly different.
 
 Make sure you are correctly setup to access the cluster, for example using
@@ -96,19 +98,49 @@ When finished with remote dev:
 
 The remote development workflow will compile client and server code changes locally and you'll then be able to *access the UI in the remote cluster* (i.e. {clustername}.Opstrace.io **NOTE: select "disable cache" under your browsers network tab) to see the updated changes. Hot reloading is disabled so you'll have to hit a browser refresh.
 
+### Without Telepresence
+
+If you are seeing issues with Telepresence, such as queries consistently failing in the browser after several builds, you can try to restart your machine.
+If you cannot restart or if it doesn't help, you can manually run the app locally as follows:
+
+Note: This doesn't work yet due to Auth0 requirements around https - possible solution may be a local https->http proxy wrapper e.g. via docker
+
+```bash
+# Terminal 1) Start port forward to graphql (needs kubectl access)
+yarn remote:services:start:graphql
+
+# Terminal 2) Start port forward to redis (needs kubectl access)
+yarn remote:services:start:redis
+
+# Terminal 3) Start app server (needs kubectl for graphql/redis credentials)
+yarn remote:server:start
+
+# Terminal 4) Ensure opstrace.io points to local IP, then start app client with target host
+sudo nano -w /etc/hosts
+  127.0.0.1 CLUSTER.opstrace.io
+HOST=CLUSTER.opstrace.io yarn client:start
+
+# Terminal 5) Run https->http proxy?
+TODO
+
+# Browser: http://CLUSTER.opstrace.io:3000
+```
+
+### Remote Hasura access
+
 For accessing the remote Hasura console run the these scripts:
 
 * `remote:services:start:graphql`
 * `remote:console`
 
-### What this does
+#### What this does
 
-The `remote:services:start:graphql` starts a port forward into your cluster making the Hasura server available locally on port `8090`. The `remote:console` script then connects to this using the Hasura admin secret it extracts from the appropriate k8s secret that are set as ENV VARs.
+The `remote:services:start:graphql` starts a port forward into your cluster making the Hasura server available locally on port `8090`.
+The `remote:console` script then connects to this using the Hasura admin secret it extracts from the appropriate k8s secret that are set as ENV VARs.
 
 ### Todo
 
 * At the moment the main `services:start` script still runs everything locally with docker-compose even though some of it is not needed.
-
 
 ## Schema development
 

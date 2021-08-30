@@ -88,7 +88,7 @@ export async function route53PurgeZonesForDnsName(
     log.info("route53: delete the hosted zone itself");
     try {
       await deleteHostedZone(zone);
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof AWSApiError && e.name == "NoSuchHostedZone") {
         log.info("error during zone deletion: %s, ignore", e.name);
       } else {

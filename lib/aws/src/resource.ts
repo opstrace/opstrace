@@ -117,7 +117,7 @@ export abstract class AWSResource<
   private async checkDestroySuccessWrapper(): DestroyCheckResultType {
     try {
       return await this.checkDestroySuccess();
-    } catch (e) {
+    } catch (e: any) {
       if (!(e instanceof AWSApiError)) {
         throw e;
       }
@@ -148,7 +148,7 @@ export abstract class AWSResource<
   private async tryDestroyWrapper(): TryDestroyResultType {
     try {
       return await this.tryDestroy();
-    } catch (e) {
+    } catch (e: any) {
       if (!(e instanceof AWSApiError)) {
         throw e;
       }
@@ -184,7 +184,7 @@ export abstract class AWSResource<
   > {
     try {
       return await this.checkCreateSuccess();
-    } catch (e) {
+    } catch (e: any) {
       if (!(e instanceof AWSApiError)) {
         throw e;
       }
@@ -255,7 +255,7 @@ export abstract class AWSResource<
   private async tryCreateWrapper(params: SetupParameterType): Promise<boolean> {
     try {
       return await this.tryCreate(params);
-    } catch (e) {
+    } catch (e: any) {
       if (!(e instanceof AWSApiError)) {
         throw e;
       }

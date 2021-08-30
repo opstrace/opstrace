@@ -26,12 +26,13 @@ import * as grafana from "client/utils/grafana";
 
 import { updateGrafanaStateForIntegration } from "state/integration/actions";
 
-import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
 
 import { Box } from "client/components/Box";
-import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
+import { Card, CardContent, CardHeader } from "client/components/Card";
+import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
 
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -44,7 +45,6 @@ import styled from "styled-components";
 import { Tenant } from "state/tenant/types";
 import { useNotificationService } from "client/services/Notification";
 import { getConfigFileName } from "client/integrations/configUtils";
-import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -100,7 +100,7 @@ export const InstallInstructions = ({
 
   const configFilename = getConfigFileName(tenant, integration);
 
-  const deployYamlCommand = useMemo(
+  const deployCommand = useMemo(
     () => commands.deployYaml(configFilename, tenant.name),
     [tenant.name, configFilename]
   );
@@ -109,7 +109,7 @@ export const InstallInstructions = ({
     let folder;
     try {
       folder = await grafana.createFolder({ integration, tenant });
-    } catch (error) {
+    } catch (error: any) {
       notifyError(
         `Could not create grafana integration dashboard folder ${integration.name}`,
         error.response.data.message ?? error.message
@@ -123,7 +123,7 @@ export const InstallInstructions = ({
     })) {
       try {
         await grafana.createDashboard(tenant, d);
-      } catch (error) {
+      } catch (error: any) {
         /*
           Errors are usually communicated as a JSON in a list. 
           For example:
@@ -200,9 +200,10 @@ export const InstallInstructions = ({
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
                   {`Run this command to install Prometheus`}
-                  <br />
-                  <code>{deployYamlCommand}</code>
-                  <CopyToClipboardIcon text={deployYamlCommand} />
+                  <Box pl={2}>
+                    <code>{deployCommand}</code>
+                    <CopyToClipboardIcon text={deployCommand} />
+                  </Box>
                 </Box>
               </TimelineContent>
             </TimelineItem>

@@ -152,7 +152,7 @@ export class PersistentVolume extends K8sResource {
             )
           })
         );
-      } catch (error) {
+      } catch (error: any) {
         channel(persistentVolumeActions.fetch.failure({ error }));
         log.warning("starting informer failed (will retry):  %s", error);
         return setTimeout(watch, 3000);

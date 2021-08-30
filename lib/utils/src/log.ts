@@ -126,7 +126,7 @@ export function debugLogErrorDetail(err: Error): void {
   // e.g. as of `TypeError: Converting circular structure to JSON`
   try {
     log.debug("JSON representation of err: %s", JSON.stringify(err, null, 2));
-  } catch (e) {
+  } catch (e: any) {
     log.debug("could not json-serialize error: %s", e);
   }
 }

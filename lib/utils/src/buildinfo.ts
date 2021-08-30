@@ -82,7 +82,7 @@ function probeAndParseFile(p: string): boolean {
     if (fs.existsSync(p)) {
       exists = true;
     }
-  } catch (err) {
+  } catch (err: any) {
     // ignore errors probing the existence of this path: treat as non-existing
   }
 
@@ -114,7 +114,7 @@ function readBuildInfo() {
   // unexpected: expose underlying error detail
   try {
     parseFile(process.env.OPSTRACE_BUILDINFO_PATH);
-  } catch (err) {
+  } catch (err: any) {
     // this is expected to put the entire stack trace of the original error
     // into the string template
     throw Error(

@@ -164,7 +164,7 @@ export function* ensureDNSExists({
           dns: target === "aws" ? (awsDNS as Route53) : (gcpDNS as DNS),
           provider: target
         });
-      } catch (err) {
+      } catch (err: any) {
         if (!err.code || (err.code && err.code !== 409)) {
           throw err;
         } else {
@@ -219,7 +219,7 @@ export function* destroyDNSZone(
         name: z.zone.name,
         dns: gcpDNS as DNS
       });
-    } catch (err) {
+    } catch (err: any) {
       if (err.code && err.code === 404) {
         log.info("ignore: %s", err.message);
       } else {

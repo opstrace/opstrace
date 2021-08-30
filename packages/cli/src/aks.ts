@@ -60,7 +60,7 @@ export async function createKeypair(): Promise<void> {
       mode: 0o600,
       encoding: "utf8"
     });
-  } catch (err) {
+  } catch (err: any) {
     return die(`could not write file '${fpath}': ${err.message}`);
   }
 }

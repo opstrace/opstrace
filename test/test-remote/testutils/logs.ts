@@ -132,7 +132,7 @@ Query parameters: ${JSON.stringify(
     let result: any;
     try {
       result = await queryLoki(lokiQuerierBaseUrl, qparms, additionalHeaders);
-    } catch (e) {
+    } catch (e: any) {
       // handle any error that happened during http request processing
       if (e instanceof got.RequestError) {
         log.info(

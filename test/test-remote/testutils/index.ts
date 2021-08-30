@@ -245,7 +245,7 @@ export function globalTestSuiteSetupOnce() {
   try {
     fs.mkdirSync(TMPDIRPATH, { mode: 0o777 });
     log.info("Created %s", TMPDIRPATH);
-  } catch (err) {
+  } catch (err: any) {
     if (err.code !== "EEXIST") throw err;
   }
 }
@@ -456,7 +456,7 @@ export function enrichHeadersWithAuthToken(
 export function readDockerDNSSettings(): any[] | undefined {
   try {
     return [readFileSync("/tmp/dns_cache_ip").toString()];
-  } catch (e) {
+  } catch (e: any) {
     log.warning(`could not read docker dns settings: ${e.message}`);
     return undefined;
   }
@@ -868,7 +868,7 @@ export async function queryJSONAPI(url: string, queryParams: URLSearchParams) {
 
   try {
     return JSON.parse(response.body);
-  } catch (e) {
+  } catch (e: any) {
     log.error("Failed to parse response as JSON:");
     logHTTPResponse(response);
     throw e;
@@ -899,7 +899,7 @@ export async function waitForQueryResult<T>(
     let data: any;
     try {
       data = await queryFunc();
-    } catch (e) {
+    } catch (e: any) {
       // handle any error that happened during http request processing
       if (e instanceof got.RequestError) {
         log.info(
@@ -942,7 +942,7 @@ async function sigkillContInNSeconds(
   try {
     log.info("send SIGKILL");
     cont.kill({ signal: "SIGKILL" });
-  } catch (err) {
+  } catch (err: any) {
     log.warning("error sending SIGKILL: %s", err.message);
   }
 }
@@ -955,7 +955,7 @@ export async function terminateContainer(
 
   try {
     await cont.kill({ signal: "SIGTERM" });
-  } catch (err) {
+  } catch (err: any) {
     log.warning("could not kill container: %s", err.message);
   }
 
@@ -967,7 +967,7 @@ export async function terminateContainer(
   log.info("wait for container to stop");
   try {
     await cont.wait();
-  } catch (err) {
+  } catch (err: any) {
     log.warning("error waiting for container: %s", err.message);
   }
 
@@ -977,7 +977,7 @@ export async function terminateContainer(
   log.info("force-remove container");
   try {
     await cont.remove({ force: true });
-  } catch (err) {
+  } catch (err: any) {
     log.warning("could not remove container: %s", err.message);
   }
   log.info(

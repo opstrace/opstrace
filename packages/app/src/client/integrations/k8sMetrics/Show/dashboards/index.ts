@@ -30,7 +30,7 @@ export function makePrometheusDashboardRequests({
 }: DashboardProps) {
   return [
     {
-      uid: `as-${integrationId}`,
+      uid: `api-${integrationId}`,
       dashboard: makeApiserverDashboard(integrationId),
       folderId: folderId,
       overwrite: true

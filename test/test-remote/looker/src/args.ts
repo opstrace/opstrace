@@ -459,7 +459,7 @@ export function parseCmdlineArgs(): void {
           encoding: "utf8"
         })
         .trim();
-    } catch (err) {
+    } catch (err: any) {
       log.error(
         "failed to read file %s: %s",
         CFG.bearer_token_file,

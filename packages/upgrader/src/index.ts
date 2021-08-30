@@ -144,7 +144,7 @@ function* triggerInfraUpgrade() {
     // triggerControllerDeploymentUpgrade to check the endpoints are available
     // when the upgrade finishes.
     setCreateConfig(createConfig);
-  } catch (e) {
+  } catch (e: any) {
     die(`could not find tenant api token files: ${e}`);
   }
 

@@ -551,7 +551,7 @@ export function* reconcile(
       comprehensiveUpdateCollection,
       "update"
     );
-  } catch (e) {
+  } catch (e: any) {
     log.error(`Error in reconcile loop: ${e}`);
   }
 }

@@ -45,7 +45,7 @@ function* setDefaultAlertmanagerConfigIfEmpty(
       // Already has config set
       return;
     }
-  } catch (err) {
+  } catch (err: any) {
     if (!err.response) {
       log.error(
         `could not read alertmanager config for tenant: ${tenant}, got unknown error: %s`,
@@ -85,7 +85,7 @@ function* setDefaultAlertmanagerConfigIfEmpty(
 `
     });
     log.info(`successfully set default alertmanager config ${tenant} tenant`);
-  } catch (err) {
+  } catch (err: any) {
     log.error(
       `could not write default alertmanager config to ${tenant} tenant: %s`,
       err
@@ -178,7 +178,7 @@ export function* syncTenants(
             }
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         log.error(
           "could not read/write from/to db during tenant sync, retrying in 5s: %s",
           err

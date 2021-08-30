@@ -39,7 +39,7 @@ async function listServiceConnections(network: string): Promise<void> {
       parent: "services/servicenetworking.googleapis.com",
       network: network
     });
-  } catch (err) {
+  } catch (err: any) {
     log.warning(`error during services.connections.list: ${err} -- ignore`);
     return;
   }
@@ -106,7 +106,7 @@ async function createServiceConnection({
     let result: any;
     try {
       result = await snclient.services.connections.create(requestparams);
-    } catch (err) {
+    } catch (err: any) {
       log.error(`${logpfx}: error during services.connections.create: ${err}`);
     }
     log.debug(
@@ -186,7 +186,7 @@ async function waitForLongrunningOperationToSucceed(
       result = await apiclient.operations.get({
         name: operationName
       });
-    } catch (err) {
+    } catch (err: any) {
       log.error(`${logpfx}: error during operations.get: ${err}`);
     }
     log.debug(`${logpfx}: operations.get result: ${result}`);
@@ -337,7 +337,7 @@ export function* ensureCloudSQLExists({
       yield call(ensureSQLDatabaseExists, { opstraceClusterName });
 
       return existingInstance;
-    } catch (err) {
+    } catch (err: any) {
       log.debug("Creating SQLInstance failed, retrying: %s", err);
     }
   }

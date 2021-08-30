@@ -52,7 +52,7 @@ test("handles click", async () => {
 
 test("handles errors", async () => {
   const label = "Download YAML";
-  const errorMessage = "something went terribly wrong"
+  const errorMessage = "something went terribly wrong";
 
   renderComponent(
     <DownloadConfigButton
@@ -69,8 +69,8 @@ test("handles errors", async () => {
 
   userEvent.click(screen.getByRole("button", { name: label }));
 
-  expect(screen.getByText("Could not download YAML")).toBeInTheDocument()
-  expect(screen.getByText(errorMessage)).toBeInTheDocument()
+  expect(screen.getByText("Could not download YAML")).toBeInTheDocument();
+  expect(screen.getByText(errorMessage)).toBeInTheDocument();
 });
 
 const renderComponent = (

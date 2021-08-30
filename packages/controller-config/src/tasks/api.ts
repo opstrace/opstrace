@@ -41,7 +41,7 @@ export async function fetch(
     const v1ConfigMap = await cm.read();
     log.debug("got config map body from k8s cluster: %s", v1ConfigMap.body);
     return deserialize(new ConfigMap(v1ConfigMap.body, kubeConfig));
-  } catch (e) {
+  } catch (e: any) {
     if (e.response) {
       if (e.response.body.code.toString().startsWith("4")) {
         log.info(

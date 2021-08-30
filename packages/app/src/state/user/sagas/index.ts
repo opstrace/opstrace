@@ -52,7 +52,7 @@ export default function* userTaskManager() {
           try {
             yield call(saga);
             break;
-          } catch (e) {
+          } catch (e: any) {
             console.error(e);
           }
         }
@@ -88,7 +88,7 @@ function* addUser(action: ReturnType<typeof actions.addUser>) {
         username: action.payload
       });
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
   }
 }
@@ -104,7 +104,7 @@ function* deleteUser(action: ReturnType<typeof actions.deleteUser>) {
     yield graphqlClient.DeactivateUser({
       id: action.payload
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
   }
 }
@@ -135,7 +135,7 @@ function* persistDarkModePreference() {
           })
         )
       );
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
     }
     try {
@@ -144,7 +144,7 @@ function* persistDarkModePreference() {
         user_id: user.id,
         dark_mode: action.payload
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
     }
   }

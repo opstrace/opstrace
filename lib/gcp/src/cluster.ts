@@ -193,7 +193,7 @@ export function* ensureGKEExists({
           zone,
           cluster
         });
-      } catch (e) {
+      } catch (e: any) {
         if (e instanceof GCPApiError) {
           log.info(
             "test for JP: e instanceof GCPApiError: %s",
@@ -260,7 +260,7 @@ export function* ensureGKEDoesNotExist(
         GKEClusterName,
         existingGKECluster.location
       );
-    } catch (e) {
+    } catch (e: any) {
       if (e.code && e.code === 3) {
         log.info("grpc error 3: %s, retry", e.details);
         continue;
@@ -306,7 +306,7 @@ export async function getGKEKubeconfig(
       loadFromCluster: false,
       kubeconfig: kstring
     });
-  } catch (e) {
+  } catch (e: any) {
     log.warning("Failed to fetch kubeconfig for GKE cluster: %s", e.message);
     return undefined;
   }

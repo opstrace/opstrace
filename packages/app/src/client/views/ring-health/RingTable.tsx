@@ -94,12 +94,16 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
         const bodyFormData = new FormData();
         bodyFormData.append("forget", shardId);
         setIsRefreshing(true);
-        const response = await request.post<Payload>(ringEndpoint, bodyFormData, {
-          headers: { "Content-Type": "multipart/form-data" }
-        });
+        const response = await request.post<Payload>(
+          ringEndpoint,
+          bodyFormData,
+          {
+            headers: { "Content-Type": "multipart/form-data" }
+          }
+        );
         setShards(response.data.shards);
         setIsRefreshing(false);
-      } catch (e) {
+      } catch (e: any) {
         setIsRefreshing(false);
         notifyError(`Could not forget shard`, e.message);
       }
@@ -123,7 +127,7 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
       }
       const response = await request.get<Payload>(ringEndpoint);
       setShards(response.data.shards);
-    } catch (e) {
+    } catch (e: any) {
       notifyError("Could not load table", e.response?.data ?? e.message);
       setKeepPolling(false);
     }

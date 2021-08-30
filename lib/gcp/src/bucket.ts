@@ -125,7 +125,7 @@ export function* ensureBucketExists({
           storage
         });
       }
-    } catch (e) {
+    } catch (e: any) {
       if (!e.code || (e.code && e.code !== 409)) {
         throw e;
       }
@@ -153,7 +153,7 @@ export function* emptyBucket({
       days: 0,
       storage
     });
-  } catch (e) {
+  } catch (e: any) {
     if (!e.code || (e.code && e.code !== 409)) {
       throw e;
     }

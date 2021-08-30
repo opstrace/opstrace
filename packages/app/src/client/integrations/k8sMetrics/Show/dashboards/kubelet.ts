@@ -2171,7 +2171,7 @@ export default function makeDashboard(integrationId: string) {
     },
     timezone: "",
     title: "Kubernetes / Kubelet metrics",
-    uid: "3138fa155d5915769fbded898ac09fd9",
+    uid: `kub-${integrationId}`,
     version: 0
   };
 }

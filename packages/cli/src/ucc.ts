@@ -55,7 +55,7 @@ export async function uccGetAndValidate(
   let ucc;
   try {
     ucc = yaml.safeLoad(uccDoc);
-  } catch (err) {
+  } catch (err: any) {
     die(`could not YAML-decode cluster config: ${err.message}`);
   }
 
@@ -72,7 +72,7 @@ export async function uccGetAndValidate(
 function uccFromFile(clusterConfigFilePath: string) {
   try {
     return fs.readFileSync(clusterConfigFilePath, "utf8");
-  } catch (err) {
+  } catch (err: any) {
     // This is an over-generalized error handler. Would have loved to
     // handle only SystemError (around file interaction) and decoding
     // errors, and re-raise every other error. How to do that cleanly?

@@ -539,7 +539,7 @@ export default function makeDashboard(integrationId: string) {
     },
     timezone: "",
     title: "Kubernetes / Logs summary",
-    uid: "n2RLwfjGk",
+    uid: `sum-${integrationId}`,
     version: 0
   };
 }

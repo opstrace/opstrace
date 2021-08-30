@@ -63,14 +63,14 @@ export const ReinstallInstructions = ({
 }: ReinstallInstructionsProps) => {
   const dispatch = useDispatch();
 
-  const {
-    registerNotification,
-    unregisterNotification
-  } = useNotificationService();
+  const { registerNotification, unregisterNotification } =
+    useNotificationService();
 
   const notifyError = useCallback(
     (title: string, message: string) => {
-      const messageId = Math.floor(Math.random() * Math.floor(100000)).toString();
+      const messageId = Math.floor(
+        Math.random() * Math.floor(100000)
+      ).toString();
       const newNotification = {
         id: messageId,
         state: "error" as const,
@@ -92,7 +92,7 @@ export const ReinstallInstructions = ({
     // Delete existing folder, if any.
     try {
       await grafana.deleteFolder({ integration, tenant });
-    } catch (err) {
+    } catch (err: any) {
       // Ignore 404 error - expected for initial dashboard install
       if (err.response.status !== 404) {
         console.log(err);
@@ -107,7 +107,7 @@ export const ReinstallInstructions = ({
     let folder = null;
     try {
       folder = await grafana.createFolder({ integration, tenant });
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
       notifyError(
         `Could not create grafana integration dashboard folder ${integration}`,
@@ -122,7 +122,7 @@ export const ReinstallInstructions = ({
     })) {
       try {
         await grafana.createDashboard(tenant, d);
-      } catch (err) {
+      } catch (err: any) {
         console.log(err);
         notifyError(
           `Could not create grafana integration dashboard`,

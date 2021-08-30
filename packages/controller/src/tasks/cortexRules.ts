@@ -72,7 +72,7 @@ export function* cortexSystemRulesReconciler(): Generator<
             })
           )
         );
-      } catch (err) {
+      } catch (err: any) {
         log.error("failed applying system rules/alerts: %s", err);
       }
       // loop through again in 1 min

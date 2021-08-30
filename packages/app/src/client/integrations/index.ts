@@ -16,6 +16,7 @@
 
 import { pluck, zipObj } from "ramda";
 
+import { cockroachMetricsIntegration } from "./cockroachMetrics";
 import { k8sLogsIntegration } from "./k8sLogs";
 import { k8sMetricsIntegration } from "./k8sMetrics";
 import { exporterCloudWatchIntegration } from "./exporterCloudWatch";
@@ -29,6 +30,7 @@ export * from "./types";
 export * from "./paths";
 
 export const integrationsDefs: IntegrationDefs = [
+  cockroachMetricsIntegration,
   k8sMetricsIntegration,
   k8sLogsIntegration,
   exporterCloudWatchIntegration,

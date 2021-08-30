@@ -27,12 +27,14 @@ import * as grafana from "client/utils/grafana";
 
 import { updateGrafanaStateForIntegration } from "state/integration/actions";
 
-import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
+import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 import { ViewConfigDialogBtn } from "client/integrations/common/ViewConfigDialogBtn";
+import { getConfigFileName } from "client/integrations/configUtils";
 
 import { Box } from "client/components/Box";
-import { Card, CardContent, CardHeader } from "client/components/Card";
 import { Button } from "client/components/Button";
+import { Card, CardContent, CardHeader } from "client/components/Card";
+import { CopyToClipboardIcon } from "client/components/CopyToClipboard";
 
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -43,8 +45,6 @@ import TimelineDot from "@material-ui/lab/TimelineDot";
 
 import styled from "styled-components";
 import { Tenant } from "state/tenant/types";
-import { getConfigFileName } from "client/integrations/configUtils";
-import DownloadConfigButton from "client/integrations/common/DownloadConfigButton";
 
 const TimelineDotWrapper = styled(TimelineDot)`
   padding-left: 10px;
@@ -74,7 +74,7 @@ export const InstallInstructions = ({
   const dispatch = useDispatch();
   const configFilename = getConfigFileName(tenant, integration);
 
-  const deployYamlCommand = useMemo(
+  const deployCommand = useMemo(
     () => commands.deployYaml(configFilename, tenant.name),
     [tenant.name, configFilename]
   );
@@ -96,7 +96,7 @@ export const InstallInstructions = ({
     let folder = null;
     try {
       folder = await grafana.createFolder({ integration, tenant });
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
       notifyError(
         `Could not create grafana integration dashboard folder ${integration}`,
@@ -111,7 +111,7 @@ export const InstallInstructions = ({
     })) {
       try {
         await grafana.createDashboard(tenant, d);
-      } catch (err) {
+      } catch (err: any) {
         console.log(err);
         notifyError(
           `Could not create grafana integration dashboard`,
@@ -173,9 +173,10 @@ export const InstallInstructions = ({
               <TimelineContent>
                 <Box flexGrow={1} pb={2}>
                   {`Run this command to install Promtail`}
-                  <br />
-                  <code>{deployYamlCommand}</code>
-                  <CopyToClipboardIcon text={deployYamlCommand} />
+                  <Box pl={2}>
+                    <code>{deployCommand}</code>
+                    <CopyToClipboardIcon text={deployCommand} />
+                  </Box>
                 </Box>
               </TimelineContent>
             </TimelineItem>

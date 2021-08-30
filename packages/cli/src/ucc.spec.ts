@@ -153,13 +153,13 @@ random string
 
   try {
     await uccGetAndValidate(filename, "aws");
-  } catch (e) {
+  } catch (e: any) {
     expect(e).toEqual(expectedErr);
   }
 
   try {
     await uccGetAndValidate(filename, "gcp");
-  } catch (e) {
+  } catch (e: any) {
     expect(e).toEqual(expectedErr);
   }
 

@@ -69,14 +69,14 @@ export async function deployAll(resources: K8sResource[]) {
     try {
       log.info(`Try to create ${r.constructor.name}: ${r.namespace}/${r.name}`);
       await r.create();
-    } catch (e) {
+    } catch (e: any) {
       const err = kubernetesError(e);
       if (err.statusCode === 409) {
         // If we're re-running the test against a cluster, ensure things like job labels are updated.
         log.info("Already exists, doing an update");
         try {
           await r.update();
-        } catch (e2) {
+        } catch (e2: any) {
           const err2 = kubernetesError(e2);
           log.error(`update failed with error: ${err2.message}`);
           throw e2;
@@ -96,7 +96,7 @@ export async function deleteAll(resources: K8sResource[]) {
     try {
       log.info(`Try to delete ${r.constructor.name}: ${r.namespace}/${r.name}`);
       await r.delete();
-    } catch (e) {
+    } catch (e: any) {
       const err = kubernetesError(e);
       if (err.statusCode === 404) {
         log.info("already doesn't exist");
@@ -222,7 +222,7 @@ function* runInformers(
       const event = yield take(clusterChannel);
       yield put(event);
     }
-  } catch (e) {
+  } catch (e: any) {
     log.error(e);
   } finally {
     // If task cancelled, close the channel, unsubscribing the informers
