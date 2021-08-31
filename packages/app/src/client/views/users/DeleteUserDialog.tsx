@@ -15,44 +15,20 @@
  */
 
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 
 import useUserList from "state/user/hooks/useUserList";
-import { deleteUser } from "state/user/actions";
 import { usePickerService, PickerOption } from "client/services/Picker";
 import { useCommandService } from "client/services/Command";
 import { userToPickerOption } from "./UserPicker";
+import useUserConfirmDeletionPicker from "./useUserConfirmDeletionPicker";
+import { User } from "state/user/types";
 
 export const deleteUserCommand = "delete-user-picker";
 
 const DeleteUserPicker = () => {
   const users = useUserList();
-  const [user, setSelectedUser] = useState<PickerOption | null>();
-  const dispatch = useDispatch();
-
-  const { activatePickerWithText } = usePickerService(
-    {
-      title: `Delete ${user?.text}?`,
-      activationPrefix: "delete user?:",
-      disableFilter: true,
-      disableInput: true,
-      options: [
-        {
-          id: "yes",
-          text: "yes"
-        },
-        {
-          id: "no",
-          text: "no"
-        }
-      ],
-      onSelected: option => {
-        console.log("Bingo")
-        if (option.id === "yes" && user) dispatch(deleteUser(user.id));
-      }
-    },
-    [user]
-  );
+  const [user, setSelectedUser] = useState<PickerOption<User> | null>();
+  const { activatePickerWithText } = useUserConfirmDeletionPicker(user?.data);
 
   usePickerService(
     {

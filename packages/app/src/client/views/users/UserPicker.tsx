@@ -24,9 +24,10 @@ import { User } from "state/user/types";
 import useUserList from "state/user/hooks/useUserList";
 import { PickerOption, usePickerService } from "client/services/Picker";
 
-export const userToPickerOption = (user: User): PickerOption => ({
+export const userToPickerOption = (user: User): PickerOption<User> => ({
   text: user.email,
-  id: user.id
+  id: user.id,
+  data: user
 });
 
 const UserPicker = () => {
