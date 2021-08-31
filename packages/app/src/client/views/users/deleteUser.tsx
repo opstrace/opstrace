@@ -15,41 +15,16 @@
  */
 
 import React from "react";
-import { useDispatch } from "react-redux";
-
-import { usePickerService } from "client/services/Picker";
 import useCurrentUser from "state/user/hooks/useCurrentUser";
 
-import { deleteUser } from "state/user/actions";
 import { Button } from "client/components/Button";
 import { User } from "state/user/types";
+import useUserConfirmDeletionPicker from "./useUserConfirmDeletionPicker";
 
 const DeleteUserButton = ({ user }: { user: User }) => {
-  const dispatch = useDispatch();
   const currentUser = useCurrentUser();
 
-  const { activatePickerWithText } = usePickerService(
-    {
-      title: `Delete ${user.email}?`,
-      activationPrefix: `delete user ${user.email} directly?:`,
-      disableFilter: true,
-      disableInput: true,
-      options: [
-        {
-          id: "yes",
-          text: `yes`
-        },
-        {
-          id: "no",
-          text: "no"
-        }
-      ],
-      onSelected: option => {
-        if (option.id === "yes" && user.id) dispatch(deleteUser(user.id));
-      }
-    },
-    [user.id]
-  );
+  const { activatePickerWithText } = useUserConfirmDeletionPicker(user);
 
   return (
     <Button
@@ -59,7 +34,7 @@ const DeleteUserButton = ({ user }: { user: User }) => {
       disabled={currentUser.email === user.email}
       onClick={e => {
         e.stopPropagation();
-        activatePickerWithText(`delete user ${user.email} directly?: `);
+        activatePickerWithText(`delete user?: `);
       }}
     >
       Delete

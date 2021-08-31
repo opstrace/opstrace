@@ -15,10 +15,10 @@
  */
 import { ReactNode } from "react";
 
-export type PickerOption = {
+export type PickerOption<Data = any> = {
   id: string;
   text: string;
-  data?: any;
+  data?: Data;
 };
 
 export type PickerListProps = {
