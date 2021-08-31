@@ -99,7 +99,7 @@ export function* destroyAWSInfra(): Generator<
   // for some tasks / task groups explicitly every now and then for now to keep
   // things debuggable.
 
-  const taskGroup1 = [];
+  const taskGroup1: any[] = [];
 
   taskGroup1.push(
     yield fork(destroyAutoScalingGroup, destroyConfig.clusterName)
@@ -131,7 +131,7 @@ export function* destroyAWSInfra(): Generator<
 
   const eksDestroyTask = yield fork(destroyEKS, destroyConfig.clusterName);
 
-  const taskGroup2 = [];
+  const taskGroup2: any[] = [];
 
   taskGroup2.push(
     yield fork(
@@ -155,7 +155,7 @@ export function* destroyAWSInfra(): Generator<
     );
   }
 
-  const taskGroup3 = [];
+  const taskGroup3: any[] = [];
   for (const rtclass of [RouteTablePrivateRes, RouteTablePublicRes]) {
     taskGroup3.push(
       yield fork([new rtclass(destroyConfig.clusterName), "teardown"])
@@ -172,7 +172,7 @@ export function* destroyAWSInfra(): Generator<
     ])
   );
 
-  const taskGroup4 = [];
+  const taskGroup4: any[] = [];
 
   // Note(JP): do not delete any DNS-related infra when the Opstrace instance
   // was set up with a custom DNS name. TODO: when the Opstrace instance
@@ -212,7 +212,7 @@ export function* destroyAWSInfra(): Generator<
 
   // A task group that needs a better name, tasks will be joined late in the
   // game.
-  const taskGroupBob = [];
+  const taskGroupBob: any[] = [];
 
   taskGroupBob.push(
     yield fork([new RDSSubnetGroupRes(destroyConfig.clusterName), "teardown"])
@@ -439,7 +439,7 @@ function* detachPoliciesFromRoles(
 }
 
 function* getIamPoliciesByNames(polnames: string[]) {
-  const policies = [];
+  const policies: IAM.Policy[] = [];
   for (const pname of polnames) {
     const p: IAM.Policy = yield call(getPolicy, {
       PolicyName: pname

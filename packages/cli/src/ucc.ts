@@ -99,7 +99,7 @@ async function readTextFromStdinUntilEOF() {
   // https://github.com/sindresorhus/get-stdin/issues/21
   // should be working in all relevant environments / on all relevant
   // platforms, but of course let's see; this is a very pragmatic approach.
-  const chunks = [];
+  const chunks: Uint8Array[] = [];
   for await (const chunk of process.stdin) chunks.push(chunk);
   return Buffer.concat(chunks).toString("utf8");
 }

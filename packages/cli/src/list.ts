@@ -118,7 +118,7 @@ export async function EKSgetOpstraceClustersAcrossManyRegions(): Promise<
   ];
 
   // Fetch, for all regions concurrently.
-  const actors = [];
+  const actors: Promise<EKSOpstraceClusterRegionRelation[]>[] = [];
   for (const region of regions) {
     actors.push(EKSgetOpstraceClustersInRegion(region));
   }
