@@ -40,7 +40,7 @@ suite("Loki tail API test suite", function () {
     log.info("suite teardown");
   });
 
-  test("connect and stream cortex ingester pod logs from /loki/api/v1/tail", async function () {
+  test.skip("connect and stream cortex ingester pod logs from /loki/api/v1/tail", async function () {
     // encode query string
     const query = querystring.stringify({
       query: `{k8s_namespace_name="cortex",k8s_container_name="ingester"}`
