@@ -31,6 +31,7 @@ var (
 	loglevel                 string
 	listenAddress            string
 	lokiQuerierURL           string
+	lokiQueryFrontendURL     string
 	lokiDistributorURL       string
 	tenantName               string
 	disableAPIAuthentication bool
@@ -39,6 +40,7 @@ var (
 func main() {
 	flag.StringVar(&listenAddress, "listen", "", "")
 	flag.StringVar(&lokiQuerierURL, "loki-querier-url", "", "")
+	flag.StringVar(&lokiQueryFrontendURL, "loki-query-frontend-url", "", "")
 	flag.StringVar(&lokiDistributorURL, "loki-distributor-url", "", "")
 	flag.StringVar(&tenantName, "tenantname", "", "")
 	flag.StringVar(&loglevel, "loglevel", "info", "error|info|debug")
@@ -57,12 +59,18 @@ func main() {
 		log.Fatalf("bad loki querier URL: %s", uerr)
 	}
 
+	lokiqfurl, uerr := url.Parse(lokiQueryFrontendURL)
+	if uerr != nil {
+		log.Fatalf("bad loki query frontend URL: %s", uerr)
+	}
+
 	lokidurl, uerr := url.Parse(lokiDistributorURL)
 	if uerr != nil {
 		log.Fatalf("bad loki distributor URL: %s", uerr)
 	}
 
 	log.Infof("loki querier URL: %s", lokiqurl)
+	log.Infof("loki query-frontend URL: %s", lokiqfurl)
 	log.Infof("loki distributor URL: %s", lokidurl)
 	log.Infof("listen address: %s", listenAddress)
 	log.Infof("tenant name: %s", tenantName)
@@ -80,6 +88,12 @@ func main() {
 		lokiqurl,
 		disableAPIAuthentication,
 	)
+	queryFrontendProxy := middleware.NewReverseProxyFixedTenant(
+		tenantName,
+		lokiTenantHeader,
+		lokiqfurl,
+		disableAPIAuthentication,
+	)
 	distributorProxy := middleware.NewReverseProxyFixedTenant(
 		tenantName,
 		lokiTenantHeader,
@@ -93,12 +107,16 @@ func main() {
 	// The intended push path.
 	router.PathPrefix("/loki/api/v1/push").HandlerFunc(distributorProxy.HandleWithProxy)
 
+	// Proxy tail endpoint request directly to the queriers.
+	// https://grafana.com/docs/loki/latest/api/#get-lokiapiv1tail
+	router.PathPrefix("/loki/api/v1/tail").HandlerFunc(querierProxy.HandleWithProxy)
+
 	// Maybe we should not expose this?
 	// From loki API docs: WARNING: /api/prom/push is DEPRECATED; use /loki/api/v1/push instead.
 	// router.PathPrefix("/api/prom/push").HandlerFunc(reverseProxy.HandleWithDistributorProxy)
 
 	// The intended query / readout path(s)
-	router.PathPrefix("/loki/api/v1/").HandlerFunc(querierProxy.HandleWithProxy)
+	router.PathPrefix("/loki/api/v1/").HandlerFunc(queryFrontendProxy.HandleWithProxy)
 
 	// I think we can outcomment this one here, too. Want to encourage to use
 	// /loki/api/v1/ for readout.

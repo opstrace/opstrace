@@ -58,7 +58,9 @@ export function LokiAPIResources(
   const namespace = getTenantNamespace(tenant);
   const api = "loki";
   const name = `${api}-api`;
-  const lokiQuerierUrl = "http://query-frontend.loki.svc.cluster.local:1080";
+  const lokiQuerierUrl = "http://querier.loki.svc.cluster.local:1080";
+  const lokiQueryFrontendUrl =
+    "http://query-frontend.loki.svc.cluster.local:1080";
   const lokiDistributorUrl = "http://distributor.loki.svc.cluster.local:1080";
 
   const lokiApiProxyCliArgs = [
@@ -66,6 +68,7 @@ export function LokiAPIResources(
     `-tenantname=${tenant.name}`,
     // Upstream endpoints for the opstrace loki proxy
     `-loki-querier-url=${lokiQuerierUrl}`,
+    `-loki-query-frontend-url=${lokiQueryFrontendUrl}`,
     `-loki-distributor-url=${lokiDistributorUrl}`
   ];
 
