@@ -40,7 +40,7 @@ suite("Loki tail API test suite", function () {
     log.info("suite teardown");
   });
 
-  test.skip("connect and stream cortex ingester pod logs from /loki/api/v1/tail", async function () {
+  test("connect and stream cortex ingester pod logs from /loki/api/v1/tail", async function () {
     // encode query string
     const query = querystring.stringify({
       query: `{k8s_namespace_name="cortex",k8s_container_name="ingester"}`
@@ -63,20 +63,24 @@ suite("Loki tail API test suite", function () {
       setTimeout(() => resolve("timeout"), 30000)
     );
 
+    ws.on("open", () => log.info("connected to websocket endpoint"));
+
     const test = new Promise((resolve, reject) => {
-      ws.on("connection", () => {
-        log.info("connected via websocket");
-      });
       ws.on("message", msg => {
         log.info(`got a message over websocket: ${msg.slice(0, 180)}`);
         resolve("test");
       });
       ws.on("close", () => reject("websocket closed"));
+      ws.on("error", err => {
+        reject(`websocket failed with error: ${JSON.stringify(err)}`);
+      });
     });
 
     log.info(`waiting 30s for a websocket message...`);
     const result = await Promise.race([timeout, test]);
+    // `WebSocket#terminate()`, which immediately destroys the connection,
+    // instead of `WebSocket#close()`, which waits for the close timer.
+    ws.terminate();
     assert.strictEqual(result, "test");
-    ws.close();
   });
 });
