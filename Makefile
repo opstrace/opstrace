@@ -156,6 +156,9 @@ fetch-secrets:
 	--include "gcp-svc-acc-ci-shard-ddd.json" \
 	--include "gcp-svc-acc-ci-shard-eee.json" \
 	--include "gcp-svc-acc-ci-shard-fff.json" \
+	--include "gcp-svc-acc-ci-shard-ggg.json" \
+	--include "gcp-svc-acc-ci-shard-hhh.json" \
+	--include "gcp-svc-acc-ci-shard-iii.json" \
 	--include "gcp-svc-acc-cost-test-1.json"
 	chmod 600 secrets/ci.id_rsa
 
