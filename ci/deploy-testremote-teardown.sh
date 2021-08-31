@@ -69,7 +69,7 @@ source secrets/opstrace_dockerhub_creds.sh
 # https://stackoverflow.com/q/5189913/145400.
 #OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb ci-shard-ccc)
 # remove ddd, eee and fff for now, see issue #293
-OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-aaa ci-shard-bbb ci-shard-ccc)
+OPSTRACE_GCP_PROJECT_ID=$(shuf -n1 -e ci-shard-bbb ci-shard-ccc)
 echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
