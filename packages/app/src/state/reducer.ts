@@ -21,6 +21,7 @@ import { reducer as integrationReducer } from "./integration/reducer";
 import { reducer as cortexConfigReducer } from "./cortex-config/reducer";
 import { reducer as opstraceConfigReducer } from "./opstrace-config/reducer";
 import { reducer as formReducer } from "./form/reducer";
+import { notificationServiceReducer } from "client/services/Notification/reducer";
 
 export const mainReducers = {
   users: userReducer,
@@ -28,7 +29,8 @@ export const mainReducers = {
   integrations: integrationReducer,
   form: formReducer,
   cortex: cortexConfigReducer,
-  opstrace: opstraceConfigReducer
+  opstrace: opstraceConfigReducer,
+  notifications: notificationServiceReducer
 };
 
 export const mainReducer = combineReducers(mainReducers);
