@@ -22,7 +22,7 @@ import { ZonedDateTime } from "@js-joda/core";
 
 import { rndstring } from "./util";
 
-import { log, buildLogger, setLogger } from "./log";
+import { log, changeStderrLogLevel } from "./log";
 
 import { DEFAULT_LOG_LEVEL_STDERR } from "./index";
 
@@ -375,11 +375,7 @@ export function parseCmdlineArgs(): void {
 
   CFG = parser.parse_args();
 
-  setLogger(
-    buildLogger({
-      stderrLevel: CFG.logLevel
-    })
-  );
+  changeStderrLogLevel(CFG.logLevel);
 
   if (CFG.invocation_id === "") {
     // Generate invocation ID. For long-running test scenarios where individual
