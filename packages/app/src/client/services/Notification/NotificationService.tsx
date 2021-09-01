@@ -21,30 +21,24 @@ import type {
   NotificationServiceState,
   Notification
 } from "./types";
-import { actions, notificationServiceReducer, initialState } from "./reducer";
-import { useTypesafeReducer } from "../../hooks/useTypesafeReducer";
+import { actions } from "./reducer";
 import NotificationsList from "../../components/NotificationsList/NotificationsList";
 import { random } from "lodash";
+import { useDispatch, useSelector } from "react-redux";
+import { State } from "state/reducer";
 
-const notificationServiceContext = React.createContext<NotificationServiceApi | null>(
-  null
-);
+const notificationServiceContext =
+  React.createContext<NotificationServiceApi | null>(null);
 
 function NotificationService({ children }: { children: React.ReactNode }) {
-  const [
-    state,
-    { register, unregister, unregisterAll, changeVisibility }
-  ] = useTypesafeReducer<NotificationServiceState, typeof actions>(
-    notificationServiceReducer,
-    initialState,
-    actions
-  );
+  const dispatch = useDispatch();
+  const { notifications, visibility } = useSelector<State, NotificationServiceState>(state => state.notifications);
 
   const notificationService: NotificationServiceApi = {
-    register,
-    unregister,
-    unregisterAll,
-    changeVisibility
+    register: (...args) => dispatch(actions.register(...args)),
+    unregister: (...args) => dispatch(actions.unregister(...args)),
+    unregisterAll: (...args) => dispatch(actions.unregisterAll(...args)),
+    changeVisibility: (...args) => dispatch(actions.changeVisibility(...args))
   };
 
   // Enable this when we have notifications to show
@@ -65,10 +59,10 @@ function NotificationService({ children }: { children: React.ReactNode }) {
         {children}
       </notificationServiceContext.Provider>
       <NotificationsList
-        isOpen={state.visibility}
-        items={state.notifications}
+        isOpen={visibility}
+        items={notifications}
         onDeleteAll={notificationService.unregisterAll}
-        onClose={changeVisibility}
+        onClose={notificationService.changeVisibility}
       />
     </>
   );
@@ -104,10 +98,8 @@ export function useNotificationService(
 }
 
 export function useSimpleNotification() {
-  const {
-    registerNotification,
-    unregisterNotification
-  } = useNotificationService();
+  const { registerNotification, unregisterNotification } =
+    useNotificationService();
 
   return {
     registerNotification: ({

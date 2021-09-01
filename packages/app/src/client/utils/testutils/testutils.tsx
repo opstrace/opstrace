@@ -19,6 +19,12 @@ import { render as rtlRender, RenderResult } from "@testing-library/react";
 import { History, createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import UE from "@testing-library/user-event";
+import { Provider } from "react-redux";
+import getStore from "state/store";
+import "@testing-library/jest-dom";
+import ThemeProvider from "client/themes/Provider";
+import light from "client/themes/light";
+import Services from "client/services";
 
 export type RenderOptions = {
   // optionally pass in a history object to control routes in the test
@@ -49,6 +55,21 @@ export function render(
 
   return rtlRender(<div>{ui}</div>, { wrapper: Wrapper, ...renderOptions });
 }
+
+export const renderWithEnv = (
+  children: React.ReactNode,
+  { store = getStore(), history = createMemoryHistory() } = {}
+) => {
+  return render(
+    <Provider store={store}>
+      <ThemeProvider theme={light}>
+        <Services>
+          <Router history={history}>{children}</Router>
+        </Services>
+      </ThemeProvider>
+    </Provider>
+  );
+};
 
 export function sleep(ms: number) {
   return new Promise((resolve) => {

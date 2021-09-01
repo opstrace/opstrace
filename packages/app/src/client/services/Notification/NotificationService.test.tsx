@@ -19,15 +19,13 @@ import {
   useSimpleNotification,
   NotificationService
 } from "client/services/Notification";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { render } from "@testing-library/react";
+import { renderWithEnv, screen, act, within } from "client/utils/testutils";
 
 test("useNotificationService", async () => {
-  const title = "my-title";
-  const information = "my-information";
+  const buttonName = "click me!";
+  const title = "my title";
+  const information = "my information";
   const state = "error";
   const TestComponent = () => {
     const { registerNotification } = useSimpleNotification();
@@ -40,22 +38,22 @@ test("useNotificationService", async () => {
             state
           })
         }
-      />
+      >
+        {buttonName}
+      </button>
     );
   };
 
-  const container = renderComponent(<TestComponent />);
+  renderComponent(<TestComponent />);
+  act(() => {
+    userEvent.click(screen.getByRole("button", { name: buttonName }));
+  });
 
-  userEvent.click(container.getByRole("button"));
-
-  expect(await container.findByText(title)).toBeInTheDocument();
-  expect(await container.findByText(information)).toBeInTheDocument();
+  const alert = within((await screen.findAllByRole("alert"))[0]);
+  expect(await alert.findByText(title)).toBeInTheDocument();
+  expect(await alert.findByText(information)).toBeInTheDocument();
 });
 
 const renderComponent = (children: React.ReactNode) => {
-  return render(
-    <ThemeProvider theme={light}>
-      <NotificationService>{children}</NotificationService>
-    </ThemeProvider>
-  );
+  return renderWithEnv(<NotificationService>{children}</NotificationService>);
 };

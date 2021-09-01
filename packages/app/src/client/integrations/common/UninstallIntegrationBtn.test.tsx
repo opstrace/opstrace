@@ -16,19 +16,14 @@
 
 import React, { ReactNode } from "react";
 import { UninstallBtn } from "./UninstallIntegrationBtn";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
-import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { render, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { Integration } from "state/integration/types";
 import { createMemoryHistory } from "history";
 import { Tenant } from "state/tenant/types";
-import { Router } from "react-router-dom";
 import { graphql, rest } from "msw";
 import { setupServer } from "msw/node";
+import { renderWithEnv } from "client/utils/testutils";
 
 /* did not manage to get the picker service running with the tests
  * so I just mocked it, as I primarily want to test network interactions.
@@ -104,9 +99,9 @@ test("handles click", async () => {
   mockHasuraEndpoint();
   mockGrafanaEndpoint(tenant, integration);
 
-  const container = renderComponent(
+  const container = renderWithEnv(
     <UninstallBtn integration={integration} tenant={tenant} disabled={false} />,
-    history
+    { history }
   );
 
   userEvent.click(container.getByRole("button"));
@@ -136,9 +131,9 @@ test("shows error messages if hasura request fails", async () => {
   );
   mockGrafanaEndpoint(tenant, integration);
 
-  const container = renderComponent(
+  const container = renderWithEnv(
     <UninstallBtn integration={integration} tenant={tenant} disabled={false} />,
-    history
+    { history }
   );
 
   userEvent.click(container.getByRole("button"));
@@ -166,26 +161,12 @@ test("doesn't show error messages if grafana request fails", async () => {
     )
   );
 
-  const container = renderComponent(
+  const container = renderWithEnv(
     <UninstallBtn integration={integration} tenant={tenant} disabled={false} />,
-    history
+    { history }
   );
-
-  userEvent.click(container.getByRole("button"));
+  userEvent.click(
+    container.getByRole("button", { name: "Uninstall Integration" })
+  );
   expect(container.queryAllByText(errorMessage)).toHaveLength(0);
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  history = createMemoryHistory()
-) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};
