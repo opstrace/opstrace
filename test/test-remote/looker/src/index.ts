@@ -275,16 +275,16 @@ async function createNewSeries(
     // times as wide as a single time series fragment (in time). If the total
     // buffer is 3 times that then the regime to pick values from is as wide as
     // 2 ...
-    // const startTimeOffsetIntoPast = util.rndFloatFromInterval(
-    //   WALLTIME_COUPLING_PARAMS.minLagSeconds +
-    //     1.5 * calcFragmentTimeLeapSeconds(),
-    //   WALLTIME_COUPLING_PARAMS.maxLagSeconds -
-    //     1.5 * calcFragmentTimeLeapSeconds()
-    // );
     const startTimeOffsetIntoPast = util.rndFloatFromInterval(
-      WALLTIME_COUPLING_PARAMS.minLagSeconds + 5,
-      WALLTIME_COUPLING_PARAMS.maxLagSeconds - 5
+      WALLTIME_COUPLING_PARAMS.minLagSeconds +
+        1.5 * calcFragmentTimeLeapSeconds(),
+      WALLTIME_COUPLING_PARAMS.maxLagSeconds -
+        1.5 * calcFragmentTimeLeapSeconds()
     );
+    // const startTimeOffsetIntoPast = util.rndFloatFromInterval(
+    //   WALLTIME_COUPLING_PARAMS.minLagSeconds + 5,
+    //   WALLTIME_COUPLING_PARAMS.maxLagSeconds - 5
+    // );
 
     const starttime = now.minusSeconds(startTimeOffsetIntoPast).withNano(0);
 
