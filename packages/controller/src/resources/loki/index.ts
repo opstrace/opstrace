@@ -1339,7 +1339,8 @@ export function LokiResources(
                 {
                   args: [
                     "-config.file=/etc/loki/config.yaml",
-                    "-target=querier"
+                    "-target=querier",
+                    "-log.level=debug"
                   ],
                   env: deploymentConfig.env,
                   image: DockerImages.loki,
