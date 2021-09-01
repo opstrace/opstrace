@@ -235,7 +235,7 @@ async function createNewSeries(
 ): Promise<Array<LogSeries | MetricSeries>> {
   const series = [];
 
-  log.info(`create ${CFG.n_concurrent_streams} time series objects`);
+  log.info(`create ${CFG.n_series} time series objects`);
 
   if (CFG.additional_labels !== undefined) {
     log.info(
@@ -246,7 +246,7 @@ async function createNewSeries(
 
   const now = ZonedDateTime.now();
 
-  for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
+  for (let i = 1; i < CFG.n_series + 1; i++) {
     const seriesname = `${invocationCycleId}-${i.toString()}`;
 
     const labelset: LabelSet = {};
@@ -336,7 +336,7 @@ async function createNewSeries(
 
     const msg = `Initialized series: ${s}. Time of first sample: ${s.currentTimeRFC3339Nano()}`;
 
-    const logEveryN = util.logEveryNcalc(CFG.n_concurrent_streams);
+    const logEveryN = util.logEveryNcalc(CFG.n_series);
     if (i % logEveryN == 0) {
       log.info(msg + ` (${logEveryN - 1} msgs like this are/will be hidden)`);
       // Allow for more or less snappy SIGINTing this initialization step.
@@ -449,7 +449,7 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
     log.info(
       "randomly marking %s/%s streams for validation",
       CFG.read_n_streams_only,
-      CFG.n_concurrent_streams
+      CFG.n_series
     );
 
     const streamsToValidate: Array<LogSeries | MetricSeries> =
