@@ -761,9 +761,12 @@ async function tryToGetNFragmentsFromSeriesPool(
   // candidate-popping loop: try to acquire at most `nf` fragments (all from
   // different series) from the pool (not every candidate might have one
   // ready!)
+
+  let candidatesPoppedSinceLastFragmentGenerated = 0;
   while (true) {
     // Look at a candidate: pop off item from the end of the queue.
     const s = seriespool.pop();
+    candidatesPoppedSinceLastFragmentGenerated += 1;
 
     if (s === undefined) {
       log.info(
@@ -801,6 +804,7 @@ async function tryToGetNFragmentsFromSeriesPool(
       if (f !== undefined) {
         // A fragment was generated from `s`. Leave this lazy-throttling loop.
         fragment = f;
+        candidatesPoppedSinceLastFragmentGenerated = 0;
         break;
       }
 
@@ -816,6 +820,20 @@ async function tryToGetNFragmentsFromSeriesPool(
       );
 
       pm.counter_fragment_generation_delayed.inc(1);
+
+      if (candidatesPoppedSinceLastFragmentGenerated >= CFG.n_series) {
+        // We looked at least as many time series as there are and none of them
+        // had a fragment ready. Example: just one actor and two series, and
+        // none of these two series will have a fragment ready within the next
+        // five minutes of wall time. Then do not busy-spin in this loop (the
+        // candidate-popping loop) by constantly popping one of those series
+        // off the work pool and immediately putting it back, immediately
+        // proceeding with the next. Add a tiny sleep in this case per
+        // candidate-popping loop iteration. This allows for CTRL+C ing quickly
+        // in this scenario and changes the average CPU utilization from ~100 %
+        // to ~0 %.
+        await sleep(0.5);
+      }
 
       // If there's still a bunch of other candidates in the pool then put the
       // current candidate back and pick another one. Else, start polling loop
