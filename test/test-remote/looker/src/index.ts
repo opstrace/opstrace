@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,48 +110,50 @@ function setUptimeGauge() {
 async function main() {
   parseCmdlineArgs();
   const httpServerTerminator = pm.setupPromExporter();
-
-  let dummystreams: Array<LogSeries | MetricSeries>;
-
   WALLTIME_COUPLING_PARAMS = calcWalltimeCouplingOptions();
 
+  log.info("cycle 1: create a fresh set of time series");
+
+  let series: Array<LogSeries | MetricSeries> = await createNewSeries(
+    cycleId(1)
+  );
+
   for (let cyclenum = 1; cyclenum <= CFG.n_cycles; cyclenum++) {
-    setUptimeGauge();
-
-    // The idea is that `CFG.invocation_id` is unique among those looker
-    // instances that interact with the same data ingest system.
-    const invocationCycleId = `${CFG.invocation_id}-${cyclenum}`;
-
-    log.info("enter write/read cycle  %s", cyclenum);
-
-    if (cyclenum === 1) {
-      log.info("cycle %s: create a fresh set of time series", cyclenum);
-      dummystreams = await createNewSeries(invocationCycleId);
-    } else if (
-      CFG.change_streams_every_n_cycles > 0 &&
-      (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0
-    ) {
-      // update streams at the configured number of cycles
-      log.info("cycle %s: create new time series", cyclenum);
-      dummystreams = await createNewSeries(invocationCycleId);
-    } else {
-      log.info(
-        "cycle %s: continue to use time series of previous cycle",
-        cyclenum
-      );
+    // create a bit of visual separation between per-cycle log blobs.
+    // `process.stderr.write()` might interleave unpredictably with rest of log
+    // output.
+    log.info("cyclenum: %s", cyclenum);
+    if (cyclenum > 1) {
+      // log.info("\n\n\n");
+      process.stderr.write("\n\n");
     }
 
+    log.info("enter write/read cycle %s", cyclenum);
+    setUptimeGauge();
+
+    const cycleid = cycleId(cyclenum);
+    if (cyclenum > 1) {
+      if (
+        CFG.change_streams_every_n_cycles > 0 &&
+        (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0
+      ) {
+        log.info(
+          `cycle ${cyclenum}: fresh time series object(s) as ` +
+            "of CFG.change_streams_every_n_cycles"
+        );
+        series = await createNewSeries(cycleid);
+      } else {
+        log.info(
+          "cycle %s: continue to use time series of previous cycle",
+          cyclenum
+        );
+      }
+    }
     pm.counter_rw_cycles.inc();
 
-    // wrap performWriteReadCycle() in an overgeneralized error handler "just"
-    // to more reliably crash looker, see CH1288. I'd love for all unexpected
-    // errors to crash the runtime instead.
     try {
-      // we pass the updated cycle id here even if dummystreams doesnt use it
-      // this ensures the cycle report json has a distinct filename
-      //@ts-expect-error: see comment above
-      await performWriteReadCycle(cyclenum, dummystreams, invocationCycleId);
-    } catch (err: any) {
+      await performWriteReadCycle(cyclenum, series, cycleid);
+    } catch (err) {
       log.crit("err during write/read cycle: %s", err);
       process.exit(1);
     }
@@ -159,6 +161,21 @@ async function main() {
 
   log.info("shutting down http server");
   httpServerTerminator.terminate();
+}
+
+/**
+ * Generate Cycle ID from cycle number `n`. `n` is 1, 2, 3, ...
+ *
+ * Return value is constant for constant `n`.
+ *
+ * The Cycle ID contains the invocation ID which contains quite a bit of
+ * randomness.
+ * @param n: the cycle number, an integer >= 1
+ */
+function cycleId(n: number) {
+  // The idea is that `CFG.invocation_id` is unique among those looker
+  // instances that interact with the same data ingest system.
+  return `${CFG.invocation_id}-${n}`;
 }
 
 function calcFragmentTimeLeapSeconds(): number {
@@ -181,7 +198,10 @@ function calcFragmentTimeLeapSeconds(): number {
 function calcWalltimeCouplingOptions(): WalltimeCouplingOptions {
   const fragmentTimeLeapSeconds = calcFragmentTimeLeapSeconds();
 
-  log.info(`fragmentTimeLeapSeconds: ${fragmentTimeLeapSeconds.toFixed(2)} s`);
+  log.info(
+    "walltime coupling: fragmentTimeLeapSeconds: " +
+      `${fragmentTimeLeapSeconds.toFixed(2)} s`
+  );
 
   // Why must maxLagSeconds depend on fragmentTimeLeapSconds? See
   // `TimeseriesBase.validateWtOpts()`.
@@ -215,19 +235,28 @@ async function createNewSeries(
 ): Promise<Array<LogSeries | MetricSeries>> {
   const series = [];
 
+  log.info(`create ${CFG.n_concurrent_streams} time series objects`);
+
+  if (CFG.additional_labels !== undefined) {
+    log.info(
+      "adding additional labels: %s",
+      JSON.stringify(CFG.additional_labels)
+    );
+  }
+
   const now = ZonedDateTime.now();
 
   for (let i = 1; i < CFG.n_concurrent_streams + 1; i++) {
     const seriesname = `${invocationCycleId}-${i.toString()}`;
-    const labelset: LabelSet = {};
 
+    const labelset: LabelSet = {};
     // add more labels (key/value pairs) as given by command line
     // without further validation
     if (CFG.additional_labels !== undefined) {
-      log.info(
-        "adding additional labels: %s",
-        JSON.stringify(CFG.additional_labels)
-      );
+      // log.info(
+      //   "adding additional labels: %s",
+      //   JSON.stringify(CFG.additional_labels)
+      // );
       for (const kvpair of CFG.additional_labels) {
         labelset[kvpair[0]] = kvpair[1];
       }
@@ -367,7 +396,7 @@ async function performWriteReadCycle(
       read: readstats
     }
   };
-  log.info("Report:\n%s", JSON.stringify(report, null, 2));
+  log.debug("Report:\n%s", JSON.stringify(report, null, 2));
   const reportFilePath = `${invocationCycleId}.report.json`;
   fs.writeFileSync(reportFilePath, JSON.stringify(report, null, 2));
   log.info("wrote report to %s", reportFilePath);
@@ -376,7 +405,7 @@ async function performWriteReadCycle(
 async function writePhase(streams: Array<LogSeries | MetricSeries>) {
   const fragmentsPushedBefore = COUNTER_STREAM_FRAGMENTS_PUSHED;
 
-  log.info("reset per-series fragment push counter");
+  log.debug("reset per-series fragment push counter");
   PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE = {};
   for (const s of streams) {
     PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] = 0;
@@ -440,7 +469,7 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
 
   // It's interesting to see how long these iterations took for millions of
   // streams.
-  log.info(
+  log.debug(
     "re-labeling series for validation info collection took %s s",
     labelForValidationDurationSeconds.toFixed(2)
   );
@@ -916,18 +945,13 @@ async function _postFragments(
   }
   const genduration = mtimeDiffSeconds(t0);
 
-  let name: string;
   // the compiler thinks that this can be `undefined` as of the [0] -- but
   // it's confirmed (above) that this array is not empty.
   const firstseries = fragments[0].parent as LogSeries | MetricSeries;
-
   const fcount = fragments.length;
-
-  if (fcount === 1) {
-    name = `actor ${actorIndex}: prProducerPOSTer(${firstseries.promQueryString()})`;
-  } else {
-    name = `actor ${actorIndex}: prProducerPOSTer(nstreams=${fcount}, first=${firstseries.promQueryString()})`;
-  }
+  const name =
+    `actor ${actorIndex}: _postFragments((nstreams=${fcount}, ` +
+    `first=${firstseries.promQueryString()})`;
 
   if (
     COUNTER_PUSHREQUEST_STATS_LOG_THROTTLE < 1 ||
