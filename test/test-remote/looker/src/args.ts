@@ -27,7 +27,7 @@ import { log, changeStderrLogLevel } from "./log";
 import { DEFAULT_LOG_LEVEL_STDERR } from "./index";
 
 interface CfgInterface {
-  n_concurrent_streams: number;
+  n_series: number;
   n_chars_per_msg: number;
   n_samples_per_series_fragment: number;
   n_cycles: number;
@@ -140,10 +140,10 @@ export function parseCmdlineArgs(): void {
     default: false
   });
 
-  // note: maybe rename to --n-streams or --n-streams-per-cycle,
-  // because concurrency is controlled differently
-  parser.add_argument("--n-concurrent-streams", {
-    help: "number of log streams (or metric series) to create per write/read cycle",
+  parser.add_argument("--n-series", {
+    help:
+      "Number of synthetic time series to generate and consume from in each " +
+      "write/read cycle. ",
     type: "int",
     required: true
   });
@@ -419,10 +419,8 @@ export function parseCmdlineArgs(): void {
   //   process.exit(1);
   // }
 
-  if (CFG.max_concurrent_writes > CFG.n_concurrent_streams) {
-    log.error(
-      "--max-concurrent-writes must not be larger than --n-concurrent-streams"
-    );
+  if (CFG.max_concurrent_writes > CFG.n_series) {
+    log.error("--max-concurrent-writes must not be larger than --n-series");
     process.exit(1);
   }
 
@@ -442,7 +440,7 @@ export function parseCmdlineArgs(): void {
   }
 
   if (CFG.max_concurrent_writes === 0) {
-    CFG.max_concurrent_writes = CFG.n_concurrent_streams;
+    CFG.max_concurrent_writes = CFG.n_series;
   }
 
   if (CFG.bearer_token_file !== "") {
@@ -482,10 +480,8 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
-  if (CFG.read_n_streams_only > CFG.n_concurrent_streams) {
-    log.error(
-      "--read-n-streams-only must not be larger than --n-concurrent-streams"
-    );
+  if (CFG.read_n_streams_only > CFG.n_series) {
+    log.error("--read-n-streams-only must not be larger than --n-series");
     process.exit(1);
   }
 
