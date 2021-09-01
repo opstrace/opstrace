@@ -41,6 +41,7 @@ export interface MetricSeriesOpts {
   metricName: string;
   starttime: ZonedDateTime;
   uniqueName: string;
+  // Additional label set (merged into what's set automatically)
   labelset: LabelSet | undefined;
   // The time difference between adjacent metric samples in a series fragment,
   // in milliseconds. Expected to be an integer. Defined via the substraction

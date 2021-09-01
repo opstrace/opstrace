@@ -153,7 +153,10 @@ export function setupPromExporter() {
     for (let tryport = 8900; tryport < 8901; tryport++) {
       try {
         httpserver = httpapp.listen(tryport, () =>
-          log.info("HTTP server listening on port %s", tryport)
+          log.info(
+            "HTTP server for exposing Prometheus metrics: listening on port %s",
+            tryport
+          )
         );
       } catch (err: any) {
         if (err.message.includes("EADDRINUSE")) {
