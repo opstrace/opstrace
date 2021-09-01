@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import { format, createLogger, transports, config, Logger } from "winston";
 
 const logFormat = format.printf(
@@ -26,6 +28,8 @@ const logFormat = format.printf(
 // read only live bindings". Consuming modules are supposed to import `log` and
 // then use it via `log.info('msg')` etc.
 export let log: Logger;
+
+let winstonStderrTransport: transports.ConsoleTransportInstance;
 
 export function setLogger(logger: Logger): void {
   if (log !== undefined) {
@@ -45,24 +49,24 @@ export interface CliLogOptions {
 }
 
 export function buildLogger(opts: CliLogOptions): Logger {
-  // Try to import the `TransportStream` type. Use that instead of `any`.
+  // This transport is to emit to stderr (stdout is default). Also see
+  // opstrace-prelaunch/issues/998.
+  const stderrtransp = new transports.Console({
+    stderrLevels: Object.keys(config.syslog.levels),
+    level: opts.stderrLevel,
+    format: format.combine(
+      // removing format.error because it throws "function does not exist" and
+      // adding the stack formatting to the logFormat above instead.
+      format.splat(),
+      format.timestamp(),
+      format.colorize(),
+      logFormat
+    )
+  });
+
   const ts: Array<
     transports.ConsoleTransportInstance | transports.FileTransportInstance
-  > = [
-    // Emit to stderr (stdout is default). Also see opstrace-prelaunch/issues/998.
-    new transports.Console({
-      stderrLevels: Object.keys(config.syslog.levels),
-      level: opts.stderrLevel,
-      format: format.combine(
-        // removing format.error because it throws "function does not exist" and
-        // adding the stack formatting to the logFormat above instead.
-        format.splat(),
-        format.timestamp(),
-        format.colorize(),
-        logFormat
-      )
-    })
-  ];
+  > = [stderrtransp];
 
   if (
     [opts.filePath, opts.fileLevel].filter(v => v !== undefined).length == 1
@@ -88,12 +92,25 @@ export function buildLogger(opts: CliLogOptions): Logger {
 
   // console.log(JSON.stringify(ts, null, 2));
 
-  return createLogger({
+  const logger = createLogger({
     // Use syslog levels (`warning' etc.),
     // see https://github.com/winstonjs/winston-syslog#log-levels
     levels: config.syslog.levels,
     transports: ts
   });
+
+  // Set module-global for keeping track of the `ConsoleTransportInstance`
+  // object that writes to stderr. This is used for dynamically changing the
+  // log level of this transport at runtime, via `changeStderrLogLevel()`
+  // below.
+  winstonStderrTransport = stderrtransp;
+  return logger;
+}
+
+export function changeStderrLogLevel(stderrLevel: string): void {
+  assert(stderrLevel in config.syslog.levels);
+  // also see https://github.com/winstonjs/winston/issues/1107
+  winstonStderrTransport.level = stderrLevel;
 }
 
 // file transport options
