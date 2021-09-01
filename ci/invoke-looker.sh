@@ -50,7 +50,7 @@ docker run ${COMMON_ARGS} looker \
 cat looker-${TSTRING}.log | tail -n 10
 
 
-# Different invocation, cover --change-streams-every-n-cycles
+# Different invocation, cover --change-series-every-n-cycles
 TSTRING="$(date +%Y%m%d-%H%M%S)"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
@@ -60,7 +60,7 @@ docker run ${COMMON_ARGS} looker \
     --n-chars-per-msg 100 \
     --stream-write-n-seconds 10 \
     --n-cycles 5 \
-    --change-streams-every-n-cycles 3 \
+    --change-series-every-n-cycles 3 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > looker-${TSTRING}.log 2>&1
 cat looker-${TSTRING}.log | tail -n 10

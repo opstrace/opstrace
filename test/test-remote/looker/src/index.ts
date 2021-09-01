@@ -134,12 +134,12 @@ async function main() {
     const cycleid = cycleId(cyclenum);
     if (cyclenum > 1) {
       if (
-        CFG.change_streams_every_n_cycles > 0 &&
-        (cyclenum - 1) % CFG.change_streams_every_n_cycles === 0
+        CFG.change_series_every_n_cycles > 0 &&
+        (cyclenum - 1) % CFG.change_series_every_n_cycles === 0
       ) {
         log.info(
           `cycle ${cyclenum}: fresh time series object(s) as ` +
-            "of CFG.change_streams_every_n_cycles"
+            "of CFG.change_series_every_n_cycles"
         );
         series = await createNewSeries(cycleid);
       } else {

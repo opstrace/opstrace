@@ -44,7 +44,7 @@ interface CfgInterface {
   http_server_port: number;
   additional_labels: Array<[string, string]> | undefined;
   compressability: string;
-  change_streams_every_n_cycles: number;
+  change_series_every_n_cycles: number;
   stream_write_n_seconds_jitter: number;
   fetch_n_entries_per_query: number;
   metrics_mode: boolean;
@@ -268,19 +268,12 @@ export function parseCmdlineArgs(): void {
     default: 1
   });
 
-  // TODO: change: initialize the new streams with current wall time, and
-  // consequentially make this incompatible with --log-start-time, then also
-  // implement it so that and document that --log-start-time has no effect on
-  // metrics mode, and document that in metrics mode the dummystream time
-  // source is always wall time or inspired by walltime with regular skew sync.
-  parser.add_argument("--change-streams-every-n-cycles", {
+  parser.add_argument("--change-series-every-n-cycles", {
     help:
-      "Use the same log/metric stream for N cycles, then create a new set of " +
-      "streams (unique label sets), or 0 to reuse streams for the process lifetime. " +
-      "Default: new streams are created with every write/read cycle (1). " +
-      "For log streams, when a new stream is initialized it " +
-      "re-uses the same synthetic start time as set before (program invocation time " +
-      "or --log-start-time). Metric streams are always guided by wall time.",
+      "Use the same log/metric time series for N cycles, then create a new " +
+      "set of series (unique label sets). If set to 0 then the initial set " +
+      "of time series is reused for the process lifetime. " +
+      "Default: 1, i.e. new series are created with every write/read cycle. ",
     type: "int",
     default: 1
   });
@@ -397,14 +390,14 @@ export function parseCmdlineArgs(): void {
     CFG.stream_write_n_fragments = 10 ** 14;
   }
 
-  if (CFG.change_streams_every_n_cycles > CFG.n_cycles) {
+  if (CFG.change_series_every_n_cycles > CFG.n_cycles) {
     log.error(
-      "--change-streams-every-n-cycles must not be larger than --n-cycles"
+      "--change-series-every-n-cycles must not be larger than --n-cycles"
     );
     process.exit(1);
   }
-  if (CFG.change_streams_every_n_cycles < 0) {
-    log.error("--change-streams-every-n-cycles must not be negative");
+  if (CFG.change_series_every_n_cycles < 0) {
+    log.error("--change-series-every-n-cycles must not be negative");
     process.exit(1);
   }
 
