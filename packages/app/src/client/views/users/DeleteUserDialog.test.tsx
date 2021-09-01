@@ -104,7 +104,7 @@ test("deactivates users", async () => {
   userEvent.type(confirmationInput, "yes{enter}");
 });
 
-test.only("handles user deactivation error", async () => {
+test("handles user deactivation error", async () => {
   const store = getStore();
   const mockUser = createMockUser();
   const errorMessage = "terrible error!"
