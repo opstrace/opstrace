@@ -84,6 +84,8 @@ export const DEFAULT_LOG_LEVEL_STDERR = "info";
 // only expose via CLI args if a good use case arises.
 export let WALLTIME_COUPLING_PARAMS: WalltimeCouplingOptions;
 
+let tooFastMsgLoggedLastTime = BigInt(0);
+
 // let STATS_WRITE: WriteStats;
 // let STATS_READ: ReadStats;
 
@@ -122,7 +124,7 @@ async function main() {
     // create a bit of visual separation between per-cycle log blobs.
     // `process.stderr.write()` might interleave unpredictably with rest of log
     // output.
-    log.info("cyclenum: %s", cyclenum);
+    // log.info("cyclenum: %s", cyclenum);
     if (cyclenum > 1) {
       // log.info("\n\n\n");
       process.stderr.write("\n\n");
@@ -520,8 +522,10 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
     megaPayloadBytesSent.toFixed(2)
   );
   log.info(
-    "Payload write net throughput (mean): %s million bytes per second (assumes utf8 for logs and 12+8 Bytes per sample for metrics)",
-    megaPayloadBytesSentPerSec.toFixed(2)
+    "Payload write net throughput (mean): " +
+      megaPayloadBytesSentPerSec.toFixed(5) +
+      " million bytes per second (assumes utf8 for logs and 12+8 " +
+      "bytes per sample for metrics)"
   );
 
   // for (const stream of streams) {
@@ -584,7 +588,7 @@ async function unthrottledFetchAndValidate(stream: LogSeries | MetricSeries) {
 }
 
 async function readPhase(streams: Array<LogSeries | MetricSeries>) {
-  log.info("entering read / validation phase");
+  log.debug("entering read / validation phase");
   const validators = [];
   const vt0 = mtime();
 
@@ -808,17 +812,22 @@ async function tryToGetNFragmentsFromSeriesPool(
         break;
       }
 
-      // `s` was not ready.
-      const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
-      log.debug(
-        `actor ${actorIndex}: ${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
-          1
-        )} minutes. Sample generation is too fast. Delay generating ` +
-          "and pushing the next fragment. This may take up to " +
-          `${(s.fragmentTimeLeapSeconds / 60.0).toFixed(1)} minutes ` +
-          "(the time width of a stream fragment)."
-      );
-
+      // `s` was not ready. Info-log this fact, but only once per N seconds (to
+      // keep some progress report here; this might take many minutes w/o
+      // generating log output otherwise).
+      if (mtimeDiffSeconds(tooFastMsgLoggedLastTime) > 10) {
+        const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
+        log.info(
+          `actor ${actorIndex}: ${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
+            1
+          )} minutes. Sample generation is too fast. Delay generating ` +
+            "and pushing the next fragment. This may take up to " +
+            `${(s.fragmentTimeLeapSeconds / 60.0).toFixed(1)} minutes, ` +
+            "the time width of a series fragment. " +
+            "(not logged for every case)"
+        );
+        tooFastMsgLoggedLastTime = mtime();
+      }
       pm.counter_fragment_generation_delayed.inc(1);
 
       if (candidatesPoppedSinceLastFragmentGenerated >= CFG.n_series) {
