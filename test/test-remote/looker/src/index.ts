@@ -629,7 +629,7 @@ async function readPhase(streams: Array<LogSeries | MetricSeries>) {
   }
 
   if (CFG.read_n_series_only !== 0) {
-    log.info("drop 'validation info' for all streams");
+    log.debug("drop 'validation info' for all streams");
     for (const s of streams) {
       // Say there are 10^6 streams and we just read/validated a tiny fraction
       // of them, then there's a lot of data in memory (that would be needed to
@@ -777,7 +777,7 @@ async function tryToGetNFragmentsFromSeriesPool(
 
     if (s === undefined) {
       log.info(
-        `actor ${actorIndex}: series pool is empty. generated ${fragments.length} fragments (desired: ${nf})`
+        `write actor ${actorIndex}: series pool is empty. generated ${fragments.length} fragments (desired: ${nf})`
       );
       // Break from the loop. At this point, the `fragments` array may
       // be of length between 0 or nf-1.
@@ -821,7 +821,7 @@ async function tryToGetNFragmentsFromSeriesPool(
       if (mtimeDiffSeconds(tooFastMsgLoggedLastTime) > 10) {
         const shiftIntoPastMinutes = shiftIntoPastSeconds / 60;
         log.info(
-          `actor ${actorIndex}: ${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
+          `write actor ${actorIndex}: ${s}: current lag compared to wall time is ${shiftIntoPastMinutes.toFixed(
             1
           )} minutes. Sample generation is too fast. Delay generating ` +
             "and pushing the next fragment. This may take up to " +
@@ -856,7 +856,7 @@ async function tryToGetNFragmentsFromSeriesPool(
         // or less work than that. Don't put the current candidate back into
         // the pool. Observe it.
         log.debug(
-          `actor ${actorIndex}: actors are running out of work ` +
+          `write actor ${actorIndex}: actors are running out of work ` +
             `(queue length: ${ql}): idle-watch candidate`
         );
         await sleep(5);
@@ -888,7 +888,7 @@ async function tryToGetNFragmentsFromSeriesPool(
 
     if (fragments.length === nf) {
       log.debug(`seriespool.length: ${seriespool.length}`);
-      log.debug(`actor ${actorIndex}: collected ${nf} fragments`);
+      log.debug(`write actor ${actorIndex}: collected ${nf} fragments`);
       return fragments;
     }
   }
@@ -912,7 +912,7 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
 
     if (fragments.length === 0) {
       log.info(
-        `actor ${actorIndex}: candidate-popping loop terminated, no fragment acquired: all work done, exit actor.`
+        `write actor ${actorIndex}: candidate-popping loop terminated, no fragment acquired: all work done, exit actor.`
       );
       return;
     }
@@ -926,7 +926,7 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
       );
       if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
         log.debug(
-          `actor ${actorIndex}: ${secondsSinceCycleStart.toFixed(
+          `write actor ${actorIndex}: ${secondsSinceCycleStart.toFixed(
             2
           )} seconds passed: stop producer`
         );
@@ -952,7 +952,7 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
         log.debug(`put ${s.uniqueName} back into work queue`);
       } else {
         log.debug(
-          `actor ${actorIndex}:  CFG.stream_write_n_fragments (${CFG.stream_write_n_fragments}) ` +
+          `write actor ${actorIndex}:  CFG.stream_write_n_fragments (${CFG.stream_write_n_fragments}) ` +
             `pushed for ${s.uniqueName}`
         );
       }
@@ -980,7 +980,7 @@ async function _postFragments(
   const firstseries = fragments[0].parent as LogSeries | MetricSeries;
   const fcount = fragments.length;
   const name =
-    `actor ${actorIndex}: _postFragments((nstreams=${fcount}, ` +
+    `write actor ${actorIndex}: _postFragments((nstreams=${fcount}, ` +
     `first=${firstseries.promQueryString()})`;
 
   if (
