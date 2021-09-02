@@ -315,7 +315,6 @@ export function parseCmdlineArgs(): void {
     help:
       "Maximum number of log entries to fetch per query during " +
       "read/validation phase (honored in metric mode? TODO)",
-
     type: "int",
     default: 60000
   });
