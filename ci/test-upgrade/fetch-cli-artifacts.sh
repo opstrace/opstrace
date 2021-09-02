@@ -2,6 +2,8 @@
 
 set -eou pipefail
 
+source ci/utils.sh
+
 if [ -z ${OPSTRACE_CLI_VERSION_FROM+x} ];
 then
     echo "OPSTRACE_CLI_VERSION_FROM env var is not set"
@@ -20,7 +22,9 @@ fi
 #
 fetch_cli_s3_artifact() {
     echo "downloading ${artifact}"
-    aws s3 cp --only-show-errors ${artifact} .
+    # aws cli retry modes documentation
+    # https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html
+    AWS_MAX_ATTEMPTS=3 AWS_RETRY_MODE=standard aws s3 cp --only-show-errors ${artifact} .
 
     echo "extracting ${artifact} to target dir ${dir}"
     tar xjf $(basename ${artifact#s3://}) -C ${dir}
@@ -32,6 +36,8 @@ fetch_cli_s3_artifact() {
 #
 fetch_cli_http_artifact() {
     echo "downloading ${artifact}"
+    # curl retry flag documentation
+    # https://man7.org/linux/man-pages/man1/curl.1.html
     curl -L ${artifact} --output opstrace-cli-artifact.tar.bz2
 
     echo "extracting ${artifact} to target dir ${dir}"
