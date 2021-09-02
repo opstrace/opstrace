@@ -405,13 +405,15 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     opts: LogSeriesFetchAndValidateOpts
   ): Promise<number> {
     const lokiQuerierBaseURL = opts.querierBaseUrl;
-    const chunkSize = opts.chunkSize || 20000;
-    const inspectEveryNthEntry = opts.inspectEveryNthEntry || 0;
-    const customLokiQueryFunc = opts.customLokiQueryFunc;
-
-    const additionalHeaders = opts.additionalHeaders || {};
 
     // chunkSize: think of it as "fetch at most those many entries per query"
+    const chunkSize = opts.chunkSize || 20000;
+
+    // Not used by looker as of the time of writing
+    const inspectEveryNthEntry = opts.inspectEveryNthEntry || 0;
+    const customLokiQueryFunc = opts.customLokiQueryFunc;
+    const additionalHeaders = opts.additionalHeaders || {};
+
     const expectedSampleCount =
       this.nFragmentsSuccessfullySentSinceLastValidate *
       this.n_samples_per_series_fragment;
@@ -493,6 +495,20 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
           continue;
         }
         const tstring = entry[0];
+
+        // For LogSeries, the current validation method does not act on
+        // individual fragments written, but instead assumes a continuous
+        // stream of samples. Since individual written fragments are not used
+        // as the 'unit of validation' (not even in their reduced form, after
+        // dropping most payload data), the hash over the log text content
+        // cannot be used. This was smart when written fragments were small but
+        // the to-be-read "fragments" (chunk sizes) were supposed to be much
+        // larger, to speed up the read phase. Today, this is not smart
+        // anymore, because it's in conceptual conflict with the leap-forward
+        // walltime coupling technique. TODO: as with the metrics mode, iterate
+        // over individual fragments written (as they are saved in their
+        // reduced form) and perform a per-fragment read validation. Then we
+        // can use the md5 checksum over the log contents.
         if (!entry[1].startsWith(tstring)) {
           log.error("invalid entry: %s", entry);
           throw Error("boo!");
