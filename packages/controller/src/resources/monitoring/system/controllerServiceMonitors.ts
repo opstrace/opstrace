@@ -16,6 +16,7 @@
 
 import {
   ResourceCollection,
+  Service,
   V1ServicemonitorResource
 } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
@@ -26,6 +27,40 @@ export function ControllerServiceMonitorResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
+  // Have the controller create a Service that points back to itself.
+  // This is required for the controller ServiceMonitor below to work.
+  collection.add(
+    new Service(
+      {
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          labels: {
+            name: "opstrace-controller",
+            tenant: "system"
+          },
+          name: "opstrace-controller",
+          namespace: "kube-system"
+        },
+        spec: {
+          ports: [
+            {
+              name: "metrics",
+              port: 8900,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              targetPort: "metrics" as any
+            }
+          ],
+          selector: {
+            name: "opstrace-controller"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
+
+  // ServiceMonitor in system-tenant that scrapes the Service in kube-system.
   collection.add(
     new V1ServicemonitorResource(
       {
@@ -33,7 +68,7 @@ export function ControllerServiceMonitorResources(
         kind: "ServiceMonitor",
         metadata: {
           labels: {
-            "k8s-app": "opstrace-controller",
+            name: "opstrace-controller",
             tenant: "system"
           },
           name: "opstrace-controller",
