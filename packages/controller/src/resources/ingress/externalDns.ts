@@ -36,8 +36,8 @@ export function ExternalDnsResources(
 
   const domain = getDomain(state);
   const { target } = getControllerConfig(state);
-  let platformProvider = null;
 
+  let platformProvider: string | null = null;
   if (target === "gcp") {
     platformProvider = "google";
   }

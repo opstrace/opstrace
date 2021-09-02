@@ -271,7 +271,7 @@ async function getELBsAssociatedWithVPC(
     return [];
   }
 
-  const elbs = [];
+  const elbs: ELBv2.LoadBalancers = [];
   for (const lb of data.LoadBalancers) {
     if (lb.VpcId === referenceVpcId) {
       log.info(

@@ -155,7 +155,7 @@ export function* ensureAWSInfraExists(): Generator<
   });
 
   // create s3 buckets and vpc concurrently
-  const tasks = [];
+  const tasks: any[] = [];
   tasks.push(
     yield fork([
       new S3BucketRes(
