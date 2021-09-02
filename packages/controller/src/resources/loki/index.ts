@@ -200,7 +200,11 @@ export function LokiResources(
     server: {
       http_listen_port: 1080,
       grpc_server_max_recv_msg_size: grpc_server_max_msg_size,
-      grpc_server_max_send_msg_size: grpc_server_max_msg_size
+      grpc_server_max_send_msg_size: grpc_server_max_msg_size,
+      // https://github.com/grafana/loki/pull/4182/files
+      grpc_server_max_concurrent_streams: 1000,
+      grpc_server_ping_without_stream_allowed: true,
+      grpc_server_min_time_between_pings: "10s"
     },
     auth_enabled: true,
     chunk_store_config: {
