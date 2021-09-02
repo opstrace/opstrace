@@ -198,7 +198,7 @@ export function parseCmdlineArgs(): void {
   parser.add_argument("--max-concurrent-writes", {
     help:
       "Maximum number of POST HTTP requests to perform concurrently. " +
-      "Default: 0 (do as many as given by --n-series).",
+      "Default: use 10 concurrent writers or less if --n-series is smaller.",
     type: "int",
     default: 0
   });
@@ -207,8 +207,8 @@ export function parseCmdlineArgs(): void {
   readgroup.add_argument("--max-concurrent-reads", {
     help:
       "Maximum number of GET HTTP requests to perform concurrently during " +
-      "the read/validation phase. Default: 0 " +
-      "(do as many as given by --n-series).",
+      "the read/validation phase. " +
+      "Default: use 10 concurrent writers or less if --n-series is smaller.",
     type: "int",
     default: 0
   });
@@ -426,8 +426,17 @@ export function parseCmdlineArgs(): void {
     }
   }
 
+  // Choose a good default for max_concurrent_writes:
   if (CFG.max_concurrent_writes === 0) {
-    CFG.max_concurrent_writes = CFG.n_series;
+    // Default to using at most 10 concurrent writers or less if n_series
+    // is smaller.
+    CFG.max_concurrent_writes = Math.min(10, CFG.n_series);
+  }
+
+  if (CFG.max_concurrent_reads === 0) {
+    // Default to using at most 10 concurrent writers or less if n_series
+    // is smaller.
+    CFG.max_concurrent_reads = Math.min(10, CFG.n_series);
   }
 
   if (CFG.bearer_token_file !== "") {
