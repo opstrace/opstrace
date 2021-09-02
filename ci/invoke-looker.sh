@@ -143,7 +143,7 @@ docker run ${COMMON_ARGS} looker \
     > ${LNAME}.log 2>&1
 echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
-# Test --read-n-streams-only
+# Test --read-n-series-only
 LPREFIX="metrics" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
 echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
@@ -156,7 +156,7 @@ docker run ${COMMON_ARGS} looker \
     --stream-write-n-fragments 10 \
     --metrics-time-increment-ms 2000 \
     --max-concurrent-writes 6 \
-    --read-n-streams-only 1 \
+    --read-n-series-only 1 \
     > ${LNAME}.log 2>&1
 echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
