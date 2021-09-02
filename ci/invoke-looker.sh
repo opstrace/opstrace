@@ -113,6 +113,7 @@ docker run ${COMMON_ARGS} looker \
     --n-fragments-per-push-message 2 \
     --n-chars-per-msg 100 \
     --max-concurrent-reads 2 \
+    --max-concurrent-writes 2 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     --stream-write-n-seconds 10 \
     > ${LNAME}.log 2>&1
