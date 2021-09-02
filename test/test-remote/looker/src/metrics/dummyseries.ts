@@ -58,7 +58,6 @@ export interface MetricSeriesFetchAndValidateOpts {
   querierBaseUrl: string;
   additionalHeaders?: Record<string, string>;
   chunkSize?: number;
-  inspectEveryNthEntry?: number | undefined;
   customHTTPGetFunc?: (
     url: string,
     gotRequestOptions: any

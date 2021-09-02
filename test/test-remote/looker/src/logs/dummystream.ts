@@ -381,11 +381,11 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     startEntryIdx += offset;
     endEntryIdx += offset;
 
-    log.info(
-      "query startEntryIdx, endEntryIdx: %s, %s",
-      startEntryIdx,
-      endEntryIdx
-    );
+    // log.debug(
+    //   "query startEntryIdx, endEntryIdx: %s, %s",
+    //   startEntryIdx,
+    //   endEntryIdx
+    // );
 
     const queryParams = {
       query: logqlLabelString(this.labels),
@@ -439,12 +439,12 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
       );
       // the last chunk might be expected to be smaller than the regular
       // chunk size.
-      log.info("remaining entries: %s", entriesRemainingToBeChecked);
+      log.debug("remaining entries: %s", entriesRemainingToBeChecked);
       let expectedCount = chunkSize;
       if (entriesRemainingToBeChecked < chunkSize)
         expectedCount = entriesRemainingToBeChecked;
 
-      log.info(
+      log.debug(
         "waitForLokiQueryResult() for chunk %s. expectedCount: %s. ",
         chunkIndex,
         expectedCount
@@ -476,24 +476,29 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
         );
       }
 
-      log.info("got result with hash '%s'", result.textmd5);
+      log.debug("got result with hash '%s'", result.textmd5);
 
-      //   {
-      //     "ts": "2020-02-20T15:23:38.483000026Z",
-      //     "line": "1582212218483000026:5_iz3O9NTnGE97l <snip>"
-      //   },
+      // Example for an entry:
+      //
+      // [
+      //   "1630578960000000000",
+      //   "1630578960000000000:QNd+vNFSYgfJfwMlzhLSlbx9 <snip>"
+      // ]
 
       // validate payload
       for (const entry of result.entries) {
-        entriesRemainingToBeChecked -= 1;
+        // log.info("entry: %s", JSON.stringify(entry, null, 2));
+
+        entriesRemainingToBeChecked--;
 
         if (
           inspectEveryNthEntry &&
           entriesRemainingToBeChecked % inspectEveryNthEntry
         ) {
-          // this parsing is rather costly, only validate every Nth sample.
+          // Only validate every Nth sample.
           continue;
         }
+
         const tstring = entry[0];
 
         // For LogSeries, the current validation method does not act on
@@ -514,17 +519,18 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
           throw Error("boo!");
         }
       }
-      log.info(
+
+      log.debug(
         "validated %s entries (inspected every Nth entry: %s (0: all))",
         result.entries.length,
         inspectEveryNthEntry
       );
-      //entriesRemainingToBeChecked -= expectedCount;
+
       chunkIndex += 1;
     }
-    log.info(
-      "stream %s: validation took %s s overall",
-      this.uniqueName,
+    log.debug(
+      "series %s: validation took %s s overall",
+      this,
       mtimeDiffSeconds(vt0).toFixed(1)
     );
 
