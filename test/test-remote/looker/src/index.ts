@@ -161,7 +161,7 @@ async function main() {
     }
   }
 
-  log.info("shutting down http server");
+  log.debug("shutting down http server");
   httpServerTerminator.terminate();
 }
 
@@ -854,9 +854,9 @@ async function tryToGetNFragmentsFromSeriesPool(
         // the pool. Observe it.
         log.debug(
           `actor ${actorIndex}: actors are running out of work ` +
-            `(queue lengths: ${ql}): idle-watch candidate`
+            `(queue length: ${ql}): idle-watch candidate`
         );
-        await sleep(1);
+        await sleep(5);
         continue;
       }
 
@@ -1306,7 +1306,9 @@ async function httpGETRetryUntil200OrError(
         // dummystream.
         pm.counter_get_non_http_errors.inc();
 
-        log.warning(`Query: attempt ${attempt} failed with ${e.message}`);
+        log.warning(
+          `Query: attempt ${attempt}/${maxRetries} failed with ${e.message}`
+        );
 
         // Note(JP): pragmatic time constant for now
         await sleep(3.0);
@@ -1369,7 +1371,7 @@ async function queryLokiWithRetryOrError(
   chunkIndex: number,
   stream: LogSeries
 ): Promise<LokiQueryResult> {
-  log.info("looker-specific query func");
+  log.debug("looker-specific query func");
 
   // wrap httpGETRetryUntil200OrError() and inspect entry count.
   async function _queryAndCountEntries(
