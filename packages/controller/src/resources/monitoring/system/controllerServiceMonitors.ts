@@ -46,13 +46,13 @@ export function ControllerServiceMonitorResources(
               port: "metrics"
             }
           ],
-          jobLabel: "k8s-app",
+          jobLabel: "name",
           namespaceSelector: {
             matchNames: ["kube-system"]
           },
           selector: {
             matchLabels: {
-              "k8s-app": "opstrace-controller"
+              name: "opstrace-controller"
             }
           }
         }
