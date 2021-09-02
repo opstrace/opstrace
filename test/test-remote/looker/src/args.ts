@@ -426,11 +426,33 @@ export function parseCmdlineArgs(): void {
     }
   }
 
+  // if (CFG.n_fragments_per_push_message > CFG.n_series) {
+  //   log.error(
+  //     "--n-fragments-per-push-message must not be larger than --n-series"
+  //   );
+  //   process.exit(1);
+  // }
+
   // Choose a good default for max_concurrent_writes:
   if (CFG.max_concurrent_writes === 0) {
     // Default to using at most 10 concurrent writers or less if n_series
     // is smaller.
     CFG.max_concurrent_writes = Math.min(10, CFG.n_series);
+  }
+
+  if (
+    CFG.n_fragments_per_push_message * CFG.max_concurrent_writes >
+    CFG.n_series
+  ) {
+    log.error(
+      `--n-fragments-per-push-message (${CFG.n_fragments_per_push_message}) ` +
+        "multiplied with max_concurrent_writes " +
+        `(${CFG.max_concurrent_writes}) = ${
+          CFG.n_fragments_per_push_message * CFG.max_concurrent_writes
+        } ` +
+        `must not be larger than --n-series (${CFG.n_series})`
+    );
+    process.exit(1);
   }
 
   if (CFG.max_concurrent_reads === 0) {
