@@ -80,52 +80,6 @@ export function parseCmdlineArgs(): void {
     Looker originated as a black-box storage testing program for Loki with
     strict and deep read validation. Since then, it has evolved quite a bit.
 
-    Write/read cycle
-    ================
-
-    Looker operates in write/read cycles. Each cycle starts with a write
-    phase followed by a read phase. The purpose of the read phase is to
-    perform strict data validation: it confirms that data that was written
-    in the write phase can be read back. Data integrity is confirmed with
-    checksumming.
-
-    The read phase can be skipped entirely or modified to do a sparse readout
-    (where the ratio between write and read load can be chosen freely).
-    This enables a wide set of load generation and benchmarking use cases.
-
-
-    Wall time coupling
-    ==================
-
-    Looker tries to be CPU-bound which also implies that it wants to
-    generate log/metric samples as quickly as it can.
-
-    The timestamps associated with log/metric samples are synthetically
-    generated to allow for strict/deep read validation.
-
-    By default, synthetic time series start time is chosen randomly from an
-    interval in the past compared to current wall time. Specifically, from the
-    interval [now-maxLagSeconds, now-minLagSeconds). The meaning of
-    'maxLagSeconds' and 'minLagSeconds' is explained below.
-
-    By default, the synthetic time source used for time series generation is
-    guided by wall time through a loose coupling mechanism. When synthetic
-    time passes faster than wall time that mechanism
-    throttles sample generation when getting too close to 'now', as defined
-    by 'minLagSeconds'. That is, this mechanism guarantees that each
-    generated sample has a timestamp at least as old as now-minLagSeconds
-    (with 'now' approximately being the sample generation time).
-
-    When the synthetic time source passes slower than wall time then the
-    coupling mechanism compensates for that by a forward-leap method:
-    if the last generated sample is older than now-maxLagSeconds then the
-    next generated sample will have a timestamp very close to
-    now-minLagSeconds.
-
-    This loose coupling between wall time and synthetic time allows for
-    pushing data to an ingest system which does not accept data to
-    that is either too old or too new, compared to is own perspective on wall
-    time.
     `
     // .replace("\n\n", "FOO")
     // .replace("\n", " ")

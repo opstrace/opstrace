@@ -7,6 +7,42 @@ Looker is a Loki / Cortex testing and benchmarking tool.
 Looker originated early 2020 as a black-box storage testing for Loki with strict and deep read validation.
 Since then, it has evolved quite a bit.
 
+
+## Concepts
+
+### Write/read cycle
+
+Looker operates in write/read cycles.
+Each cycle starts with a write phase followed by a read phase.
+The major purpose of the read phase is to perform data validation; it confirms that data that was written in the write phase can be read back.
+
+The strictness and extent of the readout is flexible:
+the read phase can be skipped entirely or configured to do a sparse readout so that after all the ratio between write and read load can be chosen rather freely.
+This enables a wide set of load generation and benchmarking use cases.
+
+In the strictest configuration, all individual log entries and metric samples are required to be returned exactly as previously written.
+Some of that validation is implemented with checksumming (so that the bulk of the payload data does not need to be kept in memory between write and read phase).
+
+### Wall time coupling
+
+Looker implements a loose coupling between wall time and the synthetic time used for sample generation.
+This loose wall time coupling allows for pushing data to an ingest system which does not accept data that is either too old or too new compared to is own perspective on current wall time.
+
+Looker tries to be CPU-bound which also implies that it wants to generate log/metric samples as quickly as it can.
+
+The timestamps associated with log/metric samples are synthetically generated to allow for strict/deep read validation.
+
+By default, the synthetic time series start time is chosen randomly from an interval in the past compared to current wall time. Specifically, from the interval `[now-maxLagSeconds, now-minLagSeconds)`.
+The meaning of `maxLagSeconds` and `minLagSeconds` is explained below.
+
+By default, the synthetic time source used for time series generation is guided by wall time through a loose coupling mechanism.
+When synthetic time passes faster than wall time that mechanism throttles sample generation when getting too close to `now`, as defined by `minLagSeconds`. That is, this mechanism guarantees that each generated sample has a timestamp at least as old as `now-minLagSeconds` (with `now` approximately being the sample generation time).
+
+When the synthetic time source passes slower than wall time then the coupling mechanism compensates for that by a forward-leap method:
+if the last generated sample is older than `now-maxLagSeconds` then the next generated sample will have a timestamp very close to `now-minLagSeconds`.
+
+
+
 ## Local development
 
 `cd` to looker's main directory. Set up NodeJS 16 with yarn:
