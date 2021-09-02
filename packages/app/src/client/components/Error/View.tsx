@@ -76,7 +76,7 @@ const ErrorView = (props: ErrorViewProps) => {
       >
         Open Github Issue
       </Button>
-      <Button variant="outlined" onClick={() => window.location.reload(true)}>
+      <Button variant="outlined" onClick={() => window.location.reload()}>
         Refresh
       </Button>
     </CardActions>
