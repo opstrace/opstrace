@@ -24,7 +24,8 @@ ${LOOKER_IMAGE_NAME}"
 # do not show output in main build log (it's a lot!)
 # instead make sure that the *.log files are collected as build
 # artifacts.
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="metrics" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -33,10 +34,11 @@ docker run ${COMMON_ARGS} looker \
     --n-samples-per-series-fragment 25000 \
     --stream-write-n-fragments 2 \
     --n-cycles 2 \
-    > looker-metrics-${TSTRING}.log 2>&1
-cat looker-metrics-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="logs" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -46,12 +48,13 @@ docker run ${COMMON_ARGS} looker \
     --stream-write-n-fragments 15 \
     --n-cycles 3 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-    > looker-${TSTRING}.log 2>&1
-cat looker-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
 
 # Different invocation, cover --change-series-every-n-cycles
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="logs" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -62,12 +65,13 @@ docker run ${COMMON_ARGS} looker \
     --n-cycles 5 \
     --change-series-every-n-cycles 3 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-    > looker-${TSTRING}.log 2>&1
-cat looker-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
 
 # Different invocation, cover --max-concurrent-writes
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="logs" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -77,12 +81,13 @@ docker run ${COMMON_ARGS} looker \
     --stream-write-n-fragments 10 \
     --max-concurrent-writes 2  \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-    > looker-${TSTRING}.log 2>&1
-cat looker-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
 
 # Different invocation, cover --stream-write-n-seconds-jitter
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="logs" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -92,13 +97,14 @@ docker run ${COMMON_ARGS} looker \
     --stream-write-n-seconds 10 \
     --stream-write-n-seconds-jitter 5 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-    > looker-${TSTRING}.log 2>&1
-cat looker-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
 
 # Different invocation, cover --max-concurrent-reads
 # and also cover --n-fragments-per-push-message in logs mode
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="logs" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -109,8 +115,8 @@ docker run ${COMMON_ARGS} looker \
     --max-concurrent-reads 2 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     --stream-write-n-seconds 10 \
-    > looker-${TSTRING}.log 2>&1
-cat looker-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
 # Metrics mode: use --n-fragments-per-push-message to create an HTTP request
 # payload that contains samples from _many_ streams (individual time series);
@@ -121,7 +127,8 @@ cat looker-${TSTRING}.log | tail -n 10
 # on the receiving end. The readout is skipped because otherwise it would
 # take way too long (when done stream-by-stream and therefore it
 # taking while (O(1) HTTP request per time series, i.e. O(10^5) HTTP requests).
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="metrics" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -133,11 +140,12 @@ docker run ${COMMON_ARGS} looker \
     --metrics-time-increment-ms 2000 \
     --max-concurrent-writes 6 \
     --skip-read \
-    > looker-metrics-2-${TSTRING}.log 2>&1
-cat looker-metrics-2-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
 # Test --read-n-streams-only
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="metrics" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -149,8 +157,8 @@ docker run ${COMMON_ARGS} looker \
     --metrics-time-increment-ms 2000 \
     --max-concurrent-writes 6 \
     --read-n-streams-only 1 \
-    > looker-metrics-3-${TSTRING}.log 2>&1
-cat looker-metrics-3-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
 
 # Test throttling in metrics mode. Send from just one series/stream, and make
@@ -162,7 +170,8 @@ cat looker-metrics-3-${TSTRING}.log | tail -n 10
 # see these log messages: "DummyTimeseries(..): current lag compared to wall
 # time is 9.9 minutes. Sample generation is too fast. Delay generating and
 # pushing the next fragment. This may take up to 10 minutes."
-TSTRING="$(date +%Y%m%d-%H%M%S)"
+LPREFIX="metrics" && TSTRING="$(date +%Y%m%d-%H%M%S)" && LNAME="looker-${LPREFIX}-${TSTRING}"
+echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
@@ -172,5 +181,5 @@ docker run ${COMMON_ARGS} looker \
     --metrics-time-increment-ms 10000 \
     --stream-write-n-seconds 20 \
     --log-level=debug \
-    > looker-metrics-4-${TSTRING}.log 2>&1
-cat looker-metrics-4-${TSTRING}.log | tail -n 10
+    > ${LNAME}.log 2>&1
+echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
