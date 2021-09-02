@@ -609,7 +609,9 @@ async function readPhase(streams: Array<LogSeries | MetricSeries>) {
     } else {
       const semaphore = new Semaphore(CFG.max_concurrent_reads);
       for (const s of streams) {
-        validators.push(throttledFetchAndValidate(semaphore, s));
+        if (s.shouldBeValidated()) {
+          validators.push(throttledFetchAndValidate(semaphore, s));
+        }
       }
     }
   }
