@@ -405,7 +405,10 @@ export function CortexResources(
           config: {
             server: {
               grpc_server_max_recv_msg_size: 41943040, // default (4 MB) * 10
-              grpc_server_max_send_msg_size: 41943040 // default (4 MB) * 10
+              grpc_server_max_send_msg_size: 41943040, // default (4 MB) * 10
+              // https://github.com/grafana/cortex-jsonnet/pull/233
+              grpc_server_ping_without_stream_allowed: true,
+              grpc_server_min_time_between_pings: "10s"
             },
             memberlist: {
               max_join_backoff: "1m",
