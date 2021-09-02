@@ -27,10 +27,11 @@ import { Tenant } from "@opstrace/tenants";
 
 import { KubeConfig } from "@kubernetes/client-node";
 
+import { ControllerServiceMonitorResources } from "./controllerServiceMonitors";
+import { KubeServiceMonitorResources } from "./kubeServiceMonitors";
 import { KubeStateMetricsResources } from "./kubeStateMetrics";
 import { NodeExporterResources } from "./nodeExporter";
 import { PrometheusAdaptorResources } from "./prometheusAdaptor";
-import { KubeServiceMonitorResources } from "./kubeServiceMonitors";
 
 export function SystemMonitoringResources(
   state: State,
@@ -42,10 +43,11 @@ export function SystemMonitoringResources(
   const namespace = getTenantNamespace(tenant);
   const prometheusName = getPrometheusName(tenant);
 
-  collection.add(PrometheusAdaptorResources(state, kubeConfig, namespace));
-  collection.add(KubeStateMetricsResources(state, kubeConfig, namespace));
-  collection.add(NodeExporterResources(state, kubeConfig, namespace));
-  collection.add(KubeServiceMonitorResources(state, kubeConfig, namespace));
+  collection.add(ControllerServiceMonitorResources(kubeConfig, namespace));
+  collection.add(KubeServiceMonitorResources(kubeConfig, namespace));
+  collection.add(KubeStateMetricsResources(kubeConfig, namespace));
+  collection.add(NodeExporterResources(kubeConfig, namespace));
+  collection.add(PrometheusAdaptorResources(kubeConfig, namespace));
 
   /**
    * Namespaces that need monitoring
