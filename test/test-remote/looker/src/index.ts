@@ -425,7 +425,7 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
     for (const s of streams) {
       s.disableValidation();
     }
-  } else if (CFG.read_n_streams_only === 0) {
+  } else if (CFG.read_n_series_only === 0) {
     log.info(
       "mark all streams to keep track of validation info: no --skip-read, and no --read-n-streams-only"
     );
@@ -439,7 +439,7 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
   // record of the data that was written for that little fraction. I.eq., mark
   // most streams with a validation-info-not-needed flag, which reduces the
   // memory usage during the write phase.
-  if (CFG.read_n_streams_only !== 0) {
+  if (CFG.read_n_series_only !== 0) {
     // this implies that --skip-read is _not_ set.
     log.info(
       "mark all streams to not keep track of validation info: --read-n-streams-only is set"
@@ -450,15 +450,15 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
 
     log.info(
       "randomly marking %s/%s streams for validation",
-      CFG.read_n_streams_only,
+      CFG.read_n_series_only,
       CFG.n_series
     );
 
     const streamsToValidate: Array<LogSeries | MetricSeries> =
-      util.randomSampleFromArray(streams, CFG.read_n_streams_only);
+      util.randomSampleFromArray(streams, CFG.read_n_series_only);
 
     // For a small selection, show the names of the streams, for debuggability
-    if (CFG.read_n_streams_only < 20) {
+    if (CFG.read_n_series_only < 20) {
       const names = streamsToValidate.map(s => s.uniqueName).join(", ");
       log.info("selected: %s", names);
     }

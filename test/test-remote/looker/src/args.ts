@@ -56,7 +56,7 @@ interface CfgInterface {
   retry_post_max_delay_seconds: number;
   retry_post_jitter: number;
   skip_read: boolean;
-  read_n_streams_only: number;
+  read_n_series_only: number;
 }
 
 export let CFG: CfgInterface;
@@ -226,16 +226,27 @@ export function parseCmdlineArgs(): void {
   // https://bugs.python.org/issue10984. Simply do ad-hoch manual validation
   // below. Caveat: the [ ... | ... ]- like notation in the auto-generated
   // help text will not be entirely correct.
-  parser.add_argument("--read-n-streams-only", {
+  parser.add_argument("--read-n-series-only", {
     help:
-      "Maximum number of streams to read (validate) in the read phase of a " +
+      "Maximum number of series to read (validate) in the read phase of a " +
       "write/read cycle. Use this if you want to read (validate) less data " +
-      "than what was written. The subset of streams is picked randomly at the " +
+      "than what was written. The subset of series is picked randomly at the " +
       "beginning of each read phase. Default: 0 " +
       "(read back everything that was written).",
     type: "int",
     default: 0
   });
+
+  // parser.add_argument("--inspect-every-nth-log-entry", {
+  //   help:
+  //     "When a log time series is selected for read validation then all " +
+  //     "entries from that series are fetched, but not all log entries are .." +
+  //     "NOTE(JP): while I write this I realize that it is better to only have " +
+  //     "--read-n-series-only for now, and to look at each entry when "+
+  //     "a series is selected for read-validation",
+  //   type: "int",
+  //   default: 200
+  // });
 
   parser.add_argument("--compressability", {
     help:
@@ -450,15 +461,15 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
-  if (CFG.skip_read && CFG.read_n_streams_only !== 0) {
+  if (CFG.skip_read && CFG.read_n_series_only !== 0) {
     // see above, can't easily be covered by the mutually_exclusive_group
     // technique; this here is a cheap but at least quite helpful validation.
-    log.error("--skip-read must not be used with --read-n-streams-only");
+    log.error("--skip-read must not be used with --read-n-series-only");
     process.exit(1);
   }
 
-  if (CFG.read_n_streams_only > CFG.n_series) {
-    log.error("--read-n-streams-only must not be larger than --n-series");
+  if (CFG.read_n_series_only > CFG.n_series) {
+    log.error("--read-n-series-only must not be larger than --n-series");
     process.exit(1);
   }
 
