@@ -23,12 +23,10 @@ import {
   DaemonSet,
   V1ServicemonitorResource
 } from "@opstrace/kubernetes";
-import { State } from "../../../reducer";
 import { KubeConfig } from "@kubernetes/client-node";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function NodeExporterResources(
-  state: State,
   kubeConfig: KubeConfig,
   namespace: string
 ): ResourceCollection {

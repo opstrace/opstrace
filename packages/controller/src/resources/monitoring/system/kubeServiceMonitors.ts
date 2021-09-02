@@ -18,11 +18,9 @@ import {
   ResourceCollection,
   V1ServicemonitorResource
 } from "@opstrace/kubernetes";
-import { State } from "../../../reducer";
 import { KubeConfig } from "@kubernetes/client-node";
 
 export function KubeServiceMonitorResources(
-  state: State,
   kubeConfig: KubeConfig,
   namespace: string
 ): ResourceCollection {
