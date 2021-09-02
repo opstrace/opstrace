@@ -616,17 +616,17 @@ async function readPhase(streams: Array<LogSeries | MetricSeries>) {
 
   // This code section must still be reached when using --skip-read, to
   // generate a 'correct' report, indicating that nothing was read.
-  let nEntriesReadArr;
+  let nSamplesReadArr;
   try {
     // each validator returns the number of entries read (and validated)
     // TODO: a little it of progress report here would be nice.
-    nEntriesReadArr = await Promise.all(validators);
+    nSamplesReadArr = await Promise.all(validators);
   } catch (err: any) {
     log.crit("error during validation: %s", err);
     process.exit(1);
   }
 
-  if (CFG.read_n_streams_only !== 0) {
+  if (CFG.read_n_series_only !== 0) {
     log.info("drop 'validation info' for all streams");
     for (const s of streams) {
       // Say there are 10^6 streams and we just read/validated a tiny fraction
@@ -636,36 +636,39 @@ async function readPhase(streams: Array<LogSeries | MetricSeries>) {
       // important to do this _after_ `await Promise.all(validators)` above, so
       // that we do not pull validation info underneath validator methods that
       // need them.
+      // TODO: might not be needed if in the beginning of the cycle things
+      // are properly set up
       s.dropValidationInfo();
     }
   }
 
-  const nEntriesRead = nEntriesReadArr.reduce((a, b) => a + b, 0);
-  //log.info("nEntriesReadArr sum: %s", nEntriesRead);
+  const nSamplesRead = nSamplesReadArr.reduce((a, b) => a + b, 0);
+  //log.info("nSamplesReadArr sum: %s", nSamplesRead);
 
   const readDurationSeconds = mtimeDiffSeconds(vt0);
   log.info(
-    "validation (read) took %s s overall",
-    readDurationSeconds.toFixed(1)
+    `validation (read) took ${readDurationSeconds.toFixed(1)} s overall. ` +
+      `${nSamplesRead} samples read across ${validators.length} series (` +
+      `${nSamplesRead / validators.length} per series).`
   );
 
   // assume that exact payload was read as previously sent for now
   // TODO: build these stats on the fly during readout and expect numbers
   // to match write?
-  //const nEntriesRead = STATS_WRITE.nEntriesSent;
-  let nPayloadBytesRead = nEntriesRead * CFG.n_chars_per_msg;
+  //const nSamplesRead = STATS_WRITE.nEntriesSent;
+  let nPayloadBytesRead = nSamplesRead * CFG.n_chars_per_msg;
 
   if (CFG.metrics_mode) {
     // 64 bit floating point, i.e. 8 bytes per sample
-    nPayloadBytesRead = nEntriesRead * 8;
+    nPayloadBytesRead = nSamplesRead * 8;
   }
 
   const megaPayloadBytesRead = nPayloadBytesRead / 10 ** 6;
 
   const stats: ReadStats = {
-    nEntriesRead: nEntriesRead,
+    nEntriesRead: nSamplesRead,
     nPayloadBytesRead: nPayloadBytesRead,
-    entriesReadPerSec: nEntriesRead / readDurationSeconds,
+    entriesReadPerSec: nSamplesRead / readDurationSeconds,
     megaPayloadBytesReadPerSec: megaPayloadBytesRead / readDurationSeconds,
     durationSeconds: readDurationSeconds
   };
