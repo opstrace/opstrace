@@ -207,7 +207,7 @@ function calcWalltimeCouplingOptions(): WalltimeCouplingOptions {
 
   // Why must maxLagSeconds depend on fragmentTimeLeapSconds? See
   // `TimeseriesBase.validateWtOpts()`.
-  const minimalMaxLagSeconds = 5 * 60;
+  const minimalMaxLagSeconds = 2 * 60;
   const dynamicMaxLagSeconds = Math.ceil(fragmentTimeLeapSeconds * 5);
   let actualMaxLagSeconds;
 
@@ -228,7 +228,7 @@ function calcWalltimeCouplingOptions(): WalltimeCouplingOptions {
 
   return {
     maxLagSeconds: actualMaxLagSeconds,
-    minLagSeconds: 1 * 60
+    minLagSeconds: 0.5 * 60
   };
 }
 
