@@ -175,6 +175,8 @@
     "@types/jest": "^26.0.8",
     "@types/minio": "^7.0.6",
     "@types/redis": "^2.8.28",
+    "faker": "5.5.3",
+    "@types/faker": "5.5.3",
     "@types/supertest": "^2.0.11",
     "@types/testing-library__jest-dom": "^5.9.5",
     "@types/testing-library__react": "^10.2.0",
