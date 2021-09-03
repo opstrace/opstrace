@@ -289,11 +289,14 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     }
   }
 
-  protected leapForward(n: number): void {
+  protected leapForward(n: bigint): void {
     // invariant: this must not be called when `this.walltimeCouplingOptions`
     // is undefined.
     assert(this.walltimeCouplingOptions);
-    this.currentSeconds += n;
+    // `currentSeconds` is of type `number` but must always hold an integer
+    // value. To make this explicit and to get some compiler support, require
+    // `n` to be passed as type `bigint`.
+    this.currentSeconds += Number(n);
   }
 
   public currentTime(): ZonedDateTime {

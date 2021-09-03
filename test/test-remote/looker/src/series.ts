@@ -293,7 +293,7 @@ export abstract class TimeseriesBase<FragmentType> {
    *
    * Must only be called after just having completed a fragment (right?).
    */
-  protected abstract leapForward(n: number): void;
+  protected abstract leapForward(n: bigint): void;
 
   abstract fetchAndValidate(
     opts: MetricSeriesFetchAndValidateOpts | LogSeriesFetchAndValidateOpts
@@ -434,10 +434,14 @@ export abstract class TimeseriesBase<FragmentType> {
     // just a little bit when fallen  behind just a little bit.
 
     if (shiftIntoPastSeconds > this.walltimeCouplingOptions.maxLagSeconds) {
-      const secondsToLeapForward =
-        shiftIntoPastSeconds - this.walltimeCouplingOptions.minLagSeconds - 5;
+      // Do Math.floor() to make this be an integer value
+      const secondsToLeapForward = BigInt(
+        Math.floor(
+          shiftIntoPastSeconds - this.walltimeCouplingOptions.minLagSeconds - 5
+        )
+      );
 
-      const lfm = secondsToLeapForward / 60;
+      const lfm = Number(secondsToLeapForward) / 60;
       log.debug(`${this}: leap forward by ${lfm.toFixed(2)} minutes`);
 
       // rely on the implementation here to actually leap by the amount that
