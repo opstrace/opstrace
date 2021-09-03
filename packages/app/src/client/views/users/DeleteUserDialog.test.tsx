@@ -112,7 +112,7 @@ test("handles user deactivation error", async () => {
   store.dispatch(setUserList([mockUser]));
 
   mockServer.use(
-    graphql.mutation("DeleteIntegration", (req, res, ctx) => {
+    graphql.mutation("DeactivateUser", (req, res, ctx) => {
       return res(
         ctx.errors([
           {
@@ -144,9 +144,10 @@ test("handles user deactivation error", async () => {
     name: "picker filter"
   });
   userEvent.type(confirmationInput, "yes{enter}");
-});
 
-test.todo("handle if no user is selected and enter is pressed");
+  expect(await screen.findByText("Could not delete user")).toBeInTheDocument()
+  expect(await screen.findByText(errorMessage)).toBeInTheDocument()
+});
 
 const CommandServiceTrigger = ({ children }: { children: ReactNode }) => {
   const cmdService = useCommandService();
