@@ -206,6 +206,10 @@ export abstract class TimeseriesBase<FragmentType> {
    */
   fragmentTimeLeapSeconds: number;
 
+  // `undefined` means: do not collect validation info; this is so
+  // that we ideally save memory
+  postedFragmentsSinceLastValidate: Array<FragmentType> | undefined;
+
   sample_time_increment_ns: number;
   n_samples_per_series_fragment: number;
   uniqueName: string;
@@ -224,6 +228,8 @@ export abstract class TimeseriesBase<FragmentType> {
     this.sample_time_increment_ns = opts.sample_time_increment_ns;
     this.nSamplesValidatedSoFar = BigInt(0);
     this.walltimeCouplingOptions = opts.wtopts;
+
+    this.postedFragmentsSinceLastValidate = undefined;
 
     if (!Number.isInteger(opts.sample_time_increment_ns)) {
       throw new Error("sample_time_increment_ns must be an integer value");
@@ -295,7 +301,12 @@ export abstract class TimeseriesBase<FragmentType> {
    */
   protected abstract leapForward(n: bigint): void;
 
-  abstract fetchAndValidate(
+  // abstract fetchAndValidate(
+  //   opts: MetricSeriesFetchAndValidateOpts | LogSeriesFetchAndValidateOpts
+  // ): Promise<number>;
+
+  protected abstract fetchAndValidateFragment(
+    fragment: FragmentType,
     opts: MetricSeriesFetchAndValidateOpts | LogSeriesFetchAndValidateOpts
   ): Promise<number>;
 
@@ -508,5 +519,41 @@ export abstract class TimeseriesBase<FragmentType> {
     // Behind wall time, but too close to wall time. Do not generate a new
     // fragment.
     return [shiftIntoPastSeconds, undefined];
+  }
+
+  // Most of FetchAndValidateOpts is ignored, just here to make this func
+  // signature match DummyStream.fetchAndValidate
+  public async fetchAndValidate(
+    opts: MetricSeriesFetchAndValidateOpts
+  ): Promise<number> {
+    log.debug("%s fetchAndValidate()", this);
+
+    let samplesValidated = 0;
+    let fragmentsValidated = 0;
+
+    // `this.postedFragmentsSinceLastValidate` is `undefined` if
+    // `this.collectValidationInfo` was set to `false`.
+    if (this.postedFragmentsSinceLastValidate === undefined) {
+      return 0;
+    }
+
+    for (const fragment of this.postedFragmentsSinceLastValidate) {
+      const validated = await this.fetchAndValidateFragment(fragment, opts);
+      samplesValidated += validated;
+      fragmentsValidated += 1;
+
+      // Control log verbosity
+      if (fragmentsValidated % 20 === 0) {
+        log.debug(
+          "%s fetchAndValidate(): %s fragments validated (%s samples)",
+          this.uniqueName,
+          fragmentsValidated,
+          samplesValidated
+        );
+      }
+    }
+
+    this.postedFragmentsSinceLastValidate = [];
+    return samplesValidated;
   }
 }
