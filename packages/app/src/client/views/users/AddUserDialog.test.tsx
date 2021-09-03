@@ -31,18 +31,22 @@ import { graphql } from "msw";
 import { setupServer } from "msw/node";
 import { User } from "state/graphql-api-types";
 import { setUserList } from "state/user/actions";
+import faker from "faker"
 
-const createMockUser = (userConfig: Partial<User> = {}): User => ({
-  id: "2175de7c-c05d-4907-992d-81abfec79a8a",
-  email: "asdasd@internet.cat",
-  username: "asdasd@internet.cat",
-  role: "user_admin",
-  active: true,
-  avatar: "",
-  created_at: "2021-08-25T14:28:16.714233+00:00",
-  session_last_updated: null,
-  ...userConfig
-});
+const createMockUser = (userConfig: Partial<User> = {}): User => {
+  const email = faker.internet.email()
+  return ({
+    id: faker.datatype.uuid(),
+    email: email,
+    username: email,
+    role: "user_admin",
+    active: true,
+    avatar: "",
+    created_at: "2021-08-25T14:28:16.714233+00:00",
+    session_last_updated: null,
+    ...userConfig
+  })
+};
 
 const mockUserCreationEndpoint = (user: User) => {
   mockServer.use(
@@ -146,12 +150,72 @@ test("handles when name is no email", async () => {
   const input = screen.getByRole("textbox", { name: "picker filter" });
   userEvent.type(input, username + "{enter}");
 
-  expect(screen.getByText("It must be a valid email address")).toBeInTheDocument();
+  expect(
+    screen.getByText("It must be a valid email address")
+  ).toBeInTheDocument();
 });
 
-test.todo("handles user creation error");
+test("handles user creation error", async () => {
+  const store = getStore();
+  const mockUser = createMockUser();
+  const errorMessage = "Oh my - what an error!"
 
-test.todo("handles user reactivation error");
+  mockServer.use(
+    graphql.mutation("CreateUser", (req, res, ctx) => {
+      return res(
+        ctx.errors([
+          {
+            message: errorMessage
+          }
+        ])
+      );
+    })
+  );
+
+  renderComponent(
+    <CommandServiceTrigger>
+      <AddUserDialog />
+    </CommandServiceTrigger>,
+    { store }
+  );
+  expect(await screen.findByText("Enter user's email")).toBeInTheDocument();
+  const input = screen.getByRole("textbox", { name: "picker filter" });
+  userEvent.type(input, mockUser.email + "{enter}");
+
+  expect(await screen.findByText("Could not add user")).toBeInTheDocument()
+  expect(await screen.findByText(errorMessage)).toBeInTheDocument()
+});
+
+test("handles user reactivation error", async () => {
+  const store = getStore();
+  const mockUser = createMockUser();
+  const errorMessage = "Oh my - what an error!"
+
+  mockServer.use(
+    graphql.mutation("ReactivateUser", (req, res, ctx) => {
+      return res(
+        ctx.errors([
+          {
+            message: errorMessage
+          }
+        ])
+      );
+    })
+  );
+
+  renderComponent(
+    <CommandServiceTrigger>
+      <AddUserDialog />
+    </CommandServiceTrigger>,
+    { store }
+  );
+  expect(await screen.findByText("Enter user's email")).toBeInTheDocument();
+  const input = screen.getByRole("textbox", { name: "picker filter" });
+  userEvent.type(input, mockUser.email + "{enter}");
+
+  expect(await screen.findByText("Could not add user")).toBeInTheDocument()
+  expect(await screen.findByText(errorMessage)).toBeInTheDocument()
+});
 
 const CommandServiceTrigger = ({ children }: { children: ReactNode }) => {
   const cmdService = useCommandService();

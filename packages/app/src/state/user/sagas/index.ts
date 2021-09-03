@@ -94,8 +94,21 @@ function* addUser(action: ReturnType<typeof actions.addUser>) {
         username: action.payload
       });
     }
-  } catch (err: any) {
-    console.error(err);
+  } catch (error: any) {
+    let message;
+    if (isGraphQLClientError(error)) {
+      message = getGraphQLClientErrorMessage(error);
+    } else {
+      message = (error as Error).message;
+    }
+    yield put(
+      notificationActions.register({
+        id: uniqueId(),
+        state: "error" as const,
+        title: "Could not add user",
+        information: message
+      })
+    );
   }
 }
 
