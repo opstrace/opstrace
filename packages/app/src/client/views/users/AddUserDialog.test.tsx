@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ReactNode, useEffect, useState } from "react";
+import React from "react";
 import Services from "client/services";
 import light from "client/themes/light";
 import ThemeProvider from "client/themes/Provider";
@@ -24,18 +24,17 @@ import { render, screen } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import AddUserDialog, { addUserCommandId } from "./AddUserDialog";
-import { useCommandService } from "client/services/Command";
-import { userEvent } from "client/utils/testutils";
+import { CommandServiceTrigger, userEvent } from "client/utils/testutils";
 import getStore from "state/store";
 import { graphql } from "msw";
 import { setupServer } from "msw/node";
 import { User } from "state/graphql-api-types";
 import { setUserList } from "state/user/actions";
-import faker from "faker"
+import faker from "faker";
 
 const createMockUser = (userConfig: Partial<User> = {}): User => {
-  const email = faker.internet.email()
-  return ({
+  const email = faker.internet.email();
+  return {
     id: faker.datatype.uuid(),
     email: email,
     username: email,
@@ -45,7 +44,7 @@ const createMockUser = (userConfig: Partial<User> = {}): User => {
     created_at: "2021-08-25T14:28:16.714233+00:00",
     session_last_updated: null,
     ...userConfig
-  })
+  };
 };
 
 const mockUserCreationEndpoint = (user: User) => {
@@ -96,7 +95,7 @@ test("adds new user", async () => {
   mockUserCreationEndpoint(mockUser);
 
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
     { store }
@@ -115,7 +114,7 @@ test("reactivates users", async () => {
   mockUserRecreationEndpoint(mockUser);
 
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
     { store }
@@ -128,7 +127,7 @@ test("reactivates users", async () => {
 test("handles when no name is entered", async () => {
   const username = "";
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>
   );
@@ -142,7 +141,7 @@ test("handles when no name is entered", async () => {
 test("handles when name is no email", async () => {
   const username = "not an email";
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>
   );
@@ -158,7 +157,7 @@ test("handles when name is no email", async () => {
 test("handles user creation error", async () => {
   const store = getStore();
   const mockUser = createMockUser();
-  const errorMessage = "Oh my - what an error!"
+  const errorMessage = "Oh my - what an error!";
 
   mockServer.use(
     graphql.mutation("CreateUser", (req, res, ctx) => {
@@ -173,7 +172,7 @@ test("handles user creation error", async () => {
   );
 
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
     { store }
@@ -182,14 +181,14 @@ test("handles user creation error", async () => {
   const input = screen.getByRole("textbox", { name: "picker filter" });
   userEvent.type(input, mockUser.email + "{enter}");
 
-  expect(await screen.findByText("Could not add user")).toBeInTheDocument()
-  expect(await screen.findByText(errorMessage)).toBeInTheDocument()
+  expect(await screen.findByText("Could not add user")).toBeInTheDocument();
+  expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
 
 test("handles user reactivation error", async () => {
   const store = getStore();
   const mockUser = createMockUser();
-  const errorMessage = "Oh my - what an error!"
+  const errorMessage = "Oh my - what an error!";
 
   mockServer.use(
     graphql.mutation("ReactivateUser", (req, res, ctx) => {
@@ -204,7 +203,7 @@ test("handles user reactivation error", async () => {
   );
 
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
     { store }
@@ -213,23 +212,9 @@ test("handles user reactivation error", async () => {
   const input = screen.getByRole("textbox", { name: "picker filter" });
   userEvent.type(input, mockUser.email + "{enter}");
 
-  expect(await screen.findByText("Could not add user")).toBeInTheDocument()
-  expect(await screen.findByText(errorMessage)).toBeInTheDocument()
+  expect(await screen.findByText("Could not add user")).toBeInTheDocument();
+  expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const CommandServiceTrigger = ({ children }: { children: ReactNode }) => {
-  const cmdService = useCommandService();
-  const [commandServiceReady, setCommandServiceReady] = useState(false);
-  useEffect(() => {
-    // CommandService is not ready on first render, as commands havent been registered yet.
-    // This will retriger the command service on second render cycle.
-    setCommandServiceReady(true);
-  }, []);
-  useEffect(() => {
-    cmdService.executeCommand(addUserCommandId);
-  }, [commandServiceReady, cmdService]);
-  return <>{children}</>;
-};
 
 const renderComponent = (
   children: React.ReactNode,
