@@ -83,6 +83,7 @@ test_info() {
     echo "expected exit code 0, got $exit_code"
     exit 1
   fi
+  echo ${info_output}
   for key in "kubernetes_version" "controller_version" "installer_version"; do
     if ! echo "$info_output" | grep -q "$key"; then
       echo "key $key not found in info output"
