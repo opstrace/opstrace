@@ -75,10 +75,6 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
   metricName: string;
   nFragmentsSuccessfullySentSinceLastValidate: number;
 
-  // `undefined` means: do not collect validation info; this is so
-  // that we ideally save memory
-  postedFragmentsSinceLastValidate: Array<MetricSeriesFragment> | undefined;
-
   constructor(opts: MetricSeriesOpts) {
     super(opts);
 
@@ -98,8 +94,6 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
       // comply.
       this.validateWtOpts(this.walltimeCouplingOptions);
     }
-
-    this.postedFragmentsSinceLastValidate = undefined;
 
     this.metricName = opts.metricName;
 
@@ -359,42 +353,6 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
         this.postedFragmentsSinceLastValidate.push(fragment);
       }
     }
-  }
-
-  // Most of FetchAndValidateOpts is ignored, just here to make this func
-  // signature match DummyStream.fetchAndValidate
-  public async fetchAndValidate(
-    opts: MetricSeriesFetchAndValidateOpts
-  ): Promise<number> {
-    log.debug("%s fetchAndValidate()", this);
-
-    let samplesValidated = 0;
-    let fragmentsValidated = 0;
-
-    // `this.postedFragmentsSinceLastValidate` is `undefined` if
-    // `this.collectValidationInfo` was set to `false`.
-    if (this.postedFragmentsSinceLastValidate === undefined) {
-      return 0;
-    }
-
-    for (const fragment of this.postedFragmentsSinceLastValidate) {
-      const validated = await this.fetchAndValidateFragment(fragment, opts);
-      samplesValidated += validated;
-      fragmentsValidated += 1;
-
-      // Control log verbosity
-      if (fragmentsValidated % 20 === 0) {
-        log.debug(
-          "%s fetchAndValidate(): %s fragments validated (%s samples)",
-          this.uniqueName,
-          fragmentsValidated,
-          samplesValidated
-        );
-      }
-    }
-
-    this.postedFragmentsSinceLastValidate = [];
-    return samplesValidated;
   }
 
   public dropValidationInfo(): void {

@@ -40,6 +40,7 @@ import {
   LogSample,
   LogSampleTimestamp,
   LogSeriesFragment,
+  LogSeriesFragmentStats,
   logqlLabelString
 } from "./index";
 
@@ -356,6 +357,77 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
 
     // Return string indicating nanoseconds since epoch.
     return timeOfEntry;
+  }
+
+  private queryParamsForFragment(fragment: LogSeriesFragment) {
+    // Confirm that fragment is 'closed' (serialized, has stats), and override
+    // type from `LogStreamFragmentStats | MetricSeriesFragmentStats` to just
+    // `MetricSeriesFragmentStats`.
+    assert(fragment.stats);
+    const stats = fragment.stats as LogSeriesFragmentStats;
+
+    if (stats.sampleCount > 60000) {
+      throw new Error(
+        "too many samples to fetch in one go -- needs feature: N queries per fragment"
+      );
+    }
+
+    const qparams: TypeQueryParamDict = {
+      query: logqlLabelString(this.labels),
+      direction: "FORWARD",
+      limit: stats.sampleCount.toString(),
+      start: stats.timeOfFirstEntry,
+      // end is not inclusive, i.e. if we set `end` to e.g. 1582211051130000099
+      // then the last entry returned would be from 1582211051130000098 even if
+      // there is one at 1582211051130000099. So, bump this by one nanosecond
+      // to get N entries returned in the happy case.
+      end: (BigInt(stats.timeOfFirstEntry) + BigInt(1)).toString()
+    };
+
+    log.debug("query params: %s", qparams);
+    return qparams;
+  }
+
+  private async fetchAndValidateFragment(
+    fragment: LogSeriesFragment,
+    opts: LogSeriesFetchAndValidateOpts
+  ): Promise<number> {
+    // instant-query-range-vector-selector-validation-method
+    // const url = `${opts.querierBaseUrl}/api/v1/query`;
+
+    const qparams = this.queryParamsForFragment(fragment);
+
+    log.debug(
+      "waitForLokiQueryResult() for chunk %s. expectedCount: %s. ",
+      chunkIndex,
+      expectedCount
+    );
+
+    let result: LokiQueryResult;
+    if (customLokiQueryFunc !== undefined) {
+      // why would the compiler not know that in here customQueryFunc is indeed
+      // _not_ undefined?
+      //@ts-ignore: see comment above
+      result = await customLokiQueryFunc(
+        lokiQuerierBaseURL,
+        additionalHeaders,
+        queryParams,
+        expectedCount,
+        chunkIndex,
+        this // pass dummystream object to func for better error reporting
+      );
+    } else {
+      // used by e.g. test-remote project (can change)
+      result = await waitForLokiQueryResult(
+        lokiQuerierBaseURL,
+        additionalHeaders,
+        queryParams,
+        expectedCount,
+        false,
+        1,
+        false // disable building hash over payload
+      );
+    }
   }
 
   private queryParamsForVerify(
