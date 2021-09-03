@@ -274,12 +274,12 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
     return this.millisSinceEpochOfLastGeneratedSample.divide(1000).toNumber();
   }
 
-  protected leapForward(n: number): void {
+  protected leapForward(n: bigint): void {
     // invariant: this must not be called when `this.walltimeCouplingOptions`
     // is undefined.
     assert(this.walltimeCouplingOptions);
     this.millisSinceEpochOfLastGeneratedSample =
-      this.millisSinceEpochOfLastGeneratedSample.add(n * 1000);
+      this.millisSinceEpochOfLastGeneratedSample.add(Number(n) * 1000);
   }
 
   protected generateNextFragment(): MetricSeriesFragment {
