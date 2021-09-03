@@ -18,10 +18,15 @@ import { all, call, spawn, takeEvery, put } from "redux-saga/effects";
 import * as yamlParser from "js-yaml";
 
 import * as actions from "../actions";
-import graphqlClient from "state/clients/graphqlClient";
+import graphqlClient, {
+  getGraphQLClientErrorMessage,
+  isGraphQLClientError
+} from "state/clients/graphqlClient";
 import { updateFormStatus, updateForm } from "state/form/actions";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
+import { actions as notificationActions } from "client/services/Notification/reducer";
+import { uniqueId } from "lodash";
 
 // create a generic type
 type AsyncReturnType<T extends (...args: any) => any> =
@@ -73,8 +78,21 @@ function* addTenant(action: ReturnType<typeof actions.addTenant>) {
         }
       ]
     });
-  } catch (err: any) {
-    console.error(err);
+  } catch (error: any) {
+    let message;
+    if (isGraphQLClientError(error)) {
+      message = getGraphQLClientErrorMessage(error);
+    } else {
+      message = (error as Error).message;
+    }
+    yield put(
+      notificationActions.register({
+        id: uniqueId(),
+        state: "error" as const,
+        title: "Could not add tenant",
+        information: message
+      })
+    );
   }
 }
 
