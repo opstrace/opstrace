@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ReactNode, useEffect, useState } from "react";
+import React from "react";
 import Services from "client/services";
 import light from "client/themes/light";
 import ThemeProvider from "client/themes/Provider";
@@ -24,8 +24,7 @@ import { render, screen } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import DeleteUserDialog, { deleteUserCommand } from "./DeleteUserDialog";
-import { useCommandService } from "client/services/Command";
-import { userEvent } from "client/utils/testutils";
+import { CommandServiceTrigger, userEvent } from "client/utils/testutils";
 import getStore from "state/store";
 import { graphql } from "msw";
 import { setupServer } from "msw/node";
@@ -82,7 +81,7 @@ test("deactivates users", async () => {
   mockUserDeactivationEndpoint(mockUser);
 
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={deleteUserCommand}>
       <DeleteUserDialog />
     </CommandServiceTrigger>,
     { store }
@@ -107,7 +106,7 @@ test("deactivates users", async () => {
 test("handles user deactivation error", async () => {
   const store = getStore();
   const mockUser = createMockUser();
-  const errorMessage = "terrible error!"
+  const errorMessage = "terrible error!";
 
   store.dispatch(setUserList([mockUser]));
 
@@ -124,7 +123,7 @@ test("handles user deactivation error", async () => {
   );
 
   renderComponent(
-    <CommandServiceTrigger>
+    <CommandServiceTrigger commandId={deleteUserCommand}>
       <DeleteUserDialog />
     </CommandServiceTrigger>,
     { store }
@@ -145,23 +144,9 @@ test("handles user deactivation error", async () => {
   });
   userEvent.type(confirmationInput, "yes{enter}");
 
-  expect(await screen.findByText("Could not delete user")).toBeInTheDocument()
-  expect(await screen.findByText(errorMessage)).toBeInTheDocument()
+  expect(await screen.findByText("Could not delete user")).toBeInTheDocument();
+  expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const CommandServiceTrigger = ({ children }: { children: ReactNode }) => {
-  const cmdService = useCommandService();
-  const [commandServiceReady, setCommandServiceReady] = useState(false);
-  useEffect(() => {
-    // CommandService is not ready on first render, as commands havent been registered yet.
-    // This will retriger the command service on second render cycle.
-    setCommandServiceReady(true);
-  }, []);
-  useEffect(() => {
-    cmdService.executeCommand(deleteUserCommand);
-  }, [commandServiceReady, cmdService]);
-  return <>{children}</>;
-};
 
 const renderComponent = (
   children: React.ReactNode,

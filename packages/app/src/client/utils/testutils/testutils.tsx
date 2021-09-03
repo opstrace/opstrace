@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { render as rtlRender, RenderResult } from "@testing-library/react";
 import { History, createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
@@ -25,6 +25,7 @@ import "@testing-library/jest-dom";
 import ThemeProvider from "client/themes/Provider";
 import light from "client/themes/light";
 import Services from "client/services";
+import { useCommandService } from "client/services/Command";
 
 export type RenderOptions = {
   // optionally pass in a history object to control routes in the test
@@ -72,10 +73,30 @@ export const renderWithEnv = (
 };
 
 export function sleep(ms: number) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
 }
+
+export const CommandServiceTrigger = ({
+  children,
+  commandId
+}: {
+  children: ReactNode;
+  commandId: string;
+}) => {
+  const cmdService = useCommandService();
+  const [commandServiceReady, setCommandServiceReady] = useState(false);
+  useEffect(() => {
+    // CommandService is not ready on first render, as commands havent been registered yet.
+    // This will retriger the command service on second render cycle.
+    setCommandServiceReady(true);
+  }, []);
+  useEffect(() => {
+    cmdService.executeCommand(commandId);
+  }, [commandServiceReady, cmdService, commandId]);
+  return <>{children}</>;
+};
 
 // re-export everything
 export * from "@testing-library/react";
