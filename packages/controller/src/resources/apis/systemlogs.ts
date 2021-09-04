@@ -211,11 +211,11 @@ export function SystemLogAgentResources(
                   ],
                   resources: {
                     limits: {
-                      cpu: "200m",
+                      cpu: "400m",
                       memory: "200Mi"
                     },
                     requests: {
-                      cpu: "50m",
+                      cpu: "200m",
                       memory: "100Mi"
                     }
                   },
