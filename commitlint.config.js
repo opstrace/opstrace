@@ -22,6 +22,7 @@ module.exports = {
       2,
       "always",
       [
+        "alerts", // use `alerts: ` for changes to alert rules, definitions, thresholds, etc.
         "ui", // use `ui: ` for changes to client, and `ui: app:` for changes to server
         "bump", // third-party lib/component bump (can be big, including Cortex, ...)
         "chore", // small routine tasks, very localized refactors
