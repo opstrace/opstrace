@@ -57,7 +57,6 @@ export interface MetricSeriesOpts {
 export interface MetricSeriesFetchAndValidateOpts {
   querierBaseUrl: string;
   additionalHeaders?: Record<string, string>;
-  chunkSize?: number;
   customHTTPGetFunc?: (
     url: string,
     gotRequestOptions: any
@@ -401,7 +400,7 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
     return params;
   }
 
-  private async fetchAndValidateFragment(
+  protected async fetchAndValidateFragment(
     fragment: MetricSeriesFragment,
     opts: MetricSeriesFetchAndValidateOpts
   ): Promise<number> {

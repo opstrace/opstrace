@@ -563,11 +563,6 @@ async function throttledFetchAndValidate(
 }
 
 async function unthrottledFetchAndValidate(stream: LogSeries | MetricSeries) {
-  // const inspectEveryNthEntry = 200;
-  // const headers: Record<string, string> = {};
-  // if (BEARER_TOKEN) {
-  //   headers["Authorization"] = `Bearer ${BEARER_TOKEN}`;
-  // }
   if (CFG.metrics_mode) {
     const opts: MetricSeriesFetchAndValidateOpts = {
       querierBaseUrl: CFG.apibaseurl,
@@ -575,8 +570,10 @@ async function unthrottledFetchAndValidate(stream: LogSeries | MetricSeries) {
     };
     return await stream.fetchAndValidate(opts);
   }
+
   const opts: LogSeriesFetchAndValidateOpts = {
     querierBaseUrl: CFG.apibaseurl,
+    additionalHeaders: {},
     // inspectEveryNthEntry: inspectEveryNthEntry,
     customLokiQueryFunc: queryLokiWithRetryOrError // only used by LogSeries.fetchAndValidate: has custom header injection
   };
