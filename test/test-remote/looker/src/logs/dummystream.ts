@@ -83,7 +83,6 @@ type CustomQueryFuncSigType = (
 export interface LogSeriesFetchAndValidateOpts {
   querierBaseUrl: string;
   chunkSize?: number;
-  inspectEveryNthEntry?: number | undefined;
   customLokiQueryFunc?: CustomQueryFuncSigType;
   additionalHeaders?: Record<string, string>;
 }
