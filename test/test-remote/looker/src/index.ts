@@ -920,10 +920,10 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
         CYCLE_START_TIME_MONOTONIC
       );
       if (secondsSinceCycleStart > CYCLE_STOP_WRITE_AFTER_SECONDS) {
-        log.debug(
+        log.info(
           `write actor ${actorIndex}: ${secondsSinceCycleStart.toFixed(
             2
-          )} seconds passed: stop producer`
+          )} seconds passed: stop`
         );
         return;
       }
@@ -934,24 +934,28 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
     // only do that now after the push message has been sent out)
     for (const f of fragments) {
       const s = f.parent!;
-      if (
-        PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] <
-        CFG.cycle_stop_write_after_n_fragments
-      ) {
-        // Put back into work pool (left-hand side). All other actors might
-        // have terminated by now because maybe temporarily the pool size
-        // appeared as 0 (and in fact, was). Now that _this actor here_ is
-        // adding back items onto the pool, we also have to make sure that this
-        // actor here performs one more outer loop interation.
-        seriespool.unshift(s);
-        log.debug(`put ${s.uniqueName} back into work queue`);
-      } else {
-        log.debug(
-          `write actor ${actorIndex}:  CFG.cycle_stop_write_after_n_fragments ` +
-            `(${CFG.cycle_stop_write_after_n_fragments}) ` +
-            `pushed for ${s.uniqueName}`
-        );
+
+      if (CFG.cycle_stop_write_after_n_fragments !== 0) {
+        if (
+          PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] ===
+          CFG.cycle_stop_write_after_n_fragments
+        ) {
+          log.debug(
+            `write actor ${actorIndex}:  CFG.cycle_stop_write_after_n_fragments ` +
+              `(${CFG.cycle_stop_write_after_n_fragments}) ` +
+              `pushed for ${s.uniqueName}, do not put back into work queue`
+          );
+          continue;
+        }
       }
+
+      // Put back into work pool (left-hand side). All other actors might
+      // have terminated by now because maybe temporarily the pool size
+      // appeared as 0 (and in fact, was). Now that _this actor here_ is
+      // adding back items onto the pool, we also have to make sure that this
+      // actor here performs one more outer loop interation.
+      seriespool.unshift(s);
+      log.debug(`put ${s.uniqueName} back into work queue`);
     }
   }
 }
