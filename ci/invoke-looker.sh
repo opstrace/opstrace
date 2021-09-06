@@ -33,7 +33,7 @@ docker run ${COMMON_ARGS} looker \
     --n-series 3 \
     --n-samples-per-series-fragment 25000 \
     --change-series-every-n-cycles 1 \
-    --stream-write-n-fragments 2 \
+    --cycle-stop-write-after-n-fragments 2 \
     --n-cycles 2 \
     > ${LNAME}.log 2>&1
 echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
@@ -46,7 +46,7 @@ docker run ${COMMON_ARGS} looker \
     --n-series 3 \
     --n-samples-per-series-fragment 10000 \
     --n-chars-per-msg 100 \
-    --stream-write-n-fragments 15 \
+    --cycle-stop-write-after-n-fragments 15 \
     --change-series-every-n-cycles 1 \
     --n-cycles 3 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
@@ -63,7 +63,7 @@ docker run ${COMMON_ARGS} looker \
     --n-series 3 \
     --n-samples-per-series-fragment 1000 \
     --n-chars-per-msg 100 \
-    --stream-write-n-seconds 10 \
+    --cycle-stop-write-after-n-seconds 10 \
     --n-cycles 5 \
     --change-series-every-n-cycles 3 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
@@ -81,7 +81,7 @@ docker run ${COMMON_ARGS} looker \
     --n-series 10 \
     --n-samples-per-series-fragment 1000 \
     --n-chars-per-msg 100 \
-    --stream-write-n-fragments 10 \
+    --cycle-stop-write-after-n-fragments 10 \
     --max-concurrent-writes 2  \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > ${LNAME}.log 2>&1
@@ -98,8 +98,8 @@ docker run ${COMMON_ARGS} looker \
     --n-series 5 \
     --n-samples-per-series-fragment 5000 \
     --n-chars-per-msg 100 \
-    --stream-write-n-seconds 10 \
-    --stream-write-n-seconds-jitter 5 \
+    --cycle-stop-write-after-n-seconds 10 \
+    --cycle-stop-write-after-n-seconds-jitter 5 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > ${LNAME}.log 2>&1
 echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
@@ -120,7 +120,7 @@ docker run ${COMMON_ARGS} looker \
     --max-concurrent-reads 2 \
     --max-concurrent-writes 2 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-    --stream-write-n-seconds 10 \
+    --cycle-stop-write-after-n-seconds 10 \
     > ${LNAME}.log 2>&1
 echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
 
@@ -143,7 +143,7 @@ docker run ${COMMON_ARGS} looker \
     --n-series 100000 \
     --n-samples-per-series-fragment 5 \
     --n-fragments-per-push-message 15000 \
-    --stream-write-n-fragments 2 \
+    --cycle-stop-write-after-n-fragments 2 \
     --metrics-time-increment-ms 2000 \
     --max-concurrent-writes 6 \
     --skip-read \
@@ -161,7 +161,7 @@ docker run ${COMMON_ARGS} looker \
     --n-series 100000 \
     --n-samples-per-series-fragment 5 \
     --n-fragments-per-push-message 15000 \
-    --stream-write-n-fragments 10 \
+    --cycle-stop-write-after-n-fragments 10 \
     --metrics-time-increment-ms 2000 \
     --max-concurrent-writes 6 \
     --read-n-series-only 1 \
@@ -188,7 +188,7 @@ docker run ${COMMON_ARGS} looker \
     --n-series 1 \
     --n-samples-per-series-fragment 10 \
     --metrics-time-increment-ms 10000 \
-    --stream-write-n-seconds 20 \
+    --cycle-stop-write-after-n-seconds 20 \
     --log-level=debug \
     > ${LNAME}.log 2>&1
 echo -e "\n\n looker stdout/err tail:\n" && cat ${LNAME}.log | tail -n 15
