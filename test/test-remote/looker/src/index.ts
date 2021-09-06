@@ -1382,6 +1382,18 @@ async function queryLokiWithRetryOrError(
     const response = await httpGETRetryUntil200OrError(url, gotRequestOptions);
     const data = JSON.parse(response.body);
 
+    if (data.data === undefined || data.data.result === undefined) {
+      throw new Error(
+        `unexpected JSON doc: ${JSON.stringify(data, null, 2).slice(0, 400)}}`
+      );
+    }
+
+    if (data.data.result.length !== 1) {
+      throw new Error(
+        `data.data.result.length: expected 1, but got ${data.data.result.length}}`
+      );
+    }
+
     // expect 1 stream with non-zero entries, maybe assert on that here.
     const entrycount = data.data.result[0].values.length;
     // log.info(
@@ -1400,6 +1412,7 @@ async function queryLokiWithRetryOrError(
       };
       return result;
     }
+
     throw new Error(
       `unexpected entry count returned in query result: ${entrycount} ` +
         `(expected: ${expectedEntryCount}). stream: ${stream.uniqueName} chunkIndex: ${chunkIndex}`
