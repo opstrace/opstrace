@@ -127,21 +127,6 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
       }
     }
 
-    // The actual time width of a fragment in seconds, may be a float.
-    // say, there are 1000 samples per fragment and metrics_time_increment_ms is 1.
-    // Then the actual fragment time width is 0.999 seconds.
-    const fragmentWidthSeconds =
-      ((opts.n_samples_per_series_fragment - 1) * sampleTimeIncrementMs) /
-      1000.0;
-
-    // For metrics_time_increment_ms being integer multiple of 1000 this is the
-    // actual time width of a fragment (the time between the first and the last
-    // sample). For smaller values of metrics_time_increment_ms this is not the
-    // actual time width of a fragment, but precisely one delta_t between two
-    // samples more than that.. That's by design: this number must be an
-    // integer, and is used for query construction.
-    this.fragmentWidthSecondsForQuery = BigInt(Math.ceil(fragmentWidthSeconds));
-
     // Distinguish two special cases, also see ch1767;
     if (sampleTimeIncrementMs < 1000) {
       // Does adding one delta_t result in a fragment time width of n * 1 s?
@@ -155,6 +140,31 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
             "n_samples_per_series_fragment * metrics_time_increment_ms = multiple of 1000"
         );
       }
+    }
+
+    // The actual time width of a fragment in seconds, may be a float.
+    // say, there are 1000 samples per fragment and metrics_time_increment_ms is 1.
+    // Then the actual fragment time width is 0.999 seconds.
+    const fragmentWidthSeconds =
+      ((opts.n_samples_per_series_fragment - 1) * sampleTimeIncrementMs) /
+      1000.0;
+
+    // For metrics_time_increment_ms being integer multiple of 1000 this is the
+    // actual time width of a fragment (the time between the first and the last
+    // sample). For smaller values of metrics_time_increment_ms this is not the
+    // actual time width of a fragment, but precisely one delta_t between two
+    // samples more than that.. That's by design: this number must be an
+    // integer, and is used for query construction.
+    if (opts.n_samples_per_series_fragment > 1) {
+      this.fragmentWidthSecondsForQuery = BigInt(
+        Math.ceil(fragmentWidthSeconds)
+      );
+    } else {
+      // opts.n_samples_per_series_fragment being 1 means that the fragment has
+      // a time width of zero. In this case set `fragmentWidthSecondsForQuery`
+      // to 1 second (and ensure that the next sample (in the next fragment) is
+      // further apart than one second).
+      this.fragmentWidthSecondsForQuery = BigInt(1);
     }
 
     // For non-1000 ms step fragments  (e.g. 1 ms between adjacent samples)
