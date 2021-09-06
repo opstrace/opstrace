@@ -32,6 +32,7 @@ docker run ${COMMON_ARGS} looker \
     --metrics-mode \
     --n-series 3 \
     --n-samples-per-series-fragment 25000 \
+    --change-series-every-n-cycles 1 \
     --stream-write-n-fragments 2 \
     --n-cycles 2 \
     > ${LNAME}.log 2>&1
@@ -46,6 +47,7 @@ docker run ${COMMON_ARGS} looker \
     --n-samples-per-series-fragment 10000 \
     --n-chars-per-msg 100 \
     --stream-write-n-fragments 15 \
+    --change-series-every-n-cycles 1 \
     --n-cycles 3 \
     --log-start-time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     > ${LNAME}.log 2>&1
