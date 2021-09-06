@@ -46,7 +46,6 @@ interface CfgInterface {
   compressability: string;
   change_series_every_n_cycles: number;
   stream_write_n_seconds_jitter: number;
-  fetch_n_entries_per_query: number;
   metrics_mode: boolean;
   // max_start_time_offset_minutes: number;
   metrics_time_increment_ms: number;
@@ -309,14 +308,6 @@ export function parseCmdlineArgs(): void {
     metavar: "J",
     type: "float",
     default: 0
-  });
-
-  parser.add_argument("--fetch-n-entries-per-query", {
-    help:
-      "Maximum number of log entries to fetch per query during " +
-      "read/validation phase (honored in metric mode? TODO)",
-    type: "int",
-    default: 60000
   });
 
   parser.add_argument("--retry-post-deadline-seconds", {

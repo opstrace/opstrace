@@ -571,14 +571,12 @@ async function unthrottledFetchAndValidate(stream: LogSeries | MetricSeries) {
   if (CFG.metrics_mode) {
     const opts: MetricSeriesFetchAndValidateOpts = {
       querierBaseUrl: CFG.apibaseurl,
-      chunkSize: CFG.fetch_n_entries_per_query,
       customHTTPGetFunc: httpGETRetryUntil200OrError
     };
     return await stream.fetchAndValidate(opts);
   }
   const opts: LogSeriesFetchAndValidateOpts = {
     querierBaseUrl: CFG.apibaseurl,
-    chunkSize: CFG.fetch_n_entries_per_query,
     // inspectEveryNthEntry: inspectEveryNthEntry,
     customLokiQueryFunc: queryLokiWithRetryOrError // only used by LogSeries.fetchAndValidate: has custom header injection
   };
