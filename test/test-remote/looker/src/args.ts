@@ -32,8 +32,9 @@ interface CfgInterface {
   n_samples_per_series_fragment: number;
   n_cycles: number;
   n_fragments_per_push_message: number;
-  stream_write_n_fragments: number;
-  stream_write_n_seconds: number;
+  cycle_stop_write_after_n_fragments: number;
+  cycle_stop_write_after_n_seconds: number;
+  cycle_stop_write_after_n_seconds_jitter: number;
   max_concurrent_writes: number;
   max_concurrent_reads: number;
   logLevel: string;
@@ -45,7 +46,6 @@ interface CfgInterface {
   additional_labels: Array<[string, string]> | undefined;
   compressability: string;
   change_series_every_n_cycles: number;
-  stream_write_n_seconds_jitter: number;
   metrics_mode: boolean;
   // max_start_time_offset_minutes: number;
   metrics_time_increment_ms: number;
@@ -290,24 +290,26 @@ export function parseCmdlineArgs(): void {
   });
 
   const stopgroup = parser.add_mutually_exclusive_group({ required: true });
-  stopgroup.add_argument("--stream-write-n-fragments", {
+  stopgroup.add_argument("--cycle-stop-write-after-n-fragments", {
     help:
-      "within a write/read cycle, stop write (and enter read phase) when " +
-      "this many fragments were written for a log/metric stream",
+      "Cycle write phase stop criterion A: stop write (and enter read phase) " +
+      "when  this many fragments were written for each time series. " +
+      "Default: 0 (never enter the read phase).",
     type: "int",
     default: 0
   });
 
-  stopgroup.add_argument("--stream-write-n-seconds", {
+  stopgroup.add_argument("--cycle-stop-write-after-n-seconds", {
     help:
-      "within a write/read cycle, stop write (and enter read phase) after " +
-      "having written for approx. that many seconds",
+      "Cycle write phase stop criterion A: stop write (and enter read phase) " +
+      "having written for approximately that many seconds. " +
+      "Default: 0 (never enter the read phase).",
     type: "int",
     default: 0
   });
 
-  parser.add_argument("--stream-write-n-seconds-jitter", {
-    help: "add random number of seconds from interval [-J,J] to --stream-write-n-seconds ",
+  parser.add_argument("--cycle-stop-write-after-n-seconds-jitter", {
+    help: "add random number of seconds from interval [-J,J] to --cycle-stop-write-after-n-seconds ",
     metavar: "J",
     type: "float",
     default: 0
@@ -375,7 +377,7 @@ export function parseCmdlineArgs(): void {
   if (CFG.stream_write_n_seconds !== 0) {
     // For now: use very big number to effectively make the dummystream appear
     // infinitely long, so that it's only limited by the wall time passed.
-    CFG.stream_write_n_fragments = 10 ** 14;
+    CFG.cycle_stop_write_after_n_fragments = 10 ** 14;
   }
 
   if (CFG.change_series_every_n_cycles > CFG.n_cycles) {
@@ -405,16 +407,19 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
-  if (CFG.stream_write_n_seconds_jitter) {
-    if (CFG.stream_write_n_seconds === 0) {
+  if (CFG.cycle_stop_write_after_n_seconds_jitter) {
+    if (CFG.cycle_stop_write_after_n_seconds === 0) {
       log.error(
-        "--stream-write-n-seconds-jitter can only be used with --stream-write-n-seconds"
+        "--cycle-stop-write-after-n-seconds-jitter can only be used with --cycle-stop-write-after-n-seconds"
       );
       process.exit(1);
     }
-    if (CFG.stream_write_n_seconds_jitter > CFG.stream_write_n_seconds) {
+    if (
+      CFG.cycle_stop_write_after_n_seconds_jitter >
+      CFG.cycle_stop_write_after_n_seconds
+    ) {
       log.error(
-        "--stream-write-n-seconds-jitter must be smaller than --stream-write-n-seconds"
+        "--cycle-stop-write-after-n-seconds-jitter must be smaller than --cycle-stop-write-after-n-seconds"
       );
       process.exit(1);
     }

@@ -359,17 +359,17 @@ async function performWriteReadCycle(
   invocationCycleId: string
 ) {
   CYCLE_START_TIME_MONOTONIC = mtime();
-  CYCLE_STOP_WRITE_AFTER_SECONDS = CFG.stream_write_n_seconds;
+  CYCLE_STOP_WRITE_AFTER_SECONDS = CFG.cycle_stop_write_after_n_seconds;
 
-  if (CFG.stream_write_n_seconds_jitter !== 0) {
+  if (CFG.cycle_stop_write_after_n_seconds_jitter !== 0) {
     const jitter = util.rndFloatFromInterval(
-      -CFG.stream_write_n_seconds_jitter,
-      CFG.stream_write_n_seconds_jitter
+      -CFG.cycle_stop_write_after_n_seconds_jitter,
+      CFG.cycle_stop_write_after_n_seconds_jitter
     );
     CYCLE_STOP_WRITE_AFTER_SECONDS += jitter;
     log.info(
       "CYCLE_STOP_WRITE_AFTER_SECONDS: (%s + %s) s",
-      CFG.stream_write_n_seconds,
+      CFG.cycle_stop_write_after_n_seconds,
       jitter.toFixed(2)
     );
   }
@@ -936,7 +936,7 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
       const s = f.parent!;
       if (
         PER_STREAM_FRAGMENTS_CONSUMED_IN_CURRENT_CYCLE[s.uniqueName] <
-        CFG.stream_write_n_fragments
+        CFG.cycle_stop_write_after_n_fragments
       ) {
         // Put back into work pool (left-hand side). All other actors might
         // have terminated by now because maybe temporarily the pool size
@@ -947,7 +947,8 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
         log.debug(`put ${s.uniqueName} back into work queue`);
       } else {
         log.debug(
-          `write actor ${actorIndex}:  CFG.stream_write_n_fragments (${CFG.stream_write_n_fragments}) ` +
+          `write actor ${actorIndex}:  CFG.cycle_stop_write_after_n_fragments ` +
+            `(${CFG.cycle_stop_write_after_n_fragments}) ` +
             `pushed for ${s.uniqueName}`
         );
       }
