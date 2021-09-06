@@ -257,9 +257,13 @@ export function parseCmdlineArgs(): void {
   });
 
   parser.add_argument("--n-cycles", {
-    help: "number of write/read cycles to perform. Every cycle generates a report.",
+    help:
+      "Number of write/read cycles to perform before terminating the program. " +
+      "Every cycle allows for (potentially sparse) read validation of " +
+      "what was previously written, and also generates a performance report. " +
+      "Default: 0 (perform an infinite amount of cycles). ",
     type: "int",
-    default: 1
+    default: 0
   });
 
   parser.add_argument("--change-series-every-n-cycles", {
