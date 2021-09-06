@@ -78,8 +78,8 @@ export interface LogSampleTimestamp {
 export class LogSample extends SampleBase<string, LogSampleTimestamp> {}
 
 export interface LogSeriesFragmentStats extends FragmentStatsBase {
-  timeOfFirstEntry: string;
-  timeOfLastEntry: string;
+  timeOfFirstEntry: bigint;
+  timeOfLastEntry: bigint;
 }
 
 export class LogSeriesFragment extends FragmentBase<LogSample, LogSeries> {
@@ -140,11 +140,18 @@ export class LogSeriesFragment extends FragmentBase<LogSample, LogSeries> {
       throw new Error("not yet serialized");
     }
 
-    const stats = {
+    const tsfirst = this.samples[0].time;
+    const tslast = this.samples.slice(-1)[0].time;
+    const stats: LogSeriesFragmentStats = {
       sampleCount: BigInt(this.samples.length),
-      timeOfFirstEntry: JSON.stringify(this.samples[0].time),
-      timeOfLastEntry: JSON.stringify(this.samples.slice(-1)[0].time)
+      timeOfFirstEntry: BigInt(
+        tsfirst.seconds.toString() + tsfirst.nanos.toString()
+      ),
+      timeOfLastEntry: BigInt(
+        tslast.seconds.toString() + tslast.nanos.toString()
+      )
     };
+
     this.stats = stats;
     // log.info("fragmentStat right after generate: %s", stats);
 
