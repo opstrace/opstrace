@@ -1240,30 +1240,19 @@ async function customPostWithRetryOrError(
   }
 }
 
-// should this be a method on the class?
+// should this be a method on pushmessage class?
 function markPushMessageAsSuccessfullySent(
   pr: LogSeriesFragmentPushRequest | MetricSeriesFragmentPushMessage
 ) {
   // Keep track of the fact that this was successfully pushed out,
   // important for e.g. read-based validation after write.
 
-  // Plan for this push request to contain potentially more than one
-  // time series (metrics or logs).
-  for (const frgmnt of pr.fragments) {
-    // dummystream version
-    // also works for dummyseries but is noop
-    frgmnt.parent!.nFragmentsSuccessfullySentSinceLastValidate += 1;
-
-    // drop actual samples (otherwise mem usage would grow quite fast).
-    frgmnt.buildStatisticsAndDropData();
-
-    // dummyseries version
-    if (frgmnt instanceof MetricSeriesFragment) {
-      // `postedFragmentsSinceLastValidate` is an array if this object is meant
-      // to collect information for read-validation, or `undefined` otherwise.
-      if (frgmnt.parent!.postedFragmentsSinceLastValidate !== undefined) {
-        frgmnt.parent!.postedFragmentsSinceLastValidate.push(frgmnt);
-      }
+  // A push message can contain more than one time series fragment.
+  for (const f of pr.fragments) {
+    if (f.parent!.shouldBeValidated()) {
+      // Drop actual samples (otherwise mem usage could grow quite fast).
+      f.buildStatisticsAndDropData();
+      f.parent!.rememberFragmentForValidation(f);
     }
   }
 }

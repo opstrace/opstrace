@@ -208,7 +208,9 @@ export abstract class TimeseriesBase<FragmentType> {
 
   // `undefined` means: do not collect validation info; this is so
   // that we ideally save memory
-  postedFragmentsSinceLastValidate: Array<FragmentType> | undefined;
+  postedFragmentsSinceLastValidate:
+    | Array<LogSeriesFragment | MetricSeriesFragment>
+    | undefined;
 
   sample_time_increment_ns: number;
   n_samples_per_series_fragment: number;
@@ -266,14 +268,6 @@ export abstract class TimeseriesBase<FragmentType> {
     opts: LogSeriesOpts | MetricSeriesOpts
   ): LabelSet;
 
-  abstract disableValidation(): void;
-
-  abstract enableValidation(): void;
-
-  abstract shouldBeValidated(): boolean;
-
-  abstract dropValidationInfo(): void;
-
   abstract currentTimeRFC3339Nano(): string;
 
   abstract promQueryString(): string;
@@ -306,7 +300,7 @@ export abstract class TimeseriesBase<FragmentType> {
   // ): Promise<number>;
 
   protected abstract fetchAndValidateFragment(
-    fragment: FragmentType,
+    fragment: LogSeriesFragment | MetricSeriesFragment,
     opts: MetricSeriesFetchAndValidateOpts | LogSeriesFetchAndValidateOpts
   ): Promise<number>;
 
@@ -555,5 +549,32 @@ export abstract class TimeseriesBase<FragmentType> {
 
     this.postedFragmentsSinceLastValidate = [];
     return samplesValidated;
+  }
+
+  public disableValidation(): void {
+    this.postedFragmentsSinceLastValidate = undefined;
+  }
+
+  public enableValidation(): void {
+    this.postedFragmentsSinceLastValidate = [];
+  }
+
+  public shouldBeValidated(): boolean {
+    if (this.postedFragmentsSinceLastValidate === undefined) {
+      return false;
+    }
+    return true;
+  }
+
+  public rememberFragmentForValidation(
+    f: LogSeriesFragment | MetricSeriesFragment
+  ): void {
+    if (this.postedFragmentsSinceLastValidate !== undefined) {
+      this.postedFragmentsSinceLastValidate.push(f);
+    }
+  }
+
+  public dropValidationInfo(): void {
+    this.postedFragmentsSinceLastValidate = [];
   }
 }
