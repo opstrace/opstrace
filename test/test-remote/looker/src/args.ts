@@ -266,10 +266,9 @@ export function parseCmdlineArgs(): void {
     help:
       "Use the same log/metric time series for N cycles, then create a new " +
       "set of series (unique label sets). If set to 0 then the initial set " +
-      "of time series is reused for the process lifetime. " +
-      "Default: 1, i.e. new series are created with every write/read cycle. ",
+      "of time series is reused for the process lifetime (the default). ",
     type: "int",
-    default: 1
+    default: 0
   });
 
   parser.add_argument("--label", {
