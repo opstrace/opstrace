@@ -333,21 +333,6 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     // a noop so far, see DummyTimeseries for what this is about
   }
 
-  // private timeofEntryN(N: bigint): bigint {
-  //   // Get the time of the first entry (1) in the stream as an integer number
-  //   // representing the number of nanoseconds passed since epoch.
-  //   const start =
-  //     BigInt(this.starttime.toEpochSecond()) * BigInt(10 ** 9) +
-  //     BigInt(this.starttime.nano());
-
-  //   // Entry 1: return start time.
-  //   const timeOfEntry =
-  //     start + (N - BigInt(1)) * BigInt(this.sample_time_increment_ns);
-
-  //   // Return string indicating nanoseconds since epoch.
-  //   return timeOfEntry;
-  // }
-
   private queryParamsForFragment(fragment: LogSeriesFragment) {
     // Confirm that fragment is 'closed' (serialized, has stats), and override
     // type from `LogStreamFragmentStats | MetricSeriesFragmentStats` to just
@@ -365,12 +350,12 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
       query: logqlLabelString(this.labels),
       direction: "FORWARD",
       limit: stats.sampleCount.toString(),
-      start: stats.timeOfFirstEntry,
+      start: stats.timeOfFirstEntry.toString(),
       // end is not inclusive, i.e. if we set `end` to e.g. 1582211051130000099
       // then the last entry returned would be from 1582211051130000098 even if
       // there is one at 1582211051130000099. So, bump this by one nanosecond
       // to get N entries returned in the happy case.
-      end: (BigInt(stats.timeOfFirstEntry) + BigInt(1)).toString()
+      end: (stats.timeOfFirstEntry + BigInt(1)).toString()
     };
 
     log.debug("query params: %s", qparams);
@@ -385,14 +370,11 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
 
     let result: LokiQueryResult;
     if (opts.customLokiQueryFunc !== undefined) {
-      // why would the compiler not know that in here customQueryFunc is indeed
-      // _not_ undefined?
-      //@ts-ignore: see comment above
-      result = await customLokiQueryFunc(
+      result = await opts.customLokiQueryFunc(
         opts.querierBaseUrl,
         opts.additionalHeaders,
         qparams,
-        fragment.stats!.sampleCount,
+        Number(fragment.stats!.sampleCount),
         fragment.index,
         this // pass dummystream object to func for better error reporting
       );
@@ -414,192 +396,6 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
 
     return result.entries.length;
   }
-
-  // private queryParamsForVerify(
-  //   chunksize: bigint,
-  //   chunkindex: bigint,
-  //   offset: bigint
-  // ) {
-  //   // Fetch entries in "chunks". The first chunk has index 1.
-  //   // The first entry has index 1. The chunk size is the number of entries.
-  //   // Example: chunk size 100
-  //   //    chunk index 1:
-  //   //        yield entries 1-100 (including 100)
-  //   //    chunk index 2:
-  //   //        yield entries 101-200 (including 200)
-  //   // Offset: the first entry in the first chunk is not entry 1 in the stream
-  //   // but instead it is entry O+1.
-  //   // offset can be large so do all of this in bigint.
-
-  //   let startEntryIdx: bigint;
-  //   let endEntryIdx: bigint;
-  //   startEntryIdx = (chunkindex - BigInt(1)) * chunksize + BigInt(1);
-  //   endEntryIdx = chunkindex * chunksize;
-
-  //   // Apply offset separately to make things appear not more complicated
-  //   // than they are.
-  //   startEntryIdx += offset;
-  //   endEntryIdx += offset;
-
-  //   // log.debug(
-  //   //   "query startEntryIdx, endEntryIdx: %s, %s",
-  //   //   startEntryIdx,
-  //   //   endEntryIdx
-  //   // );
-
-  //   const queryParams = {
-  //     query: logqlLabelString(this.labels),
-  //     direction: "FORWARD",
-  //     limit: chunksize.toString(),
-  //     start: this.timeofEntryN(startEntryIdx).toString(),
-  //     // end is not inclusive, i.e. if we set `end` to e.g. 1582211051130000099
-  //     // then the last entry returned would be from 1582211051130000098 even if
-  //     // there is one at 1582211051130000099. So, bump this by one nanosecond
-  //     // to get N entries returned in the happy case.
-  //     end: this.timeofEntryN(endEntryIdx + BigInt(1)).toString()
-  //   };
-  //   return queryParams;
-  // }
-
-  //   public async fetchAndValidate(
-  //     opts: LogSeriesFetchAndValidateOpts
-  //   ): Promise<number> {
-  //     const lokiQuerierBaseURL = opts.querierBaseUrl;
-
-  //     // chunkSize: think of it as "fetch at most those many entries per query"
-  //     const chunkSize = opts.chunkSize || 20000;
-
-  //     // Not used by looker as of the time of writing
-  //     const inspectEveryNthEntry = opts.inspectEveryNthEntry || 0;
-  //     const customLokiQueryFunc = opts.customLokiQueryFunc;
-  //     const additionalHeaders = opts.additionalHeaders || {};
-
-  //     const expectedSampleCount =
-  //       this.nFragmentsSuccessfullySentSinceLastValidate *
-  //       this.n_samples_per_series_fragment;
-
-  //     const vt0 = mtime();
-  //     log.debug(
-  //       "%s: validate. Sent %s fragments since last validation. Expect %s entries. Previously validated: %s entries",
-  //       this,
-  //       this.nFragmentsSuccessfullySentSinceLastValidate,
-  //       expectedSampleCount,
-  //       this.nSamplesValidatedSoFar
-  //     );
-
-  //     let entriesRemainingToBeChecked = expectedSampleCount;
-  //     let chunkIndex = 1;
-
-  //     // cheap way out: do not check the last chunk in this loop.
-  //     while (entriesRemainingToBeChecked > 0) {
-  //       const queryParams = this.queryParamsForVerify(
-  //         BigInt(chunkSize),
-  //         BigInt(chunkIndex),
-  //         this.nSamplesValidatedSoFar
-  //       );
-  //       // the last chunk might be expected to be smaller than the regular
-  //       // chunk size.
-  //       log.debug("remaining entries: %s", entriesRemainingToBeChecked);
-  //       let expectedCount = chunkSize;
-  //       if (entriesRemainingToBeChecked < chunkSize)
-  //         expectedCount = entriesRemainingToBeChecked;
-
-  //       log.debug(
-  //         "waitForLokiQueryResult() for chunk %s. expectedCount: %s. ",
-  //         chunkIndex,
-  //         expectedCount
-  //       );
-
-  //       let result: LokiQueryResult;
-  //       if (customLokiQueryFunc !== undefined) {
-  //         // why would the compiler not know that in here customQueryFunc is indeed
-  //         // _not_ undefined?
-  //         //@ts-ignore: see comment above
-  //         result = await customLokiQueryFunc(
-  //           lokiQuerierBaseURL,
-  //           additionalHeaders,
-  //           queryParams,
-  //           expectedCount,
-  //           chunkIndex,
-  //           this // pass dummystream object to func for better error reporting
-  //         );
-  //       } else {
-  //         // used by e.g. test-remote project (can change)
-  //         result = await waitForLokiQueryResult(
-  //           lokiQuerierBaseURL,
-  //           additionalHeaders,
-  //           queryParams,
-  //           expectedCount,
-  //           false,
-  //           1,
-  //           false // disable building hash over payload
-  //         );
-  //       }
-
-  //       log.debug("got result with hash '%s'", result.textmd5);
-
-  //       // Example for an entry:
-  //       //
-  //       // [
-  //       //   "1630578960000000000",
-  //       //   "1630578960000000000:QNd+vNFSYgfJfwMlzhLSlbx9 <snip>"
-  //       // ]
-
-  //       // validate payload
-  //       for (const entry of result.entries) {
-  //         // log.info("entry: %s", JSON.stringify(entry, null, 2));
-
-  //         entriesRemainingToBeChecked--;
-
-  //         if (
-  //           inspectEveryNthEntry &&
-  //           entriesRemainingToBeChecked % inspectEveryNthEntry
-  //         ) {
-  //           // Only validate every Nth sample.
-  //           continue;
-  //         }
-
-  //         const tstring = entry[0];
-
-  //         // For LogSeries, the current validation method does not act on
-  //         // individual fragments written, but instead assumes a continuous
-  //         // stream of samples. Since individual written fragments are not used
-  //         // as the 'unit of validation' (not even in their reduced form, after
-  //         // dropping most payload data), the hash over the log text content
-  //         // cannot be used. This was smart when written fragments were small but
-  //         // the to-be-read "fragments" (chunk sizes) were supposed to be much
-  //         // larger, to speed up the read phase. Today, this is not smart
-  //         // anymore, because it's in conceptual conflict with the leap-forward
-  //         // walltime coupling technique. TODO: as with the metrics mode, iterate
-  //         // over individual fragments written (as they are saved in their
-  //         // reduced form) and perform a per-fragment read validation. Then we
-  //         // can use the md5 checksum over the log contents.
-  //         if (!entry[1].startsWith(tstring)) {
-  //           log.error("invalid entry: %s", entry);
-  //           throw Error("boo!");
-  //         }
-  //       }
-
-  //       log.debug(
-  //         "validated %s entries (inspected every Nth entry: %s (0: all))",
-  //         result.entries.length,
-  //         inspectEveryNthEntry
-  //       );
-
-  //       chunkIndex += 1;
-  //     }
-  //     log.debug(
-  //       "series %s: validation took %s s overall",
-  //       this,
-  //       mtimeDiffSeconds(vt0).toFixed(1)
-  //     );
-
-  //     this.nFragmentsSuccessfullySentSinceLastValidate = 0;
-  //     this.nSamplesValidatedSoFar += BigInt(expectedSampleCount);
-
-  //     // return the number of entries read (and validated)
-  //     return expectedSampleCount;
-  //   }
 }
 
 export interface LokiQueryResult {
