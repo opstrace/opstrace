@@ -374,7 +374,15 @@ export function parseCmdlineArgs(): void {
     assert(!CFG.metrics_mode);
   }
 
-  if (CFG.stream_write_n_seconds !== 0) {
+  if (
+    CFG.cycle_stop_write_after_n_seconds !== 0 &&
+    CFG.cycle_stop_write_after_n_fragments !== 0
+  ) {
+    log.error("Only one per-cycle write stop criterion must be defined");
+    process.exit(1);
+  }
+
+  if (CFG.cycle_stop_write_after_n_seconds !== 0) {
     // For now: use very big number to effectively make the dummystream appear
     // infinitely long, so that it's only limited by the wall time passed.
     CFG.cycle_stop_write_after_n_fragments = 10 ** 14;
