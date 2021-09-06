@@ -382,12 +382,6 @@ export function parseCmdlineArgs(): void {
     process.exit(1);
   }
 
-  if (CFG.cycle_stop_write_after_n_seconds !== 0) {
-    // For now: use very big number to effectively make the dummystream appear
-    // infinitely long, so that it's only limited by the wall time passed.
-    CFG.cycle_stop_write_after_n_fragments = 10 ** 14;
-  }
-
   if (CFG.change_series_every_n_cycles > CFG.n_cycles) {
     log.error(
       "--change-series-every-n-cycles must not be larger than --n-cycles"
