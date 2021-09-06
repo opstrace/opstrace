@@ -94,7 +94,6 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
   private includeTimeInMsg: boolean;
   private firstEntryGenerated: boolean;
   private genChars: (n: number) => string;
-  private shouldBeValidatedflag: boolean;
 
   n_chars_per_msg: number;
 
@@ -102,8 +101,6 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
 
   constructor(opts: LogSeriesOpts) {
     super(opts);
-
-    this.shouldBeValidatedflag = true;
 
     this.currentSeconds = opts.starttime.toEpochSecond();
     this.currentNanos = opts.starttime.nano();
@@ -286,6 +283,11 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
         );
       }
       await pushrequest.postWithRetryOrError(lokiBaseUrl, 3, additionalHeaders);
+
+      if (this.shouldBeValidated()) {
+        assert(this.postedFragmentsSinceLastValidate);
+        this.postedFragmentsSinceLastValidate.push(fragment);
+      }
     }
   }
 
@@ -325,18 +327,6 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
 
   public currentTimeRFC3339Nano(): string {
     return timestampToRFC3339Nano(this.currentTime());
-  }
-
-  public disableValidation(): void {
-    this.shouldBeValidatedflag = false;
-  }
-
-  public enableValidation(): void {
-    this.shouldBeValidatedflag = true;
-  }
-
-  public shouldBeValidated(): boolean {
-    return this.shouldBeValidatedflag;
   }
 
   public dropValidationInfo(): void {

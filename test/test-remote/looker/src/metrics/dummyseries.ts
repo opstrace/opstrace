@@ -218,21 +218,6 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
     return `${this.metricName}{uniquename="${this.uniqueName}"}`;
   }
 
-  public disableValidation(): void {
-    this.postedFragmentsSinceLastValidate = undefined;
-  }
-
-  public enableValidation(): void {
-    this.postedFragmentsSinceLastValidate = [];
-  }
-
-  public shouldBeValidated(): boolean {
-    if (this.postedFragmentsSinceLastValidate === undefined) {
-      return false;
-    }
-    return true;
-  }
-
   private nextValue() {
     // Note: this ignores the compressability concept so far.
     // Math.random() is inclusive of 0, but not of 1.
@@ -346,16 +331,12 @@ export class MetricSeries extends TimeseriesBase<MetricSeriesFragment> {
       // drop actual samples (otherwise mem usage would grow quite fast).
       fragment.buildStatisticsAndDropData();
 
-      // if this stream is marked to never be validated then don't collect
-      // information about this fragment at all
-      if (this.postedFragmentsSinceLastValidate !== undefined) {
+      // If this stream is marked to never be validated then don't collect this.
+      if (this.shouldBeValidated()) {
+        assert(this.postedFragmentsSinceLastValidate);
         this.postedFragmentsSinceLastValidate.push(fragment);
       }
     }
-  }
-
-  public dropValidationInfo(): void {
-    this.postedFragmentsSinceLastValidate = [];
   }
 
   private queryParamsForFragment(fragment: MetricSeriesFragment) {
