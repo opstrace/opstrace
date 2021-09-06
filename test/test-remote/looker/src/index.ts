@@ -120,7 +120,10 @@ async function main() {
     cycleId(1)
   );
 
-  for (let cyclenum = 1; cyclenum <= CFG.n_cycles; cyclenum++) {
+  let cyclenum = 0;
+  while (true) {
+    cyclenum++;
+
     // create a bit of visual separation between per-cycle log blobs.
     // `process.stderr.write()` might interleave unpredictably with rest of log
     // output.
@@ -158,6 +161,13 @@ async function main() {
     } catch (err) {
       log.crit("err during write/read cycle: %s", err);
       process.exit(1);
+    }
+
+    if (CFG.n_cycles !== 0) {
+      if (cyclenum === CFG.n_cycles) {
+        log.info(`cycles completed: ${CFG.n_cycles}, terminate`);
+      }
+      break;
     }
   }
 
