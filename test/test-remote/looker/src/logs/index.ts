@@ -144,12 +144,8 @@ export class LogSeriesFragment extends FragmentBase<LogSample, LogSeries> {
     const tslast = this.samples.slice(-1)[0].time;
     const stats: LogSeriesFragmentStats = {
       sampleCount: BigInt(this.samples.length),
-      timeOfFirstEntry: BigInt(
-        tsfirst.seconds.toString() + tsfirst.nanos.toString()
-      ),
-      timeOfLastEntry: BigInt(
-        tslast.seconds.toString() + tslast.nanos.toString()
-      )
+      timeOfFirstEntry: BigInt(logSampleTimeStampToString(tsfirst)),
+      timeOfLastEntry: BigInt(logSampleTimeStampToString(tslast))
     };
 
     this.stats = stats;
@@ -159,6 +155,8 @@ export class LogSeriesFragment extends FragmentBase<LogSample, LogSeries> {
     // see https://stackoverflow.com/a/1232046/145400
     this.samples.length = 0;
     this.stats = stats;
+
+    // log.info("stats: \n\n %s", stats);
   }
 
   public serialize(): LogSeriesFragmentPushRequest {
@@ -372,6 +370,10 @@ export class LogSeriesFragmentPushRequest {
     const serializationTimeSeconds = mtimeDiffSeconds(t0);
     return [prBufferSnapped, logtextmd5, serializationTimeSeconds];
   }
+}
+
+export function logSampleTimeStampToString(t: LogSampleTimestamp): string {
+  return t.seconds.toString() + t.nanos.toString().toString().padStart(9, "0");
 }
 
 export function logqlKvPairTextToObj(lql: string) {
