@@ -355,7 +355,7 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
       // then the last entry returned would be from 1582211051130000098 even if
       // there is one at 1582211051130000099. So, bump this by one nanosecond
       // to get N entries returned in the happy case.
-      end: (stats.timeOfFirstEntry + BigInt(1)).toString()
+      end: (stats.timeOfLastEntry + BigInt(1)).toString()
     };
 
     log.debug("query params: %s", qparams);
