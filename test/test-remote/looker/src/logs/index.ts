@@ -80,6 +80,7 @@ export class LogSample extends SampleBase<string, LogSampleTimestamp> {}
 export interface LogSeriesFragmentStats extends FragmentStatsBase {
   timeOfFirstEntry: bigint;
   timeOfLastEntry: bigint;
+  textmd5: string;
 }
 
 export class LogSeriesFragment extends FragmentBase<LogSample, LogSeries> {
@@ -142,10 +143,22 @@ export class LogSeriesFragment extends FragmentBase<LogSample, LogSeries> {
 
     const tsfirst = this.samples[0].time;
     const tslast = this.samples.slice(-1)[0].time;
+
+    // This is the hash over the text content of the samples in this fragment.
+    // Note that this is not including timestamp data.
+    const logTextHash = crypto.createHash("md5");
+    for (const s of this.samples) {
+      // Update log text hash with the UTF-8-encoded version of the text. From
+      // docs: "If encoding is not provided, and the data is a string, an
+      // encoding of 'utf8' is enforced"
+      logTextHash.update(s.value);
+    }
+
     const stats: LogSeriesFragmentStats = {
       sampleCount: BigInt(this.samples.length),
       timeOfFirstEntry: BigInt(logSampleTimeStampToString(tsfirst)),
-      timeOfLastEntry: BigInt(logSampleTimeStampToString(tslast))
+      timeOfLastEntry: BigInt(logSampleTimeStampToString(tslast)),
+      textmd5: logTextHash.digest("hex")
     };
 
     this.stats = stats;

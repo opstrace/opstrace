@@ -329,10 +329,6 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     return timestampToRFC3339Nano(this.currentTime());
   }
 
-  public dropValidationInfo(): void {
-    // a noop so far, see DummyTimeseries for what this is about
-  }
-
   private queryParamsForFragment(fragment: LogSeriesFragment) {
     // Confirm that fragment is 'closed' (serialized, has stats), and override
     // type from `LogStreamFragmentStats | MetricSeriesFragmentStats` to just
@@ -366,6 +362,9 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
     fragment: LogSeriesFragment,
     opts: LogSeriesFetchAndValidateOpts
   ): Promise<number> {
+    assert(fragment.stats);
+    const stats = fragment.stats as LogSeriesFragmentStats;
+
     const qparams = this.queryParamsForFragment(fragment);
 
     let result: LokiQueryResult;
@@ -374,7 +373,7 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
         opts.querierBaseUrl,
         opts.additionalHeaders,
         qparams,
-        Number(fragment.stats!.sampleCount),
+        Number(stats.sampleCount),
         fragment.index,
         this // pass dummystream object to func for better error reporting
       );
@@ -384,7 +383,7 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
         opts.querierBaseUrl,
         opts.additionalHeaders,
         qparams,
-        Number(fragment.stats!.sampleCount),
+        Number(stats.sampleCount),
         false,
         1,
         false // disable building hash over payload
@@ -393,6 +392,24 @@ export class LogSeries extends TimeseriesBase<LogSeriesFragment> {
 
     // TODO: compare stats derived from the query result with the .stats
     // propery on the fragment.
+    const logTextHash = crypto.createHash("md5");
+    for (const e of result.entries) {
+      // Update log text hash with the UTF-8-encoded version of the text. From
+      // docs: "If encoding is not provided, and the data is a string, an
+      // encoding of 'utf8' is enforced"
+      logTextHash.update(e[1]);
+    }
+    const textmd5fromq = logTextHash.digest("hex");
+
+    if (stats.textmd5 !== textmd5fromq) {
+      throw new Error(
+        "log time series fragment text checksum mismatch: " +
+          `series: ${fragment.parent!.promQueryString} ` +
+          `fragment: ${fragment.index} + \n fragment stats: ` +
+          JSON.stringify(stats, null, 2) +
+          `\nchecksum from query result: ${textmd5fromq}`
+      );
+    }
 
     return result.entries.length;
   }
