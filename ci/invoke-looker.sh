@@ -77,6 +77,7 @@ echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
+    --n-cycles 1 \
     --n-series 10 \
     --n-samples-per-series-fragment 1000 \
     --n-chars-per-msg 100 \
@@ -93,6 +94,7 @@ echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
+    --n-cycles 1 \
     --n-series 5 \
     --n-samples-per-series-fragment 5000 \
     --n-chars-per-msg 100 \
@@ -110,6 +112,7 @@ echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_LOKI_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
+    --n-cycles 1 \
     --n-series 5 \
     --n-samples-per-series-fragment 1000 \
     --n-fragments-per-push-message 2 \
@@ -136,6 +139,7 @@ docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --metrics-mode \
+    --n-cycles 1 \
     --n-series 100000 \
     --n-samples-per-series-fragment 5 \
     --n-fragments-per-push-message 15000 \
@@ -152,6 +156,7 @@ echo -e "\n\n Invoke looker test: ${LNAME}\n"
 docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
+    --n-cycles 1 \
     --metrics-mode \
     --n-series 100000 \
     --n-samples-per-series-fragment 5 \
@@ -179,6 +184,7 @@ docker run ${COMMON_ARGS} looker \
     "${TENANT_DEFAULT_CORTEX_API_BASE_URL}" \
     --bearer-token-file "${TENANT_DEFAULT_API_TOKEN_FILEPATH}" \
     --metrics-mode \
+    --n-cycles 1 \
     --n-series 1 \
     --n-samples-per-series-fragment 10 \
     --metrics-time-increment-ms 10000 \
