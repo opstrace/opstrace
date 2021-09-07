@@ -724,8 +724,8 @@ export async function generateAndPostFragments(
 
   // We do not want to mutate the original `series` Array -- which of the
   // following two techniques fulfills that? Both?
-  const seriespool = new Denque([...series]);
-  //const seriespool = new Denque(series);
+  //const seriespool = new Denque([...series]);
+  const seriespool = new Denque(series);
 
   const actorCount = CFG.max_concurrent_writes;
   for (let i = 1; i <= actorCount; i++) {
