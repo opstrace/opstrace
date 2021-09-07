@@ -1206,7 +1206,7 @@ async function customPostWithRetryOrError(
         ) {
           previousPushSuccessAmbiguous = true;
           log.warning(
-            `POST ${pr}: previousPushSuccessAmbiguous: set as of a` +
+            `POST ${pr}: previousPushSuccessAmbiguous: set as of a ` +
               "got http client timeout for the 'request' or 'response' " +
               "phase -> next 'out or order' error not fatal"
           );
