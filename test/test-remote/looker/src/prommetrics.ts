@@ -140,7 +140,7 @@ export function setupPromExporter() {
   httpapp.get(
     "/metrics",
     function (req: express.Request, res: express.Response) {
-      log.info("handling request to /metrics");
+      log.debug("handling request to /metrics");
       res.send(promclient.register.metrics());
     }
   );
