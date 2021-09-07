@@ -25,7 +25,9 @@ import { selectTenantById } from "state/tenant/hooks/useTenant";
 import { Integration } from "state/integration/types";
 import { Tenant } from "state/tenant/types";
 
-import { getFolder } from "client/utils/grafana";
+import { getFolder, isGrafanaError } from "client/utils/grafana";
+import uniqueId from "lodash/uniqueId";
+import { actions as notificationActions } from "client/services/Notification/reducer";
 
 // create a generic type
 type AsyncReturnType<T extends (...args: any) => any> =
@@ -96,7 +98,16 @@ function* loadGrafanaStateForIntegration(
         }
       })
     );
-  } catch (err: any) {
-    console.error(err);
+  } catch (error: any) {
+    yield put(
+      notificationActions.register({
+        id: uniqueId(),
+        state: "error" as const,
+        title: "Could not load grafana state for integration",
+        information: isGrafanaError(error)
+          ? error.response.data.message
+          : error.message
+      })
+    );
   }
 }
