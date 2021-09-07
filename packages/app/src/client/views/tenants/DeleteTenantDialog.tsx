@@ -25,6 +25,8 @@ import { deleteTenant } from "state/tenant/actions";
 
 import { Tenant } from "state/tenant/types";
 
+export const deleteTenantCommandId = "delete-tenant-picker"
+
 function tenantToPickerOption(tenant: Tenant): PickerOption {
   return {
     text: tenant.name,
@@ -78,7 +80,7 @@ const DeleteTenantPicker = () => {
 
   useCommandService(
     {
-      id: "delete-tenant-picker",
+      id: deleteTenantCommandId,
       description: "Delete Tenant",
       disabled: tenants.length < 2,
       handler: e => {

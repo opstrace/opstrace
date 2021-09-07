@@ -53,3 +53,8 @@ nock.enableNetConnect(
 // https://github.com/nock/nock/issues/699#issuecomment-272708264
 // https://github.com/axios/axios/issues/305
 axios.defaults.adapter = require("axios/lib/adapters/http");
+
+// Has to be mocked as react-virtualized-auto-sizer does not work with the test renderer. 
+// See more here:
+// https://github.com/bvaughn/react-virtualized/issues/493#issuecomment-631093196
+jest.mock('react-virtualized-auto-sizer', () => ({ children }) => children({ height: 600, width: 600 }), );
