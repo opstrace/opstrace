@@ -59,7 +59,7 @@ export function ApplicationResources(
           dnsNames: [getDomain(state)],
           issuerRef: {
             name: tlsCertificateIssuer,
-            kind: "Issuer"
+            kind: "ClusterIssuer"
           }
         }
       },

@@ -84,7 +84,7 @@ export function IngressResources(
             dnsNames: [tenantHost, `*.${tenantHost}`],
             issuerRef: {
               name: tlsCertificateIssuer,
-              kind: "Issuer"
+              kind: "ClusterIssuer"
             }
           }
         },
