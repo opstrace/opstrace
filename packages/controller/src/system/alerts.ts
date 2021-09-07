@@ -1252,19 +1252,22 @@ export default (runbookUrl: string, grafanaUrl: string) => [
         labels: {
           severity: "warning"
         }
-      },
-      {
-        alert: "CortexProvisioningTooManyWrites",
-        annotations: {
-          message:
-            "Ingesters in {{ $labels.cluster }}/{{ $labels.namespace }} ingest too many samples per second.\n"
-        },
-        expr: "avg by (cluster, namespace) (rate(cortex_ingester_ingested_samples_total[1m])) > 80e3\n",
-        for: "15m",
-        labels: {
-          severity: "warning"
-        }
       }
+      // Disable this alert until we have a method to dyanmically set the threshold based on
+      // instance capacity.  Note: this alert should probably be considered 'critical' in the future.
+      //
+      // {
+      //   alert: "CortexProvisioningTooManyWrites",
+      //   annotations: {
+      //     message:
+      //       "Ingesters in {{ $labels.cluster }}/{{ $labels.namespace }} ingest too many samples per second.\n"
+      //   },
+      //   expr: "avg by (cluster, namespace) (rate(cortex_ingester_ingested_samples_total[1m])) > 80e3\n",
+      //   for: "15m",
+      //   labels: {
+      //     severity: "warning"
+      //   }
+      // }
       // Disable this alert until we enable container memory limits for the ingesters.  (Without
       // limits the denominator resolves to 0.)
       //
