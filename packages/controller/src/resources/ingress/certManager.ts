@@ -24,7 +24,6 @@ import {
   RoleBinding,
   Service,
   V1ClusterissuerResource,
-  V1CertificateResource,
   CustomResourceDefinition,
   Role,
   Deployment,
@@ -35,10 +34,9 @@ import {
   issuers,
   orders
 } from "@opstrace/kubernetes";
-import { getControllerConfig, getDomain, getTenantDomain } from "../../helpers";
+import { getControllerConfig } from "../../helpers";
 import { State } from "../../reducer";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
-import { V1IssuerResource } from "@opstrace/kubernetes/build/custom-resources/v1issuer";
 
 export function CertManagerResources(
   state: State,
@@ -57,8 +55,7 @@ export function CertManagerResources(
   //@ts-ignore: some of the versions in the CRD don't align with the extenstions/v1 CustomResourceDefinition.
   collection.add(new CustomResourceDefinition(orders, kubeConfig));
 
-  const { target, region, aws, gcp, tlsCertificateIssuer } =
-    getControllerConfig(state);
+  const { target, region, aws, gcp } = getControllerConfig(state);
 
   let dns01 = {};
 
@@ -91,22 +88,6 @@ export function CertManagerResources(
   }
 
   //
-  // list of domain names to include in the certificate.
-  // example of how it looks with the system tenant:
-  //
-  // [
-  //   "clustername.aws.opstrace.io",
-  //   "system.clustername.aws.opstrace.io",
-  //   *.system.clustername.aws.opstrace.io
-  // ]
-  //
-  let domains: string[] = [getDomain(state)];
-  state.tenants.list.tenants.forEach(tenant => {
-    const host = getTenantDomain(tenant, state);
-    domains = domains.concat([host, `*.${host}`]);
-  });
-
-  //
   // Self signed Issuers will issue self signed certificates. This is useful
   // when building PKI within Kubernetes, or as a means to generate a root CA
   // for use with the CA Issuer. A self-signed Issuer contains no additional
@@ -128,39 +109,14 @@ export function CertManagerResources(
     )
   );
 
-  // Create a certificate. The secret it generates is copied over to the tenant
-  // namespaces and application to avoid creating a certificate for each
-  // ingress.
+  // Cluster issuer: Make available to application and per-tenant namespaces
   collection.add(
-    new V1CertificateResource(
+    new V1ClusterissuerResource(
       {
         apiVersion: "cert-manager.io/v1",
-        kind: "Certificate",
+        kind: "ClusterIssuer",
         metadata: {
-          name: "https-cert",
-          namespace: namespace
-        },
-        spec: {
-          secretName: "https-cert",
-          dnsNames: domains,
-          issuerRef: {
-            name: tlsCertificateIssuer,
-            kind: "Issuer"
-          }
-        }
-      },
-      kubeConfig
-    )
-  );
-
-  collection.add(
-    new V1IssuerResource(
-      {
-        apiVersion: "cert-manager.io/v1",
-        kind: "Issuer",
-        metadata: {
-          name: "letsencrypt-prod",
-          namespace: namespace
+          name: "letsencrypt-prod"
         },
         spec: {
           acme: {
@@ -182,14 +138,14 @@ export function CertManagerResources(
     )
   );
 
+  // Cluster issuer: Make available to application and per-tenant namespaces
   collection.add(
-    new V1IssuerResource(
+    new V1ClusterissuerResource(
       {
         apiVersion: "cert-manager.io/v1",
-        kind: "Issuer",
+        kind: "ClusterIssuer",
         metadata: {
-          name: "letsencrypt-staging",
-          namespace: namespace
+          name: "letsencrypt-staging"
         },
         spec: {
           acme: {

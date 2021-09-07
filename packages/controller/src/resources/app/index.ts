@@ -17,9 +17,12 @@
 import { Ingress } from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 
-import { ResourceCollection } from "@opstrace/kubernetes";
+import {
+  ResourceCollection,
+  V1CertificateResource
+} from "@opstrace/kubernetes";
 import { State } from "../../reducer";
-import { getDomain } from "../../helpers";
+import { getControllerConfig, getDomain } from "../../helpers";
 
 import { OpstraceAPIResources } from "./api";
 import { OpstraceApplicationResources } from "./app";
@@ -27,9 +30,7 @@ import { OpstraceApplicationResources } from "./app";
 export function ApplicationResources(
   state: State,
   kubeConfig: KubeConfig,
-  namespace: string,
-  ingressNamespace: string,
-  ingressCertSecretName: string
+  namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
@@ -37,17 +38,34 @@ export function ApplicationResources(
 
   // App UI
   collection.add(
-    OpstraceApplicationResources(
-      state,
-      kubeConfig,
-      namespace,
-      domain,
-      ingressNamespace,
-      ingressCertSecretName
-    )
+    OpstraceApplicationResources(state, kubeConfig, namespace, domain)
   );
   // Config API
   collection.add(OpstraceAPIResources(state, kubeConfig, namespace));
+
+  // Certificate for the root domain, used by the App Ingress and Config Ingress
+  const { tlsCertificateIssuer } = getControllerConfig(state);
+  collection.add(
+    new V1CertificateResource(
+      {
+        apiVersion: "cert-manager.io/v1",
+        kind: "Certificate",
+        metadata: {
+          name: "https-cert",
+          namespace: namespace
+        },
+        spec: {
+          secretName: "https-cert",
+          dnsNames: [getDomain(state)],
+          issuerRef: {
+            name: tlsCertificateIssuer,
+            kind: "Issuer"
+          }
+        }
+      },
+      kubeConfig
+    )
+  );
 
   // Ingress for the root domain, shared by the App UI and Config API
   collection.add(
