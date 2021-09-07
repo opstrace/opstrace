@@ -365,7 +365,7 @@ async function createNewSeries(
 
 async function performWriteReadCycle(
   cyclenum: number,
-  dummystreams: Array<LogSeries | MetricSeries>,
+  series: Array<LogSeries | MetricSeries>,
   invocationCycleId: string
 ) {
   CYCLE_START_TIME_MONOTONIC = mtime();
@@ -384,18 +384,20 @@ async function performWriteReadCycle(
     );
   }
 
-  const dsLenthBeforeWrite = dummystreams.length;
+  const arrayLengthBeforeWrite = series.length;
 
   log.info("cycle %s: entering write phase", cyclenum);
-  const writestats = await writePhase(dummystreams);
+  const writestats = await writePhase(series);
 
-  // This is to protect against bugs in `writePhase()` where the `dummystreams`
-  // array becomes accidentally mutated (had this before: dummystreams got
+  // This is to protect against bugs in `writePhase()` where the `series`
+  // array becomes accidentally mutated (had this before: series got
   // depopulated, read validation was happy in no time: 0 streams to validate)
-  assert(dsLenthBeforeWrite === dummystreams.length);
+  assert(arrayLengthBeforeWrite === series.length);
 
   log.info("cycle %s: entering read phase", cyclenum);
-  const readstats = await readPhase(dummystreams);
+
+  await sleep(1);
+  const readstats = await readPhase(series);
 
   const report = {
     argv: process.argv,
@@ -495,15 +497,19 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
     COUNTER_STREAM_FRAGMENTS_PUSHED - fragmentsPushedBefore
   );
 
-  for (const stream of streams) {
-    log.debug(
-      "stream %s: wrote %s fragment(s)",
-      stream.uniqueName,
-      stream.nFragmentsSuccessfullySentSinceLastValidate
-    );
-  }
+  // This loop might be too heavy for millions of time series
+  // for (const stream of streams) {
+  //   log.debug(
+  //     "stream %s: wrote %s fragment(s)",
+  //     stream.uniqueName,
+  //     stream.nFragmentsSuccessfullySentSinceLastValidate
+  //   );
+  // }
 
-  log.info("fragments POSTed in write phase: %s", nStreamFragmentsSent);
+  log.info(
+    `fragments POSTed in write phase: ${nStreamFragmentsSent}, across ` +
+      `${streams.length} series`
+  );
   const nEntriesSent = nStreamFragmentsSent * CFG.n_samples_per_series_fragment;
   let nPayloadBytesSent = nEntriesSent * CFG.n_chars_per_msg;
 
@@ -537,6 +543,10 @@ async function writePhase(streams: Array<LogSeries | MetricSeries>) {
       " million bytes per second (assumes utf8 for logs and 12+8 " +
       "bytes per sample for metrics)"
   );
+
+  // `FATAL ERROR: Reached heap limit Allocation failed` happens somewhere
+  // after the write phase. Trying to find out where/why.
+  await sleep(1);
 
   // for (const stream of streams) {
   //   log.debug(
@@ -620,6 +630,9 @@ async function readPhase(streams: Array<LogSeries | MetricSeries>) {
       }
     }
   }
+
+  log.info(`created ${validators.length} actor(s) for validation/readout`);
+  await sleep(1);
 
   // This code section must still be reached when using --skip-read, to
   // generate a 'correct' report, indicating that nothing was read.
@@ -714,8 +727,6 @@ export async function generateAndPostFragments(
   const seriespool = new Denque([...series]);
   //const seriespool = new Denque(series);
 
-  log.debug(`seriespool.length: ${seriespool.length}`);
-
   const actorCount = CFG.max_concurrent_writes;
   for (let i = 1; i <= actorCount; i++) {
     actors.push(
@@ -729,6 +740,14 @@ export async function generateAndPostFragments(
   }
 
   await Promise.all(actors);
+  log.info("all write actors terminated");
+
+  // Somewhere around here is where FATAL ERROR: Reached heap limit Allocation
+  // failed - JavaScript heap out of memory happens, if it happens. I doubt
+  // this function has anything to do with it, and to confirm that I'd like to
+  // see the log statement above -- and to really give that time to end up
+  // being visible on the transport (stderr / file), sleep for a moment.
+  await sleep(1);
 }
 
 /**
@@ -782,7 +801,8 @@ async function tryToGetNFragmentsFromSeriesPool(
 
     if (s === undefined) {
       log.info(
-        `write actor ${actorIndex}: series pool is empty. generated ${fragments.length} fragments (desired: ${nf})`
+        `write actor ${actorIndex}: series pool is empty. ` +
+          `generated ${fragments.length} fragments (desired: ${nf})`
       );
       // Break from the loop. At this point, the `fragments` array may
       // be of length between 0 or nf-1.
@@ -917,7 +937,8 @@ async function produceAndPOSTpushrequestsUntilCycleStopCriterion(
 
     if (fragments.length === 0) {
       log.info(
-        `write actor ${actorIndex}: candidate-popping loop terminated, no fragment acquired: all work done, exit actor.`
+        `write actor ${actorIndex}: tryToGetNFragmentsFromSeriesPool() ` +
+          "return 0 fragments: work done, exit actor"
       );
       return;
     }
