@@ -228,7 +228,7 @@ function calcWalltimeCouplingOptions(): WalltimeCouplingOptions {
     actualMaxLagSeconds = minimalMaxLagSeconds;
   } else {
     log.info(
-      `walltime coupling: use dynamic maxLagSeconds: ${minimalMaxLagSeconds} ` +
+      `walltime coupling: use dynamic maxLagSeconds: ${dynamicMaxLagSeconds} ` +
         `(based on fragmentTimeLeapSeconds: ${fragmentTimeLeapSeconds.toFixed(
           2
         )} s)`
