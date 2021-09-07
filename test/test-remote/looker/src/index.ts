@@ -1166,8 +1166,6 @@ async function customPostWithRetryOrError(
         log.warning(
           `POST ${pr}: attempt ${attempt}: transient problem: ${e.message}`
         );
-        // Move on to next attempt.
-        continue;
 
         // Note that the request might have been written successfully and maybe
         // we're missing a success response because of an unfortunate TCP
@@ -1178,6 +1176,23 @@ async function customPostWithRetryOrError(
         // error wouldn't be fatal. But this should be done so that it's clear
         // that the request was actually written. Should be detectable, can
         // look into that later.
+        // Note: doing this now, because seen the need in the wild:
+        // https://github.com/opstrace/opstrace/issues/1328
+        // but this should be more precise, ideally.
+        if (
+          e.message.includes("Timeout awaiting 'request'") ||
+          e.message.includes("Timeout awaiting 'response'")
+        ) {
+          previousPushSuccessAmbiguous = true;
+          log.warning(
+            `POST ${pr}: previousPushSuccessAmbiguous: set as of a` +
+              "got http client timeout for the 'request' or 'response' " +
+              "phase -> next 'out or order' error not fatal"
+          );
+        }
+
+        // Move on to next attempt.
+        continue;
       } else {
         // Assume that this is a programming error, let program crash.
         throw e;
@@ -1478,7 +1493,16 @@ async function httpPostProtobuf(
       // If a TCP connect() takes longer then ~5 seconds then most certainly there
       // is a backpressure or networking issue, fail fast in that case.
       connect: 12000,
-      request: 60000
+      // After TCP-connect, this controls the time it takes for the TLS handshake
+      secureConnect: 5000,
+      // after (secure)connect, require request to be written to connection within
+      // ~20 seconds.
+      send: 20000,
+      // After having written the request, expect response _headers_ to arrive
+      // within that time (not the complete response).
+      response: 60000,
+      // global timeout, supposedly until final response byte arrived.
+      request: 80000
     }
   });
   return response;
