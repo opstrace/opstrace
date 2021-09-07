@@ -19,6 +19,7 @@ export * from "./autoScalingGroup";
 export * from "./bucket";
 export * from "./eks";
 export * from "./iamRole";
+export * from "./iamUser";
 export * from "./iam";
 export * from "./instanceProfile";
 export * from "./internetGateway";

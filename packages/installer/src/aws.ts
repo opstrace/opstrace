@@ -25,10 +25,12 @@ import {
   createVPC,
   ensureSubnetsExist,
   ensureRoleExists,
+  attachRolePolicy,
+  ensureUserExists,
+  attachUserPolicy,
   createInstanceProfile,
   ensureAutoScalingGroupExists,
   ensurePolicyExists,
-  attachPolicy,
   addRole,
   ensureInternetGatewayExists,
   attachInternetGateway,
@@ -350,6 +352,21 @@ export function* ensureAWSInfraExists(): Generator<
     }
   }
 
+  const clusterLabels = {
+    opstrace_cluster_name: ccfg.cluster_name
+  };
+
+  const clusterLabelList = entries(clusterLabels).reduce<TagList>(
+    (acc, curr) => {
+      acc.push({
+        Key: curr[0],
+        Value: curr[1]
+      });
+      return acc;
+    },
+    []
+  );
+
   // Policy required for external-dns and cert-manager
   const Route53ExternalDNSPolicyName = `${ccfg.cluster_name}-externaldns`;
   log.info(`Ensuring ${Route53ExternalDNSPolicyName} policy exists`);
@@ -424,6 +441,54 @@ export function* ensureAWSInfraExists(): Generator<
     awsAccountID,
     ccfg.aws.eks_admin_roles
   );
+
+  // Cloudwatch Reader Policy
+  // See permissions here: https://github.com/prometheus/cloudwatch_exporter#credentials-and-permissions
+  const CloudwatchReaderPolicyName = `${ccfg.cluster_name}-cloudwatch-reader`;
+  const cloudwatchReaderPolicy: AWS.IAM.Policy = yield call(
+    ensurePolicyExists,
+    {
+      PolicyName: CloudwatchReaderPolicyName,
+      PolicyDocument: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Sid: "ReadCloudwatchMetrics",
+            Effect: "Allow",
+            // TODO verify this structure works (as opposed to multiple parent elements)
+            Action: [
+              "cloudwatch:ListMetrics",
+              "cloudwatch:GetMetricStatistics",
+              "tag:GetResources"
+            ],
+            Resource: ["*"]
+          }
+        ]
+      })
+    }
+  );
+
+  // Cloudwatch Reader User
+  const CloudwatchReaderUserName = `${ccfg.cluster_name}-cloudwatch-reader`;
+  log.info(`Ensuring ${CloudwatchReaderUserName} user exists`);
+  const cloudwatchReaderUser: AWS.IAM.User = yield call(ensureUserExists, {
+    UserName: CloudwatchReaderUserName,
+    Tags: entries(clusterLabels).reduce<TagList>((acc, curr) => {
+      acc.push({
+        Key: curr[0],
+        Value: curr[1]
+      });
+      return acc;
+    }, [])
+  });
+
+  // Attach Cloudwatch User to Cloudwatch Policy
+  yield call(attachUserPolicy, {
+    UserName: cloudwatchReaderUser.UserName,
+    PolicyArn: cloudwatchReaderPolicy.Arn!
+  });
+
+  // TODO generate AWS credential keypair for user, write to configmap
 
   // Loki Bucket Policy
   const LokiS3PolicyName = `${lokiBucketName}-s3`;
@@ -622,7 +687,7 @@ export function* ensureAWSInfraExists(): Generator<
     const policy = eksWorkerNodeRolePolicies[i];
     log.info(`Ensuring ${policy.RoleName} is attached`);
 
-    yield call(attachPolicy, {
+    yield call(attachRolePolicy, {
       ...policy
     });
   }
@@ -814,20 +879,6 @@ export function* ensureAWSInfraExists(): Generator<
 
   const { endpointPrivateAccess, endpointPublicAccess, k8sVersion } = awsConfig;
 
-  const clusterLabels = {
-    opstrace_cluster_name: ccfg.cluster_name
-  };
-
-  const clusterLabelList = entries(clusterLabels).reduce<TagList>(
-    (acc, curr) => {
-      acc.push({
-        Key: curr[0],
-        Value: curr[1]
-      });
-      return acc;
-    },
-    []
-  );
   // Run the following in parallel
   const [cluster, dbCluster]: [AWS.EKS.Cluster, AWS.RDS.DBCluster] = yield all([
     call(ensureEKSExists, {
