@@ -23,10 +23,10 @@ import graphqlClient, {
   isGraphQLClientError
 } from "state/clients/graphqlClient";
 import { updateFormStatus, updateForm } from "state/form/actions";
+import { actions as notificationActions } from "client/services/Notification/reducer";
 
 import tenantListSubscriptionManager from "./tenantListSubscription";
-import { actions as notificationActions } from "client/services/Notification/reducer";
-import { uniqueId } from "lodash";
+import uniqueId from "lodash/uniqueId";
 
 // create a generic type
 type AsyncReturnType<T extends (...args: any) => any> =
@@ -105,8 +105,21 @@ function* deleteTenant(action: ReturnType<typeof actions.deleteTenant>) {
     yield graphqlClient.DeleteTenant({
       name: action.payload
     });
-  } catch (err: any) {
-    console.error(err);
+  } catch (error: any) {
+    let message;
+    if (isGraphQLClientError(error)) {
+      message = getGraphQLClientErrorMessage(error);
+    } else {
+      message = (error as Error).message;
+    }
+    yield put(
+      notificationActions.register({
+        id: uniqueId(),
+        state: "error" as const,
+        title: "Could not delete tenant",
+        information: message
+      })
+    );
   }
 }
 
