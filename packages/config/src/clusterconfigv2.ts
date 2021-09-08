@@ -47,4 +47,5 @@ export interface ClusterConfigTypeV2 {
   gcp: GCPInfraConfigTypeV2 | undefined;
   custom_dns_name?: string;
   custom_auth0_client_id?: string;
+  custom_auth0_domain?: string;
 }

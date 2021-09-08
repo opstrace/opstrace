@@ -181,6 +181,7 @@ function* createClusterCore() {
     disable_data_api_authentication: ccfg.data_api_authentication_disabled,
     custom_dns_name: ccfg.custom_dns_name,
     custom_auth0_client_id: ccfg.custom_auth0_client_id,
+    custom_auth0_domain: ccfg.custom_auth0_domain,
     cliMetadata: {
       allCLIVersions: [
         {
