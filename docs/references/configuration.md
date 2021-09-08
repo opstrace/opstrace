@@ -206,9 +206,9 @@ Note:
 * `letsencrypt-prod` results in browser-trusted certificates, but is subject to quota/limits: [https://letsencrypt.org/docs/rate-limits/](https://letsencrypt.org/docs/rate-limits).
 
 
-### `custom_auth0_client_id`
+### `custom_auth0_client_id` and `custom_auth0_domain`
 
-Use this when you want to log in to the web UI of your Opstrace instance via your custom Auth0 'application'.
+Use these two parameters when you want to log in to the web UI of your Opstrace instance via your custom Auth0 'application'.
 
 This makes sense especially when you would like to connect to a special identity provider, and is obligatory when using a `custom_dns_name` (see above).
 
@@ -222,9 +222,10 @@ This makes sense especially when you would like to connect to a special identity
 
 ```yaml
 custom_auth0_client_id: 1333337
+custom_auth0_domain: barfoo.us.auth0.com
 ```
 
-<!-- TODO -->
+These two parameters must be provided together.
 
 ### `controller_image`
 
