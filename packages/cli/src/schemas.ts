@@ -59,16 +59,14 @@ function V1toV2(
 
 // function that takes any user cluster config and upgrades it to the latest
 // version if necessary.
-export async function upgradeToLatest(
+export function upgradeToLatest(
   ucc: any,
   cloudProvider: string
-): Promise<
-  [
-    LatestClusterConfigFileSchemaType,
-    LatestAWSInfraConfigType | undefined,
-    LatestGCPInfraConfigType | undefined
-  ]
-> {
+): [
+  LatestClusterConfigFileSchemaType,
+  LatestAWSInfraConfigType | undefined,
+  LatestGCPInfraConfigType | undefined
+] {
   // handle user cluster config
   const uccWithDefaults = upgradeClusterConfigSchemaToLatest(ucc);
 
