@@ -30,6 +30,9 @@ import { log, die } from "@opstrace/utils";
 /**
  * Read user-given cluster config (UCC) document from either file or stdin.
  * Validate it, interpolate with defaults, and return it. Or error out.
+ *
+ * Note: "cluster config" is a legacy term, we decided to call this "Opstrace
+ * instance" instead, and therefore this is more of an 'instance config'.
  */
 export async function uccGetAndValidate(
   clusterConfigFilePath: string,
@@ -64,9 +67,30 @@ export async function uccGetAndValidate(
     JSON.stringify(ucc, null, 2)
   );
 
-  return upgradeToLatest(ucc, cloudProvider).catch(err => {
-    die(`invalid cluster config document: ${err.message}`);
-  });
+  let uccWithDefaults, infraConfigAWS, infraConfigGCP;
+  try {
+    [uccWithDefaults, infraConfigAWS, infraConfigGCP] = upgradeToLatest(
+      ucc,
+      cloudProvider
+    );
+  } catch (err) {
+    die(`invalid config document: ${err.message}`);
+  }
+
+  // Custom validation section (maybe this can be done in the yup way, but
+  // yup also has a bit of mental overhead)
+  // This counts the number of trueish values in the array
+  const v = [
+    uccWithDefaults.custom_auth0_client_id,
+    uccWithDefaults.custom_auth0_domain
+  ].filter(Boolean).length;
+  if (v === 1) {
+    die(
+      `invalid config document: 'custom_auth0_client_id' requires 'custom_auth0_domain' and vice versa`
+    );
+  }
+
+  return [uccWithDefaults, infraConfigAWS, infraConfigGCP];
 }
 
 function uccFromFile(clusterConfigFilePath: string) {
