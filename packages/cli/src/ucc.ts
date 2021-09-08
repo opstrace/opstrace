@@ -73,7 +73,7 @@ export async function uccGetAndValidate(
       ucc,
       cloudProvider
     );
-  } catch (err) {
+  } catch (err: any) {
     die(`invalid config document: ${err.message}`);
   }
 
