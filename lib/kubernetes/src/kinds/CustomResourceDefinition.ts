@@ -183,7 +183,7 @@ export class CustomResourceDefinition extends K8sResource {
         }
       };
       request = await informer.watch(
-        "/apis/apiextensions.k8s.io/v1beta1/customresourcedefinitions",
+        "/apis/apiextensions.k8s.io/v1/customresourcedefinitions",
         { resourceVersion: undefined },
         watchHandler,
         watch
