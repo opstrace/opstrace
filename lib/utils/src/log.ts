@@ -27,6 +27,12 @@ const logFormat = format.printf(
 // then use it via `log.info('msg')` etc.
 export let log: Logger;
 
+// Utility function for checking if debug logging is enabled.
+// Useful when a debug message is expensive to compose then throw away.
+export function isDebugLogging(): boolean {
+  return log.level === "debug";
+}
+
 export function setLogger(logger: Logger): void {
   // if (log !== undefined) {
   //   throw Error("logger already set");
