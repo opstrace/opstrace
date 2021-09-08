@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import { urlJoin } from "url-join-ts";
 import {
   ResourceCollection,
@@ -38,7 +40,8 @@ export function OpstraceApplicationResources(
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
-  const { custom_auth0_client_id } = getControllerConfig(state);
+  const { custom_auth0_client_id, custom_auth0_domain } =
+    getControllerConfig(state);
 
   // This comment here is both solution and homage to
   // https://github.com/opstrace/opstrace/issues/1274.
@@ -49,8 +52,11 @@ export function OpstraceApplicationResources(
   // This is the Auth0 client ID corresponding to opstrace-dev.us.auth0.com,
   // preconfigured for the Opstrace DNS infrastructure behind *.opstrace.io.
   let auth0_client_id = "vs6bgTunbVK4dvdLRj02DptWjOmAVWVM";
+  let auth0_domain = "opstrace-dev.us.auth0.com";
   if (custom_auth0_client_id !== undefined) {
+    assert(custom_auth0_domain);
     auth0_client_id = custom_auth0_client_id;
+    auth0_domain = custom_auth0_domain;
   }
 
   collection.add(
@@ -277,7 +283,7 @@ export function OpstraceApplicationResources(
                     },
                     {
                       name: "AUTH0_DOMAIN",
-                      value: "opstrace-dev.us.auth0.com"
+                      value: auth0_domain
                     },
                     { name: "DOMAIN", value: `https://${domain}` },
                     { name: "UI_DOMAIN", value: `https://${domain}` },
