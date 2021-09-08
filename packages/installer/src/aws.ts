@@ -432,18 +432,22 @@ export function* ensureAWSInfraExists(): Generator<
     PolicyName: LokiS3PolicyName,
     PolicyDocument: JSON.stringify({
       Version: "2012-10-17",
+      // https://grafana.com/docs/loki/latest/operations/storage/#s3
       Statement: [
         {
-          Sid: "ListObjectsInBucket",
+          Sid: "LokiS3BucketPolicy",
           Effect: "Allow",
-          Action: ["s3:ListBucket"],
-          Resource: [`arn:aws:s3:::${lokiBucketName}`]
-        },
-        {
-          Sid: "AllObjectActions",
-          Effect: "Allow",
-          Action: "s3:*Object",
-          Resource: [`arn:aws:s3:::${lokiBucketName}/*`]
+          Action: [
+            "s3:ListBucket",
+            "s3:ListObjects",
+            "s3:PutObject",
+            "s3:GetObject",
+            "s3:DeleteObject"
+          ],
+          Resource: [
+            `arn:aws:s3:::${lokiBucketName}`,
+            `arn:aws:s3:::${lokiBucketName}/*`
+          ]
         }
       ]
     })
