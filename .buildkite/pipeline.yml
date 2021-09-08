@@ -30,18 +30,18 @@ steps:
       - exit_status: 42
     artifact_paths:
       - "${OPSTRACE_PREBUILD_DIR}/bk-artifacts/check-docs/**/*"
-  - label: "🔨 unit tests"
-    key: "unit-tests"
-    env:
-      OPSTRACE_ARTIFACT_DIR: "${OPSTRACE_PREBUILD_DIR}/bk-artifacts/unit-tests"
-    depends_on:
-      - "preamble"
-      - "check-docs"
-    command:
-      - cd "${OPSTRACE_PREBUILD_DIR}"
-      - bash ci/check-if-docs-pr.sh || make ci-unit-tests
-    artifact_paths:
-      - "${OPSTRACE_PREBUILD_DIR}/bk-artifacts/unit-tests/**/*"
+  #- label: "🔨 unit tests"
+  #  key: "unit-tests"
+  #  env:
+  #    OPSTRACE_ARTIFACT_DIR: "${OPSTRACE_PREBUILD_DIR}/bk-artifacts/unit-tests"
+  #  depends_on:
+  #    - "preamble"
+  #    - "check-docs"
+  #  command:
+  #    - cd "${OPSTRACE_PREBUILD_DIR}"
+  #    - bash ci/check-if-docs-pr.sh || make ci-unit-tests
+  #  artifact_paths:
+  #    - "${OPSTRACE_PREBUILD_DIR}/bk-artifacts/unit-tests/**/*"
   #- label: "🔨 main test (GCP)"
   #  key: "maintest-gcp"
   #  depends_on:
@@ -59,7 +59,9 @@ steps:
   - label: "🔨 main test (AWS)"
     key: "maintest-aws"
     depends_on:
-      - "unit-tests"
+      - "preamble"
+      - "check-docs"
+      # - "unit-tests"
     env:
       OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
       OPSTRACE_BUILD_DIR: "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a"
