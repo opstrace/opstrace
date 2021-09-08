@@ -83,8 +83,8 @@ export const ClusterConfigFileSchemaV2 = yup
     // Added later to V2, but is an optional parameter, therefore not strictly
     // justifying a new schema version. Content and name need to be iterated on.
     custom_dns_name: yup.string().notRequired(),
-
     custom_auth0_client_id: yup.string().notRequired(),
+    custom_auth0_domain: yup.string().notRequired(),
 
     cert_issuer: yup
       .string()

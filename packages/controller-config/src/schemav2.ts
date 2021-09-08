@@ -38,6 +38,7 @@ export const ControllerConfigSchemaV2 = yup
     // justifying a new schema version. Content and name need to be iterated on.
     custom_dns_name: yup.string().notRequired(),
     custom_auth0_client_id: yup.string().notRequired(),
+    custom_auth0_domain: yup.string().notRequired(),
 
     terminate: yup.bool().default(false),
     // https://stackoverflow.com/a/63944333/145400 `data_api_authn_pubkey_pem`
