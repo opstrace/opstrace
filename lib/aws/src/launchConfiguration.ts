@@ -127,6 +127,9 @@ set -o xtrace
     SecurityGroups: [securityGroupId],
     ImageId: imageId,
     InstanceType: instanceType,
+    MetadataOptions: {
+      HttpPutResponseHopLimit: 2
+    },
     UserData
   };
 
