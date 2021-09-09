@@ -37,7 +37,7 @@ import { State } from "state/reducer";
 import { getUserList } from "../hooks/useUserList";
 import { Tenants } from "state/tenant/types";
 import { selectTenantList } from "state/tenant/hooks/useTenantList";
-import { grafanaUrl } from "client/utils/grafana";
+import { grafanaUrl, isGrafanaError } from "client/utils/grafana";
 import { actions as notificationActions } from "client/services/Notification/reducer";
 import uniqueId from "lodash/uniqueId";
 
@@ -143,9 +143,8 @@ function* deleteUser(action: ReturnType<typeof actions.deleteUser>) {
 
 function* persistDarkModePreference() {
   while (true) {
-    const action: ReturnType<typeof actions.requestSetDarkMode> = yield take(
-      actions.requestSetDarkMode
-    );
+    const { payload }: ReturnType<typeof actions.requestSetDarkMode> =
+      yield take(actions.requestSetDarkMode);
     const user: User | undefined = yield select(getCurrentUser);
     if (!user?.id) {
       return;
@@ -154,30 +153,52 @@ function* persistDarkModePreference() {
     try {
       // First update Grafana instances
       yield Promise.all(
-        tenants.map(tenant =>
-          axios({
+        tenants.map(tenant => {
+          return axios({
             method: "put",
             url: `${grafanaUrl({ tenant })}/grafana/api/user/preferences`,
             withCredentials: true,
             data: {
               homeDashboardId: 0,
-              theme: action.payload ? "dark" : "light",
+              theme: payload ? "dark" : "light",
               timezone: ""
             }
-          })
-        )
+          });
+        })
       );
-    } catch (err: any) {
-      console.error(err);
+    } catch (error: any) {
+      yield put(
+        notificationActions.register({
+          id: uniqueId(),
+          state: "error" as const,
+          title: "Could not persist dark mode preferences in grafana",
+          information: isGrafanaError(error)
+            ? error.response.data.message
+            : error.message
+        })
+      );
     }
     try {
-      yield put(actions.setDarkMode(action.payload));
+      yield put(actions.setDarkMode(payload));
       yield graphqlClient.SetDarkMode({
         user_id: user.id,
-        dark_mode: action.payload
+        dark_mode: payload
       });
-    } catch (err: any) {
-      console.error(err);
+    } catch (error: any) {
+      let message;
+      if (isGraphQLClientError(error)) {
+        message = getGraphQLClientErrorMessage(error);
+      } else {
+        message = (error as Error).message;
+      }
+      yield put(
+        notificationActions.register({
+          id: uniqueId(),
+          state: "error" as const,
+          title: "Could not persist dark mode preferences in hasura",
+          information: message
+        })
+      );
     }
   }
 }
