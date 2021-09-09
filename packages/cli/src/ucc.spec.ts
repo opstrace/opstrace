@@ -148,7 +148,7 @@ random string
   fs.writeFileSync(filename, configFile);
 
   const expectedErr = new Error(
-    'invalid cluster config document: this must be a `object` type, but the final value was: `"random string"`.'
+    'invalid config document: this must be a `object` type, but the final value was: `"random string"`.'
   );
 
   try {
