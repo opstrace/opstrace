@@ -15,7 +15,8 @@
  */
 
 import * as Diff from "diff";
-import { log } from "./log";
+import { log, isDebugLogging } from "./log";
+
 /**
  * Deep diff between two objects
  */
@@ -32,6 +33,10 @@ export function logDiff(
   possiblyChangedObj: any // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) {
+  if (!isDebugLogging()) {
+    // Avoid calculating a diff string if debug isn't enabled
+    return;
+  }
   let msg = "";
   diff(old, possiblyChangedObj).forEach(change => {
     if (change.added) {

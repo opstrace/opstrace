@@ -15,8 +15,18 @@
  */
 
 import { KubeConfig } from "@kubernetes/client-node";
-import { ResourceCollection, Namespace, Ingress } from "@opstrace/kubernetes";
-import { getTenantDomain, getTenantNamespace, getDomain } from "../../helpers";
+import {
+  Ingress,
+  Namespace,
+  ResourceCollection,
+  V1CertificateResource
+} from "@opstrace/kubernetes";
+import {
+  getControllerConfig,
+  getDomain,
+  getTenantDomain,
+  getTenantNamespace
+} from "../../helpers";
 import { State } from "../../reducer";
 import { CertManagerResources } from "./certManager";
 import { ExternalDnsResources } from "./externalDns";
@@ -53,9 +63,34 @@ export function IngressResources(
 
   const domain = getDomain(state);
 
+  const { tlsCertificateIssuer } = getControllerConfig(state);
+
   state.tenants.list.tenants.forEach(tenant => {
     const tenantHost = getTenantDomain(tenant, state);
     const tenantNamespace = getTenantNamespace(tenant);
+
+    // Creates an 'https-cert' Secret for the tenant's ingresses
+    collection.add(
+      new V1CertificateResource(
+        {
+          apiVersion: "cert-manager.io/v1",
+          kind: "Certificate",
+          metadata: {
+            name: "https-cert",
+            namespace: tenantNamespace
+          },
+          spec: {
+            secretName: "https-cert",
+            dnsNames: [tenantHost, `*.${tenantHost}`],
+            issuerRef: {
+              name: tlsCertificateIssuer,
+              kind: "ClusterIssuer"
+            }
+          }
+        },
+        kubeConfig
+      )
+    );
 
     collection.add(
       new Ingress(

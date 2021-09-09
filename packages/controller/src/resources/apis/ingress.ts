@@ -43,6 +43,7 @@ export const addApiIngress = ({
   const apiHost = getApiDomain(api, tenant, state);
 
   // Add ingress for data API
+  // https-cert is shared with the App UI Ingress on the same domain
   collection.add(
     new Ingress(
       {

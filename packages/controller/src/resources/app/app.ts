@@ -29,15 +29,12 @@ import { KubeConfig } from "@kubernetes/client-node";
 import { State } from "../../reducer";
 import { generateSecretValue, getControllerConfig } from "../../helpers";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
-import { getCertSecretCopy } from "../utils";
 
 export function OpstraceApplicationResources(
   state: State,
   kubeConfig: KubeConfig,
   namespace: string,
-  domain: string,
-  ingressNamespace: string,
-  ingressCertSecretName: string
+  domain: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
@@ -71,18 +68,6 @@ export function OpstraceApplicationResources(
       kubeConfig
     )
   );
-
-  const certSecret = getCertSecretCopy(
-    namespace,
-    state,
-    kubeConfig,
-    ingressNamespace,
-    ingressCertSecretName
-  );
-
-  if (certSecret) {
-    collection.add(certSecret);
-  }
 
   collection.add(
     new Service(

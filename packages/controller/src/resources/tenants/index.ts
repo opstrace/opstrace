@@ -16,15 +16,12 @@
 
 import { KubeConfig } from "@kubernetes/client-node";
 import { ResourceCollection, Namespace } from "@opstrace/kubernetes";
-import { State } from "../../reducer";
 import { getTenantNamespace } from "../../helpers";
-import { getCertSecretCopy } from "../utils";
+import { State } from "../../reducer";
 
 export function TenantResources(
   state: State,
-  kubeConfig: KubeConfig,
-  ingressNamespace: string,
-  ingressCertSecretName: string
+  kubeConfig: KubeConfig
 ): ResourceCollection {
   const collection = new ResourceCollection();
 
@@ -47,18 +44,6 @@ export function TenantResources(
         kubeConfig
       )
     );
-
-    const certSecretCopy = getCertSecretCopy(
-      tenantNamespace,
-      state,
-      kubeConfig,
-      ingressNamespace,
-      ingressCertSecretName
-    );
-
-    if (certSecretCopy) {
-      collection.add(certSecretCopy);
-    }
   });
 
   return collection;

@@ -97,17 +97,9 @@ export function* reconciliationLoop(
     desired.add(APIResources(state, kubeConfig));
     desired.add(CortexResources(state, kubeConfig, "cortex"));
     desired.add(IngressResources(state, kubeConfig, "ingress"));
-    desired.add(
-      ApplicationResources(
-        state,
-        kubeConfig,
-        "application",
-        "ingress",
-        "https-cert"
-      )
-    );
+    desired.add(ApplicationResources(state, kubeConfig, "application"));
     desired.add(RedisResources(state, kubeConfig, "application"));
-    desired.add(TenantResources(state, kubeConfig, "ingress", "https-cert"));
+    desired.add(TenantResources(state, kubeConfig));
     desired.add(IntegrationResources(state, kubeConfig));
     desired.add(
       CortexOperatorResources(state, kubeConfig, "cortex-operator-system")

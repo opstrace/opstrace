@@ -187,8 +187,11 @@ export class K8sResource implements Resource {
     if (!this.resource.metadata.annotations) {
       this.resource.metadata.annotations = {};
     }
-    this.resource.metadata.annotations[OPSTRACE_MANAGED_VERSION_KEY] =
-      BUILD_INFO.VERSION_STRING;
+    // Avoid setting annotation to undefined - can result in strange K8s update behavior
+    if (BUILD_INFO.VERSION_STRING) {
+      this.resource.metadata.annotations[OPSTRACE_MANAGED_VERSION_KEY] =
+        BUILD_INFO.VERSION_STRING;
+    }
   }
   /**
    * Annotate the object (via k8s metadata annotations) with a custom key/value
