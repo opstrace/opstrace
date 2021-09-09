@@ -127,6 +127,12 @@ set -o xtrace
     SecurityGroups: [securityGroupId],
     ImageId: imageId,
     InstanceType: instanceType,
+    MetadataOptions: {
+      // Increase allowed network hops to allow containers to that access the
+      // AWS instance metadata endpoint. Check
+      // https://github.com/opstrace/opstrace/issues/1226 for more details.
+      HttpPutResponseHopLimit: 2
+    },
     UserData
   };
 
