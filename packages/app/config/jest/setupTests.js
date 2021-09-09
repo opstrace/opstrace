@@ -36,7 +36,7 @@ const testTimeout = 30 * 1000; // 30s
 
 jest.setTimeout(testTimeout);
 configure({
-  asyncUtilTimeout: testTimeout
+  asyncUtilTimeout: testTimeout - 10
 });
 /* limiting net requests to localhost, see
  * https://github.com/nock/nock#enabledisable-real-http-requests

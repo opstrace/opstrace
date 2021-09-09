@@ -93,6 +93,8 @@ export function ThemeSwitcher({ children }: { children: React.ReactNode }) {
   );
 }
 
+export const toggleDarkModeCommandId = "toggle-dark-mode"
+
 export function ThemeCommands({ children }: { children: React.ReactNode }) {
   const currentUser = useCurrentUser();
   const darkMode = currentUser?.preference?.dark_mode === false ? false : true;
@@ -107,7 +109,7 @@ export function ThemeCommands({ children }: { children: React.ReactNode }) {
 
   useCommandService(
     {
-      id: "toggle-dark-mode",
+      id: toggleDarkModeCommandId,
       description: darkMode ? "Turn dark mode off" : "Turn dark mode on",
       handler: () => {
         setDarkModePreference(!darkMode);
