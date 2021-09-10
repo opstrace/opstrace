@@ -184,19 +184,19 @@ export function* upgradeControllerConfigMap(
   let cfg: LatestControllerConfigType;
   try {
     cfg = upgradeControllerConfigMapToLatest(cfgJSON);
-    cfg.cliMetadata.allCLIVersions.push({
-      version: BUILD_INFO.VERSION_STRING,
-      // Current time in UTC using RFC3339 string representation (w/o
-      // fractional seconds, with Z tz specififer), e.g.
-      // '2021-07-28T15:43:07Z'
-      timestamp: ZonedDateTime.now(ZoneOffset.UTC).format(
-        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-      )
-    });
   } catch (e: any) {
-    die(`failed to upgrade controller configuration: ${e.message}`);
+    die(`failed to migrate controller config: ${e.message}`);
   }
 
+  cfg.cliMetadata.allCLIVersions.push({
+    version: BUILD_INFO.VERSION_STRING,
+    // Current time in UTC using RFC3339 string representation (w/o
+    // fractional seconds, with Z tz specififer), e.g.
+    // '2021-07-28T15:43:07Z'
+    timestamp: ZonedDateTime.now(ZoneOffset.UTC).format(
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    )
+  });
   //
   // At this point, override any new fields that require reading from the user
   // cluster config.
