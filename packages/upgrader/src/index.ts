@@ -121,6 +121,7 @@ function* triggerInfraUpgrade() {
   // catch programmer's error (call setUpgradeConfig() first)
   assert(upgradeConfig);
 
+  log.info("try to build kubeconfig for Opstrace instance");
   const kubeConfig: KubeConfig | undefined = yield call(
     getKubecfgIfk8sClusterExists,
     upgradeConfig
@@ -157,9 +158,13 @@ function* triggerInfraUpgrade() {
 
   log.info("k8s cluster seems to exist, trigger infrastructure upgrade");
 
-  if (!dryRun()) {
-    yield call(upgradeInfra, upgradeConfig.cloudProvider);
+  if (dryRun()) {
+    log.debug("dry run: leave triggerInfraUpgrade() early");
+    return;
   }
+
+  yield call(upgradeInfra, upgradeConfig.cloudProvider);
+  log.info("infrastructure upgrade done");
 }
 
 // Upgrade controller deployment and wait for it to finish updating Kubernetes
@@ -206,7 +211,7 @@ function readTenantApiTokenFiles(tenantNames: string[]): Dict<string> {
 /**
  * Timeout control around a single cluster infrastructure upgrade attempt.
  */
-function* upgradeClusterCoreAttemptWithTimeout() {
+function* upgradeInfraAttemptWithTimeout() {
   log.debug("upgradeClusterInfraAttemptWithTimeout");
   const { timeout } = yield race({
     upgrade: call(triggerInfraUpgrade),
@@ -221,7 +226,7 @@ function* upgradeClusterCoreAttemptWithTimeout() {
     // the hierarchy, maybe as of usage of promises as part of the stack?
     // also see opstrace-prelaunch/issues/1457
     log.warning(
-      "cluster upgrade attempt timed out after %s seconds",
+      "Opstrace instance infrastructure upgrade attempt timed out after %s seconds",
       UPGRADE_INFRA_ATTEMPT_TIMEOUT_SECONDS
     );
     throw new ClusterUpgradeTimeoutError();
@@ -275,17 +280,18 @@ function* rootTaskUpgrade(): Generator<any, any, any> {
   // fails.
   yield call(k8sListNamespacesOrError, kubeConfig);
 
-  log.info("k8s cluster seems to exist, trigger instance upgrade");
+  log.info("k8s cluster seems to exist, trigger Opstrace instance upgrade");
 
-  log.info("starting kubernetes informers");
+  log.debug("starting kubernetes informers");
   //@ts-ignore: TS7075 generator lacks return type (TS 4.3)
   const informers = yield fork(runInformers, kubeConfig);
 
+  log.debug("blockUntilCacheHydrated()");
   yield call(blockUntilCacheHydrated);
 
   const requiresUpgrade: boolean = yield call(opstraceInstanceRequiresUpgrade);
   if (!requiresUpgrade) {
-    log.warning(
+    log.info(
       `Opstrace instance is already running the desired version, skipping upgrade`
     );
     // Cancel the forked informers so we can exit
@@ -299,10 +305,10 @@ function* rootTaskUpgrade(): Generator<any, any, any> {
   // synchronously, but after all still takes a while to be properly reflected
   // across all views).
   yield call(retryUponAnyError, {
-    task: upgradeClusterCoreAttemptWithTimeout,
+    task: upgradeInfraAttemptWithTimeout,
     maxAttempts: UPGRADE_ATTEMPTS,
     doNotLogDetailForTheseErrors: [ClusterUpgradeTimeoutError],
-    actionName: "cluster infrastructure upgrade",
+    actionName: "Opstrace instance infrastructure upgrade",
     delaySeconds: 30
   });
 

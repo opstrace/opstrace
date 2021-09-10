@@ -163,6 +163,9 @@ export function* upgradeControllerConfigMap(
   kubeConfig: KubeConfig
 ): Generator<Effect, void, State> {
   const state: State = yield select();
+
+  log.info("controller upgrade: obtain current controller config");
+
   const cm = state.kubernetes.cluster.ConfigMaps.resources.find(
     cm => cm.name === CONFIGMAP_NAME
   );
@@ -175,6 +178,7 @@ export function* upgradeControllerConfigMap(
     die(`invalid Opstrace controller config map`);
   }
 
+  log.info("got current controller config map");
   log.debug(`controller config: ${JSON.stringify(cfgJSON, null, 2)}`);
 
   let cfg: LatestControllerConfigType;
@@ -202,9 +206,10 @@ export function* upgradeControllerConfigMap(
   // client id. CI uses it to automate the login flow using email and password.
   cfg.custom_auth0_client_id = ucc.custom_auth0_client_id;
 
-  log.debug(`upgraded controller config ${JSON.stringify(cfg, null, 2)}`);
+  log.info(`upgraded controller config:\n${JSON.stringify(cfg, null, 2)}`);
 
   yield call(updateControllerConfig, cfg, kubeConfig);
+  log.info("controller config upgrade done");
 }
 
 export function* upgradeInfra(cloudProvider: string) {
