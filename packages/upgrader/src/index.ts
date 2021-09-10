@@ -133,22 +133,18 @@ function* triggerInfraUpgrade() {
 
   const ucc: LatestClusterConfigType = getClusterConfig();
 
-  try {
-    // Check the tenant API tokens are available and fail as early as possible
-    // if they are not.
-    const tenantApiTokens = readTenantApiTokenFiles(ucc.tenants);
-    const createConfig: ClusterCreateConfigInterface = {
-      holdController: true,
-      tenantApiTokens: tenantApiTokens,
-      kubeconfigFilePath: ""
-    };
-    // This is required by the waitUntil*AreReachable functions called by
-    // triggerControllerDeploymentUpgrade to check the endpoints are available
-    // when the upgrade finishes.
-    setCreateConfig(createConfig);
-  } catch (e: any) {
-    die(`could not find tenant api token files: ${e}`);
-  }
+  // Check the tenant API tokens are available and fail as early as possible
+  // if they are not.
+  const tenantApiTokens: Dict<string> = readTenantApiTokenFiles(ucc.tenants);
+  const createConfig: ClusterCreateConfigInterface = {
+    holdController: true,
+    tenantApiTokens: tenantApiTokens,
+    kubeconfigFilePath: ""
+  };
+  // This is required by the waitUntil*AreReachable functions called by
+  // triggerControllerDeploymentUpgrade to check the endpoints are available
+  // when the upgrade finishes.
+  setCreateConfig(createConfig);
 
   yield call(checkIfDockerImageExistsOrErrorOut, ucc.controller_image);
 
@@ -202,8 +198,14 @@ function readTenantApiTokenFiles(tenantNames: string[]): Dict<string> {
 
   for (const tname of tnames) {
     const fpath = `tenant-api-token-${tname}`;
-    const token = fs.readFileSync(fpath);
-    tenantApiTokens[tname] = token.toString();
+    log.info(`read tenant API token file: ${fpath}`);
+    let bytes;
+    try {
+      bytes = fs.readFileSync(fpath);
+    } catch (err: any) {
+      die(`could not read api token file ${fpath}: ${err.message}`);
+    }
+    tenantApiTokens[tname] = bytes.toString();
   }
   return tenantApiTokens;
 }
