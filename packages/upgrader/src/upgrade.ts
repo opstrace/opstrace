@@ -197,14 +197,28 @@ export function* upgradeControllerConfigMap(
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
     )
   });
-  //
-  // At this point, override any new fields that require reading from the user
-  // cluster config.
-  //
+
+  // Note(Simao): at this point, override any new fields that require reading
+  // from the user cluster config.
+  // Note(JP): adding my perspective here in my words, because this was a bit
+  // mind boggling :). The input for the new controller config cannot only be
+  // the old controller config, but also the 'new' user-given Opstrace instance
+  // config (UIC, previous UCC) document. We don't need to do a complex,
+  // generally working migration here. But we can start small: pick specific
+  // params from the UIC and use them. On a case-by-case basis this can be done
+  // for individual params
   const ucc = getClusterConfig();
   // custom_auth0_client_id was introduced to be able to configure the Auth0
   // client id. CI uses it to automate the login flow using email and password.
-  cfg.custom_auth0_client_id = ucc.custom_auth0_client_id;
+  if (ucc.custom_auth0_client_id) {
+    log.info(
+      "new controller config: set custom_auth0_domain / " +
+        `custom_auth0_client_id to ${ucc.custom_auth0_domain} / ` +
+        ucc.custom_auth0_client_id
+    );
+    cfg.custom_auth0_client_id = ucc.custom_auth0_client_id;
+    cfg.custom_auth0_domain = ucc.custom_auth0_domain;
+  }
 
   log.info(`upgraded controller config:\n${JSON.stringify(cfg, null, 2)}`);
 
