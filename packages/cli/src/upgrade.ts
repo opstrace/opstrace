@@ -32,7 +32,7 @@ import { logDockerHubCredentialsMessage } from "@opstrace/controller-config";
 
 export async function upgrade(): Promise<void> {
   log.info(
-    `About to upgrade cluster ${cli.CLIARGS.instanceName} (${cli.CLIARGS.cloudProvider}).`
+    `About to upgrade Opstrace instance '${cli.CLIARGS.instanceName}' (${cli.CLIARGS.cloudProvider}).`
   );
 
   const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
