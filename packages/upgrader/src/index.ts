@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { strict as assert } from "assert";
+
 import fs from "fs";
 import { fork, call, race, delay, cancel } from "redux-saga/effects";
 import { createStore, applyMiddleware } from "redux";
@@ -116,9 +118,8 @@ async function getKubecfgIfk8sClusterExists(
 // buckets, required to run Opstrace. Checks if Kubernetes cluster is available
 // before starting the upgrade.
 function* triggerInfraUpgrade() {
-  if (upgradeConfig === undefined) {
-    throw new Error("call setUpgradeConfig() first");
-  }
+  // catch programmer's error (call setUpgradeConfig() first)
+  assert(upgradeConfig);
 
   const kubeConfig: KubeConfig | undefined = yield call(
     getKubecfgIfk8sClusterExists,
