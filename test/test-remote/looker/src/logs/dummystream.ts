@@ -497,6 +497,12 @@ Query parameters: ${JSON.stringify(
           `waitForLokiQueryResult() loop: http request failed: ${e.message} -- ignore, proceed with next iteration`
         );
         continue;
+      } else if (e instanceof SyntaxError) {
+        // JSON.parse() failed on loki response (e.g. 500 error)
+        log.warning(
+          `waitForLokiQueryResult() loop: http parse response failed: ${e.message} -- ignore, proceed with next iteration`
+        );
+        continue;
       } else {
         // Throw any other error, mainly programming error.
         throw e;
