@@ -270,11 +270,13 @@ class EC2InstanceMetadata extends AWSResource<boolean> {
           if (result.Reservations[0].Instances.length === 1) {
             const instance = result.Reservations[0].Instances[0];
             if (instance.MetadataOptions?.HttpPutResponseHopLimit === 2) {
-              log.info(`${this}: HttpPutResponseHopLimit is 2`);
+              log.info(`${this.rname}: HttpPutResponseHopLimit is 2`);
               return true;
             } else {
               const s = JSON.stringify(instance.MetadataOptions, null, 2);
-              log.info(`${this}: HttpPutResponseHopLimit is not 2:\n${s}`);
+              log.info(
+                `${this.rname}: HttpPutResponseHopLimit is not 2:\n${s}`
+              );
               return false;
             }
           }
@@ -283,7 +285,7 @@ class EC2InstanceMetadata extends AWSResource<boolean> {
     }
 
     log.info(
-      `${this}: unexpected describeInstances result: :\n${JSON.stringify(
+      `${this.rname}: unexpected describeInstances result: :\n${JSON.stringify(
         result,
         null,
         2
