@@ -859,16 +859,16 @@ async function tryToGetNFragmentsFromSeriesPool(
       pm.counter_fragment_generation_delayed.inc(1);
 
       if (candidatesPoppedSinceLastFragmentGenerated >= CFG.n_series) {
-        // We looked at least as many time series as there are and none of them
-        // had a fragment ready. Example: just one actor and two series, and
-        // none of these two series will have a fragment ready within the next
-        // five minutes of wall time. Then do not busy-spin in this loop (the
-        // candidate-popping loop) by constantly popping one of those series
-        // off the work pool and immediately putting it back, immediately
-        // proceeding with the next. Add a tiny sleep in this case per
-        // candidate-popping loop iteration. This allows for CTRL+C ing quickly
-        // in this scenario and changes the average CPU utilization from ~100 %
-        // to ~0 %.
+        // We looked at at least as many time series as there are and none of
+        // them had a fragment ready. Example: just one actor and two series,
+        // and none of these two series will have a fragment ready within the
+        // next five minutes of wall time. Then do not busy-spin in this loop
+        // (the candidate-popping loop) by constantly popping one of those
+        // series off the work pool and immediately putting it back,
+        // immediately proceeding with the next. Add a tiny sleep in this case
+        // per candidate-popping loop iteration. This allows for CTRL+C ing
+        // quickly in this scenario and changes the average CPU utilization
+        // from ~100 % to ~0 %.
         await sleep(0.5);
       }
 
@@ -889,13 +889,11 @@ async function tryToGetNFragmentsFromSeriesPool(
       }
 
       // There's still work in the pool (candidates to look at before other
-      // actors will). Put this candidate back onto the queue (left-hand
-      // side). Since this is a double-ended queue implementation this
-      // operation is of constant time complexity (O(1)).
+      // actors will). Put this candidate back onto the queue (left-hand side)
+      // and leave this lazy-throttling loop with a `break`. Since this is a
+      // double-ended queue implementation this operation is of constant time
+      // complexity (O(1)).
       seriespool.unshift(s);
-
-      // Leave this lazy-throttling loop, meaning that `fragment` is
-      // `undefined`.
       break;
     }
 
