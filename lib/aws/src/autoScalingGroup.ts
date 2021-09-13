@@ -16,11 +16,12 @@
 
 import { strict as assert } from "assert";
 
-import { AutoScaling } from "aws-sdk";
+import AWS, { AutoScaling } from "aws-sdk";
 import { Subnet } from "./types";
 import { log } from "@opstrace/utils";
 
-import { autoScalingClient, awsPromErrFilter } from "./util";
+import { autoScalingClient, ec2c, awsPromErrFilter } from "./util";
+
 import { AWSResource } from "./resource";
 
 class ASGRes extends AWSResource<
@@ -220,6 +221,89 @@ class ASGRes extends AWSResource<
   }
 }
 
+class EC2InstanceMetadata extends AWSResource<boolean> {
+  // overridden in constructor, see below.
+  protected rname = "";
+  private instanceid: string;
+
+  constructor(opstraceClusterName: string, instanceid: string) {
+    super(opstraceClusterName);
+    this.rname = `ec2 instance metadata - ${instanceid}`;
+    this.instanceid = instanceid;
+  }
+
+  protected async tryCreate(): Promise<boolean> {
+    const req = {
+      HttpPutResponseHopLimit: 2,
+      InstanceId: this.instanceid
+    };
+
+    const result = await awsPromErrFilter(
+      ec2c().modifyInstanceMetadataOptions(req).promise()
+    );
+
+    if (result && result.InstanceId) {
+      return true;
+    }
+
+    throw new Error(
+      `ec2 instance metadata modify error? Result object: ${JSON.stringify(
+        result,
+        null,
+        2
+      )}`
+    );
+  }
+
+  protected async checkCreateSuccess(): Promise<boolean> {
+    const req: AWS.EC2.DescribeInstancesRequest = {
+      InstanceIds: [this.instanceid]
+    };
+
+    const result = await awsPromErrFilter(
+      ec2c().describeInstances(req).promise()
+    );
+
+    if (result.Reservations !== undefined) {
+      if (result.Reservations.length === 1) {
+        if (result.Reservations[0].Instances) {
+          if (result.Reservations[0].Instances.length === 1) {
+            const instance = result.Reservations[0].Instances[0];
+            if (instance.MetadataOptions?.HttpPutResponseHopLimit === 2) {
+              log.info(`${this}: HttpPutResponseHopLimit is 2`);
+              return true;
+            } else {
+              const s = JSON.stringify(instance.MetadataOptions, null, 2);
+              log.info(`${this}: HttpPutResponseHopLimit is not 2:\n${s}`);
+              return false;
+            }
+          }
+        }
+      }
+    }
+
+    log.info(
+      `${this}: unexpected describeInstances result: :\n${JSON.stringify(
+        result,
+        null,
+        2
+      )}`
+    );
+
+    return false;
+  }
+
+  protected async tryDestroy(): Promise<void> {
+    // implementation not needed
+    return;
+  }
+
+  protected async checkDestroySuccess(): Promise<true> {
+    // Implementation not needed
+    return true;
+  }
+}
+
 export async function ensureAutoScalingGroupExists({
   opstraceClusterName,
   subnets,
@@ -260,8 +344,27 @@ export async function ensureAutoScalingGroupExists({
       .join(",")
   };
 
-  const asg = new ASGRes(opstraceClusterName);
-  await asg.setup(asgCreateParams);
+  const asgres = new ASGRes(opstraceClusterName);
+  const asg = await asgres.setup(asgCreateParams);
+
+  // Note(JP): at this point, it's known that the ASG is healthy, the EC2
+  // instance count in the ASG is as expected. Now, perform per-instance
+  // checks/mutation. These mutations are not persistent: when an instance goes
+  // away then the ASG will launch a new one, based on the launch
+  // configuration. That is, the launch configuration would be the 'right'
+  // place to implement EC2 instance properties when the goal is that all
+  // instances created in the ASG should have them. The non-persistent mutation
+  // however is helping for https://github.com/opstrace/opstrace/issues/1383.
+  assert(asg.Instances);
+  for (const instance of asg.Instances) {
+    const ec2imres = new EC2InstanceMetadata(
+      opstraceClusterName,
+      instance.InstanceId
+    );
+    // Could do this concurrently for all instances, but that makes log
+    // output harder to read and probably only saves a few seconds.
+    await ec2imres.setup();
+  }
 }
 
 export async function destroyAutoScalingGroup(
