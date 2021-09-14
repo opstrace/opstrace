@@ -56,10 +56,12 @@ do
     done
 done
 
-# See opstrace-prelaunch/issues/2091
-for RESOURCE in issuer certificate certificaterequest order challenge
+# Collect cert-manager resources to help root cause possible issues when issuing
+# certificates.
+kubectl describe clusterissuer > clusterlogs_clusterissuers-${OPSTRACE_CLUSTER_NAME}-ingress.log
+for RESOURCE in certificate certificaterequest order challenge
 do
-    kubectl --namespace=ingress describe ${RESOURCE} > clusterlogs_${RESOURCE}-${OPSTRACE_CLUSTER_NAME}-ingress.log
+    kubectl describe ${RESOURCE} --all-namespaces > clusterlogs_${RESOURCE}-${OPSTRACE_CLUSTER_NAME}-ingress.log
 done
 
 cp opstrace_cli_*log ${OPSTRACE_ARTIFACT_DIR}
