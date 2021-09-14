@@ -435,7 +435,7 @@ export async function waitUntilDataAPIEndpointsAreReachable(
     "waiting for expected HTTP responses at these URLs: %s",
     JSON.stringify(probeUrls, null, 2)
   );
-  const actors: any[] = [];
+  const actors: Array<Promise<void>> = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
     actors.push(waitForProbeURL(probeUrl, tenantName, 200, true));
   }
@@ -464,7 +464,7 @@ export async function waitUntilDDAPIEndpointsAreReachable(
     "waiting for expected HTTP responses at these URLs: %s",
     JSON.stringify(probeUrls, null, 2)
   );
-  const actors: any[] = [];
+  const actors: Array<Promise<void>> = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
     actors.push(waitForProbeURL(probeUrl, tenantName, 405, false, true, true));
   }
@@ -495,7 +495,7 @@ export async function waitUntilUIIsReachable(
     "waiting for expected HTTP responses at these URLs: %s",
     JSON.stringify(probeUrls, null, 2)
   );
-  const actors: any[] = [];
+  const actors: Array<Promise<void>> = [];
   for (const [probeUrl, tenantName] of Object.entries(probeUrls)) {
     // Do not inspect JSON in response, do not enrich request with
     // authentication proof.

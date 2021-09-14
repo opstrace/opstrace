@@ -27,7 +27,7 @@ import errorSvg from "./loadingStages/tracy-error.svg";
 import logoutSvg from "./loadingStages/tracy-logout.svg";
 import statusCheckSvg from "./loadingStages/tracy-status-check.svg";
 
-const STAGES: Record<string, any> = {
+const STAGES = {
   "access-denied": accessDeniedSvg,
   auth0: auth0Svg,
   "create-session": createSessionSvg,
@@ -37,7 +37,7 @@ const STAGES: Record<string, any> = {
 };
 
 type LoadingPageProps = {
-  stage: string;
+  stage: keyof typeof STAGES;
 };
 
 export const LoadingPage = ({ stage }: LoadingPageProps) => (
