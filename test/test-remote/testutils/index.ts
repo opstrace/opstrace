@@ -33,11 +33,9 @@ import { ZonedDateTime, DateTimeFormatter } from "@js-joda/core";
 export const CORTEX_API_TLS_VERIFY = false;
 export const LOKI_API_TLS_VERIFY = false;
 
-const logFormat = winston.format.printf(
-  ({ level, message, label, timestamp }) => {
-    return `${timestamp} ${level}: ${message}`;
-  }
-);
+const logFormat = winston.format.printf(({ level, message, timestamp }) => {
+  return `${timestamp} ${level}: ${message}`;
+});
 
 export const log = winston.createLogger({
   levels: winston.config.syslog.levels,
@@ -53,9 +51,7 @@ export const log = winston.createLogger({
 
 const TMPDIRPATH = `${os.tmpdir()}${path.sep}opstrace-test-remote`;
 
-export declare interface Dict<T = any> {
-  [key: string]: T;
-}
+export type Dict<T> = Record<string, T>;
 
 /**
  * In mochajs there is no "global hook" that would allow for running setup code
@@ -453,11 +449,13 @@ export function enrichHeadersWithAuthToken(
 
 // Check if we're running the DNS cache by reading from the file the
 // ci/dns_cache.sh script creates with the IP address of the DNS cache server.
-export function readDockerDNSSettings(): any[] | undefined {
+export function readDockerDNSSettings(): [string] | undefined {
   try {
     return [readFileSync("/tmp/dns_cache_ip").toString()];
-  } catch (e: any) {
-    log.warning(`could not read docker dns settings: ${e.message}`);
+  } catch (error) {
+    log.warning(
+      `could not read docker dns settings: ${(error as Error).message}`
+    );
     return undefined;
   }
 }

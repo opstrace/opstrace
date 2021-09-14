@@ -28,7 +28,7 @@ const headers = { "Content-Type": "application/json", ...authHeader };
 const useHasuraSubscription = (
   query: string,
   variables: {} = {}
-): SWRResponse<any, any> => {
+): SWRResponse<void, any> => {
   const token = useDeepMemo(() => [query, variables], [query, variables]);
   return useSWR(token, fetcher(token, query, variables));
 };

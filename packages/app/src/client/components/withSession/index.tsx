@@ -309,7 +309,7 @@ const CreateSession = ({
       // Note(JP): this request exchanges the Auth0 access token into a session
       // secret. The request must have its own local error handler. Show an
       // "access denied" error (only!) when a 403 response comes in.
-      let resp: AxiosResponse<any>;
+      let resp: AxiosResponse<{ currentUserId: string }>;
       try {
         resp = await loginRequestWithRetry(at);
       } catch (err: any) {

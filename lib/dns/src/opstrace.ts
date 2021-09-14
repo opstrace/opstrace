@@ -84,11 +84,10 @@ async function loginPollRequest(
   let data: any;
   try {
     data = JSON.parse(resp.body);
-  } catch (err: any) {
+  } catch (err) {
     log.warning(
-      "could not parse response body as JSON: %s: %s",
-      err.code,
-      err.message
+      "could not parse response body as JSON: %s",
+      (err as SyntaxError).message
     );
 
     return undefined;

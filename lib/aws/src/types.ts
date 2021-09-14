@@ -17,9 +17,7 @@
 import * as yup from "yup";
 import { EC2 } from "aws-sdk";
 
-export declare interface Dict<T = unknown> {
-  [key: string]: T;
-}
+export type Dict<T> = Record<string, T>;
 
 export type PickRequired<T, K extends keyof T> = Omit<T, K> &
   Required<Pick<T, K>>;
