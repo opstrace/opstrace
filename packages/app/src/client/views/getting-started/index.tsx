@@ -93,7 +93,7 @@ const GettingStarted = () => {
                   <small>
                     <pre>
                       https://cortex.{tenant.name}.{window.location.host}
-                      .opstrace.io/api/v1/push
+                      /api/v1/push
                     </pre>
                   </small>
                 </Typography>
