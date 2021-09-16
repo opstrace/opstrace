@@ -116,7 +116,11 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
             emitter(actions.setCortexRuntimeConfig(res.data));
           })
           .catch(err => {
-            if (ServerError.isInstance(err.response.data)) {
+            if (
+              axios.isAxiosError(err) &&
+              err.response &&
+              ServerError.isInstance(err.response.data)
+            ) {
               // Extract the specific error message
               emitter(actions.setCortexConfigError(err.response.data.message));
             } else {
@@ -133,7 +137,11 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
             emitter(actions.setRecognizedCortexRuntimeConfig(data));
           })
           .catch(err => {
-            if (ServerError.isInstance(err.response.data)) {
+            if (
+              axios.isAxiosError(err) &&
+              err.response &&
+              ServerError.isInstance(err.response.data)
+            ) {
               // Extract the specific error message
               emitter(actions.setCortexConfigError(err.response.data.message));
             } else {
@@ -150,7 +158,11 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
             emitter(actions.setCortexConfig(data));
           })
           .catch(err => {
-            if (ServerError.isInstance(err.response.data)) {
+            if (
+              axios.isAxiosError(err) &&
+              err.response &&
+              ServerError.isInstance(err.response.data)
+            ) {
               // Extract the specific error message
               emitter(actions.setCortexConfigError(err.response.data.message));
             } else {

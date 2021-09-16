@@ -60,7 +60,11 @@ function* saveRuntimeConfig(
       data: yaml.dump(action.payload)
     });
   } catch (err: any) {
-    if (ServerError.isInstance(err.response.data)) {
+    if (
+      axios.isAxiosError(err) &&
+      err.response &&
+      ServerError.isInstance(err.response.data)
+    ) {
       // Extract the specific error message
       yield put(
         actions.saveCortexRuntimeConfigError(err.response.data.message)
