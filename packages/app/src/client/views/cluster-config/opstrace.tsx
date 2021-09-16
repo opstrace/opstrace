@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from "react";
+import React, { ReactNode } from "react";
 import { format, parseISO } from "date-fns";
 
 import useOpstraceConfig from "state/opstrace-config/hooks/useOpstraceConfig";
@@ -31,14 +31,15 @@ import {
 import { Card } from "client/components/Card";
 import { Typography } from "client/components/Typography";
 import { Box } from "client/components/Box";
+import { OpstraceBuildInfo } from "state/opstrace-config/types";
 
 type FieldType = {
-  key: string;
-  label: string;
-  formatter?: Function;
+  key: keyof OpstraceBuildInfo;
+  label: ReactNode;
+  formatter?: (value: string) => ReactNode;
 };
 
-const fields: FieldType[] = [
+const FIELDS: FieldType[] = [
   { key: "version", label: "Version" },
   { key: "commit", label: "Commit" },
   { key: "branch", label: "Branch" },
@@ -65,7 +66,7 @@ const OpstraceConfig = () => {
         <TableContainer component={Card}>
           <Table aria-label="tenants" data-test="tenant/list">
             <TableBody>
-              {fields.map(field => (
+              {FIELDS.map(field => (
                 <TableRow key={field.key}>
                   <TableCell component="th" scope="row">
                     {field.label}
