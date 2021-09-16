@@ -66,7 +66,7 @@ const OpstraceConfig = () => {
         <TableContainer component={Card}>
           <Table aria-label="tenants" data-test="tenant/list">
             <TableBody>
-              {FIELDS.map(field => (
+              {FIELDS.filter(field => !!buildInfo[field.key]).map(field => (
                 <TableRow key={field.key}>
                   <TableCell component="th" scope="row">
                     {field.label}

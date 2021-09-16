@@ -19,9 +19,9 @@ export type OpstraceConfig = {
 };
 
 export type OpstraceBuildInfo = {
-  branch: string;
-  version: string;
-  commit: string;
-  buildTime: string;
-  buildHostname: string;
+  branch?: string;
+  version?: string;
+  commit?: string;
+  buildTime?: string;
+  buildHostname?: string;
 };
