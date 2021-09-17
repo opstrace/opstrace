@@ -51,10 +51,11 @@ check_certificate() {
     # also show all output on stderr via a tee shunt.
     # For the grep text, also see
     # https://github.com/opstrace/opstrace/issues/386
-    timeout --kill-after=10 10 \
-    openssl s_client -showcerts -connect "${1}"  </dev/null \
-    | openssl x509 -noout -issuer \
-    |& tee /dev/stderr | grep "O = (STAGING) Let's Encrypt, CN = (STAGING) Artificial Apricot"
+    # Setting the results to variables will result in printing them in CI via 'set -o xstrace'
+    # For example if the -showcerts command returns an error then the error should be logged
+    CERT="$(timeout --kill-after=10 10 openssl s_client -showcerts -connect $1 </dev/null 2>&1)"
+    ISSUER=$(echo "$CERT" | openssl x509 -noout -issuer 2>&1)
+    echo "$ISSUER" | grep "O = (STAGING) Let's Encrypt, CN = (STAGING) Artificial Apricot"
 }
 
 retry_check_certificate() {
