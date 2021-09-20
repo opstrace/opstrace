@@ -29,7 +29,7 @@ export default function getStore(): Store {
   return _store;
 }
 
-function createMainStore(): Store {
+export function createMainStore(): Store {
   const sagaMiddleware = createSagaMiddleware();
   const middlewares = [sagaMiddleware];
 
