@@ -15,17 +15,12 @@
  */
 
 import React from "react";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { render, screen } from "@testing-library/react";
-import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
+import { screen } from "@testing-library/react";
 import DownloadConfigButton from "./DownloadConfigButton";
 import { saveAs } from "file-saver";
+import { renderWithEnv } from "client/utils/testutils";
 
 jest.mock("file-saver");
 
@@ -34,7 +29,7 @@ test("handles click", async () => {
   const filename = "my-filename";
   const label = "Download YAML";
 
-  renderComponent(
+  renderWithEnv(
     <DownloadConfigButton
       config={config}
       filename={filename}
@@ -54,7 +49,7 @@ test("handles errors", async () => {
   const label = "Download YAML";
   const errorMessage = "something went terribly wrong";
 
-  renderComponent(
+  renderWithEnv(
     <DownloadConfigButton
       config="my-config"
       filename="my-filename"
@@ -72,18 +67,3 @@ test("handles errors", async () => {
   expect(screen.getByText("Could not download YAML")).toBeInTheDocument();
   expect(screen.getByText(errorMessage)).toBeInTheDocument();
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  history = createMemoryHistory()
-) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

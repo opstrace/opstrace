@@ -15,17 +15,15 @@
  */
 
 import React from "react";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
-import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
+import { screen } from "@testing-library/react";
 import AddUserDialog, { addUserCommandId } from "./AddUserDialog";
-import { CommandServiceTrigger, userEvent } from "client/utils/testutils";
-import getStore from "state/store";
+import {
+  CommandServiceTrigger,
+  renderWithEnv,
+  userEvent
+} from "client/utils/testutils";
+import { createMainStore } from "state/store";
 import { graphql } from "msw";
 import { setupServer } from "msw/node";
 import { User } from "state/graphql-api-types";
@@ -89,12 +87,12 @@ beforeEach(() => {
 afterAll(() => mockServer.close());
 
 test("adds new user", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const mockUser = createMockUser();
 
   mockUserCreationEndpoint(mockUser);
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
@@ -106,14 +104,14 @@ test("adds new user", async () => {
 });
 
 test("reactivates users", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const mockUser = createMockUser({ active: false });
 
   store.dispatch(setUserList([mockUser]));
 
   mockUserRecreationEndpoint(mockUser);
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
@@ -126,7 +124,7 @@ test("reactivates users", async () => {
 
 test("handles when no name is entered", async () => {
   const username = "";
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>
@@ -140,7 +138,7 @@ test("handles when no name is entered", async () => {
 
 test("handles when name is no email", async () => {
   const username = "not an email";
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>
@@ -155,7 +153,7 @@ test("handles when name is no email", async () => {
 });
 
 test("handles user creation error", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const mockUser = createMockUser();
   const errorMessage = "Oh my - what an error!";
 
@@ -171,7 +169,7 @@ test("handles user creation error", async () => {
     })
   );
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
@@ -186,9 +184,11 @@ test("handles user creation error", async () => {
 });
 
 test("handles user reactivation error", async () => {
-  const store = getStore();
-  const mockUser = createMockUser();
+  const store = createMainStore();
+  const mockUser = createMockUser({ active: false });
   const errorMessage = "Oh my - what an error!";
+
+  store.dispatch(setUserList([mockUser]));
 
   mockServer.use(
     graphql.mutation("ReactivateUser", (req, res, ctx) => {
@@ -202,7 +202,7 @@ test("handles user reactivation error", async () => {
     })
   );
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addUserCommandId}>
       <AddUserDialog />
     </CommandServiceTrigger>,
@@ -215,18 +215,3 @@ test("handles user reactivation error", async () => {
   expect(await screen.findByText("Could not add user")).toBeInTheDocument();
   expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  { store = getStore(), history = createMemoryHistory() } = {}
-) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

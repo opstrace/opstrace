@@ -27,6 +27,7 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { render } from "@testing-library/react";
 import { createMockShard } from "../testUtils";
+import { renderWithEnv } from "client/utils/testutils";
 
 jest.useFakeTimers();
 
@@ -44,7 +45,7 @@ describe("LokiRingHealth", () => {
   test("renders title correctly", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
-    const container = renderComponent(
+    const container = renderWithEnv(
       <Router history={history}>
         <RingHealth baseUrl={baseUrl} />
       </Router>
@@ -57,7 +58,7 @@ describe("LokiRingHealth", () => {
   test("selects ingester tab by default", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
-    const container = renderComponent(
+    const container = renderWithEnv(
       <Router history={history}>
         <RingHealth baseUrl={baseUrl} />
       </Router>
@@ -87,7 +88,7 @@ describe("LokiRingHealth", () => {
 
         const baseUrl = "/route/to/ring-health";
         const history = createMemoryHistory({ initialEntries: [baseUrl] });
-        const container = renderComponent(
+        const container = renderWithEnv(
           <Router history={history}>
             <RingHealth baseUrl={baseUrl} />
           </Router>
@@ -115,13 +116,3 @@ describe("LokiRingHealth", () => {
     );
   });
 });
-
-const renderComponent = (children: React.ReactNode) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>{children}</Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

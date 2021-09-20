@@ -15,19 +15,17 @@
  */
 
 import React from "react";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
-import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
+import { screen, waitFor } from "@testing-library/react";
 import DeleteTenantDialog, {
   deleteTenantCommandId
 } from "./DeleteTenantDialog";
-import { CommandServiceTrigger, userEvent } from "client/utils/testutils";
-import getStore from "state/store";
+import {
+  CommandServiceTrigger,
+  renderWithEnv,
+  userEvent
+} from "client/utils/testutils";
+import { createMainStore } from "state/store";
 import { graphql } from "msw";
 import { setupServer } from "msw/node";
 import faker from "faker";
@@ -73,14 +71,14 @@ beforeEach(() => {
 afterAll(() => mockServer.close());
 
 test("deletes tenant tenant", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const mockTenant = createMockTenant();
 
   store.dispatch(setTenantList([mockTenant]));
 
   const request = mockTenantDeletionEndpoint(mockTenant);
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={deleteTenantCommandId}>
       <DeleteTenantDialog />
     </CommandServiceTrigger>,
@@ -101,7 +99,7 @@ test("deletes tenant tenant", async () => {
 });
 
 test("handles tenant deletion error", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const mockTenant = createMockTenant();
   const errorMessage = "Oh my - what an error!";
 
@@ -119,7 +117,7 @@ test("handles tenant deletion error", async () => {
     })
   );
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={deleteTenantCommandId}>
       <DeleteTenantDialog />
     </CommandServiceTrigger>,
@@ -134,21 +132,8 @@ test("handles tenant deletion error", async () => {
   ).toBeInTheDocument();
   userEvent.click(screen.getByText(`yes`));
 
-  expect(await screen.findByText("Could not delete tenant")).toBeInTheDocument();
+  expect(
+    await screen.findByText("Could not delete tenant")
+  ).toBeInTheDocument();
   expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  { store = getStore(), history = createMemoryHistory() } = {}
-) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

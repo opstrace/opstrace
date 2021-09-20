@@ -16,19 +16,14 @@
 
 import React from "react";
 import { AllIntegrations } from "./All";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
 import "@testing-library/jest-dom";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
-import { StoreProvider } from "state/provider";
 import integrationsDefs from "client/integrations";
-import { userEvent } from "client/utils/testutils";
+import { renderWithEnv, userEvent } from "client/utils/testutils";
 
 test("renders integrations", async () => {
-  renderComponent(<AllIntegrations />);
+  renderWithEnv(<AllIntegrations />);
   integrationsDefs
     .filter(i9n => i9n.enabled)
     .forEach(i9n => {
@@ -37,7 +32,7 @@ test("renders integrations", async () => {
 });
 
 test("does not render disabled integrations", async () => {
-  renderComponent(<AllIntegrations />);
+  renderWithEnv(<AllIntegrations />);
   integrationsDefs
     .filter(i9n => !i9n.enabled)
     .forEach(i9n => {
@@ -48,25 +43,10 @@ test("does not render disabled integrations", async () => {
 test("clicking install redirects correctly", async () => {
   const history = createMemoryHistory();
   const integration = integrationsDefs[0].kind;
-  renderComponent(<AllIntegrations />, { history });
+  renderWithEnv(<AllIntegrations />, { history });
   const integrationCard = within(screen.getByTestId(`${integration}-card`));
   userEvent.click(integrationCard.getByRole("button", { name: "Install" }));
   expect(history.location.pathname).toBe(
     `/tenant/system/integrations/all/install/${integration}`
   );
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  { history = createMemoryHistory() } = {}
-) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

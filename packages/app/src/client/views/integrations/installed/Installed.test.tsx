@@ -16,19 +16,14 @@
 
 import React from "react";
 import { InstalledIntegrations } from "./Installed";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
-import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
-import { Provider } from "react-redux";
-import getStore from "state/store";
+import { screen } from "@testing-library/react";
+import { createMainStore } from "state/store";
 import { updateIntegrations } from "state/integration/actions";
 import uniqueId from "lodash/uniqueId";
 import integrationsDefs from "client/integrations";
 import randomNumber from "lodash/random";
+import { renderWithEnv } from "client/utils/testutils";
 
 const getRandomIntegrationDef = () =>
   integrationsDefs[randomNumber(0, integrationsDefs.length - 1)];
@@ -49,13 +44,13 @@ const createMockIntegration = (integrationDef = getRandomIntegrationDef()) => {
 };
 
 test("renders integrations", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const integrationDef = getRandomIntegrationDef();
   const integration = createMockIntegration(integrationDef);
 
   store.dispatch(updateIntegrations([integration]));
 
-  renderComponent(<InstalledIntegrations />, { store });
+  renderWithEnv(<InstalledIntegrations />, { store });
 
   expect(
     screen.getByRole("cell", { name: integration.name })
@@ -66,18 +61,3 @@ test("renders integrations", async () => {
 });
 
 test.todo("renders integration's status");
-
-const renderComponent = (
-  children: React.ReactNode,
-  { store = getStore(), history = createMemoryHistory() } = {}
-) => {
-  return render(
-    <Provider store={store}>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </Provider>
-  );
-};

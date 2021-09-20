@@ -16,16 +16,11 @@
 
 import React from "react";
 import RingHealth from "./RingHealth";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import nock from "nock";
-import { MemoryRouter } from "react-router";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { render } from "@testing-library/react";
 import { createMockShard } from "./testUtils";
+import { renderWithEnv } from "client/utils/testutils";
 
 jest.useFakeTimers();
 
@@ -37,7 +32,7 @@ beforeEach(() => {
 describe("RingHealth", () => {
   test("renders title correctly", async () => {
     const title = "my title";
-    const container = renderComponent(
+    const container = renderWithEnv(
       <RingHealth
         title={title}
         tabs={[
@@ -69,7 +64,7 @@ describe("RingHealth", () => {
         endpoint: "/second-endpoint"
       }
     ];
-    const container = renderComponent(
+    const container = renderWithEnv(
       <RingHealth title="some title" tabs={tabs} />
     );
 
@@ -105,7 +100,7 @@ describe("RingHealth", () => {
         now: Date.now()
       });
 
-    const container = renderComponent(
+    const container = renderWithEnv(
       <RingHealth title="some title" tabs={[tab]} />
     );
 
@@ -148,7 +143,7 @@ describe("RingHealth", () => {
       now: Date.now()
     });
 
-    const container = renderComponent(
+    const container = renderWithEnv(
       <RingHealth title="some title" tabs={[tab]} />
     );
 
@@ -191,7 +186,7 @@ test("handles request errors", async () => {
     })
     .persist();
 
-  const container = renderComponent(
+  const container = renderWithEnv(
     <RingHealth title="some title" tabs={[tab]} />
   );
 
@@ -214,7 +209,7 @@ test("handles response errors", async () => {
 
   nock("http://localhost").get(tab.endpoint).reply(500, errorMessage).persist();
 
-  const container = renderComponent(
+  const container = renderWithEnv(
     <RingHealth title="some title" tabs={[tab]} />
   );
 
@@ -225,15 +220,3 @@ test("handles response errors", async () => {
   ).toBeInTheDocument();
   expect(await container.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const renderComponent = (children: React.ReactNode) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <MemoryRouter>{children}</MemoryRouter>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};
