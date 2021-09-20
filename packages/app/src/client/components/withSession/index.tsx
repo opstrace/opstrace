@@ -313,6 +313,10 @@ const CreateSession = ({
       try {
         resp = await loginRequestWithRetry(at);
       } catch (err: any) {
+        if (!axios.isAxiosError(err)) {
+          // re-throw programming errors
+          throw err;
+        }
         if (err.response) {
           // non-2xx responses
           const r = err.response;
@@ -434,8 +438,12 @@ async function authStatusRequestWithRetry(): Promise<
       withCredentials: true
     });
   } catch (err: any) {
+    if (!axios.isAxiosError(err)) {
+      // re-throw programming errors
+      throw err;
+    }
     if (err.response) {
-      // non-2xx responses  
+      // non-2xx responses
       const r = err.response;
       return [
         undefined,
