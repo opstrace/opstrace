@@ -894,7 +894,31 @@ export function LokiResources(
           serviceName: "ingester",
           replicas: deploymentConfig.ingester.replicas,
           revisionHistoryLimit: 10,
-          podManagementPolicy: "OrderedReady",
+          // Use Parallel to reduce blocking ingester deployments caused by readiness probes.
+          // Loki ingesters may fail their readiness probe if OTHER ingesters are down due to e.g.
+          // a dead host node, creating a circular dependency. To get out of this state, we can
+          // delete and recreate the StatefulSet to sidestep the cross-ingester circular dependency.
+          //
+          // See also Cortex Operator where we use Parallel:
+          // https://github.com/opstrace/cortex-operator/blob/81e70c4/controllers/cortex_ingester_controller.go#L127
+          //
+          // EXAMPLE scenario with 5 ingesters (0 thru 4):
+          // - ingester-4 is down
+          // - ingester-0 and ingester-3 are failing readiness probes because ingester-4 is down
+          // - ingester-4 will not be redeployed until ingester-0 and ingester-3 have passing probes
+          //
+          // Workaround:
+          // - Delete and recreate ingester statefulset (do NOT delete PVCs)
+          // - Ingesters will all redeploy in Parallel, short-circuiting the circular dependency
+          //   between ingesters. This will cause a brief service outage but the lack of Ingester
+          //   replicas would already be creating an outage of its own at this point.
+          //
+          // FUTURE WORK:
+          // - Option A: Revisit how the readiness probe is calculated?
+          //             Can we break the circular dependency in the readiness probe itself?
+          // - Option B: Custom Loki operator logic that does not wait on readiness probes when
+          //             recovering downed ingesters?
+          podManagementPolicy: "Parallel",
           selector: {
             matchLabels: {
               name: "ingester",
