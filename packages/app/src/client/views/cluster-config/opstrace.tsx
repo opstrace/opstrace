@@ -46,7 +46,7 @@ const FIELDS: FieldType[] = [
   {
     key: "buildTime",
     label: "Build Time",
-    formatter: (val: string) => format(parseISO(val), "Pppp")
+    formatter: (val: string) => val ? format(parseISO(val), "Pppp") : null
   },
   { key: "buildHostname", label: "Build Hostname" }
 ];
