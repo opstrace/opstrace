@@ -20,8 +20,8 @@ import { ThemeCommands, toggleDarkModeCommandId } from "./Provider";
 import { Provider as StoreProvider } from "react-redux";
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
-import { CommandServiceTrigger } from "../utils/testutils";
-import getStore from "../../state/store";
+import { CommandServiceTrigger, renderWithEnv } from "../utils/testutils";
+import { createMainStore } from "../../state/store";
 import { graphql, rest } from "msw";
 import { setupServer } from "msw/node";
 import { CommandService } from "../services/Command";
@@ -107,7 +107,7 @@ beforeEach(() => {
 afterAll(() => mockServer.close());
 
 test("ThemeCommands activates dark mode", async () => {
-  const store = getStore();
+  const store = createMainStore();
 
   const currentUser = createMockUser();
   const tenant = createMockTenant();
@@ -119,7 +119,7 @@ test("ThemeCommands activates dark mode", async () => {
   const grafanaRequestBodySpy = mockGrafanaDarkModeEndpoint(tenant);
   const gqlRequestBodySpy = mockGraphQLDarkModeRequest();
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={toggleDarkModeCommandId}>
       <ThemeCommands>
         <></>
@@ -149,7 +149,7 @@ test("ThemeCommands activates dark mode", async () => {
   });
 });
 
-xtest("ThemeCommands handles grafana errors", async () => {
+test("ThemeCommands handles grafana errors", async () => {
   const tenant = createMockTenant();
   mockServer.use(
     rest.put(
@@ -160,7 +160,7 @@ xtest("ThemeCommands handles grafana errors", async () => {
     )
   );
   mockGraphQLDarkModeRequest();
-  const store = getStore();
+  const store = createMainStore();
 
   const currentUser = createMockUser();
 
@@ -170,7 +170,7 @@ xtest("ThemeCommands handles grafana errors", async () => {
   store.dispatch(setCurrentUser(currentUser.id));
   store.dispatch(setTenantList([tenant]));
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={toggleDarkModeCommandId}>
       <ThemeCommands>
         <></>
@@ -189,8 +189,8 @@ xtest("ThemeCommands handles grafana errors", async () => {
   expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
 
-xtest("ThemeCommands handles graphql errors", async () => {
-  const store = getStore();
+test("ThemeCommands handles graphql errors", async () => {
+  const store = createMainStore();
 
   const currentUser = createMockUser();
   const tenant = createMockTenant();
@@ -214,7 +214,7 @@ xtest("ThemeCommands handles graphql errors", async () => {
     })
   );
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={toggleDarkModeCommandId}>
       <ThemeCommands>
         <></>
@@ -224,26 +224,7 @@ xtest("ThemeCommands handles graphql errors", async () => {
   );
 
   expect(
-    await screen.findByText(
-      "Could not persist dark mode preferences in grafana"
-    )
+    await screen.findByText("Could not persist dark mode preferences in hasura")
   ).toBeInTheDocument();
   expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  { store = getStore() } = {}
-) => {
-  return render(
-    <StoreProvider store={store}>
-      <ThemeProvider theme={light}>
-        <PickerService>
-          <CommandService>
-            <NotificationService>{children}</NotificationService>
-          </CommandService>
-        </PickerService>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

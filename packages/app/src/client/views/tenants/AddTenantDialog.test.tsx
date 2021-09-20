@@ -15,17 +15,14 @@
  */
 
 import React from "react";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
-import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
+import { screen, waitFor } from "@testing-library/react";
 import AddTenantDialog, { addTenantCommandId } from "./AddTenantDialog";
-import { CommandServiceTrigger, userEvent } from "client/utils/testutils";
-import getStore from "state/store";
+import {
+  CommandServiceTrigger,
+  renderWithEnv,
+  userEvent
+} from "client/utils/testutils";
 import { graphql } from "msw";
 import { setupServer } from "msw/node";
 import faker from "faker";
@@ -70,16 +67,14 @@ beforeEach(() => {
 afterAll(() => mockServer.close());
 
 test("adds new tenant", async () => {
-  const store = getStore();
   const mockTenant = createMockTenant();
 
   const request = mockTenantCreationEndpoint(mockTenant);
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addTenantCommandId}>
       <AddTenantDialog />
-    </CommandServiceTrigger>,
-    { store }
+    </CommandServiceTrigger>
   );
   expect(await screen.findByText("Enter tenant name")).toBeInTheDocument();
   const input = screen.getByRole("textbox", { name: "picker filter" });
@@ -94,7 +89,7 @@ test("adds new tenant", async () => {
 
 test("handles when no name is entered", async () => {
   const tenantname = "";
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addTenantCommandId}>
       <AddTenantDialog />
     </CommandServiceTrigger>
@@ -108,7 +103,7 @@ test("handles when no name is entered", async () => {
 
 test("handles when name is too short", async () => {
   const tenantname = "a";
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addTenantCommandId}>
       <AddTenantDialog />
     </CommandServiceTrigger>
@@ -124,7 +119,7 @@ test("handles when name is too short", async () => {
 
 test("handles when name is invalid", async () => {
   const tenantname = "$$$";
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addTenantCommandId}>
       <AddTenantDialog />
     </CommandServiceTrigger>
@@ -139,7 +134,6 @@ test("handles when name is invalid", async () => {
 });
 
 test("handles tenant creation error", async () => {
-  const store = getStore();
   const mockTenant = createMockTenant();
   const errorMessage = "Oh my - what an error!";
 
@@ -155,11 +149,10 @@ test("handles tenant creation error", async () => {
     })
   );
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={addTenantCommandId}>
       <AddTenantDialog />
-    </CommandServiceTrigger>,
-    { store }
+    </CommandServiceTrigger>
   );
   expect(await screen.findByText("Enter tenant name")).toBeInTheDocument();
   const input = screen.getByRole("textbox", { name: "picker filter" });
@@ -168,18 +161,3 @@ test("handles tenant creation error", async () => {
   expect(await screen.findByText("Could not add tenant")).toBeInTheDocument();
   expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  { store = getStore(), history = createMemoryHistory() } = {}
-) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

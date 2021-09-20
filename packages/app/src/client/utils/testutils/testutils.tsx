@@ -20,7 +20,7 @@ import { History, createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import UE from "@testing-library/user-event";
 import { Provider } from "react-redux";
-import getStore from "state/store";
+import { createMainStore } from "state/store";
 import "@testing-library/jest-dom";
 import ThemeProvider from "client/themes/Provider";
 import light from "client/themes/light";
@@ -59,9 +59,9 @@ export function render(
 
 export const renderWithEnv = (
   children: React.ReactNode,
-  { store = getStore(), history = createMemoryHistory() } = {}
+  { store = createMainStore(), history = createMemoryHistory() } = {}
 ) => {
-  return render(
+  return rtlRender(
     <Provider store={store}>
       <ThemeProvider theme={light}>
         <Services>

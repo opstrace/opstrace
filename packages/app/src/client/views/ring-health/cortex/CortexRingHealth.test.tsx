@@ -16,17 +16,13 @@
 
 import React from "react";
 import RingHealth, { TABS } from ".";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import nock from "nock";
 import { Router } from "react-router";
 import { createMemoryHistory } from "history";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { render } from "@testing-library/react";
 import { createMockShard } from "../testUtils";
+import { renderWithEnv } from "client/utils/testutils";
 
 jest.useFakeTimers();
 
@@ -44,7 +40,7 @@ describe("CortexRingHealth", () => {
   test("renders title correctly", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
-    const container = renderComponent(
+    const container = renderWithEnv(
       <Router history={history}>
         <RingHealth baseUrl={baseUrl} />
       </Router>
@@ -56,7 +52,7 @@ describe("CortexRingHealth", () => {
   test("selects ingester tab by default", async () => {
     const baseUrl = "/route/to/ring-health";
     const history = createMemoryHistory({ initialEntries: [baseUrl] });
-    const container = renderComponent(
+    const container = renderWithEnv(
       <Router history={history}>
         <RingHealth baseUrl={baseUrl} />
       </Router>
@@ -86,7 +82,7 @@ describe("CortexRingHealth", () => {
 
         const baseUrl = "/route/to/ring-health";
         const history = createMemoryHistory({ initialEntries: [baseUrl] });
-        const container = renderComponent(
+        const container = renderWithEnv(
           <Router history={history}>
             <RingHealth baseUrl={baseUrl} />
           </Router>
@@ -114,13 +110,3 @@ describe("CortexRingHealth", () => {
     );
   });
 });
-
-const renderComponent = (children: React.ReactNode) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>{children}</Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

@@ -32,11 +32,11 @@ jest.mock("workers", () => {
   };
 });
 
-const testTimeout = 30 * 1000; // 30s
+const testTimeout = 15 * 1000; // 30s
 
 jest.setTimeout(testTimeout);
 configure({
-  asyncUtilTimeout: testTimeout - 10
+  asyncUtilTimeout: 10000
 });
 /* limiting net requests to localhost, see
  * https://github.com/nock/nock#enabledisable-real-http-requests

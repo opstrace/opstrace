@@ -15,17 +15,15 @@
  */
 
 import React from "react";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
-import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
+import { screen } from "@testing-library/react";
 import DeleteUserDialog, { deleteUserCommand } from "./DeleteUserDialog";
-import { CommandServiceTrigger, userEvent } from "client/utils/testutils";
-import getStore from "state/store";
+import {
+  CommandServiceTrigger,
+  renderWithEnv,
+  userEvent
+} from "client/utils/testutils";
+import { createMainStore } from "state/store";
 import { graphql } from "msw";
 import { setupServer } from "msw/node";
 import { User } from "state/graphql-api-types";
@@ -73,14 +71,14 @@ beforeEach(() => {
 afterAll(() => mockServer.close());
 
 test("deactivates users", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const mockUser = createMockUser();
 
   store.dispatch(setUserList([mockUser]));
 
   mockUserDeactivationEndpoint(mockUser);
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={deleteUserCommand}>
       <DeleteUserDialog />
     </CommandServiceTrigger>,
@@ -104,7 +102,7 @@ test("deactivates users", async () => {
 });
 
 test("handles user deactivation error", async () => {
-  const store = getStore();
+  const store = createMainStore();
   const mockUser = createMockUser();
   const errorMessage = "terrible error!";
 
@@ -122,7 +120,7 @@ test("handles user deactivation error", async () => {
     })
   );
 
-  renderComponent(
+  renderWithEnv(
     <CommandServiceTrigger commandId={deleteUserCommand}>
       <DeleteUserDialog />
     </CommandServiceTrigger>,
@@ -147,18 +145,3 @@ test("handles user deactivation error", async () => {
   expect(await screen.findByText("Could not delete user")).toBeInTheDocument();
   expect(await screen.findByText(errorMessage)).toBeInTheDocument();
 });
-
-const renderComponent = (
-  children: React.ReactNode,
-  { store = getStore(), history = createMemoryHistory() } = {}
-) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>{children}</Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
-  );
-};

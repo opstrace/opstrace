@@ -16,15 +16,11 @@
 
 import React from "react";
 import { InstallIntegration } from "./Install";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
-import { Route, Router } from "react-router-dom";
-import { StoreProvider } from "state/provider";
-import { userEvent } from "client/utils/testutils";
+import { Route } from "react-router-dom";
+import { renderWithEnv, userEvent } from "client/utils/testutils";
 import { IntegrationDef, integrationsDefs } from "client/integrations";
 import { Tenant } from "state/tenant/types";
 import { Integration } from "state/integration/types";
@@ -140,17 +136,10 @@ const renderComponent = (
   children: React.ReactNode,
   { history = createMemoryHistory() } = {}
 ) => {
-  return render(
-    <StoreProvider>
-      <ThemeProvider theme={light}>
-        <Services>
-          <Router history={history}>
-            <Route path="/tenant/:tenantId/integrations/all/install/:integrationKind">
-              {children}
-            </Route>
-          </Router>
-        </Services>
-      </ThemeProvider>
-    </StoreProvider>
+  return renderWithEnv(
+    <Route path="/tenant/:tenantId/integrations/all/install/:integrationKind">
+      {children}
+    </Route>,
+    { history }
   );
 };

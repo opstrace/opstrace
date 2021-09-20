@@ -25,7 +25,7 @@ import { deleteTenant } from "state/tenant/actions";
 
 import { Tenant } from "state/tenant/types";
 
-export const deleteTenantCommandId = "delete-tenant-picker"
+export const deleteTenantCommandId = "delete-tenant-picker";
 
 function tenantToPickerOption(tenant: Tenant): PickerOption {
   return {

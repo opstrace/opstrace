@@ -36,10 +36,10 @@ const UserDetail = () => {
   const users = useUserList();
   const currentUser = useCurrentUser();
 
-  const selectedUser = useMemo(() => users.find(u => u.id === params.userId), [
-    params.userId,
-    users
-  ]);
+  const selectedUser = useMemo(
+    () => users.find(u => u.id === params.userId),
+    [params.userId, users]
+  );
 
   const cmdService = useCommandService();
 
