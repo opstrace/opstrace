@@ -63,7 +63,7 @@ type TenantReverseProxy struct {
 	tenantName               *string
 	headerName               string
 	backendURL               *url.URL
-	Revproxy                 *httputil.ReverseProxy
+	revproxy                 *httputil.ReverseProxy
 	disableAPIAuthentication bool
 }
 
@@ -79,7 +79,7 @@ func NewReverseProxyFixedTenant(
 		httputil.NewSingleHostReverseProxy(backendURL),
 		disableAPIAuthentication,
 	}
-	trp.Revproxy.ErrorHandler = proxyErrorHandler
+	trp.revproxy.ErrorHandler = proxyErrorHandler
 	if backendURL.Path != "" && backendURL.Path != "/" {
 		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
 	}
@@ -97,20 +97,19 @@ func NewReverseProxyDynamicTenant(
 		httputil.NewSingleHostReverseProxy(backendURL),
 		disableAPIAuthentication,
 	}
-	trp.Revproxy.ErrorHandler = proxyErrorHandler
+	trp.revproxy.ErrorHandler = proxyErrorHandler
 	if backendURL.Path != "" && backendURL.Path != "/" {
 		log.Fatalf("Backend path must be empty, use backendPathReplacement: %s", backendURL.String())
 	}
 	return trp
 }
 
-// Replaces the internal ReverseProxy with one that will apply the provided backendPathReplacement
-// to request paths.
-// This does not currently support rewriting responses, which may be needed for any HTML with embedded URLs.
+// Updates the internal ReverseProxy to apply the provided backendPathReplacement to request paths.
+// This does not rewrite responses for e.g. HTML with embedded links, see ReplaceResponses.
 func (trp *TenantReverseProxy) ReplacePaths(reqPathReplacement func(*url.URL) string) *TenantReverseProxy {
 	if reqPathReplacement != nil {
 		// Requests: Update URL path with replacement
-		trp.Revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
+		trp.revproxy.Director = pathReplacementDirector(trp.backendURL, reqPathReplacement)
 	}
 	return trp
 }
@@ -143,6 +142,13 @@ func pathReplacementDirector(backendURL *url.URL, reqPathReplacement func(*url.U
 	}
 }
 
+// Updates the internal ReverseProxy to apply the provided conversion against responses before sending
+// them back to the client. This does not apply when e.g. the proxy is failing to reach the backend.
+func (trp *TenantReverseProxy) ReplaceResponses(f func(req *http.Response) error) *TenantReverseProxy {
+	trp.revproxy.ModifyResponse = f
+	return trp
+}
+
 func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Request) {
 	tenantName, ok := authenticator.GetTenantNameOr401(w, r, trp.tenantName, trp.disableAPIAuthentication)
 	if !ok {
@@ -152,7 +158,7 @@ func (trp *TenantReverseProxy) HandleWithProxy(w http.ResponseWriter, r *http.Re
 
 	// Add the tenant in the request header and then forward the request to the backend.
 	r.Header.Set(trp.headerName, tenantName)
-	trp.Revproxy.ServeHTTP(w, r)
+	trp.revproxy.ServeHTTP(w, r)
 }
 
 func proxyErrorHandler(resp http.ResponseWriter, r *http.Request, proxyerr error) {

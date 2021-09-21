@@ -34,11 +34,11 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func createUpstream429Responder() (*url.URL, func()) {
+func createUpstreamResponder(code int, body string) (*url.URL, func()) {
 	router := mux.NewRouter()
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusTooManyRequests)
-		w.Write([]byte("original 429 error response"))
+		w.WriteHeader(code)
+		w.Write([]byte(body))
 	})
 
 	backend := httptest.NewServer(router)
@@ -52,13 +52,12 @@ func createUpstream429Responder() (*url.URL, func()) {
 }
 
 func TestReverseProxy_CortexPushRewrite429(t *testing.T) {
-	upstreamURL, upstreamClose := createUpstream429Responder()
+	upstreamURL, upstreamClose := createUpstreamResponder(http.StatusTooManyRequests, "original 429 error response")
 	defer upstreamClose()
 
 	disableAPIAuth := true
 	rp := middleware.NewReverseProxyFixedTenant(tenantName, "test", upstreamURL, disableAPIAuth)
-
-	rp.Revproxy.ModifyResponse = CortexPushRewrite429
+	rp.ReplaceResponses(replacePushErrors)
 
 	// Create a request to the proxy (not to the backend/upstream). Use the
 	// decisive `/api/v1/push` ingredient to test the response modification.
@@ -74,5 +73,66 @@ func TestReverseProxy_CortexPushRewrite429(t *testing.T) {
 	w = httptest.NewRecorder()
 	rp.HandleWithProxy(w, req)
 	resp = w.Result()
-	assert.Equal(t, 429, resp.StatusCode)
+	assert.Equal(t, http.StatusTooManyRequests, resp.StatusCode)
+}
+
+func TestReverseProxy_CortexPushRewrite500(t *testing.T) {
+	upstreamURL, upstreamClose := createUpstreamResponder(http.StatusInternalServerError, "original 500 error response")
+	defer upstreamClose()
+
+	disableAPIAuth := true
+	rp := middleware.NewReverseProxyFixedTenant(tenantName, "test", upstreamURL, disableAPIAuth)
+	rp.ReplaceResponses(replacePushErrors)
+
+	// Create a request to the proxy (not to the backend/upstream). Use the
+	// decisive `/api/v1/push` ingredient to test the response modification.
+	req := httptest.NewRequest("GET", "http://localhost/api/v1/push", nil)
+	w := httptest.NewRecorder()
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	assert.Equal(t, 409, resp.StatusCode)
+	assert.Equal(t, "500-to-409: original 500 error response", middleware.GetStrippedBody(resp))
+
+	// Test without `/api/v1/push`, confirm that response is left intact.
+	req = httptest.NewRequest("GET", "http://localhost/", nil)
+	w = httptest.NewRecorder()
+	rp.HandleWithProxy(w, req)
+	resp = w.Result()
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+}
+
+func TestReverseProxy_CortexPushNotRewrite202(t *testing.T) {
+	upstreamURL, upstreamClose := createUpstreamResponder(http.StatusAccepted, "original 202 success response")
+	defer upstreamClose()
+
+	disableAPIAuth := true
+	rp := middleware.NewReverseProxyFixedTenant(tenantName, "test", upstreamURL, disableAPIAuth)
+	rp.ReplaceResponses(replacePushErrors)
+
+	// Create a request to the proxy (not to the backend/upstream). Use the
+	// decisive `/api/v1/push` ingredient to test the response modification.
+	req := httptest.NewRequest("GET", "http://localhost/api/v1/push", nil)
+	w := httptest.NewRecorder()
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
+	assert.Equal(t, "original 202 success response", middleware.GetStrippedBody(resp))
+}
+
+func TestReverseProxy_CortexPushNotRewrite499(t *testing.T) {
+	upstreamURL, upstreamClose := createUpstreamResponder(499, "original 499 error response")
+	defer upstreamClose()
+
+	disableAPIAuth := true
+	rp := middleware.NewReverseProxyFixedTenant(tenantName, "test", upstreamURL, disableAPIAuth)
+	rp.ReplaceResponses(replacePushErrors)
+
+	// Create a request to the proxy (not to the backend/upstream). Use the
+	// decisive `/api/v1/push` ingredient to test the response modification.
+	req := httptest.NewRequest("GET", "http://localhost/api/v1/push", nil)
+	w := httptest.NewRecorder()
+	rp.HandleWithProxy(w, req)
+	resp := w.Result()
+	assert.Equal(t, 499, resp.StatusCode)
+	assert.Equal(t, "original 499 error response", middleware.GetStrippedBody(resp))
 }
