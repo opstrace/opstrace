@@ -17,32 +17,24 @@
 import React, { ReactNode } from "react";
 import { UninstallBtn } from "./UninstallIntegrationBtn";
 import userEvent from "@testing-library/user-event";
-import { waitFor } from "@testing-library/react";
+import { waitFor, screen } from "@testing-library/react";
 import { Integration } from "state/integration/types";
 import { createMemoryHistory } from "history";
 import { Tenant } from "state/tenant/types";
 import { graphql, rest } from "msw";
 import { setupServer } from "msw/node";
 import { renderWithEnv } from "client/utils/testutils";
-
-/* did not manage to get the picker service running with the tests
- * so I just mocked it, as I primarily want to test network interactions.
- */
-jest.mock("client/services/Picker", () => ({
-  PickerService: ({ children }: { children: ReactNode }) => children,
-  usePickerService: ({ onSelected }: { onSelected: Function }) => ({
-    activatePickerWithText: () => onSelected({ id: "yes" })
-  })
-}));
+import faker from "faker";
+import { uniqueId } from "lodash";
 
 const mockServer = setupServer();
 
-const mockHasuraEndpoint = () => {
+const mockHasuraEndpoint = (integration: Integration) => {
   mockServer.use(
     graphql.mutation("DeleteIntegration", (req, res, ctx) => {
       return res(
         ctx.data({
-          data: [{ id: 1 }],
+          data: [{ id: integration.id }],
           error: null,
           loading: false
         })
@@ -70,44 +62,58 @@ beforeEach(() => {
 
 afterAll(() => mockServer.close());
 
-const getMockIntegration = (): Integration => ({
-  id: 1,
-  tenant_id: 2,
-  name: "mock-integration",
-  key: "some-key",
-  kind: "some-kind",
-  data: {},
-  created_at: "today",
-  updated_at: "tomorrow"
-});
+const getMockIntegration = (tenant: Tenant): Integration => {
+  const id = uniqueId();
+  const creationDate = faker.date.past().toString();
+  return {
+    id: id,
+    tenant_id: tenant.id,
+    name: `integration-name-${id}`,
+    key: `integration-key-${id}`,
+    kind: `integration-kind-${id}`,
+    data: {},
+    created_at: creationDate,
+    updated_at: creationDate
+  };
+};
 
-const getMockTenant = (): Tenant => ({
-  id: 4,
-  name: "mock-tenant",
-  key: "some-key",
-  type: "some-type",
-  created_at: "today",
-  updated_at: "tomorrow"
-});
+const getMockTenant = (): Tenant => {
+  const id = uniqueId();
+  const creationDate = faker.date.past().toString();
+  return {
+    id,
+    name: `tenant-name-${id}`,
+    key: `tenant-key-${id}`,
+    type: `tenant-type-${id}`,
+    created_at: creationDate,
+    updated_at: creationDate
+  };
+};
 
 test("handles click", async () => {
   const history = createMemoryHistory();
 
-  const integration = getMockIntegration();
   const tenant = getMockTenant();
+  const integration = getMockIntegration(tenant);
 
-  mockHasuraEndpoint();
+  mockHasuraEndpoint(integration);
   mockGrafanaEndpoint(tenant, integration);
 
-  const container = renderWithEnv(
+  renderWithEnv(
     <UninstallBtn integration={integration} tenant={tenant} disabled={false} />,
     { history }
   );
 
-  userEvent.click(container.getByRole("button"));
+  userEvent.click(
+    screen.getByRole("button", { name: "Uninstall Integration" })
+  );
+  expect(screen.getByText(`Uninstall "${integration.name}"?`));
+  userEvent.click(screen.getByText("yes"));
+
+  // screen.debug()
   await waitFor(() =>
     expect(history.location.pathname).toBe(
-      "/tenant/mock-tenant/integrations/installed"
+      `/tenant/${tenant.name}/integrations/installed`
     )
   );
 });
@@ -115,8 +121,8 @@ test("handles click", async () => {
 test("shows error messages if hasura request fails", async () => {
   const history = createMemoryHistory();
 
-  const integration = getMockIntegration();
   const tenant = getMockTenant();
+  const integration = getMockIntegration(tenant);
   const errorMessage = "Something went super wrong here!";
   mockServer.use(
     graphql.mutation("DeleteIntegration", (req, res, ctx) => {
@@ -136,7 +142,12 @@ test("shows error messages if hasura request fails", async () => {
     { history }
   );
 
-  userEvent.click(container.getByRole("button"));
+  userEvent.click(
+    screen.getByRole("button", { name: "Uninstall Integration" })
+  );
+  expect(screen.getByText(`Uninstall "${integration.name}"?`));
+  userEvent.click(screen.getByText("yes"));
+
   expect(
     await container.findByText("Could not uninstall integration")
   ).toBeInTheDocument();
@@ -146,11 +157,11 @@ test("shows error messages if hasura request fails", async () => {
 test("doesn't show error messages if grafana request fails", async () => {
   const history = createMemoryHistory();
 
-  const integration = getMockIntegration();
   const tenant = getMockTenant();
+  const integration = getMockIntegration(tenant);
   const errorMessage = "Folder API error";
 
-  mockHasuraEndpoint();
+  mockHasuraEndpoint(integration);
   // Grafana requests fails
   mockServer.use(
     rest.delete(
@@ -165,8 +176,12 @@ test("doesn't show error messages if grafana request fails", async () => {
     <UninstallBtn integration={integration} tenant={tenant} disabled={false} />,
     { history }
   );
+
   userEvent.click(
-    container.getByRole("button", { name: "Uninstall Integration" })
+    screen.getByRole("button", { name: "Uninstall Integration" })
   );
+  expect(screen.getByText(`Uninstall "${integration.name}"?`));
+  userEvent.click(screen.getByText("yes"));
+
   expect(container.queryAllByText(errorMessage)).toHaveLength(0);
 });
