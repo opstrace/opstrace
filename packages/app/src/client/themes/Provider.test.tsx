@@ -15,18 +15,13 @@
  */
 
 import React from "react";
-import light from "./light";
 import { ThemeCommands, toggleDarkModeCommandId } from "./Provider";
-import { Provider as StoreProvider } from "react-redux";
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { CommandServiceTrigger, renderWithEnv } from "../utils/testutils";
 import { createMainStore } from "../../state/store";
 import { graphql, rest } from "msw";
 import { setupServer } from "msw/node";
-import { CommandService } from "../services/Command";
-import { PickerService } from "../services/Picker";
-import ThemeProvider from "../themes/Provider";
 import faker from "faker";
 import { setCurrentUser, setUserList } from "../../state/user/actions";
 import { User } from "../../state/graphql-api-types";
@@ -34,7 +29,6 @@ import { getCurrentUser } from "../../state/user/hooks/useCurrentUser";
 import { setTenantList } from "../../state/tenant/actions";
 import { Tenant } from "../../state/tenant/types";
 import { grafanaUrl } from "../utils/grafana";
-import { NotificationService } from "../services/Notification";
 
 const createMockTenant = (config: Partial<Tenant> = {}): Tenant => {
   const name = faker.internet.domainWord();
