@@ -171,7 +171,7 @@
           "title": "Workload-based scaling",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "transform": "table",
@@ -372,7 +372,7 @@
           "title": "Resource-based scaling",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "transform": "table",

@@ -303,7 +303,7 @@
       "title": "[METRICS] Total Number of Active Series (total across system AND myteam tenants)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -402,7 +402,7 @@
       "title": "[LOGS] Total Number of Log Lines Received (total across system AND myteam tenants)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -520,7 +520,7 @@
       "title": "[METRICS] Ingestion (Write) Latency (all tenants)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",

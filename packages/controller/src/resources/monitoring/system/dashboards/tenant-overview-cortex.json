@@ -159,9 +159,7 @@
         "justifyMode": "center",
         "orientation": "vertical",
         "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
+          "calcs": ["last"],
           "fields": "/.*/",
           "values": false
         },
@@ -250,7 +248,7 @@
       "title": "distributor: sample recv rate ($timewindow mean,  tenant: '$tenant')",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -355,7 +353,7 @@
       "title": "ingesters: number of active series in memory (tenant: '$tenant')",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -525,7 +523,7 @@
       "title": "ingesters: TSDB head chunk creation rate  ($timewindow mean, tenant: '$tenant')",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -629,7 +627,7 @@
       "title": "Queries through Grafana, req duration by status code ($timewindow mean, tenant: '$tenant')",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -729,7 +727,7 @@
       "title": "compactor: total number of blocks in storage bucket (tenant: '$tenant')",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -831,7 +829,7 @@
       "title": "API proxy /api/v1/query[_range], GETs, rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -931,7 +929,7 @@
       "title": "ingesters: TSDB local storage used (tenant: '$tenant')",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",

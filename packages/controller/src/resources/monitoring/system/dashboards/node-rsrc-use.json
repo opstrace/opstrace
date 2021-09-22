@@ -59,7 +59,7 @@
           "title": "CPU Utilisation",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -135,7 +135,7 @@
           "title": "CPU Saturation (Load1 per CPU)",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -223,7 +223,7 @@
           "title": "Memory Utilisation",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -299,7 +299,7 @@
           "title": "Memory Saturation (pages swapped per second)",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -405,7 +405,7 @@
           "title": "Net Utilisation (Bytes Receive/Transmit)",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -499,7 +499,7 @@
           "title": "Net Saturation (Drops Receive/Transmit)",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -587,7 +587,7 @@
           "title": "Disk IO Utilisation",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -663,7 +663,7 @@
           "title": "Disk IO Saturation",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -751,7 +751,7 @@
           "title": "Disk Space Utilisation",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",

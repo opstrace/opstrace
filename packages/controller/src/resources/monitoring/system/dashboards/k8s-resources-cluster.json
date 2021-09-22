@@ -59,7 +59,7 @@
           "title": "CPU Utilisation",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "singlestat",
@@ -135,7 +135,7 @@
           "title": "CPU Requests Commitment",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "singlestat",
@@ -211,7 +211,7 @@
           "title": "CPU Limits Commitment",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "singlestat",
@@ -287,7 +287,7 @@
           "title": "Memory Utilisation",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "singlestat",
@@ -363,7 +363,7 @@
           "title": "Memory Requests Commitment",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "singlestat",
@@ -439,7 +439,7 @@
           "title": "Memory Limits Commitment",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "singlestat",
@@ -527,7 +527,7 @@
           "title": "CPU Usage",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -801,7 +801,7 @@
           "title": "CPU Quota",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "transform": "table",
@@ -890,7 +890,7 @@
           "title": "Memory Usage (w/o cache)",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -1164,7 +1164,7 @@
           "title": "Requests by Namespace",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "transform": "table",
