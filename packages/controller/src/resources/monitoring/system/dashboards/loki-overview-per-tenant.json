@@ -641,7 +641,7 @@
       "title": "distributor: tenant: $tenant, ingest rate before rejection (timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -950,7 +950,7 @@
       "title": "distributor: all tenants, log entry ingest rate, before rejection ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1256,7 +1256,7 @@
       "title": "distributor, all tenants, POSTs only, HTTP response rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1733,7 +1733,7 @@
       "title": "loki_logql_querystats_downloaded_chunk_total (what does this _really_ mean?)",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",

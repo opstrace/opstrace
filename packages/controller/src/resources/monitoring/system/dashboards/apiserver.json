@@ -162,7 +162,7 @@
           "title": "RPC Rate",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -241,7 +241,7 @@
           "title": "Request duration 99th quantile",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -333,7 +333,7 @@
           "title": "Work Queue Add Rate",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -412,7 +412,7 @@
           "title": "Work Queue Depth",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -491,7 +491,7 @@
           "title": "Work Queue Latency",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -583,7 +583,7 @@
           "title": "ETCD Cache Entry Total",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -669,7 +669,7 @@
           "title": "ETCD Cache Hit/Miss Rate",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -755,7 +755,7 @@
           "title": "ETCD Cache Duration 99th Quantile",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -847,7 +847,7 @@
           "title": "Memory",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -926,7 +926,7 @@
           "title": "CPU usage",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -1005,7 +1005,7 @@
           "title": "Goroutines",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -1077,7 +1077,7 @@
         "query": "label_values(apiserver_request_total{job=\"apiserver\"}, instance)",
         "refresh": 2,
         "regex": "",
-        "sort": 0,
+        "sort": 2,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",

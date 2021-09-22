@@ -99,7 +99,7 @@
           "title": "Memory Usage",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -205,7 +205,7 @@
           "title": "CPU Usage",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -304,7 +304,7 @@
           "title": "Network I/O",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -396,7 +396,7 @@
           "title": "Total Restarts Per Container",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -468,7 +468,7 @@
         "query": "label_values(kube_pod_info, cluster)",
         "refresh": 2,
         "regex": "",
-        "sort": 0,
+        "sort": 2,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -488,7 +488,7 @@
         "query": "label_values(kube_pod_info{cluster=\"$cluster\"}, namespace)",
         "refresh": 2,
         "regex": "",
-        "sort": 0,
+        "sort": 2,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -508,7 +508,7 @@
         "query": "label_values(kube_pod_info{cluster=\"$cluster\", namespace=~\"$namespace\"}, pod)",
         "refresh": 2,
         "regex": "",
-        "sort": 0,
+        "sort": 2,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -528,7 +528,7 @@
         "query": "label_values(kube_pod_container_info{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\"}, container)",
         "refresh": 2,
         "regex": "",
-        "sort": 0,
+        "sort": 2,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",

@@ -540,7 +540,7 @@
       "title": "[METRICS] In-Memory/Active Series",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -658,7 +658,7 @@
       "title": "[LOGS] Rate of log entries vs. bytes per entry; total bytes per second (5m mean) ALL tenants",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "transformations": [],
@@ -762,7 +762,7 @@
       "title": "[METRICS] Ingester inflight push requests",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -858,7 +858,7 @@
       "title": "[LOGS] Ingester inflight push requests",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1174,7 +1174,7 @@
       "title": "[METRICS] Ingester Write Latency [1m]",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1591,7 +1591,7 @@
       "title": "[WIP] Compactor error rate?",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1709,7 +1709,7 @@
       "title": "[WIP] Compactor metrics scratch pad",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -3740,7 +3740,7 @@
       "title": "Instance Uptime",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",

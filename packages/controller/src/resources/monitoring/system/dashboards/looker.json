@@ -80,7 +80,7 @@
       "title": "Uptime",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -152,9 +152,7 @@
         "justifyMode": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -306,7 +304,7 @@
       "title": "GET HTTP response rate by status code",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -404,7 +402,7 @@
       "title": "POST HTTP  request body size (gauge, last seen)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -502,7 +500,7 @@
       "title": "POST HTTP response rate by status code",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -601,7 +599,7 @@
       "title": "sample push rate (log entries or metric samples)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -699,7 +697,7 @@
       "title": "rate of transient errors during POST",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -797,7 +795,7 @@
       "title": "NodeJS process CPU utilization",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -896,7 +894,7 @@
       "title": "rate of transient errors during GET",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1000,7 +998,7 @@
       "title": "NodeJS event loop lag max and mean",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1100,7 +1098,7 @@
       "title": "rate of unexpected query results",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1199,7 +1197,7 @@
       "title": "metrics mode: rate of 'forward leaps'",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1304,7 +1302,7 @@
       "title": "push data rate (on wire vs. log payload)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1403,7 +1401,7 @@
       "title": "metrics mode: rate of 'fragment generation delayed'",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1502,7 +1500,7 @@
       "title": "push compression factor in % (75%: on-wire data is 25 % of transmitted payload data w/o timestamps)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",

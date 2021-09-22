@@ -66,7 +66,7 @@
           "title": "CPU Usage",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -166,7 +166,7 @@
           "title": "Load Average",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -279,7 +279,7 @@
           "title": "Memory Usage",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -477,7 +477,7 @@
           "title": "Disk I/O",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -572,7 +572,7 @@
           "title": "Disk Space Usage",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -665,7 +665,7 @@
           "title": "Network Received",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -745,7 +745,7 @@
           "title": "Network Transmitted",
           "tooltip": {
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -817,7 +817,7 @@
         "query": "label_values(node_exporter_build_info{job=\"node-exporter\"}, instance)",
         "refresh": 2,
         "regex": "",
-        "sort": 0,
+        "sort": 2,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",

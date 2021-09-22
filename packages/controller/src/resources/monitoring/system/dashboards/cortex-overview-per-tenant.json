@@ -190,7 +190,7 @@
       "title": "Queries through Grafana (tenant: $tenant), req duration ($timewindow mean) by status code",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -294,7 +294,7 @@
       "title": "TSDB WAL fsync duration ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -468,7 +468,7 @@
       "title": "API proxy /api/v1/query[_range], GETs, rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -572,7 +572,7 @@
       "title": "TSDB WAL page flush rate ($timewindow mean), all tenants",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -682,7 +682,7 @@
       "title": "distributor: tenant: $tenant, sample recv rate ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -861,7 +861,7 @@
       "title": "ingesters: total number of (failed) TSDB HEAD trunctions, all tenants",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -964,7 +964,7 @@
       "title": "distributor: all tenants, ingester append rate  ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1072,7 +1072,7 @@
       "title": "total rate of cortex_distributor_ingester_queries (?)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1179,7 +1179,7 @@
       "title": "ingesters: total number of (failed) TSDB WAL trunctions, all tenants",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1282,7 +1282,7 @@
       "title": "distributor, all tenants, POSTs, HTTP response rate by status code ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1382,7 +1382,7 @@
       "title": "compactors: total number of blocks in storage bucket, for tenant $tenant",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1681,7 +1681,7 @@
       "title": "ingesters: total number of uploaded TSDB blocks, all tenants",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1885,7 +1885,7 @@
       "title": "ingesters: number of series in memory",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -1989,7 +1989,7 @@
       "title": "ingesters: total number of chunks in the TSDB head block, all tenants",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -2194,7 +2194,7 @@
       "title": "ingesters: total number of chunks in the TSDB head block, all tenants",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -2402,7 +2402,7 @@
       "title": "ingester, all tenants,  sample failure rate (?) ($timewindow mean)",
       "tooltip": {
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
@@ -2506,7 +2506,7 @@
       "title": "distributor replication factor, by instance",
       "tooltip": {
         "shared": true,
-        "sort": 1,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
