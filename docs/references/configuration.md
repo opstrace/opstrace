@@ -36,6 +36,7 @@ At least one name is required.
 ```yaml
 tenants:
     - prod
+    - staging
     - ci
 ```
 
@@ -183,8 +184,6 @@ custom_dns_name: myopstrace.powerteam.com
   * If you install the Opstrace instance in an AWS account, this DNS name must correspond to a so-called _hosted zone_ in AWS Route53 which you must set up prior to installing Opstrace. A guide can be found [here](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html).
 * **A custom Auth0 application** which you have to set up in advance. It needs to be configured specifically for the custom DNS name you are planning to use. A guide can be found here TODO. Take note of the so-called "client ID" of this Auth0 application and refer to it via `custom_auth0_client_id`. This is necessary for a **secure** single sign-on (SSO) experience; we cannot provide an out-of-the-box SSO experience that works against arbitrary DNS names.
 
-
-
 ### `cert_issuer`
 
 Defines the issuer to use for all TLS-terminating certificates, such as for the externally available data API endpoints.
@@ -199,7 +198,7 @@ Defines the issuer to use for all TLS-terminating certificates, such as for the 
 cert_issuer: letsencrypt-prod
 ```
 
-Note:
+Notes:
 
 * `letsencrypt-staging` should be used for test setups and playgrounds.
   This results in certificates that are not automatically trusted by browsers, i.e. users are likely to see security warnings.
@@ -247,3 +246,22 @@ Note that the controller does not get deployed when initiating `create` with the
 In that case, `controller_image` must still be set but is ignored.
 
 Change this (compared to the default value) only when you know what you're doing :-).
+
+### `log_retention_days` and `metrics_retention_days`
+
+Defines data retention in terms of the number of desired days (for each data type).
+
+*Default:* 7 days.
+
+*Value type:* number \(integer\)
+
+```yaml
+log_retention_days: 90
+metrics_retention_days: 365
+```
+
+Notes:
+
+* These options currently cannot be specified on a per-tenant basis.
+* These options currently cannot be changed after initial cluster creation.
+
