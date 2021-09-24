@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import express from "express";
 import jwt from "express-jwt";
 import jwksRsa from "jwks-rsa";
@@ -30,6 +30,7 @@ import { AUTH0_CONFIG } from "./uicfg";
 import { BUILD_INFO } from "@opstrace/utils";
 
 import * as jwkshelpers from "./jwks";
+import request from "client/utils/request";
 
 // Use something like this for testing error handling.
 //const JWKS_URL = `http://httpbin.org/delay/10`;
@@ -234,7 +235,7 @@ const loadUserInfo = async (accessToken: string) => {
     name?: string;
     email?: string;
     picture?: string;
-  }> = await axios.get(`https://${env.AUTH0_DOMAIN}/userinfo`, {
+  }> = await request.get(`https://${env.AUTH0_DOMAIN}/userinfo`, {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }

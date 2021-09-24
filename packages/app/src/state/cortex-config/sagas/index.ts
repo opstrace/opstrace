@@ -22,6 +22,7 @@ import * as actions from "../actions";
 
 import cortexConfigSubscriptionManager from "./cortexConfigSubscription";
 import { GrafanaError } from "client/utils/grafana";
+import request from "client/utils/request";
 
 export default function* userTaskManager() {
   const sagas = [cortexConfigSubscriptionManager, saveRuntimeConfigListener];
@@ -52,7 +53,7 @@ function* saveRuntimeConfig(
   action: ReturnType<typeof actions.saveCortexRuntimeConfig>
 ) {
   try {
-    yield axios.request({
+    yield request.request({
       method: "POST",
       url: "/_/cortex/runtime_config",
       headers: {
