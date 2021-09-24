@@ -40,8 +40,8 @@ const ID_TOKEN_FILE_PATH = "./id.jwt";
 
 // Use e.g. https://httpbin.org/status/500
 // for testing behavior upon 5xx.
-//const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
-const DNS_SERVICE_URL = "http://httpbin.org/status/404";
+const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
+//const DNS_SERVICE_URL = "http://httpbin.org/status/401";
 
 const OIDC_ISSUER = "https://opstrace-dev.us.auth0.com";
 const OIDC_CLIENT_ID = "fT9EPILybLT44hQl2xE7hK0eTuH1sb21";
@@ -389,9 +389,14 @@ export class DNSClient {
           // It's actually unlikely that a high-level retry will heal something
           // at this point, but maybe it does. Let's see, maybe it's better UX to
           // `die()`, here, too.
+          log.info(
+            "dns api: not an expected http error response, throw HighLevelRetry"
+          );
+
           throw new HighLevelRetry(`${action} failed`);
         }
 
+        log.info(`http err handler, throw: ${e.name} -- ${e.message}`);
         // Re-throw all other errors, such as JSON.parse() errors.
         throw e;
       }
