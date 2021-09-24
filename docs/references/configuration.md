@@ -95,7 +95,7 @@ gcp:
     zone_suffix: a
 ```
 
-Note: the example above shows the defaults.
+The example above shows the defaults.
 
 **Note:**
 we develop and test mainly with `region` set to `us-west2`.
@@ -263,5 +263,5 @@ metrics_retention_days: 365
 Notes:
 
 * These options currently cannot be specified on a per-tenant basis.
-* These options currently cannot be changed after initial cluster creation.
+* These options (as with the other options in the configuration file) currently cannot be changed after initial cluster creation.
 
