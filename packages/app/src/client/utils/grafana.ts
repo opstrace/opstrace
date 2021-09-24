@@ -94,7 +94,7 @@ export async function getFolder({
   integration,
   tenant
 }: FolderProps): Promise<FolderInfo | undefined> {
-  return axios({
+  return request({
     method: "get",
     url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
     withCredentials: true
@@ -155,7 +155,7 @@ export async function createDashboard(
   tenant: Tenant,
   dashboard: Dashboard
 ): Promise<dashboardInfo> {
-  const responseData = await axios({
+  const responseData = await request({
     method: "post",
     url: makeUrl(tenant, "dashboards/db"),
     data: dashboard,
