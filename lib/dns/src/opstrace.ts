@@ -40,7 +40,8 @@ const ID_TOKEN_FILE_PATH = "./id.jwt";
 
 // Use e.g. https://httpbin.org/status/500
 // for testing behavior upon 5xx.
-const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
+//const DNS_SERVICE_URL = "https://dns-api.opstrace.net/dns/";
+const DNS_SERVICE_URL = "http://httpbin.org/status/404";
 
 const OIDC_ISSUER = "https://opstrace-dev.us.auth0.com";
 const OIDC_CLIENT_ID = "fT9EPILybLT44hQl2xE7hK0eTuH1sb21";
@@ -64,6 +65,7 @@ async function loginPollRequest(
     },
     // Some HTTP error responses are expected. Do this handling work manually.
     throwHttpErrors: false
+    //responseType: "text"
   };
 
   const url = `${OIDC_ISSUER}/oauth/token`;
@@ -336,7 +338,9 @@ export class DNSClient {
         // Good response, no data in response.
         return undefined;
       } catch (e: any) {
-        if (e instanceof got.RequestError) {
+        // got.RequestError does not always work, therefore also
+        // make the HTTPError name check -- see issue #1323
+        if (e instanceof got.RequestError || e.name === "HTTPError") {
           debugLogHTTPResponse(e.response);
 
           // In the future, a DELETE may result in a 404 when the cluster isn't
