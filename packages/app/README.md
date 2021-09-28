@@ -43,10 +43,6 @@ Services launched by `yarn services:start` via [the docker compose file](docker-
 
 In the project directory, you can run:
 
-### `yarn storybook`
-
-Starts Storybook for our application development kit and serves the storybook UI at localhost:9009.
-
 ### `yarn console`
 
 Opens the Hasura console in a new browser window (localhost:9009). We use [Hasura](https://hasura.io) for our GraphQL/Postgress backend.
