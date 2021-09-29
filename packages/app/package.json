@@ -65,6 +65,7 @@
     "deep-diff": "^1.0.2",
     "deepmerge": "^4.2.2",
     "delay": "^4.4.0",
+    "dotenv-expand": "5.1.0",
     "dot-object": "^2.1.4",
     "eslint": "^7.13.0",
     "eslint-config-prettier": "^7.1.0",
