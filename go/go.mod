@@ -19,7 +19,7 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/common v0.10.0
-	github.com/prometheus/prometheus v2.5.0+incompatible
+	github.com/prometheus/prometheus v1.8.2-0.20190525122359-d20e84d0fb64
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/testcontainers/testcontainers-go v0.11.1
