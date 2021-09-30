@@ -95,7 +95,7 @@ func sanitizeLabelName(value string) string {
 	return metricNameinvalidCharRE.ReplaceAllString(value, "_")
 }
 
-func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
+func TranslateDDCheckRunJSON(doc []byte) ([]prompb.TimeSeries, error) {
 	// Attempt to deserialize entire JSON document, using the type definitions
 	// above.
 	var checkupdates ddServiceChecksSubmitBody
@@ -104,7 +104,7 @@ func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		return nil, fmt.Errorf("invalid JSON doc: %v", jerr)
 	}
 
-	promTimeSeriesFragments := make([]*prompb.TimeSeries, 0, len(checkupdates))
+	promTimeSeriesFragments := make([]prompb.TimeSeries, 0, len(checkupdates))
 	for _, checkupdate := range checkupdates {
 		// Build up label set as a map to ensure uniqueness of keys.
 		labels := map[string]string{
@@ -164,7 +164,7 @@ func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// prompb.Label. For `prompb.TimeSeries` construction below. Skip
 		// prompb.Label construction for empty values (for example,
 		// `fragment.Device` may be empty).
-		promLabelset := make([]*prompb.Label, 0, len(labels))
+		promLabelset := make([]prompb.Label, 0, len(labels))
 		for k, v := range labels {
 			if len(v) == 0 {
 				continue
@@ -174,7 +174,7 @@ func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 				Name:  k,
 				Value: v,
 			}
-			promLabelset = append(promLabelset, &l)
+			promLabelset = append(promLabelset, l)
 		}
 
 		// Note that every service check update comes with a status value of 0,
@@ -192,7 +192,7 @@ func TranslateDDCheckRunJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			Labels:  promLabelset,
 		}
 
-		promTimeSeriesFragments = append(promTimeSeriesFragments, &pts)
+		promTimeSeriesFragments = append(promTimeSeriesFragments, pts)
 	}
 	return promTimeSeriesFragments, nil
 }
@@ -233,7 +233,7 @@ specific metric. Each metric is defined by its name and other meta data (think:
 labels). The time series fragment is comprised of one or multiple data points /
 samples.
 */
-func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
+func TranslateDDSeriesJSON(doc []byte) ([]prompb.TimeSeries, error) {
 	// Attempt to deserialize entire JSON document, using the type definitions
 	// above including the custom deserialization function
 	// ddPoint.UnmarshalJSON().
@@ -243,7 +243,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		return nil, fmt.Errorf("invalid JSON doc: %v", jerr)
 	}
 
-	promTimeSeriesFragments := make([]*prompb.TimeSeries, 0, len(sfragments.Fragments))
+	promTimeSeriesFragments := make([]prompb.TimeSeries, 0, len(sfragments.Fragments))
 	for _, fragment := range sfragments.Fragments {
 		// Build up label set as a map to ensure uniqueness of keys.
 		labels := map[string]string{
@@ -296,7 +296,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 		// prompb.Label. For `prompb.TimeSeries` construction below. Skip
 		// prompb.Label construction for empty values (for example,
 		// `fragment.Device` may be empty).
-		promLabelset := make([]*prompb.Label, 0, len(labels))
+		promLabelset := make([]prompb.Label, 0, len(labels))
 		for k, v := range labels {
 			if len(v) == 0 {
 				continue
@@ -306,7 +306,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 				Name:  k,
 				Value: v,
 			}
-			promLabelset = append(promLabelset, &l)
+			promLabelset = append(promLabelset, l)
 		}
 
 		// Inspiration from
@@ -362,7 +362,7 @@ func TranslateDDSeriesJSON(doc []byte) ([]*prompb.TimeSeries, error) {
 			Labels:  promLabelset,
 		}
 
-		promTimeSeriesFragments = append(promTimeSeriesFragments, &pts)
+		promTimeSeriesFragments = append(promTimeSeriesFragments, pts)
 	}
 	return promTimeSeriesFragments, nil
 }

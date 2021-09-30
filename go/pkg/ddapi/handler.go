@@ -130,7 +130,7 @@ func (ddcp *DDCortexProxy) ReadAndValidateRequest(w http.ResponseWriter, r *http
 func (ddcp *DDCortexProxy) HandlerCommonAfterJSONTranslate(
 	w http.ResponseWriter,
 	r *http.Request,
-	ptsf []*prompb.TimeSeries,
+	ptsf []prompb.TimeSeries,
 ) {
 	// Create Prometheus/Cortex "write request", and serialize it into
 	// protobuf message (a byte sequence).
