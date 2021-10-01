@@ -454,7 +454,7 @@ func TestHandlerSeriesPostAuthenticator_badtokenNoKidNoFallback(t *testing.T) {
 	// Instantiate proxy with enabled authenticator
 	disableAPIAuthentication := false
 
-	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", authenticator.TestKeysetEnvValTwoPubkeys)
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", authenticator.TestKeysetEnvValThreePubkeys)
 
 	authenticator.ReadConfigFromEnvOrCrash()
 	// log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
@@ -505,6 +505,86 @@ func TestHandlerSeriesPostAuthenticator_badtokenNoKidNoFallback(t *testing.T) {
 	assert.Equal(
 		t,
 		"bad authentication token",
+		getStrippedBody(resp),
+	)
+}
+
+func TestHandlerSeriesPostAuthenticator_goodtokenbadtenant(t *testing.T) {
+	// Instantiate proxy with enabled authenticator
+	disableAPIAuthentication := false
+
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", authenticator.TestKeysetEnvValThreePubkeys)
+
+	authenticator.ReadConfigFromEnvOrCrash()
+	// log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
+	// log.Infof("fallback key:\n%v", authtokenVerificationPubKeyFallback)
+
+	// Expect a tenant API token with `sub` claim of value `tenant-jizzel`,
+	// i.e. espect a token signed for a specific tenant name: jizzel.
+	// authenticator.TenantAPITokenForKey624 is known to encode the tenant name
+	// `tenantfoo`. That is, authentication is expected to fail -- but not
+	// because the cryptographic token verification failed.
+	ddcp := NewDDCortexProxy("jizzel", "http://localhost", disableAPIAuthentication)
+
+	req := httptest.NewRequest(
+		"POST",
+		fmt.Sprintf(
+			"http://localhost/api/v1/series?api_key=%s",
+			authenticator.TenantAPITokenForKey624,
+		),
+		strings.NewReader("{}"),
+	)
+
+	w := httptest.NewRecorder()
+
+	ddcp.HandlerSeriesPost(w, req)
+	resp := w.Result()
+	assert.Equal(t, 401, resp.StatusCode)
+	assert.Equal(
+		t,
+		"bad authentication token: unexpected tenant: tenantfoo",
+		getStrippedBody(resp),
+	)
+}
+
+func TestHandlerSeriesPostAuthenticator_goodtokengoodtenant(t *testing.T) {
+	// Instantiate proxy with enabled authenticator
+	disableAPIAuthentication := false
+
+	os.Setenv("API_AUTHTOKEN_VERIFICATION_PUBKEY_SET", authenticator.TestKeysetEnvValThreePubkeys)
+
+	authenticator.ReadConfigFromEnvOrCrash()
+	// log.Infof("keyset map:\n%v", authtokenVerificationPubKeys)
+	// log.Infof("fallback key:\n%v", authtokenVerificationPubKeyFallback)
+
+	// Expect a tenant API token with `sub` claim of value `tenant-jizzel`,
+	// i.e. espect a token signed for a specific tenant name: jizzel.
+	// authenticator.TenantAPITokenForKey624 is known to encode the tenant name
+	// `tenantfoo`. That is, authentication is expected to fail -- but not
+	// because the cryptographic token verification failed.
+	ddcp := NewDDCortexProxy("tenantfoo", "http://localhost", disableAPIAuthentication)
+
+	req := httptest.NewRequest(
+		"POST",
+		fmt.Sprintf(
+			"http://localhost/api/v1/series?api_key=%s",
+			authenticator.TenantAPITokenForKey624,
+		),
+		strings.NewReader("{}"),
+	)
+
+	w := httptest.NewRecorder()
+
+	ddcp.HandlerSeriesPost(w, req)
+	resp := w.Result()
+
+	// Expect that this request passes through authentication stage, and is
+	// then responded to with a 400 Bad Request response indicating that it
+	// lacks a content-type header.
+	assert.Equal(t, 400, resp.StatusCode)
+	assert.Equal(
+		t,
+		"bad request: request lacks content-type header",
 		getStrippedBody(resp),
 	)
 }
