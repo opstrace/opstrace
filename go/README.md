@@ -1,4 +1,14 @@
 
+# Run unit tests
+
+The unit tests manage Docker containers, i.e. the Docker daemon needs to be running.
+
+
+```
+cd go
+make unit-tests
+```
+
 # Cortex
 
 ## Test Cortex locally
@@ -50,11 +60,4 @@ Build and push container images with the following script:
 ```
 
 `packages/controller-config/src/docker-images.json` will be updated to refer to newly built images.
-
-
-Build the controller to use the new configuration:
-
-```bash
-make dependencies
-```
 
