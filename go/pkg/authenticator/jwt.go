@@ -33,7 +33,7 @@ func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) 
 	// set of standard claims to be present (`sub`, `iss` and the likes), and
 	// custom claims to not be present.
 	tokenstruct, veriferr := jwt.ParseWithClaims(
-		authTokenUnverified, &jwt.StandardClaims{}, keyLookupCallback)
+		authTokenUnverified, &jwt.RegisteredClaims{}, keyLookupCallback)
 
 	if veriferr != nil {
 		log.Infof("jwt verification failed: %s", veriferr)
@@ -52,8 +52,8 @@ func validateAuthTokenGetTenantName(authTokenUnverified string) (string, error) 
 		return "", fmt.Errorf("bad authentication token")
 	}
 
-	// https://godoc.org/github.com/dgrijalva/jwt-go#StandardClaims
-	claims := tokenstruct.Claims.(*jwt.StandardClaims)
+	// https://pkg.go.dev/github.com/golang-jwt/jwt/v4#RegisteredClaims
+	claims := tokenstruct.Claims.(*jwt.RegisteredClaims)
 	// log.Infof("claims: %+v", claims)
 
 	// Custom convention: encode Opstrace tenant name in subject, expect
