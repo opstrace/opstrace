@@ -7,7 +7,7 @@ require (
 	github.com/Microsoft/hcsshim v0.8.22 // indirect
 	github.com/containerd/containerd v1.5.7 // indirect
 	github.com/containerd/continuity v0.2.0 // indirect
-	github.com/docker/docker v20.10.8+incompatible // indirect
+	github.com/docker/docker v20.10.9+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
