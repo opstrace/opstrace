@@ -1,4 +1,4 @@
-FROM fluent/fluentd:v1.12.4-debian-1.0
+FROM fluent/fluentd:v1.14.1-debian-1.0
 USER root
 
 # What follows is a combination of instructions for how to customize the
@@ -14,10 +14,10 @@ RUN buildDeps="sudo make gcc g++ libc-dev git" \
    && apt-get update \
    && apt-get install -y --no-install-recommends $buildDeps \
    && oldpath=`pwd` && mkdir /tmp/lokicheckout && cd /tmp/lokicheckout \
-   && git init && git remote add origin https://github.com/jgehrcke/loki \
-   && git fetch origin 081cc024d67d0292a377f5995f4822a07a8e38af \
+   && git init && git remote add origin https://github.com/grafana/loki \
+   && git fetch origin f5fd029660034d31833ff1d2620bb82d1c1618af \
    && git reset --hard FETCH_HEAD \
-   && cd /tmp/lokicheckout/cmd/fluentd/ \
+   && cd /tmp/lokicheckout/clients/cmd/fluentd/ \
    && gem build fluent-plugin-grafana-loki.gemspec \
    && gem install --ignore-dependencies *gem \
    && gem install fluent-plugin-kubernetes_metadata_filter -v 2.6.0 \
