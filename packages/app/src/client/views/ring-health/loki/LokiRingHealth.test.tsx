@@ -16,16 +16,11 @@
 
 import React from "react";
 import RingHealth, { TABS } from ".";
-import Services from "client/services";
-import light from "client/themes/light";
-import ThemeProvider from "client/themes/Provider";
-import { StoreProvider } from "state/provider";
 import nock from "nock";
 import { Router } from "react-router";
 import { createMemoryHistory } from "history";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { render } from "@testing-library/react";
 import { createMockShard } from "../testUtils";
 import { renderWithEnv } from "client/utils/testutils";
 

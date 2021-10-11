@@ -21,6 +21,7 @@ import { ServerError } from "server/errors";
 import * as actions from "../actions";
 
 import cortexConfigSubscriptionManager from "./cortexConfigSubscription";
+import { GrafanaError } from "client/utils/grafana";
 
 export default function* userTaskManager() {
   const sagas = [cortexConfigSubscriptionManager, saveRuntimeConfigListener];
@@ -67,7 +68,9 @@ function* saveRuntimeConfig(
     ) {
       // Extract the specific error message
       yield put(
-        actions.saveCortexRuntimeConfigError(err.response.data.message)
+        actions.saveCortexRuntimeConfigError(
+          (err as GrafanaError).response.data.message
+        )
       );
     } else {
       yield put(actions.saveCortexRuntimeConfigError(err.toString()));

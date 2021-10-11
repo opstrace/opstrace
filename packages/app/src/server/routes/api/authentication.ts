@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import express from "express";
 import jwt from "express-jwt";
 import jwksRsa from "jwks-rsa";
@@ -225,7 +225,16 @@ function createAuthHandler(): express.Router {
 const loadUserInfo = async (accessToken: string) => {
   // Note(JP): perform retrying. This is expected to return a 429 response,
   // so ideally perform retrying while respecting the retry-after header.
-  const { data } = await axios.get(`https://${env.AUTH0_DOMAIN}/userinfo`, {
+  const {
+    data
+  }: AxiosResponse<{
+    nickname?: string;
+    username?: string;
+    given_name?: string;
+    name?: string;
+    email?: string;
+    picture?: string;
+  }> = await axios.get(`https://${env.AUTH0_DOMAIN}/userinfo`, {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }

@@ -40,6 +40,7 @@ import useInterval from "react-use/lib/useInterval";
 import useMountedState from "react-use/lib/useMountedState";
 import { usePickerService } from "client/services/Picker";
 import request from "client/utils/request";
+import { AxiosResponse } from "axios";
 
 const useStyles = makeStyles(theme => ({
   shardWarning: {
@@ -94,13 +95,12 @@ const RingTable = ({ ringEndpoint, baseUrl }: Props) => {
         const bodyFormData = new FormData();
         bodyFormData.append("forget", shardId);
         setIsRefreshing(true);
-        const response = await request.post<Payload>(
-          ringEndpoint,
-          bodyFormData,
-          {
-            headers: { "Content-Type": "multipart/form-data" }
-          }
-        );
+        const response = await request.post<
+          FormData,
+          AxiosResponse<{ shards: Array<Shard> }>
+        >(ringEndpoint, bodyFormData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
         setShards(response.data.shards);
         setIsRefreshing(false);
       } catch (e: any) {

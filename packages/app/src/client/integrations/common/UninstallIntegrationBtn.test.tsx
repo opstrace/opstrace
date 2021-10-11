@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { ReactNode } from "react";
+import React from "react";
 import { UninstallBtn } from "./UninstallIntegrationBtn";
 import userEvent from "@testing-library/user-event";
 import { waitFor, screen } from "@testing-library/react";
