@@ -33,6 +33,7 @@ import {
   validateCortexConfig
 } from "../utils";
 import { ServerError } from "server/errors";
+import { GrafanaError } from "client/utils/grafana";
 
 type Actions = ActionType<typeof actions>;
 
@@ -122,7 +123,11 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
               ServerError.isInstance(err.response.data)
             ) {
               // Extract the specific error message
-              emitter(actions.setCortexConfigError(err.response.data.message));
+              emitter(
+                actions.setCortexConfigError(
+                  (err as GrafanaError).response.data.message
+                )
+              );
             } else {
               emitter(actions.setCortexConfigError(err.toString()));
             }
@@ -143,7 +148,11 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
               ServerError.isInstance(err.response.data)
             ) {
               // Extract the specific error message
-              emitter(actions.setCortexConfigError(err.response.data.message));
+              emitter(
+                actions.setCortexConfigError(
+                  (err as GrafanaError).response.data.message
+                )
+              );
             } else {
               emitter(actions.setCortexConfigError(err.toString()));
             }
@@ -164,7 +173,11 @@ export function cortexConfigSubscriptionEventChannel(): EventChannel<Actions> {
               ServerError.isInstance(err.response.data)
             ) {
               // Extract the specific error message
-              emitter(actions.setCortexConfigError(err.response.data.message));
+              emitter(
+                actions.setCortexConfigError(
+                  (err as GrafanaError).response.data.message
+                )
+              );
             } else {
               emitter(actions.setCortexConfigError(err.toString()));
             }

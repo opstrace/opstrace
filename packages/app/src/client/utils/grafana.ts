@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { isString } from "ramda-adjunct";
 import useSWR from "swr";
 
@@ -52,6 +52,11 @@ type FolderInfo = {
   path: string; // The '/grafana/...' path linking to the folder in Grafana.
 };
 
+type FolderResponse = {
+  id: number;
+  url: string;
+};
+
 // see also: https://grafana.com/docs/grafana/latest/http_api/folder/#create-folder
 export async function createFolder({
   integration,
@@ -65,7 +70,7 @@ export async function createFolder({
       title: `Integration: ${integration.name}`
     },
     withCredentials: true
-  }).then(res => res.data);
+  }).then((res: AxiosResponse<FolderResponse>) => res.data);
 
   return {
     id: responseData.id,
@@ -94,7 +99,7 @@ export async function getFolder({
     url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
     withCredentials: true
   })
-    .then(response => ({
+    .then((response: AxiosResponse<FolderResponse>) => ({
       id: response.data.id,
       path: response.data.url
     }))
@@ -112,7 +117,7 @@ export async function deleteFolder({
     method: "delete",
     url: makeUrl(tenant, `folders/${makeUuid(integration)}`),
     withCredentials: true
-  }).then(res => res.data);
+  }).then((res: AxiosResponse<{ id: number }>) => res.data);
 
   return {
     id: responseData.id
@@ -155,7 +160,7 @@ export async function createDashboard(
     url: makeUrl(tenant, "dashboards/db"),
     data: dashboard,
     withCredentials: true
-  }).then(res => res.data);
+  }).then((res: AxiosResponse<{ url: string }>) => res.data);
 
   return {
     path: responseData.url
@@ -176,5 +181,7 @@ export const isGrafanaError = (error: Error): error is GrafanaError => {
   if (!axios.isAxiosError(error)) {
     return false;
   }
+  // @ts-expect-error bug in types
+  // Will be fixed soon, see https://github.com/axios/axios/pull/4142
   return !!error.response?.data?.message;
 };
