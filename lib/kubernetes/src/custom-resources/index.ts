@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,3 +48,9 @@ export * from "./v1alpha3order";
 export * from "./v1beta1order";
 
 export * from "./v1alpha1cortex";
+
+export * from "./v1clickhouseinstallation"
+export * from "./v1clickhouseinstallationtemplate"
+export * from "./v1clickhouseoperatorconfiguration"
+
+export * from "./v1jaeger"
