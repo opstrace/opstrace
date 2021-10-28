@@ -2575,7 +2575,7 @@
         }
       ],
       "timeShift": null,
-      "title": "CPU Load Average (average of instances, min & max)",
+      "title": "Linux Load Average (average of instances, min & max)",
       "tooltip": {
         "shared": true,
         "sort": 2,
