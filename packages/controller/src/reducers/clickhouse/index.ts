@@ -14,8 +14,5 @@
  * limitations under the License.
  */
 
-export interface ResourceCache<T> {
-  loaded: boolean;
-  error: Error | null;
-  resources: T[];
-}
+export * as databases from "./databases";
+export * as users from "./users";
