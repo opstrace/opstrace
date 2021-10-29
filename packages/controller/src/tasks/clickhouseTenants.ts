@@ -21,6 +21,8 @@ import { State } from "../reducer";
 
 import { dbClient } from "../clickhouseClient";
 
+const tenantPrefix = "tenant_";
+
 export function* clickhouseTenantsReconciler(): Generator<
   CallEffect,
   unknown,
@@ -65,9 +67,9 @@ export function* clickhouseTenantsReconciler(): Generator<
       }
 
       // Convert e.g. "system" => "tenant_system", "user-tenant" => "tenant_user_tenant"
-      // Clickhouse does not support dashes, so we map them to underscores which are supported
+      // Clickhouse does not like dashes, so we map them to underscores which are supported
       const clickhouseTenants = tenants.map(
-        tenant => `tenant_${tenant.name.replace("-", "_")}`
+        tenant => `${tenantPrefix}${tenant.name.replace("-", "_")}`
       );
 
       const currentDBs = state.clickhouse.Databases.resources;
@@ -85,12 +87,22 @@ export function* clickhouseTenantsReconciler(): Generator<
           `GRANT SELECT, INSERT, ALTER, CREATE, DROP, TRUNCATE, OPTIMIZE, SHOW ON ${userToAdd}.* TO ${userToAdd}`
         ]);
 
+      // Search for users and DBs that start with 'tenant_',
+      // but that aren't present in the list of expected tenants.
+      // In particular we want to avoid deleting any system users/dbs.
       const usersToRemove = currentUsers
-        .filter(curuser => !clickhouseTenants.includes(curuser))
-        .map(dbToRemove => `DROP USER IF EXISTS ${dbToRemove}`);
+        .filter(
+          curuser =>
+            curuser.startsWith(tenantPrefix) &&
+            !clickhouseTenants.includes(curuser)
+        )
+        .map(tenantUserToRemove => `DROP USER IF EXISTS ${tenantUserToRemove}`);
       const dbsToRemove = currentDBs
-        .filter(curdb => !clickhouseTenants.includes(curdb))
-        .map(dbToRemove => `DROP DATABASE IF EXISTS ${dbToRemove}`);
+        .filter(
+          curdb =>
+            curdb.startsWith(tenantPrefix) && !clickhouseTenants.includes(curdb)
+        )
+        .map(tenantDbToRemove => `DROP DATABASE IF EXISTS ${tenantDbToRemove}`);
 
       const queries = dbsToAdd
         .concat(usersToAdd)
