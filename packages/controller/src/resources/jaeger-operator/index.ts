@@ -18,12 +18,14 @@ import { KubeConfig } from "@kubernetes/client-node";
 import {
   ClusterRole,
   ClusterRoleBinding,
+  CustomResourceDefinition,
   Deployment,
   ResourceCollection,
   Service,
   ServiceAccount,
   Secret,
-  V1ServicemonitorResource
+  V1ServicemonitorResource,
+  jaegers
 } from "@opstrace/kubernetes";
 import { generateSecretValue } from "../../helpers";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
@@ -33,6 +35,8 @@ export function JaegerOperatorResources(
   namespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
+
+  collection.add(new CustomResourceDefinition(jaegers, kubeConfig));
 
   const jaegerPasswordSecret = new Secret(
     {

@@ -20,12 +20,16 @@ import {
   ClusterRole,
   ClusterRoleBinding,
   ConfigMap,
+  CustomResourceDefinition,
   Deployment,
   ResourceCollection,
   Service,
   ServiceAccount,
   Secret,
-  V1ServicemonitorResource
+  V1ServicemonitorResource,
+  clickhouseinstallations,
+  clickhouseinstallationtemplates,
+  clickhouseoperatorconfigurations
 } from "@opstrace/kubernetes";
 import { generateSecretValue } from "../../helpers";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
@@ -36,6 +40,16 @@ export function ClickHouseOperatorResources(
   clickhouseNamespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
+
+  collection.add(
+    new CustomResourceDefinition(clickhouseinstallations, kubeConfig)
+  );
+  collection.add(
+    new CustomResourceDefinition(clickhouseinstallationtemplates, kubeConfig)
+  );
+  collection.add(
+    new CustomResourceDefinition(clickhouseoperatorconfigurations, kubeConfig)
+  );
 
   const clickhousePasswordSecret = new Secret(
     {
@@ -273,6 +287,14 @@ export function ClickHouseOperatorResources(
     <!-- Default behavior is autodetection (log to console if not daemon mode and is tty) -->
     <console>1</console>
   </logger>
+
+  <prometheus>
+    <endpoint>/metrics</endpoint>
+    <port>8001</port>
+    <metrics>true</metrics>
+    <events>true</events>
+    <asynchronous_metrics>true</asynchronous_metrics>
+  </prometheus>
 
   <query_log replace="1">
     <database>system</database>
@@ -515,7 +537,7 @@ export function ClickHouseOperatorResources(
                 {
                   name: "exporter",
                   image: DockerImages.clickhouseOperatorExporter,
-                  // TODO skipping volumeMounts, are they actually needed?
+                  // TODO(nickbp) skipping volumeMounts, are they actually needed?
                   ports: [
                     {
                       containerPort: 6379,

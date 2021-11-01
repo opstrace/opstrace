@@ -17,11 +17,16 @@
 import { call, delay, select, CallEffect } from "redux-saga/effects";
 
 import { log, SECOND } from "@opstrace/utils";
+import { Tenant } from "@opstrace/tenants";
 import { State } from "../reducer";
 
 import { dbClient } from "../clickhouseClient";
 
 const tenantPrefix = "tenant_";
+
+export function getTenantClickHouseName(tenant: Tenant): string {
+  return `${tenantPrefix}${tenant.name.replace("-", "_")}`;
+}
 
 export function* clickhouseTenantsReconciler(): Generator<
   CallEffect,
@@ -68,8 +73,8 @@ export function* clickhouseTenantsReconciler(): Generator<
 
       // Convert e.g. "system" => "tenant_system", "user-tenant" => "tenant_user_tenant"
       // Clickhouse does not like dashes, so we map them to underscores which are supported
-      const clickhouseTenants = tenants.map(
-        tenant => `${tenantPrefix}${tenant.name.replace("-", "_")}`
+      const clickhouseTenants = tenants.map(tenant =>
+        getTenantClickHouseName(tenant)
       );
 
       const currentDBs = state.clickhouse.Databases.resources;

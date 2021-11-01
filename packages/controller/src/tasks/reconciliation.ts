@@ -40,6 +40,7 @@ import { KubeConfig } from "@kubernetes/client-node";
 
 import { APIResources } from "../resources/apis";
 import { ApplicationResources } from "../resources/app";
+import { ClickHouseResources } from "../resources/clickhouse";
 import { ClickHouseOperatorResources } from "../resources/clickhouse-operator";
 import { CortexResources } from "../resources/cortex";
 import { CortexOperatorResources } from "../resources/cortex-operator";
@@ -113,6 +114,7 @@ export function* reconciliationLoop(
         "clickhouse"
       )
     );
+    desired.add(ClickHouseResources(kubeConfig, "clickhouse"));
     desired.add(JaegerOperatorResources(kubeConfig, "jaeger-operator-system"));
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);

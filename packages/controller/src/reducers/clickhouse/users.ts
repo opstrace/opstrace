@@ -65,6 +65,11 @@ export const reducer = createReducer<ClickHouseUserState, ClickHouseDBActions>(
     })
   );
 
+// Response type for "SHOW USERS" command
+interface UserEntry {
+  name: string;
+}
+
 export function startInformer(channel: (input: unknown) => void): () => void {
   let cancelled = false;
   //@ts-ignore: TS7023 'poll' implicitly has return type 'any'
@@ -80,11 +85,9 @@ export function startInformer(channel: (input: unknown) => void): () => void {
     }
     try {
       const users = await dbClient.query("SHOW USERS").toPromise();
-      log.warning(`users: ${users}`); // TODO remove
+      log.warning(`users: ${users}`); // TODO(nickbp) remove
       channel(
-        actions.fetch.success(
-          [] // TODO convert list to strings
-        )
+        actions.fetch.success((users as UserEntry[]).map(user => user.name))
       );
       // refresh in 3s
       return setTimeout(poll, 3000);

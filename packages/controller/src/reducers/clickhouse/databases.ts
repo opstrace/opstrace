@@ -65,6 +65,11 @@ export const reducer = createReducer<ClickHouseDBState, ClickHouseDBActions>(
     })
   );
 
+// Response type for "SHOW DATABASES" command
+interface DatabaseEntry {
+  name: string;
+}
+
 export function startInformer(channel: (input: unknown) => void): () => void {
   let cancelled = false;
   //@ts-ignore: TS7023 'poll' implicitly has return type 'any'
@@ -80,11 +85,9 @@ export function startInformer(channel: (input: unknown) => void): () => void {
     }
     try {
       const dbs = await dbClient.query("SHOW DATABASES").toPromise();
-      log.warning(`dbs: ${dbs}`); // TODO remove
+      log.warning(`dbs: ${dbs}`); // TODO(nickbp) remove
       channel(
-        actions.fetch.success(
-          [] // TODO convert dbs[] to strings
-        )
+        actions.fetch.success((dbs as DatabaseEntry[]).map(db => db.name))
       );
       // refresh in 3s
       return setTimeout(poll, 3000);
