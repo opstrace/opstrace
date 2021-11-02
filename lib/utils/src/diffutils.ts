@@ -33,7 +33,7 @@ export function logDiff(
   possiblyChangedObj: any // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) {
-  if (false && !isDebugLogging()) {
+  if (!isDebugLogging()) {
     // Avoid calculating a diff string if debug isn't enabled
     return;
   }

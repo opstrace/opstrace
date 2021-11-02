@@ -89,10 +89,6 @@ export function JaegerResources(
           namespace
         },
         spec: {
-          // strategy can be allInOne (default), production (separate pods), or streaming (separate pods + kafka)
-          // for now we just use allInOne for each (per-tenant) instance
-          // reference: https://www.jaegertracing.io/docs/1.27/operator/#allinone-default-strategy
-          strategy: "allInOne",
           allInOne: {
             image: DockerImages.jaegerAllInOne,
             // TODO(nickbp): not actually an option... figure out image pull secrets support
@@ -104,8 +100,11 @@ export function JaegerResources(
               "query.base-path": "/jaeger"
             }
           },
+          ingress: {
+            // We manage the Service/Ingress creation ourselves.
+            enabled: false
+          },
           storage: {
-            type: "grpc-plugin",
             grpcPlugin: {
               image: DockerImages.jaegerClickhouse
               // TODO(nickbp): not actually an option... figure out image pull secrets support
@@ -117,18 +116,18 @@ export function JaegerResources(
                 binary: "/plugin/jaeger-clickhouse",
                 "configuration-file": "/plugin-config/config.yaml"
               }
-            }
+            },
+            type: "grpc-plugin"
           },
-          ingress: {
-            // We manage the Service/Ingress creation ourselves.
-            enabled: false
-          },
+          // strategy can be allInOne (default), production (separate pods), or streaming (separate pods + kafka)
+          // for now we just use allInOne for each (per-tenant) instance
+          // reference: https://www.jaegertracing.io/docs/1.27/operator/#allinone-default-strategy
+          strategy: "allInOne",
           ui: {
             options: {
               // Just an example, see docs: https://www.jaegertracing.io/docs/1.27/frontend-ui/
               menu: [
                 {
-                  label: "Opstrace",
                   items: [
                     {
                       label: "Slack",
@@ -142,7 +141,8 @@ export function JaegerResources(
                       label: "Blog",
                       url: "https://opstrace.com/blog"
                     }
-                  ]
+                  ],
+                  label: "Opstrace"
                 }
               ]
             }
@@ -157,10 +157,10 @@ export function JaegerResources(
           ],
           volumes: [
             {
-              name: "plugin-config",
               configMap: {
                 name: "jaeger-clickhouse"
-              }
+              },
+              name: "plugin-config"
             }
           ]
         }

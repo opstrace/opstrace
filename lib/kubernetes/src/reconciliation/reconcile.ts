@@ -80,9 +80,9 @@ import {
   hasCertificateChanged,
   hasClusterRoleChanged,
   hasCustomResourceDefinitionChanged,
-  hasCortexSpecChanged
-  //hasClickhouseinstallationSpecChanged,
-  //hasJaegerSpecChanged
+  hasCortexSpecChanged,
+  hasClickhouseinstallationSpecChanged,
+  hasJaegerSpecChanged
 } from "../equality";
 
 import { entries } from "@opstrace/utils";
@@ -531,8 +531,8 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.Clickhouses,
       actualState.Clickhouses,
-      // TODO(nickbp): For now we disable full change detection. Needs work to avoid false updates.
-      null, //(desired, existing) => hasClickhouseinstallationSpecChanged(desired, existing),
+      (desired, existing) =>
+        hasClickhouseinstallationSpecChanged(desired, existing),
       null,
       createCollection,
       deleteCollection,
@@ -543,8 +543,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.Jaegers,
       actualState.Jaegers,
-      // TODO(nickbp): For now we disable full change detection. Needs work to avoid false updates.
-      null, //(desired, existing) => hasJaegerSpecChanged(desired, existing),
+      (desired, existing) => hasJaegerSpecChanged(desired, existing),
       null,
       createCollection,
       deleteCollection,

@@ -21,7 +21,7 @@ import {
   V1ClickhouseinstallationResource,
   V1ServicemonitorResource
 } from "@opstrace/kubernetes";
-import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
+import { DockerImages } from "@opstrace/controller-config";
 
 // Note: Changing this requires also changing the "opstrace_controller" keys below.
 export const CLICKHOUSE_USERNAME = "opstrace_controller";
@@ -102,62 +102,6 @@ export function ClickHouseResources(
           },
 
           templates: {
-            // reference: https://github.com/Altinity/clickhouse-operator/blob/master/docs/custom_resource_explained.md#spectemplatesservicetemplates
-            serviceTemplates: [
-              {
-                name: "service-template",
-                // resulting service at: basic.clickhouse.svc.cluster.local
-                generateName: "{chi}",
-                spec: {
-                  // Default is a public LoadBalancer, we don't want that!
-                  type: "ClusterIP",
-                  // Must be provided manually or else deployment fails
-                  ports: [
-                    {
-                      name: "http",
-                      port: 8123
-                    },
-                    {
-                      name: "client",
-                      port: 9000
-                    },
-                    {
-                      name: "metrics",
-                      port: 9001
-                    }
-                  ]
-                }
-              }
-            ],
-
-            // reference: https://github.com/Altinity/clickhouse-operator/blob/master/docs/custom_resource_explained.md#spectemplatesvolumeclaimtemplates
-            volumeClaimTemplates: [
-              {
-                name: "data-volume",
-                spec: {
-                  storageClassName: "pd-ssd",
-                  accessModes: ["ReadWriteOnce"],
-                  resources: {
-                    requests: {
-                      storage: "10Gi"
-                    }
-                  }
-                }
-              },
-              {
-                name: "logs-volume",
-                spec: {
-                  storageClassName: "pd-ssd",
-                  accessModes: ["ReadWriteOnce"],
-                  resources: {
-                    requests: {
-                      storage: "1Gi"
-                    }
-                  }
-                }
-              }
-            ],
-
             // reference: https://github.com/Altinity/clickhouse-operator/blob/master/docs/custom_resource_explained.md#spectemplatespodtemplates
             podTemplates: [
               {
@@ -172,7 +116,8 @@ export function ClickHouseResources(
                       name: "clickhouse",
                       // Default is "latest" tag
                       image: DockerImages.clickhouse,
-                      imagePullSecrets: getImagePullSecrets(),
+                      // TODO(nickbp): not actually an option... figure out image pull secrets support
+                      //imagePullSecrets: getImagePullSecrets(),
                       securityContext: {
                         // Trying to tidy up startup warnings about missing capabilities,
                         // but doesn't seem to work according to container logs...
@@ -186,6 +131,62 @@ export function ClickHouseResources(
                       }
                     }
                   ]
+                }
+              }
+            ],
+
+            // reference: https://github.com/Altinity/clickhouse-operator/blob/master/docs/custom_resource_explained.md#spectemplatesservicetemplates
+            serviceTemplates: [
+              {
+                // creates Service at: basic.clickhouse.svc.cluster.local
+                generateName: "{chi}",
+                name: "service-template",
+                spec: {
+                  // Must be provided manually or else deployment fails
+                  ports: [
+                    {
+                      name: "http",
+                      port: 8123
+                    },
+                    {
+                      name: "client",
+                      port: 9000
+                    },
+                    {
+                      name: "metrics",
+                      port: 9001
+                    }
+                  ],
+                  // Default is a PUBLIC LoadBalancer, we don't want that!
+                  type: "ClusterIP"
+                }
+              }
+            ],
+
+            // reference: https://github.com/Altinity/clickhouse-operator/blob/master/docs/custom_resource_explained.md#spectemplatesvolumeclaimtemplates
+            volumeClaimTemplates: [
+              {
+                name: "data-volume",
+                spec: {
+                  accessModes: ["ReadWriteOnce"],
+                  resources: {
+                    requests: {
+                      storage: "10Gi" // TODO(nickbp): Configurable data volume size
+                    }
+                  },
+                  storageClassName: "pd-ssd"
+                }
+              },
+              {
+                name: "logs-volume",
+                spec: {
+                  accessModes: ["ReadWriteOnce"],
+                  resources: {
+                    requests: {
+                      storage: "1Gi"
+                    }
+                  },
+                  storageClassName: "pd-ssd"
                 }
               }
             ]

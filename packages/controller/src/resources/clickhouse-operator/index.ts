@@ -517,7 +517,6 @@ export function ClickHouseOperatorResources(
                 {
                   name: "exporter",
                   image: DockerImages.clickhouseOperatorExporter,
-                  // TODO(nickbp) skipping volumeMounts, are they actually needed?
                   ports: [
                     {
                       containerPort: 6379,

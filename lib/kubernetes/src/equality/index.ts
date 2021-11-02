@@ -424,7 +424,15 @@ export const hasJaegerSpecChanged = (
   desired: V1JaegerResource,
   existing: V1JaegerResource
 ): boolean => {
-  if (!isDeepStrictEqual(desired.spec.spec, existing.spec.spec)) {
+  // TODO(nickbp): Attempting to diff the entire Jaeger spec results in false positives.
+  //               Looks like the CRD returned by K8s has a bunch of empty fields that we don't set.
+  //               For now we just check an arbitrary field...
+  if (
+    !isDeepStrictEqual(
+      desired.spec.spec?.allInOne?.image,
+      existing.spec.spec?.allInOne?.image
+    )
+  ) {
     logDifference(
       `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
       desired.spec.spec,
