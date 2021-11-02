@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 import { ClickHouse } from "clickhouse";
+import {
+  CLICKHOUSE_USERNAME,
+  CLICKHOUSE_PASSWORD
+} from "./resources/clickhouse/";
 
 // Make this optional, so that running the controller locally during dev
 // doesn't require a connection to the db.
-const clickhouseUrl = process.env.CLICKHOUSE_URL;
-const clickhouseUsername = process.env.CLICKHOUSE_USERNAME ?? "";
-const clickhousePassword = process.env.CLICKHOUSE_PASSWORD ?? "";
+const clickhouseUrl = process.env.CLICKHOUSE_ENDPOINT;
+
+// Default to hardcoded values in clickhouse instance spec, but allow env override
+const clickhouseUsername =
+  process.env.CLICKHOUSE_USERNAME ?? CLICKHOUSE_USERNAME;
+const clickhousePassword =
+  process.env.CLICKHOUSE_PASSWORD ?? CLICKHOUSE_PASSWORD;
 
 if (clickhouseUrl && (!clickhouseUsername || !clickhousePassword)) {
   throw Error(
-    "when specifying CLICKHOUSE_URL, must also specify CLICKHOUSE_USERNAME and CLICKHOUSE_PASSWORD"
+    "when specifying CLICKHOUSE_ENDPOINT, must also specify CLICKHOUSE_USERNAME and CLICKHOUSE_PASSWORD"
   );
 }
 

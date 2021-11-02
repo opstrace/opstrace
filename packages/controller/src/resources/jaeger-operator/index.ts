@@ -20,14 +20,13 @@ import {
   ClusterRoleBinding,
   CustomResourceDefinition,
   Deployment,
+  Namespace,
   ResourceCollection,
   Service,
   ServiceAccount,
-  Secret,
   V1ServicemonitorResource,
   jaegers
 } from "@opstrace/kubernetes";
-import { generateSecretValue } from "../../helpers";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function JaegerOperatorResources(
@@ -38,25 +37,18 @@ export function JaegerOperatorResources(
 
   collection.add(new CustomResourceDefinition(jaegers, kubeConfig));
 
-  const jaegerPasswordSecret = new Secret(
-    {
-      apiVersion: "v1",
-      kind: "Secret",
-      metadata: {
-        name: "jaeger-operator-password",
-        namespace
+  collection.add(
+    new Namespace(
+      {
+        apiVersion: "v1",
+        kind: "Namespace",
+        metadata: {
+          name: namespace
+        }
       },
-      data: {
-        username: "jaeger_operator",
-        password: Buffer.from(generateSecretValue()).toString("base64")
-      }
-    },
-    kubeConfig
+      kubeConfig
+    )
   );
-  // We don't want this value to change once it exists.
-  // The value of this secret can always be updated manually in the cluster if needs be (kubectl delete <name> -n application) and the controller will create a new one.
-  jaegerPasswordSecret.setImmutable();
-  collection.add(jaegerPasswordSecret);
 
   collection.add(
     new ServiceAccount(
@@ -409,6 +401,11 @@ export function JaegerOperatorResources(
                     {
                       name: "OPERATOR_NAME",
                       value: "jaeger-operator"
+                    },
+                    // Set to empty string: Watch all (per-tenant) namespaces
+                    {
+                      name: "WATCH_NAMESPACE",
+                      value: ""
                     }
                   ]
                 }

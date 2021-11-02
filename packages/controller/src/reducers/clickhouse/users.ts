@@ -25,7 +25,7 @@ export const actions = {
     "FETCH_CLICKHOUSE_USERS_REQUEST",
     "FETCH_CLICKHOUSE_USERS_SUCCESS",
     "FETCH_CLICKHOUSE_USERS_FAILURE"
-  )<Record<string, unknown>, string[], { error: Error }>()
+  )<Record<string, unknown>, { resources: string[] }, { error: Error }>()
 };
 export type ClickHouseDBActions = ActionType<typeof actions>;
 export type ClickHouseUserState = ResourceCache<string[]>;
@@ -79,16 +79,15 @@ export function startInformer(channel: (input: unknown) => void): () => void {
     }
     if (!dbClient) {
       log.warning(
-        "skipping ClickHouse user sync due to missing env var CLICKHOUSE_URL"
+        "skipping ClickHouse user informer due to missing env var CLICKHOUSE_ENDPOINT"
       );
       return;
     }
     try {
       const users = await dbClient.query("SHOW USERS").toPromise();
-      log.warning(`users: ${users}`); // TODO(nickbp) remove
-      channel(
-        actions.fetch.success((users as UserEntry[]).map(user => user.name))
-      );
+      const userNames = (users as UserEntry[]).map(user => user.name);
+      log.debug(`clickhouse users: ${userNames}`);
+      channel(actions.fetch.success({ resources: userNames }));
       // refresh in 3s
       return setTimeout(poll, 3000);
     } catch (error: any) {

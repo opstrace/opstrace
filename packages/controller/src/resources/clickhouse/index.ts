@@ -23,6 +23,10 @@ import {
 } from "@opstrace/kubernetes";
 import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
+// Note: Changing this requires also changing the "opstrace_controller" keys below.
+export const CLICKHOUSE_USERNAME = "opstrace_controller";
+export const CLICKHOUSE_PASSWORD = "opstrace_controller_password";
+
 export function ClickHouseResources(
   kubeConfig: KubeConfig,
   namespace: string
@@ -35,10 +39,7 @@ export function ClickHouseResources(
         apiVersion: "v1",
         kind: "Namespace",
         metadata: {
-          name: namespace,
-          labels: {
-            "cert-manager.io/disable-validation": "true"
-          }
+          name: namespace
         }
       },
       kubeConfig
@@ -76,12 +77,13 @@ export function ClickHouseResources(
               // reference: https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings/
             },
             users: {
-              "opstrace_controller/password": "opstrace_controller_password",
+              // Can't use `${CLICKHOUSE_USERNAME}/*` in keys:
+              "opstrace_controller/password": `${CLICKHOUSE_PASSWORD}`,
               "opstrace_controller/networks/ip": [
                 // Note: could restrict to something like "host local, regexp opstrace-controller-.*\.kube-system\.svc\.cluster\.local"
                 "0.0.0.0/0"
               ],
-              // opstrace_controller can create other users and grant access to them
+              // controller user can create other users and grant access to them
               "opstrace_controller/access_management": "1"
             }
           },

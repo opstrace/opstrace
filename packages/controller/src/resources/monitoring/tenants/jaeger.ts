@@ -28,7 +28,7 @@ import { Tenant } from "@opstrace/tenants";
 import { getTenantNamespace } from "../../../helpers";
 import { getTenantClickHouseName } from "../../../tasks/clickhouseTenants";
 import { KubeConfig } from "@kubernetes/client-node";
-import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
+import { DockerImages } from "@opstrace/controller-config";
 
 export function JaegerResources(
   state: State,
@@ -95,67 +95,75 @@ export function JaegerResources(
           strategy: "allInOne",
           allInOne: {
             image: DockerImages.jaegerAllInOne,
-            imagePullSecrets: getImagePullSecrets()
-          }
-          // reference: https://www.jaegertracing.io/docs/1.27/cli/#jaeger-all-in-one-grpc-plugin
-          //options: {
-          //  log-level: "debug"
-          //}
-        },
-        storage: {
-          type: "grpc-plugin",
-          grpcPlugin: {
-            image: DockerImages.jaegerClickhouse,
-            imagePullSecrets: getImagePullSecrets()
+            // TODO(nickbp): not actually an option... figure out image pull secrets support
+            //imagePullSecrets: getImagePullSecrets(),
+            // reference: https://www.jaegertracing.io/docs/1.27/cli/#jaeger-all-in-one-grpc-plugin
+            options: {
+              // Ensure the Jaeger works at <tenant>.cluster/jaeger
+              //"log-level": "debug",
+              "query.base-path": "/jaeger"
+            }
           },
-          options: {
-            "grpc-storage-plugin": {
-              binary: "/plugin/jaeger-clickhouse",
-              "configuration-file": "/plugin-config/config.yaml"
-              //"log-level": "debug"
-            }
-          }
-        },
-        ingress: {
-          // We manage the Service/Ingress creation ourselves.
-          enabled: false
-        },
-        ui: {
-          options: {
-            // TODO(nickbp): just an example, reference: https://www.jaegertracing.io/docs/1.27/frontend-ui/
-            menu: [
-              {
-                label: "Hello Opstrace",
-                items: [
-                  {
-                    label: "Docs",
-                    url: "https://opstrace.com/docs"
-                  },
-                  {
-                    label: "Blog",
-                    url: "https://opstrace.com/blog"
-                  }
-                ]
+          storage: {
+            type: "grpc-plugin",
+            grpcPlugin: {
+              image: DockerImages.jaegerClickhouse
+              // TODO(nickbp): not actually an option... figure out image pull secrets support
+              //imagePullSecrets: getImagePullSecrets()
+            },
+            options: {
+              "grpc-storage-plugin": {
+                //"log-level": "debug",
+                binary: "/plugin/jaeger-clickhouse",
+                "configuration-file": "/plugin-config/config.yaml"
               }
-            ]
-          }
-        },
-        // other options reference, e.g. labels or resources:
-        //   https://www.jaegertracing.io/docs/1.27/operator/#finer-grained-configuration
-        volumeMounts: [
-          {
-            name: "plugin-config",
-            mountPath: "/plugin-config"
-          }
-        ],
-        volumes: [
-          {
-            name: "plugin-config",
-            configMap: {
-              name: "jaeger-clickhouse"
             }
-          }
-        ]
+          },
+          ingress: {
+            // We manage the Service/Ingress creation ourselves.
+            enabled: false
+          },
+          ui: {
+            options: {
+              // Just an example, see docs: https://www.jaegertracing.io/docs/1.27/frontend-ui/
+              menu: [
+                {
+                  label: "Opstrace",
+                  items: [
+                    {
+                      label: "Slack",
+                      url: "https://go.opstrace.com/community"
+                    },
+                    {
+                      label: "Docs",
+                      url: "https://opstrace.com/docs"
+                    },
+                    {
+                      label: "Blog",
+                      url: "https://opstrace.com/blog"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          // other options reference, e.g. labels or resources:
+          //   https://www.jaegertracing.io/docs/1.27/operator/#finer-grained-configuration
+          volumeMounts: [
+            {
+              name: "plugin-config",
+              mountPath: "/plugin-config"
+            }
+          ],
+          volumes: [
+            {
+              name: "plugin-config",
+              configMap: {
+                name: "jaeger-clickhouse"
+              }
+            }
+          ]
+        }
       },
       kubeConfig
     )
@@ -177,10 +185,10 @@ export function JaegerResources(
         spec: {
           ports: [
             {
-              name: "ui",
-              port: 14269,
+              name: "query",
+              port: 16686,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              targetPort: "ui" as any
+              targetPort: "query" as any
             }
           ],
           selector: {
@@ -208,7 +216,7 @@ export function JaegerResources(
           endpoints: [
             {
               interval: "60s",
-              port: "ui"
+              port: "query"
             }
           ],
           jobLabel: "job",

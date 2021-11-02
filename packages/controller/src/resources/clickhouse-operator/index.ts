@@ -22,10 +22,11 @@ import {
   ConfigMap,
   CustomResourceDefinition,
   Deployment,
+  Namespace,
   ResourceCollection,
+  Secret,
   Service,
   ServiceAccount,
-  Secret,
   V1ServicemonitorResource,
   clickhouseinstallations,
   clickhouseinstallationtemplates,
@@ -36,7 +37,7 @@ import { DockerImages, getImagePullSecrets } from "@opstrace/controller-config";
 
 export function ClickHouseOperatorResources(
   kubeConfig: KubeConfig,
-  namespace: string,
+  operatorNamespace: string,
   clickhouseNamespace: string
 ): ResourceCollection {
   const collection = new ResourceCollection();
@@ -51,13 +52,26 @@ export function ClickHouseOperatorResources(
     new CustomResourceDefinition(clickhouseoperatorconfigurations, kubeConfig)
   );
 
+  collection.add(
+    new Namespace(
+      {
+        apiVersion: "v1",
+        kind: "Namespace",
+        metadata: {
+          name: operatorNamespace
+        }
+      },
+      kubeConfig
+    )
+  );
+
   const clickhousePasswordSecret = new Secret(
     {
       apiVersion: "v1",
       kind: "Secret",
       metadata: {
         name: "clickhouse-operator-password",
-        namespace
+        namespace: operatorNamespace
       },
       data: {
         password: Buffer.from(generateSecretValue()).toString("base64")
@@ -77,7 +91,7 @@ export function ClickHouseOperatorResources(
         kind: "ServiceAccount",
         metadata: {
           name: "clickhouse-operator",
-          namespace
+          namespace: operatorNamespace
         }
       },
       kubeConfig
@@ -203,7 +217,7 @@ export function ClickHouseOperatorResources(
         apiVersion: "rbac.authorization.k8s.io/v1",
         kind: "ClusterRoleBinding",
         metadata: {
-          name: `clickhouse-operator-${namespace}`
+          name: `clickhouse-operator-${operatorNamespace}`
         },
         roleRef: {
           apiGroup: "rbac.authorization.k8s.io",
@@ -214,7 +228,7 @@ export function ClickHouseOperatorResources(
           {
             kind: "ServiceAccount",
             name: "clickhouse-operator",
-            namespace
+            namespace: operatorNamespace
           }
         ]
       },
@@ -248,7 +262,7 @@ export function ClickHouseOperatorResources(
     // operator access
     //chUsername: clickhouse_operator,
     //chPassword: clickhouse_operator_password,
-    chCredentialsSecretNamespace: namespace,
+    chCredentialsSecretNamespace: operatorNamespace,
     chCredentialsSecretName: "clickhouse-operator-password",
     chPort: 8123,
 
@@ -269,8 +283,7 @@ export function ClickHouseOperatorResources(
     appendScopeLabels: "no"
   };
 
-  const clickhouseConfig = `
-<yandex>
+  const clickhouseConfig = `<yandex>
 
   <!-- Listen wildcard address to allow accepting connections from other containers and host network. -->
   <listen_host>0.0.0.0</listen_host>
@@ -314,8 +327,8 @@ export function ClickHouseOperatorResources(
 
 </yandex>`;
 
-  const clickhouseUserConfig = `
-<yandex>
+  // Templated with '%%OPERATOR_PASSWORD%%'
+  const clickhouseUserConfig = `<yandex>
 
   <users>
     <clickhouse_operator>
@@ -355,12 +368,12 @@ export function ClickHouseOperatorResources(
         data: {
           "operator-config.yaml": yaml.safeDump(operatorConfig),
           "clickhouse-config.xml": clickhouseConfig,
-          "clickhouse-users.xml": clickhouseUserConfig
+          "clickhouse-users.xml.tmpl": clickhouseUserConfig
         },
         kind: "ConfigMap",
         metadata: {
           name: "clickhouse-operator",
-          namespace
+          namespace: operatorNamespace
         }
       },
       kubeConfig
@@ -374,7 +387,7 @@ export function ClickHouseOperatorResources(
         kind: "Deployment",
         metadata: {
           name: "clickhouse-operator",
-          namespace,
+          namespace: operatorNamespace,
           labels: {
             app: "clickhouse-operator"
           }
@@ -394,44 +407,7 @@ export function ClickHouseOperatorResources(
             },
             spec: {
               serviceAccountName: "clickhouse-operator",
-              volumes: [
-                {
-                  name: "operator-config",
-                  configMap: {
-                    name: "clickhouse-operator",
-                    items: [
-                      {
-                        key: "clickhouse-operator.yaml",
-                        path: "clickhouse-operator.yaml"
-                      }
-                    ]
-                  }
-                },
-                {
-                  name: "clickhouse-config",
-                  configMap: {
-                    name: "clickhouse-operator",
-                    items: [
-                      {
-                        key: "clickhouse-config.xml",
-                        path: "clickhouse-config.xml"
-                      }
-                    ]
-                  }
-                },
-                {
-                  name: "clickhouse-user-config",
-                  configMap: {
-                    name: "clickhouse-operator",
-                    items: [
-                      {
-                        key: "clickhouse-users.xml.tmpl",
-                        path: "clickhouse-users.xml.tmpl"
-                      }
-                    ]
-                  }
-                }
-              ],
+              imagePullSecrets: getImagePullSecrets(),
               containers: [
                 {
                   name: "clickhouse-operator",
@@ -440,21 +416,7 @@ export function ClickHouseOperatorResources(
                   command: [
                     "/bin/sh",
                     "-c",
-                    "sed \"s/%%OPERATOR_PASSWORD%%/$(echo -n $OPERATOR_PASSWORD | sha256sum | tr -d '-')/g\" /tmp/clickhouse-users.xml.tmpl > /etc/clickhouse-operator/users.d/clickhouse-users.xml && /clickhouse-operator -logtostderr=true -v=1"
-                  ],
-                  volumeMounts: [
-                    {
-                      name: "operator-config",
-                      mountPath: "/etc/clickhouse-operator"
-                    },
-                    {
-                      name: "clickhouse-config",
-                      mountPath: "/etc/clickhouse-operator/config.d"
-                    },
-                    {
-                      name: "clickhouse-user-config",
-                      mountPath: "/tmp/"
-                    }
+                    "sed \"s/%%OPERATOR_PASSWORD%%/$(echo -n $OPERATOR_PASSWORD | sha256sum | tr -d ' -')/g\" /tmp/clickhouse-users.xml.tmpl > /etc/clickhouse-operator/users.d/clickhouse-users.xml && /clickhouse-operator -logtostderr=true -v=1"
                   ],
                   env: [
                     {
@@ -532,6 +494,24 @@ export function ClickHouseOperatorResources(
                         }
                       }
                     }
+                  ],
+                  volumeMounts: [
+                    {
+                      name: "operator-config",
+                      mountPath: "/etc/clickhouse-operator"
+                    },
+                    {
+                      name: "clickhouse-config",
+                      mountPath: "/etc/clickhouse-operator/config.d"
+                    },
+                    {
+                      name: "clickhouse-user-config",
+                      mountPath: "/tmp/"
+                    },
+                    {
+                      name: "clickhouse-user-dir",
+                      mountPath: "/etc/clickhouse-operator/users.d"
+                    }
                   ]
                 },
                 {
@@ -546,7 +526,48 @@ export function ClickHouseOperatorResources(
                   ]
                 }
               ],
-              imagePullSecrets: getImagePullSecrets()
+              volumes: [
+                {
+                  name: "operator-config",
+                  configMap: {
+                    name: "clickhouse-operator",
+                    items: [
+                      {
+                        key: "operator-config.yaml",
+                        path: "config.yaml"
+                      }
+                    ]
+                  }
+                },
+                {
+                  name: "clickhouse-config",
+                  configMap: {
+                    name: "clickhouse-operator",
+                    items: [
+                      {
+                        key: "clickhouse-config.xml",
+                        path: "clickhouse-config.xml"
+                      }
+                    ]
+                  }
+                },
+                {
+                  name: "clickhouse-user-config",
+                  configMap: {
+                    name: "clickhouse-operator",
+                    items: [
+                      {
+                        key: "clickhouse-users.xml.tmpl",
+                        path: "clickhouse-users.xml.tmpl"
+                      }
+                    ]
+                  }
+                },
+                {
+                  name: "clickhouse-user-dir",
+                  emptyDir: {}
+                }
+              ]
             }
           }
         }
@@ -562,7 +583,7 @@ export function ClickHouseOperatorResources(
         kind: "Service",
         metadata: {
           name: "clickhouse-operator",
-          namespace,
+          namespace: operatorNamespace,
           labels: {
             app: "clickhouse-operator"
           }
@@ -592,7 +613,7 @@ export function ClickHouseOperatorResources(
         kind: "ServiceMonitor",
         metadata: {
           name: "clickhouse-operator",
-          namespace,
+          namespace: operatorNamespace,
           labels: {
             app: "clickhouse-operator"
           }
@@ -607,7 +628,7 @@ export function ClickHouseOperatorResources(
           ],
           jobLabel: "job",
           namespaceSelector: {
-            matchNames: [namespace]
+            matchNames: [operatorNamespace]
           },
           selector: {
             matchLabels: {

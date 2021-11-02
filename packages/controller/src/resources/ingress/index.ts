@@ -163,12 +163,14 @@ export function IngressResources(
                       }
                     },
                     {
+                      // TODO(nickbp): /jaeger doesn't completely work: tries to fetch e.g. "/static/foo.css"
+                      //               need to set up a redirect, or figure out how to configure jaeger to support subpath
                       path: "/jaeger",
                       pathType: "Prefix",
                       backend: {
                         serviceName: "jaeger",
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        servicePort: "ui" as any
+                        servicePort: "query" as any
                       }
                     }
                   ]

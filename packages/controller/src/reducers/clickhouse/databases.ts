@@ -25,7 +25,7 @@ export const actions = {
     "FETCH_CLICKHOUSE_DBS_REQUEST",
     "FETCH_CLICKHOUSE_DBS_SUCCESS",
     "FETCH_CLICKHOUSE_DBS_FAILURE"
-  )<Record<string, unknown>, string[], { error: Error }>()
+  )<Record<string, unknown>, { resources: string[] }, { error: Error }>()
 };
 export type ClickHouseDBActions = ActionType<typeof actions>;
 export type ClickHouseDBState = ResourceCache<string[]>;
@@ -79,16 +79,15 @@ export function startInformer(channel: (input: unknown) => void): () => void {
     }
     if (!dbClient) {
       log.warning(
-        "skipping ClickHouse database sync due to missing env var CLICKHOUSE_URL"
+        "skipping ClickHouse database informer due to missing env var CLICKHOUSE_ENDPOINT"
       );
       return;
     }
     try {
       const dbs = await dbClient.query("SHOW DATABASES").toPromise();
-      log.warning(`dbs: ${dbs}`); // TODO(nickbp) remove
-      channel(
-        actions.fetch.success((dbs as DatabaseEntry[]).map(db => db.name))
-      );
+      const dbNames = (dbs as DatabaseEntry[]).map(db => db.name);
+      log.debug(`clickhouse dbs: ${dbNames}`);
+      channel(actions.fetch.success({ resources: dbNames }));
       // refresh in 3s
       return setTimeout(poll, 3000);
     } catch (error: any) {

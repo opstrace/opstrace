@@ -70,6 +70,8 @@ export function* runInformers(
       k8s.V1ClusterissuerResource.startInformer(kubeConfig, channel),
       k8s.V1IssuerResource.startInformer(kubeConfig, channel),
       k8s.V1Alpha1CortexResource.startInformer(kubeConfig, channel),
+      k8s.V1ClickhouseinstallationResource.startInformer(kubeConfig, channel),
+      k8s.V1JaegerResource.startInformer(kubeConfig, channel),
       graphqlIntegrations.startInformer(channel),
       clickhouse.databases.startInformer(channel),
       clickhouse.users.startInformer(channel)

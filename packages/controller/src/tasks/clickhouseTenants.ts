@@ -35,8 +35,8 @@ export function* clickhouseTenantsReconciler(): Generator<
 > {
   return yield call(function* () {
     if (dbClient === null) {
-      log.info(
-        "disabled clickhouse tenants reconciliation: CLICKHOUSE_URL not configured"
+      log.warning(
+        "skipping ClickHouse tenant database/user reconciliation: CLICKHOUSE_ENDPOINT not configured"
       );
       return;
     }
@@ -81,12 +81,12 @@ export function* clickhouseTenantsReconciler(): Generator<
       const currentUsers = state.clickhouse.Users.resources;
 
       const dbsToAdd = clickhouseTenants
-        .filter(tenant => !currentDBs.includes(tenant))
+        .filter(clickhouseTenant => !currentDBs.includes(clickhouseTenant))
         .map(
           dbToAdd => `CREATE DATABASE IF NOT EXISTS ${dbToAdd} ENGINE=Atomic`
         );
       const usersToAdd = clickhouseTenants
-        .filter(tenant => !currentUsers.includes(tenant))
+        .filter(clickhouseTenant => !currentUsers.includes(clickhouseTenant))
         .flatMap(userToAdd => [
           `CREATE USER IF NOT EXISTS ${userToAdd} IDENTIFIED WITH plaintext_password BY '${userToAdd}_password' HOST ANY DEFAULT DATABASE ${userToAdd}`,
           `GRANT SELECT, INSERT, ALTER, CREATE, DROP, TRUNCATE, OPTIMIZE, SHOW ON ${userToAdd}.* TO ${userToAdd}`

@@ -41,7 +41,9 @@ import {
 import { logDifference } from "./general";
 import {
   V1Alpha1CortexResource,
-  V1CertificateResource
+  V1CertificateResource,
+  V1ClickhouseinstallationResource,
+  V1JaegerResource
 } from "../custom-resources";
 import { isCertificateEqual } from "./Certificate";
 import { log } from "@opstrace/utils";
@@ -391,7 +393,43 @@ export const hasCortexSpecChanged = (
   existing: V1Alpha1CortexResource
 ): boolean => {
   if (!isDeepStrictEqual(desired.spec.spec, existing.spec.spec)) {
-    logDifference("", desired.spec.spec, existing.spec.spec);
+    logDifference(
+      `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec.spec,
+      existing.spec.spec
+    );
+    return true;
+  }
+
+  return false;
+};
+
+export const hasClickhouseinstallationSpecChanged = (
+  desired: V1ClickhouseinstallationResource,
+  existing: V1ClickhouseinstallationResource
+): boolean => {
+  if (!isDeepStrictEqual(desired.spec.spec, existing.spec.spec)) {
+    logDifference(
+      `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec.spec,
+      existing.spec.spec
+    );
+    return true;
+  }
+
+  return false;
+};
+
+export const hasJaegerSpecChanged = (
+  desired: V1JaegerResource,
+  existing: V1JaegerResource
+): boolean => {
+  if (!isDeepStrictEqual(desired.spec.spec, existing.spec.spec)) {
+    logDifference(
+      `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec.spec,
+      existing.spec.spec
+    );
     return true;
   }
 
