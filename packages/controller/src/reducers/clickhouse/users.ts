@@ -86,7 +86,7 @@ export function startInformer(channel: (input: unknown) => void): () => void {
     try {
       const users = await dbClient.query("SHOW USERS").toPromise();
       const userNames = (users as UserEntry[]).map(user => user.name);
-      log.debug(`clickhouse users: ${userNames}`);
+      log.debug("ClickHouse users: %s", userNames);
       channel(actions.fetch.success({ resources: userNames }));
       // refresh in 3s
       return setTimeout(poll, 3000);

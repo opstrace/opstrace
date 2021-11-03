@@ -50,9 +50,8 @@ export function* clickhouseTenantsReconciler(): Generator<
       const tenants = state.tenants.list.tenants;
       if (tenants.length === 0) {
         // tenants not loaded? something's not right. wait and try again after delay
-        log.warning(
-          "skipping clickhouse tenants sync: missing tenants in configmap"
-        );
+        // In particular we don't want to drop all DBs if the tenants list is missing/empty
+        log.warning("skipping ClickHouse tenant sync: empty tenants list");
         continue;
       }
 
@@ -61,13 +60,13 @@ export function* clickhouseTenantsReconciler(): Generator<
         !state.clickhouse.Users.loaded
       ) {
         log.debug(
-          "skipping clickhouse tenants sync: databases or users not loaded"
+          "skipping ClickHouse tenant sync: databases or users not loaded"
         );
         continue;
       }
 
       if (dbClient === null) {
-        log.warning("skipping clickhouse tenants sync: client became null");
+        log.warning("skipping ClickHouse tenant sync: client became null");
         continue;
       }
 
@@ -87,10 +86,18 @@ export function* clickhouseTenantsReconciler(): Generator<
         );
       const usersToAdd = clickhouseTenants
         .filter(clickhouseTenant => !currentUsers.includes(clickhouseTenant))
-        .flatMap(userToAdd => [
-          `CREATE USER IF NOT EXISTS ${userToAdd} IDENTIFIED WITH plaintext_password BY '${userToAdd}_password' HOST ANY DEFAULT DATABASE ${userToAdd}`,
-          `GRANT SELECT, INSERT, ALTER, CREATE, DROP, TRUNCATE, OPTIMIZE, SHOW ON ${userToAdd}.* TO ${userToAdd}`
-        ]);
+        .flatMap(userToAdd =>
+          // There is a potential bug here where the controller could exit between the
+          // CREATE USER and GRANT queries, resulting in a degraded user missing permissions.
+          // To fix this properly we could poll permissions using SHOW GRANTS, but parsing that would be
+          // complicated. For now we punt on this and just ensure the queries are run sequentially (below).
+          // Note that the CREATE USER + GRANT unfortunately cannot be sent as a single semicolon-separated
+          // query/transaction: the server returns a 'Multi-statements are not allowed' error.
+          [
+            `CREATE USER IF NOT EXISTS ${userToAdd} IDENTIFIED WITH plaintext_password BY '${userToAdd}_password' HOST ANY DEFAULT DATABASE ${userToAdd};`,
+            `GRANT SELECT, INSERT, ALTER, CREATE, DROP, TRUNCATE, OPTIMIZE, SHOW ON ${userToAdd}.* TO ${userToAdd}`
+          ]
+        );
 
       // Search for users and DBs that start with 'tenant_',
       // but that aren't present in the list of expected tenants.
@@ -109,19 +116,29 @@ export function* clickhouseTenantsReconciler(): Generator<
         )
         .map(tenantDbToRemove => `DROP DATABASE IF EXISTS ${tenantDbToRemove}`);
 
+      // The ordering here probably doesn't matter,
+      // but it feels like DBs should only be created before (and deleted after) their associated users.
       const queries = dbsToAdd
         .concat(usersToAdd)
         .concat(usersToRemove)
         .concat(dbsToRemove);
 
-      log.debug("clickhouse sync queries to execute: %s", queries);
+      log.debug("ClickHouse tenant sync queries to execute: %s", queries);
 
-      try {
-        yield Promise.all(
-          [...queries].map(query => dbClient2.query(query).toPromise())
-        );
-      } catch (err: any) {
-        log.error("failed syncing clickhouse dbs/users: %s", err);
+      // Run the queries sequentially. In theory it should be okay to run them in parallel,
+      // but that introduces a potential for weird races/corner cases on ClickHouse's end.
+      // Note that we MUST currently run queries in sequential order anyway, to ensure that
+      // GRANT requests occur after their associated CREATE USER requests. See above comments.
+      for (const query of queries) {
+        try {
+          yield dbClient2.query(query).toPromise();
+        } catch (err: any) {
+          log.error(
+            "executing ClickHouse query '%s' failed (retrying in 5s): %s",
+            query,
+            err
+          );
+        }
       }
     }
   });

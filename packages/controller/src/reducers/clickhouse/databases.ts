@@ -86,7 +86,7 @@ export function startInformer(channel: (input: unknown) => void): () => void {
     try {
       const dbs = await dbClient.query("SHOW DATABASES").toPromise();
       const dbNames = (dbs as DatabaseEntry[]).map(db => db.name);
-      log.debug(`clickhouse dbs: ${dbNames}`);
+      log.debug("ClickHouse dbs: %s", dbNames);
       channel(actions.fetch.success({ resources: dbNames }));
       // refresh in 3s
       return setTimeout(poll, 3000);
