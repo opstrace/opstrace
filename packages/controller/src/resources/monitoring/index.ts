@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import { AlertManagerResources } from "./tenants/alertmanager";
 import { KubeConfig } from "@kubernetes/client-node";
 import { ResourceCollection, Namespace } from "@opstrace/kubernetes";
 import { GrafanaResources } from "./tenants/grafana";
-import { AlertManagerResources } from "./tenants/alertmanager";
+import { JaegerResources } from "./tenants/jaeger";
 import { PrometheusOperatorResources } from "./prometheusOperator";
 import { PrometheusResources } from "./tenants/prometheus";
 import { State } from "../../reducer";
@@ -53,6 +54,9 @@ export function MonitoringResources(
     // Each tenant gets Prometheus, Grafana
     collection.add(GrafanaResources(state, kubeConfig, tenant));
     collection.add(PrometheusResources(state, kubeConfig, tenant));
+
+    // Each tenant also gets Jaeger, pointing to the shared ClickHouse instance
+    collection.add(JaegerResources(state, kubeConfig, tenant));
 
     // SYSTEM is special. It's where we monitor the opstrace system.
     if (tenant.type === "SYSTEM") {

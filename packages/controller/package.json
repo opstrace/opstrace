@@ -32,6 +32,7 @@
     "@types/express": "^4.17.13",
     "@types/lightship": "^6.1.0",
     "argparse": "^1.0.10",
+    "clickhouse": "^2.4.2",
     "express": "^4.17.1",
     "graphql": "^15.0.0",
     "graphql-request": "^3.0.0",

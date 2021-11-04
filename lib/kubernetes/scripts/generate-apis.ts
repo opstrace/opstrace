@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Opstrace, Inc.
+ * Copyright 2021 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,24 @@
  */
 
 import {
-  alertmanager,
-  podmonitor,
-  prometheus,
-  prometheusrule,
-  servicemonitor,
   certificaterequests,
   certificates,
   challenges,
   clusterIssuers,
   issuers,
   orders,
+  clickhouseinstallations,
+  clickhouseinstallationtemplates,
+  clickhouseoperatorconfigurations,
+  cortices,
+  jaegers,
+  alertmanager,
+  podmonitor,
   probe,
-  thanosruler,
-  cortices
+  prometheus,
+  prometheusrule,
+  servicemonitor,
+  thanosruler
 } from "../src/crds";
 
 import { GenerateCodeForCRD } from "./apigen";
@@ -36,20 +40,28 @@ import { GenerateCodeForCRD } from "./apigen";
 const outDir = `${__dirname}/../src/custom-resources`;
 
 [
-  certificates,
   certificaterequests,
+  certificates,
   challenges,
   clusterIssuers,
   issuers,
   orders,
+
+  clickhouseinstallations,
+  clickhouseinstallationtemplates,
+  clickhouseoperatorconfigurations,
+
+  cortices,
+
+  jaegers,
+
   alertmanager,
   podmonitor,
+  probe,
   prometheus,
   prometheusrule,
   servicemonitor,
-  probe,
-  thanosruler,
-  cortices
+  thanosruler
 ].map(async crd => {
   try {
     await GenerateCodeForCRD(crd, outDir);

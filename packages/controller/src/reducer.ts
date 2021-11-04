@@ -51,10 +51,16 @@ import {
   V1ClusterissuerReducer,
   V1IssuerReducer,
   V1OrderReducer,
-  V1Alpha1CortexReducer
+  V1Alpha1CortexReducer,
+  V1ClickhouseinstallationReducer,
+  V1JaegerReducer
 } from "@opstrace/kubernetes";
 
 import { integrations } from "./reducers/graphql";
+import {
+  databases as chDatabases,
+  users as chUsers
+} from "./reducers/clickhouse";
 
 export const rootReducers = {
   tenants: tenantReducer,
@@ -92,11 +98,17 @@ export const rootReducers = {
       ClusterIssuers: V1ClusterissuerReducer,
       Issuers: V1IssuerReducer,
       Orders: V1OrderReducer,
-      Cortices: V1Alpha1CortexReducer
+      Cortices: V1Alpha1CortexReducer,
+      Clickhouses: V1ClickhouseinstallationReducer,
+      Jaegers: V1JaegerReducer
     })
   }),
   graphql: combineReducers({
     Integrations: integrations.reducer
+  }),
+  clickhouse: combineReducers({
+    Databases: chDatabases.reducer,
+    Users: chUsers.reducer
   })
 };
 

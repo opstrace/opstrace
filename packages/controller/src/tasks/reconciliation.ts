@@ -40,9 +40,13 @@ import { KubeConfig } from "@kubernetes/client-node";
 
 import { APIResources } from "../resources/apis";
 import { ApplicationResources } from "../resources/app";
+import { ClickHouseResources } from "../resources/clickhouse";
+import { ClickHouseOperatorResources } from "../resources/clickhouse-operator";
 import { CortexResources } from "../resources/cortex";
+import { CortexOperatorResources } from "../resources/cortex-operator";
 import { IngressResources } from "../resources/ingress";
 import { IntegrationResources } from "../resources/integrations";
+import { JaegerOperatorResources } from "../resources/jaeger-operator";
 import { LokiResources } from "../resources/loki";
 import { MemcacheResources } from "../resources/memcache";
 import { MonitoringResources } from "../resources/monitoring";
@@ -52,7 +56,6 @@ import { TenantResources } from "../resources/tenants";
 
 import { getControllerConfig } from "../helpers";
 import { setToReady } from "./kubernetesReadinessProbe";
-import { CortexOperatorResources } from "../resources/cortex-operator";
 
 export function* reconciliationLoop(
   kubeConfig: KubeConfig
@@ -104,6 +107,15 @@ export function* reconciliationLoop(
     desired.add(
       CortexOperatorResources(state, kubeConfig, "cortex-operator-system")
     );
+    desired.add(
+      ClickHouseOperatorResources(
+        kubeConfig,
+        "clickhouse-operator-system",
+        "clickhouse"
+      )
+    );
+    desired.add(ClickHouseResources(kubeConfig, "clickhouse"));
+    desired.add(JaegerOperatorResources(kubeConfig, "jaeger-operator-system"));
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);
 

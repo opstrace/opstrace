@@ -4,23 +4,25 @@ set +o xtrace
 #
 # Get the list of images running on the cluster.
 #
-DEPLOYED_IMAGES=$(kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" |\
-tr -s '[[:space:]]' '\n' |\
-sort |\
-uniq)
+DEPLOYED_INITCONTAINER_IMAGES=$(\
+kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.initContainers[*].image}" |\
+tr -s '[[:space:]]' '\n')
+DEPLOYED_CONTAINER_IMAGES=$(\
+kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" |\
+tr -s '[[:space:]]' '\n')
+
+DEPLOYED_IMAGES=$(echo "${DEPLOYED_INITCONTAINER_IMAGES}
+${DEPLOYED_CONTAINER_IMAGES}" | sort | uniq)
 
 echo "--- list of images deployed to the cluster"
 echo "${DEPLOYED_IMAGES}"
-echo
 
 #
 # List of images that are not expected to be included in the main containers list.
-# - postgresql-client: Only in initContainers which we aren't checking
 # - *exporter: Not deployed in initial cluster, only added after user (or test) adds an exporter
 # - local-volume-provisioner: Not deployed on AWS
 #
 UNEXPECTED_IMAGES=(
-    "tmaier/postgresql-client"
     "opstrace/azure_metrics_exporter"
     "prom/blackbox-exporter"
     "prom/cloudwatch-exporter"
@@ -35,11 +37,13 @@ fi
 # bash array, then filter out the UNEXPECTED_IMAGES.
 #
 readarray -t ALL_IMAGES < <(jq -r ' . | to_entries[] | .value ' packages/controller-config/src/docker-images.json)
+echo
+echo "--- list of images from docker-images.json that are not required to be deployed"
 for img in "${ALL_IMAGES[@]}"; do
     SKIP=''
     for unexpected in "${UNEXPECTED_IMAGES[@]}"; do
         if [[ "$img" == *"$unexpected"* ]]; then
-            echo "Skip: $img (vs $unexpected)"
+            echo "$img ($unexpected)"
             SKIP='y'
             break
         fi
@@ -50,8 +54,8 @@ for img in "${ALL_IMAGES[@]}"; do
     EXPECTED_IMAGES+=($img)
 done
 echo
-echo "Expected images from docker-images.json"
-( IFS=$'\n'; echo "${EXPECTED_IMAGES[*]}" )
+echo "--- list of images from docker-images.json that are required to be deployed"
+( IFS=$'\n'; echo "${EXPECTED_IMAGES[*]}" | sort )
 echo
 
 #
@@ -62,7 +66,7 @@ echo
 FAIL=0
 for img in "${EXPECTED_IMAGES[@]}"; do
     if ! grep -q ${img} <<< "${DEPLOYED_IMAGES}" ; then
-        echo "ERROR: expected image ${img} was not deployed"
+        echo "ERROR: required image ${img} was not deployed"
         FAIL=1
     fi
 done

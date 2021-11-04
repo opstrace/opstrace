@@ -59,7 +59,9 @@ import {
   V1ClusterissuerResources,
   V1IssuerResources,
   V1OrderResources,
-  V1Alpha1CortexResources
+  V1Alpha1CortexResources,
+  V1ClickhouseinstallationResources,
+  V1JaegerResources
 } from "../custom-resources";
 
 import {
@@ -78,7 +80,9 @@ import {
   hasCertificateChanged,
   hasClusterRoleChanged,
   hasCustomResourceDefinitionChanged,
-  hasCortexSpecChanged
+  hasCortexSpecChanged,
+  hasClickhouseinstallationSpecChanged,
+  hasJaegerSpecChanged
 } from "../equality";
 
 import { entries } from "@opstrace/utils";
@@ -116,6 +120,8 @@ export type ReconcileResourceTypes = {
   Issuers: V1IssuerResources;
   Orders: V1OrderResources;
   Cortices: V1Alpha1CortexResources;
+  Clickhouses: V1ClickhouseinstallationResources;
+  Jaegers: V1JaegerResources;
 };
 
 // Keep track of the last time we logged about missing 'opstrace' annotations.
@@ -162,6 +168,8 @@ export function* reconcile(
     Issuers: [],
     Orders: [],
     Cortices: [],
+    Clickhouses: [],
+    Jaegers: [],
     ...actual
   };
   try {
@@ -513,6 +521,29 @@ export function* reconcile(
       desiredState.Cortices,
       actualState.Cortices,
       (desired, existing) => hasCortexSpecChanged(desired, existing),
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection,
+      notOursCollection
+    );
+
+    reconcileResourceType(
+      desiredState.Clickhouses,
+      actualState.Clickhouses,
+      (desired, existing) =>
+        hasClickhouseinstallationSpecChanged(desired, existing),
+      null,
+      createCollection,
+      deleteCollection,
+      updateCollection,
+      notOursCollection
+    );
+
+    reconcileResourceType(
+      desiredState.Jaegers,
+      actualState.Jaegers,
+      (desired, existing) => hasJaegerSpecChanged(desired, existing),
       null,
       createCollection,
       deleteCollection,

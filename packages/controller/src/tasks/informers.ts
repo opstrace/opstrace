@@ -28,6 +28,7 @@ import * as k8s from "@opstrace/kubernetes";
 import { KubeConfig } from "@kubernetes/client-node";
 import { log, debugLogErrorDetail } from "@opstrace/utils";
 import * as graphqlIntegrations from "../reducers/graphql/integrations";
+import * as clickhouse from "../reducers/clickhouse";
 
 export function* runInformers(
   kubeConfig: KubeConfig
@@ -69,7 +70,11 @@ export function* runInformers(
       k8s.V1ClusterissuerResource.startInformer(kubeConfig, channel),
       k8s.V1IssuerResource.startInformer(kubeConfig, channel),
       k8s.V1Alpha1CortexResource.startInformer(kubeConfig, channel),
-      graphqlIntegrations.startInformer(channel)
+      k8s.V1ClickhouseinstallationResource.startInformer(kubeConfig, channel),
+      k8s.V1JaegerResource.startInformer(kubeConfig, channel),
+      graphqlIntegrations.startInformer(channel),
+      clickhouse.databases.startInformer(channel),
+      clickhouse.users.startInformer(channel)
     ];
 
     // return the unsubscribe function for eventChannel. This will be called when the channel
