@@ -41,7 +41,7 @@ export function* clickhouseTenantsReconciler(): Generator<
       return;
     }
     const dbClient2 = dbClient;
-    var initializedGrants = false;
+    let initializedGrants = false;
 
     while (true) {
       // loop through again in 5s
@@ -85,7 +85,7 @@ export function* clickhouseTenantsReconciler(): Generator<
       // This is ultimately just a best-effort attempt at repairing grants if they are missing,
       // and should be a no-op most of the time. This repair can be removed if we start checking
       // SHOW GRANTS, as mentioned below.
-      var permissionsToGrant: string[] = [];
+      let permissionsToGrant: string[] = [];
       if (!initializedGrants) {
         permissionsToGrant = clickhouseTenants.map(queryGrantUser);
         initializedGrants = true;
