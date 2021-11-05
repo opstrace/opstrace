@@ -114,7 +114,7 @@ func TestHijack(t *testing.T) {
 
 		_, _, err := rrw.Hijack()
 		if err != nil {
-			t.Errorf("Hijack() = %w", err)
+			t.Errorf("Hijack() = %v", err)
 		}
 
 		if tt.expected != rrw.statusCode {
@@ -140,7 +140,7 @@ func TestPrometheusMetrics(t *testing.T) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		t.Errorf("got %w", err)
+		t.Errorf("got %v", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -149,7 +149,7 @@ func TestPrometheusMetrics(t *testing.T) {
 
 	metrics, err := prometheus.DefaultGatherer.Gather()
 	if err != nil {
-		t.Errorf("got %w", err)
+		t.Errorf("got %v", err)
 	}
 
 	fail := true

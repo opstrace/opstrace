@@ -33,8 +33,12 @@ clean-ddapi:
 clean-loki:
 	rm -f loki-api
 
+.PHONY: clean-tracing
+clean-tracing:
+	rm -f tracing-api
+
 .PHONY: build-image
-build-image: build-image-config build-image-cortex build-image-ddapi build-image-loki
+build-image: build-image-config build-image-cortex build-image-ddapi build-image-loki build-image-tracing
 
 define get_docker_image_name
 	$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
@@ -74,8 +78,14 @@ build-image-loki: DOCKER_IMAGE_NAME = loki-api
 build-image-loki:
 	$(call build_docker_image)
 
+.PHONY: build-image-tracing
+build-image-tracing: DOCKERFILE = Dockerfile.tracing
+build-image-tracing: DOCKER_IMAGE_NAME = tracing-api
+build-image-tracing:
+	$(call build_docker_image)
+
 .PHONY: publish
-publish: publish-config publish-cortex publish-ddapi publish-loki
+publish: publish-config publish-cortex publish-ddapi publish-loki publish-tracing
 
 define publish_docker_image
 	docker push $(call get_docker_image_name)
@@ -101,8 +111,13 @@ publish-loki: DOCKER_IMAGE_NAME = loki-api
 publish-loki:
 	$(call publish_docker_image)
 
+.PHONY: publish-tracing
+publish-tracing: DOCKER_IMAGE_NAME = tracing-api
+publish-tracing:
+	$(call publish_docker_image)
+
 .PHONY: build
-build: build-config build-cortex build-ddapi build-loki
+build: build-config build-cortex build-ddapi build-loki build-tracing
 
 .PHONY: build-config
 build-config: config-api
@@ -127,6 +142,12 @@ build-loki: loki-api
 
 loki-api:
 	go build -o loki-api ./cmd/loki/
+
+.PHONY: build-tracing
+build-tracing: tracing-api
+
+tracing-api:
+	go build -o tracing-api ./cmd/tracing/
 
 
 .PHONY: unit-tests

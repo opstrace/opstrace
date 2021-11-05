@@ -4,7 +4,7 @@
 The unit tests manage Docker containers, i.e. the Docker daemon needs to be running.
 
 
-```
+```bash
 cd go
 make unit-tests
 ```
@@ -26,7 +26,7 @@ INFO[0000] tenant name: peter
 
 ```bash
 curl -v localhost:8080/metrics
-curl -v localhost:8080/api/prom/
+curl -v localhost:8080/api/v1/push
 curl -v localhost:8080/metrics
 ```
 
@@ -42,16 +42,31 @@ INFO[0000] loki distributor URL: http://loki2.url
 INFO[0000] listen address: localhost:8080
 INFO[0000] tenant name: peter
 2020/04/07 13:37:57 http: proxy error: dial tcp: lookup loki2.url on 192.168.0.1:53: no such host
-
 ```
 
 ```bash
 curl -v localhost:8080/metrics
-curl -v localhost:8080/api/prom/
+curl -v localhost:8080/loki/api/v1/push
 curl -v localhost:8080/metrics
 ```
 
-# Test in opstrace cluster
+# Tracing
+
+## Test Tracing locally
+
+```bash
+$ make build-tracing
+$ ./tracing-api -listen=localhost:8080 -TODO-ARGS
+TODO LOGS
+```
+
+```bash
+curl -v localhost:8080/metrics
+TODO EXAMPLE CURL QUERY
+curl -v localhost:8080/metrics
+```
+
+# Test in Opstrace cluster
 
 Build and push container images with the following script:
 

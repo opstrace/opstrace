@@ -136,7 +136,7 @@ func TestReverseProxy_unhealthy(t *testing.T) {
 	// simulate an error reaching the backend
 	u, err := url.Parse("http://localhost:0")
 	if err != nil {
-		t.Errorf("got %w", err)
+		t.Errorf("got %v", err)
 	}
 
 	// we can reuse the same backend to send both the querier and distributor
