@@ -75,6 +75,8 @@ echo "--- random choice for GCP project ID: ${OPSTRACE_GCP_PROJECT_ID}"
 export GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-svc-acc-${OPSTRACE_GCP_PROJECT_ID}.json
 
 
+# The root opstraceaws.com zone ID in route53.
+ROOT_OPSTRACEAWS_ZONEID=ZG5OGHVAQ79V5
 AWS_CLI_REGION="us-west-2"
 GCLOUD_CLI_ZONE="us-west2-a"
 
@@ -144,6 +146,18 @@ teardown() {
                 --yes
         fi
 
+        if [ -f upsert-changeset.json ]; then
+            # Generate the changeset in json format to remove the NS entries from
+            # the root opstraceaws zone
+            sed 's/UPSERT/DELETE/; s/Add NS/Remove NS/' upsert-changeset.json > delete-changeset.json
+            # Apply the changeset to delete the instance NS records.
+            aws route53 change-resource-record-sets --hosted-zone-id ${ROOT_OPSTRACEAWS_ZONEID} --change-batch file://delete-changeset.json
+            # Extract the instance hosted zone id and remove the /hostedzone/
+            # prefix.
+            HOSTED_ZONE_ID=$(cat hosted-zone.json | jq -r '.HostedZone.Id' | cut -d'/' -f3)
+
+            aws route53 delete-hosted-zone --id ${HOSTED_ZONE_ID}
+        fi
     else
         ./build/bin/opstrace destroy gcp ${OPSTRACE_CLUSTER_NAME} --log-level=debug --yes
         EXITCODE_DESTROY=$?
@@ -236,6 +250,28 @@ export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstrace.io"
 # the cluster and wait until deployments are 'ready'.
 echo "--- create cluster "
 if [[ "${OPSTRACE_CLOUD_PROVIDER}" == "aws" ]]; then
+
+    # Create Opstrace instance in AWS. Use custom_dns_name and
+    # custom_auth0_client_id features.
+    export OPSTRACE_INSTANCE_DNS_NAME="${OPSTRACE_CLUSTER_NAME}.opstraceaws.com"
+
+    # Add install-time parameter to Opstrace install-time configuration file.
+    # The Auth0 client ID corresponds to an Auth0 app configured for our CI
+    echo -e "\ncustom_dns_name: ${OPSTRACE_INSTANCE_DNS_NAME}" >> ci/cluster-config.yaml
+    # rely on this custom auth0 client id to already be present in the config:
+
+    # Create a hosted zone in Route53 with the given OPSTRACE_INSTANCE_DNS_NAME.
+    # It outputs a json object which we save for further processing.
+    aws route53 create-hosted-zone --name ${OPSTRACE_INSTANCE_DNS_NAME} --caller-reference ${OPSTRACE_CLUSTER_NAME} > hosted-zone.json
+
+    # Extract the new zone nameservers and generate the changeset in json format
+    # to add them to the root opstraceaws zone.
+    cat hosted-zone.json | jq -r ".DelegationSet.NameServers | { Comment: \"Add NS records for the instance ${OPSTRACE_CLUSTER_NAME}\", Changes: [{ Action: \"UPSERT\", ResourceRecordSet: { Name: \"${OPSTRACE_INSTANCE_DNS_NAME}\", Type: \"NS\", TTL: 30, ResourceRecords: map(. | {Value: .}) } }] }" > upsert-changeset.json
+
+    # Apply the changeset and add the NS entry in the root opstraceaws zone
+    # pointing to the new zone.
+    aws route53 change-resource-record-sets --hosted-zone-id ${ROOT_OPSTRACEAWS_ZONEID} --change-batch file://upsert-changeset.json
+
     cat ci/cluster-config.yaml | ./build/bin/opstrace create aws ${OPSTRACE_CLUSTER_NAME} \
         --log-level=debug --yes \
         --write-kubeconfig-file "${OPSTRACE_CLI_WRITE_KUBECFG_FILEPATH}"
