@@ -20,7 +20,6 @@ import yaml from "js-yaml";
 import AWS from "aws-sdk";
 import { all, call, fork, join } from "redux-saga/effects";
 
-import { ensureDNSExists } from "@opstrace/dns";
 import {
   createVPC,
   ensureSubnetsExist,
@@ -57,11 +56,7 @@ import {
   RDSSubnetGroupRes
 } from "@opstrace/aws";
 
-import {
-  getClusterConfig,
-  getDnsConfig,
-  LatestClusterConfigType
-} from "@opstrace/config";
+import { getClusterConfig, LatestClusterConfigType } from "@opstrace/config";
 
 import {
   ConfigMap,
@@ -69,7 +64,7 @@ import {
   createOrUpdateConfigMapWithRetry
 } from "@opstrace/kubernetes";
 
-import { log, getBucketName, sleep, entries } from "@opstrace/utils";
+import { log, getBucketName, sleep, entries, die } from "@opstrace/utils";
 
 import { getAWSConfig } from "@opstrace/config";
 import { EnsureInfraExistsResponse } from "./types";
@@ -126,15 +121,12 @@ export function* ensureAWSInfraExists(): Generator<
   // State-mutating API calls below.
   yield call([new ServiceLinkedRoleRes(ccfg.cluster_name), "setup"]);
 
-  if (ccfg.custom_dns_name === undefined) {
-    yield call(ensureDNSExists, {
-      opstraceClusterName: ccfg.cluster_name,
-      dnsName: getDnsConfig(ccfg.cloud_provider).dnsName,
-      target: ccfg.cloud_provider,
-      dnsProvider: ccfg.cloud_provider
-    });
-  } else {
-    log.info("skip DNS setup, custom DNS name set");
+  if (!ccfg.custom_dns_name) {
+    die("custom_dns_name is not set");
+  }
+
+  if (!ccfg.custom_auth0_client_id || !ccfg.custom_auth0_domain) {
+    die("custom_dns_name and custom_auth0_domain are not set");
   }
 
   const lokiBucketName = getBucketName({

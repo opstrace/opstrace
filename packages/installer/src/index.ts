@@ -366,7 +366,7 @@ function* createClusterCore() {
   //   );
   // }
 
-  const opstraceInstanceDNSname = instanceDNSNameFromClusterConfig(ccfg);
+  const opstraceInstanceDNSname = ccfg.custom_dns_name;
   log.info(
     "expected DNS name for this Opstrace instance: %s",
     opstraceInstanceDNSname
@@ -382,7 +382,7 @@ function* createClusterCore() {
 
 export function instanceDNSNameFromClusterConfig(
   ccfg: LatestClusterConfigType
-) {
+): string {
   let opstraceInstanceDNSname = `${ccfg.cluster_name}.opstrace.io`;
   if (ccfg.custom_dns_name !== undefined) {
     opstraceInstanceDNSname = ccfg.custom_dns_name;
