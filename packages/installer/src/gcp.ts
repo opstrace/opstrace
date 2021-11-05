@@ -32,14 +32,9 @@ import {
   setCortexServiceAccount,
   setLokiServiceAccount
 } from "@opstrace/gcp";
-import { ensureDNSExists } from "@opstrace/dns";
-import {
-  getGKEClusterConfig,
-  getDnsConfig,
-  getCloudSQLConfig
-} from "@opstrace/config";
+import { getGKEClusterConfig, getCloudSQLConfig } from "@opstrace/config";
 import { GCPAuthOptions } from "@opstrace/gcp";
-import { getBucketName, log, SECOND } from "@opstrace/utils";
+import { die, getBucketName, log, SECOND } from "@opstrace/utils";
 import {
   getClusterConfig,
   //RenderedClusterConfigSchemaType
@@ -58,18 +53,12 @@ export function* ensureGCPInfraExists(
     throw Error("`gcp` property expected");
   }
 
-  if (ccfg.custom_dns_name === undefined) {
-    const dnsConf = getDnsConfig(ccfg.cloud_provider);
-    const dnsname = yield call(ensureDNSExists, {
-      opstraceClusterName: ccfg.cluster_name,
-      dnsName: dnsConf.dnsName,
-      target: ccfg.cloud_provider,
-      dnsProvider: ccfg.cloud_provider
-    });
+  if (!ccfg.custom_dns_name) {
+    die("custom_dns_name is not set");
+  }
 
-    log.info("DNS name has been set up: %s", dnsname);
-  } else {
-    log.info("skip DNS setup, custom DNS name set");
+  if (!ccfg.custom_auth0_client_id || !ccfg.custom_auth0_domain) {
+    die("custom_dns_name and custom_auth0_domain are not set");
   }
 
   const gkeConf = getGKEClusterConfig(ccfg, gcpAuthOptions);

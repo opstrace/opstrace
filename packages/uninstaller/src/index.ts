@@ -37,8 +37,6 @@ import { setAWSRegion, getEKSKubeconfig } from "@opstrace/aws";
 
 import { log, SECOND, retryUponAnyError, sleep } from "@opstrace/utils";
 
-import { DNSClient } from "@opstrace/dns";
-
 import {
   CONTROLLER_NAME,
   set as saveControllerConfig,
@@ -118,21 +116,6 @@ function* destroyClusterCore(): Generator<Effect, void, any> {
 
   if (kubeconfig) {
     yield call(triggerk8sTeardown, kubeconfig);
-  }
-
-  // First, try to determine if the  DNS name <instance_name>.opstrace.io
-  // exists for this Opstrace instance name (it may not when it was set up with
-  // a custom DNS name, which we are trying to find out here); and then attempt
-  // DNS service entry deletion (which may fail after login, when it turns out
-  // that <instance_name>.opstrace.io belongs to someone else, see #861 for
-  // trade-off discussion). Note(JP): for manually preventing false positives,
-  // maybe add a flag --skip-dns-service-login
-  if (yield call(doesOpstraceIoDNSNameExist, destroyConfig.clusterName)) {
-    const opstraceClient = yield call([DNSClient, DNSClient.getInstance]);
-    yield call(
-      [opstraceClient, opstraceClient.delete],
-      destroyConfig.clusterName
-    );
   }
 
   if (destroyConfig.cloudProvider === "gcp") {
