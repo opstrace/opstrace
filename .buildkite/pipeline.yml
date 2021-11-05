@@ -70,27 +70,27 @@ steps:
       - bash ci/check-if-docs-pr.sh || make ci-deploy-testremote-teardown
     artifact_paths:
       - "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-a/bk-artifacts/**/*"
-  - label: "🔨 test upgrades (GCP)"
-    key: "testupgrades-gcp"
-    depends_on:
-      - "unit-tests"
-    env:
-      # Fetch the latest Opstrace CLI release artifact and use that as the
-      # initial cluster version.
-      OPSTRACE_CLI_VERSION_FROM: https://go.otr.dev/cli-latest-release-linux
-      # Use the Opstrace CLI artifact built from the PR branch to upgrade the
-      # cluster.
-      OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
-      OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug"
-      OPSTRACE_BUILD_DIR: "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug"
-      OPSTRACE_ARTIFACT_DIR: "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug/bk-artifacts"
-      OPSTRACE_CLOUD_PROVIDER: "gcp"
-      GCLOUD_CLI_REGION: "us-west2"
-      GCLOUD_CLI_ZONE: "us-west2-a"
-    command:
-      - bash ci/check-if-docs-pr.sh || make ci-test-upgrade-run-sh
-    artifact_paths:
-      - "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug/bk-artifacts/**/*"
+  # - label: "🔨 test upgrades (GCP)"
+  #   key: "testupgrades-gcp"
+  #   depends_on:
+  #     - "unit-tests"
+  #   env:
+  #     # Fetch the latest Opstrace CLI release artifact and use that as the
+  #     # initial cluster version.
+  #     OPSTRACE_CLI_VERSION_FROM: https://go.otr.dev/cli-latest-release-linux
+  #     # Use the Opstrace CLI artifact built from the PR branch to upgrade the
+  #     # cluster.
+  #     OPSTRACE_CLI_VERSION_TO: ${OPSTRACE_PREBUILD_DIR}/build/bin/opstrace
+  #     OPSTRACE_CLUSTER_NAME: "${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug"
+  #     OPSTRACE_BUILD_DIR: "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug"
+  #     OPSTRACE_ARTIFACT_DIR: "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug/bk-artifacts"
+  #     OPSTRACE_CLOUD_PROVIDER: "gcp"
+  #     GCLOUD_CLI_REGION: "us-west2"
+  #     GCLOUD_CLI_ZONE: "us-west2-a"
+  #   command:
+  #     - bash ci/check-if-docs-pr.sh || make ci-test-upgrade-run-sh
+  #   artifact_paths:
+  #     - "/tmp/builddir-${BUILDKITE_PIPELINE_SLUG:0:7}-bk-${BUILDKITE_BUILD_NUMBER}-${BUILDKITE_COMMIT:0:3}-ug/bk-artifacts/**/*"
   - label: "🔨 cleanup /tmp"
     key: "cleanup-tmp"
     depends_on:
