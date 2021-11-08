@@ -19,7 +19,6 @@ import {
   ResourceCollection,
   ConfigMap,
   Deployment,
-  Ingress,
   Service,
   V1ServicemonitorResource,
   withPodAntiAffinityRequired
@@ -28,11 +27,11 @@ import { State } from "../../reducer";
 import { Tenant } from "@opstrace/tenants";
 import { KubeConfig, V1EnvVar } from "@kubernetes/client-node";
 import {
-  getApiDomain,
   getControllerConfig,
   getNodeCount,
   getTenantNamespace
 } from "../../helpers";
+import { addTracingApiIngress } from "./ingress";
 import { nodecountToReplicacount } from "./index";
 import {
   DockerImages,
@@ -274,55 +273,16 @@ export function TracingAPIResources(
     )
   );
 
-  // Not using addApiIngress: custom annotation to support gRPC
-  const apiHost = getApiDomain(api, tenant, state);
-  collection.add(
-    new Ingress(
-      {
-        apiVersion: "networking.k8s.io/v1beta1",
-        kind: "Ingress",
-        metadata: {
-          name: api,
-          namespace,
-          annotations: {
-            "kubernetes.io/ingress.class": "api",
-            "external-dns.alpha.kubernetes.io/ttl": "30",
-            // CUSTOM ANNOTATION for gRPC support
-            // see also https://kubernetes.github.io/ingress-nginx/examples/grpc/
-            "nginx.ingress.kubernetes.io/backend-protocol": "GRPC",
-            "nginx.ingress.kubernetes.io/client-body-buffer-size": "10m"
-          }
-        },
-        spec: {
-          tls: [
-            {
-              hosts: [apiHost],
-              secretName: "https-cert"
-            }
-          ],
-          rules: [
-            {
-              host: apiHost,
-              http: {
-                paths: [
-                  {
-                    backend: {
-                      serviceName: name,
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      servicePort: "otlp-grpc" as any
-                    },
-                    pathType: "ImplementationSpecific",
-                    path: "/"
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      kubeConfig
-    )
-  );
+  addTracingApiIngress({
+    serviceName: name,
+    issuer: controllerConfig.tlsCertificateIssuer,
+    namespace,
+    tenant,
+    api,
+    state,
+    collection,
+    kubeConfig
+  });
 
   collection.add(
     new V1ServicemonitorResource(

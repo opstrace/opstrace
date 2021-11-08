@@ -89,3 +89,79 @@ export const addApiIngress = ({
     )
   );
 };
+
+export const addTracingApiIngress = ({
+  serviceName,
+  namespace,
+  tenant,
+  api,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  issuer,
+  kubeConfig,
+  state,
+  collection
+}: {
+  serviceName: string;
+  namespace: string;
+  tenant: Tenant;
+  api: string;
+  issuer: string;
+  kubeConfig: KubeConfig;
+  state: State;
+  collection: ResourceCollection;
+}): void => {
+  const apiHost = getApiDomain(api, tenant, state);
+
+  // Tracing has some differences vs the regular API ingress:
+  // - Separate ingress object: custom annotation to support gRPC
+  // - Separate ingress class/controller: custom https port 4318 instead of 443
+  collection.add(
+    new Ingress(
+      {
+        apiVersion: "networking.k8s.io/v1beta1",
+        kind: "Ingress",
+        metadata: {
+          name: api,
+          namespace,
+          annotations: {
+            // Use the 'tracing' ingress controller which listens at port 4318
+            // See also nginxIngress.ts.
+            "kubernetes.io/ingress.class": "tracing",
+            "external-dns.alpha.kubernetes.io/ttl": "30",
+            // CUSTOM ANNOTATION for gRPC support,
+            // see also https://kubernetes.github.io/ingress-nginx/examples/grpc/
+            "nginx.ingress.kubernetes.io/backend-protocol": "GRPC",
+            "nginx.ingress.kubernetes.io/client-body-buffer-size": "10m"
+          }
+        },
+        spec: {
+          tls: [
+            {
+              hosts: [apiHost],
+              secretName: "https-cert"
+            }
+          ],
+          rules: [
+            {
+              host: apiHost,
+              http: {
+                paths: [
+                  {
+                    backend: {
+                      serviceName,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      servicePort: "otlp-grpc" as any
+                    },
+                    pathType: "ImplementationSpecific",
+                    path: "/"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      kubeConfig
+    )
+  );
+};
