@@ -97,7 +97,7 @@ export function TracingAPIResources(
       otlp: {
         protocols: {
           grpc: {
-            endpoint: ":4318",
+            endpoint: ":4317",
             auth: configReceiversAuth
           }
         }
@@ -190,7 +190,7 @@ export function TracingAPIResources(
                     {
                       name: "otlp-grpc",
                       protocol: "TCP",
-                      containerPort: 4318
+                      containerPort: 4317
                     },
                     {
                       name: "metrics",
@@ -251,7 +251,7 @@ export function TracingAPIResources(
           ports: [
             {
               name: "otlp-grpc",
-              port: 4318,
+              port: 4317,
               protocol: "TCP",
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               targetPort: "otlp-grpc" as any

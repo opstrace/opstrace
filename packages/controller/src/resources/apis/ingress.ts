@@ -114,7 +114,7 @@ export const addTracingApiIngress = ({
 
   // Tracing has some differences vs the regular API ingress:
   // - Separate ingress object: custom annotation to support gRPC
-  // - Separate ingress class/controller: custom https port 4318 instead of 443
+  // - Separate ingress class/controller: custom https port 4317 instead of 443
   collection.add(
     new Ingress(
       {
@@ -124,7 +124,7 @@ export const addTracingApiIngress = ({
           name: api,
           namespace,
           annotations: {
-            // Use the 'tracing' ingress controller which listens at port 4318
+            // Use the 'tracing' ingress controller which listens at port 4317
             // See also nginxIngress.ts.
             "kubernetes.io/ingress.class": "tracing",
             "external-dns.alpha.kubernetes.io/ttl": "30",

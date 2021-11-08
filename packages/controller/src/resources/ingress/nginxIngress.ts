@@ -59,14 +59,14 @@ export function NginxIngressResources(
       http: 80,
       https: 443
     },
-    // Tracing listens on the standard OTLP-gRPC port 4318
+    // Tracing listens on the standard OTLP-gRPC port 4317
     // We still use an Ingress for this rather than a LoadBalancer Service because the ingress
     // handles automatic SSL termination and renewal for us. We can switch to a LoadBalancer
     // Service later but will need to ensure that the pod automatically picks up new certs.
     tracing: {
       public: true,
       http: null,
-      https: 4318
+      https: 4317
     }
   };
 
