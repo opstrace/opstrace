@@ -15,11 +15,30 @@
 package authenticator
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
+
+// Tries BasicAuth before falling back to checking the Authorization header.
+func getUnverifiedHTTPAuthTokenOr401(w http.ResponseWriter, r *http.Request) (string, bool) {
+	_, authTokenUnverifiedFromBasicAuth, ok := r.BasicAuth()
+	if ok {
+		// It's not documented what `ok` being `true` really means so this
+		// next check is just for sanity
+		if len(authTokenUnverifiedFromBasicAuth) > 1 {
+			return authTokenUnverifiedFromBasicAuth, true
+		}
+	}
+
+	authTokenUnverified, err := getUnverifiedAuthHeader(r.Header)
+	if err != nil {
+		return "", exit401(w, err.Error())
+	}
+	return authTokenUnverified, true
+}
 
 // Expect HTTP request to have a header of the shape
 //
@@ -32,30 +51,21 @@ import (
 // header with the Basic scheme then extract the Basic auth credentials
 // (username, password), ignore the username, and treat the password as
 // <AUTHTOKEN>.
-func getAuthTokenUnverifiedFromHeaderOr401(w http.ResponseWriter, r *http.Request) (string, bool) {
-	_, authTokenUnverifiedFromBasicAuth, ok := r.BasicAuth()
-	if ok {
-		// It's not documented what `ok` being `true` really means so this
-		// next check is just for sanity
-		if len(authTokenUnverifiedFromBasicAuth) > 1 {
-			return authTokenUnverifiedFromBasicAuth, true
-		}
-	}
-
+func getUnverifiedAuthHeader(header map[string][]string) (string, error) {
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
-	av := r.Header.Get("Authorization")
-	if av == "" {
-		return "", exit401(w, "Authorization header missing")
+	av, ok := header["Authorization"]
+	if !ok || len(av) != 0 || av[0] == "" {
+		return "", errors.New("authorization header missing or invalid")
 	}
-	asplits := strings.Split(av, "Bearer ")
+	asplits := strings.Split(av[0], "Bearer ")
 
 	if len(asplits) != 2 {
-		return "", exit401(w, "Authorization header format invalid. Expecting `Authorization: Bearer <AUTHTOKEN>`")
+		return "", errors.New("authorization header format invalid. Expecting 'Authorization: Bearer <AUTHTOKEN>'")
 	}
 
 	authTokenUnverified := asplits[1]
-	return authTokenUnverified, true
+	return authTokenUnverified, nil
 }
 
 /* Write 401 response and return false.

@@ -1,0 +1,25 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: :4318
+
+exporters:
+  jaeger:
+    endpoint: localhost:14250
+    tls:
+      insecure: true
+  logging:
+    logLevel: debug
+
+extensions:
+  opstraceauth:
+    tenantName: foo
+
+service:
+  extensions: [opstraceauth]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [jaeger,logging]

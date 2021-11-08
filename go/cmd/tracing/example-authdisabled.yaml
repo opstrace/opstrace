@@ -1,0 +1,21 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: :4318
+
+exporters:
+  jaeger:
+    endpoint: localhost:14250
+    tls:
+      insecure: true
+  logging:
+    logLevel: debug
+
+service:
+  extensions: []
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [jaeger,logging]

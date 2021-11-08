@@ -169,7 +169,7 @@ in a bad format, or invalid in any way.
 Callers can rely on a 401 response to have been emitted when `ok` is `false`.
 */
 func AuthenticateAnyTenantByHeaderOr401(w http.ResponseWriter, r *http.Request) (string, bool) {
-	authTokenUnverified, ok := getAuthTokenUnverifiedFromHeaderOr401(w, r)
+	authTokenUnverified, ok := getUnverifiedHTTPAuthTokenOr401(w, r)
 	if !ok {
 		return "", false
 	}
@@ -197,7 +197,7 @@ bad format, or invalid in any way. Return `false`.
 Callers can rely on a 401 response to have been emitted when `ok` is `false`.
 */
 func AuthenticateSpecificTenantByHeaderOr401(w http.ResponseWriter, r *http.Request, expectedTenantName string) bool {
-	authTokenUnverified, ok := getAuthTokenUnverifiedFromHeaderOr401(w, r)
+	authTokenUnverified, ok := getUnverifiedHTTPAuthTokenOr401(w, r)
 	if !ok {
 		return false
 	}
@@ -212,4 +212,36 @@ func AuthenticateSpecificTenantByHeaderOr401(w http.ResponseWriter, r *http.Requ
 			tenantNameFromToken))
 	}
 	return true
+}
+
+/*
+Expect HTTP request to be authenticated. Require that the tenant (identified by
+its name) matches `expectedTenantName`.
+
+Require the tenant authentication token to be presented via the Bearer scheme
+in the `Authorization` header.
+
+Return `true` when authentication succeeded.
+
+Write a 401 response to `w` when the authentication proof is not present, in a
+bad format, or invalid in any way. Return `false`.
+
+Callers can rely on a 401 response to have been emitted when `ok` is `false`.
+*/
+func AuthenticateSpecificTenantByHeaderMap(headers map[string][]string, expectedTenantName string) error {
+	authTokenUnverified, geterr := getUnverifiedAuthHeader(headers)
+	if geterr != nil {
+		return geterr
+	}
+
+	tenantNameFromToken, veriferr := validateAuthTokenGetTenantName(authTokenUnverified)
+	if veriferr != nil {
+		return veriferr
+	}
+
+	if expectedTenantName != tenantNameFromToken {
+		return fmt.Errorf("bad authentication token: unexpected tenant: %s",
+			tenantNameFromToken)
+	}
+	return nil
 }
