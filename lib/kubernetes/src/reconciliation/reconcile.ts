@@ -78,6 +78,7 @@ import {
   hasAlertManagerChanged,
   hasPrometheusChanged,
   hasCertificateChanged,
+  hasRoleChanged,
   hasClusterRoleChanged,
   hasCustomResourceDefinitionChanged,
   hasCortexSpecChanged,
@@ -300,7 +301,7 @@ export function* reconcile(
     reconcileResourceType(
       desiredState.Roles,
       actualState.Roles,
-      null,
+      (desired, existing) => hasRoleChanged(desired, existing),
       null,
       createCollection,
       deleteCollection,

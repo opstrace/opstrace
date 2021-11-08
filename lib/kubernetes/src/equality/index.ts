@@ -23,19 +23,20 @@ import * as PrometheusRule from "./PrometheusRule";
 import * as Prometheus from "./Prometheus";
 import * as AlertManager from "./AlertManager";
 import {
-  DeploymentType,
-  StatefulSetType,
+  ClusterRoleType,
+  ConfigMapType,
+  CustomResourceDefinitionType,
   DaemonSetType,
+  DeploymentType,
+  IngressType,
+  RoleType,
   SecretType,
   ServiceType,
-  ConfigMapType,
-  ClusterRoleType,
-  CustomResourceDefinitionType,
+  StatefulSetType,
   V1ServicemonitorResourceType,
   V1PrometheusruleResourceType,
   V1PrometheusResourceType,
-  V1AlertmanagerResourceType,
-  IngressType
+  V1AlertmanagerResourceType
 } from "..";
 
 import { logDifference } from "./general";
@@ -325,13 +326,50 @@ export const hasAlertManagerChanged = (
   return false;
 };
 
+export const hasRoleChanged = (
+  desired: RoleType,
+  existing: RoleType
+): boolean => {
+  // The spec in the Role resource contains the metadata field.
+  // Kubernetes adds some fields to the metadata when a resource is created.
+  // Those defaults make this check fail. Check if any of the fields we are
+  // interested in have changed.
+  if (
+    !isDeepStrictEqual(desired.spec.rules, existing.spec.rules) ||
+    !isDeepStrictEqual(desired.spec.apiVersion, existing.spec.apiVersion) ||
+    !isDeepStrictEqual(desired.spec.kind, existing.spec.kind) ||
+    !isDeepStrictEqual(desired.spec.rules, existing.spec.rules) ||
+    !isDeepStrictEqual(
+      desired.spec.metadata?.annotations,
+      existing.spec.metadata?.annotations
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.metadata?.labels,
+      existing.spec.metadata?.labels
+    ) ||
+    !isDeepStrictEqual(
+      desired.spec.metadata?.name,
+      existing.spec.metadata?.name
+    )
+  ) {
+    logDifference(
+      `${desired.spec.metadata?.namespace}/${desired.spec.metadata?.name}`,
+      desired.spec,
+      existing.spec
+    );
+    return true;
+  }
+
+  return false;
+};
+
 export const hasClusterRoleChanged = (
   desired: ClusterRoleType,
   existing: ClusterRoleType
 ): boolean => {
   // The spec in the ClusterRole resource contains the metadata field.
   // Kubernetes adds some fields to the metadata when a resource is created.
-  // Those defaults make this check fail. Check if any of the fiels we are
+  // Those defaults make this check fail. Check if any of the fields we are
   // interested in have changed.
   if (
     !isDeepStrictEqual(
