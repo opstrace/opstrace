@@ -22,10 +22,10 @@ import { State } from "../../reducer";
 import { CortexAPIResources } from "./cortex";
 import { DDAPIResources } from "./dd";
 import { LokiAPIResources } from "./loki";
-
 // This does not serve an API, right?
 // Maybe we should move this out of resources/apis or rename resources/apis
 import { SystemLogAgentResources } from "./systemlogs";
+import { TracingAPIResources } from "./tracing";
 
 /* Translate node count into replica count*/
 export function nodecountToReplicacount(nodecount: number): number {
@@ -52,10 +52,11 @@ export function APIResources(
 
   // Per-tenant resources
   state.tenants.list.tenants.forEach(tenant => {
-    collection.add(SystemLogAgentResources(state, tenant, kubeConfig));
-    collection.add(LokiAPIResources(state, tenant, kubeConfig));
     collection.add(CortexAPIResources(state, tenant, kubeConfig));
     collection.add(DDAPIResources(state, tenant, kubeConfig));
+    collection.add(LokiAPIResources(state, tenant, kubeConfig));
+    collection.add(SystemLogAgentResources(state, tenant, kubeConfig));
+    collection.add(TracingAPIResources(state, tenant, kubeConfig));
   });
 
   return collection;

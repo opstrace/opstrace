@@ -37,5 +37,6 @@
   "graphqlEngine": "opstrace/graphql:0daad9e1a65e6a829874f5f51dec0982",
   "app": "opstrace/app:0daad9e1a65e6a829874f5f51dec0982",
   "redis": "bitnami/redis:6.0.9",
-  "postgresClient": "tmaier/postgresql-client@sha256:3702d3bff09b18e1d173cdf5887d6e4fea5feac0a521becf4a27559992e44ff3"
+  "postgresClient": "tmaier/postgresql-client@sha256:3702d3bff09b18e1d173cdf5887d6e4fea5feac0a521becf4a27559992e44ff3",
+  "tracingApi": "opstrace/tracing-api:8242bc61c90ec493a7f4bde198a1e3210e5f444b"
 }

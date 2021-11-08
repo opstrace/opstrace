@@ -3,6 +3,8 @@ receivers:
     protocols:
       grpc:
         endpoint: :4318
+        auth:
+          authenticator: opstraceauth
 
 exporters:
   jaeger:
