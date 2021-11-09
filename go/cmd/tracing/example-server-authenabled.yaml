@@ -1,8 +1,14 @@
+extensions:
+  opstraceauth:
+    tenantName: foo
+
 receivers:
   otlp:
     protocols:
       grpc:
         endpoint: :4317
+        auth:
+          authenticator: opstraceauth
 
 exporters:
   jaeger:
@@ -13,9 +19,9 @@ exporters:
     logLevel: debug
 
 service:
-  extensions: []
+  extensions: [opstraceauth]
   pipelines:
     traces:
       receivers: [otlp]
       processors: []
-      exporters: [jaeger,logging]
+      exporters: [jaeger, logging]

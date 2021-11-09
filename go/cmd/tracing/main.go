@@ -24,17 +24,26 @@ import (
 	// at "go.opentelemetry.io/collector/exporter/jaegerexporter",
 	// however it hasn't had changes as recently.
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
+	"go.opentelemetry.io/collector/extension/ballastextension"
+	"go.opentelemetry.io/collector/extension/zpagesextension"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
 	"go.opentelemetry.io/collector/service"
 )
 
 // Components returns the enabled components in our collector.
 // This omits components that we don't use, and adds the opstrace authentication validator.
+// Lots of other formats are available, for example Prom remote_write input/output are supported.
+// See also the opentelemetry-collector and opentelemetry-collector-contrib repos.
 func Components() (component.Factories, error) {
 	extensions, err := component.MakeExtensionFactoryMap(
 		opstraceauthextension.NewFactory(),
+		// Included in the build just in case, enable by editing the collector config yaml.
+		ballastextension.NewFactory(), // for performance optimization via memory pool
+		pprofextension.NewFactory(),   // for in-process debugging
+		zpagesextension.NewFactory(),  // for in-process debugging
 	)
 	if err != nil {
 		return component.Factories{}, err

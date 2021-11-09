@@ -55,7 +55,7 @@ func getUnverifiedAuthHeader(header map[string][]string) (string, error) {
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
 	av, ok := header["Authorization"]
-	if !ok || len(av) != 0 || av[0] == "" {
+	if !ok || len(av) == 0 || av[0] == "" {
 		return "", errors.New("authorization header missing or invalid")
 	}
 	asplits := strings.Split(av[0], "Bearer ")

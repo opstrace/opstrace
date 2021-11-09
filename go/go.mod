@@ -17,6 +17,7 @@ require (
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.38.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.38.0
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/prometheus v1.8.2-0.20190525122359-d20e84d0fb64
 	github.com/sirupsen/logrus v1.8.1

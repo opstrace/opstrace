@@ -1,0 +1,22 @@
+# This version requires the contrib collector, for the bearertokenauth extension
+# https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/bearertokenauthextension
+# https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+
+extensions:
+  bearertokenauth:
+    # Put the content of tenant-api-token-<tenant> here
+    token: "TOKEN_HERE"
+
+exporters:
+  otlp:
+    endpoint: tracing.TENANT_HERE.INSTANCE_HERE.opstrace.io:4317
+    auth:
+      authenticator: bearertokenauth
+
+service:
+  extensions: [bearertokenauth]
+  pipelines:
+    traces:
+      receivers: [] # TODO example?
+      processors: []
+      exporters: [otlp]
