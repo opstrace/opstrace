@@ -147,15 +147,26 @@ teardown() {
         fi
 
         if [ -f upsert-changeset.json ]; then
-            # Generate the changeset in json format to remove the NS entries from
-            # the root opstraceaws zone
+            # Generate the changeset in json format to remove the NS entries
+            # from the root opstraceaws zone
             sed 's/UPSERT/DELETE/; s/Add NS/Remove NS/' upsert-changeset.json > delete-changeset.json
-            # Apply the changeset to delete the instance NS records.
+            # Apply the changeset to delete the instance NS records from the
+            # root opstraceaws zone.
             aws route53 change-resource-record-sets --hosted-zone-id ${ROOT_OPSTRACEAWS_ZONEID} --change-batch file://delete-changeset.json
             # Extract the instance hosted zone id and remove the /hostedzone/
             # prefix.
             HOSTED_ZONE_ID=$(cat hosted-zone.json | jq -r '.HostedZone.Id' | cut -d'/' -f3)
-
+            # Use list-resource-record-sets to find all of the current DNS
+            # entries in the hosted zone and filter out the SOA and NS records.
+            # For each entry, generate a changeset in json format and save to a
+            # file with the change-record-set prefix
+            aws route53 list-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} | \
+                jq --compact-output "[.ResourceRecordSets[] | select(.Type != \"NS\" and .Type != \"SOA\") | {Action:\"DELETE\", ResourceRecordSet:.}] | _nwise(1) | {Changes: .}" | split - -l 1 change-recordset-
+            # Delete the DNS entries by applying the changeset in the files.
+            for CHANGESET_FILE in change-recordset-*; do
+                aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch file://${CHANGESET_FILE}
+            done
+            # Delete the new custom hosted zone.
             aws route53 delete-hosted-zone --id ${HOSTED_ZONE_ID}
         fi
     else
