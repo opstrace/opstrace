@@ -219,6 +219,14 @@ export function* upgradeControllerConfigMap(
     cfg.custom_auth0_client_id = ucc.custom_auth0_client_id;
     cfg.custom_auth0_domain = ucc.custom_auth0_domain;
   }
+  // custom_dns_name was introduced to be able to move instances to a new domain
+  // name
+  if (ucc.custom_dns_name) {
+    log.info(
+      `new controller config: set custom_dns_name to ${ucc.custom_dns_name}`
+    );
+    cfg.custom_dns_name = ucc.custom_dns_name;
+  }
 
   log.info(`upgraded controller config:\n${JSON.stringify(cfg, null, 2)}`);
 
