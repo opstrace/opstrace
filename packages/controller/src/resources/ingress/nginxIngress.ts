@@ -84,7 +84,7 @@ export function NginxIngressResources(
       };
     }
 
-    let servicePortSpecs = [
+    const servicePortSpecs = [
       {
         name: "https",
         port: endpointConfig.https,
@@ -92,13 +92,13 @@ export function NginxIngressResources(
         targetPort: "https" as any
       }
     ];
-    let daemonsetPortSpecs = [
+    const daemonsetPortSpecs = [
       {
         name: "https",
         containerPort: endpointConfig.https
       }
     ];
-    let nginxArgs = [
+    const nginxArgs = [
       "/nginx-ingress-controller",
       `--election-id=ingress-controller-leader-${endpointName}`,
       `--configmap=$(POD_NAMESPACE)/nginx-configuration-${endpointName}`,

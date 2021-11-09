@@ -56,8 +56,8 @@ export function TracingAPIResources(
   const name = `${api}-api`;
 
   let tracingApiEnv: V1EnvVar[];
-  let configReceiversAuth: object;
-  let configExtensions: object;
+  let configReceiversAuth: Record<string, unknown>;
+  let configExtensions: Record<string, unknown>;
   let configExtensionNames: string[];
   if (controllerConfig.disable_data_api_authentication) {
     tracingApiEnv = [];
