@@ -61,7 +61,9 @@ func (e *oidcExtension) Shutdown(context.Context) error {
 // Authenticate checks whether the given context contains valid auth data.
 // Successfully authenticated calls will always return a nil error and a context with the auth data.
 func (e *oidcExtension) Authenticate(ctx context.Context, headers map[string][]string) (context.Context, error) {
-	err := authenticator.AuthenticateSpecificTenantByHeaderMap(headers, e.cfg.TenantName)
+	// In HTTP the header is capitalized "Authorization"
+	// Meanwhile for gRPC the header is (apparently) lowercase "authorization"
+	err := authenticator.AuthenticateSpecificTenantByHeaderMap(headers, "authorization", e.cfg.TenantName)
 	if err != nil {
 		return ctx, err
 	}

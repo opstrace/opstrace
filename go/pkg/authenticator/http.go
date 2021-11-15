@@ -15,7 +15,7 @@
 package authenticator
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -33,7 +33,7 @@ func getUnverifiedHTTPAuthTokenOr401(w http.ResponseWriter, r *http.Request) (st
 		}
 	}
 
-	authTokenUnverified, err := getUnverifiedAuthHeader(r.Header)
+	authTokenUnverified, err := getUnverifiedAuthHeader(r.Header, "Authorization")
 	if err != nil {
 		return "", exit401(w, err.Error())
 	}
@@ -42,7 +42,7 @@ func getUnverifiedHTTPAuthTokenOr401(w http.ResponseWriter, r *http.Request) (st
 
 // Expect HTTP request to have a header of the shape
 //
-//      `Authorization: Bearer <AUTHTOKEN>`
+//      `<headerName>: Bearer <AUTHTOKEN>`
 //
 // set. Extract (and do _not_ verify) the authentication token. Emit error HTTP
 // response and return `false` upon any failure.
@@ -51,17 +51,17 @@ func getUnverifiedHTTPAuthTokenOr401(w http.ResponseWriter, r *http.Request) (st
 // header with the Basic scheme then extract the Basic auth credentials
 // (username, password), ignore the username, and treat the password as
 // <AUTHTOKEN>.
-func getUnverifiedAuthHeader(header map[string][]string) (string, error) {
+func getUnverifiedAuthHeader(headers map[string][]string, headerName string) (string, error) {
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
-	av, ok := header["Authorization"]
+	av, ok := headers[headerName]
 	if !ok || len(av) == 0 || av[0] == "" {
-		return "", errors.New("authorization header missing or invalid")
+		return "", fmt.Errorf("%s header missing or invalid", headerName)
 	}
 	asplits := strings.Split(av[0], "Bearer ")
 
 	if len(asplits) != 2 {
-		return "", errors.New("authorization header format invalid. Expecting 'Authorization: Bearer <AUTHTOKEN>'")
+		return "", fmt.Errorf("%s header format invalid. Expecting 'Bearer <AUTHTOKEN>'", headerName)
 	}
 
 	authTokenUnverified := asplits[1]

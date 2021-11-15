@@ -106,7 +106,7 @@ export function TracingAPIResources(
     exporters: {
       jaeger: {
         // TODO: could instead use jaeger-collector-headless?
-        endpoint: `http://jaeger-collector.${namespace}.svc.cluster.local:14250`,
+        endpoint: `jaeger-collector.${namespace}.svc.cluster.local:14250`,
         tls: {
           insecure: true
         }

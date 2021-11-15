@@ -215,21 +215,20 @@ func AuthenticateSpecificTenantByHeaderOr401(w http.ResponseWriter, r *http.Requ
 }
 
 /*
-Expect HTTP request to be authenticated. Require that the tenant (identified by
+Expect HTTP or GRPC request to be authenticated. Require that the tenant (identified by
 its name) matches `expectedTenantName`.
 
 Require the tenant authentication token to be presented via the Bearer scheme
-in the `Authorization` header.
+in the `Authorization` (or other name as specified by `headerName`) header.
 
-Return `true` when authentication succeeded.
-
-Write a 401 response to `w` when the authentication proof is not present, in a
-bad format, or invalid in any way. Return `false`.
-
-Callers can rely on a 401 response to have been emitted when `ok` is `false`.
+Return `nil` when authentication succeeded, or `error` otherwise.
 */
-func AuthenticateSpecificTenantByHeaderMap(headers map[string][]string, expectedTenantName string) error {
-	authTokenUnverified, geterr := getUnverifiedAuthHeader(headers)
+func AuthenticateSpecificTenantByHeaderMap(
+	headers map[string][]string,
+	headerName string,
+	expectedTenantName string,
+) error {
+	authTokenUnverified, geterr := getUnverifiedAuthHeader(headers, headerName)
 	if geterr != nil {
 		return geterr
 	}
