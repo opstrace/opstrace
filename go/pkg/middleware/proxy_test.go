@@ -180,7 +180,7 @@ func TestReverseProxyAuthenticator_noheader(t *testing.T) {
 	// Confirm that a helpful error message is in the body.
 	assert.Equal(
 		t,
-		"authorization header missing or invalid",
+		"Authorization header missing or invalid",
 		GetStrippedBody(resp),
 	)
 }
