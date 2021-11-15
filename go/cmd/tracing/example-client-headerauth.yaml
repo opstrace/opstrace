@@ -1,0 +1,17 @@
+# This version can run with the base/non-contrib collector
+# https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+
+exporters:
+  otlp:
+    endpoint: tracing.TENANT_HERE.INSTANCE_HERE.opstrace.io:4317
+    headers:
+      # Put the content of tenant-api-token-<tenant> here
+      Authorization: "Bearer TOKEN_HERE"
+
+service:
+  extensions: [bearertokenauth]
+  pipelines:
+    traces:
+      receivers: [] # TODO example?
+      processors: []
+      exporters: [otlp]

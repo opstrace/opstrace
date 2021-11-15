@@ -23,8 +23,8 @@ import (
 	"time"
 
 	json "github.com/json-iterator/go"
-	"github.com/prometheus/common/log"
 	"github.com/prometheus/prometheus/prompb"
+	log "github.com/sirupsen/logrus"
 )
 
 type ddPoint struct {

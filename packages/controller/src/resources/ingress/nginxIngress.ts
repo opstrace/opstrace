@@ -47,6 +47,7 @@ export function NginxIngressResources(
   const ports: {
     ui: { public: boolean; http: number; https: number };
     api: { public: boolean; http: number; https: number };
+    tracing: { public: boolean; http: number | null; https: number };
   } = {
     ui: {
       public: true,
@@ -57,12 +58,22 @@ export function NginxIngressResources(
       public: true,
       http: 80,
       https: 443
+    },
+    // Tracing listens on the standard OTLP-gRPC port 4317
+    // We still use an Ingress for this rather than a LoadBalancer Service because the ingress
+    // handles automatic SSL termination and renewal for us. We can switch to a LoadBalancer
+    // Service later but will need to ensure that the pod automatically picks up new certs.
+    tracing: {
+      public: true,
+      http: null,
+      https: 4317
     }
   };
 
   entries({
     ui: uiSourceIpFirewallRules,
-    api: apiSourceIpFirewallRules
+    api: apiSourceIpFirewallRules,
+    tracing: apiSourceIpFirewallRules
   }).forEach(([endpointName, sourceIps]) => {
     const endpointConfig = ports[endpointName];
 
@@ -71,6 +82,44 @@ export function NginxIngressResources(
       extraSVCLoadBalancerAnnotations = {
         "external-dns.alpha.kubernetes.io/hostname": `${domain}`
       };
+    }
+
+    const servicePortSpecs = [
+      {
+        name: "https",
+        port: endpointConfig.https,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        targetPort: "https" as any
+      }
+    ];
+    const daemonsetPortSpecs = [
+      {
+        name: "https",
+        containerPort: endpointConfig.https
+      }
+    ];
+    const nginxArgs = [
+      "/nginx-ingress-controller",
+      `--election-id=ingress-controller-leader-${endpointName}`,
+      `--configmap=$(POD_NAMESPACE)/nginx-configuration-${endpointName}`,
+      `--publish-service=$(POD_NAMESPACE)/nginx-ingress-controller-${endpointName}`,
+      "--annotations-prefix=nginx.ingress.kubernetes.io",
+      `--ingress-class=${endpointName}`,
+      `--https-port=${endpointConfig.https}`
+    ];
+    if (endpointConfig.http != null) {
+      // Enable HTTP port
+      servicePortSpecs.push({
+        name: "http",
+        port: endpointConfig.http,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        targetPort: "http" as any
+      });
+      daemonsetPortSpecs.push({
+        name: "http",
+        containerPort: endpointConfig.http
+      });
+      nginxArgs.push(`--http-port=${endpointConfig.http}`);
     }
 
     collection.add(
@@ -100,20 +149,7 @@ export function NginxIngressResources(
             selector: {
               "app.kubernetes.io/name": `ingress-nginx-${endpointName}`
             },
-            ports: [
-              {
-                name: "http",
-                port: endpointConfig.http,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                targetPort: "http" as any
-              },
-              {
-                name: "https",
-                port: endpointConfig.https,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                targetPort: "https" as any
-              }
-            ]
+            ports: servicePortSpecs
           }
         },
         kubeConfig
@@ -152,16 +188,7 @@ export function NginxIngressResources(
                   {
                     name: "nginx-ingress-controller",
                     image: DockerImages.nginxController,
-                    args: [
-                      "/nginx-ingress-controller",
-                      `--election-id=ingress-controller-leader-${endpointName}`,
-                      `--configmap=$(POD_NAMESPACE)/nginx-configuration-${endpointName}`,
-                      `--publish-service=$(POD_NAMESPACE)/nginx-ingress-controller-${endpointName}`,
-                      "--annotations-prefix=nginx.ingress.kubernetes.io",
-                      `--ingress-class=${endpointName}`,
-                      `--http-port=${endpointConfig.http}`,
-                      `--https-port=${endpointConfig.https}`
-                    ],
+                    args: nginxArgs,
                     securityContext: {
                       allowPrivilegeEscalation: true,
                       capabilities: {
@@ -188,16 +215,7 @@ export function NginxIngressResources(
                         }
                       }
                     ],
-                    ports: [
-                      {
-                        name: "http",
-                        containerPort: endpointConfig.http
-                      },
-                      {
-                        name: "https",
-                        containerPort: endpointConfig.https
-                      }
-                    ],
+                    ports: daemonsetPortSpecs,
                     resources: {
                       limits: {
                         cpu: "500m"
@@ -386,6 +404,7 @@ export function NginxIngressResources(
             resources: ["configmaps"],
             resourceNames: [
               "ingress-controller-leader-api-api",
+              "ingress-controller-leader-tracing-tracing",
               "ingress-controller-leader-ui-ui"
             ],
             verbs: ["get", "update"]

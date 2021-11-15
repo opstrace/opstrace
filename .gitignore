@@ -49,6 +49,7 @@ go/config-api
 go/cortex-api
 go/ddapi
 go/loki-api
+go/tracing-api
 
 tenant-api-token-*
 opstrace_cli_*.log

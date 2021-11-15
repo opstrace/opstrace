@@ -15,24 +15,15 @@
 package authenticator
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
 
-// Expect HTTP request to have a header of the shape
-//
-//      `Authorization: Bearer <AUTHTOKEN>`
-//
-// set. Extract (and do _not_ verify) the authentication token. Emit error HTTP
-// response and return `false` upon any failure.
-//
-// Added later, for legacy software: if this HTTP request has an Authorization
-// header with the Basic scheme then extract the Basic auth credentials
-// (username, password), ignore the username, and treat the password as
-// <AUTHTOKEN>.
-func getAuthTokenUnverifiedFromHeaderOr401(w http.ResponseWriter, r *http.Request) (string, bool) {
+// Tries BasicAuth before falling back to checking the Authorization header.
+func getUnverifiedHTTPAuthTokenOr401(w http.ResponseWriter, r *http.Request) (string, bool) {
 	_, authTokenUnverifiedFromBasicAuth, ok := r.BasicAuth()
 	if ok {
 		// It's not documented what `ok` being `true` really means so this
@@ -42,20 +33,39 @@ func getAuthTokenUnverifiedFromHeaderOr401(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
+	authTokenUnverified, err := getUnverifiedAuthHeader(r.Header, "Authorization")
+	if err != nil {
+		return "", exit401(w, err.Error())
+	}
+	return authTokenUnverified, true
+}
+
+// Expect HTTP request to have a header of the shape
+//
+//      `<headerName>: Bearer <AUTHTOKEN>`
+//
+// set. Extract (and do _not_ verify) the authentication token. Emit error HTTP
+// response and return `false` upon any failure.
+//
+// Added later, for legacy software: if this HTTP request has an Authorization
+// header with the Basic scheme then extract the Basic auth credentials
+// (username, password), ignore the username, and treat the password as
+// <AUTHTOKEN>.
+func getUnverifiedAuthHeader(headers map[string][]string, headerName string) (string, error) {
 	// Read first value set for Authorization header. (no support for multiple
 	// of these headers yet, maybe never.)
-	av := r.Header.Get("Authorization")
-	if av == "" {
-		return "", exit401(w, "Authorization header missing")
+	av, ok := headers[headerName]
+	if !ok || len(av) == 0 || av[0] == "" {
+		return "", fmt.Errorf("%s header missing or invalid", headerName)
 	}
-	asplits := strings.Split(av, "Bearer ")
+	asplits := strings.Split(av[0], "Bearer ")
 
 	if len(asplits) != 2 {
-		return "", exit401(w, "Authorization header format invalid. Expecting `Authorization: Bearer <AUTHTOKEN>`")
+		return "", fmt.Errorf("%s header format invalid. Expecting 'Bearer <AUTHTOKEN>'", headerName)
 	}
 
 	authTokenUnverified := asplits[1]
-	return authTokenUnverified, true
+	return authTokenUnverified, nil
 }
 
 /* Write 401 response and return false.

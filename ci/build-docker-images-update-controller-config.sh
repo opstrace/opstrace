@@ -24,6 +24,7 @@ CORTEX_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=cortex-ap
 LOKI_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=loki-api print-docker-image-name-tag)
 DD_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=ddapi print-docker-image-name-tag)
 CONFIG_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=config-api print-docker-image-name-tag)
+TRACING_API_PROXY_IMAGE=$(cd ${DIR}/../go/ && make -s DOCKER_IMAGE_NAME=tracing-api print-docker-image-name-tag)
 OPSTRACE_APP_IMAGE=$(cd ${DIR}/../packages/app/ && make -s DOCKER_IMAGE_NAME=app print-docker-image-name-tag)
 OPSTRACE_GRAPHQL_IMAGE=$(cd ${DIR}/../packages/app/ && make -s DOCKER_IMAGE_NAME=graphql print-docker-image-name-tag)
 
@@ -36,6 +37,7 @@ jqi '.cortexApiProxy = "'${CORTEX_API_PROXY_IMAGE}'"' "${DIJSON_PATH}"
 jqi '.lokiApiProxy = "'${LOKI_API_PROXY_IMAGE}'"' "${DIJSON_PATH}"
 jqi '.ddApi = "'${DD_API_PROXY_IMAGE}'"' "${DIJSON_PATH}"
 jqi '.configApi = "'${CONFIG_API_PROXY_IMAGE}'"' "${DIJSON_PATH}"
+jqi '.tracingApi = "'${TRACING_API_PROXY_IMAGE}'"' "${DIJSON_PATH}"
 jqi '.app = "'${OPSTRACE_APP_IMAGE}'"' "${DIJSON_PATH}"
 jqi '.graphqlEngine = "'${OPSTRACE_GRAPHQL_IMAGE}'"' "${DIJSON_PATH}"
 
@@ -49,7 +51,7 @@ git --no-pager diff "${DIJSON_PATH}"
 cp "${DIJSON_PATH}" "${WRITE_NEW_DOCKER_IMAGES_JSON_FILE_HERE_ABSPATH}"
 
 echo "Check if Go-based / API docker images exist"
-docker pull ${CORTEX_API_PROXY_IMAGE} && docker pull ${LOKI_API_PROXY_IMAGE} && docker pull ${DD_API_PROXY_IMAGE} && docker pull ${CONFIG_API_PROXY_IMAGE}
+docker pull ${CORTEX_API_PROXY_IMAGE} && docker pull ${LOKI_API_PROXY_IMAGE} && docker pull ${DD_API_PROXY_IMAGE} && docker pull ${CONFIG_API_PROXY_IMAGE} && docker pull ${TRACING_API_PROXY_IMAGE}
 if [ $? -ne 0 ];
 then
 	set -e
