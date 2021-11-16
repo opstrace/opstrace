@@ -57,10 +57,11 @@
     "**/**/dot-prop": "^5.1.1",
     "**/**/elliptic": "^6.5.3",
     "**/**/lodash": "^4.17.19",
-    "**/**/object-path": "^0.11.5",
+    "**/**/object-path": "^0.11.8",
     "**/**/serialize-javascript": "^3.1.0",
     "**/**/yargs-parser": "^20.2.6",
-    "**/app/hasura-cli/axios": "0.21.1"
+    "**/**/tar": "^6.1.11",
+    "**/app/hasura-cli/axios": "0.21.2"
   },
   "scripts": {
     "clean": "yarn wsrun -c clean && rimraf .cache tsconfig.tsbuildinfo",
