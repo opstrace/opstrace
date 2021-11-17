@@ -161,15 +161,6 @@ export function IngressResources(
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         servicePort: 3000 as any
                       }
-                    },
-                    {
-                      path: "/jaeger",
-                      pathType: "Prefix",
-                      backend: {
-                        serviceName: "jaeger",
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        servicePort: "query" as any
-                      }
                     }
                   ]
                 }

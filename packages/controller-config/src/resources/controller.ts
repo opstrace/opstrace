@@ -154,11 +154,6 @@ export function ControllerResources({
                       name: "RULER_ENDPOINT",
                       value:
                         "http://ruler.cortex.svc.cluster.local/api/v1/rules"
-                    },
-                    {
-                      name: "CLICKHOUSE_ENDPOINT",
-                      // TODO(nickbp): update to new clickhouse instance name once it's changed
-                      value: "http://basic.clickhouse.svc.cluster.local:8123/"
                     }
                   ],
                   readinessProbe: {

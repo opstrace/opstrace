@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Opstrace, Inc.
+ * Copyright 2020 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,12 @@ export * from "./certmanager/clusterIssuers";
 export * from "./certmanager/issuers";
 export * from "./certmanager/orders";
 
-export * from "./clickhouse-operator/clickhouseinstallations";
-export * from "./clickhouse-operator/clickhouseinstallationtemplates";
-export * from "./clickhouse-operator/clickhouseoperatorconfigurations";
-
-export * from "./cortex-operator/cortices";
-
-export * from "./jaeger-operator/jaegers";
-
 export * from "./kube-prometheus/alertmanager";
 export * from "./kube-prometheus/podmonitor";
-export * from "./kube-prometheus/probe";
 export * from "./kube-prometheus/prometheus";
 export * from "./kube-prometheus/prometheusrule";
 export * from "./kube-prometheus/servicemonitor";
+export * from "./kube-prometheus/probe";
 export * from "./kube-prometheus/thanosruler";
+
+export * from "./cortex-operator/cortices";

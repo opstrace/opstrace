@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Opstrace, Inc.
+ * Copyright 2020 Opstrace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-export * from "./clickhouseTenants";
-export * from "./cortexRules";
-export * from "./informers";
-export * from "./kubernetesReadinessProbe";
-export * from "./readiness";
 export * from "./reconciliation";
-export * from "./syncTenants";
+export * from "./informers";
 export * from "./wait";
+export * from "./readiness";
+export * from "./syncTenants";
+export * from "./cortexRules";
+export * from "./kubernetesReadinessProbe";
