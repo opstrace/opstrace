@@ -27,6 +27,9 @@ describe("ClusterConfigFileSchemaV2", () => {
     metric_retention_days: 7,
     data_api_authentication_disabled: true,
     data_api_authorized_ip_ranges: ["0.0.0.0/0"],
+    custom_dns_name: "foo",
+    custom_auth0_domain: "bar",
+    custom_auth0_client_id: "foobar",
     aws: {},
     gcp: {},
     ...overwrite

@@ -18,7 +18,12 @@ import fs from "fs";
 
 import yaml from "js-yaml";
 
-import { LatestClusterConfigFileSchemaType, upgradeToLatest } from "./schemas";
+import {
+  LatestClusterConfigFileSchema,
+  LatestClusterConfigFileSchemaType,
+  LatestAWSInfraConfigSchema,
+  LatestGCPInfraConfigSchema
+} from "./schemas";
 
 import {
   LatestAWSInfraConfigType,
@@ -67,28 +72,81 @@ export async function uccGetAndValidate(
     JSON.stringify(ucc, null, 2)
   );
 
-  let uccWithDefaults, infraConfigAWS, infraConfigGCP;
+  // https://github.com/jquense/yup/issues/829#issuecomment-606030995
+  // https://github.com/jquense/yup/issues/697
   try {
-    [uccWithDefaults, infraConfigAWS, infraConfigGCP] = upgradeToLatest(
-      ucc,
-      cloudProvider
-    );
+    LatestClusterConfigFileSchema.validateSync(ucc, { strict: true });
   } catch (err: any) {
-    die(`invalid config document: ${err.message}`);
+    die(`invalid instance config document: ${err.message}`);
   }
 
-  // Custom validation section (maybe this can be done in the yup way, but
-  // yup also has a bit of mental overhead)
-  // This counts the number of trueish values in the array
-  const v = [
-    uccWithDefaults.custom_auth0_client_id,
-    uccWithDefaults.custom_auth0_domain
-  ].filter(Boolean).length;
-  if (v === 1) {
-    die(
-      `invalid config document: 'custom_auth0_client_id' requires 'custom_auth0_domain' and vice versa`
+  // validate again, this time "only" to interpolate with defaults, see
+  // https://github.com/jquense/yup/pull/961
+  const uccWithDefaults: LatestClusterConfigFileSchemaType =
+    LatestClusterConfigFileSchema.validateSync(ucc);
+
+  // now process provider-specific part of config
+
+  let infraConfigAWS: LatestAWSInfraConfigType | undefined;
+  let infraConfigGCP: LatestGCPInfraConfigType | undefined;
+
+  if (cloudProvider === "aws") {
+    if (uccWithDefaults.aws !== undefined) {
+      log.debug("ucc.aws: %s", JSON.stringify(uccWithDefaults.aws, null, 2));
+    } else {
+      uccWithDefaults.aws = {};
+      log.info("infra config: `aws` not set: populate with defaults");
+    }
+
+    try {
+      LatestAWSInfraConfigSchema.validateSync(uccWithDefaults.aws, {
+        strict: true
+      });
+    } catch (err: any) {
+      die(`config error: invalid value for 'aws': ${err.message}`);
+    }
+
+    infraConfigAWS = LatestAWSInfraConfigSchema.validateSync(
+      uccWithDefaults.aws
     );
+
+    if (uccWithDefaults.gcp !== undefined) {
+      log.info("Provider is AWS. `gcp` is set in config. Ignore.");
+      delete uccWithDefaults.gcp;
+    }
+    // Forget user-given input, overwrite with validation/fill result.
+    //uccWithDefaults.aws = infraConfigAWS;
   }
+
+  if (cloudProvider === "gcp") {
+    if (uccWithDefaults.gcp !== undefined) {
+      log.debug("ucc.gcp: %s", JSON.stringify(uccWithDefaults.gcp, null, 2));
+    } else {
+      uccWithDefaults.gcp = {};
+      log.info("infra config: `gcp` not set: populate with defaults");
+    }
+
+    try {
+      LatestGCPInfraConfigSchema.validateSync(uccWithDefaults.gcp, {
+        strict: true
+      });
+    } catch (err: any) {
+      die(`cluster config error: invalid value for 'gcp': ${err.message}`);
+    }
+    infraConfigGCP = LatestGCPInfraConfigSchema.validateSync(
+      uccWithDefaults.gcp
+    );
+
+    if (uccWithDefaults.aws !== undefined) {
+      log.info("Provider is GCP. `aws` is set in config. Ignore.");
+      delete uccWithDefaults.aws;
+    }
+  }
+
+  // provider-specific infra config has been extracted, remove all traces
+  // from ucc
+  delete uccWithDefaults.aws;
+  delete uccWithDefaults.gcp;
 
   return [uccWithDefaults, infraConfigAWS, infraConfigGCP];
 }

@@ -74,6 +74,9 @@ tenants:
 - dev
 env_label: unit-tests
 node_count: 3
+custom_auth0_domain: foo
+custom_auth0_client_id: bar
+custom_dns_name: foobar
 `;
   fs.writeFileSync(filename, configFile);
 
@@ -92,7 +95,10 @@ node_count: 3
     log_retention_days: 7,
     metric_retention_days: 7,
     node_count: 3,
-    tenants: ["prod", "dev"]
+    tenants: ["prod", "dev"],
+    custom_auth0_client_id: "bar",
+    custom_auth0_domain: "foo",
+    custom_dns_name: "foobar"
   });
 
   expect(infraConfigAWS).toEqual({
@@ -104,42 +110,6 @@ node_count: 3
   expect(infraConfigGCP).toBeUndefined();
 });
 
-test("[GCP] should parse and validate latest cluster config file with defaults", async () => {
-  const filename = tmpDir + "/" + "gcp-test.yaml";
-  const configFile = `
-tenants:
-- prod
-- dev
-env_label: unit-tests
-node_count: 3
-`;
-  fs.writeFileSync(filename, configFile);
-
-  const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
-    LatestClusterConfigFileSchemaType,
-    LatestAWSInfraConfigType | undefined,
-    LatestGCPInfraConfigType | undefined
-  ] = await uccGetAndValidate(filename, "gcp");
-
-  expect(userClusterConfig).toEqual({
-    cert_issuer: "letsencrypt-prod",
-    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
-    data_api_authentication_disabled: false,
-    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
-    env_label: "unit-tests",
-    log_retention_days: 7,
-    metric_retention_days: 7,
-    node_count: 3,
-    tenants: ["prod", "dev"]
-  });
-  expect(infraConfigAWS).toBeUndefined();
-  expect(infraConfigGCP).toEqual({
-    machine_type: "n1-standard-4",
-    region: "us-west2",
-    zone_suffix: "a"
-  });
-});
-
 test("should fail to parse invalid config file", async () => {
   const filename = tmpDir + "/" + "invalid-test.yaml";
   const configFile = `
@@ -148,7 +118,7 @@ random string
   fs.writeFileSync(filename, configFile);
 
   const expectedErr = new Error(
-    'invalid config document: this must be a `object` type, but the final value was: `"random string"`.'
+    'invalid instance config document: this must be a `object` type, but the final value was: `"random string"`.'
   );
 
   try {
@@ -164,174 +134,4 @@ random string
   }
 
   expect(mockDie).toBeCalledTimes(2);
-});
-
-test("[AWS] should upgrade cluster config V1 to V2 with defaults", async () => {
-  const filename = tmpDir + "/" + "v1.yaml";
-  // from v1 to v2 log_retention and metric retention was renamed to
-  // log_retention_days and metric_retention_days
-  const configFile = `
-tenants:
-- prod
-- dev
-env_label: unit-tests
-node_count: 3
-log_retention: 14
-metric_retention: 30
-`;
-  fs.writeFileSync(filename, configFile);
-
-  const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
-    LatestClusterConfigFileSchemaType,
-    LatestAWSInfraConfigType | undefined,
-    LatestGCPInfraConfigType | undefined
-  ] = await uccGetAndValidate(filename, "aws");
-
-  expect(userClusterConfig).toEqual({
-    cert_issuer: "letsencrypt-staging",
-    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
-    data_api_authentication_disabled: false,
-    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
-    env_label: "unit-tests",
-    log_retention_days: 14,
-    metric_retention_days: 30,
-    node_count: 3,
-    tenants: ["prod", "dev"]
-  });
-
-  expect(infraConfigAWS).toEqual({
-    eks_admin_roles: [],
-    instance_type: "t3.xlarge",
-    region: "us-west-2",
-    zone_suffix: "a"
-  });
-  expect(infraConfigGCP).toBeUndefined();
-});
-
-test("[GCP] should upgrade cluster config V1 to V2 with defaults", async () => {
-  const filename = tmpDir + "/" + "gcp-test.yaml";
-  const configFile = `
-tenants:
-- prod
-- dev
-env_label: unit-tests
-node_count: 3
-log_retention: 14
-metric_retention: 30
-`;
-  fs.writeFileSync(filename, configFile);
-
-  const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
-    LatestClusterConfigFileSchemaType,
-    LatestAWSInfraConfigType | undefined,
-    LatestGCPInfraConfigType | undefined
-  ] = await uccGetAndValidate(filename, "gcp");
-
-  expect(userClusterConfig).toEqual({
-    cert_issuer: "letsencrypt-staging",
-    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
-    data_api_authentication_disabled: false,
-    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
-    env_label: "unit-tests",
-    log_retention_days: 14,
-    metric_retention_days: 30,
-    node_count: 3,
-    tenants: ["prod", "dev"]
-  });
-  expect(infraConfigAWS).toBeUndefined();
-  expect(infraConfigGCP).toEqual({
-    machine_type: "n1-standard-4",
-    region: "us-west2",
-    zone_suffix: "a"
-  });
-});
-
-test("[AWS] should upgrade cluster config V1 to V2 with custom settings", async () => {
-  const filename = tmpDir + "/" + "v1.yaml";
-  // from v1 to v2 log_retention and metric retention was renamed to
-  // log_retention_days and metric_retention_days
-  const configFile = `
-tenants:
-- prod
-- dev
-env_label: unit-tests
-node_count: 3
-log_retention: 14
-metric_retention: 30
-aws:
-  eks_admin_roles:
-  - SomeRoleName
-  instance_type: test-type
-  region: eu-west-3
-  zone_suffix: z
-`;
-  fs.writeFileSync(filename, configFile);
-
-  const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
-    LatestClusterConfigFileSchemaType,
-    LatestAWSInfraConfigType | undefined,
-    LatestGCPInfraConfigType | undefined
-  ] = await uccGetAndValidate(filename, "aws");
-
-  expect(userClusterConfig).toEqual({
-    cert_issuer: "letsencrypt-staging",
-    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
-    data_api_authentication_disabled: false,
-    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
-    env_label: "unit-tests",
-    log_retention_days: 14,
-    metric_retention_days: 30,
-    node_count: 3,
-    tenants: ["prod", "dev"]
-  });
-
-  expect(infraConfigAWS).toEqual({
-    eks_admin_roles: ["SomeRoleName"],
-    instance_type: "test-type",
-    region: "eu-west-3",
-    zone_suffix: "z"
-  });
-  expect(infraConfigGCP).toBeUndefined();
-});
-
-test("[GCP] should upgrade from cluster config V1 to V2 with custom settings", async () => {
-  const filename = tmpDir + "/" + "gcp-test.yaml";
-  const configFile = `
-tenants:
-- prod
-- dev
-env_label: unit-tests
-node_count: 3
-log_retention: 14
-metric_retention: 30
-gcp:
-  machine_type: test-type
-  region: test-region
-  zone_suffix: test-suffix
-`;
-  fs.writeFileSync(filename, configFile);
-
-  const [userClusterConfig, infraConfigAWS, infraConfigGCP]: [
-    LatestClusterConfigFileSchemaType,
-    LatestAWSInfraConfigType | undefined,
-    LatestGCPInfraConfigType | undefined
-  ] = await uccGetAndValidate(filename, "gcp");
-
-  expect(userClusterConfig).toEqual({
-    cert_issuer: "letsencrypt-staging",
-    controller_image: `opstrace/controller:${BUILD_INFO.VERSION_STRING}`,
-    data_api_authentication_disabled: false,
-    data_api_authorized_ip_ranges: ["0.0.0.0/0"],
-    env_label: "unit-tests",
-    log_retention_days: 14,
-    metric_retention_days: 30,
-    node_count: 3,
-    tenants: ["prod", "dev"]
-  });
-  expect(infraConfigAWS).toBeUndefined();
-  expect(infraConfigGCP).toEqual({
-    machine_type: "test-type",
-    region: "test-region",
-    zone_suffix: "test-suffix"
-  });
 });
