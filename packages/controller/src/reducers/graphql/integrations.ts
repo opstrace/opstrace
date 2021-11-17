@@ -16,7 +16,7 @@
 
 import { createReducer, createAsyncAction, ActionType } from "typesafe-actions";
 import { log } from "@opstrace/utils";
-import { ResourceCache } from "../util";
+import { ResourceCache } from "./util";
 
 import dbClient from "../../dbClient";
 
@@ -34,16 +34,17 @@ export interface Integration {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
 }
+export type Integrations = Integration[];
 
 export const actions = {
   fetch: createAsyncAction(
     "FETCH_GRAPHQL_INTEGRATIONS_REQUEST",
     "FETCH_GRAPHQL_INTEGRATIONS_SUCCESS",
     "FETCH_GRAPHQL_INTEGRATIONS_FAILURE"
-  )<Record<string, unknown>, { resources: Integration[] }, { error: Error }>()
+  )<Record<string, unknown>, { resources: Integrations }, { error: Error }>()
 };
 export type IntegrationActions = ActionType<typeof actions>;
-export type IntegrationState = ResourceCache<Integration[]>;
+export type IntegrationState = ResourceCache<Integration>;
 
 const initialState: IntegrationState = {
   loaded: false,

@@ -86,11 +86,7 @@ import {
   V1IssuerResource,
   V1OrderResource,
   isV1Alpha1CortexResource,
-  V1Alpha1CortexResource,
-  isV1ClickhouseinstallationResource,
-  V1ClickhouseinstallationResource,
-  isV1JaegerResource,
-  V1JaegerResource
+  V1Alpha1CortexResource
 } from "../custom-resources";
 
 type ReduceCollectionType = {
@@ -124,8 +120,6 @@ type ReduceCollectionType = {
   Issuers: V1IssuerResource[];
   Orders: V1OrderResource[];
   Cortices: V1Alpha1CortexResource[];
-  Clickhouses: V1ClickhouseinstallationResource[];
-  Jaegers: V1JaegerResource[];
 };
 
 export const reduceCollection = (
@@ -160,9 +154,7 @@ export const reduceCollection = (
   ClusterIssuers: resources.filter(isV1ClusterissuerResource),
   Issuers: resources.filter(isV1IssuerResource),
   Orders: resources.filter(isV1OrderResource),
-  Cortices: resources.filter(isV1Alpha1CortexResource),
-  Clickhouses: resources.filter(isV1ClickhouseinstallationResource),
-  Jaegers: resources.filter(isV1JaegerResource)
+  Cortices: resources.filter(isV1Alpha1CortexResource)
 });
 
 type ResourceMap = ReturnType<typeof reduceCollection>;

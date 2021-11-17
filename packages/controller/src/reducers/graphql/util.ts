@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export { default as clickhouseinstallationtemplates } from "./clickhouse.altinity.com_clickhouseinstallationtemplates.json";
+export interface ResourceCache<T> {
+  loaded: boolean;
+  error: Error | null;
+  resources: T[];
+}

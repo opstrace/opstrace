@@ -37,13 +37,12 @@ setLogger(
 );
 
 import {
-  blockUntilCacheHydrated,
-  clickhouseTenantsReconciler,
-  cortexSystemRulesReconciler,
   reconciliationLoop,
   runInformers,
+  blockUntilCacheHydrated,
   runReporter,
-  syncTenants
+  syncTenants,
+  cortexSystemRulesReconciler
 } from "./tasks";
 import { rootReducer } from "./reducer";
 import { fetchGKEVersion } from "./tasks/gke";
@@ -99,7 +98,7 @@ function* core() {
   log.info(`fetching tenants`);
   yield call(fetchTenants, kubeConfig);
 
-  log.info(`starting informers`);
+  log.info(`starting kubernetes and graphql informers`);
   yield fork(runInformers, kubeConfig);
 
   yield call(blockUntilCacheHydrated);
@@ -113,9 +112,6 @@ function* core() {
 
   log.info(`starting system rules reconciler`);
   yield fork(cortexSystemRulesReconciler);
-
-  log.info(`starting clickhouse tenants reconciler`);
-  yield fork(clickhouseTenantsReconciler);
 
   yield fork(fetchGKEVersion, kubeConfig);
 
