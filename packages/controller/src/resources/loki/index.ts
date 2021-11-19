@@ -35,10 +35,10 @@ import {
   select,
   getBucketName,
   min,
-  roundDown
+  roundDown,
+  deepMerge
 } from "@opstrace/utils";
 import {
-  deepMerge,
   getControllerConfig,
   getControllerLokiConfigOverrides,
   getNodeCount

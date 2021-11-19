@@ -23,10 +23,11 @@ import {
   min,
   roundDown,
   roundDownToOdd,
-  select
+  select,
+  deepMerge
 } from "@opstrace/utils";
 import { State } from "../../reducer";
-import { getNodeCount, getControllerConfig, deepMerge } from "../../helpers";
+import { getNodeCount, getControllerConfig } from "../../helpers";
 import { KubeConfig } from "@kubernetes/client-node";
 import {
   Deployment,
