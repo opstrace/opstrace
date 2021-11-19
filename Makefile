@@ -801,6 +801,8 @@ ts-unit-tests:
 	export OPSTRACE_BUILDINFO_PATH="$(shell pwd)/buildinfo.json" && cd lib/kubernetes && CI=true yarn test
 	@echo "--- run cli unit tests"
 	export OPSTRACE_BUILDINFO_PATH="$(shell pwd)/buildinfo.json" &&  cd packages/cli && CI=true yarn test
+	@echo "--- run controller unit tests"
+	export OPSTRACE_BUILDINFO_PATH="$(shell pwd)/buildinfo.json" &&  cd packages/controller && CI=true yarn test
 
 .PHONY: preamble
 preamble:

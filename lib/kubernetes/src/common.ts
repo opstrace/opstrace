@@ -22,7 +22,7 @@
 
 import localVarRequest from "request";
 import { KubeConfig, V1Status } from "@kubernetes/client-node";
-import { BUILD_INFO } from "@opstrace/utils";
+import { BUILD_INFO, deepMerge } from "@opstrace/utils";
 
 export const OPSTRACE_MANAGED_KEY = "opstrace";
 export const OPSTRACE_MANAGED_VERSION_KEY = "opstrace/version";
@@ -157,6 +157,9 @@ export class K8sResource implements Resource {
   get kind(): string {
     return this.resource.kind;
   }
+  get apiVersion(): string {
+    return this.resource.apiVersion;
+  }
   get labels(): { [key: string]: string } {
     if (this.resource.metadata?.labels) {
       return this.resource.metadata.labels;
@@ -224,6 +227,15 @@ export class K8sResource implements Resource {
   }
   isTerminating(): boolean {
     return this.resource.metadata.deletionTimestamp !== undefined;
+  }
+  // Run deepMerge to override any property of this resource with the given
+  // object o.
+  override(o: any): void {
+    this.resource = deepMerge(this.resource, o);
+  }
+  // Getter for this resource;
+  get(): any {
+    return this.resource;
   }
 }
 

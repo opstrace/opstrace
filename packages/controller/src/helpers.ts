@@ -20,6 +20,7 @@ import { State } from "./reducer";
 import { LatestControllerConfigType } from "@opstrace/controller-config";
 import { Tenant, Tenants } from "@opstrace/tenants";
 import { log } from "@opstrace/utils";
+import { ConfigMap } from "@opstrace/kubernetes";
 
 export { generateSecretValue } from "@opstrace/controller-config";
 
@@ -50,6 +51,50 @@ export const getControllerConfig = (
   }
   return state.config.config;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ControllerOverrides = { [key: string]: any };
+
+// Parse the ConfigMap with the opstrace controller overrides and return it as a
+// map of string to json object values. The key is expected to be in the format
+// `kind__namespace__name' (double underscores) since a valid config key must
+// consist of alphanumeric characters, '-', '_' or '.' (e.g. 'key.name',  or
+// 'KEY_NAME', or 'key-name', regex used for validation is '[-._a-zA-Z0-9]+':
+// - where kind is the Kubernetes Kind of the resource where the override is
+//   applied
+// - where namespace is the Kubernetes namespace name where the resource where
+//   the override is applied is stored
+// - where name is the name of the resource where the override is applied
+//
+// Example of an entry to override the number of replicas of the Loki
+// distributors deployment:
+//
+// "Deployment__loki__distributors": | spec: replicas: 2
+//
+// Example of an entry to override the number of replicas of the Cortex
+// queriers:
+//
+// "Cortex__cortex__opstrace-cortex": | spec: querier_spec: replicas: 1
+//
+export function getControllerOverrides(cm: ConfigMap): ControllerOverrides {
+  const o: ControllerOverrides = {};
+
+  if (!cm.spec.data) {
+    return o;
+  }
+
+  for (const key of Object.keys(cm.spec.data)) {
+    try {
+      o[key] = yaml.load(cm.spec.data[key]);
+    } catch (e: unknown) {
+      log.warning(
+        `failed to parse controller config override key=${key} value=${cm.spec.data[key]}: ${e}`
+      );
+    }
+  }
+
+  return o;
+}
 
 // getControllerConfigOverrides checks if there's a ConfigMap named
 // "opstrace-controller-config-overrides in the default namespace. If it exists

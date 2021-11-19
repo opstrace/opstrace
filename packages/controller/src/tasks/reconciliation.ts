@@ -23,6 +23,7 @@ import {
   SelectEffect
 } from "redux-saga/effects";
 import { State } from "../reducer";
+import { override } from "./override";
 
 import { SECOND, entries } from "@opstrace/utils";
 import {
@@ -104,6 +105,9 @@ export function* reconciliationLoop(
     desired.add(
       CortexOperatorResources(state, kubeConfig, "cortex-operator-system")
     );
+
+    // Check if we need to set any overrides.
+    yield call(override, state, desired);
 
     yield call(reconcile, desired, reduceCollection(actualCollection), false);
 
