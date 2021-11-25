@@ -21,7 +21,7 @@ import { State } from "../reducer";
 import { ControllerOverrides, getControllerOverrides } from "../helpers";
 import { log } from "@opstrace/utils";
 
-export function override(state: State, desired: ResourceCollection) {
+export function override(state: State, desired: ResourceCollection): void {
   const cm: ConfigMap | undefined =
     state.kubernetes.cluster.ConfigMaps.resources.find(
       cm =>
