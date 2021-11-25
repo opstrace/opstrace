@@ -193,7 +193,7 @@ const rootReducers = {
 const rootReducer = combineReducers(rootReducers);
 type State = ReturnType<typeof rootReducer>;
 
-function* runInformers(
+export function* runInformers(
   kubeConfig: KubeConfig
 ): Generator<
   ChannelTakeEffect<void | unknown> | PutEffect | CancelledEffect,
@@ -232,7 +232,7 @@ function* runInformers(
   }
 }
 
-function* blockUntilCacheHydrated(): Generator<
+export function* blockUntilCacheHydrated(): Generator<
   SelectEffect | CallEffect,
   void,
   CombinedState<State>
@@ -251,7 +251,7 @@ function* blockUntilCacheHydrated(): Generator<
 }
 
 //eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-function* waitForReady(config: {
+export function* waitForReady(config: {
   originalDaemonSets: DaemonSet[];
   originalDeployments: Deployment[];
   originalStatefulSets: StatefulSet[];
