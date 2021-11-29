@@ -247,7 +247,7 @@ In that case, `controller_image` must still be set but is ignored.
 
 Change this (compared to the default value) only when you know what you're doing :-).
 
-### `log_retention_days` and `metrics_retention_days`
+### `log_retention_days` and `metric_retention_days`
 
 Defines data retention in terms of the number of desired days (for each data type).
 
@@ -257,7 +257,7 @@ Defines data retention in terms of the number of desired days (for each data typ
 
 ```yaml
 log_retention_days: 90
-metrics_retention_days: 365
+metric_retention_days: 365
 ```
 
 Notes:
