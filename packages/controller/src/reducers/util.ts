@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-export * from "./clickhouseTenants";
-export * from "./cortexRules";
-export * from "./informers";
-export * from "./kubernetesReadinessProbe";
-export * from "./readiness";
-export * from "./reconciliation";
-export * from "./syncTenants";
-export * from "./wait";
+export interface ResourceCache<T> {
+  loaded: boolean;
+  error: Error | null;
+  resources: T;
+}

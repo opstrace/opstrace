@@ -14,11 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./clickhouseTenants";
-export * from "./cortexRules";
-export * from "./informers";
-export * from "./kubernetesReadinessProbe";
-export * from "./readiness";
-export * from "./reconciliation";
-export * from "./syncTenants";
-export * from "./wait";
+export { default as clickhouseinstallations } from "./clickhouse.altinity.com_clickhouseinstallations.json";

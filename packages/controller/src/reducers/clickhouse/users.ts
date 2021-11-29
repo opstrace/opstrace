@@ -18,53 +18,38 @@ import { createReducer, createAsyncAction, ActionType } from "typesafe-actions";
 import { log } from "@opstrace/utils";
 import { ResourceCache } from "../util";
 
-import dbClient from "../../dbClient";
-
-export interface Integration {
-  // UUID
-  id: string;
-  // Arbitrary string provided by the user
-  name: string;
-  // Derived from the name, more user-friendly than the id
-  key: string;
-  kind: string;
-  tenant_id: string;
-  // This data is defined on a per-integration basis, see *IntegrationData types.
-  // Some integration kinds do not involve the controller at all, so we allow this to be any.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
-}
+import { dbClient } from "../../clickhouseClient";
 
 export const actions = {
   fetch: createAsyncAction(
-    "FETCH_GRAPHQL_INTEGRATIONS_REQUEST",
-    "FETCH_GRAPHQL_INTEGRATIONS_SUCCESS",
-    "FETCH_GRAPHQL_INTEGRATIONS_FAILURE"
-  )<Record<string, unknown>, { resources: Integration[] }, { error: Error }>()
+    "FETCH_CLICKHOUSE_USERS_REQUEST",
+    "FETCH_CLICKHOUSE_USERS_SUCCESS",
+    "FETCH_CLICKHOUSE_USERS_FAILURE"
+  )<Record<string, unknown>, { resources: string[] }, { error: Error }>()
 };
-export type IntegrationActions = ActionType<typeof actions>;
-export type IntegrationState = ResourceCache<Integration[]>;
+export type ClickHouseDBActions = ActionType<typeof actions>;
+export type ClickHouseUserState = ResourceCache<string[]>;
 
-const initialState: IntegrationState = {
+const initialState: ClickHouseUserState = {
   loaded: false,
   error: null,
   resources: []
 };
 
-export const reducer = createReducer<IntegrationState, IntegrationActions>(
+export const reducer = createReducer<ClickHouseUserState, ClickHouseDBActions>(
   initialState
 )
   .handleAction(
     actions.fetch.request,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (state, _): IntegrationState => ({
+    (state, _): ClickHouseUserState => ({
       ...state,
       loaded: false
     })
   )
   .handleAction(
     actions.fetch.success,
-    (state, action): IntegrationState => ({
+    (state, action): ClickHouseUserState => ({
       ...state,
       ...action.payload,
       error: null,
@@ -73,17 +58,20 @@ export const reducer = createReducer<IntegrationState, IntegrationActions>(
   )
   .handleAction(
     actions.fetch.failure,
-    (state, action): IntegrationState => ({
+    (state, action): ClickHouseUserState => ({
       ...state,
       ...action.payload,
       loaded: false
     })
   );
 
+// Response type for "SHOW USERS" command
+interface UserEntry {
+  name: string;
+}
+
 export function startInformer(channel: (input: unknown) => void): () => void {
   let cancelled = false;
-  // We use a polling loop rather than a GraphQL subscription.
-  // In CI runs, subscriptions were occasionally failing to get any data, primarily on GCP clusters.
   //@ts-ignore: TS7023 'poll' implicitly has return type 'any'
   const poll = async () => {
     if (cancelled) {
@@ -91,24 +79,23 @@ export function startInformer(channel: (input: unknown) => void): () => void {
     }
     if (!dbClient) {
       log.warning(
-        "skipping integration sync due to missing env vars GRAPHQL_ENDPOINT & HASURA_GRAPHQL_ADMIN_SECRET"
+        "skipping ClickHouse user informer due to missing env var CLICKHOUSE_ENDPOINT"
       );
       return;
     }
     try {
-      const res = await dbClient.GetIntegrationsDump();
-      if (res.data?.integration) {
-        channel(
-          actions.fetch.success({
-            resources: res.data?.integration
-          })
-        );
-      }
+      const users = await dbClient.query("SHOW USERS").toPromise();
+      const userNames = (users as UserEntry[]).map(user => user.name);
+      log.debug("ClickHouse users: %s", userNames);
+      channel(actions.fetch.success({ resources: userNames }));
       // refresh in 3s
       return setTimeout(poll, 3000);
     } catch (error: any) {
       channel(actions.fetch.failure({ error }));
-      log.warning("polling integrations failed (retrying in 15s): %s", error);
+      log.warning(
+        "polling ClickHouse users failed (retrying in 15s): %s",
+        error
+      );
       // seems like a good idea to wait a bit longer in the event of failure
       return setTimeout(poll, 15000);
     }

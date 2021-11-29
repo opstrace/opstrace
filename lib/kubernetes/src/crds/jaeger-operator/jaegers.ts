@@ -14,11 +14,4 @@
  * limitations under the License.
  */
 
-export * from "./clickhouseTenants";
-export * from "./cortexRules";
-export * from "./informers";
-export * from "./kubernetesReadinessProbe";
-export * from "./readiness";
-export * from "./reconciliation";
-export * from "./syncTenants";
-export * from "./wait";
+export { default as jaegers } from "./jaegertracing.io_jaegers.json";
