@@ -24,8 +24,6 @@ Open a terminal and verify you have the following:
   * While GCP is also fully supported, we will focus on AWS in this quick start.
 * For sending dummy data to Opstrace, you'll need [Docker](https://docs.docker.com/install) and [Docker Compose](https://docs.docker.com/compose/install)
 
-You will also need an Auth0 account to wire up Google or GitHub log in (sign up for free here).
-
 ```bash
 aws configure list
 docker --version
