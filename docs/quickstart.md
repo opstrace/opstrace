@@ -24,7 +24,7 @@ Open a terminal and verify you have the following:
   * While GCP is also fully supported, we will focus on AWS in this quick start.
 * For sending dummy data to Opstrace, you'll need [Docker](https://docs.docker.com/install) and [Docker Compose](https://docs.docker.com/compose/install)
 
-Note: the code blocks are all copy-and-pastable.
+You will also need an Auth0 account to wire up Google or GitHub log in (sign up for free here).
 
 ```bash
 aws configure list
@@ -67,7 +67,15 @@ curl -L https://go.opstrace.com/cli-latest-release-linux | tar xjf -
 <!-- /tabs -->
 
 If you see a proper help message, you're ready to go.
-So let's get started.
+
+### Authentication
+
+Opstrace is secure by default—it requires authentication (provided through Auth0) to work.
+It's easy to get started—follow [this guide to set up Auth0](https://github.com/opstrace/opstrace/wiki/User-guide:-custom-Auth0-integration).
+
+### DNS
+
+Next, create DNS records to point to your cluster by [following these instructions](https://github.com/opstrace/opstrace/wiki/User-guide:-Upgrade-Opstrace-with-a-custom-DNS-domain-and-custom-Auth0-integration).
 
 ## Step 1: Install Opstrace
 
@@ -81,7 +89,7 @@ export OPSTRACE_NAME=<choose_a_name>
 
 <!--/export-to-input-->
 
-The name will globally identify you in our domain as `$OPSTRACE_NAME.opstrace.io`, which we provide for you by default as a convenience.
+The name will globally identify you in our domain as `$OPSTRACE_NAME.example.com`, which we provide for you by default as a convenience.
 
 Then, you'll create a simple [configuration file](./references/configuration.md) with the most basic options.
 Note that we define two tenants named `staging` and `prod` that are separate from the `system` tenant that hosts internal metrics about Opstrace.
@@ -96,6 +104,10 @@ tenants:
   - prod
 env_label: quickstart
 cert_issuer: letsencrypt-prod
+
+custom_dns_name: instance.example.com
+custom_auth0_client_id: AUTH0_KEY_ID_HERE
+custom_auth0_domain: AUTH0_DOMAIN_HERE
 EOF
 ```
 
@@ -119,7 +131,7 @@ When everything is done, you'll see the following log lines:
 
 ```text
 info: create operation finished: $OPSTRACE_NAME (aws)
-info: Log in here: https://$OPSTRACE_NAME.opstrace.io
+info: Log in here: https://$OPSTRACE_NAME.example.com
 ```
 
 In case of any **installation errors** search our [GitHub issues](https://github.com/opstrace/opstrace/issues).
@@ -145,7 +157,7 @@ Create a file with the Prometheus configuration to send data to Opstrace:
 ```bash
 cat <<EOF > prometheus.yml
   remote_write:
-    - url: "https://cortex.staging.$OPSTRACE_NAME.opstrace.io/api/v1/push"
+    - url: "https://cortex.staging.$OPSTRACE_NAME.example.com/api/v1/push"
       bearer_token_file: /var/run/tenant/token
       queue_config:
         batch_send_deadline: 5s
@@ -191,7 +203,7 @@ cat <<EOF > fluentd.conf
 
 <match *>
   @type loki
-  url https://loki.staging.$OPSTRACE_NAME.opstrace.io
+  url https://loki.staging.$OPSTRACE_NAME.example.com
   flush_interval 5s
   bearer_token_file /var/run/tenant/token
   extra_labels { "label": "quickstart" }
@@ -272,7 +284,7 @@ You now have dummy (random) metrics and associated logs (simulating a real app y
 Let's view the data in our `staging` tenant using the Grafana "explore" view:
 
 <!-- markdown-link-check-disable -->
-<https://staging.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
+<https://staging.$OPSTRACE_NAME.example.com/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
 <!-- markdown-link-check-enable -->
 
 1. To query these metrics, first select the "metrics" data source in the upper left-hand corner.
@@ -293,17 +305,18 @@ As you can see, the data we sent to Opstrace in step 3 is indeed ingested as exp
 You can also see that the `prod` tenant is empty, completely separated from `staging`:
 
 <!-- markdown-link-check-disable -->
-<https://prod.$OPSTRACE_NAME.opstrace.io/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
+<https://prod.$OPSTRACE_NAME.example.com/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
 <!-- markdown-link-check-enable -->
 
 ## Step 4: Add users and tenants
 
+That's it—you've got a running instance.
 Congratulations!
-You've walked through the majority of our foundational release, but we're [working on much more](./references/roadmap.md).
-Before you uninstall Opstrace, why not check out our UI which allows you to add users and tenants to the system:
+
+Next, you can use our UI to add users and tenants to the system:
 
 <!-- markdown-link-check-disable -->
-<https://$OPSTRACE_NAME.opstrace.io/login>
+<https://$OPSTRACE_NAME.example.com/login>
 <!-- markdown-link-check-enable -->
 
 ## Step 5: Clean up
