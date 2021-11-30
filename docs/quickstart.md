@@ -87,7 +87,17 @@ export OPSTRACE_NAME=<choose_a_name>
 
 <!--/export-to-input-->
 
-The name will globally identify your Opstrace instance as `$OPSTRACE_NAME.example.com`.
+Then, set `OPSTRACE_CUSTOM_DNS_NAME` that you chose above (so that the rest of this quick start works easily):
+
+<!--export-to-input-->
+
+```bash
+export OPSTRACE_CUSTOM_DNS_NAME=<custom_dns_name>
+```
+
+<!--/export-to-input-->
+
+The name will globally identify your Opstrace instance as `https://$OPSTRACE_CUSTOM_DNS_NAME`.
 
 Then, you'll create a simple [configuration file](./references/configuration.md) with the most basic options.
 Note that we define two tenants named `staging` and `prod` that are separate from the `system` tenant that hosts internal metrics about Opstrace.
@@ -103,7 +113,7 @@ tenants:
 env_label: quickstart
 cert_issuer: letsencrypt-prod
 
-custom_dns_name: instance.example.com
+custom_dns_name: $OPSTRACE_CUSTOM_DNS_NAME
 custom_auth0_client_id: AUTH0_KEY_ID_HERE
 custom_auth0_domain: AUTH0_DOMAIN_HERE
 EOF
@@ -129,7 +139,7 @@ When everything is done, you'll see the following log lines:
 
 ```text
 info: create operation finished: $OPSTRACE_NAME (aws)
-info: Log in here: https://$OPSTRACE_NAME.example.com
+info: Log in here: https://$OPSTRACE_CUSTOM_DNS_NAME
 ```
 
 In case of any **installation errors** search our [GitHub issues](https://github.com/opstrace/opstrace/issues).
@@ -149,13 +159,13 @@ Let's get started by creating the following workload on your laptop using Docker
 * Log messages from Avalanche and Prometheus scraped with [FluentD](https://www.fluentd.org).
 
 **Launch:** Start the following workloads in the same terminal window you've been using thus far, as shown in the code blocks below.
-If you do open a new terminal, however, do be sure you're still in the correct directory since these commands will look in `pwd` for the [API token files](./references/concepts.md#anatomy-of-a-data-api-token-and-how-to-present-it) created during `opstrace create`, and be sure to have your `OPSTRACE_NAME` environment variable set.
+If you do open a new terminal, however, do be sure you're still in the correct directory since these commands will look in `pwd` for the [API token files](./references/concepts.md#anatomy-of-a-data-api-token-and-how-to-present-it) created during `opstrace create`, and be sure to have your `OPSTRACE_NAME` and `OPSTRACE_CUSTOM_DNS_NAME` environment variables set.
 Create a file with the Prometheus configuration to send data to Opstrace:
 
 ```bash
 cat <<EOF > prometheus.yml
   remote_write:
-    - url: "https://cortex.staging.$OPSTRACE_NAME.example.com/api/v1/push"
+    - url: "https://cortex.staging.$OPSTRACE_CUSTOM_DNS_NAME/api/v1/push"
       bearer_token_file: /var/run/tenant/token
       queue_config:
         batch_send_deadline: 5s
@@ -201,7 +211,7 @@ cat <<EOF > fluentd.conf
 
 <match *>
   @type loki
-  url https://loki.staging.$OPSTRACE_NAME.example.com
+  url https://loki.staging.$OPSTRACE_CUSTOM_DNS_NAME
   flush_interval 5s
   bearer_token_file /var/run/tenant/token
   extra_labels { "label": "quickstart" }
@@ -282,7 +292,7 @@ You now have dummy (random) metrics and associated logs (simulating a real app y
 Let's view the data in our `staging` tenant using the Grafana "explore" view:
 
 <!-- markdown-link-check-disable -->
-<https://staging.$OPSTRACE_NAME.example.com/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
+<https://staging.$OPSTRACE_CUSTOM_DNS_NAME/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
 <!-- markdown-link-check-enable -->
 
 1. To query these metrics, first select the "metrics" data source in the upper left-hand corner.
@@ -303,7 +313,7 @@ As you can see, the data we sent to Opstrace in step 3 is indeed ingested as exp
 You can also see that the `prod` tenant is empty, completely separated from `staging`:
 
 <!-- markdown-link-check-disable -->
-<https://prod.$OPSTRACE_NAME.example.com/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
+<https://prod.$OPSTRACE_CUSTOM_DNS_NAME/grafana/explore?orgId=1&left=%5B%22now-30m%22,%22now%22,%22metrics%22,%7B%7D%5D>
 <!-- markdown-link-check-enable -->
 
 ## Step 4: Add users and tenants
@@ -314,7 +324,7 @@ Congratulations!
 Next, you can use our UI to add users and tenants to the system:
 
 <!-- markdown-link-check-disable -->
-<https://$OPSTRACE_NAME.example.com/login>
+<https://$OPSTRACE_CUSTOM_DNS_NAME/login>
 <!-- markdown-link-check-enable -->
 
 ## Step 5: Clean up
