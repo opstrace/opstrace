@@ -89,7 +89,7 @@ export OPSTRACE_NAME=<choose_a_name>
 
 <!--/export-to-input-->
 
-The name will globally identify you in our domain as `$OPSTRACE_NAME.example.com`, which we provide for you by default as a convenience.
+The name will globally identify your Opstrace instance as `$OPSTRACE_NAME.example.com`.
 
 Then, you'll create a simple [configuration file](./references/configuration.md) with the most basic options.
 Note that we define two tenants named `staging` and `prod` that are separate from the `system` tenant that hosts internal metrics about Opstrace.
