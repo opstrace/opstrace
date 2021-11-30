@@ -75,7 +75,7 @@ It's easy to get started—follow [this guide to set up Auth0](https://github.co
 
 ### DNS
 
-Next, create DNS records to point to your cluster by [following these instructions](https://github.com/opstrace/opstrace/wiki/User-guide:-Upgrade-Opstrace-with-a-custom-DNS-domain-and-custom-Auth0-integration).
+Next, set up a DNS domain for your Opstrace instance by [following these instructions](https://github.com/opstrace/opstrace/wiki/User-guide:-Upgrade-Opstrace-with-a-custom-DNS-domain-and-custom-Auth0-integration).
 
 ## Step 1: Install Opstrace
 
